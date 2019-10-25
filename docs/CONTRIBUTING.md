@@ -49,9 +49,9 @@ mvn clean install # creates .jar in target/ which you would copy to your plugins
 mvn clean compile jib:dockerBuild # builds a Docker container named "pgm" which is a full server
 ```
 
-5. Commit your changes, using the `-s` tag to [certify](https://developercertificate.org) the origin of your code.
+5. Commit your changes, using the `-sS` tag to [sign](https://help.github.com/en/github/authenticating-to-github/signing-commits) and [certify](https://developercertificate.org) the origin of your code.
 ```bash
-git commit -s -m "A short description of your changes"
+git commit -sS -m "A short description of your changes"
 ```
 
 6. Submit your pull request for review and feedback.
