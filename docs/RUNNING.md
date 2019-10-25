@@ -32,3 +32,38 @@ cp -r /path/to/map-0/ plugins/PGM/maps/map-0
 ```bash
 java -jar sportpaper.jar nogui
 ```
+
+Advanced
+--------
+
+You can also run an "out-of-the-box" PGM server as a container. This is a more advanced method of running a server and is only recommended if you have some basic knowledge about [Docker.](https://www.freecodecamp.org/news/a-beginner-friendly-introduction-to-containers-vms-and-docker-79a9e3e119b/)
+
+1. Pull the latest version of the PGM server.
+```bash
+docker pull electroid/pgm:latest # Gets the latest version
+docker pull electroid/pgm:2019-10-25 # Gets the version on a specific date
+```
+
+2. Run a PGM server with `1 GB` of RAM and `2` CPUs. Read [here](https://docs.docker.com/engine/reference/run) for more detailed documentation.
+```bash
+docker run \
+    -dit \
+    -p 25565:25565 \
+    --restart=unless-stopped \
+    --memory-swappiness=100 \
+    --memory=1G \
+    --cpus=2 \
+    --name=myserver \
+    electroid/pgm:latest
+```
+
+3. You can also run other `docker` commands to interact with the PGM server.
+```bash
+docker ps # List all servers
+docker logs -f myserver # Tails the logs from the server
+docker attach myserver # Access and run commands on the server
+docker stop myserver # Stops the server, will not restart
+docker start myserver # Starts a server, if stopped
+docker restart myserver # Restarts the server
+docker rm -f myserver # Stops and delete the server
+```
