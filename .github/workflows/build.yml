@@ -1,16 +1,10 @@
 name: build
 on:
   push:
-    paths:
-      - src/
-      - pom.xml
   pull_request:
-    paths:
-    - src/
-    - pom.xml
+  repository_dispatch:
   schedule:
     - cron: 0 1 * * *
-  repository_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
