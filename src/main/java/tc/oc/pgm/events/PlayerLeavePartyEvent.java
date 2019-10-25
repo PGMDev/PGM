@@ -1,0 +1,33 @@
+package tc.oc.pgm.events;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import org.bukkit.event.HandlerList;
+import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.match.Party;
+
+/** Called BEFORE a {@link MatchPlayer} leaves a {@link Party} */
+public class PlayerLeavePartyEvent extends MatchPlayerEvent {
+
+  protected final Party oldParty;
+
+  public PlayerLeavePartyEvent(MatchPlayer player, Party oldParty) {
+    super(player);
+    this.oldParty = checkNotNull(oldParty);
+  }
+
+  public Party getParty() {
+    return oldParty;
+  }
+
+  private static HandlerList handlers = new HandlerList();
+
+  @Override
+  public HandlerList getHandlers() {
+    return handlers;
+  }
+
+  public static HandlerList getHandlerList() {
+    return handlers;
+  }
+}

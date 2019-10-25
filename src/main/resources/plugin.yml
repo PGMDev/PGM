@@ -1,0 +1,3 @@
+name: PGM
+main: tc.oc.pgm.PGM
+version: ${project.version}

@@ -1,0 +1,38 @@
+# Maven generated files
+target
+*.jar
+dependency-reduced-pom.xml
+
+# Mac OSX generated files
+.DS_Store
+
+# Eclipse generated files
+.classpath
+.project
+.settings
+
+# IntelliJ IDEA
+.idea
+*.iml
+
+# Vim generated files
+*~
+*.swp
+
+# XCode 3 and 4 generated files
+*.mode1
+*.mode1v3
+*.mode2v3
+*.perspective
+*.perspectivev3
+*.pbxuser
+*.xcworkspace
+xcuserdata
+*class
+
+# CrowdIn files
+Commons/core/src/main/i18n/translations/*
+
+# Minecraft generated files
+/server/
+maps.zip

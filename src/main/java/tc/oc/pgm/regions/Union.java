@@ -1,0 +1,69 @@
+package tc.oc.pgm.regions;
+
+import org.bukkit.util.Vector;
+
+public class Union extends AbstractRegion {
+  private final Region[] regions;
+
+  public Union(Region... regions) {
+    this.regions = regions;
+  }
+
+  public static Union of(Region... regions) {
+    return new Union(regions);
+  }
+
+  public Region[] getRegions() {
+    return regions;
+  }
+
+  @Override
+  public boolean contains(Vector point) {
+    for (Region region : this.regions) {
+      if (region.contains(point)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public boolean isBlockBounded() {
+    for (Region region : this.regions) {
+      if (!region.isBlockBounded()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @Override
+  public boolean isEmpty() {
+    for (Region region : this.regions) {
+      if (!region.isEmpty()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @Override
+  public Bounds getBounds() {
+    Bounds bounds = Bounds.empty();
+    for (Region region : this.regions) {
+      bounds = Bounds.union(bounds, region.getBounds());
+    }
+    return bounds;
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("Union{regions=[");
+    for (Region region : this.regions) {
+      sb.append(region.toString()).append(",");
+    }
+    sb.append("]}");
+    return sb.toString();
+  }
+}

@@ -1,0 +1,74 @@
+#
+# PvP Game Manager Sample Configuration
+#
+# This file describes some high-level configuration about the server as a
+# whole.  Map-specific configuration should be specified in the map folder.
+
+map:
+  default: true
+  sources:
+    default:
+      priority: 0
+      path: maps/
+  auto-reload:
+    enabled: true
+    reload-when-error: false
+
+restart:
+  enabled: true
+  uptime: 3h
+  match-limit: 10
+
+start:
+  auto: true                  # Start the match automatically when ready
+  countdown: 30s              # Default match start countdown
+  huddle: 0s                  # Team huddle duration
+
+cycle:
+  countdown: 30s              # Default countdown for cycle commands
+  running-match: false        # Allow cycle commands during a running match without the -f flag
+  match-empty:                # Cycle if a running match empties out
+    enabled: false
+    countdown: 5s
+  match-end:                  # Cycle when a match ends
+    enabled: true
+    countdown: 30s
+
+join:
+  priority-kick: true         # Kick non-privileged players to make room for privileged ones
+  mid-match: true             # Allow players to join after the match has started (does not override Blitz rule)
+  commit-players: false       # Do various things to keep players in the match once committed
+  capacity:
+    enabled: true
+    overfill: true            # Enable overfill (false disables overfill, regardless of XML)
+    overfill-ratio: 1.25      # Default value, XML overrides this
+
+minimum-players: 1
+
+teams:
+  minimum-players: 0
+  allow-choose: true       # Allow privileged players to choose their team
+  allow-switch: true       # Allow players to be on multiple teams in the same match
+  try-balance: false       # Try to balance teams if they are stacked
+  require-even: false      # Force evenly sized teams when using queued joins
+
+broadcast:
+  enabled: true
+  frequency: 600
+
+arrow-removal:
+  enabled: true
+  delay: 10
+
+fishing:
+  disable-treasure: true
+
+scoreboard:
+  show-proximity: false
+  precise-progress: false
+
+wool:
+  auto-refill: true
+
+player-list:
+  enabled: true
