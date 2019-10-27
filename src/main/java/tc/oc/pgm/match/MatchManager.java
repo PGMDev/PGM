@@ -11,8 +11,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -226,9 +228,34 @@ public class MatchManager {
    */
   public PGMMap getNextMap() {
     if (this.nextMap == null) {
-      setNextMap(RandomUtils.element(new Random(), mapLibrary.getMaps()));
+      final Match match = getCurrentMatch();
+      final int size = match == null ? Bukkit.getOnlinePlayers().size() : match.getPlayers().size();
+      setNextMap(getRandomMap(size));
     }
     return this.nextMap;
+  }
+
+  public PGMMap getRandomMap(int online) {
+    final Random random = new Random();
+    final Map<PGMMap, Double> maps =
+        getMaps().stream()
+            .collect(
+                Collectors.toMap(
+                    Function.identity(),
+                    m -> online - m.getPersistentContext().getMaxPlayers() * 0.75));
+    PGMMap result = RandomUtils.element(random, getMaps());
+    double best = Double.MAX_VALUE;
+
+    for (PGMMap map : maps.keySet()) {
+      if (maps.get(map) <= 0) continue;
+      final double weight = -Math.log(random.nextDouble()) / maps.get(map);
+      if (weight < best) {
+        best = weight;
+        result = map;
+      }
+    }
+
+    return result;
   }
 
   /**
