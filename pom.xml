@@ -71,41 +71,16 @@
             <version>1.18.10</version>
             <scope>provided</scope>
         </dependency>
-        <!-- Various Apache commons libraries -->
+        <!-- Error logging libraries for Sentry integration -->
         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
+            <groupId>net.kencochrane.raven</groupId>
+            <artifactId>raven</artifactId>
+            <version>5.0</version>
         </dependency>
         <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-            <version>3.2.1</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.4</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.8</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>2.0-rc1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>2.0-rc1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.10</version>
+            <groupId>net.kencochrane.raven</groupId>
+            <artifactId>raven-log4j2</artifactId>
+            <version>5.0</version>
         </dependency>
     </dependencies>
     <build>
@@ -168,6 +143,10 @@
                             <exclude>app.ashcon.intake:intake-core:jar:*</exclude>
                             <exclude>com.google.code.findbugs:jsr305:jar:*</exclude>
                         </excludes>
+                        <includes>
+                            <!-- Raven depends on this and does not shade it, so we have to -->
+                            <include>com.fasterxml.jackson.core:jackson-core</include>
+                        </includes>
                     </artifactSet>
                 </configuration>
                 <executions>
