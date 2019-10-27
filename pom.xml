@@ -270,6 +270,9 @@
                         </volumes>
                         <workingDirectory>/server</workingDirectory>
                     </container>
+                    <extraDirectories>
+                        <paths>deploy</paths>
+                    </extraDirectories>
                 </configuration>
             </plugin>
         </plugins>
