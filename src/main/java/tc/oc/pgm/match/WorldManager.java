@@ -46,7 +46,10 @@ public class WorldManager implements Listener {
   /** Registers a given world with Bukkit. */
   public World createWorld(String worldName, PGMMap map) throws IllegalArgumentException {
     MapInfo info = map.getInfo();
-    TerrainModule terrain = map.getContext().needModule(TerrainModule.class);
+    if (!map.getContext().isPresent()) {
+      throw new IllegalStateException("Map is not loaded!");
+    }
+    TerrainModule terrain = map.getContext().get().needModule(TerrainModule.class);
     WorldCreator creator = server.detectWorld(worldName);
     if (creator == null) creator = new WorldCreator(worldName);
     creator

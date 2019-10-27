@@ -9,12 +9,14 @@ import org.jdom2.Document;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.features.FeatureDefinitionContext;
+import tc.oc.pgm.ffa.FreeForAllModule;
 import tc.oc.pgm.filters.FeatureFilterParser;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.filters.LegacyFilterParser;
 import tc.oc.pgm.kits.FeatureKitParser;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.kits.LegacyKitParser;
+import tc.oc.pgm.match.Party;
 import tc.oc.pgm.module.ModuleInfo;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.module.ModuleLoader;
@@ -23,6 +25,8 @@ import tc.oc.pgm.modules.InfoModule;
 import tc.oc.pgm.regions.FeatureRegionParser;
 import tc.oc.pgm.regions.LegacyRegionParser;
 import tc.oc.pgm.regions.RegionParser;
+import tc.oc.pgm.teams.TeamFactory;
+import tc.oc.pgm.teams.TeamModule;
 import tc.oc.util.SemanticVersion;
 import tc.oc.xml.InvalidXMLException;
 
@@ -54,6 +58,31 @@ public class MapModuleContext extends ModuleLoader<MapModule> {
     this.proto = proto;
     this.basePath = basePath;
     this.featureDefinitionContext = new FeatureDefinitionContext();
+  }
+
+  public MapPersistentContext generatePersistentContext() {
+    MapInfo info = getInfo();
+    int maxPlayers = 0;
+
+    TeamModule tm = getModule(TeamModule.class);
+    if (tm != null) {
+      for (TeamFactory factory : getModule(TeamModule.class).getTeams()) {
+        if (factory.getType() == Party.Type.Participating) {
+          maxPlayers += factory.getMaxPlayers();
+        }
+      }
+    }
+
+    FreeForAllModule ffam = getModule(FreeForAllModule.class);
+    if (ffam != null) {
+      maxPlayers += ffam.getOptions().maxPlayers;
+    }
+
+    return new MapPersistentContext(proto, info, maxPlayers);
+  }
+
+  public MapInfo getInfo() {
+    return needModule(InfoModule.class).getMapInfo();
   }
 
   public File getBasePath() {

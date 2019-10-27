@@ -71,11 +71,11 @@ public class MapLoader {
               added.add(path);
 
               map = new PGMMap(pgm, factory, xmlBuilder, new MapFolder(source, path));
-              if (map.reload()) maps.add(map);
+              if (map.reload(false)) maps.add(map);
             } else if (map.shouldReload()) {
               logger.fine("  UPDATED " + path);
               updated.add(path);
-              map.reload();
+              map.reload(false);
             }
           } catch (MapNotFoundException e) {
             // ignore - will be removed below

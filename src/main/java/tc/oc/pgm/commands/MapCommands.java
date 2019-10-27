@@ -21,14 +21,10 @@ import tc.oc.named.NameStyle;
 import tc.oc.named.NicknameRenderer;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.commands.annotations.Text;
-import tc.oc.pgm.ffa.FreeForAllModule;
 import tc.oc.pgm.map.Contributor;
 import tc.oc.pgm.map.MapInfo;
 import tc.oc.pgm.map.PGMMap;
 import tc.oc.pgm.match.MatchManager;
-import tc.oc.pgm.match.Party;
-import tc.oc.pgm.teams.TeamFactory;
-import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.PrettyPaginatedResult;
 import tc.oc.server.Permissions;
 import tc.oc.util.components.Components;
@@ -131,26 +127,11 @@ public class MapCommands {
       }
     }
 
-    int maxPlayers = 0;
-
-    TeamModule tm = map.getContext().getModule(TeamModule.class);
-    if (tm != null) {
-      for (TeamFactory factory : map.getContext().getModule(TeamModule.class).getTeams()) {
-        if (factory.getType() == Party.Type.Participating) {
-          maxPlayers += factory.getMaxPlayers();
-        }
-      }
-    }
-
-    FreeForAllModule ffam = map.getContext().getModule(FreeForAllModule.class);
-    if (ffam != null) {
-      maxPlayers += ffam.getOptions().maxPlayers;
-    }
-
     audience.sendMessage(
         new PersonalizedText(
             mapInfoLabel("command.map.mapInfo.playerLimit"),
-            new PersonalizedText(String.valueOf(maxPlayers), ChatColor.GOLD)));
+            new PersonalizedText(
+                String.valueOf(map.getPersistentContext().getMaxPlayers()), ChatColor.GOLD)));
 
     if (sender.hasPermission(Permissions.DEBUG)) {
       audience.sendMessage(
@@ -160,7 +141,7 @@ public class MapCommands {
       audience.sendMessage(
           new PersonalizedText(
               mapInfoLabel("command.map.mapInfo.proto"),
-              new PersonalizedText(map.getContext().getProto().toString(), ChatColor.GOLD)));
+              new PersonalizedText(mapInfo.proto.toString(), ChatColor.GOLD)));
       audience.sendMessage(
           new PersonalizedText(
               mapInfoLabel("command.map.mapInfo.folder"),
