@@ -1,14 +1,14 @@
 Contributing
 ===========
 
-We're really excited to have you join the community of contributors for the PGM project! Before we jump into the nitty-gritty details, let's go over the design choices and philisophy of the project so we're all on the same page.
+We're really excited to have you join the community of contributors for the PGM project! Before we jump into the nitty-gritty details, let's go over the design choices and philosophy of the project so we're all on the same page.
 
 Philosophy
 ----------
 
 1. [**Simplicity**](https://thevaluable.dev/kiss-principle-explained/)
 
-The most important principle is maintaing simplicity, both for contributors and players. When thinking about your changes, make sure your code is easy to comprehend, not overly complex or abstracted, and doesn't include unnecessary third-party libraries. If your changes affect gameplay, make sure players can easily adapt to them.
+The most important principle is maintaining simplicity, both for contributors and players. When thinking about your changes, make sure your code is easy to comprehend, not overly complex or abstracted, and doesn't include unnecessary third-party libraries. If your changes affect gameplay, make sure players can easily adapt to them.
 
 2. [**Collaboration**](https://deepsource.io/blog/code-review-best-practices/)
 
@@ -16,7 +16,7 @@ You can save a good amount of time during code review if you share your ideas an
 
 3. [**Out-of-the-box**](https://www.smithsonianmag.com/arts-culture/how-steve-jobs-love-of-simplicity-fueled-a-design-revolution-23868877/)
 
-Players, contributors, and server owners should be able to enjoy PGM "out-of-the-box" without any extra plugins or requirments. No website, database, or external API should be required to run a server on your local machine.
+Players, contributors, and server owners should be able to enjoy PGM "out-of-the-box" without any extra plugins or requirements. No website, database, or external API should be required to run a server on your local machine.
 
 Dependencies
 ------------
@@ -35,7 +35,7 @@ Steps
 git clone git@github.com:Electroid/PGM.git
 ```
 
-2. Make your changes (leauge system, anyone?)
+2. Make your changes (league system, anyone?)
 
 3. Run the code formatter, we follow Google's [code style.](https://google.github.io/styleguide/javaguide.html)
 
