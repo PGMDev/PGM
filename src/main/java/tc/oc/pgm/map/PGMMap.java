@@ -14,6 +14,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -47,7 +48,8 @@ public final class PGMMap implements Comparable<PGMMap> {
   protected final MapFolder folder;
   protected final MapLogger logger;
 
-  protected MapModuleContext context;
+  protected @Nullable MapModuleContext context;
+  private @Nullable MapPersistentContext persistentContext;
   protected File xmlFile;
   protected HashCode xmlFileHash;
 
@@ -141,7 +143,7 @@ public final class PGMMap implements Comparable<PGMMap> {
     }
   }
 
-  public boolean reload() throws MapNotFoundException {
+  public boolean reload(boolean saveContext) throws MapNotFoundException {
     this.pgm.getMapErrorTracker().clearErrors(this); // TODO: decouple this orthogonal concern
 
     List<? extends ModuleLoadException> errors;
@@ -150,7 +152,10 @@ public final class PGMMap implements Comparable<PGMMap> {
       MapModuleContext newContext = this.load();
 
       if (!newContext.hasErrors()) {
-        this.context = newContext;
+        if (saveContext) {
+          this.context = newContext;
+        }
+        this.persistentContext = newContext.generatePersistentContext();
         this.pushed = false;
         return true;
       }
@@ -167,6 +172,10 @@ public final class PGMMap implements Comparable<PGMMap> {
     }
 
     return false;
+  }
+
+  public void deleteContext() {
+    this.context = null;
   }
 
   public boolean isPushed() {
@@ -194,15 +203,22 @@ public final class PGMMap implements Comparable<PGMMap> {
     return factory;
   }
 
-  public MapModuleContext getContext() {
-    return this.context;
+  public Optional<MapModuleContext> getContext() {
+    if (context == null) {
+      throw new IllegalStateException("Map is not loaded: " + this);
+    }
+    return Optional.of(context);
   }
 
-  public @Nullable MapInfo getInfo() {
-    if (this.context == null) return null;
-    InfoModule infoModule = this.context.getModule(InfoModule.class);
-    if (infoModule == null) return null;
-    return infoModule.getMapInfo();
+  public MapPersistentContext getPersistentContext() {
+    if (persistentContext == null) {
+      throw new IllegalStateException("Map is not loaded: " + this);
+    }
+    return persistentContext;
+  }
+
+  public MapInfo getInfo() {
+    return getPersistentContext().getInfo();
   }
 
   public MapFolder getFolder() {

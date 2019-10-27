@@ -15,7 +15,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.World;
@@ -33,7 +32,6 @@ import tc.oc.pgm.map.PGMMap;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.terrain.TerrainModule;
 import tc.oc.pgm.util.MatchPlayers;
-import tc.oc.server.Permissions;
 import tc.oc.util.FileUtils;
 import tc.oc.util.RandomUtils;
 import tc.oc.util.logging.ClassLogger;
@@ -348,10 +346,7 @@ public class MatchManager {
       throws Throwable {
     this.log.info("Cycling to " + newMap.toString());
 
-    if (newMap.shouldReload()) {
-      Bukkit.broadcast(ChatColor.GREEN + "XML changes detected, reloading", Permissions.DEBUG);
-      newMap.reload();
-    }
+    newMap.reload(true);
 
     if (oldMatch != null) oldMatch.end();
 
@@ -399,8 +394,11 @@ public class MatchManager {
     if (destination.exists()) {
       FileUtils.delete(destination);
     }
+    if (!map.getContext().isPresent()) {
+      map.reload(true);
+    }
     this.mapManager.copyWorld(
-        map.getContext().needModule(TerrainModule.class).getWorldFolder(),
+        map.getContext().get().needModule(TerrainModule.class).getWorldFolder(),
         destination); // may throw
 
     World world = this.mapManager.createWorld(worldName, map); // may throw
@@ -428,6 +426,14 @@ public class MatchManager {
     this.mapManager.archive(match.getWorld().getName(), archiveEvent.getOutputDirectory());
 
     this.matches.remove(match.getWorld());
+
+    // Don't delete the map context if another match is using the map
+    for (Match matchCheck : matches.values()) {
+      if (matchCheck.getMap() == match.getMap()) {
+        return;
+      }
+    }
+    match.getMap().deleteContext();
   }
 
   /**

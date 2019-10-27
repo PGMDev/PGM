@@ -412,7 +412,10 @@ public class Match implements Audience {
   }
 
   public MapModuleContext getModuleContext() {
-    return this.map.getContext();
+    if (!this.map.getContext().isPresent()) {
+      throw new IllegalStateException("Map is not loaded!");
+    }
+    return this.map.getContext().get();
   }
 
   public <T extends MatchModule> T getMatchModule(Class<T> matchModuleClass) {

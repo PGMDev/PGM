@@ -21,6 +21,7 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.scheduler.BukkitTask;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 import tc.oc.pgm.AllTranslations;
@@ -70,34 +71,37 @@ public class ViewInventoryMatchModule extends MatchModule implements Listener {
     return inventorySlot; // default
   }
 
+  private BukkitTask task;
+
   public ViewInventoryMatchModule(Match match) {
     super(match);
 
-    Bukkit.getScheduler()
-        .runTaskTimer(
-            PGM.get(),
-            new Runnable() {
-              @Override
-              public void run() {
-                if (ViewInventoryMatchModule.this.updateQueue.size() == 0) return;
+    task =
+        Bukkit.getScheduler()
+            .runTaskTimer(
+                PGM.get(),
+                new Runnable() {
+                  @Override
+                  public void run() {
+                    if (ViewInventoryMatchModule.this.updateQueue.size() == 0) return;
 
-                for (Iterator<Map.Entry<String, Instant>> iterator =
-                        ViewInventoryMatchModule.this.updateQueue.entrySet().iterator();
-                    iterator.hasNext(); ) {
-                  Map.Entry<String, Instant> entry = iterator.next();
-                  if (entry.getValue().isAfterNow()) continue;
+                    for (Iterator<Map.Entry<String, Instant>> iterator =
+                            ViewInventoryMatchModule.this.updateQueue.entrySet().iterator();
+                        iterator.hasNext(); ) {
+                      Map.Entry<String, Instant> entry = iterator.next();
+                      if (entry.getValue().isAfterNow()) continue;
 
-                  Player player = Bukkit.getPlayerExact(entry.getKey());
-                  if (player != null) {
-                    ViewInventoryMatchModule.this.checkMonitoredInventories(player);
+                      Player player = Bukkit.getPlayerExact(entry.getKey());
+                      if (player != null) {
+                        ViewInventoryMatchModule.this.checkMonitoredInventories(player);
+                      }
+
+                      iterator.remove();
+                    }
                   }
-
-                  iterator.remove();
-                }
-              }
-            },
-            0,
-            4);
+                },
+                0,
+                4);
   }
 
   @EventHandler(ignoreCancelled = true)
@@ -257,6 +261,11 @@ public class ViewInventoryMatchModule extends MatchModule implements Listener {
   public void updateMonitoredSpawn(final ParticipantSpawnEvent event) {
     // must have this hack so we update player's inventories when they respawn and recieve a kit
     ViewInventoryMatchModule.this.scheduleCheck(event.getPlayer().getBukkit());
+  }
+
+  @Override
+  public void unload() {
+    task.cancel();
   }
 
   public boolean canPreviewInventory(Player viewer, Player holder) {
