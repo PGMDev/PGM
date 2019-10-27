@@ -198,25 +198,10 @@ public class Server extends DedicatedServer {
     a(new DedicatedPlayerList(this));
     a(MinecraftEncryption.b());
     DispenserRegistry.c();
-
-    // Do *not* load the /restart or /tps commands
-    // SharedConfig.registerCommands();
   }
 
   private void setupPlugins() {
     server.loadPlugins();
-
-    final Map associations =
-        readField(
-            SimplePluginManager.class, server.getPluginManager(), Map.class, "fileAssociations");
-    associations.put(Pattern.compile("\\.jam$"), associations.values().iterator().next());
-    server.loadPlugins();
-
-    // TODO: investigate where ViaRewind loads, but does not get enabled
-    final Plugin rewind = server.getPluginManager().getPlugin("ViaRewind");
-    if (rewind != null) {
-      new Loader().togglePlugin(rewind, true);
-    }
 
     for (Class<? extends JavaPlugin> plugin : plugins) {
       setupPlugin(plugin);

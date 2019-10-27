@@ -25,7 +25,6 @@
             <groupId>app.ashcon</groupId>
             <artifactId>sportpaper</artifactId>
             <version>1.8.8-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
         </dependency>
         <!-- Command framework for developing simple commands -->
         <dependency>
@@ -128,6 +127,7 @@
                     <minimizeJar>true</minimizeJar>
                     <artifactSet>
                         <excludes>
+                            <exclude>app.ashcon:sportpaper:jar:*</exclude>
                             <exclude>app.ashcon.intake:intake-core:jar:*</exclude>
                             <exclude>com.google.code.findbugs:jsr305:jar:*</exclude>
                         </excludes>
@@ -243,9 +243,16 @@
                             <jvmFlag>-XX:InitiatingHeapOccupancyPercent=10</jvmFlag>
                             <jvmFlag>-XX:G1MixedGCLiveThresholdPercent=35</jvmFlag>
                             <jvmFlag>-XX:+ScavengeBeforeFullGC</jvmFlag>
+                            <!-- JVM debugging -->
+                            <jvmFlag>-Dcom.sun.management.jmxremote.port=25564</jvmFlag>
+                            <jvmFlag>-Dcom.sun.management.jmxremote.ssl=false</jvmFlag>
+                            <jvmFlag>-Dcom.sun.management.jmxremote.authenticate=false</jvmFlag>
                         </jvmFlags>
                         <ports>
+                            <!-- Minecraft port -->
                             <port>25565/tcp</port>
+                            <!-- JMX debug port, do not expose to the Internet -->
+                            <port>25564/tcp</port>
                         </ports>
                         <volumes>
                             <volume>/server</volume>
