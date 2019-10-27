@@ -13,14 +13,14 @@ cd /path/to/folder
 
 2. Download the latest version of [SportPaper](https://github.com/Electroid/SportPaper), a fork of the Minecraft 1.8 server.
 ```bash
-curl https://pkg.ashcon.app/sportpaper -o sportpaper.jar
-curl https://pkg.ashcon.app/sportpaper-config -o sportpaper.yml
+curl https://pkg.ashcon.app/sportpaper -Lo sportpaper.jar
+curl https://pkg.ashcon.app/sportpaper-config -Lo sportpaper.yml
 ```
 
 3. Create a plugins folder and download the latest version of PGM.
 ```bash
 mkdir plugins
-curl https://pkg.ashcon.app/pgm -o plugins/pgm.jar
+curl https://pkg.ashcon.app/pgm -Lo plugins/pgm.jar
 ```
 
 4. Add your maps to the maps folder, if you don't have any, skip this step.
