@@ -1,6 +1,5 @@
 # Maven generated files
 target
-*.jar
 dependency-reduced-pom.xml
 
 # Mac OSX generated files

@@ -32,18 +32,6 @@
             <artifactId>intake-bukkit</artifactId>
             <version>1.1-SNAPSHOT</version>
         </dependency>
-        <!-- Guava libraries that *must* match version used in SportPaper -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>17.0</version>
-        </dependency>
-        <!-- YAML parsing library that *must* match version used in SportPaper -->
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>1.15</version>
-        </dependency>
         <!-- Time convience libraries for "Instant" and "Duration" -->
         <!-- TODO: Use Java 8's standard time libraries -->
         <dependency>
@@ -143,10 +131,6 @@
                             <exclude>app.ashcon.intake:intake-core:jar:*</exclude>
                             <exclude>com.google.code.findbugs:jsr305:jar:*</exclude>
                         </excludes>
-                        <includes>
-                            <!-- Raven depends on this and does not shade it, so we have to -->
-                            <include>com.fasterxml.jackson.core:jackson-core</include>
-                        </includes>
                     </artifactSet>
                 </configuration>
                 <executions>
@@ -259,9 +243,16 @@
                             <jvmFlag>-XX:InitiatingHeapOccupancyPercent=10</jvmFlag>
                             <jvmFlag>-XX:G1MixedGCLiveThresholdPercent=35</jvmFlag>
                             <jvmFlag>-XX:+ScavengeBeforeFullGC</jvmFlag>
+                            <!-- JVM debugging -->
+                            <jvmFlag>-Dcom.sun.management.jmxremote.port=25564</jvmFlag>
+                            <jvmFlag>-Dcom.sun.management.jmxremote.ssl=false</jvmFlag>
+                            <jvmFlag>-Dcom.sun.management.jmxremote.authenticate=false</jvmFlag>
                         </jvmFlags>
                         <ports>
+                            <!-- Minecraft port -->
                             <port>25565/tcp</port>
+                            <!-- JMX debug port, do not expose to the Internet -->
+                            <port>25564/tcp</port>
                         </ports>
                         <volumes>
                             <volume>/server</volume>
