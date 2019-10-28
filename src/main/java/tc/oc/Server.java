@@ -57,6 +57,7 @@ import org.bukkit.plugin.UnknownDependencyException;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
 import org.fusesource.jansi.AnsiConsole;
+import org.spigotmc.SpigotConfig;
 import tc.oc.pgm.PGM;
 
 /** Embedded {@link org.bukkit.Bukkit} server that natively runs {@link tc.oc.pgm.PGM}. */
@@ -105,11 +106,13 @@ public class Server extends DedicatedServer {
     logger = setupLogger();
 
     setupProperties();
+    setupMode();
     setupServer();
     setupPlugins();
     setupWorld();
     setupListener();
     setupConsole();
+    setupMode();
 
     return true;
   }
@@ -192,6 +195,17 @@ public class Server extends DedicatedServer {
     setPort(propertyManager.getInt("port", 25565));
     c(propertyManager.getInt("max-build-height", 256)); // setBuildHeight
     c(propertyManager.getString("server-ip", "0.0.0.0")); // setServerIp
+  }
+
+  private void setupMode() {
+    final String mode = System.getenv("LOGIN_MODE");
+    if (mode != null) {
+      final boolean online = mode.equalsIgnoreCase("online");
+      propertyManager.setProperty("online-mode", online);
+      setOnlineMode(online);
+
+      SpigotConfig.bungee = mode.equalsIgnoreCase("bungee");
+    }
   }
 
   private void setupServer() {

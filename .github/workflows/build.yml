@@ -37,5 +37,5 @@ jobs:
           -Djib.to.auth.username=${{ secrets.DOCKER_USERNAME }} \
           -Djib.to.auth.password=${{ secrets.DOCKER_PASSWORD }} \
           -Djib.to.image=${{ secrets.DOCKER_IMAGE }} \
-          -Djib.container.environment=SENTRY_DSN="{{ secrets.SENTRY_DSN }}" \
+          -Djib.container.environment=SENTRY_DSN={{ secrets.SENTRY_DSN }} \
           -Djib.to.tags=latest,$(date +%F)
