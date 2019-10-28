@@ -203,6 +203,11 @@ public class Server extends DedicatedServer {
   private void setupPlugins() {
     server.loadPlugins();
 
+    final JavaPlugin rewind = (JavaPlugin) server.getPluginManager().getPlugin("ViaRewind");
+    if (rewind != null) {
+      new Loader().togglePlugin(rewind, true);
+    }
+
     for (Class<? extends JavaPlugin> plugin : plugins) {
       setupPlugin(plugin);
     }
