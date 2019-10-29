@@ -16,7 +16,7 @@ public class MotdListener implements Listener {
 
   private static final String MAP_NAME_KEY = "map.name";
   private static final String MAP_VERSION_KEY = "map.version";
-  private static final String STAtE_COLOR_KEY = "state.color";
+  private static final String STATE_COLOR_KEY = "state.color";
   private static final String STATE_NAME_KEY = "state.name";
   private static final String STATE_NAME_LOWER_KEY = "state.name-lower";
 
@@ -71,6 +71,6 @@ public class MotdListener implements Listener {
     }
     MOTD_DATA.put(STATE_NAME_KEY, name);
     MOTD_DATA.put(STATE_NAME_LOWER_KEY, name.toLowerCase());
-    MOTD_DATA.put(STAtE_COLOR_KEY, ChatColor.COLOR_CHAR + color.toString());
+    MOTD_DATA.put(STATE_COLOR_KEY, ChatColor.COLOR_CHAR + color.toString());
   }
 }
