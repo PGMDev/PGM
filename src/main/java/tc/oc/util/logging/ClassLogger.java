@@ -19,7 +19,7 @@ import tc.oc.util.collection.ArrayUtils;
  * <p>Instances of this class should ONLY be acquired by calling the static {@link #get} methods.
  * These will deduplicate loggers by name, and register them with the java.world.logging subsystem.
  *
- * <p>TODO: Make the constructor private.
+ * <p>
  */
 public class ClassLogger extends Logger {
 
@@ -105,12 +105,6 @@ public class ClassLogger extends Logger {
           parent); // addLogger will set the parent, so we have to set it back again
       return classLogger;
     }
-  }
-
-  // TODO: make this ctors private and fix everything that calls it to use the static getter instead
-  @Deprecated
-  public ClassLogger(@Nullable Logger parent, Class<?> klass) {
-    this(parent, klass, null);
   }
 
   private ClassLogger(@Nullable Logger parent, Class<?> klass, @Nullable String instanceKey) {

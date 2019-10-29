@@ -55,7 +55,7 @@ public class RestartListener implements Listener {
     instance = this;
 
     this.plugin = plugin;
-    this.logger = new ClassLogger(this.plugin.getLogger(), this.getClass());
+    this.logger = ClassLogger.get(this.plugin.getLogger(), this.getClass());
 
     this.loadConfig(this.plugin.getConfig());
   }

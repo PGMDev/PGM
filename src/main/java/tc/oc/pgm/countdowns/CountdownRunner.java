@@ -39,7 +39,7 @@ public class CountdownRunner extends BukkitRunnable {
 
     this.plugin = plugin;
     this.clock = clock;
-    this.logger = new ClassLogger(parentLogger, getClass());
+    this.logger = ClassLogger.get(parentLogger, getClass());
     this.countdown = countdown;
   }
 
