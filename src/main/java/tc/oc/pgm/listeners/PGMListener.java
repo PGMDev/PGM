@@ -13,7 +13,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
-import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.AllTranslations;
@@ -21,7 +20,6 @@ import tc.oc.pgm.Config;
 import tc.oc.pgm.events.*;
 import tc.oc.pgm.gamerules.GameRule;
 import tc.oc.pgm.gamerules.GameRulesModule;
-import tc.oc.pgm.map.PGMMap;
 import tc.oc.pgm.match.*;
 import tc.oc.pgm.modules.TimeLockModule;
 import tc.oc.server.Permissions;
@@ -33,18 +31,6 @@ public class PGMListener implements Listener {
   public PGMListener(Plugin parent, MatchManager mm) {
     this.parent = parent;
     this.mm = mm;
-  }
-
-  @EventHandler
-  public void onServerListPing(ServerListPingEvent event) {
-    final Match match = mm.getCurrentMatch();
-    if (match != null) {
-      final PGMMap map = match.getMap();
-      if (map != null) {
-        final ChatColor color = match.isRunning() ? ChatColor.GREEN : ChatColor.YELLOW;
-        event.setMotd(color + "\u00BB " + ChatColor.AQUA + map.getName() + color + " \u00AB");
-      }
-    }
   }
 
   @EventHandler

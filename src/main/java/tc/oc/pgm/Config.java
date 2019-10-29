@@ -3,6 +3,7 @@ package tc.oc.pgm;
 import com.google.common.collect.ImmutableList;
 import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -209,6 +210,58 @@ public class Config {
   public abstract static class Wool {
     public static boolean autoRefillWoolChests() {
       return getConfiguration().getBoolean("wool.auto-refill", true);
+    }
+  }
+
+  public static class Motd {
+    public static boolean enabled() {
+      return getConfiguration().getBoolean("motd.enabled", true);
+    }
+
+    public static String format() {
+      // Originally from PGMListener
+      return ChatColor.translateAlternateColorCodes(
+          '&',
+          getConfiguration()
+              .getString("motd.format", "{state.color}\u00BB &b{map.name} {state.color}\u00AB"));
+    }
+
+    public static class Colors {
+      public static ChatColor idle() {
+        return ChatColor.valueOf(
+            getConfiguration()
+                .getString("motd.colors.idle", "gray")
+                .trim()
+                .toUpperCase()
+                .replace(' ', '_'));
+      }
+
+      public static ChatColor starting() {
+        return ChatColor.valueOf(
+            getConfiguration()
+                .getString("motd.colors.starting", "yellow")
+                .trim()
+                .toUpperCase()
+                .replace(' ', '_'));
+      }
+
+      public static ChatColor running() {
+        return ChatColor.valueOf(
+            getConfiguration()
+                .getString("motd.colors.running", "green")
+                .trim()
+                .toUpperCase()
+                .replace(' ', '_'));
+      }
+
+      public static ChatColor finished() {
+        return ChatColor.valueOf(
+            getConfiguration()
+                .getString("motd.colors.finished", "red")
+                .trim()
+                .toUpperCase()
+                .replace(' ', '_'));
+      }
     }
   }
 }
