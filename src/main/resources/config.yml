@@ -72,3 +72,18 @@ wool:
 
 player-list:
   enabled: true
+
+motd:
+  enabled: true                                          # If the custom PGM motd should be shown to players
+  ## Available Placeholders ##
+  # {map.name} - Name of the currently playing map
+  # {map.version} - Version of the currently playing map
+  # {state.color} - Chat color (with the §) describing the current match's state (configured below)
+  # {state.name} - Name of the current match state, with an uppercase first letter
+  # {state.name-lower} - Fully lowercase name of the current match state
+  format: "{state.color}» &b{map.name} {state.color}«"   # Format of the MOTD
+  colors:
+    idle: gray                                           # Color designating a match which is waiting to start
+    starting: yellow                                     # Color designating a match which is starting
+    running: green                                       # Color designating a match which is currently running
+    finished: red                                        # Color designating a match which has ended
