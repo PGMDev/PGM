@@ -230,7 +230,7 @@ public abstract class FilterParser {
     }
   }
 
-  @MethodParser("world")
+  @MethodParser("material")
   public MaterialFilter parseMaterial(Element el) throws InvalidXMLException {
     return new MaterialFilter(XMLUtils.parseMaterialPattern(el));
   }
