@@ -40,7 +40,7 @@ public class RestartManager implements Runnable, Listener {
     instance = this;
 
     this.plugin = plugin;
-    this.logger = new ClassLogger(this.plugin.getLogger(), this.getClass());
+    this.logger = ClassLogger.get(this.plugin.getLogger(), this.getClass());
     this.startTime = Instant.now();
 
     this.plugin.getServer().getPluginManager().registerEvents(this, this.plugin);

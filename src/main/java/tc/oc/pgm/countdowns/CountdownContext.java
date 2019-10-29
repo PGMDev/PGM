@@ -18,7 +18,7 @@ public class CountdownContext {
 
   public CountdownContext(Plugin plugin, TickClock clock, Logger parentLogger) {
     this.plugin = plugin;
-    this.logger = new ClassLogger(parentLogger, getClass());
+    this.logger = ClassLogger.get(parentLogger, getClass());
     this.clock = clock;
   }
 

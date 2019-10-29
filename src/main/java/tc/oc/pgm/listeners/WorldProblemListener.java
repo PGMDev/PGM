@@ -39,7 +39,7 @@ public class WorldProblemListener implements Listener {
       new DefaultMapAdapter<>(new BlockVectorSet.Factory<>(), true);
 
   public WorldProblemListener(Plugin plugin) {
-    this.logger = new ClassLogger(plugin.getLogger(), getClass());
+    this.logger = ClassLogger.get(plugin.getLogger(), getClass());
   }
 
   void broadcastDeveloperWarning(String message) {
