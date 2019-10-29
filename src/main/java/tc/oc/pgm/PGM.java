@@ -380,6 +380,7 @@ public final class PGM extends JavaPlugin {
     this.registerEvents(new RestartListener(this));
     this.registerEvents(new WorldProblemListener(this));
     this.registerEvents(new MatchAnnouncer());
+    this.registerEvents(new MotdListener());
   }
 
   public void registerCommands() {
