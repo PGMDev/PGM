@@ -62,7 +62,7 @@ public class Renewable implements Listener, Tickable {
   public Renewable(RenewableDefinition definition, Match match, Logger parent) {
     this.definition = definition;
     this.match = match;
-    this.logger = new ClassLogger(parent, getClass());
+    this.logger = ClassLogger.get(parent, getClass());
 
     updateLastTick();
   }

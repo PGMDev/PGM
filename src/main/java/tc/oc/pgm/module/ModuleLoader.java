@@ -20,7 +20,7 @@ public abstract class ModuleLoader<T> {
   private final List<ModuleLoadException> errors = new ArrayList<>();
 
   protected ModuleLoader(Logger parentLogger) {
-    this.logger = new ClassLogger(parentLogger, getClass());
+    this.logger = ClassLogger.get(parentLogger, getClass());
   }
 
   /** Return all modules in dependency order */

@@ -58,7 +58,7 @@ public class TabManager implements Listener {
     if (viewProvider == null) viewProvider = new TabView.Factory();
     if (playerEntryProvider == null) playerEntryProvider = new PlayerTabEntry.Factory();
 
-    this.logger = new ClassLogger(plugin.getLogger(), getClass());
+    this.logger = ClassLogger.get(plugin.getLogger(), getClass());
     this.plugin = plugin;
     this.enabledViews = new DefaultMapAdapter<>(viewProvider, true);
     this.playerEntries = new DefaultMapAdapter<>(playerEntryProvider, true);
