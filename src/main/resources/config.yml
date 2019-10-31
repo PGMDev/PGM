@@ -16,8 +16,8 @@ map:
 
 restart:
   enabled: true
-  uptime: 6h
-  match-limit: 30
+  uptime: 3h
+  match-limit: 15
 
 start:
   auto: true                  # Start the match automatically when ready
