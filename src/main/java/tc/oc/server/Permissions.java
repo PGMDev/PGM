@@ -27,6 +27,7 @@ public interface Permissions {
   String DEFUSE = ROOT + ".defuse"; // Defuse tnt from observers using shears
   String DEBUG = ROOT + ".debug"; // Errors from map loading and debug commands
   String STAFF = ROOT + ".staff"; // Considered apart of the staff team
+  String RELOAD = ROOT + ".reload"; // Reload the PGM configuration
 
   // Role-specific permission nodes
   Permission DEFAULT =
@@ -69,6 +70,7 @@ public interface Permissions {
               .putAll(MODERATOR.getChildren())
               .put(GAMEPLAY, true)
               .put(DEBUG, true)
+              .put(RELOAD, true)
               .build());
 
   Permission ALL = new Permission("pgm.*", PermissionDefault.OP, DEVELOPER.getChildren());

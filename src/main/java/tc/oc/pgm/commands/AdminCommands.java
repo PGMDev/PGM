@@ -173,6 +173,16 @@ public class AdminCommands {
         ChatColor.GREEN + AllTranslations.get().translate("command.admin.cancel.success", sender));
   }
 
+  @Command(
+      aliases = {"pgm"},
+      desc = "Reload the PGM configuration",
+      perms = Permissions.RELOAD)
+  public void pgm(CommandSender sender) {
+    PGM.get().reloadConfig();
+    sender.sendMessage(
+        ChatColor.GREEN + AllTranslations.get().translate("command.admin.pgm", sender));
+  }
+
   private static Map<String, Competitor> getCompetitorMap(CommandSender sender, Match match) {
     return match.getCompetitors().stream()
         .map(competitor -> new AbstractMap.SimpleEntry<>(competitor.getName(sender), competitor))
