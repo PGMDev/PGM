@@ -63,11 +63,14 @@ public class MapDevelopmentCommands {
       throws CommandException {
     Multimap<PGMMap, PGMMap.MapLogRecord> errors = getErrors();
     Multimap<PGMMap, PGMMap.MapLogRecord> filtered = ArrayListMultimap.create();
-    filtered.putAll(map, errors.get(map));
-    errors = filtered;
+
+    if (map != null) {
+      filtered.putAll(map, errors.get(map));
+      errors = filtered;
+    }
 
     new PrettyPaginatedResult<Entry<PGMMap, MapLogRecord>>(
-        map == null ? "Map Errors" : map.getName() + " Errors") {
+        map == null ? "Errors" : map.getName() + " Errors") {
       @Override
       public String format(Map.Entry<PGMMap, PGMMap.MapLogRecord> entry, int index) {
         return entry.getValue().getLegacyFormattedMessage();
