@@ -77,6 +77,6 @@ public class MotdListener implements Listener {
     }
     MOTD_DATA.put(STATE_NAME_KEY, name);
     MOTD_DATA.put(STATE_NAME_LOWER_KEY, name.toLowerCase());
-    MOTD_DATA.put(STATE_COLOR_KEY, ChatColor.COLOR_CHAR + color.toString());
+    MOTD_DATA.put(STATE_COLOR_KEY, color.toString());
   }
 }

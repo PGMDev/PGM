@@ -18,18 +18,9 @@ import net.kencochrane.raven.event.EventBuilder;
 import net.kencochrane.raven.event.interfaces.ExceptionInterface;
 import net.kencochrane.raven.event.interfaces.StackTraceInterface;
 import net.kencochrane.raven.log4j2.SentryAppender;
-import net.minecraft.server.v1_8_R3.DedicatedPlayerList;
-import net.minecraft.server.v1_8_R3.DedicatedServer;
-import net.minecraft.server.v1_8_R3.DispenserRegistry;
-import net.minecraft.server.v1_8_R3.MinecraftEncryption;
-import net.minecraft.server.v1_8_R3.PropertyManager;
-import net.minecraft.server.v1_8_R3.WorldLoaderServer;
-import net.minecraft.server.v1_8_R3.WorldServer;
-import net.minecraft.server.v1_8_R3.WorldSettings;
-import net.minecraft.server.v1_8_R3.WorldType;
+import net.minecraft.server.v1_8_R3.*;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.appender.ConsoleAppender;
@@ -47,13 +38,7 @@ import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.server.PluginEvent;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.PluginLoadOrder;
-import org.bukkit.plugin.PluginLoader;
-import org.bukkit.plugin.RegisteredListener;
-import org.bukkit.plugin.SimplePluginManager;
-import org.bukkit.plugin.UnknownDependencyException;
+import org.bukkit.plugin.*;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
 import org.fusesource.jansi.AnsiConsole;
@@ -158,6 +143,7 @@ public class Server extends DedicatedServer {
   }
 
   private void setupConsole() {
+    if (System.console() == null) return;
     final Thread console =
         new Thread(
             () -> {
