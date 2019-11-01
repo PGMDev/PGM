@@ -9,6 +9,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerListPingEvent;
 import tc.oc.pgm.Config;
+import tc.oc.pgm.events.ConfigLoadEvent;
 import tc.oc.pgm.events.MatchLoadEvent;
 import tc.oc.pgm.events.MatchStateChangeEvent;
 
@@ -21,7 +22,7 @@ public class MotdListener implements Listener {
   private static final String STATE_NAME_LOWER_KEY = "state.name-lower";
 
   private static final Map<String, String> MOTD_DATA = Maps.newHashMap();
-  private final String format;
+  private String format;
 
   // Show the default MOTD until a match has loaded
   private boolean ready = false;
@@ -42,6 +43,11 @@ public class MotdListener implements Listener {
       motd = motd.replace("{" + find + "}", replace);
     }
     event.setMotd(motd);
+  }
+
+  @EventHandler
+  public void onConfigReload(ConfigLoadEvent event) {
+    this.format = Config.Motd.format();
   }
 
   @EventHandler
