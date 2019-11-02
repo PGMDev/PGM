@@ -15,6 +15,7 @@ public class BossBarView implements BossBarObserver {
 
   public static final float BOSS_18_HEALTH = 300;
   public static final double BOSS_18_DISTANCE = 50;
+  public static final float BOSS_18_ANGLE = 20;
   public static final int MAX_TEXT_LENGTH = 64;
 
   private final Plugin plugin;
@@ -72,14 +73,15 @@ public class BossBarView implements BossBarObserver {
   }
 
   private void spawnBoss() {
-    resetBossLocation();
+    resetBossLocation(viewer.getLocation());
     NMSHacks.spawnWither(viewer, entityId, location, renderText(), renderMeter());
     spawned = true;
   }
 
-  private void resetBossLocation() {
-    location = viewer.getLocation();
-    // Keep the boss in the center of the player's view
+  private void resetBossLocation(Location pos) {
+    location = pos;
+    // Keep the boss a few degrees up from the center of the player's view
+    location.setPitch(location.getPitch() - BOSS_18_ANGLE);
     location.add(location.getDirection().multiply(BOSS_18_DISTANCE));
   }
 
@@ -104,7 +106,7 @@ public class BossBarView implements BossBarObserver {
   // Dispatched from elsewhere
   public void onPlayerMove(PlayerMoveEvent event) {
     if (viewer == event.getPlayer() && spawned) {
-      resetBossLocation();
+      resetBossLocation(event.getTo().clone());
       NMSHacks.teleportEntity(viewer, entityId, location);
     }
   }

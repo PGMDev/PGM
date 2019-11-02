@@ -393,8 +393,8 @@ public interface NMSHacks {
 
   static EntityMetadata createWitherMetadata(String name, float health) {
     EntityMetadata data = createBossMetadata(name, health);
-    DataWatcher watcher = ((EntityMetadata) data).dataWatcher;
-    watcher.a(20, (int) 1000); // Invulnerability countdown
+    DataWatcher watcher = data.dataWatcher;
+    watcher.a(20, 890); // Invulnerability countdown
     return data;
   }
 
