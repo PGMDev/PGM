@@ -9,6 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInitialSpawnEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import tc.oc.bossbar.BossBar;
 import tc.oc.bossbar.BossBarStack;
 import tc.oc.bossbar.BossBarView;
@@ -85,6 +86,12 @@ public class BossBarMatchModule extends MatchModule implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerMove(PlayerMoveEvent event) {
+    BossBarView view = views.get(event.getPlayer());
+    if (view != null) view.onPlayerMove(event);
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerMove(PlayerTeleportEvent event) {
     BossBarView view = views.get(event.getPlayer());
     if (view != null) view.onPlayerMove(event);
   }
