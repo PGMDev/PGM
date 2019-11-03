@@ -1,6 +1,6 @@
 package tc.oc.pgm.features;
 
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
 
 /**
  * Super-class for all match-time features. Stores a unique ID (see documentation below) that is

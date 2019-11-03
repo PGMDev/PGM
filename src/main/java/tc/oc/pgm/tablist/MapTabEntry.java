@@ -8,8 +8,8 @@ import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.named.NameStyle;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.map.Contributor;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.util.TranslationUtils;
 import tc.oc.tablist.DynamicTabEntry;
 import tc.oc.tablist.TabView;
@@ -33,9 +33,9 @@ public class MapTabEntry extends DynamicTabEntry {
   @Override
   public BaseComponent getContent(TabView view) {
     Component content =
-        new PersonalizedText(match.getMapInfo().name, ChatColor.AQUA, ChatColor.BOLD);
+        new PersonalizedText(match.getMap().getInfo().name, ChatColor.AQUA, ChatColor.BOLD);
 
-    List<Contributor> authors = match.getMapInfo().getNamedAuthors();
+    List<Contributor> authors = match.getMap().getInfo().getNamedAuthors();
     if (!authors.isEmpty()) {
       content =
           new PersonalizedText(

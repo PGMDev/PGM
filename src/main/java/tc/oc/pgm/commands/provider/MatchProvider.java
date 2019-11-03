@@ -5,8 +5,8 @@ import app.ashcon.intake.bukkit.parametric.provider.BukkitProvider;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import org.bukkit.command.CommandSender;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchManager;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchManager;
 
 public class MatchProvider implements BukkitProvider<Match> {
 
@@ -23,6 +23,6 @@ public class MatchProvider implements BukkitProvider<Match> {
 
   @Override
   public Match get(CommandSender sender, CommandArgs args, List<? extends Annotation> list) {
-    return matchManager.getCurrentMatch(sender);
+    return matchManager.getMatch(sender);
   }
 }

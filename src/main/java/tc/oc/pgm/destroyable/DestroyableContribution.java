@@ -1,8 +1,8 @@
 package tc.oc.pgm.destroyable;
 
 import com.google.common.base.Preconditions;
+import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.goals.Contribution;
-import tc.oc.pgm.match.MatchPlayerState;
 
 public class DestroyableContribution extends Contribution {
   private final int blocks;

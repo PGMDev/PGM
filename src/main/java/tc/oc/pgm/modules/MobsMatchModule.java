@@ -4,10 +4,10 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.Filter.QueryResponse;
 import tc.oc.pgm.filters.query.EntitySpawnQuery;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
 
 public class MobsMatchModule extends MatchModule implements Listener {

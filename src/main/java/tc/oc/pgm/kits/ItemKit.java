@@ -10,7 +10,7 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import tc.oc.item.Items;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 public class ItemKit implements KitDefinition {
 
@@ -44,7 +44,7 @@ public class ItemKit implements KitDefinition {
   @Override
   public void apply(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {
     ApplyItemKitEvent event = new ApplyItemKitEvent(player, this);
-    player.getMatch().getPluginManager().callEvent(event);
+    player.getMatch().callEvent(event);
     if (event.isCancelled()) {
       return;
     }

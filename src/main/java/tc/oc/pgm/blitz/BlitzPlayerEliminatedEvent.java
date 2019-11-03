@@ -4,10 +4,10 @@ import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
 import org.bukkit.Location;
 import org.bukkit.event.HandlerList;
-import tc.oc.pgm.events.MatchEvent;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.event.MatchEvent;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 /**
  * Called when a player is eliminated in the blitz game mode.

@@ -1,9 +1,9 @@
 package tc.oc.pgm.filters;
 
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.filters.query.IDamageQuery;
 import tc.oc.pgm.filters.query.MatchQuery;
 import tc.oc.pgm.filters.query.PlayerStateQuery;
-import tc.oc.pgm.match.ParticipantState;
 
 public class AttackerFilter extends TypedFilter<IDamageQuery> {
 

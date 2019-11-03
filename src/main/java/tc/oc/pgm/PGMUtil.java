@@ -14,10 +14,10 @@ import tc.oc.identity.RealIdentity;
 import tc.oc.named.CachingNameRenderer;
 import tc.oc.named.NameRenderer;
 import tc.oc.named.NicknameRenderer;
+import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.listeners.GeneralizingListener;
 import tc.oc.pgm.listeners.InactivePlayerListener;
 import tc.oc.server.ConfigUtils;
-import tc.oc.server.Permissions;
 
 public class PGMUtil implements Listener {
 

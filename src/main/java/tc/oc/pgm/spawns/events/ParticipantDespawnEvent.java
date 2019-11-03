@@ -2,8 +2,8 @@ package tc.oc.pgm.spawns.events;
 
 import org.bukkit.Location;
 import org.bukkit.event.HandlerList;
-import tc.oc.pgm.events.MatchPlayerEvent;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.MatchPlayerEvent;
 
 /**
  * Called immediately before a participating player ceases to be a specific living, physical entity

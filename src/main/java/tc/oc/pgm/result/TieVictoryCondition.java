@@ -2,8 +2,8 @@ package tc.oc.pgm.result;
 
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Competitor;
 
 /** Everybody loses */
 public class TieVictoryCondition extends ImmediateVictoryCondition {

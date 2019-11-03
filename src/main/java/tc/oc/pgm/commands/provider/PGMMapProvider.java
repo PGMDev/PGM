@@ -10,10 +10,11 @@ import java.util.Arrays;
 import java.util.List;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.AllTranslations;
+import tc.oc.pgm.api.match.MatchManager;
+import tc.oc.pgm.commands.MapCommands;
 import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.pgm.map.MapLibrary;
 import tc.oc.pgm.map.PGMMap;
-import tc.oc.pgm.match.MatchManager;
 import tc.oc.util.StringUtils;
 
 public class PGMMapProvider implements BukkitProvider<PGMMap> {
@@ -34,7 +35,7 @@ public class PGMMapProvider implements BukkitProvider<PGMMap> {
   @Override
   public PGMMap get(CommandSender sender, CommandArgs args, List<? extends Annotation> annotations)
       throws ArgumentException {
-    PGMMap map = matchManager.getCurrentMatch(sender).getMap();
+    PGMMap map = matchManager.getMatch(sender).getMap();
 
     if (args.hasNext()) {
       String mapName = getRemainingText(args);
@@ -44,7 +45,7 @@ public class PGMMapProvider implements BukkitProvider<PGMMap> {
         map = mapLibrary.getMapByNameOrId(fuzzyName).orNull();
       }
     } else if (isGoToNext(annotations)) {
-      map = matchManager.getNextMap();
+      map = MapCommands.popNextMap();
     }
 
     if (map == null) {

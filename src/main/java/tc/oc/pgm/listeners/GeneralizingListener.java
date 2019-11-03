@@ -19,7 +19,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.util.RayBlockIntersection;
 import org.bukkit.util.Vector;
 import tc.oc.block.BlockVectors;
-import tc.oc.chat.BukkitAudiences;
+import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.events.BlockPunchEvent;
 import tc.oc.pgm.events.BlockTrampleEvent;
 import tc.oc.pgm.events.CoarsePlayerMoveEvent;
@@ -282,7 +282,7 @@ public class GeneralizingListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void processCancelMessage(final CoarsePlayerMoveEvent event) {
     if (event.isCancelled() && event.getCancelMessage() != null) {
-      BukkitAudiences.getAudience(event.getPlayer()).sendWarning(event.getCancelMessage(), false);
+      Audience.get(event.getPlayer()).sendWarning(event.getCancelMessage(), false);
     }
   }
 }

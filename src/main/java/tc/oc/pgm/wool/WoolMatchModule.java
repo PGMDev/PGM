@@ -20,22 +20,22 @@ import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 import tc.oc.block.BlockVectors;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.Config;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.BlockTransformEvent;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.goals.Contribution;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.ParticipantState;
 import tc.oc.pgm.teams.Team;
 import tc.oc.server.BukkitUtils;
 
@@ -56,7 +56,6 @@ public class WoolMatchModule extends MatchModule implements Listener {
   protected final Map<Inventory, Map<Integer, ItemStack>> woolChests = new HashMap<>();
 
   private static final long REFILL_INTERVAL_TICKS = 600;
-  private BukkitTask refillTask;
 
   public WoolMatchModule(Match match, Multimap<Team, MonumentWool> wools) {
     super(match);
@@ -66,26 +65,13 @@ public class WoolMatchModule extends MatchModule implements Listener {
   @Override
   public void enable() {
     super.enable();
-    Runnable task =
-        new Runnable() {
-          @Override
-          public void run() {
-            WoolMatchModule.this.refillOneWoolPerContainer();
-          }
-        };
-    this.refillTask =
-        this.getMatch()
-            .getServer()
-            .getScheduler()
-            .runTaskTimer(this.getMatch().getPlugin(), task, 0, REFILL_INTERVAL_TICKS);
+    this.getMatch()
+        .getScheduler(MatchScope.RUNNING)
+        .runTaskTimer(0, REFILL_INTERVAL_TICKS, WoolMatchModule.this::refillOneWoolPerContainer);
   }
 
   @Override
   public void disable() {
-    if (this.refillTask != null) {
-      this.refillTask.cancel();
-      this.refillTask = null;
-    }
     super.disable();
   }
 
@@ -200,16 +186,12 @@ public class WoolMatchModule extends MatchModule implements Listener {
     if (player != null) { // wool can only be placed by a player
       Component woolName = BukkitUtils.woolName(wool.getDyeColor());
       if (!isValidWool(wool.getDyeColor(), event.getNewState())) {
-        player
-            .getAudience()
-            .sendWarning(new PersonalizedTranslatable("match.wool.placeWrong", woolName), true);
+        player.sendWarning(new PersonalizedTranslatable("match.wool.placeWrong", woolName), true);
       } else if (wool.getOwner() != player.getParty()) {
-        player
-            .getAudience()
-            .sendWarning(
-                new PersonalizedTranslatable(
-                    "match.wool.placeOther", wool.getOwner().getComponentName(), woolName),
-                true);
+        player.sendWarning(
+            new PersonalizedTranslatable(
+                "match.wool.placeOther", wool.getOwner().getComponentName(), woolName),
+            true);
       } else {
         event.setCancelled(false);
         wool.markPlaced();

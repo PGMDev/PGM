@@ -9,9 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Sound;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -19,10 +17,21 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.Vector;
 import org.joda.time.Instant;
+import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.material.matcher.SingleMaterialMatcher;
-import tc.oc.pgm.AllTranslations;
-import tc.oc.pgm.events.*;
-import tc.oc.pgm.match.*;
+import tc.oc.named.NameStyle;
+import tc.oc.pgm.api.chat.Sound;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.party.event.CompetitorScoreChangeEvent;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
+import tc.oc.pgm.events.CoarsePlayerMoveEvent;
+import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.events.PlayerItemTransferEvent;
+import tc.oc.pgm.match.MatchModule;
 import tc.oc.util.collection.DefaultMapAdapter;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -30,8 +39,7 @@ public class ScoreMatchModule extends MatchModule implements Listener {
 
   protected final ScoreConfig config;
   private final Set<ScoreBox> scoreBoxes;
-  protected final Map<Competitor, Double> scores =
-      new DefaultMapAdapter<>(new HashMap<Competitor, Double>(), 0d);
+  protected final Map<Competitor, Double> scores = new DefaultMapAdapter<>(new HashMap<>(), 0d);
 
   public ScoreMatchModule(Match match, ScoreConfig config, Set<ScoreBox> scoreBoxes) {
     super(match);
@@ -142,10 +150,9 @@ public class ScoreMatchModule extends MatchModule implements Listener {
       if (box.getRegion().enters(from, to) && box.canScore(playerState)) {
         if (box.isCoolingDown(playerState)) {
           this.getMatch()
-              .getPlugin()
               .getLogger()
               .warning(
-                  playerState.getUuid()
+                  playerState.getId()
                       + " tried to score multiple times in one second (from="
                       + from
                       + " to="
@@ -169,10 +176,8 @@ public class ScoreMatchModule extends MatchModule implements Listener {
           && box.getRegion().contains(player.getBukkit())
           && box.canScore(player.getParticipantState())) {
         this.getMatch()
-            .getServer()
-            .getScheduler()
+            .getScheduler(MatchScope.RUNNING)
             .runTask(
-                this.getMatch().getPlugin(),
                 new Runnable() {
                   @Override
                   public void run() {
@@ -197,42 +202,15 @@ public class ScoreMatchModule extends MatchModule implements Listener {
     int wholePoints = (int) points;
     if (wholePoints < 1) return;
 
-    Bukkit.getConsoleSender()
-        .sendMessage(
-            ChatColor.GRAY
-                + AllTranslations.get()
-                    .translate(
-                        "match.score.scorebox",
-                        Bukkit.getConsoleSender(),
-                        player.getColoredName() + ChatColor.GRAY,
-                        AllTranslations.get()
-                            .translate(
-                                wholePoints == 1
-                                    ? "points.singularCompound"
-                                    : "points.pluralCompound",
-                                Bukkit.getConsoleSender(),
-                                ChatColor.DARK_AQUA + String.valueOf(wholePoints) + ChatColor.GRAY),
-                        player.getParty().getColoredName() + ChatColor.GRAY));
-
-    for (MatchPlayer viewer : this.match.getPlayers()) {
-      viewer.sendMessage(
-          ChatColor.GRAY
-              + AllTranslations.get()
-                  .translate(
-                      "match.score.scorebox",
-                      viewer.getBukkit(),
-                      player.getColoredName(viewer) + ChatColor.GRAY,
-                      AllTranslations.get()
-                          .translate(
-                              wholePoints == 1
-                                  ? "points.singularCompound"
-                                  : "points.pluralCompound",
-                              viewer.getBukkit(),
-                              ChatColor.DARK_AQUA + String.valueOf(wholePoints) + ChatColor.GRAY),
-                      player.getParty().getColoredName() + ChatColor.GRAY));
-    }
-
-    player.playSound(Sound.LEVEL_UP, 1, 1);
+    match.sendMessage(
+        new PersonalizedTranslatable(
+            "match.score.scorebox",
+            player.getStyledName(NameStyle.COLOR),
+            new PersonalizedTranslatable(
+                wholePoints == 1 ? "points.singularCompound" : "points.pluralCompound",
+                ChatColor.DARK_AQUA + String.valueOf(wholePoints) + ChatColor.GRAY),
+            player.getParty().getStyledName(NameStyle.COLOR)));
+    player.playSound(new Sound("random.levelup"));
   }
 
   public void incrementScore(Competitor competitor, double amount) {
@@ -243,13 +221,13 @@ public class ScoreMatchModule extends MatchModule implements Listener {
       newScore = this.config.scoreLimit;
     }
 
-    MatchScoreChangeEvent event =
-        new MatchScoreChangeEvent(competitor.getMatch(), competitor, oldScore, newScore);
-    this.match.getServer().getPluginManager().callEvent(event);
+    CompetitorScoreChangeEvent event =
+        new CompetitorScoreChangeEvent(competitor, oldScore, newScore);
+    this.match.callEvent(event);
 
     this.scores.put(competitor, event.getNewScore());
 
-    this.match.invalidateCompetitorRanking();
-    this.match.checkEnd();
+    this.match.calculateVictory();
+    this.match.calculateVictory();
   }
 }

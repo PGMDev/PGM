@@ -3,7 +3,6 @@ package tc.oc.pgm.ffa;
 import java.util.*;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Sound;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -11,11 +10,16 @@ import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.identity.PlayerIdentityChangeEvent;
+import tc.oc.pgm.api.chat.Sound;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.party.event.PartyRenameEvent;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.events.PartyRenameEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.join.*;
-import tc.oc.pgm.match.*;
+import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
 import tc.oc.server.NullCommandSender;
@@ -58,10 +62,18 @@ public class FreeForAllMatchModule extends MatchModule implements Listener, Join
   private @Nullable Integer minPlayers, maxPlayers, maxOverfill;
   private int minPlayersNeeded = Integer.MAX_VALUE;
   private final Map<UUID, Tribute> tributes = new HashMap<>();
+  private JoinMatchModule jmm;
 
   public FreeForAllMatchModule(Match match, FreeForAllOptions options) {
     super(match);
     this.options = options;
+  }
+
+  private JoinMatchModule join() {
+    if (jmm == null) {
+      jmm = match.needModule(JoinMatchModule.class);
+    }
+    return jmm;
   }
 
   public FreeForAllOptions getOptions() {
@@ -102,7 +114,7 @@ public class FreeForAllMatchModule extends MatchModule implements Listener, Join
   }
 
   protected void updateReadiness() {
-    if (getMatch().hasStarted()) return;
+    if (getMatch().isRunning()) return;
 
     int players = 0;
     for (Competitor competitor : getMatch().getCompetitors()) {
@@ -128,40 +140,40 @@ public class FreeForAllMatchModule extends MatchModule implements Listener, Join
   }
 
   protected Tribute getTribute(MatchPlayer player) {
-    Tribute tribute = tributes.get(player.getPlayerId());
+    Tribute tribute = tributes.get(player.getId());
     if (tribute == null) {
       tribute = new Tribute(player);
-      tributes.put(player.getPlayerId(), tribute);
+      tributes.put(player.getId(), tribute);
       logger.fine("Created " + tribute);
     }
     return tribute;
   }
 
   protected boolean canPriorityKick(MatchPlayer joining) {
-    if (!joining.canPriorityKick()) return false;
+    if (!join().canPriorityKick(joining)) return false;
 
-    for (MatchPlayer player : getMatch().getParticipatingPlayers()) {
-      if (!player.canPriorityKick()) return true;
+    for (MatchPlayer player : getMatch().getParticipants()) {
+      if (!join().canPriorityKick(player)) return true;
     }
 
     return false;
   }
 
   protected boolean priorityKick(MatchPlayer joining) {
-    if (!joining.canPriorityKick()) return false;
+    if (!join().canPriorityKick(joining)) return false;
 
     List<MatchPlayer> kickable = new ArrayList<>();
-    for (MatchPlayer player : getMatch().getParticipatingPlayers()) {
-      if (!player.canPriorityKick()) kickable.add(player);
+    for (MatchPlayer player : getMatch().getParticipants()) {
+      if (!join().canPriorityKick(player)) kickable.add(player);
     }
     if (kickable.isEmpty()) return false;
 
     MatchPlayer kickMe = kickable.get(getMatch().getRandom().nextInt(kickable.size()));
 
     kickMe.sendWarning(new PersonalizedTranslatable("gameplay.ffa.kickedForPremium"), false);
-    kickMe.playSound(Sound.VILLAGER_HIT, kickMe.getBukkit().getLocation(), 1, 1);
+    kickMe.playSound(new Sound("mob.villager.hit"));
 
-    getMatch().setPlayerParty(kickMe, getMatch().getDefaultParty());
+    getMatch().setParty(kickMe, getMatch().getDefaultParty());
 
     return true;
   }
@@ -175,9 +187,9 @@ public class FreeForAllMatchModule extends MatchModule implements Listener, Join
       return GenericJoinResult.Status.REDUNDANT.toResult();
     }
 
-    int players = getMatch().getParticipatingPlayers().size();
+    int players = getMatch().getParticipants().size();
 
-    if (joining.canJoinFull()) {
+    if (join().canJoinFull(joining)) {
       if (players >= getMaxOverfill() && !canPriorityKick(joining)) {
         return GenericJoinResult.Status.FULL.toResult();
       }
@@ -238,7 +250,7 @@ public class FreeForAllMatchModule extends MatchModule implements Listener, Join
           new PersonalizedTranslatable("command.gameplay.join.alreadyJoined"), false);
     }
 
-    return getMatch().setPlayerParty(joining, getTribute(joining));
+    return getMatch().setParty(joining, getTribute(joining));
   }
 
   @EventHandler(priority = EventPriority.MONITOR)

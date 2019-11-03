@@ -4,7 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.annotation.Nullable;
 import org.bukkit.event.Event;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
 
 public class MatchQuery extends Query implements IMatchQuery {
 

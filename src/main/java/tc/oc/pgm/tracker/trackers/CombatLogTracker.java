@@ -24,9 +24,10 @@ import org.joda.time.Duration;
 import org.joda.time.Instant;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.material.Materials;
+import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 
 /**
@@ -146,7 +147,7 @@ public class CombatLogTracker implements Listener {
   // This must be called BEFORE the listener that removes the player from the match
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onQuit(PlayerQuitEvent event) {
-    Match match = Match.get(event.getWorld());
+    Match match = PGM.getMatchManager().getMatch(event.getWorld());
     if (match == null || !match.isRunning()) return;
 
     MatchPlayer player = match.getPlayer(event.getPlayer());
@@ -192,7 +193,10 @@ public class CombatLogTracker implements Listener {
     try {
       currentDeathEvent =
           new PlayerDeathEvent(
-              player.getBukkit(), drops, 0, player.getDisplayName() + " logged out to avoid death");
+              player.getBukkit(),
+              drops,
+              0,
+              player.getBukkit().getDisplayName() + " logged out to avoid death");
       match.callEvent(currentDeathEvent);
     } finally {
       currentDeathEvent = null;

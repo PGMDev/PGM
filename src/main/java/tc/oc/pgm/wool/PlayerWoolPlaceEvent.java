@@ -2,8 +2,8 @@ package tc.oc.pgm.wool;
 
 import org.bukkit.block.BlockState;
 import org.bukkit.event.HandlerList;
-import tc.oc.pgm.events.MatchEvent;
-import tc.oc.pgm.match.ParticipantState;
+import tc.oc.pgm.api.match.event.MatchEvent;
+import tc.oc.pgm.api.player.ParticipantState;
 
 public class PlayerWoolPlaceEvent extends MatchEvent {
   private static final HandlerList handlers = new HandlerList();

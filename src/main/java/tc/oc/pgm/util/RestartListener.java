@@ -16,13 +16,13 @@ import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.event.MatchFinishEvent;
+import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.countdowns.SingleCountdownContext;
 import tc.oc.pgm.events.ConfigLoadEvent;
-import tc.oc.pgm.events.MatchEndEvent;
-import tc.oc.pgm.events.MatchLoadEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.restart.CancelRestartEvent;
 import tc.oc.pgm.restart.RequestRestartEvent;
 import tc.oc.pgm.restart.RestartManager;
@@ -74,24 +74,24 @@ public class RestartListener implements Listener {
 
   /** Start a countdown with the default duration if there isn't already one running */
   private void ensureCountdown(Match match) {
-    SingleCountdownContext ctx = match.getCountdownContext();
+    SingleCountdownContext ctx = (SingleCountdownContext) match.getCountdown();
     ctx.cancelOthers(RestartCountdown.class);
     if (ctx.getCountdown() == null) {
-      this.logger.info("Starting default countdown");
+      this.logger.info("STARTING default countdown");
       ctx.start(new RestartCountdown(match), this.defaultCountdownTime);
     }
   }
 
   /** Start a countdown of the given duration after cancelling any existing one */
   private void startCountdown(Match match, Duration duration) {
-    SingleCountdownContext ctx = match.getCountdownContext();
+    SingleCountdownContext ctx = (SingleCountdownContext) match.getCountdown();
     ctx.cancelAll();
-    this.logger.info("Starting countdown from " + duration);
+    this.logger.info("STARTING countdown from " + duration);
     ctx.start(new RestartCountdown(match), duration);
   }
 
   private void cancelCountdown(Match match) {
-    SingleCountdownContext ctx = match.getCountdownContext();
+    SingleCountdownContext ctx = (SingleCountdownContext) match.getCountdown();
     if (ctx.getCountdown(RestartCountdown.class) != null) {
       this.logger.info("Cancelling countdown");
       ctx.cancelAll();
@@ -102,9 +102,9 @@ public class RestartListener implements Listener {
     if (this.deferral == null) return;
 
     if (match.isRunning()) {
-      if (match.getParticipatingPlayers().isEmpty()) {
+      if (match.getParticipants().isEmpty()) {
         this.logger.info("Ending empty match due to restart request");
-        match.end();
+        match.finish();
       }
     } else {
       this.ensureCountdown(match);
@@ -118,7 +118,8 @@ public class RestartListener implements Listener {
   @EventHandler
   public void onRequestRestart(RequestRestartEvent event) {
     if (!this.plugin.getServer().getOnlinePlayers().isEmpty()) {
-      Match match = PGM.getMatchManager().getCurrentMatch();
+      // FIXME: Fix for multi-match support
+      Match match = PGM.getMatchManager().getMatches().iterator().next();
       if (match == null) return;
 
       this.logger.info("Deferring restart");
@@ -133,7 +134,7 @@ public class RestartListener implements Listener {
    * priority over map cycling.
    */
   @EventHandler(priority = EventPriority.LOW)
-  public void onMatchEnd(MatchEndEvent event) {
+  public void onMatchEnd(MatchFinishEvent event) {
     if (this.deferral != null) {
       this.checkRestart(event.getMatch());
     } else if (this.matchLimit != null && this.matchCount >= this.matchLimit) {
@@ -143,7 +144,7 @@ public class RestartListener implements Listener {
     }
   }
 
-  /** If the match empties out while a restart is queued, end the match */
+  /** If the match empties out while a restart is queued, finish the match */
   @EventHandler
   public void onPartyChange(PlayerPartyChangeEvent event) {
     this.checkRestart(event.getMatch());
@@ -152,7 +153,7 @@ public class RestartListener implements Listener {
   /** When restart is cancelled, cancel any countdown and discard our deferral */
   @EventHandler
   public void onCancelRestart(CancelRestartEvent event) {
-    this.cancelCountdown(PGM.getMatchManager().getCurrentMatch());
+    this.cancelCountdown(PGM.getMatchManager().getMatches().iterator().next());
     this.deferral = null;
   }
 

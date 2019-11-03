@@ -10,10 +10,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerOnGroundEvent;
 import tc.oc.material.Materials;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.MatchScope;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.damage.*;
 import tc.oc.pgm.tracker.event.PlayerSpleefEvent;
@@ -61,7 +61,7 @@ public class SpleefTracker implements Listener {
       breaker = new PlayerInfo(event.getPlayerState());
     }
 
-    final SpleefInfo info = new SpleefInfo(breaker, match.getClock().now());
+    final SpleefInfo info = new SpleefInfo(breaker, match.getTick());
     brokenBlocks.put(block, info);
 
     match
@@ -87,7 +87,7 @@ public class SpleefTracker implements Listener {
     Block block = this.lastBlockBrokenUnderPlayer(player);
     if (block != null) {
       SpleefInfo info = brokenBlocks.get(block);
-      if (match.getClock().now().tick - info.getTime().tick <= MAX_SPLEEF_TICKS) {
+      if (match.getTick().tick - info.getTime().tick <= MAX_SPLEEF_TICKS) {
         match.callEvent(new PlayerSpleefEvent(player, block, info));
       }
     }

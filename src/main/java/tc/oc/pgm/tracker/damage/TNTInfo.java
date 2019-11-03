@@ -3,7 +3,7 @@ package tc.oc.pgm.tracker.damage;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.bukkit.Location;
-import tc.oc.pgm.match.ParticipantState;
+import tc.oc.pgm.api.player.ParticipantState;
 
 public class TNTInfo extends OwnerInfoBase implements RangedInfo {
 

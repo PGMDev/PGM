@@ -1,7 +1,7 @@
 package tc.oc.pgm.filters;
 
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.query.IPlayerQuery;
-import tc.oc.pgm.match.MatchPlayer;
 
 public class CanFlyFilter extends ParticipantFilter {
 

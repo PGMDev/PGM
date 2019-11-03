@@ -8,19 +8,19 @@ import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.command.CommandSender;
 import org.bukkit.scoreboard.NameTagVisibility;
-import tc.oc.chat.Sound;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedPlayer;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.identity.Identities;
 import tc.oc.named.NameStyle;
 import tc.oc.named.Names;
+import tc.oc.pgm.api.chat.Sound;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.query.IPartyQuery;
 import tc.oc.pgm.filters.query.IPlayerQuery;
 import tc.oc.pgm.filters.query.PartyQuery;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
 
 /**
  * Wraps a single {@link MatchPlayer} in a free-for-all match.
@@ -54,8 +54,8 @@ public class Tribute implements Competitor {
     this.match = player.getMatch();
     this.ffa = match.needMatchModule(FreeForAllMatchModule.class);
 
-    this.playerId = player.getPlayerId();
-    this.username = player.getName();
+    this.playerId = player.getId();
+    this.username = player.getBukkit().getName();
   }
 
   @Override
@@ -133,23 +133,8 @@ public class Tribute implements Competitor {
   }
 
   @Override
-  public Type getType() {
-    return Type.Participating;
-  }
-
-  @Override
-  public boolean isParticipatingType() {
-    return true;
-  }
-
-  @Override
   public boolean isParticipating() {
     return getMatch().isRunning();
-  }
-
-  @Override
-  public boolean isObservingType() {
-    return false;
   }
 
   @Override
@@ -168,42 +153,28 @@ public class Tribute implements Competitor {
   }
 
   @Override
-  public Set<UUID> getPastPlayers() {
-    return getMatch().isCommitted()
-        ? Collections.singleton(playerId)
-        : Collections.<UUID>emptySet();
-  }
-
-  @Override
-  public void commit() {}
-
-  @Override
   public @Nullable MatchPlayer getPlayer(UUID playerId) {
-    return player != null && player.getPlayerId().equals(playerId) ? player : null;
+    return player != null && player.getId().equals(playerId) ? player : null;
   }
 
   protected void checkPlayer(MatchPlayer player) {
-    if (!player.getPlayerId().equals(playerId)) {
+    if (!player.getId().equals(playerId)) {
       throw new UnsupportedOperationException();
     }
   }
 
   @Override
-  public boolean addPlayer(MatchPlayer player) {
+  public void internalAddPlayer(MatchPlayer player) {
     checkPlayer(player);
-    boolean changed = this.player == null;
     this.player = player;
     this.players = Collections.singleton(player);
-    return changed;
   }
 
   @Override
-  public boolean removePlayer(MatchPlayer player) {
+  public void internalRemovePlayer(MatchPlayer player) {
     checkPlayer(player);
-    boolean changed = this.player != null;
     this.player = null;
     this.players = Collections.emptySet();
-    return changed;
   }
 
   @Override

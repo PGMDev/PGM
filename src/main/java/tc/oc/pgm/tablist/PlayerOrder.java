@@ -4,8 +4,8 @@ import java.util.Comparator;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import tc.oc.pgm.Config;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.server.Permissions;
+import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 /**
  * The order that players are listed for a given viewer. Roughly speaking, the order is: 1. viewer

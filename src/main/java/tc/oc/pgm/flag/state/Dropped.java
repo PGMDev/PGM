@@ -4,11 +4,11 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.joda.time.Duration;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.Party;
 import tc.oc.pgm.scoreboard.SidebarMatchModule;
 import tc.oc.util.TimeUtils;
 

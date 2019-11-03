@@ -2,8 +2,9 @@ package tc.oc.pgm.timelimit;
 
 import javax.annotation.Nullable;
 import org.joda.time.Duration;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.match.MatchModule;
+import tc.oc.pgm.result.VictoryCondition;
 
 public class TimeLimitMatchModule extends MatchModule {
   private final TimeLimit defaultTimeLimit;
@@ -35,7 +36,11 @@ public class TimeLimitMatchModule extends MatchModule {
       logger.fine("Changing time limit to " + timeLimit);
 
       this.timeLimit = timeLimit;
-      getMatch().removeVictoryConditions(TimeLimit.class);
+      for (VictoryCondition condition : getMatch().getVictoryConditions()) {
+        if (condition instanceof TimeLimit) {
+          getMatch().removeVictoryCondition(condition);
+        }
+      }
       if (this.timeLimit != null) {
         getMatch().addVictoryCondition(this.timeLimit);
       }
@@ -51,7 +56,7 @@ public class TimeLimitMatchModule extends MatchModule {
   }
 
   public void start() {
-    // Match.end() will cancel this, so we don't have to
+    // Match.finish() will cancel this, so we don't have to
     if (this.timeLimit != null && this.getMatch().isRunning()) {
       this.countdown = new TimeLimitCountdown(this.getMatch(), this.timeLimit);
       this.countdown.start();

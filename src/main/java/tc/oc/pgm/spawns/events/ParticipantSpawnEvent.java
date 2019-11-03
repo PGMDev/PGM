@@ -1,7 +1,7 @@
 package tc.oc.pgm.spawns.events;
 
 import org.bukkit.Location;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 /**
  * Called immediately before a participating player transitions into a specific, living, physical

@@ -1,29 +1,26 @@
 package tc.oc.pgm.teams;
 
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
 import javax.annotation.Nullable;
 import org.apache.commons.lang.math.Fraction;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.command.CommandSender;
 import org.bukkit.scoreboard.NameTagVisibility;
-import org.joda.time.Duration;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.named.NameStyle;
-import tc.oc.pgm.events.PartyRenameEvent;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.party.event.PartyRenameEvent;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.Feature;
 import tc.oc.pgm.join.GenericJoinResult;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.MultiPlayerParty;
+import tc.oc.pgm.join.JoinMatchModule;
+import tc.oc.pgm.match.SimpleParty;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
 import tc.oc.server.BukkitUtils;
-import tc.oc.util.collection.PunchClock;
 import tc.oc.util.components.ComponentUtils;
 
 /**
@@ -31,7 +28,7 @@ import tc.oc.util.components.ComponentUtils;
  * match and will only live as long as the match lives. Teams support custom names and colors that
  * differ from the defaults specified by the map creator.
  */
-public class Team extends MultiPlayerParty implements Competitor, Feature<TeamFactory> {
+public class Team extends SimpleParty implements Competitor, Feature<TeamFactory> {
   // The maximum allowed ratio between the "fullness" of any two teams in a match,
   // as measured by the Team.getFullness method. An imbalance of one player is
   // always allowed, even if it exceeds this ratio.
@@ -39,18 +36,14 @@ public class Team extends MultiPlayerParty implements Competitor, Feature<TeamFa
 
   protected final TeamFactory info;
   private TeamMatchModule tmm;
+  private JoinMatchModule jmm;
   protected @Nullable String name = null;
   protected @Nullable Component componentName;
   protected Component chatPrefix;
   protected Integer minPlayers, maxPlayers, maxOverfill;
-  protected final Set<UUID> pastPlayers = new HashSet<>();
 
   // Recorded in the match document, Tourney plugin sets this
   protected @Nullable String leagueTeamId;
-
-  // Players who have ever been on this team and their participation/absence times
-  protected final PunchClock<UUID> participationClock =
-      new PunchClock<>(getMatch().getRunningTimeSupplier());
 
   /**
    * Construct a Team instance with the necessary information.
@@ -61,6 +54,13 @@ public class Team extends MultiPlayerParty implements Competitor, Feature<TeamFa
   public Team(TeamFactory info, Match match) {
     super(match);
     this.info = info;
+  }
+
+  protected JoinMatchModule join() {
+    if (jmm == null) {
+      jmm = getMatch().needModule(JoinMatchModule.class);
+    }
+    return jmm;
   }
 
   protected TeamMatchModule module() {
@@ -107,23 +107,8 @@ public class Team extends MultiPlayerParty implements Competitor, Feature<TeamFa
   }
 
   @Override
-  public Type getType() {
-    return Type.Participating;
-  }
-
-  @Override
-  public boolean isParticipatingType() {
-    return true;
-  }
-
-  @Override
   public boolean isParticipating() {
     return match.isRunning();
-  }
-
-  @Override
-  public boolean isObservingType() {
-    return false;
   }
 
   @Override
@@ -267,56 +252,13 @@ public class Team extends MultiPlayerParty implements Competitor, Feature<TeamFa
     setMaxSize(null, null);
   }
 
-  public PunchClock<UUID> getParticipationClock() {
-    return participationClock;
-  }
-
-  public Duration getCumulativeParticipation(UUID playerId) {
-    return getParticipationClock().getCumulativePresence(playerId);
-  }
-
-  @Override
-  public Set<UUID> getPastPlayers() {
-    return pastPlayers;
-  }
-
-  @Override
-  public boolean addPlayer(MatchPlayer player) {
-    if (super.addPlayer(player)) {
-      participationClock.punchIn(player.getPlayerId());
-      if (getMatch().isCommitted()) {
-        pastPlayers.add(player.getPlayerId());
-      }
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  @Override
-  public boolean removePlayer(MatchPlayer player) {
-    if (super.removePlayer(player)) {
-      participationClock.punchOut(player.getPlayerId());
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  @Override
-  public void commit() {
-    for (MatchPlayer player : getPlayers()) {
-      pastPlayers.add(player.getPlayerId());
-    }
-  }
-
   @Override
   public boolean isAutomatic() {
     return false;
   }
 
   public int getMaxSize(MatchPlayer joining) {
-    return joining.canJoinFull() ? this.getMaxOverfill() : this.getMaxPlayers();
+    return join().canJoinFull(joining) ? this.getMaxOverfill() : this.getMaxPlayers();
   }
 
   /**
@@ -338,7 +280,7 @@ public class Team extends MultiPlayerParty implements Competitor, Feature<TeamFa
    */
   public int getSizeAfterJoin(
       @Nullable MatchPlayer joining, @Nullable Team newTeam, boolean priority) {
-    Set<MatchPlayer> members = this.getPlayers();
+    Collection<MatchPlayer> members = this.getPlayers();
     int size = members.size();
 
     if (joining != null) {
@@ -349,7 +291,7 @@ public class Team extends MultiPlayerParty implements Competitor, Feature<TeamFa
 
     if (priority)
       for (MatchPlayer member : members) {
-        if (member.canPriorityKick()) size--;
+        if (join().canPriorityKick(member)) size--;
       }
 
     return size;
@@ -399,14 +341,14 @@ public class Team extends MultiPlayerParty implements Competitor, Feature<TeamFa
    */
   public int getOpenSlots(MatchPlayer joining, boolean priorityKick) {
     // Can always join obs
-    if (this.getType() == Type.Observing) return 1;
+    if (this.isObserving()) return 1;
 
     // Count existing team members with and without join privileges
     int normal = 0, privileged = 0;
 
     for (MatchPlayer player : this.getPlayers()) {
       if (player != joining) {
-        if (player.canPriorityKick()) privileged++;
+        if (join().canPriorityKick(player)) privileged++;
         else normal++;
       }
     }
@@ -415,7 +357,7 @@ public class Team extends MultiPlayerParty implements Competitor, Feature<TeamFa
     int slots = this.getMaxSize(joining) - privileged;
 
     // If normal players cannot be bumped, deduct them as well
-    if (!(priorityKick && joining.canPriorityKick())) slots -= normal;
+    if (!(priorityKick && join().canPriorityKick(joining))) slots -= normal;
 
     return Math.max(0, slots);
   }

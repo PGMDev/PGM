@@ -4,6 +4,8 @@ import javax.annotation.Nullable;
 import org.bukkit.command.CommandSender;
 import tc.oc.component.Component;
 import tc.oc.component.render.ComponentRenderers;
+import tc.oc.pgm.api.chat.Audience;
+import tc.oc.pgm.api.chat.Sound;
 
 public class CommandSenderAudience implements Audience {
 

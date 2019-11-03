@@ -6,6 +6,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.api.event.GeneralizingEvent;
 
 /** Fired when an item moves in/out of an Inventory */
 public class ItemTransferEvent extends GeneralizingEvent {
@@ -51,7 +52,11 @@ public class ItemTransferEvent extends GeneralizingEvent {
   @Override
   public String toString() {
     String s =
-        this.getClass().getName() + " cause=" + this.cause.getEventName() + " type=" + this.type;
+        this.getClass().getName()
+            + " cause="
+            + this.getCause().getEventName()
+            + " type="
+            + this.type;
 
     if (this.fromInventory != null) {
       s += " from=" + this.fromInventory.getName();

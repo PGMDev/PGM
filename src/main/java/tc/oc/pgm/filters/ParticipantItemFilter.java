@@ -2,8 +2,8 @@ package tc.oc.pgm.filters;
 
 import com.google.common.base.Preconditions;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.query.IPlayerQuery;
-import tc.oc.pgm.match.MatchPlayer;
 
 public abstract class ParticipantItemFilter extends ParticipantFilter {
   protected final ItemStack base;

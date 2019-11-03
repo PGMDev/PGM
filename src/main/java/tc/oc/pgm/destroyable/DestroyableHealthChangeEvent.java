@@ -3,7 +3,7 @@ package tc.oc.pgm.destroyable;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.bukkit.event.HandlerList;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
 
 /**
  * Called when an a {@link Destroyable} is damaged or repaired.

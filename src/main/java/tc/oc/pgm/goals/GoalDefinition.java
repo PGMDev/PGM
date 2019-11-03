@@ -3,8 +3,8 @@ package tc.oc.pgm.goals;
 import javax.annotation.Nullable;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
-import tc.oc.pgm.match.Match;
 
 /**
  * Definition of a goal/objective feature. Provides a name field, used to identify the goal to
@@ -51,6 +51,6 @@ public abstract class GoalDefinition extends SelfIdentifyingFeatureDefinition {
   }
 
   public Goal<? extends GoalDefinition> getGoal(Match match) {
-    return (Goal<? extends GoalDefinition>) match.getMatchFeatureContext().get(this.getId());
+    return (Goal<? extends GoalDefinition>) match.getFeatureContext().get(this.getId());
   }
 }

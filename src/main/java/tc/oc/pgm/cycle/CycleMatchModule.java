@@ -4,11 +4,17 @@ import javax.annotation.Nullable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.joda.time.Duration;
+import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchManager;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.event.MatchFinishEvent;
+import tc.oc.pgm.commands.MapCommands;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.events.MatchEndEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.map.PGMMap;
-import tc.oc.pgm.match.*;
+import tc.oc.pgm.match.MatchModule;
+import tc.oc.pgm.match.MatchModuleFactory;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.restart.RestartManager;
@@ -28,8 +34,8 @@ public class CycleMatchModule extends MatchModule implements Listener {
 
   public CycleMatchModule(Match match) {
     super(match);
-    this.mm = match.getPlugin().matchManager;
-    this.config = new CycleConfig(match.getPlugin().getConfig());
+    this.mm = PGM.getMatchManager();
+    this.config = new CycleConfig(PGM.get().getConfig());
   }
 
   public CycleConfig getConfig() {
@@ -44,33 +50,28 @@ public class CycleMatchModule extends MatchModule implements Listener {
     startCountdown(Duration.ZERO, map);
   }
 
-  public void startCountdown() {
-    startCountdown((Duration) null);
-  }
-
   public void startCountdown(PGMMap nextMap) {
     startCountdown(null, nextMap);
   }
 
-  public void startCountdown(@Nullable Duration duration) {
-    if (duration == null) duration = config.countdown();
-    getMatch().end();
-    if (Duration.ZERO.equals(duration)) {
-      mm.cycle(getMatch(), false, false);
-    } else {
-      getMatch().getCountdownContext().start(new CycleCountdown(mm, getMatch()), duration);
-    }
+  public void startCountdown(Duration duration) {
+    startCountdown(duration, MapCommands.popNextMap());
   }
 
   public void startCountdown(@Nullable Duration duration, PGMMap nextMap) {
-    mm.setNextMap(nextMap);
-    startCountdown(duration);
+    if (duration == null) duration = config.countdown();
+    getMatch().finish();
+    if (Duration.ZERO.equals(duration)) {
+      mm.cycleMatch(getMatch(), nextMap, false);
+    } else {
+      getMatch().getCountdown().start(new CycleCountdown(mm, getMatch(), nextMap), duration);
+    }
   }
 
   @EventHandler
   public void onPartyChange(PlayerPartyChangeEvent event) {
     final Match match = getMatch();
-    if (match.isRunning() && match.getParticipatingPlayers().isEmpty()) {
+    if (match.isRunning() && match.getParticipants().isEmpty()) {
       CycleConfig.Auto autoConfig = config.matchEmpty();
       if (autoConfig.enabled()) {
         logger.info("Cycling due to empty match");
@@ -80,7 +81,7 @@ public class CycleMatchModule extends MatchModule implements Listener {
   }
 
   @EventHandler
-  public void onMatchEnd(MatchEndEvent event) {
+  public void onMatchEnd(MatchFinishEvent event) {
     final Match match = event.getMatch();
     if (!RestartManager.get().isRestartRequested()) {
       CycleConfig.Auto autoConfig = config.matchEnd();

@@ -5,7 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.FallingBlock;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.match.ParticipantState;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.world.NMSHacks;
 
 public class FallingBlockInfo extends EntityInfo implements DamageInfo {

@@ -2,12 +2,12 @@ package tc.oc.pgm.flag.event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.FlagDefinition;
 import tc.oc.pgm.flag.Net;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.MatchPlayer;
 
 public class FlagCaptureEvent extends GoalCompleteEvent {
 

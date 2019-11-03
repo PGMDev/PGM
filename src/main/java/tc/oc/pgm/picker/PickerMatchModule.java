@@ -8,7 +8,6 @@ import java.util.*;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -27,17 +26,23 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.material.MaterialData;
 import tc.oc.item.Items;
 import tc.oc.pgm.AllTranslations;
+import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.chat.Sound;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.event.MatchFinishEvent;
+import tc.oc.pgm.api.match.event.MatchStartEvent;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.PlayerClass;
-import tc.oc.pgm.events.*;
+import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.events.PlayerJoinMatchEvent;
+import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.join.GenericJoinResult;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.join.JoinResult;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.MatchScope;
 import tc.oc.pgm.spawns.events.DeathKitApplyEvent;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.teams.Team;
@@ -88,7 +93,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
   }
 
   private boolean hasJoined(MatchPlayer joining) {
-    return joining.isParticipatingType()
+    return joining.isParticipating()
         || getMatch().needMatchModule(JoinMatchModule.class).isQueuedToJoin(joining);
   }
 
@@ -239,7 +244,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
   }
 
   private void refreshKitAll() {
-    for (MatchPlayer player : getMatch().getObservingPlayers()) {
+    for (MatchPlayer player : getMatch().getObservers()) {
       refreshKit(player);
     }
   }
@@ -355,13 +360,13 @@ public class PickerMatchModule extends MatchModule implements Listener {
   }
 
   @EventHandler
-  public void matchBegin(final MatchBeginEvent event) {
+  public void matchBegin(final MatchStartEvent event) {
     refreshCountsAll();
     refreshKitAll();
   }
 
   @EventHandler
-  public void matchEnd(final MatchEndEvent event) {
+  public void matchEnd(final MatchFinishEvent event) {
     refreshCountsAll();
     refreshKitAll();
   }
@@ -455,7 +460,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
   private Inventory openWindow(MatchPlayer player, ItemStack[] contents) {
     closeWindow(player);
     Inventory inv =
-        getMatch()
+        PGM.get()
             .getServer()
             .createInventory(
                 player.getBukkit(),
@@ -524,7 +529,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
         (cls.canUse(viewer.getBukkit()) ? ChatColor.GREEN : ChatColor.RED) + cls.getName());
     if (getMatch()
         .getMatchModule(ClassMatchModule.class)
-        .getSelectedClass(viewer.getPlayerId())
+        .getSelectedClass(viewer.getId())
         .equals(cls)) {
       meta.addEnchant(Enchantment.ARROW_INFINITE, 1, true);
     }
@@ -560,8 +565,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
     autojoinMeta.setLore(
         Lists.newArrayList(
             this.getTeamSizeDescription(
-                viewer.getMatch().getParticipatingPlayers().size(),
-                viewer.getMatch().getMaxPlayers()),
+                viewer.getMatch().getParticipants().size(), viewer.getMatch().getMaxPlayers()),
             ChatColor.AQUA
                 + AllTranslations.get()
                     .translate("teamSelection.picker.autoJoin.tooltip", viewer.getBukkit())));
@@ -631,7 +635,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
 
   private void handleInventoryClick(
       final MatchPlayer player, final String name, final MaterialData material) {
-    player.playSound(Sound.CLICK, 1, 2);
+    player.playSound(new Sound("random.click", 1, 2));
 
     if (hasClasses) {
       ClassMatchModule cmm = player.getMatch().needMatchModule(ClassMatchModule.class);
@@ -640,9 +644,9 @@ public class PickerMatchModule extends MatchModule implements Listener {
       if (cls != null && cls.getIcon().equals(material)) {
         if (!cls.canUse(player.getBukkit())) return;
 
-        if (cls != cmm.getSelectedClass(player.getPlayerId())) {
-          if (cmm.getCanChangeClass(player.getPlayerId())) {
-            cmm.setPlayerClass(player.getPlayerId(), cls);
+        if (cls != cmm.getSelectedClass(player.getId())) {
+          if (cmm.getCanChangeClass(player.getId())) {
+            cmm.setPlayerClass(player.getId(), cls);
             player.sendMessage(
                 ChatColor.GOLD
                     + AllTranslations.get()

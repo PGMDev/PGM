@@ -2,11 +2,7 @@ package tc.oc.pgm.tablist;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,14 +11,13 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import tc.oc.identity.PlayerIdentityChangeEvent;
 import tc.oc.pgm.Config;
+import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.Party;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.server.Permissions;
 import tc.oc.tablist.TabEntry;
 import tc.oc.tablist.TabView;
 import tc.oc.util.Numbers;
@@ -37,7 +32,8 @@ public class MatchTabView extends TabView implements Listener {
     }
   }
 
-  private final ListMultimap<Party.Type, MatchPlayer> players = ArrayListMultimap.create();
+  private final List<MatchPlayer> observerPlayers = new ArrayList<>();
+  private final List<MatchPlayer> participantPlayers = new ArrayList<>();
   private final ListMultimap<Team, MatchPlayer> teamPlayers = ArrayListMultimap.create();
 
   private Match match;
@@ -105,12 +101,12 @@ public class MatchTabView extends TabView implements Listener {
       this.setHeader(this.getManager().getMapEntry(this.match));
       this.setFooter(this.getManager().getFooterEntry(this.match));
 
-      Set<MatchPlayer> observers = this.match.getObservingPlayers();
+      Collection<MatchPlayer> observers = this.match.getObservers();
 
       // Number of players/staff on observers
       int observingPlayers = 0;
       int observingStaff = 0;
-      if (Config.PlayerList.playersSeeObservers() || matchPlayer.isObservingType()) {
+      if (Config.PlayerList.playersSeeObservers() || matchPlayer.isObserving()) {
         observingPlayers = observers.size();
         for (MatchPlayer player : observers) {
           if (player.getBukkit().hasPermission(Permissions.STAFF)) observingStaff++;
@@ -174,12 +170,11 @@ public class MatchTabView extends TabView implements Listener {
           }
         }
       } else {
-        List<MatchPlayer> participants = players.get(Party.Type.Participating);
         // Minimum rows required by participating players
         int participantRows =
             Math.min(
                 availableRows - observerRows,
-                1 + Numbers.divideRoundingUp(participants.size(), this.getWidth()));
+                1 + Numbers.divideRoundingUp(participantPlayers.size(), this.getWidth()));
 
         // Expand observer rows until all observers are showing
         observerRows =
@@ -191,7 +186,7 @@ public class MatchTabView extends TabView implements Listener {
         participantRows = availableRows - observerRows;
 
         this.renderTeam(
-            participants,
+            participantPlayers,
             getManager().getFreeForAllEntry(match),
             true,
             0,
@@ -208,7 +203,7 @@ public class MatchTabView extends TabView implements Listener {
 
         // Render observers
         this.renderTeam(
-            players.get(Party.Type.Observing),
+            observerPlayers,
             null,
             false,
             0,
@@ -229,8 +224,10 @@ public class MatchTabView extends TabView implements Listener {
       this.playerOrder = new PlayerOrder(this.matchPlayer);
       this.teamOrder = new TeamOrder(this.matchPlayer);
 
-      this.players.replaceValues(Party.Type.Observing, this.match.getObservingPlayers());
-      this.players.replaceValues(Party.Type.Participating, this.match.getParticipatingPlayers());
+      this.observerPlayers.clear();
+      this.observerPlayers.addAll(this.match.getObservers());
+      this.participantPlayers.clear();
+      this.participantPlayers.addAll(this.match.getParticipants());
 
       this.tmm = this.match.getMatchModule(TeamMatchModule.class);
       if (this.tmm != null) {
@@ -248,13 +245,20 @@ public class MatchTabView extends TabView implements Listener {
     if (this.match != event.getMatch()) return;
 
     if (event.getOldParty() != null) {
-      this.players
-          .get(event.getOldParty().getType())
-          .removeAll(Collections.singleton(event.getPlayer()));
+      if (event.getOldParty().isParticipating()) {
+        this.participantPlayers.remove(event.getPlayer());
+      } else {
+        this.observerPlayers.remove(event.getPlayer());
+      }
     }
-    if (event.getNewParty() != null
-        && !this.players.containsEntry(event.getNewParty().getType(), event.getPlayer())) {
-      this.players.put(event.getNewParty().getType(), event.getPlayer());
+    if (event.getNewParty() != null) {
+      if (event.getNewParty().isParticipating()
+          && !this.participantPlayers.contains(event.getPlayer())) {
+        this.participantPlayers.add(event.getPlayer());
+      } else if (event.getNewParty().isObserving()
+          && !this.observerPlayers.contains(event.getPlayer())) {
+        this.observerPlayers.add(event.getPlayer());
+      }
     }
 
     if (event.getOldParty() instanceof Team) {

@@ -351,8 +351,23 @@ public interface NMSHacks {
 
   /** Entity Spawning and Metadata */
   static int allocateEntityId() {
-    return Bukkit.allocateEntityId();
+    return allocateEntityId(null);
   }
+
+  static int allocateEntityId(@Nullable Object context) {
+    Integer i = null;
+    if (context != null) {
+      i = ENTITY_IDS.get(context);
+    }
+    if (i == null) {
+      i = Bukkit.allocateEntityId();
+      if (context != null) ENTITY_IDS.put(context, i);
+    }
+    return i;
+  }
+
+  // FIXME: Ensure map size does not grow forever
+  Map<Object, Integer> ENTITY_IDS = new WeakHashMap<>();
 
   static class EntityMetadata {
     public final DataWatcher dataWatcher;

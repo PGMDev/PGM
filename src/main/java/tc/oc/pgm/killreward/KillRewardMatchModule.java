@@ -14,12 +14,16 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.events.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.PlayerItemTransferEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.filters.query.DamageQuery;
-import tc.oc.pgm.match.*;
+import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.tracker.damage.DamageInfo;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -84,12 +88,14 @@ public class KillRewardMatchModule extends MatchModule implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onDeath(MatchPlayerDeathEvent event) {
     if (!event.isChallengeKill()) return;
-    MatchPlayer killer = event.getOnlineKiller();
+    ParticipantState killer = event.getKiller();
     if (killer == null) return;
+    MatchPlayer onlineKiller = killer.getPlayer().orElse(null);
+    if (onlineKiller == null) return;
 
     Collection<KillReward> rewards = getRewards(event);
 
-    if (killer.isDead()) {
+    if (onlineKiller.isDead()) {
       // If a player earns a KW while dead, give it to them when they respawn. Rationale: If they
       // click respawn
       // fast enough, they will get the reward anyway, and we can't prevent it in that case, so we
@@ -97,9 +103,9 @@ public class KillRewardMatchModule extends MatchModule implements Listener {
       // just give it to them always. Also, if the KW is in itemkeep, they should definitely get it
       // while dead,
       // and this is a relatively simple way to handle that case.
-      deadPlayerRewards.putAll(killer, rewards);
+      deadPlayerRewards.putAll(onlineKiller, rewards);
     } else {
-      giveRewards(killer, rewards);
+      giveRewards(onlineKiller, rewards);
     }
   }
 

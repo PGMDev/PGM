@@ -3,12 +3,12 @@ package tc.oc.pgm.timelimit;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import org.joda.time.Duration;
-import tc.oc.chat.Sound;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.api.chat.Sound;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.MatchCountdown;
-import tc.oc.pgm.match.Match;
 
 public class TimeLimitCountdown extends MatchCountdown {
 
@@ -78,7 +78,7 @@ public class TimeLimitCountdown extends MatchCountdown {
   @Override
   public void onEnd(Duration total) {
     super.onEnd(total);
-    this.getMatch().checkEnd();
+    this.getMatch().calculateVictory();
     this.freeze(Duration.ZERO);
   }
 
@@ -91,10 +91,10 @@ public class TimeLimitCountdown extends MatchCountdown {
   }
 
   public void start() {
-    this.getMatch().getCountdownContext().start(this, this.timeLimit.getDuration());
+    this.getMatch().getCountdown().start(this, this.timeLimit.getDuration());
   }
 
   public void cancel() {
-    this.getMatch().getCountdownContext().cancel(this);
+    this.getMatch().getCountdown().cancel(this);
   }
 }

@@ -11,16 +11,16 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitTask;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.BlockTransformEvent;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.goals.events.GoalEvent;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.MatchScope;
-import tc.oc.pgm.match.ParticipantState;
-import tc.oc.pgm.match.Party;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
@@ -137,7 +137,7 @@ public abstract class BaseState implements Runnable, State {
 
   @Override
   public boolean isCarrying(ParticipantState player) {
-    MatchPlayer matchPlayer = player.getMatchPlayer();
+    MatchPlayer matchPlayer = player.getPlayer().orElse(null);
     return matchPlayer != null && isCarrying(matchPlayer);
   }
 

@@ -8,7 +8,7 @@ import org.joda.time.Duration;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 
@@ -94,8 +94,7 @@ public class StartCountdown extends PreMatchCountdown {
     if (this.tmm != null) this.tmm.balanceTeams();
 
     if (willHuddle()) {
-      getMatch().commit();
-      getMatch().getCountdownContext().start(new HuddleCountdown(getMatch()), huddle);
+      getMatch().getCountdown().start(new HuddleCountdown(getMatch()), huddle);
     } else {
       getMatch().start();
     }

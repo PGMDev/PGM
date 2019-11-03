@@ -1,7 +1,10 @@
 package tc.oc.pgm.listeners;
 
 import java.util.*;
-import org.bukkit.*;
+import org.bukkit.Effect;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
@@ -18,8 +21,8 @@ import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.NameTagVisibility;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.ParticipantState;
+import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.tracker.Trackers;
 import tc.oc.world.NMSHacks;
 
@@ -114,7 +117,7 @@ public class LongRangeTNTListener implements Listener {
 
     public boolean show(TNT tnt) {
       ParticipantState owner = Trackers.getOwnerSafely(tnt.entity);
-      boolean owned = owner != null && owner.isEntity(this.player);
+      boolean owned = owner != null && owner.getId().equals(this.player.getUniqueId());
       Slot slot = null;
 
       if (!this.slotsFree.isEmpty()) {
@@ -185,7 +188,7 @@ public class LongRangeTNTListener implements Listener {
     }
 
     boolean tick() {
-      if (this.entity.isDead() || Match.get((Physical) this.entity) == null) {
+      if (this.entity.isDead() || PGM.getMatchManager().getMatch(this.entity) == null) {
         this.hideAll(false);
         return true;
       }

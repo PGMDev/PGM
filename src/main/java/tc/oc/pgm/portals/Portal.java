@@ -6,18 +6,16 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.util.Vector;
-import tc.oc.chat.Sound;
 import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.chat.Sound;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.FeatureDefinition;
 import tc.oc.pgm.filters.Filter;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.MatchScope;
 import tc.oc.pgm.regions.Region;
 
 public class Portal implements FeatureDefinition {
-  protected static final Sound USE_SOUND = new Sound("mob.endermen.portal", 1f, 1f);
-
   protected final Region region;
   protected final @Nullable Region destinationRegion;
   protected final Filter filter;
@@ -149,7 +147,7 @@ public class Portal implements FeatureDefinition {
   protected Location transformToRegion(Location old, Region region) {
     return cloneWith(
         old,
-        region.getRandom(PGM.getMatchManager().getCurrentMatch().getRandom()),
+        region.getRandom(PGM.getMatchManager().getMatch(old.getWorld()).getRandom()),
         (float) this.dYaw.get(old.getYaw()),
         (float) this.dPitch.get(old.getPitch()));
   }
@@ -176,7 +174,8 @@ public class Portal implements FeatureDefinition {
       // because they will instantly teleport away and hear the one at the exit.
       for (MatchPlayer listener : match.getPlayers()) {
         if (listener != player && listener.getBukkit().canSee(player.getBukkit())) {
-          listener.playSound(USE_SOUND, bukkit.getLocation());
+          listener.playSound(
+              new Sound("mob.endermen.portal", 1f, 1f, bukkit.getLocation().toVector()));
         }
       }
     }
@@ -206,7 +205,8 @@ public class Portal implements FeatureDefinition {
                 if (Portal.this.sound) {
                   for (MatchPlayer listener : match.getPlayers()) {
                     if (listener.getBukkit().canSee(player.getBukkit())) {
-                      listener.playSound(USE_SOUND, destinationClone);
+                      listener.playSound(
+                          new Sound("mob.endermen.portal", 1f, 1f, destinationClone.toVector()));
                     }
                   }
                 }

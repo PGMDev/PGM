@@ -4,7 +4,7 @@ import java.util.List;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 /** Disowns any Ender Pearls the player has thrown */
 public class ResetEnderPearlsKit extends AbstractKit {

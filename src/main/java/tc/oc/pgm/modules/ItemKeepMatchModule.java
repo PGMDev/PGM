@@ -8,13 +8,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.filters.BlockFilter;
 import tc.oc.pgm.kits.ArmorType;
 import tc.oc.pgm.kits.KitMatchModule;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchPlayer;
 
 public class ItemKeepMatchModule extends MatchModule implements Listener {
   protected final Set<BlockFilter> itemsToKeep;

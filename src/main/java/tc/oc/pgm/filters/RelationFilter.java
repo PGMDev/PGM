@@ -1,7 +1,7 @@
 package tc.oc.pgm.filters;
 
+import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.filters.query.IDamageQuery;
-import tc.oc.pgm.match.PlayerRelation;
 
 public class RelationFilter extends TypedFilter<IDamageQuery> {
 

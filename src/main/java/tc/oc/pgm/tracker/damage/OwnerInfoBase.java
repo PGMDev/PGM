@@ -1,7 +1,7 @@
 package tc.oc.pgm.tracker.damage;
 
 import javax.annotation.Nullable;
-import tc.oc.pgm.match.ParticipantState;
+import tc.oc.pgm.api.player.ParticipantState;
 
 public abstract class OwnerInfoBase implements OwnerInfo {
   private final @Nullable ParticipantState owner;

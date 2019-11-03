@@ -6,8 +6,8 @@ import javax.annotation.Nullable;
 import org.bukkit.block.Block;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.ParticipantState;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.tracker.damage.SpleefInfo;
 
 public class PlayerSpleefEvent extends Event {

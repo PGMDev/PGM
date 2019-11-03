@@ -26,14 +26,18 @@ import org.joda.time.Duration;
 import org.joda.time.Instant;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.ObserverInteractEvent;
 import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.doublejump.DoubleJumpMatchModule;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.events.ObserverInteractEvent;
 import tc.oc.pgm.events.PlayerBlockTransformEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.kits.WalkSpeedKit;
-import tc.oc.pgm.match.*;
+import tc.oc.pgm.match.MatchModule;
+import tc.oc.pgm.match.MatchModuleFactory;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.util.InventoryTrackerEntry;
@@ -117,7 +121,7 @@ public class ViewInventoryMatchModule extends MatchModule implements Listener {
         // started
         if (!player.canInteract()
             || (player.getMatch().isRunning()
-                && player.getMatch().getLength().isShorterThan(CHEST_PROTECT_TIME))) {
+                && player.getMatch().getDuration().isShorterThan(CHEST_PROTECT_TIME))) {
           event.setCancelled(true);
         }
       }
@@ -131,7 +135,7 @@ public class ViewInventoryMatchModule extends MatchModule implements Listener {
 
   @EventHandler
   public void playerQuit(final PlayerPartyChangeEvent event) {
-    this.monitoredInventories.remove(event.getPlayer().getName());
+    this.monitoredInventories.remove(event.getPlayer().getBukkit().getName());
   }
 
   @EventHandler(ignoreCancelled = true)

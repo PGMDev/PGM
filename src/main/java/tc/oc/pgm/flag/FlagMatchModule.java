@@ -5,8 +5,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.bukkit.event.Listener;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.goals.GoalMatchModule;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleLoadException;
 
@@ -30,7 +30,7 @@ public class FlagMatchModule extends MatchModule implements Listener {
 
       Flag flag = new Flag(match, definition, netsBuilder.build());
       flags.put(definition, flag);
-      match.getMatchFeatureContext().add(flag);
+      match.getFeatureContext().add(flag);
       match.needMatchModule(GoalMatchModule.class).addGoal(flag);
     }
     this.flags = flags.build();

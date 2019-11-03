@@ -7,7 +7,6 @@ import java.util.*;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import org.apache.commons.lang.math.Fraction;
-import org.bukkit.Sound;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -15,14 +14,20 @@ import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.Config;
+import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.chat.Sound;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.join.*;
-import tc.oc.pgm.match.*;
+import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
-import tc.oc.server.Permissions;
 import tc.oc.util.StringUtils;
 
 @ListenerScope(MatchScope.LOADED)
@@ -99,6 +104,8 @@ public class TeamMatchModule extends MatchModule implements Listener, JoinHandle
   // Minimum at any time of the number of additional players needed to start the match
   private int minPlayersNeeded = Integer.MAX_VALUE;
 
+  private final JoinMatchModule jmm;
+
   public TeamMatchModule(Match match, Set<TeamFactory> teamFactories, boolean requireEven) {
     super(match);
     this.teams = new HashSet<>(teamFactories.size());
@@ -107,6 +114,8 @@ public class TeamMatchModule extends MatchModule implements Listener, JoinHandle
     for (TeamFactory teamFactory : teamFactories) {
       this.teams.add(teamFactory.createTeam(match));
     }
+
+    this.jmm = match.needModule(JoinMatchModule.class);
   }
 
   @Override
@@ -132,7 +141,7 @@ public class TeamMatchModule extends MatchModule implements Listener, JoinHandle
   }
 
   protected void updateReadiness() {
-    if (getMatch().hasStarted()) return;
+    if (getMatch().isRunning()) return;
 
     final int playersQueued =
         getMatch()
@@ -140,7 +149,7 @@ public class TeamMatchModule extends MatchModule implements Listener, JoinHandle
             .getQueuedParticipants()
             .getPlayers()
             .size();
-    final int playersJoined = getMatch().getParticipatingPlayers().size();
+    final int playersJoined = getMatch().getParticipants().size();
 
     Team singleTeam = null;
     int teamNeeded = 0;
@@ -218,7 +227,7 @@ public class TeamMatchModule extends MatchModule implements Listener, JoinHandle
   }
 
   public boolean canSwitchTeams(MatchPlayer joining) {
-    return Config.Teams.allowSwitch() || !getMatch().hasStarted();
+    return Config.Teams.allowSwitch() || !getMatch().isRunning();
   }
 
   public boolean canChooseTeam(MatchPlayer joining) {
@@ -241,7 +250,7 @@ public class TeamMatchModule extends MatchModule implements Listener, JoinHandle
     Party oldTeam = player.getParty();
     if (oldTeam == newTeam) return true;
 
-    if (getMatch().setPlayerParty(player, newTeam)) {
+    if (getMatch().setParty(player, newTeam)) {
       setAutoJoin(player, autoJoin);
       return true;
     } else {
@@ -361,8 +370,7 @@ public class TeamMatchModule extends MatchModule implements Listener, JoinHandle
    * joined a team.
    */
   public @Nullable Team getLastTeam(UUID playerId) {
-    Competitor competitor = getMatch().getLastCompetitor(playerId);
-    return competitor instanceof Team ? (Team) competitor : null;
+    return null; // No longer track last competitors
   }
 
   /** What would happen if the given player tried to join the given team right now? */
@@ -376,7 +384,7 @@ public class TeamMatchModule extends MatchModule implements Listener, JoinHandle
   }
 
   private JoinResult queryJoin(MatchPlayer joining, @Nullable Team chosenTeam, boolean queued) {
-    final Team lastTeam = getLastTeam(joining.getPlayerId());
+    final Team lastTeam = getLastTeam(joining.getId());
 
     if (chosenTeam == null) {
       // If autojoining, and the player is already on a team, the request is satisfied
@@ -390,7 +398,7 @@ public class TeamMatchModule extends MatchModule implements Listener, JoinHandle
       // If team choosing is disabled, and the match has not started yet, defer the join.
       // Note that this can only happen with autojoin. Choosing a team always fails if
       // the condition below is true.
-      if (!queued && !Config.Teams.allowChoose() && !getMatch().hasStarted()) {
+      if (!queued && !Config.Teams.allowChoose() && !getMatch().isRunning()) {
         return GenericJoinResult.Status.QUEUED.toResult();
       }
 
@@ -446,7 +454,7 @@ public class TeamMatchModule extends MatchModule implements Listener, JoinHandle
   public boolean join(MatchPlayer joining, @Nullable Competitor chosenParty, JoinResult result) {
     if (result instanceof TeamJoinResult) {
       TeamJoinResult teamResult = (TeamJoinResult) result;
-      Team lastTeam = getLastTeam(joining.getPlayerId());
+      Team lastTeam = getLastTeam(joining.getId());
 
       switch (teamResult.getStatus()) {
         case SWITCH_DISABLED:
@@ -497,7 +505,7 @@ public class TeamMatchModule extends MatchModule implements Listener, JoinHandle
             "Bumping a player from "
                 + teamResult.getTeam().getColoredName()
                 + " to make room for "
-                + joining.getDisplayName());
+                + joining.getBukkit().getName());
         kickPlayerOffTeam(teamResult.getTeam(), false);
       }
 
@@ -563,7 +571,7 @@ public class TeamMatchModule extends MatchModule implements Listener, JoinHandle
     // Find all players who can be bumped
     List<MatchPlayer> kickable = new ArrayList<>();
     for (MatchPlayer player : kickFrom.getPlayers()) {
-      if (!player.canPriorityKick() || (forBalance && isAutoJoin(player))) {
+      if (!jmm.canPriorityKick(player) || (forBalance && isAutoJoin(player))) {
         // Premium players can be auto-balanced if they auto-joined
         kickable.add(player);
       }
@@ -586,12 +594,12 @@ public class TeamMatchModule extends MatchModule implements Listener, JoinHandle
     }
 
     // Give them the bad news
-    if (kickMe.canPriorityKick()) {
+    if (jmm.canPriorityKick(kickMe)) {
       kickMe.sendMessage(
           new PersonalizedTranslatable("gameplay.kickedForBalance", kickTo.getComponentName()));
       kickMe.sendMessage(new PersonalizedTranslatable("gameplay.autoJoinSwitch"));
     } else {
-      kickMe.playSound(Sound.VILLAGER_HIT, kickMe.getBukkit().getLocation(), 1, 1);
+      kickMe.playSound(new Sound("mob.villager.hit"));
       if (forBalance) {
         kickMe.sendWarning(
             new PersonalizedTranslatable("gameplay.kickedForBalance", kickTo.getComponentName()),
@@ -603,12 +611,13 @@ public class TeamMatchModule extends MatchModule implements Listener, JoinHandle
       }
     }
 
-    logger.info("Bumping " + kickMe.getDisplayName() + " to " + kickTo.getColoredName());
+    logger.info(
+        "Bumping " + kickMe.getBukkit().getDisplayName() + " to " + kickTo.getColoredName());
 
     if (kickTo instanceof Team) {
       return forceJoin(kickMe, (Team) kickTo);
     } else {
-      return getMatch().setPlayerParty(kickMe, kickTo);
+      return getMatch().setParty(kickMe, kickTo);
     }
   }
 

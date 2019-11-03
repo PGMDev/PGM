@@ -4,8 +4,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.controlpoint.events.ControllerChangeEvent;
-import tc.oc.pgm.match.Match;
 
 public class ControlPointAnnouncer implements Listener {
   private final Match match;

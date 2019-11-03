@@ -23,12 +23,17 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.util.BlockVector;
-import tc.oc.chat.Sound;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.material.Materials;
 import tc.oc.named.NameStyle;
+import tc.oc.pgm.api.chat.Sound;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.BlockTransformEvent;
 import tc.oc.pgm.filters.query.IQuery;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
@@ -38,7 +43,6 @@ import tc.oc.pgm.goals.TouchableGoal;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
-import tc.oc.pgm.match.*;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.points.AngleProvider;
 import tc.oc.pgm.points.PointProvider;
@@ -231,7 +235,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
   @Override
   public boolean canTouch(ParticipantState player) {
-    MatchPlayer matchPlayer = player.getMatchPlayer();
+    MatchPlayer matchPlayer = player.getPlayer().orElse(null);
     return matchPlayer != null && canPickup(matchPlayer, state.getPost());
   }
 
@@ -349,7 +353,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   }
 
   public boolean isCarrying(ParticipantState player) {
-    MatchPlayer matchPlayer = player.getMatchPlayer();
+    MatchPlayer matchPlayer = player.getPlayer().orElse(null);
     return matchPlayer != null && isCarrying(matchPlayer);
   }
 

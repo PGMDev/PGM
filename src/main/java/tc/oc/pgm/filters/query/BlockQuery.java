@@ -12,7 +12,7 @@ import org.bukkit.event.Event;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 import tc.oc.pgm.PGM;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
 
 /**
  * A block query is canonically defined by a {@link World} and a set of integer block coordinates.

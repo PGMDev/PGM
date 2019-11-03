@@ -7,7 +7,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.world.NMSHacks;
 

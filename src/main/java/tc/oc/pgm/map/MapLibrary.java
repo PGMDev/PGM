@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import tc.oc.util.logging.ClassLogger;
 
 public class MapLibrary {
+
   protected final Map<String, PGMMap> mapsById = Maps.newHashMap();
   protected final Map<Path, PGMMap> mapsByPath = new HashMap<>();
   protected final SetMultimap<String, PGMMap> mapsByName = HashMultimap.create();

@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import org.bukkit.Location;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.match.ParticipantState;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.util.components.Components;
 
 public class ProjectileInfo implements PhysicalInfo, DamageInfo, RangedInfo {

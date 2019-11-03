@@ -4,8 +4,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import javax.annotation.Nullable;
 import org.bukkit.event.HandlerList;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.Party;
+import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.MatchPlayerEvent;
 
 /**
  * Called AFTER a player leaves and/or joins a party. Subclasses are called for more specific cases,
@@ -37,11 +38,11 @@ public class PlayerPartyChangeEvent extends MatchPlayerEvent {
   }
 
   public boolean wasParticipating() {
-    return oldParty != null && oldParty.isParticipatingType();
+    return oldParty != null && oldParty.isParticipating();
   }
 
   public boolean isParticipating() {
-    return newParty != null && newParty.isParticipatingType();
+    return newParty != null && newParty.isParticipating();
   }
 
   private static final HandlerList handlers = new HandlerList();

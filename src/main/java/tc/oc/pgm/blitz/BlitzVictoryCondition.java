@@ -2,8 +2,8 @@ package tc.oc.pgm.blitz;
 
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.result.VictoryCondition;
 
 public class BlitzVictoryCondition implements VictoryCondition {

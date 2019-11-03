@@ -14,13 +14,13 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import tc.oc.block.BlockStates;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.material.Materials;
+import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.BlockTransformEvent;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.FlagMatchModule;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.event.FlagPickupEvent;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.Party;
 import tc.oc.world.NMSHacks;
 
 /** Base class for flag states in which the banner is placed on the ground somewhere as a block */
@@ -115,7 +115,7 @@ public abstract class Uncarried extends Spawned {
     try {
       this.pickingUp = carrier;
       FlagPickupEvent event = new FlagPickupEvent(this.flag, carrier, this.location);
-      this.flag.getMatch().getPluginManager().callEvent(event);
+      this.flag.getMatch().callEvent(event);
       if (event.isCancelled()) return false;
     } finally {
       this.pickingUp = null;

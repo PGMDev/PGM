@@ -3,8 +3,9 @@ package tc.oc.pgm.spawns.states;
 import java.util.List;
 import org.bukkit.event.Event;
 import org.bukkit.permissions.PermissionAttachment;
-import tc.oc.pgm.events.MatchEndEvent;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.match.event.MatchFinishEvent;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 
 public class Participating extends State {
@@ -18,7 +19,7 @@ public class Participating extends State {
   @Override
   public void enterState() {
     super.enterState();
-    permissionAttachment = bukkit.addAttachment(smm.getMatch().getPlugin());
+    permissionAttachment = bukkit.addAttachment(PGM.get());
     permissionAttachment.setPermission(smm.getParticipantPermissions(), true);
   }
 
@@ -29,7 +30,7 @@ public class Participating extends State {
   }
 
   @Override
-  public void onEvent(MatchEndEvent event) {
+  public void onEvent(MatchFinishEvent event) {
     super.onEvent(event);
     transition(new Observing(smm, player, true, false));
   }

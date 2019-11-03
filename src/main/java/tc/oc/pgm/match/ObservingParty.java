@@ -6,10 +6,11 @@ import org.bukkit.command.CommandSender;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.named.NameStyle;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.server.BukkitUtils;
 import tc.oc.util.components.ComponentUtils;
 
-public abstract class ObservingParty extends MultiPlayerParty {
+public abstract class ObservingParty extends SimpleParty {
 
   private String coloredName;
   private Component componentName;
@@ -83,23 +84,8 @@ public abstract class ObservingParty extends MultiPlayerParty {
   }
 
   @Override
-  public Type getType() {
-    return Type.Observing;
-  }
-
-  @Override
-  public boolean isParticipatingType() {
-    return false;
-  }
-
-  @Override
   public boolean isParticipating() {
     return false;
-  }
-
-  @Override
-  public boolean isObservingType() {
-    return true;
   }
 
   @Override

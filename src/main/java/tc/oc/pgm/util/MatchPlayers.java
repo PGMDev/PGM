@@ -1,7 +1,7 @@
 package tc.oc.pgm.util;
 
 import javax.annotation.Nullable;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 public class MatchPlayers {
   public static boolean canInteract(@Nullable MatchPlayer player) {

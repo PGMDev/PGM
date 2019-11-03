@@ -21,8 +21,18 @@ import org.bukkit.permissions.Permission;
 import org.jdom2.Element;
 import tc.oc.pgm.PGM;
 import tc.oc.pgm.PGMUtil;
-import tc.oc.pgm.events.*;
-import tc.oc.pgm.match.*;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.event.MatchFinishEvent;
+import tc.oc.pgm.api.match.event.MatchStartEvent;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.party.event.CompetitorRemoveEvent;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
+import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.events.PlayerJoinPartyEvent;
+import tc.oc.pgm.events.PlayerPartyChangeEvent;
+import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.modules.EventFilterMatchModule;
 import tc.oc.pgm.spawns.states.Joining;
 import tc.oc.pgm.spawns.states.Observing;
@@ -43,7 +53,7 @@ public class SpawnMatchModule extends MatchModule implements Listener {
   public SpawnMatchModule(Match match, SpawnModule module) {
     super(match);
     this.module = module;
-    this.observerToolFactory = new ObserverToolFactory(match.getPlugin());
+    this.observerToolFactory = new ObserverToolFactory(PGM.get());
   }
 
   public RespawnOptions getRespawnOptions() {
@@ -161,10 +171,10 @@ public class SpawnMatchModule extends MatchModule implements Listener {
 
   public void reportFailedSpawn(Spawn spawn, MatchPlayer player) {
     if (failed.add(spawn)) {
-      Element elSpawn = getMatch().getModuleContext().features().getNode(spawn);
+      Element elSpawn = getMatch().getMapContext().features().getNode(spawn);
       InvalidXMLException ex =
           new InvalidXMLException(
-              "Failed to generate spawn location for " + player.getName(), elSpawn);
+              "Failed to generate spawn location for " + player.getBukkit().getName(), elSpawn);
       getMatch().getMap().getLogger().log(Level.SEVERE, ex.getMessage(), ex);
     }
   }
@@ -239,7 +249,7 @@ public class SpawnMatchModule extends MatchModule implements Listener {
   }
 
   @EventHandler
-  public void matchBegin(final MatchBeginEvent event) {
+  public void matchBegin(final MatchStartEvent event) {
     // Copy states so they can transition without concurrent modification
     for (State state : ImmutableList.copyOf(states.values())) {
       state.onEvent(event);
@@ -247,7 +257,7 @@ public class SpawnMatchModule extends MatchModule implements Listener {
   }
 
   @EventHandler
-  public void matchEnd(final MatchEndEvent event) {
+  public void matchEnd(final MatchFinishEvent event) {
     // Copy states so they can transition without concurrent modification
     for (State state : ImmutableList.copyOf(states.values())) {
       state.onEvent(event);

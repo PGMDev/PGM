@@ -10,9 +10,10 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.projectiles.BlockProjectileSource;
 import org.bukkit.projectiles.ProjectileSource;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.ParticipantState;
 import tc.oc.pgm.tracker.damage.DamageInfo;
 import tc.oc.pgm.tracker.damage.NullDamageInfo;
 import tc.oc.pgm.tracker.damage.PhysicalInfo;
@@ -43,18 +44,18 @@ public class TrackerMatchModule extends MatchModule {
 
   @Override
   public void load() {
-    match.registerEvents(fallTracker);
-    match.registerEvents(fireTracker);
-    match.registerEvents(entityTracker);
-    match.registerEvents(blockTracker);
-    match.registerEvents(new DispenserTracker(this));
-    match.registerEvents(new TNTTracker(this));
-    match.registerEvents(new SpleefTracker(this));
-    match.registerEvents(new OwnedMobTracker(this));
-    match.registerEvents(new ProjectileTracker(this));
-    match.registerEvents(new AnvilTracker(this));
-    match.registerEvents(new CombatLogTracker(this));
-    match.registerEvents(new DeathTracker(this));
+    match.addListener(fallTracker, MatchScope.RUNNING);
+    match.addListener(fireTracker, MatchScope.RUNNING);
+    match.addListener(entityTracker, MatchScope.RUNNING);
+    match.addListener(blockTracker, MatchScope.RUNNING);
+    match.addListener(new DispenserTracker(this), MatchScope.RUNNING);
+    match.addListener(new TNTTracker(this), MatchScope.RUNNING);
+    match.addListener(new SpleefTracker(this), MatchScope.RUNNING);
+    match.addListener(new OwnedMobTracker(this), MatchScope.RUNNING);
+    match.addListener(new ProjectileTracker(this), MatchScope.RUNNING);
+    match.addListener(new AnvilTracker(this), MatchScope.RUNNING);
+    match.addListener(new CombatLogTracker(this), MatchScope.RUNNING);
+    match.addListener(new DeathTracker(this), MatchScope.RUNNING);
   }
 
   public EntityTracker getEntityTracker() {
@@ -102,7 +103,7 @@ public class TrackerMatchModule extends MatchModule {
   private DamageInfo resolveDamage(
       EntityDamageEvent.DamageCause damageType, Entity victim, @Nullable PhysicalInfo damager) {
     // Filter out observers immediately
-    if (!getMatch().canInteract(victim)) return new NullDamageInfo();
+    if (getMatch().getParticipant(victim) == null) return new NullDamageInfo();
 
     for (DamageResolver resolver : damageResolvers) {
       DamageInfo resolvedInfo = resolver.resolveDamage(damageType, victim, damager);

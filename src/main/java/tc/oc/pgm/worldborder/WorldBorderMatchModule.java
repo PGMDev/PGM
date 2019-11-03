@@ -13,15 +13,15 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.joda.time.Duration;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.CoarsePlayerMoveEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.filters.query.IQuery;
 import tc.oc.pgm.filters.query.MatchQuery;
 import tc.oc.pgm.goals.events.GoalEvent;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.MatchScope;
 import tc.oc.util.collection.DefaultMapAdapter;
 import tc.oc.world.WorldBorders;
 
@@ -88,7 +88,7 @@ public class WorldBorderMatchModule extends MatchModule implements Listener {
 
     border.apply(getMatch().getWorld().getWorldBorder(), appliedBorder != null);
     appliedBorder = border;
-    appliedAt = getMatch().getRunningTime();
+    appliedAt = getMatch().getDuration();
   }
 
   private void reset() {
@@ -145,7 +145,7 @@ public class WorldBorderMatchModule extends MatchModule implements Listener {
   private void refresh() {
     if (appliedBorder != null) {
       appliedBorder.refresh(
-          getMatch().getWorld().getWorldBorder(), getMatch().getRunningTime().minus(appliedAt));
+          getMatch().getWorld().getWorldBorder(), getMatch().getDuration().minus(appliedAt));
     }
   }
 

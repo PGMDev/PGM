@@ -1,6 +1,8 @@
 package tc.oc.chat;
 
 import java.util.Collections;
+import tc.oc.pgm.api.chat.Audience;
+import tc.oc.pgm.api.chat.MultiAudience;
 
 public class NullAudience implements MultiAudience {
 

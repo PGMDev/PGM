@@ -3,11 +3,11 @@ package tc.oc.pgm.filters;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.classes.ClassModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.module.ModuleLoadException;
@@ -23,7 +23,7 @@ public class FilterModule extends MapModule {
 
   @Override
   public MatchModule createMatchModule(Match match) throws ModuleLoadException {
-    if (match.getModuleContext().getProto().isOlderThan(ProtoVersions.FILTER_FEATURES)) {
+    if (match.getMapContext().getProto().isOlderThan(ProtoVersions.FILTER_FEATURES)) {
       return null;
     } else {
       return new FilterMatchModule(match);

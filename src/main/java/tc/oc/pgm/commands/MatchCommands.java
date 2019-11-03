@@ -11,12 +11,11 @@ import java.util.Map;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.AllTranslations;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchPhase;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
 import tc.oc.pgm.goals.Goal;
 import tc.oc.pgm.goals.GoalMatchModule;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchState;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
@@ -32,18 +31,13 @@ public class MatchCommands {
   public static void matchInfo(CommandSender sender, Match match) {
     // indicates whether we have game information from the match yet
     boolean haveGameInfo =
-        match.getState() == MatchState.Running || match.getState() == MatchState.Finished;
+        match.getPhase() == MatchPhase.RUNNING || match.getPhase() == MatchPhase.FINISHED;
 
     sender.sendMessage(
         StringUtils.dashedChatMessage(
             ChatColor.DARK_AQUA
                 + " "
-                + AllTranslations.get().translate("command.match.matchInfo.title", sender)
-                + " "
-                + ChatColor.GRAY
-                + "("
-                + PGM.getMatchManager().getMatchId()
-                + ")",
+                + AllTranslations.get().translate("command.match.matchInfo.title", sender),
             ChatColor.STRIKETHROUGH + "-",
             ChatColor.RED.toString()));
     if (haveGameInfo) {
@@ -55,7 +49,7 @@ public class MatchCommands {
               + ChatColor.GOLD
               + PeriodFormats.COLONS_PRECISE
                   .withLocale(Locales.getLocale(sender))
-                  .print(match.getLength().toPeriod()));
+                  .print(match.getDuration().toPeriod()));
     }
 
     TeamMatchModule tmm = match.getMatchModule(TeamMatchModule.class);
@@ -89,7 +83,7 @@ public class MatchCommands {
               + ChatColor.GRAY
               + ": "
               + ChatColor.WHITE
-              + match.getParticipatingPlayers().size()
+              + match.getParticipants().size()
               + ChatColor.GRAY
               + '/'
               + ffamm.getMaxPlayers());
@@ -101,7 +95,7 @@ public class MatchCommands {
             + ChatColor.GRAY
             + ": "
             + ChatColor.WHITE
-            + match.getObservingPlayers().size());
+            + match.getObservers().size());
 
     sender.sendMessage(Joiner.on(ChatColor.DARK_GRAY + " | ").join(teamCountParts));
 

@@ -2,7 +2,7 @@ package tc.oc.pgm.kits;
 
 import java.util.List;
 import org.bukkit.inventory.ItemStack;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 /** Clears the player's inventory, including anything they may be holding on the cursor */
 public class ClearItemsKit extends AbstractKit {

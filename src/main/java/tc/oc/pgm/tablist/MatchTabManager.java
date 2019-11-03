@@ -10,11 +10,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
-import tc.oc.pgm.events.*;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.event.MatchResizeEvent;
+import tc.oc.pgm.api.match.event.MatchUnloadEvent;
+import tc.oc.pgm.api.party.event.PartyRenameEvent;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
+import tc.oc.pgm.events.PlayerJoinMatchEvent;
+import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.ffa.Tribute;
-import tc.oc.pgm.ffa.events.MatchResizeEvent;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
@@ -115,7 +119,7 @@ public class MatchTabManager extends TabManager implements Listener {
 
   protected void invalidate(MatchPlayer player) {
     getPlayerEntry(player).invalidate();
-    if (player.getMatch().getMapInfo().isAuthor(player.getPlayerId())) {
+    if (player.getMatch().getMap().getInfo().isAuthor(player.getId())) {
       MapTabEntry mapEntry = mapEntries.get(player.getMatch());
       if (mapEntry != null) mapEntry.invalidate();
     }

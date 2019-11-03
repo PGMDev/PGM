@@ -12,12 +12,17 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import tc.oc.item.Potions;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.query.DamageQuery;
 import tc.oc.pgm.filters.query.IDamageQuery;
 import tc.oc.pgm.filters.query.IQuery;
-import tc.oc.pgm.match.*;
+import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.damage.*;
 
@@ -72,7 +77,7 @@ public class DamageMatchModule extends MatchModule implements Listener {
         }
 
       case ALLY:
-        if (!match.getMapInfo().friendlyFire && !isAllowedTeamDamage(damageInfo)) {
+        if (!match.getMap().getInfo().friendlyFire && !isAllowedTeamDamage(damageInfo)) {
           return Filter.QueryResponse.DENY;
         }
 
