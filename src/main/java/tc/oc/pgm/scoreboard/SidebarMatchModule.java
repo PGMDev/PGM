@@ -19,9 +19,21 @@ import tc.oc.component.render.ComponentRenderers;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.named.NameStyle;
 import tc.oc.pgm.Config;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.event.MatchVictoryChangeEvent;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.party.event.CompetitorScoreChangeEvent;
+import tc.oc.pgm.api.party.event.PartyAddEvent;
+import tc.oc.pgm.api.party.event.PartyRemoveEvent;
+import tc.oc.pgm.api.party.event.PartyRenameEvent;
+import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.destroyable.Destroyable;
-import tc.oc.pgm.events.*;
+import tc.oc.pgm.events.FeatureChangeEvent;
+import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.ffa.Tribute;
 import tc.oc.pgm.goals.Goal;
 import tc.oc.pgm.goals.GoalMatchModule;
@@ -30,7 +42,7 @@ import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalProximityChangeEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
-import tc.oc.pgm.match.*;
+import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.events.TeamRespawnsChangeEvent;
@@ -70,7 +82,7 @@ public class SidebarMatchModule extends MatchModule implements Listener {
           StringUtils.left(
               ComponentRenderers.toLegacyText(
                   new PersonalizedText(
-                      getMatch().getModuleContext().getGame(), net.md_5.bungee.api.ChatColor.AQUA),
+                      getMatch().getMapContext().getGame(), net.md_5.bungee.api.ChatColor.AQUA),
                   NullCommandSender.INSTANCE),
               32));
       this.objective.setDisplaySlot(DisplaySlot.SIDEBAR);
@@ -215,7 +227,7 @@ public class SidebarMatchModule extends MatchModule implements Listener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
-  public void scoreChange(final MatchScoreChangeEvent event) {
+  public void scoreChange(final CompetitorScoreChangeEvent event) {
     renderSidebarDebounce();
   }
 
@@ -259,7 +271,7 @@ public class SidebarMatchModule extends MatchModule implements Listener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
-  public void resultChange(MatchResultChangeEvent event) {
+  public void resultChange(MatchVictoryChangeEvent event) {
     renderSidebarDebounce();
   }
 
@@ -303,7 +315,7 @@ public class SidebarMatchModule extends MatchModule implements Listener {
       return ChatColor.WHITE.toString() + bmm.getRemainingPlayers(competitor);
     } else if (competitor instanceof Tribute && bmm.getConfig().getNumLives() > 1) {
       return ChatColor.WHITE.toString()
-          + bmm.lifeManager.getLives(competitor.getPlayers().iterator().next().getPlayerId());
+          + bmm.lifeManager.getLives(competitor.getPlayers().iterator().next().getId());
     } else {
       return "";
     }
@@ -356,7 +368,7 @@ public class SidebarMatchModule extends MatchModule implements Listener {
 
       // Scores/Blitz
       if (hasScores || isBlitz) {
-        for (Competitor competitor : getMatch().getRankedCompetitors()) {
+        for (Competitor competitor : getMatch().getCompetitors()) {
           String text;
           if (hasScores) {
             text = renderScore(competitor, viewingParty);
@@ -393,7 +405,7 @@ public class SidebarMatchModule extends MatchModule implements Listener {
         }
       } else {
         // Observers see the competitors sorted by closeness to winning
-        Collections.sort(sortedCompetitors, match.getCompetitorRanking());
+        // FIXME: Collections.sort(sortedCompetitors, match.getCompetitorRanking());
       }
 
       for (Competitor competitor : sortedCompetitors) {

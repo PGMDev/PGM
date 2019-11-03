@@ -6,7 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.match.ParticipantState;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.util.components.Components;
 import tc.oc.world.NMSHacks;
 

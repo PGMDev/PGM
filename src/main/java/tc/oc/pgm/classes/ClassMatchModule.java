@@ -13,12 +13,12 @@ import javax.annotation.Nullable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.kits.Kit;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.MatchScope;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -167,10 +167,8 @@ public class ClassMatchModule extends MatchModule implements Listener {
 
     MatchPlayer matchPlayer = this.match.getPlayer(userId);
     if (matchPlayer != null) {
-      this.match
-          .getPluginManager()
-          .callEvent(
-              new PlayerClassChangeEvent(this.match, matchPlayer, this.family, oldClass, cls));
+      this.match.callEvent(
+          new PlayerClassChangeEvent(this.match, matchPlayer, this.family, oldClass, cls));
     }
 
     return oldClass;
@@ -179,11 +177,11 @@ public class ClassMatchModule extends MatchModule implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerSpawn(ParticipantSpawnEvent event) {
     this.lastPlayedClass.put(
-        event.getPlayer().getPlayerId(), getSelectedClass(event.getPlayer().getPlayerId()));
+        event.getPlayer().getId(), getSelectedClass(event.getPlayer().getId()));
   }
 
   public void giveClassKits(MatchPlayer player) {
-    for (Kit kit : getSelectedClass(player.getPlayerId()).getKits()) {
+    for (Kit kit : getSelectedClass(player.getId()).getKits()) {
       player.applyKit(kit, true);
     }
   }

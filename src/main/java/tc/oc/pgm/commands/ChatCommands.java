@@ -9,15 +9,15 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
-import tc.oc.chat.BukkitAudiences;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedPlayer;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.named.NameStyle;
 import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.chat.Audience;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.ffa.Tribute;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.server.Permissions;
 import tc.oc.util.components.Components;
 import tc.oc.world.OnlinePlayerMapAdapter;
 
@@ -77,7 +77,7 @@ public class ChatCommands {
       usage = "[player] [message]")
   public void direct(MatchPlayer sender, Player receiver, @Text String message) {
     lastDirectMessage.put(sender.getBukkit(), receiver.getUniqueId());
-    lastDirectMessage.putIfAbsent(receiver, sender.getPlayerId());
+    lastDirectMessage.putIfAbsent(receiver, sender.getId());
     send(
         sender,
         message,
@@ -93,7 +93,8 @@ public class ChatCommands {
     final MatchPlayer receiver =
         sender.getMatch().getPlayer(lastDirectMessage.get(sender.getBukkit()));
     if (receiver == null) {
-      sender.sendWarning("Did not find a message to reply to, use /msg"); // TODO: translate
+      sender.sendWarning(
+          new PersonalizedText("Did not find a message to reply to, use /msg")); // TODO: translate
       return;
     }
 
@@ -137,7 +138,7 @@ public class ChatCommands {
 
                 event
                     .getRecipients()
-                    .forEach(player -> BukkitAudiences.getAudience(player).sendMessage(component));
+                    .forEach(player -> Audience.get(player).sendMessage(component));
               }
             });
   }

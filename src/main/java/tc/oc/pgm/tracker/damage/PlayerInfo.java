@@ -5,8 +5,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import javax.annotation.Nullable;
 import tc.oc.component.Component;
 import tc.oc.named.NameStyle;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.ParticipantState;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.ParticipantState;
 
 public class PlayerInfo implements OwnerInfo, MeleeInfo, PhysicalInfo {
 
@@ -43,7 +43,7 @@ public class PlayerInfo implements OwnerInfo, MeleeInfo, PhysicalInfo {
 
   @Override
   public String getIdentifier() {
-    return player.getPlayerId().toString();
+    return player.getId().toString();
   }
 
   @Override

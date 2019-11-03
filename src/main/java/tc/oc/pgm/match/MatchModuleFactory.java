@@ -1,6 +1,7 @@
 package tc.oc.pgm.match;
 
 import javax.annotation.Nullable;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.module.ModuleLoadException;
 
 /**

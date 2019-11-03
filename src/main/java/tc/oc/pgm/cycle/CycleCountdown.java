@@ -6,22 +6,23 @@ import tc.oc.component.Component;
 import tc.oc.component.types.BlankComponent;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.map.PGMMap;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchManager;
 
 public class CycleCountdown extends MatchCountdown {
   protected final MatchManager mm;
+  protected final PGMMap nextMap;
 
-  public CycleCountdown(MatchManager mm, Match match) {
+  public CycleCountdown(MatchManager mm, Match match, PGMMap nextMap) {
     super(match);
     this.mm = mm;
+    this.nextMap = nextMap;
   }
 
   @Override
   protected Component formatText() {
-    PGMMap nextMap = mm.getNextMap();
     if (nextMap == null || nextMap.getInfo() == null) return BlankComponent.INSTANCE;
     Component mapName = new PersonalizedText(nextMap.getInfo().name, ChatColor.AQUA);
 
@@ -39,6 +40,6 @@ public class CycleCountdown extends MatchCountdown {
   @Override
   public void onEnd(Duration total) {
     super.onEnd(total);
-    this.mm.cycle(this.getMatch(), true, false);
+    this.mm.cycleMatch(this.getMatch(), nextMap, false);
   }
 }

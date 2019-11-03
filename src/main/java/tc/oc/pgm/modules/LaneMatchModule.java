@@ -17,12 +17,12 @@ import org.bukkit.util.Vector;
 import tc.oc.block.BlockVectors;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.AllTranslations;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.BlockTransformEvent;
 import tc.oc.pgm.events.CoarsePlayerMoveEvent;
 import tc.oc.pgm.events.PlayerBlockTransformEvent;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchPlayer;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.Team;
@@ -64,7 +64,7 @@ public class LaneMatchModule extends MatchModule implements Listener {
       }
     }
 
-    if (this.voidPlayers.contains(player.getPlayerId())) {
+    if (this.voidPlayers.contains(player.getId())) {
       event.getPlayer().setFallDistance(0);
       // they have been marked as "out of lane"
       if (containsTo && !containsFrom) {
@@ -84,7 +84,7 @@ public class LaneMatchModule extends MatchModule implements Listener {
       if (!containsFrom && !containsTo) {
         // they are outside of the lane
         if (isIllegallyOutsideLane(laneRegion, event.getTo())) {
-          this.voidPlayers.add(player.getPlayerId());
+          this.voidPlayers.add(player.getId());
           event
               .getPlayer()
               .sendMessage(
@@ -99,14 +99,13 @@ public class LaneMatchModule extends MatchModule implements Listener {
   public void preventBlockPlaceByVoidPlayer(final BlockTransformEvent event) {
     if (event instanceof PlayerBlockTransformEvent) {
       event.setCancelled(
-          this.voidPlayers.contains(
-              ((PlayerBlockTransformEvent) event).getPlayerState().getPlayerId()));
+          this.voidPlayers.contains(((PlayerBlockTransformEvent) event).getPlayerState().getId()));
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void clearLaneStatus(final ParticipantDespawnEvent event) {
-    this.voidPlayers.remove(event.getPlayer().getPlayerId());
+    this.voidPlayers.remove(event.getPlayer().getId());
   }
 
   private static BlockFace[] CARDINAL_DIRECTIONS = {

@@ -6,7 +6,7 @@ import org.bukkit.material.MaterialData;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.match.ParticipantState;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.world.NMSHacks;
 
 public class BlockInfo extends OwnerInfoBase implements PhysicalInfo {

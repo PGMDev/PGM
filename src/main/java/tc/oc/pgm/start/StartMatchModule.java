@@ -10,18 +10,19 @@ import org.joda.time.Duration;
 import tc.oc.bossbar.DynamicBossBar;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
+import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchPhase;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.bossbar.BossBarMatchModule;
 import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.countdowns.SingleCountdownContext;
 import tc.oc.pgm.cycle.CycleMatchModule;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.events.MatchPreCommitEvent;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerLeaveMatchEvent;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchScope;
-import tc.oc.pgm.match.MatchState;
 
 @ListenerScope(MatchScope.LOADED)
 public class StartMatchModule extends MatchModule implements Listener {
@@ -29,7 +30,7 @@ public class StartMatchModule extends MatchModule implements Listener {
   class UnreadyBar extends DynamicBossBar {
     @Override
     public boolean isVisible(Player viewer) {
-      return !getMatch().hasStarted() && !unreadyReasons.isEmpty();
+      return !getMatch().isRunning() && !unreadyReasons.isEmpty();
     }
 
     @Override
@@ -74,7 +75,7 @@ public class StartMatchModule extends MatchModule implements Listener {
   public StartMatchModule(Match match) {
     super(match);
     this.unreadyBar = new UnreadyBar();
-    this.config = new StartConfig(getMatch().getPlugin().getConfig());
+    this.config = new StartConfig(PGM.get().getConfig());
     this.autoStart = config.autoStart();
     this.bbmm = match.needMatchModule(BossBarMatchModule.class);
   }
@@ -86,13 +87,14 @@ public class StartMatchModule extends MatchModule implements Listener {
   }
 
   @EventHandler
-  public void onCommit(MatchPreCommitEvent event) {
+  public void onCommit(MatchStartEvent event) {
     bbmm.removeBossBar(unreadyBar);
     unreadyReasons.clear();
   }
 
+  // FIXME: Unsafe cast to SingleCountdownContext
   private SingleCountdownContext cc() {
-    return getMatch().getCountdownContext();
+    return (SingleCountdownContext) getMatch().getCountdown();
   }
 
   /** If true, the match start countdown will automatically start when conditions allow it */
@@ -142,8 +144,6 @@ public class StartMatchModule extends MatchModule implements Listener {
   /** Atomically replace all unready reasons of the given type with one other reason */
   public void addUnreadyReason(
       Class<? extends UnreadyReason> oldReasonType, UnreadyReason newReason) {
-    if (getMatch().isCommitted()) return;
-
     boolean removed = removeUnreadyReasonsNoUpdate(oldReasonType);
     boolean added = addUnreadyReasonNoUpdate(newReason);
     if (removed || added) update();
@@ -151,8 +151,6 @@ public class StartMatchModule extends MatchModule implements Listener {
 
   /** Withdraw all unready reasons of the given type */
   public void removeUnreadyReason(Class<? extends UnreadyReason> reasonType) {
-    if (getMatch().isCommitted()) return;
-
     if (removeUnreadyReasonsNoUpdate(reasonType)) {
       update();
     }
@@ -180,7 +178,7 @@ public class StartMatchModule extends MatchModule implements Listener {
   }
 
   public boolean canStart(boolean force) {
-    if (!getMatch().canTransitionTo(MatchState.Starting)) return false;
+    if (!getMatch().getPhase().canTransitionTo(MatchPhase.STARTING)) return false;
     for (UnreadyReason reason : unreadyReasons) {
       if (!force || !reason.canForceStart()) return false;
     }
@@ -218,7 +216,7 @@ public class StartMatchModule extends MatchModule implements Listener {
     if (duration == null) duration = config.countdown();
     if (huddle == null) huddle = config.huddle();
 
-    logger.fine("Starting countdown");
+    logger.fine("STARTING countdown");
     cc().start(new StartCountdown(getMatch(), force, huddle), duration);
 
     return true;
@@ -235,7 +233,7 @@ public class StartMatchModule extends MatchModule implements Listener {
   private void startUnreadyTimeout() {
     Duration duration = config.timeout();
     if (duration != null) {
-      logger.fine("Starting unready timeout with duration " + duration);
+      logger.fine("STARTING unready timeout with duration " + duration);
       cc().start(new UnreadyTimeout(getMatch()), duration);
     }
   }
@@ -247,8 +245,6 @@ public class StartMatchModule extends MatchModule implements Listener {
   }
 
   private void update() {
-    if (getMatch().isCommitted()) return;
-
     final StartCountdown countdown = cc().getCountdown(StartCountdown.class);
     final boolean ready = canStart(countdown != null && countdown.isForced());
     final boolean empty = getMatch().getPlayers().isEmpty();

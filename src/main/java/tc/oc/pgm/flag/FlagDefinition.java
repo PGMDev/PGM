@@ -4,6 +4,7 @@ import java.util.Collection;
 import javax.annotation.Nullable;
 import org.bukkit.DyeColor;
 import tc.oc.component.Component;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.features.FeatureInfo;
 import tc.oc.pgm.features.FeatureReference;
 import tc.oc.pgm.filters.Filter;
@@ -11,7 +12,6 @@ import tc.oc.pgm.filters.query.IQuery;
 import tc.oc.pgm.goals.ProximityGoalDefinition;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.kits.Kit;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.server.BukkitUtils;
 

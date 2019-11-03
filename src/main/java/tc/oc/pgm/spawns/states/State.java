@@ -7,11 +7,11 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerAttackEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import tc.oc.pgm.events.MatchBeginEvent;
-import tc.oc.pgm.events.MatchEndEvent;
-import tc.oc.pgm.events.MatchPlayerDeathEvent;
+import tc.oc.pgm.api.match.event.MatchFinishEvent;
+import tc.oc.pgm.api.match.event.MatchStartEvent;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.PlayerJoinPartyEvent;
-import tc.oc.pgm.match.MatchPlayer;
 import tc.oc.pgm.spawns.RespawnOptions;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 
@@ -79,7 +79,7 @@ public abstract class State {
 
   public void onEvent(final PlayerAttackEntityEvent event) {}
 
-  public void onEvent(final MatchBeginEvent event) {}
+  public void onEvent(final MatchStartEvent event) {}
 
-  public void onEvent(final MatchEndEvent event) {}
+  public void onEvent(final MatchFinishEvent event) {}
 }

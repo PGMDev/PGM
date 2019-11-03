@@ -5,8 +5,9 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.MatchPlayerEvent;
 
 public abstract class PlayerParticipationEvent extends MatchPlayerEvent implements Cancellable {
 

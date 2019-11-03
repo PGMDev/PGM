@@ -27,6 +27,6 @@ public class RandomFilter extends TypedFilter<IMatchQuery> {
   @Override
   public QueryResponse queryTyped(IMatchQuery query) {
     return QueryResponse.fromBoolean(
-        this.chance.contains(query.getMatch().getRandomDoubleForTick(query.hashCode())));
+        this.chance.contains(query.getMatch().getRandomFromTick(query.hashCode())));
   }
 }

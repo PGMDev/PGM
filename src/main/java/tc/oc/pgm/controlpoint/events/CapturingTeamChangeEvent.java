@@ -2,8 +2,8 @@ package tc.oc.pgm.controlpoint.events;
 
 import javax.annotation.Nullable;
 import org.bukkit.event.HandlerList;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.controlpoint.ControlPoint;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.teams.Team;
 
 public class CapturingTeamChangeEvent extends ControlPointEvent {

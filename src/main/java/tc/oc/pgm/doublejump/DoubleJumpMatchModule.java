@@ -12,12 +12,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerResetEvent;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.MatchScope;
 import tc.oc.world.OnlinePlayerMapAdapter;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -37,7 +38,7 @@ public class DoubleJumpMatchModule extends MatchModule implements Listener {
 
   public DoubleJumpMatchModule(Match match) {
     super(match);
-    this.jumpers = new OnlinePlayerMapAdapter<>(this.getMatch().getPlugin());
+    this.jumpers = new OnlinePlayerMapAdapter<>(PGM.get());
     this.jumpers.enable();
   }
 

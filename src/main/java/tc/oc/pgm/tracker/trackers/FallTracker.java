@@ -14,11 +14,11 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerOnGroundEvent;
 import tc.oc.material.Materials;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.MatchScope;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
-import tc.oc.pgm.time.TickTime;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.damage.*;
 import tc.oc.pgm.tracker.event.PlayerSpleefEvent;
@@ -107,7 +107,7 @@ public class FallTracker implements Listener, DamageResolver {
   }
 
   void checkFallTimeout(final FallState fall) {
-    TickTime now = match.getClock().now();
+    Tick now = match.getTick();
     if ((fall.isStarted && fall.isEndedSafely(now)) || (!fall.isStarted && fall.isExpired(now))) {
 
       endFall(fall);
@@ -135,7 +135,7 @@ public class FallTracker implements Listener, DamageResolver {
   private void playerBecameUnsupported(FallState fall) {
     if (!fall.isStarted
         && !fall.isSupported()
-        && match.getClock().now().tick - fall.startTime.tick <= FallState.MAX_KNOCKBACK_TICKS) {
+        && match.getTick().tick - fall.startTime.tick <= FallState.MAX_KNOCKBACK_TICKS) {
       fall.isStarted = true;
       logger.fine("Started " + fall);
     }
@@ -220,7 +220,7 @@ public class FallTracker implements Listener, DamageResolver {
       boolean isSwimming = Materials.isWater(event.getTo());
       boolean isInLava = Materials.isLava(event.getTo());
       boolean becameUnsupported = false;
-      TickTime now = match.getClock().now();
+      Tick now = match.getTick();
 
       if (isClimbing != fall.isClimbing) {
         if ((fall.isClimbing = isClimbing)) {
@@ -254,7 +254,7 @@ public class FallTracker implements Listener, DamageResolver {
           fall.inLavaTick = now.tick;
         } else {
           // Because players continue to "fall" as long as they are in lava, moving out of lava
-          // can immediately end their fall
+          // can immediately finish their fall
           this.checkFallTimeout(fall);
         }
       }
@@ -272,7 +272,7 @@ public class FallTracker implements Listener, DamageResolver {
       if (event.getOnGround()) {
         // Falling player landed on the ground, cancel the fall if they are still there after
         // MAX_ON_GROUND_TIME
-        fall.onGroundTick = match.getClock().now().tick;
+        fall.onGroundTick = match.getTick().tick;
         fall.groundTouchCount++;
         this.scheduleCheckFallTimeout(fall, FallState.MAX_ON_GROUND_TICKS + 1);
       } else {

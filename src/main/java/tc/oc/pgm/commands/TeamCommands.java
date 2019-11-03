@@ -12,11 +12,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.AllTranslations;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.server.Permissions;
 
 public class TeamCommands {
 
@@ -47,7 +47,7 @@ public class TeamCommands {
     MatchPlayer matchPlayer = match.getPlayer(player);
     if (teamName != null) {
       if (teamName.trim().toLowerCase().startsWith("obs")) {
-        match.setPlayerParty(matchPlayer, match.getDefaultParty());
+        match.setParty(matchPlayer, match.getDefaultParty());
       } else {
         Team team = tmm.bestFuzzyMatch(teamName);
         tmm.forceJoin(matchPlayer, team);
@@ -68,7 +68,7 @@ public class TeamCommands {
           AllTranslations.get().translate("command.team.shuffle.matchRunning", sender));
     } else {
       List<Team> teams = new ArrayList<>(tmm.getParticipatingTeams());
-      List<MatchPlayer> participating = new ArrayList<>(match.getParticipatingPlayers());
+      List<MatchPlayer> participating = new ArrayList<>(match.getParticipants());
       Collections.shuffle(participating);
       for (int i = 0; i < participating.size(); i++) {
         tmm.forceJoin(participating.get(i), teams.get((i * teams.size()) / participating.size()));

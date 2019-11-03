@@ -2,8 +2,8 @@ package tc.oc.pgm.kits;
 
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
-import tc.oc.pgm.events.MatchEvent;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.match.event.MatchEvent;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 /**
  * Fired when any kind of Kit is applied to a player. This is fired once for each terminal node of a

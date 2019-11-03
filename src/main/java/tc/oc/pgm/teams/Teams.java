@@ -3,13 +3,13 @@ package tc.oc.pgm.teams;
 import static tc.oc.pgm.map.ProtoVersions.FILTER_FEATURES;
 
 import javax.annotation.Nullable;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.FeatureReference;
 import tc.oc.pgm.features.ImmediateFeatureReference;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.Party;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
@@ -45,7 +45,7 @@ public class Teams {
   }
 
   public static Team getTeam(String team, Match match) {
-    TeamFactory teamFactory = getTeam(team, match.getModuleContext());
+    TeamFactory teamFactory = getTeam(team, match.getMapContext());
     return teamFactory == null
         ? null
         : match.needMatchModule(TeamMatchModule.class).getTeam(teamFactory);

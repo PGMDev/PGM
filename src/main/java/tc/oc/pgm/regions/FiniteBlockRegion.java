@@ -140,7 +140,7 @@ public class FiniteBlockRegion extends AbstractRegion {
   public static FiniteBlockRegion fromWorld(Region region, World world, Filter materials) {
     List<Block> blocks = new LinkedList<>();
     Bounds bounds = region.getBounds();
-    PGMMap map = PGM.getMapManager().getMap(world);
+    PGMMap map = PGM.getMatchManager().getMatch(world).getMap();
 
     if (region instanceof CuboidRegion
         && map != null

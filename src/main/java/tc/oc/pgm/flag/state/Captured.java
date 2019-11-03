@@ -2,13 +2,13 @@ package tc.oc.pgm.flag.state;
 
 import org.bukkit.Location;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.filters.query.GoalQuery;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.Net;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
-import tc.oc.pgm.match.Party;
 
 /**
  * Flag is looking for a place to respawn after being captured. This phase can be delayed by a

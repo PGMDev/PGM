@@ -1,8 +1,8 @@
 package tc.oc.pgm.filters;
 
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.query.IPlayerQuery;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.MatchPlayer;
 
 /**
  * Base for filters that apply to *online*, participating players. The base class returns DENY if

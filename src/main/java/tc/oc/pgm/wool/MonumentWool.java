@@ -12,9 +12,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedPlayer;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.named.NameStyle;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.PlayerItemTransferEvent;
 import tc.oc.pgm.goals.Goal;
 import tc.oc.pgm.goals.ProximityMetric;
@@ -22,7 +26,6 @@ import tc.oc.pgm.goals.TouchableGoal;
 import tc.oc.pgm.kits.ApplyItemKitEvent;
 import tc.oc.pgm.kits.ApplyKitEvent;
 import tc.oc.pgm.kits.ArmorKit;
-import tc.oc.pgm.match.*;
 import tc.oc.pgm.teams.Team;
 import tc.oc.server.BukkitUtils;
 
@@ -64,7 +67,7 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
   public Component getTouchMessage(ParticipantState toucher, boolean self) {
     return new PersonalizedTranslatable(
         self ? "match.touch.wool.you" : "match.touch.wool.teamSuffix",
-        new PersonalizedPlayer(toucher.getIdentity(), NameStyle.COLOR),
+        toucher.getStyledName(NameStyle.COLOR),
         getComponentName(),
         toucher.getParty().getComponentName());
   }
@@ -86,7 +89,7 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
     // runners
     if (!super.canPlayerUpdateProximity(player)) return false;
     if (!hasTouched(player.getParty())) return true;
-    MatchPlayer onlinePlayer = player.getMatchPlayer();
+    MatchPlayer onlinePlayer = player.getPlayer().orElse(null);
     return onlinePlayer != null && this.getDefinition().isHolding(onlinePlayer);
   }
 

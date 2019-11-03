@@ -1,7 +1,7 @@
 package tc.oc.pgm.events;
 
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 /**
  * Called immediately before a player joins a {@link Competitor}. This differs from {@link

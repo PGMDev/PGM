@@ -23,12 +23,18 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.util.Vector;
 import tc.oc.block.BlockStates;
 import tc.oc.block.BlockVectors;
+import tc.oc.pgm.api.event.GeneralizingEvent;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.*;
+import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.filters.Filter.QueryResponse;
 import tc.oc.pgm.filters.query.*;
 import tc.oc.pgm.flag.event.FlagPickupEvent;
 import tc.oc.pgm.map.ProtoVersions;
-import tc.oc.pgm.match.*;
+import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.util.MatchPlayers;
 
 @ListenerScope(MatchScope.LOADED)
@@ -41,7 +47,7 @@ public class RegionMatchModule extends MatchModule implements Listener {
     super(match);
     this.rfaContext = rfaContext;
     this.useRegionPriority =
-        this.getMatch().getMapInfo().proto.isNoOlderThan(REGION_PRIORITY_VERSION);
+        this.getMatch().getMap().getInfo().proto.isNoOlderThan(REGION_PRIORITY_VERSION);
   }
 
   protected void checkEnterLeave(
@@ -361,7 +367,7 @@ public class RegionMatchModule extends MatchModule implements Listener {
 
   private ParticipantState getActor(BlockTransformEvent event) {
     // Legacy maps assume that all TNT damage is done by "world"
-    if (getMatch().getMapInfo().proto.isOlderThan(ProtoVersions.FILTER_OWNED_TNT)
+    if (getMatch().getMap().getInfo().proto.isOlderThan(ProtoVersions.FILTER_OWNED_TNT)
         && event.getCause() instanceof EntityExplodeEvent) return null;
 
     return ParticipantBlockTransformEvent.getPlayerState(event);

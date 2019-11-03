@@ -3,8 +3,8 @@ package tc.oc.pgm.events;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.annotation.Nullable;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.Party;
+import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 /**
  * Subclass of {@link PlayerPartyChangeEvent} called in cases where the player is actually joining a

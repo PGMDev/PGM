@@ -1,8 +1,8 @@
 package tc.oc.pgm.spawns.events;
 
 import org.bukkit.event.HandlerList;
-import tc.oc.pgm.events.MatchPlayerEvent;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.MatchPlayerEvent;
 
 /**
  * Called shortly after a participating player dies and the time is right to give them any items

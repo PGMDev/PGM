@@ -7,6 +7,11 @@ import org.bukkit.ChatColor;
 import org.bukkit.event.HandlerList;
 import org.bukkit.util.Vector;
 import org.joda.time.Duration;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.controlpoint.events.CapturingTeamChangeEvent;
 import tc.oc.pgm.controlpoint.events.CapturingTimeChangeEvent;
 import tc.oc.pgm.controlpoint.events.ControllerChangeEvent;
@@ -14,10 +19,6 @@ import tc.oc.pgm.goals.IncrementalGoal;
 import tc.oc.pgm.goals.SimpleGoal;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.Party;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.Team;
@@ -73,8 +74,8 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
   }
 
   public void registerEvents() {
-    this.match.registerEvents(this.playerTracker);
-    this.match.registerEvents(this.blockDisplay);
+    this.match.addListener(this.playerTracker, MatchScope.RUNNING);
+    this.match.addListener(this.blockDisplay, MatchScope.RUNNING);
 
     this.blockDisplay.render();
   }
@@ -233,7 +234,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
   }
 
   public float getEffectivePointsPerSecond() {
-    float seconds = this.getMatch().getLength().getStandardSeconds();
+    float seconds = this.getMatch().getDuration().getStandardSeconds();
     float initial = this.getDefinition().getPointsPerSecond();
     float growth = this.getDefinition().getPointsGrowth();
     return (float) (initial * Math.pow(2, seconds / growth));
@@ -257,7 +258,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
     if (this.getControllingTeam() != null && this.getDefinition().affectsScore()) {
       ScoreMatchModule scoreMatchModule = this.getMatch().getMatchModule(ScoreMatchModule.class);
       if (scoreMatchModule != null) {
-        float seconds = this.getMatch().getLength().getStandardSeconds();
+        float seconds = this.getMatch().getDuration().getStandardSeconds();
         float initial = this.getDefinition().getPointsPerSecond();
         float growth = this.getDefinition().getPointsGrowth();
         float rate = (float) (initial * Math.pow(2, seconds / growth));
@@ -341,32 +342,23 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
     this.dominate(dominantTeam, dominantTime);
 
     if (oldCapturingTeam != this.capturingTeam || !oldCapturingTime.equals(this.capturingTime)) {
-      this.match.getPluginManager().callEvent(new CapturingTimeChangeEvent(this.match, this));
-      this.match.getPluginManager().callEvent(new GoalStatusChangeEvent(this.match, this, null));
+      this.match.callEvent(new CapturingTimeChangeEvent(this.match, this));
+      this.match.callEvent(new GoalStatusChangeEvent(this.match, this, null));
     }
 
     if (oldCapturingTeam != this.capturingTeam) {
-      this.match
-          .getPluginManager()
-          .callEvent(
-              new CapturingTeamChangeEvent(this.match, this, oldCapturingTeam, this.capturingTeam));
+      this.match.callEvent(
+          new CapturingTeamChangeEvent(this.match, this, oldCapturingTeam, this.capturingTeam));
     }
 
     if (oldControllingTeam != this.controllingTeam) {
-      this.match
-          .getPluginManager()
-          .callEvent(
-              new ControllerChangeEvent(
-                  this.match, this, oldControllingTeam, this.controllingTeam));
+      this.match.callEvent(
+          new ControllerChangeEvent(this.match, this, oldControllingTeam, this.controllingTeam));
 
       if (this.controllingTeam == null) {
-        this.match
-            .getPluginManager()
-            .callEvent(new GoalCompleteEvent(this.match, this, oldControllingTeam, false));
+        this.match.callEvent(new GoalCompleteEvent(this.match, this, oldControllingTeam, false));
       } else {
-        this.match
-            .getPluginManager()
-            .callEvent(new GoalCompleteEvent(this.match, this, this.controllingTeam, true));
+        this.match.callEvent(new GoalCompleteEvent(this.match, this, this.controllingTeam, true));
       }
     }
   }

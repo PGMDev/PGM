@@ -1,8 +1,7 @@
 package tc.oc.pgm.tablist;
 
 import java.util.Comparator;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.Parties;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.Teams;
 
@@ -19,8 +18,8 @@ public class TeamOrder implements Comparator<Team> {
     if (a == b) return 0;
 
     // Observing team is last
-    boolean aObs = Parties.isObservingType(a);
-    boolean bObs = Parties.isObservingType(b);
+    boolean aObs = a.isObserving();
+    boolean bObs = b.isObserving();
     if (aObs && !bObs) return 1;
     if (bObs && !aObs) return -1;
 

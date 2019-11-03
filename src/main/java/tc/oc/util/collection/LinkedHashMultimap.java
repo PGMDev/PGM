@@ -28,8 +28,8 @@ public class LinkedHashMultimap<K, V> extends ForwardingSetMultimap<K, V> {
   }
 
   /**
-   * Add the given key-value pair to the map, forcing the value to the end of the key's list if it
-   * is already present.
+   * Add the given key-value pair to the map, forcing the value to the finish of the key's list if
+   * it is already present.
    */
   public boolean force(K key, V value) {
     boolean added = !remove(key, value);

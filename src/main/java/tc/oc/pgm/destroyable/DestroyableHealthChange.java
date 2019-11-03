@@ -5,7 +5,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import tc.oc.pgm.match.ParticipantState;
+import tc.oc.pgm.api.player.ParticipantState;
 
 /** Provides additional information about why a {@link Destroyable} was damaged. */
 public class DestroyableHealthChange {

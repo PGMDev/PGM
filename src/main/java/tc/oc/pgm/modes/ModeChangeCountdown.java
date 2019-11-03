@@ -19,7 +19,7 @@ public class ModeChangeCountdown extends MatchCountdown implements Comparable<Mo
   public ModeChangeCountdown(ObjectiveModesMatchModule parent, Mode mode) {
     super(parent.getMatch());
 
-    this.context = parent.getCountdownContext();
+    this.context = parent.getCountdown();
     this.mode = mode;
   }
 
@@ -67,7 +67,7 @@ public class ModeChangeCountdown extends MatchCountdown implements Comparable<Mo
 
   @Override
   public boolean showBossBar() {
-    CountdownContext countdowns = this.getMatch().getCountdownContext();
+    CountdownContext countdowns = this.getMatch().getCountdown();
     Set<TimeLimitCountdown> timeLimitCountdowns = countdowns.getAll(TimeLimitCountdown.class);
 
     for (TimeLimitCountdown limit : timeLimitCountdowns) {

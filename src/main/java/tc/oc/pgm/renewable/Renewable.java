@@ -20,12 +20,13 @@ import tc.oc.block.BlockFaces;
 import tc.oc.block.BlockVectorSet;
 import tc.oc.block.BlockVectors;
 import tc.oc.material.MaterialCounter;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.Tickable;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.BlockTransformEvent;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.query.BlockQuery;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.Tickable;
 import tc.oc.pgm.snapshot.SnapshotMatchModule;
 import tc.oc.util.logging.ClassLogger;
 import tc.oc.world.NMSHacks;
@@ -122,7 +123,7 @@ public class Renewable implements Listener, Tickable {
   }
 
   @Override
-  public void tick(Match match) {
+  public void tick(Match match, Tick tick) {
     invalidateCaches();
 
     float interval = updateLastTick(); // should always be 1
@@ -140,8 +141,8 @@ public class Renewable implements Listener, Tickable {
   }
 
   long updateLastTick() {
-    long delta = match.getClock().now().tick - lastTick;
-    lastTick = match.getClock().now().tick;
+    long delta = match.getTick().tick - lastTick;
+    lastTick = match.getTick().tick;
     return delta;
   }
 
@@ -195,7 +196,7 @@ public class Renewable implements Listener, Tickable {
     if (definition.avoidPlayersRange > 0d) {
       double rangeSquared = definition.avoidPlayersRange * definition.avoidPlayersRange;
       pos = BlockVectors.center(pos);
-      for (MatchPlayer player : match.getParticipatingPlayers()) {
+      for (MatchPlayer player : match.getParticipants()) {
         Location location = player.getBukkit().getLocation().add(0, 1, 0);
         if (location.toVector().distanceSquared(pos) < rangeSquared) {
           return false;

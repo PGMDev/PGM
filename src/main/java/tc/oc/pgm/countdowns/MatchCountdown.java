@@ -9,8 +9,8 @@ import tc.oc.bossbar.DynamicBossBar;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.bossbar.BossBarMatchModule;
-import tc.oc.pgm.match.Match;
 import tc.oc.util.components.PeriodFormats;
 
 public abstract class MatchCountdown extends Countdown {
@@ -101,7 +101,6 @@ public abstract class MatchCountdown extends Countdown {
 
     if (showTitle()) {
       getMatch()
-          .getParticipantAudience()
           .showTitle(
               new PersonalizedText(
                   String.valueOf(remaining.getStandardSeconds()), ChatColor.YELLOW),

@@ -2,11 +2,11 @@ package tc.oc.pgm.picker;
 
 import java.util.logging.Logger;
 import org.jdom2.Document;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.classes.ClassModule;
 import tc.oc.pgm.ffa.FreeForAllModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.teams.TeamModule;

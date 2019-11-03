@@ -1,7 +1,8 @@
 package tc.oc.pgm.events;
 
 import org.bukkit.event.HandlerList;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.match.event.MatchEvent;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 /** Called immediately before a MatchPlayer is "reset" i.e. set to the default state */
 public class PlayerResetEvent extends MatchEvent {

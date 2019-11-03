@@ -15,10 +15,11 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchScope;
 import tc.oc.pgm.projectile.EntityLaunchEvent;
 import tc.oc.world.NMSHacks;
 
@@ -39,7 +40,7 @@ public class ModifyBowProjectileMatchModule extends MatchModule implements Liste
 
   @EventHandler(ignoreCancelled = true)
   public void changeBowProjectile(EntityShootBowEvent event) {
-    Plugin plugin = this.getMatch().getPlugin();
+    Plugin plugin = PGM.get();
     Entity newProjectile;
 
     if (this.cls == Arrow.class && event.getProjectile() instanceof Arrow) {

@@ -5,9 +5,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.bukkit.event.HandlerList;
 import org.joda.time.Instant;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.goals.TouchableGoal;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.ParticipantState;
 
 /** Raised when a player touches a goal. */
 public class GoalTouchEvent extends GoalEvent {

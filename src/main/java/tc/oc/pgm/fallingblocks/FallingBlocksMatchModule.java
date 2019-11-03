@@ -20,13 +20,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockFallEvent;
-import org.bukkit.scheduler.BukkitTask;
 import tc.oc.material.Materials;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.BlockTransformEvent;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.ParticipantState;
 import tc.oc.util.collection.LongDeque;
 
 public class FallingBlocksMatchModule extends MatchModule implements Listener {
@@ -44,7 +44,6 @@ public class FallingBlocksMatchModule extends MatchModule implements Listener {
   private final List<FallingBlocksRule> rules;
   private final TLongObjectMap<TLongObjectMap<ParticipantState>> blockDisturbersByTick =
       new TLongObjectHashMap<>();
-  private BukkitTask task;
 
   public FallingBlocksMatchModule(Match match, List<FallingBlocksRule> rules) {
     super(match);
@@ -64,29 +63,13 @@ public class FallingBlocksMatchModule extends MatchModule implements Listener {
   @Override
   public void enable() {
     super.enable();
-    this.task =
-        this.getMatch()
-            .getServer()
-            .getScheduler()
-            .runTaskTimer(
-                this.getMatch().getPlugin(),
-                new Runnable() {
-                  @Override
-                  public void run() {
-                    FallingBlocksMatchModule.this.fallCheck();
-                  }
-                },
-                0,
-                1);
+    getMatch()
+        .getScheduler(MatchScope.RUNNING)
+        .runTaskTimer(1, FallingBlocksMatchModule.this::fallCheck);
   }
 
   @Override
   public void disable() {
-    if (this.task != null) {
-      this.task.cancel();
-      this.task = null;
-    }
-
     logger.info("Longest search for this match: " + this.visitsWorstTick);
     super.disable();
   }
@@ -226,7 +209,7 @@ public class FallingBlocksMatchModule extends MatchModule implements Listener {
 
     World world = this.getMatch().getWorld();
     TLongObjectMap<ParticipantState> blockDisturbers =
-        this.blockDisturbersByTick.remove(this.getMatch().getClock().now().tick);
+        this.blockDisturbersByTick.remove(this.getMatch().getTick().tick);
     if (blockDisturbers == null) return;
 
     TLongSet supported = new TLongHashSet();
@@ -293,7 +276,7 @@ public class FallingBlocksMatchModule extends MatchModule implements Listener {
   private void disturb(long pos, BlockState blockState, @Nullable ParticipantState disturber) {
     FallingBlocksRule rule = this.ruleWithShortestDelay(blockState);
     if (rule != null) {
-      long tick = this.getMatch().getClock().now().tick + rule.delay;
+      long tick = this.getMatch().getTick().tick + rule.delay;
       TLongObjectMap<ParticipantState> blockDisturbers = this.blockDisturbersByTick.get(tick);
 
       if (blockDisturbers == null) {

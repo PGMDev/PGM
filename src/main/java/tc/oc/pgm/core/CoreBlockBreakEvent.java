@@ -2,7 +2,7 @@ package tc.oc.pgm.core;
 
 import org.bukkit.block.BlockState;
 import org.bukkit.event.HandlerList;
-import tc.oc.pgm.match.MatchPlayerState;
+import tc.oc.pgm.api.player.MatchPlayerState;
 
 public class CoreBlockBreakEvent extends CoreEvent {
   private static final HandlerList handlers = new HandlerList();

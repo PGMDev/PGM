@@ -3,8 +3,8 @@ package tc.oc.pgm.score;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import tc.oc.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.filters.Filter;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.regions.Region;
 
 public class ScoreBoxFactory {

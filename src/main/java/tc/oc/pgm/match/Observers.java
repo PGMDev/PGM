@@ -1,5 +1,7 @@
 package tc.oc.pgm.match;
 
+import tc.oc.pgm.api.match.Match;
+
 public class Observers extends ObservingParty {
 
   public Observers(Match match) {

@@ -5,8 +5,8 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.Event;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.ParticipantState;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.ParticipantState;
 
 public class ParticipantBlockTransformEvent extends PlayerBlockTransformEvent {
 
@@ -33,6 +33,6 @@ public class ParticipantBlockTransformEvent extends PlayerBlockTransformEvent {
 
   public static @Nullable MatchPlayer getParticipant(BlockTransformEvent event) {
     ParticipantState state = getPlayerState(event);
-    return state == null ? null : state.getMatchPlayer();
+    return state == null ? null : state.getPlayer().orElse(null);
   }
 }

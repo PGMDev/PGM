@@ -10,11 +10,11 @@ import tc.oc.component.render.ComponentRenderers;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.AllTranslations;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.start.StartCountdown;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
-import tc.oc.server.Permissions;
 
 public class StartCommands {
 
@@ -37,7 +37,7 @@ public class StartCommands {
     }
 
     if (smm.canStart(true)) {
-      match.getCountdownContext().cancelAll(StartCountdown.class);
+      match.getCountdown().cancelAll(StartCountdown.class);
       smm.forceStartCountdown(countdown, huddle);
     } else {
       ComponentRenderers.send(

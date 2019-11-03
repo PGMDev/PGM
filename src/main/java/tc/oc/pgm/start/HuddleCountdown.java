@@ -7,8 +7,9 @@ import org.joda.time.Duration;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.teams.Team;
 import tc.oc.util.components.PeriodFormats;
 
@@ -31,7 +32,7 @@ public class HuddleCountdown extends PreMatchCountdown implements Listener {
   public void onStart(Duration remaining, Duration total) {
     super.onStart(remaining, total);
 
-    getMatch().registerEvents(this);
+    getMatch().addListener(this, MatchScope.LOADED);
 
     for (Competitor competitor : getMatch().getCompetitors()) {
       if (competitor instanceof Team) {

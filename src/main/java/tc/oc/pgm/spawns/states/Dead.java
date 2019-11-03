@@ -8,9 +8,9 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinPartyEvent;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.MatchPlayer;
 import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.SpawnModule;
@@ -25,7 +25,7 @@ public class Dead extends Spawning {
   private boolean kitted, rotted;
 
   public Dead(SpawnMatchModule smm, MatchPlayer player) {
-    this(smm, player, player.getMatch().getClock().now().tick);
+    this(smm, player, player.getMatch().getTick().tick);
   }
 
   public Dead(SpawnMatchModule smm, MatchPlayer player, long deathTick) {
@@ -37,7 +37,7 @@ public class Dead extends Spawning {
   public void enterState() {
     super.enterState();
 
-    player.clearInventory();
+    player.resetInventory();
 
     if (player.isVisible()) NMSHacks.playDeathAnimation(player.getBukkit());
 
@@ -57,7 +57,7 @@ public class Dead extends Spawning {
   }
 
   protected long age() {
-    return player.getMatch().getClock().now().tick - deathTick;
+    return player.getMatch().getTick().tick - deathTick;
   }
 
   @Override
@@ -75,7 +75,7 @@ public class Dead extends Spawning {
       this.rotted = true;
       // Make player invisible after the death animation is complete
       player.setVisible(false);
-      player.refreshGameMode();
+      player.resetGamemode();
     }
 
     super.tick(); // May transition to a different state, so call last
@@ -103,7 +103,7 @@ public class Dead extends Spawning {
   }
 
   public void requestSpawn() {
-    if (player.getMatch().getClock().now().tick - deathTick
+    if (player.getMatch().getTick().tick - deathTick
         >= SpawnModule.IGNORE_CLICKS_DELAY.getMillis() / 50) {
       super.requestSpawn();
     }

@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
 import tc.oc.pgm.PGM;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
 
 public class EntityQuery extends Query implements IEntityTypeQuery {
 

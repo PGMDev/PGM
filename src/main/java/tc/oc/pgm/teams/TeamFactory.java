@@ -3,15 +3,13 @@ package tc.oc.pgm.teams;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.scoreboard.NameTagVisibility;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.features.FeatureInfo;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.Party;
 
 /** Immutable class to represent a team in a map that is not tied to any specific match. */
 @FeatureInfo(name = "team")
 public class TeamFactory extends SelfIdentifyingFeatureDefinition {
-  protected final Party.Type type;
   protected final String defaultName;
   protected final boolean defaultNamePlural;
   protected final ChatColor defaultColor;
@@ -25,7 +23,6 @@ public class TeamFactory extends SelfIdentifyingFeatureDefinition {
    * Create a TeamInfo instance with the specified information.
    *
    * @param id unique id
-   * @param type Type of the team.
    * @param defaultName Default name for the team.
    * @param defaultNamePlural Is the default name a plural word?
    * @param defaultColor Default color for the team.
@@ -35,7 +32,6 @@ public class TeamFactory extends SelfIdentifyingFeatureDefinition {
    */
   public TeamFactory(
       @Nullable String id,
-      Party.Type type,
       String defaultName,
       boolean defaultNamePlural,
       ChatColor defaultColor,
@@ -45,7 +41,6 @@ public class TeamFactory extends SelfIdentifyingFeatureDefinition {
       int maxOverfill,
       NameTagVisibility nameTagVisibility) {
     super(id);
-    this.type = type;
     this.defaultName = defaultName;
     this.defaultNamePlural = defaultNamePlural;
     this.defaultColor = defaultColor;
@@ -63,22 +58,13 @@ public class TeamFactory extends SelfIdentifyingFeatureDefinition {
 
   public Team createTeam(Match match) {
     Team newTeam = new Team(this, match);
-    match.getMatchFeatureContext().add(newTeam);
+    match.getFeatureContext().add(newTeam);
     return newTeam;
   }
 
   @Override
   public String toString() {
     return this.getDefaultName();
-  }
-
-  /**
-   * Gets the type of this team.
-   *
-   * @return Type of the team that cannot be changed.
-   */
-  public Party.Type getType() {
-    return this.type;
   }
 
   /**

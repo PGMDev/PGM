@@ -6,10 +6,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import org.joda.time.Duration;
-import tc.oc.chat.Sound;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.filters.Filter;
 
 public class Broadcast implements Comparable<Broadcast> {

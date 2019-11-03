@@ -1,8 +1,8 @@
 package tc.oc.pgm.join;
 
 import javax.annotation.Nullable;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 /**
  * Something that is able to join the player to the match. {@link JoinGuard}s that are NOT {@link

@@ -1,7 +1,7 @@
 package tc.oc.pgm.filters;
 
 import org.bukkit.inventory.ItemStack;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 public class HoldingItemFilter extends ParticipantItemFilter {
   public HoldingItemFilter(ItemStack base) {

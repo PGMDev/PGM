@@ -34,14 +34,14 @@ import org.bukkit.plugin.PluginManager;
 import tc.oc.block.BlockStates;
 import tc.oc.material.Materials;
 import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayerState;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.blockdrops.BlockDropsMatchModule;
 import tc.oc.pgm.events.BlockTransformEvent;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.events.PlayerBlockTransformEvent;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.MatchPlayerState;
-import tc.oc.pgm.match.ParticipantState;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.Trackers;
 import tc.oc.server.Events;
@@ -80,8 +80,8 @@ public class BlockTransformListener implements Listener {
             new EventExecutor() {
               @Override
               public void execute(Listener listener, Event event) throws EventException {
-                // Ignore events from non-match worlds
-                if (Match.get(event) == null) return;
+                // FIXME: Ignore events from non-match worlds
+                // if (Match.get(event) == null) return;
 
                 if (!Events.isCancelled(event)) {
                   // At the first priority level, call the event handler method.
@@ -471,7 +471,6 @@ public class BlockTransformListener implements Listener {
 
       ((PlayerBlockTransformEvent) event)
           .getPlayerState()
-          .getAudience()
           .sendWarning(event.getCancelMessage(), false);
     }
   }

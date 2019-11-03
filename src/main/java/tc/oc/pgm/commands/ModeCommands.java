@@ -9,13 +9,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.joda.time.Duration;
 import org.joda.time.Period;
-import tc.oc.chat.Audience;
+import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.chat.Audience;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.CountdownContext;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.modes.ModeChangeCountdown;
 import tc.oc.pgm.modes.ObjectiveModesMatchModule;
 import tc.oc.pgm.util.ModesPaginatedResult;
-import tc.oc.server.Permissions;
 import tc.oc.util.components.PeriodFormats;
 
 public class ModeCommands {
@@ -35,7 +35,7 @@ public class ModeCommands {
         StringBuilder builder = new StringBuilder(ChatColor.DARK_PURPLE + "Next mode: ");
 
         ModeChangeCountdown next = countdowns.get(0);
-        Duration timeLeft = modes.getCountdownContext().getTimeLeft(next);
+        Duration timeLeft = modes.getCountdown().getTimeLeft(next);
 
         if (timeLeft == null) {
           builder.append(ChatColor.GOLD).append(next.getMode().getPreformattedMaterialName());
@@ -79,7 +79,7 @@ public class ModeCommands {
       throwNoResults();
     }
 
-    CountdownContext countdowns = modes.getCountdownContext();
+    CountdownContext countdowns = modes.getCountdown();
     List<ModeChangeCountdown> sortedCountdowns = modes.getSortedCountdowns();
 
     Period offset;

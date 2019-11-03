@@ -2,7 +2,7 @@ package tc.oc.pgm.kits;
 
 import java.util.List;
 import org.bukkit.inventory.ItemStack;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 /**
  * When applied, fires an {@link ApplyKitEvent} and then calls {@link #applyPostEvent} unless the
@@ -12,7 +12,7 @@ public abstract class AbstractKit implements KitDefinition {
   @Override
   public void apply(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {
     ApplyKitEvent event = new ApplyKitEvent(player, this);
-    player.getMatch().getPluginManager().callEvent(event);
+    player.getMatch().callEvent(event);
     if (!event.isCancelled()) {
       this.applyPostEvent(player, force, displacedItems);
     }

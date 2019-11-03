@@ -4,14 +4,16 @@ import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Default;
 import com.google.common.collect.ImmutableSortedSet;
+import java.lang.ref.WeakReference;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.command.CommandSender;
-import tc.oc.chat.Audience;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedPlayer;
 import tc.oc.component.types.PersonalizedText;
@@ -20,16 +22,45 @@ import tc.oc.identity.Identity;
 import tc.oc.named.NameStyle;
 import tc.oc.named.NicknameRenderer;
 import tc.oc.pgm.AllTranslations;
+import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.chat.Audience;
+import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.pgm.map.Contributor;
 import tc.oc.pgm.map.MapInfo;
+import tc.oc.pgm.map.MapLibrary;
 import tc.oc.pgm.map.PGMMap;
-import tc.oc.pgm.match.MatchManager;
 import tc.oc.pgm.util.PrettyPaginatedResult;
-import tc.oc.server.Permissions;
 import tc.oc.util.components.Components;
 
 public class MapCommands {
+
+  // FIXME: This is temporary until a new rotation/vote system is determined.
+  private static WeakReference<PGMMap> nextMap;
+
+  public static PGMMap peekNextMap() {
+    if (nextMap != null) {
+      PGMMap map = nextMap.get();
+      if (map != null) {
+        return map;
+      }
+    }
+    List<PGMMap> maps = new ArrayList<>(PGM.get().getMapLibrary().getMaps());
+    Collections.shuffle(maps);
+    setNextMap(maps.get(0));
+    return nextMap.get();
+  }
+
+  public static void setNextMap(PGMMap map) {
+    nextMap = new WeakReference<>(map);
+  }
+
+  public static PGMMap popNextMap() {
+    PGMMap peek = peekNextMap();
+    nextMap = null;
+    return peek;
+  }
 
   @Command(
       aliases = {"maplist", "maps", "ml"},
@@ -38,12 +69,12 @@ public class MapCommands {
       help =
           "Shows all the maps that are currently loaded including ones that are not in the rotation.")
   public static void maplist(
-      Audience audience, CommandSender sender, MatchManager matchManager, @Default("1") int page)
+      Audience audience, CommandSender sender, MapLibrary library, @Default("1") int page)
       throws CommandException {
-    final Set<PGMMap> maps = ImmutableSortedSet.copyOf(matchManager.getMaps());
+    final Set<PGMMap> maps = ImmutableSortedSet.copyOf(library.getMaps());
 
     int resultsPerPage = 8;
-    int pages = matchManager.getMaps().size() / resultsPerPage + 1;
+    int pages = library.getMaps().size() / resultsPerPage + 1;
 
     String listHeader =
         ChatColor.BLUE.toString()
@@ -171,7 +202,7 @@ public class MapCommands {
       aliases = {"mapnext", "mn", "nextmap", "nm", "next"},
       desc = "Shows which map is coming up next")
   public void next(Audience audience, CommandSender sender, MatchManager matchManager) {
-    final PGMMap next = matchManager.getNextMap();
+    final PGMMap next = peekNextMap();
     audience.sendMessage(
         ChatColor.DARK_PURPLE
             + AllTranslations.get()

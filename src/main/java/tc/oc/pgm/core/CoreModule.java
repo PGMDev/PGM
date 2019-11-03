@@ -10,13 +10,13 @@ import org.bukkit.material.MaterialData;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.GoalModule;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.modules.InfoModule;
@@ -47,7 +47,7 @@ public class CoreModule extends MapModule {
     ImmutableList.Builder<Core> cores = new ImmutableList.Builder<>();
     for (CoreFactory factory : this.coreFactories) {
       Core core = new Core(factory, match);
-      match.getMatchFeatureContext().add(core);
+      match.getFeatureContext().add(core);
       match.needMatchModule(GoalMatchModule.class).addGoal(core);
       cores.add(core);
     }

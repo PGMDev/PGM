@@ -12,11 +12,11 @@ import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.material.MaterialData;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.BlockTransformEvent;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchPlayer;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
 
 public class DestroyableMatchModule extends MatchModule implements Listener {
@@ -122,9 +122,7 @@ public class DestroyableMatchModule extends MatchModule implements Listener {
         destroyable.replaceBlocks(event.getMode().getMaterialData());
         if (oldCompletion != destroyable.getCompletion()) {
           // Multi-stage destroyables can have their total completion changed by this
-          this.match
-              .getPluginManager()
-              .callEvent(new DestroyableHealthChangeEvent(this.match, destroyable, null));
+          this.match.callEvent(new DestroyableHealthChangeEvent(this.match, destroyable, null));
         }
       }
     }

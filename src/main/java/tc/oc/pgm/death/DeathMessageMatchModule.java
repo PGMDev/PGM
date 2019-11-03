@@ -9,9 +9,13 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.events.MatchPlayerDeathEvent;
-import tc.oc.pgm.match.*;
+import tc.oc.pgm.match.MatchModule;
+import tc.oc.pgm.match.MatchModuleFactory;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.module.ModuleLoadException;
 
@@ -48,8 +52,8 @@ public class DeathMessageMatchModule extends MatchModule implements Listener {
           new PersonalizedText(" "), new PersonalizedTranslatable("death.predictedSuffix"));
     }
 
-    UUID victimId = event.getVictim().getPlayerId();
-    UUID killerId = event.getKiller() == null ? null : event.getKiller().getPlayerId();
+    UUID victimId = event.getVictim().getId();
+    UUID killerId = event.getKiller() == null ? null : event.getKiller().getId();
 
     for (MatchPlayer viewer : event.getMatch().getPlayers()) {
       if (event.isInvolved(viewer)) {

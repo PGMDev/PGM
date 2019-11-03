@@ -8,10 +8,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.AllTranslations;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.PlayerClass;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
 import tc.oc.util.StringUtils;
 
 public class ClassCommands {
@@ -24,7 +24,7 @@ public class ClassCommands {
       throws CommandException {
     ClassMatchModule classModule = getClassModule(match, sender);
 
-    PlayerClass cls = classModule.getSelectedClass(player.getPlayerId());
+    PlayerClass cls = classModule.getSelectedClass(player.getId());
 
     if (search == null) {
       // show current class
@@ -62,7 +62,7 @@ public class ClassCommands {
       }
 
       try {
-        classModule.setPlayerClass(player.getPlayerId(), result);
+        classModule.setPlayerClass(player.getId(), result);
       } catch (IllegalStateException e) {
         throw new CommandException(
             AllTranslations.get().translate("command.class.stickyClass", player.getBukkit()));

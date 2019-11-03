@@ -11,11 +11,10 @@ import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.Config;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.Party;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.modules.InfoModule;
 import tc.oc.pgm.start.StartModule;
@@ -127,7 +126,6 @@ public class TeamModule extends MapModule {
     TeamFactory teamFactory =
         new TeamFactory(
             id,
-            Party.Type.Participating,
             name,
             plural,
             color,

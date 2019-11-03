@@ -1,9 +1,9 @@
 package tc.oc.pgm.result;
 
 import javax.annotation.Nullable;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.goals.GoalsVictoryCondition;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamVictoryCondition;

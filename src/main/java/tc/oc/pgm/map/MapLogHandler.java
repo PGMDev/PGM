@@ -2,9 +2,9 @@ package tc.oc.pgm.map;
 
 import java.util.logging.LogRecord;
 import org.jdom2.input.JDOMParseException;
+import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.server.LogHandler;
-import tc.oc.server.Permissions;
 import tc.oc.xml.InvalidXMLException;
 
 public class MapLogHandler extends LogHandler {

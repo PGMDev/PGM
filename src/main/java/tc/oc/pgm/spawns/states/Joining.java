@@ -2,9 +2,9 @@ package tc.oc.pgm.spawns.states;
 
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinPartyEvent;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.MatchPlayer;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 
 /** Player is waiting to spawn after joining a team */

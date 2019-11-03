@@ -2,9 +2,9 @@ package tc.oc.pgm.tracker.damage;
 
 import javax.annotation.Nullable;
 import org.bukkit.Location;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.ParticipantState;
-import tc.oc.pgm.time.TickTime;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.api.time.Tick;
 
 public class FallState implements FallInfo {
 
@@ -32,7 +32,7 @@ public class FallState implements FallInfo {
   public final From from;
   public final TrackerInfo cause;
 
-  public final TickTime startTime;
+  public final Tick startTime;
 
   // Where they land.. this is set when the fall ends
   public To to;
@@ -70,7 +70,7 @@ public class FallState implements FallInfo {
     this.victim = victim;
     this.from = from;
     this.cause = cause;
-    this.startTime = victim.getMatch().getClock().now();
+    this.startTime = victim.getMatch().getTick();
     this.origin = victim.getBukkit().getLocation();
   }
 
@@ -113,7 +113,7 @@ public class FallState implements FallInfo {
   }
 
   /** Check if the victim has failed to become unsupported quickly enough after the fall began */
-  public boolean isExpired(TickTime now) {
+  public boolean isExpired(Tick now) {
     return this.isSupported() && now.tick - startTime.tick > MAX_KNOCKBACK_TICKS;
   }
 
@@ -125,7 +125,7 @@ public class FallState implements FallInfo {
    * MAX_GROUND_TOUCHES times - victim has been in water for MAX_SWIMMING_TICKS - victim has been on
    * a ladder for MAX_CLIMBING_TICKS
    */
-  public boolean isEndedSafely(TickTime now) {
+  public boolean isEndedSafely(Tick now) {
     return !this.isInLava
         && ((victim.getBukkit().isOnGround()
                 && (now.tick - onGroundTick > MAX_ON_GROUND_TICKS

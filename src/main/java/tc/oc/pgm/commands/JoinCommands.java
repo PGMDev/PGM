@@ -7,12 +7,12 @@ import app.ashcon.intake.parametric.annotation.Text;
 import javax.annotation.Nullable;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.AllTranslations;
+import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.join.JoinMatchModule;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.server.Permissions;
 
 public class JoinCommands {
 

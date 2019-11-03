@@ -3,20 +3,21 @@ package tc.oc.pgm.spawns.states;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.bukkit.Location;
-import org.bukkit.Sound;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
+import tc.oc.pgm.api.chat.Sound;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.classes.ClassMatchModule;
-import tc.oc.pgm.events.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.PlayerJoinPartyEvent;
 import tc.oc.pgm.killreward.KillRewardMatchModule;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.MatchScope;
-import tc.oc.pgm.match.ParticipantState;
 import tc.oc.pgm.modules.ItemKeepMatchModule;
 import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
@@ -41,7 +42,7 @@ public class Alive extends Participating {
 
     player.reset();
     player.setDead(false);
-    player.refreshGameMode();
+    player.resetGamemode();
 
     // Fire Bukkit's event
     PlayerRespawnEvent respawnEvent = new PlayerRespawnEvent(player.getBukkit(), location, false);
@@ -64,7 +65,7 @@ public class Alive extends Participating {
     }
 
     player.setVisible(true);
-    player.refreshGameMode();
+    player.resetGamemode();
 
     // Apply spawn kit
     spawn.applyKit(player);
@@ -123,7 +124,7 @@ public class Alive extends Participating {
     // we need the fall distance for the death message
     // we set the fall distance back to 0 when we refresh the player
     float fallDistance = bukkit.getFallDistance();
-    player.refreshGameMode();
+    player.resetGamemode();
     bukkit.setFallDistance(fallDistance);
 
     playDeathEffect(killer);
@@ -171,21 +172,21 @@ public class Alive extends Participating {
   }
 
   private void playDeathSound(@Nullable ParticipantState killer) {
-    Location death = player.getBukkit().getLocation();
+    Vector death = player.getBukkit().getLocation().toVector();
 
     for (MatchPlayer listener : player.getMatch().getPlayers()) {
       if (listener == player) {
         // Own death is normal pitch, full volume
-        listener.playSound(Sound.IRONGOLEM_DEATH);
+        listener.playSound(new Sound("mob.irongolem.death"));
       } else if (killer != null && killer.isPlayer(listener)) {
         // Kill is higher pitch, quieter
-        listener.playSound(Sound.IRONGOLEM_DEATH, 0.75f, 4f / 3f);
+        listener.playSound(new Sound("mob.irongolem.death", 0.75f, 4f / 3f));
       } else if (listener.getParty() == player.getParty()) {
         // Ally death is a shorter sound
-        listener.playSound(Sound.IRONGOLEM_HIT, death);
+        listener.playSound(new Sound("mob.irongolem.hit", death));
       } else {
         // Enemy death is higher pitch
-        listener.playSound(Sound.IRONGOLEM_HIT, death, 1, 4f / 3f);
+        listener.playSound(new Sound("mob.irongolem.hit", 1, 4f / 3f, death));
       }
     }
   }

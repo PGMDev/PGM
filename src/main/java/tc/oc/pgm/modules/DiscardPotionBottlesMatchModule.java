@@ -6,10 +6,10 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchScope;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DiscardPotionBottlesMatchModule extends MatchModule implements Listener {

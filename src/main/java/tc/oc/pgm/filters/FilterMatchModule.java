@@ -9,11 +9,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.joda.time.Duration;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchScope;
 
 public class FilterMatchModule extends MatchModule implements Listener {
 
@@ -47,7 +47,7 @@ public class FilterMatchModule extends MatchModule implements Listener {
   @Override
   public void load() {
     super.load();
-    for (TimeFilter filter : getMatch().getModuleContext().features().getAll(TimeFilter.class)) {
+    for (TimeFilter filter : getMatch().getMapContext().features().getAll(TimeFilter.class)) {
       timeFilterQueue.add(filter);
     }
   }
@@ -78,7 +78,7 @@ public class FilterMatchModule extends MatchModule implements Listener {
   void checkTimeFilters() {
     if (!getMatch().isRunning()) return;
 
-    Duration now = getMatch().getLength();
+    Duration now = getMatch().getDuration();
     boolean removed = false;
     TimeFilter next;
     for (; ; ) {

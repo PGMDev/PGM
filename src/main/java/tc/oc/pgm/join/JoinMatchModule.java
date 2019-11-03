@@ -11,15 +11,20 @@ import org.bukkit.event.Listener;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.Config;
+import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.event.MatchStartEvent;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.events.MatchPlayerAddEvent;
-import tc.oc.pgm.events.MatchPreCommitEvent;
-import tc.oc.pgm.match.*;
+import tc.oc.pgm.match.MatchModule;
+import tc.oc.pgm.match.MatchModuleFactory;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
-import tc.oc.server.Permissions;
 import tc.oc.util.components.PeriodFormats;
 
 @ModuleDescription(name = "Join")
@@ -66,7 +71,7 @@ public class JoinMatchModule extends MatchModule implements Listener, JoinHandle
   public boolean canPriorityKick(MatchPlayer joining) {
     return Config.Join.priorityKick()
         && joining.getBukkit().hasPermission(Permissions.JOIN_FULL)
-        && !getMatch().hasStarted();
+        && !getMatch().isRunning();
   }
 
   private Iterable<JoinGuard> allGuards() {
@@ -87,9 +92,7 @@ public class JoinMatchModule extends MatchModule implements Listener, JoinHandle
 
     // If mid-match join is disabled, player cannot join for the first time after the match has
     // started
-    if (!Config.Join.midMatch()
-        && getMatch().isCommitted()
-        && !getMatch().hasEverParticipated(joining.getPlayerId())) {
+    if (!Config.Join.midMatch()) {
       return GenericJoinResult.Status.MATCH_STARTED.toResult();
     }
 
@@ -150,7 +153,7 @@ public class JoinMatchModule extends MatchModule implements Listener, JoinHandle
   public boolean leave(MatchPlayer leaving) {
     if (cancelQueuedJoin(leaving)) return true;
 
-    if (leaving.isObservingType()) {
+    if (leaving.isObserving()) {
       leaving.sendWarning(
           new PersonalizedTranslatable("command.gameplay.leave.alreadyOnObservers"), false);
       return false;
@@ -162,15 +165,9 @@ public class JoinMatchModule extends MatchModule implements Listener, JoinHandle
       return false;
     }
 
-    if (Config.Join.commitPlayers() && leaving.isCommitted()) {
-      leaving.sendWarning(
-          new PersonalizedTranslatable("command.gameplay.leave.leaveDenied"), false);
-      return false;
-    }
-
     Party observers = getMatch().getDefaultParty();
     leaving.sendMessage(new PersonalizedTranslatable("team.join", observers.getComponentName()));
-    return getMatch().setPlayerParty(leaving, observers);
+    return getMatch().setParty(leaving, observers);
   }
 
   public QueuedParticipants getQueuedParticipants() {
@@ -182,7 +179,7 @@ public class JoinMatchModule extends MatchModule implements Listener, JoinHandle
   }
 
   public boolean queueToJoin(MatchPlayer joining) {
-    boolean joined = getMatch().setPlayerParty(joining, queuedParticipants);
+    boolean joined = getMatch().setParty(joining, queuedParticipants);
     if (joined) {
       joining.sendMessage(new PersonalizedTranslatable("ffa.join"));
     }
@@ -241,7 +238,7 @@ public class JoinMatchModule extends MatchModule implements Listener, JoinHandle
 
   public boolean cancelQueuedJoin(MatchPlayer joining) {
     if (!isQueuedToJoin(joining)) return false;
-    if (getMatch().setPlayerParty(joining, getMatch().getDefaultParty())) {
+    if (getMatch().setParty(joining, getMatch().getDefaultParty())) {
       joining.sendMessage(
           new PersonalizedText(
               new PersonalizedTranslatable("team.join.deferred.cancel"), ChatColor.YELLOW));
@@ -261,22 +258,12 @@ public class JoinMatchModule extends MatchModule implements Listener, JoinHandle
 
     // Send any leftover players to obs
     for (MatchPlayer joining : queue.getOrderedPlayers()) {
-      getMatch().setPlayerParty(joining, getMatch().getDefaultParty());
+      getMatch().setParty(joining, getMatch().getDefaultParty());
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
-  public void onMatchCommit(MatchPreCommitEvent event) {
+  public void onMatchCommit(MatchStartEvent event) {
     queuedJoin(queuedParticipants);
-  }
-
-  @EventHandler
-  public void onRejoin(MatchPlayerAddEvent event) {
-    if (Config.Join.commitPlayers() && getMatch().isCommitted() && !getMatch().isFinished()) {
-      Competitor competitor = getMatch().getLastCompetitor(event.getPlayerId());
-      if (competitor != null) {
-        event.setInitialParty(competitor);
-      }
-    }
   }
 }

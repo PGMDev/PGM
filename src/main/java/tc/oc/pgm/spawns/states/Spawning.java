@@ -9,7 +9,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 
@@ -28,7 +28,7 @@ public abstract class Spawning extends Participating {
     super.enterState();
 
     player.setDead(true);
-    player.refreshGameMode();
+    player.resetGamemode();
   }
 
   public void requestSpawn() {

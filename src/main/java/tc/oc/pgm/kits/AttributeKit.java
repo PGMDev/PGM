@@ -7,7 +7,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.inventory.ItemStack;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 public class AttributeKit extends AbstractKit {
   private final SetMultimap<String, AttributeModifier> modifiers;

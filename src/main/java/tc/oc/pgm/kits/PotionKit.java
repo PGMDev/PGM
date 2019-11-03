@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Set;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 public class PotionKit extends AbstractKit {
   protected final Set<PotionEffect> effects;

@@ -8,7 +8,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.AllTranslations;
-import tc.oc.pgm.match.MatchManager;
+import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.teams.TeamMatchModule;
 
 public class TeamMatchModuleProvider implements BukkitProvider<TeamMatchModule> {
@@ -30,7 +30,7 @@ public class TeamMatchModuleProvider implements BukkitProvider<TeamMatchModule> 
       CommandSender sender, CommandArgs commandArgs, List<? extends Annotation> list)
       throws ProvisionException {
     TeamMatchModule teamMatchModule =
-        matchManager.getCurrentMatch(sender).getMatchModule(TeamMatchModule.class);
+        matchManager.getMatch(sender).getMatchModule(TeamMatchModule.class);
     if (teamMatchModule == null) {
       throw new ProvisionException(AllTranslations.get().translate("command.noTeams", sender));
     }

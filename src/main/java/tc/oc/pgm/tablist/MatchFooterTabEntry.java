@@ -8,8 +8,8 @@ import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.Config;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchScope;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.tablist.DynamicTabEntry;
 import tc.oc.tablist.TabView;
 import tc.oc.util.collection.DefaultProvider;
@@ -68,7 +68,7 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
                 + ": ",
             ChatColor.GRAY),
         new PersonalizedText(
-            PeriodFormats.COLONS.print(this.match.getRunningTime().toPeriod()),
+            PeriodFormats.COLONS.print(this.match.getDuration().toPeriod()),
             this.match.isRunning() ? ChatColor.GREEN : ChatColor.GOLD));
 
     if (server != null) {

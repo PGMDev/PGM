@@ -1,7 +1,7 @@
 package tc.oc.pgm.goals;
 
 import com.google.common.base.Preconditions;
-import tc.oc.pgm.match.MatchPlayerState;
+import tc.oc.pgm.api.player.MatchPlayerState;
 
 public class Contribution {
   private final MatchPlayerState player;

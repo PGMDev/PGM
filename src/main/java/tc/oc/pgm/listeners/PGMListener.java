@@ -17,12 +17,20 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.Config;
-import tc.oc.pgm.events.*;
+import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchManager;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.event.MatchFinishEvent;
+import tc.oc.pgm.api.match.event.MatchLoadEvent;
+import tc.oc.pgm.api.match.event.MatchStartEvent;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.events.PlayerJoinMatchEvent;
+import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.gamerules.GameRule;
 import tc.oc.pgm.gamerules.GameRulesModule;
-import tc.oc.pgm.match.*;
 import tc.oc.pgm.modules.TimeLockModule;
-import tc.oc.server.Permissions;
 
 public class PGMListener implements Listener {
   private final Plugin parent;
@@ -49,7 +57,7 @@ public class PGMListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW)
   public void addPlayerOnJoin(final PlayerJoinEvent event) {
-    if (event.getPlayer().getLocation().getWorld() != this.mm.getCurrentMatch().getWorld()) {
+    if (this.mm.getMatch(event.getWorld()) == null) {
       event
           .getPlayer()
           .kickPlayer(
@@ -65,7 +73,8 @@ public class PGMListener implements Listener {
       return;
     }
 
-    this.mm.getCurrentMatch().addPlayer(event.getPlayer());
+    // FIXME: multi-match support
+    this.mm.getMatches().iterator().next().addPlayer(event.getPlayer());
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -73,7 +82,7 @@ public class PGMListener implements Listener {
     // Handle join message and send it to all players except the one joining
     if (event.getJoinMessage() != null) {
       event.setJoinMessage(null);
-      Match match = this.mm.getCurrentMatch();
+      Match match = this.mm.getMatch(event.getWorld());
       MatchPlayer player = match.getPlayer(event.getPlayer());
       if (player != null) {
         for (MatchPlayer viewer : match.getPlayers()) {
@@ -84,7 +93,8 @@ public class PGMListener implements Listener {
                         .translate(
                             "broadcast.joinMessage",
                             viewer.getBukkit(),
-                            player.getColoredName(viewer) + ChatColor.YELLOW));
+                            player.getBukkit().getDisplayName(viewer.getBukkit())
+                                + ChatColor.YELLOW));
           }
         }
       }
@@ -93,7 +103,7 @@ public class PGMListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void removePlayerOnDisconnect(PlayerQuitEvent event) {
-    Match match = this.mm.getCurrentMatch();
+    Match match = this.mm.getMatch(event.getWorld());
     if (match == null) return;
 
     if (event.getQuitMessage() != null) {
@@ -107,7 +117,8 @@ public class PGMListener implements Listener {
                         .translate(
                             "broadcast.leaveMessage",
                             viewer.getBukkit(),
-                            player.getColoredName(viewer) + ChatColor.YELLOW));
+                            player.getBukkit().getDisplayName(viewer.getBukkit())
+                                + ChatColor.YELLOW));
           }
         }
       }
@@ -120,7 +131,7 @@ public class PGMListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void sendWelcomeMessage(final PlayerJoinMatchEvent event) {
     final Match match = event.getMatch();
-    final UUID viewerId = event.getPlayer().getPlayerId();
+    final UUID viewerId = event.getPlayer().getId();
     match
         .getScheduler(MatchScope.LOADED)
         .runTaskLater(
@@ -131,7 +142,8 @@ public class PGMListener implements Listener {
                 MatchPlayer viewer = match.getPlayer(viewerId);
                 if (viewer == null) return;
 
-                match.sendWelcomeMessage(viewer);
+                // FIXME: welcome message
+                // match.sendWelcomeMessage(viewer);
               }
             });
   }
@@ -199,14 +211,14 @@ public class PGMListener implements Listener {
   }
 
   @EventHandler
-  public void unlockTime(final MatchBeginEvent event) {
+  public void unlockTime(final MatchStartEvent event) {
     boolean unlockTime = false;
-    if (!event.getMatch().getModuleContext().getModule(TimeLockModule.class).isTimeLocked()) {
+    if (!event.getMatch().getMapContext().getModule(TimeLockModule.class).isTimeLocked()) {
       unlockTime = true;
     }
 
     GameRulesModule gameRulesModule =
-        event.getMatch().getModuleContext().getModule(GameRulesModule.class);
+        event.getMatch().getMapContext().getModule(GameRulesModule.class);
 
     if (gameRulesModule != null
         && gameRulesModule.getGameRules().containsKey(GameRule.DO_DAYLIGHT_CYCLE)) {
@@ -220,7 +232,7 @@ public class PGMListener implements Listener {
   }
 
   @EventHandler
-  public void lockTime(final MatchEndEvent event) {
+  public void lockTime(final MatchFinishEvent event) {
     event
         .getMatch()
         .getWorld()

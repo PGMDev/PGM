@@ -6,8 +6,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Competitor;
 
 /** A measurement of progress towards completing goals in a match */
 public class GoalProgress implements Comparable<GoalProgress> {

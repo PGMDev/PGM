@@ -5,8 +5,7 @@ import app.ashcon.intake.bukkit.parametric.provider.BukkitProvider;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import org.bukkit.command.CommandSender;
-import tc.oc.chat.Audience;
-import tc.oc.chat.BukkitAudiences;
+import tc.oc.pgm.api.chat.Audience;
 
 public class AudienceProvider implements BukkitProvider<Audience> {
 
@@ -17,6 +16,6 @@ public class AudienceProvider implements BukkitProvider<Audience> {
 
   @Override
   public Audience get(CommandSender sender, CommandArgs args, List<? extends Annotation> list) {
-    return BukkitAudiences.getAudience(sender);
+    return Audience.get(sender);
   }
 }

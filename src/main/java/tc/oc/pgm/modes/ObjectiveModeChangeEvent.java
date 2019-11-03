@@ -4,11 +4,11 @@ import com.google.common.base.Preconditions;
 import java.util.Collection;
 import javax.annotation.Nonnull;
 import org.bukkit.event.HandlerList;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.event.MatchEvent;
 import tc.oc.pgm.core.Core;
 import tc.oc.pgm.destroyable.Destroyable;
-import tc.oc.pgm.events.MatchEvent;
 import tc.oc.pgm.goals.GoalMatchModule;
-import tc.oc.pgm.match.Match;
 
 public class ObjectiveModeChangeEvent extends MatchEvent {
 
@@ -23,7 +23,7 @@ public class ObjectiveModeChangeEvent extends MatchEvent {
     if (this.mode.getName() != null) {
       this.name = this.mode.getName();
     } else {
-      GoalMatchModule wins = this.match.needMatchModule(GoalMatchModule.class);
+      GoalMatchModule wins = getMatch().needMatchModule(GoalMatchModule.class);
       Collection<Core> cores = wins.getGoals(Core.class).values();
       Collection<Destroyable> destroyables = wins.getGoals(Destroyable.class).values();
 

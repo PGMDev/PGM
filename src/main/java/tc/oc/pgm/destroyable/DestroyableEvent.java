@@ -2,8 +2,8 @@ package tc.oc.pgm.destroyable;
 
 import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
-import tc.oc.pgm.events.MatchEvent;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.event.MatchEvent;
 
 /** Abstract superclass for {@link Destroyable} related events. */
 public abstract class DestroyableEvent extends MatchEvent {

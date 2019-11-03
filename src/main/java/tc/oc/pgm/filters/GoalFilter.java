@@ -2,13 +2,13 @@ package tc.oc.pgm.filters;
 
 import com.google.common.base.Preconditions;
 import javax.annotation.Nullable;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.features.FeatureReference;
 import tc.oc.pgm.filters.query.IMatchQuery;
 import tc.oc.pgm.filters.query.IPartyQuery;
 import tc.oc.pgm.goals.Goal;
 import tc.oc.pgm.goals.GoalDefinition;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.Party;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamMatchModule;
 

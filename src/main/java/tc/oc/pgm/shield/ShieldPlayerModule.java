@@ -6,9 +6,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PotionEffectRemoveEvent;
 import org.bukkit.potion.PotionEffectType;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.Tickable;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.Tickable;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.time.Tick;
 import tc.oc.util.TimeUtils;
 import tc.oc.util.logging.ClassLogger;
 import tc.oc.world.NMSHacks;
@@ -31,7 +32,7 @@ public class ShieldPlayerModule implements Tickable {
   public ShieldPlayerModule(
       ShieldMatchModule smm, MatchPlayer player, ShieldParameters parameters) {
     this.smm = smm;
-    this.logger = ClassLogger.get(smm.getLogger(), getClass(), player.getName());
+    this.logger = ClassLogger.get(smm.getLogger(), getClass(), player.getBukkit().getName());
     this.player = player;
     this.bukkit = player.getBukkit();
     this.parameters = parameters;
@@ -77,7 +78,7 @@ public class ShieldPlayerModule implements Tickable {
   }
 
   @Override
-  public void tick(Match match) {
+  public void tick(Match match, Tick tick) {
     if (rechargeTicks > 0) {
       if (--rechargeTicks == 0) {
         recharge();

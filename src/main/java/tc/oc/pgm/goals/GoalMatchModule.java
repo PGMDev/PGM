@@ -7,15 +7,19 @@ import java.util.*;
 import java.util.Map.Entry;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import tc.oc.chat.Sound;
-import tc.oc.pgm.events.CompetitorAddEvent;
-import tc.oc.pgm.events.CompetitorRemoveEvent;
+import tc.oc.pgm.api.chat.Sound;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.party.event.CompetitorAddEvent;
+import tc.oc.pgm.api.party.event.CompetitorRemoveEvent;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalProximityChangeEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
-import tc.oc.pgm.match.*;
+import tc.oc.pgm.match.MatchModule;
 
 @ListenerScope(MatchScope.LOADED)
 public class GoalMatchModule extends MatchModule implements Listener {
@@ -119,7 +123,7 @@ public class GoalMatchModule extends MatchModule implements Listener {
     for (Competitor competitor : competitorsByGoal.get(goal)) {
       progressByCompetitor.put(competitor, new GoalProgress(competitor));
     }
-    getMatch().invalidateCompetitorRanking();
+    getMatch().calculateVictory();
   }
 
   // TODO: These events will often be fired together.. debounce them somehow?
@@ -130,7 +134,7 @@ public class GoalMatchModule extends MatchModule implements Listener {
 
     // Don't play the objective sound if the match is over, because the win/lose sound will play
     // instead
-    if (!getMatch().checkEnd() && event.getGoal().isVisible()) {
+    if (!getMatch().calculateVictory() && event.getGoal().isVisible()) {
       for (MatchPlayer player : event.getMatch().getPlayers()) {
         if (player.getParty() instanceof Competitor
             && event.isGood() != (event.getCompetitor() == player.getParty())) {

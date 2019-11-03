@@ -2,8 +2,8 @@ package tc.oc.pgm.filters;
 
 import com.google.common.collect.BoundType;
 import com.google.common.collect.Range;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.query.IPlayerQuery;
-import tc.oc.pgm.match.MatchPlayer;
 
 public class KillStreakFilter extends ParticipantFilter {
   private final Range<Integer> range;
@@ -16,7 +16,7 @@ public class KillStreakFilter extends ParticipantFilter {
 
   @Override
   protected QueryResponse queryPlayer(IPlayerQuery query, MatchPlayer player) {
-    int streak = player.getKillStreak();
+    int streak = 0; // FIXME: Add back kill streak tracker
     if (this.repeat && streak > 0) {
       int modulo =
           this.range.upperEndpoint() - (this.range.upperBoundType() == BoundType.CLOSED ? 0 : 1);

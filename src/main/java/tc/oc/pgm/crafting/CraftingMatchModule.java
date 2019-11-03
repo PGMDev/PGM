@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.Set;
 import org.bukkit.inventory.Recipe;
 import tc.oc.material.matcher.SingleMaterialMatcher;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.match.MatchModule;
 
 public class CraftingMatchModule extends MatchModule {
@@ -23,7 +23,7 @@ public class CraftingMatchModule extends MatchModule {
   public void enable() {
     super.enable();
 
-    for (Iterator<Recipe> iter = getMatch().getServer().recipeIterator(); iter.hasNext(); ) {
+    for (Iterator<Recipe> iter = match.getWorld().recipeIterator(); iter.hasNext(); ) {
       Recipe recipe = iter.next();
       for (SingleMaterialMatcher result : disabledRecipes) {
         if (result.matches(recipe.getResult())) {
@@ -34,7 +34,7 @@ public class CraftingMatchModule extends MatchModule {
     }
 
     for (Recipe recipe : customRecipes) {
-      getMatch().getServer().addRecipe(recipe);
+      match.getWorld().addRecipe(recipe);
     }
   }
 
@@ -43,7 +43,7 @@ public class CraftingMatchModule extends MatchModule {
     // Recipe changes affect all worlds on the server, so we make changes at match start/end
     // to avoid interfering with adjacent matches. If we wait until unload() to reset them,
     // the next match would already be loaded.
-    getMatch().getServer().resetRecipes();
+    match.getWorld().resetRecipes();
     super.disable();
   }
 }
