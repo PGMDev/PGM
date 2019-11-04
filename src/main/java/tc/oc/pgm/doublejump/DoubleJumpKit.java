@@ -3,8 +3,8 @@ package tc.oc.pgm.doublejump;
 import java.util.List;
 import org.bukkit.inventory.ItemStack;
 import org.joda.time.Duration;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.kits.AbstractKit;
-import tc.oc.pgm.match.MatchPlayer;
 
 public class DoubleJumpKit extends AbstractKit {
   public static final float DEFAULT_POWER = 3f; // mainly for backward compatibility

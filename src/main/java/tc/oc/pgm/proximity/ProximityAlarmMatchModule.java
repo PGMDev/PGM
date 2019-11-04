@@ -5,9 +5,9 @@ import java.util.Random;
 import java.util.Set;
 import org.bukkit.event.HandlerList;
 import org.bukkit.scheduler.BukkitTask;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchScope;
 
 public class ProximityAlarmMatchModule extends MatchModule {
   private static final long ALARM_INTERVAL = 3;
@@ -27,7 +27,7 @@ public class ProximityAlarmMatchModule extends MatchModule {
   @Override
   public void enable() {
     for (ProximityAlarm proximityAlarm : this.proximityAlarms) {
-      this.match.registerEvents(proximityAlarm);
+      this.match.addListener(proximityAlarm, MatchScope.RUNNING);
     }
 
     this.task =

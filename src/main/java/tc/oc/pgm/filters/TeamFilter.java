@@ -1,8 +1,8 @@
 package tc.oc.pgm.filters;
 
+import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.features.FeatureReference;
 import tc.oc.pgm.filters.query.IPartyQuery;
-import tc.oc.pgm.match.Party;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamFactory;
 

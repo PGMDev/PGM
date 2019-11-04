@@ -9,15 +9,18 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInitialSpawnEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import tc.oc.bossbar.BossBar;
 import tc.oc.bossbar.BossBarStack;
 import tc.oc.bossbar.BossBarView;
+import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerLeaveMatchEvent;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchScope;
+import tc.oc.world.NMSHacks;
 
 @ListenerScope(MatchScope.LOADED)
 public class BossBarMatchModule extends MatchModule implements Listener {
@@ -28,7 +31,7 @@ public class BossBarMatchModule extends MatchModule implements Listener {
 
   public BossBarMatchModule(Match match) {
     super(match);
-    this.entityId = match.allocateEntityId();
+    this.entityId = NMSHacks.allocateEntityId(match);
   }
 
   protected void removeView(Player viewer) {
@@ -70,8 +73,7 @@ public class BossBarMatchModule extends MatchModule implements Listener {
 
   @EventHandler
   public void onPlayerJoin(PlayerJoinMatchEvent event) {
-    BossBarView view =
-        new BossBarView(getMatch().getPlugin(), event.getPlayer().getBukkit(), entityId);
+    BossBarView view = new BossBarView(PGM.get(), event.getPlayer().getBukkit(), entityId);
     view.setBar(stack);
     views.put(event.getPlayer().getBukkit(), view);
   }
@@ -85,6 +87,12 @@ public class BossBarMatchModule extends MatchModule implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerMove(PlayerMoveEvent event) {
+    BossBarView view = views.get(event.getPlayer());
+    if (view != null) view.onPlayerMove(event);
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerMove(PlayerTeleportEvent event) {
     BossBarView view = views.get(event.getPlayer());
     if (view != null) view.onPlayerMove(event);
   }

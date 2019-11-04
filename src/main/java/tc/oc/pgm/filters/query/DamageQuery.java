@@ -4,7 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.annotation.Nullable;
 import org.bukkit.event.Event;
-import tc.oc.pgm.match.ParticipantState;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.tracker.damage.DamageInfo;
 
 public class DamageQuery extends PlayerStateQuery implements IDamageQuery {

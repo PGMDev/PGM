@@ -4,21 +4,20 @@ import com.google.common.base.Preconditions;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
-import tc.oc.pgm.time.TickClock;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.server.Scheduler;
 import tc.oc.util.logging.ClassLogger;
 
 public class CountdownRunner extends BukkitRunnable {
 
   public static final Duration MIN_REPEAT_INTERVAL = Duration.millis(50);
 
-  protected final Plugin plugin;
-  protected final TickClock clock;
+  protected final Match match;
   protected final Logger logger;
   protected final Countdown countdown;
 
@@ -32,13 +31,11 @@ public class CountdownRunner extends BukkitRunnable {
 
   private BukkitTask task = null;
 
-  public CountdownRunner(
-      @Nonnull Plugin plugin, TickClock clock, Logger parentLogger, @Nonnull Countdown countdown) {
-    Preconditions.checkNotNull(plugin, "plugin");
+  public CountdownRunner(@Nonnull Match match, Logger parentLogger, @Nonnull Countdown countdown) {
+    Preconditions.checkNotNull(match, "match");
     Preconditions.checkNotNull(countdown, "countdown");
 
-    this.plugin = plugin;
-    this.clock = clock;
+    this.match = match;
     this.logger = ClassLogger.get(parentLogger, getClass());
     this.countdown = countdown;
   }
@@ -57,7 +54,7 @@ public class CountdownRunner extends BukkitRunnable {
 
   public @Nonnull CountdownRunner start(
       Duration remaining, @Nullable Duration interval, int count) {
-    logger.fine("Starting countdown " + countdown + " for duration " + remaining);
+    logger.fine("STARTING countdown " + countdown + " for duration " + remaining);
 
     if (interval != null && interval.isShorterThan(MIN_REPEAT_INTERVAL) && count > 1) {
       throw new IllegalArgumentException(
@@ -67,12 +64,12 @@ public class CountdownRunner extends BukkitRunnable {
     if (this.task == null && count > 0) {
       this.count = count;
       this.interval = interval;
-      this.start = this.clock.now().instant;
+      this.start = match.getTick().instant;
       this.end = this.start.plus(remaining);
       this.secondsRemaining = remaining.getStandardSeconds();
       this.countdown.onStart(remaining, this.getTotalTime());
 
-      this.task = this.getScheduler().runTask(this.plugin, this);
+      this.task = this.getScheduler().runTask(this);
     }
 
     return this;
@@ -83,7 +80,7 @@ public class CountdownRunner extends BukkitRunnable {
       logger.fine("Cancelling countdown " + countdown);
 
       this.stop();
-      Duration remaining = new Duration(this.clock.now().instant, this.end);
+      Duration remaining = new Duration(match.getTick().instant, this.end);
       this.countdown.onCancel(
           remaining.isShorterThan(Duration.ZERO) ? Duration.ZERO : remaining, this.getTotalTime());
     }
@@ -96,8 +93,8 @@ public class CountdownRunner extends BukkitRunnable {
     }
   }
 
-  protected BukkitScheduler getScheduler() {
-    return this.plugin.getServer().getScheduler();
+  protected Scheduler getScheduler() {
+    return match.getScheduler(MatchScope.LOADED);
   }
 
   public @Nullable Instant getStart() {
@@ -123,7 +120,7 @@ public class CountdownRunner extends BukkitRunnable {
 
     // Get the total ticks remaining in the countdown
     long ticksRemaining =
-        Math.round(new Duration(this.clock.now().instant, this.end).getMillis() / 50d);
+        Math.round(new Duration(match.getTick().instant, this.end).getMillis() / 50d);
 
     // Handle any cycles since the last one
     for (;
@@ -135,9 +132,9 @@ public class CountdownRunner extends BukkitRunnable {
     if (this.secondsRemaining >= 0) {
       // If there are cycles left, schedule the next run
       long ticks = ticksRemaining - this.secondsRemaining * 20;
-      this.task = this.getScheduler().runTaskLater(this.plugin, this, ticks < 1 ? 1 : ticks);
+      this.task = this.getScheduler().runTaskLater(ticks < 1 ? 1 : ticks, this);
     } else {
-      // Otherwise, end the countdown
+      // Otherwise, finish the countdown
       logger.fine("Ending countdown " + countdown);
 
       this.secondsRemaining = 0;

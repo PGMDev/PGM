@@ -1,12 +1,7 @@
 package tc.oc.util;
 
 import com.google.common.base.Strings;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import net.md_5.bungee.api.ChatColor;
 
 public class StringUtils {

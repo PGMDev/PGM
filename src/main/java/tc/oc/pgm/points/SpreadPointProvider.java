@@ -4,8 +4,8 @@ import java.util.Collection;
 import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 /** Get 16 points from each child and choose the farthest point from any enemy */
 public class SpreadPointProvider extends AggregatePointProvider {
@@ -29,7 +29,7 @@ public class SpreadPointProvider extends AggregatePointProvider {
 
         double nearest = Double.POSITIVE_INFINITY;
 
-        for (MatchPlayer enemy : match.getParticipatingPlayers()) {
+        for (MatchPlayer enemy : match.getParticipants()) {
           if (enemy.isParticipating()
               && !enemy.isDead()
               && (player == null || player.getParty() != enemy.getParty())) {

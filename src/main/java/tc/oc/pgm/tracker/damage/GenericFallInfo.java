@@ -4,7 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.annotation.Nullable;
 import org.bukkit.Location;
-import tc.oc.pgm.match.ParticipantState;
+import tc.oc.pgm.api.player.ParticipantState;
 
 public class GenericFallInfo implements FallInfo {
 

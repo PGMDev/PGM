@@ -3,13 +3,14 @@ package tc.oc.pgm.commands;
 import app.ashcon.intake.parametric.AbstractModule;
 import org.bukkit.util.Vector;
 import org.joda.time.Duration;
-import tc.oc.chat.Audience;
 import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.chat.Audience;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchManager;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.commands.provider.*;
+import tc.oc.pgm.map.MapLibrary;
 import tc.oc.pgm.map.PGMMap;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchManager;
-import tc.oc.pgm.match.MatchPlayer;
 import tc.oc.pgm.teams.TeamMatchModule;
 
 public class CommandModule extends AbstractModule {
@@ -29,6 +30,7 @@ public class CommandModule extends AbstractModule {
   private void configureInstances() {
     bind(PGM.class).toInstance(pgm);
     bind(MatchManager.class).toInstance(pgm.matchManager);
+    bind(MapLibrary.class).toInstance(pgm.getMapLibrary());
   }
 
   private void configureProviders() {

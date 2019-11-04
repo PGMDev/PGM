@@ -8,8 +8,8 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.MatchPlayerState;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayerState;
 
 /**
  * A version of BlockTransformEvent where the block transformation can be attributed to a player.
@@ -34,7 +34,7 @@ public class PlayerBlockTransformEvent extends BlockTransformEvent {
   }
 
   public @Nullable MatchPlayer getPlayer() {
-    return player.getMatchPlayer();
+    return player.getPlayer().orElse(null);
   }
 
   @Override

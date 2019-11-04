@@ -8,8 +8,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockDispenseEntityEvent;
 import org.bukkit.event.entity.ExplosionPrimeByEntityEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
-import tc.oc.pgm.match.ParticipantState;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.damage.TNTInfo;
 

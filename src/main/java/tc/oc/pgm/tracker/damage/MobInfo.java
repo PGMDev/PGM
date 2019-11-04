@@ -2,7 +2,7 @@ package tc.oc.pgm.tracker.damage;
 
 import javax.annotation.Nullable;
 import org.bukkit.entity.LivingEntity;
-import tc.oc.pgm.match.ParticipantState;
+import tc.oc.pgm.api.player.ParticipantState;
 
 public class MobInfo extends EntityInfo implements MeleeInfo {
 

@@ -8,13 +8,13 @@ import org.bukkit.DyeColor;
 import org.bukkit.util.Vector;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.GoalModule;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.Region;
@@ -48,7 +48,7 @@ public class WoolModule extends MapModule {
     for (Entry<TeamFactory, MonumentWoolFactory> woolEntry : this.woolFactories.entries()) {
       Team team = match.needMatchModule(TeamMatchModule.class).getTeam(woolEntry.getKey());
       MonumentWool wool = new MonumentWool(woolEntry.getValue(), match);
-      match.getMatchFeatureContext().add(wool);
+      match.getFeatureContext().add(wool);
       wools.put(team, wool);
       match.needMatchModule(GoalMatchModule.class).addGoal(wool);
     }

@@ -14,6 +14,10 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 import tc.oc.component.render.MatchNameRenderer;
+import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchManager;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.blitz.BlitzModule;
 import tc.oc.pgm.blockdrops.BlockDropsModule;
 import tc.oc.pgm.bossbar.BossBarModule;
@@ -46,10 +50,7 @@ import tc.oc.pgm.killreward.KillRewardModule;
 import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.listeners.*;
 import tc.oc.pgm.map.*;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchManager;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.WorldManager;
+import tc.oc.pgm.match.MatchManagerImpl;
 import tc.oc.pgm.modes.ObjectiveModesModule;
 import tc.oc.pgm.module.ModuleRegistry;
 import tc.oc.pgm.modules.*;
@@ -77,7 +78,6 @@ import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.util.RestartListener;
 import tc.oc.pgm.wool.WoolModule;
 import tc.oc.pgm.worldborder.WorldBorderModule;
-import tc.oc.server.Permissions;
 import tc.oc.util.SemanticVersion;
 
 public final class PGM extends JavaPlugin {
@@ -89,7 +89,6 @@ public final class PGM extends JavaPlugin {
   private Logger mapLogger;
 
   public MatchManager matchManager = null;
-  public WorldManager worldManager = null;
 
   public PGM() {
     super();
@@ -123,10 +122,6 @@ public final class PGM extends JavaPlugin {
       throw new IllegalStateException("PGMMatchManager is not available");
     }
     return mm;
-  }
-
-  public static WorldManager getMapManager() {
-    return pgm == null ? null : pgm.worldManager;
   }
 
   public Logger getMapLogger() {
@@ -190,14 +185,11 @@ public final class PGM extends JavaPlugin {
     getServer().getPluginManager().addPermission(new Permission(Permissions.DEBUG));
     getServer().getPluginManager().removePermission(Permissions.DEBUG);
 
-    this.worldManager = new WorldManager(this.getServer());
-    registerEvents(this.worldManager);
-
     this.mapLoader = new MapLoader(this, this.getLogger(), this.moduleRegistry);
     this.mapLibrary = new MapLibrary(this.getLogger());
 
     try {
-      this.matchManager = new MatchManager(this, mapLibrary, mapLoader, this.worldManager);
+      this.matchManager = new MatchManagerImpl(getServer(), mapLibrary, mapLoader);
     } catch (MapNotFoundException e) {
       this.getLogger().log(Level.SEVERE, "PGM could not load any maps, server will shut down", e);
       this.getServer().shutdown();
@@ -219,7 +211,10 @@ public final class PGM extends JavaPlugin {
             new Runnable() {
               @Override
               public void run() {
-                if (PGM.this.matchManager.cycle(null, true, true) == null) {
+                if (!PGM.this
+                    .matchManager
+                    .cycleMatch(null, mapLibrary.getMaps().iterator().next(), true)
+                    .isPresent()) {
                   getLogger().severe("Failed to load an initial match, shutting down");
                   getServer().shutdown();
                 }
@@ -236,28 +231,32 @@ public final class PGM extends JavaPlugin {
               new Runnable() {
                 @Override
                 public void run() {
-                  Match match = PGM.this.matchManager.getCurrentMatch();
-                  Bukkit.getConsoleSender()
-                      .sendMessage(
+                  for (Match match : matchManager.getMatches()) {
+                    Bukkit.getConsoleSender()
+                        .sendMessage(
+                            ChatColor.DARK_PURPLE
+                                + AllTranslations.get()
+                                    .translate(
+                                        "broadcast.currentlyPlaying",
+                                        Bukkit.getConsoleSender(),
+                                        match
+                                                .getMap()
+                                                .getInfo()
+                                                .getShortDescription(Bukkit.getConsoleSender())
+                                            + ChatColor.DARK_PURPLE));
+                    for (MatchPlayer player : match.getPlayers()) {
+                      player.sendMessage(
                           ChatColor.DARK_PURPLE
                               + AllTranslations.get()
                                   .translate(
                                       "broadcast.currentlyPlaying",
-                                      Bukkit.getConsoleSender(),
+                                      player.getBukkit(),
                                       match
                                               .getMap()
                                               .getInfo()
-                                              .getShortDescription(Bukkit.getConsoleSender())
+                                              .getShortDescription(player.getBukkit())
                                           + ChatColor.DARK_PURPLE));
-                  for (MatchPlayer player : match.getPlayers()) {
-                    player.sendMessage(
-                        ChatColor.DARK_PURPLE
-                            + AllTranslations.get()
-                                .translate(
-                                    "broadcast.currentlyPlaying",
-                                    player.getBukkit(),
-                                    match.getMap().getInfo().getShortDescription(player.getBukkit())
-                                        + ChatColor.DARK_PURPLE));
+                    }
                   }
                 }
               },
@@ -281,7 +280,9 @@ public final class PGM extends JavaPlugin {
     }
 
     if (this.matchManager != null) {
-      this.matchManager.unloadAllMatches();
+      for (Match match : this.matchManager.getMatches()) {
+        this.matchManager.unloadMatch(match.getId());
+      }
       this.matchManager = null;
     }
 
@@ -377,7 +378,6 @@ public final class PGM extends JavaPlugin {
     this.registerEvents(new FormattingListener());
     this.registerEvents(new AntiGriefListener(this.matchManager));
     this.registerEvents(new ItemTransferListener());
-    this.registerEvents(new KillStreakListener());
     this.registerEvents(new LongRangeTNTListener(this));
     this.registerEvents(new RestartListener(this));
     this.registerEvents(new WorldProblemListener(this));

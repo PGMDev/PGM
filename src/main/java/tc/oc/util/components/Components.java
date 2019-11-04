@@ -366,7 +366,7 @@ public class Components {
   public static void copyLastFormat(String legacy, Component to) {
     int length = legacy.length();
 
-    // Search backwards from the end as it is faster
+    // Search backwards from the finish as it is faster
     for (int index = length - 1; index > -1; index--) {
       char section = legacy.charAt(index);
       if (section == ChatColor.COLOR_CHAR && index < length - 1) {

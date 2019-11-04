@@ -6,11 +6,7 @@ import com.google.common.collect.Iterables;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
@@ -167,7 +163,7 @@ public class Logging {
 
       int score = 0;
       if (pos == 0) score += 2; // match at start
-      if (pos + searchLower.length() == nameLower.length()) score += 1; // match at end
+      if (pos + searchLower.length() == nameLower.length()) score += 1; // match at finish
 
       if (bestName != null) {
         if (score < bestScore) continue;

@@ -6,8 +6,8 @@ import java.util.Comparator;
 import java.util.List;
 import org.bukkit.ChatColor;
 import tc.oc.pgm.Config;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.match.ObservingParty;
 
 /**
@@ -20,7 +20,8 @@ public class QueuedParticipants extends ObservingParty {
   static class JoinOrder implements Comparator<MatchPlayer> {
     @Override
     public int compare(MatchPlayer a, MatchPlayer b) {
-      return Boolean.compare(b.canPriorityKick(), a.canPriorityKick());
+      final JoinMatchModule join = a.getMatch().needModule(JoinMatchModule.class);
+      return Boolean.compare(join.canPriorityKick(b), join.canPriorityKick(a));
     }
   }
 
@@ -35,21 +36,15 @@ public class QueuedParticipants extends ObservingParty {
   }
 
   @Override
-  public boolean addPlayer(MatchPlayer player) {
-    if (super.addPlayer(player)) {
-      invalidateShuffle();
-      return true;
-    }
-    return false;
+  public void internalAddPlayer(MatchPlayer player) {
+    super.internalAddPlayer(player);
+    invalidateShuffle();
   }
 
   @Override
-  public boolean removePlayer(MatchPlayer player) {
-    if (super.removePlayer(player)) {
-      invalidateShuffle();
-      return true;
-    }
-    return false;
+  public void internalRemovePlayer(MatchPlayer player) {
+    super.internalRemovePlayer(player);
+    invalidateShuffle();
   }
 
   public List<MatchPlayer> getOrderedPlayers() {

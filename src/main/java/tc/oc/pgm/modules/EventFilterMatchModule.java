@@ -21,11 +21,15 @@ import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.world.PortalCreateEvent;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayerState;
+import tc.oc.pgm.api.player.event.ObserverInteractEvent;
 import tc.oc.pgm.events.AdventureModeInteractEvent;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.events.ObserverInteractEvent;
 import tc.oc.pgm.events.PlayerBlockTransformEvent;
-import tc.oc.pgm.match.*;
+import tc.oc.pgm.match.MatchModule;
 
 /**
  * Listens to many events at low priority and cancels them if the actor is not allowed to interact
@@ -80,14 +84,15 @@ public class EventFilterMatchModule extends MatchModule implements Listener {
     return entity != null
         && cancel(
             event,
-            !getMatch().canInteract(entity),
+            getMatch().getParticipant(entity) == null,
             entity.getWorld(),
             getMatch().getPlayer(entity),
             null);
   }
 
   boolean cancelUnlessInteracting(Cancellable event, MatchPlayerState player) {
-    return cancel(event, !getMatch().canInteract(player), player.getMatch().getWorld(), null, null);
+    return cancel(
+        event, !player.getParty().isParticipating(), player.getMatch().getWorld(), null, null);
   }
 
   ClickType convertClick(ClickType clickType, Player player) {
@@ -298,7 +303,7 @@ public class EventFilterMatchModule extends MatchModule implements Listener {
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onPotionSplash(final PotionSplashEvent event) {
     for (LivingEntity entity : event.getAffectedEntities()) {
-      if (!getMatch().canInteract(entity)) {
+      if (getMatch().getParticipant(entity) == null) {
         event.setIntensity(entity, 0);
       }
     }
@@ -310,7 +315,7 @@ public class EventFilterMatchModule extends MatchModule implements Listener {
 
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onPlayerDropItem(final PlayerDropItemEvent event) {
-    if (!getMatch().canInteract(event.getPlayer())) {
+    if (getMatch().getParticipant(event.getPlayer()) == null) {
       event.getItemDrop().remove();
     }
   }

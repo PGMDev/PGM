@@ -28,6 +28,10 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.BlockTransformEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.filters.Filter;
@@ -35,7 +39,7 @@ import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.filters.query.IQuery;
 import tc.oc.pgm.filters.query.PlayerBlockQuery;
 import tc.oc.pgm.kits.tag.ItemTags;
-import tc.oc.pgm.match.*;
+import tc.oc.pgm.match.MatchModule;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ProjectileMatchModule extends MatchModule implements Listener {
@@ -179,7 +183,7 @@ public class ProjectileMatchModule extends MatchModule implements Listener {
 
       if (filter.query(query).isAllowed()) {
         BlockTransformEvent bte = new BlockTransformEvent(event, hitBlock, Material.AIR);
-        getMatch().getPluginManager().callEvent(bte);
+        getMatch().callEvent(bte);
         if (!bte.isCancelled()) {
           hitBlock.setType(Material.AIR);
           projectile.remove();

@@ -4,6 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
@@ -65,8 +66,10 @@ public abstract class Spawned extends BaseState {
               Material.WOOL.getId(),
               this.flag.getDyeColor().getWoolData());
 
-      for (Player player : this.flag.getMatch().getServer().getOnlinePlayers()) {
-        if (this.canSeeParticles(player)) NMSHacks.sendPacket(player, packet);
+      for (MatchPlayer player : flag.getMatch().getPlayers()) {
+        if (this.canSeeParticles(player.getBukkit())) {
+          NMSHacks.sendPacket(player.getBukkit(), packet);
+        }
       }
     }
   }

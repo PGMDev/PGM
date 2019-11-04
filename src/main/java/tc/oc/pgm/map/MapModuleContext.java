@@ -16,7 +16,6 @@ import tc.oc.pgm.filters.LegacyFilterParser;
 import tc.oc.pgm.kits.FeatureKitParser;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.kits.LegacyKitParser;
-import tc.oc.pgm.match.Party;
 import tc.oc.pgm.module.ModuleInfo;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.module.ModuleLoader;
@@ -67,9 +66,7 @@ public class MapModuleContext extends ModuleLoader<MapModule> {
     TeamModule tm = getModule(TeamModule.class);
     if (tm != null) {
       for (TeamFactory factory : getModule(TeamModule.class).getTeams()) {
-        if (factory.getType() == Party.Type.Participating) {
-          maxPlayers += factory.getMaxPlayers();
-        }
+        maxPlayers += factory.getMaxPlayers();
       }
     }
 

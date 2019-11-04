@@ -8,10 +8,11 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.PermissionAttachment;
 import tc.oc.block.BlockVectors;
-import tc.oc.pgm.events.MatchBeginEvent;
+import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.match.event.MatchStartEvent;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinPartyEvent;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.MatchPlayer;
 import tc.oc.pgm.spawns.ObserverToolFactory;
 import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
@@ -33,12 +34,12 @@ public class Observing extends State {
   public void enterState() {
     super.enterState();
 
-    permissionAttachment = bukkit.addAttachment(this.smm.getMatch().getPlugin());
+    permissionAttachment = bukkit.addAttachment(PGM.get());
     permissionAttachment.setPermission(smm.getObserverPermissions(), true);
 
     if (reset) player.reset();
     player.setDead(false);
-    player.refreshGameMode();
+    player.resetGamemode();
 
     Spawn spawn = smm.getDefaultSpawn();
 
@@ -74,7 +75,7 @@ public class Observing extends State {
 
     player.getBukkit().updateInventory();
     player.setVisible(true);
-    player.refreshGameMode();
+    player.resetGamemode();
 
     // The player is not standing on anything, turn their flying on
     if (bukkit.getAllowFlight()) {
@@ -92,9 +93,9 @@ public class Observing extends State {
   }
 
   @Override
-  public void onEvent(MatchBeginEvent event) {
+  public void onEvent(MatchStartEvent event) {
     super.onEvent(event);
-    if (player.isParticipatingType()) {
+    if (player.isParticipating()) {
       transition(new Joining(smm, player));
     }
   }

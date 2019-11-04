@@ -15,16 +15,16 @@ import org.bukkit.command.CommandSender;
 import org.joda.time.Duration;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchManager;
+import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.map.PGMMap;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchManager;
 import tc.oc.pgm.restart.RestartManager;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.timelimit.TimeLimitCountdown;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.pgm.util.RestartListener;
-import tc.oc.server.Permissions;
 import tc.oc.util.StringUtils;
 import tc.oc.util.TimeUtils;
 
@@ -50,7 +50,7 @@ public class AdminCommands {
           AllTranslations.get().translate("command.admin.restart.matchRunning", sender));
     }
 
-    match.end();
+    match.finish();
     RestartListener.get().queueRestart(match, countdown, "/restart command");
   }
 
@@ -113,7 +113,7 @@ public class AdminCommands {
       throw new CommandException(
           AllTranslations.get().translate("command.competitorNotFound", sender));
 
-    boolean ended = match.end(winner);
+    boolean ended = match.finish(winner);
 
     if (!ended)
       throw new CommandException(
@@ -137,7 +137,7 @@ public class AdminCommands {
           AllTranslations.get().translate("command.admin.setNext.restartQueued", sender));
     }
 
-    mm.setNextMap(map);
+    MapCommands.setNextMap(map);
 
     if (restartQueued) {
       RestartManager.get().cancelRestart();
@@ -153,7 +153,7 @@ public class AdminCommands {
                 .translate(
                     "command.admin.set.success",
                     sender,
-                    ChatColor.GOLD + mm.getNextMap().getInfo().name + ChatColor.DARK_PURPLE));
+                    ChatColor.GOLD + map.getInfo().name + ChatColor.DARK_PURPLE));
   }
 
   @Command(
@@ -161,16 +161,26 @@ public class AdminCommands {
       desc = "Cancels all active PGM countdowns and disables auto-start for the current match",
       perms = Permissions.STOP)
   public static void cancel(CommandSender sender, Match match) {
-    if (!match.getCountdownContext().getAll(TimeLimitCountdown.class).isEmpty()) {
+    if (!match.getCountdown().getAll(TimeLimitCountdown.class).isEmpty()) {
       TimeLimitMatchModule tlmm = match.getMatchModule(TimeLimitMatchModule.class);
       tlmm.cancel();
       tlmm.setTimeLimit(null);
     }
 
-    match.getCountdownContext().cancelAll();
+    match.getCountdown().cancelAll();
     match.needMatchModule(StartMatchModule.class).setAutoStart(false);
     sender.sendMessage(
         ChatColor.GREEN + AllTranslations.get().translate("command.admin.cancel.success", sender));
+  }
+
+  @Command(
+      aliases = {"pgm"},
+      desc = "Reload the PGM configuration",
+      perms = Permissions.RELOAD)
+  public void pgm(CommandSender sender) {
+    PGM.get().reloadConfig();
+    sender.sendMessage(
+        ChatColor.GREEN + AllTranslations.get().translate("command.admin.pgm", sender));
   }
 
   private static Map<String, Competitor> getCompetitorMap(CommandSender sender, Match match) {

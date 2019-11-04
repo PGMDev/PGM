@@ -6,8 +6,8 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
-import tc.oc.pgm.match.MatchManager;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.match.MatchManager;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 public class MatchPlayerProvider implements BukkitProvider<MatchPlayer> {
 

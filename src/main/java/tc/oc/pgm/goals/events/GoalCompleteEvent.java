@@ -2,10 +2,10 @@ package tc.oc.pgm.goals.events;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.goals.Contribution;
 import tc.oc.pgm.goals.Goal;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.Match;
 
 public class GoalCompleteEvent extends GoalEvent {
 

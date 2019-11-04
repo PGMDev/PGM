@@ -4,8 +4,8 @@ import org.bukkit.Location;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.flag.Flag;
-import tc.oc.pgm.match.MatchPlayer;
 
 /**
  * Fired BEFORE a player picks up a flag, allowing it to be cancelled. This is used by {@link

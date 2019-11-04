@@ -1,8 +1,8 @@
 package tc.oc.pgm.spawns.events;
 
 import org.bukkit.event.HandlerList;
-import tc.oc.pgm.events.MatchPlayerEvent;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.MatchPlayerEvent;
 
 /**
  * Called when a player becomes an observer, before any spawn kit is applied. Other modules can use

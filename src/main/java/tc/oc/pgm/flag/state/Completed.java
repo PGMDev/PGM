@@ -3,12 +3,12 @@ package tc.oc.pgm.flag.state;
 import java.util.Collections;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.goals.SimpleGoal;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.ParticipantState;
-import tc.oc.pgm.match.Party;
 
 // Flag has been permanently captured
 public class Completed extends Returned {

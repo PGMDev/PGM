@@ -3,7 +3,7 @@ package tc.oc.pgm.gamerules;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.match.MatchModule;
 
 public class GameRulesMatchModule extends MatchModule {

@@ -2,8 +2,8 @@ package tc.oc.pgm.shield;
 
 import java.util.List;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.kits.AbstractKit;
-import tc.oc.pgm.match.MatchPlayer;
 
 public class ShieldKit extends AbstractKit {
 

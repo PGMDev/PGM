@@ -6,13 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import tc.oc.pgm.goals.Goal;
-import tc.oc.pgm.goals.GoalMatchModule;
-import tc.oc.pgm.goals.ProximityGoal;
-import tc.oc.pgm.goals.ProximityMetric;
-import tc.oc.pgm.goals.TouchableGoal;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.goals.*;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 

@@ -14,13 +14,13 @@ import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.material.matcher.SingleMaterialMatcher;
 import tc.oc.named.NameStyle;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.player.MatchPlayerState;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.goals.Contribution;
 import tc.oc.pgm.goals.ModeChangeGoal;
 import tc.oc.pgm.goals.TouchableGoal;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayerState;
-import tc.oc.pgm.match.ParticipantState;
 import tc.oc.pgm.modes.ModeUtils;
 import tc.oc.pgm.regions.CuboidRegion;
 import tc.oc.pgm.regions.FiniteBlockRegion;
@@ -50,7 +50,6 @@ public class Core extends TouchableGoal<CoreFactory> implements ModeChangeGoal<C
             region, match.getWorld(), new SingleMaterialMatcher(this.material));
     if (this.casingRegion.getBlocks().isEmpty()) {
       match
-          .getServer()
           .getLogger()
           .warning("No casing world (" + this.material + ") found in core " + this.getName());
     }
@@ -62,7 +61,7 @@ public class Core extends TouchableGoal<CoreFactory> implements ModeChangeGoal<C
             new SingleMaterialMatcher(Material.LAVA, (byte) 0),
             new SingleMaterialMatcher(Material.STATIONARY_LAVA, (byte) 0));
     if (this.lavaRegion.getBlocks().isEmpty()) {
-      match.getServer().getLogger().warning("No lava found in core " + this.getName());
+      match.getLogger().warning("No lava found in core " + this.getName());
     }
 
     Vector min = region.getBounds().getMin().subtract(new Vector(15, 0, 15));

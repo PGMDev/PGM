@@ -4,16 +4,16 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import tc.oc.chat.Sound;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.events.MatchBeginEvent;
-import tc.oc.pgm.events.MatchEndEvent;
+import tc.oc.pgm.api.chat.Sound;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.event.MatchFinishEvent;
+import tc.oc.pgm.api.match.event.MatchStartEvent;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
 import tc.oc.pgm.teams.Team;
 
 public class MatchAnnouncer implements Listener {
@@ -23,7 +23,7 @@ public class MatchAnnouncer implements Listener {
   private static final Sound SOUND_MATCH_LOSE = new Sound("mob.wither.spawn", 1f, 1f);
 
   @EventHandler(priority = EventPriority.MONITOR)
-  public void onMatchBegin(final MatchBeginEvent event) {
+  public void onMatchBegin(final MatchStartEvent event) {
     Match match = event.getMatch();
     match.sendMessage(
         new PersonalizedText(
@@ -31,7 +31,7 @@ public class MatchAnnouncer implements Listener {
 
     Component go =
         new PersonalizedText(new PersonalizedTranslatable("broadcast.go"), ChatColor.GREEN);
-    for (MatchPlayer player : match.getParticipatingPlayers()) {
+    for (MatchPlayer player : match.getParticipants()) {
       player.showTitle(go, null, 0, 5, 15);
     }
 
@@ -39,10 +39,10 @@ public class MatchAnnouncer implements Listener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
-  public void onMatchEnd(final MatchEndEvent event) {
+  public void onMatchEnd(final MatchFinishEvent event) {
     Match match = event.getMatch();
 
-    // broadcast match end message
+    // broadcast match finish message
     for (MatchPlayer viewer : match.getPlayers()) {
       Component title, subtitle = null;
       if (event.getWinner() == null) {

@@ -8,26 +8,26 @@ import java.util.Optional;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.destroyable.Destroyable;
 import tc.oc.pgm.destroyable.DestroyableMatchModule;
-import tc.oc.pgm.match.Match;
-import tc.oc.server.Permissions;
 
 public class DestroyableCommands {
-  private static DestroyableMatchModule matchModule() throws CommandException {
-    Match match = PGM.getMatchManager().getCurrentMatch();
+  private static DestroyableMatchModule matchModule(CommandSender sender) throws CommandException {
+    Match match = PGM.getMatchManager().getMatch(sender);
     DestroyableMatchModule dmm = match.getMatchModule(DestroyableMatchModule.class);
     if (dmm == null) throw new CommandException("No destroyables");
     return dmm;
   }
 
-  private static Destroyable lookup(String id) throws CommandException {
-    Match match = PGM.getMatchManager().getCurrentMatch();
+  private static Destroyable lookup(CommandSender sender, String id) throws CommandException {
+    Match match = PGM.getMatchManager().getMatch(sender);
 
-    Destroyable destroyable = match.getMatchFeatureContext().get(id, Destroyable.class);
+    Destroyable destroyable = match.getFeatureContext().get(id, Destroyable.class);
     if (destroyable != null) return destroyable;
 
-    for (Destroyable feature : match.getMatchFeatureContext().getAll(Destroyable.class)) {
+    for (Destroyable feature : match.getFeatureContext().getAll(Destroyable.class)) {
       if (feature.getId().startsWith(id)) {
         if (destroyable != null)
           throw new CommandException("Multiple destroyables have IDs that start with '" + id + "'");
@@ -57,7 +57,7 @@ public class DestroyableCommands {
       list(sender);
     } else {
       String id = optionalID.get();
-      Destroyable destroyable = lookup(id);
+      Destroyable destroyable = lookup(sender, id);
 
       if (!optionalAction.isPresent()) {
         details(sender, destroyable);
@@ -81,7 +81,7 @@ public class DestroyableCommands {
     List<String> lines = new ArrayList<>();
     lines.add(ChatColor.GRAY + "Destroyables");
 
-    for (Destroyable destroyable : matchModule().getDestroyables()) {
+    for (Destroyable destroyable : matchModule(sender).getDestroyables()) {
       lines.add(
           "  "
               + ChatColor.AQUA

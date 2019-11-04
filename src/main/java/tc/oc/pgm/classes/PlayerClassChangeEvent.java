@@ -3,9 +3,9 @@ package tc.oc.pgm.classes;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.bukkit.event.HandlerList;
-import tc.oc.pgm.events.MatchEvent;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.event.MatchEvent;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 public class PlayerClassChangeEvent extends MatchEvent {
   public PlayerClassChangeEvent(

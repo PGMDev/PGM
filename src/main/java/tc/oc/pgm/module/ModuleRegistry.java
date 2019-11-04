@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import org.bukkit.plugin.Plugin;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.map.*;
 import tc.oc.pgm.match.FixtureMatchModuleFactory;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.match.MatchModuleFactory;
 

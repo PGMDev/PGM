@@ -22,6 +22,12 @@ import tc.oc.material.matcher.SingleMaterialMatcher;
 import tc.oc.named.NameStyle;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayerState;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.blockdrops.BlockDrops;
 import tc.oc.pgm.blockdrops.BlockDropsMatchModule;
 import tc.oc.pgm.blockdrops.BlockDropsRuleSet;
@@ -31,7 +37,6 @@ import tc.oc.pgm.goals.ModeChangeGoal;
 import tc.oc.pgm.goals.TouchableGoal;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
-import tc.oc.pgm.match.*;
 import tc.oc.pgm.modes.ModeUtils;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.teams.Team;
@@ -96,10 +101,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
         FiniteBlockRegion.fromWorld(
             definition.getRegion(), match.getWorld(), this.materialPatterns);
     if (this.blockRegion.getBlocks().isEmpty()) {
-      match
-          .getServer()
-          .getLogger()
-          .warning("No destroyable blocks found in destroyable " + this.getName());
+      match.getLogger().warning("No destroyable blocks found in destroyable " + this.getName());
     }
 
     BlockDropsMatchModule bdmm = match.getMatchModule(BlockDropsMatchModule.class);
@@ -356,18 +358,14 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
       }
     }
 
-    this.match
-        .getPluginManager()
-        .callEvent(new DestroyableHealthChangeEvent(this.getMatch(), this, changeInfo));
-    this.match.getPluginManager().callEvent(new GoalStatusChangeEvent(this.getMatch(), this));
+    this.match.callEvent(new DestroyableHealthChangeEvent(this.getMatch(), this, changeInfo));
+    this.match.callEvent(new GoalStatusChangeEvent(this.getMatch(), this));
 
     if (this.isDestroyed()) {
-      this.match.getPluginManager().callEvent(new DestroyableDestroyedEvent(this.match, this));
-      this.match
-          .getPluginManager()
-          .callEvent(
-              new GoalCompleteEvent(
-                  this.getMatch(), this, this.getOwner(), false, this.getContributions()));
+      this.match.callEvent(new DestroyableDestroyedEvent(this.match, this));
+      this.match.callEvent(
+          new GoalCompleteEvent(
+              this.getMatch(), this, this.getOwner(), false, this.getContributions()));
     }
 
     return changeInfo;
@@ -472,10 +470,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
       }
 
       this.destructionRequired = destructionRequired;
-      this.getOwner()
-          .getMatch()
-          .getPluginManager()
-          .callEvent(new FeatureChangeEvent(this.getMatch(), this));
+      this.getOwner().getMatch().callEvent(new FeatureChangeEvent(this.getMatch(), this));
     }
   }
 
@@ -500,7 +495,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
   @Override
   public String renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
-    if (this.getShowProgress() || Parties.isObservingType(viewer)) {
+    if (this.getShowProgress() || viewer.isObserving()) {
       String text = this.renderCompletion();
       if (Config.Scoreboard.preciseProgress()) {
         String precise = this.renderPreciseCompletion();

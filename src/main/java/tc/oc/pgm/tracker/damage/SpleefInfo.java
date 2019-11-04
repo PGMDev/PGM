@@ -3,15 +3,15 @@ package tc.oc.pgm.tracker.damage;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.annotation.Nullable;
-import tc.oc.pgm.match.ParticipantState;
-import tc.oc.pgm.time.TickTime;
+import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.api.time.Tick;
 
 public class SpleefInfo implements DamageInfo, CauseInfo {
 
   private final DamageInfo breaker;
-  private final TickTime time;
+  private final Tick time;
 
-  public SpleefInfo(DamageInfo breaker, TickTime time) {
+  public SpleefInfo(DamageInfo breaker, Tick time) {
     this.breaker = checkNotNull(breaker);
     this.time = checkNotNull(time);
   }
@@ -30,7 +30,7 @@ public class SpleefInfo implements DamageInfo, CauseInfo {
     return breaker;
   }
 
-  public TickTime getTime() {
+  public Tick getTime() {
     return time;
   }
 

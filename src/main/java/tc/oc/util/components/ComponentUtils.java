@@ -313,7 +313,7 @@ public class ComponentUtils {
   /**
    * Return the length of the longest prefix of the given string that fits within the given pixel
    * width when rendered in the Minecraft font. If the prefix is shorter than the entire string,
-   * then it is guaranteed to end with a visible character, and not any formatting character.
+   * then it is guaranteed to finish with a visible character, and not any formatting character.
    */
   public static int longestPrefix(String text, int maxWidth) {
     int pos = 0;
@@ -333,7 +333,7 @@ public class ComponentUtils {
   /**
    * Return the length of the longest prefix of the given string that ends on a word boundary and
    * fits within the given pixel width when rendered in the Minecraft font. If the prefix is shorter
-   * than the entire string, then it is guaranteed to end with a visible character, and not any
+   * than the entire string, then it is guaranteed to finish with a visible character, and not any
    * formatting character.
    */
   public static int longestWordPrefix(String text, int maxWidth) {

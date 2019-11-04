@@ -4,8 +4,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.annotation.Nullable;
 import org.bukkit.event.Event;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.Party;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Party;
 
 public class PartyQuery extends Query implements IPartyQuery {
 

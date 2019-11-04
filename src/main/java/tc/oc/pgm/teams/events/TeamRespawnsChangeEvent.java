@@ -1,8 +1,8 @@
 package tc.oc.pgm.teams.events;
 
 import org.bukkit.event.HandlerList;
-import tc.oc.pgm.events.MatchEvent;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.event.MatchEvent;
 import tc.oc.pgm.teams.Team;
 
 public class TeamRespawnsChangeEvent extends MatchEvent {

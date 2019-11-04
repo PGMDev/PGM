@@ -55,7 +55,7 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
    * @return Formatted text
    */
   public String formatSingleCountdown(ModeChangeCountdown countdown) {
-    Duration currentTimeLeft = modes.getCountdownContext().getTimeLeft(countdown);
+    Duration currentTimeLeft = modes.getCountdown().getTimeLeft(countdown);
     StringBuilder builder = new StringBuilder();
 
     if (countdown.getMatch().isRunning()) {
@@ -70,12 +70,12 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
   }
 
   private boolean isRunning(ModeChangeCountdown countdown) {
-    Duration timeLeft = this.modes.getCountdownContext().getTimeLeft(countdown);
+    Duration timeLeft = this.modes.getCountdown().getTimeLeft(countdown);
     return timeLeft != null && timeLeft.getStandardSeconds() > 0;
   }
 
   private boolean isExpired(ModeChangeCountdown countdown) {
-    Duration timeLeft = this.modes.getCountdownContext().getTimeLeft(countdown);
+    Duration timeLeft = this.modes.getCountdown().getTimeLeft(countdown);
     return timeLeft != null && timeLeft.getStandardSeconds() <= 0;
   }
 }

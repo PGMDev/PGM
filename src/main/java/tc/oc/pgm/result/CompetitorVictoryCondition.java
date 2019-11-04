@@ -4,8 +4,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Competitor;
 
 /** Immediate, unconditional victory for an explicit {@link Competitor} */
 public class CompetitorVictoryCondition extends ImmediateVictoryCondition {

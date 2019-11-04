@@ -13,11 +13,11 @@ import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import tc.oc.chunk.ChunkVector;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.BlockTransformEvent;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchScope;
 
 /**
  * Keeps a snapshot of the block state of the entire match world at load time, using a copy-on-write

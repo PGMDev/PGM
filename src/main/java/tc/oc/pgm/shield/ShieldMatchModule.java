@@ -8,8 +8,13 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PotionEffectRemoveEvent;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.Tickable;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.match.*;
+import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 
@@ -43,9 +48,9 @@ public class ShieldMatchModule extends MatchModule implements Listener, Tickable
   }
 
   @Override
-  public void tick(Match match) {
+  public void tick(Match match, Tick tick) {
     for (ShieldPlayerModule shield : playerShields.values()) {
-      shield.tick(match);
+      shield.tick(match, tick);
     }
   }
 

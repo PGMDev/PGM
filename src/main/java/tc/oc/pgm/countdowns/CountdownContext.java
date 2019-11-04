@@ -5,21 +5,18 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import org.bukkit.plugin.Plugin;
 import org.joda.time.Duration;
-import tc.oc.pgm.time.TickClock;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.util.logging.ClassLogger;
 
 public class CountdownContext {
-  protected final Plugin plugin;
+  protected final Match match;
   protected final Logger logger;
-  protected final TickClock clock;
   protected final Map<Countdown, CountdownRunner> runners = new HashMap<>();
 
-  public CountdownContext(Plugin plugin, TickClock clock, Logger parentLogger) {
-    this.plugin = plugin;
+  public CountdownContext(Match match, Logger parentLogger) {
+    this.match = match;
     this.logger = ClassLogger.get(parentLogger, getClass());
-    this.clock = clock;
   }
 
   public void start(Countdown countdown, int seconds) {
@@ -44,8 +41,7 @@ public class CountdownContext {
     if (runner != null) runner.cancel();
     this.runners.put(
         countdown,
-        new CountdownRunner(this.plugin, this.clock, this.logger, countdown)
-            .start(duration, interval, count));
+        new CountdownRunner(match, this.logger, countdown).start(duration, interval, count));
   }
 
   public void cancel(Countdown countdown) {

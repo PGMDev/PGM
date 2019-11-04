@@ -1,9 +1,9 @@
 package tc.oc.pgm.renewable;
 
 import java.util.List;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchScope;
 
 public class RenewableMatchModule extends MatchModule {
 
@@ -20,8 +20,8 @@ public class RenewableMatchModule extends MatchModule {
 
     for (RenewableDefinition definition : definitions) {
       Renewable renewable = new Renewable(definition, match, logger);
-      getMatch().registerEvents(renewable, MatchScope.RUNNING);
-      getMatch().registerTickable(renewable, MatchScope.RUNNING);
+      getMatch().addListener(renewable, MatchScope.RUNNING);
+      getMatch().addTickable(renewable, MatchScope.RUNNING);
     }
   }
 }

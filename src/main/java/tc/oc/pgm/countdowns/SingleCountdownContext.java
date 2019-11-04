@@ -2,14 +2,13 @@ package tc.oc.pgm.countdowns;
 
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import org.bukkit.plugin.Plugin;
 import org.joda.time.Duration;
-import tc.oc.pgm.time.TickClock;
+import tc.oc.pgm.api.match.Match;
 
 public class SingleCountdownContext extends CountdownContext {
 
-  public SingleCountdownContext(Plugin plugin, TickClock clock, Logger parentLogger) {
-    super(plugin, clock, parentLogger);
+  public SingleCountdownContext(Match match, Logger parentLogger) {
+    super(match, parentLogger);
   }
 
   @Override

@@ -1,5 +1,6 @@
 package tc.oc.pgm.match;
 
+import tc.oc.pgm.api.match.Match;
 import tc.oc.util.logging.ClassLogger;
 
 /** Scope: Match */

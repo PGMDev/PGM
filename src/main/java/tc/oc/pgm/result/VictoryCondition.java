@@ -2,8 +2,8 @@ package tc.oc.pgm.result;
 
 import java.util.Comparator;
 import tc.oc.component.Component;
-import tc.oc.pgm.match.Competitor;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Competitor;
 
 /**
  * A condition used to decide if a {@link Competitor} has won the {@link Match}, and for measuring
@@ -28,7 +28,7 @@ public interface VictoryCondition extends Comparator<Competitor> {
 
   /**
    * Test if this victory condition has been satisfied for the given match. When this returns true,
-   * the match will end, and the lowest {@link Competitor}s in the ordering will be the winners.
+   * the match will finish, and the lowest {@link Competitor}s in the ordering will be the winners.
    */
   boolean isCompleted(Match match);
 

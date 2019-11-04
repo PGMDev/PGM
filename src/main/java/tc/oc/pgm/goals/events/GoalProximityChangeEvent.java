@@ -3,8 +3,8 @@ package tc.oc.pgm.goals.events;
 import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.event.HandlerList;
+import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.goals.ProximityGoal;
-import tc.oc.pgm.match.Competitor;
 
 public class GoalProximityChangeEvent extends GoalEvent {
   private final @Nullable Location location;

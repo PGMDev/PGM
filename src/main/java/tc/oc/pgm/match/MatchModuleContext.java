@@ -19,7 +19,7 @@ public class MatchModuleContext {
     this.matchFeatureContext = matchFeatureContext;
   }
 
-  public MatchFeatureContext getMatchFeatureContext() {
+  public MatchFeatureContext getFeatureContext() {
     return this.matchFeatureContext;
   }
 

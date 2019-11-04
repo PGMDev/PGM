@@ -1,7 +1,7 @@
 package tc.oc.pgm.join;
 
 import javax.annotation.Nullable;
-import tc.oc.pgm.match.Competitor;
+import tc.oc.pgm.api.party.Competitor;
 
 /** Encapsulates the result of a match join operation or query */
 public class GenericJoinResult implements JoinResult {

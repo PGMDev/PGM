@@ -6,10 +6,10 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.kits.tag.ItemTags;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.MatchPlayerState;
-import tc.oc.pgm.match.MatchScope;
 import tc.oc.util.components.PeriodFormats;
 
 public class ProjectileCooldown {

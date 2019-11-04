@@ -12,10 +12,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.util.Vector;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.events.MatchPlayerDeathEvent;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.PlayerParticipationStartEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.match.*;
+import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 
 public class BlitzMatchModule extends MatchModule implements Listener {
@@ -61,7 +65,7 @@ public class BlitzMatchModule extends MatchModule implements Listener {
     if (victim.getParty() instanceof Competitor) {
       Competitor competitor = (Competitor) victim.getParty();
 
-      int lives = this.lifeManager.addLives(event.getVictim().getPlayerId(), -1);
+      int lives = this.lifeManager.addLives(event.getVictim().getId(), -1);
 
       if (lives <= 0) {
         this.handleElimination(victim, competitor);
@@ -71,7 +75,7 @@ public class BlitzMatchModule extends MatchModule implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void handleLeave(final PlayerPartyChangeEvent event) {
-    int lives = this.lifeManager.getLives(event.getPlayer().getPlayerId());
+    int lives = this.lifeManager.getLives(event.getPlayer().getId());
     if (event.getOldParty() instanceof Competitor && lives > 0) {
       this.handleElimination(event.getPlayer(), (Competitor) event.getOldParty());
     }
@@ -79,19 +83,19 @@ public class BlitzMatchModule extends MatchModule implements Listener {
 
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void handleJoin(final PlayerParticipationStartEvent event) {
-    if (event.getMatch().hasStarted()) {
+    if (event.getMatch().isRunning()) {
       event.cancel(
           new PersonalizedTranslatable(
               "blitz.join",
               new PersonalizedText(
-                  getMatch().getModuleContext().getGame(), net.md_5.bungee.api.ChatColor.AQUA)));
+                  getMatch().getMapContext().getGame(), net.md_5.bungee.api.ChatColor.AQUA)));
     }
   }
 
   @EventHandler
   public void handleSpawn(final ParticipantSpawnEvent event) {
     if (this.config.broadcastLives) {
-      int lives = this.lifeManager.getLives(event.getPlayer().getPlayerId());
+      int lives = this.lifeManager.getLives(event.getPlayer().getId());
       event
           .getPlayer()
           .showTitle(
@@ -146,10 +150,9 @@ public class BlitzMatchModule extends MatchModule implements Listener {
               public void run() {
                 match.callEvent(eliminatedEvent);
                 if (player.getParty() instanceof Competitor) {
-                  match.setPlayerParty(player, match.getDefaultParty());
+                  match.setParty(player, match.getDefaultParty());
                 }
-                match.invalidateCompetitorRanking();
-                match.checkEnd();
+                match.calculateVictory();
               }
             });
   }

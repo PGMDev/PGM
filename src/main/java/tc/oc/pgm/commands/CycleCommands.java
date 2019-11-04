@@ -7,11 +7,11 @@ import app.ashcon.intake.parametric.annotation.Switch;
 import org.bukkit.command.CommandSender;
 import org.joda.time.Duration;
 import tc.oc.pgm.AllTranslations;
+import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.pgm.cycle.CycleMatchModule;
 import tc.oc.pgm.map.PGMMap;
-import tc.oc.pgm.match.Match;
-import tc.oc.server.Permissions;
 
 public class CycleCommands {
 

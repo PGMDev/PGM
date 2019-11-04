@@ -1,8 +1,8 @@
 package tc.oc.pgm.result;
 
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.match.Match;
 
-/** Base class for victory conditions that end the match immediately and unambiguously. */
+/** Base class for victory conditions that finish the match immediately and unambiguously. */
 public abstract class ImmediateVictoryCondition implements VictoryCondition {
 
   @Override

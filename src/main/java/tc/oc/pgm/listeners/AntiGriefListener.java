@@ -22,15 +22,14 @@ import tc.oc.component.render.ComponentRenderers;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.named.NameStyle;
 import tc.oc.pgm.AllTranslations;
-import tc.oc.pgm.match.MatchManager;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.ParticipantState;
-import tc.oc.pgm.match.Parties;
+import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.match.MatchManager;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.tnt.TNTMatchModule;
 import tc.oc.pgm.tracker.Trackers;
 import tc.oc.pgm.util.TranslationUtils;
-import tc.oc.server.Permissions;
 
 public class AntiGriefListener implements Listener {
 
@@ -90,7 +89,7 @@ public class AntiGriefListener implements Listener {
                     .translate(
                         "defuse.player",
                         clicker.getBukkit(),
-                        owner.getDisplayName(clicker) + ChatColor.RED));
+                        owner.getBukkit().getDisplayName(clicker.getBukkit()) + ChatColor.RED));
       } else {
         this.notifyDefuse(
             clicker,
@@ -164,7 +163,7 @@ public class AntiGriefListener implements Listener {
 
   @EventHandler
   public void giveKit(final ObserverKitApplyEvent event) {
-    if (!Parties.isObservingType(event.getPlayer().getParty())
+    if (!event.getPlayer().getParty().isObserving()
         || !event.getPlayer().getBukkit().hasPermission(Permissions.DEFUSE)) return;
 
     ItemStack shears = new ItemStack(DEFUSE_ITEM);

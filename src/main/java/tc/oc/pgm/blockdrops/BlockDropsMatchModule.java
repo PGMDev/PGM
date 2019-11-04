@@ -25,11 +25,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.RayBlockIntersection;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.*;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.MatchScope;
 import tc.oc.util.Pair;
 import tc.oc.world.NMSHacks;
 

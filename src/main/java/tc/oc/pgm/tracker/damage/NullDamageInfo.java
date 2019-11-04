@@ -1,7 +1,7 @@
 package tc.oc.pgm.tracker.damage;
 
 import javax.annotation.Nullable;
-import tc.oc.pgm.match.ParticipantState;
+import tc.oc.pgm.api.player.ParticipantState;
 
 /**
  * Returned by the master damage resolver to indicate that the damage is invalid, i.e. because one

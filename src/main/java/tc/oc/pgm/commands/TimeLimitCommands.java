@@ -11,13 +11,13 @@ import org.joda.time.Duration;
 import tc.oc.component.render.ComponentRenderers;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.match.Match;
+import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.result.TieVictoryCondition;
 import tc.oc.pgm.result.VictoryCondition;
 import tc.oc.pgm.result.VictoryConditions;
 import tc.oc.pgm.timelimit.TimeLimit;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
-import tc.oc.server.Permissions;
 import tc.oc.util.components.PeriodFormats;
 
 public class TimeLimitCommands {
@@ -66,7 +66,7 @@ public class TimeLimitCommands {
         VictoryCondition result;
         if (resultString != null) {
           try {
-            result = VictoryConditions.parse(match.getModuleContext(), resultString);
+            result = VictoryConditions.parse(match.getMapContext(), resultString);
           } catch (IllegalArgumentException ex) {
             throw new CommandException("Invalid result or team name: " + resultString);
           }

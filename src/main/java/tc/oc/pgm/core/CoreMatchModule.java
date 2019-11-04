@@ -14,22 +14,24 @@ import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.util.Vector;
 import tc.oc.block.BlockVectors;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.AllTranslations;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.BlockTransformEvent;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
-import tc.oc.pgm.match.*;
+import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
 
 public class CoreMatchModule extends MatchModule implements Listener {
   protected final List<Core> cores;
-  protected int ccmTaskId1 = -1; // FIXME: hack
-  protected int ccmTaskId2 = -1;
 
   public CoreMatchModule(Match match, List<Core> cores) {
     super(match);
@@ -38,23 +40,11 @@ public class CoreMatchModule extends MatchModule implements Listener {
 
   @Override
   public void enable() {
-    if (this.match.getMapInfo().proto.isOlderThan(MODES_IMPLEMENTATION_VERSION)) {
+    if (this.match.getMap().getInfo().proto.isOlderThan(MODES_IMPLEMENTATION_VERSION)) {
       CoreConvertMonitor ccm = new CoreConvertMonitor(this);
-      BukkitScheduler scheduler = this.match.getServer().getScheduler();
-      this.ccmTaskId1 =
-          scheduler.scheduleSyncDelayedTask(
-              this.match.getPlugin(), ccm, 15 * 60 * 20); // 15 minutes
-      this.ccmTaskId2 =
-          scheduler.scheduleSyncDelayedTask(
-              this.match.getPlugin(), ccm, 20 * 60 * 20); // 20 minutes
-    }
-  }
 
-  @Override
-  public void disable() {
-    if (ccmTaskId1 != -1 || ccmTaskId2 != -1) {
-      this.match.getServer().getScheduler().cancelTask(ccmTaskId1);
-      this.match.getServer().getScheduler().cancelTask(ccmTaskId2);
+      match.getScheduler(MatchScope.RUNNING).runTaskLater(15 * 60 * 20, ccm); // 15 minutes
+      match.getScheduler(MatchScope.RUNNING).runTaskLater(20 * 60 * 20, ccm); // 20 minutes
     }
   }
 
@@ -68,14 +58,10 @@ public class CoreMatchModule extends MatchModule implements Listener {
         if (!core.hasLeaked() && core.getLeakRegion().contains(blockVector)) {
           // core has leaked
           core.markLeaked();
-          this.match
-              .getPluginManager()
-              .callEvent(new CoreLeakEvent(this.match, core, event.getNewState()));
-          this.match
-              .getPluginManager()
-              .callEvent(
-                  new GoalCompleteEvent(
-                      this.match, core, core.getOwner(), false, core.getContributions()));
+          this.match.callEvent(new CoreLeakEvent(this.match, core, event.getNewState()));
+          this.match.callEvent(
+              new GoalCompleteEvent(
+                  this.match, core, core.getOwner(), false, core.getContributions()));
         }
       }
     }
@@ -97,16 +83,12 @@ public class CoreMatchModule extends MatchModule implements Listener {
             if (team == core.getOwner()) {
               event.setCancelled(true, new PersonalizedTranslatable("match.core.damageOwn"));
             } else if (event.getOldState().getData().equals(core.getMaterial())) {
-              this.match
-                  .getPluginManager()
-                  .callEvent(new CoreBlockBreakEvent(core, player, event.getOldState()));
+              this.match.callEvent(new CoreBlockBreakEvent(core, player, event.getOldState()));
               core.touch(player);
 
               // Note: team may not have touched a broken core if a different team broke it
               if (!core.isCompleted(team) && !core.hasTouched(team)) {
-                this.match
-                    .getPluginManager()
-                    .callEvent(new GoalStatusChangeEvent(this.match, core));
+                this.match.callEvent(new GoalStatusChangeEvent(this.match, core));
               }
             }
           } else if (event.getCause() instanceof EntityExplodeEvent) {

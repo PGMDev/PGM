@@ -11,9 +11,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,21 +23,21 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
-import tc.oc.chat.Audience;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.chat.Audience;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchPhase;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.Feature;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.FilterDefinition;
 import tc.oc.pgm.map.MapNotFoundException;
 import tc.oc.pgm.map.PGMMap;
 import tc.oc.pgm.map.PGMMap.MapLogRecord;
-import tc.oc.pgm.match.Match;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.MatchState;
 import tc.oc.pgm.util.PrettyPaginatedResult;
-import tc.oc.server.Permissions;
 import tc.oc.world.NMSHacks;
 
 public class MapDevelopmentCommands {
@@ -63,11 +63,14 @@ public class MapDevelopmentCommands {
       throws CommandException {
     Multimap<PGMMap, PGMMap.MapLogRecord> errors = getErrors();
     Multimap<PGMMap, PGMMap.MapLogRecord> filtered = ArrayListMultimap.create();
-    filtered.putAll(map, errors.get(map));
-    errors = filtered;
+
+    if (map != null) {
+      filtered.putAll(map, errors.get(map));
+      errors = filtered;
+    }
 
     new PrettyPaginatedResult<Entry<PGMMap, MapLogRecord>>(
-        map == null ? "Map Errors" : map.getName() + " Errors") {
+        map == null ? "Errors" : map.getName() + " Errors") {
       @Override
       public String format(Map.Entry<PGMMap, PGMMap.MapLogRecord> entry, int index) {
         return entry.getValue().getLegacyFormattedMessage();
@@ -91,7 +94,7 @@ public class MapDevelopmentCommands {
     PGM.get().getMapErrorTracker().clearErrorsExcept(PGM.get().getMapLibrary().getMaps());
 
     try {
-      final Set<PGMMap> newMaps = PGM.getMatchManager().loadMaps();
+      final Collection<PGMMap> newMaps = PGM.getMatchManager().loadNewMaps();
 
       if (newMaps.isEmpty()) {
         sender.sendMessage(ChatColor.WHITE + "No new maps found");
@@ -134,7 +137,7 @@ public class MapDevelopmentCommands {
             + ChatColor.RED
             + feature.getClass().getSimpleName();
       }
-    }.display(player, match.getMatchFeatureContext().getAll(), page);
+    }.display(player, match.getFeatureContext().getAll(), page);
   }
 
   @Command(
@@ -143,7 +146,7 @@ public class MapDevelopmentCommands {
       usage = "[feature]",
       perms = Permissions.DEBUG)
   public static void featureCommand(CommandSender sender, Match match, @Text String featureQuery) {
-    if (match == null || match.getMatchFeatureContext().get(featureQuery) == null) {
+    if (match == null || match.getFeatureContext().get(featureQuery) == null) {
       sender.sendMessage(
           ChatColor.RED
               + "No feature by the name of "
@@ -152,7 +155,7 @@ public class MapDevelopmentCommands {
               + ChatColor.RED
               + " was found.");
     } else {
-      Feature feature = match.getMatchFeatureContext().get(featureQuery);
+      Feature feature = match.getFeatureContext().get(featureQuery);
       sender.sendMessage(
           ChatColor.GOLD
               + featureQuery
@@ -197,7 +200,7 @@ public class MapDevelopmentCommands {
             + ChatColor.DARK_GRAY
             + "("
             + ChatColor.GRAY
-            + target.getName(sender)
+            + target.getBukkit().getName(sender)
             + ChatColor.DARK_GRAY
             + ") -> ";
 
@@ -226,7 +229,7 @@ public class MapDevelopmentCommands {
     final PGMMap map = match.getMap();
     final Logger logger = map.getLogger();
 
-    if (match.getState() != MatchState.Idle && !force) {
+    if (match.getPhase() != MatchPhase.IDLE && !force) {
       sender.sendMessage(
           ChatColor.RED + AllTranslations.get().translate("command.map.update.running", sender));
     } else {
@@ -321,7 +324,7 @@ public class MapDevelopmentCommands {
 
   private static FilterDefinition getFilterDefinition(String id, Match match, CommandSender sender)
       throws CommandException {
-    FilterDefinition feature = match.getModuleContext().features().get(id, FilterDefinition.class);
+    FilterDefinition feature = match.getMapContext().features().get(id, FilterDefinition.class);
     if (feature == null) {
       throw new CommandException("No " + FilterDefinition.class.getSimpleName() + " with ID " + id);
     }

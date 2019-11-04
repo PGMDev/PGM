@@ -3,7 +3,7 @@ package tc.oc.pgm.kits;
 import com.google.common.collect.Iterables;
 import java.util.*;
 import org.bukkit.inventory.ItemStack;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 /**
  * Fired when an {@link ItemKit} is applied to a player. The kit can be modified through the

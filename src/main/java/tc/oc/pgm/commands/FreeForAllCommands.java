@@ -9,9 +9,9 @@ import java.util.Optional;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.AllTranslations;
+import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
-import tc.oc.pgm.match.Match;
-import tc.oc.server.Permissions;
 
 public class FreeForAllCommands {
 

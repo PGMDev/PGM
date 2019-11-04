@@ -10,9 +10,9 @@ import tc.oc.named.NameType;
 import tc.oc.named.Names;
 import tc.oc.named.NicknameRenderer;
 import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.Party;
 import tc.oc.util.components.ComponentUtils;
 
 /** Adds team colors to player names */

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 public class ArmorKit extends AbstractKit {
   public static class ArmorItem {

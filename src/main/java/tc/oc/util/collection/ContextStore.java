@@ -1,13 +1,8 @@
 package tc.oc.util.collection;
 
 import com.google.common.collect.Maps;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.UUID;
 
 public class ContextStore<T> implements Iterable<Entry<String, T>> {
   protected final Map<String, T> store = Maps.newLinkedHashMap();

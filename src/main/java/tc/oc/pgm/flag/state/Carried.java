@@ -14,6 +14,12 @@ import org.bukkit.inventory.ItemStack;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.named.NameStyle;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.filters.query.IQuery;
 import tc.oc.pgm.filters.query.PlayerStateQuery;
 import tc.oc.pgm.flag.Flag;
@@ -26,7 +32,6 @@ import tc.oc.pgm.goals.events.GoalEvent;
 import tc.oc.pgm.kits.ArmorType;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitMatchModule;
-import tc.oc.pgm.match.*;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.scoreboard.SidebarMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
@@ -226,12 +231,11 @@ public class Carried extends Spawned implements Missing {
 
     this.flag
         .getMatch()
-        .sendMessageExcept(
+        .sendMessage(
             new PersonalizedTranslatable(
                 "match.flag.capture",
                 this.flag.getComponentName(),
-                this.carrier.getComponentName()),
-            this.carrier);
+                this.carrier.getStyledName(NameStyle.COLOR)));
 
     this.flag.resetTouches(this.carrier.getCompetitor());
     this.flag.resetProximity(this.carrier.getCompetitor());

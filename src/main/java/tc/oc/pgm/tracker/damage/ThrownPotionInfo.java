@@ -6,7 +6,7 @@ import org.bukkit.potion.PotionEffectType;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.item.Potions;
-import tc.oc.pgm.match.ParticipantState;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.world.NMSHacks;
 
 public class ThrownPotionInfo extends EntityInfo implements PotionInfo {

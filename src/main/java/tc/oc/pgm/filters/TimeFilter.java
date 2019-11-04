@@ -17,7 +17,7 @@ public class TimeFilter extends TypedFilter<IMatchQuery> implements Comparable<T
 
   @Override
   protected QueryResponse queryTyped(IMatchQuery query) {
-    return QueryResponse.fromBoolean(!query.getMatch().getRunningTime().isShorterThan(duration));
+    return QueryResponse.fromBoolean(!query.getMatch().getDuration().isShorterThan(duration));
   }
 
   public Duration getTime() {

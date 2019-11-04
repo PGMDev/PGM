@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import javax.annotation.Nullable;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.util.reflect.ReflectionUtils;
 

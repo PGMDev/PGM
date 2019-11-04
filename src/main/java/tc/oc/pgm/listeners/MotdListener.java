@@ -9,8 +9,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerListPingEvent;
 import tc.oc.pgm.Config;
-import tc.oc.pgm.events.MatchLoadEvent;
-import tc.oc.pgm.events.MatchStateChangeEvent;
+import tc.oc.pgm.api.match.event.MatchLoadEvent;
+import tc.oc.pgm.api.match.event.MatchPhaseChangeEvent;
+import tc.oc.pgm.events.ConfigLoadEvent;
 
 public class MotdListener implements Listener {
 
@@ -21,7 +22,7 @@ public class MotdListener implements Listener {
   private static final String STATE_NAME_LOWER_KEY = "state.name-lower";
 
   private static final Map<String, String> MOTD_DATA = Maps.newHashMap();
-  private final String format;
+  private String format;
 
   // Show the default MOTD until a match has loaded
   private boolean ready = false;
@@ -45,32 +46,37 @@ public class MotdListener implements Listener {
   }
 
   @EventHandler
+  public void onConfigReload(ConfigLoadEvent event) {
+    this.format = Config.Motd.format();
+  }
+
+  @EventHandler
   public void onLoad(MatchLoadEvent event) {
-    MOTD_DATA.put(MAP_NAME_KEY, event.getMatch().getMapInfo().name);
-    MOTD_DATA.put(MAP_VERSION_KEY, event.getMatch().getMapInfo().version.toString());
+    MOTD_DATA.put(MAP_NAME_KEY, event.getMatch().getMap().getInfo().name);
+    MOTD_DATA.put(MAP_VERSION_KEY, event.getMatch().getMap().getInfo().version.toString());
     ready = true;
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
-  public void onStateChange(MatchStateChangeEvent event) {
-    String name = event.getNewState().name();
+  public void onStateChange(MatchPhaseChangeEvent event) {
+    String name = event.getNewPhase().name();
     ChatColor color = ChatColor.WHITE;
-    switch (event.getNewState()) {
-      case Idle:
+    switch (event.getNewPhase()) {
+      case IDLE:
         color = Config.Motd.Colors.idle();
         break;
-      case Starting:
+      case STARTING:
         color = Config.Motd.Colors.starting();
         break;
-      case Running:
+      case RUNNING:
         color = Config.Motd.Colors.running();
         break;
-      case Finished:
+      case FINISHED:
         color = Config.Motd.Colors.finished();
         break;
     }
     MOTD_DATA.put(STATE_NAME_KEY, name);
     MOTD_DATA.put(STATE_NAME_LOWER_KEY, name.toLowerCase());
-    MOTD_DATA.put(STATE_COLOR_KEY, ChatColor.COLOR_CHAR + color.toString());
+    MOTD_DATA.put(STATE_COLOR_KEY, color.toString());
   }
 }

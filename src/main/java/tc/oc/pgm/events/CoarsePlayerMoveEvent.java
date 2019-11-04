@@ -6,6 +6,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerMoveEvent;
 import tc.oc.block.BlockVectors;
+import tc.oc.pgm.api.event.GeneralizingEvent;
 
 /**
  * Wraps PlayerMoveEvents that cross block boundaries. The from and to locations are the same as the
@@ -56,8 +57,8 @@ public class CoarsePlayerMoveEvent extends GeneralizingEvent {
   }
 
   public void setTo(Location newLoc) {
-    if (this.cause instanceof PlayerMoveEvent) {
-      ((PlayerMoveEvent) this.cause).setTo(newLoc);
+    if (getCause() instanceof PlayerMoveEvent) {
+      ((PlayerMoveEvent) getCause()).setTo(newLoc);
     }
   }
 

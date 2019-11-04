@@ -18,6 +18,7 @@ import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.material.MaterialData;
 import tc.oc.block.BlockStates;
 import tc.oc.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.api.event.GeneralizingEvent;
 import tc.oc.pgm.blockdrops.BlockDrops;
 import tc.oc.util.reflect.ReflectionUtils;
 

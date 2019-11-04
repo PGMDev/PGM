@@ -3,9 +3,9 @@ package tc.oc.pgm.projectile;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.joda.time.Duration;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.kits.tag.ItemTags;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.MatchPlayerState;
 
 public class CooldownRunnable extends BukkitRunnable {
   private final ProjectileCooldown projectileCooldown;

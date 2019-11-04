@@ -900,7 +900,7 @@ public class XMLUtils {
     return new Skin(data, null);
   }
 
-  /** Guess if the given text is a JSON object by looking for the curly braces at either end */
+  /** Guess if the given text is a JSON object by looking for the curly braces at either finish */
   public static boolean looksLikeJson(String text) {
     text = text.trim();
     return text.startsWith("{") && text.endsWith("}");

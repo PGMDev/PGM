@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.GoalModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.RegionModule;
@@ -36,7 +36,7 @@ public class ControlPointModule extends MapModule {
 
     for (ControlPointDefinition definition : this.definitions) {
       ControlPoint controlPoint = new ControlPoint(match, definition);
-      match.getMatchFeatureContext().add(controlPoint);
+      match.getFeatureContext().add(controlPoint);
       match.needMatchModule(GoalMatchModule.class).addGoal(controlPoint);
       controlPoints.add(controlPoint);
     }

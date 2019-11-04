@@ -15,8 +15,18 @@ import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
+import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.party.event.PartyAddEvent;
+import tc.oc.pgm.api.party.event.PartyRemoveEvent;
+import tc.oc.pgm.api.party.event.PartyRenameEvent;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.*;
-import tc.oc.pgm.match.*;
+import tc.oc.pgm.events.PlayerPartyChangeEvent;
+import tc.oc.pgm.match.MatchModule;
 import tc.oc.util.StringUtils;
 
 @ListenerScope(MatchScope.LOADED)
@@ -27,7 +37,7 @@ public class ScoreboardMatchModule extends MatchModule implements Listener {
 
   public ScoreboardMatchModule(Match match) {
     super(match);
-    this.hiddenScoreboard = getMatch().getServer().getScoreboardManager().getNewScoreboard();
+    this.hiddenScoreboard = PGM.get().getServer().getScoreboardManager().getNewScoreboard();
   }
 
   @Override
@@ -50,7 +60,7 @@ public class ScoreboardMatchModule extends MatchModule implements Listener {
     team.setSuffix(ChatColor.WHITE.toString());
 
     team.setCanSeeFriendlyInvisibles(true);
-    team.setAllowFriendlyFire(getMatch().getMapInfo().friendlyFire);
+    team.setAllowFriendlyFire(getMatch().getMap().getInfo().friendlyFire);
 
     if (!forObservers && party instanceof Competitor) {
       NameTagVisibility nameTags = ((Competitor) party).getNameTagVisibility();
@@ -76,7 +86,7 @@ public class ScoreboardMatchModule extends MatchModule implements Listener {
 
   protected void addPartyScoreboard(Party newParty) {
     // Create the new party's scoreboard
-    Scoreboard newScoreboard = getMatch().getServer().getScoreboardManager().getNewScoreboard();
+    Scoreboard newScoreboard = PGM.get().getServer().getScoreboardManager().getNewScoreboard();
     logger.fine("Created scoreboard " + toString(newScoreboard) + " for party " + newParty);
 
     // Add all previously existing parties to the new scoreboard (but not the new party)

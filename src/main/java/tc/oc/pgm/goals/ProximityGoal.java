@@ -10,14 +10,18 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import tc.oc.block.BlockVectors;
 import tc.oc.pgm.Config;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.party.event.CompetitorRemoveEvent;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.CoarsePlayerMoveEvent;
-import tc.oc.pgm.events.CompetitorRemoveEvent;
-import tc.oc.pgm.events.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalProximityChangeEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
-import tc.oc.pgm.match.*;
 import tc.oc.util.collection.DefaultMapAdapter;
 import tc.oc.util.components.ComponentUtils;
 
@@ -153,7 +157,7 @@ public abstract class ProximityGoal<T extends ProximityGoalDefinition> extends O
     return team != null
         && Config.Scoreboard.showProximity()
         && isProximityRelevant(team)
-        && (viewer == team || viewer.isObservingType());
+        && (viewer == team || viewer.isObserving());
   }
 
   public ChatColor renderProximityColor(Competitor team, Party viewer) {

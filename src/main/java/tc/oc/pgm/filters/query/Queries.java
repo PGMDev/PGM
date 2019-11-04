@@ -3,7 +3,7 @@ package tc.oc.pgm.filters.query;
 import javax.annotation.Nullable;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.Event;
-import tc.oc.pgm.match.ParticipantState;
+import tc.oc.pgm.api.player.ParticipantState;
 
 public class Queries {
   private Queries() {}

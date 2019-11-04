@@ -16,15 +16,16 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemBreakEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ItemTransferEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerResetEvent;
 import tc.oc.pgm.kits.tag.Grenade;
 import tc.oc.pgm.kits.tag.ItemTags;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchPlayer;
-import tc.oc.pgm.match.MatchScope;
 import tc.oc.world.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -52,7 +53,7 @@ public class KitMatchModule extends MatchModule implements Listener {
   /** Clear any {@link AttributeModifier}s applied to the player by {@link AttributeKit}s */
   public void clearAttributeModifiers(MatchPlayer player) {
     for (AttributeModifier modifier :
-        getMatch().getModuleContext().getKitParser().getAttributeModifiers()) {
+        getMatch().getMapContext().getKitParser().getAttributeModifiers()) {
       // ASHCON: player.getBukkit().removeAttributeModifier(modifier);
     }
   }
@@ -140,7 +141,7 @@ public class KitMatchModule extends MatchModule implements Listener {
 
         Grenade grenade = Grenade.ITEM_TAG.get(stack);
         if (grenade != null) {
-          grenade.set(getMatch().getPlugin(), event.getEntity());
+          grenade.set(PGM.get(), event.getEntity());
         }
       }
     }

@@ -3,7 +3,7 @@ package tc.oc.pgm.kits;
 import com.google.common.base.Preconditions;
 import java.util.List;
 import org.bukkit.inventory.ItemStack;
-import tc.oc.pgm.match.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 public class HealthKit extends AbstractKit {
   protected final int halfHearts;

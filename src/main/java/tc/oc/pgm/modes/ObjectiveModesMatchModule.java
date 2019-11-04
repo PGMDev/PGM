@@ -10,10 +10,10 @@ import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import tc.oc.chat.Sound;
 import tc.oc.component.types.PersonalizedText;
+import tc.oc.pgm.api.chat.Sound;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.CountdownContext;
-import tc.oc.pgm.match.Match;
 import tc.oc.pgm.match.MatchModule;
 
 public class ObjectiveModesMatchModule extends MatchModule {
@@ -29,8 +29,7 @@ public class ObjectiveModesMatchModule extends MatchModule {
     this.modes = modes;
 
     this.countdowns = new ArrayList<>(this.modes.size());
-    this.countdownContext =
-        new CountdownContext(this.match.getPlugin(), match.getClock(), match.getLogger());
+    this.countdownContext = new CountdownContext(getMatch(), match.getLogger());
   }
 
   @Override
@@ -55,7 +54,7 @@ public class ObjectiveModesMatchModule extends MatchModule {
     }
   }
 
-  public CountdownContext getCountdownContext() {
+  public CountdownContext getCountdown() {
     return this.countdownContext;
   }
 
@@ -81,7 +80,7 @@ public class ObjectiveModesMatchModule extends MatchModule {
                   @Override
                   public boolean apply(@Nullable ModeChangeCountdown countdown) {
                     return ObjectiveModesMatchModule.this
-                            .getCountdownContext()
+                            .getCountdown()
                             .getTimeLeft(countdown)
                             .getStandardSeconds()
                         > 0;
