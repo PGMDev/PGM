@@ -18,6 +18,7 @@ import tc.oc.pgm.blitz.BlitzModule;
 import tc.oc.pgm.blockdrops.BlockDropsModule;
 import tc.oc.pgm.bossbar.BossBarModule;
 import tc.oc.pgm.broadcast.BroadcastModule;
+import tc.oc.pgm.channels.ChannelsMatchModule;
 import tc.oc.pgm.classes.ClassModule;
 import tc.oc.pgm.commands.*;
 import tc.oc.pgm.controlpoint.ControlPointModule;
@@ -364,6 +365,7 @@ public final class PGM extends JavaPlugin {
     factory.register(ViewInventoryMatchModule.class, new ViewInventoryMatchModule.Factory());
     factory.register(JoinMatchModule.class, new JoinMatchModule.Factory());
     factory.register(CycleMatchModule.class, new CycleMatchModule.Factory());
+    factory.register(ChannelsMatchModule.class, new ChannelsMatchModule.Factory());
 
     return factory;
   }
