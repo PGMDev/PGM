@@ -3,6 +3,7 @@ package tc.oc.pgm.listeners;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -59,7 +60,7 @@ public class MotdListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onStateChange(MatchPhaseChangeEvent event) {
-    String name = event.getNewPhase().name();
+    String name = event.getNewPhase().name().toLowerCase();
     ChatColor color = ChatColor.WHITE;
     switch (event.getNewPhase()) {
       case IDLE:
@@ -75,8 +76,8 @@ public class MotdListener implements Listener {
         color = Config.Motd.Colors.finished();
         break;
     }
-    MOTD_DATA.put(STATE_NAME_KEY, name);
-    MOTD_DATA.put(STATE_NAME_LOWER_KEY, name.toLowerCase());
+    MOTD_DATA.put(STATE_NAME_KEY, StringUtils.capitalize(name));
+    MOTD_DATA.put(STATE_NAME_LOWER_KEY, name);
     MOTD_DATA.put(STATE_COLOR_KEY, color.toString());
   }
 }
