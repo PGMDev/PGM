@@ -3,7 +3,10 @@ package tc.oc.pgm.match;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.lang.ref.WeakReference;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
@@ -110,10 +113,7 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
       return null;
     } else {
       return new ParticipantStateImpl(
-          getMatch(),
-          Identities.current(getBukkit()),
-          (Competitor) party,
-          getBukkit().getLocation());
+          getMatch(), Identities.current(getBukkit()), getParty(), getBukkit().getLocation());
     }
   }
 
@@ -299,7 +299,7 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
 
   @Override
   public void internalSetParty(Party newParty) {
-    if (getParty() != newParty && party.compareAndSet(getParty(), newParty)) {
+    if (party.compareAndSet(getParty(), newParty)) {
       query.set(new PlayerQuery(null, this));
     }
   }

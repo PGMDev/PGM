@@ -3,8 +3,6 @@ package tc.oc.pgm.match;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import java.lang.ref.WeakReference;
 import java.util.*;
@@ -15,6 +13,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -357,17 +356,19 @@ public class MatchImpl implements Match, Comparable<Match> {
 
   @Override
   public Collection<MatchPlayer> getPlayers() {
-    return ImmutableSet.copyOf(players.values());
+    return Collections.unmodifiableCollection(players.values());
   }
 
   @Override
   public Collection<MatchPlayer> getObservers() {
-    return Collections2.filter(getPlayers(), player -> player.isObserving());
+    return observers.getPlayers();
   }
 
   @Override
   public Collection<MatchPlayer> getParticipants() {
-    return Collections2.filter(getPlayers(), player -> player.isParticipating());
+    return getCompetitors().stream()
+        .flatMap(c -> c.getPlayers().stream())
+        .collect(Collectors.toList());
   }
 
   @Override
@@ -545,7 +546,7 @@ public class MatchImpl implements Match, Comparable<Match> {
 
   @Override
   public Collection<VictoryCondition> getVictoryConditions() {
-    return ImmutableSet.copyOf(victory);
+    return Collections.unmodifiableCollection(victory);
   }
 
   @Override
@@ -574,12 +575,12 @@ public class MatchImpl implements Match, Comparable<Match> {
 
   @Override
   public Collection<Party> getParties() {
-    return ImmutableSet.copyOf(parties);
+    return Collections.unmodifiableCollection(parties);
   }
 
   @Override
   public Collection<Competitor> getCompetitors() {
-    return ImmutableSet.copyOf(competitors);
+    return Collections.unmodifiableCollection(competitors);
   }
 
   @Override

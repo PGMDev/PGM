@@ -1,10 +1,6 @@
 package tc.oc.pgm.match;
 
-import com.google.common.collect.ImmutableList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import javax.annotation.Nullable;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.chat.MultiAudience;
@@ -47,7 +43,7 @@ public abstract class SimpleParty implements Party, MultiAudience {
 
   @Override
   public Collection<MatchPlayer> getPlayers() {
-    return ImmutableList.copyOf(players.values());
+    return Collections.unmodifiableCollection(players.values());
   }
 
   @Override

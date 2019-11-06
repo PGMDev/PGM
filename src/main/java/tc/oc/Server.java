@@ -143,7 +143,6 @@ public class Server extends DedicatedServer {
   }
 
   private void setupConsole() {
-    if (System.console() == null) return;
     final Thread console =
         new Thread(
             () -> {

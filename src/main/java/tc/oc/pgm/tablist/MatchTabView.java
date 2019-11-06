@@ -16,6 +16,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
+import tc.oc.pgm.match.ObservingParty;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.tablist.TabEntry;
@@ -245,19 +246,19 @@ public class MatchTabView extends TabView implements Listener {
     if (this.match != event.getMatch()) return;
 
     if (event.getOldParty() != null) {
-      if (event.getOldParty().isParticipating()) {
-        this.participantPlayers.remove(event.getPlayer());
-      } else {
-        this.observerPlayers.remove(event.getPlayer());
-      }
+      this.participantPlayers.remove(event.getPlayer());
+      this.observerPlayers.remove(event.getPlayer());
     }
+
     if (event.getNewParty() != null) {
-      if (event.getNewParty().isParticipating()
-          && !this.participantPlayers.contains(event.getPlayer())) {
-        this.participantPlayers.add(event.getPlayer());
-      } else if (event.getNewParty().isObserving()
-          && !this.observerPlayers.contains(event.getPlayer())) {
-        this.observerPlayers.add(event.getPlayer());
+      if (event.getNewParty() instanceof ObservingParty) {
+        if (!this.observerPlayers.contains(event.getPlayer())) {
+          this.observerPlayers.add(event.getPlayer());
+        }
+      } else {
+        if (!this.participantPlayers.contains(event.getPlayer())) {
+          this.participantPlayers.add(event.getPlayer());
+        }
       }
     }
 

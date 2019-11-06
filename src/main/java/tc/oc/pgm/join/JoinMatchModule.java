@@ -21,6 +21,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.match.MatchModuleFactory;
+import tc.oc.pgm.match.ObservingParty;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.teams.TeamMatchModule;
@@ -92,7 +93,7 @@ public class JoinMatchModule extends MatchModule implements Listener, JoinHandle
 
     // If mid-match join is disabled, player cannot join for the first time after the match has
     // started
-    if (!Config.Join.midMatch()) {
+    if (getMatch().isRunning() && !Config.Join.midMatch()) {
       return GenericJoinResult.Status.MATCH_STARTED.toResult();
     }
 
@@ -153,7 +154,7 @@ public class JoinMatchModule extends MatchModule implements Listener, JoinHandle
   public boolean leave(MatchPlayer leaving) {
     if (cancelQueuedJoin(leaving)) return true;
 
-    if (leaving.isObserving()) {
+    if (leaving.getParty() instanceof ObservingParty) {
       leaving.sendWarning(
           new PersonalizedTranslatable("command.gameplay.leave.alreadyOnObservers"), false);
       return false;
@@ -175,7 +176,7 @@ public class JoinMatchModule extends MatchModule implements Listener, JoinHandle
   }
 
   public boolean isQueuedToJoin(MatchPlayer joining) {
-    return queuedParticipants == joining.getParty();
+    return queuedParticipants.equals(joining.getParty());
   }
 
   public boolean queueToJoin(MatchPlayer joining) {

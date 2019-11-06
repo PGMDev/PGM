@@ -134,14 +134,14 @@ public class PickerMatchModule extends MatchModule implements Listener {
   private boolean canUse(MatchPlayer player) {
     if (player == null) return false;
 
-    // Not allowed to join teams
-    if (!canAutoJoin(player)) return false;
-
     // Player is eliminated from Blitz
     if (isBlitz && getMatch().isRunning()) return false;
 
     // Player is not observing or dead
     if (!(player.isObserving() || player.isDead())) return false;
+
+    // Not allowed to join teams
+    if (!canAutoJoin(player)) return false;
 
     return true;
   }
