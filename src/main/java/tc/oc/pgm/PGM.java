@@ -212,7 +212,7 @@ public final class PGM extends JavaPlugin {
               public void run() {
                 if (!PGM.this
                     .matchManager
-                    .cycleMatch(null, mapLibrary.getMaps().iterator().next(), true)
+                    .cycleMatch(null, MapCommands.popNextMap(), true)
                     .isPresent()) {
                   getLogger().severe("Failed to load an initial match, shutting down");
                   getServer().shutdown();
