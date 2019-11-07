@@ -73,8 +73,7 @@ public class PGMListener implements Listener {
       return;
     }
 
-    // FIXME: multi-match support
-    this.mm.getMatches().iterator().next().addPlayer(event.getPlayer());
+    this.mm.getMatch(event.getWorld()).addPlayer(event.getPlayer());
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
