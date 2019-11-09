@@ -73,8 +73,11 @@ public class MapCommands {
       throws CommandException {
     final Set<PGMMap> maps = ImmutableSortedSet.copyOf(library.getMaps());
 
-    int resultsPerPage = 8;
-    int pages = library.getMaps().size() / resultsPerPage + 1;
+    double resultsPerPage = 8;
+    int pages =
+        library.getMaps().size() / resultsPerPage <= 0
+            ? 1
+            : (int) Math.ceil(library.getMaps().size() / resultsPerPage);
 
     String listHeader =
         ChatColor.BLUE.toString()
@@ -98,7 +101,7 @@ public class MapCommands {
             + " ---------------"
             + ChatColor.RESET;
 
-    new PrettyPaginatedResult<PGMMap>(listHeader, resultsPerPage) {
+    new PrettyPaginatedResult<PGMMap>(listHeader, (int) resultsPerPage) {
       @Override
       public String format(PGMMap map, int index) {
         return (index + 1) + ". " + map.getInfo().getShortDescription(sender);
