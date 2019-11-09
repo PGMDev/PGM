@@ -167,8 +167,7 @@ public class RestartListener implements Listener {
    * duration.
    */
   public void queueRestart(Match match, Duration duration, String reason) {
-    this.startCountdown(match, duration);
-    RestartManager.get().requestRestart(reason);
+    RestartManager.get().requestTimedRestart(duration);
   }
 
   /**

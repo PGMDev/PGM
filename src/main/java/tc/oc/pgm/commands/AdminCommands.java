@@ -31,7 +31,7 @@ import tc.oc.util.TimeUtils;
 public class AdminCommands {
 
   @Command(
-      aliases = {"restart"},
+      aliases = {"timedrestart"},
       desc = "Queues a server restart after a certain amount of time",
       usage = "[seconds] - defaults to 30 seconds",
       flags = "f",
