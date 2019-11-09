@@ -106,7 +106,10 @@ public class RestartManager implements Runnable, Listener {
             .runTaskLater(
                 this.plugin,
                 () -> {
-                  if (!this.deferrals.isEmpty()) return;
+                  if (!this.deferrals.isEmpty()) {
+                    timedQueuedRestartTaskID = 0;
+                    return;
+                  }
                   timedQueuedRestartTaskID = 0;
                   logger.info("Restarting due to request at " + queueStamp);
                   this.plugin.getServer().shutdown();
@@ -123,8 +126,10 @@ public class RestartManager implements Runnable, Listener {
   }
 
   public void cancelRestart() {
-    if (timedQueuedRestartTaskID > 0)
+    if (timedQueuedRestartTaskID > 0) {
       this.plugin.getServer().getScheduler().cancelTask(timedQueuedRestartTaskID);
+      timedQueuedRestartTaskID = 0;
+    }
     if (this.isRestartRequested()) {
       this.queuedAt = null;
       this.reason = null;
