@@ -81,13 +81,16 @@ public class EventFilterMatchModule extends MatchModule implements Listener {
   }
 
   boolean cancelUnlessInteracting(Cancellable event, Entity entity) {
-    return entity != null
-        && cancel(
-            event,
-            getMatch().getParticipant(entity) == null,
-            entity.getWorld(),
-            getMatch().getPlayer(entity),
-            null);
+    if (!(entity instanceof Player)) {
+      return false;
+    }
+
+    return cancel(
+        event,
+        getMatch().getParticipant(entity) == null,
+        entity.getWorld(),
+        getMatch().getPlayer(entity),
+        null);
   }
 
   boolean cancelUnlessInteracting(Cancellable event, MatchPlayerState player) {
@@ -303,7 +306,7 @@ public class EventFilterMatchModule extends MatchModule implements Listener {
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onPotionSplash(final PotionSplashEvent event) {
     for (LivingEntity entity : event.getAffectedEntities()) {
-      if (getMatch().getParticipant(entity) == null) {
+      if (entity instanceof Player && getMatch().getParticipant(entity) == null) {
         event.setIntensity(entity, 0);
       }
     }
