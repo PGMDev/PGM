@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
+import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.joda.time.Duration;
@@ -35,7 +36,7 @@ public class RestartManager implements Runnable, Listener {
   private Instant queuedAt;
   private String reason;
 
-  private int timedQueuedRestartTaskID;
+  private int queuedRestartTask;
 
   public RestartManager(Plugin plugin) {
     checkState(instance == null);
@@ -99,18 +100,13 @@ public class RestartManager implements Runnable, Listener {
   public void requestTimedRestart(Duration duration) {
     Instant queueStamp = Instant.now();
     long ticks = duration.getStandardSeconds() * 20;
-    timedQueuedRestartTaskID =
-        this.plugin
-            .getServer()
-            .getScheduler()
+    queuedRestartTask =
+        Bukkit.getScheduler()
             .runTaskLater(
                 this.plugin,
                 () -> {
-                  if (!this.deferrals.isEmpty()) {
-                    timedQueuedRestartTaskID = 0;
-                    return;
-                  }
-                  timedQueuedRestartTaskID = 0;
+                  queuedRestartTask = 0;
+                  if (!this.deferrals.isEmpty()) return;
                   logger.info("Restarting due to request at " + queueStamp);
                   this.plugin.getServer().shutdown();
                 },
@@ -126,9 +122,9 @@ public class RestartManager implements Runnable, Listener {
   }
 
   public void cancelRestart() {
-    if (timedQueuedRestartTaskID > 0) {
-      this.plugin.getServer().getScheduler().cancelTask(timedQueuedRestartTaskID);
-      timedQueuedRestartTaskID = 0;
+    if (queuedRestartTask > 0) {
+      this.plugin.getServer().getScheduler().cancelTask(queuedRestartTask);
+      queuedRestartTask = 0;
     }
     if (this.isRestartRequested()) {
       this.queuedAt = null;
