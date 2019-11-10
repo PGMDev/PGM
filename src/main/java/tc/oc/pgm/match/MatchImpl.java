@@ -77,6 +77,7 @@ public class MatchImpl implements Match, Comparable<Match> {
   private final AtomicBoolean loaded;
   private final AtomicReference<MatchPhase> state;
   private final AtomicLong start;
+  private final AtomicLong end;
   private final AtomicInteger capacity;
   private final EnumMap<MatchScope, Scheduler> schedulers;
   private final EnumMap<MatchScope, Collection<Listener>> listeners;
@@ -103,6 +104,7 @@ public class MatchImpl implements Match, Comparable<Match> {
     this.loaded = new AtomicBoolean(false);
     this.state = new AtomicReference<>(MatchPhase.IDLE);
     this.start = new AtomicLong(0);
+    this.end = new AtomicLong(0);
     this.capacity = new AtomicInteger(map.getPersistentContext().getMaxPlayers());
     this.schedulers = new EnumMap<>(MatchScope.class);
     this.listeners = new EnumMap<>(MatchScope.class);
@@ -176,6 +178,7 @@ public class MatchImpl implements Match, Comparable<Match> {
       if (state == MatchPhase.FINISHED) {
         removeListeners(MatchScope.RUNNING);
         getModuleContext().getAll().forEach(MatchModule::disable);
+        end.set(System.currentTimeMillis());
       }
 
       getPlayers().forEach(MatchPlayer::resetGamemode);
@@ -627,7 +630,13 @@ public class MatchImpl implements Match, Comparable<Match> {
     if (start.get() <= 0) {
       return Duration.ZERO;
     }
-    return new Duration(start.get(), System.currentTimeMillis());
+
+    long endMs = end.get();
+    if (endMs <= 0) {
+      endMs = System.currentTimeMillis();
+    }
+
+    return new Duration(start.get(), endMs);
   }
 
   private void startTickables(MatchScope scope) {
