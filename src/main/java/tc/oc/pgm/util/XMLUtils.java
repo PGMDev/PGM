@@ -1018,12 +1018,15 @@ public class XMLUtils {
 
   public static AttributeModifier.Operation parseAttributeOperation(Node node, String text)
       throws InvalidXMLException {
-    AttributeModifier.Operation operation =
-        AttributeModifier.Operation.valueOf(text.toUpperCase().replace(" ", "_"));
-    if (operation == null) {
-      throw new InvalidXMLException("Unknown attribute modifier operation '" + text + "'", node);
+    switch (text.toLowerCase()) {
+      case "add":
+        return AttributeModifier.Operation.ADD_NUMBER;
+      case "base":
+        return AttributeModifier.Operation.ADD_SCALAR;
+      case "multiply":
+        return AttributeModifier.Operation.MULTIPLY_SCALAR_1;
     }
-    return operation;
+    throw new InvalidXMLException("Unknown attribute modifier operation '" + text + "'", node);
   }
 
   public static AttributeModifier.Operation parseAttributeOperation(Node node)
