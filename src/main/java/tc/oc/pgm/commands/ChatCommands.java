@@ -83,6 +83,12 @@ public class ChatCommands {
         message,
         "[" + ChatColor.GOLD + "DM" + ChatColor.WHITE + "] {0}: {1}",
         viewer -> viewer.getBukkit().equals(receiver));
+
+    send(
+        PGM.getMatchManager().getPlayer(receiver),
+        message,
+        "[" + ChatColor.GOLD + "DM" + ChatColor.WHITE + "] -> {0}: {1}",
+        viewer -> viewer.getBukkit().equals(sender.getBukkit()));
   }
 
   @Command(
