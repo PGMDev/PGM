@@ -6,6 +6,8 @@ bukkit:
     connection-throttle: -1
     # Changed from 'Server stopped'
     shutdown-message: Server restarting
+    # Move world container from root to matches directory
+    world-container: './matches'
   chunk-gc:
     # Disable garbage collection of chunks
     period-in-ticks: 0
