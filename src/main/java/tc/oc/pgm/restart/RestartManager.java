@@ -98,6 +98,10 @@ public class RestartManager implements Runnable, Listener {
   }
 
   public void requestTimedRestart(Duration duration) {
+    if (queuedRestartTask > 0) {
+      this.plugin.getServer().getScheduler().cancelTask(queuedRestartTask);
+      queuedRestartTask = 0;
+    }
     Instant queueStamp = Instant.now();
     long ticks = duration.getStandardSeconds() * 20;
     queuedRestartTask =
