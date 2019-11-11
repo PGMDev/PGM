@@ -30,7 +30,8 @@ public class MatchManagerImpl implements MatchManager {
   private final MapLibrary library;
   private final MapLoader loader;
 
-  private final Map<String, Match> matches;
+  private final Map<String, Match> matchById;
+  private final Map<String, String> matchIdByWorldName;
   private final AtomicInteger count;
 
   public MatchManagerImpl(Server server, MapLibrary library, MapLoader loader)
@@ -39,7 +40,8 @@ public class MatchManagerImpl implements MatchManager {
     this.server = server;
     this.library = library;
     this.loader = loader;
-    this.matches = new HashMap<>();
+    this.matchById = new HashMap<>();
+    this.matchIdByWorldName = new HashMap<>();
     this.count = new AtomicInteger(0);
 
     loadNewMaps();
@@ -61,8 +63,8 @@ public class MatchManagerImpl implements MatchManager {
 
     final Match match = new MatchImpl(id, map, world);
 
-    matches.put(match.getId(), match);
-    matches.put(match.getWorld().getName(), match);
+    matchById.put(match.getId(), match);
+    matchIdByWorldName.put(match.getWorld().getName(), match.getId());
 
     try {
       match.load();
@@ -129,12 +131,12 @@ public class MatchManagerImpl implements MatchManager {
 
   @Override
   public Collection<Match> getMatches() {
-    return Collections.unmodifiableCollection(matches.values());
+    return Collections.unmodifiableCollection(matchById.values());
   }
 
   @Override
   public void unloadMatch(@Nullable String id) {
-    final Match match = matches.get(id);
+    final Match match = matchById.get(id);
     if (match == null) return;
 
     if (match.isRunning()) {
@@ -145,8 +147,8 @@ public class MatchManagerImpl implements MatchManager {
       match.unload();
     }
 
-    matches.remove(match.getWorld().getName());
-    matches.remove(id);
+    matchIdByWorldName.remove(match.getWorld().getName());
+    matchById.remove(id);
   }
 
   @Override
@@ -285,7 +287,10 @@ public class MatchManagerImpl implements MatchManager {
   @Nullable
   @Override
   public Match getMatch(@Nullable World world) {
-    return world == null ? null : matches.get(world.getName());
+    if (world == null) return null;
+    final String matchId = matchIdByWorldName.get(world.getName());
+    if (matchId == null) return null;
+    return matchById.get(matchId);
   }
 
   @Nullable
