@@ -74,7 +74,7 @@ public class MapCommands {
     final Set<PGMMap> maps = ImmutableSortedSet.copyOf(library.getMaps());
 
     int resultsPerPage = 8;
-    int pages = library.getMaps().size() / resultsPerPage + 1;
+    int pages = (library.getMaps().size() + resultsPerPage - 1) / resultsPerPage;
 
     String listHeader =
         ChatColor.BLUE.toString()
