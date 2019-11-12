@@ -1,13 +1,18 @@
 package tc.oc.pgm.crafting;
 
-import java.util.Iterator;
 import java.util.Set;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.inventory.CraftingInventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import tc.oc.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.match.MatchModule;
 
-public class CraftingMatchModule extends MatchModule {
+public class CraftingMatchModule extends MatchModule implements Listener {
 
   private final Set<Recipe> customRecipes;
   private final Set<SingleMaterialMatcher> disabledRecipes;
@@ -22,17 +27,6 @@ public class CraftingMatchModule extends MatchModule {
   @Override
   public void enable() {
     super.enable();
-
-    for (Iterator<Recipe> iter = match.getWorld().recipeIterator(); iter.hasNext(); ) {
-      Recipe recipe = iter.next();
-      for (SingleMaterialMatcher result : disabledRecipes) {
-        if (result.matches(recipe.getResult())) {
-          iter.remove();
-          break;
-        }
-      }
-    }
-
     for (Recipe recipe : customRecipes) {
       match.getWorld().addRecipe(recipe);
     }
@@ -45,5 +39,21 @@ public class CraftingMatchModule extends MatchModule {
     // the next match would already be loaded.
     match.getWorld().resetRecipes();
     super.disable();
+  }
+
+  @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+  public void removeDisabledRecipe(PrepareItemCraftEvent event) {
+    CraftingInventory crafting = event.getInventory();
+    ItemStack result = crafting.getResult();
+    if (result == null) {
+      return;
+    }
+
+    for (SingleMaterialMatcher disabled : disabledRecipes) {
+      if (disabled.matches(result)) {
+        crafting.setResult(null);
+        break;
+      }
+    }
   }
 }
