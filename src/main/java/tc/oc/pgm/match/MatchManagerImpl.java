@@ -1,5 +1,6 @@
 package tc.oc.pgm.match;
 
+import com.google.common.collect.ImmutableSet;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -131,7 +132,7 @@ public class MatchManagerImpl implements MatchManager {
 
   @Override
   public Collection<Match> getMatches() {
-    return Collections.unmodifiableCollection(matchById.values());
+    return ImmutableSet.copyOf(matchById.values());
   }
 
   @Override
