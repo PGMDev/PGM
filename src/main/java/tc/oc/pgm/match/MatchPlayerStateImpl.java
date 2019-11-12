@@ -91,11 +91,12 @@ public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
 
   @Override
   public String toString() {
+    Location location = getLocation();
     return new ToStringBuilder(this)
         .append("id", getId())
         .append("party", getParty().getDefaultName())
         .append("match", getMatch().getId())
-        .append("location", getLocation().toVector())
+        .append("location", location == null ? null : location.toVector())
         .build();
   }
 }
