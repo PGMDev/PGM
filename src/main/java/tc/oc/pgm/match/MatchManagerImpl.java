@@ -277,6 +277,8 @@ public class MatchManagerImpl implements MatchManager {
       for (Player player : players) {
         newMatch.addPlayer(player);
       }
+
+      this.unloadMatch(oldMatch.getId());
     }
 
     logger.info("Loaded " + newMap.toString());
