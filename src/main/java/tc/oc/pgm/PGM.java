@@ -40,6 +40,7 @@ import tc.oc.pgm.ffa.FreeForAllModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.flag.FlagModule;
 import tc.oc.pgm.gamerules.GameRulesModule;
+import tc.oc.pgm.ghostsquadron.GhostSquadronModule;
 import tc.oc.pgm.goals.GoalModule;
 import tc.oc.pgm.hunger.HungerModule;
 import tc.oc.pgm.inventory.ViewInventoryMatchModule;
@@ -355,6 +356,7 @@ public final class PGM extends JavaPlugin {
     factory.registerStatic(GoalModule.class);
     factory.registerStatic(DamageModule.class);
     factory.registerStatic(WorldBorderModule.class);
+    factory.registerStatic(GhostSquadronModule.class);
     factory.register(CraftingModule.class, new CraftingModule.Factory());
     factory.register(ItemModifyModule.class, new ItemModifyModule.Factory());
     factory.registerFixtureMatchModule(SnapshotMatchModule.class);
