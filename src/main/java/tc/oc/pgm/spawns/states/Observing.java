@@ -59,12 +59,7 @@ public class Observing extends State {
       player.getInventory().setItem(0, toolFactory.getTeleportTool(bukkit));
 
       ItemStack book = toolFactory.getHowToBook(bukkit);
-      if (toolFactory.canUseEditWand(bukkit)) {
-        player.getInventory().setItem(1, toolFactory.getEditWand(bukkit));
-        if (book != null) player.getInventory().setItem(28, book);
-      } else {
-        if (book != null) player.getInventory().setItem(1, book);
-      }
+      if (book != null) player.getInventory().setItem(1, book);
 
       // Let other modules give observer items
       player.getMatch().callEvent(new ObserverKitApplyEvent(player));

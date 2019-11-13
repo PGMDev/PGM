@@ -10,7 +10,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.permissions.Permissible;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
@@ -26,8 +25,6 @@ import tc.oc.xml.InvalidXMLException;
 
 /** Creates some of the items for the observer hotbar */
 public class ObserverToolFactory {
-
-  public static final String EDIT_WAND_PERMISSION = "worldedit.wand";
 
   private final Logger logger;
   private final PGM plugin;
@@ -47,20 +44,6 @@ public class ObserverToolFactory {
                 + ChatColor.BOLD
                 + AllTranslations.get().translate("teleportTool.displayName", player))
         .get();
-  }
-
-  public ItemStack getEditWand(Player player) {
-    return new ItemBuilder()
-        .material(Material.RABBIT_FOOT)
-        .name(
-            ChatColor.DARK_PURPLE.toString()
-                + ChatColor.BOLD
-                + AllTranslations.get().translate("editWand.displayName", player))
-        .get();
-  }
-
-  public boolean canUseEditWand(Permissible permissible) {
-    return permissible.hasPermission(EDIT_WAND_PERMISSION);
   }
 
   public @Nullable ItemStack getHowToBook(Player player) {
