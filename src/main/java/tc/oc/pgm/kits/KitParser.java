@@ -267,15 +267,15 @@ public abstract class KitParser {
   public List<PotionEffect> parsePotions(Element el) throws InvalidXMLException {
     List<PotionEffect> effects = new ArrayList<>();
 
-    Node attr = Node.fromAttr(el, "potion", "potions");
+    Node attr = Node.fromAttr(el, "potion", "potions", "effect", "effects");
     if (attr != null) {
       for (String piece : attr.getValue().split(";")) {
         effects.add(XMLUtils.parseCompactPotionEffect(attr, piece));
       }
     }
 
-    for (Element elPotion : el.getChildren("potion")) {
-      effects.add(XMLUtils.parsePotionEffect(elPotion));
+    for (Node elPotion : Node.fromChildren(el, "potion", "effect")) {
+      effects.add(XMLUtils.parsePotionEffect(elPotion.getElement()));
     }
 
     return effects;
