@@ -1051,20 +1051,18 @@ public class XMLUtils {
     AttributeModifier.Operation operation = parseAttributeOperation(node, parts[1]);
     double amount = parseNumber(node, parts[2], Double.class);
 
-    return Pair.create(
-        attribute.getName(),
-        null /*Bukkit.getAttributeFactory().newAttributeModifier("FromXML", amount, operation)*/);
+    return Pair.create(attribute.getName(), new AttributeModifier("FromXML", amount, operation));
   }
 
   public static Pair<String, AttributeModifier> parseAttributeModifier(Element el)
       throws InvalidXMLException {
-    return Pair.create(
-        parseAttribute(new Node(el)).getName(),
-        /*Bukkit.getAttributeFactory().newAttributeModifier(
-            "FromXML",
-            parseNumber(Node.fromRequiredAttr(el, "amount"), Double.class),
-            parseAttributeOperation(Node.fromAttr(el, "operation"), AttributeModifier.Operation.ADD)
-        )*/ null);
+    String attribute = parseAttribute(new Node(el)).getName();
+    double amount = parseNumber(Node.fromRequiredAttr(el, "amount"), Double.class);
+    AttributeModifier.Operation operation =
+        parseAttributeOperation(
+            Node.fromAttr(el, "operation"), AttributeModifier.Operation.ADD_NUMBER);
+
+    return Pair.create(attribute, new AttributeModifier("FromXML", amount, operation));
   }
 
   public static GameMode parseGameMode(Node node, String text) throws InvalidXMLException {
