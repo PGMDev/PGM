@@ -13,7 +13,7 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import tc.oc.bossbar.BossBar;
 import tc.oc.bossbar.BossBarStack;
 import tc.oc.bossbar.BossBarView;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;

@@ -2,7 +2,6 @@ package tc.oc.pgm;
 
 import com.google.common.collect.ImmutableList;
 import javax.annotation.Nullable;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -11,6 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.permissions.Permission;
 import org.joda.time.Duration;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.events.ConfigLoadEvent;
 
 public class Config {
@@ -110,7 +110,7 @@ public class Config {
 
   public static class Broadcast {
     public static boolean enabled() {
-      return getConfiguration().getBoolean("broadcast.enabled", false);
+      return getConfiguration().getBoolean("broadcast.enabled", true);
     }
 
     public static int /* seconds */ frequency() {
@@ -182,8 +182,8 @@ public class Config {
 
     private static final PlayerList instance = new PlayerList();
 
-    public static void register() {
-      Bukkit.getPluginManager().registerEvents(instance, PGM.get());
+    public static PlayerList get() {
+      return instance;
     }
 
     public static boolean enabled() {

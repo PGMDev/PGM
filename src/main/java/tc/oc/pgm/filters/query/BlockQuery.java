@@ -11,7 +11,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.event.Event;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 
 /**
@@ -82,7 +82,7 @@ public class BlockQuery extends Query implements IBlockQuery {
 
   @Override
   public Match getMatch() {
-    return PGM.getMatchManager().getMatch(world);
+    return PGM.get().getMatchManager().getMatch(world);
   }
 
   @Override

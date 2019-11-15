@@ -32,6 +32,7 @@ public class MatchFinishEvent extends MatchEvent {
     return winners;
   }
 
+  /** @return Either the first and only winner, or {@code null} if none or multiple winners. */
   @Deprecated
   public final @Nullable Competitor getWinner() {
     if (getWinners().size() == 1) {

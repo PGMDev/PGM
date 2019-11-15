@@ -21,7 +21,7 @@ import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.NameTagVisibility;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.tracker.Trackers;
 import tc.oc.world.NMSHacks;
@@ -188,7 +188,7 @@ public class LongRangeTNTListener implements Listener {
     }
 
     boolean tick() {
-      if (this.entity.isDead() || PGM.getMatchManager().getMatch(this.entity) == null) {
+      if (this.entity.isDead() || PGM.get().getMatchManager().getMatch(this.entity) == null) {
         this.hideAll(false);
         return true;
       }

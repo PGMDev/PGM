@@ -17,10 +17,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerAttackEntityEvent;
 import org.bukkit.event.player.PlayerInitialSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.permissions.Permission;
 import org.jdom2.Element;
-import tc.oc.pgm.PGM;
-import tc.oc.pgm.PGMUtil;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
@@ -68,16 +66,8 @@ public class SpawnMatchModule extends MatchModule implements Listener {
     return module.spawns;
   }
 
-  public Permission getObserverPermissions() {
-    return PGMUtil.get().getObserverPermissions();
-  }
-
   public ObserverToolFactory getObserverToolFactory() {
     return observerToolFactory;
-  }
-
-  public Permission getParticipantPermissions() {
-    return PGM.get().getParticipantPermissions();
   }
 
   /** Return all {@link Spawn}s that the given player is currently allowed to spawn at */

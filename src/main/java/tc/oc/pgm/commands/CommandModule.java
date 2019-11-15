@@ -3,7 +3,7 @@ package tc.oc.pgm.commands;
 import app.ashcon.intake.parametric.AbstractModule;
 import org.bukkit.util.Vector;
 import org.joda.time.Duration;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
@@ -29,17 +29,17 @@ public class CommandModule extends AbstractModule {
 
   private void configureInstances() {
     bind(PGM.class).toInstance(pgm);
-    bind(MatchManager.class).toInstance(pgm.matchManager);
+    bind(MatchManager.class).toInstance(pgm.getMatchManager());
     bind(MapLibrary.class).toInstance(pgm.getMapLibrary());
   }
 
   private void configureProviders() {
     bind(Audience.class).toProvider(new AudienceProvider());
-    bind(Match.class).toProvider(new MatchProvider(pgm.matchManager));
-    bind(MatchPlayer.class).toProvider(new MatchPlayerProvider(pgm.matchManager));
-    bind(PGMMap.class).toProvider(new PGMMapProvider(pgm.matchManager, pgm.getMapLibrary()));
+    bind(Match.class).toProvider(new MatchProvider(pgm.getMatchManager()));
+    bind(MatchPlayer.class).toProvider(new MatchPlayerProvider(pgm.getMatchManager()));
+    bind(PGMMap.class).toProvider(new PGMMapProvider(pgm.getMatchManager(), pgm.getMapLibrary()));
     bind(Duration.class).toProvider(new DurationProvider());
-    bind(TeamMatchModule.class).toProvider(new TeamMatchModuleProvider(pgm.matchManager));
+    bind(TeamMatchModule.class).toProvider(new TeamMatchModuleProvider(pgm.getMatchManager()));
     bind(Vector.class).toProvider(new VectorProvider());
   }
 }

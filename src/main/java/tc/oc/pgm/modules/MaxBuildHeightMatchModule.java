@@ -5,8 +5,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.events.BlockTransformEvent;
 import tc.oc.pgm.match.MatchModule;
 
 public class MaxBuildHeightMatchModule extends MatchModule implements Listener {

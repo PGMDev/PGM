@@ -6,12 +6,7 @@ import app.ashcon.intake.parametric.annotation.Default;
 import com.google.common.collect.ImmutableSortedSet;
 import java.lang.ref.WeakReference;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -24,7 +19,7 @@ import tc.oc.identity.Identity;
 import tc.oc.named.NameStyle;
 import tc.oc.named.NicknameRenderer;
 import tc.oc.pgm.AllTranslations;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.match.Match;
@@ -50,7 +45,7 @@ public class MapCommands {
       }
     }
 
-    Iterator<Match> iterator = PGM.getMatchManager().getMatches().iterator();
+    Iterator<Match> iterator = PGM.get().getMatchManager().getMatches().iterator();
     PGMMap current = iterator.hasNext() ? iterator.next().getMap() : null;
 
     List<PGMMap> maps = new ArrayList<>(PGM.get().getMapLibrary().getMaps());

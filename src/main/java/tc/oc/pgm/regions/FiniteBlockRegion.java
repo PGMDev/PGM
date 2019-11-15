@@ -15,7 +15,7 @@ import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import tc.oc.block.BlockVectors;
 import tc.oc.material.matcher.SingleMaterialMatcher;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.filters.AnyFilter;
 import tc.oc.pgm.filters.BlockFilter;
 import tc.oc.pgm.filters.Filter;
@@ -140,7 +140,7 @@ public class FiniteBlockRegion extends AbstractRegion {
   public static FiniteBlockRegion fromWorld(Region region, World world, Filter materials) {
     List<Block> blocks = new LinkedList<>();
     Bounds bounds = region.getBounds();
-    PGMMap map = PGM.getMatchManager().getMatch(world).getMap();
+    PGMMap map = PGM.get().getMatchManager().getMatch(world).getMap();
 
     if (region instanceof CuboidRegion
         && map != null

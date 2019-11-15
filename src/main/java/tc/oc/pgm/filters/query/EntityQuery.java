@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import javax.annotation.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 
 public class EntityQuery extends Query implements IEntityTypeQuery {
@@ -24,7 +24,7 @@ public class EntityQuery extends Query implements IEntityTypeQuery {
 
   @Override
   public Match getMatch() {
-    return PGM.getMatchManager().getMatch(entity.getWorld());
+    return PGM.get().getMatchManager().getMatch(entity.getWorld());
   }
 
   @Override

@@ -43,13 +43,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
 import org.fusesource.jansi.AnsiConsole;
 import org.spigotmc.SpigotConfig;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.PGMImpl;
+import tc.oc.pgm.api.PGM;
 
-/** Embedded {@link org.bukkit.Bukkit} server that natively runs {@link tc.oc.pgm.PGM}. */
+/** Embedded {@link org.bukkit.Bukkit} server that natively runs {@link PGM}. */
 public class Server extends DedicatedServer {
 
   public static void main(String[] args) {
-    init(PGM.class);
+    init(PGMImpl.class);
   }
 
   public static void init(Class<? extends JavaPlugin>... plugins) {

@@ -21,6 +21,8 @@ import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.material.matcher.SingleMaterialMatcher;
 import tc.oc.named.NameStyle;
 import tc.oc.pgm.api.chat.Sound;
+import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
+import tc.oc.pgm.api.event.PlayerItemTransferEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
@@ -28,9 +30,7 @@ import tc.oc.pgm.api.party.event.CompetitorScoreChangeEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
-import tc.oc.pgm.events.CoarsePlayerMoveEvent;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.events.PlayerItemTransferEvent;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.util.collection.DefaultMapAdapter;
 

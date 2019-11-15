@@ -9,7 +9,7 @@ import tc.oc.identity.Identity;
 import tc.oc.named.NameType;
 import tc.oc.named.Names;
 import tc.oc.named.NicknameRenderer;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
@@ -27,7 +27,7 @@ public class MatchNameRenderer extends NicknameRenderer implements Listener {
   @Override
   public ChatColor getColor(Identity identity, NameType type) {
     if (type.online && !(type.dead && type.style.showDeath)) {
-      MatchPlayer player = pgm.matchManager.getPlayer(identity.getPlayerId());
+      MatchPlayer player = pgm.getMatchManager().getPlayer(identity.getPlayerId());
       if (player != null) {
         return ComponentUtils.convert(player.getParty().getColor());
       }

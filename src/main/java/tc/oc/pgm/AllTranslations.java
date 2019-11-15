@@ -1,5 +1,6 @@
 package tc.oc.pgm;
 
+import tc.oc.pgm.api.PGM;
 import tc.oc.translations.BaseTranslator;
 import tc.oc.translations.provider.TranslationProvider;
 
@@ -9,7 +10,7 @@ public final class AllTranslations extends BaseTranslator {
 
   public AllTranslations() {
     super(
-        PGMUtil.plugin().getLogger(),
+        PGM.get().getLogger(),
         new TranslationProvider("chatmoderator.ChatModeratorErrors"),
         new TranslationProvider("chatmoderator.ChatModeratorMessages"),
         new TranslationProvider("adminchat.AdminChatErrors"),

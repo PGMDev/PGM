@@ -4,7 +4,7 @@ import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.match.Match;
 
 /**
- * Called before a {@link Match} unloads, no players are left, but features are still loaded.
+ * Called before a {@link Match} unloads, when no players are left, but features are still loaded.
  *
  * @see Match#unload()
  */
