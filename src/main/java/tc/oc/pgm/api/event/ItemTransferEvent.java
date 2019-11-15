@@ -1,4 +1,4 @@
-package tc.oc.pgm.events;
+package tc.oc.pgm.api.event;
 
 import javax.annotation.Nullable;
 import org.bukkit.entity.Item;
@@ -6,11 +6,11 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import tc.oc.pgm.api.event.GeneralizingEvent;
 
-/** Fired when an item moves in/out of an Inventory */
+/** Called when an {@link ItemStack} moves in or out of an {@link Inventory}. */
 public class ItemTransferEvent extends GeneralizingEvent {
-  public static enum Type {
+
+  public enum Type {
     PLACE, // Item placed in an inventory through a GUI
     TAKE, // Item taken from an inventory through a GUI
     TRANSFER, // Item transferred instantly from one inventory to another
@@ -19,14 +19,14 @@ public class ItemTransferEvent extends GeneralizingEvent {
     PLUGIN // Item transferred somehow by a plugin
   }
 
-  protected final Type type;
-  @Nullable protected final Inventory fromInventory;
-  @Nullable protected final Integer fromSlot;
-  @Nullable protected final Inventory toInventory;
-  @Nullable protected final Integer toSlot;
-  protected final ItemStack itemStack;
-  @Nullable protected final Item itemEntity;
-  protected int quantity;
+  private final Type type;
+  private final @Nullable Inventory fromInventory;
+  private final @Nullable Integer fromSlot;
+  private final @Nullable Inventory toInventory;
+  private final @Nullable Integer toSlot;
+  private final ItemStack itemStack;
+  private final @Nullable Item itemEntity;
+  private int quantity;
 
   public ItemTransferEvent(
       @Nullable Event cause,
@@ -49,79 +49,81 @@ public class ItemTransferEvent extends GeneralizingEvent {
     this.quantity = quantity;
   }
 
-  @Override
-  public String toString() {
-    String s =
-        this.getClass().getName()
-            + " cause="
-            + this.getCause().getEventName()
-            + " type="
-            + this.type;
-
-    if (this.fromInventory != null) {
-      s += " from=" + this.fromInventory.getName();
-      if (this.fromSlot != null) {
-        s += ":" + this.fromSlot;
-      }
-    }
-
-    if (this.toInventory != null) {
-      s += " to=" + this.toInventory.getName();
-      if (this.toSlot != null) {
-        s += ":" + this.toSlot;
-      }
-    }
-
-    if (this.itemStack != null) {
-      s += " stack=" + this.itemStack;
-    }
-
-    if (this.itemEntity != null) {
-      s += " entity=" + this.itemEntity;
-    }
-
-    return s + " qty=" + this.quantity;
-  }
-
+  /**
+   * Get the generic "type" of {@link ItemTransferEvent} this is.
+   *
+   * @return The {@link Type} of {@link ItemTransferEvent}.
+   */
   public Type getType() {
     return type;
   }
 
-  @Nullable
-  public Inventory getFromInventory() {
-    return fromInventory;
-  }
-
-  @Nullable
-  public Integer getFromSlot() {
-    return fromSlot;
-  }
-
-  @Nullable
-  public Inventory getToInventory() {
-    return toInventory;
-  }
-
-  @Nullable
-  public Integer getToSlot() {
-    return toSlot;
-  }
-
+  /**
+   * Get the {@link ItemStack} that moved from one {@link Inventory} to another.
+   *
+   * @return The involved {@link ItemStack}.
+   */
   public ItemStack getItemStack() {
     return itemStack;
   }
 
+  /**
+   * Get the {@link Item} entity that was involved, if any.
+   *
+   * @return The involved {@link Item}.
+   */
   @Nullable
   public Item getItemEntity() {
     return itemEntity;
   }
 
-  public int getQuantity() {
-    return quantity;
+  /**
+   * Get the {@link Inventory} the {@link ItemStack} was previously from.
+   *
+   * @return The previous {@link Inventory}.
+   */
+  @Nullable
+  public Inventory getFromInventory() {
+    return fromInventory;
   }
 
-  public void setQuantity(int quantity) {
-    this.quantity = quantity;
+  /**
+   * Get the slot in the {@link Inventory} the {@link ItemStack} was previously from.
+   *
+   * @return The previous {@link Inventory} slot.
+   */
+  @Nullable
+  public Integer getFromSlot() {
+    return fromSlot;
+  }
+
+  /**
+   * Get the {@link Inventory} the {@link ItemStack} has moved to.
+   *
+   * @return The new {@link Inventory}.
+   */
+  @Nullable
+  public Inventory getToInventory() {
+    return toInventory;
+  }
+
+  /**
+   * Get the slot in the {@link Inventory} the {@link ItemStack} has moved to.
+   *
+   * @return The new {@link Inventory} slot.
+   */
+  @Nullable
+  public Integer getToSlot() {
+    return toSlot;
+  }
+
+  /**
+   * Get the quantity of the {@link ItemStack}.
+   *
+   * @return The quantity of the involved {@link ItemStack}.
+   */
+  public int getQuantity() {
+    return quantity;
   }
 
   private static final HandlerList handlers = new HandlerList();

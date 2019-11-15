@@ -13,9 +13,9 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.*;
-import tc.oc.pgm.PGM;
-import tc.oc.pgm.events.ItemTransferEvent;
-import tc.oc.pgm.events.PlayerItemTransferEvent;
+import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.event.ItemTransferEvent;
+import tc.oc.pgm.api.event.PlayerItemTransferEvent;
 
 public class ItemTransferListener implements Listener {
   // Track players dropping an item stack from within an inventory GUI

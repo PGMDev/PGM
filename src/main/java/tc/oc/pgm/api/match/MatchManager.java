@@ -8,11 +8,12 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
+import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.map.MapNotFoundException;
 import tc.oc.pgm.map.PGMMap;
 
 /** A manager that creates, loads, unloads, and cycles {@link Match}es. */
-public interface MatchManager extends MatchPlayerResolver {
+public interface MatchManager extends MatchPlayerResolver, Audience {
 
   /**
    * Creates a new {@link Match} and {@link World} from a {@link PGMMap}.

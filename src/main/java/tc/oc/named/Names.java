@@ -5,14 +5,14 @@ import org.bukkit.entity.Player;
 import tc.oc.component.Component;
 import tc.oc.identity.Identities;
 import tc.oc.identity.Identity;
-import tc.oc.pgm.PGMUtil;
+import tc.oc.pgm.api.PGM;
 
 public class Names {
   private Names() {}
 
   /** Get the current (global) {@link NameRenderer} */
   public static NameRenderer renderer() {
-    return PGMUtil.get().getNameRenderer();
+    return PGM.get().getNameRenderer();
   }
 
   /** Invalidate any cached names for the given {@link Identity} */

@@ -13,7 +13,7 @@ import tc.oc.identity.Identities;
 import tc.oc.identity.Identity;
 import tc.oc.named.NameStyle;
 import tc.oc.named.NameType;
-import tc.oc.pgm.PGMUtil;
+import tc.oc.pgm.api.PGM;
 
 /**
  * A component that renders as a player's name.
@@ -55,7 +55,7 @@ public class PersonalizedPlayer extends Component {
 
   @Override
   public BaseComponent render(CommandSender viewer) {
-    return PGMUtil.get()
+    return PGM.get()
         .getNameRenderer()
         .getComponentName(getIdentity(), new NameType(getStyle(), getIdentity(), viewer))
         .render(viewer);

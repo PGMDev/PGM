@@ -5,10 +5,10 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.PermissionAttachment;
 import tc.oc.block.BlockVectors;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -35,7 +35,7 @@ public class Observing extends State {
     super.enterState();
 
     permissionAttachment = bukkit.addAttachment(PGM.get());
-    permissionAttachment.setPermission(smm.getObserverPermissions(), true);
+    permissionAttachment.setPermission(Permissions.OBSERVER, true);
 
     if (reset) player.reset();
     player.setDead(false);
@@ -58,12 +58,8 @@ public class Observing extends State {
       ObserverToolFactory toolFactory = smm.getObserverToolFactory();
       player.getInventory().setItem(0, toolFactory.getTeleportTool(bukkit));
 
-      ItemStack book = toolFactory.getHowToBook(bukkit);
       if (toolFactory.canUseEditWand(bukkit)) {
         player.getInventory().setItem(1, toolFactory.getEditWand(bukkit));
-        if (book != null) player.getInventory().setItem(28, book);
-      } else {
-        if (book != null) player.getInventory().setItem(1, book);
       }
 
       // Let other modules give observer items

@@ -26,7 +26,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.material.MaterialData;
 import tc.oc.item.Items;
 import tc.oc.pgm.AllTranslations;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;

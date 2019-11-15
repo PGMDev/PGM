@@ -5,7 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.tracker.damage.RangedInfo;
@@ -14,11 +14,11 @@ public final class Trackers {
   private Trackers() {}
 
   static TrackerMatchModule needModule(World world) {
-    return PGM.needMatchManager().getMatch(world).needMatchModule(TrackerMatchModule.class);
+    return PGM.get().getMatchManager().getMatch(world).needMatchModule(TrackerMatchModule.class);
   }
 
   static @Nullable TrackerMatchModule getModule(World world) {
-    Match match = PGM.needMatchManager().getMatch(world);
+    Match match = PGM.get().getMatchManager().getMatch(world);
     return match == null ? null : match.getMatchModule(TrackerMatchModule.class);
   }
 

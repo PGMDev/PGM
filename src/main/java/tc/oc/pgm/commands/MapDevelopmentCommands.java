@@ -25,7 +25,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.pgm.AllTranslations;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.match.Match;
@@ -94,7 +94,7 @@ public class MapDevelopmentCommands {
     PGM.get().getMapErrorTracker().clearErrorsExcept(PGM.get().getMapLibrary().getMaps());
 
     try {
-      final Collection<PGMMap> newMaps = PGM.getMatchManager().loadNewMaps();
+      final Collection<PGMMap> newMaps = PGM.get().getMatchManager().loadNewMaps();
 
       if (newMaps.isEmpty()) {
         sender.sendMessage(ChatColor.WHITE + "No new maps found");

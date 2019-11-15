@@ -25,7 +25,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 import tc.oc.pgm.AllTranslations;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;

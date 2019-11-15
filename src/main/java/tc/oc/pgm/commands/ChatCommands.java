@@ -13,7 +13,7 @@ import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedPlayer;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.named.NameStyle;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -85,7 +85,7 @@ public class ChatCommands {
         viewer -> viewer.getBukkit().equals(receiver));
 
     send(
-        PGM.getMatchManager().getPlayer(receiver),
+        PGM.get().getMatchManager().getPlayer(receiver),
         message,
         "[" + ChatColor.GOLD + "DM" + ChatColor.WHITE + "] -> {0}: {1}",
         viewer -> viewer.getBukkit().equals(sender.getBukkit()));

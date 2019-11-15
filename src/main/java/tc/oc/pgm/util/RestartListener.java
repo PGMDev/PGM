@@ -15,7 +15,7 @@ import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.Config;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
@@ -119,7 +119,7 @@ public class RestartListener implements Listener {
   public void onRequestRestart(RequestRestartEvent event) {
     if (!this.plugin.getServer().getOnlinePlayers().isEmpty()) {
       // FIXME: Fix for multi-match support
-      Match match = PGM.getMatchManager().getMatches().iterator().next();
+      Match match = PGM.get().getMatchManager().getMatches().iterator().next();
       if (match == null) return;
 
       this.logger.info("Deferring restart");
@@ -153,7 +153,7 @@ public class RestartListener implements Listener {
   /** When restart is cancelled, cancel any countdown and discard our deferral */
   @EventHandler
   public void onCancelRestart(CancelRestartEvent event) {
-    this.cancelCountdown(PGM.getMatchManager().getMatches().iterator().next());
+    this.cancelCountdown(PGM.get().getMatchManager().getMatches().iterator().next());
     this.deferral = null;
   }
 

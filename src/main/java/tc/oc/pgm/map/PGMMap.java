@@ -25,7 +25,7 @@ import org.jdom2.JDOMException;
 import org.jdom2.input.JDOMParseException;
 import org.jdom2.input.SAXBuilder;
 import tc.oc.pgm.Config;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.module.ModuleRegistry;
 import tc.oc.pgm.modules.InfoModule;
@@ -98,7 +98,7 @@ public final class PGMMap implements Comparable<PGMMap> {
     // verify proto
     Node protoNode = Node.fromRequiredAttr(doc.getRootElement(), "proto");
     SemanticVersion protoVersion = XMLUtils.parseSemanticVersion(protoNode);
-    if (protoVersion.isNewerThan(PGM.MAP_PROTO_SUPPORTED)) {
+    if (protoVersion.isNewerThan(PGM.get().getMapProtoSupported())) {
       throw new InvalidXMLVersionException(protoNode, protoVersion);
     }
 

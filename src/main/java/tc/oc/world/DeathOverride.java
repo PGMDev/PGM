@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
-import tc.oc.pgm.PGMUtil;
+import tc.oc.pgm.api.PGM;
 
 /**
  * A somewhat hacky mechanism for faking an entity's death. The name rendering system checks this
@@ -20,9 +20,9 @@ public interface DeathOverride {
    */
   static void setDead(Entity player, @Nullable Boolean dead) {
     if (dead != null) {
-      player.setMetadata(METADATA_KEY, new FixedMetadataValue(PGMUtil.plugin(), dead));
+      player.setMetadata(METADATA_KEY, new FixedMetadataValue(PGM.get(), dead));
     } else {
-      player.removeMetadata(METADATA_KEY, PGMUtil.plugin());
+      player.removeMetadata(METADATA_KEY, PGM.get());
     }
   }
 
@@ -31,7 +31,7 @@ public interface DeathOverride {
    * falling back to {@link Entity#isDead}.
    */
   static boolean isDead(Entity player) {
-    MetadataValue value = player.getMetadata(METADATA_KEY, PGMUtil.plugin());
+    MetadataValue value = player.getMetadata(METADATA_KEY, PGM.get());
     if (value != null) {
       return value.asBoolean();
     } else {

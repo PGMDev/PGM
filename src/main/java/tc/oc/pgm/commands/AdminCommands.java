@@ -14,7 +14,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.joda.time.Duration;
 import tc.oc.pgm.AllTranslations;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
@@ -129,7 +129,7 @@ public class AdminCommands {
       perms = Permissions.SETNEXT)
   public static void setNext(CommandSender sender, @Switch('f') boolean force, @Text PGMMap map)
       throws CommandException {
-    MatchManager mm = PGM.getMatchManager();
+    MatchManager mm = PGM.get().getMatchManager();
     boolean restartQueued = RestartManager.get().isRestartRequested();
 
     if (restartQueued && !force) {

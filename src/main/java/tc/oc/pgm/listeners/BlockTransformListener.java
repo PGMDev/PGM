@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.Material;
+import org.bukkit.Physical;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -33,13 +34,13 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import tc.oc.block.BlockStates;
 import tc.oc.material.Materials;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.blockdrops.BlockDropsMatchModule;
-import tc.oc.pgm.events.BlockTransformEvent;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.events.PlayerBlockTransformEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
@@ -80,8 +81,10 @@ public class BlockTransformListener implements Listener {
             new EventExecutor() {
               @Override
               public void execute(Listener listener, Event event) throws EventException {
-                // FIXME: Ignore events from non-match worlds
-                // if (Match.get(event) == null) return;
+                // Ignore the event if it was fron a non-Match world
+                if (event instanceof Physical
+                    && PGM.get().getMatchManager().getMatch(((Physical) event).getWorld()) == null)
+                  return;
 
                 if (!Events.isCancelled(event)) {
                   // At the first priority level, call the event handler method.
@@ -147,7 +150,7 @@ public class BlockTransformListener implements Listener {
 
   private BlockTransformEvent callEvent(
       Event cause, BlockState oldState, BlockState newState, @Nullable Player player) {
-    MatchPlayer matchPlayer = PGM.getMatchManager().getPlayer(player);
+    MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(player);
     return callEvent(
         cause, oldState, newState, matchPlayer == null ? null : matchPlayer.getState());
   }
@@ -310,7 +313,7 @@ public class BlockTransformListener implements Listener {
 
   @EventWrapper
   public void onBlockBurn(final BlockBurnEvent event) {
-    Match match = PGM.getMatchManager().getMatch(event.getBlock().getWorld());
+    Match match = PGM.get().getMatchManager().getMatch(event.getBlock().getWorld());
     if (match == null) return;
 
     BlockState oldState = event.getBlock().getState();
@@ -481,7 +484,7 @@ public class BlockTransformListener implements Listener {
     // because doBlockDrops will cancel the event, and we don't want any
     // other listeners to think the event is cancelled when it isn't.
     if (event != null && !event.isCancelled() && event.getDrops() != null) {
-      Match match = PGM.getMatchManager().getMatch(event.getWorld());
+      Match match = PGM.get().getMatchManager().getMatch(event.getWorld());
       if (match != null) {
         BlockDropsMatchModule bdmm = match.getMatchModule(BlockDropsMatchModule.class);
         if (bdmm != null) {

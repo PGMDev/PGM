@@ -13,7 +13,9 @@ import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.chat.Audience;
+import tc.oc.pgm.api.chat.MultiAudience;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -24,7 +26,7 @@ import tc.oc.util.FileUtils;
 import tc.oc.util.logging.ClassLogger;
 import tc.oc.world.NMSHacks;
 
-public class MatchManagerImpl implements MatchManager {
+public class MatchManagerImpl implements MatchManager, MultiAudience {
 
   private final Logger logger;
   private final Server server;
@@ -303,5 +305,10 @@ public class MatchManagerImpl implements MatchManager {
     final Match match = getMatch(player.getWorld());
     if (match == null) return null;
     return match.getPlayer(player);
+  }
+
+  @Override
+  public Iterable<? extends Audience> getAudiences() {
+    return getMatches();
   }
 }

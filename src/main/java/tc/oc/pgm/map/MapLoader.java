@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.jdom2.input.SAXBuilder;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.module.ModuleRegistry;
 import tc.oc.server.ConfigUtils;
 import tc.oc.util.logging.ClassLogger;

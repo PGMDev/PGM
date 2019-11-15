@@ -21,7 +21,7 @@ import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.material.matcher.SingleMaterialMatcher;
 import tc.oc.named.NameStyle;
 import tc.oc.pgm.Config;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;

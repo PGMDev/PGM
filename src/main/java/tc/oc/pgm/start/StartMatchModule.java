@@ -10,7 +10,7 @@ import org.joda.time.Duration;
 import tc.oc.bossbar.DynamicBossBar;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchPhase;
 import tc.oc.pgm.api.match.MatchScope;

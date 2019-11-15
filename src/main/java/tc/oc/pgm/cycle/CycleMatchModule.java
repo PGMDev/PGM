@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.joda.time.Duration;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.MatchScope;
@@ -34,7 +34,7 @@ public class CycleMatchModule extends MatchModule implements Listener {
 
   public CycleMatchModule(Match match) {
     super(match);
-    this.mm = PGM.getMatchManager();
+    this.mm = PGM.get().getMatchManager();
     this.config = new CycleConfig(PGM.get().getConfig());
   }
 

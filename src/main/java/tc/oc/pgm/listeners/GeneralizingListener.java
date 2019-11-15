@@ -20,9 +20,9 @@ import org.bukkit.util.RayBlockIntersection;
 import org.bukkit.util.Vector;
 import tc.oc.block.BlockVectors;
 import tc.oc.pgm.api.chat.Audience;
-import tc.oc.pgm.events.BlockPunchEvent;
-import tc.oc.pgm.events.BlockTrampleEvent;
-import tc.oc.pgm.events.CoarsePlayerMoveEvent;
+import tc.oc.pgm.api.event.BlockPunchEvent;
+import tc.oc.pgm.api.event.BlockTrampleEvent;
+import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 
 /**
  * Translates standard Bukkit events into a few extra events: {@link CoarsePlayerMoveEvent} {@link
@@ -265,6 +265,7 @@ public class GeneralizingListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void detectBlockTrample(CoarsePlayerMoveEvent event) {
     if (!event.getPlayer().isOnGround()) return;
+    if (event.getPlayer().getGameMode() != GameMode.ADVENTURE) return;
 
     Block block = event.getBlockTo().getBlock();
     if (!block.getType().isSolid()) {

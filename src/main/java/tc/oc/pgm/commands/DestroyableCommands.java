@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import tc.oc.pgm.PGM;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.destroyable.Destroyable;
@@ -15,14 +15,14 @@ import tc.oc.pgm.destroyable.DestroyableMatchModule;
 
 public class DestroyableCommands {
   private static DestroyableMatchModule matchModule(CommandSender sender) throws CommandException {
-    Match match = PGM.getMatchManager().getMatch(sender);
+    Match match = PGM.get().getMatchManager().getMatch(sender);
     DestroyableMatchModule dmm = match.getMatchModule(DestroyableMatchModule.class);
     if (dmm == null) throw new CommandException("No destroyables");
     return dmm;
   }
 
   private static Destroyable lookup(CommandSender sender, String id) throws CommandException {
-    Match match = PGM.getMatchManager().getMatch(sender);
+    Match match = PGM.get().getMatchManager().getMatch(sender);
 
     Destroyable destroyable = match.getFeatureContext().get(id, Destroyable.class);
     if (destroyable != null) return destroyable;
