@@ -297,13 +297,10 @@ public abstract class RegionParser {
   @MethodParser("union")
   public Region parseUnion(Element el) throws InvalidXMLException {
     Region[] regions = this.parseSubRegionsArray(el);
-    switch (regions.length) {
-      case 0:
-        return EmptyRegion.INSTANCE;
-      case 1:
-        return regions[0];
-      default:
-        return new Union(regions);
+    if (regions.length < 1) {
+      return EmptyRegion.INSTANCE;
+    } else {
+      return new Union(regions);
     }
   }
 
