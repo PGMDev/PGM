@@ -4,7 +4,6 @@ import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Default;
 import com.google.common.collect.ImmutableSortedSet;
-import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.*;
 import javax.annotation.Nullable;
@@ -35,14 +34,11 @@ import tc.oc.util.components.Components;
 public class MapCommands {
 
   // FIXME: This is temporary until a new rotation/vote system is determined.
-  private static WeakReference<PGMMap> nextMap;
+  private static PGMMap nextMap;
 
   public static PGMMap peekNextMap() {
     if (nextMap != null) {
-      PGMMap map = nextMap.get();
-      if (map != null) {
-        return map;
-      }
+      return nextMap;
     }
 
     Iterator<Match> iterator = PGM.get().getMatchManager().getMatches().iterator();
@@ -60,7 +56,7 @@ public class MapCommands {
   }
 
   public static void setNextMap(PGMMap map) {
-    nextMap = new WeakReference<>(map);
+    nextMap = map;
   }
 
   public static PGMMap popNextMap() {
