@@ -211,10 +211,23 @@ public final class PGMImpl extends JavaPlugin implements PGM {
         .scheduleSyncDelayedTask(
             this,
             () -> {
-              if (!matchManager.cycleMatch(null, MapCommands.popNextMap(), true).isPresent()) {
-                logger.severe("PGM could not load the initial match, server will shut down");
-                server.shutdown();
+              if (matchManager.getActiveRotation().isEnabled()) {
+                if (!matchManager
+                    .cycleMatch(null, matchManager.getNextMapByRotation(), true)
+                    .isPresent()) {
+                  logger.severe(
+                      "PGM could not load the initial match from rotation, server will shut down");
+                  server.shutdown();
+                }
+              } else {
+                if (!matchManager
+                    .cycleMatch(null, matchManager.getNextMapRandomly(), true)
+                    .isPresent()) {
+                  logger.severe("PGM could not load an initial random map, server will shut down");
+                  server.shutdown();
+                }
               }
+              matchManager.getActiveRotation().rotate();
             });
 
     if (Config.PlayerList.enabled()) {
@@ -352,6 +365,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     node.registerCommands(new MatchCommands());
     node.registerNode("mode", "modes").registerCommands(new ModeCommands());
     node.registerCommands(new TimeLimitCommands());
+    node.registerCommands(new RotationCommands());
 
     new BukkitIntake(this, graph).register();
   }

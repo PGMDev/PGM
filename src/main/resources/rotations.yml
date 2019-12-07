@@ -1,0 +1,14 @@
+#
+# Rotations sample configuration
+#
+# Each new rotation should follow the same configuration structure, within this file
+
+default:
+  enabled: true
+  players: 1
+  maps:
+    - Airship Battle
+    - Harb
+    - Race for Victory
+    - The Fenland
+    - Warlock

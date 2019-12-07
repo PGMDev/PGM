@@ -11,9 +11,12 @@ import org.bukkit.entity.Entity;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.map.MapNotFoundException;
 import tc.oc.pgm.map.PGMMap;
+import tc.oc.pgm.rotation.PGMMapOrderProvider;
+import tc.oc.pgm.rotation.RotationManager;
 
 /** A manager that creates, loads, unloads, and cycles {@link Match}es. */
-public interface MatchManager extends MatchPlayerResolver, Audience {
+public interface MatchManager
+    extends MatchPlayerResolver, Audience, PGMMapOrderProvider, RotationManager {
 
   /**
    * Creates a new {@link Match} and {@link World} from a {@link PGMMap}.

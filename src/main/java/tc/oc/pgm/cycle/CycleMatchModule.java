@@ -55,7 +55,11 @@ public class CycleMatchModule extends MatchModule implements Listener {
   }
 
   public void startCountdown(Duration duration) {
-    startCountdown(duration, MapCommands.peekNextMap());
+    if (mm.getActiveRotation().isEnabled() && !mm.getActiveRotation().isOverwritten()) {
+      startCountdown(duration, mm.getNextMapByRotation());
+    } else {
+      startCountdown(duration, MapCommands.peekNextMap());
+    }
   }
 
   public void startCountdown(@Nullable Duration duration, PGMMap nextMap) {
@@ -63,6 +67,7 @@ public class CycleMatchModule extends MatchModule implements Listener {
     getMatch().finish();
     if (Duration.ZERO.equals(duration)) {
       mm.cycleMatch(getMatch(), nextMap, false);
+      mm.getActiveRotation().rotate();
     } else {
       getMatch().getCountdown().start(new CycleCountdown(mm, getMatch(), nextMap), duration);
     }
@@ -83,6 +88,15 @@ public class CycleMatchModule extends MatchModule implements Listener {
   @EventHandler
   public void onMatchEnd(MatchFinishEvent event) {
     final Match match = event.getMatch();
+
+    /*
+     * Whether player counts should be evaluated for activating a more
+     * accurate rotation depending on the amount of online / active players
+     */
+    if (mm.isEvaluatingPlayerCount()) {
+      mm.evaluatePlayerCount();
+    }
+
     if (!RestartManager.get().isRestartRequested()) {
       CycleConfig.Auto autoConfig = config.matchEnd();
       if (autoConfig.enabled()) {

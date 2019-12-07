@@ -36,6 +36,10 @@ public class MapCommands {
   // FIXME: This is temporary until a new rotation/vote system is determined.
   private static PGMMap nextMap;
 
+  public static PGMMap getNextMap() {
+    return nextMap;
+  }
+
   public static PGMMap peekNextMap() {
     if (nextMap != null) {
       return nextMap;
@@ -205,7 +209,13 @@ public class MapCommands {
       aliases = {"mapnext", "mn", "nextmap", "nm", "next"},
       desc = "Shows which map is coming up next")
   public void next(Audience audience, CommandSender sender, MatchManager matchManager) {
-    final PGMMap next = peekNextMap();
+    final PGMMap next;
+    if (matchManager.getActiveRotation().isEnabled()) {
+      next = matchManager.getNextMapByRotation();
+    } else {
+      next = matchManager.getNextMapRandomly();
+    }
+
     audience.sendMessage(
         ChatColor.DARK_PURPLE
             + AllTranslations.get()

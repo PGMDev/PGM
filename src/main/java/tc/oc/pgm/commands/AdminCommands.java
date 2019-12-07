@@ -127,7 +127,8 @@ public class AdminCommands {
       usage = "[map name]",
       flags = "f",
       perms = Permissions.SETNEXT)
-  public static void setNext(CommandSender sender, @Switch('f') boolean force, @Text PGMMap map)
+  public static void setNext(
+      CommandSender sender, @Switch('f') boolean force, @Text PGMMap map, MatchManager matchManager)
       throws CommandException {
     MatchManager mm = PGM.get().getMatchManager();
     boolean restartQueued = RestartManager.get().isRestartRequested();
@@ -137,7 +138,11 @@ public class AdminCommands {
           AllTranslations.get().translate("command.admin.setNext.restartQueued", sender));
     }
 
-    MapCommands.setNextMap(map);
+    if (matchManager.getActiveRotation().isEnabled()) {
+      matchManager.getActiveRotation().overwriteWithMap(map);
+    } else {
+      MapCommands.setNextMap(map);
+    }
 
     if (restartQueued) {
       RestartManager.get().cancelRestart();
