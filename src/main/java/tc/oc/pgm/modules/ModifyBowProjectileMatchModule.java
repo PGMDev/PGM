@@ -4,6 +4,7 @@ import java.util.Random;
 import java.util.Set;
 import org.bukkit.World;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
@@ -40,44 +41,52 @@ public class ModifyBowProjectileMatchModule extends MatchModule implements Liste
 
   @EventHandler(ignoreCancelled = true)
   public void changeBowProjectile(EntityShootBowEvent event) {
-    Plugin plugin = PGM.get();
-    Entity newProjectile;
-
-    if (this.cls == Arrow.class && event.getProjectile() instanceof Arrow) {
-      // Don't change the projectile if it's an Arrow and the custom entity type is also Arrow
-      newProjectile = event.getProjectile();
-    } else {
-      // Replace the projectile
-      World world = event.getEntity().getWorld();
+    if (event.getProjectile() instanceof Arrow) {
       Projectile oldEntity = (Projectile) event.getProjectile();
-      newProjectile = world.spawn(oldEntity.getLocation(), this.cls);
-      event.setProjectile(newProjectile);
 
-      // Copy some things from the old projectile
-      newProjectile.setVelocity(oldEntity.getVelocity());
-      newProjectile.setFallDistance(oldEntity.getFallDistance());
-      newProjectile.setFireTicks(oldEntity.getFireTicks());
-
-      if (newProjectile instanceof Projectile) {
-        ((Projectile) newProjectile).setShooter(oldEntity.getShooter());
-        ((Projectile) newProjectile).setBounce(oldEntity.doesBounce());
+      // EnderPearl isn't an entity type in world#spawn so this is a workaround
+      if (EnderPearl.class.isAssignableFrom(this.cls)) {
+        event.getEntity().launchProjectile(EnderPearl.class).setVelocity(oldEntity.getVelocity());
+        event.setCancelled(true);
+        return;
       }
 
-      // Save some special properties of Arrows
-      if (oldEntity instanceof Arrow) {
-        Arrow arrow = (Arrow) oldEntity;
-        newProjectile.setMetadata("critical", new FixedMetadataValue(plugin, arrow.isCritical()));
-        newProjectile.setMetadata(
-            "knockback", new FixedMetadataValue(plugin, arrow.getKnockbackStrength()));
-        newProjectile.setMetadata(
-            "damage", new FixedMetadataValue(plugin, NMSHacks.getArrowDamage(arrow)));
+      Plugin plugin = PGM.get();
+      Entity newProjectile;
+      if (this.cls == Arrow.class) {
+        // Don't change the projectile if it's an Arrow and the custom entity type is also Arrow
+        newProjectile = event.getProjectile();
+      } else {
+        // Replace the projectile
+        World world = event.getEntity().getWorld();
+        newProjectile = world.spawn(oldEntity.getLocation(), this.cls);
+        event.setProjectile(newProjectile);
+
+        // Copy some things from the old projectile
+        newProjectile.setVelocity(oldEntity.getVelocity());
+        newProjectile.setFallDistance(oldEntity.getFallDistance());
+        newProjectile.setFireTicks(oldEntity.getFireTicks());
+
+        if (newProjectile instanceof Projectile) {
+          ((Projectile) newProjectile).setShooter(oldEntity.getShooter());
+          ((Projectile) newProjectile).setBounce(oldEntity.doesBounce());
+        }
+
+        // Save some special properties of Arrows
+        if (oldEntity instanceof Arrow) {
+          Arrow arrow = (Arrow) oldEntity;
+          newProjectile.setMetadata("critical", new FixedMetadataValue(plugin, arrow.isCritical()));
+          newProjectile.setMetadata(
+              "knockback", new FixedMetadataValue(plugin, arrow.getKnockbackStrength()));
+          newProjectile.setMetadata(
+              "damage", new FixedMetadataValue(plugin, NMSHacks.getArrowDamage(arrow)));
+        }
       }
+
+      // Tag the projectile as custom
+      newProjectile.setMetadata("customProjectile", new FixedMetadataValue(plugin, true));
+      getMatch().callEvent(new EntityLaunchEvent(newProjectile, event.getEntity()));
     }
-
-    // Tag the projectile as custom
-    newProjectile.setMetadata("customProjectile", new FixedMetadataValue(plugin, true));
-
-    getMatch().callEvent(new EntityLaunchEvent(newProjectile, event.getEntity()));
   }
 
   @EventHandler(ignoreCancelled = true)
