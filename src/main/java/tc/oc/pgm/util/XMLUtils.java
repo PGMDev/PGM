@@ -19,7 +19,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.bukkit.*;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Entity;
+import org.bukkit.entity.Projectile;
 import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -498,31 +498,34 @@ public class XMLUtils {
     return node == null ? def : parseSecondDuration(node);
   }
 
-  public static Class<? extends Entity> parseEntityType(Element el) throws InvalidXMLException {
-    return parseEntityType(new Node(el));
+  public static Class<? extends Projectile> parseProjectileType(Element el)
+      throws InvalidXMLException {
+    return parseProjectileType(new Node(el));
   }
 
-  public static Class<? extends Entity> parseEntityTypeAttribute(
-      Element el, String attributeName, Class<? extends Entity> def) throws InvalidXMLException {
-    Node node = Node.fromAttr(el, attributeName);
-    return node == null ? def : parseEntityType(node);
+  public static Class<? extends Projectile> parseProjectileType(Node node)
+      throws InvalidXMLException {
+    return parseProjectileType(node, node.getValue());
   }
 
-  public static Class<? extends Entity> parseEntityType(Node node) throws InvalidXMLException {
-    return parseEntityType(node, node.getValue());
-  }
-
-  public static Class<? extends Entity> parseEntityType(Node node, String value)
+  public static Class<? extends Projectile> parseProjectileType(Node node, String value)
       throws InvalidXMLException {
     if (!value.matches("[a-zA-Z0-9_]+")) {
-      throw new InvalidXMLException("Invalid entity type '" + value + "'", node);
+      throw new InvalidXMLException("Invalid projectile type '" + value + "'", node);
     }
 
     try {
-      return Class.forName("org.bukkit.entity." + value).asSubclass(Entity.class);
+      return Class.forName("org.bukkit.entity." + value).asSubclass(Projectile.class);
     } catch (ClassNotFoundException | ClassCastException e) {
-      throw new InvalidXMLException("Invalid entity type '" + value + "'", node);
+      throw new InvalidXMLException("Invalid projectile type '" + value + "'", node);
     }
+  }
+
+  public static Class<? extends Projectile> parseProjectileTypeAttribute(
+      Element el, String attributeName, Class<? extends Projectile> def)
+      throws InvalidXMLException {
+    Node node = Node.fromAttr(el, attributeName);
+    return node == null ? def : parseProjectileType(node);
   }
 
   public static Vector parseVector(Node node, String value) throws InvalidXMLException {
