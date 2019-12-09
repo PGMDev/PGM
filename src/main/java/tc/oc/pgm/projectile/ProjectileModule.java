@@ -57,7 +57,7 @@ public class ProjectileModule extends MapModule {
               "click action",
               ClickAction.BOTH);
       Class<? extends Entity> entity =
-          XMLUtils.parseEntityTypeAttribute(projectileElement, "projectile", Arrow.class);
+          XMLUtils.parseProjectileTypeAttribute(projectileElement, "projectile", Arrow.class);
       List<PotionEffect> potionKit = kitParser.parsePotions(projectileElement);
       Filter destroyFilter = filterParser.parseFilterProperty(projectileElement, "destroy-filter");
       Duration coolDown = XMLUtils.parseDuration(projectileElement.getAttribute("cooldown"));
