@@ -118,10 +118,11 @@ public interface NMSHacks {
     EntityVillager newVillager = new EntityVillager(player.world);
 
     villager.b(data);
-    newVillager.a(data);
     newVillager.dead = false;
     newVillager.setAge(1);
-    newVillager.a(player); // ELECTROID: _a
+    newVillager.a(data);
+    newVillager.a_(player);
+
     player.openTrade(newVillager);
   }
 
