@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Projectile;
+import org.bukkit.entity.Entity;
 import org.bukkit.potion.PotionEffect;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -19,12 +19,12 @@ import tc.oc.xml.InvalidXMLException;
 
 @ModuleDescription(name = "Modify Bow Projectile")
 public class ModifyBowProjectileModule extends MapModule {
-  protected final Class<? extends Projectile> cls;
+  protected final Class<? extends Entity> cls;
   protected final float velocityMod;
   protected final Set<PotionEffect> potionEffects;
 
   public ModifyBowProjectileModule(
-      Class<? extends Projectile> cls, float velocityMod, Set<PotionEffect> effects) {
+      Class<? extends Entity> cls, float velocityMod, Set<PotionEffect> effects) {
     this.cls = cls;
     this.velocityMod = velocityMod;
     potionEffects = effects;
@@ -43,7 +43,7 @@ public class ModifyBowProjectileModule extends MapModule {
   public static ModifyBowProjectileModule parse(
       MapModuleContext context, Logger logger, Document doc) throws InvalidXMLException {
     boolean changed = false;
-    Class<? extends Projectile> projectile = Arrow.class;
+    Class<? extends Entity> projectile = Arrow.class;
     float velocityMod = 1;
     Set<PotionEffect> potionEffects = new HashSet<>();
 
@@ -56,7 +56,7 @@ public class ModifyBowProjectileModule extends MapModule {
 
       Element projectileElement = parent.getChild("projectile");
       if (projectileElement != null) {
-        projectile = XMLUtils.parseProjectileType(projectileElement);
+        projectile = XMLUtils.parseEntityType(projectileElement);
         changed = true;
       }
 

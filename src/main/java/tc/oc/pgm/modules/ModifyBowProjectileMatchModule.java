@@ -2,7 +2,11 @@ package tc.oc.pgm.modules;
 
 import java.util.Random;
 import java.util.Set;
-import org.bukkit.entity.*;
+import org.bukkit.World;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -21,13 +25,13 @@ import tc.oc.world.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ModifyBowProjectileMatchModule extends MatchModule implements Listener {
-  protected final Class<? extends Projectile> cls;
+  protected final Class<? extends Entity> cls;
   protected final float velocityMod;
   protected final Set<PotionEffect> potionEffects;
   protected final Random random = new Random();
 
   public ModifyBowProjectileMatchModule(
-      Match match, Class<? extends Projectile> cls, float velocityMod, Set<PotionEffect> effects) {
+      Match match, Class<? extends Entity> cls, float velocityMod, Set<PotionEffect> effects) {
     super(match);
     this.cls = cls;
     this.velocityMod = velocityMod;
@@ -36,26 +40,36 @@ public class ModifyBowProjectileMatchModule extends MatchModule implements Liste
 
   @EventHandler(ignoreCancelled = true)
   public void changeBowProjectile(EntityShootBowEvent event) {
-    Projectile oldProjectile = (Projectile) event.getProjectile();
-    Entity newProjectile = event.getProjectile();
     Plugin plugin = PGM.get();
+    Entity newProjectile;
 
-    // Change the projectile if the custom entity type is not "Arrow"
-    if (this.cls != Arrow.class) {
-      // Replace the old projectile
-      newProjectile = event.getEntity().launchProjectile(this.cls);
+    if (this.cls == Arrow.class && event.getProjectile() instanceof Arrow) {
+      // Don't change the projectile if it's an Arrow and the custom entity type is also Arrow
+      newProjectile = event.getProjectile();
+    } else {
+      // Replace the projectile
+      Projectile oldEntity = (Projectile) event.getProjectile();
+      if (this.cls.isAssignableFrom(Projectile.class)) {
+        newProjectile = event.getEntity().launchProjectile((Class<? extends Projectile>) this.cls);
+      } else {
+        World world = event.getEntity().getWorld();
+        newProjectile = world.spawn(oldEntity.getLocation(), this.cls);
+      }
       event.setProjectile(newProjectile);
 
-      // Copy properties from old projectile
-      newProjectile.setVelocity(oldProjectile.getVelocity());
-      newProjectile.setFallDistance(oldProjectile.getFallDistance());
-      newProjectile.setFireTicks(oldProjectile.getFireTicks());
-      ((Projectile) newProjectile).setShooter(oldProjectile.getShooter());
-      ((Projectile) newProjectile).setBounce(oldProjectile.doesBounce());
+      // Copy some things from the old projectile
+      newProjectile.setVelocity(oldEntity.getVelocity());
+      newProjectile.setFallDistance(oldEntity.getFallDistance());
+      newProjectile.setFireTicks(oldEntity.getFireTicks());
+
+      if (newProjectile instanceof Projectile) {
+        ((Projectile) newProjectile).setShooter(oldEntity.getShooter());
+        ((Projectile) newProjectile).setBounce(oldEntity.doesBounce());
+      }
 
       // Save some special properties of Arrows
-      if (oldProjectile instanceof Arrow) {
-        Arrow arrow = (Arrow) oldProjectile;
+      if (oldEntity instanceof Arrow) {
+        Arrow arrow = (Arrow) oldEntity;
         newProjectile.setMetadata("critical", new FixedMetadataValue(plugin, arrow.isCritical()));
         newProjectile.setMetadata(
             "knockback", new FixedMetadataValue(plugin, arrow.getKnockbackStrength()));
@@ -66,6 +80,7 @@ public class ModifyBowProjectileMatchModule extends MatchModule implements Liste
 
     // Tag the projectile as custom
     newProjectile.setMetadata("customProjectile", new FixedMetadataValue(plugin, true));
+
     getMatch().callEvent(new EntityLaunchEvent(newProjectile, event.getEntity()));
   }
 
