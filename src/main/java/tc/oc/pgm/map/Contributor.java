@@ -3,6 +3,7 @@ package tc.oc.pgm.map;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -22,6 +23,9 @@ import tc.oc.named.Named;
  * without a Minecraft account, like mom or Jesus).
  */
 public class Contributor implements Named {
+
+  private static HashMap<UUID, String> cachedNames = new HashMap<UUID, String>();
+
   protected final @Nullable UUID uuid;
   protected final @Nullable String fallbackName;
   protected final @Nullable String contribution;
@@ -49,9 +53,7 @@ public class Contributor implements Named {
 
   /** Gets the name of this contributor. */
   public @Nullable String getName() {
-    // ASHCON
-    UUID pid = this.playerId;
-    return pid != null ? this.fallbackName : this.fallbackName;
+    return isUUIDCached(this.uuid) ? getCachedName(this.uuid) : this.fallbackName;
   }
 
   public @Nullable UUID getPlayerId() {
@@ -102,5 +104,17 @@ public class Contributor implements Named {
       }
     }
     return resolved;
+  }
+
+  public static boolean isUUIDCached(UUID uuid) {
+    return cachedNames.containsKey(uuid);
+  }
+
+  public static String getCachedName(UUID uuid) {
+    return cachedNames.get(uuid);
+  }
+
+  public static void cacheName(UUID uuid, String name) {
+    cachedNames.put(uuid, name);
   }
 }
