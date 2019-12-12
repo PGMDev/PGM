@@ -1,12 +1,6 @@
 package tc.oc.pgm.modules;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -135,7 +129,6 @@ public class InfoModule extends MapModule {
           throw new InvalidXMLException("Contributor must have either a name or UUID", child);
         }
 
-        // FIXME low quality code, but it gets the job done
         if (uuid != null) {
           if (Contributor.isUUIDCached(uuid)) {
             name = Contributor.getCachedName(uuid);
@@ -145,37 +138,12 @@ public class InfoModule extends MapModule {
                     PGM.get(),
                     () -> {
                       try {
-                        HttpURLConnection con =
-                            (HttpURLConnection)
-                                new URL("https://api.ashcon.app/mojang/v2/user/" + uuid.toString())
-                                    .openConnection();
-                        con.setRequestMethod("GET");
-                        con.setRequestProperty("Accept", "application/json");
-                        BufferedReader br =
-                            new BufferedReader(
-                                new InputStreamReader(
-                                    con.getInputStream(), StandardCharsets.UTF_8));
-                        StringBuilder response = new StringBuilder();
-                        String line = null;
-                        while ((line = br.readLine()) != null) {
-                          response.append(line.trim());
-                        }
-                        br.close();
-                        String n =
-                            new Gson()
-                                .fromJson(response.toString(), JsonObject.class)
-                                .get("username")
-                                .getAsString();
-                        Contributor.cacheName(uuid, n);
-                        System.out.println("CACHED: " + n + " (" + uuid.toString() + ")");
-                      } catch (Exception e) {
-                        // TODO proper exception handling
-                        e.printStackTrace();
+                        Contributor.resolve(uuid);
+                      } catch (IOException e) {
                       }
                     });
           }
         }
-        // end low quality code
 
         contribs.add(new Contributor(uuid, name, contribution));
       }

@@ -2,6 +2,14 @@ package tc.oc.pgm.map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -116,5 +124,26 @@ public class Contributor implements Named {
 
   public static void cacheName(UUID uuid, String name) {
     cachedNames.put(uuid, name);
+  }
+
+  public static void resolve(UUID uuid) throws IOException {
+    HttpURLConnection con =
+        (HttpURLConnection)
+            new URL("https://api.ashcon.app/mojang/v2/user/" + uuid.toString()).openConnection();
+    con.setRequestMethod("GET");
+    con.setRequestProperty("Accept", "application/json");
+    con.setConnectTimeout(5000);
+    con.setReadTimeout(5000);
+    BufferedReader br =
+        new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));
+    StringBuilder response = new StringBuilder();
+    String line = null;
+    while ((line = br.readLine()) != null) {
+      response.append(line.trim());
+    }
+    br.close();
+    String n =
+        new Gson().fromJson(response.toString(), JsonObject.class).get("username").getAsString();
+    cacheName(uuid, n);
   }
 }
