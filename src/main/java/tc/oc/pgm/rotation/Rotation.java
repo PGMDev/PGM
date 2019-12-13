@@ -1,6 +1,7 @@
 package tc.oc.pgm.rotation;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.pgm.api.PGM;
@@ -40,7 +41,7 @@ public class Rotation implements PGMMapOrderProvider {
   }
 
   public List<PGMMap> getMaps() {
-    return maps;
+    return Collections.unmodifiableList(maps);
   }
 
   public void setMaps(List<PGMMap> maps) {
