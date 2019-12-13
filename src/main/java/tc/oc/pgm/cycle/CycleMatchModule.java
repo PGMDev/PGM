@@ -9,7 +9,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
-import tc.oc.pgm.commands.MapCommands;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.map.PGMMap;
@@ -55,11 +54,7 @@ public class CycleMatchModule extends MatchModule implements Listener {
   }
 
   public void startCountdown(Duration duration) {
-    if (mm.getActiveRotation().isEnabled() && !mm.getActiveRotation().isOverwritten()) {
-      startCountdown(duration, mm.getNextMapByRotation());
-    } else {
-      startCountdown(duration, MapCommands.peekNextMap());
-    }
+    startCountdown(duration, mm.getRotationManager().getNextMap());
   }
 
   public void startCountdown(@Nullable Duration duration, PGMMap nextMap) {
@@ -67,7 +62,7 @@ public class CycleMatchModule extends MatchModule implements Listener {
     getMatch().finish();
     if (Duration.ZERO.equals(duration)) {
       mm.cycleMatch(getMatch(), nextMap, false);
-      mm.getActiveRotation().rotate();
+      mm.getRotationManager().popNextMap();
     } else {
       getMatch().getCountdown().start(new CycleCountdown(mm, getMatch(), nextMap), duration);
     }
@@ -90,11 +85,11 @@ public class CycleMatchModule extends MatchModule implements Listener {
     final Match match = event.getMatch();
 
     /*
-     * Whether player counts should be evaluated for activating a more
-     * accurate rotation depending on the amount of online / active players
-     */
-    if (mm.isEvaluatingPlayerCount()) {
-      mm.evaluatePlayerCount();
+     Whether player counts should be evaluated for activating a more
+     accurate rotation depending on the amount of online / active players
+    */
+    if (mm.getRotationManager().isEvaluatingPlayerCount()) {
+      mm.getRotationManager().recalculateActiveRotation();
     }
 
     if (!RestartManager.get().isRestartRequested()) {

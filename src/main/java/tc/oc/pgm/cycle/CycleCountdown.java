@@ -8,7 +8,6 @@ import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
-import tc.oc.pgm.commands.MapCommands;
 import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.map.PGMMap;
 
@@ -42,15 +41,6 @@ public class CycleCountdown extends MatchCountdown {
   public void onEnd(Duration total) {
     super.onEnd(total);
     this.mm.cycleMatch(this.getMatch(), nextMap, false);
-    if (mm.getActiveRotation().isEnabled()) {
-      if (nextMap == mm.getNextMapByRotation()) {
-        mm.getActiveRotation().rotate();
-      } else {
-        if (mm.getActiveRotation().isOverwritten()) {
-          mm.getActiveRotation().setOverwritten(false);
-          MapCommands.setNextMap(mm.getNextMapByRotation());
-        }
-      }
-    }
+    mm.getRotationManager().popNextMap();
   }
 }

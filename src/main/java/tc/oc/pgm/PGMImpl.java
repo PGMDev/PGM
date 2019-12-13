@@ -68,6 +68,7 @@ import tc.oc.pgm.rage.RageModule;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.renewable.RenewableModule;
 import tc.oc.pgm.restart.RestartManager;
+import tc.oc.pgm.rotation.RotationManager;
 import tc.oc.pgm.score.ScoreModule;
 import tc.oc.pgm.scoreboard.ScoreboardModule;
 import tc.oc.pgm.scoreboard.SidebarModule;
@@ -179,6 +180,9 @@ public final class PGMImpl extends JavaPlugin implements PGM {
 
     try {
       matchManager = new MatchManagerImpl(server, mapLibrary, mapLoader);
+      matchManager.setRotationManager(
+          new RotationManager(
+              matchManager, new File(PGM.GLOBAL.get().getDataFolder(), "rotations.yml")));
     } catch (MapNotFoundException e) {
       logger.log(Level.SEVERE, "PGM could not load any maps, server will shut down", e);
       server.shutdown();
@@ -211,23 +215,14 @@ public final class PGMImpl extends JavaPlugin implements PGM {
         .scheduleSyncDelayedTask(
             this,
             () -> {
-              if (matchManager.getActiveRotation().isEnabled()) {
+              if (matchManager.getRotationManager().getActiveRotation() != null) {
                 if (!matchManager
-                    .cycleMatch(null, matchManager.getNextMapByRotation(), true)
+                    .cycleMatch(null, matchManager.getRotationManager().getInitialMap(), true)
                     .isPresent()) {
-                  logger.severe(
-                      "PGM could not load the initial match from rotation, server will shut down");
-                  server.shutdown();
-                }
-              } else {
-                if (!matchManager
-                    .cycleMatch(null, matchManager.getNextMapRandomly(), true)
-                    .isPresent()) {
-                  logger.severe("PGM could not load an initial random map, server will shut down");
+                  logger.severe("PGM could not load an initial match, server will shut down");
                   server.shutdown();
                 }
               }
-              matchManager.getActiveRotation().rotate();
             });
 
     if (Config.PlayerList.enabled()) {

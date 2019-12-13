@@ -2,10 +2,14 @@
 # Rotations sample configuration
 #
 # Each new rotation should follow the same configuration structure, within this file
+#
+# NOTE: Map names are case-sensitive
+#
 
 default:
   enabled: true
   players: 1
+  position: 0                 # This helps the server resume rotations in the position they were before a server shutdown/restart
   maps:
     - Airship Battle
     - Harb

@@ -4,31 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.commands.MapCommands;
 import tc.oc.pgm.map.PGMMap;
 
-public class Rotation {
+public class Rotation implements PGMMapOrderProvider {
   private ConfigurationSection configurationSection;
 
   private String name;
   private boolean enabled;
   private List<PGMMap> maps = new ArrayList<>();
   private int players;
+  private int position;
 
-  private int position = 0;
-  private boolean overwritten = false;
-
-  public Rotation(ConfigurationSection configurationSection, String name) {
+  Rotation(ConfigurationSection configurationSection, String name) {
     this.configurationSection = configurationSection;
     this.name = name;
-  }
-
-  public ConfigurationSection getConfigurationSection() {
-    return configurationSection;
-  }
-
-  public void setConfigurationSection(ConfigurationSection configurationSection) {
-    this.configurationSection = configurationSection;
+    this.enabled = configurationSection.getBoolean("enabled");
+    this.players = configurationSection.getInt("players");
+    this.position = configurationSection.getInt("position");
   }
 
   public String getName() {
@@ -67,14 +59,6 @@ public class Rotation {
     this.position = position;
   }
 
-  public boolean isOverwritten() {
-    return overwritten;
-  }
-
-  public void setOverwritten(boolean overwritten) {
-    this.overwritten = overwritten;
-  }
-
   public int getPosition() {
     return position;
   }
@@ -99,23 +83,45 @@ public class Rotation {
                             + " not found in map repo. Ignoring...");
               }
             });
-
-    setEnabled(configurationSection.getBoolean("enabled"));
-    setPlayers(configurationSection.getInt("players"));
   }
 
-  public void rotate() {
-    if (!overwritten) {
-      if (position + 1 == getMaps().size()) {
-        position = 0;
-      } else {
-        position++;
-      }
-    } else overwritten = false;
+  private void rotate() {
+    if (position + 1 == maps.size() || position + 1 > maps.size()) {
+      position = 0;
+    } else {
+      movePosition(1);
+    }
   }
 
-  public void overwriteWithMap(PGMMap map) {
-    overwritten = true;
-    MapCommands.setNextMap(map);
+  public void movePosition(int positions) {
+    if (((position + positions) + 1) > maps.size()) {
+      position = ((position + positions) + 1) % maps.size();
+    } else {
+      position = position + positions;
+    }
   }
+
+  public PGMMap getMapInPosition(int position) {
+    return maps.get(position);
+  }
+
+  @Override
+  public PGMMap popNextMap() {
+    PGMMap nextMap = maps.get(position);
+    rotate();
+    return nextMap;
+  }
+
+  @Override
+  public PGMMap getNextMap() {
+    return maps.get(position);
+  }
+
+  @Override
+  public PGMMap popFallbackMap() {
+    return null;
+  }
+
+  @Override
+  public void setNextMap(PGMMap map) {}
 }

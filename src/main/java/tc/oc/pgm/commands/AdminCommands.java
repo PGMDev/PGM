@@ -138,11 +138,7 @@ public class AdminCommands {
           AllTranslations.get().translate("command.admin.setNext.restartQueued", sender));
     }
 
-    if (matchManager.getActiveRotation().isEnabled()) {
-      matchManager.getActiveRotation().overwriteWithMap(map);
-    } else {
-      MapCommands.setNextMap(map);
-    }
+    matchManager.getRotationManager().setNextMap(map);
 
     if (restartQueued) {
       RestartManager.get().cancelRestart();

@@ -7,6 +7,7 @@ import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.AllTranslations;
+import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.map.PGMMap;
@@ -24,11 +25,11 @@ public class RotationCommands {
       throws CommandException {
 
     List<PGMMap> maps;
-    Rotation rotation = matchManager.getActiveRotation();
-    if (rotation != null && rotation.isEnabled()) maps = rotation.getMaps();
+    Rotation rotation = matchManager.getRotationManager().getActiveRotation();
+    if (rotation != null) maps = rotation.getMaps();
     else {
       sender.sendMessage(
-          ChatColor.RED + AllTranslations.get().translate("command.map.noRotation", sender));
+          ChatColor.RED + AllTranslations.get().translate("command.rotation.noRotation", sender));
       return;
     }
 
@@ -41,7 +42,7 @@ public class RotationCommands {
             + "-----------"
             + ChatColor.RESET
             + " "
-            + AllTranslations.get().translate("command.map.currentRotation.title", sender)
+            + AllTranslations.get().translate("command.rotation.currentRotation.title", sender)
             + ChatColor.DARK_AQUA
             + " ("
             + ChatColor.AQUA
@@ -69,7 +70,7 @@ public class RotationCommands {
       public String format(PGMMap map, int index) {
         index++;
         String indexString =
-            matchManager.getActiveRotation().getPosition() + 1 == index
+            matchManager.getRotationManager().getActiveRotation().getPosition() + 1 == index
                 ? ChatColor.DARK_AQUA.toString() + index
                 : String.valueOf(index);
         return (indexString) + ". " + ChatColor.RESET + map.getInfo().getShortDescription(sender);
@@ -98,11 +99,12 @@ public class RotationCommands {
       throws CommandException {
 
     List<PGMMap> maps;
-    Rotation rotation = matchManager.getRotationByName(rotationName);
+    Rotation rotation = matchManager.getRotationManager().getRotationByName(rotationName);
     if (rotation != null) maps = rotation.getMaps();
     else {
       sender.sendMessage(
-          ChatColor.RED + AllTranslations.get().translate("command.map.noRotationMatch", sender));
+          ChatColor.RED
+              + AllTranslations.get().translate("command.rotation.noRotationMatch", sender));
       return;
     }
 
@@ -115,7 +117,7 @@ public class RotationCommands {
             + "-----------"
             + ChatColor.RESET
             + " "
-            + AllTranslations.get().translate("command.map.currentRotation.title", sender)
+            + AllTranslations.get().translate("command.rotation.currentRotation.title", sender)
             + ChatColor.DARK_AQUA
             + " ("
             + ChatColor.AQUA
@@ -159,11 +161,11 @@ public class RotationCommands {
       Audience audience, CommandSender sender, MatchManager matchManager, @Default("1") int page)
       throws CommandException {
     List<Rotation> rotations;
-    if (!matchManager.getRotations().isEmpty()) {
-      rotations = matchManager.getRotations();
+    if (!matchManager.getRotationManager().getRotations().isEmpty()) {
+      rotations = matchManager.getRotationManager().getRotations();
     } else {
       sender.sendMessage(
-          ChatColor.RED + AllTranslations.get().translate("command.map.noRotations", sender));
+          ChatColor.RED + AllTranslations.get().translate("command.rotation.noRotations", sender));
       return;
     }
 
@@ -176,7 +178,7 @@ public class RotationCommands {
             + "-----------"
             + ChatColor.RESET
             + " "
-            + AllTranslations.get().translate("command.map.rotationList.title", sender)
+            + AllTranslations.get().translate("command.rotation.rotationList.title", sender)
             + ChatColor.DARK_AQUA
             + " ("
             + ChatColor.AQUA
@@ -193,7 +195,11 @@ public class RotationCommands {
       @Override
       public String format(Rotation rotation, int index) {
         String arrow =
-            matchManager.getActiveRotation().getName().equals(rotation.getName())
+            matchManager
+                    .getRotationManager()
+                    .getActiveRotation()
+                    .getName()
+                    .equals(rotation.getName())
                 ? ChatColor.GREEN + "» "
                 : "» ";
         return arrow
@@ -209,5 +215,33 @@ public class RotationCommands {
             + ")";
       }
     }.display(audience, rotations, page);
+  }
+
+  @Command(
+      aliases = {"skip"},
+      desc = "Skips one or more maps from the current rotation.",
+      usage = "[positions]",
+      perms = Permissions.SETNEXT)
+  public static void skip(
+      CommandSender sender, MatchManager matchManager, @Default("1") int positions) {
+
+    matchManager.getRotationManager().getActiveRotation().movePosition(positions);
+    sender.sendMessage(
+        ChatColor.WHITE
+            + "["
+            + ChatColor.GOLD
+            + "Rotations"
+            + ChatColor.WHITE
+            + "] "
+            + "["
+            + ChatColor.AQUA
+            + matchManager.getRotationManager().getActiveRotation().getName()
+            + ChatColor.WHITE
+            + "] "
+            + "Skipped a total of "
+            + ChatColor.AQUA
+            + positions
+            + ChatColor.WHITE
+            + " positions.");
   }
 }

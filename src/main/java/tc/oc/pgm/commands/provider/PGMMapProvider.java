@@ -11,7 +11,6 @@ import java.util.List;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.match.MatchManager;
-import tc.oc.pgm.commands.MapCommands;
 import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.pgm.map.MapLibrary;
 import tc.oc.pgm.map.PGMMap;
@@ -45,9 +44,7 @@ public class PGMMapProvider implements BukkitProvider<PGMMap> {
         map = mapLibrary.getMapByNameOrId(fuzzyName).orNull();
       }
     } else if (isGoToNext(annotations)) {
-      if (matchManager.getActiveRotation().isEnabled()) {
-        map = matchManager.getNextMapByRotation();
-      } else map = MapCommands.peekNextMap();
+      map = matchManager.getRotationManager().getNextMap();
     }
 
     if (map == null) {

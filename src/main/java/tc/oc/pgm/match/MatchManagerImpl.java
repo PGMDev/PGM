@@ -4,27 +4,28 @@ import com.google.common.collect.ImmutableSet;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.*;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.chat.MultiAudience;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.commands.MapCommands;
 import tc.oc.pgm.map.*;
 import tc.oc.pgm.module.ModuleLoadException;
-import tc.oc.pgm.rotation.Rotation;
+import tc.oc.pgm.rotation.RotationManager;
 import tc.oc.pgm.terrain.TerrainModule;
 import tc.oc.util.FileUtils;
 import tc.oc.util.logging.ClassLogger;
@@ -41,9 +42,7 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
   private final Map<String, String> matchIdByWorldName;
   private final AtomicInteger count;
 
-  private List<Rotation> rotations = new ArrayList<>();
-  private Rotation activeRotation;
-  private boolean evaluatePlayerCount = true;
+  private RotationManager rotationManager;
 
   public MatchManagerImpl(Server server, MapLibrary library, MapLoader loader)
       throws MapNotFoundException {
@@ -56,7 +55,6 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
     this.count = new AtomicInteger(0);
 
     loadNewMaps();
-    loadRotations();
   }
 
   @Override
@@ -166,9 +164,7 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
   @Override
   public Optional<Match> cycleMatch(@Nullable Match oldMatch, PGMMap nextMap, boolean retry) {
     // Pop map out
-    if (!activeRotation.isEnabled()) {
-      PGM.GLOBAL.get().getMatchManager().getNextMapRandomly();
-    }
+    rotationManager.popNextMap();
 
     // Match unload also does this, but doing it earlier avoids some problems.
     // Specifically, RestartCountdown cannot cancel itself during a cycle.
@@ -258,6 +254,16 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
     return newMaps;
   }
 
+  @Override
+  public void setRotationManager(RotationManager rotationManager) {
+    this.rotationManager = rotationManager;
+  }
+
+  @Override
+  public RotationManager getRotationManager() {
+    return rotationManager;
+  }
+
   /**
    * Creates and loads a new {@link Match} on the given map, optionally unloading an old match and
    * transferring all players to the new one.
@@ -324,149 +330,5 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
   @Override
   public Iterable<? extends Audience> getAudiences() {
     return getMatches();
-  }
-
-  @Override
-  public PGMMap getNextMapByRotation() {
-    if (activeRotation.isOverwritten()) {
-      return MapCommands.getNextMap();
-    } else {
-      return activeRotation.getMaps().get(activeRotation.getPosition());
-    }
-  }
-
-  @Override
-  public PGMMap getNextMapRandomly() {
-    return MapCommands.popNextMap();
-  }
-
-  @Override
-  public File getRotationsFile() {
-    File rotationsYMLFile = new File(PGM.GLOBAL.get().getDataFolder(), Config.Rotations.getPath());
-
-    if (!rotationsYMLFile.exists()) {
-      try {
-        org.apache.commons.io.FileUtils.copyInputStreamToFile(
-            PGM.GLOBAL.get().getResource("rotations.yml"), rotationsYMLFile);
-        return rotationsYMLFile;
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
-    return rotationsYMLFile;
-  }
-
-  @Override
-  public void loadRotations() {
-    if (getRotationsFile().exists()) {
-      FileConfiguration rotationsFileConfiguration =
-          YamlConfiguration.loadConfiguration(getRotationsFile());
-
-      rotationsFileConfiguration
-          .getKeys(false)
-          .forEach(
-              key ->
-                  rotations.add(
-                      new Rotation(rotationsFileConfiguration.getConfigurationSection(key), key)));
-      rotations.forEach(Rotation::load);
-
-      setActiveRotation(getRotationByName("default"));
-    }
-  }
-
-  @Override
-  public void evaluatePlayerCount() {
-    final Object[] onlinePlayers = Bukkit.getOnlinePlayers().toArray();
-    if (onlinePlayers.length == 0) return;
-
-    int activeOnlinePlayers =
-        onlinePlayers.length
-            - Objects.requireNonNull(getMatch((Player) onlinePlayers[0])).getObservers().size() / 2;
-    int[] playerCounts = new int[rotations.size()];
-
-    AtomicInteger count = new AtomicInteger(0);
-    rotations.forEach(
-        rotation -> {
-          if (rotation.isEnabled()) {
-            playerCounts[count.get()] = rotation.getPlayers();
-            count.getAndIncrement();
-          }
-        });
-
-    int distance = Math.abs(playerCounts[0] - activeOnlinePlayers);
-    int accuratePlayerCountIndex = 0;
-
-    for (int i = 1; i < playerCounts.length; i++) {
-      int idistance = Math.abs(playerCounts[i] - activeOnlinePlayers);
-      if (idistance < distance) {
-        accuratePlayerCountIndex = i;
-        distance = idistance;
-      }
-    }
-
-    final int correspondingRotationIndex = accuratePlayerCountIndex;
-    rotations.forEach(
-        rotation -> {
-          if (rotation.getPlayers() == playerCounts[correspondingRotationIndex]
-              && activeRotation.getPlayers() != playerCounts[correspondingRotationIndex]) {
-            setActiveRotation(rotation);
-            Bukkit.broadcastMessage(
-                ChatColor.WHITE
-                    + "["
-                    + ChatColor.GOLD
-                    + "Rotations"
-                    + ChatColor.WHITE
-                    + "] "
-                    + ChatColor.GREEN
-                    + "Rotation has been set to "
-                    + ChatColor.AQUA
-                    + rotation.getName()
-                    + ChatColor.GREEN
-                    + " in order to better adjust to the current player count.");
-          }
-        });
-  }
-
-  @Override
-  public void setEvaluatingPlayerCount(boolean evaluatingPlayerCount) {
-    this.evaluatePlayerCount = evaluatingPlayerCount;
-  }
-
-  @Override
-  public boolean isEvaluatingPlayerCount() {
-    return evaluatePlayerCount;
-  }
-
-  @Override
-  public void setActiveRotation(Rotation activeRotation) {
-    this.activeRotation = activeRotation;
-  }
-
-  @Override
-  public Rotation getActiveRotation() {
-    return activeRotation;
-  }
-
-  @Override
-  public void setRotations(List<Rotation> rotations) {
-    this.rotations = rotations;
-  }
-
-  @Override
-  public List<Rotation> getRotations() {
-    return rotations;
-  }
-
-  @Override
-  public Rotation getRotationByName(String name) {
-    AtomicReference<Rotation> matchByName = new AtomicReference<>();
-    getRotations()
-        .forEach(
-            rotation -> {
-              if (rotation.getName().equals(name)) {
-                matchByName.set(rotation);
-              }
-            });
-    return matchByName.get();
   }
 }

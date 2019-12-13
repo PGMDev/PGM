@@ -18,10 +18,8 @@ import tc.oc.identity.Identity;
 import tc.oc.named.NameStyle;
 import tc.oc.named.NicknameRenderer;
 import tc.oc.pgm.AllTranslations;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
-import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.pgm.map.Contributor;
@@ -32,42 +30,6 @@ import tc.oc.pgm.util.PrettyPaginatedResult;
 import tc.oc.util.components.Components;
 
 public class MapCommands {
-
-  // FIXME: This is temporary until a new rotation/vote system is determined.
-  private static PGMMap nextMap;
-
-  public static PGMMap getNextMap() {
-    return nextMap;
-  }
-
-  public static PGMMap peekNextMap() {
-    if (nextMap != null) {
-      return nextMap;
-    }
-
-    Iterator<Match> iterator = PGM.get().getMatchManager().getMatches().iterator();
-    PGMMap current = iterator.hasNext() ? iterator.next().getMap() : null;
-
-    List<PGMMap> maps = new ArrayList<>(PGM.get().getMapLibrary().getMaps());
-    PGMMap next;
-    do {
-      Collections.shuffle(maps);
-      next = maps.get(0);
-    } while (maps.size() > 1 && Objects.equals(current, next));
-
-    setNextMap(next);
-    return next;
-  }
-
-  public static void setNextMap(PGMMap map) {
-    nextMap = map;
-  }
-
-  public static PGMMap popNextMap() {
-    PGMMap peek = peekNextMap();
-    nextMap = null;
-    return peek;
-  }
 
   @Command(
       aliases = {"maplist", "maps", "ml"},
@@ -209,12 +171,7 @@ public class MapCommands {
       aliases = {"mapnext", "mn", "nextmap", "nm", "next"},
       desc = "Shows which map is coming up next")
   public void next(Audience audience, CommandSender sender, MatchManager matchManager) {
-    final PGMMap next;
-    if (matchManager.getActiveRotation().isEnabled()) {
-      next = matchManager.getNextMapByRotation();
-    } else {
-      next = matchManager.getNextMapRandomly();
-    }
+    final PGMMap next = matchManager.getRotationManager().getNextMap();
 
     audience.sendMessage(
         ChatColor.DARK_PURPLE
