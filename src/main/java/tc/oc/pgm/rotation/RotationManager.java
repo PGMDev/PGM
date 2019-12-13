@@ -22,6 +22,7 @@ import tc.oc.pgm.map.PGMMap;
 public class RotationManager implements PGMMapOrderProvider {
 
   private MatchManager matchManager;
+  private Logger logger;
 
   private File rotationsFile;
   private List<Rotation> rotations = new ArrayList<>();
@@ -33,6 +34,7 @@ public class RotationManager implements PGMMapOrderProvider {
   public RotationManager(MatchManager matchManager, Logger logger, File rotationsFile) {
     this.matchManager = matchManager;
     this.rotationsFile = rotationsFile;
+    this.logger = logger;
 
     if (!rotationsFile.exists()) {
       try {
@@ -95,7 +97,8 @@ public class RotationManager implements PGMMapOrderProvider {
     try {
       rotationFileConfiguration.save(rotationsFile);
     } catch (IOException e) {
-      e.printStackTrace();
+      logger.log(
+          Level.SEVERE, "Could not save current rotation's position for future reference", e);
     }
   }
 
