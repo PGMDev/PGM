@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -27,7 +29,7 @@ public class RotationManager implements PGMMapOrderProvider {
   /** When a {@link PGMMap} is manually set next, it overrides the rotation order * */
   private PGMMap overriderMap;
 
-  public RotationManager(MatchManager matchManager, File rotationsFile) {
+  public RotationManager(MatchManager matchManager, Logger logger, File rotationsFile) {
     this.matchManager = matchManager;
     this.rotationsFile = rotationsFile;
 
@@ -36,12 +38,11 @@ public class RotationManager implements PGMMapOrderProvider {
         FileUtils.copyInputStreamToFile(
             PGM.GLOBAL.get().getResource("rotations.yml"), rotationsFile);
       } catch (IOException e) {
-        e.printStackTrace();
+        logger.log(Level.SEVERE, "Failed to create the rotations.yml file", e);
       }
     }
 
     loadRotations();
-    setActiveRotation(getRotationByName("default"));
   }
 
   private void loadRotations() {

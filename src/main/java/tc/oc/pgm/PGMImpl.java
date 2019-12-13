@@ -182,7 +182,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
       matchManager = new MatchManagerImpl(server, mapLibrary, mapLoader);
       matchManager.setRotationManager(
           new RotationManager(
-              matchManager, new File(PGM.GLOBAL.get().getDataFolder(), "rotations.yml")));
+              matchManager, logger, new File(getDataFolder(), Config.Rotations.getPath())));
     } catch (MapNotFoundException e) {
       logger.log(Level.SEVERE, "PGM could not load any maps, server will shut down", e);
       server.shutdown();
