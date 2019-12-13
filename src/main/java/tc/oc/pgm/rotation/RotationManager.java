@@ -13,6 +13,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
@@ -149,11 +150,11 @@ public class RotationManager implements PGMMapOrderProvider {
                     + ChatColor.WHITE
                     + "] "
                     + ChatColor.GREEN
-                    + "Rotation has been set to "
-                    + ChatColor.AQUA
-                    + rotation.getName()
-                    + ChatColor.GREEN
-                    + " in order to better adjust to the current player count.");
+                    + AllTranslations.get()
+                        .translate(
+                            "rotations.rotationChange",
+                            Bukkit.getConsoleSender(),
+                            (ChatColor.AQUA + rotation.getName() + ChatColor.GREEN)));
           }
         });
   }
