@@ -1,5 +1,6 @@
 package tc.oc.pgm.rotation;
 
+import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -69,9 +70,10 @@ public class Rotation implements PGMMapOrderProvider {
         .getStringList("maps")
         .forEach(
             map -> {
-              if (PGM.GLOBAL.get().getMapLibrary().getMapByNameOrId(map).isPresent()) {
-                maps.add(PGM.GLOBAL.get().getMapLibrary().getMapByNameOrId(map).get());
-              } else {
+              final Optional<PGMMap> mapByNameOrId =
+                  PGM.GLOBAL.get().getMapLibrary().getMapByNameOrId(map);
+              if (mapByNameOrId.isPresent()) maps.add(mapByNameOrId.get());
+              else {
                 PGM.GLOBAL
                     .get()
                     .getLogger()
