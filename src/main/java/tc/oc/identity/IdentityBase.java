@@ -64,7 +64,8 @@ public abstract class IdentityBase implements Identity {
 
   @Override
   public boolean isSelf(CommandSender sender) {
-    return Bukkit.getPlayer(getPlayerId()).equals(sender);
+    Player p = Bukkit.getPlayer(getPlayerId());
+    return p != null && p.equals(sender);
   }
 
   @Override

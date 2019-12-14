@@ -1,22 +1,20 @@
 package tc.oc.pgm.modules;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
-import org.bukkit.Bukkit;
 import org.bukkit.Difficulty;
 import org.bukkit.World.Environment;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.map.Contributor;
 import tc.oc.pgm.map.MapInfo;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
+import tc.oc.pgm.map.NameCacheUtil;
 import tc.oc.pgm.map.ProtoVersions;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.util.XMLUtils;
@@ -130,19 +128,7 @@ public class InfoModule extends MapModule {
         }
 
         if (uuid != null) {
-          if (Contributor.isUUIDCached(uuid)) {
-            name = Contributor.getCachedName(uuid);
-          } else {
-            Bukkit.getScheduler()
-                .runTaskAsynchronously(
-                    PGM.get(),
-                    () -> {
-                      try {
-                        Contributor.resolve(uuid);
-                      } catch (IOException e) {
-                      }
-                    });
-          }
+          NameCacheUtil.addUUID(uuid);
         }
 
         contribs.add(new Contributor(uuid, name, contribution));

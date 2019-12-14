@@ -9,7 +9,13 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -71,7 +77,9 @@ public class MapLoader {
               added.add(path);
 
               map = new PGMMap(pgm, factory, xmlBuilder, new MapFolder(source, path));
-              if (map.reload(false)) maps.add(map);
+              if (map.reload(false)) {
+                maps.add(map);
+              }
             } else if (map.shouldReload()) {
               logger.fine("  UPDATED " + path);
               updated.add(path);
@@ -101,6 +109,9 @@ public class MapLoader {
             + " new, "
             + removed.size()
             + " removed");
+
+    NameCacheUtil.resolveAll();
+
     return maps;
   }
 
