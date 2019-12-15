@@ -16,7 +16,7 @@ import tc.oc.pgm.util.PrettyPaginatedResult;
 
 public class RotationCommands {
   @Command(
-      aliases = {"rotation", "rot", "rt"},
+      aliases = {"rotation", "rot"},
       desc = "Shows the maps in the active rotation",
       usage = "[page]",
       help = "Shows all the maps that are currently in the active rotation.")
@@ -81,11 +81,7 @@ public class RotationCommands {
   @Command(
       aliases = {
         "rotationcheckout",
-        "rotationcheck",
-        "rotcheckout",
         "rotcheck",
-        "rtcheckout",
-        "rtcheck"
       },
       desc = "Shows the maps in the specified rotation",
       usage = "[rotation] [page]",
@@ -154,7 +150,7 @@ public class RotationCommands {
   }
 
   @Command(
-      aliases = {"rotations", "rots", "rts"},
+      aliases = {"rotations", "rots"},
       desc = "Shows all the existing rotations.",
       help = "Shows all the existing rotations and their trigger player counts.")
   public static void rotations(
