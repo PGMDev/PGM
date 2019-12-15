@@ -51,7 +51,7 @@ public class Contributor implements Named {
   /** Gets the name of this contributor. */
   public @Nullable String getName() {
     return NameCacheUtil.isUUIDCached(this.uuid)
-        ? NameCacheUtil.getCachedName(this.uuid)
+        ? NameCacheUtil.getCachedPlayer(this.uuid).getName()
         : this.fallbackName;
   }
 
