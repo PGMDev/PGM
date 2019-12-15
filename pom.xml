@@ -204,7 +204,7 @@
                 <version>1.6.1</version>
                 <configuration>
                     <from>
-                        <image>ibmjava:8-sfj-alpine</image>
+                        <image>adoptopenjdk:11-jre-openj9</image>
                     </from>
                     <to>
                         <image>pgm</image>
@@ -215,51 +215,23 @@
                     <container>
                         <mainClass>tc.oc.Server</mainClass>
                         <jvmFlags>
-                            <!-- Virtual machine -->
-                            <jvmFlag>-XX:+UnlockExperimentalVMOptions</jvmFlag>
-                            <jvmFlag>-XX:+UseCGroupMemoryLimitForHeap</jvmFlag>
-                            <!-- Performance tune -->
-                            <jvmFlag>-XX:+AggressiveOpts</jvmFlag>
-                            <jvmFlag>-XX:+AlwaysPreTouch</jvmFlag>
-                            <jvmFlag>-XX:+ParallelRefProcEnabled</jvmFlag>
-                            <jvmFlag>-XX:+UseLargePagesInMetaspace</jvmFlag>
-                            <jvmFlag>-XX:+UseBiasedLocking</jvmFlag>
-                            <jvmFlag>-XX:+UseStringDeduplication</jvmFlag>
-                            <!-- IBM Performance tune -->
+                            <jvmFlag>-showversion</jvmFlag>
                             <jvmFlag>-Xaggressive</jvmFlag>
-                            <jvmFlag>-Xnoclassgc</jvmFlag>
-                            <jvmFlag>-Xcompressedrefs</jvmFlag>
                             <jvmFlag>-Xfastresolve</jvmFlag>
-                            <jvmFlag>-Xshareclasses:nonfatal</jvmFlag>
-                            <jvmFlag>-Xshareclasses:cacheDir=/cache</jvmFlag>
+                            <jvmFlag>-Xcompressedrefs</jvmFlag>
+                            <jvmFlag>-Xquickstart</jvmFlag>
+                            <jvmFlag>-Xzero</jvmFlag>
+                            <jvmFlag>-Xgcpolicy:metronome</jvmFlag>
+                            <jvmFlag>-Xgc:targetPauseTime=100</jvmFlag>
                             <jvmFlag>-Xtune:elastic</jvmFlag>
                             <jvmFlag>-Xtune:virtualized</jvmFlag>
-                            <jvmFlag>-Xzero</jvmFlag>
-                            <!-- Garbage collection -->
-                            <jvmFlag>-XX:+UseG1GC</jvmFlag>
-                            <jvmFlag>-XX:MaxGCPauseMillis=100</jvmFlag>
-                            <jvmFlag>-XX:-DisableExplicitGC</jvmFlag>
-                            <jvmFlag>-XX:TargetSurvivorRatio=90</jvmFlag>
-                            <jvmFlag>-XX:G1NewSizePercent=50</jvmFlag>
-                            <jvmFlag>-XX:G1MaxNewSizePercent=80</jvmFlag>
-                            <jvmFlag>-XX:InitiatingHeapOccupancyPercent=10</jvmFlag>
-                            <jvmFlag>-XX:G1MixedGCLiveThresholdPercent=35</jvmFlag>
-                            <jvmFlag>-XX:+ScavengeBeforeFullGC</jvmFlag>
-                            <!-- JVM debugging -->
-                            <jvmFlag>-Dcom.sun.management.jmxremote.port=25564</jvmFlag>
-                            <jvmFlag>-Dcom.sun.management.jmxremote.ssl=false</jvmFlag>
-                            <jvmFlag>-Dcom.sun.management.jmxremote.authenticate=false</jvmFlag>
+                            <jvmFlag>-XX:+UseContainerSupport</jvmFlag>
                         </jvmFlags>
                         <ports>
-                            <!-- Minecraft port -->
                             <port>25565/tcp</port>
-                            <!-- JMX debug port, do not expose to the Internet -->
-                            <port>25564/tcp</port>
                         </ports>
                         <volumes>
                             <volume>/server</volume>
-                            <!-- Used by IBM to share classes between different JVMs -->
-                            <volume>/cache</volume>
                         </volumes>
                         <workingDirectory>/server</workingDirectory>
                     </container>

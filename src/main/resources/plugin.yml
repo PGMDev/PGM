@@ -1,3 +1,4 @@
 name: PGM
+prefix: PGM
 main: tc.oc.pgm.PGMImpl
 version: ${project.version}-${git.commit.id.abbrev}
