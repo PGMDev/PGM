@@ -4,11 +4,11 @@ checkforupdates: false
 # Send supported protocol versions in pings
 send-supported-versions: true
 
-# Fix shift + double click not working when moving items 
+# Fix shift + double click not working when moving items
 quick-move-action-fix: true
 
 # Disable 1.13+ tab autocomplete issues
-disable-1_13-auto-complete: true
+1_13-tab-complete-delay: 10
 
 # Fix 1.13+ clients getting stuck in snow
 fix-low-snow-collision: true
