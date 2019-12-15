@@ -234,10 +234,11 @@ public class RotationCommands {
             + matchManager.getRotationManager().getActiveRotation().getName()
             + ChatColor.WHITE
             + "] "
-            + "Skipped a total of "
-            + ChatColor.AQUA
-            + positions
-            + ChatColor.WHITE
-            + " positions.");
+            + ChatColor.GREEN
+            + AllTranslations.get()
+                .translate(
+                    "command.rotation.skip.message",
+                    sender,
+                    (ChatColor.AQUA.toString() + positions + ChatColor.GREEN)));
   }
 }
