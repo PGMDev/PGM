@@ -13,6 +13,7 @@ import tc.oc.identity.Identity;
 import tc.oc.identity.RealIdentity;
 import tc.oc.named.NameStyle;
 import tc.oc.named.Named;
+import tc.oc.pgm.util.NameCacheUtil;
 
 /**
  * A contributor to a {@link PGMMap}. Can have either or both of a UUID and arbitrary String name.
@@ -51,7 +52,7 @@ public class Contributor implements Named {
   /** Gets the name of this contributor. */
   public @Nullable String getName() {
     return NameCacheUtil.isUUIDCached(this.uuid)
-        ? NameCacheUtil.getCachedPlayer(this.uuid).getName()
+        ? NameCacheUtil.getCachedPlayer(this.uuid).name
         : this.fallbackName;
   }
 

@@ -1,9 +1,8 @@
-package tc.oc.pgm.map;
+package tc.oc.pgm.util;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonWriter;
+import com.google.gson.reflect.TypeToken;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -13,10 +12,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import tc.oc.pgm.api.PGM;
@@ -24,15 +23,16 @@ import tc.oc.pgm.api.PGM;
 public class NameCacheUtil {
 
   private static final Gson GSON = new Gson();
+  private static final long ONE_WEEK_AGO = 7 * 24 * 60 * 60 * 1000;
 
-  private static List<UUID> unresolved = new ArrayList<UUID>();
-  private static HashMap<UUID, CachedPlayer> cache = new HashMap<UUID, CachedPlayer>();
+  private static Set<UUID> unresolved = new HashSet<UUID>();
+  private static Map<UUID, NameCacheEntry> cache = new HashMap<UUID, NameCacheEntry>();
 
   public static boolean isUUIDCached(UUID uuid) {
     return cache.containsKey(uuid);
   }
 
-  public static CachedPlayer getCachedPlayer(UUID uuid) {
+  public static NameCacheEntry getCachedPlayer(UUID uuid) {
     return cache.get(uuid);
   }
 
@@ -66,12 +66,11 @@ public class NameCacheUtil {
         .runTaskAsynchronously(
             PGM.get(),
             () -> {
-              for (int i = 0; i < unresolved.size(); i++) {
+              for (UUID uuid : unresolved) {
                 try {
-                  UUID uuid = unresolved.get(i);
                   cache.put(
                       uuid,
-                      new CachedPlayer(
+                      new NameCacheEntry(
                           uuid, NameCacheUtil.resolveName(uuid), System.currentTimeMillis()));
                 } catch (IOException ignored) {
                 }
@@ -85,38 +84,32 @@ public class NameCacheUtil {
   }
 
   public static void writeCacheToDisk() throws IOException {
-    JsonWriter writer =
-        new JsonWriter(new FileWriter(new File(PGM.get().getDataFolder(), "uuidcache.json")));
-    writer.beginArray();
-    for (Entry<UUID, CachedPlayer> entry : cache.entrySet()) {
-      writer.beginObject();
-      writer.name("uuid").value(entry.getKey().toString());
-      writer.name("name").value(entry.getValue().getName());
-      writer.name("timestamp").value(entry.getValue().getTimestamp());
-      writer.endObject();
+    try (FileWriter writer =
+        new FileWriter(new File(PGM.get().getDataFolder(), "uuidcache.json"))) {
+      GSON.toJson(cache, writer);
     }
-    writer.endArray();
-    writer.close();
   }
 
   public static void readCacheFromDisk() throws IOException {
-    BufferedReader bufferedReader =
-        new BufferedReader(new FileReader(new File(PGM.get().getDataFolder(), "uuidcache.json")));
+    try (FileReader reader =
+        new FileReader(new File(PGM.get().getDataFolder(), "uuidcache.json"))) {
+      cache = GSON.fromJson(reader, new TypeToken<HashMap<UUID, NameCacheEntry>>() {}.getType());
+    }
+    cache.values().stream()
+        .filter(entry -> entry.timestamp < ONE_WEEK_AGO)
+        .forEach(ce -> unresolved.add(ce.uuid));
+  }
 
-    JsonArray array = GSON.fromJson(bufferedReader, JsonArray.class);
-    for (int i = 0; i < array.size(); i++) {
-      JsonObject obj = array.get(i).getAsJsonObject();
-      CachedPlayer player =
-          new CachedPlayer(
-              UUID.fromString(obj.get("uuid").getAsString()),
-              obj.get("name").getAsString(),
-              obj.get("timestamp").getAsLong());
-      // If the player's name has been fetched within the last seven days
-      if (System.currentTimeMillis() - player.getTimestamp() < 604800000L) {
-        cache.put(player.getUUID(), player);
-      } else {
-        unresolved.add(player.getUUID());
-      }
+  public static class NameCacheEntry {
+
+    public final UUID uuid;
+    public final long timestamp;
+    public String name;
+
+    public NameCacheEntry(UUID uuid, String name, long timestamp) {
+      this.uuid = uuid;
+      this.name = name;
+      this.timestamp = timestamp;
     }
   }
 }
