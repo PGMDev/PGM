@@ -58,7 +58,7 @@ public interface PGM extends Plugin {
   @Deprecated
   NameRenderer getNameRenderer();
 
-  AtomicReference<PGM> GLOBAL = new AtomicReference<>(null);
+  @Deprecated AtomicReference<PGM> GLOBAL = new AtomicReference<>(null);
 
   @Deprecated
   static PGM set(PGM pgm) {
@@ -71,7 +71,6 @@ public interface PGM extends Plugin {
     return get();
   }
 
-  @Deprecated
   static PGM get() {
     final PGM pgm = GLOBAL.get();
     if (pgm == null) {
