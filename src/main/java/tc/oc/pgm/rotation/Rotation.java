@@ -29,10 +29,6 @@ public class Rotation implements PGMMapOrderProvider {
     return name;
   }
 
-  public void setName(String name) {
-    this.name = name;
-  }
-
   public boolean isEnabled() {
     return enabled;
   }
@@ -43,10 +39,6 @@ public class Rotation implements PGMMapOrderProvider {
 
   public List<PGMMap> getMaps() {
     return Collections.unmodifiableList(maps);
-  }
-
-  public void setMaps(List<PGMMap> maps) {
-    this.maps = maps;
   }
 
   public int getPlayers() {
@@ -71,11 +63,10 @@ public class Rotation implements PGMMapOrderProvider {
         .forEach(
             map -> {
               final Optional<PGMMap> mapByNameOrId =
-                  PGM.GLOBAL.get().getMapLibrary().getMapByNameOrId(map);
+                  PGM.get().getMapLibrary().getMapByNameOrId(map);
               if (mapByNameOrId.isPresent()) maps.add(mapByNameOrId.get());
               else {
-                PGM.GLOBAL
-                    .get()
+                PGM.get()
                     .getLogger()
                     .warning(
                         "[Rotation] "
