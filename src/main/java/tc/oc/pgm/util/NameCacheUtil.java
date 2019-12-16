@@ -94,12 +94,13 @@ public class NameCacheUtil {
   }
 
   public static void readCacheFromDisk() throws IOException {
+    long oneWeekAgo = System.currentTimeMillis() - ONE_WEEK;
     try (FileReader reader =
         new FileReader(new File(PGM.get().getDataFolder(), "uuidcache.json"))) {
       cache = GSON.fromJson(reader, new TypeToken<HashMap<UUID, NameCacheEntry>>() {}.getType());
     }
     cache.values().stream()
-        .filter(entry -> System.currentTimeMillis() - entry.timestamp < ONE_WEEK)
+        .filter(entry -> entry.timestamp > oneWeekAgo)
         .forEach(ce -> unresolved.add(ce.uuid));
   }
 
