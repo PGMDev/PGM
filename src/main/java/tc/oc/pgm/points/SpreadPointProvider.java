@@ -1,11 +1,14 @@
 package tc.oc.pgm.points;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.util.RandomUtils;
 
 /** Get 16 points from each child and choose the farthest point from any enemy */
 public class SpreadPointProvider extends AggregatePointProvider {
@@ -18,7 +21,7 @@ public class SpreadPointProvider extends AggregatePointProvider {
 
   @Override
   public Location getPoint(Match match, @Nullable Entity entity) {
-    Location bestPoint = null;
+    List<Location> bestPoints = new ArrayList<>(SAMPLE_COUNT);
     double bestDistance = Double.NEGATIVE_INFINITY;
     MatchPlayer player = match.getPlayer(entity);
 
@@ -37,14 +40,14 @@ public class SpreadPointProvider extends AggregatePointProvider {
           }
         }
 
-        if (bestDistance < nearest) {
+        if (bestDistance <= nearest) {
           bestDistance = nearest;
-          bestPoint = pos;
+          bestPoints.add(pos);
         }
       }
     }
 
-    return bestPoint;
+    return RandomUtils.element(match.getRandom(), bestPoints);
   }
 
   @Override
