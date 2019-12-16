@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import org.bukkit.Bukkit;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedPlayer;
 import tc.oc.component.types.PersonalizedText;
@@ -14,6 +13,7 @@ import tc.oc.identity.Identity;
 import tc.oc.identity.RealIdentity;
 import tc.oc.named.NameStyle;
 import tc.oc.named.Named;
+import tc.oc.pgm.util.NameCacheUtil;
 
 /**
  * A contributor to a {@link PGMMap}. Can have either or both of a UUID and arbitrary String name.
@@ -22,6 +22,7 @@ import tc.oc.named.Named;
  * without a Minecraft account, like mom or Jesus).
  */
 public class Contributor implements Named {
+
   protected final @Nullable UUID uuid;
   protected final @Nullable String fallbackName;
   protected final @Nullable String contribution;
@@ -32,6 +33,7 @@ public class Contributor implements Named {
   public Contributor(
       @Nullable UUID uuid, @Nullable String fallbackName, @Nullable String contribution) {
     this.uuid = uuid;
+    this.playerId = uuid;
     this.fallbackName = fallbackName;
     this.contribution = contribution;
 
@@ -49,9 +51,9 @@ public class Contributor implements Named {
 
   /** Gets the name of this contributor. */
   public @Nullable String getName() {
-    // ASHCON
-    UUID pid = this.playerId;
-    return pid != null ? this.fallbackName : this.fallbackName;
+    return NameCacheUtil.isUUIDCached(this.uuid)
+        ? NameCacheUtil.getCachedName(this.uuid)
+        : this.fallbackName;
   }
 
   public @Nullable UUID getPlayerId() {
@@ -63,14 +65,12 @@ public class Contributor implements Named {
   }
 
   public @Nullable Identity getIdentity() {
-    return playerId == null
-        ? null
-        : new RealIdentity(getPlayerId(), Bukkit.getPlayer(getPlayerId()).getName());
+    return playerId == null ? null : new RealIdentity(getPlayerId(), getName());
   }
 
   @Override
   public Component getStyledName(NameStyle style) {
-    return playerId != null
+    return getIdentity() != null
         ? new PersonalizedPlayer(getIdentity(), style)
         : new PersonalizedText(fallbackName);
   }
