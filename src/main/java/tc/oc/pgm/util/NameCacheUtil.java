@@ -17,13 +17,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
 import tc.oc.pgm.api.PGM;
 
 public class NameCacheUtil {
 
   private static final Gson GSON = new Gson();
-  private static final long ONE_WEEK_AGO = 7 * 24 * 60 * 60 * 1000;
+  private static final long ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
 
   private static Set<UUID> unresolved = new HashSet<UUID>();
   private static Map<UUID, NameCacheEntry> cache = new HashMap<UUID, NameCacheEntry>();
@@ -32,8 +33,10 @@ public class NameCacheUtil {
     return cache.containsKey(uuid);
   }
 
-  public static NameCacheEntry getCachedPlayer(UUID uuid) {
-    return cache.get(uuid);
+  @Nullable
+  public static String getCachedName(UUID uuid) {
+    NameCacheEntry entry = cache.get(uuid);
+    return entry == null ? null : entry.name;
   }
 
   public static void addUUID(UUID uuid) {
@@ -96,11 +99,11 @@ public class NameCacheUtil {
       cache = GSON.fromJson(reader, new TypeToken<HashMap<UUID, NameCacheEntry>>() {}.getType());
     }
     cache.values().stream()
-        .filter(entry -> entry.timestamp < ONE_WEEK_AGO)
+        .filter(entry -> System.currentTimeMillis() - entry.timestamp < ONE_WEEK)
         .forEach(ce -> unresolved.add(ce.uuid));
   }
 
-  public static class NameCacheEntry {
+  private static class NameCacheEntry {
 
     public final UUID uuid;
     public final long timestamp;
