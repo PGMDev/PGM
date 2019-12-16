@@ -3,7 +3,6 @@ package tc.oc.pgm.rotation;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,8 +37,7 @@ public class RotationManager implements PGMMapOrderProvider {
 
     if (!rotationsFile.exists()) {
       try {
-        FileUtils.copyInputStreamToFile(
-            PGM.GLOBAL.get().getResource("rotations.yml"), rotationsFile);
+        FileUtils.copyInputStreamToFile(PGM.get().getResource("rotations.yml"), rotationsFile);
       } catch (IOException e) {
         logger.log(Level.SEVERE, "Failed to create the rotations.yml file", e);
       }
@@ -104,29 +102,30 @@ public class RotationManager implements PGMMapOrderProvider {
 
   public void recalculateActiveRotation() {
     int activePlayers = getActivePlayers();
-    int[] playerCounts = new int[rotations.size()];
+    List<Integer> playerCounts = new ArrayList<>(rotations.size());
 
-    AtomicInteger count = new AtomicInteger(0);
     rotations.forEach(
         rotation -> {
           if (rotation.isEnabled()) {
-            playerCounts[count.get()] = rotation.getPlayers();
-            count.getAndIncrement();
+            playerCounts.add(rotation.getPlayers());
           }
         });
 
-    int distance = Math.abs(playerCounts[0] - activePlayers);
-    int accuratePlayerCountIndex = 0;
+    Collections.sort(playerCounts);
+    Rotation newRotation = null;
 
-    for (int i = 1; i < playerCounts.length; i++) {
-      int idistance = Math.abs(playerCounts[i] - activePlayers);
-      if (idistance < distance) {
-        accuratePlayerCountIndex = i;
-        distance = idistance;
+    int count = 0;
+    while (count < playerCounts.size()) {
+      newRotation = getRotationByPlayerCount(playerCounts.get(count));
+
+      if (playerCounts.get(count) >= activePlayers) {
+        break;
       }
+
+      count++;
     }
 
-    updateRotation(playerCounts, accuratePlayerCountIndex);
+    updateActiveRotation(newRotation);
   }
 
   private int getActivePlayers() {
@@ -139,27 +138,36 @@ public class RotationManager implements PGMMapOrderProvider {
     return onlinePlayers.size() - match.getObservers().size() / 2;
   }
 
-  private void updateRotation(final int[] playerCounts, final int accuratePlayerCountIndex) {
+  private void updateActiveRotation(Rotation rotation) {
+    if (rotation == activeRotation) return;
+
+    setActiveRotation(rotation);
+    Bukkit.broadcastMessage(
+        ChatColor.WHITE
+            + "["
+            + ChatColor.GOLD
+            + "Rotations"
+            + ChatColor.WHITE
+            + "] "
+            + ChatColor.GREEN
+            + AllTranslations.get()
+                .translate(
+                    "rotations.rotationChange",
+                    Bukkit.getConsoleSender(),
+                    (ChatColor.AQUA + rotation.getName() + ChatColor.GREEN)));
+  }
+
+  private Rotation getRotationByPlayerCount(int playerCount) {
+    AtomicReference<Rotation> matchByPlayerCount = new AtomicReference<>();
+
     rotations.forEach(
         rotation -> {
-          if (rotation.getPlayers() == playerCounts[accuratePlayerCountIndex]
-              && activeRotation.getPlayers() != playerCounts[accuratePlayerCountIndex]) {
-            setActiveRotation(rotation);
-            Bukkit.broadcastMessage(
-                ChatColor.WHITE
-                    + "["
-                    + ChatColor.GOLD
-                    + "Rotations"
-                    + ChatColor.WHITE
-                    + "] "
-                    + ChatColor.GREEN
-                    + AllTranslations.get()
-                        .translate(
-                            "rotations.rotationChange",
-                            Bukkit.getConsoleSender(),
-                            (ChatColor.AQUA + rotation.getName() + ChatColor.GREEN)));
+          if (rotation.getPlayers() == playerCount) {
+            matchByPlayerCount.set(rotation);
           }
         });
+
+    return matchByPlayerCount.get();
   }
 
   public Rotation getRotationByName(String name) {
@@ -206,7 +214,7 @@ public class RotationManager implements PGMMapOrderProvider {
     Iterator<Match> iterator = matchManager.getMatches().iterator();
     PGMMap current = iterator.hasNext() ? iterator.next().getMap() : null;
 
-    List<PGMMap> maps = new ArrayList<>(PGM.GLOBAL.get().getMapLibrary().getMaps());
+    List<PGMMap> maps = new ArrayList<>(PGM.get().getMapLibrary().getMaps());
     PGMMap next;
     do {
       Collections.shuffle(maps);

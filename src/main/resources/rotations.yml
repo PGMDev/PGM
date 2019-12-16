@@ -9,7 +9,7 @@
 default:
   enabled: true
   players: 1
-  position: 0                 # This helps the server resume rotations in the position they were before a server shutdown/restart
+  next_map: Harb                 # This helps the server resume rotations in the position they were before a server shutdown/restart
   maps:
     - Airship Battle
     - Harb
