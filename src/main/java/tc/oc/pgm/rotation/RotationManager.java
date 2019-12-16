@@ -89,8 +89,10 @@ public class RotationManager implements PGMMapOrderProvider {
   private void saveCurrentPosition() {
     FileConfiguration rotationFileConfiguration =
         YamlConfiguration.loadConfiguration(rotationsFile);
+
     rotationFileConfiguration.set(
-        activeRotation.getName() + ".position", activeRotation.getPosition());
+        activeRotation.getName() + ".next_map",
+        activeRotation.getMapInPosition(activeRotation.getPosition() + 1).getName());
 
     try {
       rotationFileConfiguration.save(rotationsFile);
@@ -184,7 +186,8 @@ public class RotationManager implements PGMMapOrderProvider {
     return matchByName.get();
   }
 
-  public PGMMap getInitialMap() {
+  public PGMMap popInitialMap() {
+    saveCurrentPosition();
     return activeRotation.getMapInPosition(activeRotation.getPosition());
   }
 

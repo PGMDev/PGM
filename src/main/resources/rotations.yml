@@ -9,7 +9,10 @@
 default:
   enabled: true
   players: 1
-  next_map: Harb                 # This helps the server resume rotations in the position they were before a server shutdown/restart
+  # next_map helps the server resume rotations in the position they were before a server shutdown/restart
+  # The next map for default is the first map in it's map list.
+  # This only applies when the server creates the rotations.yml file for the first time
+  next_map: Airship Battle
   maps:
     - Airship Battle
     - Harb

@@ -269,7 +269,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
             () -> {
               if (matchManager.getRotationManager().getActiveRotation() != null) {
                 if (!matchManager
-                    .cycleMatch(null, matchManager.getRotationManager().getInitialMap(), true)
+                    .cycleMatch(null, matchManager.getRotationManager().popInitialMap(), true)
                     .isPresent()) {
                   logger.severe("PGM could not load an initial match, server will shut down");
                   server.shutdown();
