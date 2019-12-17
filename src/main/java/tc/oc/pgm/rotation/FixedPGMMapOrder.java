@@ -80,9 +80,9 @@ public class FixedPGMMapOrder implements PGMMapOrder {
               }
             });
 
-    Optional<PGMMap> next_map =
+    Optional<PGMMap> nextMap =
         PGM.get().getMapLibrary().getMapByNameOrId(configurationSection.getString("next_map"));
-    if (!next_map.isPresent()) {
+    if (!nextMap.isPresent()) {
       PGM.get()
           .getLogger()
           .log(
@@ -90,7 +90,7 @@ public class FixedPGMMapOrder implements PGMMapOrder {
               "Could not resolve next map from rotations. Resuming on initial position: 0");
       this.position = 0;
     } else {
-      this.position = getMapPosition(next_map.get());
+      this.position = getMapPosition(nextMap.get());
     }
   }
 
@@ -102,7 +102,6 @@ public class FixedPGMMapOrder implements PGMMapOrder {
       count++;
     }
 
-    System.out.println(count);
     return count;
   }
 

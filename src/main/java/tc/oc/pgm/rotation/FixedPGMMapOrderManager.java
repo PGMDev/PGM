@@ -20,7 +20,7 @@ import tc.oc.pgm.map.PGMMap;
 
 /**
  * Manages all the existing {@link FixedPGMMapOrder}s (Rotations), as for maintaining their order,
- * and updating the one pgm will use after very match depending on the player count (Dynamic
+ * and updating the one {@link PGM} will use after every match depending on the player count (Dynamic
  * Rotations)
  */
 public class FixedPGMMapOrderManager implements PGMMapOrder {
