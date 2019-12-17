@@ -4,6 +4,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.Iterables;
+
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -18,6 +20,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -61,6 +64,7 @@ import tc.oc.pgm.result.CompetitorVictoryCondition;
 import tc.oc.pgm.result.VictoryCondition;
 import tc.oc.server.Events;
 import tc.oc.server.Scheduler;
+import tc.oc.util.FileUtils;
 import tc.oc.util.collection.RankedSet;
 import tc.oc.util.logging.ClassLogger;
 import tc.oc.world.NMSHacks;
@@ -782,14 +786,15 @@ public class MatchImpl implements Match, Comparable<Match> {
       }
     }
 
-    Stream.of(getWorld().getLoadedChunks()).forEach(chunk -> chunk.unload(true, false));
+    Stream.of(getWorld().getLoadedChunks()).forEach(Chunk::unload);
     getWorld().getEntities().stream().forEach(Entity::remove);
 
-    final boolean unloaded = PGM.get().getServer().unloadWorld(getWorld(), false);
+    final String worldName = getWorld().getName();
+    final boolean unloaded = PGM.get().getServer().unloadWorld(worldName, true);
     if (!unloaded) {
       logger.log(
           Level.SEVERE,
-          "Unable to unload world " + getWorld().getName() + " (this can cause memory leaks!)");
+          "Unable to unload world " + worldName + " (this can cause memory leaks!)");
     }
 
     schedulers.clear();
@@ -806,6 +811,11 @@ public class MatchImpl implements Match, Comparable<Match> {
     world.enqueue();
 
     loaded.compareAndSet(true, false);
+
+    final File oldMatchFolder = new File(PGM.get().getServer().getWorldContainer(), worldName);
+    if (oldMatchFolder.exists()) {
+      FileUtils.delete(oldMatchFolder);
+    }
   }
 
   @Override
