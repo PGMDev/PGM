@@ -47,7 +47,7 @@ public class PGMMapProvider implements BukkitProvider<PGMMap> {
       map = matchManager.getMapOrder().getNextMap();
     }
 
-    if (map == null) {
+     if (map == null && !isGoToNext(annotations)) {
       throw new ArgumentException(AllTranslations.get().translate("command.mapNotFound", sender));
     }
 
