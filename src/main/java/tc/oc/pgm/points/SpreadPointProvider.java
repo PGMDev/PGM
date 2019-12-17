@@ -41,6 +41,9 @@ public class SpreadPointProvider extends AggregatePointProvider {
         }
 
         if (bestDistance <= nearest) {
+          if (bestDistance != nearest) {
+            bestPoints.clear();
+          }
           bestDistance = nearest;
           bestPoints.add(pos);
         }
