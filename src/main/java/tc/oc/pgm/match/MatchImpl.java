@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.Iterables;
-
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.*;
@@ -793,8 +792,7 @@ public class MatchImpl implements Match, Comparable<Match> {
     final boolean unloaded = PGM.get().getServer().unloadWorld(worldName, true);
     if (!unloaded) {
       logger.log(
-          Level.SEVERE,
-          "Unable to unload world " + worldName + " (this can cause memory leaks!)");
+          Level.SEVERE, "Unable to unload world " + worldName + " (this can cause memory leaks!)");
     }
 
     schedulers.clear();
