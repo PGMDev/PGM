@@ -9,7 +9,8 @@ import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.map.PGMMap;
 
-public class Rotation implements PGMMapOrderProvider {
+/** In practice, a {@link FixedPGMMapOrder} is a rotation of maps, a type of {@link PGMMapOrder} */
+public class FixedPGMMapOrder implements PGMMapOrder {
   private ConfigurationSection configurationSection;
 
   private String name;
@@ -17,8 +18,9 @@ public class Rotation implements PGMMapOrderProvider {
   private List<PGMMap> maps = new ArrayList<>();
   private int players;
   private int position;
+  private boolean booting = true;
 
-  Rotation(ConfigurationSection configurationSection, String name) {
+  FixedPGMMapOrder(ConfigurationSection configurationSection, String name) {
     this.configurationSection = configurationSection;
     this.name = name;
     this.enabled = configurationSection.getBoolean("enabled");
@@ -87,7 +89,9 @@ public class Rotation implements PGMMapOrderProvider {
               Level.SEVERE,
               "Could not resolve next map from rotations. Resuming on initial position: 0");
       this.position = 0;
-    } else this.position = getMapPosition(next_map.get());
+    } else {
+      this.position = getMapPosition(next_map.get());
+    }
   }
 
   private int getMapPosition(PGMMap map) {
@@ -98,6 +102,7 @@ public class Rotation implements PGMMapOrderProvider {
       count++;
     }
 
+    System.out.println(count);
     return count;
   }
 
@@ -137,18 +142,18 @@ public class Rotation implements PGMMapOrderProvider {
   @Override
   public PGMMap popNextMap() {
     PGMMap nextMap = maps.get(position);
-    rotate();
-    return nextMap;
+    if (booting) {
+      this.booting = false;
+      return nextMap;
+    } else {
+      rotate();
+      return nextMap;
+    }
   }
 
   @Override
   public PGMMap getNextMap() {
     return maps.get(position);
-  }
-
-  @Override
-  public PGMMap popFallbackMap() {
-    return null;
   }
 
   @Override

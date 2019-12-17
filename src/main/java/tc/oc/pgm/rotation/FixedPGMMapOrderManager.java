@@ -18,19 +18,24 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.map.PGMMap;
 
-public class RotationManager implements PGMMapOrderProvider {
+/**
+ * Manages all the existing {@link FixedPGMMapOrder}s (Rotations), as for maintaining their order,
+ * and updating the one pgm will use after very match depending on the player count (Dynamic
+ * Rotations)
+ */
+public class FixedPGMMapOrderManager implements PGMMapOrder {
 
   private MatchManager matchManager;
   private Logger logger;
 
   private File rotationsFile;
-  private List<Rotation> rotations = new ArrayList<>();
-  private Rotation activeRotation;
+  private List<FixedPGMMapOrder> rotations = new ArrayList<>();
+  private FixedPGMMapOrder activeRotation;
   private boolean isEvaluatingPlayerCount = true;
   /** When a {@link PGMMap} is manually set next, it overrides the rotation order * */
   private PGMMap overriderMap;
 
-  public RotationManager(MatchManager matchManager, Logger logger, File rotationsFile) {
+  public FixedPGMMapOrderManager(MatchManager matchManager, Logger logger, File rotationsFile) {
     this.matchManager = matchManager;
     this.rotationsFile = rotationsFile;
     this.logger = logger;
@@ -55,8 +60,9 @@ public class RotationManager implements PGMMapOrderProvider {
         .forEach(
             key ->
                 rotations.add(
-                    new Rotation(rotationsFileConfiguration.getConfigurationSection(key), key)));
-    rotations.forEach(Rotation::load);
+                    new FixedPGMMapOrder(
+                        rotationsFileConfiguration.getConfigurationSection(key), key)));
+    rotations.forEach(FixedPGMMapOrder::load);
 
     rotations.forEach(
         rotation -> {
@@ -66,11 +72,11 @@ public class RotationManager implements PGMMapOrderProvider {
     setActiveRotation(getRotationByName("default"));
   }
 
-  private void setActiveRotation(Rotation activeRotation) {
+  private void setActiveRotation(FixedPGMMapOrder activeRotation) {
     this.activeRotation = activeRotation;
   }
 
-  public Rotation getActiveRotation() {
+  public FixedPGMMapOrder getActiveRotation() {
     return activeRotation;
   }
 
@@ -82,7 +88,7 @@ public class RotationManager implements PGMMapOrderProvider {
     return isEvaluatingPlayerCount;
   }
 
-  public List<Rotation> getRotations() {
+  public List<FixedPGMMapOrder> getRotations() {
     return rotations;
   }
 
@@ -114,7 +120,7 @@ public class RotationManager implements PGMMapOrderProvider {
         });
 
     Collections.sort(playerCounts);
-    Rotation newRotation = null;
+    FixedPGMMapOrder newRotation = null;
 
     int count = 0;
     while (count < playerCounts.size()) {
@@ -140,7 +146,7 @@ public class RotationManager implements PGMMapOrderProvider {
     return onlinePlayers.size() - match.getObservers().size() / 2;
   }
 
-  private void updateActiveRotation(Rotation rotation) {
+  private void updateActiveRotation(FixedPGMMapOrder rotation) {
     if (rotation == activeRotation) return;
 
     setActiveRotation(rotation);
@@ -159,8 +165,8 @@ public class RotationManager implements PGMMapOrderProvider {
                     (ChatColor.AQUA + rotation.getName() + ChatColor.GREEN)));
   }
 
-  private Rotation getRotationByPlayerCount(int playerCount) {
-    AtomicReference<Rotation> matchByPlayerCount = new AtomicReference<>();
+  private FixedPGMMapOrder getRotationByPlayerCount(int playerCount) {
+    AtomicReference<FixedPGMMapOrder> matchByPlayerCount = new AtomicReference<>();
 
     rotations.forEach(
         rotation -> {
@@ -172,8 +178,15 @@ public class RotationManager implements PGMMapOrderProvider {
     return matchByPlayerCount.get();
   }
 
-  public Rotation getRotationByName(String name) {
-    AtomicReference<Rotation> matchByName = new AtomicReference<>();
+  /**
+   * Method to be kept for the future, as it's very useful and could be used for a variety of
+   * things.
+   *
+   * @param name The name of the desired rotation
+   * @return The {@link FixedPGMMapOrder} (Rotation) which matches the input name
+   */
+  public FixedPGMMapOrder getRotationByName(String name) {
+    AtomicReference<FixedPGMMapOrder> matchByName = new AtomicReference<>();
 
     getRotations()
         .forEach(
@@ -184,11 +197,6 @@ public class RotationManager implements PGMMapOrderProvider {
             });
 
     return matchByName.get();
-  }
-
-  public PGMMap popInitialMap() {
-    saveCurrentPosition();
-    return activeRotation.getMapInPosition(activeRotation.getPosition());
   }
 
   @Override
@@ -209,22 +217,7 @@ public class RotationManager implements PGMMapOrderProvider {
       if (overriderMap == null) {
         return activeRotation.getNextMap();
       } else return overriderMap;
-    } else return popFallbackMap();
-  }
-
-  @Override
-  public PGMMap popFallbackMap() {
-    Iterator<Match> iterator = matchManager.getMatches().iterator();
-    PGMMap current = iterator.hasNext() ? iterator.next().getMap() : null;
-
-    List<PGMMap> maps = new ArrayList<>(PGM.get().getMapLibrary().getMaps());
-    PGMMap next;
-    do {
-      Collections.shuffle(maps);
-      next = maps.get(0);
-    } while (maps.size() > 1 && Objects.equals(current, next));
-
-    return next;
+    } else return null;
   }
 
   @Override

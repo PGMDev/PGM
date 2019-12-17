@@ -17,6 +17,7 @@ import tc.oc.pgm.match.MatchModuleFactory;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.restart.RestartManager;
+import tc.oc.pgm.rotation.FixedPGMMapOrderManager;
 
 @ModuleDescription(name = "Cycle")
 @ListenerScope(MatchScope.LOADED)
@@ -54,7 +55,7 @@ public class CycleMatchModule extends MatchModule implements Listener {
   }
 
   public void startCountdown(Duration duration) {
-    startCountdown(duration, mm.getRotationManager().getNextMap());
+    startCountdown(duration, mm.getMapOrder().getNextMap());
   }
 
   public void startCountdown(@Nullable Duration duration, PGMMap nextMap) {
@@ -62,7 +63,7 @@ public class CycleMatchModule extends MatchModule implements Listener {
     getMatch().finish();
     if (Duration.ZERO.equals(duration)) {
       mm.cycleMatch(getMatch(), nextMap, false);
-      mm.getRotationManager().popNextMap();
+      mm.getMapOrder().popNextMap();
     } else {
       getMatch().getCountdown().start(new CycleCountdown(mm, getMatch(), nextMap), duration);
     }
@@ -84,12 +85,16 @@ public class CycleMatchModule extends MatchModule implements Listener {
   public void onMatchEnd(MatchFinishEvent event) {
     final Match match = event.getMatch();
 
-    /*
-     Whether player counts should be evaluated for activating a more
-     accurate rotation depending on the amount of online / active players
-    */
-    if (mm.getRotationManager().isEvaluatingPlayerCount()) {
-      mm.getRotationManager().recalculateActiveRotation();
+    if (mm.getMapOrder() instanceof FixedPGMMapOrderManager) {
+      FixedPGMMapOrderManager fixedPGMMapOrderManager = (FixedPGMMapOrderManager) mm.getMapOrder();
+
+      /*
+      Whether player counts should be evaluated for activating a more
+      accurate rotation depending on the amount of online / active players or not
+      */
+      if (fixedPGMMapOrderManager.isEvaluatingPlayerCount()) {
+        fixedPGMMapOrderManager.recalculateActiveRotation();
+      }
     }
 
     if (!RestartManager.get().isRestartRequested()) {

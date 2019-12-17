@@ -45,6 +45,7 @@ import tc.oc.pgm.commands.MapCommands;
 import tc.oc.pgm.commands.MapDevelopmentCommands;
 import tc.oc.pgm.commands.MatchCommands;
 import tc.oc.pgm.commands.ModeCommands;
+import tc.oc.pgm.commands.RotationCommands;
 import tc.oc.pgm.commands.StartCommands;
 import tc.oc.pgm.commands.TeamCommands;
 import tc.oc.pgm.commands.TimeLimitCommands;
@@ -113,7 +114,8 @@ import tc.oc.pgm.rage.RageModule;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.renewable.RenewableModule;
 import tc.oc.pgm.restart.RestartManager;
-import tc.oc.pgm.rotation.RotationManager;
+import tc.oc.pgm.rotation.FixedPGMMapOrderManager;
+import tc.oc.pgm.rotation.RandomPGMMapOrder;
 import tc.oc.pgm.score.ScoreModule;
 import tc.oc.pgm.scoreboard.ScoreboardModule;
 import tc.oc.pgm.scoreboard.SidebarModule;
@@ -232,9 +234,15 @@ public final class PGMImpl extends JavaPlugin implements PGM {
 
     try {
       matchManager = new MatchManagerImpl(server, mapLibrary, mapLoader);
-      matchManager.setRotationManager(
-          new RotationManager(
-              matchManager, logger, new File(getDataFolder(), Config.Rotations.getPath())));
+
+      if (Config.Rotations.areEnabled()) {
+        matchManager.setMapOrder(
+            new FixedPGMMapOrderManager(
+                matchManager, logger, new File(getDataFolder(), Config.Rotations.getPath())));
+      } else {
+        matchManager.setMapOrder(new RandomPGMMapOrder(matchManager));
+      }
+
     } catch (MapNotFoundException e) {
       logger.log(Level.SEVERE, "PGM could not load any maps, server will shut down", e);
       server.shutdown();
@@ -267,13 +275,11 @@ public final class PGMImpl extends JavaPlugin implements PGM {
         .scheduleSyncDelayedTask(
             this,
             () -> {
-              if (matchManager.getRotationManager().getActiveRotation() != null) {
-                if (!matchManager
-                    .cycleMatch(null, matchManager.getRotationManager().popInitialMap(), true)
-                    .isPresent()) {
-                  logger.severe("PGM could not load an initial match, server will shut down");
-                  server.shutdown();
-                }
+              if (!matchManager
+                  .cycleMatch(null, matchManager.getMapOrder().popNextMap(), true)
+                  .isPresent()) {
+                logger.severe("PGM could not load an initial match, server will shut down");
+                server.shutdown();
               }
             });
 

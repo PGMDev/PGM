@@ -171,7 +171,7 @@ public class MapCommands {
       aliases = {"mapnext", "mn", "nextmap", "nm", "next"},
       desc = "Shows which map is coming up next")
   public void next(Audience audience, CommandSender sender, MatchManager matchManager) {
-    final PGMMap next = matchManager.getRotationManager().getNextMap();
+    final PGMMap next = matchManager.getMapOrder().getNextMap();
 
     audience.sendMessage(
         ChatColor.DARK_PURPLE

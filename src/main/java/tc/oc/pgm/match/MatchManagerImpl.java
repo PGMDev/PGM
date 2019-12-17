@@ -25,7 +25,7 @@ import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.map.*;
 import tc.oc.pgm.module.ModuleLoadException;
-import tc.oc.pgm.rotation.RotationManager;
+import tc.oc.pgm.rotation.PGMMapOrder;
 import tc.oc.pgm.terrain.TerrainModule;
 import tc.oc.util.FileUtils;
 import tc.oc.util.logging.ClassLogger;
@@ -42,7 +42,7 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
   private final Map<String, String> matchIdByWorldName;
   private final AtomicInteger count;
 
-  private RotationManager rotationManager;
+  private PGMMapOrder pgmMapOrder;
 
   public MatchManagerImpl(Server server, MapLibrary library, MapLoader loader)
       throws MapNotFoundException {
@@ -164,7 +164,7 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
   @Override
   public Optional<Match> cycleMatch(@Nullable Match oldMatch, PGMMap nextMap, boolean retry) {
     // Pop map out
-    rotationManager.popNextMap();
+    pgmMapOrder.popNextMap();
 
     // Match unload also does this, but doing it earlier avoids some problems.
     // Specifically, RestartCountdown cannot cancel itself during a cycle.
@@ -255,13 +255,13 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
   }
 
   @Override
-  public void setRotationManager(RotationManager rotationManager) {
-    this.rotationManager = rotationManager;
+  public void setMapOrder(PGMMapOrder pgmMapOrder) {
+    this.pgmMapOrder = pgmMapOrder;
   }
 
   @Override
-  public RotationManager getRotationManager() {
-    return rotationManager;
+  public PGMMapOrder getMapOrder() {
+    return pgmMapOrder;
   }
 
   /**

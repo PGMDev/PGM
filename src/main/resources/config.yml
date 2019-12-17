@@ -15,6 +15,7 @@ map:
     reload-when-error: false
 
 rotations:
+  enabled: true
   path: rotations.yml
 
 restart:

@@ -38,7 +38,7 @@ public class CycleCommands {
     }
 
     if (map != null) {
-      matchManager.getRotationManager().setNextMap(map);
+      matchManager.getMapOrder().setNextMap(map);
       cmm.startCountdown(countdown, map);
     } else {
       cmm.startCountdown(countdown);

@@ -44,7 +44,7 @@ public class PGMMapProvider implements BukkitProvider<PGMMap> {
         map = mapLibrary.getMapByNameOrId(fuzzyName).orNull();
       }
     } else if (isGoToNext(annotations)) {
-      map = matchManager.getRotationManager().getNextMap();
+      map = matchManager.getMapOrder().getNextMap();
     }
 
     if (map == null) {

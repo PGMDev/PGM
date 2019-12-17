@@ -34,6 +34,10 @@ public class Config {
   }
 
   public static class Rotations {
+    public static boolean areEnabled() {
+      return getConfiguration().getBoolean("rotations.enabled");
+    }
+
     public static String getPath() {
       return getConfiguration().getString("rotations.path");
     }

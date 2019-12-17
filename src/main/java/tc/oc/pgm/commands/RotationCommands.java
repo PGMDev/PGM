@@ -11,7 +11,8 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.map.PGMMap;
-import tc.oc.pgm.rotation.Rotation;
+import tc.oc.pgm.rotation.FixedPGMMapOrder;
+import tc.oc.pgm.rotation.FixedPGMMapOrderManager;
 import tc.oc.pgm.util.PrettyPaginatedResult;
 
 public class RotationCommands {
@@ -24,58 +25,62 @@ public class RotationCommands {
       Audience audience, CommandSender sender, MatchManager matchManager, @Default("1") int page)
       throws CommandException {
 
-    List<PGMMap> maps;
-    Rotation rotation = matchManager.getRotationManager().getActiveRotation();
-    if (rotation != null) maps = rotation.getMaps();
-    else {
-      sender.sendMessage(
-          ChatColor.RED + AllTranslations.get().translate("command.rotation.noRotation", sender));
-      return;
-    }
+    if (matchManager.getMapOrder() instanceof FixedPGMMapOrderManager) {
+      FixedPGMMapOrderManager fixedPGMMapOrderManager =
+          (FixedPGMMapOrderManager) matchManager.getMapOrder();
+      FixedPGMMapOrder rotation = fixedPGMMapOrderManager.getActiveRotation();
 
-    int resultsPerPage = 8;
-    int pages = (maps.size() + resultsPerPage - 1) / resultsPerPage;
-
-    String listHeader =
-        ChatColor.BLUE.toString()
-            + ChatColor.STRIKETHROUGH
-            + "-----------"
-            + ChatColor.RESET
-            + " "
-            + AllTranslations.get().translate("command.rotation.currentRotation.title", sender)
-            + ChatColor.DARK_AQUA
-            + " ("
-            + ChatColor.AQUA
-            + rotation.getName()
-            + ChatColor.DARK_AQUA
-            + ")"
-            + " ("
-            + ChatColor.AQUA
-            + page
-            + ChatColor.DARK_AQUA
-            + " of "
-            + ChatColor.AQUA
-            + pages
-            + ChatColor.DARK_AQUA
-            + ") "
-            /*
-             * This below ensures that the string remains always colored. For some reason the logic behind this de-colored
-             * the text if it were to get put into a second line of chat when the header exceeded the maximum length
-             * of the first one
-             */
-            + ChatColor.translateAlternateColorCodes('&', "&9&m-----------");
-
-    new PrettyPaginatedResult<PGMMap>(listHeader, resultsPerPage) {
-      @Override
-      public String format(PGMMap map, int index) {
-        index++;
-        String indexString =
-            matchManager.getRotationManager().getActiveRotation().getPosition() + 1 == index
-                ? ChatColor.DARK_AQUA.toString() + index
-                : String.valueOf(index);
-        return (indexString) + ". " + ChatColor.RESET + map.getInfo().getShortDescription(sender);
+      List<PGMMap> maps;
+      if (rotation != null) maps = rotation.getMaps();
+      else {
+        sender.sendMessage(
+            ChatColor.RED + AllTranslations.get().translate("command.rotation.noRotation", sender));
+        return;
       }
-    }.display(audience, maps, page);
+
+      int resultsPerPage = 8;
+      int pages = (maps.size() + resultsPerPage - 1) / resultsPerPage;
+
+      String listHeader =
+          ChatColor.BLUE.toString()
+              + ChatColor.STRIKETHROUGH
+              + "-----------"
+              + ChatColor.RESET
+              + " "
+              + AllTranslations.get().translate("command.rotation.currentRotation.title", sender)
+              + ChatColor.DARK_AQUA
+              + " ("
+              + ChatColor.AQUA
+              + rotation.getName()
+              + ChatColor.DARK_AQUA
+              + ")"
+              + " ("
+              + ChatColor.AQUA
+              + page
+              + ChatColor.DARK_AQUA
+              + " of "
+              + ChatColor.AQUA
+              + pages
+              + ChatColor.DARK_AQUA
+              + ") "
+              + ChatColor.translateAlternateColorCodes('&', "&9&m-----------");
+
+      new PrettyPaginatedResult<PGMMap>(listHeader, resultsPerPage) {
+        @Override
+        public String format(PGMMap map, int index) {
+          index++;
+          String indexString =
+              rotation.getPosition() + 1 == index
+                  ? ChatColor.DARK_AQUA.toString() + index
+                  : String.valueOf(index);
+          return (indexString) + ". " + ChatColor.RESET + map.getInfo().getShortDescription(sender);
+        }
+      }.display(audience, maps, page);
+    } else {
+      sender.sendMessage(
+          ChatColor.RED
+              + AllTranslations.get().translate("command.rotation.rotationsDisabled", sender));
+    }
   }
 
   @Command(
@@ -94,59 +99,63 @@ public class RotationCommands {
       @Default("1") int page)
       throws CommandException {
 
-    List<PGMMap> maps;
-    Rotation rotation = matchManager.getRotationManager().getRotationByName(rotationName);
-    if (rotation != null) maps = rotation.getMaps();
-    else {
+    if (matchManager.getMapOrder() instanceof FixedPGMMapOrderManager) {
+      List<PGMMap> maps;
+      FixedPGMMapOrderManager fixedPGMMapOrderManager =
+          (FixedPGMMapOrderManager) matchManager.getMapOrder();
+      FixedPGMMapOrder rotation = fixedPGMMapOrderManager.getRotationByName(rotationName);
+
+      if (rotation != null) maps = rotation.getMaps();
+      else {
+        sender.sendMessage(
+            ChatColor.RED
+                + AllTranslations.get().translate("command.rotation.noRotationMatch", sender));
+        return;
+      }
+
+      int resultsPerPage = 8;
+      int pages = (maps.size() + resultsPerPage - 1) / resultsPerPage;
+
+      String listHeader =
+          ChatColor.BLUE.toString()
+              + ChatColor.STRIKETHROUGH
+              + "-----------"
+              + ChatColor.RESET
+              + " "
+              + AllTranslations.get().translate("command.rotation.currentRotation.title", sender)
+              + ChatColor.DARK_AQUA
+              + " ("
+              + ChatColor.AQUA
+              + rotation.getName()
+              + ChatColor.DARK_AQUA
+              + ")"
+              + " ("
+              + ChatColor.AQUA
+              + page
+              + ChatColor.DARK_AQUA
+              + " of "
+              + ChatColor.AQUA
+              + pages
+              + ChatColor.DARK_AQUA
+              + ") "
+              + ChatColor.translateAlternateColorCodes('&', "&9&m-----------");
+
+      new PrettyPaginatedResult<PGMMap>(listHeader, resultsPerPage) {
+        @Override
+        public String format(PGMMap map, int index) {
+          index++;
+          String indexString =
+              rotation.getPosition() + 1 == index
+                  ? ChatColor.DARK_AQUA.toString() + index
+                  : String.valueOf(index);
+          return (indexString) + ". " + ChatColor.RESET + map.getInfo().getShortDescription(sender);
+        }
+      }.display(audience, maps, page);
+    } else {
       sender.sendMessage(
           ChatColor.RED
-              + AllTranslations.get().translate("command.rotation.noRotationMatch", sender));
-      return;
+              + AllTranslations.get().translate("command.rotation.rotationsDisabled", sender));
     }
-
-    int resultsPerPage = 8;
-    int pages = (maps.size() + resultsPerPage - 1) / resultsPerPage;
-
-    String listHeader =
-        ChatColor.BLUE.toString()
-            + ChatColor.STRIKETHROUGH
-            + "-----------"
-            + ChatColor.RESET
-            + " "
-            + AllTranslations.get().translate("command.rotation.currentRotation.title", sender)
-            + ChatColor.DARK_AQUA
-            + " ("
-            + ChatColor.AQUA
-            + rotation.getName()
-            + ChatColor.DARK_AQUA
-            + ")"
-            + " ("
-            + ChatColor.AQUA
-            + page
-            + ChatColor.DARK_AQUA
-            + " of "
-            + ChatColor.AQUA
-            + pages
-            + ChatColor.DARK_AQUA
-            + ") "
-            /*
-             * This below ensures that the string remains always colored. For some reason the logic behind this de-colored
-             * the text if it were to get put into a second line of chat when the header exceeded the maximum length
-             * of the first one
-             */
-            + ChatColor.translateAlternateColorCodes('&', "&9&m-----------");
-
-    new PrettyPaginatedResult<PGMMap>(listHeader, resultsPerPage) {
-      @Override
-      public String format(PGMMap map, int index) {
-        index++;
-        String indexString =
-            rotation.getPosition() + 1 == index
-                ? ChatColor.DARK_AQUA.toString() + index
-                : String.valueOf(index);
-        return (indexString) + ". " + ChatColor.RESET + map.getInfo().getShortDescription(sender);
-      }
-    }.display(audience, maps, page);
   }
 
   @Command(
@@ -156,61 +165,68 @@ public class RotationCommands {
   public static void rotations(
       Audience audience, CommandSender sender, MatchManager matchManager, @Default("1") int page)
       throws CommandException {
-    List<Rotation> rotations;
-    if (!matchManager.getRotationManager().getRotations().isEmpty()) {
-      rotations = matchManager.getRotationManager().getRotations();
+
+    if (matchManager.getMapOrder() instanceof FixedPGMMapOrderManager) {
+      FixedPGMMapOrderManager fixedPGMMapOrderManager =
+          (FixedPGMMapOrderManager) matchManager.getMapOrder();
+
+      List<FixedPGMMapOrder> rotations;
+      if (!fixedPGMMapOrderManager.getRotations().isEmpty()) {
+        rotations = fixedPGMMapOrderManager.getRotations();
+      } else {
+        sender.sendMessage(
+            ChatColor.RED
+                + AllTranslations.get().translate("command.rotation.noRotations", sender));
+        return;
+      }
+
+      int resultsPerPage = 8;
+      int pages = (rotations.size() + resultsPerPage - 1) / resultsPerPage;
+
+      String listHeader =
+          ChatColor.BLUE.toString()
+              + ChatColor.STRIKETHROUGH
+              + "-----------"
+              + ChatColor.RESET
+              + " "
+              + AllTranslations.get().translate("command.rotation.rotationList.title", sender)
+              + ChatColor.DARK_AQUA
+              + " ("
+              + ChatColor.AQUA
+              + page
+              + ChatColor.DARK_AQUA
+              + " of "
+              + ChatColor.AQUA
+              + pages
+              + ChatColor.DARK_AQUA
+              + ") "
+              + ChatColor.translateAlternateColorCodes('&', "&9&m-----------");
+
+      new PrettyPaginatedResult<FixedPGMMapOrder>(listHeader, resultsPerPage) {
+        @Override
+        public String format(FixedPGMMapOrder rotation, int index) {
+          String arrow =
+              fixedPGMMapOrderManager.getActiveRotation().getName().equals(rotation.getName())
+                  ? ChatColor.GREEN + "» "
+                  : "» ";
+          return arrow
+              + ChatColor.GOLD
+              + rotation.getName()
+              + ChatColor.DARK_AQUA
+              + " ("
+              + ChatColor.AQUA
+              + "Players: "
+              + ChatColor.WHITE
+              + rotation.getPlayers()
+              + ChatColor.DARK_AQUA
+              + ")";
+        }
+      }.display(audience, rotations, page);
     } else {
       sender.sendMessage(
-          ChatColor.RED + AllTranslations.get().translate("command.rotation.noRotations", sender));
-      return;
+          ChatColor.RED
+              + AllTranslations.get().translate("command.rotation.rotationsDisabled", sender));
     }
-
-    int resultsPerPage = 8;
-    int pages = (rotations.size() + resultsPerPage - 1) / resultsPerPage;
-
-    String listHeader =
-        ChatColor.BLUE.toString()
-            + ChatColor.STRIKETHROUGH
-            + "-----------"
-            + ChatColor.RESET
-            + " "
-            + AllTranslations.get().translate("command.rotation.rotationList.title", sender)
-            + ChatColor.DARK_AQUA
-            + " ("
-            + ChatColor.AQUA
-            + page
-            + ChatColor.DARK_AQUA
-            + " of "
-            + ChatColor.AQUA
-            + pages
-            + ChatColor.DARK_AQUA
-            + ") "
-            + ChatColor.translateAlternateColorCodes('&', "&9&m-----------");
-
-    new PrettyPaginatedResult<Rotation>(listHeader, resultsPerPage) {
-      @Override
-      public String format(Rotation rotation, int index) {
-        String arrow =
-            matchManager
-                    .getRotationManager()
-                    .getActiveRotation()
-                    .getName()
-                    .equals(rotation.getName())
-                ? ChatColor.GREEN + "» "
-                : "» ";
-        return arrow
-            + ChatColor.GOLD
-            + rotation.getName()
-            + ChatColor.DARK_AQUA
-            + " ("
-            + ChatColor.AQUA
-            + "Players: "
-            + ChatColor.WHITE
-            + rotation.getPlayers()
-            + ChatColor.DARK_AQUA
-            + ")";
-      }
-    }.display(audience, rotations, page);
   }
 
   @Command(
@@ -221,24 +237,33 @@ public class RotationCommands {
   public static void skip(
       CommandSender sender, MatchManager matchManager, @Default("1") int positions) {
 
-    matchManager.getRotationManager().getActiveRotation().movePosition(positions);
-    sender.sendMessage(
-        ChatColor.WHITE
-            + "["
-            + ChatColor.GOLD
-            + "Rotations"
-            + ChatColor.WHITE
-            + "] "
-            + "["
-            + ChatColor.AQUA
-            + matchManager.getRotationManager().getActiveRotation().getName()
-            + ChatColor.WHITE
-            + "] "
-            + ChatColor.GREEN
-            + AllTranslations.get()
-                .translate(
-                    "command.rotation.skip.message",
-                    sender,
-                    (ChatColor.AQUA.toString() + positions + ChatColor.GREEN)));
+    if (matchManager.getMapOrder() instanceof FixedPGMMapOrderManager) {
+      FixedPGMMapOrderManager fixedPGMMapOrderManager =
+          (FixedPGMMapOrderManager) matchManager.getMapOrder();
+
+      fixedPGMMapOrderManager.getActiveRotation().movePosition(positions);
+      sender.sendMessage(
+          ChatColor.WHITE
+              + "["
+              + ChatColor.GOLD
+              + "Rotations"
+              + ChatColor.WHITE
+              + "] "
+              + "["
+              + ChatColor.AQUA
+              + fixedPGMMapOrderManager.getActiveRotation().getName()
+              + ChatColor.WHITE
+              + "] "
+              + ChatColor.GREEN
+              + AllTranslations.get()
+                  .translate(
+                      "command.rotation.skip.message",
+                      sender,
+                      (ChatColor.AQUA.toString() + positions + ChatColor.GREEN)));
+    } else {
+      sender.sendMessage(
+          ChatColor.RED
+              + AllTranslations.get().translate("command.rotation.rotationsDisabled", sender));
+    }
   }
 }

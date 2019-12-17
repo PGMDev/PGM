@@ -41,6 +41,6 @@ public class CycleCountdown extends MatchCountdown {
   public void onEnd(Duration total) {
     super.onEnd(total);
     this.mm.cycleMatch(this.getMatch(), nextMap, false);
-    mm.getRotationManager().popNextMap();
+    mm.getMapOrder().popNextMap();
   }
 }
