@@ -30,7 +30,7 @@ public class PGMMapProvider implements BukkitProvider<PGMMap> {
   public String getName() {
     return "map";
   }
-
+  
   @Override
   public PGMMap get(CommandSender sender, CommandArgs args, List<? extends Annotation> annotations)
       throws ArgumentException {
