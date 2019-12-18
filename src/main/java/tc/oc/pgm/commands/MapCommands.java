@@ -30,7 +30,7 @@ import tc.oc.pgm.util.PrettyPaginatedResult;
 import tc.oc.util.components.Components;
 
 public class MapCommands {
-  
+
   @Command(
       aliases = {"maplist", "maps", "ml"},
       desc = "Shows the maps that are currently loaded",

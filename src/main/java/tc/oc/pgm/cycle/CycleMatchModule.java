@@ -53,7 +53,7 @@ public class CycleMatchModule extends MatchModule implements Listener {
   public void startCountdown(PGMMap nextMap) {
     startCountdown(null, nextMap);
   }
-  
+
   public void startCountdown(Duration duration) {
     startCountdown(duration, mm.getMapOrder().getNextMap());
   }

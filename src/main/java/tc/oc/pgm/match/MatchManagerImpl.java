@@ -23,7 +23,6 @@ import tc.oc.pgm.api.chat.MultiAudience;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.commands.MapCommands;
 import tc.oc.pgm.map.*;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.rotation.PGMMapOrder;
@@ -164,9 +163,6 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
 
   @Override
   public Optional<Match> cycleMatch(@Nullable Match oldMatch, PGMMap nextMap, boolean retry) {
-    // Pop map out
-    MapCommands.popNextMap();
-
     // Match unload also does this, but doing it earlier avoids some problems.
     // Specifically, RestartCountdown cannot cancel itself during a cycle.
     if (oldMatch != null) {
