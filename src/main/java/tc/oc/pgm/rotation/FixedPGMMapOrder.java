@@ -58,6 +58,10 @@ public class FixedPGMMapOrder implements PGMMapOrder {
     return position;
   }
 
+  public int getNextPosition() {
+    return (position + 1) % maps.size();
+  }
+
   public void load() {
     configurationSection
         .getStringList("maps")
@@ -105,25 +109,15 @@ public class FixedPGMMapOrder implements PGMMapOrder {
   }
 
   private void rotate() {
-    if (position + 1 >= maps.size()) {
-      position = 0;
-    } else {
-      movePosition(1);
-    }
+    movePosition(1);
   }
 
   public void movePosition(int positions) {
-    if (position + positions >= maps.size()) {
-      position = (position + positions) % maps.size();
-    } else {
-      position = position + positions;
-    }
+    position = (position + positions) % maps.size();
   }
 
   PGMMap getMapInPosition(int position) {
-    if (position == maps.size()) {
-      return getMapInPosition(0);
-    } else if (position > maps.size()) {
+    if (position > maps.size()) {
       PGM.get()
           .getLogger()
           .log(
@@ -134,7 +128,9 @@ public class FixedPGMMapOrder implements PGMMapOrder {
                   + maps.size()
                   + " has been issued. Returning map in position 0 instead.");
       return getMapInPosition(0);
-    } else return maps.get(position);
+    }
+
+    return maps.get(position % maps.size());
   }
 
   @Override

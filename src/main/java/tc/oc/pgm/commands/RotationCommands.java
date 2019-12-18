@@ -237,6 +237,13 @@ public class RotationCommands {
   public static void skip(
       CommandSender sender, MatchManager matchManager, @Default("1") int positions) {
 
+    if (positions < 0) {
+      sender.sendMessage(
+          ChatColor.RED
+              + AllTranslations.get().translate("command.rotation.skip.noNegative", sender));
+      return;
+    }
+
     if (matchManager.getMapOrder() instanceof FixedPGMMapOrderManager) {
       FixedPGMMapOrderManager fixedPGMMapOrderManager =
           (FixedPGMMapOrderManager) matchManager.getMapOrder();

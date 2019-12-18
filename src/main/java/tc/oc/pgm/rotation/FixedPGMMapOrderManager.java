@@ -3,7 +3,6 @@ package tc.oc.pgm.rotation;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
@@ -98,40 +97,27 @@ public class FixedPGMMapOrderManager implements PGMMapOrder {
 
     rotationFileConfiguration.set(
         activeRotation.getName() + ".next_map",
-        activeRotation.getMapInPosition(activeRotation.getPosition() + 1).getName());
+        activeRotation.getMapInPosition(activeRotation.getNextPosition()).getName());
 
     try {
       rotationFileConfiguration.save(rotationsFile);
     } catch (IOException e) {
-      logger.log(
-          Level.SEVERE, "Could not save current rotation's position for future reference", e);
+      logger.log(Level.SEVERE, "Could not save next map for future reference", e);
     }
   }
 
   public void recalculateActiveRotation() {
     int activePlayers = getActivePlayers();
-    List<Integer> playerCounts = new ArrayList<>(rotations.size());
 
-    rotations.forEach(
-        rotation -> {
-          if (rotation.isEnabled()) {
-            playerCounts.add(rotation.getPlayers());
-          }
-        });
-
-    Collections.sort(playerCounts);
-    FixedPGMMapOrder newRotation = null;
-
-    int count = 0;
-    while (count < playerCounts.size()) {
-      newRotation = getRotationByPlayerCount(playerCounts.get(count));
-
-      if (playerCounts.get(count) >= activePlayers) {
-        break;
-      }
-
-      count++;
-    }
+    FixedPGMMapOrder newRotation =
+        rotations.stream()
+            .filter(FixedPGMMapOrder::isEnabled)
+            .map(FixedPGMMapOrder::getPlayers)
+            .sorted()
+            .filter(playerCount -> playerCount >= activePlayers)
+            .map(this::getRotationByPlayerCount)
+            .findFirst()
+            .orElse(null);
 
     updateActiveRotation(newRotation);
   }
@@ -166,16 +152,10 @@ public class FixedPGMMapOrderManager implements PGMMapOrder {
   }
 
   private FixedPGMMapOrder getRotationByPlayerCount(int playerCount) {
-    AtomicReference<FixedPGMMapOrder> matchByPlayerCount = new AtomicReference<>();
-
-    rotations.forEach(
-        rotation -> {
-          if (rotation.getPlayers() == playerCount) {
-            matchByPlayerCount.set(rotation);
-          }
-        });
-
-    return matchByPlayerCount.get();
+    return rotations.stream()
+        .filter(rotation -> rotation.getPlayers() == playerCount)
+        .findFirst()
+        .orElse(null);
   }
 
   /**
@@ -186,17 +166,7 @@ public class FixedPGMMapOrderManager implements PGMMapOrder {
    * @return The {@link FixedPGMMapOrder} (Rotation) which matches the input name
    */
   public FixedPGMMapOrder getRotationByName(String name) {
-    AtomicReference<FixedPGMMapOrder> matchByName = new AtomicReference<>();
-
-    getRotations()
-        .forEach(
-            rotation -> {
-              if (rotation.getName().equals(name)) {
-                matchByName.set(rotation);
-              }
-            });
-
-    return matchByName.get();
+    return rotations.stream().filter(rot -> rot.getName().equals(name)).findFirst().orElse(null);
   }
 
   @Override
