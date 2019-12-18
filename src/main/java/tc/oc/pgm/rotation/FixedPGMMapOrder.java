@@ -106,7 +106,7 @@ public class FixedPGMMapOrder implements PGMMapOrder {
   }
 
   private void rotate() {
-    if (position + 1 == maps.size() || position + 1 > maps.size()) {
+    if (position + 1 >= maps.size()) {
       position = 0;
     } else {
       movePosition(1);
@@ -114,8 +114,8 @@ public class FixedPGMMapOrder implements PGMMapOrder {
   }
 
   public void movePosition(int positions) {
-    if (((position + positions) + 1) > maps.size()) {
-      position = ((position + positions) + 1) % maps.size();
+    if (position + positions >= maps.size()) {
+      position = (position + positions) % maps.size();
     } else {
       position = position + positions;
     }
