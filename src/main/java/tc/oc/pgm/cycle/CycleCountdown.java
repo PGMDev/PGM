@@ -40,6 +40,9 @@ public class CycleCountdown extends MatchCountdown {
   @Override
   public void onEnd(Duration total) {
     super.onEnd(total);
-    this.mm.cycleMatch(this.getMatch(), nextMap, false);
+    // For some reason, popNextMap() isn't being executed from within this function below
+    this.mm.cycleMatch(this.getMatch(), this.mm.getMapOrder().popNextMap(), false);
+    // This remains here for the above stated:
+    this.mm.getMapOrder().popNextMap();
   }
 }
