@@ -218,7 +218,7 @@ public class Server extends DedicatedServer {
   private void setupPlugin(Class<? extends JavaPlugin> mainClass) {
     final SimplePluginManager manager = (SimplePluginManager) server.getPluginManager();
     try {
-      final String name = mainClass.getSimpleName().replace("Plugin", "");
+      final String name = mainClass.getSimpleName().replace("Plugin", "").replace("Impl", "");
       final PluginDescriptionFile description =
           new PluginDescriptionFile(name, "unknown", mainClass.getName());
       final File file = new File("plugins", name);
