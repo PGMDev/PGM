@@ -18,7 +18,6 @@ public class FixedPGMMapOrder implements PGMMapOrder {
   private List<PGMMap> maps = new ArrayList<>();
   private int players;
   private int position;
-  private boolean booting = true;
 
   FixedPGMMapOrder(ConfigurationSection configurationSection, String name) {
     this.configurationSection = configurationSection;
@@ -141,13 +140,8 @@ public class FixedPGMMapOrder implements PGMMapOrder {
   @Override
   public PGMMap popNextMap() {
     PGMMap nextMap = maps.get(position);
-    if (booting) {
-      this.booting = false;
-      return nextMap;
-    } else {
-      rotate();
-      return nextMap;
-    }
+    rotate();
+    return nextMap;
   }
 
   @Override

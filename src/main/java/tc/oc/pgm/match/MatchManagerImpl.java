@@ -163,9 +163,6 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
 
   @Override
   public Optional<Match> cycleMatch(@Nullable Match oldMatch, PGMMap nextMap, boolean retry) {
-    // Pop map out
-    pgmMapOrder.popNextMap();
-
     // Match unload also does this, but doing it earlier avoids some problems.
     // Specifically, RestartCountdown cannot cancel itself during a cycle.
     if (oldMatch != null) {

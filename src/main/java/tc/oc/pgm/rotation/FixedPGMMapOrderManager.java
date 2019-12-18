@@ -92,7 +92,7 @@ public class FixedPGMMapOrderManager implements PGMMapOrder {
     return rotations;
   }
 
-  private void saveCurrentPosition() {
+  public void saveCurrentPosition() {
     FileConfiguration rotationFileConfiguration =
         YamlConfiguration.loadConfiguration(rotationsFile);
 

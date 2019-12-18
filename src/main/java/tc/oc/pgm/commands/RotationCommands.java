@@ -242,6 +242,7 @@ public class RotationCommands {
           (FixedPGMMapOrderManager) matchManager.getMapOrder();
 
       fixedPGMMapOrderManager.getActiveRotation().movePosition(positions);
+      fixedPGMMapOrderManager.saveCurrentPosition();
       sender.sendMessage(
           ChatColor.WHITE
               + "["
