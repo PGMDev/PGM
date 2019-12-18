@@ -201,13 +201,13 @@ public class FixedPGMMapOrderManager implements PGMMapOrder {
 
   @Override
   public PGMMap popNextMap() {
-    if (overriderMap == null) {
-      saveCurrentPosition();
-      return activeRotation.popNextMap();
-    } else {
+    if (overriderMap != null) {
       PGMMap overrider = overriderMap;
       overriderMap = null;
       return overrider;
+    } else {
+      saveCurrentPosition();
+      return activeRotation.popNextMap();
     }
   }
 

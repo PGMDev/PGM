@@ -1,6 +1,10 @@
 package tc.oc.pgm.rotation;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
@@ -20,6 +24,12 @@ public class RandomPGMMapOrder implements PGMMapOrder {
 
   @Override
   public PGMMap popNextMap() {
+    if (nextMap != null) {
+      PGMMap next = nextMap;
+      nextMap = null;
+      return next;
+    }
+
     Iterator<Match> iterator = matchManager.getMatches().iterator();
     PGMMap current = iterator.hasNext() ? iterator.next().getMap() : null;
 
