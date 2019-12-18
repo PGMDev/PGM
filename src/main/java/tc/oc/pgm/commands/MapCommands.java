@@ -173,6 +173,12 @@ public class MapCommands {
   public void next(Audience audience, CommandSender sender, MatchManager matchManager) {
     final PGMMap next = matchManager.getMapOrder().getNextMap();
 
+    if (next == null) {
+      sender.sendMessage(
+          ChatColor.RED + AllTranslations.get().translate("command.map.next.noNextMap", sender));
+      return;
+    }
+
     audience.sendMessage(
         ChatColor.DARK_PURPLE
             + AllTranslations.get()
