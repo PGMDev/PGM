@@ -117,7 +117,7 @@ public class FixedPGMMapOrder implements PGMMapOrder {
   }
 
   PGMMap getMapInPosition(int position) {
-    if (position > maps.size()) {
+    if (position >= maps.size()) {
       PGM.get()
           .getLogger()
           .log(
@@ -130,7 +130,7 @@ public class FixedPGMMapOrder implements PGMMapOrder {
       return getMapInPosition(0);
     }
 
-    return maps.get(position % maps.size());
+    return maps.get(position);
   }
 
   @Override
