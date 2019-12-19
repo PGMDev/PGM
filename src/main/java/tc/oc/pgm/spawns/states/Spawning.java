@@ -9,6 +9,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.api.event.PlayerItemTransferEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
@@ -38,9 +39,9 @@ public abstract class Spawning extends Participating {
   @Override
   public void onEvent(PlayerInteractEvent event) {
     super.onEvent(event);
+    event.setCancelled(true);
     if (event.getAction() == Action.LEFT_CLICK_AIR
         || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-      event.setCancelled(true);
       requestSpawn();
     }
   }
@@ -50,6 +51,12 @@ public abstract class Spawning extends Participating {
     super.onEvent(event);
     event.setCancelled(true);
     requestSpawn();
+  }
+
+  @Override
+  public void onEvent(final PlayerItemTransferEvent event) {
+    super.onEvent(event);
+    event.setCancelled(true);
   }
 
   @Override

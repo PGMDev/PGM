@@ -2,7 +2,12 @@ package tc.oc.pgm.spawns;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import javax.annotation.Nullable;
 import org.bukkit.Location;
@@ -19,6 +24,7 @@ import org.bukkit.event.player.PlayerInitialSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.jdom2.Element;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.event.PlayerItemTransferEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
@@ -231,6 +237,15 @@ public class SpawnMatchModule extends MatchModule implements Listener {
 
   @EventHandler
   public void onAttackEntity(final PlayerAttackEntityEvent event) {
+    MatchPlayer player = getMatch().getPlayer(event.getPlayer());
+    if (player != null) {
+      State state = states.get(player);
+      if (state != null) state.onEvent(event);
+    }
+  }
+
+  @EventHandler
+  public void onTransferItem(final PlayerItemTransferEvent event) {
     MatchPlayer player = getMatch().getPlayer(event.getPlayer());
     if (player != null) {
       State state = states.get(player);
