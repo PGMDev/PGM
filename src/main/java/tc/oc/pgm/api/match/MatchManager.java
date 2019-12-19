@@ -11,6 +11,7 @@ import org.bukkit.entity.Entity;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.map.MapNotFoundException;
 import tc.oc.pgm.map.PGMMap;
+import tc.oc.pgm.rotation.PGMMapOrder;
 
 /** A manager that creates, loads, unloads, and cycles {@link Match}es. */
 public interface MatchManager extends MatchPlayerResolver, Audience {
@@ -89,4 +90,8 @@ public interface MatchManager extends MatchPlayerResolver, Audience {
   // TODO: Move to either MapLibrary or MapLoader, this is an orthogonal concern
   @Deprecated
   Collection<PGMMap> loadNewMaps() throws MapNotFoundException;
+
+  void setMapOrder(PGMMapOrder pgmMapOrder);
+
+  PGMMapOrder getMapOrder();
 }

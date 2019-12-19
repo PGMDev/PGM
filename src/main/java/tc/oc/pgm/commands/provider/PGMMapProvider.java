@@ -11,7 +11,6 @@ import java.util.List;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.match.MatchManager;
-import tc.oc.pgm.commands.MapCommands;
 import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.pgm.map.MapLibrary;
 import tc.oc.pgm.map.PGMMap;
@@ -45,10 +44,10 @@ public class PGMMapProvider implements BukkitProvider<PGMMap> {
         map = mapLibrary.getMapByNameOrId(fuzzyName).orNull();
       }
     } else if (isGoToNext(annotations)) {
-      map = MapCommands.peekNextMap();
+      map = matchManager.getMapOrder().getNextMap();
     }
 
-    if (map == null) {
+    if (map == null && !isGoToNext(annotations)) {
       throw new ArgumentException(AllTranslations.get().translate("command.mapNotFound", sender));
     }
 

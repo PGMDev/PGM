@@ -14,6 +14,10 @@ map:
     enabled: true
     reload-when-error: false
 
+rotations:
+  enabled: true
+  path: rotations.yml
+
 restart:
   enabled: true
   uptime: 3h

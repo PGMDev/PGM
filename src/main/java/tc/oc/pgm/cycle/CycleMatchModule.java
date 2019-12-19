@@ -9,7 +9,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
-import tc.oc.pgm.commands.MapCommands;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.map.PGMMap;
@@ -18,6 +17,7 @@ import tc.oc.pgm.match.MatchModuleFactory;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.restart.RestartManager;
+import tc.oc.pgm.rotation.FixedPGMMapOrderManager;
 
 @ModuleDescription(name = "Cycle")
 @ListenerScope(MatchScope.LOADED)
@@ -55,14 +55,17 @@ public class CycleMatchModule extends MatchModule implements Listener {
   }
 
   public void startCountdown(Duration duration) {
-    startCountdown(duration, MapCommands.peekNextMap());
+    startCountdown(duration, mm.getMapOrder().getNextMap());
   }
 
-  public void startCountdown(@Nullable Duration duration, PGMMap nextMap) {
+  public void startCountdown(@Nullable Duration duration, @Nullable PGMMap nextMap) {
     if (duration == null) duration = config.countdown();
     getMatch().finish();
     if (Duration.ZERO.equals(duration)) {
-      mm.cycleMatch(getMatch(), nextMap, false);
+      // For some reason, popNextMap() isn't being executed from within this function below
+      mm.cycleMatch(getMatch(), mm.getMapOrder().popNextMap(), false);
+      // This remains here for the above stated:
+      mm.getMapOrder().popNextMap();
     } else {
       getMatch().getCountdown().start(new CycleCountdown(mm, getMatch(), nextMap), duration);
     }
@@ -83,6 +86,19 @@ public class CycleMatchModule extends MatchModule implements Listener {
   @EventHandler
   public void onMatchEnd(MatchFinishEvent event) {
     final Match match = event.getMatch();
+
+    if (mm.getMapOrder() instanceof FixedPGMMapOrderManager) {
+      FixedPGMMapOrderManager fixedPGMMapOrderManager = (FixedPGMMapOrderManager) mm.getMapOrder();
+
+      /*
+      Whether player counts should be evaluated for activating a more
+      accurate rotation depending on the amount of online / active players or not
+      */
+      if (fixedPGMMapOrderManager.isEvaluatingPlayerCount()) {
+        fixedPGMMapOrderManager.recalculateActiveRotation();
+      }
+    }
+
     if (!RestartManager.get().isRestartRequested()) {
       CycleConfig.Auto autoConfig = config.matchEnd();
       if (autoConfig.enabled()) {
