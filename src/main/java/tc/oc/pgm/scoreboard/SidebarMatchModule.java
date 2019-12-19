@@ -2,7 +2,15 @@ package tc.oc.pgm.scoreboard;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Ordering;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import javax.annotation.Nullable;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
@@ -63,6 +71,7 @@ public class SidebarMatchModule extends MatchModule implements Listener {
   protected @Nullable BukkitTask renderTask;
 
   private class Sidebar {
+
     private static final String IDENTIFIER = "pgm";
 
     private final Scoreboard scoreboard;
@@ -289,8 +298,7 @@ public class SidebarMatchModule extends MatchModule implements Listener {
     if (goal instanceof ProximityGoal) {
       sb.append(" ");
       // Show teams their own proximity on shared goals
-      Competitor proximityCompetitor = competitor != null ? competitor : (Competitor) viewingParty;
-      sb.append(((ProximityGoal) goal).renderProximity(proximityCompetitor, viewingParty));
+      sb.append(((ProximityGoal) goal).renderProximity(competitor, viewingParty));
     }
 
     sb.append(" ");
@@ -486,6 +494,7 @@ public class SidebarMatchModule extends MatchModule implements Listener {
   }
 
   private class BlinkTask implements Runnable {
+
     private final BukkitTask task;
     private final Goal goal;
     private final long intervalTicks;
