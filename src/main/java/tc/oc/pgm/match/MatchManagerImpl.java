@@ -4,14 +4,18 @@ import com.google.common.collect.ImmutableSet;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import org.bukkit.Server;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.chat.Audience;
@@ -19,9 +23,9 @@ import tc.oc.pgm.api.chat.MultiAudience;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.commands.MapCommands;
 import tc.oc.pgm.map.*;
 import tc.oc.pgm.module.ModuleLoadException;
+import tc.oc.pgm.rotation.PGMMapOrder;
 import tc.oc.pgm.terrain.TerrainModule;
 import tc.oc.util.FileUtils;
 import tc.oc.util.logging.ClassLogger;
@@ -37,6 +41,8 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
   private final Map<String, Match> matchById;
   private final Map<String, String> matchIdByWorldName;
   private final AtomicInteger count;
+
+  private PGMMapOrder pgmMapOrder;
 
   public MatchManagerImpl(Server server, MapLibrary library, MapLoader loader)
       throws MapNotFoundException {
@@ -157,9 +163,6 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
 
   @Override
   public Optional<Match> cycleMatch(@Nullable Match oldMatch, PGMMap nextMap, boolean retry) {
-    // Pop map out
-    MapCommands.popNextMap();
-
     // Match unload also does this, but doing it earlier avoids some problems.
     // Specifically, RestartCountdown cannot cancel itself during a cycle.
     if (oldMatch != null) {
@@ -246,6 +249,16 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
     }
 
     return newMaps;
+  }
+
+  @Override
+  public void setMapOrder(PGMMapOrder pgmMapOrder) {
+    this.pgmMapOrder = pgmMapOrder;
+  }
+
+  @Override
+  public PGMMapOrder getMapOrder() {
+    return pgmMapOrder;
   }
 
   /**

@@ -9,6 +9,7 @@ import org.joda.time.Duration;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.pgm.cycle.CycleMatchModule;
 import tc.oc.pgm.map.PGMMap;
@@ -24,6 +25,7 @@ public class CycleCommands {
   public static void cycle(
       CommandSender sender,
       Match match,
+      MatchManager matchManager,
       Duration countdown,
       @Switch('f') boolean force,
       @Default("next") @Text PGMMap map)
@@ -36,6 +38,7 @@ public class CycleCommands {
     }
 
     if (map != null) {
+      matchManager.getMapOrder().setNextMap(map);
       cmm.startCountdown(countdown, map);
     } else {
       cmm.startCountdown(countdown);
@@ -49,8 +52,12 @@ public class CycleCommands {
       flags = "f",
       perms = Permissions.START)
   public static void recycle(
-      CommandSender sender, Match match, Duration duration, @Switch('f') boolean force)
+      CommandSender sender,
+      Match match,
+      MatchManager matchManager,
+      Duration duration,
+      @Switch('f') boolean force)
       throws CommandException {
-    cycle(sender, match, duration, force, match.getMap());
+    cycle(sender, match, matchManager, duration, force, match.getMap());
   }
 }
