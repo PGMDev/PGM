@@ -2,7 +2,12 @@ package tc.oc.pgm.spawns;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import javax.annotation.Nullable;
 import org.bukkit.Location;
@@ -19,6 +24,7 @@ import org.bukkit.event.player.PlayerInitialSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.jdom2.Element;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.event.PlayerItemTransferEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
@@ -97,7 +103,9 @@ public class SpawnMatchModule extends MatchModule implements Listener {
       potential.removeAll(unique.values());
       if (!potential.isEmpty()) {
         Spawn spawn = RandomUtils.element(match.getRandom(), potential);
-        if (spawn.attributes.exclusive) unique.put(competitor, spawn);
+        if (spawn.attributes.exclusive) {
+          unique.put(competitor, spawn);
+        }
         return spawn;
       } else {
         return null;
@@ -142,7 +150,9 @@ public class SpawnMatchModule extends MatchModule implements Listener {
         throw new IllegalStateException("Tried to transition out of non-current state " + oldState);
       }
 
-      if (oldState != null) oldState.leaveState(events);
+      if (oldState != null) {
+        oldState.leaveState(events);
+      }
 
       if (newState == null) {
         states.remove(player);
@@ -184,10 +194,11 @@ public class SpawnMatchModule extends MatchModule implements Listener {
     } else {
       // Party change during match
       State state = states.get(event.getPlayer());
-      if (state != null)
+      if (state != null) {
         state.onEvent(
             (PlayerJoinPartyEvent)
                 event); // Should always be PlayerPartyJoinEvent if getNewParty() != null
+      }
     }
   }
 
@@ -195,16 +206,22 @@ public class SpawnMatchModule extends MatchModule implements Listener {
   @EventHandler(priority = EventPriority.LOW)
   public void onVanillaDeath(final PlayerDeathEvent event) {
     MatchPlayer player = getMatch().getPlayer(event.getEntity());
-    if (player == null) return;
+    if (player == null) {
+      return;
+    }
 
     State state = states.get(player);
-    if (state != null) state.onEvent(event);
+    if (state != null) {
+      state.onEvent(event);
+    }
   }
 
   @EventHandler(priority = EventPriority.HIGH)
   public void onDeath(final MatchPlayerDeathEvent event) {
     State state = states.get(event.getVictim());
-    if (state != null) state.onEvent(event);
+    if (state != null) {
+      state.onEvent(event);
+    }
   }
 
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -212,7 +229,9 @@ public class SpawnMatchModule extends MatchModule implements Listener {
     MatchPlayer player = getMatch().getPlayer(event.getWhoClicked());
     if (player != null) {
       State state = states.get(player);
-      if (state != null) state.onEvent(event);
+      if (state != null) {
+        state.onEvent(event);
+      }
     }
   }
 
@@ -225,7 +244,9 @@ public class SpawnMatchModule extends MatchModule implements Listener {
     MatchPlayer player = getMatch().getPlayer(event.getPlayer());
     if (player != null) {
       State state = states.get(player);
-      if (state != null) state.onEvent(event);
+      if (state != null) {
+        state.onEvent(event);
+      }
     }
   }
 
@@ -234,7 +255,20 @@ public class SpawnMatchModule extends MatchModule implements Listener {
     MatchPlayer player = getMatch().getPlayer(event.getPlayer());
     if (player != null) {
       State state = states.get(player);
-      if (state != null) state.onEvent(event);
+      if (state != null) {
+        state.onEvent(event);
+      }
+    }
+  }
+
+  @EventHandler
+  public void onTransferItem(final PlayerItemTransferEvent event) {
+    MatchPlayer player = getMatch().getPlayer(event.getPlayer());
+    if (player != null) {
+      State state = states.get(player);
+      if (state != null) {
+        state.onEvent(event);
+      }
     }
   }
 

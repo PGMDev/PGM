@@ -2,7 +2,15 @@ package tc.oc.pgm.scoreboard;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Ordering;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import javax.annotation.Nullable;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
@@ -43,6 +51,7 @@ import tc.oc.pgm.goals.events.GoalProximityChangeEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
 import tc.oc.pgm.match.MatchModule;
+import tc.oc.pgm.match.ObservingParty;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.events.TeamRespawnsChangeEvent;
@@ -63,6 +72,7 @@ public class SidebarMatchModule extends MatchModule implements Listener {
   protected @Nullable BukkitTask renderTask;
 
   private class Sidebar {
+
     private static final String IDENTIFIER = "pgm";
 
     private final Scoreboard scoreboard;
@@ -109,7 +119,9 @@ public class SidebarMatchModule extends MatchModule implements Listener {
     }
 
     private void setRow(int maxScore, int row, @Nullable String text) {
-      if (row < 0 || row >= MAX_ROWS) return;
+      if (row < 0 || row >= MAX_ROWS) {
+        return;
+      }
 
       int score = text == null ? -1 : maxScore - row - 1;
       if (this.scores[row] != score) {
@@ -176,7 +188,9 @@ public class SidebarMatchModule extends MatchModule implements Listener {
   @Override
   public void load() {
     super.load();
-    for (Party party : getMatch().getParties()) addSidebar(party);
+    for (Party party : getMatch().getParties()) {
+      addSidebar(party);
+    }
     renderSidebarDebounce();
   }
 
@@ -286,7 +300,7 @@ public class SidebarMatchModule extends MatchModule implements Listener {
     }
     sb.append(goal.renderSidebarStatusText(competitor, viewingParty));
 
-    if (goal instanceof ProximityGoal) {
+    if (goal instanceof ProximityGoal && !(viewingParty instanceof ObservingParty)) {
       sb.append(" ");
       // Show teams their own proximity on shared goals
       Competitor proximityCompetitor = competitor != null ? competitor : (Competitor) viewingParty;
@@ -375,7 +389,9 @@ public class SidebarMatchModule extends MatchModule implements Listener {
           } else {
             text = renderBlitz(competitor, viewingParty);
           }
-          if (text.length() != 0) text += " ";
+          if (text.length() != 0) {
+            text += " ";
+          }
           rows.add(text + competitor.getStyledName(NameStyle.FANCY).toLegacyText());
         }
 
@@ -482,10 +498,13 @@ public class SidebarMatchModule extends MatchModule implements Listener {
 
   public void stopBlinkingGoal(Goal goal) {
     BlinkTask task = this.blinkingGoals.remove(goal);
-    if (task != null) task.stop();
+    if (task != null) {
+      task.stop();
+    }
   }
 
   private class BlinkTask implements Runnable {
+
     private final BukkitTask task;
     private final Goal goal;
     private final long intervalTicks;
