@@ -5,17 +5,20 @@
 #
 # NOTE: Map names are case-sensitive
 #
+# Record for the last active rotation on the server, so that it can be resumed upon shutdown/restart
+last_active: default
 
-default:
-  enabled: true
-  players: 1
-  # next_map helps the server resume rotations in the position they were before a server shutdown/restart
-  # The next map for default is the first map in it's map list.
-  # This only applies when the server creates the rotations.yml file for the first time
-  next_map: Airship Battle
-  maps:
-    - Airship Battle
-    - Harb
-    - Race for Victory
-    - The Fenland
-    - Warlock
+rotations:
+  default:
+    enabled: true
+    players: 1
+    # next_map helps the server resume rotations in the position they were before a server shutdown/restart
+    # The next map for default is the first map in it's map list.
+    # This only applies when the server creates the rotations.yml file for the first time
+    next_map: Airship Battle
+    maps:
+      - Airship Battle
+      - Harb
+      - Race for Victory
+      - The Fenland
+      - Warlock

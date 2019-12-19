@@ -28,6 +28,7 @@ public class FixedPGMMapOrderManager implements PGMMapOrder {
   private Logger logger;
 
   private File rotationsFile;
+  private FileConfiguration rotationsFileConfiguration;
   private List<FixedPGMMapOrder> rotations = new ArrayList<>();
   private FixedPGMMapOrder activeRotation;
   private boolean isEvaluatingPlayerCount = true;
@@ -44,23 +45,25 @@ public class FixedPGMMapOrderManager implements PGMMapOrder {
         FileUtils.copyInputStreamToFile(PGM.get().getResource("rotations.yml"), rotationsFile);
       } catch (IOException e) {
         logger.log(Level.SEVERE, "Failed to create the rotations.yml file", e);
+        return;
       }
     }
 
+    this.rotationsFileConfiguration = YamlConfiguration.loadConfiguration(rotationsFile);
     loadRotations();
   }
 
   private void loadRotations() {
-    FileConfiguration rotationsFileConfiguration =
-        YamlConfiguration.loadConfiguration(rotationsFile);
-
     rotationsFileConfiguration
+        .getConfigurationSection("rotations")
         .getKeys(false)
         .forEach(
             key ->
                 rotations.add(
                     new FixedPGMMapOrder(
-                        rotationsFileConfiguration.getConfigurationSection(key), key)));
+                        rotationsFileConfiguration.getConfigurationSection("rotations." + key),
+                        key)));
+
     rotations.forEach(FixedPGMMapOrder::load);
 
     rotations.forEach(
@@ -68,7 +71,15 @@ public class FixedPGMMapOrderManager implements PGMMapOrder {
           if (!rotation.isEnabled()) rotations.remove(rotation);
         });
 
-    setActiveRotation(getRotationByName("default"));
+    FixedPGMMapOrder lastActiveRotation =
+        rotations.stream()
+            .map(FixedPGMMapOrder::getName)
+            .filter(name -> name.equals(rotationsFileConfiguration.getString("last_active")))
+            .map(this::getRotationByName)
+            .findFirst()
+            .orElse(null);
+
+    setActiveRotation(lastActiveRotation);
   }
 
   private void setActiveRotation(FixedPGMMapOrder activeRotation) {
@@ -92,15 +103,12 @@ public class FixedPGMMapOrderManager implements PGMMapOrder {
   }
 
   public void saveCurrentPosition() {
-    FileConfiguration rotationFileConfiguration =
-        YamlConfiguration.loadConfiguration(rotationsFile);
-
-    rotationFileConfiguration.set(
-        activeRotation.getName() + ".next_map",
+    rotationsFileConfiguration.set(
+        "rotations." + activeRotation.getName() + ".next_map",
         activeRotation.getMapInPosition(activeRotation.getNextPosition()).getName());
 
     try {
-      rotationFileConfiguration.save(rotationsFile);
+      rotationsFileConfiguration.save(rotationsFile);
     } catch (IOException e) {
       logger.log(Level.SEVERE, "Could not save next map for future reference", e);
     }
@@ -136,6 +144,15 @@ public class FixedPGMMapOrderManager implements PGMMapOrder {
     if (rotation == activeRotation) return;
 
     setActiveRotation(rotation);
+
+    rotationsFileConfiguration.set("last_active", activeRotation.getName());
+
+    try {
+      rotationsFileConfiguration.save(rotationsFile);
+    } catch (IOException e) {
+      logger.log(Level.SEVERE, "Could not save last active rotation for future reference.", e);
+    }
+
     Bukkit.broadcastMessage(
         ChatColor.WHITE
             + "["
