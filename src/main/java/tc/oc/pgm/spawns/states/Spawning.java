@@ -69,19 +69,13 @@ public abstract class Spawning extends Participating {
   }
 
   protected boolean trySpawn() {
-    if (!spawnRequested) {
-      return false;
-    }
+    if (!spawnRequested) return false;
 
     Spawn spawn = chooseSpawn();
-    if (spawn == null) {
-      return false;
-    }
+    if (spawn == null) return false;
 
     Location location = spawn.getSpawn(player);
-    if (location == null) {
-      return false;
-    }
+    if (location == null) return false;
 
     transition(new Alive(smm, player, spawn, location));
     return true;
