@@ -64,4 +64,8 @@ public class PersonalizedTranslatable extends Component {
       return replacement;
     }
   }
+
+  public PersonalizedText getPersonalizedText() {
+    return new PersonalizedText(render());
+  }
 }
