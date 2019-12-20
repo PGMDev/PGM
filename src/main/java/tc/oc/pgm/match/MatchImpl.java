@@ -356,7 +356,7 @@ public class MatchImpl implements Match, Comparable<Match> {
   public void setMaxPlayers(int players) {
     int previous = capacity.getAndSet(players);
     if (previous != players) {
-      callEvent(new MatchResizeEvent(null));
+      callEvent(new MatchResizeEvent(this));
     }
   }
 
