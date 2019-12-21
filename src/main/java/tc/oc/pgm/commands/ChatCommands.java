@@ -72,7 +72,7 @@ public class ChatCommands {
   }
 
   @Command(
-      aliases = {"msg"},
+      aliases = {"msg", "tell"},
       desc = "Send a direct message to a player",
       usage = "[player] [message]")
   public void direct(MatchPlayer sender, Player receiver, @Text String message) {
