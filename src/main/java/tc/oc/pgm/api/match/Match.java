@@ -442,6 +442,4 @@ public interface Match extends MatchPlayerResolver, MultiAudience {
    * @return If the {@link Match} was just ended.
    */
   boolean calculateVictory();
-
-  String getWorldName();
 }

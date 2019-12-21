@@ -157,7 +157,7 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
       match.unload();
     }
 
-    matchIdByWorldName.remove(match.getWorldName());
+    matchIdByWorldName.remove(getWorldName(id));
     matchById.remove(id);
   }
 
@@ -329,7 +329,7 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
     return getMatches();
   }
 
-  public static String getWorldName(String matchId) {
+  private static String getWorldName(String matchId) {
     return "match-" + matchId;
   }
 }
