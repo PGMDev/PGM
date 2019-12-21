@@ -841,4 +841,9 @@ public class MatchImpl implements Match, Comparable<Match> {
         .append("state", getPhase())
         .build();
   }
+
+  @Override
+  public String getWorldName() {
+    return MatchManagerImpl.getWorldName(getId());
+  }
 }
