@@ -157,7 +157,7 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
       match.unload();
     }
 
-    matchIdByWorldName.remove(match.getWorld().getName());
+    matchIdByWorldName.remove("match-" + id);
     matchById.remove(id);
   }
 
