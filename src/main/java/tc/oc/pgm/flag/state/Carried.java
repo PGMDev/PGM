@@ -183,7 +183,10 @@ public class Carried extends Spawned implements Missing {
     super.tickRunning();
 
     Component message = this.getMessage();
-    this.carrier.sendHotbarMessage(message);
+    this.carrier.sendHotbarMessage(
+        message instanceof PersonalizedTranslatable
+            ? ((PersonalizedTranslatable) message).getPersonalizedText()
+            : message);
 
     if (!Components.equals(message, this.lastMessage)) {
       this.lastMessage = message;
