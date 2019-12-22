@@ -13,7 +13,8 @@ import tc.oc.identity.Identity;
 import tc.oc.identity.RealIdentity;
 import tc.oc.named.NameStyle;
 import tc.oc.named.Named;
-import tc.oc.pgm.util.NameCacheUtil;
+import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.db.Username;
 
 /**
  * A contributor to a {@link PGMMap}. Can have either or both of a UUID and arbitrary String name.
@@ -23,26 +24,34 @@ import tc.oc.pgm.util.NameCacheUtil;
  */
 public class Contributor implements Named {
 
-  protected final @Nullable UUID uuid;
-  protected final @Nullable String fallbackName;
-  protected final @Nullable String contribution;
-
-  protected @Nullable UUID playerId;
+  private final @Nullable UUID uuid;
+  private final @Nullable String fallbackName;
+  private final @Nullable String contribution;
+  private @Nullable String cachedName;
 
   /** Creates a contributor with a name and a contribution. */
   public Contributor(
       @Nullable UUID uuid, @Nullable String fallbackName, @Nullable String contribution) {
     this.uuid = uuid;
-    this.playerId = uuid;
     this.fallbackName = fallbackName;
     this.contribution = contribution;
 
     checkArgument(uuid != null || fallbackName != null);
+    loadUsername();
+  }
+
+  public void loadUsername() {
+    if (uuid == null || cachedName != null) return;
+
+    final Username username = PGM.get().getDatastore().getUsername(uuid);
+    if (username.getName() != null) {
+      cachedName = username.getName();
+    }
   }
 
   @Override
   public String toString() {
-    return this.getName();
+    return getName();
   }
 
   public @Nullable UUID getUuid() {
@@ -51,21 +60,16 @@ public class Contributor implements Named {
 
   /** Gets the name of this contributor. */
   public @Nullable String getName() {
-    return NameCacheUtil.isUUIDCached(this.uuid)
-        ? NameCacheUtil.getCachedName(this.uuid)
-        : this.fallbackName;
+    loadUsername();
+    return uuid == null ? fallbackName : cachedName;
   }
 
   public @Nullable UUID getPlayerId() {
-    return playerId;
-  }
-
-  public void setPlayerId(UUID playerId) {
-    this.playerId = playerId;
+    return uuid;
   }
 
   public @Nullable Identity getIdentity() {
-    return playerId == null ? null : new RealIdentity(getPlayerId(), getName());
+    return uuid == null || cachedName == null ? null : new RealIdentity(getPlayerId(), getName());
   }
 
   @Override
@@ -77,11 +81,7 @@ public class Contributor implements Named {
 
   /** @return true only if a username is available */
   public boolean hasName() {
-    return this.playerId != null || this.fallbackName != null;
-  }
-
-  public boolean needsLookup() {
-    return this.uuid != null && this.playerId == null;
+    return this.uuid != null || this.fallbackName != null;
   }
 
   /** Indicates whether or not this contributor has a specific contribution. */
