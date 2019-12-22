@@ -5,7 +5,7 @@ import app.ashcon.intake.bukkit.graph.BasicBukkitCommandGraph;
 import app.ashcon.intake.fluent.DispatcherNode;
 import com.google.common.collect.ImmutableSet;
 import java.io.File;
-import java.io.IOException;
+import java.sql.SQLException;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,6 +24,7 @@ import tc.oc.named.CachingNameRenderer;
 import tc.oc.named.NameRenderer;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.db.Datastore;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.blitz.BlitzModule;
@@ -55,6 +56,7 @@ import tc.oc.pgm.crafting.CraftingModule;
 import tc.oc.pgm.cycle.CycleMatchModule;
 import tc.oc.pgm.damage.DamageModule;
 import tc.oc.pgm.damage.DisableDamageModule;
+import tc.oc.pgm.db.DatastoreImpl;
 import tc.oc.pgm.death.DeathMessageMatchModule;
 import tc.oc.pgm.destroyable.DestroyableModule;
 import tc.oc.pgm.development.MapErrorTracker;
@@ -129,7 +131,6 @@ import tc.oc.pgm.terrain.TerrainModule;
 import tc.oc.pgm.timelimit.TimeLimitModule;
 import tc.oc.pgm.tnt.TNTModule;
 import tc.oc.pgm.tracker.TrackerMatchModule;
-import tc.oc.pgm.util.NameCacheUtil;
 import tc.oc.pgm.util.RestartListener;
 import tc.oc.pgm.wool.WoolModule;
 import tc.oc.pgm.worldborder.WorldBorderModule;
@@ -146,6 +147,8 @@ public final class PGMImpl extends JavaPlugin implements PGM {
 
   private IdentityProvider identityProvider;
   private NameRenderer nameRenderer;
+
+  private Datastore database;
 
   public PGMImpl() {
     super();
@@ -166,6 +169,11 @@ public final class PGMImpl extends JavaPlugin implements PGM {
 
   public NameRenderer getNameRenderer() {
     return nameRenderer;
+  }
+
+  @Override
+  public Datastore getDatastore() {
+    return database;
   }
 
   public MatchManager getMatchManager() {
@@ -214,6 +222,14 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     mapLogger.addHandler(mapErrorTracker);
     mapLogger.addHandler(new MapLogHandler());
 
+    try {
+      database = new DatastoreImpl(new File(getDataFolder(), "pgm.db"));
+    } catch (SQLException e) {
+      logger.log(Level.SEVERE, "PGM could not load SQL datastore", e);
+      server.shutdown();
+      return;
+    }
+
     ModuleRegistry registry;
     try {
       registry = createPGMModuleFactory();
@@ -221,12 +237,6 @@ public final class PGMImpl extends JavaPlugin implements PGM {
       logger.log(Level.SEVERE, "PGM could not load any modules, server will shut down", t);
       server.shutdown();
       return;
-    }
-
-    try {
-      NameCacheUtil.readCacheFromDisk();
-    } catch (IOException e) {
-      logger.log(Level.WARNING, "PGM could not load cached player names");
     }
 
     MapLoader mapLoader = new MapLoader(this, logger, registry);

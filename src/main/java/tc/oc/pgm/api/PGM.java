@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import org.bukkit.plugin.Plugin;
 import tc.oc.identity.IdentityProvider;
 import tc.oc.named.NameRenderer;
+import tc.oc.pgm.api.db.Datastore;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.development.MapErrorTracker;
@@ -16,6 +17,13 @@ import tc.oc.util.SemanticVersion;
 
 /** PvP Game Manager (aka. PGM), the global {@link Plugin} to manage PvP games. */
 public interface PGM extends Plugin {
+
+  /**
+   * Get a datastore that persists between matches and server restarts.
+   *
+   * @return A persistent, synchronous datastore.
+   */
+  Datastore getDatastore();
 
   /**
    * Get the specific manager that loads and unloads {@link Match}s.
@@ -58,9 +66,8 @@ public interface PGM extends Plugin {
   @Deprecated
   NameRenderer getNameRenderer();
 
-  @Deprecated AtomicReference<PGM> GLOBAL = new AtomicReference<>(null);
+  AtomicReference<PGM> GLOBAL = new AtomicReference<>(null);
 
-  @Deprecated
   static PGM set(PGM pgm) {
     try {
       get();
