@@ -183,7 +183,10 @@ public class FixedPGMMapOrderManager implements PGMMapOrder {
    * @return The {@link FixedPGMMapOrder} (Rotation) which matches the input name
    */
   public FixedPGMMapOrder getRotationByName(String name) {
-    return rotations.stream().filter(rot -> rot.getName().equals(name)).findFirst().orElse(null);
+    return rotations.stream()
+        .filter(rot -> rot.getName().equalsIgnoreCase(name))
+        .findFirst()
+        .orElse(null);
   }
 
   @Override

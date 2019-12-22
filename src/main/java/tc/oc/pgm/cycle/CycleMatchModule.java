@@ -62,10 +62,7 @@ public class CycleMatchModule extends MatchModule implements Listener {
     if (duration == null) duration = config.countdown();
     getMatch().finish();
     if (Duration.ZERO.equals(duration)) {
-      // For some reason, popNextMap() isn't being executed from within this function below
       mm.cycleMatch(getMatch(), mm.getMapOrder().popNextMap(), false);
-      // This remains here for the above stated:
-      mm.getMapOrder().popNextMap();
     } else {
       getMatch().getCountdown().start(new CycleCountdown(mm, getMatch(), nextMap), duration);
     }
