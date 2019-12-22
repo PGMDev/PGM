@@ -89,7 +89,7 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
   }
 
   private String createMatchFolder(String id, File src) throws IOException {
-    final String worldName = "match-" + id;
+    final String worldName = getWorldName(id);
     final File dest = new File(server.getWorldContainer(), worldName);
 
     if (dest.exists()) FileUtils.delete(dest);
@@ -157,7 +157,7 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
       match.unload();
     }
 
-    matchIdByWorldName.remove("match-" + id);
+    matchIdByWorldName.remove(getWorldName(id));
     matchById.remove(id);
   }
 
@@ -327,5 +327,9 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
   @Override
   public Iterable<? extends Audience> getAudiences() {
     return getMatches();
+  }
+
+  private static String getWorldName(String matchId) {
+    return "match-" + matchId;
   }
 }
