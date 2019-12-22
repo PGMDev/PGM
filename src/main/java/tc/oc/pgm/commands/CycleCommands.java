@@ -37,7 +37,7 @@ public class CycleCommands {
           AllTranslations.get().translate("command.admin.cycle.matchRunning", sender));
     }
 
-    if (map != null) {
+    if (map != null && matchManager.getMapOrder().getNextMap() != map) {
       matchManager.getMapOrder().setNextMap(map);
       cmm.startCountdown(countdown, map);
     } else {

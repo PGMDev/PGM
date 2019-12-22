@@ -13,7 +13,7 @@ import tc.oc.pgm.map.PGMMap;
 
 public class CycleCountdown extends MatchCountdown {
   protected final MatchManager mm;
-  protected final PGMMap nextMap;
+  protected PGMMap nextMap;
 
   public CycleCountdown(MatchManager mm, Match match, PGMMap nextMap) {
     super(match);
@@ -25,6 +25,9 @@ public class CycleCountdown extends MatchCountdown {
   protected Component formatText() {
     if (nextMap == null || nextMap.getInfo() == null) return BlankComponent.INSTANCE;
     Component mapName = new PersonalizedText(nextMap.getInfo().name, ChatColor.AQUA);
+
+    PGMMap expectedNextMap = mm.getMapOrder().getNextMap();
+    if (expectedNextMap != null && expectedNextMap != nextMap) nextMap = expectedNextMap;
 
     if (remaining.isLongerThan(Duration.ZERO)) {
       return new PersonalizedText(
@@ -40,9 +43,6 @@ public class CycleCountdown extends MatchCountdown {
   @Override
   public void onEnd(Duration total) {
     super.onEnd(total);
-    // For some reason, popNextMap() isn't being executed from within this function below
-    this.mm.cycleMatch(this.getMatch(), this.mm.getMapOrder().popNextMap(), false);
-    // This remains here for the above stated:
-    this.mm.getMapOrder().popNextMap();
+    this.mm.cycleMatch(this.getMatch(), mm.getMapOrder().popNextMap(), false);
   }
 }
