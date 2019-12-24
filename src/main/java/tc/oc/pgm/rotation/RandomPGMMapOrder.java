@@ -15,31 +15,34 @@ import tc.oc.pgm.map.PGMMap;
  * able to continue cycling
  */
 public class RandomPGMMapOrder implements PGMMapOrder {
+
   private MatchManager matchManager;
   private PGMMap nextMap;
 
   public RandomPGMMapOrder(MatchManager matchManager) {
     this.matchManager = matchManager;
+    this.nextMap = getRandomMap();
+  }
+
+  private PGMMap getRandomMap() {
+    Iterator<Match> iterator = matchManager.getMatches().iterator();
+    PGMMap current = iterator.hasNext() ? iterator.next().getMap() : null;
+    List<PGMMap> maps = new ArrayList<>(PGM.get().getMapLibrary().getMaps());
+
+    PGMMap randomMap = null;
+    do {
+      Collections.shuffle(maps);
+      randomMap = maps.get(0);
+    } while (maps.size() > 1 && Objects.equals(current, randomMap));
+
+    return randomMap;
   }
 
   @Override
   public PGMMap popNextMap() {
-    if (nextMap != null) {
-      PGMMap next = nextMap;
-      nextMap = null;
-      return next;
-    }
-
-    Iterator<Match> iterator = matchManager.getMatches().iterator();
-    PGMMap current = iterator.hasNext() ? iterator.next().getMap() : null;
-
-    List<PGMMap> maps = new ArrayList<>(PGM.get().getMapLibrary().getMaps());
-    do {
-      Collections.shuffle(maps);
-      nextMap = maps.get(0);
-    } while (maps.size() > 1 && Objects.equals(current, nextMap));
-
-    return nextMap;
+    PGMMap map = nextMap;
+    this.nextMap = getRandomMap();
+    return map;
   }
 
   @Override
@@ -49,6 +52,6 @@ public class RandomPGMMapOrder implements PGMMapOrder {
 
   @Override
   public void setNextMap(PGMMap map) {
-    nextMap = map;
+    this.nextMap = map;
   }
 }
