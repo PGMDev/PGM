@@ -1,11 +1,8 @@
 package tc.oc.pgm;
 
 import com.google.common.collect.ImmutableList;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.TreeMap;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.Configuration;
@@ -282,26 +279,28 @@ public class Config {
   }
 
   public static class Flairs implements Listener {
-    private boolean configMode;
-    private Map<String, Flair> flairs = new HashMap<String, Flair>();
+    private Map<String, Flair> flairs = new TreeMap<String, Flair>();
 
     @EventHandler
     public void onConfigLoad(ConfigLoadEvent event) throws InvalidConfigurationException {
-      this.configMode = event.getConfig().getBoolean("flair.config-mode", true);
-      final ConfigurationSection section =
-          event.getConfig().getConfigurationSection("flair.definitions");
-      List<Flair> flairs = new ArrayList<Flair>();
+      final ConfigurationSection section = event.getConfig().getConfigurationSection("groups");
       for (String key : section.getKeys(false)) {
-        flairs.add(
+        if (section.getConfigurationSection(key + ".flair") == null) {
+          continue;
+        }
+        flairs.put(
+            key,
             new Flair(
                 key,
                 section.getInt(key + ".priority"),
-                section.getString(key + ".symbol"),
+                section.getString(key + ".flair.symbol"),
                 ChatColor.valueOf(
-                    section.getString(key + ".color").trim().toUpperCase().replace(' ', '_'))));
+                    section
+                        .getString(key + ".flair.color")
+                        .trim()
+                        .toUpperCase()
+                        .replace(' ', '_'))));
       }
-      flairs.sort((a, b) -> b.compareTo(a));
-      this.flairs = flairs.stream().collect(Collectors.toMap(f -> f.name, f -> f));
     }
 
     private static final Flairs instance = new Flairs();
@@ -310,15 +309,15 @@ public class Config {
       return instance;
     }
 
+    public static boolean enabled() {
+      return instance.flairs.size() > 0;
+    }
+
     public static Map<String, Flair> getFlairs() {
       return instance.flairs;
     }
 
-    public static boolean configMode() {
-      return instance.configMode;
-    }
-
-    public static class Flair {
+    public static class Flair implements Comparable<Flair> {
       public String name;
       public int priority;
       public String symbol;
@@ -331,6 +330,7 @@ public class Config {
         this.color = color;
       }
 
+      @Override
       public int compareTo(Flair other) {
         return Integer.compare(priority, other.priority);
       }

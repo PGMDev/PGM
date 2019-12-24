@@ -25,6 +25,7 @@ import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedPlayer;
 import tc.oc.identity.Identities;
 import tc.oc.named.NameStyle;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.chat.MultiAudience;
 import tc.oc.pgm.api.match.Match;
@@ -317,6 +318,11 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
   @Override
   public Component getStyledName(NameStyle style) {
     return new PersonalizedPlayer(getBukkit(), style);
+  }
+
+  @Override
+  public String getFlairedName() {
+    return PGM.get().getFlairRegistry().getFlairedName(getBukkit(), getParty());
   }
 
   @Override

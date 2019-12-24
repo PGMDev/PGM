@@ -9,7 +9,7 @@ import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.identity.Identity;
-import tc.oc.pgm.util.FlairUtils;
+import tc.oc.pgm.api.PGM;
 
 public class NicknameRenderer implements NameRenderer {
 
@@ -49,7 +49,7 @@ public class NicknameRenderer implements NameRenderer {
     }
 
     if (type.style.showFlair && type.online && type.reveal) {
-      final String flair = FlairUtils.getFlairString(identity.getPlayerId());
+      final String flair = PGM.get().getFlairRegistry().getFlair(identity.getPlayerId());
       if (flair != null) {
         rendered = flair + rendered;
       }
@@ -94,8 +94,8 @@ public class NicknameRenderer implements NameRenderer {
           new PersonalizedTranslatable("tip.teleportTo", dupe).render());
     }
 
-    if (type.style.showFlair && type.online && type.reveal && identity.isOnline(null)) {
-      final String flair = FlairUtils.getFlairString(identity.getPlayerId());
+    if (type.style.showFlair && type.online && type.reveal) {
+      final String flair = PGM.get().getFlairRegistry().getFlair(identity.getPlayerId());
       if (flair != null) {
         rendered = new PersonalizedText(new PersonalizedText(flair), rendered);
       }

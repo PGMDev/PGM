@@ -64,6 +64,8 @@ import tc.oc.pgm.fallingblocks.FallingBlocksModule;
 import tc.oc.pgm.ffa.FreeForAllModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.flag.FlagModule;
+import tc.oc.pgm.flair.FlairRegistry;
+import tc.oc.pgm.flair.FlairRegistryImpl;
 import tc.oc.pgm.gamerules.GameRulesModule;
 import tc.oc.pgm.goals.GoalModule;
 import tc.oc.pgm.hunger.HungerModule;
@@ -129,7 +131,6 @@ import tc.oc.pgm.terrain.TerrainModule;
 import tc.oc.pgm.timelimit.TimeLimitModule;
 import tc.oc.pgm.tnt.TNTModule;
 import tc.oc.pgm.tracker.TrackerMatchModule;
-import tc.oc.pgm.util.FlairUtils;
 import tc.oc.pgm.util.NameCacheUtil;
 import tc.oc.pgm.util.RestartListener;
 import tc.oc.pgm.wool.WoolModule;
@@ -147,6 +148,8 @@ public final class PGMImpl extends JavaPlugin implements PGM {
 
   private IdentityProvider identityProvider;
   private NameRenderer nameRenderer;
+
+  private FlairRegistry flairRegistry;
 
   public PGMImpl() {
     super();
@@ -173,6 +176,10 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     return matchManager;
   }
 
+  public MatchTabManager getMatchTabManager() {
+    return matchTabManager;
+  }
+
   public Logger getMapLogger() {
     return mapLogger;
   }
@@ -183,6 +190,11 @@ public final class PGMImpl extends JavaPlugin implements PGM {
 
   public MapLibrary getMapLibrary() {
     return mapLibrary;
+  }
+
+  @Override
+  public FlairRegistry getFlairRegistry() {
+    return flairRegistry;
   }
 
   @Override
@@ -250,8 +262,6 @@ public final class PGMImpl extends JavaPlugin implements PGM {
       return;
     }
 
-    FlairUtils.setMatchManager(matchManager);
-
     identityProvider =
         new IdentityProvider() {
           @Override
@@ -268,8 +278,6 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     MatchNameRenderer matchNameRenderer = new MatchNameRenderer(this);
     registerEvents(matchNameRenderer);
     nameRenderer = new CachingNameRenderer(matchNameRenderer);
-
-    FlairUtils.setNameRenderer(nameRenderer);
 
     registerListeners();
     registerCommands();
@@ -293,7 +301,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
       matchTabManager.enable();
     }
 
-    FlairUtils.setTabManager(matchTabManager);
+    flairRegistry = new FlairRegistryImpl();
 
     new RestartManager(this);
   }

@@ -23,6 +23,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.Config;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
@@ -37,7 +38,6 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.gamerules.GameRule;
 import tc.oc.pgm.gamerules.GameRulesModule;
 import tc.oc.pgm.modules.TimeLockModule;
-import tc.oc.pgm.util.FlairUtils;
 
 public class PGMListener implements Listener {
   private final Plugin parent;
@@ -132,7 +132,7 @@ public class PGMListener implements Listener {
     }
 
     match.removePlayer(event.getPlayer());
-    FlairUtils.removeFlair(event.getPlayer().getUniqueId());
+    PGM.get().getFlairRegistry().removeFlair(event.getPlayer().getUniqueId());
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
