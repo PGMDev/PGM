@@ -117,17 +117,13 @@ public class FixedPGMMapOrderManager implements PGMMapOrder {
   public void recalculateActiveRotation() {
     int activePlayers = getActivePlayers();
 
-    FixedPGMMapOrder newRotation =
-        rotations.stream()
-            .filter(FixedPGMMapOrder::isEnabled)
-            .map(FixedPGMMapOrder::getPlayers)
-            .sorted()
-            .filter(playerCount -> playerCount >= activePlayers)
-            .map(this::getRotationByPlayerCount)
-            .findFirst()
-            .orElse(null);
-
-    updateActiveRotation(newRotation);
+    rotations.stream()
+        .filter(FixedPGMMapOrder::isEnabled)
+        .map(FixedPGMMapOrder::getPlayers)
+        .filter(playerCount -> playerCount >= activePlayers)
+        .min(Integer::compareTo)
+        .map(this::getRotationByPlayerCount)
+        .ifPresent(this::updateActiveRotation);
   }
 
   private int getActivePlayers() {
