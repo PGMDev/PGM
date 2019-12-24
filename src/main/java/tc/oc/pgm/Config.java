@@ -1,9 +1,15 @@
 package tc.oc.pgm;
 
 import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
@@ -271,6 +277,67 @@ public class Config {
                 .trim()
                 .toUpperCase()
                 .replace(' ', '_'));
+      }
+    }
+  }
+
+  public static class Flairs implements Listener {
+    private boolean configMode;
+    private Map<String, Flair> flairs = new HashMap<String, Flair>();
+
+    @EventHandler
+    public void onConfigLoad(ConfigLoadEvent event) throws InvalidConfigurationException {
+      this.configMode = event.getConfig().getBoolean("flair.config-mode", true);
+      final ConfigurationSection section =
+          event.getConfig().getConfigurationSection("flair.definitions");
+      List<Flair> flairs = new ArrayList<Flair>();
+      for (String key : section.getKeys(false)) {
+        flairs.add(
+            new Flair(
+                key,
+                section.getInt(key + ".priority"),
+                section.getString(key + ".symbol"),
+                ChatColor.valueOf(
+                    section.getString(key + ".color").trim().toUpperCase().replace(' ', '_'))));
+      }
+      flairs.sort((a, b) -> b.compareTo(a));
+      this.flairs = flairs.stream().collect(Collectors.toMap(f -> f.name, f -> f));
+    }
+
+    private static final Flairs instance = new Flairs();
+
+    public static Flairs get() {
+      return instance;
+    }
+
+    public static Map<String, Flair> getFlairs() {
+      return instance.flairs;
+    }
+
+    public static boolean configMode() {
+      return instance.configMode;
+    }
+
+    public static class Flair {
+      public String name;
+      public int priority;
+      public String symbol;
+      public ChatColor color;
+
+      public Flair(String name, int priority, String symbol, ChatColor color) {
+        this.name = name;
+        this.priority = priority;
+        this.symbol = symbol;
+        this.color = color;
+      }
+
+      public int compareTo(Flair other) {
+        return Integer.compare(priority, other.priority);
+      }
+
+      @Override
+      public String toString() {
+        return color + symbol;
       }
     }
   }

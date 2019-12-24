@@ -91,3 +91,16 @@ motd:
     starting: yellow                                     # Color designating a match which is starting
     running: green                                       # Color designating a match which is currently running
     finished: red                                        # Color designating a match which has ended
+
+flair:
+  config-mode: false                                     # If true, use the flairs defined below,
+                                                         # otherwise use flairs sent from an API
+  definitions:
+    admin:
+      priority: 1
+      symbol: ❖
+      color: gold
+    mod:
+      priority: 2
+      symbol: ❖
+      color: red

@@ -13,6 +13,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
+import tc.oc.pgm.util.FlairUtils;
 import tc.oc.util.components.ComponentUtils;
 
 /** Adds team colors to player names */
@@ -42,7 +43,7 @@ public class MatchNameRenderer extends NicknameRenderer implements Listener {
     Names.invalidate(player);
     final Party party = event.getNewParty();
     if (party != null) {
-      player.setDisplayName(/* flair + */ party.getColor() + player.getName() + ChatColor.WHITE);
+      player.setDisplayName(FlairUtils.getFlairedName(player, party));
     }
   }
 }

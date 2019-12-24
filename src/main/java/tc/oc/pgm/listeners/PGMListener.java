@@ -11,8 +11,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
+import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.AllTranslations;
@@ -31,6 +37,7 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.gamerules.GameRule;
 import tc.oc.pgm.gamerules.GameRulesModule;
 import tc.oc.pgm.modules.TimeLockModule;
+import tc.oc.pgm.util.FlairUtils;
 
 public class PGMListener implements Listener {
   private final Plugin parent;
@@ -125,6 +132,7 @@ public class PGMListener implements Listener {
     }
 
     match.removePlayer(event.getPlayer());
+    FlairUtils.removeFlair(event.getPlayer().getUniqueId());
   }
 
   @EventHandler(priority = EventPriority.MONITOR)

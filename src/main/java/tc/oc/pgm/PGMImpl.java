@@ -129,6 +129,7 @@ import tc.oc.pgm.terrain.TerrainModule;
 import tc.oc.pgm.timelimit.TimeLimitModule;
 import tc.oc.pgm.tnt.TNTModule;
 import tc.oc.pgm.tracker.TrackerMatchModule;
+import tc.oc.pgm.util.FlairUtils;
 import tc.oc.pgm.util.NameCacheUtil;
 import tc.oc.pgm.util.RestartListener;
 import tc.oc.pgm.wool.WoolModule;
@@ -249,6 +250,8 @@ public final class PGMImpl extends JavaPlugin implements PGM {
       return;
     }
 
+    FlairUtils.setMatchManager(matchManager);
+
     identityProvider =
         new IdentityProvider() {
           @Override
@@ -265,6 +268,8 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     MatchNameRenderer matchNameRenderer = new MatchNameRenderer(this);
     registerEvents(matchNameRenderer);
     nameRenderer = new CachingNameRenderer(matchNameRenderer);
+
+    FlairUtils.setNameRenderer(nameRenderer);
 
     registerListeners();
     registerCommands();
@@ -287,6 +292,8 @@ public final class PGMImpl extends JavaPlugin implements PGM {
       matchTabManager = new MatchTabManager(this);
       matchTabManager.enable();
     }
+
+    FlairUtils.setTabManager(matchTabManager);
 
     new RestartManager(this);
   }
