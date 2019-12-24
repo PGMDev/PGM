@@ -120,10 +120,9 @@ public class FixedPGMMapOrderManager implements PGMMapOrder {
     rotations.stream()
         .filter(FixedPGMMapOrder::isEnabled)
         .map(FixedPGMMapOrder::getPlayers)
-        .sorted()
         .filter(playerCount -> playerCount >= activePlayers)
+        .min(Integer::compareTo)
         .map(this::getRotationByPlayerCount)
-        .findFirst()
         .ifPresent(this::updateActiveRotation);
   }
 
