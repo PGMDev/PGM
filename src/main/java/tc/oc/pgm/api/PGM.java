@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 import org.bukkit.plugin.Plugin;
 import tc.oc.identity.IdentityProvider;
 import tc.oc.named.NameRenderer;
-import tc.oc.pgm.api.db.Datastore;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.development.MapErrorTracker;
@@ -24,6 +23,13 @@ public interface PGM extends Plugin {
    * @return A persistent, synchronous datastore.
    */
   Datastore getDatastore();
+
+  /**
+   * Get a cached datastore that persists between matches and server restarts.
+   *
+   * @return {@link #getDatastore()} wrapped in an in-memory cache.
+   */
+  Datastore getDatastoreCache();
 
   /**
    * Get the specific manager that loads and unloads {@link Match}s.

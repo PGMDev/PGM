@@ -26,6 +26,7 @@ import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedPlayer;
 import tc.oc.identity.Identities;
 import tc.oc.named.NameStyle;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.chat.MultiAudience;
 import tc.oc.pgm.api.match.Match;
@@ -35,6 +36,7 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.api.setting.Setting;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.PlayerResetEvent;
 import tc.oc.pgm.filters.query.IPlayerQuery;
@@ -318,6 +320,11 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
                 }
               }
             });
+  }
+
+  @Override
+  public Setting getSetting() {
+    return PGM.get().getDatastoreCache().getSetting(id);
   }
 
   @Override

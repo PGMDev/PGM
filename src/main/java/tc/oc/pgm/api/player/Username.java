@@ -1,20 +1,20 @@
-package tc.oc.pgm.api.db;
+package tc.oc.pgm.api.player;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
 
-/** Represents the mapping of a {@link UUID} to a username that expires at a given time. */
+/** Represents the mapping of a {@link UUID} to a username. */
 public interface Username {
 
   /**
-   * Get the unique {@link UUID} of the user.
+   * Get the unique {@link UUID} of the player.
    *
    * @return The unique {@link UUID}.
    */
   UUID getId();
 
   /**
-   * Get the username of the user.
+   * Get the username of the player.
    *
    * @return The username.
    */
@@ -22,7 +22,7 @@ public interface Username {
   String getName();
 
   /**
-   * Change the username of the user, also updating the expiration.
+   * Change the username of the player.
    *
    * @param name The new username or null.
    * @return Whether the operation was successful.

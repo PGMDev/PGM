@@ -1,22 +1,26 @@
 package tc.oc.pgm.util;
 
-import com.google.common.collect.ImmutableMap;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.ref.SoftReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
 import tc.oc.pgm.api.PGM;
 
@@ -27,83 +31,98 @@ import tc.oc.pgm.api.PGM;
  */
 public class UsernameResolver {
 
-  private static final Map<UUID, SoftReference<Consumer<String>>> QUEUE = new ConcurrentHashMap<>();
   private static final Gson GSON = new Gson();
+  private static final ReentrantLock LOCK = new ReentrantLock();
+  private static final Map<UUID, Consumer<String>> QUEUE = new ConcurrentHashMap<>();
 
   /**
-   * Resolve all remaining usernames on an asynchronous thread.
+   * Queue all remaining username resolves on an asynchronous thread.
    *
    * @see #resolve(UUID, Consumer)
    */
   public static void resolveAll() {
-    Bukkit.getScheduler()
-        .runTaskAsynchronously(
-            PGM.get(),
-            () -> {
-              final Map<UUID, SoftReference<Consumer<String>>> queue = ImmutableMap.copyOf(QUEUE);
-              final List<UUID> failed = new LinkedList<>();
-              Throwable throwable = null;
-
-              for (UUID uuid : queue.keySet()) {
-                try {
-                  final String username = resolveNow(uuid);
-                  final Consumer<String> callback = queue.get(uuid).get();
-
-                  // If the callback still exists, run it on another thread to avoid a dead lock
-                  if (callback != null) {
-                    Bukkit.getScheduler()
-                        .runTaskAsynchronously(PGM.get(), () -> callback.accept(username));
-                  }
-                } catch (Throwable t) {
-                  failed.add(uuid);
-                  throwable = t;
-                } finally {
-                  QUEUE.remove(uuid);
-                }
-              }
-
-              if (!failed.isEmpty()) {
-                PGM.get()
-                    .getMapLogger()
-                    .log(
-                        Level.WARNING,
-                        "Failed to lookup " + failed.size() + " usernames: " + failed,
-                        throwable);
-              }
-            });
+    if (LOCK.isLocked()) return;
+    Bukkit.getScheduler().runTaskAsynchronously(PGM.get(), UsernameResolver::resolveAllSync);
   }
 
   /**
    * Queue a username resolve with an asynchronous callback.
    *
-   * @param uuid A {@link UUID} to resolve.
+   * @param id A {@link UUID} to resolve.
    * @param callback A callback to run after the username is resolved.
    */
-  public static void resolve(UUID uuid, Consumer<String> callback) {
-    QUEUE.put(
-        uuid,
-        new SoftReference<>(
-            callback)); // Use soft reference to avoid potential leakage during queue
+  public static void resolve(UUID id, @Nullable Consumer<String> callback) {
+    final Consumer<String> existing = QUEUE.get(checkNotNull(id));
+    if (callback == null) callback = i -> {};
+
+    // If a callback already exists, chain the new one after the existing one
+    if (existing != null && callback != existing) {
+      callback = existing.andThen(callback);
+    }
+
+    QUEUE.put(id, callback);
+
+    // If the queue is reaching capacity, try to queue an asynchronous resolve
+    if (QUEUE.size() >= 10) {
+      resolveAll();
+    }
   }
 
-  private static String resolveNow(UUID uuid) throws IOException {
-    HttpURLConnection con =
-        (HttpURLConnection)
-            new URL("https://api.ashcon.app/mojang/v2/user/" + uuid.toString()).openConnection();
-    con.setRequestMethod("GET");
-    con.setRequestProperty("User-Agent", "Bukkit (" + Bukkit.getMotd() + ")");
-    con.setRequestProperty("Accept", "application/json");
-    con.setInstanceFollowRedirects(true);
-    con.setConnectTimeout(5000);
-    con.setReadTimeout(5000);
-    BufferedReader br =
-        new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));
-    StringBuilder response = new StringBuilder();
-    String line;
-    while ((line = br.readLine()) != null) {
-      response.append(line.trim());
+  private static void resolveAllSync() {
+    if (!LOCK.tryLock()) return;
+
+    final Set<UUID> queue = ImmutableSet.copyOf(QUEUE.keySet());
+    final Map<UUID, Throwable> errors = new LinkedHashMap<>();
+
+    for (UUID id : queue) {
+      String name = null;
+      try {
+        name = resolveSync(id);
+      } catch (IOException e) {
+        errors.put(id, e);
+      } finally {
+        final Consumer<String> listener = QUEUE.remove(id);
+        if (listener != null) {
+          listener.accept(name);
+        }
+      }
     }
-    br.close();
+
+    if (!errors.isEmpty()) {
+      PGM.get()
+          .getMapLogger()
+          .log(
+              Level.SEVERE,
+              "Could not resolve "
+                  + (errors.size() > 1 ? errors.size() + " usernames: " : "username: ")
+                  + Joiner.on(", ").join(errors.keySet()),
+              errors.values().iterator().next());
+    }
+
+    LOCK.unlock();
+  }
+
+  private static String resolveSync(UUID id) throws IOException {
+    final HttpURLConnection url =
+        (HttpURLConnection)
+            new URL("https://api.ashcon.app/mojang/v2/user/" + checkNotNull(id).toString())
+                .openConnection();
+    url.setRequestMethod("GET");
+    url.setRequestProperty("User-Agent", "Bukkit (" + Bukkit.getMotd() + ")");
+    url.setRequestProperty("Accept", "application/json");
+    url.setInstanceFollowRedirects(true);
+    url.setConnectTimeout(5000);
+    url.setReadTimeout(5000);
+
+    final StringBuilder response = new StringBuilder();
+    try (final BufferedReader br =
+        new BufferedReader(new InputStreamReader(url.getInputStream(), StandardCharsets.UTF_8))) {
+      String line;
+      while ((line = br.readLine()) != null) {
+        response.append(line.trim());
+      }
+    }
+
     return GSON.fromJson(response.toString(), JsonObject.class).get("username").getAsString();
   }
 }

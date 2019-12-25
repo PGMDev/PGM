@@ -5,18 +5,16 @@ import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Default;
 import com.google.common.collect.ImmutableSortedSet;
 import java.net.URL;
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.command.CommandSender;
 import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedPlayer;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.identity.Identity;
 import tc.oc.named.NameStyle;
-import tc.oc.named.NicknameRenderer;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
@@ -189,27 +187,13 @@ public class MapCommands {
   }
 
   private @Nullable Component formatContribution(Contributor contributor) {
-    Component c = formatContributor(contributor);
-    if (c == null || !contributor.hasContribution()) return c;
+    Component c = contributor.getStyledName(NameStyle.FANCY);
+    if (!contributor.hasContribution()) return c;
     return new PersonalizedText(
         c,
         new PersonalizedText(ChatColor.GRAY, ChatColor.ITALIC)
             .extra(" - ")
             .extra(contributor.getContribution()));
-  }
-
-  private @Nullable Component formatContributor(Contributor contributor) {
-    Identity identity = contributor.getIdentity();
-    if (identity != null) {
-      return new PersonalizedPlayer(identity, NameStyle.FANCY);
-    }
-
-    String name = contributor.getName();
-    if (name != null) {
-      return new PersonalizedText(name, NicknameRenderer.OFFLINE_COLOR);
-    }
-
-    return null;
   }
 
   private Component mapInfoLabel(String key) {
