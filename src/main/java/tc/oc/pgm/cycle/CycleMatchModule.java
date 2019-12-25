@@ -17,7 +17,6 @@ import tc.oc.pgm.match.MatchModuleFactory;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.restart.RestartManager;
-import tc.oc.pgm.rotation.FixedPGMMapOrderManager;
 
 @ModuleDescription(name = "Cycle")
 @ListenerScope(MatchScope.LOADED)
@@ -83,18 +82,7 @@ public class CycleMatchModule extends MatchModule implements Listener {
   @EventHandler
   public void onMatchEnd(MatchFinishEvent event) {
     final Match match = event.getMatch();
-
-    if (mm.getMapOrder() instanceof FixedPGMMapOrderManager) {
-      FixedPGMMapOrderManager fixedPGMMapOrderManager = (FixedPGMMapOrderManager) mm.getMapOrder();
-
-      /*
-      Whether player counts should be evaluated for activating a more
-      accurate rotation depending on the amount of online / active players or not
-      */
-      if (fixedPGMMapOrderManager.isEvaluatingPlayerCount()) {
-        fixedPGMMapOrderManager.recalculateActiveRotation();
-      }
-    }
+    mm.getMapOrder().matchEnded(match);
 
     if (!RestartManager.get().isRestartRequested()) {
       CycleConfig.Auto autoConfig = config.matchEnd();

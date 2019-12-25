@@ -1,11 +1,15 @@
 package tc.oc.pgm.map;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import tc.oc.util.logging.ClassLogger;
@@ -93,7 +97,7 @@ public class MapLibrary {
     Set<PGMMap> maps = mapsByName.get(nameOrId);
 
     if (maps.isEmpty()) {
-      return Optional.fromNullable(mapsById.get(nameOrId));
+      return Optional.ofNullable(mapsById.get(nameOrId));
     }
 
     PGMMap best = null;
