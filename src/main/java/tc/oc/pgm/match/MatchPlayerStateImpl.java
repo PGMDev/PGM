@@ -3,7 +3,6 @@ package tc.oc.pgm.match;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,7 +26,7 @@ public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
   private final Match match;
   private final Identity identity;
   private final Party party;
-  private final WeakReference<Location> location;
+  private final Location location;
 
   protected MatchPlayerStateImpl(Match match, Identity identity, Party party, Location location) {
     this.match = checkNotNull(match);
@@ -35,7 +34,7 @@ public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
     this.party = checkNotNull(party);
     checkArgument(
         location.getWorld().equals(match.getWorld()), "location and match world must be the same");
-    this.location = new WeakReference<>(checkNotNull(location));
+    this.location = checkNotNull(location);
   }
 
   @Override
@@ -55,7 +54,7 @@ public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
 
   @Override
   public Location getLocation() {
-    return location.get();
+    return location;
   }
 
   @Override
