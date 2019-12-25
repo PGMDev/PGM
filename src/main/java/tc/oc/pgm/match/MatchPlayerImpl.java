@@ -17,6 +17,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.GameMode;
 import org.bukkit.World;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -46,6 +47,8 @@ import tc.oc.world.NMSHacks;
 
 public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<MatchPlayer> {
 
+  // TODO: Probably should be moved to a better location
+  private static final int FROZEN_VEHICLE_ENTITY_ID = NMSHacks.allocateEntityId();
   private final Logger logger;
   private final Match match;
   private final UUID id;
@@ -261,7 +264,27 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
 
   @Override
   public void setFrozen(boolean yes) {
-    frozen.set(yes);
+    if (frozen.compareAndSet(!yes, yes)) {
+      Player bukkit = getBukkit();
+      if (yes) {
+        resetGamemode();
+
+        NMSHacks.EntityMetadata metadata = NMSHacks.createEntityMetadata();
+        NMSHacks.setEntityMetadata(metadata, false, false, false, false, true, (short) 0);
+        NMSHacks.setArmorStandFlags(metadata, false, false, false, false);
+        NMSHacks.spawnLivingEntity(
+            bukkit,
+            EntityType.ARMOR_STAND,
+            FROZEN_VEHICLE_ENTITY_ID,
+            bukkit.getLocation().subtract(0, 1.1, 0),
+            metadata);
+        NMSHacks.entityAttach(bukkit, bukkit.getEntityId(), FROZEN_VEHICLE_ENTITY_ID, false);
+      } else {
+        NMSHacks.destroyEntities(bukkit, FROZEN_VEHICLE_ENTITY_ID);
+
+        resetGamemode();
+      }
+    }
   }
 
   /**
@@ -332,7 +355,7 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
       // If the player right-clicks on another vehicle while frozen, the client will
       // eject them from the freeze entity unconditionally, so we have to spam them
       // with these packets to keep them on it.
-      NMSHacks.entityAttach(bukkit, bukkit.getEntityId(), NMSHacks.allocateEntityId(match), false);
+      NMSHacks.entityAttach(bukkit, bukkit.getEntityId(), FROZEN_VEHICLE_ENTITY_ID, false);
     }
   }
 
