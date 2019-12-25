@@ -15,6 +15,7 @@ import org.bukkit.permissions.Permission;
 import org.joda.time.Duration;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.events.ConfigLoadEvent;
+import tc.oc.pgm.prefix.ConfigPrefixProvider;
 
 public class Config {
   public static Configuration getConfiguration() {
@@ -288,6 +289,7 @@ public class Config {
         if (section.getConfigurationSection(key + ".prefix") == null) {
           continue;
         }
+        PGM.get().getLogger().info("CONFIG KEY: " + section.getName());
         prefixes.put(
             key,
             new Prefix(
@@ -300,6 +302,9 @@ public class Config {
                         .trim()
                         .toUpperCase()
                         .replace(' ', '_'))));
+      }
+      if (prefixes.size() > 0) {
+        PGM.get().setDefaultPrefixProvider(new ConfigPrefixProvider());
       }
     }
 

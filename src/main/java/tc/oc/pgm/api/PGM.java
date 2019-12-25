@@ -12,6 +12,7 @@ import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.development.MapErrorTracker;
 import tc.oc.pgm.map.MapLibrary;
 import tc.oc.pgm.map.PGMMap;
+import tc.oc.pgm.prefix.PrefixProvider;
 import tc.oc.pgm.prefix.PrefixRegistry;
 import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.util.SemanticVersion;
@@ -57,6 +58,10 @@ public interface PGM extends Plugin {
   MapErrorTracker getMapErrorTracker();
 
   PrefixRegistry getPrefixRegistry();
+
+  void setDefaultPrefixProvider(PrefixProvider prefixProvider);
+
+  PrefixProvider getDefaultPrefixProvider();
 
   @Deprecated
   IdentityProvider getIdentityProvider();
