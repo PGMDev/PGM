@@ -114,8 +114,8 @@ import tc.oc.pgm.rage.RageModule;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.renewable.RenewableModule;
 import tc.oc.pgm.restart.RestartManager;
-import tc.oc.pgm.rotation.FixedPGMMapOrderManager;
 import tc.oc.pgm.rotation.RandomPGMMapOrder;
+import tc.oc.pgm.rotation.RotationManager;
 import tc.oc.pgm.score.ScoreModule;
 import tc.oc.pgm.scoreboard.ScoreboardModule;
 import tc.oc.pgm.scoreboard.SidebarModule;
@@ -237,8 +237,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
 
       if (Config.Rotations.areEnabled()) {
         matchManager.setMapOrder(
-            new FixedPGMMapOrderManager(
-                matchManager, logger, new File(getDataFolder(), Config.Rotations.getPath())));
+            new RotationManager(logger, new File(getDataFolder(), Config.Rotations.getPath())));
       } else {
         matchManager.setMapOrder(new RandomPGMMapOrder(matchManager));
       }
