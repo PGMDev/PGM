@@ -64,8 +64,6 @@ import tc.oc.pgm.fallingblocks.FallingBlocksModule;
 import tc.oc.pgm.ffa.FreeForAllModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.flag.FlagModule;
-import tc.oc.pgm.flair.FlairRegistry;
-import tc.oc.pgm.flair.FlairRegistryImpl;
 import tc.oc.pgm.gamerules.GameRulesModule;
 import tc.oc.pgm.goals.GoalModule;
 import tc.oc.pgm.hunger.HungerModule;
@@ -110,6 +108,8 @@ import tc.oc.pgm.modules.TimeLockModule;
 import tc.oc.pgm.modules.ToolRepairModule;
 import tc.oc.pgm.picker.PickerModule;
 import tc.oc.pgm.portals.PortalModule;
+import tc.oc.pgm.prefix.PrefixRegistry;
+import tc.oc.pgm.prefix.PrefixRegistryImpl;
 import tc.oc.pgm.projectile.ProjectileModule;
 import tc.oc.pgm.proximity.ProximityAlarmModule;
 import tc.oc.pgm.rage.RageModule;
@@ -149,7 +149,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
   private IdentityProvider identityProvider;
   private NameRenderer nameRenderer;
 
-  private FlairRegistry flairRegistry;
+  private PrefixRegistry prefixRegistry;
 
   public PGMImpl() {
     super();
@@ -193,8 +193,8 @@ public final class PGMImpl extends JavaPlugin implements PGM {
   }
 
   @Override
-  public FlairRegistry getFlairRegistry() {
-    return flairRegistry;
+  public PrefixRegistry getPrefixRegistry() {
+    return prefixRegistry;
   }
 
   @Override
@@ -301,7 +301,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
       matchTabManager.enable();
     }
 
-    flairRegistry = new FlairRegistryImpl();
+    prefixRegistry = new PrefixRegistryImpl();
 
     new RestartManager(this);
   }

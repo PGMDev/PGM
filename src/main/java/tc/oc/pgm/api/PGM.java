@@ -10,9 +10,9 @@ import tc.oc.named.NameRenderer;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.development.MapErrorTracker;
-import tc.oc.pgm.flair.FlairRegistry;
 import tc.oc.pgm.map.MapLibrary;
 import tc.oc.pgm.map.PGMMap;
+import tc.oc.pgm.prefix.PrefixRegistry;
 import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.util.SemanticVersion;
 
@@ -56,7 +56,7 @@ public interface PGM extends Plugin {
    */
   MapErrorTracker getMapErrorTracker();
 
-  FlairRegistry getFlairRegistry();
+  PrefixRegistry getPrefixRegistry();
 
   @Deprecated
   IdentityProvider getIdentityProvider();

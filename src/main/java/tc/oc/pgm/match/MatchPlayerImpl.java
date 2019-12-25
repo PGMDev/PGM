@@ -321,8 +321,8 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
   }
 
   @Override
-  public String getFlairedName() {
-    return PGM.get().getFlairRegistry().getFlairedName(getBukkit(), getParty());
+  public String getPrefixedName() {
+    return PGM.get().getPrefixRegistry().getPrefixedName(getBukkit(), getParty());
   }
 
   @Override

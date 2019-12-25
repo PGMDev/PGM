@@ -13,7 +13,7 @@ public enum NameStyle {
   VERBOSE(true, true, true, true, true, true, false, true); // Fancy plus nickname
 
   public final boolean isColor;
-  public final boolean showFlair;
+  public final boolean showPrefix;
   public final boolean showSelf; // Bold if self
   public final boolean showFriend; // Italic if friend
   public final boolean showDisguise; // Strikethrough if disguised
@@ -23,7 +23,7 @@ public enum NameStyle {
 
   NameStyle(
       boolean isColor,
-      boolean showFlair,
+      boolean showPrefix,
       boolean showSelf,
       boolean showFriend,
       boolean showDisguise,
@@ -31,7 +31,7 @@ public enum NameStyle {
       boolean showDeath,
       boolean teleport) {
     this.isColor = isColor;
-    this.showFlair = showFlair;
+    this.showPrefix = showPrefix;
     this.showSelf = showSelf;
     this.showFriend = showFriend;
     this.showDisguise = showDisguise;

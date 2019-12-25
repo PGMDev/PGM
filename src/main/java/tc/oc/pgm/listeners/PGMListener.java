@@ -132,7 +132,7 @@ public class PGMListener implements Listener {
     }
 
     match.removePlayer(event.getPlayer());
-    PGM.get().getFlairRegistry().removeFlair(event.getPlayer().getUniqueId());
+    PGM.get().getPrefixRegistry().removePlayer(event.getPlayer().getUniqueId());
   }
 
   @EventHandler(priority = EventPriority.MONITOR)

@@ -278,52 +278,52 @@ public class Config {
     }
   }
 
-  public static class Flairs implements Listener {
-    private Map<String, Flair> flairs = new TreeMap<String, Flair>();
+  public static class Prefixes implements Listener {
+    private Map<String, Prefix> prefixes = new TreeMap<String, Prefix>();
 
     @EventHandler
     public void onConfigLoad(ConfigLoadEvent event) throws InvalidConfigurationException {
       final ConfigurationSection section = event.getConfig().getConfigurationSection("groups");
       for (String key : section.getKeys(false)) {
-        if (section.getConfigurationSection(key + ".flair") == null) {
+        if (section.getConfigurationSection(key + ".prefix") == null) {
           continue;
         }
-        flairs.put(
+        prefixes.put(
             key,
-            new Flair(
+            new Prefix(
                 key,
                 section.getInt(key + ".priority"),
-                section.getString(key + ".flair.symbol"),
+                section.getString(key + ".prefix.symbol"),
                 ChatColor.valueOf(
                     section
-                        .getString(key + ".flair.color")
+                        .getString(key + ".prefix.color")
                         .trim()
                         .toUpperCase()
                         .replace(' ', '_'))));
       }
     }
 
-    private static final Flairs instance = new Flairs();
+    private static final Prefixes instance = new Prefixes();
 
-    public static Flairs get() {
+    public static Prefixes get() {
       return instance;
     }
 
     public static boolean enabled() {
-      return instance.flairs.size() > 0;
+      return instance.prefixes.size() > 0;
     }
 
-    public static Map<String, Flair> getFlairs() {
-      return instance.flairs;
+    public static Map<String, Prefix> getPrefixes() {
+      return instance.prefixes;
     }
 
-    public static class Flair implements Comparable<Flair> {
+    public static class Prefix implements Comparable<Prefix> {
       public String name;
       public int priority;
       public String symbol;
       public ChatColor color;
 
-      public Flair(String name, int priority, String symbol, ChatColor color) {
+      public Prefix(String name, int priority, String symbol, ChatColor color) {
         this.name = name;
         this.priority = priority;
         this.symbol = symbol;
@@ -331,7 +331,7 @@ public class Config {
       }
 
       @Override
-      public int compareTo(Flair other) {
+      public int compareTo(Prefix other) {
         return Integer.compare(priority, other.priority);
       }
 

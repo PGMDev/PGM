@@ -48,10 +48,10 @@ public class NicknameRenderer implements NameRenderer {
       rendered = ChatColor.ITALIC + rendered;
     }
 
-    if (type.style.showFlair && type.online && type.reveal) {
-      final String flair = PGM.get().getFlairRegistry().getFlair(identity.getPlayerId());
-      if (flair != null) {
-        rendered = flair + rendered;
+    if (type.style.showPrefix && type.online && type.reveal) {
+      final String prefix = PGM.get().getPrefixRegistry().getPrefix(identity.getPlayerId());
+      if (prefix != null) {
+        rendered = prefix + rendered;
       }
     }
 
@@ -94,10 +94,10 @@ public class NicknameRenderer implements NameRenderer {
           new PersonalizedTranslatable("tip.teleportTo", dupe).render());
     }
 
-    if (type.style.showFlair && type.online && type.reveal) {
-      final String flair = PGM.get().getFlairRegistry().getFlair(identity.getPlayerId());
-      if (flair != null) {
-        rendered = new PersonalizedText(new PersonalizedText(flair), rendered);
+    if (type.style.showPrefix && type.online && type.reveal) {
+      final String prefix = PGM.get().getPrefixRegistry().getPrefix(identity.getPlayerId());
+      if (prefix != null) {
+        rendered = new PersonalizedText(new PersonalizedText(prefix), rendered);
       }
     }
 

@@ -1,4 +1,4 @@
-package tc.oc.pgm.flair;
+package tc.oc.pgm.prefix;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,23 +9,23 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import tc.oc.identity.Identities;
-import tc.oc.pgm.Config;
-import tc.oc.pgm.Config.Flairs.Flair;
+import tc.oc.pgm.Config.Prefixes;
+import tc.oc.pgm.Config.Prefixes.Prefix;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.tablist.PlayerTabEntry;
 
-public class FlairRegistryImpl implements FlairRegistry {
+public class PrefixRegistryImpl implements PrefixRegistry {
 
-  private final Map<UUID, String> flairCache = new HashMap<UUID, String>();
+  private final Map<UUID, String> prefixCache = new HashMap<UUID, String>();
 
   @Override
   public void updateDisplayName(UUID uuid) {
     final MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(uuid);
     matchPlayer
         .getBukkit()
-        .setDisplayName(getFlairedName(Bukkit.getPlayer(uuid), matchPlayer.getParty()));
+        .setDisplayName(getPrefixedName(Bukkit.getPlayer(uuid), matchPlayer.getParty()));
     PGM.get().getNameRenderer().invalidateCache(Identities.current(matchPlayer.getBukkit()));
     final PlayerTabEntry tabEntry =
         (PlayerTabEntry)
@@ -37,50 +37,50 @@ public class FlairRegistryImpl implements FlairRegistry {
   }
 
   @Override
-  public String getFlairedName(Player player, Party party) {
-    return getFlairs(player)
+  public String getPrefixedName(Player player, Party party) {
+    return getPrefixes(player)
         + (party == null ? ChatColor.RESET : party.getColor())
         + player.getName()
         + ChatColor.WHITE;
   }
 
   @Override
-  public void setFlair(UUID uuid, String flair) {
-    flairCache.put(uuid, flair);
+  public void setPrefix(UUID uuid, String prefix) {
+    prefixCache.put(uuid, prefix);
     updateDisplayName(uuid);
   }
 
   @Override
   @Nullable
-  public String getFlair(UUID uuid) {
-    return flairCache.get(uuid);
+  public String getPrefix(UUID uuid) {
+    return prefixCache.get(uuid);
   }
 
   @Override
-  public void removeFlair(UUID uuid) {
-    flairCache.remove(uuid);
+  public void removePlayer(UUID uuid) {
+    prefixCache.remove(uuid);
   }
 
-  private String getFlairs(Player player) {
-    return Config.Flairs.enabled()
-        ? getConfigFlairs(player)
-        : (getAPIFlairs(player) != null ? getAPIFlairs(player) : "");
+  private String getPrefixes(Player player) {
+    return Prefixes.enabled()
+        ? getConfigPrefixes(player)
+        : (getAPIPrefixes(player) != null ? getAPIPrefixes(player) : "");
   }
 
-  private String getConfigFlairs(Player player) {
-    StringBuilder flair = new StringBuilder();
-    for (Entry<String, Flair> entry : Config.Flairs.getFlairs().entrySet()) {
+  private String getConfigPrefixes(Player player) {
+    StringBuilder prefix = new StringBuilder();
+    for (Entry<String, Prefix> entry : Prefixes.getPrefixes().entrySet()) {
       if (player.hasPermission("pgm.flair." + entry.getKey())) {
-        flair.append(entry.getValue().toString());
+        prefix.append(entry.getValue().toString());
       }
     }
-    return flair.toString();
+    return prefix.toString();
   }
 
   @Nullable
-  private String getAPIFlairs(Player player) {
-    return flairCache.containsKey(player.getUniqueId())
-        ? flairCache.get(player.getUniqueId())
+  private String getAPIPrefixes(Player player) {
+    return prefixCache.containsKey(player.getUniqueId())
+        ? prefixCache.get(player.getUniqueId())
         : null;
   }
 }

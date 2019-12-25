@@ -193,7 +193,7 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
    */
   void applyKit(Kit kit, boolean force);
 
-  String getFlairedName();
+  String getPrefixedName();
 
   @Override
   PlayerInventory getInventory();

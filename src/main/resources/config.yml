@@ -95,11 +95,11 @@ motd:
 groups:
   admin:
     priority: 1
-    flair:
+    prefix:
       symbol: ❖
       color: gold
   mod:
     priority: 2
-    flair:
+    prefix:
       symbol: ❖
       color: red
