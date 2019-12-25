@@ -2,6 +2,7 @@ package tc.oc.pgm.api.match;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.bukkit.Physical;
 import org.bukkit.World;
@@ -9,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
 import tc.oc.pgm.api.chat.Audience;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.map.MapNotFoundException;
 import tc.oc.pgm.map.PGMMap;
 import tc.oc.pgm.rotation.PGMMapOrder;
@@ -69,6 +71,17 @@ public interface MatchManager extends MatchPlayerResolver, Audience {
    * @return All the {@link Match}es.
    */
   Collection<Match> getMatches();
+
+  /**
+   * Get all the {@link MatchPlayer}s in all {@link Match}es.
+   *
+   * @return All the {@link MatchPlayer}s.
+   */
+  default Collection<MatchPlayer> getPlayers() {
+    return getMatches().stream()
+        .flatMap(match -> match.getPlayers().stream())
+        .collect(Collectors.toList());
+  }
 
   /**
    * Unload and and remove a {@link Match} from the registry.
