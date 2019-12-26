@@ -2,7 +2,7 @@ package tc.oc.pgm.api;
 
 import java.util.UUID;
 import tc.oc.pgm.api.player.Username;
-import tc.oc.pgm.api.setting.Setting;
+import tc.oc.pgm.api.setting.Settings;
 
 /** A fast, persistent datastore that provides synchronous responses. */
 public interface Datastore {
@@ -19,7 +19,7 @@ public interface Datastore {
    * Get the settings for a given player {@link UUID}.
    *
    * @param uuid The {@link UUID} of a player.
-   * @return A {@link Setting}.
+   * @return A {@link Settings}.
    */
-  Setting getSetting(UUID uuid);
+  Settings getSettings(UUID uuid);
 }
