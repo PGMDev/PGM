@@ -31,11 +31,11 @@ import tc.oc.world.OnlinePlayerMapAdapter;
 public class ChatDispatcher implements Listener {
 
   private final MatchManager manager;
-  private final OnlinePlayerMapAdapter<UUID> lastDirectMessage;
+  private final OnlinePlayerMapAdapter<UUID> lastMessagedBy;
 
   public ChatDispatcher(MatchManager manager) {
     this.manager = manager;
-    this.lastDirectMessage = new OnlinePlayerMapAdapter<>(PGM.get());
+    this.lastMessagedBy = new OnlinePlayerMapAdapter<>(PGM.get());
   }
 
   @Command(
@@ -90,8 +90,7 @@ public class ChatDispatcher implements Listener {
       usage = "[player] [message]")
   public void sendDirect(Match match, MatchPlayer sender, Player receiver, @Text String message) {
     if (sender != null) {
-      lastDirectMessage.put(sender.getBukkit(), receiver.getUniqueId());
-      lastDirectMessage.putIfAbsent(receiver, sender.getId());
+      lastMessagedBy.put(receiver, sender.getId());
     }
 
     send(
@@ -114,7 +113,7 @@ public class ChatDispatcher implements Listener {
       desc = "Reply to a direct message",
       usage = "[message]")
   public void sendReply(Match match, Audience audience, MatchPlayer sender, @Text String message) {
-    final MatchPlayer receiver = manager.getPlayer(lastDirectMessage.get(sender.getBukkit()));
+    final MatchPlayer receiver = manager.getPlayer(lastMessagedBy.get(sender.getBukkit()));
     if (receiver == null) {
       audience.sendWarning(
           new PersonalizedText("Did not find a message to reply to, use /msg")); // TODO: translate
