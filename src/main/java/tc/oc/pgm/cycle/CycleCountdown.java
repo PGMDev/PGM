@@ -3,7 +3,6 @@ package tc.oc.pgm.cycle;
 import net.md_5.bungee.api.ChatColor;
 import org.joda.time.Duration;
 import tc.oc.component.Component;
-import tc.oc.component.types.BlankComponent;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.match.Match;
@@ -14,35 +13,64 @@ import tc.oc.pgm.map.PGMMap;
 public class CycleCountdown extends MatchCountdown {
   protected final MatchManager mm;
   protected PGMMap nextMap;
+  private boolean ended, preloadedNext;
 
-  public CycleCountdown(MatchManager mm, Match match, PGMMap nextMap) {
+  public CycleCountdown(MatchManager mm, Match match) {
     super(match);
     this.mm = mm;
-    this.nextMap = nextMap;
+    this.nextMap = mm.getMapOrder().getNextMap();
+  }
+
+  private PGMMap setNextMap(PGMMap map, boolean end) {
+    if (!ended && nextMap != map) {
+      nextMap = map;
+      preloadedNext = false;
+    }
+    ended |= end;
+    return nextMap;
   }
 
   @Override
   protected Component formatText() {
-    if (nextMap == null || nextMap.getInfo() == null) return BlankComponent.INSTANCE;
-    Component mapName = new PersonalizedText(nextMap.getInfo().name, ChatColor.AQUA);
+    Component mapName =
+        nextMap == null || nextMap.getInfo() == null
+            ? null
+            : new PersonalizedText(nextMap.getInfo().name, ChatColor.AQUA);
 
-    PGMMap expectedNextMap = mm.getMapOrder().getNextMap();
-    if (expectedNextMap != null && expectedNextMap != nextMap) nextMap = expectedNextMap;
-
-    if (remaining.isLongerThan(Duration.ZERO)) {
-      return new PersonalizedText(
-          new PersonalizedTranslatable(
-              "countdown.cycle.message", mapName, secondsRemaining(ChatColor.DARK_RED)),
-          ChatColor.DARK_AQUA);
+    PersonalizedTranslatable cycleComponent;
+    if (!remaining.isLongerThan(Duration.ZERO)) {
+      cycleComponent =
+          mapName != null
+              ? new PersonalizedTranslatable("countdown.cycle.complete", mapName)
+              : new PersonalizedTranslatable("countdown.cycle.complete.no_map");
     } else {
-      return new PersonalizedText(
-          new PersonalizedTranslatable("countdown.cycle.complete", mapName), ChatColor.DARK_AQUA);
+      Component secs = secondsRemaining(ChatColor.DARK_RED);
+      cycleComponent =
+          mapName != null
+              ? new PersonalizedTranslatable("countdown.cycle.message", mapName, secs)
+              : new PersonalizedTranslatable("countdown.cycle.message.no_map", secs);
+    }
+
+    return new PersonalizedText(cycleComponent, ChatColor.DARK_AQUA);
+  }
+
+  @Override
+  public void onTick(Duration remaining, Duration total) {
+    PGMMap next = setNextMap(mm.getMapOrder().getNextMap(), false);
+    super.onTick(remaining, total);
+
+    if (remaining.getStandardSeconds() <= 3 && next != null && !preloadedNext) {
+      preloadedNext = true;
+      try {
+        mm.createPreMatchAsync(nextMap);
+      } catch (Throwable ignore) {
+      }
     }
   }
 
   @Override
   public void onEnd(Duration total) {
     super.onEnd(total);
-    this.mm.cycleMatch(this.getMatch(), mm.getMapOrder().popNextMap(), false);
+    this.mm.cycleMatch(this.getMatch(), setNextMap(mm.getMapOrder().popNextMap(), true), false);
   }
 }
