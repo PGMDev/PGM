@@ -37,7 +37,7 @@ public class ConfigPrefixProvider implements PrefixProvider {
     }
     StringBuilder prefix = new StringBuilder();
     for (Entry<String, Prefix> entry : Prefixes.getPrefixes().entrySet()) {
-      if (Bukkit.getPlayer(uuid).hasPermission("pgm.flair." + entry.getKey())) {
+      if (Bukkit.getPlayer(uuid).hasPermission("pgm.group." + entry.getKey())) {
         prefix.append(entry.getValue().toString());
       }
     }
