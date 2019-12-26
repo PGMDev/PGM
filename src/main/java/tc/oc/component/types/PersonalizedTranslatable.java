@@ -1,7 +1,7 @@
 package tc.oc.component.types;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TranslatableComponent;
 import org.bukkit.command.CommandSender;
@@ -38,11 +38,12 @@ public class PersonalizedTranslatable extends Component {
   }
 
   private static Object[] render(Object... toRender) {
+    Object[] result = new Object[toRender.length];
     for (int i = 0; i < toRender.length; i++) {
       Object element = toRender[i];
-      if (element instanceof Component) toRender[i] = ((Component) element).render();
+      result[i] = element instanceof Component ? ((Component) element).render() : element;
     }
-    return toRender;
+    return result;
   }
 
   @Override
@@ -52,8 +53,8 @@ public class PersonalizedTranslatable extends Component {
 
     if (pattern != null) {
       // Found a TranslatableComponent with one of our keys
-      List<Component> with =
-          component.getWith().stream().map(Component::new).collect(Collectors.toList());
+      List<Component> with = new ArrayList<>(component.getWith().size());
+      for (BaseComponent extra : component.getWith()) with.add(new Component(extra));
       return new PersonalizedText(Components.format(pattern, with)).render(viewer);
     } else {
       // Fallback
