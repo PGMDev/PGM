@@ -350,6 +350,11 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
   }
 
   @Override
+  public String getPrefixedName() {
+    return PGM.get().getPrefixRegistry().getPrefixedName(getBukkit(), getParty());
+  }
+
+  @Override
   public void tick(Match match, Tick tick) {
     final Player bukkit = getBukkit();
     if (isFrozen()) {

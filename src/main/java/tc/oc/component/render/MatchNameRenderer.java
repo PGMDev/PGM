@@ -42,7 +42,7 @@ public class MatchNameRenderer extends NicknameRenderer implements Listener {
     Names.invalidate(player);
     final Party party = event.getNewParty();
     if (party != null) {
-      player.setDisplayName(/* flair + */ party.getColor() + player.getName() + ChatColor.WHITE);
+      player.setDisplayName(event.getPlayer().getPrefixedName());
     }
   }
 }

@@ -1,9 +1,12 @@
 package tc.oc.pgm;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Map;
+import java.util.TreeMap;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
@@ -271,6 +274,71 @@ public class Config {
                 .trim()
                 .toUpperCase()
                 .replace(' ', '_'));
+      }
+    }
+  }
+
+  public static class Prefixes implements Listener {
+    private Map<String, Prefix> prefixes = new TreeMap<String, Prefix>();
+
+    @EventHandler
+    public void onConfigLoad(ConfigLoadEvent event) throws InvalidConfigurationException {
+      final ConfigurationSection section = event.getConfig().getConfigurationSection("groups");
+      for (String key : section.getKeys(false)) {
+        if (section.getConfigurationSection(key + ".prefix") == null) {
+          continue;
+        }
+        PGM.get().getLogger().info("CONFIG KEY: " + section.getName());
+        prefixes.put(
+            key,
+            new Prefix(
+                key,
+                section.getInt(key + ".priority"),
+                section.getString(key + ".prefix.symbol"),
+                ChatColor.valueOf(
+                    section
+                        .getString(key + ".prefix.color")
+                        .trim()
+                        .toUpperCase()
+                        .replace(' ', '_'))));
+      }
+    }
+
+    private static final Prefixes instance = new Prefixes();
+
+    public static Prefixes get() {
+      return instance;
+    }
+
+    public static boolean enabled() {
+      return instance.prefixes.size() > 0;
+    }
+
+    public static Map<String, Prefix> getPrefixes() {
+      return instance.prefixes;
+    }
+
+    public static class Prefix implements Comparable<Prefix> {
+      public String name;
+      public int priority;
+      public String symbol;
+      public ChatColor color;
+
+      public Prefix(String name, int priority, String symbol, ChatColor color) {
+        this.name = name;
+        this.priority = priority;
+        this.symbol = symbol;
+        this.color = color;
+      }
+
+      @Override
+      public int compareTo(Prefix other) {
+        return Integer.compare(priority, other.priority);
+      }
+
+      @Override
+      public String toString() {
+        return color + symbol;
       }
     }
   }

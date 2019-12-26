@@ -201,6 +201,8 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
    */
   Setting getSetting();
 
+  String getPrefixedName();
+
   @Override
   PlayerInventory getInventory();
 

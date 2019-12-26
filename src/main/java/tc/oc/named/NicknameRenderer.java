@@ -9,6 +9,7 @@ import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.identity.Identity;
+import tc.oc.pgm.api.PGM;
 
 public class NicknameRenderer implements NameRenderer {
 
@@ -47,8 +48,11 @@ public class NicknameRenderer implements NameRenderer {
       rendered = ChatColor.ITALIC + rendered;
     }
 
-    if (type.style.showFlair && type.online && type.reveal) {
-      // rendered = <get flair> + rendered
+    if (type.style.showPrefix && type.online && type.reveal) {
+      final String prefix = PGM.get().getPrefixRegistry().getPrefix(identity.getPlayerId());
+      if (prefix != null) {
+        rendered = prefix + rendered;
+      }
     }
 
     return rendered;
@@ -90,8 +94,11 @@ public class NicknameRenderer implements NameRenderer {
           new PersonalizedTranslatable("tip.teleportTo", dupe).render());
     }
 
-    if (type.style.showFlair && type.online && type.reveal) {
-      // rendered = <get flair> + rendered
+    if (type.style.showPrefix && type.online && type.reveal) {
+      final String prefix = PGM.get().getPrefixRegistry().getPrefix(identity.getPlayerId());
+      if (prefix != null) {
+        rendered = new PersonalizedText(new PersonalizedText(prefix), rendered);
+      }
     }
 
     return rendered;

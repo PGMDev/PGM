@@ -91,3 +91,15 @@ motd:
     starting: yellow                                     # Color designating a match which is starting
     running: green                                       # Color designating a match which is currently running
     finished: red                                        # Color designating a match which has ended
+
+groups:
+  admin:
+    priority: 1
+    prefix:
+      symbol: ❖
+      color: gold
+  mod:
+    priority: 2
+    prefix:
+      symbol: ❖
+      color: red

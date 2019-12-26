@@ -127,6 +127,8 @@ import tc.oc.pgm.modules.TimeLockModule;
 import tc.oc.pgm.modules.ToolRepairModule;
 import tc.oc.pgm.picker.PickerModule;
 import tc.oc.pgm.portals.PortalModule;
+import tc.oc.pgm.prefix.PrefixRegistry;
+import tc.oc.pgm.prefix.PrefixRegistryImpl;
 import tc.oc.pgm.projectile.ProjectileModule;
 import tc.oc.pgm.proximity.ProximityAlarmModule;
 import tc.oc.pgm.rage.RageModule;
@@ -166,6 +168,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
   private IdentityProvider identityProvider;
   private NameRenderer nameRenderer;
 
+  private PrefixRegistry prefixRegistry;
   private Datastore datastore;
   private Datastore datastoreCache;
 
@@ -204,6 +207,10 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     return matchManager;
   }
 
+  public MatchTabManager getMatchTabManager() {
+    return matchTabManager;
+  }
+
   public Logger getMapLogger() {
     return mapLogger;
   }
@@ -214,6 +221,11 @@ public final class PGMImpl extends JavaPlugin implements PGM {
 
   public MapLibrary getMapLibrary() {
     return mapLibrary;
+  }
+
+  @Override
+  public PrefixRegistry getPrefixRegistry() {
+    return prefixRegistry;
   }
 
   @Override
@@ -234,6 +246,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     server.getConsoleSender().addAttachment(this, Permissions.ALL.getName(), true);
 
     registerEvents(Config.PlayerList.get());
+    registerEvents(Config.Prefixes.get());
     getConfig().options().copyDefaults(true);
     saveConfig();
     reloadConfig();
@@ -321,6 +334,9 @@ public final class PGMImpl extends JavaPlugin implements PGM {
       matchTabManager = new MatchTabManager(this);
       matchTabManager.enable();
     }
+
+    prefixRegistry = new PrefixRegistryImpl();
+    registerEvents(prefixRegistry);
 
     new RestartManager(this);
   }
