@@ -1,6 +1,5 @@
 package tc.oc.component.types;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -35,16 +34,15 @@ public class PersonalizedTranslatable extends Component {
    * @param with arguments
    */
   public PersonalizedTranslatable(String translate, Object... with) {
-    super(
-        new TranslatableComponent(
-            translate,
-            Arrays.stream(with)
-                .map(
-                    o -> {
-                      if (o instanceof Component) return ((Component) o).render();
-                      else return o;
-                    })
-                .toArray()));
+    super(new TranslatableComponent(translate, render(with)));
+  }
+
+  private static Object[] render(Object... toRender) {
+    for (int i = 0; i < toRender.length; i++) {
+      Object element = toRender[i];
+      if (element instanceof Component) toRender[i] = ((Component) element).render();
+    }
+    return toRender;
   }
 
   @Override

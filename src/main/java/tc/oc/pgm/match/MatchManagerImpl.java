@@ -159,6 +159,11 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
 
     matchIdByWorldName.remove(getWorldName(id));
     matchById.remove(id);
+    // Destroy the match 5 seconds after unload, to let the server catch-up
+    PGM.get()
+        .getServer()
+        .getScheduler()
+        .runTaskLaterAsynchronously(PGM.get(), match::destroy, 5 * 20);
   }
 
   @Override
@@ -286,18 +291,17 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
         players.add(matchPlayer.getBukkit());
       }
 
-      for (Player player : players) {
-        NMSHacks.forceRespawn(player);
-        player.teleport(newMatch.getWorld().getSpawnLocation());
-        player.setArrowsStuck(0);
-      }
-
+      // First unload, required to remove players & stop listeners
       oldMatch.unload();
 
       for (Player player : players) {
+        NMSHacks.forceRespawn(player);
+        // player.teleport(newMatch.getWorld().getSpawnLocation()); // Avoid teleporting twice.
+        player.setArrowsStuck(0);
         newMatch.addPlayer(player);
       }
 
+      // The second unload, will get rid of the links to match, and call destroy asynchronously
       this.unloadMatch(oldMatch.getId());
     }
 
