@@ -16,8 +16,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.Semaphore;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import javax.annotation.Nullable;
@@ -32,7 +33,7 @@ import tc.oc.pgm.api.PGM;
 public class UsernameResolver {
 
   private static final Gson GSON = new Gson();
-  private static final ReentrantLock LOCK = new ReentrantLock();
+  private static final Semaphore LOCK = new Semaphore(1);
   private static final Map<UUID, Consumer<String>> QUEUE = new ConcurrentHashMap<>();
 
   /**
@@ -41,8 +42,8 @@ public class UsernameResolver {
    * @see #resolve(UUID, Consumer)
    */
   public static void resolveAll() {
-    if (LOCK.isLocked()) return;
-    Bukkit.getScheduler().runTaskAsynchronously(PGM.get(), UsernameResolver::resolveAllSync);
+    if (!LOCK.tryAcquire()) return;
+    CompletableFuture.runAsync(UsernameResolver::resolveAllSync);
   }
 
   /**
@@ -61,15 +62,10 @@ public class UsernameResolver {
     }
 
     QUEUE.put(id, callback);
-
-    // If the queue is reaching capacity, try to queue an asynchronous resolve
-    if (QUEUE.size() >= 10) {
-      resolveAll();
-    }
   }
 
   private static void resolveAllSync() {
-    if (!LOCK.tryLock()) return;
+    LOCK.tryAcquire();
 
     final Set<UUID> queue = ImmutableSet.copyOf(QUEUE.keySet());
     final Map<UUID, Throwable> errors = new LinkedHashMap<>();
@@ -99,7 +95,7 @@ public class UsernameResolver {
               errors.values().iterator().next());
     }
 
-    LOCK.unlock();
+    LOCK.release();
   }
 
   private static String resolveSync(UUID id) throws IOException {
