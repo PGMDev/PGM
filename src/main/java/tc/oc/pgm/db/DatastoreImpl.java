@@ -3,7 +3,6 @@ package tc.oc.pgm.db;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.File;
-import java.lang.ref.WeakReference;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -28,7 +27,7 @@ import tc.oc.util.logging.ClassLogger;
 public class DatastoreImpl implements Datastore {
 
   private final Logger logger;
-  private final WeakReference<Connection> connection;
+  private final Connection connection;
 
   public DatastoreImpl(File file) throws SQLException {
     this.logger = ClassLogger.get(PGM.get().getLogger(), DatastoreImpl.class);
@@ -43,7 +42,7 @@ public class DatastoreImpl implements Datastore {
     final Connection connection =
         DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
     connection.setAutoCommit(true);
-    this.connection = new WeakReference<>(connection);
+    this.connection = connection;
 
     initUsername();
     initSettings();
@@ -249,6 +248,6 @@ public class DatastoreImpl implements Datastore {
   }
 
   private Connection getConnection() {
-    return connection.get();
+    return connection;
   }
 }
