@@ -193,14 +193,14 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
    * @param force Whether to apply with force.
    */
   void applyKit(Kit kit, boolean force);
-  
+
   /**
    * Get the {@link Setting} of the {@link MatchPlayer}.
    *
    * @return The cached {@link Setting}.
    */
   Setting getSetting();
-  
+
   String getPrefixedName();
 
   @Override
