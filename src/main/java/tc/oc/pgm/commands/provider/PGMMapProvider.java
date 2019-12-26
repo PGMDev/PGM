@@ -38,10 +38,10 @@ public class PGMMapProvider implements BukkitProvider<PGMMap> {
 
     if (args.hasNext()) {
       String mapName = getRemainingText(args);
-      map = mapLibrary.getMapByNameOrId(mapName).orNull();
+      map = mapLibrary.getMapByNameOrId(mapName).orElse(null);
       if (map == null) {
         String fuzzyName = StringUtils.bestFuzzyMatch(mapName, mapLibrary.getMapNames(), 0.9);
-        map = mapLibrary.getMapByNameOrId(fuzzyName).orNull();
+        map = mapLibrary.getMapByNameOrId(fuzzyName).orElse(null);
       }
     } else if (isGoToNext(annotations)) {
       map = matchManager.getMapOrder().getNextMap();

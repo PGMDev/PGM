@@ -26,7 +26,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.jdom2.input.SAXBuilder;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.module.ModuleRegistry;
-import tc.oc.pgm.util.NameCacheUtil;
+import tc.oc.pgm.util.UsernameResolver;
 import tc.oc.server.ConfigUtils;
 import tc.oc.util.logging.ClassLogger;
 import tc.oc.xml.SAXHandler;
@@ -111,7 +111,7 @@ public class MapLoader {
             + removed.size()
             + " removed");
 
-    NameCacheUtil.resolveAll();
+    UsernameResolver.resolveAll();
 
     return maps;
   }

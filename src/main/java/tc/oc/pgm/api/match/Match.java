@@ -12,7 +12,11 @@ import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 import org.joda.time.Duration;
 import tc.oc.pgm.api.chat.MultiAudience;
-import tc.oc.pgm.api.match.event.*;
+import tc.oc.pgm.api.match.event.MatchFinishEvent;
+import tc.oc.pgm.api.match.event.MatchLoadEvent;
+import tc.oc.pgm.api.match.event.MatchPhaseChangeEvent;
+import tc.oc.pgm.api.match.event.MatchStartEvent;
+import tc.oc.pgm.api.match.event.MatchUnloadEvent;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -219,7 +223,7 @@ public interface Match extends MatchPlayerResolver, MultiAudience {
    * Try to get a {@link MatchModule}, if one is loaded for the {@link Match}.
    *
    * @param moduleClass The class of the module.
-   * @param <T> The type of the module.
+   * @param <T> The setting of the module.
    * @return The optional {@link MatchModule}.
    */
   <T extends MatchModule> Optional<T> getModule(Class<T> moduleClass);
@@ -239,7 +243,7 @@ public interface Match extends MatchPlayerResolver, MultiAudience {
    *
    * @see #getModule(Class)
    * @param moduleClass The class of the module.
-   * @param <T> The type of the module.
+   * @param <T> The setting of the module.
    * @return The {@link MatchModule}.
    * @throws IllegalStateException If the module is not found.
    */

@@ -20,6 +20,20 @@ import tc.oc.util.SemanticVersion;
 public interface PGM extends Plugin {
 
   /**
+   * Get a datastore that persists between matches and server restarts.
+   *
+   * @return A persistent, synchronous datastore.
+   */
+  Datastore getDatastore();
+
+  /**
+   * Get a cached datastore that persists between matches and server restarts.
+   *
+   * @return {@link #getDatastore()} wrapped in an in-memory cache.
+   */
+  Datastore getDatastoreCache();
+
+  /**
    * Get the specific manager that loads and unloads {@link Match}s.
    *
    * @return The {@link MatchManager}.
@@ -64,9 +78,8 @@ public interface PGM extends Plugin {
   @Deprecated
   NameRenderer getNameRenderer();
 
-  @Deprecated AtomicReference<PGM> GLOBAL = new AtomicReference<>(null);
+  AtomicReference<PGM> GLOBAL = new AtomicReference<>(null);
 
-  @Deprecated
   static PGM set(PGM pgm) {
     try {
       get();

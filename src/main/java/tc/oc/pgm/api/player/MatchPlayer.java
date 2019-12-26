@@ -11,6 +11,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.setting.Setting;
 import tc.oc.pgm.filters.query.IPlayerQuery;
 import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.kits.Kit;
@@ -192,7 +193,14 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
    * @param force Whether to apply with force.
    */
   void applyKit(Kit kit, boolean force);
-
+  
+  /**
+   * Get the {@link Setting} of the {@link MatchPlayer}.
+   *
+   * @return The cached {@link Setting}.
+   */
+  Setting getSetting();
+  
   String getPrefixedName();
 
   @Override

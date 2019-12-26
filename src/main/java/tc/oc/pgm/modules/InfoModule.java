@@ -16,7 +16,6 @@ import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
 import tc.oc.pgm.module.ModuleDescription;
-import tc.oc.pgm.util.NameCacheUtil;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.SemanticVersion;
 import tc.oc.xml.InvalidXMLException;
@@ -125,10 +124,6 @@ public class InfoModule extends MapModule {
 
         if (name == null && uuid == null) {
           throw new InvalidXMLException("Contributor must have either a name or UUID", child);
-        }
-
-        if (uuid != null) {
-          NameCacheUtil.addUUID(uuid);
         }
 
         contribs.add(new Contributor(uuid, name, contribution));

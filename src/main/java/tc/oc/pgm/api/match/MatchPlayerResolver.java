@@ -1,19 +1,26 @@
 package tc.oc.pgm.api.match;
 
+import java.util.Collection;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.util.StringUtils;
 
 /**
  * Helper interface to resolve a {@link MatchPlayer}, {@link MatchPlayerState}, or {@link
  * ParticipantState} from {@link Bukkit} primitives.
  */
 public interface MatchPlayerResolver {
+
+  Collection<MatchPlayer> getPlayers();
 
   @Nullable
   MatchPlayer getPlayer(@Nullable Player player);
@@ -76,5 +83,21 @@ public interface MatchPlayerResolver {
   @Nullable
   default MatchPlayer getParticipant(@Nullable Entity entity) {
     return entity instanceof Player ? getParticipant((Player) entity) : null;
+  }
+
+  @Nullable
+  default MatchPlayer findPlayer(@Nullable String username, @Nullable CommandSender viewer) {
+    return StringUtils.bestFuzzyMatch(
+        username,
+        getPlayers().stream()
+            .collect(
+                Collectors.toMap(
+                    player -> player.getBukkit().getName(viewer), Function.identity())),
+        0.5);
+  }
+
+  @Nullable
+  default MatchPlayer findPlayer(@Nullable String username) {
+    return findPlayer(username, null);
   }
 }
