@@ -94,12 +94,8 @@ motd:
 
 groups:
   admin:
-    priority: 1
+    op: true
+    priority: 10
     prefix:
       symbol: ❖
       color: gold
-  mod:
-    priority: 2
-    prefix:
-      symbol: ❖
-      color: red
