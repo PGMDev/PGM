@@ -288,7 +288,6 @@ public class Config {
         if (section.getConfigurationSection(key + ".prefix") == null) {
           continue;
         }
-        PGM.get().getLogger().info("CONFIG KEY: " + section.getName());
         prefixes.put(
             key,
             new Prefix(
