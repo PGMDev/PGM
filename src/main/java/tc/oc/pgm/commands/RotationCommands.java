@@ -12,13 +12,14 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.map.PGMMap;
+import tc.oc.pgm.rotation.MapPool;
+import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.Rotation;
-import tc.oc.pgm.rotation.RotationManager;
 import tc.oc.pgm.util.PrettyPaginatedResult;
 
 public class RotationCommands {
   @Command(
-      aliases = {"rotation", "rot"},
+      aliases = {"rotation", "rot", "pool"},
       desc = "Shows the maps in the active rotation",
       usage = "[page] [-r rotation]",
       help = "Shows all the maps that are currently in the active rotation.")
@@ -27,21 +28,23 @@ public class RotationCommands {
       CommandSender sender,
       MatchManager matchManager,
       @Default("1") int page,
-      @Switch('r') String rotationName)
+      @Switch('r') String rotationName,
+      @Switch('p') String poolName)
       throws CommandException {
+    if (rotationName != null) poolName = rotationName;
 
-    RotationManager rotationManager = getRotationManager(sender, matchManager);
-    Rotation rotation =
-        rotationName == null
-            ? rotationManager.getActiveRotation()
-            : rotationManager.getRotationByName(rotationName);
+    MapPoolManager mapPoolManager = getMapPoolManager(sender, matchManager);
+    MapPool mapPool =
+        poolName == null
+            ? mapPoolManager.getActiveMapPool()
+            : mapPoolManager.getMapPoolByName(poolName);
 
-    if (rotation == null) {
+    if (mapPool == null) {
       sender.sendMessage(
           ChatColor.RED + AllTranslations.get().translate("command.rotation.noRotation", sender));
       return;
     }
-    List<PGMMap> maps = rotation.getMaps();
+    List<PGMMap> maps = mapPool.getMaps();
 
     int resultsPerPage = 8;
     int pages = (maps.size() + resultsPerPage - 1) / resultsPerPage;
@@ -56,7 +59,7 @@ public class RotationCommands {
             + ChatColor.DARK_AQUA
             + " ("
             + ChatColor.AQUA
-            + rotation.getName()
+            + mapPool.getName()
             + ChatColor.DARK_AQUA
             + ")"
             + " ("
@@ -69,39 +72,38 @@ public class RotationCommands {
             + ChatColor.DARK_AQUA
             + ") "
             + ChatColor.translateAlternateColorCodes('&', "&9&m-----------");
+    int nextPos = mapPool instanceof Rotation ? ((Rotation) mapPool).getNextPosition() : -1;
 
     new PrettyPaginatedResult<PGMMap>(listHeader, resultsPerPage) {
       @Override
       public String format(PGMMap map, int index) {
         index++;
         String indexString =
-            rotation.getNextPosition() == index
-                ? ChatColor.DARK_AQUA.toString() + index
-                : String.valueOf(index);
+            nextPos == index ? ChatColor.DARK_AQUA.toString() + index : String.valueOf(index);
         return (indexString) + ". " + ChatColor.RESET + map.getInfo().getShortDescription(sender);
       }
     }.display(audience, maps, page);
   }
 
   @Command(
-      aliases = {"rotations", "rots"},
+      aliases = {"rotations", "rots", "pools"},
       desc = "Shows all the existing rotations.",
       help = "Shows all the existing rotations and their trigger player counts.")
   public static void rotations(
       Audience audience, CommandSender sender, MatchManager matchManager, @Default("1") int page)
       throws CommandException {
 
-    RotationManager rotationManager = getRotationManager(sender, matchManager);
+    MapPoolManager mapPoolManager = getMapPoolManager(sender, matchManager);
 
-    List<Rotation> rotations = rotationManager.getRotations();
-    if (rotations.isEmpty()) {
+    List<MapPool> mapPools = mapPoolManager.getMapPools();
+    if (mapPools.isEmpty()) {
       sender.sendMessage(
           ChatColor.RED + AllTranslations.get().translate("command.rotation.noRotations", sender));
       return;
     }
 
     int resultsPerPage = 8;
-    int pages = (rotations.size() + resultsPerPage - 1) / resultsPerPage;
+    int pages = (mapPools.size() + resultsPerPage - 1) / resultsPerPage;
 
     String listHeader =
         ChatColor.BLUE.toString()
@@ -122,26 +124,26 @@ public class RotationCommands {
             + ") "
             + ChatColor.translateAlternateColorCodes('&', "&9&m-----------");
 
-    new PrettyPaginatedResult<Rotation>(listHeader, resultsPerPage) {
+    new PrettyPaginatedResult<MapPool>(listHeader, resultsPerPage) {
       @Override
-      public String format(Rotation rotation, int index) {
+      public String format(MapPool mapPool, int index) {
         String arrow =
-            rotationManager.getActiveRotation().getName().equals(rotation.getName())
+            mapPoolManager.getActiveMapPool().getName().equals(mapPool.getName())
                 ? ChatColor.GREEN + "» "
                 : "» ";
         return arrow
             + ChatColor.GOLD
-            + rotation.getName()
+            + mapPool.getName()
             + ChatColor.DARK_AQUA
             + " ("
             + ChatColor.AQUA
             + "Players: "
             + ChatColor.WHITE
-            + rotation.getPlayers()
+            + mapPool.getPlayers()
             + ChatColor.DARK_AQUA
             + ")";
       }
-    }.display(audience, rotations, page);
+    }.display(audience, mapPools, page);
   }
 
   @Command(
@@ -160,10 +162,14 @@ public class RotationCommands {
       return;
     }
 
-    RotationManager rotationManager = getRotationManager(sender, matchManager);
+    MapPool pool = getMapPoolManager(sender, matchManager).getActiveMapPool();
+    if (!(pool instanceof Rotation)) {
+      sender.sendMessage(
+          ChatColor.RED + AllTranslations.get().translate("command.rotation.noRotation", sender));
+      return;
+    }
 
-    rotationManager.getActiveRotation().advance(positions);
-    rotationManager.saveRotations();
+    ((Rotation) pool).advance(positions);
     sender.sendMessage(
         ChatColor.WHITE
             + "["
@@ -173,7 +179,7 @@ public class RotationCommands {
             + "] "
             + "["
             + ChatColor.AQUA
-            + rotationManager.getActiveRotation().getName()
+            + pool.getName()
             + ChatColor.WHITE
             + "] "
             + ChatColor.GREEN
@@ -184,10 +190,10 @@ public class RotationCommands {
                     (ChatColor.AQUA.toString() + positions + ChatColor.GREEN)));
   }
 
-  private static RotationManager getRotationManager(CommandSender sender, MatchManager matchManager)
+  private static MapPoolManager getMapPoolManager(CommandSender sender, MatchManager matchManager)
       throws CommandException {
-    if (matchManager.getMapOrder() instanceof RotationManager)
-      return (RotationManager) matchManager.getMapOrder();
+    if (matchManager.getMapOrder() instanceof MapPoolManager)
+      return (MapPoolManager) matchManager.getMapOrder();
 
     throw new CommandException(
         AllTranslations.get().translate("command.rotation.rotationsDisabled", sender));

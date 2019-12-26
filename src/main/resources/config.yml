@@ -14,9 +14,9 @@ map:
     enabled: true
     reload-when-error: false
 
-rotations:
+map-pools:
   enabled: true
-  path: rotations.yml
+  path: map-pools.yml
 
 restart:
   enabled: true

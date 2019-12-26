@@ -38,13 +38,13 @@ public class Config {
     }
   }
 
-  public static class Rotations {
+  public static class MapPools {
     public static boolean areEnabled() {
-      return getConfiguration().getBoolean("rotations.enabled");
+      return getConfiguration().getBoolean("map-pools.enabled");
     }
 
     public static String getPath() {
-      return getConfiguration().getString("rotations.path");
+      return getConfiguration().getString("map-pools.path");
     }
   }
 
