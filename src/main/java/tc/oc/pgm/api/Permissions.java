@@ -2,6 +2,7 @@ package tc.oc.pgm.api;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.stream.Stream;
+import org.bukkit.Bukkit;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
@@ -12,12 +13,15 @@ public interface Permissions {
   // Root permission node
   String ROOT = "pgm";
 
+  // Root permission node for groups
+  String GROUP = ROOT + ".group";
+
   // Individual permission nodes
   String START = ROOT + ".start"; // Start and cycle matches
   String STOP = ROOT + ".stop"; // Stop matches and restart the server
   String SETNEXT = ROOT + ".setnext"; // Change the rotation and maps
   String ADMINCHAT = ROOT + ".adminchat"; // Secret chat with other operators
-  String GAMEPLAY = ROOT + ".gameplay"; // Edit gameplay such as time limits, destroyables, modes.
+  String GAMEPLAY = ROOT + ".gameplay"; // Edit gameplay such as time limits, destroyables, modes
   String RESIZE = ROOT + ".resize"; // Resize the number of players per match
   String JOIN = ROOT + ".join"; // Allowed to join a match as a participant
   String JOIN_CHOOSE = JOIN + ".choose"; // Can choose which team to join
@@ -114,5 +118,11 @@ public interface Permissions {
   static void register(PluginManager pluginManager) {
     Stream.of(DEFAULT, PREMIUM, MODERATOR, DEVELOPER, ALL, PARTICIPANT, OBSERVER)
         .forEachOrdered(pluginManager::addPermission);
+  }
+
+  static Permission register(String node, PermissionDefault def) {
+    final Permission permission = new Permission(node, def);
+    Bukkit.getServer().getPluginManager().addPermission(permission);
+    return permission;
   }
 }

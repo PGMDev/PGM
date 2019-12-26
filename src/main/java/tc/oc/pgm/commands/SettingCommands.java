@@ -10,9 +10,9 @@ import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.setting.Setting;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
+import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.util.TranslationUtils;
 
 public class SettingCommands {
@@ -21,12 +21,12 @@ public class SettingCommands {
       aliases = {"setting"},
       desc = "Get the value of a setting",
       usage = "[setting name]")
-  public void setting(CommandSender sender, MatchPlayer player, SettingKey key)
+  public static void setting(CommandSender sender, MatchPlayer player, SettingKey key)
       throws ArgumentException {
     if (player == null)
       throw new ArgumentException(AllTranslations.get().translate("command.onlyPlayers", sender));
 
-    final SettingValue value = player.getSetting().getValue(key);
+    final SettingValue value = player.getSettings().getValue(key);
 
     player.sendMessage(
         new PersonalizedTranslatable(
@@ -47,13 +47,13 @@ public class SettingCommands {
       aliases = {"toggle", "set"},
       desc = "Toggle or set the value of a setting",
       usage = "[setting name] <option>")
-  public void toggle(
+  public static void toggle(
       CommandSender sender, MatchPlayer player, SettingKey key, @Nullable SettingValue value)
       throws ArgumentException {
     if (player == null)
       throw new ArgumentException(AllTranslations.get().translate("command.onlyPlayers", sender));
 
-    final Setting setting = player.getSetting();
+    final Settings setting = player.getSettings();
     final SettingValue old = setting.getValue(key);
 
     if (value == null) {
@@ -63,11 +63,19 @@ public class SettingCommands {
       setting.setValue(key, value);
     }
 
-    player.sendMessage(
-        new PersonalizedTranslatable(
-            "command.setting.set",
-            new PersonalizedText(key.getName()),
-            new PersonalizedText(old.getName(), ChatColor.GRAY),
-            new PersonalizedText(value.getName(), ChatColor.GREEN)));
+    if (old == value) {
+      player.sendMessage(
+          new PersonalizedTranslatable(
+              "command.setting.get",
+              new PersonalizedText(key.getName()),
+              new PersonalizedText(old.getName(), ChatColor.GREEN)));
+    } else {
+      player.sendMessage(
+          new PersonalizedTranslatable(
+              "command.setting.set",
+              new PersonalizedText(key.getName()),
+              new PersonalizedText(old.getName(), ChatColor.GRAY),
+              new PersonalizedText(value.getName(), ChatColor.GREEN)));
+    }
   }
 }
