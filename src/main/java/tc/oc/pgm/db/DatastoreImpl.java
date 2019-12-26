@@ -105,7 +105,8 @@ public class DatastoreImpl implements Datastore {
   private Username selectUsername(UUID id) throws SQLException {
     final PreparedStatement statement =
         getConnection()
-            .prepareStatement("SELECT name, expires FROM usernames WHERE id = ? LIMIT 1");
+            .prepareStatement(
+                "SELECT name, strftime('%s', expires) FROM usernames WHERE id = ? LIMIT 1");
     statement.setString(1, checkNotNull(id).toString());
 
     final ResultSet result = statement.executeQuery();
