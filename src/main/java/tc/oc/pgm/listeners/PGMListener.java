@@ -132,12 +132,7 @@ public class PGMListener implements Listener {
     }
 
     match.removePlayer(event.getPlayer());
-    if (PGM.get().getPrefixRegistry().getPrefixProvider() != null) {
-      PGM.get()
-          .getPrefixRegistry()
-          .getPrefixProvider()
-          .removePlayer(event.getPlayer().getUniqueId());
-    }
+    PGM.get().getPrefixRegistry().removePlayer(event.getPlayer().getUniqueId());
   }
 
   @EventHandler(priority = EventPriority.MONITOR)

@@ -108,7 +108,6 @@ import tc.oc.pgm.modules.TimeLockModule;
 import tc.oc.pgm.modules.ToolRepairModule;
 import tc.oc.pgm.picker.PickerModule;
 import tc.oc.pgm.portals.PortalModule;
-import tc.oc.pgm.prefix.PrefixProvider;
 import tc.oc.pgm.prefix.PrefixRegistry;
 import tc.oc.pgm.prefix.PrefixRegistryImpl;
 import tc.oc.pgm.projectile.ProjectileModule;
@@ -150,7 +149,6 @@ public final class PGMImpl extends JavaPlugin implements PGM {
   private IdentityProvider identityProvider;
   private NameRenderer nameRenderer;
 
-  private PrefixProvider defaultPrefixProvider;
   private PrefixRegistry prefixRegistry;
 
   public PGMImpl() {
@@ -197,16 +195,6 @@ public final class PGMImpl extends JavaPlugin implements PGM {
   @Override
   public PrefixRegistry getPrefixRegistry() {
     return prefixRegistry;
-  }
-
-  @Override
-  public void setDefaultPrefixProvider(PrefixProvider prefixProvider) {
-    this.defaultPrefixProvider = prefixProvider;
-  }
-
-  @Override
-  public PrefixProvider getDefaultPrefixProvider() {
-    return defaultPrefixProvider;
   }
 
   @Override
@@ -315,7 +303,6 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     }
 
     prefixRegistry = new PrefixRegistryImpl();
-    prefixRegistry.setPrefixProvider(defaultPrefixProvider);
     registerEvents(prefixRegistry);
 
     new RestartManager(this);

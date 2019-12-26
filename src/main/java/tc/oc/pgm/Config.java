@@ -15,7 +15,6 @@ import org.bukkit.permissions.Permission;
 import org.joda.time.Duration;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.events.ConfigLoadEvent;
-import tc.oc.pgm.prefix.ConfigPrefixProvider;
 
 public class Config {
   public static Configuration getConfiguration() {
@@ -302,9 +301,6 @@ public class Config {
                         .trim()
                         .toUpperCase()
                         .replace(' ', '_'))));
-      }
-      if (prefixes.size() > 0) {
-        PGM.get().setDefaultPrefixProvider(new ConfigPrefixProvider());
       }
     }
 

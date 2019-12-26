@@ -13,6 +13,8 @@ public interface PrefixRegistry extends Listener {
 
   String getPrefix(UUID uuid);
 
+  void removePlayer(UUID uuid);
+
   void setPrefixProvider(PrefixProvider prefixProvider);
 
   PrefixProvider getPrefixProvider();

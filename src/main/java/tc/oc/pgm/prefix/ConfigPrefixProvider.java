@@ -32,7 +32,7 @@ public class ConfigPrefixProvider implements PrefixProvider {
   }
 
   private String getPrefixFromConfig(UUID uuid) {
-    if (!Bukkit.getPlayer(uuid).isOnline()) {
+    if (Bukkit.getPlayer(uuid) == null) {
       return "";
     }
     StringBuilder prefix = new StringBuilder();

@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import tc.oc.identity.Identities;
+import tc.oc.pgm.Config.Prefixes;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -16,6 +17,10 @@ import tc.oc.tablist.PlayerTabEntry;
 public class PrefixRegistryImpl implements PrefixRegistry, Listener {
 
   private PrefixProvider prefixProvider;
+
+  public PrefixRegistryImpl() {
+    this.prefixProvider = Prefixes.enabled() ? new ConfigPrefixProvider() : null;
+  }
 
   @Override
   @EventHandler
@@ -53,6 +58,13 @@ public class PrefixRegistryImpl implements PrefixRegistry, Listener {
   @Override
   public String getPrefix(UUID uuid) {
     return prefixProvider != null ? prefixProvider.getPrefix(uuid) : "";
+  }
+
+  @Override
+  public void removePlayer(UUID uuid) {
+    if (prefixProvider != null) {
+      prefixProvider.removePlayer(uuid);
+    }
   }
 
   @Override
