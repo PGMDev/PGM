@@ -8,7 +8,8 @@ import static tc.oc.pgm.api.setting.SettingValue.*;
  * @see SettingValue
  */
 public enum SettingKey {
-  CHAT("chat", TEAM, GLOBAL, ADMIN); // Changes the default chat channel
+  CHAT("chat", CHAT_TEAM, CHAT_GLOBAL, CHAT_ADMIN), // Changes the default chat channel
+  DEATH("death", DEATH_OWN, DEATH_ALL); // Changes which death messages are seen
 
   private final String name;
   private final SettingValue[] values;

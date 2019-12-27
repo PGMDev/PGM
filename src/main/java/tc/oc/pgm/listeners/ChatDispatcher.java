@@ -45,7 +45,7 @@ public class ChatDispatcher implements Listener {
       desc = "Send a message to everyone",
       usage = "[message]")
   public void sendGlobal(Match match, MatchPlayer sender, @Nullable @Text String message) {
-    send(match, sender, message, "<{0}>: {1}", viewer -> true, SettingValue.GLOBAL);
+    send(match, sender, message, "<{0}>: {1}", viewer -> true, SettingValue.CHAT_GLOBAL);
   }
 
   @Command(
@@ -70,7 +70,7 @@ public class ChatDispatcher implements Listener {
             party.equals(viewer.getParty())
                 || (viewer.isObserving()
                     && viewer.getBukkit().hasPermission(Permissions.ADMINCHAT)),
-        SettingValue.TEAM);
+        SettingValue.CHAT_TEAM);
   }
 
   @Command(
@@ -94,7 +94,7 @@ public class ChatDispatcher implements Listener {
         message,
         "[" + ChatColor.GOLD + "A" + ChatColor.WHITE + "] {0}: {1}",
         viewer -> viewer.getBukkit().hasPermission(Permissions.ADMINCHAT),
-        SettingValue.ADMIN);
+        SettingValue.CHAT_ADMIN);
   }
 
   @Command(
@@ -168,11 +168,13 @@ public class ChatDispatcher implements Listener {
   }
 
   public void sendDefault(Match match, MatchPlayer sender, String message) {
-    switch (sender == null ? SettingValue.GLOBAL : sender.getSettings().getValue(SettingKey.CHAT)) {
-      case TEAM:
+    switch (sender == null
+        ? SettingValue.CHAT_GLOBAL
+        : sender.getSettings().getValue(SettingKey.CHAT)) {
+      case CHAT_TEAM:
         sendTeam(match, sender, message);
         return;
-      case ADMIN:
+      case CHAT_ADMIN:
         sendAdmin(match, sender, message);
         return;
       default:
@@ -190,7 +192,7 @@ public class ChatDispatcher implements Listener {
     // When a message is empty, this indicates the player wants to change their default chat channel
     if (message == null) {
       try {
-        SettingCommands.toggle(sender.getBukkit(), sender, SettingKey.CHAT, type);
+        SettingCommands.toggle(sender.getBukkit(), sender, SettingKey.CHAT, type.getName());
       } catch (ArgumentException e) {
         // No-op, this is when console tries to change chat settings
       }
