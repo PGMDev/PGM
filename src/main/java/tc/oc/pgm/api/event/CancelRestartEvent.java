@@ -1,10 +1,11 @@
-package tc.oc.pgm.restart;
+package tc.oc.pgm.api.event;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import tc.oc.pgm.restart.RestartTask;
 
 /**
- * Fired by {@link RestartManager} when a requested restart is cancelled. Any registered {@link
+ * Fired by {@link RestartTask} when a requested restart is cancelled. Any registered {@link
  * RequestRestartEvent.Deferral}s are forgotten by the manager and can be discarded.
  */
 public class CancelRestartEvent extends Event {

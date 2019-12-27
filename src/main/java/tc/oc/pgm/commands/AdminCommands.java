@@ -20,11 +20,11 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.map.PGMMap;
-import tc.oc.pgm.restart.RestartManager;
+import tc.oc.pgm.restart.RestartListener;
+import tc.oc.pgm.restart.RestartTask;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.timelimit.TimeLimitCountdown;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
-import tc.oc.pgm.util.RestartListener;
 import tc.oc.util.StringUtils;
 import tc.oc.util.TimeUtils;
 
@@ -51,7 +51,7 @@ public class AdminCommands {
     }
 
     match.finish();
-    RestartListener.get().queueRestart(match, countdown, "/restart command");
+    RestartTask.get().startDelayedRestart("/restart command", countdown);
   }
 
   @Command(
@@ -63,13 +63,13 @@ public class AdminCommands {
       perms = Permissions.STOP)
   public static void postponeRestart(
       CommandSender sender, @Range(min = 0, max = 10) int matchNumber) {
-    Integer matches = RestartListener.get().restartAfterMatches(matchNumber);
+    Integer matches = RestartListener.get().increaseMatchLimit(matchNumber);
 
     if (matches == null) {
-      RestartManager.get().cancelRestart();
+      RestartTask.get().cancelRestart();
       sender.sendMessage(ChatColor.RED + "Automatic match count restart disabled");
     } else if (matches > 0) {
-      RestartManager.get().cancelRestart();
+      RestartTask.get().cancelRestart();
       sender.sendMessage(
           ChatColor.RED + "Server will restart automatically in " + matches + " matches");
     } else if (matches == 0) {
@@ -83,8 +83,8 @@ public class AdminCommands {
       desc = "Restart the server at the next safe opportunity",
       perms = Permissions.STOP)
   public void queueRestart(CommandSender sender) {
-    if (!RestartManager.get().isRestartRequested()) {
-      RestartManager.get().requestRestart("/queuerestart commands");
+    if (!RestartTask.get().isRequested()) {
+      RestartTask.get().startRestart("/queuerestart commands");
     }
     sender.sendMessage(ChatColor.RED + "Server will restart automatically after the current match");
   }
@@ -94,8 +94,8 @@ public class AdminCommands {
       desc = "Cancels a previously requested restart",
       perms = Permissions.STOP)
   public void cancelRestart(CommandSender sender) {
-    if (!RestartManager.get().isRestartRequested()) {
-      RestartManager.get().cancelRestart();
+    if (RestartTask.get().isRequested()) {
+      RestartTask.get().cancelRestart();
     }
     sender.sendMessage(ChatColor.RED + "Server restart is now cancelled");
   }
@@ -131,7 +131,7 @@ public class AdminCommands {
       CommandSender sender, @Switch('f') boolean force, @Text PGMMap map, MatchManager matchManager)
       throws CommandException {
     MatchManager mm = PGM.get().getMatchManager();
-    boolean restartQueued = RestartManager.get().isRestartRequested();
+    boolean restartQueued = RestartTask.get().isRequested();
 
     if (restartQueued && !force) {
       throw new CommandException(
@@ -141,7 +141,7 @@ public class AdminCommands {
     matchManager.getMapOrder().setNextMap(map);
 
     if (restartQueued) {
-      RestartManager.get().cancelRestart();
+      RestartTask.get().cancelRestart();
       sender.sendMessage(
           ChatColor.GREEN
               + AllTranslations.get()

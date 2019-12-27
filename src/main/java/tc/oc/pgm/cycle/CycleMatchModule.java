@@ -16,7 +16,7 @@ import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.match.MatchModuleFactory;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.module.ModuleLoadException;
-import tc.oc.pgm.restart.RestartManager;
+import tc.oc.pgm.restart.RestartTask;
 import tc.oc.pgm.rotation.FixedPGMMapOrderManager;
 
 @ModuleDescription(name = "Cycle")
@@ -96,7 +96,7 @@ public class CycleMatchModule extends MatchModule implements Listener {
       }
     }
 
-    if (!RestartManager.get().isRestartRequested()) {
+    if (!RestartTask.get().isRequested()) {
       CycleConfig.Auto autoConfig = config.matchEnd();
       if (autoConfig.enabled()) {
         startCountdown(autoConfig.countdown());
