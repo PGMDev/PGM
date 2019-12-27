@@ -22,6 +22,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
+import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.chat.MultiAudience;
@@ -253,11 +254,15 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
 
     matchIdByWorldName.remove(getWorldName(id));
     matchById.remove(id);
-    // Destroy the match 5 seconds after unload, to let the server catch-up
-    PGM.get()
-        .getServer()
-        .getScheduler()
-        .runTaskLaterAsynchronously(PGM.get(), match::destroy, 5 * 20);
+    int destroyDelay = Config.Experiments.get().getDestroyMatchDelay();
+    if (destroyDelay <= 0) match.destroy();
+    else {
+      // Destroy the match 5 seconds after unload, to let the server catch-up
+      PGM.get()
+          .getServer()
+          .getScheduler()
+          .runTaskLaterAsynchronously(PGM.get(), match::destroy, destroyDelay);
+    }
   }
 
   @Override
@@ -387,10 +392,13 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
 
       // First unload, required to remove players & stop listeners
       oldMatch.unload();
-
+      boolean doubleTp = !Config.Experiments.get().isAvoidDoubleTp();
       for (Player player : players) {
         NMSHacks.forceRespawn(player);
-        // player.teleport(newMatch.getWorld().getSpawnLocation()); // Avoid teleporting twice.
+        // Players will be teleported when being added to the match either way.
+        if (doubleTp) {
+          player.teleport(newMatch.getWorld().getSpawnLocation());
+        }
         player.setArrowsStuck(0);
         newMatch.addPlayer(player);
       }

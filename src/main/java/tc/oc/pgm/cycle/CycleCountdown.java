@@ -5,12 +5,15 @@ import org.joda.time.Duration;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.Config;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.map.PGMMap;
 
 public class CycleCountdown extends MatchCountdown {
+  private int preloadTime = Config.Experiments.get().getPreload();
+
   protected final MatchManager mm;
   protected PGMMap nextMap;
   private boolean ended, preloadedNext;
@@ -59,7 +62,7 @@ public class CycleCountdown extends MatchCountdown {
     PGMMap next = setNextMap(mm.getMapOrder().getNextMap(), false);
     super.onTick(remaining, total);
 
-    if (remaining.getStandardSeconds() <= 3 && next != null && !preloadedNext) {
+    if (remaining.getStandardSeconds() <= preloadTime && next != null && !preloadedNext) {
       preloadedNext = true;
       try {
         mm.createPreMatchAsync(nextMap);

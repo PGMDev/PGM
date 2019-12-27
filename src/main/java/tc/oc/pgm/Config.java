@@ -349,4 +349,45 @@ public class Config {
       }
     }
   }
+
+  public static class Experiments implements Listener {
+    private int preload;
+    private boolean avoidDoubleTp;
+    private int tabRenderDelay;
+    private int destroyMatchDelay;
+
+    @EventHandler
+    public void onConfigLoad(ConfigLoadEvent event) throws InvalidConfigurationException {
+      this.load(event.getConfig().getConfigurationSection("experiments"));
+    }
+
+    public void load(ConfigurationSection config) throws InvalidConfigurationException {
+      this.preload = config.getInt("preload-matches", 3);
+      this.avoidDoubleTp = config.getBoolean("avoid-double-teleport", true);
+      this.tabRenderDelay = config.getInt("tab-render-delay", 5);
+      this.destroyMatchDelay = config.getInt("destroy-match-delay", 5);
+    }
+
+    private static final Experiments instance = new Experiments();
+
+    public static Experiments get() {
+      return instance;
+    }
+
+    public int getPreload() {
+      return preload;
+    }
+
+    public boolean isAvoidDoubleTp() {
+      return avoidDoubleTp;
+    }
+
+    public int getTabRenderDelay() {
+      return tabRenderDelay;
+    }
+
+    public int getDestroyMatchDelay() {
+      return destroyMatchDelay;
+    }
+  }
 }
