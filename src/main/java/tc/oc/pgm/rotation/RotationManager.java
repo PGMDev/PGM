@@ -90,7 +90,7 @@ public class RotationManager implements PGMMapOrder {
 
     rotations.stream()
         .filter(rot -> activePlayers >= rot.getPlayers())
-        .min(Rotation::compareTo)
+        .max(Rotation::compareTo)
         .ifPresent(this::updateActiveRotation);
   }
 
