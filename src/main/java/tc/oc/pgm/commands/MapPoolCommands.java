@@ -4,9 +4,11 @@ import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
+import app.ashcon.intake.parametric.annotation.Text;
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
@@ -15,9 +17,10 @@ import tc.oc.pgm.map.PGMMap;
 import tc.oc.pgm.rotation.MapPool;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.Rotation;
+import tc.oc.pgm.rotation.VotingPool;
 import tc.oc.pgm.util.PrettyPaginatedResult;
 
-public class RotationCommands {
+public class MapPoolCommands {
   @Command(
       aliases = {"rotation", "rot", "pool"},
       desc = "Shows the maps in the active rotation",
@@ -188,6 +191,29 @@ public class RotationCommands {
                     "command.rotation.skip.message",
                     sender,
                     (ChatColor.AQUA.toString() + positions + ChatColor.GREEN)));
+  }
+
+  @Command(aliases = "votenext", desc = "Vote for the next map to play", usage = "map")
+  public static void setNext(CommandSender sender, MatchManager matchManager, @Text PGMMap map)
+      throws CommandException {
+    MapPool pool = getMapPoolManager(sender, matchManager).getActiveMapPool();
+    if (!(pool instanceof VotingPool)) {
+      sender.sendMessage(
+          ChatColor.RED + AllTranslations.get().translate("command.pool.noVote", sender));
+      return;
+    }
+    if (!(sender instanceof Player)) {
+      // FIXME: Either translate this, or ask for a MatchPlayer and avoid it
+      sender.sendMessage("Only players are allowed to vote");
+      return;
+    }
+    // FIXME: Currently only voting for yes, can't remove vote.
+    // FIXME: messages not translated
+    if (((VotingPool) pool).registerVote(map, ((Player) sender).getUniqueId(), true)) {
+      sender.sendMessage("Successfully voted for " + map.getName());
+    } else {
+      sender.sendMessage("Couldn't cast vote for " + map.getName());
+    }
   }
 
   private static MapPoolManager getMapPoolManager(CommandSender sender, MatchManager matchManager)

@@ -5,7 +5,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.map.PGMMap;
 
-@SuppressWarnings("unchecked")
 public class VotingPool extends MapPool {
 
   // Number of maps in the vote, unless not enough maps in pool
@@ -14,6 +13,8 @@ public class VotingPool extends MapPool {
   private final double DEFAULT_WEIGHT;
   private final int VOTE_SIZE;
   private final Map<PGMMap, Double> mapScores = new HashMap<>();
+
+  private boolean voteRunning;
   private final Map<PGMMap, Set<UUID>> votes = new HashMap<>();
 
   public VotingPool(MapPoolManager manager, ConfigurationSection section, String name) {
@@ -26,8 +27,8 @@ public class VotingPool extends MapPool {
     }
   }
 
-  /** Updates scores for all maps, with a weighted average towards DEFAULT_WEIGHT */
-  private void updateScores() {
+  /** Ticks scores for all maps, making them go slowly towards DEFAULT_WEIGHT. */
+  private void tickScores() {
     mapScores.replaceAll((mapScores, value) -> (value * 3 + DEFAULT_WEIGHT) / 4);
   }
 
@@ -40,6 +41,8 @@ public class VotingPool extends MapPool {
    * @return true if the vote was casted successfully, false otherwise
    */
   public boolean registerVote(PGMMap votedMap, UUID player, boolean inFavor) {
+    if (!voteRunning) return false;
+
     Set<UUID> votes = this.votes.computeIfAbsent(votedMap, m -> new HashSet<>());
 
     if (inFavor) return votes.add(player);
@@ -55,12 +58,20 @@ public class VotingPool extends MapPool {
   }
 
   /**
-   * Resets the voting process after a map has been picked
+   * Resets the voting process after a map has been picked & updates scores
    *
    * @param picked The picked map after the vote
    */
   private void resetVote(PGMMap picked) {
+    // Amount of players that voted, smaller or equal to amount of votes
+    double votingPlayerCount =
+        votes.values().stream().flatMap(Collection::stream).distinct().count();
+    // Could turn the voters.size into premium-dependent vote count.
+    votes.forEach((map, voters) -> mapScores.put(map, voters.size() / votingPlayerCount));
+    voteRunning = false;
     votes.clear();
+    // The picked map gets reset to 0, ensuring it can't appear on next vote and will have a low
+    // chance after that.
     mapScores.put(picked, 0d);
   }
 
@@ -73,7 +84,7 @@ public class VotingPool extends MapPool {
       voted = getRandom();
     }
 
-    updateScores();
+    tickScores();
     resetVote(voted);
 
     return voted;
@@ -86,6 +97,16 @@ public class VotingPool extends MapPool {
 
   @Override
   public void matchEnded(Match match) {
-    // TODO: Start a vote, pick VOTE_SIZE best maps
+    // FIXME: this picks best N maps, instead of randomly weight.
+    // TODO: Properly format on chat, probably include GUI as well.
+    voteRunning = true;
+    mapScores.entrySet().stream()
+        .sorted(Comparator.comparingDouble(Map.Entry::getValue))
+        .map(Map.Entry::getKey)
+        .limit(VOTE_SIZE)
+        .forEach(
+            map ->
+                match.sendMessage(
+                    "To vote for " + map.getName() + " type /votenext " + map.getName()));
   }
 }
