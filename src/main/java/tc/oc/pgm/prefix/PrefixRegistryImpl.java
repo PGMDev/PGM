@@ -29,9 +29,6 @@ public class PrefixRegistryImpl implements PrefixRegistry, Listener {
       return;
     }
     final Player player = Bukkit.getPlayer(event.getUUID());
-    if (player == null || !player.isOnline()) {
-      return;
-    }
     final MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(player);
     if (matchPlayer == null) {
       return;
