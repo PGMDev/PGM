@@ -12,8 +12,10 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
 import org.joda.time.Duration;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.events.ConfigLoadEvent;
 
 public class Config {
@@ -288,7 +290,6 @@ public class Config {
         if (section.getConfigurationSection(key + ".prefix") == null) {
           continue;
         }
-        PGM.get().getLogger().info("CONFIG KEY: " + section.getName());
         prefixes.put(
             key,
             new Prefix(
@@ -300,7 +301,8 @@ public class Config {
                         .getString(key + ".prefix.color")
                         .trim()
                         .toUpperCase()
-                        .replace(' ', '_'))));
+                        .replace(' ', '_')),
+                section.getBoolean(key + ".op")));
       }
     }
 
@@ -323,12 +325,17 @@ public class Config {
       public int priority;
       public String symbol;
       public ChatColor color;
+      public Permission permission;
 
-      public Prefix(String name, int priority, String symbol, ChatColor color) {
+      public Prefix(String name, int priority, String symbol, ChatColor color, boolean op) {
         this.name = name;
         this.priority = priority;
         this.symbol = symbol;
         this.color = color;
+        this.permission =
+            Permissions.register(
+                Permissions.GROUP + "." + name,
+                op ? PermissionDefault.OP : PermissionDefault.FALSE);
       }
 
       @Override

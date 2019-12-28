@@ -36,7 +36,7 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.ParticipantState;
-import tc.oc.pgm.api.setting.Setting;
+import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.PlayerResetEvent;
 import tc.oc.pgm.filters.query.IPlayerQuery;
@@ -323,8 +323,8 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
   }
 
   @Override
-  public Setting getSetting() {
-    return PGM.get().getDatastoreCache().getSetting(id);
+  public Settings getSettings() {
+    return PGM.get().getDatastoreCache().getSettings(id);
   }
 
   @Override

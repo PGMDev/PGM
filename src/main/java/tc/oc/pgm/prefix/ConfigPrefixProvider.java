@@ -2,15 +2,15 @@ package tc.oc.pgm.prefix;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.UUID;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import tc.oc.pgm.Config.Prefixes;
 import tc.oc.pgm.Config.Prefixes.Prefix;
 
 public class ConfigPrefixProvider implements PrefixProvider {
 
-  private final Map<UUID, String> prefixMap = new HashMap<UUID, String>();
+  private final Map<UUID, String> prefixMap = new HashMap<>();
 
   @Override
   public void setPrefix(UUID uuid, String prefix) {
@@ -32,15 +32,13 @@ public class ConfigPrefixProvider implements PrefixProvider {
   }
 
   private String getPrefixFromConfig(UUID uuid) {
-    if (Bukkit.getPlayer(uuid) == null) {
-      return "";
-    }
-    StringBuilder prefix = new StringBuilder();
-    for (Entry<String, Prefix> entry : Prefixes.getPrefixes().entrySet()) {
-      if (Bukkit.getPlayer(uuid).hasPermission("pgm.group." + entry.getKey())) {
-        prefix.append(entry.getValue().toString());
+    final Player player = Bukkit.getPlayer(uuid);
+    if (player == null) return "";
+    for (Prefix prefix : Prefixes.getPrefixes().values()) {
+      if (player.hasPermission(prefix.permission)) {
+        return prefix.toString();
       }
     }
-    return prefix.toString();
+    return "";
   }
 }

@@ -1,6 +1,7 @@
 package tc.oc.pgm.listeners;
 
 import app.ashcon.intake.Command;
+import app.ashcon.intake.argument.ArgumentException;
 import app.ashcon.intake.parametric.annotation.Text;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -24,6 +25,7 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
+import tc.oc.pgm.commands.SettingCommands;
 import tc.oc.pgm.ffa.Tribute;
 import tc.oc.util.components.Components;
 import tc.oc.world.OnlinePlayerMapAdapter;
@@ -43,7 +45,7 @@ public class ChatDispatcher implements Listener {
       desc = "Send a message to everyone",
       usage = "[message]")
   public void sendGlobal(Match match, MatchPlayer sender, @Nullable @Text String message) {
-    send(match, sender, message, "<{0}>: {1}", viewer -> true);
+    send(match, sender, message, "<{0}>: {1}", viewer -> true, SettingValue.GLOBAL);
   }
 
   @Command(
@@ -67,7 +69,8 @@ public class ChatDispatcher implements Listener {
         viewer ->
             party.equals(viewer.getParty())
                 || (viewer.isObserving()
-                    && viewer.getBukkit().hasPermission(Permissions.ADMINCHAT)));
+                    && viewer.getBukkit().hasPermission(Permissions.ADMINCHAT)),
+        SettingValue.TEAM);
   }
 
   @Command(
@@ -76,12 +79,22 @@ public class ChatDispatcher implements Listener {
       usage = "[message]",
       perms = Permissions.ADMINCHAT)
   public void sendAdmin(Match match, MatchPlayer sender, @Nullable @Text String message) {
+    // If a player managed to send a default message without permissions, reset their chat channel
+    if (sender != null && !sender.getBukkit().hasPermission(Permissions.ADMINCHAT)) {
+      sender.getSettings().resetValue(SettingKey.CHAT);
+      sender.sendWarning(
+          "You do not have permissions for admin chat, your chat setting has now been reset",
+          true); // TODO: translate
+      return;
+    }
+
     send(
         match,
         sender,
         message,
         "[" + ChatColor.GOLD + "A" + ChatColor.WHITE + "] {0}: {1}",
-        viewer -> viewer.getBukkit().hasPermission(Permissions.ADMINCHAT));
+        viewer -> viewer.getBukkit().hasPermission(Permissions.ADMINCHAT),
+        SettingValue.ADMIN);
   }
 
   @Command(
@@ -98,14 +111,16 @@ public class ChatDispatcher implements Listener {
         sender,
         message,
         "[" + ChatColor.GOLD + "DM" + ChatColor.WHITE + "] {0}: {1}",
-        viewer -> viewer.getBukkit().equals(receiver));
+        viewer -> viewer.getBukkit().equals(receiver),
+        null);
 
     send(
         match,
         manager.getPlayer(receiver), // Allow for cross-match messages
         message,
         "[" + ChatColor.GOLD + "DM" + ChatColor.WHITE + "] -> {0}: {1}",
-        viewer -> viewer.getBukkit().equals(sender.getBukkit()));
+        viewer -> viewer.getBukkit().equals(sender.getBukkit()),
+        null);
   }
 
   @Command(
@@ -153,7 +168,7 @@ public class ChatDispatcher implements Listener {
   }
 
   public void sendDefault(Match match, MatchPlayer sender, String message) {
-    switch (sender == null ? SettingValue.GLOBAL : sender.getSetting().getValue(SettingKey.CHAT)) {
+    switch (sender == null ? SettingValue.GLOBAL : sender.getSettings().getValue(SettingKey.CHAT)) {
       case TEAM:
         sendTeam(match, sender, message);
         return;
@@ -168,9 +183,20 @@ public class ChatDispatcher implements Listener {
   public void send(
       Match match,
       MatchPlayer sender,
-      String message,
+      @Nullable String message,
       String format,
-      Predicate<MatchPlayer> filter) {
+      Predicate<MatchPlayer> filter,
+      @Nullable SettingValue type) {
+    // When a message is empty, this indicates the player wants to change their default chat channel
+    if (message == null) {
+      try {
+        SettingCommands.toggle(sender.getBukkit(), sender, SettingKey.CHAT, type);
+      } catch (ArgumentException e) {
+        // No-op, this is when console tries to change chat settings
+      }
+      return;
+    }
+
     final Component component =
         new PersonalizedText(
             Components.format(

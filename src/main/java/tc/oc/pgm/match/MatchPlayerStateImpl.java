@@ -3,7 +3,6 @@ package tc.oc.pgm.match;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
@@ -11,6 +10,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Location;
+import org.bukkit.util.Vector;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedPlayer;
 import tc.oc.identity.Identity;
@@ -27,7 +27,7 @@ public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
   private final Match match;
   private final Identity identity;
   private final Party party;
-  private final WeakReference<Location> location;
+  private final Vector location;
 
   protected MatchPlayerStateImpl(Match match, Identity identity, Party party, Location location) {
     this.match = checkNotNull(match);
@@ -35,7 +35,7 @@ public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
     this.party = checkNotNull(party);
     checkArgument(
         location.getWorld().equals(match.getWorld()), "location and match world must be the same");
-    this.location = new WeakReference<>(checkNotNull(location));
+    this.location = checkNotNull(location).toVector();
   }
 
   @Override
@@ -55,7 +55,7 @@ public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
 
   @Override
   public Location getLocation() {
-    return location.get();
+    return location.toLocation(match.getWorld());
   }
 
   @Override
@@ -96,7 +96,7 @@ public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
         .append("id", getId())
         .append("party", getParty().getDefaultName())
         .append("match", getMatch().getId())
-        .append("location", location == null ? null : location.toVector())
+        .append("location", location)
         .build();
   }
 }

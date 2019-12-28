@@ -7,7 +7,7 @@ import java.util.UUID;
  *
  * @see SettingValue
  */
-public interface Setting {
+public interface Settings {
 
   /**
    * Get the unique {@link UUID} of the player.

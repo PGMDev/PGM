@@ -145,6 +145,6 @@ public class Rotation implements PGMMapOrder, Comparable<Rotation> {
 
   @Override
   public int compareTo(Rotation o) {
-    return Integer.compare(this.position, o.position);
+    return Integer.compare(this.players, o.players);
   }
 }
