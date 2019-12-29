@@ -1,5 +1,6 @@
 package tc.oc.pgm.restart;
 
+import java.util.Iterator;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
@@ -50,7 +51,8 @@ public class RestartListener implements Listener {
     if (this.plugin.getServer().getOnlinePlayers().isEmpty()) {
       Bukkit.getServer().shutdown();
     } else {
-      Match match = this.matchManager.getMatches().iterator().next();
+      Iterator<Match> iterator = matchManager.getMatches().iterator();
+      Match match = iterator.hasNext() ? iterator.next() : null;
       if (match != null) {
         this.deferral = event.defer(this.plugin);
         if (match.isRunning()) {
@@ -72,7 +74,8 @@ public class RestartListener implements Listener {
 
   @EventHandler
   public void onCancelRestart(CancelRestartEvent event) {
-    Match match = this.matchManager.getMatches().iterator().next();
+    Iterator<Match> iterator = matchManager.getMatches().iterator();
+    Match match = iterator.hasNext() ? iterator.next() : null;
     if (match != null) {
       SingleCountdownContext ctx = (SingleCountdownContext) match.getCountdown();
       if (ctx.getCountdown(RestartCountdown.class) != null) {
