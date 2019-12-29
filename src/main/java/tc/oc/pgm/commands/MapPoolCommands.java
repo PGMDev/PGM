@@ -9,10 +9,12 @@ import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import tc.oc.component.types.PersonalizedText;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.match.MatchManager;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.map.PGMMap;
 import tc.oc.pgm.rotation.MapPool;
 import tc.oc.pgm.rotation.MapPoolManager;
@@ -194,26 +196,24 @@ public class MapPoolCommands {
   }
 
   @Command(aliases = "votenext", desc = "Vote for the next map to play", usage = "map")
-  public static void setNext(CommandSender sender, MatchManager matchManager, @Text PGMMap map)
+  public static void setNext(
+      MatchPlayer player, CommandSender sender, MatchManager matchManager, @Text PGMMap map)
       throws CommandException {
     MapPool pool = getMapPoolManager(sender, matchManager).getActiveMapPool();
-    if (!(pool instanceof VotingPool)) {
+    VotingPool.Poll poll = pool instanceof VotingPool ? ((VotingPool) pool).getCurrentPoll() : null;
+    if (poll == null) {
       sender.sendMessage(
           ChatColor.RED + AllTranslations.get().translate("command.pool.noVote", sender));
       return;
     }
-    if (!(sender instanceof Player)) {
-      // FIXME: Either translate this, or ask for a MatchPlayer and avoid it
-      sender.sendMessage("Only players are allowed to vote");
-      return;
-    }
-    // FIXME: Currently only voting for yes, can't remove vote.
     // FIXME: messages not translated
-    if (((VotingPool) pool).registerVote(map, ((Player) sender).getUniqueId(), true)) {
-      sender.sendMessage("Successfully voted for " + map.getName());
+    if (poll.toggleVote(map, ((Player) sender).getUniqueId())) {
+      sender.sendMessage(new PersonalizedText("Voted for " + map.getName(), ChatColor.GREEN));
     } else {
-      sender.sendMessage("Couldn't cast vote for " + map.getName());
+      sender.sendMessage(
+          new PersonalizedText("Removed your vote for " + map.getName(), ChatColor.RED));
     }
+    poll.sendMessage(player);
   }
 
   private static MapPoolManager getMapPoolManager(CommandSender sender, MatchManager matchManager)

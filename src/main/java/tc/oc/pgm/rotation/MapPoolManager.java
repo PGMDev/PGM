@@ -116,6 +116,10 @@ public class MapPoolManager implements PGMMapOrder {
         .orElse(null);
   }
 
+  protected PGMMap getOverriderMap() {
+    return overriderMap;
+  }
+
   @Override
   public PGMMap popNextMap() {
     if (overriderMap != null) {
@@ -136,6 +140,7 @@ public class MapPoolManager implements PGMMapOrder {
   @Override
   public void setNextMap(PGMMap map) {
     overriderMap = map;
+    activeMapPool.setNextMap(map); // Notify pool a next map has been set
   }
 
   @Override
