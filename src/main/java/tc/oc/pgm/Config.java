@@ -365,7 +365,7 @@ public class Config {
       this.preload = config.getInt("preload-matches", 3);
       this.avoidDoubleTp = config.getBoolean("avoid-double-teleport", true);
       this.tabRenderDelay = config.getInt("tab-render-delay", 5);
-      this.destroyMatchDelay = config.getInt("destroy-match-delay", 5);
+      this.destroyMatchDelay = config.getInt("destroy-match-delay", 100);
     }
 
     private static final Experiments instance = new Experiments();

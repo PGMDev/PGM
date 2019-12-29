@@ -79,7 +79,7 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
   }
 
   public void createPreMatchAsync(final PGMMap map) {
-    PGM.get().getLogger().fine("Creating pre-match for " + map.getName() + " async");
+    logger.fine("Creating pre-match for " + map.getName() + " async");
     PGM.get()
         .getServer()
         .getScheduler()
@@ -106,7 +106,7 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
    * @throws Exception If the match fails to be generated
    */
   private Match createPreMatch(PGMMap map) throws Exception {
-    PGM.get().getLogger().fine("Creating pre-match for " + map.getName());
+    logger.fine("Creating pre-match for " + map.getName());
     String id = Integer.toString(count.getAndIncrement());
 
     if (!map.getContext().isPresent()) {
@@ -124,7 +124,7 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
     matchById.put(match.getId(), match);
     matchIdByWorldName.put(match.getWorld().getName(), match.getId());
 
-    PGM.get().getLogger().fine("Done creating pre-match for " + map.getName());
+    logger.fine("Done creating pre-match for " + map.getName());
     return match;
   }
 
@@ -257,7 +257,7 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
     int destroyDelay = Config.Experiments.get().getDestroyMatchDelay();
     if (destroyDelay <= 0) match.destroy();
     else {
-      // Destroy the match 5 seconds after unload, to let the server catch-up
+      // Destroy the match after unload, to let the server catch-up
       PGM.get()
           .getServer()
           .getScheduler()
