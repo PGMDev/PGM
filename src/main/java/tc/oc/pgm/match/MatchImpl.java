@@ -27,13 +27,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
 import org.bukkit.World;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
@@ -780,6 +777,7 @@ public class MatchImpl implements Match, Comparable<Match> {
       callEvent(new MatchLoadEvent(this));
     } catch (Throwable e) {
       unload();
+      destroy();
       throw e;
     }
   }
@@ -811,16 +809,6 @@ public class MatchImpl implements Match, Comparable<Match> {
       }
     }
 
-    Stream.of(getWorld().getLoadedChunks()).forEach(Chunk::unload);
-    getWorld().getEntities().stream().forEach(Entity::remove);
-
-    final String worldName = getWorld().getName();
-    final boolean unloaded = PGM.get().getServer().unloadWorld(worldName, true);
-    if (!unloaded) {
-      logger.log(
-          Level.SEVERE, "Unable to unload world " + worldName + " (this can cause memory leaks!)");
-    }
-
     schedulers.clear();
     listeners.clear();
     tickables.clear();
@@ -835,6 +823,27 @@ public class MatchImpl implements Match, Comparable<Match> {
     world.enqueue();
 
     loaded.compareAndSet(true, false);
+  }
+
+  @Override
+  public void destroy() {
+    if (isLoaded()) {
+      logger.log(
+          Level.SEVERE,
+          "Match " + getId() + " is being destroyed without having previously been unloaded");
+      unload();
+    }
+
+    World world = getWorld();
+    if (world == null) return;
+
+    final String worldName = world.getName();
+    if (PGM.get().getServer().unloadWorld(worldName, false)) {
+      logger.fine("Successfully unloaded " + worldName);
+    } else {
+      logger.log(
+          Level.SEVERE, "Unable to unload world " + worldName + " (this can cause memory leaks!)");
+    }
 
     final File oldMatchFolder = new File(PGM.get().getServer().getWorldContainer(), worldName);
     if (oldMatchFolder.exists()) {

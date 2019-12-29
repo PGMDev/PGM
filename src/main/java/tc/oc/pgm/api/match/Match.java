@@ -103,12 +103,21 @@ public interface Match extends MatchPlayerResolver, MultiAudience {
   void load() throws ModuleLoadException;
 
   /**
-   * The de-constructor for {@link Match}, which should reset all state and ensure that resources
-   * are eligible for garbage collection.
+   * First step de-constructor for {@link Match}, which should reset all state. Does not include
+   * blocking operations.
    *
+   * @see Match#destroy()
    * @see MatchUnloadEvent
    */
   void unload();
+
+  /**
+   * Final step de-constructor for {@link Match}, releases all resources for garbage collecting.
+   * Includes blocking operations. You must first unload a match to be able to destroy it.
+   *
+   * @see Match#unload()
+   */
+  void destroy();
 
   /**
    * Get the {@link MatchPhase} of the {@link Match}.
