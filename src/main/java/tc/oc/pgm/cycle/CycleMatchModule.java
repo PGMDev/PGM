@@ -71,7 +71,7 @@ public class CycleMatchModule extends MatchModule implements Listener {
     final Match match = event.getMatch();
     mm.getMapOrder().matchEnded(match);
 
-    if (!RestartManager.get().isQueued()) {
+    if (!RestartManager.isQueued()) {
       CycleConfig.Auto autoConfig = config.matchEnd();
       if (autoConfig.enabled()) {
         startCountdown(autoConfig.countdown());

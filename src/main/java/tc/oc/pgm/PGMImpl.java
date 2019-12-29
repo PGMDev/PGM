@@ -135,7 +135,6 @@ import tc.oc.pgm.rage.RageModule;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.renewable.RenewableModule;
 import tc.oc.pgm.restart.RestartListener;
-import tc.oc.pgm.restart.RestartManager;
 import tc.oc.pgm.restart.ShouldRestartTask;
 import tc.oc.pgm.rotation.RandomPGMMapOrder;
 import tc.oc.pgm.rotation.RotationManager;
@@ -341,7 +340,6 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     registerEvents(prefixRegistry);
 
     if (Config.AutoRestart.enabled()) {
-      new RestartManager();
       getServer().getScheduler().runTaskTimer(this, new ShouldRestartTask(this), 0, 20 * 60);
     }
   }

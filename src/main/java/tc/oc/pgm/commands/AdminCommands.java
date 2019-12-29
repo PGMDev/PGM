@@ -15,12 +15,12 @@ import org.joda.time.Duration;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
-import tc.oc.pgm.api.event.CancelRestartEvent;
-import tc.oc.pgm.api.event.RequestRestartEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.map.PGMMap;
+import tc.oc.pgm.restart.CancelRestartEvent;
+import tc.oc.pgm.restart.RequestRestartEvent;
 import tc.oc.pgm.restart.RestartManager;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.timelimit.TimeLimitCountdown;
@@ -38,9 +38,8 @@ public class AdminCommands {
   public void queueRestart(
       CommandSender sender, Match match, @Default("30") int duration, @Switch('f') boolean force)
       throws CommandException {
-    RestartManager.get()
-        .queueRestart(
-            "Restart requested via /queuerestart command", Duration.standardSeconds(duration));
+    RestartManager.queueRestart(
+        "Restart requested via /queuerestart command", Duration.standardSeconds(duration));
 
     sender.sendMessage(
         ChatColor.RED + "Server will restart automatically at the next safe opportunity.");
@@ -48,10 +47,7 @@ public class AdminCommands {
     if (force && match.isRunning()) {
       match.finish();
     } else {
-      PGM.get()
-          .getServer()
-          .getPluginManager()
-          .callEvent(new RequestRestartEvent(RestartManager.get()));
+      PGM.get().getServer().getPluginManager().callEvent(new RequestRestartEvent());
     }
   }
 
@@ -60,7 +56,7 @@ public class AdminCommands {
       desc = "Cancels a previously requested restart",
       perms = Permissions.STOP)
   public void cancelRestart(CommandSender sender) {
-    if (RestartManager.get().isQueued()) {
+    if (RestartManager.isQueued()) {
       PGM.get().getServer().getPluginManager().callEvent(new CancelRestartEvent());
       sender.sendMessage(ChatColor.RED + "Server restart is now cancelled");
     } else {
@@ -100,15 +96,15 @@ public class AdminCommands {
       throws CommandException {
     MatchManager mm = PGM.get().getMatchManager();
 
-    if (RestartManager.get().isQueued() && !force) {
+    if (RestartManager.isQueued() && !force) {
       throw new CommandException(
           AllTranslations.get().translate("command.admin.setNext.restartQueued", sender));
     }
 
     matchManager.getMapOrder().setNextMap(map);
 
-    if (RestartManager.get().isQueued()) {
-      RestartManager.get().cancelRestart();
+    if (RestartManager.isQueued()) {
+      RestartManager.cancelRestart();
       sender.sendMessage(
           ChatColor.GREEN
               + AllTranslations.get()

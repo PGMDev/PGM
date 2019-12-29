@@ -1,4 +1,4 @@
-package tc.oc.pgm.api.event;
+package tc.oc.pgm.restart;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;

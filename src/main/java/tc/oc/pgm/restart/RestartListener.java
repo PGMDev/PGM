@@ -9,8 +9,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.joda.time.Duration;
 import tc.oc.pgm.Config;
-import tc.oc.pgm.api.event.CancelRestartEvent;
-import tc.oc.pgm.api.event.RequestRestartEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
@@ -62,8 +60,8 @@ public class RestartListener implements Listener {
           ctx.cancelAll();
 
           Duration countdownTime =
-              RestartManager.get().getCountdown() != null
-                  ? RestartManager.get().getCountdown()
+              RestartManager.getCountdown() != null
+                  ? RestartManager.getCountdown()
                   : Duration.standardSeconds(30);
           this.logger.info("Starting restart countdown from " + countdownTime);
           ctx.start(new RestartCountdown(match), countdownTime);
@@ -83,16 +81,13 @@ public class RestartListener implements Listener {
       }
       this.deferral = null;
     }
-    RestartManager.get().cancelRestart();
+    RestartManager.cancelRestart();
   }
 
   @EventHandler(priority = EventPriority.LOW)
   public void onMatchEnd(MatchFinishEvent event) {
-    if (RestartManager.get().isQueued()) {
-      this.plugin
-          .getServer()
-          .getPluginManager()
-          .callEvent(new RequestRestartEvent(RestartManager.get()));
+    if (RestartManager.isQueued()) {
+      this.plugin.getServer().getPluginManager().callEvent(new RequestRestartEvent());
     }
   }
 
@@ -104,7 +99,7 @@ public class RestartListener implements Listener {
   @EventHandler
   public void onMatchLoad(MatchLoadEvent event) {
     if (this.matchLimit != null && ++this.matchCount >= this.matchLimit) {
-      RestartManager.get().queueRestart("Reached match limit of " + this.matchLimit);
+      RestartManager.queueRestart("Reached match limit of " + this.matchLimit);
     }
   }
 }

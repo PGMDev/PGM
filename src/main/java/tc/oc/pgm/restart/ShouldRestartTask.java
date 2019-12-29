@@ -25,13 +25,13 @@ public class ShouldRestartTask implements Runnable {
 
   @Override
   public void run() {
-    if (!RestartManager.get().isQueued()) {
+    if (!RestartManager.isQueued()) {
       if (uptimeLimit()) {
-        RestartManager.get().queueRestart("Exceeded uptime limit of " + uptimeLimit);
+        RestartManager.queueRestart("Exceeded uptime limit of " + uptimeLimit);
       }
 
       if (memoryLimit()) {
-        RestartManager.get().queueRestart("Exceeded memory limit of " + memoryLimit);
+        RestartManager.queueRestart("Exceeded memory limit of " + memoryLimit);
       }
     }
   }

@@ -1,9 +1,8 @@
-package tc.oc.pgm.api.event;
+package tc.oc.pgm.restart;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
-import tc.oc.pgm.restart.RestartManager;
 
 public class RequestRestartEvent extends Event {
 
@@ -23,24 +22,19 @@ public class RequestRestartEvent extends Event {
      * and can be discarded.
      */
     public void remove() {
-      restartManager.removeDeferral(this);
+      RestartManager.removeDeferral(this);
     }
 
     public boolean isDeferring() {
-      return restartManager.isDeferredBy(this);
+      return RestartManager.isDeferredBy(this);
     }
   }
 
   private static final HandlerList handlers = new HandlerList();
-  private final RestartManager restartManager;
-
-  public RequestRestartEvent(RestartManager restartManager) {
-    this.restartManager = restartManager;
-  }
 
   public Deferral defer(Plugin plugin) {
     Deferral deferral = new Deferral(plugin);
-    this.restartManager.addDeferral(deferral);
+    RestartManager.addDeferral(deferral);
     return deferral;
   }
 

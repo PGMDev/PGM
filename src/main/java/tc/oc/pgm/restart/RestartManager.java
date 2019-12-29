@@ -1,92 +1,79 @@
 package tc.oc.pgm.restart;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nullable;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
-import tc.oc.pgm.api.event.RequestRestartEvent;
 
 public class RestartManager {
 
-  private static RestartManager instance;
-  private final Set<RequestRestartEvent.Deferral> deferrals = new HashSet<>();
+  private static final Set<RequestRestartEvent.Deferral> _deferrals = new HashSet<>();
 
-  private Instant queuedAt;
-  private String reason;
-  private Duration countdown;
-
-  public RestartManager() {
-    checkState(instance == null);
-    instance = this;
-  }
-
-  public static RestartManager get() {
-    return instance;
-  }
+  private static Instant _queuedAt;
+  private static String _reason;
+  private static Duration _countdown;
 
   /** Queues a restart to be initiated at next available opportunity. */
-  public boolean queueRestart(String reason) {
+  public static boolean queueRestart(String reason) {
     if (!isQueued()) {
-      this.queuedAt = Instant.now();
-      this.reason = reason;
+      _queuedAt = Instant.now();
+      _reason = reason;
       return true;
     }
     return false;
   }
 
-  public boolean queueRestart(String reason, Duration countdown) {
+  public static boolean queueRestart(String reason, Duration countdown) {
     if (!isQueued()) {
-      this.queuedAt = Instant.now();
-      this.reason = reason;
-      this.countdown = countdown;
+      _queuedAt = Instant.now();
+      _reason = reason;
+      _countdown = countdown;
       return true;
     }
     return false;
   }
 
   /** Cancels the restart if there is one already queued */
-  public void cancelRestart() {
+  public static void cancelRestart() {
     if (isQueued()) {
-      this.queuedAt = null;
-      this.reason = null;
-      this.countdown = null;
+      _queuedAt = null;
+      _reason = null;
+      _countdown = null;
     }
   }
 
-  public @Nullable Instant getQueuedAt() {
-    return queuedAt;
+  public static @Nullable Instant getQueuedAt() {
+    return _queuedAt;
   }
 
-  public @Nullable String getReason() {
-    return reason;
+  public static @Nullable String getReason() {
+    return _reason;
   }
 
-  public @Nullable Duration getCountdown() {
-    return countdown;
+  public static @Nullable Duration getCountdown() {
+    return _countdown;
   }
 
-  public boolean isQueued() {
+  public static boolean isQueued() {
     return getQueuedAt() != null;
   }
 
-  public boolean isDeferred() {
-    return !this.deferrals.isEmpty();
+  public static boolean isDeferred() {
+    return !_deferrals.isEmpty();
   }
 
-  public boolean isDeferredBy(RequestRestartEvent.Deferral deferral) {
-    return this.deferrals.contains(deferral);
+  public static boolean isDeferredBy(RequestRestartEvent.Deferral deferral) {
+    return _deferrals.contains(deferral);
   }
 
-  public void addDeferral(RequestRestartEvent.Deferral deferral) {
+  public static void addDeferral(RequestRestartEvent.Deferral deferral) {
     if (isQueued()) {
-      this.deferrals.add(deferral);
+      _deferrals.add(deferral);
     }
   }
 
-  public void removeDeferral(RequestRestartEvent.Deferral deferral) {
-    this.deferrals.remove(deferral);
+  public static void removeDeferral(RequestRestartEvent.Deferral deferral) {
+    _deferrals.remove(deferral);
   }
 }
