@@ -134,7 +134,9 @@ import tc.oc.pgm.proximity.ProximityAlarmModule;
 import tc.oc.pgm.rage.RageModule;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.renewable.RenewableModule;
+import tc.oc.pgm.restart.RestartListener;
 import tc.oc.pgm.restart.RestartManager;
+import tc.oc.pgm.restart.ShouldRestartTask;
 import tc.oc.pgm.rotation.RandomPGMMapOrder;
 import tc.oc.pgm.rotation.RotationManager;
 import tc.oc.pgm.score.ScoreModule;
@@ -151,7 +153,6 @@ import tc.oc.pgm.terrain.TerrainModule;
 import tc.oc.pgm.timelimit.TimeLimitModule;
 import tc.oc.pgm.tnt.TNTModule;
 import tc.oc.pgm.tracker.TrackerMatchModule;
-import tc.oc.pgm.util.RestartListener;
 import tc.oc.pgm.wool.WoolModule;
 import tc.oc.pgm.worldborder.WorldBorderModule;
 import tc.oc.util.SemanticVersion;
@@ -338,7 +339,10 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     prefixRegistry = new PrefixRegistryImpl();
     registerEvents(prefixRegistry);
 
-    new RestartManager(this);
+    if (Config.AutoRestart.enabled()) {
+      new RestartManager();
+      getServer().getScheduler().runTaskTimer(this, new ShouldRestartTask(this), 0, 20 * 60);
+    }
   }
 
   @Override

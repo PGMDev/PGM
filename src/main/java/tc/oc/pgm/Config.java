@@ -49,22 +49,16 @@ public class Config {
   }
 
   public static class AutoRestart {
-    private final Configuration config;
-
-    public AutoRestart(Configuration config) {
-      this.config = config;
+    public static boolean enabled() {
+      return getConfiguration().getBoolean("restart.enabled", false);
     }
 
-    public boolean enabled() {
-      return this.config.getBoolean("restart.enabled", false);
+    public static Duration time() {
+      return Duration.standardSeconds(getConfiguration().getInt("restart.time", 30)); // seconds
     }
 
-    public Duration time() {
-      return Duration.standardSeconds(this.config.getInt("restart.time", 30)); // seconds
-    }
-
-    public int matchLimit() {
-      return this.config.getInt("restart.match-limit", 30);
+    public static int matchLimit() {
+      return getConfiguration().getInt("restart.match-limit", 30);
     }
   }
 
