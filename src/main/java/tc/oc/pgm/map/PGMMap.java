@@ -204,10 +204,7 @@ public final class PGMMap implements Comparable<PGMMap> {
   }
 
   public Optional<MapModuleContext> getContext() {
-    if (context == null) {
-      throw new IllegalStateException("Map is not loaded: " + this);
-    }
-    return Optional.of(context);
+    return Optional.ofNullable(context);
   }
 
   public MapPersistentContext getPersistentContext() {

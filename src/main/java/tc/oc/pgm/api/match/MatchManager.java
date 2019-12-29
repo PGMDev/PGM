@@ -19,14 +19,22 @@ import tc.oc.pgm.rotation.PGMMapOrder;
 public interface MatchManager extends MatchPlayerResolver, Audience {
 
   /**
+   * Starts the creation of a new {@link Match} and {@link World} from a {@link PGMMap}, without
+   * loading it.
+   *
+   * @param map The {@link PGMMap} for the {@link Match}.
+   * @throws Throwable If the match cannot be created.
+   */
+  void createPreMatchAsync(PGMMap map) throws Throwable;
+
+  /**
    * Creates a new {@link Match} and {@link World} from a {@link PGMMap}.
    *
-   * @param id The unique identifier for the {@link Match}, defaults to a random one.
    * @param map The {@link PGMMap} for the {@link Match}.
    * @return The {@link Match} in an unloaded, idle state.
    * @throws Throwable If the match cannot be created.
    */
-  Match createMatch(@Nullable String id, PGMMap map) throws Throwable;
+  Match createMatch(PGMMap map) throws Throwable;
 
   /**
    * Get the {@link Match} for the specified {@link World}.
