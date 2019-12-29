@@ -3,7 +3,6 @@ package tc.oc.pgm.commands;
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Default;
-import app.ashcon.intake.parametric.annotation.Range;
 import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
 import java.util.AbstractMap;
@@ -20,73 +19,36 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.map.PGMMap;
+import tc.oc.pgm.restart.CancelRestartEvent;
+import tc.oc.pgm.restart.RequestRestartEvent;
 import tc.oc.pgm.restart.RestartManager;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.timelimit.TimeLimitCountdown;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
-import tc.oc.pgm.util.RestartListener;
 import tc.oc.util.StringUtils;
-import tc.oc.util.TimeUtils;
 
 public class AdminCommands {
 
   @Command(
-      aliases = {"timedrestart"},
-      desc = "Queues a server restart after a certain amount of time",
+      aliases = {"queuerestart", "qr"},
+      desc = "Restart the server at the next safe opportunity",
       usage = "[seconds] - defaults to 30 seconds",
       flags = "f",
       perms = Permissions.STOP)
-  public static void restart(
-      CommandSender sender,
-      Match match,
-      @Default("30s") Duration duration,
-      @Switch('f') boolean force)
+  public void queueRestart(
+      CommandSender sender, Match match, @Default("30") int duration, @Switch('f') boolean force)
       throws CommandException {
-    // Countdown defers automatic restart, so don't allow excessively long times
-    Duration countdown = TimeUtils.min(duration, Duration.standardMinutes(5));
+    RestartManager.queueRestart(
+        "Restart requested via /queuerestart command", Duration.standardSeconds(duration));
 
-    if (match.isRunning() && !force) {
-      throw new CommandException(
-          AllTranslations.get().translate("command.admin.restart.matchRunning", sender));
+    sender.sendMessage(
+        ChatColor.RED + "Server will restart automatically at the next safe opportunity.");
+
+    if (force && match.isRunning()) {
+      match.finish();
+    } else {
+      PGM.get().getServer().getPluginManager().callEvent(new RequestRestartEvent());
     }
-
-    match.finish();
-    RestartListener.get().queueRestart(match, countdown, "/restart command");
-  }
-
-  @Command(
-      aliases = {"postponerestart", "pr"},
-      usage = "[matches]",
-      desc =
-          "Cancels any queued restarts and postpones automatic restart to at least "
-              + "the given number of matches from now (default and maximum is 10).",
-      perms = Permissions.STOP)
-  public static void postponeRestart(
-      CommandSender sender, @Range(min = 0, max = 10) int matchNumber) {
-    Integer matches = RestartListener.get().restartAfterMatches(matchNumber);
-
-    if (matches == null) {
-      RestartManager.get().cancelRestart();
-      sender.sendMessage(ChatColor.RED + "Automatic match count restart disabled");
-    } else if (matches > 0) {
-      RestartManager.get().cancelRestart();
-      sender.sendMessage(
-          ChatColor.RED + "Server will restart automatically in " + matches + " matches");
-    } else if (matches == 0) {
-      sender.sendMessage(
-          ChatColor.RED + "Server will restart automatically after the current match");
-    }
-  }
-
-  @Command(
-      aliases = {"queuerestart", "qr"},
-      desc = "Restart the server at the next safe opportunity",
-      perms = Permissions.STOP)
-  public void queueRestart(CommandSender sender) {
-    if (!RestartManager.get().isRestartRequested()) {
-      RestartManager.get().requestRestart("/queuerestart commands");
-    }
-    sender.sendMessage(ChatColor.RED + "Server will restart automatically after the current match");
   }
 
   @Command(
@@ -94,10 +56,12 @@ public class AdminCommands {
       desc = "Cancels a previously requested restart",
       perms = Permissions.STOP)
   public void cancelRestart(CommandSender sender) {
-    if (!RestartManager.get().isRestartRequested()) {
-      RestartManager.get().cancelRestart();
+    if (RestartManager.isQueued()) {
+      PGM.get().getServer().getPluginManager().callEvent(new CancelRestartEvent());
+      sender.sendMessage(ChatColor.RED + "Server restart is now cancelled");
+    } else {
+      sender.sendMessage(ChatColor.RED + "No restart is currently queued.");
     }
-    sender.sendMessage(ChatColor.RED + "Server restart is now cancelled");
   }
 
   @Command(
@@ -131,17 +95,16 @@ public class AdminCommands {
       CommandSender sender, @Switch('f') boolean force, @Text PGMMap map, MatchManager matchManager)
       throws CommandException {
     MatchManager mm = PGM.get().getMatchManager();
-    boolean restartQueued = RestartManager.get().isRestartRequested();
 
-    if (restartQueued && !force) {
+    if (RestartManager.isQueued() && !force) {
       throw new CommandException(
           AllTranslations.get().translate("command.admin.setNext.restartQueued", sender));
     }
 
     matchManager.getMapOrder().setNextMap(map);
 
-    if (restartQueued) {
-      RestartManager.get().cancelRestart();
+    if (RestartManager.isQueued()) {
+      RestartManager.cancelRestart();
       sender.sendMessage(
           ChatColor.GREEN
               + AllTranslations.get()
