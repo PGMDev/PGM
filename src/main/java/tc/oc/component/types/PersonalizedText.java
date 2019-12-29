@@ -1,10 +1,8 @@
 package tc.oc.component.types;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.experimental.Delegate;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -54,7 +52,9 @@ public class PersonalizedText extends Component {
    */
   public PersonalizedText(Component... extras) {
     this();
-    this.setExtra(Arrays.stream(extras).map(Component::render).collect(Collectors.toList()));
+    List<BaseComponent> rendered = new ArrayList<>(extras.length);
+    for (Component extra : extras) rendered.add(extra.render());
+    this.setExtra(rendered);
   }
 
   /**
@@ -127,7 +127,9 @@ public class PersonalizedText extends Component {
    */
   public PersonalizedText(String text, List<Component> extras) {
     this(text);
-    this.setExtra(extras.stream().map(Component::render).collect(Collectors.toList()));
+    List<BaseComponent> rendered = new ArrayList<>(extras.size());
+    for (Component extra : extras) rendered.add(extra.render());
+    this.setExtra(rendered);
   }
 
   public Component text(String text) {

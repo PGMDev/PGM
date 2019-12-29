@@ -248,9 +248,10 @@ public final class PGMImpl extends JavaPlugin implements PGM {
 
     registerEvents(Config.PlayerList.get());
     registerEvents(Config.Prefixes.get());
+    registerEvents(Config.Experiments.get());
     getConfig().options().copyDefaults(true);
     saveConfig();
-    reloadConfig();
+    // reloadConfig(); // getConfig() already reloads config
 
     mapLogger = Logger.getLogger(logger.getName() + ".maps");
     mapLogger.setUseParentHandlers(false);
