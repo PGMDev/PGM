@@ -446,7 +446,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     registerEvents(new AntiGriefListener(matchManager));
     registerEvents(new ItemTransferListener());
     registerEvents(new LongRangeTNTListener(this));
-    registerEvents(new RestartListener(this));
+    registerEvents(new RestartListener(this, matchManager));
     registerEvents(new WorldProblemListener(this));
     registerEvents(new MatchAnnouncer());
     registerEvents(new MotdListener());

@@ -9,10 +9,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.joda.time.Duration;
 import tc.oc.pgm.Config;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.CancelRestartEvent;
 import tc.oc.pgm.api.event.RequestRestartEvent;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.countdowns.SingleCountdownContext;
@@ -22,14 +22,16 @@ import tc.oc.util.logging.ClassLogger;
 public class RestartListener implements Listener {
 
   private final Plugin plugin;
+  private final MatchManager matchManager;
   private final Logger logger;
 
   private int matchCount;
   private @Nullable Integer matchLimit;
   private @Nullable RequestRestartEvent.Deferral deferral;
 
-  public RestartListener(Plugin plugin) {
+  public RestartListener(Plugin plugin, MatchManager matchManager) {
     this.plugin = plugin;
+    this.matchManager = matchManager;
     this.logger = ClassLogger.get(this.plugin.getLogger(), this.getClass());
     this.matchLimit = Config.AutoRestart.matchLimit() > 0 ? Config.AutoRestart.matchLimit() : null;
   }
@@ -50,7 +52,7 @@ public class RestartListener implements Listener {
     if (this.plugin.getServer().getOnlinePlayers().isEmpty()) {
       Bukkit.getServer().shutdown();
     } else {
-      Match match = PGM.get().getMatchManager().getMatches().iterator().next();
+      Match match = this.matchManager.getMatches().iterator().next();
       if (match != null) {
         this.deferral = event.defer(this.plugin);
         if (match.isRunning()) {
@@ -72,7 +74,7 @@ public class RestartListener implements Listener {
 
   @EventHandler
   public void onCancelRestart(CancelRestartEvent event) {
-    Match match = PGM.get().getMatchManager().getMatches().iterator().next();
+    Match match = this.matchManager.getMatches().iterator().next();
     if (match != null) {
       SingleCountdownContext ctx = (SingleCountdownContext) match.getCountdown();
       if (ctx.getCountdown(RestartCountdown.class) != null) {
