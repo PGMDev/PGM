@@ -48,7 +48,7 @@ public class SettingCommands {
       desc = "Toggle or set the value of a setting",
       usage = "[setting name] <option>")
   public static void toggle(
-      CommandSender sender, MatchPlayer player, SettingKey key, @Nullable SettingValue value)
+      CommandSender sender, MatchPlayer player, SettingKey key, @Nullable String query)
       throws ArgumentException {
     if (player == null)
       throw new ArgumentException(AllTranslations.get().translate("command.onlyPlayers", sender));
@@ -56,10 +56,12 @@ public class SettingCommands {
     final Settings setting = player.getSettings();
     final SettingValue old = setting.getValue(key);
 
-    if (value == null) {
+    final SettingValue value;
+    if (query == null) {
       setting.toggleValue(key);
       value = setting.getValue(key);
     } else {
+      value = SettingValue.search(key, query);
       setting.setValue(key, value);
     }
 
