@@ -55,8 +55,8 @@ public class ChatDispatcher implements Listener {
   public void sendTeam(Match match, MatchPlayer sender, @Nullable @Text String message) {
     final Party party = sender == null ? match.getDefaultParty() : sender.getParty();
 
-    // No team chat when playing free-for-all, default to global chat
-    if (party instanceof Tribute) {
+    // No team chat when playing free-for-all or match end, default to global chat
+    if (party instanceof Tribute || match.isFinished()) {
       sendGlobal(match, sender, message);
       return;
     }
