@@ -1,5 +1,6 @@
 package tc.oc.pgm.match;
 
+import com.google.common.cache.*;
 import com.google.common.collect.ImmutableSet;
 import java.io.File;
 import java.io.IOException;
@@ -11,12 +12,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
+import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.chat.MultiAudience;
@@ -31,6 +37,7 @@ import tc.oc.util.FileUtils;
 import tc.oc.util.logging.ClassLogger;
 import tc.oc.world.NMSHacks;
 
+@SuppressWarnings("UnstableApiUsage")
 public class MatchManagerImpl implements MatchManager, MultiAudience {
 
   private final Logger logger;
@@ -38,8 +45,24 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
   private final MapLibrary library;
   private final MapLoader loader;
 
-  private final Map<String, Match> matchById;
-  private final Map<String, String> matchIdByWorldName;
+  private final Map<String, Match> matchById = new HashMap<>();
+  private final Map<String, String> matchIdByWorldName = new HashMap<>();
+  private final LoadingCache<PGMMap, String> preMatch =
+      CacheBuilder.newBuilder()
+          .expireAfterWrite(10, TimeUnit.SECONDS)
+          // If after 10 secs of writing the match it hasn't been loaded, unload & destroy it
+          .removalListener(
+              (RemovalNotification<PGMMap, String> r) -> {
+                if (!matchById.get(r.getValue()).isLoaded()) unloadMatch(r.getValue());
+              })
+          .concurrencyLevel(1)
+          .build(
+              new CacheLoader<PGMMap, String>() {
+                @Override
+                public String load(@Nonnull PGMMap pgmMap) throws Exception {
+                  return createPreMatch(pgmMap).getId();
+                }
+              });
   private final AtomicInteger count;
 
   private PGMMapOrder pgmMapOrder;
@@ -50,16 +73,41 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
     this.server = server;
     this.library = library;
     this.loader = loader;
-    this.matchById = new HashMap<>();
-    this.matchIdByWorldName = new HashMap<>();
     this.count = new AtomicInteger(0);
 
     loadNewMaps();
   }
 
-  @Override
-  public Match createMatch(@Nullable String id, PGMMap map) throws Throwable {
-    if (id == null || id.trim().isEmpty()) id = Integer.toString(count.get());
+  public void createPreMatchAsync(final PGMMap map) {
+    logger.fine("Creating pre-match for " + map.getName() + " async");
+    PGM.get()
+        .getServer()
+        .getScheduler()
+        .runTaskAsynchronously(
+            PGM.get(),
+            () -> {
+              try {
+                preMatch.get(map);
+                PGM.get()
+                    .getLogger()
+                    .fine("Done creating pre-match for " + map.getName() + " async");
+              } catch (Throwable t) {
+                throw new RuntimeException(t);
+              }
+            });
+  }
+
+  /**
+   * Pre-creates a match, without loading it. Can and should be done async unless a /cycle 0 is
+   * done.
+   *
+   * @param map The map to generate a pre-match for
+   * @return The created pre-match
+   * @throws Exception If the match fails to be generated
+   */
+  private Match createPreMatch(PGMMap map) throws Exception {
+    logger.fine("Creating pre-match for " + map.getName());
+    String id = Integer.toString(count.getAndIncrement());
 
     if (!map.getContext().isPresent()) {
       map.reload(true);
@@ -76,14 +124,23 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
     matchById.put(match.getId(), match);
     matchIdByWorldName.put(match.getWorld().getName(), match.getId());
 
+    logger.fine("Done creating pre-match for " + map.getName());
+    return match;
+  }
+
+  @Override
+  public Match createMatch(PGMMap map) throws Throwable {
+    final Match match = matchById.get(preMatch.get(map));
+
     try {
       match.load();
     } catch (Throwable t) {
       unloadMatch(match.getId());
       throw t;
+    } finally {
+      // Remove all preMatches, since we already loaded one
+      preMatch.invalidateAll();
     }
-
-    count.incrementAndGet();
 
     return match;
   }
@@ -121,7 +178,7 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
         .generator(terrain.getChunkGenerator())
         .seed(terrain.getSeed());
 
-    final World world = server.createWorld(creator);
+    final World world = createWorld(creator);
     if (world == null) {
       throw new IllegalStateException("Failed to create world, createWorld returned null");
     }
@@ -137,6 +194,44 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
     }
 
     return world;
+  }
+
+  /**
+   * Creates a new world, wich must be done on the primary thread. If already running on the primary
+   * thread, calls createWorld, otherwise, starts a sync task to run create world, and waits until
+   * it's done.
+   *
+   * @param creator The creator for the world
+   * @return A world if it was able to be created, null otherwise
+   */
+  private World createWorld(final WorldCreator creator) {
+    if (server.isPrimaryThread()) return server.createWorld(creator);
+
+    // FIXME: This is pretty dirty, there must be a better way to run & wait on main
+    final Object LOCK = new Object();
+    final AtomicReference<World> world = new AtomicReference<>();
+    final AtomicBoolean isDone = new AtomicBoolean();
+    PGM.get()
+        .getServer()
+        .getScheduler()
+        .runTask(
+            PGM.get(),
+            () -> {
+              world.set(server.createWorld(creator));
+              isDone.set(true);
+              synchronized (LOCK) {
+                LOCK.notifyAll();
+              }
+            });
+    while (!isDone.get()) {
+      synchronized (LOCK) {
+        try {
+          LOCK.wait();
+        } catch (InterruptedException ignore) {
+        }
+      }
+    }
+    return world.get();
   }
 
   @Override
@@ -159,6 +254,15 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
 
     matchIdByWorldName.remove(getWorldName(id));
     matchById.remove(id);
+    int destroyDelay = Config.Experiments.get().getDestroyMatchDelay();
+    if (destroyDelay <= 0) match.destroy();
+    else {
+      // Destroy the match after unload, to let the server catch-up
+      PGM.get()
+          .getServer()
+          .getScheduler()
+          .runTaskLaterAsynchronously(PGM.get(), match::destroy, destroyDelay);
+    }
   }
 
   @Override
@@ -278,7 +382,7 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
 
     if (oldMatch != null) oldMatch.finish();
 
-    Match newMatch = this.createMatch(null, newMap);
+    Match newMatch = this.createMatch(newMap);
 
     if (oldMatch != null) {
       Set<Player> players = new HashSet<>(oldMatch.getPlayers().size());
@@ -286,18 +390,20 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
         players.add(matchPlayer.getBukkit());
       }
 
+      // First unload, required to remove players & stop listeners
+      oldMatch.unload();
+      boolean doubleTp = !Config.Experiments.get().isAvoidDoubleTp();
       for (Player player : players) {
         NMSHacks.forceRespawn(player);
-        player.teleport(newMatch.getWorld().getSpawnLocation());
+        // Players will be teleported when being added to the match either way.
+        if (doubleTp) {
+          player.teleport(newMatch.getWorld().getSpawnLocation());
+        }
         player.setArrowsStuck(0);
-      }
-
-      oldMatch.unload();
-
-      for (Player player : players) {
         newMatch.addPlayer(player);
       }
 
+      // The second unload, will get rid of the links to match, and call destroy asynchronously
       this.unloadMatch(oldMatch.getId());
     }
 

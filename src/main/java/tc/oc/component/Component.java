@@ -3,10 +3,10 @@ package tc.oc.component;
 import app.ashcon.sportpaper.api.text.PersonalizedComponent;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import lombok.experimental.Delegate;
 import net.md_5.bungee.api.ChatColor;
@@ -134,8 +134,8 @@ public class Component implements PersonalizedComponent {
   }
 
   public Component extra(Collection<Component> extras) {
-    List<BaseComponent> components =
-        extras.stream().map(Component::render).collect(Collectors.toList());
+    List<BaseComponent> components = new ArrayList<>(extras.size());
+    for (Component extra : extras) components.add(extra.render());
     if (this.getExtra() == null) {
       this.setExtra(components);
     } else {

@@ -39,10 +39,8 @@ public class CycleCommands {
 
     if (map != null && matchManager.getMapOrder().getNextMap() != map) {
       matchManager.getMapOrder().setNextMap(map);
-      cmm.startCountdown(countdown, map);
-    } else {
-      cmm.startCountdown(countdown);
     }
+    cmm.startCountdown(countdown);
   }
 
   @Command(
