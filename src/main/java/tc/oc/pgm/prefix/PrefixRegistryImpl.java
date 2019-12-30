@@ -28,19 +28,15 @@ public class PrefixRegistryImpl implements PrefixRegistry, Listener {
     if (event.getUUID() == null) {
       return;
     }
+    final Player player = Bukkit.getPlayer(event.getUUID());
     final MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(event.getUUID());
-    if (matchPlayer == null
-        || matchPlayer.getBukkit() == null
-        || matchPlayer.getBukkit().isOnline()) {
+    if (matchPlayer == null) {
       return;
     }
-    matchPlayer
-        .getBukkit()
-        .setDisplayName(getPrefixedName(Bukkit.getPlayer(event.getUUID()), matchPlayer.getParty()));
-    PGM.get().getNameRenderer().invalidateCache(Identities.current(matchPlayer.getBukkit()));
+    player.setDisplayName(getPrefixedName(player, matchPlayer.getParty()));
+    PGM.get().getNameRenderer().invalidateCache(Identities.current(player));
     final PlayerTabEntry tabEntry =
-        (PlayerTabEntry)
-            PGM.get().getMatchTabManager().getPlayerEntryOrNull(matchPlayer.getBukkit());
+        (PlayerTabEntry) PGM.get().getMatchTabManager().getPlayerEntryOrNull(player);
     if (tabEntry != null) {
       tabEntry.invalidate();
       tabEntry.refresh();
