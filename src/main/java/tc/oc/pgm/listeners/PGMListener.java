@@ -50,14 +50,14 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void onPlayerLogin(final PlayerLoginEvent event) {
-    // allow ops to join when the server is full
+    // allow premiums to join when the server is full
     if (event.getResult() == Result.KICK_FULL) {
       if (event.getPlayer().hasPermission(Permissions.JOIN_FULL)) {
         event.allow();
       } else {
         event.setKickMessage(
-            AllTranslations.get()
-                .translate("serverFull", mm.getPlayer(event.getPlayer()).getBukkit()));
+            AllTranslations.get() // MatchPlayer is not available at this time
+                .translate("serverFull", null));
       }
     }
   }
