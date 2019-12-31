@@ -11,6 +11,9 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerListPingEvent;
@@ -22,15 +25,18 @@ import tc.oc.pgm.map.Contributor;
 import tc.oc.pgm.map.MapInfo;
 import tc.oc.pgm.map.PGMMap;
 import tc.oc.pgm.rotation.PGMMapOrder;
+import tc.oc.util.logging.ClassLogger;
 
 public class ServerPingDataListener implements Listener {
 
   private final MatchManager matchManager;
+  private final Logger logger;
   private final AtomicBoolean ready;
   private final LoadingCache<Match, JsonObject> matchCache;
 
-  public ServerPingDataListener(MatchManager matchManager) {
+  public ServerPingDataListener(MatchManager matchManager, Logger parentLogger) {
     this.matchManager = checkNotNull(matchManager);
+    this.logger = ClassLogger.get(parentLogger, ServerPingDataListener.class);
     this.ready = new AtomicBoolean();
     this.matchCache =
         CacheBuilder.newBuilder()
@@ -57,10 +63,11 @@ public class ServerPingDataListener implements Listener {
 
     JsonObject root = event.getOrCreateExtra(PGM.get());
     for (Match match : this.matchManager.getMatches()) {
+      String matchId = match.getId();
       try {
-        root.add(match.getId(), this.matchCache.get(match));
+        root.add(matchId, this.matchCache.get(match));
       } catch (ExecutionException e) {
-        throw new RuntimeException(e);
+        this.logger.log(Level.SEVERE, "Could not cache match " + matchId, e);
       }
     }
   }

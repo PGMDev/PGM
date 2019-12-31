@@ -299,7 +299,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     registerEvents(matchNameRenderer);
     nameRenderer = new CachingNameRenderer(matchNameRenderer);
 
-    registerListeners();
+    registerListeners(logger);
     registerCommands();
 
     // Wait until the next tick so that all other plugins are finished.
@@ -421,7 +421,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     return factory;
   }
 
-  private void registerListeners() {
+  private void registerListeners(Logger logger) {
     registerEvents(new GeneralizingListener(this));
     new BlockTransformListener(this).registerEvents();
 
@@ -434,7 +434,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     registerEvents(new WorldProblemListener(this));
     registerEvents(new MatchAnnouncer());
     registerEvents(new MotdListener());
-    registerEvents(new ServerPingDataListener(matchManager));
+    registerEvents(new ServerPingDataListener(matchManager, logger));
   }
 
   private class CommandModule extends AbstractModule {
