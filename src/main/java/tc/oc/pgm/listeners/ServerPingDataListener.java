@@ -5,10 +5,11 @@ import static com.google.common.base.Preconditions.*;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerListPingEvent;
-import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
@@ -21,20 +22,21 @@ import tc.oc.pgm.rotation.PGMMapOrder;
 public class ServerPingDataListener implements Listener {
 
   private final MatchManager matchManager;
-  private boolean ready;
+  private final AtomicBoolean ready;
 
   public ServerPingDataListener(MatchManager matchManager) {
     this.matchManager = checkNotNull(matchManager);
+    this.ready = new AtomicBoolean();
   }
 
   @EventHandler
   public void onMatchLoad(MatchLoadEvent event) {
-    ready = true;
+    ready.compareAndSet(false, true);
   }
 
   @EventHandler
   public void onServerListPing(ServerListPingEvent event) {
-    if (!Config.ServerPingData.enabled() || !ready) return;
+    if (!ready.get()) return;
 
     JsonObject root = event.getOrCreateExtra(PGM.get());
     for (Match match : this.matchManager.getMatches()) {
