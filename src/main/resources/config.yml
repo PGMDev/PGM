@@ -92,6 +92,9 @@ motd:
     running: green                                       # Color designating a match which is currently running
     finished: red                                        # Color designating a match which has ended
 
+server-ping-data:
+  enabled: true
+
 groups:
   admin:
     op: true

@@ -274,6 +274,12 @@ public class Config {
     }
   }
 
+  public static class ServerPingData {
+    public static boolean enabled() {
+      return getConfiguration().getBoolean("server-ping-data.enabled", true);
+    }
+  }
+
   public static class Prefixes implements Listener {
     private Map<String, Prefix> prefixes = new TreeMap<String, Prefix>();
 

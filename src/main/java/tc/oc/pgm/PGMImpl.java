@@ -83,6 +83,7 @@ import tc.oc.pgm.listeners.LongRangeTNTListener;
 import tc.oc.pgm.listeners.MatchAnnouncer;
 import tc.oc.pgm.listeners.MotdListener;
 import tc.oc.pgm.listeners.PGMListener;
+import tc.oc.pgm.listeners.ServerPingDataListener;
 import tc.oc.pgm.listeners.WorldProblemListener;
 import tc.oc.pgm.map.MapLibrary;
 import tc.oc.pgm.map.MapLoader;
@@ -433,6 +434,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     registerEvents(new WorldProblemListener(this));
     registerEvents(new MatchAnnouncer());
     registerEvents(new MotdListener());
+    registerEvents(new ServerPingDataListener(matchManager));
   }
 
   private class CommandModule extends AbstractModule {
