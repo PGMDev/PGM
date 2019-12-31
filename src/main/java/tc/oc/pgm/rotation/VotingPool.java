@@ -1,6 +1,7 @@
 package tc.oc.pgm.rotation;
 
 import app.ashcon.intake.CommandException;
+import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.stream.Collectors;
 import net.md_5.bungee.api.ChatColor;
@@ -11,6 +12,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.map.PGMMap;
@@ -70,8 +72,8 @@ public class VotingPool extends MapPool {
   @Override
   public void matchEnded(Match match) {
     if (manager.getOverriderMap() != null) return;
-    currentPoll = new Poll();
-    match.getPlayers().forEach(currentPoll::sendMessage);
+    currentPoll = new Poll(match);
+    match.getPlayers().forEach(p -> currentPoll.sendMessage(p, false));
   }
 
   /** Represents a polling process, with a set of options. */
@@ -79,9 +81,11 @@ public class VotingPool extends MapPool {
     private static final String SYMBOL_IGNORE = "\u274c"; // ❌
     private static final String SYMBOL_VOTED = "\u2714"; // ✔
 
+    private final WeakReference<Match> match;
     private final Map<PGMMap, Set<UUID>> votes = new HashMap<>();
 
-    Poll() {
+    Poll(Match match) {
+      this.match = new WeakReference<>(match);
       // Sorting beforehand, saves future key remaps, as bigger values are placed at the end
       List<PGMMap> sortedDist =
           mapScores.entrySet().stream()
@@ -122,20 +126,21 @@ public class VotingPool extends MapPool {
       return currWeight;
     }
 
-    public void sendMessage(MatchPlayer viewer) {
+    public void sendMessage(MatchPlayer viewer, boolean showVotes) {
       for (PGMMap pgmMap : votes.keySet()) {
-        viewer.sendMessage(getMapComponent(viewer, pgmMap));
+        viewer.sendMessage(getMapComponent(viewer, pgmMap, showVotes));
       }
     }
 
-    private Component getMapComponent(MatchPlayer viewer, PGMMap map) {
+    private Component getMapComponent(MatchPlayer viewer, PGMMap map, boolean showVotes) {
       boolean voted = votes.get(map).contains(viewer.getId());
       return new PersonalizedText(
               new PersonalizedText("["),
               new PersonalizedText(
                   voted ? SYMBOL_VOTED : SYMBOL_IGNORE,
                   voted ? ChatColor.GREEN : ChatColor.DARK_RED),
-              new PersonalizedText(" " + countVotes(votes.get(map)), ChatColor.YELLOW),
+              new PersonalizedText(
+                  showVotes ? " " + countVotes(votes.get(map)) : "", ChatColor.YELLOW),
               new PersonalizedText("] "),
               new PersonalizedText(map.getInfo().getShortDescription(viewer.getBukkit()) + " ")
               // PGM isn't reading this from xml currently
@@ -184,7 +189,7 @@ public class VotingPool extends MapPool {
       return uuids.stream()
           .map(Bukkit::getPlayer)
           // Count disconnected players as 1, can't test for their perms
-          .mapToInt(p -> p == null || !p.hasPermission("pgm.premium") ? 1 : 2)
+          .mapToInt(p -> p == null || !p.hasPermission(Permissions.PREMIUM) ? 1 : 2)
           .sum();
     }
 
@@ -196,6 +201,10 @@ public class VotingPool extends MapPool {
     PGMMap finishVote() {
       PGMMap picked = getMostVotedMap();
       if (picked == null) picked = getRandom();
+      Match match = this.match.get();
+      if (match != null) {
+        match.getPlayers().forEach(p -> currentPoll.sendMessage(p, true));
+      }
 
       // Amount of players that voted, smaller or equal to amount of votes
       double voters = votes.values().stream().flatMap(Collection::stream).distinct().count();

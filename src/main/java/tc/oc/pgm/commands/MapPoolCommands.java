@@ -181,7 +181,7 @@ public class MapPoolCommands {
             voteResult ? "command.pool.vote.voted" : "command.pool.vote.removedVote",
             map.getName());
     sender.sendMessage(new PersonalizedText(tr, voteResult ? ChatColor.GREEN : ChatColor.RED));
-    poll.sendMessage(player);
+    poll.sendMessage(player, false);
   }
 
   private static MapPoolManager getMapPoolManager(CommandSender sender, MatchManager matchManager)
