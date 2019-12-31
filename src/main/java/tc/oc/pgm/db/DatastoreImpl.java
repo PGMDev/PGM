@@ -98,44 +98,47 @@ public class DatastoreImpl implements Datastore {
   }
 
   private void initUsername() throws SQLException {
-    final Statement statement = getConnection().createStatement();
+    try (final Statement statement = getConnection().createStatement()) {
 
-    statement.addBatch(
-        "CREATE TABLE IF NOT EXISTS usernames (id VARCHAR(36) PRIMARY KEY, name VARCHAR(16), expires DATE)");
-    statement.addBatch(
-        "DELETE FROM usernames WHERE name IS NULL OR expires IS NULL OR DATE('now', 'localtime') - expires >= 60 * 60 * 24 * 30");
+      statement.addBatch(
+          "CREATE TABLE IF NOT EXISTS usernames (id VARCHAR(36) PRIMARY KEY, name VARCHAR(16), expires DATE)");
+      statement.addBatch(
+          "DELETE FROM usernames WHERE name IS NULL OR expires IS NULL OR DATE('now', 'localtime') - expires >= 60 * 60 * 24 * 30");
 
-    statement.executeBatch();
+      statement.executeBatch();
+    }
   }
 
   private Username selectUsername(UUID id) throws SQLException {
-    final PreparedStatement statement =
+    try (final PreparedStatement statement =
         getConnection()
             .prepareStatement(
-                "SELECT name, strftime('%s', expires) FROM usernames WHERE id = ? LIMIT 1");
-    statement.setString(1, checkNotNull(id).toString());
+                "SELECT name, strftime('%s', expires) FROM usernames WHERE id = ? LIMIT 1")) {
+      statement.setString(1, checkNotNull(id).toString());
 
-    final ResultSet result = statement.executeQuery();
-    if (result.next()) {
-      final String name = result.getString(1);
-      final Date expires = new Date(result.getLong(2) * 1000);
-      result.close();
+      final ResultSet result = statement.executeQuery();
+      if (result.next()) {
+        final String name = result.getString(1);
+        final Date expires = new Date(result.getLong(2) * 1000);
+        result.close();
 
-      return new UsernameImpl(id, name, expires);
+        return new UsernameImpl(id, name, expires);
+      }
     }
 
     return null;
   }
 
   private void updateUsername(UUID id, @Nullable String name) throws SQLException {
-    final PreparedStatement statement =
+    try (final PreparedStatement statement =
         getConnection()
             .prepareStatement(
-                "INSERT OR REPLACE INTO usernames VALUES (?, ?, DATE('now', '+7 day', 'localtime'))");
-    statement.setString(1, checkNotNull(id).toString());
-    statement.setString(2, name);
+                "INSERT OR REPLACE INTO usernames VALUES (?, ?, DATE('now', '+7 day', 'localtime'))")) {
+      statement.setString(1, checkNotNull(id).toString());
+      statement.setString(2, name);
 
-    statement.executeUpdate();
+      statement.executeUpdate();
+    }
   }
 
   @Override
@@ -199,52 +202,57 @@ public class DatastoreImpl implements Datastore {
   }
 
   private void initSettings() throws SQLException {
-    final Statement statement = getConnection().createStatement();
+    try (final Statement statement = getConnection().createStatement()) {
 
-    statement.addBatch(
-        "CREATE TABLE IF NOT EXISTS settings (id VARCHAR(36) PRIMARY KEY, bit INTEGER)");
-    statement.addBatch("DELETE FROM settings WHERE bit <= 0");
+      statement.addBatch(
+          "CREATE TABLE IF NOT EXISTS settings (id VARCHAR(36) PRIMARY KEY, bit INTEGER)");
+      statement.addBatch("DELETE FROM settings WHERE bit <= 0");
 
-    statement.executeBatch();
+      statement.executeBatch();
+    }
   }
 
   private int selectSettings(UUID id) throws SQLException {
-    final PreparedStatement statement =
-        getConnection().prepareStatement("SELECT bit FROM settings WHERE id = ? LIMIT 1");
-    statement.setString(1, checkNotNull(id).toString());
+    try (final PreparedStatement statement =
+        getConnection().prepareStatement("SELECT bit FROM settings WHERE id = ? LIMIT 1")) {
+      statement.setString(1, checkNotNull(id).toString());
 
-    int bit = 0;
-    final ResultSet result = statement.executeQuery();
-    if (result.next()) {
-      bit = result.getInt(1);
-      result.close();
+      int bit = 0;
+      final ResultSet result = statement.executeQuery();
+      if (result.next()) {
+        bit = result.getInt(1);
+        result.close();
+      }
+
+      return bit;
     }
-
-    return bit;
   }
 
   private void insertSettings(UUID id, int bit) throws SQLException {
-    final PreparedStatement statement =
-        getConnection().prepareStatement("INSERT OR REPLACE INTO settings VALUES (?, ?)");
-    statement.setString(1, checkNotNull(id).toString());
-    statement.setInt(2, bit);
+    try (final PreparedStatement statement =
+        getConnection().prepareStatement("INSERT OR REPLACE INTO settings VALUES (?, ?)")) {
+      statement.setString(1, checkNotNull(id).toString());
+      statement.setInt(2, bit);
 
-    statement.executeUpdate();
+      statement.executeUpdate();
+    }
   }
 
   private void updateSettings(UUID id, SettingKey key, SettingValue value) throws SQLException {
-    final PreparedStatement statement =
-        getConnection().prepareStatement("UPDATE settings SET bit = ((bit & ~?) | ?) WHERE id = ?");
+    try (final PreparedStatement statement =
+        getConnection()
+            .prepareStatement("UPDATE settings SET bit = ((bit & ~?) | ?) WHERE id = ?")) {
 
-    statement.setInt(2, bitSettings(value));
-    statement.setString(3, checkNotNull(id).toString());
+      statement.setInt(2, bitSettings(value));
+      statement.setString(3, checkNotNull(id).toString());
 
-    for (SettingValue unset : key.getPossibleValues()) {
-      statement.setInt(1, bitSettings(unset));
-      statement.addBatch();
+      for (SettingValue unset : key.getPossibleValues()) {
+        statement.setInt(1, bitSettings(unset));
+        statement.addBatch();
+      }
+
+      statement.executeBatch();
     }
-
-    statement.executeBatch();
   }
 
   private Connection getConnection() {
