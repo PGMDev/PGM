@@ -2,11 +2,15 @@ package tc.oc.pgm.listeners;
 
 import static com.google.common.base.Preconditions.*;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerListPingEvent;
@@ -23,10 +27,23 @@ public class ServerPingDataListener implements Listener {
 
   private final MatchManager matchManager;
   private final AtomicBoolean ready;
+  private final LoadingCache<Match, JsonObject> matchCache;
 
   public ServerPingDataListener(MatchManager matchManager) {
     this.matchManager = checkNotNull(matchManager);
     this.ready = new AtomicBoolean();
+    this.matchCache =
+        CacheBuilder.newBuilder()
+            .expireAfterWrite(1L, TimeUnit.SECONDS)
+            .build(
+                new CacheLoader<Match, JsonObject>() {
+                  @Override
+                  public JsonObject load(Match match) throws Exception {
+                    JsonObject jsonObject = new JsonObject();
+                    serializeMatch(match, jsonObject);
+                    return jsonObject;
+                  }
+                });
   }
 
   @EventHandler
@@ -40,9 +57,11 @@ public class ServerPingDataListener implements Listener {
 
     JsonObject root = event.getOrCreateExtra(PGM.get());
     for (Match match : this.matchManager.getMatches()) {
-      JsonObject matchObject = new JsonObject();
-      this.serializeMatch(match, matchObject);
-      root.add(match.getId(), matchObject);
+      try {
+        root.add(match.getId(), this.matchCache.get(match));
+      } catch (ExecutionException e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 
