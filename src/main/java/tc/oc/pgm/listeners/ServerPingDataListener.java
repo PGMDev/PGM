@@ -67,7 +67,7 @@ public class ServerPingDataListener implements Listener {
       try {
         root.add(matchId, this.matchCache.get(match));
       } catch (ExecutionException e) {
-        this.logger.log(Level.SEVERE, "Could not cache match " + matchId, e);
+        this.logger.log(Level.SEVERE, "Could not load server ping data for match: " + matchId, e);
       }
     }
   }
