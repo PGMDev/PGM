@@ -542,6 +542,11 @@ public class ComponentUtils {
     return String.valueOf(chars);
   }
 
+  public static String paginate(String title, int page, int pages) {
+    title += ChatColor.DARK_AQUA + " (" + ChatColor.AQUA + page + ChatColor.DARK_AQUA;
+    return title + " of " + ChatColor.AQUA + pages + ChatColor.DARK_AQUA + ")";
+  }
+
   public static net.md_5.bungee.api.ChatColor convert(Enum<?> color) {
     return net.md_5.bungee.api.ChatColor.valueOf(color.name());
   }

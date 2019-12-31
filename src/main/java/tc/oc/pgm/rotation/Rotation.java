@@ -1,57 +1,20 @@
 package tc.oc.pgm.rotation;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.map.MapLibrary;
 import tc.oc.pgm.map.PGMMap;
 
-/** Rotation of maps, a type of {@link PGMMapOrder} */
-public class Rotation implements PGMMapOrder, Comparable<Rotation> {
-  private final RotationManager manager;
-  private final ConfigurationSection configSection;
-
-  private final String name;
-  private final boolean enabled;
-  private final List<PGMMap> maps;
-  private final int players;
+public class Rotation extends MapPool {
 
   private int position;
 
-  Rotation(RotationManager manager, ConfigurationSection configSection, String name) {
-    this.manager = manager;
-    this.configSection = configSection;
-    this.name = name;
-    this.enabled = configSection.getBoolean("enabled");
-    this.players = configSection.getInt("players");
+  public Rotation(MapPoolManager manager, ConfigurationSection section, String name) {
+    super(manager, section, name);
 
-    MapLibrary library = PGM.get().getMapLibrary();
-    List<PGMMap> mapList =
-        configSection.getStringList("maps").stream()
-            .map(
-                mapName -> {
-                  Optional<PGMMap> optMap = library.getMapByNameOrId(mapName);
-                  if (optMap.isPresent()) return optMap.get();
-                  PGM.get()
-                      .getLogger()
-                      .warning(
-                          "[Rotation] ["
-                              + name
-                              + "] "
-                              + mapName
-                              + " not found in map repo. Ignoring...");
-                  return null;
-                })
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-    this.maps = Collections.unmodifiableList(mapList);
-
-    Optional<PGMMap> nextMap = library.getMapByNameOrId(configSection.getString("next_map"));
+    Optional<PGMMap> nextMap =
+        PGM.get().getMapLibrary().getMapByNameOrId(section.getString("next_map"));
     if (nextMap.isPresent()) this.position = getMapPosition(nextMap.get());
     else {
       PGM.get()
@@ -60,22 +23,6 @@ public class Rotation implements PGMMapOrder, Comparable<Rotation> {
               Level.SEVERE,
               "Could not resolve next map from rotations. Resuming on initial position: 0");
     }
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public boolean isEnabled() {
-    return enabled;
-  }
-
-  public List<PGMMap> getMaps() {
-    return Collections.unmodifiableList(maps);
-  }
-
-  public int getPlayers() {
-    return players;
   }
 
   public void setPosition(int position) {
@@ -125,7 +72,7 @@ public class Rotation implements PGMMapOrder, Comparable<Rotation> {
   public void advance(int positions) {
     position = (position + positions) % maps.size();
     configSection.set("next_map", getMapInPosition(position).getName());
-    manager.saveRotations();
+    manager.saveMapPools();
   }
 
   @Override
@@ -138,13 +85,5 @@ public class Rotation implements PGMMapOrder, Comparable<Rotation> {
   @Override
   public PGMMap getNextMap() {
     return maps.get(position);
-  }
-
-  @Override
-  public void setNextMap(PGMMap map) {}
-
-  @Override
-  public int compareTo(Rotation o) {
-    return Integer.compare(this.players, o.players);
   }
 }

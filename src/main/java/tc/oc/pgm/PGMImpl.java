@@ -40,23 +40,7 @@ import tc.oc.pgm.blockdrops.BlockDropsModule;
 import tc.oc.pgm.bossbar.BossBarModule;
 import tc.oc.pgm.broadcast.BroadcastModule;
 import tc.oc.pgm.classes.ClassModule;
-import tc.oc.pgm.commands.AdminCommands;
-import tc.oc.pgm.commands.ClassCommands;
-import tc.oc.pgm.commands.CycleCommands;
-import tc.oc.pgm.commands.DestroyableCommands;
-import tc.oc.pgm.commands.FreeForAllCommands;
-import tc.oc.pgm.commands.GoalCommands;
-import tc.oc.pgm.commands.InventoryCommands;
-import tc.oc.pgm.commands.JoinCommands;
-import tc.oc.pgm.commands.MapCommands;
-import tc.oc.pgm.commands.MapDevelopmentCommands;
-import tc.oc.pgm.commands.MatchCommands;
-import tc.oc.pgm.commands.ModeCommands;
-import tc.oc.pgm.commands.RotationCommands;
-import tc.oc.pgm.commands.SettingCommands;
-import tc.oc.pgm.commands.StartCommands;
-import tc.oc.pgm.commands.TeamCommands;
-import tc.oc.pgm.commands.TimeLimitCommands;
+import tc.oc.pgm.commands.*;
 import tc.oc.pgm.commands.provider.AudienceProvider;
 import tc.oc.pgm.commands.provider.DurationProvider;
 import tc.oc.pgm.commands.provider.MatchPlayerProvider;
@@ -136,8 +120,8 @@ import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.renewable.RenewableModule;
 import tc.oc.pgm.restart.RestartListener;
 import tc.oc.pgm.restart.ShouldRestartTask;
+import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.RandomPGMMapOrder;
-import tc.oc.pgm.rotation.RotationManager;
 import tc.oc.pgm.score.ScoreModule;
 import tc.oc.pgm.scoreboard.ScoreboardModule;
 import tc.oc.pgm.scoreboard.SidebarModule;
@@ -284,9 +268,9 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     try {
       matchManager = new MatchManagerImpl(server, mapLibrary, mapLoader);
 
-      if (Config.Rotations.areEnabled()) {
+      if (Config.MapPools.areEnabled()) {
         matchManager.setMapOrder(
-            new RotationManager(logger, new File(getDataFolder(), Config.Rotations.getPath())));
+            new MapPoolManager(logger, new File(getDataFolder(), Config.MapPools.getPath())));
       } else {
         matchManager.setMapOrder(new RandomPGMMapOrder(matchManager));
       }
@@ -500,7 +484,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     node.registerCommands(new MatchCommands());
     node.registerNode("mode", "modes").registerCommands(new ModeCommands());
     node.registerCommands(new TimeLimitCommands());
-    node.registerCommands(new RotationCommands());
+    node.registerCommands(new MapPoolCommands());
     node.registerCommands(new SettingCommands());
 
     new BukkitIntake(this, graph).register();
