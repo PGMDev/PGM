@@ -79,7 +79,7 @@ public class MapPoolManager implements PGMMapOrder {
     return mapPools;
   }
 
-  private void updateActiveMapPool(MapPool mapPool) {
+  private void updateActiveMapPool(MapPool mapPool, Match match) {
     if (mapPool == activeMapPool) return;
 
     setActiveMapPool(mapPool);
@@ -87,7 +87,7 @@ public class MapPoolManager implements PGMMapOrder {
     mapPoolFileConfig.set("last_active", activeMapPool.getName());
     saveMapPools();
 
-    Bukkit.broadcastMessage(
+    match.sendMessage(
         ChatColor.WHITE
             + "["
             + ChatColor.GOLD
@@ -150,7 +150,7 @@ public class MapPoolManager implements PGMMapOrder {
     mapPools.stream()
         .filter(rot -> activePlayers >= rot.getPlayers())
         .max(MapPool::compareTo)
-        .ifPresent(this::updateActiveMapPool);
+        .ifPresent(pool -> updateActiveMapPool(pool, match));
 
     activeMapPool.matchEnded(match);
   }
