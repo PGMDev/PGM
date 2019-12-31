@@ -35,7 +35,7 @@ public class ServerPingDataListener implements Listener {
 
   public ServerPingDataListener(MatchManager matchManager, Logger parentLogger) {
     this.matchManager = checkNotNull(matchManager);
-    this.logger = ClassLogger.get(parentLogger, ServerPingDataListener.class);
+    this.logger = ClassLogger.get(checkNotNull(parentLogger), ServerPingDataListener.class);
     this.ready = new AtomicBoolean();
     this.matchCache =
         CacheBuilder.newBuilder()
