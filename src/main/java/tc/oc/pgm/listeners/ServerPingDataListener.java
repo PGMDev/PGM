@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerListPingEvent;
@@ -40,6 +39,7 @@ public class ServerPingDataListener implements Listener {
     this.ready = new AtomicBoolean();
     this.matchCache =
         CacheBuilder.newBuilder()
+            .weakKeys()
             .expireAfterWrite(5L, TimeUnit.SECONDS)
             .build(
                 new CacheLoader<Match, JsonObject>() {
