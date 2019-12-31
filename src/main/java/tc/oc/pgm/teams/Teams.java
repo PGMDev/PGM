@@ -22,12 +22,16 @@ public class Teams {
    * up by name.
    */
   public static TeamFactory getTeam(String team, MapModuleContext context) {
+    TeamFactory teamFactory = context.features().get(team, TeamFactory.class);
     if (context.getProto().isOlderThan(FILTER_FEATURES)) {
       TeamModule teams = context.getModule(TeamModule.class);
-      return teams == null ? null : teams.getTeamByName(team);
-    } else {
-      return context.features().get(team, TeamFactory.class);
+      if (teams != null) {
+        TeamFactory teamByName = teams.getTeamByName(team);
+        if (teamByName != null) teamFactory = teamByName;
+      }
     }
+
+    return teamFactory;
   }
 
   public static FeatureReference<TeamFactory> getTeamRef(Node node, MapModuleContext context)
