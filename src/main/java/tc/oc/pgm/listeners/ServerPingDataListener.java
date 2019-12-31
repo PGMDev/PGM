@@ -34,7 +34,7 @@ public class ServerPingDataListener implements Listener {
     this.ready = new AtomicBoolean();
     this.matchCache =
         CacheBuilder.newBuilder()
-            .expireAfterWrite(1L, TimeUnit.SECONDS)
+            .expireAfterWrite(5L, TimeUnit.SECONDS)
             .build(
                 new CacheLoader<Match, JsonObject>() {
                   @Override
