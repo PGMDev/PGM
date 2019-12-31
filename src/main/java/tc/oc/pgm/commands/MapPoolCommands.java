@@ -10,6 +10,7 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.component.types.PersonalizedText;
+import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
@@ -21,6 +22,7 @@ import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.Rotation;
 import tc.oc.pgm.rotation.VotingPool;
 import tc.oc.pgm.util.PrettyPaginatedResult;
+import tc.oc.util.components.ComponentUtils;
 
 public class MapPoolCommands {
   @Command(
@@ -46,7 +48,7 @@ public class MapPoolCommands {
 
     if (mapPool == null) {
       sender.sendMessage(
-          ChatColor.RED + AllTranslations.get().translate("command.rotation.noRotation", sender));
+          ChatColor.RED + AllTranslations.get().translate("command.pools.noPoolMatch", sender));
       return;
     }
     List<PGMMap> maps = mapPool.getMaps();
@@ -54,32 +56,14 @@ public class MapPoolCommands {
     int resultsPerPage = 8;
     int pages = (maps.size() + resultsPerPage - 1) / resultsPerPage;
 
-    String listHeader =
-        ChatColor.BLUE.toString()
-            + ChatColor.STRIKETHROUGH
-            + "-----------"
-            + ChatColor.RESET
-            + " "
-            + AllTranslations.get().translate("command.rotation.currentRotation.title", sender)
-            + ChatColor.DARK_AQUA
-            + " ("
-            + ChatColor.AQUA
-            + mapPool.getName()
-            + ChatColor.DARK_AQUA
-            + ")"
-            + " ("
-            + ChatColor.AQUA
-            + page
-            + ChatColor.DARK_AQUA
-            + " of "
-            + ChatColor.AQUA
-            + pages
-            + ChatColor.DARK_AQUA
-            + ") "
-            + ChatColor.translateAlternateColorCodes('&', "&9&m-----------");
+    String title = AllTranslations.get().translate("command.pools.mapPool.title", sender);
+    title +=
+        ChatColor.DARK_AQUA + " (" + ChatColor.AQUA + mapPool.getName() + ChatColor.DARK_AQUA + ")";
+    title = ComponentUtils.paginate(title, page, pages);
+    title = ComponentUtils.horizontalLineHeading(title, ChatColor.BLUE, 250);
     int nextPos = mapPool instanceof Rotation ? ((Rotation) mapPool).getNextPosition() : -1;
 
-    new PrettyPaginatedResult<PGMMap>(listHeader, resultsPerPage) {
+    new PrettyPaginatedResult<PGMMap>(title, resultsPerPage) {
       @Override
       public String format(PGMMap map, int index) {
         index++;
@@ -103,33 +87,18 @@ public class MapPoolCommands {
     List<MapPool> mapPools = mapPoolManager.getMapPools();
     if (mapPools.isEmpty()) {
       sender.sendMessage(
-          ChatColor.RED + AllTranslations.get().translate("command.rotation.noRotations", sender));
+          ChatColor.RED + AllTranslations.get().translate("command.pools.noMapPools", sender));
       return;
     }
 
     int resultsPerPage = 8;
     int pages = (mapPools.size() + resultsPerPage - 1) / resultsPerPage;
 
-    String listHeader =
-        ChatColor.BLUE.toString()
-            + ChatColor.STRIKETHROUGH
-            + "-----------"
-            + ChatColor.RESET
-            + " "
-            + AllTranslations.get().translate("command.rotation.rotationList.title", sender)
-            + ChatColor.DARK_AQUA
-            + " ("
-            + ChatColor.AQUA
-            + page
-            + ChatColor.DARK_AQUA
-            + " of "
-            + ChatColor.AQUA
-            + pages
-            + ChatColor.DARK_AQUA
-            + ") "
-            + ChatColor.translateAlternateColorCodes('&', "&9&m-----------");
+    String title = AllTranslations.get().translate("command.pools.mapPoolList.title", sender);
+    title = ComponentUtils.paginate(title, page, pages);
+    title = ComponentUtils.horizontalLineHeading(title, ChatColor.BLUE, 250);
 
-    new PrettyPaginatedResult<MapPool>(listHeader, resultsPerPage) {
+    new PrettyPaginatedResult<MapPool>(title, resultsPerPage) {
       @Override
       public String format(MapPool mapPool, int index) {
         String arrow =
@@ -162,15 +131,14 @@ public class MapPoolCommands {
 
     if (positions < 0) {
       sender.sendMessage(
-          ChatColor.RED
-              + AllTranslations.get().translate("command.rotation.skip.noNegative", sender));
+          ChatColor.RED + AllTranslations.get().translate("command.pools.skip.noNegative", sender));
       return;
     }
 
     MapPool pool = getMapPoolManager(sender, matchManager).getActiveMapPool();
     if (!(pool instanceof Rotation)) {
       sender.sendMessage(
-          ChatColor.RED + AllTranslations.get().translate("command.rotation.noRotation", sender));
+          ChatColor.RED + AllTranslations.get().translate("command.pools.noRotation", sender));
       return;
     }
 
@@ -190,29 +158,29 @@ public class MapPoolCommands {
             + ChatColor.GREEN
             + AllTranslations.get()
                 .translate(
-                    "command.rotation.skip.message",
+                    "command.pools.skip.message",
                     sender,
                     (ChatColor.AQUA.toString() + positions + ChatColor.GREEN)));
   }
 
   @Command(aliases = "votenext", desc = "Vote for the next map to play", usage = "map")
-  public static void setNext(
+  public static void voteNext(
       MatchPlayer player, CommandSender sender, MatchManager matchManager, @Text PGMMap map)
       throws CommandException {
     MapPool pool = getMapPoolManager(sender, matchManager).getActiveMapPool();
     VotingPool.Poll poll = pool instanceof VotingPool ? ((VotingPool) pool).getCurrentPoll() : null;
     if (poll == null) {
       sender.sendMessage(
-          ChatColor.RED + AllTranslations.get().translate("command.pool.noVote", sender));
+          ChatColor.RED + AllTranslations.get().translate("command.pool.vote.noVote", sender));
       return;
     }
-    // FIXME: messages not translated
-    if (poll.toggleVote(map, ((Player) sender).getUniqueId())) {
-      sender.sendMessage(new PersonalizedText("Voted for " + map.getName(), ChatColor.GREEN));
-    } else {
-      sender.sendMessage(
-          new PersonalizedText("Removed your vote for " + map.getName(), ChatColor.RED));
-    }
+    boolean voteResult = poll.toggleVote(map, ((Player) sender).getUniqueId());
+
+    PersonalizedTranslatable tr =
+        new PersonalizedTranslatable(
+            voteResult ? "command.pool.vote.voted" : "command.pool.vote.removedVote",
+            map.getName());
+    sender.sendMessage(new PersonalizedText(tr, voteResult ? ChatColor.GREEN : ChatColor.RED));
     poll.sendMessage(player);
   }
 
@@ -222,6 +190,6 @@ public class MapPoolCommands {
       return (MapPoolManager) matchManager.getMapOrder();
 
     throw new CommandException(
-        AllTranslations.get().translate("command.rotation.rotationsDisabled", sender));
+        AllTranslations.get().translate("command.pools.mapPoolsDisabled", sender));
   }
 }

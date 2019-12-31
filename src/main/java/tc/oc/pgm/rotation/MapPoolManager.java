@@ -97,7 +97,7 @@ public class MapPoolManager implements PGMMapOrder {
             + ChatColor.GREEN
             + AllTranslations.get()
                 .translate(
-                    "rotations.rotationChange",
+                    "pools.poolChange",
                     Bukkit.getConsoleSender(),
                     (ChatColor.AQUA + mapPool.getName() + ChatColor.GREEN)));
   }

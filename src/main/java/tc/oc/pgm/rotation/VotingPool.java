@@ -2,9 +2,11 @@ package tc.oc.pgm.rotation;
 
 import app.ashcon.intake.CommandException;
 import java.util.*;
+import java.util.stream.Collectors;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
@@ -17,8 +19,10 @@ public class VotingPool extends MapPool {
 
   // Number of maps in the vote, unless not enough maps in pool
   private static final int MAX_VOTE_OPTIONS = 5;
+  // If maps were single voted, it would avg to this default
+  private static final double DEFAULT_WEIGHT = 1d / MAX_VOTE_OPTIONS;
 
-  private final double DEFAULT_WEIGHT;
+  // Amount of maps to display on vote
   private final int VOTE_SIZE;
   private final Map<PGMMap, Double> mapScores = new HashMap<>();
 
@@ -26,8 +30,7 @@ public class VotingPool extends MapPool {
 
   public VotingPool(MapPoolManager manager, ConfigurationSection section, String name) {
     super(manager, section, name);
-    DEFAULT_WEIGHT = 1d / maps.size();
-    VOTE_SIZE = Math.min(MAX_VOTE_OPTIONS, maps.size());
+    VOTE_SIZE = Math.min(MAX_VOTE_OPTIONS, maps.size() - 1);
 
     for (PGMMap map : maps) {
       mapScores.put(map, DEFAULT_WEIGHT);
@@ -50,6 +53,7 @@ public class VotingPool extends MapPool {
     PGMMap map = currentPoll.finishVote();
     currentPoll = null;
     tickScores();
+    mapScores.put(map, 0d);
     return map;
   }
 
@@ -78,12 +82,44 @@ public class VotingPool extends MapPool {
     private final Map<PGMMap, Set<UUID>> votes = new HashMap<>();
 
     Poll() {
-      // FIXME: currently just picks best 5 maps, instead of randomly pick 5 based on score.
-      mapScores.entrySet().stream()
-          .sorted(Comparator.comparingDouble(Map.Entry::getValue))
-          .map(Map.Entry::getKey)
-          .limit(VOTE_SIZE)
-          .forEach(map -> votes.put(map, new HashSet<>()));
+      // Sorting beforehand, saves future key remaps, as bigger values are placed at the end
+      List<PGMMap> sortedDist =
+          mapScores.entrySet().stream()
+              .sorted(Comparator.comparingDouble(Map.Entry::getValue))
+              .map(Map.Entry::getKey)
+              .collect(Collectors.toList());
+
+      NavigableMap<Double, PGMMap> cumulativeScores = new TreeMap<>();
+      double maxWeight = cummulativeMap(0, sortedDist, cumulativeScores);
+
+      for (int i = 0; i < VOTE_SIZE; i++) {
+        NavigableMap<Double, PGMMap> subMap =
+            cumulativeScores.tailMap(Math.random() * maxWeight, true);
+        Map.Entry<Double, PGMMap> selected = subMap.pollFirstEntry();
+        // Add map to votes
+        votes.put(selected.getValue(), new HashSet<>());
+        // No need to do replace logic after maps have been selected
+        if (votes.size() >= VOTE_SIZE) break;
+
+        // Remove map from pool, updating cumulative scores
+        double selectedWeight = mapScores.get(selected.getValue());
+        maxWeight -= selectedWeight;
+
+        NavigableMap<Double, PGMMap> temp = new TreeMap<>();
+        cummulativeMap(selected.getKey() - selectedWeight, subMap.values(), temp);
+
+        subMap.clear();
+        cumulativeScores.putAll(temp);
+      }
+    }
+
+    private double cummulativeMap(
+        double currWeight, Collection<PGMMap> maps, Map<Double, PGMMap> result) {
+      for (PGMMap map : maps) {
+        double score = mapScores.get(map);
+        if (score > 0) result.put(currWeight += mapScores.get(map), map);
+      }
+      return currWeight;
     }
 
     public void sendMessage(MatchPlayer viewer) {
@@ -99,16 +135,15 @@ public class VotingPool extends MapPool {
               new PersonalizedText(
                   voted ? SYMBOL_VOTED : SYMBOL_IGNORE,
                   voted ? ChatColor.GREEN : ChatColor.DARK_RED),
-              new PersonalizedText(" " + votes.get(map).size(), ChatColor.YELLOW),
+              new PersonalizedText(" " + countVotes(votes.get(map)), ChatColor.YELLOW),
               new PersonalizedText("] "),
               new PersonalizedText(map.getInfo().getShortDescription(viewer.getBukkit()) + " ")
-              // PGM doesn't have this info currently
+              // PGM isn't reading this from xml currently
               // new PersonalizedText(map.getInfo().getLocalizedGenre())
               )
           .hoverEvent(
               HoverEvent.Action.SHOW_TEXT,
-              // FIXME: translate
-              new PersonalizedTranslatable("Click to toggle vote").render(viewer.getBukkit()))
+              new PersonalizedTranslatable("command.pool.vote.hover").render(viewer.getBukkit()))
           .clickEvent(ClickEvent.Action.RUN_COMMAND, "/votenext " + map.getName());
     }
 
@@ -133,9 +168,24 @@ public class VotingPool extends MapPool {
     /** @return The map currently winning the vote, null if no vote is running. */
     private PGMMap getMostVotedMap() {
       return votes.entrySet().stream()
-          .max(Comparator.comparingInt(e -> e.getValue().size()))
+          .max(Comparator.comparingInt(e -> countVotes(e.getValue())))
           .map(Map.Entry::getKey)
           .orElse(null);
+    }
+
+    /**
+     * Count the amount of votes for a set of uuids. Players with the pgm.premium permission get
+     * double votes.
+     *
+     * @param uuids The players who voted
+     * @return The number of votes counted
+     */
+    private int countVotes(Set<UUID> uuids) {
+      return uuids.stream()
+          .map(Bukkit::getPlayer)
+          // Count disconnected players as 1, can't test for their perms
+          .mapToInt(p -> p == null || !p.hasPermission("pgm.premium") ? 1 : 2)
+          .sum();
     }
 
     /**
@@ -149,8 +199,7 @@ public class VotingPool extends MapPool {
 
       // Amount of players that voted, smaller or equal to amount of votes
       double voters = votes.values().stream().flatMap(Collection::stream).distinct().count();
-      // Could turn the votes.size into premium-dependent vote count.
-      votes.forEach((map, votes) -> mapScores.put(map, votes.size() / voters));
+      if (voters > 0) votes.forEach((map, votes) -> mapScores.put(map, votes.size() / voters));
       mapScores.put(picked, 0d);
       return picked;
     }
