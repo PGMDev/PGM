@@ -25,7 +25,7 @@ import tc.oc.pgm.ffa.FreeForAllModule;
 import tc.oc.pgm.flag.FlagModule;
 import tc.oc.pgm.hunger.HungerModule;
 import tc.oc.pgm.map.MapModule;
-import tc.oc.pgm.map.PGMMap;
+import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.modules.InfoModule;
 import tc.oc.pgm.modules.InternalModule;
 import tc.oc.pgm.modules.LaneModule;
@@ -76,7 +76,7 @@ public interface StandardMapTags {
   StandardMapTag WOOL = create("wool", WoolModule.class);
   StandardMapTag WORLDBORDER = create("worldborder", WorldBorderModule.class);
 
-  static StandardMapTag create(String name, Predicate<PGMMap> ifApplicable) {
+  static StandardMapTag create(String name, Predicate<MapModuleContext> ifApplicable) {
     checkNotNull(name);
     checkNotNull(ifApplicable);
     return new StandardMapTag(name, ifApplicable);
@@ -94,11 +94,10 @@ public interface StandardMapTags {
     Predicate<T> finalIfApplicable = ifApplicable != null ? ifApplicable : module -> true;
     return create(
         name,
-        map ->
-            map.getContext()
-                .map(context -> context.getModule(moduleClass))
-                .map(finalIfApplicable::test)
-                .orElse(false));
+        mapModuleContext -> {
+          T module = mapModuleContext.getModule(moduleClass);
+          return module != null && finalIfApplicable.test(module);
+        });
   }
 
   static void registerDefaults(Logger logger) {

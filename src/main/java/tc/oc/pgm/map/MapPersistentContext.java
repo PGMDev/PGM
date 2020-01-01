@@ -1,5 +1,8 @@
 package tc.oc.pgm.map;
 
+import static com.google.common.base.Preconditions.*;
+
+import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.util.SemanticVersion;
 
 /**
@@ -9,14 +12,17 @@ import tc.oc.util.SemanticVersion;
  * (like map name, authors, or player amount).
  */
 public class MapPersistentContext {
-  private SemanticVersion proto;
-  private MapInfo mapInfo;
-  private int maxPlayers;
+  private final SemanticVersion proto;
+  private final MapInfo mapInfo;
+  private final int maxPlayers;
+  private final MapTagSet mapTags;
 
-  public MapPersistentContext(SemanticVersion proto, MapInfo mapInfo, int maxPlayers) {
+  public MapPersistentContext(
+      SemanticVersion proto, MapInfo mapInfo, int maxPlayers, MapTagSet mapTags) {
     this.proto = proto;
-    this.mapInfo = mapInfo;
+    this.mapInfo = checkNotNull(mapInfo);
     this.maxPlayers = maxPlayers;
+    this.mapTags = MapTagSet.immutable(checkNotNull(mapTags));
   }
 
   public SemanticVersion getProto() {
@@ -29,5 +35,9 @@ public class MapPersistentContext {
 
   public MapInfo getInfo() {
     return mapInfo;
+  }
+
+  public MapTagSet getMapTags() {
+    return mapTags;
   }
 }

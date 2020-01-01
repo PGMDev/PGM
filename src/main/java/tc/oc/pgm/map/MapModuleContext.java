@@ -16,6 +16,9 @@ import tc.oc.pgm.filters.LegacyFilterParser;
 import tc.oc.pgm.kits.FeatureKitParser;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.kits.LegacyKitParser;
+import tc.oc.pgm.maptag.MapTagSet;
+import tc.oc.pgm.maptag.StandardMapTag;
+import tc.oc.pgm.maptag.StandardMapTags;
 import tc.oc.pgm.module.ModuleInfo;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.module.ModuleLoader;
@@ -75,7 +78,14 @@ public class MapModuleContext extends ModuleLoader<MapModule> {
       maxPlayers += ffam.getOptions().maxPlayers;
     }
 
-    return new MapPersistentContext(proto, info, maxPlayers);
+    MapTagSet mapTags = MapTagSet.mutable(info.mapTagSet);
+    for (StandardMapTag standardMapTag : StandardMapTags.REGISTRY.getAll()) {
+      if (standardMapTag.test(this)) {
+        mapTags.add(standardMapTag);
+      }
+    }
+
+    return new MapPersistentContext(proto, info, maxPlayers, mapTags);
   }
 
   public MapInfo getInfo() {
