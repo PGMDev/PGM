@@ -105,6 +105,7 @@ public interface Permissions {
               .putAll(DISABLE.getChildren())
               .put("worldedit.navigation.jumpto.tool", false)
               .put("worldedit.navigation.thru.tool", false)
+              .put("commandbook.teleport", false)
               .build());
   Permission OBSERVER =
       new Permission(
@@ -113,6 +114,7 @@ public interface Permissions {
           new ImmutableMap.Builder<String, Boolean>()
               .putAll(DISABLE.getChildren())
               .put("worldedit.navigation.*", true)
+              .put("commandbook.teleport", true)
               .build());
 
   static void register(PluginManager pluginManager) {
