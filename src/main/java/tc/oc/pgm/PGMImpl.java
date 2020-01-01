@@ -90,6 +90,7 @@ import tc.oc.pgm.map.MapLogHandler;
 import tc.oc.pgm.map.MapNotFoundException;
 import tc.oc.pgm.map.PGMMap;
 import tc.oc.pgm.map.ProtoVersions;
+import tc.oc.pgm.maptag.StandardMapTags;
 import tc.oc.pgm.match.MatchManagerImpl;
 import tc.oc.pgm.modes.ObjectiveModesModule;
 import tc.oc.pgm.module.ModuleRegistry;
@@ -264,6 +265,8 @@ public final class PGMImpl extends JavaPlugin implements PGM {
 
     MapLoader mapLoader = new MapLoader(this, logger, registry);
     mapLibrary = new MapLibrary(logger);
+
+    StandardMapTags.registerDefaults(logger);
 
     try {
       matchManager = new MatchManagerImpl(server, mapLibrary, mapLoader);

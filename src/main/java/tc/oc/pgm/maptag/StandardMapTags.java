@@ -6,10 +6,15 @@ import com.google.common.collect.ImmutableSet;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import tc.oc.pgm.api.registry.IRegistry;
+import tc.oc.pgm.api.registry.Registry;
 import tc.oc.pgm.blitz.BlitzModule;
 import tc.oc.pgm.classes.ClassModule;
 import tc.oc.pgm.controlpoint.ControlPointModule;
@@ -34,6 +39,8 @@ import tc.oc.pgm.wool.WoolModule;
 import tc.oc.pgm.worldborder.WorldBorderModule;
 
 public interface StandardMapTags {
+  IRegistry<StandardMapTag> REGISTRY = new Registry<>(new LinkedHashMap<>());
+
   StandardMapTag _4TEAMS = create("4teams", TeamModule.class, team -> team.getTeams().size() == 4);
   StandardMapTag AUTOTNT =
       create("autotnt", TNTModule.class, tnt -> tnt.getProperties().instantIgnite);
@@ -94,7 +101,20 @@ public interface StandardMapTags {
                 .orElse(false));
   }
 
+  static void registerDefaults(Logger logger) {
+    checkNotNull(logger);
+
+    try {
+      collect(StandardMapTags.class)
+          .forEach(standardMapTag -> REGISTRY.register(standardMapTag.getName(), standardMapTag));
+    } catch (IllegalAccessException e) {
+      logger.log(Level.SEVERE, "Could not register standard map tags.", e);
+    }
+  }
+
   static Set<StandardMapTag> collect(Class<?> clazz) throws IllegalAccessException {
+    checkNotNull(clazz);
+
     SortedSet<StandardMapTag> sorted = new TreeSet<>(Comparator.naturalOrder());
     for (Field field : clazz.getFields()) {
       int modifiers = field.getModifiers();
