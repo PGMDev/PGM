@@ -52,7 +52,7 @@ public class MapTagSet extends ForwardingSet<MapTag> {
   }
 
   public static MapTagSet immutable(Collection<MapTag> mapTags) {
-    return new Immutable(mapTags);
+    return mapTags instanceof Immutable ? (Immutable) mapTags : new Immutable(mapTags);
   }
 
   public static MapTagSet mutable() {
