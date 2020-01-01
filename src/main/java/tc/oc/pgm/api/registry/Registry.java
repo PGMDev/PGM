@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public class Registry<T> implements IRegistry<T> {
+
   private final Map<String, T> map;
 
   public Registry(Map<String, T> map) {

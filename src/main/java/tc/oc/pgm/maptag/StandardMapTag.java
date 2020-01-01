@@ -6,6 +6,7 @@ import java.util.function.Predicate;
 import tc.oc.pgm.map.MapModuleContext;
 
 public class StandardMapTag extends MapTag implements Predicate<MapModuleContext> {
+
   private final Predicate<MapModuleContext> ifApplicable;
 
   protected StandardMapTag(String name, Predicate<MapModuleContext> ifApplicable) {

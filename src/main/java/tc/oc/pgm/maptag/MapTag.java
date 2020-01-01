@@ -9,6 +9,7 @@ import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 
 public class MapTag implements Comparable<MapTag> {
+
   public static final Pattern PATTERN = Pattern.compile("^[a-z0-9_-]+$");
   public static final char SYMBOL = '#';
 

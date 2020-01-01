@@ -16,6 +16,7 @@ import tc.oc.component.types.PersonalizedText;
 import tc.oc.util.components.Components;
 
 public class MapTagSet extends ForwardingSet<MapTag> {
+
   private final Set<MapTag> set;
 
   private MapTagSet(Collection<MapTag> mapTags) {

@@ -13,6 +13,7 @@ import java.util.Set;
  */
 // TODO should be extended to NamespacedKeys
 public interface IRegistry<T> {
+
   /**
    * Does this registry contain the given ID?
    *

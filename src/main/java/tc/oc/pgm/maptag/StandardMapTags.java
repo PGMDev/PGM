@@ -39,6 +39,7 @@ import tc.oc.pgm.wool.WoolModule;
 import tc.oc.pgm.worldborder.WorldBorderModule;
 
 public interface StandardMapTags {
+
   IRegistry<StandardMapTag> REGISTRY = new Registry<>(new LinkedHashMap<>());
 
   StandardMapTag _4TEAMS = create("4teams", TeamModule.class, team -> team.getTeams().size() == 4);
