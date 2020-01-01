@@ -110,8 +110,7 @@ public interface StandardMapTags {
                 .orElse(false));
   }
 
-  static Set<StandardMapTag> collect(Class<? extends StandardMapTags> clazz)
-      throws IllegalAccessException {
+  static Set<StandardMapTag> collect(Class<?> clazz) throws IllegalAccessException {
     SortedSet<StandardMapTag> sorted = new TreeSet<>(Comparator.naturalOrder());
     for (Field field : clazz.getFields()) {
       int modifiers = field.getModifiers();
