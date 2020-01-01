@@ -13,6 +13,7 @@ import org.bukkit.command.CommandSender;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.AllTranslations;
+import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.util.TranslationUtils;
 import tc.oc.util.SemanticVersion;
 import tc.oc.util.StringUtils;
@@ -54,6 +55,9 @@ public class MapInfo {
   /** Whether friendly fire should be on or off. */
   public final boolean friendlyFire;
 
+  /** Custom map tags defined by the map author. */
+  public final MapTagSet mapTagSet;
+
   public MapInfo(
       SemanticVersion proto,
       @Nullable String slug,
@@ -66,7 +70,8 @@ public class MapInfo {
       List<String> rules,
       @Nullable Difficulty difficulty,
       Environment dimension,
-      boolean friendlyFire) {
+      boolean friendlyFire,
+      MapTagSet mapTagSet) {
 
     this.id = slug != null ? slug : name.toLowerCase().replaceAll("[^a-z\\d]", "_");
 
@@ -81,6 +86,7 @@ public class MapInfo {
     this.difficulty = difficulty;
     this.dimension = checkNotNull(dimension);
     this.friendlyFire = friendlyFire;
+    this.mapTagSet = checkNotNull(mapTagSet);
   }
 
   public String slug() {

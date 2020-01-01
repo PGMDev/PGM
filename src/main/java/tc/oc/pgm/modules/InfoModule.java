@@ -15,6 +15,8 @@ import tc.oc.pgm.map.MapInfo;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
+import tc.oc.pgm.maptag.MapTag;
+import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.SemanticVersion;
@@ -97,6 +99,8 @@ public class InfoModule extends MapModule {
         XMLUtils.parseBoolean(
             Node.fromLastChildOrAttr(root, "friendly-fire", "friendlyfire"), false);
 
+    MapTagSet mapTagSet = readMapTags(root);
+
     return new InfoModule(
         new MapInfo(
             context.getProto(),
@@ -110,7 +114,8 @@ public class InfoModule extends MapModule {
             rules,
             difficulty,
             dimension,
-            friendlyFire));
+            friendlyFire,
+            mapTagSet));
   }
 
   private static List<Contributor> readContributorList(Element root, String topLevelTag, String tag)
@@ -130,5 +135,24 @@ public class InfoModule extends MapModule {
       }
     }
     return contribs;
+  }
+
+  private static MapTagSet readMapTags(Element root) throws InvalidXMLException {
+    List<MapTag> mapTags = new ArrayList<>();
+    for (Element el : XMLUtils.flattenElements(root, "maptags", "maptag")) {
+      String name = el.getTextNormalize();
+      if (name.startsWith(Character.toString(MapTag.SYMBOL))) {
+        name = name.substring(1);
+      }
+
+      if (!MapTag.PATTERN.matcher(name).matches()) {
+        throw new InvalidXMLException(
+            MapTag.SYMBOL + name + " must match " + MapTag.PATTERN.pattern(), el);
+      }
+
+      mapTags.add(MapTag.forName(name));
+    }
+
+    return MapTagSet.immutable(mapTags);
   }
 }
