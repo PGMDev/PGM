@@ -44,6 +44,8 @@ import tc.oc.pgm.worldborder.WorldBorderModule;
 
 public interface StandardMapTags {
   StandardMapTag _4TEAMS = create("4teams", TeamModule.class, team -> team.getTeams().size() == 4);
+  StandardMapTag AUTOTNT =
+      create("autotnt", TNTModule.class, tnt -> tnt.getProperties().instantIgnite);
   StandardMapTag BLITZ = create("blitz", BlitzModule.class, blitz -> !blitz.isDisabled(null));
   StandardMapTag CLASSES = create("classes", ClassModule.class);
   StandardMapTag CORE = create("core", CoreModule.class);
@@ -58,19 +60,17 @@ public interface StandardMapTags {
   StandardMapTag FRIENDLYFIRE =
       create("friendlyfire", InfoModule.class, info -> info.getMapInfo().friendlyFire);
   StandardMapTag INTERNAL = create("internal", InternalModule.class);
-  StandardMapTag INSTANTTNT =
-      create("instanttnt", TNTModule.class, tnt -> tnt.getProperties().instantIgnite);
-  StandardMapTag NO_HUNGER = create("nohunger", HungerModule.class);
+  StandardMapTag NOHUNGER = create("nohunger", HungerModule.class);
   StandardMapTag RAGE = create("rage", RageModule.class);
   StandardMapTag RFW = create("rfw", LaneModule.class);
   StandardMapTag SCOREBOX =
       create("scorebox", ScoreModule.class, score -> !score.getScoreBoxFactories().isEmpty());
-  StandardMapTag TEAMS = create("teams", TeamModule.class);
   StandardMapTag TDM =
       create(
           "tdm",
           ScoreModule.class,
           score -> score.getConfig().deathScore != 0 || score.getConfig().killScore != 0);
+  StandardMapTag TEAMS = create("teams", TeamModule.class);
   StandardMapTag TIMELIMIT =
       create("timelimit", TimeLimitModule.class, timeLimit -> timeLimit.getTimeLimit().isPresent());
   StandardMapTag VANILLAWORLD =
