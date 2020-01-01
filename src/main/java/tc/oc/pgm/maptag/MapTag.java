@@ -4,14 +4,18 @@ import static com.google.common.base.Preconditions.*;
 
 import java.util.Locale;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 public class MapTag implements Comparable<MapTag> {
+  public static final Pattern PATTERN = Pattern.compile("^[a-z0-9_-]+$");
   public static final char SYMBOL = '#';
 
   private final String name;
 
   protected MapTag(String name) {
-    this.name = checkNotNull(name).toLowerCase(Locale.US);
+    name = checkNotNull(name).toLowerCase(Locale.ROOT);
+    checkArgument(PATTERN.matcher(name).matches(), name + " must match " + PATTERN.pattern());
+    this.name = name;
   }
 
   @Override
