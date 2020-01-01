@@ -18,6 +18,13 @@ package tc.oc.pgm.maptag;
 
 import static com.google.common.base.Preconditions.*;
 
+import com.google.common.collect.ImmutableSet;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Comparator;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.function.Predicate;
 import tc.oc.pgm.blitz.BlitzModule;
 import tc.oc.pgm.classes.ClassModule;
@@ -101,5 +108,22 @@ public interface StandardMapTags {
                 .map(context -> context.getModule(moduleClass))
                 .map(finalIfApplicable::test)
                 .orElse(false));
+  }
+
+  static Set<StandardMapTag> collect(Class<? extends StandardMapTags> clazz)
+      throws IllegalAccessException {
+    SortedSet<StandardMapTag> sorted = new TreeSet<>(Comparator.naturalOrder());
+    for (Field field : clazz.getFields()) {
+      int modifiers = field.getModifiers();
+      if (Modifier.isPublic(modifiers)
+          && Modifier.isStatic(modifiers)
+          && Modifier.isFinal(modifiers)) {
+        if (StandardMapTag.class.isAssignableFrom(field.getType())) {
+          sorted.add((StandardMapTag) field.get(null));
+        }
+      }
+    }
+
+    return ImmutableSet.copyOf(sorted);
   }
 }
