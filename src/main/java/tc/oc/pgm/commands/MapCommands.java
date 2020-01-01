@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.command.CommandSender;
 import tc.oc.component.Component;
@@ -25,6 +26,7 @@ import tc.oc.pgm.map.MapInfo;
 import tc.oc.pgm.map.MapLibrary;
 import tc.oc.pgm.map.PGMMap;
 import tc.oc.pgm.util.PrettyPaginatedResult;
+import tc.oc.util.components.ComponentUtils;
 import tc.oc.util.components.Components;
 
 public class MapCommands {
@@ -80,6 +82,20 @@ public class MapCommands {
   public void map(Audience audience, CommandSender sender, @Text PGMMap map) {
     MapInfo mapInfo = map.getInfo();
     audience.sendMessage(mapInfo.getFormattedMapTitle());
+
+    audience.sendMessage(
+        map.getPersistentContext()
+            .getMapTags()
+            .createComponent(
+                (mapTag, component) -> {
+                  component.clickEvent(
+                      ClickEvent.Action.RUN_COMMAND, "/mapinfo " + mapTag.toString());
+                  component.hoverEvent(
+                      HoverEvent.Action.SHOW_TEXT,
+                      new PersonalizedTranslatable(
+                              "command.map.mapInfo.mapTag.hover", mapTag.toString()).render());
+                })
+            .color(ChatColor.DARK_AQUA));
 
     Component edition =
         new PersonalizedText(

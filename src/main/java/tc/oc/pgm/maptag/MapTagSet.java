@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.BiConsumer;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.util.components.Components;
@@ -34,13 +35,24 @@ public class MapTagSet extends ForwardingSet<MapTag> {
   }
 
   public Component createComponent() {
+    return createComponent(null);
+  }
+
+  public Component createComponent(BiConsumer<MapTag, Component> onMapTagComponentCreate) {
     Component result = new PersonalizedText();
     MapTag[] mapTags = set.toArray(new MapTag[0]);
     for (int i = 0; i < mapTags.length; i++) {
       if (i != 0) {
         result.extra(Components.space());
       }
-      result.extra(mapTags[i].getComponentName());
+
+      MapTag mapTag = mapTags[i];
+      Component component = mapTags[i].getComponentName();
+
+      if (onMapTagComponentCreate != null) {
+        onMapTagComponentCreate.accept(mapTag, component);
+      }
+      result.extra(component);
     }
     return result;
   }
