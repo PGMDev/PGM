@@ -46,10 +46,10 @@ public interface StandardMapTags {
       create("autotnt", TNTModule.class, tnt -> tnt.getProperties().instantIgnite);
   StandardMapTag BLITZ = create("blitz", BlitzModule.class, blitz -> !blitz.isDisabled(null));
   StandardMapTag CLASSES = create("classes", ClassModule.class);
+  StandardMapTag CONTROLPOINT = create("controlpoint", ControlPointModule.class);
   StandardMapTag CORE = create("core", CoreModule.class);
   StandardMapTag CRAFTING =
       create("crafting", CraftingModule.class, crafting -> !crafting.getCustomRecipes().isEmpty());
-  StandardMapTag CTP = create("ctp", ControlPointModule.class);
   StandardMapTag EVENTEAMS =
       create("eventeams", TeamModule.class, team -> team.shouldRequireEven().orElse(false));
   StandardMapTag FFA = create("ffa", FreeForAllModule.class);
