@@ -1,5 +1,7 @@
 package tc.oc.pgm.maptag;
 
+import static com.google.common.base.Preconditions.*;
+
 import com.google.common.base.Joiner;
 import com.google.common.collect.ForwardingSet;
 import com.google.common.collect.ImmutableSet;
@@ -12,8 +14,6 @@ import java.util.TreeSet;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.util.components.Components;
-
-import static com.google.common.base.Preconditions.*;
 
 public class MapTagSet extends ForwardingSet<MapTag> {
   private final Set<MapTag> set;
