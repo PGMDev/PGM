@@ -35,6 +35,10 @@ public class TNTModule extends MapModule {
     return new TNTMatchModule(match, this.properties);
   }
 
+  public TNTProperties getProperties() {
+    return properties;
+  }
+
   // ---------------------
   // ---- XML Parsing ----
   // ---------------------

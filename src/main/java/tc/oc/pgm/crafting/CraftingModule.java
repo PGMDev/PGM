@@ -38,6 +38,10 @@ public class CraftingModule extends MapModule {
     return new CraftingMatchModule(match, customRecipes, disabledRecipes);
   }
 
+  public Set<Recipe> getCustomRecipes() {
+    return customRecipes;
+  }
+
   public static class Factory implements MapModuleFactory<CraftingModule> {
     @Override
     public @Nullable CraftingModule parse(MapModuleContext context, Logger logger, Document doc)

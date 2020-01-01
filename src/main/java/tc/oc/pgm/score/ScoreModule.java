@@ -72,6 +72,11 @@ public class ScoreModule extends MapModule {
     return config;
   }
 
+  @Nonnull
+  public Set<ScoreBoxFactory> getScoreBoxFactories() {
+    return scoreBoxFactories;
+  }
+
   // ---------------------
   // ---- XML Parsing ----
   // ---------------------

@@ -25,6 +25,10 @@ public class TerrainModule extends MapModule {
     this.options = options;
   }
 
+  public TerrainOptions getOptions() {
+    return options;
+  }
+
   public @Nullable ChunkGenerator getChunkGenerator() {
     return options.vanilla ? null : new NullChunkGenerator();
   }

@@ -1,7 +1,9 @@
 package tc.oc.pgm.teams;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
@@ -31,7 +33,7 @@ public class TeamModule extends MapModule {
   private final @Nullable Boolean requireEven;
 
   public TeamModule(Set<TeamFactory> teams, @Nullable Boolean requireEven) {
-    this.teams = teams;
+    this.teams = ImmutableSet.copyOf(teams);
     this.requireEven = requireEven;
   }
 
@@ -43,7 +45,7 @@ public class TeamModule extends MapModule {
   @Override
   public MatchModule createMatchModule(Match match) {
     return new TeamMatchModule(
-        match, teams, requireEven != null ? requireEven : Config.Teams.requireEven());
+        match, teams, shouldRequireEven().orElse(Config.Teams.requireEven()));
   }
 
   /**
@@ -53,6 +55,10 @@ public class TeamModule extends MapModule {
    */
   public Set<TeamFactory> getTeams() {
     return teams;
+  }
+
+  public Optional<Boolean> shouldRequireEven() {
+    return Optional.ofNullable(requireEven);
   }
 
   public TeamFactory getTeamByName(String name) {

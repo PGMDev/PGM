@@ -1,5 +1,6 @@
 package tc.oc.pgm.timelimit;
 
+import java.util.Optional;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.jdom2.Attribute;
@@ -31,6 +32,10 @@ public class TimeLimitModule extends MapModule {
   @Override
   public MatchModule createMatchModule(Match match) {
     return new TimeLimitMatchModule(match, this.timeLimit);
+  }
+
+  public Optional<TimeLimit> getTimeLimit() {
+    return Optional.ofNullable(this.timeLimit);
   }
 
   // ---------------------
