@@ -56,10 +56,9 @@ public interface StandardMapTags {
   StandardMapTag BLITZ = create("blitz", BlitzModule.class, blitz -> !blitz.isDisabled(null));
   StandardMapTag CLASSES = create("classes", ClassModule.class);
   StandardMapTag CORE = create("core", CoreModule.class);
-  StandardMapTag CP = create("cp", ControlPointModule.class);
   StandardMapTag CRAFTING =
       create("crafting", CraftingModule.class, crafting -> !crafting.getCustomRecipes().isEmpty());
-  StandardMapTag DESTROYABLE = create("destroyable", DestroyableModule.class);
+  StandardMapTag CTP = create("ctp", ControlPointModule.class);
   StandardMapTag EVENTEAMS =
       create("eventeams", TeamModule.class, team -> team.shouldRequireEven().orElse(false));
   StandardMapTag FFA = create("ffa", FreeForAllModule.class);
@@ -67,6 +66,7 @@ public interface StandardMapTags {
   StandardMapTag FRIENDLYFIRE =
       create("friendlyfire", InfoModule.class, info -> info.getMapInfo().friendlyFire);
   StandardMapTag INTERNAL = create("internal", InternalModule.class);
+  StandardMapTag MONUMENT = create("monument", DestroyableModule.class);
   StandardMapTag NOHUNGER = create("nohunger", HungerModule.class);
   StandardMapTag RAGE = create("rage", RageModule.class);
   StandardMapTag RFW = create("rfw", LaneModule.class);
@@ -80,8 +80,8 @@ public interface StandardMapTags {
   StandardMapTag TEAMS = create("teams", TeamModule.class);
   StandardMapTag TIMELIMIT =
       create("timelimit", TimeLimitModule.class, timeLimit -> timeLimit.getTimeLimit().isPresent());
-  StandardMapTag VANILLAWORLD =
-      create("vanillaworld", TerrainModule.class, terrain -> terrain.getOptions().vanilla);
+  StandardMapTag VANILLAWORLDGEN =
+      create("vanillaworldgen", TerrainModule.class, terrain -> terrain.getOptions().vanilla);
   StandardMapTag WOOL = create("wool", WoolModule.class);
   StandardMapTag WORLDBORDER = create("worldborder", WorldBorderModule.class);
 
