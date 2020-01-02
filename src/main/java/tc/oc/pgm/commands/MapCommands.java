@@ -1,12 +1,20 @@
 package tc.oc.pgm.commands;
 
+import static com.google.common.base.Preconditions.*;
+
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
+import app.ashcon.intake.bukkit.parametric.Type;
+import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
 import app.ashcon.intake.parametric.annotation.Default;
+import app.ashcon.intake.parametric.annotation.Switch;
 import com.google.common.collect.ImmutableSortedSet;
 import java.net.URL;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
+import java.util.Locale;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -36,12 +44,20 @@ public class MapCommands {
       help =
           "Shows all the maps that are currently loaded including ones that are not in the rotation.")
   public static void maplist(
-      Audience audience, CommandSender sender, MapLibrary library, @Default("1") int page)
+      Audience audience,
+      CommandSender sender,
+      MapLibrary library,
+      @Fallback(Type.NULL) @Switch('a') String author,
+      @Default("1") int page)
       throws CommandException {
-    final Set<PGMMap> maps = ImmutableSortedSet.copyOf(library.getMaps());
+    Stream<PGMMap> search = library.getMaps().stream();
+    if (author != null) {
+        search = search.filter(map -> matchesAuthor(map, author));
+    }
 
+    List<PGMMap> maps = search.collect(Collectors.toList());
     int resultsPerPage = 8;
-    int pages = (library.getMaps().size() + resultsPerPage - 1) / resultsPerPage;
+    int pages = (maps.size() + resultsPerPage - 1) / resultsPerPage;
 
     String listHeader =
         ChatColor.BLUE.toString()
@@ -70,7 +86,19 @@ public class MapCommands {
       public String format(PGMMap map, int index) {
         return (index + 1) + ". " + map.getInfo().getShortDescription(sender);
       }
-    }.display(audience, maps, page);
+    }.display(audience, ImmutableSortedSet.copyOf(Comparator.naturalOrder(), maps), page);
+  }
+
+  private static boolean matchesAuthor(PGMMap map, String query) {
+    checkNotNull(map);
+    query = checkNotNull(query).toLowerCase(Locale.ROOT);
+
+    for (Contributor contributor : map.getInfo().getNamedAuthors()) {
+      if (contributor.getName().toLowerCase(Locale.ROOT).contains(query)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Command(
