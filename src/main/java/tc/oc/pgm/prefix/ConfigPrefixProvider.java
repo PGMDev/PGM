@@ -34,11 +34,13 @@ public class ConfigPrefixProvider implements PrefixProvider {
   private String getPrefixFromConfig(UUID uuid) {
     final Player player = Bukkit.getPlayer(uuid);
     if (player == null) return "";
+
+    StringBuilder builder = new StringBuilder();
     for (Prefix prefix : Prefixes.getPrefixes().values()) {
       if (player.hasPermission(prefix.permission)) {
-        return prefix.toString();
+        builder.append(prefix.toString());
       }
     }
-    return "";
+    return builder.toString();
   }
 }
