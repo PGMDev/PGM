@@ -51,6 +51,11 @@ public interface StandardMapTags {
   StandardMapTag CORE = create("core", CoreModule.class);
   StandardMapTag CRAFTING =
       create("crafting", CraftingModule.class, crafting -> !crafting.getCustomRecipes().isEmpty());
+  StandardMapTag DEATHMATCH =
+      create(
+          "deathmatch",
+          ScoreModule.class,
+          score -> score.getConfig().deathScore != 0 || score.getConfig().killScore != 0);
   StandardMapTag EVENTEAMS =
       create("eventeams", TeamModule.class, team -> team.shouldRequireEven().orElse(false));
   StandardMapTag FFA = create("ffa", FreeForAllModule.class);
@@ -64,11 +69,6 @@ public interface StandardMapTags {
   StandardMapTag RFW = create("rfw", LaneModule.class);
   StandardMapTag SCOREBOX =
       create("scorebox", ScoreModule.class, score -> !score.getScoreBoxFactories().isEmpty());
-  StandardMapTag TDM =
-      create(
-          "tdm",
-          ScoreModule.class,
-          score -> score.getConfig().deathScore != 0 || score.getConfig().killScore != 0);
   StandardMapTag TEAMS = create("teams", TeamModule.class);
   StandardMapTag TIMELIMIT =
       create("timelimit", TimeLimitModule.class, timeLimit -> timeLimit.getTimeLimit().isPresent());
