@@ -34,10 +34,6 @@ public class MapTagSet extends ForwardingSet<MapTag> {
     return Joiner.on(' ').join(set);
   }
 
-  public Component createComponent() {
-    return createComponent(null);
-  }
-
   public Component createComponent(BiConsumer<MapTag, Component> onMapTagComponentCreate) {
     Component result = new PersonalizedText();
     MapTag[] mapTags = set.toArray(new MapTag[0]);
@@ -64,7 +60,13 @@ public class MapTagSet extends ForwardingSet<MapTag> {
   }
 
   public static MapTagSet immutable(Collection<MapTag> mapTags) {
-    return mapTags instanceof Immutable ? (Immutable) mapTags : new Immutable(mapTags);
+    checkNotNull(mapTags);
+    if (mapTags.isEmpty()) {
+      return Immutable.EMPTY;
+    } else if (mapTags instanceof Immutable) {
+      return (MapTagSet) mapTags;
+    }
+    return new Immutable(mapTags);
   }
 
   public static MapTagSet mutable() {
@@ -76,6 +78,9 @@ public class MapTagSet extends ForwardingSet<MapTag> {
   }
 
   static class Immutable extends MapTagSet {
+
+    private static final Immutable EMPTY = new Immutable(Collections.emptyList());
+
     private final String toString;
 
     private Immutable(Collection<MapTag> mapTags) {

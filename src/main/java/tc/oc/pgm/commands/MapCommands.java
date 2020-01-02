@@ -25,8 +25,8 @@ import tc.oc.pgm.map.Contributor;
 import tc.oc.pgm.map.MapInfo;
 import tc.oc.pgm.map.MapLibrary;
 import tc.oc.pgm.map.PGMMap;
+import tc.oc.pgm.maptag.MapTagsCondition;
 import tc.oc.pgm.util.PrettyPaginatedResult;
-import tc.oc.util.components.ComponentUtils;
 import tc.oc.util.components.Components;
 
 public class MapCommands {
@@ -38,9 +38,13 @@ public class MapCommands {
       help =
           "Shows all the maps that are currently loaded including ones that are not in the rotation.")
   public static void maplist(
-      Audience audience, CommandSender sender, MapLibrary library, @Default("1") int page)
+      Audience audience,
+      CommandSender sender,
+      MapLibrary library,
+      MapTagsCondition mapTags,
+      @Default("1") int page)
       throws CommandException {
-    final Set<PGMMap> maps = ImmutableSortedSet.copyOf(library.getMaps());
+    final Set<PGMMap> maps = ImmutableSortedSet.copyOf(library.getMaps(mapTags::and));
 
     int resultsPerPage = 8;
     int pages = (library.getMaps().size() + resultsPerPage - 1) / resultsPerPage;
@@ -89,11 +93,12 @@ public class MapCommands {
             .createComponent(
                 (mapTag, component) -> {
                   component.clickEvent(
-                      ClickEvent.Action.RUN_COMMAND, "/mapinfo " + mapTag.toString());
+                      ClickEvent.Action.RUN_COMMAND, "/maplist " + mapTag.toString());
                   component.hoverEvent(
                       HoverEvent.Action.SHOW_TEXT,
                       new PersonalizedTranslatable(
-                              "command.map.mapInfo.mapTag.hover", mapTag.toString()).render());
+                              "command.map.mapInfo.mapTag.hover", mapTag.toString())
+                          .render());
                 })
             .color(ChatColor.DARK_AQUA));
 

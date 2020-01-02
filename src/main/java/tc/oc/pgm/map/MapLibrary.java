@@ -10,7 +10,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import tc.oc.util.logging.ClassLogger;
 
@@ -70,7 +72,14 @@ public class MapLibrary {
   }
 
   public Collection<PGMMap> getMaps() {
-    return this.mapsById.values();
+    return getMaps(null);
+  }
+
+  public Collection<PGMMap> getMaps(Predicate<PGMMap> predicate) {
+    if (predicate == null) {
+      return mapsById.values();
+    }
+    return mapsById.values().stream().filter(predicate).collect(Collectors.toList());
   }
 
   public Set<String> getMapNames() {

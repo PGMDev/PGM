@@ -24,9 +24,7 @@ public class MapTag implements Comparable<MapTag> {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    MapTag mapTag = (MapTag) o;
-    return Objects.equals(name, mapTag.name);
+    return o instanceof MapTag && Objects.equals(name, ((MapTag) o).name);
   }
 
   @Override
