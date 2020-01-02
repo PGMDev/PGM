@@ -27,6 +27,7 @@ import tc.oc.pgm.map.MapLibrary;
 import tc.oc.pgm.map.PGMMap;
 import tc.oc.pgm.maptag.MapTagsCondition;
 import tc.oc.pgm.util.PrettyPaginatedResult;
+import tc.oc.util.components.ComponentUtils;
 import tc.oc.util.components.Components;
 
 public class MapCommands {
@@ -49,27 +50,11 @@ public class MapCommands {
     int resultsPerPage = 8;
     int pages = (library.getMaps().size() + resultsPerPage - 1) / resultsPerPage;
 
+    String title =
+        ComponentUtils.paginate(
+            AllTranslations.get().translate("command.map.mapList.title", sender), page, pages);
     String listHeader =
-        ChatColor.BLUE.toString()
-            + ChatColor.STRIKETHROUGH
-            + "---------------"
-            + ChatColor.RESET
-            + " "
-            + AllTranslations.get().translate("command.map.mapList.title", sender)
-            + ChatColor.DARK_AQUA
-            + " ("
-            + ChatColor.AQUA
-            + page
-            + ChatColor.DARK_AQUA
-            + " of "
-            + ChatColor.AQUA
-            + pages
-            + ChatColor.DARK_AQUA
-            + ") "
-            + ChatColor.BLUE.toString()
-            + ChatColor.STRIKETHROUGH
-            + " ---------------"
-            + ChatColor.RESET;
+        ComponentUtils.horizontalLineHeading(title, ChatColor.BLUE, ComponentUtils.MAX_CHAT_WIDTH);
 
     new PrettyPaginatedResult<PGMMap>(listHeader, resultsPerPage) {
       @Override
