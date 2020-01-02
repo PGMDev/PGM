@@ -111,8 +111,9 @@ experiments:
   destroy-match-delay: 100
 
 sidebar-message:
-  enabled: false
   # Text may be formatted with '&'
-  text: ""
-  # If the message should be positioned at the top or bottom of the sidebar
-  top: false
+  # Leave blank to disable
+  message-top: ""
+  message-bottom: ""
+  # If the sidebar message should overwrite lines in the sidebar when it is full
+  overwrite-existing: false

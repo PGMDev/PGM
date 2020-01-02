@@ -386,17 +386,26 @@ public class Config {
   }
 
   public static class SidebarMessage {
-    public static boolean enabled() {
-      return getConfiguration().getBoolean("sidebar-message.enabled", false);
+    public static boolean bottomEnabled() {
+      return getConfiguration().getString("sidebar-message.message-bottom", "").length() > 0;
     }
 
-    public static String format() {
+    public static boolean topEnabled() {
+      return getConfiguration().getString("sidebar-message.message-top", "").length() > 0;
+    }
+
+    public static String formatBottom() {
       return ChatColor.translateAlternateColorCodes(
-          '&', getConfiguration().getString("sidebar-message.text"));
+          '&', getConfiguration().getString("sidebar-message.message-bottom"));
     }
 
-    public static boolean atTop() {
-      return getConfiguration().getBoolean("sidebar-message.top", false);
+    public static String formatTop() {
+      return ChatColor.translateAlternateColorCodes(
+          '&', getConfiguration().getString("sidebar-message.message-top"));
+    }
+
+    public static boolean overwriteExisting() {
+      return getConfiguration().getBoolean("sidebar-message.overwrite-existing", false);
     }
   }
 }
