@@ -9,11 +9,7 @@ import static tc.oc.pgm.api.setting.SettingValue.*;
  */
 public enum SettingKey {
   CHAT("chat", CHAT_TEAM, CHAT_GLOBAL, CHAT_ADMIN), // Changes the default chat channel
-  DEATH("death", DEATH_OWN, DEATH_ALL), // Changes which death messages are seen
-  SIDEBAR_MESSAGES(
-      "sidebarmessage",
-      SIDEBAR_MESSAGE_OFF,
-      SIDEBAR_MESSAGE_ON); // Changes the visibility of sidebar messages
+  DEATH("death", DEATH_OWN, DEATH_ALL); // Changes which death messages are seen
 
   private final String name;
   private final SettingValue[] values;

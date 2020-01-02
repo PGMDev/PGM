@@ -464,19 +464,17 @@ public class SidebarMatchModule extends MatchModule implements Listener {
         }
       }
 
-      if (viewingParty != null) {
-        if (Config.SidebarMessage.topEnabled()) {
-          if (rows.size() < MAX_ROWS || Config.SidebarMessage.overwriteExisting()) {
-            rows.add(0, Config.SidebarMessage.formatTop());
-          }
+      if (Config.SidebarMessage.topEnabled()) {
+        if (rows.size() < MAX_ROWS || Config.SidebarMessage.overwriteExisting()) {
+          rows.add(0, Config.SidebarMessage.formatTop());
         }
+      }
 
-        if (Config.SidebarMessage.bottomEnabled()) {
-          if (rows.size() < MAX_ROWS) {
-            rows.add(Config.SidebarMessage.formatBottom());
-          } else if (Config.SidebarMessage.overwriteExisting()) {
-            rows.set(MAX_ROWS - 1, Config.SidebarMessage.formatBottom());
-          }
+      if (Config.SidebarMessage.bottomEnabled()) {
+        if (rows.size() < MAX_ROWS) {
+          rows.add(Config.SidebarMessage.formatBottom());
+        } else if (Config.SidebarMessage.overwriteExisting()) {
+          rows.set(MAX_ROWS - 1, Config.SidebarMessage.formatBottom());
         }
       }
 

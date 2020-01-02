@@ -18,9 +18,7 @@ public enum SettingValue {
   CHAT_GLOBAL("chat", "global"), // Send to all players in the same match
   CHAT_ADMIN("chat", "admin"), // Send to all server operators
   DEATH_OWN("death", "own"), // Only send death messages involving self
-  DEATH_ALL("death", "all"), // Send all death messages, highlight your own
-  SIDEBAR_MESSAGE_ON("sidebarmessage", "on"), // Show messages in the sidebar
-  SIDEBAR_MESSAGE_OFF("sidebarmessage", "off"); // Hide messages in the sidebar
+  DEATH_ALL("death", "all"); // Send all death messages, highlight your own
 
   private final String key;
   private final String name;
