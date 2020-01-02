@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
@@ -197,20 +197,17 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
   }
 
   /**
-   * Creates a new world, wich must be done on the primary thread. If already running on the primary
-   * thread, calls createWorld, otherwise, starts a sync task to run create world, and waits until
-   * it's done.
+   * Creates a new world, which must be done on the primary thread. If already running on the
+   * primary thread, calls createWorld, otherwise, starts a sync task to run create world, and waits
+   * until it's done.
    *
    * @param creator The creator for the world
    * @return A world if it was able to be created, null otherwise
    */
   private World createWorld(final WorldCreator creator) {
     if (server.isPrimaryThread()) return server.createWorld(creator);
-
-    // FIXME: This is pretty dirty, there must be a better way to run & wait on main
-    final Object LOCK = new Object();
+    final CountDownLatch latch = new CountDownLatch(1);
     final AtomicReference<World> world = new AtomicReference<>();
-    final AtomicBoolean isDone = new AtomicBoolean();
     PGM.get()
         .getServer()
         .getScheduler()
@@ -218,18 +215,12 @@ public class MatchManagerImpl implements MatchManager, MultiAudience {
             PGM.get(),
             () -> {
               world.set(server.createWorld(creator));
-              isDone.set(true);
-              synchronized (LOCK) {
-                LOCK.notifyAll();
-              }
+              latch.countDown();
             });
-    while (!isDone.get()) {
-      synchronized (LOCK) {
-        try {
-          LOCK.wait();
-        } catch (InterruptedException ignore) {
-        }
-      }
+    try {
+      latch.await();
+    } catch (InterruptedException e) {
+      logger.log(Level.SEVERE, "World creation was interrupted, is the server shutting down?", e);
     }
     return world.get();
   }
