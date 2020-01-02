@@ -109,3 +109,10 @@ experiments:
   tab-render-delay: 5
   # Ticks to wait to destroy older match
   destroy-match-delay: 100
+
+sidebar-message:
+  enabled: false
+  # Text may be formatted with '&'
+  text: ""
+  # If the message should be positioned at the top or bottom of the sidebar
+  top: false

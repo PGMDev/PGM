@@ -463,6 +463,17 @@ public class SidebarMatchModule extends MatchModule implements Listener {
           }
         }
       }
+      if (Config.SidebarMessage.enabled()) {
+        if (Config.SidebarMessage.atTop()) {
+          rows.add(0, Config.SidebarMessage.format());
+        } else {
+          if (rows.size() >= MAX_ROWS) {
+            rows.set(MAX_ROWS - 1, Config.SidebarMessage.format());
+          } else {
+            rows.add(Config.SidebarMessage.format());
+          }
+        }
+      }
 
       // Need at least one row for the sidebar to show
       if (rows.isEmpty()) {

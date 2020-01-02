@@ -384,4 +384,19 @@ public class Config {
       return destroyMatchDelay;
     }
   }
+
+  public static class SidebarMessage {
+    public static boolean enabled() {
+      return getConfiguration().getBoolean("sidebar-message.enabled", false);
+    }
+
+    public static String format() {
+      return ChatColor.translateAlternateColorCodes(
+          '&', getConfiguration().getString("sidebar-message.text"));
+    }
+
+    public static boolean atTop() {
+      return getConfiguration().getBoolean("sidebar-message.top", false);
+    }
+  }
 }
