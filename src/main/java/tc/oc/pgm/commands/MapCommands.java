@@ -87,12 +87,11 @@ public class MapCommands {
                 })
             .color(ChatColor.DARK_AQUA));
 
-    Component edition =
-        new PersonalizedText(
-            mapInfoLabel("command.map.mapInfo.edition"),
-            new PersonalizedText(mapInfo.getLocalizedEdition(), ChatColor.GOLD));
-
-    audience.sendMessage(edition);
+    Component edition = new PersonalizedText(mapInfo.getLocalizedEdition(), ChatColor.GOLD);
+    if (!edition.toPlainText().isEmpty()) {
+      audience.sendMessage(
+          new PersonalizedText(mapInfoLabel("command.map.mapInfo.edition"), edition));
+    }
 
     audience.sendMessage(
         new PersonalizedText(
