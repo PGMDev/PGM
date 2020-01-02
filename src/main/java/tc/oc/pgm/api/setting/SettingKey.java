@@ -16,9 +16,7 @@ import java.util.List;
 public enum SettingKey {
   CHAT("chat", CHAT_TEAM, CHAT_GLOBAL, CHAT_ADMIN), // Changes the default chat channel
   DEATH(
-      Arrays.asList("death", "dms"),
-      DEATH_ALL,
-      DEATH_OWN); // Changes which death messages are seen
+      Arrays.asList("death", "dms"), DEATH_ALL, DEATH_OWN); // Changes which death messages are seen
 
   private final List<String> aliases;
   private final SettingValue[] values;
