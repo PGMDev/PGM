@@ -9,7 +9,8 @@ import static tc.oc.pgm.api.setting.SettingValue.*;
  */
 public enum SettingKey {
   CHAT("chat", CHAT_TEAM, CHAT_GLOBAL, CHAT_ADMIN), // Changes the default chat channel
-  DEATH("death", DEATH_OWN, DEATH_ALL); // Changes which death messages are seen
+  DEATH("death", DEATH_OWN, DEATH_ALL), // Changes which death messages are seen
+  PICKER("picker", PICKER_DISPLAY, PICKER_HIDE); // Changes if the picker is displayed or not
 
   private final String name;
   private final SettingValue[] values;

@@ -33,6 +33,8 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.setting.SettingKey;
+import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.PlayerClass;
@@ -89,7 +91,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
   }
 
   protected boolean settingEnabled(MatchPlayer player) {
-    return true;
+    return player.getSettings().getValue(SettingKey.PICKER) == SettingValue.PICKER_DISPLAY;
   }
 
   private boolean hasJoined(MatchPlayer joining) {
@@ -149,10 +151,12 @@ public class PickerMatchModule extends MatchModule implements Listener {
   /**
    * Does the player have any use for the picker dialog? If the player can join, but there is
    * nothing to pick (i.e. FFA without classes) then this returns false, while {@link #canUse}
-   * returns true.
+   * returns true. Also takes into account whether the player has the picker setting enabled.
    */
   private boolean canOpenWindow(MatchPlayer player) {
-    return canUse(player) && (hasClasses || canChooseMultipleTeams(player));
+    return canUse(player)
+        && settingEnabled(player)
+        && (hasClasses || canChooseMultipleTeams(player));
   }
 
   private boolean isPicking(MatchPlayer player) {
