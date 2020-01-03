@@ -1,6 +1,7 @@
 package tc.oc.pgm.match;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.chat.MultiAudience;
@@ -14,7 +15,7 @@ import tc.oc.pgm.filters.query.PartyQuery;
 public abstract class SimpleParty implements Party, MultiAudience {
 
   protected final Match match;
-  protected final Map<UUID, MatchPlayer> players = new HashMap<>();
+  protected final Map<UUID, MatchPlayer> players = new ConcurrentHashMap<>();
   protected final PartyQuery query = new PartyQuery(null, this);
 
   public SimpleParty(Match match) {
