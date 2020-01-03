@@ -11,9 +11,11 @@ import java.util.Comparator;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.function.BiConsumer;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
+import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.util.components.Components;
 
 public class MapTagSet extends ForwardingSet<MapTag> {
@@ -34,7 +36,7 @@ public class MapTagSet extends ForwardingSet<MapTag> {
     return Joiner.on(' ').join(set);
   }
 
-  public Component createComponent(BiConsumer<MapTag, Component> onMapTagComponentCreate) {
+  public Component createComponent(boolean clickable) {
     Component result = new PersonalizedText();
     MapTag[] mapTags = set.toArray(new MapTag[0]);
     for (int i = 0; i < mapTags.length; i++) {
@@ -45,8 +47,11 @@ public class MapTagSet extends ForwardingSet<MapTag> {
       MapTag mapTag = mapTags[i];
       Component component = mapTags[i].getComponentName();
 
-      if (onMapTagComponentCreate != null) {
-        onMapTagComponentCreate.accept(mapTag, component);
+      if (clickable) {
+        component.clickEvent(ClickEvent.Action.RUN_COMMAND, "/maplist " + mapTag.toString());
+        component.hoverEvent(
+            HoverEvent.Action.SHOW_TEXT,
+            new PersonalizedTranslatable("map.mapTag.hover", mapTag.toString()).render());
       }
       result.extra(component);
     }

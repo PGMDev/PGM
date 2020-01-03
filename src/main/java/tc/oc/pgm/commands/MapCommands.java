@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.command.CommandSender;
 import tc.oc.component.Component;
@@ -73,19 +72,7 @@ public class MapCommands {
     audience.sendMessage(mapInfo.getFormattedMapTitle());
 
     audience.sendMessage(
-        map.getPersistentContext()
-            .getMapTags()
-            .createComponent(
-                (mapTag, component) -> {
-                  component.clickEvent(
-                      ClickEvent.Action.RUN_COMMAND, "/maplist " + mapTag.toString());
-                  component.hoverEvent(
-                      HoverEvent.Action.SHOW_TEXT,
-                      new PersonalizedTranslatable(
-                              "command.map.mapInfo.mapTag.hover", mapTag.toString())
-                          .render());
-                })
-            .color(ChatColor.DARK_AQUA));
+        map.getPersistentContext().getMapTags().createComponent(true).color(ChatColor.DARK_AQUA));
 
     Component edition = new PersonalizedText(mapInfo.getLocalizedEdition(), ChatColor.GOLD);
     if (!edition.toPlainText().isEmpty()) {
