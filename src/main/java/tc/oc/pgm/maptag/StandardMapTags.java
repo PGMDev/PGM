@@ -37,57 +37,74 @@ import tc.oc.pgm.timelimit.TimeLimitModule;
 import tc.oc.pgm.tnt.TNTModule;
 import tc.oc.pgm.wool.WoolModule;
 import tc.oc.pgm.worldborder.WorldBorderModule;
+import tc.oc.util.logging.ClassLogger;
 
-public interface StandardMapTags {
+public final class StandardMapTags {
 
-  IRegistry<StandardMapTag> REGISTRY = new Registry<>(new LinkedHashMap<>());
+  private StandardMapTags() {}
 
-  StandardMapTag _4TEAMS = create("4teams", TeamModule.class, team -> team.getTeams().size() == 4);
-  StandardMapTag AUTOTNT =
+  public static final IRegistry<StandardMapTag> REGISTRY = new Registry<>(new LinkedHashMap<>());
+
+  public static final StandardMapTag _4TEAMS =
+      create("4teams", TeamModule.class, team -> team.getTeams().size() == 4);
+  public static final StandardMapTag AUTOTNT =
       create("autotnt", TNTModule.class, tnt -> tnt.getProperties().instantIgnite);
-  StandardMapTag BLITZ = create("blitz", BlitzModule.class, blitz -> !blitz.isDisabled(null));
-  StandardMapTag CLASSES = create("classes", ClassModule.class);
-  StandardMapTag CONTROLPOINT = create("controlpoint", ControlPointModule.class);
-  StandardMapTag CORE = create("core", CoreModule.class);
-  StandardMapTag CRAFTING =
+  public static final StandardMapTag BLITZ =
+      create("blitz", BlitzModule.class, blitz -> !blitz.isDisabled(null));
+  public static final StandardMapTag CLASSES = create("classes", ClassModule.class);
+  public static final StandardMapTag CONTROLPOINT =
+      create("controlpoint", ControlPointModule.class);
+  public static final StandardMapTag CORE = create("core", CoreModule.class);
+  public static final StandardMapTag CRAFTING =
       create("crafting", CraftingModule.class, crafting -> !crafting.getCustomRecipes().isEmpty());
-  StandardMapTag DEATHMATCH =
+  public static final StandardMapTag DEATHMATCH =
       create(
           "deathmatch",
           ScoreModule.class,
           score -> score.getConfig().deathScore != 0 || score.getConfig().killScore != 0);
-  StandardMapTag EVENTEAMS =
+  public static final StandardMapTag EVENTEAMS =
       create("eventeams", TeamModule.class, team -> team.shouldRequireEven().orElse(false));
-  StandardMapTag FFA = create("ffa", FreeForAllModule.class);
-  StandardMapTag FLAG = create("flag", FlagModule.class);
-  StandardMapTag FRIENDLYFIRE =
+  public static final StandardMapTag FFA = create("ffa", FreeForAllModule.class);
+  public static final StandardMapTag FLAG = create("flag", FlagModule.class);
+  public static final StandardMapTag FRIENDLYFIRE =
       create("friendlyfire", InfoModule.class, info -> info.getMapInfo().friendlyFire);
-  StandardMapTag INTERNAL = create("internal", InternalModule.class);
-  StandardMapTag MONUMENT = create("monument", DestroyableModule.class);
-  StandardMapTag NOHUNGER = create("nohunger", HungerModule.class);
-  StandardMapTag RAGE = create("rage", RageModule.class);
-  StandardMapTag RFW = create("rfw", LaneModule.class);
-  StandardMapTag SCOREBOX =
+  public static final StandardMapTag INTERNAL = create("internal", InternalModule.class);
+  public static final StandardMapTag MONUMENT = create("monument", DestroyableModule.class);
+  public static final StandardMapTag NOHUNGER = create("nohunger", HungerModule.class);
+  public static final StandardMapTag RAGE = create("rage", RageModule.class);
+  public static final StandardMapTag RFW = create("rfw", LaneModule.class);
+  public static final StandardMapTag SCOREBOX =
       create("scorebox", ScoreModule.class, score -> !score.getScoreBoxFactories().isEmpty());
-  StandardMapTag TEAMS = create("teams", TeamModule.class);
-  StandardMapTag TIMELIMIT =
+  public static final StandardMapTag TEAMS = create("teams", TeamModule.class);
+  public static final StandardMapTag TIMELIMIT =
       create("timelimit", TimeLimitModule.class, timeLimit -> timeLimit.getTimeLimit().isPresent());
-  StandardMapTag VANILLAWORLDGEN =
+  public static final StandardMapTag VANILLAWORLDGEN =
       create("vanillaworldgen", TerrainModule.class, terrain -> terrain.getOptions().vanilla);
-  StandardMapTag WOOL = create("wool", WoolModule.class);
-  StandardMapTag WORLDBORDER = create("worldborder", WorldBorderModule.class);
+  public static final StandardMapTag WOOL = create("wool", WoolModule.class);
+  public static final StandardMapTag WORLDBORDER = create("worldborder", WorldBorderModule.class);
 
-  static StandardMapTag create(String name, Predicate<MapModuleContext> ifApplicable) {
+  static {
+    try {
+      for (StandardMapTag standardMapTag : collect()) {
+        REGISTRY.register(standardMapTag.getName(), standardMapTag);
+      }
+    } catch (IllegalAccessException e) {
+      Logger logger = ClassLogger.get(StandardMapTags.class);
+      logger.log(Level.SEVERE, "Could not register standard map tags.", e);
+    }
+  }
+
+  private static StandardMapTag create(String name, Predicate<MapModuleContext> ifApplicable) {
     checkNotNull(name);
     checkNotNull(ifApplicable);
     return new StandardMapTag(name, ifApplicable);
   }
 
-  static <T extends MapModule> StandardMapTag create(String name, Class<T> moduleClass) {
+  private static <T extends MapModule> StandardMapTag create(String name, Class<T> moduleClass) {
     return create(name, moduleClass, null);
   }
 
-  static <T extends MapModule> StandardMapTag create(
+  private static <T extends MapModule> StandardMapTag create(
       String name, Class<T> moduleClass, Predicate<T> ifApplicable) {
     checkNotNull(name);
     checkNotNull(moduleClass);
@@ -101,22 +118,9 @@ public interface StandardMapTags {
         });
   }
 
-  static void registerDefaults(Logger logger) {
-    checkNotNull(logger);
-
-    try {
-      collect(StandardMapTags.class)
-          .forEach(standardMapTag -> REGISTRY.register(standardMapTag.getName(), standardMapTag));
-    } catch (IllegalAccessException e) {
-      logger.log(Level.SEVERE, "Could not register standard map tags.", e);
-    }
-  }
-
-  static Set<StandardMapTag> collect(Class<?> clazz) throws IllegalAccessException {
-    checkNotNull(clazz);
-
+  private static Set<StandardMapTag> collect() throws IllegalAccessException {
     SortedSet<StandardMapTag> sorted = new TreeSet<>(Comparator.naturalOrder());
-    for (Field field : clazz.getFields()) {
+    for (Field field : StandardMapTags.class.getFields()) {
       int modifiers = field.getModifiers();
       if (Modifier.isPublic(modifiers)
           && Modifier.isStatic(modifiers)
