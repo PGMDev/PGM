@@ -1,13 +1,14 @@
 package tc.oc.pgm.api.registry;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
 /**
- * A container that collects T by its ID as {@link String}.
+ * A container that collects T by its key as {@link String}.
  *
  * @param <T> type of objects to collect
  */
@@ -15,30 +16,30 @@ import java.util.Set;
 public interface IRegistry<T> extends Iterable<T> {
 
   /**
-   * Does this registry contain the given ID?
+   * Does this registry contain the given key?
    *
-   * @param id ID of the object
-   * @return {@code true} whether this registry contains ID, otherwise {@link false}
+   * @param key key of the object
+   * @return {@code true} whether this registry contains key, otherwise {@link false}
    */
-  boolean contains(String id);
+  boolean contains(String key);
 
   /**
-   * Get T object from the given ID.
+   * Get T object from the given key.
    *
-   * @param id ID of the object
-   * @return object from this ID, never {@code null}
-   * @throws NoSuchElementException when this registry does not contain the given ID
+   * @param key key of the object
+   * @return object from this key, never {@code null}
+   * @throws NoSuchElementException when this registry does not contain the given key
    */
-  T get(String id) throws NoSuchElementException;
+  T get(String key) throws NoSuchElementException;
 
   /**
-   * Get optional T object from the given ID.
+   * Get optional T object from the given key.
    *
-   * @param id ID of the object
-   * @return object from this ID, or {@link Optional#empty()} when this registry does not contain
-   *     the given ID
+   * @param key key of the object
+   * @return object from this key, or {@link Optional#empty()} when this registry does not contain
+   *     the given key
    */
-  Optional<T> getMaybe(String id);
+  Optional<T> getMaybe(String key);
 
   /**
    * Get all keys registered in this registry.
@@ -62,7 +63,7 @@ public interface IRegistry<T> extends Iterable<T> {
   Set<Map.Entry<String, T>> entrySet();
 
   /**
-   * Convert this registry into a {@link Map} where keys are string IDs.
+   * Convert this registry into a {@link Map} where keys are string keys.
    *
    * @return {@link Map} of all entries
    */
@@ -71,17 +72,22 @@ public interface IRegistry<T> extends Iterable<T> {
   /**
    * Register the given T object in this registry.
    *
-   * @param id ID of the object
+   * @param key key of the object
    * @param object Object itself, may not be {@code null}
    * @return {@code true} whether registration was successful, otherwise {@code false}
    */
-  boolean register(String id, T object);
+  boolean register(String key, T object);
 
   /**
    * Unregister object from this registry.
    *
-   * @param id ID of the object
-   * @return {@code true} whether this registry contained this ID, otherwise {@code false}
+   * @param key key of the object
+   * @return {@code true} whether this registry contained this key, otherwise {@code false}
    */
-  boolean unregister(String id);
+  boolean unregister(String key);
+
+  @Override
+  default Iterator<T> iterator() {
+    return getAll().iterator();
+  }
 }

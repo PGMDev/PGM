@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.*;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -19,18 +18,18 @@ public class Registry<T> implements IRegistry<T> {
   }
 
   @Override
-  public boolean contains(String id) {
-    return map.containsKey(checkNotNull(id));
+  public boolean contains(String key) {
+    return map.containsKey(checkNotNull(key));
   }
 
   @Override
-  public T get(String id) throws NoSuchElementException {
-    return getMaybe(checkNotNull(id)).orElseThrow(NoSuchElementException::new);
+  public T get(String key) throws NoSuchElementException {
+    return getMaybe(checkNotNull(key)).orElseThrow(NoSuchElementException::new);
   }
 
   @Override
-  public Optional<T> getMaybe(String id) {
-    return Optional.ofNullable(map.get(checkNotNull(id)));
+  public Optional<T> getMaybe(String key) {
+    return Optional.ofNullable(map.get(checkNotNull(key)));
   }
 
   @Override
@@ -54,19 +53,14 @@ public class Registry<T> implements IRegistry<T> {
   }
 
   @Override
-  public void register(String id, T object) {
-    checkNotNull(id);
+  public boolean register(String key, T object) {
+    checkNotNull(key);
     checkNotNull(object);
-    map.put(id, object);
+    return map.putIfAbsent(key, object) == null;
   }
 
   @Override
-  public boolean unregister(String id) {
-    return map.remove(checkNotNull(id)) != null;
-  }
-
-  @Override
-  public Iterator<T> iterator() {
-    return map.values().iterator();
+  public boolean unregister(String key) {
+    return map.remove(checkNotNull(key)) != null;
   }
 }

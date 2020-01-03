@@ -79,7 +79,7 @@ public class MapModuleContext extends ModuleLoader<MapModule> {
     }
 
     MapTagSet mapTags = MapTagSet.mutable(info.mapTagSet);
-    for (StandardMapTag standardMapTag : StandardMapTags.REGISTRY.getAll()) {
+    for (StandardMapTag standardMapTag : StandardMapTags.REGISTRY) {
       if (standardMapTag.test(this)) {
         mapTags.add(standardMapTag);
       }
