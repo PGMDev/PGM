@@ -26,8 +26,8 @@ public interface IRegistry<T> extends Iterable<T> {
    * Get T object from the given ID.
    *
    * @param id ID of the object
-   * @return Object from this ID, never {@code null}
-   * @throws NoSuchElementException When this registry does not contain the given ID
+   * @return object from this ID, never {@code null}
+   * @throws NoSuchElementException when this registry does not contain the given ID
    */
   T get(String id) throws NoSuchElementException;
 
@@ -35,7 +35,7 @@ public interface IRegistry<T> extends Iterable<T> {
    * Get optional T object from the given ID.
    *
    * @param id ID of the object
-   * @return Object from this ID, or {@link Optional#empty()} when this registry does not contain
+   * @return object from this ID, or {@link Optional#empty()} when this registry does not contain
    *     the given ID
    */
   Optional<T> getMaybe(String id);
@@ -73,8 +73,9 @@ public interface IRegistry<T> extends Iterable<T> {
    *
    * @param id ID of the object
    * @param object Object itself, may not be {@code null}
+   * @return {@code true} whether registration was successful, otherwise {@code false}
    */
-  void register(String id, T object);
+  boolean register(String id, T object);
 
   /**
    * Unregister object from this registry.
