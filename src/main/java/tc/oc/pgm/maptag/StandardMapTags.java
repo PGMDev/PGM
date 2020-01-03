@@ -86,7 +86,7 @@ public final class StandardMapTags {
   static {
     try {
       for (StandardMapTag standardMapTag : collect()) {
-        REGISTRY.register(standardMapTag.getName(), standardMapTag);
+        REGISTRY.register(IRegistry.formatPGMKey(standardMapTag.getName()), standardMapTag);
       }
     } catch (IllegalAccessException e) {
       Logger logger = ClassLogger.get(StandardMapTags.class);

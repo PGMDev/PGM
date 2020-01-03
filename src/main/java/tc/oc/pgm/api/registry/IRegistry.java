@@ -1,5 +1,7 @@
 package tc.oc.pgm.api.registry;
 
+import static com.google.common.base.Preconditions.*;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -89,5 +91,17 @@ public interface IRegistry<T> extends Iterable<T> {
   @Override
   default Iterator<T> iterator() {
     return getAll().iterator();
+  }
+
+  /**
+   * Format the given key to the vanilla namespaced key standard.
+   * https://minecraft.gamepedia.com/Namespaced_ID
+   *
+   * @param key key to format
+   * @return formatted key
+   * @deprecated This method is meant to be used only by the PGM plugin!
+   */
+  static String formatPGMKey(String key) {
+    return "pgm:" + checkNotNull(key);
   }
 }
