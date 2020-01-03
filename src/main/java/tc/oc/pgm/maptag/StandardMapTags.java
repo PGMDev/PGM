@@ -71,8 +71,8 @@ public final class StandardMapTags {
   public static final StandardMapTag INTERNAL = create("internal", InternalModule.class);
   public static final StandardMapTag MONUMENT = create("monument", DestroyableModule.class);
   public static final StandardMapTag NOHUNGER = create("nohunger", HungerModule.class);
+  public static final StandardMapTag RACEFORWOOL = create("raceforwool", LaneModule.class);
   public static final StandardMapTag RAGE = create("rage", RageModule.class);
-  public static final StandardMapTag RFW = create("rfw", LaneModule.class);
   public static final StandardMapTag SCOREBOX =
       create("scorebox", ScoreModule.class, score -> !score.getScoreBoxFactories().isEmpty());
   public static final StandardMapTag TEAMS = create("teams", TeamModule.class);
