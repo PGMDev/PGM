@@ -90,7 +90,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
     this.isBlitz = match.hasMatchModule(BlitzMatchModule.class);
   }
 
-  protected boolean settingEnabled(MatchPlayer player, boolean isJoinButton) {
+  protected boolean settingEnabled(MatchPlayer player, boolean playerTriggered) {
     boolean hasPermission = player.getBukkit().hasPermission(Permissions.JOIN_CHOOSE);
     switch (player.getSettings().getValue(SettingKey.PICKER)) {
       case PICKER_OFF: // When off never show GUI
@@ -98,7 +98,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
       case PICKER_ON: // When on always show the GUI
         return true;
       default: // Display after map cycle, but check perms when clicking button.
-        return (isJoinButton ? hasPermission : true);
+        return (playerTriggered ? hasPermission : true);
     }
   }
 
