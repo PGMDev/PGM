@@ -31,12 +31,14 @@ public class ServerPingDataListener implements Listener {
   private final MatchManager matchManager;
   private final Logger logger;
   private final AtomicBoolean ready;
+  private final AtomicBoolean legacySportPaper;
   private final LoadingCache<Match, JsonObject> matchCache;
 
   public ServerPingDataListener(MatchManager matchManager, Logger parentLogger) {
     this.matchManager = checkNotNull(matchManager);
     this.logger = ClassLogger.get(checkNotNull(parentLogger), ServerPingDataListener.class);
     this.ready = new AtomicBoolean();
+    this.legacySportPaper = new AtomicBoolean();
     this.matchCache =
         CacheBuilder.newBuilder()
             .weakKeys()
@@ -59,16 +61,20 @@ public class ServerPingDataListener implements Listener {
 
   @EventHandler
   public void onServerListPing(ServerListPingEvent event) {
-    if (!ready.get()) return;
+    if (!ready.get() || legacySportPaper.get()) return;
 
-    JsonObject root = event.getOrCreateExtra(PGM.get());
-    for (Match match : this.matchManager.getMatches()) {
-      String matchId = match.getId();
-      try {
-        root.add(matchId, this.matchCache.get(match));
-      } catch (ExecutionException e) {
-        this.logger.log(Level.SEVERE, "Could not load server ping data for match: " + matchId, e);
+    try {
+      JsonObject root = event.getOrCreateExtra(PGM.get());
+      for (Match match : this.matchManager.getMatches()) {
+        String matchId = match.getId();
+        try {
+          root.add(matchId, this.matchCache.get(match));
+        } catch (ExecutionException e) {
+          this.logger.log(Level.SEVERE, "Could not load server ping data for match: " + matchId, e);
+        }
       }
+    } catch (NoSuchMethodError ex) {
+      legacySportPaper.compareAndSet(false, true);
     }
   }
 
