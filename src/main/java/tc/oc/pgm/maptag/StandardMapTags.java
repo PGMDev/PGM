@@ -95,9 +95,7 @@ public final class StandardMapTags {
   }
 
   private static StandardMapTag create(String name, Predicate<MapModuleContext> ifApplicable) {
-    checkNotNull(name);
-    checkNotNull(ifApplicable);
-    return new StandardMapTag(name, ifApplicable);
+    return StandardMapTag.create(name, ifApplicable);
   }
 
   private static <T extends MapModule> StandardMapTag create(String name, Class<T> moduleClass) {

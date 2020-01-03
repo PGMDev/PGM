@@ -18,4 +18,8 @@ public class StandardMapTag extends MapTag implements Predicate<MapModuleContext
   public boolean test(MapModuleContext mapModuleContext) {
     return this.ifApplicable.test(mapModuleContext);
   }
+
+  public static StandardMapTag create(String name, Predicate<MapModuleContext> ifApplicable) {
+    return new StandardMapTag(name, ifApplicable);
+  }
 }
