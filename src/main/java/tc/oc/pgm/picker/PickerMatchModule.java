@@ -27,6 +27,7 @@ import org.bukkit.material.MaterialData;
 import tc.oc.item.Items;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
@@ -34,7 +35,6 @@ import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
-import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.PlayerClass;
@@ -90,8 +90,16 @@ public class PickerMatchModule extends MatchModule implements Listener {
     this.isBlitz = match.hasMatchModule(BlitzMatchModule.class);
   }
 
-  protected boolean settingEnabled(MatchPlayer player) {
-    return player.getSettings().getValue(SettingKey.PICKER) == SettingValue.PICKER_DISPLAY;
+  protected boolean settingEnabled(MatchPlayer player, boolean isJoinButton) {
+    boolean hasPermission = player.getBukkit().hasPermission(Permissions.JOIN_CHOOSE);
+    switch (player.getSettings().getValue(SettingKey.PICKER)) {
+      case PICKER_OFF: // When off never show GUI
+        return false;
+      case PICKER_ON: // When on always show the GUI
+        return true;
+      default: // Display after map cycle, but check perms when clicking button.
+        return (isJoinButton ? hasPermission : true);
+    }
   }
 
   private boolean hasJoined(MatchPlayer joining) {
@@ -151,12 +159,10 @@ public class PickerMatchModule extends MatchModule implements Listener {
   /**
    * Does the player have any use for the picker dialog? If the player can join, but there is
    * nothing to pick (i.e. FFA without classes) then this returns false, while {@link #canUse}
-   * returns true. Also takes into account whether the player has the picker setting enabled.
+   * returns true.
    */
   private boolean canOpenWindow(MatchPlayer player) {
-    return canUse(player)
-        && settingEnabled(player)
-        && (hasClasses || canChooseMultipleTeams(player));
+    return canUse(player) && (hasClasses || canChooseMultipleTeams(player));
   }
 
   private boolean isPicking(MatchPlayer player) {
@@ -256,7 +262,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void join(PlayerJoinMatchEvent event) {
     final MatchPlayer player = event.getPlayer();
-    if (!settingEnabled(player)) return;
+    if (!settingEnabled(player, false)) return;
 
     if (canOpenWindow(player)) {
       event
@@ -322,10 +328,10 @@ public class PickerMatchModule extends MatchModule implements Listener {
 
     if (hand.getType() == Button.JOIN.material) {
       handled = true;
-      if (canOpenWindow(player)) {
+      if (canOpenWindow(player) && settingEnabled(player, true)) {
         showWindow(player);
       } else {
-        // If there is nothing to pick, just join immediately
+        // If there is nothing to pick or setting is disabled, just join immediately
         jmm.join(player, null);
       }
     } else if (hand.getType() == Button.LEAVE.material) {

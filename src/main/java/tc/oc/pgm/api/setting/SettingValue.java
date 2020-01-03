@@ -19,8 +19,9 @@ public enum SettingValue {
   CHAT_ADMIN("chat", "admin"), // Send to all server operators
   DEATH_OWN("death", "own"), // Only send death messages involving self
   DEATH_ALL("death", "all"), // Send all death messages, highlight your own
-  PICKER_DISPLAY("picker", "show"), // Display the picker GUI when clicked
-  PICKER_HIDE("picker", "hide"); // Hide the picker GUI, will auto join a team when clicked
+  PICKER_AUTO("picker", "auto"), // Display after cycle, or with permissions.
+  PICKER_ON("picker", "on"), // Display the picker GUI always
+  PICKER_OFF("picker", "off"); // Never display the picker GUI
 
   private final String key;
   private final String name;
