@@ -41,7 +41,8 @@ public class RageModule extends MapModule {
   public static RageModule parse(MapModuleContext context, Logger logger, Document doc) {
 
     if (doc.getRootElement().getChild("rage") != null) {
-      return new RageModule(context.hasModule(BlitzModule.class));
+      BlitzModule blitzModule = context.getModule(BlitzModule.class);
+      return new RageModule(!blitzModule.isDisabled(null));
     } else {
       return null;
     }
