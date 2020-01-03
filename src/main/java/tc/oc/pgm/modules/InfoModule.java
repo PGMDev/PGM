@@ -138,7 +138,7 @@ public class InfoModule extends MapModule {
   }
 
   private static MapTagSet readMapTags(Element root) throws InvalidXMLException {
-    List<MapTag> mapTags = new ArrayList<>();
+    MapTagSet mapTags = MapTagSet.mutable();
     for (Element el : XMLUtils.flattenElements(root, "maptags", "maptag")) {
       String name = el.getTextNormalize();
       if (name.startsWith(Character.toString(MapTag.SYMBOL))) {
