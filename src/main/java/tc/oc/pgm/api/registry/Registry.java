@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.*;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -62,5 +63,10 @@ public class Registry<T> implements IRegistry<T> {
   @Override
   public boolean unregister(String id) {
     return map.remove(checkNotNull(id)) != null;
+  }
+
+  @Override
+  public Iterator<T> iterator() {
+    return map.values().iterator();
   }
 }

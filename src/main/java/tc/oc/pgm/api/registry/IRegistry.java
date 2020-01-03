@@ -12,7 +12,7 @@ import java.util.Set;
  * @param <T> type of objects to collect
  */
 // TODO should be extended to NamespacedKeys
-public interface IRegistry<T> {
+public interface IRegistry<T> extends Iterable<T> {
 
   /**
    * Does this registry contain the given ID?
