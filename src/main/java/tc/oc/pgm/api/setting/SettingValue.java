@@ -21,7 +21,9 @@ public enum SettingValue {
   DEATH_ALL("death", "all"), // Send all death messages, highlight your own
   PICKER_AUTO("picker", "auto"), // Display after cycle, or with permissions.
   PICKER_ON("picker", "on"), // Display the picker GUI always
-  PICKER_OFF("picker", "off"); // Never display the picker GUI
+  PICKER_OFF("picker", "off"), // Never display the picker GUI
+  PM_ON("pm", "on"), // Always accept private messages
+  PM_OFF("pm", "off"); // Never accept private messages
 
   private final String key;
   private final String name;
