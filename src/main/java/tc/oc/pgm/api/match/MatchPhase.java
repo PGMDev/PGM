@@ -1,5 +1,6 @@
 package tc.oc.pgm.api.match;
 
+import java.util.Locale;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 
@@ -49,5 +50,10 @@ public enum MatchPhase {
       default:
         throw new IllegalStateException("Unknown transition state for " + next);
     }
+  }
+
+  @Override
+  public String toString() {
+    return this.name().toLowerCase(Locale.ROOT);
   }
 }

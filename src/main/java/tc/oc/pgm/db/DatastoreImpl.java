@@ -116,13 +116,13 @@ public class DatastoreImpl implements Datastore {
                 "SELECT name, strftime('%s', expires) FROM usernames WHERE id = ? LIMIT 1")) {
       statement.setString(1, checkNotNull(id).toString());
 
-      final ResultSet result = statement.executeQuery();
-      if (result.next()) {
-        final String name = result.getString(1);
-        final Date expires = new Date(result.getLong(2) * 1000);
-        result.close();
+      try (final ResultSet result = statement.executeQuery()) {
+        if (result.next()) {
+          final String name = result.getString(1);
+          final Date expires = new Date(result.getLong(2) * 1000);
 
-        return new UsernameImpl(id, name, expires);
+          return new UsernameImpl(id, name, expires);
+        }
       }
     }
 
@@ -218,10 +218,10 @@ public class DatastoreImpl implements Datastore {
       statement.setString(1, checkNotNull(id).toString());
 
       int bit = 0;
-      final ResultSet result = statement.executeQuery();
-      if (result.next()) {
-        bit = result.getInt(1);
-        result.close();
+      try (final ResultSet result = statement.executeQuery()) {
+        if (result.next()) {
+          bit = result.getInt(1);
+        }
       }
 
       return bit;
