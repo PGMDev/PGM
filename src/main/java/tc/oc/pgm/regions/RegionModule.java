@@ -9,14 +9,13 @@ import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.xml.InvalidXMLException;
 
 @ModuleDescription(
     name = "Regions",
     requires = {FilterModule.class, KitModule.class})
-public class RegionModule extends MapModule {
+public class RegionModule extends MapModule<RegionMatchModule> {
   protected final RFAContext rfaContext;
 
   public RegionModule(RFAContext rfaContext) {
@@ -28,7 +27,7 @@ public class RegionModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public RegionMatchModule createMatchModule(Match match) {
     return new RegionMatchModule(match, this.rfaContext);
   }
 

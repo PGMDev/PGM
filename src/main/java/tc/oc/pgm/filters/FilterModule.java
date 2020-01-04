@@ -8,7 +8,6 @@ import tc.oc.pgm.classes.ClassModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.regions.EmptyRegion;
@@ -19,10 +18,10 @@ import tc.oc.xml.InvalidXMLException;
 @ModuleDescription(
     name = "Filters",
     follows = {TeamModule.class, ClassModule.class})
-public class FilterModule extends MapModule {
+public class FilterModule extends MapModule<FilterMatchModule> {
 
   @Override
-  public MatchModule createMatchModule(Match match) throws ModuleLoadException {
+  public FilterMatchModule createMatchModule(Match match) throws ModuleLoadException {
     if (match.getMapContext().getProto().isOlderThan(ProtoVersions.FILTER_FEATURES)) {
       return null;
     } else {

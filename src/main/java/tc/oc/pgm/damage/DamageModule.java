@@ -10,12 +10,11 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.xml.InvalidXMLException;
 
 @ModuleDescription(name = "damage")
-public class DamageModule extends MapModule {
+public class DamageModule extends MapModule<DamageMatchModule> {
 
   private final List<Filter> filters;
 
@@ -24,7 +23,7 @@ public class DamageModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public DamageMatchModule createMatchModule(Match match) {
     return new DamageMatchModule(match, filters);
   }
 

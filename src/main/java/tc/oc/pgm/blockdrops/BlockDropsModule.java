@@ -16,7 +16,6 @@ import tc.oc.pgm.itemmeta.ItemModifyModule;
 import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.modules.InfoModule;
 import tc.oc.pgm.regions.Region;
@@ -31,7 +30,7 @@ import tc.oc.xml.Node;
     name = "Custom Block Drops",
     requires = {InfoModule.class},
     follows = {KitModule.class, RegionModule.class, FilterModule.class})
-public class BlockDropsModule extends MapModule {
+public class BlockDropsModule extends MapModule<BlockDropsMatchModule> {
   private final BlockDropsRuleSet ruleSet;
 
   public BlockDropsModule(BlockDropsRuleSet ruleSet) {
@@ -39,7 +38,7 @@ public class BlockDropsModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public BlockDropsMatchModule createMatchModule(Match match) {
     return new BlockDropsMatchModule(match, this.ruleSet);
   }
 

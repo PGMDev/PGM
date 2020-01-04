@@ -12,7 +12,6 @@ import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.util.XMLUtils;
@@ -22,7 +21,7 @@ import tc.oc.xml.Node;
 @ModuleDescription(
     name = "Falling Blocks",
     follows = {FilterModule.class, RegionModule.class})
-public class FallingBlocksModule extends MapModule {
+public class FallingBlocksModule extends MapModule<FallingBlocksMatchModule> {
   private final List<FallingBlocksRule> rules;
 
   public FallingBlocksModule(List<FallingBlocksRule> rules) {
@@ -30,7 +29,7 @@ public class FallingBlocksModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public FallingBlocksMatchModule createMatchModule(Match match) {
     return new FallingBlocksMatchModule(match, this.rules);
   }
 

@@ -1,7 +1,10 @@
 package tc.oc.pgm.modules;
 
+import com.google.common.collect.ImmutableSortedSet;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 import org.bukkit.Difficulty;
@@ -15,6 +18,8 @@ import tc.oc.pgm.map.MapInfo;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
+import tc.oc.pgm.maptag.MapTag;
+import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.SemanticVersion;
@@ -22,12 +27,19 @@ import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
 @ModuleDescription(name = "Info")
-public class InfoModule extends MapModule {
+public class InfoModule extends MapModule<MatchModule> {
+
+  private static final MapTag FRIENDLYFIRE_TAG = MapTag.forName("friendlyfire");
 
   private final MapInfo info;
 
   public InfoModule(MapInfo info) {
     this.info = info;
+  }
+
+  @Override
+  public void loadTags(Set<MapTag> tags) {
+    if (info.friendlyFire) tags.add(FRIENDLYFIRE_TAG);
   }
 
   public MapInfo getMapInfo() {
@@ -97,6 +109,8 @@ public class InfoModule extends MapModule {
         XMLUtils.parseBoolean(
             Node.fromLastChildOrAttr(root, "friendly-fire", "friendlyfire"), false);
 
+    Set<MapTag> mapTags = readMapTags(root);
+
     return new InfoModule(
         new MapInfo(
             context.getProto(),
@@ -110,7 +124,8 @@ public class InfoModule extends MapModule {
             rules,
             difficulty,
             dimension,
-            friendlyFire));
+            friendlyFire,
+            mapTags));
   }
 
   private static List<Contributor> readContributorList(Element root, String topLevelTag, String tag)
@@ -130,5 +145,24 @@ public class InfoModule extends MapModule {
       }
     }
     return contribs;
+  }
+
+  private static Set<MapTag> readMapTags(Element root) throws InvalidXMLException {
+    Set<MapTag> mapTags = new HashSet<>();
+    for (Element el : XMLUtils.flattenElements(root, "maptags", "maptag")) {
+      String name = el.getTextNormalize();
+      if (name.startsWith(Character.toString(MapTag.SYMBOL))) {
+        name = name.substring(1);
+      }
+
+      if (!MapTag.PATTERN.matcher(name).matches()) {
+        throw new InvalidXMLException(
+            MapTag.SYMBOL + name + " must match " + MapTag.PATTERN.pattern(), el);
+      }
+
+      mapTags.add(MapTag.forName(name));
+    }
+
+    return ImmutableSortedSet.copyOf(mapTags);
   }
 }
