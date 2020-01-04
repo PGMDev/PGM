@@ -1,14 +1,18 @@
 package tc.oc.pgm.commands;
 
+import static com.google.common.base.Preconditions.*;
+
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Default;
 import com.google.common.collect.ImmutableSortedSet;
 import java.net.URL;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.command.CommandSender;
 import tc.oc.component.Component;
@@ -24,6 +28,7 @@ import tc.oc.pgm.map.Contributor;
 import tc.oc.pgm.map.MapInfo;
 import tc.oc.pgm.map.MapLibrary;
 import tc.oc.pgm.map.PGMMap;
+import tc.oc.pgm.maptag.MapTag;
 import tc.oc.pgm.maptag.MapTagsCondition;
 import tc.oc.pgm.util.PrettyPaginatedResult;
 import tc.oc.util.components.ComponentUtils;
@@ -71,8 +76,8 @@ public class MapCommands {
     MapInfo mapInfo = map.getInfo();
     audience.sendMessage(mapInfo.getFormattedMapTitle());
 
-    audience.sendMessage(
-        map.getPersistentContext().getMapTags().createComponent(true).color(ChatColor.DARK_AQUA));
+    Set<MapTag> mapTags = map.getPersistentContext().getMapTags();
+    audience.sendMessage(createTagsComponent(mapTags).color(ChatColor.DARK_AQUA));
 
     Component edition = new PersonalizedText(mapInfo.getLocalizedEdition(), ChatColor.GOLD);
     if (!edition.toPlainText().isEmpty()) {
@@ -155,6 +160,30 @@ public class MapCommands {
                       new PersonalizedTranslatable("command.map.mapInfo.sourceCode.tip")
                           .render())));
     }
+  }
+
+  private static Component createTagsComponent(Set<MapTag> tags) {
+    checkNotNull(tags);
+
+    Component result = new PersonalizedText();
+    MapTag[] mapTags = tags.toArray(new MapTag[0]);
+    for (int i = 0; i < mapTags.length; i++) {
+      if (i != 0) {
+        result.extra(Components.space());
+      }
+
+      MapTag mapTag = mapTags[i];
+      Component component =
+          mapTags[i]
+              .getComponentName()
+              .clickEvent(ClickEvent.Action.RUN_COMMAND, "/maplist " + mapTag.toString())
+              .hoverEvent(
+                  HoverEvent.Action.SHOW_TEXT,
+                  new PersonalizedTranslatable("command.map.mapTag.hover", mapTag.toString())
+                      .render());
+      result.extra(component);
+    }
+    return result;
   }
 
   @Command(
