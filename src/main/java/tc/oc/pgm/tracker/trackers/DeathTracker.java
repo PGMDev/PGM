@@ -42,6 +42,12 @@ public class DeathTracker implements Listener {
     MatchPlayer victim = match.getParticipant(event.getEntity());
     if (victim == null) return;
 
+    if (victim.isDead()) {
+      // Cancel damage for dead players
+      event.setCancelled(true);
+      return;
+    }
+
     lastDamageInfos.put(victim, tmm.resolveDamage(event));
   }
 
