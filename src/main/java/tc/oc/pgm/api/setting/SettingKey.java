@@ -17,7 +17,11 @@ public enum SettingKey {
   CHAT("chat", CHAT_TEAM, CHAT_GLOBAL, CHAT_ADMIN), // Changes the default chat channel
   DEATH(
       Arrays.asList("death", "dms"), DEATH_ALL, DEATH_OWN), // Changes which death messages are seen
-  PICKER("picker", PICKER_AUTO, PICKER_ON, PICKER_OFF); // Changes when the picker is displayed
+  PICKER("picker", PICKER_AUTO, PICKER_ON, PICKER_OFF), // Changes when the picker is displayed
+  OBSERVERS(
+      Arrays.asList("observers", "obs"),
+      OBSERVERS_SHOWN,
+      OBSERVERS_HIDDEN); // Changes if observers are visible
 
   private final List<String> aliases;
   private final SettingValue[] values;
