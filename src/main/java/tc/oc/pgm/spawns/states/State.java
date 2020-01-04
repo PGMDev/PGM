@@ -3,6 +3,7 @@ package tc.oc.pgm.spawns.states;
 import java.util.List;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerAttackEntityEvent;
@@ -81,6 +82,8 @@ public abstract class State {
   public void onEvent(final PlayerAttackEntityEvent event) {}
 
   public void onEvent(final PlayerItemTransferEvent event) {}
+
+  public void onEvent(final EntityDamageEvent event) {}
 
   public void onEvent(final MatchStartEvent event) {}
 
