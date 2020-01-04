@@ -46,6 +46,7 @@ import tc.oc.pgm.commands.provider.DurationProvider;
 import tc.oc.pgm.commands.provider.MatchPlayerProvider;
 import tc.oc.pgm.commands.provider.MatchProvider;
 import tc.oc.pgm.commands.provider.PGMMapProvider;
+import tc.oc.pgm.commands.provider.SettingKeyProvider;
 import tc.oc.pgm.commands.provider.TeamMatchModuleProvider;
 import tc.oc.pgm.commands.provider.VectorProvider;
 import tc.oc.pgm.controlpoint.ControlPointModule;
@@ -83,6 +84,7 @@ import tc.oc.pgm.listeners.LongRangeTNTListener;
 import tc.oc.pgm.listeners.MatchAnnouncer;
 import tc.oc.pgm.listeners.MotdListener;
 import tc.oc.pgm.listeners.PGMListener;
+import tc.oc.pgm.listeners.ServerPingDataListener;
 import tc.oc.pgm.listeners.WorldProblemListener;
 import tc.oc.pgm.map.MapLibrary;
 import tc.oc.pgm.map.MapLoader;
@@ -298,7 +300,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     registerEvents(matchNameRenderer);
     nameRenderer = new CachingNameRenderer(matchNameRenderer);
 
-    registerListeners();
+    registerListeners(logger);
     registerCommands();
 
     // Wait until the next tick so that all other plugins are finished.
@@ -420,7 +422,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     return factory;
   }
 
-  private void registerListeners() {
+  private void registerListeners(Logger logger) {
     registerEvents(new GeneralizingListener(this));
     new BlockTransformListener(this).registerEvents();
 
@@ -433,6 +435,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     registerEvents(new WorldProblemListener(this));
     registerEvents(new MatchAnnouncer());
     registerEvents(new MotdListener());
+    registerEvents(new ServerPingDataListener(matchManager, logger));
   }
 
   private class CommandModule extends AbstractModule {
@@ -456,7 +459,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
       bind(Duration.class).toProvider(new DurationProvider());
       bind(TeamMatchModule.class).toProvider(new TeamMatchModuleProvider(getMatchManager()));
       bind(Vector.class).toProvider(new VectorProvider());
-      bind(SettingKey.class).toProvider(new EnumProvider<>(SettingKey.class));
+      bind(SettingKey.class).toProvider(new SettingKeyProvider());
       bind(SettingValue.class).toProvider(new EnumProvider<>(SettingValue.class));
     }
   }
