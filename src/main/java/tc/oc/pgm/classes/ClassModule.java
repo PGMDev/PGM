@@ -1,6 +1,6 @@
 package tc.oc.pgm.classes;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -21,7 +21,6 @@ import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.server.BukkitUtils;
@@ -31,7 +30,7 @@ import tc.oc.xml.Node;
 @ModuleDescription(
     name = "Classes",
     depends = {KitModule.class})
-public class ClassModule extends MapModule {
+public class ClassModule extends MapModule<ClassMatchModule> {
 
   private static final MapTag CLASSES_TAG = MapTag.forName("classes");
 
@@ -52,7 +51,7 @@ public class ClassModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public ClassMatchModule createMatchModule(Match match) {
     return new ClassMatchModule(match, this.family, this.classes, this.defaultClass);
   }
 

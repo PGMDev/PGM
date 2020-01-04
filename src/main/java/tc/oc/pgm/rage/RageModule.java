@@ -10,13 +10,12 @@ import tc.oc.pgm.blitz.BlitzModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 
 @ModuleDescription(
     name = "Rage",
     follows = {BlitzModule.class})
-public class RageModule extends MapModule {
+public class RageModule extends MapModule<RageMatchModule> {
 
   private static final MapTag RAGE_TAG = MapTag.forName("rage");
 
@@ -40,7 +39,7 @@ public class RageModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public RageMatchModule createMatchModule(Match match) {
     return new RageMatchModule(match);
   }
 

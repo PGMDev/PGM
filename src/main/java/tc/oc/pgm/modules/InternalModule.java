@@ -7,7 +7,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
@@ -18,7 +17,7 @@ import tc.oc.xml.Node;
  * maps have a bedrock outfill spanning the full world height.
  */
 @ModuleDescription(name = "Internal Topology Module")
-public class InternalModule extends MapModule {
+public class InternalModule extends MapModule<InternalMatchModule> {
 
   private static final MapTag INTERNAL_TAG = MapTag.forName("internal");
 
@@ -29,7 +28,7 @@ public class InternalModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public InternalMatchModule createMatchModule(Match match) {
     return new InternalMatchModule(match);
   }
 

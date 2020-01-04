@@ -11,7 +11,6 @@ import tc.oc.pgm.goals.GoalModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.regions.RegionModule;
@@ -21,7 +20,7 @@ import tc.oc.xml.InvalidXMLException;
 @ModuleDescription(
     name = "Capture the Flag",
     follows = {TeamModule.class, RegionModule.class, FilterModule.class, GoalModule.class})
-public class FlagModule extends MapModule {
+public class FlagModule extends MapModule<FlagMatchModule> {
 
   private static final MapTag FLAG_TAG = MapTag.forName("flag");
 
@@ -42,7 +41,7 @@ public class FlagModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) throws ModuleLoadException {
+  public FlagMatchModule createMatchModule(Match match) throws ModuleLoadException {
     return new FlagMatchModule(match, this.nets, this.flags);
   }
   // ---------------------

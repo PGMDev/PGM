@@ -11,7 +11,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.regions.RegionModule;
@@ -25,7 +24,7 @@ import tc.oc.xml.InvalidXMLException;
 @ModuleDescription(
     name = "Void Lane",
     depends = {RegionModule.class, TeamModule.class})
-public class LaneModule extends MapModule {
+public class LaneModule extends MapModule<LaneMatchModule> {
 
   private static final MapTag RACEFORWOOL_TAG = MapTag.forName("raceforwool");
 
@@ -42,7 +41,7 @@ public class LaneModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public LaneMatchModule createMatchModule(Match match) {
     Map<Team, Region> lanes = Maps.newHashMapWithExpectedSize(this.lanes.size());
     for (Entry<TeamFactory, Region> entry : this.lanes.entrySet()) {
       lanes.put(

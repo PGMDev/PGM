@@ -12,7 +12,6 @@ import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
 import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.result.VictoryCondition;
 import tc.oc.pgm.result.VictoryConditions;
@@ -23,7 +22,7 @@ import tc.oc.xml.InvalidXMLException;
 @ModuleDescription(
     name = "Time Limit",
     requires = {BossBarModule.class})
-public class TimeLimitModule extends MapModule {
+public class TimeLimitModule extends MapModule<TimeLimitMatchModule> {
 
   private static final MapTag TIMELIMIT_TAG = MapTag.forName("timelimit");
 
@@ -40,7 +39,7 @@ public class TimeLimitModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public TimeLimitMatchModule createMatchModule(Match match) {
     return new TimeLimitMatchModule(match, this.timeLimit);
   }
 

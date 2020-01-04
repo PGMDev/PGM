@@ -13,13 +13,14 @@ import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.MapModuleFactory;
 import tc.oc.pgm.maptag.MapTag;
+import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
 @ModuleDescription(name = "Terrain")
-public class TerrainModule extends MapModule {
+public class TerrainModule extends MapModule<MatchModule> {
 
   private static final MapTag VANILLAWORLDGEN_TAG = MapTag.forName("vanillaworldgen");
 

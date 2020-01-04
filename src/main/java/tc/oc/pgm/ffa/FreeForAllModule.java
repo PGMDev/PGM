@@ -11,7 +11,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.start.StartModule;
 import tc.oc.pgm.teams.TeamModule;
@@ -23,7 +22,7 @@ import tc.oc.xml.Node;
     name = "free-for-all",
     requires = {StartModule.class},
     follows = {TeamModule.class})
-public class FreeForAllModule extends MapModule {
+public class FreeForAllModule extends MapModule<FreeForAllMatchModule> {
 
   private static final MapTag FFA_TAG = MapTag.forName("ffa");
 
@@ -44,7 +43,7 @@ public class FreeForAllModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public FreeForAllMatchModule createMatchModule(Match match) {
     return new FreeForAllMatchModule(match, options);
   }
 

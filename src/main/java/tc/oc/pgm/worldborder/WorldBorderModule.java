@@ -15,14 +15,13 @@ import tc.oc.pgm.filters.TimeFilter;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
 @ModuleDescription(name = "World Border")
-public class WorldBorderModule extends MapModule {
+public class WorldBorderModule extends MapModule<WorldBorderMatchModule> {
 
   private static final MapTag WORLDBORDER_TAG = MapTag.forName("worldborder");
 
@@ -39,7 +38,7 @@ public class WorldBorderModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public WorldBorderMatchModule createMatchModule(Match match) {
     return new WorldBorderMatchModule(match, borders);
   }
 

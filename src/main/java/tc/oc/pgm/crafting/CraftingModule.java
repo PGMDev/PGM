@@ -7,7 +7,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import org.bukkit.inventory.*;
+import org.bukkit.inventory.FurnaceRecipe;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.ShapelessRecipe;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -17,14 +21,13 @@ import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.MapModuleFactory;
 import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 
 @ModuleDescription(name = "Crafting")
-public class CraftingModule extends MapModule {
+public class CraftingModule extends MapModule<CraftingMatchModule> {
 
   private static final MapTag CRAFTING_TAG = MapTag.forName("crafting");
 
@@ -43,7 +46,7 @@ public class CraftingModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) throws ModuleLoadException {
+  public CraftingMatchModule createMatchModule(Match match) throws ModuleLoadException {
     return new CraftingMatchModule(match, customRecipes, disabledRecipes);
   }
 

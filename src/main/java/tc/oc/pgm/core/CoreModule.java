@@ -19,7 +19,6 @@ import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
 import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.modules.InfoModule;
 import tc.oc.pgm.regions.BlockBoundedValidation;
@@ -36,7 +35,7 @@ import tc.oc.xml.Node;
 @ModuleDescription(
     name = "Cores",
     depends = {RegionModule.class, TeamModule.class, GoalModule.class, InfoModule.class})
-public class CoreModule extends MapModule {
+public class CoreModule extends MapModule<CoreMatchModule> {
 
   private static final MapTag CORE_TAG = MapTag.forName("core");
 
@@ -54,7 +53,7 @@ public class CoreModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public CoreMatchModule createMatchModule(Match match) {
     ImmutableList.Builder<Core> cores = new ImmutableList.Builder<>();
     for (CoreFactory factory : this.coreFactories) {
       Core core = new Core(factory, match);

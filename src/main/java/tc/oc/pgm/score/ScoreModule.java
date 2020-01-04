@@ -24,7 +24,6 @@ import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
 import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.regions.RegionModule;
@@ -38,7 +37,7 @@ import tc.oc.xml.Node;
     name = "Score",
     requires = {RegionModule.class, FilterModule.class},
     follows = {GoalModule.class, BlitzModule.class})
-public class ScoreModule extends MapModule {
+public class ScoreModule extends MapModule<ScoreMatchModule> {
   public ScoreModule(@Nonnull ScoreConfig config, @Nonnull Set<ScoreBoxFactory> scoreBoxFactories) {
     Preconditions.checkNotNull(config, "score config");
     Preconditions.checkNotNull(scoreBoxFactories, "score box factories");
@@ -65,7 +64,7 @@ public class ScoreModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public ScoreMatchModule createMatchModule(Match match) {
     ImmutableSet.Builder<ScoreBox> scoreBoxes = ImmutableSet.builder();
     for (ScoreBoxFactory factory : this.scoreBoxFactories) {
       scoreBoxes.add(factory.createScoreBox(match));

@@ -12,7 +12,6 @@ import tc.oc.pgm.filters.DenyFilter;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.EverywhereRegion;
 import tc.oc.pgm.regions.RFAScope;
@@ -22,7 +21,7 @@ import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 
 @ModuleDescription(name = "TNT", depends = RegionModule.class)
-public class TNTModule extends MapModule {
+public class TNTModule extends MapModule<TNTMatchModule> {
   public static final int DEFAULT_DISPENSER_NUKE_LIMIT = 16;
   public static final float DEFAULT_DISPENSER_NUKE_MULTIPLIER = 0.25f;
 
@@ -41,7 +40,7 @@ public class TNTModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public TNTMatchModule createMatchModule(Match match) {
     return new TNTMatchModule(match, this.properties);
   }
 

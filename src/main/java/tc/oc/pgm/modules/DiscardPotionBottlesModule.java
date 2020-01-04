@@ -6,13 +6,12 @@ import org.jdom2.Element;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 
 @ModuleDescription(name = "Discard Portion Bottles")
-public class DiscardPotionBottlesModule extends MapModule {
+public class DiscardPotionBottlesModule extends MapModule<DiscardPotionBottlesMatchModule> {
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public DiscardPotionBottlesMatchModule createMatchModule(Match match) {
     return new DiscardPotionBottlesMatchModule(match);
   }
 
