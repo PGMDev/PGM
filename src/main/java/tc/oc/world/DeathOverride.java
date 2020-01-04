@@ -5,6 +5,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 /**
  * A somewhat hacky mechanism for faking an entity's death. The name rendering system checks this
@@ -35,7 +36,12 @@ public interface DeathOverride {
     if (value != null) {
       return value.asBoolean();
     } else {
-      return player.isDead();
+      MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(player);
+      if (matchPlayer != null) {
+        return matchPlayer.isDead();
+      } else {
+        return player.isDead();
+      }
     }
   }
 }
