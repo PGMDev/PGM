@@ -1,5 +1,6 @@
 package tc.oc.pgm.rage;
 
+import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import tc.oc.component.Component;
@@ -9,7 +10,6 @@ import tc.oc.pgm.blitz.BlitzModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 
@@ -34,7 +34,8 @@ public class RageModule extends MapModule {
   }
 
   @Override
-  public void loadTags(MapTagSet tags) {
+  @SuppressWarnings("unchecked")
+  public void loadTags(Set tags) {
     tags.add(RAGE_TAG);
   }
 

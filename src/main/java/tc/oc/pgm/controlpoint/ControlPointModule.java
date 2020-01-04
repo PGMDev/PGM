@@ -3,6 +3,7 @@ package tc.oc.pgm.controlpoint;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -13,7 +14,6 @@ import tc.oc.pgm.goals.GoalModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.RegionModule;
@@ -35,7 +35,8 @@ public class ControlPointModule extends MapModule {
   }
 
   @Override
-  public void loadTags(MapTagSet tags) {
+  @SuppressWarnings("unchecked")
+  public void loadTags(Set tags) {
     tags.add(CONTROLPOINT_TAG);
   }
 

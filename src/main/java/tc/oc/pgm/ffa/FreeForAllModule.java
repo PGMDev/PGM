@@ -1,5 +1,6 @@
 package tc.oc.pgm.ffa;
 
+import java.util.Set;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.NameTagVisibility;
@@ -10,7 +11,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.start.StartModule;
@@ -38,7 +38,8 @@ public class FreeForAllModule extends MapModule {
   }
 
   @Override
-  public void loadTags(MapTagSet tags) {
+  @SuppressWarnings("unchecked")
+  public void loadTags(Set tags) {
     tags.add(FFA_TAG);
   }
 

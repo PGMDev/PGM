@@ -1,11 +1,12 @@
 package tc.oc.pgm.map;
 
+import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.jdom2.Document;
 import tc.oc.component.Component;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.maptag.MapTagSet;
+import tc.oc.pgm.maptag.MapTag;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.match.MatchModuleFactory;
 import tc.oc.pgm.module.ModuleInfo;
@@ -52,11 +53,11 @@ public abstract class MapModule<T extends MatchModule> implements MatchModuleFac
   }
 
   /**
-   * Add matching {@link tc.oc.pgm.maptag.MapTag}s for this module.
+   * Add matching {@link MapTag}s for this module.
    *
    * @param tags mutable collection of tags, never {@link null}
    */
-  public void loadTags(MapTagSet tags) {}
+  public void loadTags(Set<MapTag> tags) {}
 
   @Override
   public T createMatchModule(Match match) throws ModuleLoadException {

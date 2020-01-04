@@ -17,7 +17,6 @@ import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.MapModuleFactory;
 import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.module.ModuleLoadException;
@@ -38,7 +37,8 @@ public class CraftingModule extends MapModule {
   }
 
   @Override
-  public void loadTags(MapTagSet tags) {
+  @SuppressWarnings("unchecked")
+  public void loadTags(Set tags) {
     if (!customRecipes.isEmpty()) tags.add(CRAFTING_TAG);
   }
 

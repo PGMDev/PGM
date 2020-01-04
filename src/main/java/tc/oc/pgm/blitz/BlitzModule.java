@@ -3,6 +3,7 @@ package tc.oc.pgm.blitz;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -13,7 +14,6 @@ import tc.oc.pgm.ffa.FreeForAllModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.teams.TeamModule;
@@ -45,7 +45,8 @@ public class BlitzModule extends MapModule {
   }
 
   @Override
-  public void loadTags(MapTagSet tags) {
+  @SuppressWarnings("unchecked")
+  public void loadTags(Set tags) {
     if (!isDisabled(null)) tags.add(BLITZ_TAG);
   }
 

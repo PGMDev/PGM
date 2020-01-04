@@ -3,6 +3,7 @@ package tc.oc.pgm.wool;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Logger;
 import org.bukkit.DyeColor;
 import org.bukkit.util.Vector;
@@ -16,7 +17,6 @@ import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
 import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.Region;
@@ -48,7 +48,8 @@ public class WoolModule extends MapModule {
   }
 
   @Override
-  public void loadTags(MapTagSet tags) {
+  @SuppressWarnings("unchecked")
+  public void loadTags(Set tags) {
     tags.add(WOOL_TAG);
   }
 

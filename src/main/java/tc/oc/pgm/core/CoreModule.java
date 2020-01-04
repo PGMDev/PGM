@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 import org.bukkit.Material;
 import org.bukkit.material.MaterialData;
@@ -18,7 +19,6 @@ import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
 import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.modules.InfoModule;
@@ -48,7 +48,8 @@ public class CoreModule extends MapModule {
   }
 
   @Override
-  public void loadTags(MapTagSet tags) {
+  @SuppressWarnings("unchecked")
+  public void loadTags(Set tags) {
     tags.add(CORE_TAG);
   }
 

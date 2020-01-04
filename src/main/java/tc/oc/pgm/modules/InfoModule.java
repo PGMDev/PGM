@@ -2,6 +2,7 @@ package tc.oc.pgm.modules;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 import org.bukkit.Difficulty;
@@ -35,7 +36,8 @@ public class InfoModule extends MapModule {
   }
 
   @Override
-  public void loadTags(MapTagSet tags) {
+  @SuppressWarnings("unchecked")
+  public void loadTags(Set tags) {
     if (info.friendlyFire) tags.add(FRIENDLYFIRE_TAG);
   }
 

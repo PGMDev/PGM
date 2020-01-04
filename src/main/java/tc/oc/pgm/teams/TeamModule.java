@@ -15,7 +15,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.modules.InfoModule;
@@ -48,7 +47,8 @@ public class TeamModule extends MapModule {
   }
 
   @Override
-  public void loadTags(MapTagSet tags) {
+  @SuppressWarnings("unchecked")
+  public void loadTags(Set tags) {
     if (teams.size() == 4) tags.add(_4TEAMS_TAG);
     if (requireEven != null && requireEven) tags.add(EVENTEAMS_TAG);
     tags.add(TEAMS_TAG);
