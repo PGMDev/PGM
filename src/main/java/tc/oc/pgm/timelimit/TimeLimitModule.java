@@ -36,7 +36,7 @@ public class TimeLimitModule extends MapModule {
   @Override
   @SuppressWarnings("unchecked")
   public void loadTags(Set tags) {
-    tags.add(TIMELIMIT_TAG);
+    if (timeLimit != null) tags.add(TIMELIMIT_TAG);
   }
 
   @Override
