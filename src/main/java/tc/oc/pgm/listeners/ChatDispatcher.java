@@ -105,9 +105,9 @@ public class ChatDispatcher implements Listener {
   public void sendDirect(Match match, MatchPlayer sender, Player receiver, @Text String message) {
     MatchPlayer matchReceiver = manager.getPlayer(receiver);
     if (matchReceiver != null) {
-      SettingValue option = matchReceiver.getSettings().getValue(SettingKey.PM);
+      SettingValue option = matchReceiver.getSettings().getValue(SettingKey.MESSAGE);
 
-      if (option.equals(SettingValue.PM_OFF)
+      if (option.equals(SettingValue.MESSAGE_OFF)
           && !sender.getBukkit().hasPermission(Permissions.STAFF)) {
         String name = receiver.getDisplayName(sender.getBukkit()) + ChatColor.RED;
         Component component =
