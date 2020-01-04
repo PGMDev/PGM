@@ -47,7 +47,7 @@ public class MapCommands {
     List<PGMMap> maps = library.getMaps().stream().filter(mapTags).collect(Collectors.toList());
 
     int resultsPerPage = 8;
-    int pages = (library.getMaps().size() + resultsPerPage - 1) / resultsPerPage;
+    int pages = (maps.size() + resultsPerPage - 1) / resultsPerPage;
 
     String title =
         ComponentUtils.paginate(
