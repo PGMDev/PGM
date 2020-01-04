@@ -34,8 +34,7 @@ public class TNTModule extends MapModule<TNTMatchModule> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public void loadTags(Set tags) {
+  public void loadTags(Set<MapTag> tags) {
     if (properties.instantIgnite) tags.add(AUTOTNT_TAG);
   }
 

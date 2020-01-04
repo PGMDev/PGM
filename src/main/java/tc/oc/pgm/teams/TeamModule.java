@@ -46,8 +46,7 @@ public class TeamModule extends MapModule<TeamMatchModule> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public void loadTags(Set tags) {
+  public void loadTags(Set<MapTag> tags) {
     if (teams.size() == 4) tags.add(_4TEAMS_TAG);
     if (requireEven != null && requireEven) tags.add(EVENTEAMS_TAG);
     tags.add(TEAMS_TAG);

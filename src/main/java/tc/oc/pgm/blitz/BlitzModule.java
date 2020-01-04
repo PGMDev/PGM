@@ -44,8 +44,7 @@ public class BlitzModule extends MapModule<BlitzMatchModule> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public void loadTags(Set tags) {
+  public void loadTags(Set<MapTag> tags) {
     if (!isDisabled(null)) tags.add(BLITZ_TAG);
   }
 

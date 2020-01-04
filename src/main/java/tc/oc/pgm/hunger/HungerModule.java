@@ -16,8 +16,7 @@ public class HungerModule extends MapModule<HungerMatchModule> {
   private static final MapTag NOHUNGER_TAG = MapTag.forName("nohunger");
 
   @Override
-  @SuppressWarnings("unchecked")
-  public void loadTags(Set tags) {
+  public void loadTags(Set<MapTag> tags) {
     tags.add(NOHUNGER_TAG);
   }
 

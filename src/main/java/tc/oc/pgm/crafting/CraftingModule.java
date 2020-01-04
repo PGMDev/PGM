@@ -40,8 +40,7 @@ public class CraftingModule extends MapModule<CraftingMatchModule> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public void loadTags(Set tags) {
+  public void loadTags(Set<MapTag> tags) {
     if (!customRecipes.isEmpty()) tags.add(CRAFTING_TAG);
   }
 

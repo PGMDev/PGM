@@ -57,8 +57,7 @@ public class ScoreModule extends MapModule<ScoreMatchModule> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public void loadTags(Set tags) {
+  public void loadTags(Set<MapTag> tags) {
     if (config.killScore != 0 || config.deathScore != 0) tags.add(DEATHMATCH_TAG);
     if (!scoreBoxFactories.isEmpty()) tags.add(SCOREBOX_TAG);
   }

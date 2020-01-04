@@ -38,8 +38,7 @@ public class InfoModule extends MapModule<MatchModule> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public void loadTags(Set tags) {
+  public void loadTags(Set<MapTag> tags) {
     if (info.friendlyFire) tags.add(FRIENDLYFIRE_TAG);
   }
 

@@ -33,8 +33,7 @@ public class RageModule extends MapModule<RageMatchModule> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public void loadTags(Set tags) {
+  public void loadTags(Set<MapTag> tags) {
     tags.add(RAGE_TAG);
   }
 

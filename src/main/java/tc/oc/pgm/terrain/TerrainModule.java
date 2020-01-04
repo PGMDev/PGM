@@ -31,8 +31,7 @@ public class TerrainModule extends MapModule<MatchModule> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public void loadTags(Set tags) {
+  public void loadTags(Set<MapTag> tags) {
     if (options.vanilla) tags.add(VANILLAWORLDGEN_TAG);
   }
 

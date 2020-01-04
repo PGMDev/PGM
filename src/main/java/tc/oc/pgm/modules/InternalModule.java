@@ -22,8 +22,7 @@ public class InternalModule extends MapModule<InternalMatchModule> {
   private static final MapTag INTERNAL_TAG = MapTag.forName("internal");
 
   @Override
-  @SuppressWarnings("unchecked")
-  public void loadTags(Set tags) {
+  public void loadTags(Set<MapTag> tags) {
     tags.add(INTERNAL_TAG);
   }
 

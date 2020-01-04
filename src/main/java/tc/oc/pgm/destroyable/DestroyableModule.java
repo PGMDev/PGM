@@ -42,8 +42,7 @@ public class DestroyableModule extends MapModule<DestroyableMatchModule> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public void loadTags(Set tags) {
+  public void loadTags(Set<MapTag> tags) {
     tags.add(MONUMENT_TAG);
   }
 

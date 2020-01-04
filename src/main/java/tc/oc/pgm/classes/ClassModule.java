@@ -45,8 +45,7 @@ public class ClassModule extends MapModule<ClassMatchModule> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public void loadTags(Set tags) {
+  public void loadTags(Set<MapTag> tags) {
     tags.add(CLASSES_TAG);
   }
 

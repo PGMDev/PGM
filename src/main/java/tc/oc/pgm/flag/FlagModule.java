@@ -35,8 +35,7 @@ public class FlagModule extends MapModule<FlagMatchModule> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public void loadTags(Set tags) {
+  public void loadTags(Set<MapTag> tags) {
     tags.add(FLAG_TAG);
   }
 

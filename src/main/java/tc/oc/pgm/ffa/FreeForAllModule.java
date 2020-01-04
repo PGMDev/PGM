@@ -37,8 +37,7 @@ public class FreeForAllModule extends MapModule<FreeForAllMatchModule> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public void loadTags(Set tags) {
+  public void loadTags(Set<MapTag> tags) {
     tags.add(FFA_TAG);
   }
 

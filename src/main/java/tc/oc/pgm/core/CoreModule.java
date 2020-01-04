@@ -47,8 +47,7 @@ public class CoreModule extends MapModule<CoreMatchModule> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public void loadTags(Set tags) {
+  public void loadTags(Set<MapTag> tags) {
     tags.add(CORE_TAG);
   }
 

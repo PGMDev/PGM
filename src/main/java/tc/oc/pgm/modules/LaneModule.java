@@ -35,8 +35,7 @@ public class LaneModule extends MapModule<LaneMatchModule> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public void loadTags(Set tags) {
+  public void loadTags(Set<MapTag> tags) {
     tags.add(RACEFORWOOL_TAG);
   }
 

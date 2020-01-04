@@ -34,8 +34,7 @@ public class ControlPointModule extends MapModule<ControlPointMatchModule> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public void loadTags(Set tags) {
+  public void loadTags(Set<MapTag> tags) {
     tags.add(CONTROLPOINT_TAG);
   }
 

@@ -47,8 +47,7 @@ public class WoolModule extends MapModule<WoolMatchModule> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public void loadTags(Set tags) {
+  public void loadTags(Set<MapTag> tags) {
     tags.add(WOOL_TAG);
   }
 
