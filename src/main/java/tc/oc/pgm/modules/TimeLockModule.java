@@ -5,10 +5,11 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
+import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 
 @ModuleDescription(name = "Time Lock")
-public class TimeLockModule extends MapModule {
+public class TimeLockModule extends MapModule<MatchModule> {
   protected final boolean lock;
 
   public TimeLockModule(boolean lock) {

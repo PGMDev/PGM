@@ -7,6 +7,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +23,9 @@ import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.map.Contributor;
 import tc.oc.pgm.map.MapInfo;
+import tc.oc.pgm.map.MapPersistentContext;
 import tc.oc.pgm.map.PGMMap;
+import tc.oc.pgm.maptag.MapTag;
 import tc.oc.pgm.rotation.PGMMapOrder;
 import tc.oc.util.logging.ClassLogger;
 
@@ -89,7 +92,7 @@ public class ServerPingDataListener implements Listener {
     jsonObject.addProperty("max_players", match.getMaxPlayers());
 
     JsonObject mapObject = new JsonObject();
-    this.serializeMapInfo(match.getMap().getInfo(), mapObject);
+    this.serializeMap(match.getMap(), mapObject);
     jsonObject.add("map", mapObject);
 
     this.appendNextMap(jsonObject);
@@ -104,20 +107,31 @@ public class ServerPingDataListener implements Listener {
 
       if (nextMap != null) {
         JsonObject nextMapObject = new JsonObject();
-        this.serializeMapInfo(nextMap.getInfo(), nextMapObject);
+        this.serializeMap(nextMap, nextMapObject);
         jsonObject.add("next_map", nextMapObject);
       }
     }
   }
 
-  private void serializeMapInfo(MapInfo mapInfo, JsonObject jsonObject) {
-    checkNotNull(mapInfo);
+  private void serializeMap(PGMMap map, JsonObject jsonObject) {
+    checkNotNull(map);
     checkNotNull(jsonObject);
+
+    MapInfo mapInfo = map.getInfo();
+    MapPersistentContext persistentContext = map.getPersistentContext();
 
     jsonObject.addProperty("slug", mapInfo.slug());
     jsonObject.addProperty("name", mapInfo.name);
     jsonObject.addProperty("version", mapInfo.version.toString());
     jsonObject.addProperty("objective", mapInfo.objective);
+
+    JsonArray tags = new JsonArray();
+    for (MapTag mapTag : persistentContext.getMapTags()) {
+      tags.add(new JsonPrimitive(mapTag.getName()));
+    }
+    if (tags.iterator().hasNext()) {
+      jsonObject.add("tags", tags);
+    }
 
     JsonArray authors = new JsonArray();
     for (Contributor author : mapInfo.authors) {

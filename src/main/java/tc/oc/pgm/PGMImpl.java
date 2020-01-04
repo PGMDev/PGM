@@ -43,6 +43,7 @@ import tc.oc.pgm.classes.ClassModule;
 import tc.oc.pgm.commands.*;
 import tc.oc.pgm.commands.provider.AudienceProvider;
 import tc.oc.pgm.commands.provider.DurationProvider;
+import tc.oc.pgm.commands.provider.MapTagsConditionProvider;
 import tc.oc.pgm.commands.provider.MatchPlayerProvider;
 import tc.oc.pgm.commands.provider.MatchProvider;
 import tc.oc.pgm.commands.provider.PGMMapProvider;
@@ -92,6 +93,7 @@ import tc.oc.pgm.map.MapLogHandler;
 import tc.oc.pgm.map.MapNotFoundException;
 import tc.oc.pgm.map.PGMMap;
 import tc.oc.pgm.map.ProtoVersions;
+import tc.oc.pgm.maptag.MapTagsCondition;
 import tc.oc.pgm.match.MatchManagerImpl;
 import tc.oc.pgm.modes.ObjectiveModesModule;
 import tc.oc.pgm.module.ModuleRegistry;
@@ -453,6 +455,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
 
     private void configureProviders() {
       bind(Audience.class).toProvider(new AudienceProvider());
+      bind(MapTagsCondition.class).toProvider(new MapTagsConditionProvider(getMapLibrary()));
       bind(Match.class).toProvider(new MatchProvider(getMatchManager()));
       bind(MatchPlayer.class).toProvider(new MatchPlayerProvider(getMatchManager()));
       bind(PGMMap.class).toProvider(new PGMMapProvider(getMatchManager(), getMapLibrary()));

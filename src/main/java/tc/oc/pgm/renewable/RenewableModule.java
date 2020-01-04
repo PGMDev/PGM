@@ -8,10 +8,14 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.joda.time.Duration;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.filters.*;
+import tc.oc.pgm.filters.AllFilter;
+import tc.oc.pgm.filters.AnyFilter;
+import tc.oc.pgm.filters.Filter;
+import tc.oc.pgm.filters.FilterModule;
+import tc.oc.pgm.filters.FilterParser;
+import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.EverywhereRegion;
 import tc.oc.pgm.regions.RegionModule;
@@ -22,13 +26,13 @@ import tc.oc.xml.InvalidXMLException;
 @ModuleDescription(
     name = "Renewable Resources",
     follows = {RegionModule.class, FilterModule.class})
-public class RenewableModule extends MapModule {
+public class RenewableModule extends MapModule<RenewableMatchModule> {
   private static final double DEFAULT_AVOID_PLAYERS_RANGE = 2d;
 
   private final List<RenewableDefinition> renewableDefinitions = new ArrayList<>();
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public RenewableMatchModule createMatchModule(Match match) {
     return new RenewableMatchModule(match, this.renewableDefinitions);
   }
 
