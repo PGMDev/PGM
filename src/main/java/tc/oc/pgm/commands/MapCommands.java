@@ -6,7 +6,7 @@ import app.ashcon.intake.parametric.annotation.Default;
 import com.google.common.collect.ImmutableSortedSet;
 import java.net.URL;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -44,7 +44,7 @@ public class MapCommands {
       MapTagsCondition mapTags,
       @Default("1") int page)
       throws CommandException {
-    final Set<PGMMap> maps = ImmutableSortedSet.copyOf(library.getMaps(mapTags::and));
+    List<PGMMap> maps = library.getMaps().stream().filter(mapTags).collect(Collectors.toList());
 
     int resultsPerPage = 8;
     int pages = (library.getMaps().size() + resultsPerPage - 1) / resultsPerPage;
@@ -60,7 +60,7 @@ public class MapCommands {
       public String format(PGMMap map, int index) {
         return (index + 1) + ". " + map.getInfo().getShortDescription(sender);
       }
-    }.display(audience, maps, page);
+    }.display(audience, ImmutableSortedSet.copyOf(maps), page);
   }
 
   @Command(

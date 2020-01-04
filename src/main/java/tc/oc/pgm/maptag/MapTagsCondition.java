@@ -4,9 +4,10 @@ import static com.google.common.base.Preconditions.*;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
+import java.util.function.Predicate;
 import tc.oc.pgm.map.PGMMap;
 
-public class MapTagsCondition {
+public class MapTagsCondition implements Predicate<PGMMap> {
 
   private final Map<MapTag, Boolean> params;
 
@@ -24,7 +25,8 @@ public class MapTagsCondition {
    * @param map map to perform operation on
    * @return {@code true} whether AND operation is successful, otherwise {@code false}
    */
-  public boolean and(PGMMap map) {
+  @Override
+  public boolean test(PGMMap map) {
     checkNotNull(map);
 
     MapTagSet mapTags = map.getPersistentContext().getMapTags();
