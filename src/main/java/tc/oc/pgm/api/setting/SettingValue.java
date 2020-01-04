@@ -17,11 +17,18 @@ public enum SettingValue {
   CHAT_TEAM("chat", "team"), // Only send to members on the player's team
   CHAT_GLOBAL("chat", "global"), // Send to all players in the same match
   CHAT_ADMIN("chat", "admin"), // Send to all server operators
+
   DEATH_OWN("death", "own"), // Only send death messages involving self
   DEATH_ALL("death", "all"), // Send all death messages, highlight your own
+
   PICKER_AUTO("picker", "auto"), // Display after cycle, or with permissions.
   PICKER_ON("picker", "on"), // Display the picker GUI always
-  PICKER_OFF("picker", "off"); // Never display the picker GUI
+  PICKER_OFF("picker", "off"), // Never display the picker GUI
+
+  JOIN_MESSAGES_AUTO("join-messages", "auto"), // Send join messages without spamming
+  JOIN_MESSAGES_ALL("join-messages", "all"), // Send all join messages
+  JOIN_MESSAGES_NONE("join-messages", "none"), // Never send join messages
+  ;
 
   private final String key;
   private final String name;
