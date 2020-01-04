@@ -176,7 +176,8 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
   public boolean canSee(MatchPlayer other) {
     if (!other.isVisible()) return false;
     if (other.isParticipating()) return true;
-    return isObserving() && getSettings().getValue(SettingKey.OBSERVERS) == SettingValue.OBSERVERS_ON;
+    return isObserving()
+        && getSettings().getValue(SettingKey.OBSERVERS) == SettingValue.OBSERVERS_ON;
   }
 
   @Override
