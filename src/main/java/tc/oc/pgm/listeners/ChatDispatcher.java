@@ -107,15 +107,13 @@ public class ChatDispatcher implements Listener {
     if (matchReceiver != null) {
       SettingValue option = matchReceiver.getSettings().getValue(SettingKey.PM);
 
-      switch (option) {
-        case PM_OFF:
-          if (!sender.getBukkit().hasPermission(Permissions.STAFF)) {
-            String name = receiver.getDisplayName(sender.getBukkit()) + ChatColor.RED;
-            Component component =
-                new PersonalizedTranslatable("command.message.blockedNoPermissions", name);
-            sender.sendMessage(new PersonalizedText(component, ChatColor.RED));
-            return;
-          }
+      if (option.equals(SettingValue.PM_OFF)
+          && !sender.getBukkit().hasPermission(Permissions.STAFF)) {
+        String name = receiver.getDisplayName(sender.getBukkit()) + ChatColor.RED;
+        Component component =
+            new PersonalizedTranslatable("command.message.blockedNoPermissions", name);
+        sender.sendMessage(new PersonalizedText(component, ChatColor.RED));
+        return;
       }
     }
 
