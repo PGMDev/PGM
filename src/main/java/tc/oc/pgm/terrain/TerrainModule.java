@@ -2,6 +2,7 @@ package tc.oc.pgm.terrain;
 
 import java.io.File;
 import java.util.Random;
+import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.generator.ChunkGenerator;
@@ -11,18 +12,27 @@ import tc.oc.chunk.NullChunkGenerator;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.MapModuleFactory;
+import tc.oc.pgm.maptag.MapTag;
+import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
 @ModuleDescription(name = "Terrain")
-public class TerrainModule extends MapModule {
+public class TerrainModule extends MapModule<MatchModule> {
+
+  private static final MapTag VANILLAWORLDGEN_TAG = MapTag.forName("vanillaworldgen");
 
   private final TerrainOptions options;
 
   public TerrainModule(TerrainOptions options) {
     this.options = options;
+  }
+
+  @Override
+  public void loadTags(Set<MapTag> tags) {
+    if (options.vanilla) tags.add(VANILLAWORLDGEN_TAG);
   }
 
   public @Nullable ChunkGenerator getChunkGenerator() {

@@ -17,16 +17,24 @@ import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
-import tc.oc.pgm.regions.*;
+import tc.oc.pgm.regions.CuboidRegion;
+import tc.oc.pgm.regions.RFAContext;
+import tc.oc.pgm.regions.RFAScope;
+import tc.oc.pgm.regions.RandomPointsValidation;
+import tc.oc.pgm.regions.Region;
+import tc.oc.pgm.regions.RegionFilterApplication;
+import tc.oc.pgm.regions.RegionModule;
+import tc.oc.pgm.regions.RegionParser;
+import tc.oc.pgm.regions.TranslatedRegion;
+import tc.oc.pgm.regions.Union;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 
 @ModuleDescription(
     name = "Portal",
     depends = {RegionModule.class, FilterModule.class})
-public class PortalModule extends MapModule {
+public class PortalModule extends MapModule<PortalMatchModule> {
   private static final Component PROTECT_MESSAGE =
       new PersonalizedTranslatable("match.portal.protectMessage");
 
@@ -37,7 +45,7 @@ public class PortalModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public PortalMatchModule createMatchModule(Match match) {
     return new PortalMatchModule(match, this.portals);
   }
 
