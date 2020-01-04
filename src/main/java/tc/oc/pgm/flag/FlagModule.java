@@ -22,6 +22,7 @@ import tc.oc.xml.InvalidXMLException;
     name = "Capture the Flag",
     follows = {TeamModule.class, RegionModule.class, FilterModule.class, GoalModule.class})
 public class FlagModule extends MapModule {
+
   private static final MapTag FLAG_TAG = MapTag.forName("flag");
 
   private final ImmutableList<Post> posts;
