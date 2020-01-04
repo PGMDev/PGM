@@ -159,11 +159,6 @@ public class DamageMatchModule extends MatchModule implements Listener {
     MatchPlayer victim = getVictim(event.getEntity());
     if (victim == null) return;
 
-    if (victim.isDead()) {
-      event.setCancelled(true);
-      return;
-    }
-
     processDamageEvent(event, victim.getParticipantState(), tracker().resolveDamage(event));
   }
 
