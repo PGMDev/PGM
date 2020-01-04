@@ -20,6 +20,8 @@ import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
+import tc.oc.pgm.maptag.MapTag;
+import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.util.XMLUtils;
@@ -31,6 +33,9 @@ import tc.oc.xml.Node;
     name = "Classes",
     depends = {KitModule.class})
 public class ClassModule extends MapModule {
+
+  private static final MapTag CLASSES_TAG = MapTag.forName("classes");
+
   final String family;
   final Map<String, PlayerClass> classes;
   final PlayerClass defaultClass;
@@ -39,6 +44,11 @@ public class ClassModule extends MapModule {
     this.family = checkNotNull(family, "family");
     this.classes = ImmutableMap.copyOf(checkNotNull(classes, "classes"));
     this.defaultClass = checkNotNull(defaultClass, "default class");
+  }
+
+  @Override
+  public void loadTags(MapTagSet tags) {
+    tags.add(CLASSES_TAG);
   }
 
   @Override

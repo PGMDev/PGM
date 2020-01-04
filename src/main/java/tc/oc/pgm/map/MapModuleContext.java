@@ -17,8 +17,6 @@ import tc.oc.pgm.kits.FeatureKitParser;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.kits.LegacyKitParser;
 import tc.oc.pgm.maptag.MapTagSet;
-import tc.oc.pgm.maptag.StandardMapTag;
-import tc.oc.pgm.maptag.StandardMapTags;
 import tc.oc.pgm.module.ModuleInfo;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.module.ModuleLoader;
@@ -79,10 +77,8 @@ public class MapModuleContext extends ModuleLoader<MapModule> {
     }
 
     MapTagSet mapTags = MapTagSet.mutable(info.mapTagSet);
-    for (StandardMapTag standardMapTag : StandardMapTags.REGISTRY) {
-      if (standardMapTag.test(this)) {
-        mapTags.add(standardMapTag);
-      }
+    for (MapModule module : getModules()) {
+      module.loadTags(mapTags);
     }
 
     return new MapPersistentContext(proto, info, maxPlayers, mapTags);

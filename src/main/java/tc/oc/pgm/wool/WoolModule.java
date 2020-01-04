@@ -15,6 +15,8 @@ import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
+import tc.oc.pgm.maptag.MapTag;
+import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.Region;
@@ -31,6 +33,9 @@ import tc.oc.xml.InvalidXMLException;
     name = "Wool",
     depends = {RegionModule.class, TeamModule.class, GoalModule.class})
 public class WoolModule extends MapModule {
+
+  private static final MapTag WOOL_TAG = MapTag.forName("wool");
+
   protected final Multimap<TeamFactory, MonumentWoolFactory> woolFactories;
 
   public WoolModule(Multimap<TeamFactory, MonumentWoolFactory> woolFactories) {
@@ -40,6 +45,11 @@ public class WoolModule extends MapModule {
 
   public Multimap<TeamFactory, MonumentWoolFactory> getWools() {
     return woolFactories;
+  }
+
+  @Override
+  public void loadTags(MapTagSet tags) {
+    tags.add(WOOL_TAG);
   }
 
   @Override

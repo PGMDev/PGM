@@ -26,10 +26,17 @@ import tc.oc.xml.Node;
 @ModuleDescription(name = "Info")
 public class InfoModule extends MapModule {
 
+  private static final MapTag FRIENDLYFIRE_TAG = MapTag.forName("friendlyfire");
+
   private final MapInfo info;
 
   public InfoModule(MapInfo info) {
     this.info = info;
+  }
+
+  @Override
+  public void loadTags(MapTagSet tags) {
+    if (info.friendlyFire) tags.add(FRIENDLYFIRE_TAG);
   }
 
   public MapInfo getMapInfo() {

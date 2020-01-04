@@ -16,6 +16,8 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.MapModuleFactory;
+import tc.oc.pgm.maptag.MapTag;
+import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.module.ModuleLoadException;
@@ -24,6 +26,8 @@ import tc.oc.xml.InvalidXMLException;
 
 @ModuleDescription(name = "Crafting")
 public class CraftingModule extends MapModule {
+
+  private static final MapTag CRAFTING_TAG = MapTag.forName("crafting");
 
   private final Set<Recipe> customRecipes;
   private final Set<SingleMaterialMatcher> disabledRecipes;
@@ -34,12 +38,13 @@ public class CraftingModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) throws ModuleLoadException {
-    return new CraftingMatchModule(match, customRecipes, disabledRecipes);
+  public void loadTags(MapTagSet tags) {
+    if (!customRecipes.isEmpty()) tags.add(CRAFTING_TAG);
   }
 
-  public Set<Recipe> getCustomRecipes() {
-    return customRecipes;
+  @Override
+  public MatchModule createMatchModule(Match match) throws ModuleLoadException {
+    return new CraftingMatchModule(match, customRecipes, disabledRecipes);
   }
 
   public static class Factory implements MapModuleFactory<CraftingModule> {

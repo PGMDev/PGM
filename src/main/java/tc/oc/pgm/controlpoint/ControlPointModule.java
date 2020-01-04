@@ -12,6 +12,8 @@ import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.GoalModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
+import tc.oc.pgm.maptag.MapTag;
+import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.RegionModule;
@@ -24,10 +26,17 @@ import tc.oc.xml.InvalidXMLException;
     depends = {TeamModule.class, GoalModule.class, RegionModule.class, FilterModule.class})
 public class ControlPointModule extends MapModule {
 
+  private static final MapTag CONTROLPOINT_TAG = MapTag.forName("controlpoint");
+
   private final List<ControlPointDefinition> definitions;
 
   public ControlPointModule(List<ControlPointDefinition> definitions) {
     this.definitions = definitions;
+  }
+
+  @Override
+  public void loadTags(MapTagSet tags) {
+    tags.add(CONTROLPOINT_TAG);
   }
 
   @Override

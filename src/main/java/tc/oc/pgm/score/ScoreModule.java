@@ -23,6 +23,8 @@ import tc.oc.pgm.goals.GoalModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
+import tc.oc.pgm.maptag.MapTag;
+import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.Region;
@@ -48,10 +50,18 @@ public class ScoreModule extends MapModule {
 
   private static final Component GAME =
       new PersonalizedTranslatable("match.scoreboard.scores.title");
+  private static final MapTag DEATHMATCH_TAG = MapTag.forName("deathmatch");
+  private static final MapTag SCOREBOX_TAG = MapTag.forName("scorebox");
 
   @Override
   public Component getGame(MapModuleContext context) {
     return GAME;
+  }
+
+  @Override
+  public void loadTags(MapTagSet tags) {
+    if (config.killScore != 0 || config.deathScore != 0) tags.add(DEATHMATCH_TAG);
+    if (!scoreBoxFactories.isEmpty()) tags.add(SCOREBOX_TAG);
   }
 
   @Override
@@ -70,11 +80,6 @@ public class ScoreModule extends MapModule {
   @Nonnull
   public ScoreConfig getConfig() {
     return config;
-  }
-
-  @Nonnull
-  public Set<ScoreBoxFactory> getScoreBoxFactories() {
-    return scoreBoxFactories;
   }
 
   // ---------------------

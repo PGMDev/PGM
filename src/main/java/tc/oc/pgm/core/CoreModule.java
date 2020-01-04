@@ -17,6 +17,8 @@ import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
+import tc.oc.pgm.maptag.MapTag;
+import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.modules.InfoModule;
@@ -35,11 +37,19 @@ import tc.oc.xml.Node;
     name = "Cores",
     depends = {RegionModule.class, TeamModule.class, GoalModule.class, InfoModule.class})
 public class CoreModule extends MapModule {
+
+  private static final MapTag CORE_TAG = MapTag.forName("core");
+
   protected final List<CoreFactory> coreFactories;
 
   public CoreModule(List<CoreFactory> coreFactories) {
     assert coreFactories.size() > 0;
     this.coreFactories = coreFactories;
+  }
+
+  @Override
+  public void loadTags(MapTagSet tags) {
+    tags.add(CORE_TAG);
   }
 
   @Override

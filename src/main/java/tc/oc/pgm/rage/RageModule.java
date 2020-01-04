@@ -8,6 +8,8 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.blitz.BlitzModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
+import tc.oc.pgm.maptag.MapTag;
+import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 
@@ -15,6 +17,8 @@ import tc.oc.pgm.module.ModuleDescription;
     name = "Rage",
     follows = {BlitzModule.class})
 public class RageModule extends MapModule {
+
+  private static final MapTag RAGE_TAG = MapTag.forName("rage");
 
   private final boolean blitz;
 
@@ -27,6 +31,11 @@ public class RageModule extends MapModule {
   @Override
   public Component getGame(MapModuleContext context) {
     return blitz ? GAME : null;
+  }
+
+  @Override
+  public void loadTags(MapTagSet tags) {
+    tags.add(RAGE_TAG);
   }
 
   @Override

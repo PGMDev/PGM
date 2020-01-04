@@ -17,6 +17,8 @@ import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
+import tc.oc.pgm.maptag.MapTag;
+import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.BlockBoundedValidation;
@@ -33,10 +35,17 @@ import tc.oc.xml.Node;
     name = "Destroyable",
     depends = {TeamModule.class, RegionModule.class, BlockDropsModule.class, GoalModule.class})
 public class DestroyableModule extends MapModule {
+  private static final MapTag MONUMENT_TAG = MapTag.forName("monumnet");
+
   protected final List<DestroyableFactory> destroyableFactories;
 
   public DestroyableModule(List<DestroyableFactory> destroyableFactories) {
     this.destroyableFactories = destroyableFactories;
+  }
+
+  @Override
+  public void loadTags(MapTagSet tags) {
+    tags.add(MONUMENT_TAG);
   }
 
   @Override

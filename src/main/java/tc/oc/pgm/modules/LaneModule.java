@@ -9,6 +9,8 @@ import org.jdom2.Element;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
+import tc.oc.pgm.maptag.MapTag;
+import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.Region;
@@ -24,10 +26,18 @@ import tc.oc.xml.InvalidXMLException;
     name = "Void Lane",
     depends = {RegionModule.class, TeamModule.class})
 public class LaneModule extends MapModule {
+
+  private static final MapTag RACEFORWOOL_TAG = MapTag.forName("raceforwool");
+
   private final Map<TeamFactory, Region> lanes;
 
   public LaneModule(Map<TeamFactory, Region> lanes) {
     this.lanes = lanes;
+  }
+
+  @Override
+  public void loadTags(MapTagSet tags) {
+    tags.add(RACEFORWOOL_TAG);
   }
 
   @Override

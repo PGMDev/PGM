@@ -9,6 +9,8 @@ import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.goals.GoalModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
+import tc.oc.pgm.maptag.MapTag;
+import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.module.ModuleLoadException;
@@ -20,6 +22,8 @@ import tc.oc.xml.InvalidXMLException;
     name = "Capture the Flag",
     follows = {TeamModule.class, RegionModule.class, FilterModule.class, GoalModule.class})
 public class FlagModule extends MapModule {
+  private static final MapTag FLAG_TAG = MapTag.forName("flag");
+
   private final ImmutableList<Post> posts;
   private final ImmutableList<Net> nets;
   private final ImmutableList<FlagDefinition> flags;
@@ -28,6 +32,11 @@ public class FlagModule extends MapModule {
     this.posts = ImmutableList.copyOf(posts);
     this.nets = ImmutableList.copyOf(nets);
     this.flags = ImmutableList.copyOf(flags);
+  }
+
+  @Override
+  public void loadTags(MapTagSet tags) {
+    tags.add(FLAG_TAG);
   }
 
   @Override

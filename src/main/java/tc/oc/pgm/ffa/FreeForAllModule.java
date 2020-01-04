@@ -9,6 +9,8 @@ import tc.oc.pgm.Config;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
+import tc.oc.pgm.maptag.MapTag;
+import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.start.StartModule;
@@ -23,6 +25,8 @@ import tc.oc.xml.Node;
     follows = {TeamModule.class})
 public class FreeForAllModule extends MapModule {
 
+  private static final MapTag FFA_TAG = MapTag.forName("ffa");
+
   private final FreeForAllOptions options;
 
   public FreeForAllModule(FreeForAllOptions options) {
@@ -31,6 +35,11 @@ public class FreeForAllModule extends MapModule {
 
   public FreeForAllOptions getOptions() {
     return options;
+  }
+
+  @Override
+  public void loadTags(MapTagSet tags) {
+    tags.add(FFA_TAG);
   }
 
   @Override

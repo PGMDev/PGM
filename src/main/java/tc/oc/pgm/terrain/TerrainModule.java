@@ -11,6 +11,8 @@ import tc.oc.chunk.NullChunkGenerator;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.MapModuleFactory;
+import tc.oc.pgm.maptag.MapTag;
+import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
@@ -19,14 +21,17 @@ import tc.oc.xml.Node;
 @ModuleDescription(name = "Terrain")
 public class TerrainModule extends MapModule {
 
+  private static final MapTag VANILLAWORLDGEN_TAG = MapTag.forName("vanillaworldgen");
+
   private final TerrainOptions options;
 
   public TerrainModule(TerrainOptions options) {
     this.options = options;
   }
 
-  public TerrainOptions getOptions() {
-    return options;
+  @Override
+  public void loadTags(MapTagSet tags) {
+    if (options.vanilla) tags.add(VANILLAWORLDGEN_TAG);
   }
 
   public @Nullable ChunkGenerator getChunkGenerator() {
