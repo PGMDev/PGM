@@ -8,11 +8,11 @@ import app.ashcon.intake.bukkit.parametric.Type;
 import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
 import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
-import com.google.common.collect.ImmutableSortedSet;
 import java.net.URL;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -55,7 +55,7 @@ public class MapCommands {
       search = search.filter(map -> matchesAuthor(map, author));
     }
 
-    List<PGMMap> maps = search.collect(Collectors.toList());
+    Set<PGMMap> maps = search.collect(Collectors.toCollection(TreeSet::new));
     int resultsPerPage = 8;
     int pages = (maps.size() + resultsPerPage - 1) / resultsPerPage;
 
@@ -86,7 +86,7 @@ public class MapCommands {
       public String format(PGMMap map, int index) {
         return (index + 1) + ". " + map.getInfo().getShortDescription(sender);
       }
-    }.display(audience, ImmutableSortedSet.copyOf(Comparator.naturalOrder(), maps), page);
+    }.display(audience, maps, page);
   }
 
   private static boolean matchesAuthor(PGMMap map, String query) {
