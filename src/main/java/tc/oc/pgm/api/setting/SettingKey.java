@@ -20,8 +20,8 @@ public enum SettingKey {
   PICKER("picker", PICKER_AUTO, PICKER_ON, PICKER_OFF), // Changes when the picker is displayed
   OBSERVERS(
       Arrays.asList("observers", "obs"),
-      OBSERVERS_SHOWN,
-      OBSERVERS_HIDDEN); // Changes if observers are visible
+      OBSERVERS_ON,
+      OBSERVERS_OFF); // Changes if observers are visible
 
   private final List<String> aliases;
   private final SettingValue[] values;
