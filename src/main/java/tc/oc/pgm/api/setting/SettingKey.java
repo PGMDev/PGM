@@ -19,10 +19,7 @@ public enum SettingKey {
       Arrays.asList("death", "dms"), DEATH_ALL, DEATH_OWN), // Changes which death messages are seen
   PICKER("picker", PICKER_AUTO, PICKER_ON, PICKER_OFF), // Changes when the picker is displayed
   JOIN_MESSAGES(
-      Arrays.asList("join-messages", "jms"),
-      JOIN_MESSAGES_AUTO,
-      JOIN_MESSAGES_ALL,
-      JOIN_MESSAGES_NONE), // Changes which join messages are seen
+      Arrays.asList("join", "jms"), JOIN_ON, JOIN_OFF), // Changes which join messages are seen
   ;
 
   private final List<String> aliases;

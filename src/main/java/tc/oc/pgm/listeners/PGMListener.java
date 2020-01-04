@@ -136,18 +136,11 @@ public class PGMListener implements Listener {
       if (player.equals(viewer)) continue;
 
       SettingValue option = viewer.getSettings().getValue(SettingKey.JOIN_MESSAGES);
-      switch (option) {
-        case JOIN_MESSAGES_NONE:
-          continue viewerLoop;
-        case JOIN_MESSAGES_AUTO:
-          if (match.getPlayers().size() > JOIN_MESSAGE_ONLINE_THRESHOLD) {
-            continue viewerLoop;
-          }
+      if (option.equals(SettingValue.JOIN_ON)) {
+        String name = player.getBukkit().getDisplayName(viewer.getBukkit()) + ChatColor.YELLOW;
+        Component component = new PersonalizedTranslatable(messageKey, name);
+        viewer.sendMessage(new PersonalizedText(component, ChatColor.YELLOW));
       }
-
-      String name = player.getBukkit().getDisplayName(viewer.getBukkit()) + ChatColor.YELLOW;
-      Component component = new PersonalizedTranslatable(messageKey, name);
-      viewer.sendMessage(new PersonalizedText(component, ChatColor.YELLOW));
     }
   }
 
