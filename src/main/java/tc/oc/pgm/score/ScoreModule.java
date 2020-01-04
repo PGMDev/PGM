@@ -23,7 +23,7 @@ import tc.oc.pgm.goals.GoalModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
-import tc.oc.pgm.match.MatchModule;
+import tc.oc.pgm.maptag.MapTag;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.regions.RegionModule;
@@ -37,7 +37,7 @@ import tc.oc.xml.Node;
     name = "Score",
     requires = {RegionModule.class, FilterModule.class},
     follows = {GoalModule.class, BlitzModule.class})
-public class ScoreModule extends MapModule {
+public class ScoreModule extends MapModule<ScoreMatchModule> {
   public ScoreModule(@Nonnull ScoreConfig config, @Nonnull Set<ScoreBoxFactory> scoreBoxFactories) {
     Preconditions.checkNotNull(config, "score config");
     Preconditions.checkNotNull(scoreBoxFactories, "score box factories");
@@ -48,6 +48,8 @@ public class ScoreModule extends MapModule {
 
   private static final Component GAME =
       new PersonalizedTranslatable("match.scoreboard.scores.title");
+  private static final MapTag DEATHMATCH_TAG = MapTag.forName("deathmatch");
+  private static final MapTag SCOREBOX_TAG = MapTag.forName("scorebox");
 
   @Override
   public Component getGame(MapModuleContext context) {
@@ -55,7 +57,13 @@ public class ScoreModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public void loadTags(Set<MapTag> tags) {
+    if (config.killScore != 0 || config.deathScore != 0) tags.add(DEATHMATCH_TAG);
+    if (!scoreBoxFactories.isEmpty()) tags.add(SCOREBOX_TAG);
+  }
+
+  @Override
+  public ScoreMatchModule createMatchModule(Match match) {
     ImmutableSet.Builder<ScoreBox> scoreBoxes = ImmutableSet.builder();
     for (ScoreBoxFactory factory : this.scoreBoxFactories) {
       scoreBoxes.add(factory.createScoreBox(match));

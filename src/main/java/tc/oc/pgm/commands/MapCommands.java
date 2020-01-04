@@ -8,6 +8,7 @@ import app.ashcon.intake.bukkit.parametric.Type;
 import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
 import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
+import com.google.common.collect.ImmutableSortedSet;
 import java.net.URL;
 import java.util.List;
 import java.util.Locale;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.command.CommandSender;
 import tc.oc.component.Component;
@@ -32,7 +34,10 @@ import tc.oc.pgm.map.Contributor;
 import tc.oc.pgm.map.MapInfo;
 import tc.oc.pgm.map.MapLibrary;
 import tc.oc.pgm.map.PGMMap;
+import tc.oc.pgm.maptag.MapTag;
+import tc.oc.pgm.maptag.MapTagsCondition;
 import tc.oc.pgm.util.PrettyPaginatedResult;
+import tc.oc.util.components.ComponentUtils;
 import tc.oc.util.components.Components;
 
 public class MapCommands {
@@ -47,10 +52,11 @@ public class MapCommands {
       Audience audience,
       CommandSender sender,
       MapLibrary library,
+      MapTagsCondition mapTags,
       @Fallback(Type.NULL) @Switch('a') String author,
       @Default("1") int page)
       throws CommandException {
-    Stream<PGMMap> search = library.getMaps().stream();
+    Stream<PGMMap> search = library.getMaps().stream().filter(mapTags);
     if (author != null) {
       search = search.filter(map -> matchesAuthor(map, author));
     }
@@ -59,34 +65,18 @@ public class MapCommands {
     int resultsPerPage = 8;
     int pages = (maps.size() + resultsPerPage - 1) / resultsPerPage;
 
+    String title =
+        ComponentUtils.paginate(
+            AllTranslations.get().translate("command.map.mapList.title", sender), page, pages);
     String listHeader =
-        ChatColor.BLUE.toString()
-            + ChatColor.STRIKETHROUGH
-            + "---------------"
-            + ChatColor.RESET
-            + " "
-            + AllTranslations.get().translate("command.map.mapList.title", sender)
-            + ChatColor.DARK_AQUA
-            + " ("
-            + ChatColor.AQUA
-            + page
-            + ChatColor.DARK_AQUA
-            + " of "
-            + ChatColor.AQUA
-            + pages
-            + ChatColor.DARK_AQUA
-            + ") "
-            + ChatColor.BLUE.toString()
-            + ChatColor.STRIKETHROUGH
-            + " ---------------"
-            + ChatColor.RESET;
+        ComponentUtils.horizontalLineHeading(title, ChatColor.BLUE, ComponentUtils.MAX_CHAT_WIDTH);
 
     new PrettyPaginatedResult<PGMMap>(listHeader, resultsPerPage) {
       @Override
       public String format(PGMMap map, int index) {
         return (index + 1) + ". " + map.getInfo().getShortDescription(sender);
       }
-    }.display(audience, maps, page);
+    }.display(audience, ImmutableSortedSet.copyOf(maps), page);
   }
 
   private static boolean matchesAuthor(PGMMap map, String query) {
@@ -109,12 +99,14 @@ public class MapCommands {
     MapInfo mapInfo = map.getInfo();
     audience.sendMessage(mapInfo.getFormattedMapTitle());
 
-    Component edition =
-        new PersonalizedText(
-            mapInfoLabel("command.map.mapInfo.edition"),
-            new PersonalizedText(mapInfo.getLocalizedEdition(), ChatColor.GOLD));
+    Set<MapTag> mapTags = map.getPersistentContext().getMapTags();
+    audience.sendMessage(createTagsComponent(mapTags).color(ChatColor.DARK_AQUA));
 
-    audience.sendMessage(edition);
+    Component edition = new PersonalizedText(mapInfo.getLocalizedEdition(), ChatColor.GOLD);
+    if (!edition.toPlainText().isEmpty()) {
+      audience.sendMessage(
+          new PersonalizedText(mapInfoLabel("command.map.mapInfo.edition"), edition));
+    }
 
     audience.sendMessage(
         new PersonalizedText(
@@ -191,6 +183,30 @@ public class MapCommands {
                       new PersonalizedTranslatable("command.map.mapInfo.sourceCode.tip")
                           .render())));
     }
+  }
+
+  private static Component createTagsComponent(Set<MapTag> tags) {
+    checkNotNull(tags);
+
+    Component result = new PersonalizedText();
+    MapTag[] mapTags = tags.toArray(new MapTag[0]);
+    for (int i = 0; i < mapTags.length; i++) {
+      if (i != 0) {
+        result.extra(Components.space());
+      }
+
+      MapTag mapTag = mapTags[i];
+      Component component =
+          mapTags[i]
+              .getComponentName()
+              .clickEvent(ClickEvent.Action.RUN_COMMAND, "/maplist " + mapTag.toString())
+              .hoverEvent(
+                  HoverEvent.Action.SHOW_TEXT,
+                  new PersonalizedTranslatable("command.map.mapTag.hover", mapTag.toString())
+                      .render());
+      result.extra(component);
+    }
+    return result;
   }
 
   @Command(
