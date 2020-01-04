@@ -42,10 +42,9 @@ public class SettingKeyProvider implements BukkitProvider<SettingKey> {
 
     List<String> suggestions = new ArrayList<>();
     for (SettingKey settingKey : SettingKey.values()) {
-      for (String alias : settingKey.getAliases()) {
-        if (alias.toLowerCase().startsWith(query.toLowerCase())) {
-          suggestions.add(alias);
-        }
+      String name = settingKey.getName();
+      if (name.toLowerCase().startsWith(query.toLowerCase())) {
+        suggestions.add(name);
       }
     }
 
