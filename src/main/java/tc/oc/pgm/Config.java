@@ -387,25 +387,25 @@ public class Config {
 
   public static class SidebarMessage {
     public static boolean bottomEnabled() {
-      return getConfiguration().getString("sidebar-message.message-bottom", "").length() > 0;
+      return getConfiguration().getString("sidebar.bottom", "").length() > 0;
     }
 
     public static boolean topEnabled() {
-      return getConfiguration().getString("sidebar-message.message-top", "").length() > 0;
+      return getConfiguration().getString("sidebar.top", "").length() > 0;
     }
 
     public static String formatBottom() {
       return ChatColor.translateAlternateColorCodes(
-          '&', getConfiguration().getString("sidebar-message.message-bottom"));
+          '&', getConfiguration().getString("sidebar.bottom"));
     }
 
     public static String formatTop() {
       return ChatColor.translateAlternateColorCodes(
-          '&', getConfiguration().getString("sidebar-message.message-top"));
+          '&', getConfiguration().getString("sidebar.top"));
     }
 
     public static boolean overwriteExisting() {
-      return getConfiguration().getBoolean("sidebar-message.overwrite-existing", false);
+      return getConfiguration().getBoolean("sidebar.overwrite", false);
     }
   }
 }

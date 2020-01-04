@@ -110,10 +110,10 @@ experiments:
   # Ticks to wait to destroy older match
   destroy-match-delay: 100
 
-sidebar-message:
+sidebar:
   # Text may be formatted with '&'
   # Leave blank to disable
-  message-top: ""
-  message-bottom: ""
+  top: ""
+  bottom: ""
   # If the sidebar message should overwrite lines in the sidebar when it is full
-  overwrite-existing: false
+  overwrite: false
