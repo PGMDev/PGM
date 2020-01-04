@@ -52,7 +52,7 @@ public class MapCommands {
       throws CommandException {
     Stream<PGMMap> search = library.getMaps().stream();
     if (author != null) {
-        search = search.filter(map -> matchesAuthor(map, author));
+      search = search.filter(map -> matchesAuthor(map, author));
     }
 
     List<PGMMap> maps = search.collect(Collectors.toList());
