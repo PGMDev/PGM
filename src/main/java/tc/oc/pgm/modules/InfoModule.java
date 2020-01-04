@@ -1,6 +1,8 @@
 package tc.oc.pgm.modules;
 
+import com.google.common.collect.ImmutableSortedSet;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -17,7 +19,6 @@ import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
 import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.maptag.MapTagSet;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.SemanticVersion;
@@ -108,7 +109,7 @@ public class InfoModule extends MapModule {
         XMLUtils.parseBoolean(
             Node.fromLastChildOrAttr(root, "friendly-fire", "friendlyfire"), false);
 
-    MapTagSet mapTagSet = readMapTags(root);
+    Set<MapTag> mapTags = readMapTags(root);
 
     return new InfoModule(
         new MapInfo(
@@ -124,7 +125,7 @@ public class InfoModule extends MapModule {
             difficulty,
             dimension,
             friendlyFire,
-            mapTagSet));
+            mapTags));
   }
 
   private static List<Contributor> readContributorList(Element root, String topLevelTag, String tag)
@@ -146,8 +147,8 @@ public class InfoModule extends MapModule {
     return contribs;
   }
 
-  private static MapTagSet readMapTags(Element root) throws InvalidXMLException {
-    MapTagSet mapTags = MapTagSet.mutable();
+  private static Set<MapTag> readMapTags(Element root) throws InvalidXMLException {
+    Set<MapTag> mapTags = new HashSet<>();
     for (Element el : XMLUtils.flattenElements(root, "maptags", "maptag")) {
       String name = el.getTextNormalize();
       if (name.startsWith(Character.toString(MapTag.SYMBOL))) {
@@ -162,6 +163,6 @@ public class InfoModule extends MapModule {
       mapTags.add(MapTag.forName(name));
     }
 
-    return MapTagSet.immutable(mapTags);
+    return ImmutableSortedSet.copyOf(mapTags);
   }
 }

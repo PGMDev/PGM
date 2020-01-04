@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Iterables;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
@@ -13,7 +14,7 @@ import org.bukkit.command.CommandSender;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.AllTranslations;
-import tc.oc.pgm.maptag.MapTagSet;
+import tc.oc.pgm.maptag.MapTag;
 import tc.oc.pgm.util.TranslationUtils;
 import tc.oc.util.SemanticVersion;
 import tc.oc.util.StringUtils;
@@ -56,7 +57,7 @@ public class MapInfo {
   public final boolean friendlyFire;
 
   /** Custom map tags defined by the map author. */
-  public final MapTagSet mapTagSet;
+  public final Set<MapTag> mapTags;
 
   public MapInfo(
       SemanticVersion proto,
@@ -71,7 +72,7 @@ public class MapInfo {
       @Nullable Difficulty difficulty,
       Environment dimension,
       boolean friendlyFire,
-      MapTagSet mapTagSet) {
+      Set<MapTag> mapTags) {
 
     this.id = slug != null ? slug : name.toLowerCase().replaceAll("[^a-z\\d]", "_");
 
@@ -86,7 +87,7 @@ public class MapInfo {
     this.difficulty = difficulty;
     this.dimension = checkNotNull(dimension);
     this.friendlyFire = friendlyFire;
-    this.mapTagSet = checkNotNull(mapTagSet);
+    this.mapTags = checkNotNull(mapTags);
   }
 
   public String slug() {

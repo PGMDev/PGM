@@ -2,6 +2,8 @@ package tc.oc.pgm.map;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.bukkit.plugin.Plugin;
@@ -16,7 +18,7 @@ import tc.oc.pgm.filters.LegacyFilterParser;
 import tc.oc.pgm.kits.FeatureKitParser;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.kits.LegacyKitParser;
-import tc.oc.pgm.maptag.MapTagSet;
+import tc.oc.pgm.maptag.MapTag;
 import tc.oc.pgm.module.ModuleInfo;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.module.ModuleLoader;
@@ -76,7 +78,7 @@ public class MapModuleContext extends ModuleLoader<MapModule> {
       maxPlayers += ffam.getOptions().maxPlayers;
     }
 
-    MapTagSet mapTags = MapTagSet.mutable(info.mapTagSet);
+    Set<MapTag> mapTags = new TreeSet<>(info.mapTags);
     for (MapModule module : getModules()) {
       module.loadTags(mapTags);
     }

@@ -2,7 +2,10 @@ package tc.oc.pgm.map;
 
 import static com.google.common.base.Preconditions.*;
 
-import tc.oc.pgm.maptag.MapTagSet;
+import com.google.common.collect.ImmutableSortedSet;
+import java.util.Comparator;
+import java.util.Set;
+import tc.oc.pgm.maptag.MapTag;
 import tc.oc.util.SemanticVersion;
 
 /**
@@ -15,14 +18,14 @@ public class MapPersistentContext {
   private final SemanticVersion proto;
   private final MapInfo mapInfo;
   private final int maxPlayers;
-  private final MapTagSet mapTags;
+  private final Set<MapTag> mapTags;
 
   public MapPersistentContext(
-      SemanticVersion proto, MapInfo mapInfo, int maxPlayers, MapTagSet mapTags) {
+      SemanticVersion proto, MapInfo mapInfo, int maxPlayers, Set<MapTag> mapTags) {
     this.proto = proto;
     this.mapInfo = checkNotNull(mapInfo);
     this.maxPlayers = maxPlayers;
-    this.mapTags = MapTagSet.immutable(checkNotNull(mapTags));
+    this.mapTags = ImmutableSortedSet.copyOf(Comparator.naturalOrder(), checkNotNull(mapTags));
   }
 
   public SemanticVersion getProto() {
@@ -37,7 +40,7 @@ public class MapPersistentContext {
     return mapInfo;
   }
 
-  public MapTagSet getMapTags() {
+  public Set<MapTag> getMapTags() {
     return mapTags;
   }
 }

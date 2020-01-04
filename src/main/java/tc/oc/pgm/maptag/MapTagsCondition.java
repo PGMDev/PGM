@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.*;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 import tc.oc.pgm.map.PGMMap;
 
@@ -29,7 +30,7 @@ public class MapTagsCondition implements Predicate<PGMMap> {
   public boolean test(PGMMap map) {
     checkNotNull(map);
 
-    MapTagSet mapTags = map.getPersistentContext().getMapTags();
+    Set<MapTag> mapTags = map.getPersistentContext().getMapTags();
     for (Map.Entry<MapTag, Boolean> entry : params.entrySet()) {
       if (mapTags.contains(entry.getKey()) != entry.getValue()) {
         return false;
