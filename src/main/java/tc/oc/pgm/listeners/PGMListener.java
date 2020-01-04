@@ -135,7 +135,7 @@ public class PGMListener implements Listener {
     for (MatchPlayer viewer : match.getPlayers()) {
       if (player.equals(viewer)) continue;
 
-      SettingValue option = viewer.getSettings().getValue(SettingKey.JOIN_MESSAGES);
+      SettingValue option = viewer.getSettings().getValue(SettingKey.JOIN);
       if (option.equals(SettingValue.JOIN_ON)) {
         String name = player.getBukkit().getDisplayName(viewer.getBukkit()) + ChatColor.YELLOW;
         Component component = new PersonalizedTranslatable(messageKey, name);
