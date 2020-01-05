@@ -1,12 +1,11 @@
 package tc.oc.pgm.rotation;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.map.PGMMap;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class VotingPool extends MapPool {
 
@@ -78,5 +77,4 @@ public class VotingPool extends MapPool {
         .getScheduler(MatchScope.LOADED)
         .runTaskLater(20 * 5, () -> match.getPlayers().forEach(currentPoll::sendBook));
   }
-
 }

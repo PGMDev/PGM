@@ -1,6 +1,9 @@
 package tc.oc.pgm.rotation;
 
 import app.ashcon.intake.CommandException;
+import java.lang.ref.WeakReference;
+import java.util.*;
+import java.util.stream.Collectors;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -17,10 +20,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.map.PGMMap;
 import tc.oc.world.NMSHacks;
-
-import java.lang.ref.WeakReference;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /** Represents a polling process, with a set of options. */
 public class MapPoll {
@@ -102,8 +101,7 @@ public class MapPoll {
     List<Component> content = new ArrayList<>(votes.size() + 2);
     content.add(
         new PersonalizedText(
-            new PersonalizedTranslatable("command.pool.vote.book.header"),
-            ChatColor.DARK_PURPLE));
+            new PersonalizedTranslatable("command.pool.vote.book.header"), ChatColor.DARK_PURPLE));
     content.add(new PersonalizedText("\n\n"));
 
     for (PGMMap pgmMap : votes.keySet()) content.add(getMapBookComponent(viewer, pgmMap));
@@ -123,11 +121,11 @@ public class MapPoll {
   private Component getMapBookComponent(MatchPlayer viewer, PGMMap map) {
     boolean voted = votes.get(map).contains(viewer.getId());
     return new PersonalizedText(
-        new PersonalizedText(
-            voted ? SYMBOL_VOTED : SYMBOL_IGNORE,
-            voted ? ChatColor.DARK_GREEN : ChatColor.DARK_RED),
-        new PersonalizedText(" ").bold(!voted), // Fix 1px symbol diff
-        new PersonalizedText(map.getName() + "\n", ChatColor.BOLD, ChatColor.GOLD))
+            new PersonalizedText(
+                voted ? SYMBOL_VOTED : SYMBOL_IGNORE,
+                voted ? ChatColor.DARK_GREEN : ChatColor.DARK_RED),
+            new PersonalizedText(" ").bold(!voted), // Fix 1px symbol diff
+            new PersonalizedText(map.getName() + "\n", ChatColor.BOLD, ChatColor.GOLD))
         .hoverEvent(
             HoverEvent.Action.SHOW_TEXT,
             new PersonalizedTranslatable("command.pool.vote.hover").render(viewer.getBukkit()))
@@ -144,8 +142,7 @@ public class MapPoll {
    */
   public boolean toggleVote(PGMMap vote, UUID player) throws CommandException {
     Set<UUID> votes = this.votes.get(vote);
-    if (votes == null)
-      throw new CommandException(vote.getName() + " is not an option in the poll");
+    if (votes == null) throw new CommandException(vote.getName() + " is not an option in the poll");
 
     if (votes.add(player)) return true;
     votes.remove(player);
