@@ -33,7 +33,7 @@ import tc.oc.xml.Node;
     name = "Destroyable",
     depends = {TeamModule.class, RegionModule.class, BlockDropsModule.class, GoalModule.class})
 public class DestroyableModule extends MapModule<DestroyableMatchModule> {
-  private static final MapTag MONUMENT_TAG = MapTag.forName("monumnet");
+  private static final MapTag MONUMENT_TAG = MapTag.forName("monument");
 
   protected final List<DestroyableFactory> destroyableFactories;
 
