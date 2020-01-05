@@ -4,12 +4,18 @@ import static com.google.common.base.Preconditions.*;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
+import app.ashcon.intake.bukkit.parametric.Type;
+import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
 import app.ashcon.intake.parametric.annotation.Default;
+import app.ashcon.intake.parametric.annotation.Switch;
 import com.google.common.collect.ImmutableSortedSet;
 import java.net.URL;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -48,10 +54,15 @@ public class MapCommands {
       CommandSender sender,
       MapLibrary library,
       MapTagsCondition mapTags,
+      @Fallback(Type.NULL) @Switch('a') String author,
       @Default("1") int page)
       throws CommandException {
-    List<PGMMap> maps = library.getMaps().stream().filter(mapTags).collect(Collectors.toList());
+    Stream<PGMMap> search = library.getMaps().stream().filter(mapTags);
+    if (author != null) {
+      search = search.filter(map -> matchesAuthor(map, author));
+    }
 
+    Set<PGMMap> maps = search.collect(Collectors.toCollection(TreeSet::new));
     int resultsPerPage = 8;
     int pages = (maps.size() + resultsPerPage - 1) / resultsPerPage;
 
@@ -67,6 +78,18 @@ public class MapCommands {
         return (index + 1) + ". " + map.getInfo().getShortDescription(sender);
       }
     }.display(audience, ImmutableSortedSet.copyOf(maps), page);
+  }
+
+  private static boolean matchesAuthor(PGMMap map, String query) {
+    checkNotNull(map);
+    query = checkNotNull(query).toLowerCase(Locale.ROOT);
+
+    for (Contributor contributor : map.getInfo().getNamedAuthors()) {
+      if (contributor.getName().toLowerCase(Locale.ROOT).contains(query)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Command(
