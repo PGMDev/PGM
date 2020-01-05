@@ -111,9 +111,13 @@ experiments:
   destroy-match-delay: 100
 
 sidebar:
-  # Text may be formatted with '&'
+  # Messages may be formatted with '&'
   # Leave blank to disable
   top: ""
   bottom: ""
+  # If there should be a one-line gap between the messages and objectives
+  # Has no effect if the corresponding message is blank
+  gap-top: true
+  gap-bottom: true
   # If the sidebar message should overwrite lines in the sidebar when it is full
   overwrite: false
