@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 /**
  * A toggleable setting with various possible {@link SettingValue}s.
@@ -17,7 +18,19 @@ public enum SettingKey {
   CHAT("chat", CHAT_TEAM, CHAT_GLOBAL, CHAT_ADMIN), // Changes the default chat channel
   DEATH(
       Arrays.asList("death", "dms"), DEATH_ALL, DEATH_OWN), // Changes which death messages are seen
-  PICKER("picker", PICKER_AUTO, PICKER_ON, PICKER_OFF); // Changes when the picker is displayed
+  PICKER("picker", PICKER_AUTO, PICKER_ON, PICKER_OFF), // Changes when the picker is displayed
+  JOIN(Arrays.asList("join", "jms"), JOIN_ON, JOIN_OFF), // Changes if join messages are seen
+  MESSAGE(
+      Arrays.asList("message", "dm"),
+      MESSAGE_ON,
+      MESSAGE_OFF), // Changes if direct messages are accepted
+  OBSERVERS(Arrays.asList("observers", "obs"), OBSERVERS_ON, OBSERVERS_OFF) {
+    @Override
+    public void update(MatchPlayer player) {
+      player.resetVisibility();
+    }
+  }, // Changes if observers are visible
+  ;
 
   private final List<String> aliases;
   private final SettingValue[] values;
@@ -72,4 +85,11 @@ public enum SettingKey {
   public String toString() {
     return getName();
   }
+
+  /**
+   * Called whether setting has changed and is ready to be updated internally.
+   *
+   * @param player owner of the setting
+   */
+  public void update(MatchPlayer player) {}
 }

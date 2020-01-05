@@ -15,6 +15,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
+import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.named.NameStyle;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
@@ -82,6 +83,7 @@ public class ChatDispatcher implements Listener {
     // If a player managed to send a default message without permissions, reset their chat channel
     if (sender != null && !sender.getBukkit().hasPermission(Permissions.ADMINCHAT)) {
       sender.getSettings().resetValue(SettingKey.CHAT);
+      SettingKey.CHAT.update(sender);
       sender.sendWarning(
           "You do not have permissions for admin chat, your chat setting has now been reset",
           true); // TODO: translate
@@ -102,6 +104,20 @@ public class ChatDispatcher implements Listener {
       desc = "Send a direct message to a player",
       usage = "[player] [message]")
   public void sendDirect(Match match, MatchPlayer sender, Player receiver, @Text String message) {
+    MatchPlayer matchReceiver = manager.getPlayer(receiver);
+    if (matchReceiver != null) {
+      SettingValue option = matchReceiver.getSettings().getValue(SettingKey.MESSAGE);
+
+      if (option.equals(SettingValue.MESSAGE_OFF)
+          && !sender.getBukkit().hasPermission(Permissions.STAFF)) {
+        String name = receiver.getDisplayName(sender.getBukkit()) + ChatColor.RED;
+        Component component =
+            new PersonalizedTranslatable("command.message.blockedNoPermissions", name);
+        sender.sendMessage(new PersonalizedText(component, ChatColor.RED));
+        return;
+      }
+    }
+
     if (sender != null) {
       lastMessagedBy.put(receiver, sender.getId());
     }
