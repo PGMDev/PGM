@@ -47,10 +47,6 @@ import tc.oc.pgm.gamerules.GameRulesModule;
 import tc.oc.pgm.modules.TimeLockModule;
 
 public class PGMListener implements Listener {
-
-  /** If player count exceeds this number, viewers with "AUTO" setting won't receive any message. */
-  private static final int JOIN_MESSAGE_ONLINE_THRESHOLD = 30;
-
   private final Plugin parent;
   private final MatchManager mm;
 
@@ -130,9 +126,7 @@ public class PGMListener implements Listener {
     checkNotNull(player);
     checkNotNull(messageKey);
 
-    Match match = player.getMatch();
-    viewerLoop:
-    for (MatchPlayer viewer : match.getPlayers()) {
+    for (MatchPlayer viewer : player.getMatch().getPlayers()) {
       if (player.equals(viewer)) continue;
 
       SettingValue option = viewer.getSettings().getValue(SettingKey.JOIN);
