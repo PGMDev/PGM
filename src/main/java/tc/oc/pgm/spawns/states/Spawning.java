@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerAttackEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import tc.oc.component.Component;
@@ -55,6 +56,12 @@ public abstract class Spawning extends Participating {
 
   @Override
   public void onEvent(final PlayerItemTransferEvent event) {
+    super.onEvent(event);
+    event.setCancelled(true);
+  }
+
+  @Override
+  public void onEvent(EntityDamageEvent event) {
     super.onEvent(event);
     event.setCancelled(true);
   }
