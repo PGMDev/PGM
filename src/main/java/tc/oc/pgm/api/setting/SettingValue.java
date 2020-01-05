@@ -27,6 +27,12 @@ public enum SettingValue {
 
   JOIN_ON("join", "all"), // Send all join messages
   JOIN_OFF("join", "none"), // Never send join messages
+
+  MESSAGE_ON("message", "on"), // Always accept direct messages
+  MESSAGE_OFF("message", "off"), // Never accept direct messages
+
+  OBSERVERS_ON("observers", "on"), // Show observers
+  OBSERVERS_OFF("observers", "off"), // Hide observers
   ;
 
   private final String key;

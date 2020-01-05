@@ -45,6 +45,7 @@ public class SettingKeyProvider implements BukkitProvider<SettingKey> {
       for (String alias : settingKey.getAliases()) {
         if (alias.toLowerCase().startsWith(query.toLowerCase())) {
           suggestions.add(alias);
+          break; // don't suggest more aliases for this setting
         }
       }
     }

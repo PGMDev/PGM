@@ -36,6 +36,8 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.api.setting.SettingKey;
+import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.PlayerResetEvent;
@@ -173,7 +175,10 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
 
   @Override
   public boolean canSee(MatchPlayer other) {
-    return (isObserving() || other.isParticipating()) && other.isVisible();
+    if (!other.isVisible()) return false;
+    if (other.isParticipating()) return true;
+    return isObserving()
+        && getSettings().getValue(SettingKey.OBSERVERS) == SettingValue.OBSERVERS_ON;
   }
 
   @Override

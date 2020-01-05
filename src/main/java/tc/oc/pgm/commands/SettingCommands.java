@@ -78,6 +78,7 @@ public class SettingCommands {
               new PersonalizedText(key.getName()),
               new PersonalizedText(old.getName(), ChatColor.GRAY),
               new PersonalizedText(value.getName(), ChatColor.GREEN)));
+      key.update(player);
     }
   }
 }
