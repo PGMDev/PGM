@@ -11,7 +11,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.points.PointParser;
 import tc.oc.pgm.regions.RegionModule;
@@ -23,7 +22,7 @@ import tc.oc.xml.InvalidXMLException;
     name = "spawns",
     depends = {RegionModule.class, KitModule.class},
     follows = {TeamModule.class})
-public class SpawnModule extends MapModule {
+public class SpawnModule extends MapModule<SpawnMatchModule> {
 
   public static final Duration MINIMUM_RESPAWN_DELAY = Duration.standardSeconds(2);
   public static final Duration IGNORE_CLICKS_DELAY = Duration.millis(500);
@@ -40,7 +39,7 @@ public class SpawnModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public SpawnMatchModule createMatchModule(Match match) {
     return new SpawnMatchModule(match, this);
   }
 

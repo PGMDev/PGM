@@ -8,7 +8,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.regions.RegionModule;
@@ -17,7 +16,7 @@ import tc.oc.xml.InvalidXMLException;
 @ModuleDescription(
     name = "Playable Region",
     depends = {RegionModule.class})
-public class PlayableRegionModule extends MapModule implements Listener {
+public class PlayableRegionModule extends MapModule<PlayableRegionMatchModule> implements Listener {
   protected final Region playableRegion;
 
   public PlayableRegionModule(Region playableRegion) {
@@ -25,7 +24,7 @@ public class PlayableRegionModule extends MapModule implements Listener {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public PlayableRegionMatchModule createMatchModule(Match match) {
     return new PlayableRegionMatchModule(match, this.playableRegion);
   }
 

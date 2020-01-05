@@ -3,6 +3,7 @@ package tc.oc.pgm.wool;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Logger;
 import org.bukkit.DyeColor;
 import org.bukkit.util.Vector;
@@ -15,7 +16,7 @@ import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
-import tc.oc.pgm.match.MatchModule;
+import tc.oc.pgm.maptag.MapTag;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.regions.RegionModule;
@@ -30,7 +31,10 @@ import tc.oc.xml.InvalidXMLException;
 @ModuleDescription(
     name = "Wool",
     depends = {RegionModule.class, TeamModule.class, GoalModule.class})
-public class WoolModule extends MapModule {
+public class WoolModule extends MapModule<WoolMatchModule> {
+
+  private static final MapTag WOOL_TAG = MapTag.forName("wool");
+
   protected final Multimap<TeamFactory, MonumentWoolFactory> woolFactories;
 
   public WoolModule(Multimap<TeamFactory, MonumentWoolFactory> woolFactories) {
@@ -43,7 +47,12 @@ public class WoolModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public void loadTags(Set<MapTag> tags) {
+    tags.add(WOOL_TAG);
+  }
+
+  @Override
+  public WoolMatchModule createMatchModule(Match match) {
     Multimap<Team, MonumentWool> wools = ArrayListMultimap.create();
     for (Entry<TeamFactory, MonumentWoolFactory> woolEntry : this.woolFactories.entries()) {
       Team team = match.needMatchModule(TeamMatchModule.class).getTeam(woolEntry.getKey());

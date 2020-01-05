@@ -3,6 +3,7 @@ package tc.oc.pgm.controlpoint;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -12,7 +13,7 @@ import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.GoalModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.MatchModule;
+import tc.oc.pgm.maptag.MapTag;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.teams.TeamModule;
@@ -22,7 +23,9 @@ import tc.oc.xml.InvalidXMLException;
 @ModuleDescription(
     name = "Control Points",
     depends = {TeamModule.class, GoalModule.class, RegionModule.class, FilterModule.class})
-public class ControlPointModule extends MapModule {
+public class ControlPointModule extends MapModule<ControlPointMatchModule> {
+
+  private static final MapTag CONTROLPOINT_TAG = MapTag.forName("controlpoint");
 
   private final List<ControlPointDefinition> definitions;
 
@@ -31,7 +34,12 @@ public class ControlPointModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public void loadTags(Set<MapTag> tags) {
+    tags.add(CONTROLPOINT_TAG);
+  }
+
+  @Override
+  public ControlPointMatchModule createMatchModule(Match match) {
     ImmutableList.Builder<ControlPoint> controlPoints = new ImmutableList.Builder<>();
 
     for (ControlPointDefinition definition : this.definitions) {

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 import org.bukkit.Material;
 import org.bukkit.material.MaterialData;
@@ -17,7 +18,7 @@ import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
-import tc.oc.pgm.match.MatchModule;
+import tc.oc.pgm.maptag.MapTag;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.modules.InfoModule;
 import tc.oc.pgm.regions.BlockBoundedValidation;
@@ -34,7 +35,10 @@ import tc.oc.xml.Node;
 @ModuleDescription(
     name = "Cores",
     depends = {RegionModule.class, TeamModule.class, GoalModule.class, InfoModule.class})
-public class CoreModule extends MapModule {
+public class CoreModule extends MapModule<CoreMatchModule> {
+
+  private static final MapTag CORE_TAG = MapTag.forName("core");
+
   protected final List<CoreFactory> coreFactories;
 
   public CoreModule(List<CoreFactory> coreFactories) {
@@ -43,7 +47,12 @@ public class CoreModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public void loadTags(Set<MapTag> tags) {
+    tags.add(CORE_TAG);
+  }
+
+  @Override
+  public CoreMatchModule createMatchModule(Match match) {
     ImmutableList.Builder<Core> cores = new ImmutableList.Builder<>();
     for (CoreFactory factory : this.coreFactories) {
       Core core = new Core(factory, match);

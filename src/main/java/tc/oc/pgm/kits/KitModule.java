@@ -9,7 +9,6 @@ import tc.oc.pgm.features.FeatureDefinition;
 import tc.oc.pgm.itemmeta.ItemModifyModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.modules.InfoModule;
 import tc.oc.xml.InvalidXMLException;
@@ -17,10 +16,10 @@ import tc.oc.xml.InvalidXMLException;
 @ModuleDescription(
     name = "Kit",
     requires = {InfoModule.class})
-public class KitModule extends MapModule {
+public class KitModule extends MapModule<KitMatchModule> {
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public KitMatchModule createMatchModule(Match match) {
     return new KitMatchModule(match);
   }
 

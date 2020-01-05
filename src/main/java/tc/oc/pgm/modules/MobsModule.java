@@ -11,13 +11,12 @@ import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 
 @ModuleDescription(name = "Mobs", depends = FilterModule.class)
-public class MobsModule extends MapModule {
+public class MobsModule extends MapModule<MobsMatchModule> {
   private final Filter mobsFilter;
 
   public MobsModule(Filter mobsFilter) {
@@ -25,7 +24,7 @@ public class MobsModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public MobsMatchModule createMatchModule(Match match) {
     return new MobsMatchModule(match, this.mobsFilter);
   }
 
