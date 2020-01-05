@@ -1,7 +1,9 @@
 package tc.oc.pgm.listeners;
 
+import static com.google.common.base.Preconditions.*;
+
 import java.util.UUID;
-import org.bukkit.ChatColor;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
@@ -21,6 +23,9 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import tc.oc.component.Component;
+import tc.oc.component.types.PersonalizedText;
+import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
@@ -33,6 +38,8 @@ import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.setting.SettingKey;
+import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.gamerules.GameRule;
@@ -86,23 +93,14 @@ public class PGMListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void broadcastJoinMessage(final PlayerJoinEvent event) {
     // Handle join message and send it to all players except the one joining
+    Match match = this.mm.getMatch(event.getWorld());
+    if (match == null) return;
+
     if (event.getJoinMessage() != null) {
       event.setJoinMessage(null);
-      Match match = this.mm.getMatch(event.getWorld());
       MatchPlayer player = match.getPlayer(event.getPlayer());
       if (player != null) {
-        for (MatchPlayer viewer : match.getPlayers()) {
-          if (!player.equals(viewer)) {
-            viewer.sendMessage(
-                ChatColor.YELLOW
-                    + AllTranslations.get()
-                        .translate(
-                            "broadcast.joinMessage",
-                            viewer.getBukkit(),
-                            player.getBukkit().getDisplayName(viewer.getBukkit())
-                                + ChatColor.YELLOW));
-          }
-        }
+        announceJoinOrLeave(player, "broadcast.joinMessage");
       }
     }
   }
@@ -115,24 +113,29 @@ public class PGMListener implements Listener {
     if (event.getQuitMessage() != null) {
       MatchPlayer player = match.getPlayer(event.getPlayer());
       if (player != null) {
-        for (MatchPlayer viewer : match.getPlayers()) {
-          if (!player.equals(viewer)) {
-            viewer.sendMessage(
-                ChatColor.YELLOW
-                    + AllTranslations.get()
-                        .translate(
-                            "broadcast.leaveMessage",
-                            viewer.getBukkit(),
-                            player.getBukkit().getDisplayName(viewer.getBukkit())
-                                + ChatColor.YELLOW));
-          }
-        }
+        announceJoinOrLeave(player, "broadcast.leaveMessage");
       }
       event.setQuitMessage(null);
     }
 
     match.removePlayer(event.getPlayer());
     PGM.get().getPrefixRegistry().removePlayer(event.getPlayer().getUniqueId());
+  }
+
+  private void announceJoinOrLeave(MatchPlayer player, String messageKey) {
+    checkNotNull(player);
+    checkNotNull(messageKey);
+
+    for (MatchPlayer viewer : player.getMatch().getPlayers()) {
+      if (player.equals(viewer)) continue;
+
+      SettingValue option = viewer.getSettings().getValue(SettingKey.JOIN);
+      if (option.equals(SettingValue.JOIN_ON)) {
+        String name = player.getBukkit().getDisplayName(viewer.getBukkit()) + ChatColor.YELLOW;
+        Component component = new PersonalizedTranslatable(messageKey, name);
+        viewer.sendMessage(new PersonalizedText(component, ChatColor.YELLOW));
+      }
+    }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
