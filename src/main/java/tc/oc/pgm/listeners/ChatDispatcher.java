@@ -221,7 +221,7 @@ public class ChatDispatcher implements Listener {
                 format,
                 sender == null
                     ? new PersonalizedText("Console", ChatColor.AQUA, ChatColor.ITALIC)
-                    : sender.getStyledName(NameStyle.FANCY),
+                    : sender.getStyledName(NameStyle.FANCY_NO_DEATH),
                 new PersonalizedText(message.trim())));
     match.getPlayers().stream().filter(filter).forEach(player -> player.sendMessage(component));
     Audience.get(Bukkit.getConsoleSender()).sendMessage(component);

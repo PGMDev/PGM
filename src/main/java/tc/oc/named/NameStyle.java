@@ -7,6 +7,8 @@ package tc.oc.named;
 public enum NameStyle {
   PLAIN(false, false, false, false, false, false, false, false), // No formatting
   COLOR(true, false, false, false, false, false, false, true), // Color only
+  FANCY_NO_DEATH(
+      true, true, true, true, true, false, false, true), // Color, flair, friend status, nick status
   FANCY(
       true, true, true, true, true, false, true,
       true), // Color, flair, friend status, nick status, death status
