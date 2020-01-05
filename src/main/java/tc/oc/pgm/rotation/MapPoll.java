@@ -19,6 +19,7 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.map.PGMMap;
+import tc.oc.pgm.maptag.MapTag;
 import tc.oc.world.NMSHacks;
 
 /** Represents a polling process, with a set of options. */
@@ -128,7 +129,12 @@ public class MapPoll {
             new PersonalizedText(map.getName() + "\n", ChatColor.BOLD, ChatColor.GOLD))
         .hoverEvent(
             HoverEvent.Action.SHOW_TEXT,
-            new PersonalizedTranslatable("command.pool.vote.hover").render(viewer.getBukkit()))
+            new PersonalizedText(
+                    map.getPersistentContext().getMapTags().stream()
+                        .map(MapTag::toString)
+                        .collect(Collectors.joining(" ")),
+                    ChatColor.YELLOW)
+                .render())
         .clickEvent(ClickEvent.Action.RUN_COMMAND, "/votenext " + map.getName());
   }
 
