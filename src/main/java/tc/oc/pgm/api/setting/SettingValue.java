@@ -22,8 +22,8 @@ public enum SettingValue {
   PICKER_AUTO("picker", "auto"), // Display after cycle, or with permissions.
   PICKER_ON("picker", "on"), // Display the picker GUI always
   PICKER_OFF("picker", "off"), // Never display the picker GUI
-  OBSERVERS_ON("observers", "shown"), // Show observers
-  OBSERVERS_OFF("observers", "hidden"); // Hide observers
+  OBSERVERS_ON("observers", "on"), // Show observers
+  OBSERVERS_OFF("observers", "off"); // Hide observers
 
   private final String key;
   private final String name;
