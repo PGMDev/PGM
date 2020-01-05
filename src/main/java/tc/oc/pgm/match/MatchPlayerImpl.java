@@ -44,6 +44,7 @@ import tc.oc.pgm.filters.query.PlayerQuery;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.util.logging.ClassLogger;
+import tc.oc.world.DeathOverride;
 import tc.oc.world.NMSHacks;
 
 public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<MatchPlayer> {
@@ -256,6 +257,7 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
   @Override
   public void setDead(boolean yes) {
     dead.set(yes);
+    DeathOverride.setDead(getBukkit(), yes);
   }
 
   @Override
