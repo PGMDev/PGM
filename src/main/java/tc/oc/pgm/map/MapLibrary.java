@@ -70,7 +70,7 @@ public class MapLibrary {
   }
 
   public Collection<PGMMap> getMaps() {
-    return this.mapsById.values();
+    return mapsById.values();
   }
 
   public Set<String> getMapNames() {

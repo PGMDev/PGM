@@ -13,7 +13,6 @@ import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.filters.InverseFilter;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.teams.TeamModule;
@@ -23,7 +22,7 @@ import tc.oc.xml.InvalidXMLException;
 @ModuleDescription(
     name = "Proximity Alarm",
     depends = {TeamModule.class, RegionModule.class, FilterModule.class})
-public class ProximityAlarmModule extends MapModule {
+public class ProximityAlarmModule extends MapModule<ProximityAlarmMatchModule> {
   private final Set<ProximityAlarmDefinition> definitions;
 
   public ProximityAlarmModule(Set<ProximityAlarmDefinition> definitions) {
@@ -31,7 +30,7 @@ public class ProximityAlarmModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public ProximityAlarmMatchModule createMatchModule(Match match) {
     return new ProximityAlarmMatchModule(match, this.definitions);
   }
 

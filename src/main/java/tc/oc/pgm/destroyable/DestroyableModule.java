@@ -17,7 +17,7 @@ import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
-import tc.oc.pgm.match.MatchModule;
+import tc.oc.pgm.maptag.MapTag;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.regions.Region;
@@ -32,7 +32,9 @@ import tc.oc.xml.Node;
 @ModuleDescription(
     name = "Destroyable",
     depends = {TeamModule.class, RegionModule.class, BlockDropsModule.class, GoalModule.class})
-public class DestroyableModule extends MapModule {
+public class DestroyableModule extends MapModule<DestroyableMatchModule> {
+  private static final MapTag MONUMENT_TAG = MapTag.forName("monument");
+
   protected final List<DestroyableFactory> destroyableFactories;
 
   public DestroyableModule(List<DestroyableFactory> destroyableFactories) {
@@ -40,7 +42,12 @@ public class DestroyableModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public void loadTags(Set<MapTag> tags) {
+    tags.add(MONUMENT_TAG);
+  }
+
+  @Override
+  public DestroyableMatchModule createMatchModule(Match match) {
     ImmutableList.Builder<Destroyable> destroyables = new ImmutableList.Builder<>();
     for (DestroyableFactory factory : this.destroyableFactories) {
       Destroyable destroyable = new Destroyable(factory, match);
