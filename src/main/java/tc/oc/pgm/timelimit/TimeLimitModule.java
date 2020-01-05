@@ -1,5 +1,6 @@
 package tc.oc.pgm.timelimit;
 
+import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.jdom2.Attribute;
@@ -10,7 +11,7 @@ import tc.oc.pgm.bossbar.BossBarModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.ProtoVersions;
-import tc.oc.pgm.match.MatchModule;
+import tc.oc.pgm.maptag.MapTag;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.result.VictoryCondition;
 import tc.oc.pgm.result.VictoryConditions;
@@ -21,7 +22,10 @@ import tc.oc.xml.InvalidXMLException;
 @ModuleDescription(
     name = "Time Limit",
     requires = {BossBarModule.class})
-public class TimeLimitModule extends MapModule {
+public class TimeLimitModule extends MapModule<TimeLimitMatchModule> {
+
+  private static final MapTag TIMELIMIT_TAG = MapTag.forName("timelimit");
+
   private final @Nullable TimeLimit timeLimit;
 
   public TimeLimitModule(@Nullable TimeLimit limit) {
@@ -29,7 +33,12 @@ public class TimeLimitModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public void loadTags(Set<MapTag> tags) {
+    if (timeLimit != null) tags.add(TIMELIMIT_TAG);
+  }
+
+  @Override
+  public TimeLimitMatchModule createMatchModule(Match match) {
     return new TimeLimitMatchModule(match, this.timeLimit);
   }
 

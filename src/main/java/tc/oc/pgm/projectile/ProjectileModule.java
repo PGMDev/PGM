@@ -17,7 +17,6 @@ import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
@@ -26,11 +25,11 @@ import tc.oc.xml.Node;
 @ModuleDescription(
     name = "Projectile",
     depends = {FilterModule.class})
-public class ProjectileModule extends MapModule {
+public class ProjectileModule extends MapModule<ProjectileMatchModule> {
   Set<ProjectileDefinition> projectileDefinitions = new HashSet<>();
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public ProjectileMatchModule createMatchModule(Match match) {
     return new ProjectileMatchModule(match, this.projectileDefinitions);
   }
 

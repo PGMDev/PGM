@@ -16,13 +16,12 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.map.MapModuleFactory;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 
 @ModuleDescription(name = "Item Modify")
-public class ItemModifyModule extends MapModule {
+public class ItemModifyModule extends MapModule<ItemModifyMatchModule> {
   private static final BooleanItemTag APPLIED = new BooleanItemTag("custom-meta-applied", false);
 
   private final List<ItemRule> rules;
@@ -46,7 +45,7 @@ public class ItemModifyModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public ItemModifyMatchModule createMatchModule(Match match) {
     return new ItemModifyMatchModule(match);
   }
 

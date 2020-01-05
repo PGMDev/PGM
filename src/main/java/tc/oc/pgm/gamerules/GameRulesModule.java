@@ -9,12 +9,11 @@ import org.jdom2.Element;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.xml.InvalidXMLException;
 
 @ModuleDescription(name = "Gamerules")
-public class GameRulesModule extends MapModule {
+public class GameRulesModule extends MapModule<GameRulesMatchModule> {
 
   private Map<GameRule, Boolean> gameRules;
 
@@ -22,7 +21,7 @@ public class GameRulesModule extends MapModule {
     this.gameRules = gamerules;
   }
 
-  public MatchModule createMatchModule(Match match) {
+  public GameRulesMatchModule createMatchModule(Match match) {
     return new GameRulesMatchModule(match, this.gameRules);
   }
 

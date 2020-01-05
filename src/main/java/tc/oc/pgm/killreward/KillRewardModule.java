@@ -17,7 +17,6 @@ import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.kits.KitNode;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.util.XMLUtils;
@@ -27,7 +26,7 @@ import tc.oc.xml.InvalidXMLException;
     name = "Kill Reward",
     follows = {RegionModule.class, FilterModule.class},
     requires = {KitModule.class})
-public class KillRewardModule extends MapModule {
+public class KillRewardModule extends MapModule<KillRewardMatchModule> {
   protected final ImmutableList<KillReward> rewards;
 
   public KillRewardModule(List<KillReward> rewards) {
@@ -35,7 +34,7 @@ public class KillRewardModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public KillRewardMatchModule createMatchModule(Match match) {
     return new KillRewardMatchModule(match, this.rewards);
   }
 
