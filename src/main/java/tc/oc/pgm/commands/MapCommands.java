@@ -6,7 +6,6 @@ import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.bukkit.parametric.Type;
 import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
-import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
 import com.google.common.collect.ImmutableSortedSet;
 import java.net.URL;
@@ -45,7 +44,7 @@ public class MapCommands {
   @Command(
       aliases = {"maplist", "maps", "ml"},
       desc = "Shows the maps that are currently loaded",
-      usage = "[page]",
+      usage = "[-a <author>] [-p <page>] [[!]#<maptag>...]",
       help =
           "Shows all the maps that are currently loaded including ones that are not in the rotation.")
   public static void maplist(
@@ -54,8 +53,10 @@ public class MapCommands {
       MapLibrary library,
       MapTagsCondition mapTags,
       @Fallback(Type.NULL) @Switch('a') String author,
-      @Default("1") int page)
+      @Fallback(Type.NULL) @Switch('p') Integer page)
       throws CommandException {
+    if (page == null) page = 1;
+
     Stream<PGMMap> search = library.getMaps().stream().filter(mapTags);
     if (author != null) {
       search = search.filter(map -> matchesAuthor(map, author));
