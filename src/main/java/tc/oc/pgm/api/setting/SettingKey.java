@@ -55,9 +55,9 @@ public enum SettingKey {
   }
 
   /**
-   * Get all aliases of this {@link SettingKey}.
+   * Get all aliases of this {@link SettingKey}. First index is always equal to {@code #getName}.
    *
-   * @return An immutable list of all aliases.
+   * @return An immutable list of all aliases. Never {@code null} or empty.
    */
   public List<String> getAliases() {
     return aliases;
