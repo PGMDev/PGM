@@ -4,6 +4,7 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.event.Event;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.permissions.PermissionAttachment;
 import tc.oc.block.BlockVectors;
@@ -101,5 +102,11 @@ public class Observing extends State {
     if (event.getNewParty() instanceof Competitor && event.getMatch().isRunning()) {
       transition(new Joining(smm, player));
     }
+  }
+
+  @Override
+  public void onEvent(EntityDamageEvent event) {
+    super.onEvent(event);
+    event.setCancelled(true);
   }
 }

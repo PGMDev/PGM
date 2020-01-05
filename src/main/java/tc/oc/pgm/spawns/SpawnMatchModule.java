@@ -254,6 +254,15 @@ public class SpawnMatchModule extends MatchModule implements Listener {
   }
 
   @EventHandler
+  public void onPlayerDamage(final EntityDamageEvent event) {
+    MatchPlayer player = getMatch().getPlayer(event.getEntity());
+    if (player != null) {
+      State state = states.get(player);
+      if (state != null) state.onEvent(event);
+    }
+  }
+
+  @EventHandler
   public void matchBegin(final MatchStartEvent event) {
     // Copy states so they can transition without concurrent modification
     for (State state : ImmutableList.copyOf(states.values())) {
