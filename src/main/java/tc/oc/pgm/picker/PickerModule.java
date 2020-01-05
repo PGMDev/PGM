@@ -7,7 +7,6 @@ import tc.oc.pgm.classes.ClassModule;
 import tc.oc.pgm.ffa.FreeForAllModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.xml.InvalidXMLException;
@@ -15,10 +14,10 @@ import tc.oc.xml.InvalidXMLException;
 @ModuleDescription(
     name = "picker",
     follows = {TeamModule.class, FreeForAllModule.class, ClassModule.class})
-public class PickerModule extends MapModule {
+public class PickerModule extends MapModule<PickerMatchModule> {
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public PickerMatchModule createMatchModule(Match match) {
     return new PickerMatchModule(match);
   }
 

@@ -41,7 +41,7 @@ public class ChatDispatcher implements Listener {
   }
 
   @Command(
-      aliases = {"g"},
+      aliases = {"g", "all"},
       desc = "Send a message to everyone",
       usage = "[message]")
   public void sendGlobal(Match match, MatchPlayer sender, @Nullable @Text String message) {

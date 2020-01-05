@@ -19,7 +19,7 @@ public abstract class SimpleGoal<T extends GoalDefinition> implements Goal<T> {
   public static final ChatColor COLOR_INCOMPLETE = ChatColor.RED;
   public static final ChatColor COLOR_COMPLETE = ChatColor.GREEN;
 
-  public static final String SYMBOL_INCOMPLETE = "\u274c"; // ❌
+  public static final String SYMBOL_INCOMPLETE = "\u2715"; // ✕
   public static final String SYMBOL_COMPLETE = "\u2714"; // ✔
 
   protected final Logger logger;

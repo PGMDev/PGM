@@ -1,6 +1,6 @@
 package tc.oc.pgm.modes;
 
-import static tc.oc.pgm.map.ProtoVersions.MODES_IMPLEMENTATION_VERSION;
+import static tc.oc.pgm.map.ProtoVersions.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,6 @@ import org.joda.time.Duration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.components.PeriodFormats;
@@ -21,7 +20,7 @@ import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
 @ModuleDescription(name = "ObjectiveModes")
-public class ObjectiveModesModule extends MapModule {
+public class ObjectiveModesModule extends MapModule<ObjectiveModesMatchModule> {
 
   private List<Mode> modes;
   public static final Duration DEFAULT_SHOW_BEFORE = Duration.standardSeconds(60l);
@@ -31,7 +30,7 @@ public class ObjectiveModesModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public ObjectiveModesMatchModule createMatchModule(Match match) {
     return new ObjectiveModesMatchModule(match, this.modes);
   }
 
