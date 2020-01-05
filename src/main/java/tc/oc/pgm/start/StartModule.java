@@ -6,7 +6,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.bossbar.BossBarModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.xml.InvalidXMLException;
 
@@ -14,7 +13,7 @@ import tc.oc.xml.InvalidXMLException;
 @ModuleDescription(
     name = "match start",
     requires = {BossBarModule.class})
-public class StartModule extends MapModule {
+public class StartModule extends MapModule<StartMatchModule> {
 
   public static StartModule parse(MapModuleContext context, Logger logger, Document doc)
       throws InvalidXMLException {
@@ -22,7 +21,7 @@ public class StartModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public StartMatchModule createMatchModule(Match match) {
     return new StartMatchModule(match);
   }
 }

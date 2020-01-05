@@ -14,7 +14,7 @@ import tc.oc.pgm.Config;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.MatchModule;
+import tc.oc.pgm.maptag.MapTag;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.modules.InfoModule;
 import tc.oc.pgm.start.StartModule;
@@ -26,7 +26,12 @@ import tc.oc.xml.Node;
 @ModuleDescription(
     name = "Team",
     requires = {InfoModule.class, StartModule.class})
-public class TeamModule extends MapModule {
+public class TeamModule extends MapModule<TeamMatchModule> {
+
+  private static final MapTag _4TEAMS_TAG = MapTag.forName("4teams");
+  private static final MapTag EVENTEAMS_TAG = MapTag.forName("eventeams");
+  private static final MapTag TEAMS_TAG = MapTag.forName("teams");
+
   private final Set<TeamFactory> teams;
   private final @Nullable Boolean requireEven;
 
@@ -41,7 +46,14 @@ public class TeamModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public void loadTags(Set<MapTag> tags) {
+    if (teams.size() == 4) tags.add(_4TEAMS_TAG);
+    if (requireEven != null && requireEven) tags.add(EVENTEAMS_TAG);
+    tags.add(TEAMS_TAG);
+  }
+
+  @Override
+  public TeamMatchModule createMatchModule(Match match) {
     return new TeamMatchModule(
         match, teams, requireEven != null ? requireEven : Config.Teams.requireEven());
   }

@@ -5,14 +5,13 @@ import org.jdom2.Document;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 
 @ModuleDescription(name = "Boss Name and Health Display")
-public class BossBarModule extends MapModule {
+public class BossBarModule extends MapModule<BossBarMatchModule> {
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public BossBarMatchModule createMatchModule(Match match) {
     return new BossBarMatchModule(match);
   }
 

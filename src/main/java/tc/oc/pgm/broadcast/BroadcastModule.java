@@ -14,7 +14,6 @@ import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.modules.InfoModule;
 import tc.oc.pgm.util.XMLUtils;
@@ -22,7 +21,7 @@ import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
 @ModuleDescription(name = "Broadcast", requires = InfoModule.class)
-public class BroadcastModule extends MapModule {
+public class BroadcastModule extends MapModule<BroadcastMatchModule> {
   private final Multimap<Duration, Broadcast> broadcasts;
 
   public BroadcastModule(Multimap<Duration, Broadcast> broadcasts) {
@@ -30,7 +29,7 @@ public class BroadcastModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public BroadcastMatchModule createMatchModule(Match match) {
     return new BroadcastMatchModule(match, this.broadcasts);
   }
 

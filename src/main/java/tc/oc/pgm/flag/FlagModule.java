@@ -2,6 +2,7 @@ package tc.oc.pgm.flag;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import tc.oc.pgm.api.match.Match;
@@ -9,7 +10,7 @@ import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.goals.GoalModule;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.MatchModule;
+import tc.oc.pgm.maptag.MapTag;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.regions.RegionModule;
@@ -19,7 +20,10 @@ import tc.oc.xml.InvalidXMLException;
 @ModuleDescription(
     name = "Capture the Flag",
     follows = {TeamModule.class, RegionModule.class, FilterModule.class, GoalModule.class})
-public class FlagModule extends MapModule {
+public class FlagModule extends MapModule<FlagMatchModule> {
+
+  private static final MapTag FLAG_TAG = MapTag.forName("flag");
+
   private final ImmutableList<Post> posts;
   private final ImmutableList<Net> nets;
   private final ImmutableList<FlagDefinition> flags;
@@ -31,7 +35,12 @@ public class FlagModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) throws ModuleLoadException {
+  public void loadTags(Set<MapTag> tags) {
+    tags.add(FLAG_TAG);
+  }
+
+  @Override
+  public FlagMatchModule createMatchModule(Match match) throws ModuleLoadException {
     return new FlagMatchModule(match, this.nets, this.flags);
   }
   // ---------------------

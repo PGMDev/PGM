@@ -10,14 +10,13 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
 @ModuleDescription(name = "DisableDamage")
-public class DisableDamageModule extends MapModule {
+public class DisableDamageModule extends MapModule<DisableDamageMatchModule> {
   protected final SetMultimap<DamageCause, PlayerRelation> causes;
 
   public DisableDamageModule(SetMultimap<DamageCause, PlayerRelation> causes) {
@@ -25,7 +24,7 @@ public class DisableDamageModule extends MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public DisableDamageMatchModule createMatchModule(Match match) {
     return new DisableDamageMatchModule(match, this.causes);
   }
 
