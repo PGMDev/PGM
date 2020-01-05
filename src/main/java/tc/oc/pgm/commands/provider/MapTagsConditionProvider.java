@@ -10,13 +10,14 @@ import app.ashcon.intake.parametric.ProvisionException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import javax.annotation.Nullable;
 import tc.oc.pgm.map.MapLibrary;
 import tc.oc.pgm.map.PGMMap;
@@ -64,7 +65,7 @@ public class MapTagsConditionProvider implements Provider<MapTagsCondition> {
     return parseMapTag(prefix)
         .map(
             pair -> {
-              Set<String> mapTags = new HashSet<>();
+              Set<String> mapTags = new TreeSet<>(Comparator.naturalOrder());
               for (PGMMap map : mapLibrary.getMaps()) {
                 for (MapTag mapTag : map.getPersistentContext().getMapTags()) {
                   if (mapTag.getName().startsWith(pair.first)) {
