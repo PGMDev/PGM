@@ -27,6 +27,7 @@ import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.pgm.map.Contributor;
 import tc.oc.pgm.map.MapInfo;
 import tc.oc.pgm.map.MapLibrary;
+import tc.oc.pgm.map.MapPersistentContext;
 import tc.oc.pgm.map.PGMMap;
 import tc.oc.pgm.maptag.MapTag;
 import tc.oc.pgm.maptag.MapTagsCondition;
@@ -76,7 +77,8 @@ public class MapCommands {
     MapInfo mapInfo = map.getInfo();
     audience.sendMessage(mapInfo.getFormattedMapTitle());
 
-    Set<MapTag> mapTags = map.getPersistentContext().getMapTags();
+    MapPersistentContext persistentContext = map.getPersistentContext();
+    Set<MapTag> mapTags = persistentContext.getMapTags();
     audience.sendMessage(createTagsComponent(mapTags).color(ChatColor.DARK_AQUA));
 
     Component edition = new PersonalizedText(mapInfo.getLocalizedEdition(), ChatColor.GOLD);
@@ -122,11 +124,16 @@ public class MapCommands {
       }
     }
 
-    audience.sendMessage(
+    String playerLimitVs =
+        " " + AllTranslations.get().translate("command.map.mapInfo.playerLimit.vs", sender) + " ";
+    Component playerLimit =
         new PersonalizedText(
-            mapInfoLabel("command.map.mapInfo.playerLimit"),
-            new PersonalizedText(
-                String.valueOf(map.getPersistentContext().getMaxPlayers()), ChatColor.GOLD)));
+            persistentContext.getMaxPlayers().stream()
+                .map(Object::toString)
+                .collect(Collectors.joining(playerLimitVs)),
+            ChatColor.GOLD);
+    audience.sendMessage(
+        new PersonalizedText(mapInfoLabel("command.map.mapInfo.playerLimit"), playerLimit));
 
     if (sender.hasPermission(Permissions.DEBUG)) {
       audience.sendMessage(

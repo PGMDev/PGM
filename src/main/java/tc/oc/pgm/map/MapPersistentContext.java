@@ -2,8 +2,10 @@ package tc.oc.pgm.map;
 
 import static com.google.common.base.Preconditions.*;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSortedSet;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 import tc.oc.pgm.maptag.MapTag;
 import tc.oc.util.SemanticVersion;
@@ -17,14 +19,17 @@ import tc.oc.util.SemanticVersion;
 public class MapPersistentContext {
   private final SemanticVersion proto;
   private final MapInfo mapInfo;
-  private final int maxPlayers;
+  private final List<Integer> maxPlayers;
+  private final int totalMaxPlayers;
   private final Set<MapTag> mapTags;
 
   public MapPersistentContext(
-      SemanticVersion proto, MapInfo mapInfo, int maxPlayers, Set<MapTag> mapTags) {
+      SemanticVersion proto, MapInfo mapInfo, List<Integer> maxPlayers, Set<MapTag> mapTags) {
+    maxPlayers.sort(Comparator.reverseOrder()); // reverse so that bigger teams are always first
     this.proto = proto;
     this.mapInfo = checkNotNull(mapInfo);
-    this.maxPlayers = maxPlayers;
+    this.maxPlayers = ImmutableList.copyOf(maxPlayers);
+    this.totalMaxPlayers = maxPlayers.stream().mapToInt(Integer::intValue).sum();
     this.mapTags = ImmutableSortedSet.copyOf(Comparator.naturalOrder(), checkNotNull(mapTags));
   }
 
@@ -32,8 +37,12 @@ public class MapPersistentContext {
     return proto;
   }
 
-  public int getMaxPlayers() {
+  public List<Integer> getMaxPlayers() {
     return maxPlayers;
+  }
+
+  public int getTotalMaxPlayers() {
+    return totalMaxPlayers;
   }
 
   public MapInfo getInfo() {

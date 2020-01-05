@@ -131,7 +131,7 @@ public class MatchImpl implements Match, Comparable<Match> {
     this.state = new AtomicReference<>(MatchPhase.IDLE);
     this.start = new AtomicLong(0);
     this.end = new AtomicLong(0);
-    this.capacity = new AtomicInteger(map.getPersistentContext().getMaxPlayers());
+    this.capacity = new AtomicInteger(map.getPersistentContext().getTotalMaxPlayers());
     this.schedulers = new EnumMap<>(MatchScope.class);
     this.listeners = new EnumMap<>(MatchScope.class);
     this.tickables = new EnumMap<>(MatchScope.class);
