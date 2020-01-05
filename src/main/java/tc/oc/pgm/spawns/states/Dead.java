@@ -4,6 +4,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.event.Event;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
@@ -132,5 +133,11 @@ public class Dead extends Spawning {
   public void onEvent(InventoryClickEvent event) {
     super.onEvent(event);
     event.setCancelled(true); // don't allow inventory changes when dead
+  }
+
+  @Override
+  public void onEvent(EntityDamageEvent event) {
+    super.onEvent(event);
+    event.setCancelled(true);
   }
 }
