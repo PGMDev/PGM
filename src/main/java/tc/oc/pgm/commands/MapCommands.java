@@ -147,16 +147,10 @@ public class MapCommands {
       }
     }
 
-    String playerLimitVs =
-        " " + AllTranslations.get().translate("command.map.mapInfo.playerLimit.vs", sender) + " ";
-    Component playerLimit =
-        new PersonalizedText(
-            persistentContext.getMaxPlayers().stream()
-                .map(Object::toString)
-                .collect(Collectors.joining(playerLimitVs)),
-            ChatColor.GOLD);
     audience.sendMessage(
-        new PersonalizedText(mapInfoLabel("command.map.mapInfo.playerLimit"), playerLimit));
+        new PersonalizedText(
+            mapInfoLabel("command.map.mapInfo.playerLimit"),
+            createPlayerLimitComponent(sender, persistentContext)));
 
     if (sender.hasPermission(Permissions.DEBUG)) {
       audience.sendMessage(
@@ -214,6 +208,37 @@ public class MapCommands {
       result.extra(component);
     }
     return result;
+  }
+
+  private static Component createPlayerLimitComponent(
+      CommandSender sender, MapPersistentContext persistentContext) {
+    checkNotNull(sender);
+    checkNotNull(persistentContext);
+
+    List<Integer> maxPlayers = persistentContext.getMaxPlayers();
+    if (maxPlayers.isEmpty()) {
+      return Components.blank();
+    } else if (maxPlayers.size() == 1) {
+      return new PersonalizedText(maxPlayers.get(0).toString(), ChatColor.GOLD);
+    }
+
+    Component total =
+        new PersonalizedText(
+            Integer.toString(persistentContext.getTotalMaxPlayers()), ChatColor.GOLD);
+
+    String verboseVs =
+        " " + AllTranslations.get().translate("command.map.mapInfo.playerLimit.vs", sender) + " ";
+    Component verbose =
+        new PersonalizedText(
+            new PersonalizedText("(")
+                .extra(
+                    persistentContext.getMaxPlayers().stream()
+                        .map(Object::toString)
+                        .collect(Collectors.joining(verboseVs)))
+                .extra(")"),
+            ChatColor.GRAY);
+
+    return total.extra(" ").extra(verbose);
   }
 
   @Command(
