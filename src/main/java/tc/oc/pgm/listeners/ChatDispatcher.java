@@ -83,6 +83,7 @@ public class ChatDispatcher implements Listener {
     // If a player managed to send a default message without permissions, reset their chat channel
     if (sender != null && !sender.getBukkit().hasPermission(Permissions.ADMINCHAT)) {
       sender.getSettings().resetValue(SettingKey.CHAT);
+      SettingKey.CHAT.update(sender);
       sender.sendWarning(
           "You do not have permissions for admin chat, your chat setting has now been reset",
           true); // TODO: translate

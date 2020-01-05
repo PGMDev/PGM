@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 /**
  * A toggleable setting with various possible {@link SettingValue}s.
@@ -23,6 +24,12 @@ public enum SettingKey {
       Arrays.asList("message", "dm"),
       MESSAGE_ON,
       MESSAGE_OFF), // Changes if direct messages are accepted
+  OBSERVERS(Arrays.asList("observers", "obs"), OBSERVERS_ON, OBSERVERS_OFF) {
+    @Override
+    public void update(MatchPlayer player) {
+      player.resetVisibility();
+    }
+  }, // Changes if observers are visible
   ;
 
   private final List<String> aliases;
@@ -78,4 +85,11 @@ public enum SettingKey {
   public String toString() {
     return getName();
   }
+
+  /**
+   * Called whether setting has changed and is ready to be updated internally.
+   *
+   * @param player owner of the setting
+   */
+  public void update(MatchPlayer player) {}
 }
