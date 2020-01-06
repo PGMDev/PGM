@@ -44,7 +44,7 @@ public class MapTabEntry extends DynamicTabEntry {
                   content,
                   TranslationUtils.combineComponents(
                       authors.stream()
-                          .map(contributor -> contributor.getStyledName(NameStyle.FANCY))
+                          .map(contributor -> contributor.getStyledName(NameStyle.TAB))
                           .collect(Collectors.toList()))),
               ChatColor.DARK_GRAY);
     }

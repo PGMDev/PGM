@@ -62,7 +62,7 @@ public class Names {
    * @param viewer viewer of the name
    */
   public static Component fancy(Identity identity, CommandSender viewer) {
-    return renderer().getComponentName(identity, new NameType(NameStyle.FANCY, identity, viewer));
+    return renderer().getComponentName(identity, new NameType(NameStyle.TAB, identity, viewer));
   }
 
   /**

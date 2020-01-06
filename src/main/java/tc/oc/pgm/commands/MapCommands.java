@@ -231,7 +231,7 @@ public class MapCommands {
   }
 
   private @Nullable Component formatContribution(Contributor contributor) {
-    Component c = contributor.getStyledName(NameStyle.FANCY);
+    Component c = contributor.getStyledName(NameStyle.TAB);
     if (!contributor.hasContribution()) return c;
     return new PersonalizedText(
         c,
