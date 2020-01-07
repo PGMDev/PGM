@@ -6,7 +6,6 @@ import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.bukkit.parametric.Type;
 import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
-import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
 import com.google.common.collect.ImmutableSortedSet;
 import java.net.URL;
@@ -33,6 +32,7 @@ import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.pgm.map.Contributor;
 import tc.oc.pgm.map.MapInfo;
 import tc.oc.pgm.map.MapLibrary;
+import tc.oc.pgm.map.MapPersistentContext;
 import tc.oc.pgm.map.PGMMap;
 import tc.oc.pgm.maptag.MapTag;
 import tc.oc.pgm.maptag.MapTagsCondition;
@@ -45,7 +45,7 @@ public class MapCommands {
   @Command(
       aliases = {"maplist", "maps", "ml"},
       desc = "Shows the maps that are currently loaded",
-      usage = "[page]",
+      usage = "[-a <author>] [-p <page>] [[!]#<maptag>...]",
       help =
           "Shows all the maps that are currently loaded including ones that are not in the rotation.")
   public static void maplist(
@@ -54,8 +54,10 @@ public class MapCommands {
       MapLibrary library,
       MapTagsCondition mapTags,
       @Fallback(Type.NULL) @Switch('a') String author,
-      @Default("1") int page)
+      @Fallback(Type.NULL) @Switch('p') Integer page)
       throws CommandException {
+    if (page == null) page = 1;
+
     Stream<PGMMap> search = library.getMaps().stream().filter(mapTags);
     if (author != null) {
       search = search.filter(map -> matchesAuthor(map, author));
@@ -99,7 +101,8 @@ public class MapCommands {
     MapInfo mapInfo = map.getInfo();
     audience.sendMessage(mapInfo.getFormattedMapTitle());
 
-    Set<MapTag> mapTags = map.getPersistentContext().getMapTags();
+    MapPersistentContext persistentContext = map.getPersistentContext();
+    Set<MapTag> mapTags = persistentContext.getMapTags();
     audience.sendMessage(createTagsComponent(mapTags).color(ChatColor.DARK_AQUA));
 
     Component edition = new PersonalizedText(mapInfo.getLocalizedEdition(), ChatColor.GOLD);
@@ -148,8 +151,7 @@ public class MapCommands {
     audience.sendMessage(
         new PersonalizedText(
             mapInfoLabel("command.map.mapInfo.playerLimit"),
-            new PersonalizedText(
-                String.valueOf(map.getPersistentContext().getMaxPlayers()), ChatColor.GOLD)));
+            createPlayerLimitComponent(sender, persistentContext)));
 
     if (sender.hasPermission(Permissions.DEBUG)) {
       audience.sendMessage(
@@ -207,6 +209,37 @@ public class MapCommands {
       result.extra(component);
     }
     return result;
+  }
+
+  private static Component createPlayerLimitComponent(
+      CommandSender sender, MapPersistentContext persistentContext) {
+    checkNotNull(sender);
+    checkNotNull(persistentContext);
+
+    List<Integer> maxPlayers = persistentContext.getMaxPlayers();
+    if (maxPlayers.isEmpty()) {
+      return Components.blank();
+    } else if (maxPlayers.size() == 1) {
+      return new PersonalizedText(maxPlayers.get(0).toString(), ChatColor.GOLD);
+    }
+
+    Component total =
+        new PersonalizedText(
+            Integer.toString(persistentContext.getTotalMaxPlayers()), ChatColor.GOLD);
+
+    String verboseVs =
+        " " + AllTranslations.get().translate("command.map.mapInfo.playerLimit.vs", sender) + " ";
+    Component verbose =
+        new PersonalizedText(
+            new PersonalizedText("(")
+                .extra(
+                    persistentContext.getMaxPlayers().stream()
+                        .map(Object::toString)
+                        .collect(Collectors.joining(verboseVs)))
+                .extra(")"),
+            ChatColor.GRAY);
+
+    return total.extra(" ").extra(verbose);
   }
 
   @Command(

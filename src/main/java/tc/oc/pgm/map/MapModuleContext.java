@@ -1,7 +1,9 @@
 package tc.oc.pgm.map;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -64,18 +66,19 @@ public class MapModuleContext extends ModuleLoader<MapModule> {
 
   public MapPersistentContext generatePersistentContext() {
     MapInfo info = getInfo();
-    int maxPlayers = 0;
+    List<Integer> maxPlayers = new ArrayList<>();
 
     TeamModule tm = getModule(TeamModule.class);
     if (tm != null) {
       for (TeamFactory factory : getModule(TeamModule.class).getTeams()) {
-        maxPlayers += factory.getMaxPlayers();
+        maxPlayers.add(factory.getMaxPlayers());
       }
     }
 
     FreeForAllModule ffam = getModule(FreeForAllModule.class);
     if (ffam != null) {
-      maxPlayers += ffam.getOptions().maxPlayers;
+      maxPlayers.clear();
+      maxPlayers.add(ffam.getOptions().maxPlayers);
     }
 
     Set<MapTag> mapTags = new TreeSet<>(info.mapTags);
