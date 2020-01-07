@@ -8,6 +8,8 @@ public enum NameStyle {
   PLAIN(false, false, false, false, false, false, false, false), // No formatting
   COLOR(true, false, false, false, false, false, false, true), // Color only
   FANCY(
+      true, true, true, true, true, false, false, true), // Color, flair, friend status, nick status
+  TAB(
       true, true, true, true, true, false, true,
       true), // Color, flair, friend status, nick status, death status
   VERBOSE(true, true, true, true, true, true, false, true); // Fancy plus nickname
