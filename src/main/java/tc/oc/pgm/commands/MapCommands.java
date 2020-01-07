@@ -103,7 +103,7 @@ public class MapCommands {
 
     MapPersistentContext persistentContext = map.getPersistentContext();
     Set<MapTag> mapTags = persistentContext.getMapTags();
-    audience.sendMessage(createTagsComponent(mapTags).color(ChatColor.DARK_AQUA));
+    audience.sendMessage(createTagsComponent(mapTags).color(ChatColor.GRAY));
 
     Component edition = new PersonalizedText(mapInfo.getLocalizedEdition(), ChatColor.GOLD);
     if (!edition.toPlainText().isEmpty()) {
