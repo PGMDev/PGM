@@ -102,8 +102,6 @@ public class MapCommands {
     audience.sendMessage(mapInfo.getFormattedMapTitle());
 
     MapPersistentContext persistentContext = map.getPersistentContext();
-    Set<MapTag> mapTags = persistentContext.getMapTags();
-    audience.sendMessage(createTagsComponent(mapTags).color(ChatColor.GRAY));
 
     Component edition = new PersonalizedText(mapInfo.getLocalizedEdition(), ChatColor.GOLD);
     if (!edition.toPlainText().isEmpty()) {
@@ -185,6 +183,9 @@ public class MapCommands {
                       new PersonalizedTranslatable("command.map.mapInfo.sourceCode.tip")
                           .render())));
     }
+
+    Set<MapTag> mapTags = persistentContext.getMapTags();
+    audience.sendMessage(createTagsComponent(mapTags).color(ChatColor.YELLOW));
   }
 
   private static Component createTagsComponent(Set<MapTag> tags) {
