@@ -404,14 +404,6 @@ public class Config {
           '&', getConfiguration().getString("sidebar.top"));
     }
 
-    public static boolean topGap() {
-      return getConfiguration().getBoolean("sidebar.gap-top", false);
-    }
-
-    public static boolean bottomGap() {
-      return getConfiguration().getBoolean("sidebar.gap-bottom", false);
-    }
-
     public static boolean overwriteExisting() {
       return getConfiguration().getBoolean("sidebar.overwrite", false);
     }
