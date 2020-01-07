@@ -129,7 +129,7 @@ public class MatchAnnouncer implements Listener {
               .extra(
                   new PersonalizedTranslatable(
                       "broadcast.welcomeMessage.createdBy",
-                      TranslationUtils.nameList(NameStyle.TAB, authors))));
+                      TranslationUtils.nameList(NameStyle.FANCY, authors))));
     }
 
     viewer.sendMessage(ComponentUtils.horizontalLine(ChatColor.WHITE, 200));

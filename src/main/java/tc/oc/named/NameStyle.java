@@ -12,7 +12,7 @@ public enum NameStyle {
   TAB(
       true, true, true, true, true, false, true,
       true), // Color, flair, friend status, nick status, death status
-  VERBOSE(true, true, true, true, true, true, false, true); // Tab plus nickname
+  VERBOSE(true, true, true, true, true, true, false, true); // Fancy plus nickname
 
   public final boolean isColor;
   public final boolean showPrefix;

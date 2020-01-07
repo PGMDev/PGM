@@ -51,8 +51,8 @@ public class ModerationCommands {
             "command.report.notify",
             matchPlayer == null
                 ? new PersonalizedText("Console", ChatColor.AQUA, ChatColor.ITALIC)
-                : matchPlayer.getStyledName(NameStyle.TAB),
-            accused.getStyledName(NameStyle.TAB),
+                : matchPlayer.getStyledName(NameStyle.FANCY),
+            accused.getStyledName(NameStyle.FANCY),
             new PersonalizedText(reason.trim(), ChatColor.WHITE));
 
     final Component prefixedComponent =
