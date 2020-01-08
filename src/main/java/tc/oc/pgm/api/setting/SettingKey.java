@@ -30,6 +30,7 @@ public enum SettingKey {
       player.resetVisibility();
     }
   }, // Changes if observers are visible
+  RESPAWN("respawn", RESPAWN_MANUAL, RESPAWN_AUTO), // Changes if respawn is automatic or manual
   ;
 
   private final List<String> aliases;

@@ -33,6 +33,9 @@ public enum SettingValue {
 
   OBSERVERS_ON("observers", "on"), // Show observers
   OBSERVERS_OFF("observers", "off"), // Hide observers
+
+  RESPAWN_AUTO("respawn", "auto"), // Automatically respawn
+  RESPAWN_MANUAL("respawn", "manual"), // Punch to respawn
   ;
 
   private final String key;

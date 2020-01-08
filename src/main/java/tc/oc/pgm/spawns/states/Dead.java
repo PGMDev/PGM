@@ -11,6 +11,8 @@ import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.setting.SettingKey;
+import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.PlayerJoinPartyEvent;
 import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
@@ -79,6 +81,11 @@ public class Dead extends Spawning {
       player.resetGamemode();
     }
 
+    if (player.getSettings().getValue(SettingKey.RESPAWN) == SettingValue.RESPAWN_AUTO
+        && ticksUntilRespawn() <= 0) {
+      super.requestSpawn();
+    }
+
     super.tick(); // May transition to a different state, so call last
   }
 
@@ -122,7 +129,9 @@ public class Dead extends Spawning {
     long ticks = ticksUntilRespawn();
     if (ticks > 0) {
       return new PersonalizedTranslatable(
-          spawnRequested ? "death.respawn.confirmed.time" : "death.respawn.unconfirmed.time",
+          player.getSettings().getValue(SettingKey.RESPAWN) == SettingValue.RESPAWN_AUTO
+              ? "death.respawn.confirmed.time"
+              : spawnRequested ? "death.respawn.confirmed.time" : "death.respawn.unconfirmed.time",
           new PersonalizedText(String.format("%.1f", (ticks / (float) 20))).color(ChatColor.AQUA));
     } else {
       return super.getSubtitle();
