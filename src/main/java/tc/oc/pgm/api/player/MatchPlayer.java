@@ -152,6 +152,13 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
    */
   boolean canSee(MatchPlayer other);
 
+  /**
+   * Get whether the {@link MatchPlayer} has decided to forfeit the match.
+   *
+   * @return Whether the {@link MatchPlayer} has forfeit.
+   */
+  boolean hasForfeit();
+
   /** Reset the {@link MatchPlayer} when changing between {@link org.bukkit.GameMode}s. */
   void resetGamemode();
 
@@ -185,6 +192,13 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
    * @param frozen Whether to be frozen.
    */
   void setFrozen(boolean frozen);
+
+  /**
+   * Mark the {@link MatchPlayer} decision to forfeit.
+   *
+   * @param forfeit Whether to forfeit the match.
+   */
+  void setForfeit(boolean forfeit);
 
   /**
    * Apply a {@link Kit} to the {@link MatchPlayer}.

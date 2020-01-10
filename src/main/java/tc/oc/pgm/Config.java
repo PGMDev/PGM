@@ -408,4 +408,18 @@ public class Config {
       return getConfiguration().getBoolean("sidebar.overwrite", false);
     }
   }
+
+  public static class Forfeit {
+    public static boolean enabled() {
+      return getConfiguration().getBoolean("forfeit.enabled", false);
+    }
+
+    public static boolean isBroadcastEnabled() {
+      return getConfiguration().getBoolean("forfeit.broadcast-votes", false);
+    }
+
+    public static int getMaxPlayerCount() {
+      return getConfiguration().getInt("forfeit.max-players", 10);
+    }
+  }
 }

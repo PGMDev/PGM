@@ -51,6 +51,10 @@ public class TimeLimitMatchModule extends MatchModule {
     return countdown;
   }
 
+  public boolean hasTimeLimit() {
+    return getCountdown() != null;
+  }
+
   public @Nullable Duration getFinalRemaining() {
     return this.countdown == null ? null : this.countdown.getRemaining();
   }

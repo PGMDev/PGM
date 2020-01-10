@@ -100,6 +100,7 @@ import tc.oc.pgm.module.ModuleRegistry;
 import tc.oc.pgm.modules.ArrowRemovalModule;
 import tc.oc.pgm.modules.DiscardPotionBottlesModule;
 import tc.oc.pgm.modules.EventFilterMatchModule;
+import tc.oc.pgm.modules.ForfeitMatchModule;
 import tc.oc.pgm.modules.FriendlyFireRefundModule;
 import tc.oc.pgm.modules.InfoModule;
 import tc.oc.pgm.modules.InternalModule;
@@ -420,6 +421,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     factory.register(ViewInventoryMatchModule.class, new ViewInventoryMatchModule.Factory());
     factory.register(JoinMatchModule.class, new JoinMatchModule.Factory());
     factory.register(CycleMatchModule.class, new CycleMatchModule.Factory());
+    factory.register(ForfeitMatchModule.class, new ForfeitMatchModule.Factory());
 
     return factory;
   }
@@ -493,6 +495,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     node.registerCommands(new MapPoolCommands());
     node.registerCommands(new SettingCommands());
     node.registerCommands(new ModerationCommands());
+    node.registerCommands(new ForfeitCommands());
 
     new BukkitIntake(this, graph).register();
   }

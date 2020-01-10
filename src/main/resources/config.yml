@@ -117,3 +117,20 @@ sidebar:
   bottom: ""
   # If the sidebar message should overwrite lines in the sidebar when it is full
   overwrite: false
+
+forfeit:
+  # When forfeit is enabled players are able to use /forfeit to end the match.
+  # Will only end the match if every participant uses the /forfeit command.
+  enabled: true
+  
+  # Defines the maximum amount of players (per match), in which to allow a forfeit.
+  #
+  # Example: If max-players is at 25, matches which have 25 or less participants
+  # will be allowed to forfeit. Larger than 25 players and forfeit will disable.
+  #
+  # Note: set to 0 to disable this feature.
+  max-players: 10
+  
+  # When true, a broadcast will be sent to everyone after each /forfeit vote.
+  # If false feedback will only be sent to the player who used /forfeit.
+  broadcast-votes: true 

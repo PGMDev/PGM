@@ -62,6 +62,7 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
   private final AtomicBoolean frozen;
   private final AtomicBoolean dead;
   private final AtomicBoolean visible;
+  private final AtomicBoolean forfeit;
 
   public MatchPlayerImpl(Match match, Player player) {
     this.logger =
@@ -75,6 +76,7 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
     this.frozen = new AtomicBoolean(false);
     this.dead = new AtomicBoolean(false);
     this.visible = new AtomicBoolean(false);
+    this.forfeit = new AtomicBoolean(false);
   }
 
   @Override
@@ -166,6 +168,11 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
   @Override
   public boolean isFrozen() {
     return frozen.get();
+  }
+
+  @Override
+  public boolean hasForfeit() {
+    return forfeit.get();
   }
 
   @Override
@@ -293,6 +300,11 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
         resetGamemode();
       }
     }
+  }
+
+  @Override
+  public void setForfeit(boolean yes) {
+    forfeit.set(yes);
   }
 
   /**
