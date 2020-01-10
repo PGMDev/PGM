@@ -24,7 +24,7 @@ public class VotingPool extends MapPool {
   public VotingPool(MapPoolManager manager, ConfigurationSection section, String name) {
     super(manager, section, name);
     VOTE_SIZE = Math.min(MAX_VOTE_OPTIONS, maps.size() - 1);
-    ADJUST_FACTOR = 1d / maps.size();
+    ADJUST_FACTOR = 1d / (maps.size() * MAX_VOTE_OPTIONS);
 
     for (PGMMap map : maps) {
       mapScores.put(map, DEFAULT_WEIGHT);
@@ -40,19 +40,19 @@ public class VotingPool extends MapPool {
   }
 
   /** Ticks scores for all maps, making them go slowly towards DEFAULT_WEIGHT. */
-  private void tickScores() {
+  private void tickScores(PGMMap currentMap) {
     mapScores.replaceAll(
         (mapScores, value) ->
             value > DEFAULT_WEIGHT
                 ? Math.max(value - ADJUST_FACTOR, DEFAULT_WEIGHT)
                 : Math.min(value + ADJUST_FACTOR, DEFAULT_WEIGHT));
+    mapScores.put(currentMap, 0d);
   }
 
   @Override
   public PGMMap popNextMap() {
     if (currentPoll == null) return getRandom();
 
-    tickScores();
     PGMMap map = currentPoll.finishVote();
     currentPoll = null;
     return map != null ? map : getRandom();
@@ -70,11 +70,16 @@ public class VotingPool extends MapPool {
 
   @Override
   public void matchEnded(Match match) {
-    mapScores.put(match.getMap(), 0d); // Ensure same map isn't in vote
-    if (manager.getOverriderMap() != null) return;
-    currentPoll = new MapPoll(match, mapScores, VOTE_SIZE);
+    tickScores(match.getMap());
     match
         .getScheduler(MatchScope.LOADED)
-        .runTaskLater(20 * 5, () -> match.getPlayers().forEach(currentPoll::sendBook));
+        .runTaskLater(
+            20 * 5,
+            () -> {
+              // Start poll here, to avoid starting it if you set next another map.
+              if (manager.getOverriderMap() != null) return;
+              currentPoll = new MapPoll(match, mapScores, VOTE_SIZE);
+              match.getPlayers().forEach(currentPoll::sendBook);
+            });
   }
 }

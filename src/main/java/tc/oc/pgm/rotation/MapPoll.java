@@ -29,11 +29,19 @@ public class MapPoll {
 
   private final WeakReference<Match> match;
   private final Map<PGMMap, Double> mapScores;
+  private final int voteSize;
+
   private final Map<PGMMap, Set<UUID>> votes = new HashMap<>();
 
   MapPoll(Match match, Map<PGMMap, Double> mapScores, int voteSize) {
     this.match = new WeakReference<>(match);
     this.mapScores = mapScores;
+    this.voteSize = voteSize;
+
+    selectMaps();
+  }
+
+  private void selectMaps() {
     // Sorting beforehand, saves future key remaps, as bigger values are placed at the end
     List<PGMMap> sortedDist =
         mapScores.entrySet().stream()
@@ -48,13 +56,13 @@ public class MapPoll {
       NavigableMap<Double, PGMMap> subMap =
           cumulativeScores.tailMap(Math.random() * maxWeight, true);
       Map.Entry<Double, PGMMap> selected = subMap.pollFirstEntry();
-      // Add map to votes
-      votes.put(selected.getValue(), new HashSet<>());
-      // No need to do replace logic after maps have been selected
-      if (votes.size() >= voteSize) break;
+
+      if (selected == null) break; // No more maps to poll
+      votes.put(selected.getValue(), new HashSet<>()); // Add map to votes
+      if (votes.size() >= voteSize) break; // Skip replace logic after all maps have been selected
 
       // Remove map from pool, updating cumulative scores
-      double selectedWeight = mapScores.get(selected.getValue());
+      double selectedWeight = getWeight(selected.getValue());
       maxWeight -= selectedWeight;
 
       NavigableMap<Double, PGMMap> temp = new TreeMap<>();
@@ -65,10 +73,16 @@ public class MapPoll {
     }
   }
 
+  private double getWeight(PGMMap map) {
+    Double score = mapScores.get(map);
+    if (score == null || score <= 0) return 0;
+    return Math.min(Math.pow(score, 2), Double.MIN_VALUE);
+  }
+
   private double cummulativeMap(
       double currWeight, Collection<PGMMap> maps, Map<Double, PGMMap> result) {
     for (PGMMap map : maps) {
-      double score = mapScores.get(map);
+      double score = getWeight(map);
       if (score > 0) result.put(currWeight += score, map);
     }
     return currWeight;
