@@ -111,7 +111,7 @@ experiments:
   destroy-match-delay: 100
 
 sidebar:
-  # Text may be formatted with '&'
+  # Messages may be formatted with '&'
   # Leave blank to disable
   top: ""
   bottom: ""

@@ -55,7 +55,7 @@ public class PlayerTabEntry extends DynamicTabEntry {
   @Override
   public BaseComponent getContent(TabView view) {
     if (content == null) {
-      this.content = new PersonalizedPlayer(player, NameStyle.FANCY);
+      this.content = new PersonalizedPlayer(player, NameStyle.TAB);
     }
     return content.render(view.getViewer());
   }

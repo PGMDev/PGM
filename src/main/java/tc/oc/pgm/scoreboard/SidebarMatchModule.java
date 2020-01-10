@@ -471,7 +471,8 @@ public class SidebarMatchModule extends MatchModule implements Listener {
       }
 
       if (Config.SidebarMessage.bottomEnabled()) {
-        if (rows.size() < MAX_ROWS) {
+        if (rows.size() < MAX_ROWS - 1) {
+          rows.add("");
           rows.add(Config.SidebarMessage.formatBottom());
         } else if (Config.SidebarMessage.overwriteExisting()) {
           rows.set(MAX_ROWS - 1, Config.SidebarMessage.formatBottom());

@@ -2,6 +2,7 @@ package tc.oc.pgm.damage;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
+import java.util.Set;
 import java.util.logging.Logger;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.jdom2.Document;
@@ -10,6 +11,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.map.MapModule;
 import tc.oc.pgm.map.MapModuleContext;
+import tc.oc.pgm.maptag.MapTag;
 import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
@@ -17,10 +19,18 @@ import tc.oc.xml.Node;
 
 @ModuleDescription(name = "DisableDamage")
 public class DisableDamageModule extends MapModule<DisableDamageMatchModule> {
+
+  private static final MapTag NOFALLDAMAGE_TAG = MapTag.forName("nofalldamage");
+
   protected final SetMultimap<DamageCause, PlayerRelation> causes;
 
   public DisableDamageModule(SetMultimap<DamageCause, PlayerRelation> causes) {
     this.causes = causes;
+  }
+
+  @Override
+  public void loadTags(Set<MapTag> tags) {
+    if (causes.containsKey(DamageCause.FALL)) tags.add(NOFALLDAMAGE_TAG);
   }
 
   @Override
