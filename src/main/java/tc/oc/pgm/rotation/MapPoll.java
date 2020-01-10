@@ -76,7 +76,7 @@ public class MapPoll {
   private double getWeight(PGMMap map) {
     Double score = mapScores.get(map);
     if (score == null || score <= 0) return 0;
-    return Math.min(Math.pow(score, 2), Double.MIN_VALUE);
+    return Math.max(Math.pow(score, 2), Double.MIN_VALUE);
   }
 
   private double cummulativeMap(
