@@ -3,12 +3,17 @@ package tc.oc.pgm.goals;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.event.CompetitorAddEvent;
@@ -19,21 +24,21 @@ import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalProximityChangeEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
-import tc.oc.pgm.match.MatchModule;
 
 @ListenerScope(MatchScope.LOADED)
-public class GoalMatchModule extends MatchModule implements Listener {
+public class GoalMatchModule implements MatchModule, Listener {
 
   protected static final Sound GOOD_SOUND = new Sound("portal.travel", 0.7f, 2f);
   protected static final Sound BAD_SOUND = new Sound("mob.blaze.death", 0.8f, 0.8f);
 
+  protected final Match match;
   protected final List<Goal> goals = new ArrayList<>();
   protected final Multimap<Competitor, Goal> goalsByCompetitor = ArrayListMultimap.create();
   protected final Multimap<Goal, Competitor> competitorsByGoal = HashMultimap.create();
   protected final Map<Competitor, GoalProgress> progressByCompetitor = new HashMap<>();
 
   public GoalMatchModule(Match match) {
-    super(match);
+    this.match = match;
   }
 
   public Collection<Goal> getGoals() {
@@ -57,13 +62,15 @@ public class GoalMatchModule extends MatchModule implements Listener {
   }
 
   public void addGoal(Goal<?> goal) {
-    logger.fine("Adding goal " + goal);
+    match.getLogger().fine("Adding goal " + goal);
 
     if (!goal.isVisible()) return;
 
     if (goals.isEmpty()) {
-      logger.fine("First goal added, appending " + GoalsVictoryCondition.class.getSimpleName());
-      getMatch().addVictoryCondition(new GoalsVictoryCondition());
+      match
+          .getLogger()
+          .fine("First goal added, appending " + GoalsVictoryCondition.class.getSimpleName());
+      match.addVictoryCondition(new GoalsVictoryCondition());
     }
 
     goals.add(goal);
@@ -75,7 +82,7 @@ public class GoalMatchModule extends MatchModule implements Listener {
 
   private void addCompetitorGoal(Competitor competitor, Goal<?> goal) {
     if (goal.canComplete(competitor)) {
-      logger.fine("Competitor " + competitor + " can complete goal " + goal);
+      match.getLogger().fine("Competitor " + competitor + " can complete goal " + goal);
 
       goalsByCompetitor.put(competitor, goal);
       competitorsByGoal.put(goal, competitor);
@@ -84,7 +91,7 @@ public class GoalMatchModule extends MatchModule implements Listener {
 
   @EventHandler
   public void onCompetitorAdd(CompetitorAddEvent event) {
-    logger.fine("Competitor added " + event.getCompetitor());
+    match.getLogger().fine("Competitor added " + event.getCompetitor());
 
     for (Goal goal : goals) {
       addCompetitorGoal(event.getCompetitor(), goal);
@@ -123,7 +130,7 @@ public class GoalMatchModule extends MatchModule implements Listener {
     for (Competitor competitor : competitorsByGoal.get(goal)) {
       progressByCompetitor.put(competitor, new GoalProgress(competitor));
     }
-    getMatch().calculateVictory();
+    match.calculateVictory();
   }
 
   // TODO: These events will often be fired together.. debounce them somehow?
@@ -134,7 +141,7 @@ public class GoalMatchModule extends MatchModule implements Listener {
 
     // Don't play the objective sound if the match is over, because the win/lose sound will play
     // instead
-    if (!getMatch().calculateVictory() && event.getGoal().isVisible()) {
+    if (!match.calculateVictory() && event.getGoal().isVisible()) {
       for (MatchPlayer player : event.getMatch().getPlayers()) {
         if (player.getParty() instanceof Competitor
             && event.isGood() != (event.getCompetitor() == player.getParty())) {

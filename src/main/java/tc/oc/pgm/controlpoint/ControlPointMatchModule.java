@@ -5,18 +5,18 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
-import tc.oc.pgm.match.MatchModule;
 
-public class ControlPointMatchModule extends MatchModule {
+public class ControlPointMatchModule implements MatchModule {
 
+  private final Match match;
   private final List<ControlPoint> controlPoints = new ArrayList<>();
   private final ControlPointTickTask tickTask;
   private final ControlPointAnnouncer announcer;
 
   public ControlPointMatchModule(Match match, ImmutableList<ControlPoint> points) {
-    super(match);
-
+    this.match = match;
     this.controlPoints.addAll(points);
 
     this.announcer = new ControlPointAnnouncer(this.match);
@@ -25,7 +25,6 @@ public class ControlPointMatchModule extends MatchModule {
 
   @Override
   public void load() {
-    super.load();
     this.match.addListener(this.announcer, MatchScope.RUNNING);
     for (ControlPoint controlPoint : this.controlPoints) {
       controlPoint.registerEvents();
@@ -38,7 +37,6 @@ public class ControlPointMatchModule extends MatchModule {
       controlPoint.unregisterEvents();
     }
     HandlerList.unregisterAll(this.announcer);
-    super.unload();
   }
 
   @Override

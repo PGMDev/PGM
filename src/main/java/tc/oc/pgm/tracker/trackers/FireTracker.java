@@ -13,6 +13,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExtinguishEvent;
 import tc.oc.material.Materials;
 import tc.oc.pgm.api.event.BlockTransformEvent;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
@@ -32,8 +33,8 @@ public class FireTracker extends AbstractTracker<FireInfo> implements DamageReso
   // burning
   private final Map<Entity, FireInfo> burningEntities = new WeakHashMap<>();
 
-  public FireTracker(TrackerMatchModule tmm) {
-    super(FireInfo.class, tmm);
+  public FireTracker(TrackerMatchModule tmm, Match match) {
+    super(FireInfo.class, tmm, match);
   }
 
   @Override

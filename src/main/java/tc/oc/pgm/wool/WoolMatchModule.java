@@ -28,6 +28,7 @@ import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -35,12 +36,13 @@ import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.goals.Contribution;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.server.BukkitUtils;
 
-public class WoolMatchModule extends MatchModule implements Listener {
-  protected final Multimap<Team, MonumentWool> wools;
+public class WoolMatchModule implements MatchModule, Listener {
+
+  private final Match match;
+  private final Multimap<Team, MonumentWool> wools;
 
   // Map of containers to a flag indicating whether they contained objective wool when the match
   // started.
@@ -48,31 +50,25 @@ public class WoolMatchModule extends MatchModule implements Listener {
   // To ensure this,
   // containers are registered in this map the first time they are opened or accessed by a hopper or
   // dispenser.
-  protected final Map<Inventory, Boolean> chests = new HashMap<>();
+  private final Map<Inventory, Boolean> chests = new HashMap<>();
 
   // Containers that did contain wool when the match started have an entry in this map representing
   // the exact
   // layout of the wools in the inventory. This is used to refill the container with wools.
-  protected final Map<Inventory, Map<Integer, ItemStack>> woolChests = new HashMap<>();
+  private final Map<Inventory, Map<Integer, ItemStack>> woolChests = new HashMap<>();
 
   private static final long REFILL_INTERVAL_TICKS = 600;
 
   public WoolMatchModule(Match match, Multimap<Team, MonumentWool> wools) {
-    super(match);
+    this.match = match;
     this.wools = wools;
   }
 
   @Override
   public void enable() {
-    super.enable();
-    this.getMatch()
+    match
         .getScheduler(MatchScope.RUNNING)
         .runTaskTimer(0, REFILL_INTERVAL_TICKS, WoolMatchModule.this::refillOneWoolPerContainer);
-  }
-
-  @Override
-  public void disable() {
-    super.disable();
   }
 
   public Multimap<Team, MonumentWool> getWools() {

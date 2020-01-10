@@ -24,6 +24,7 @@ import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.event.PlayerItemTransferEvent;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.event.CompetitorScoreChangeEvent;
@@ -31,26 +32,25 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.util.collection.DefaultMapAdapter;
 
 @ListenerScope(MatchScope.RUNNING)
-public class ScoreMatchModule extends MatchModule implements Listener {
+public class ScoreMatchModule implements MatchModule, Listener {
 
-  protected final ScoreConfig config;
+  private final Match match;
+  private final ScoreConfig config;
   private final Set<ScoreBox> scoreBoxes;
-  protected final Map<Competitor, Double> scores = new DefaultMapAdapter<>(new HashMap<>(), 0d);
+  private final Map<Competitor, Double> scores = new DefaultMapAdapter<>(new HashMap<>(), 0d);
 
   public ScoreMatchModule(Match match, ScoreConfig config, Set<ScoreBox> scoreBoxes) {
-    super(match);
+    this.match = match;
     this.config = config;
     this.scoreBoxes = scoreBoxes;
   }
 
   @Override
   public void load() {
-    super.load();
-    this.getMatch().addVictoryCondition(new ScoreVictoryCondition());
+    match.addVictoryCondition(new ScoreVictoryCondition());
   }
 
   public boolean hasScoreLimit() {
@@ -149,7 +149,7 @@ public class ScoreMatchModule extends MatchModule implements Listener {
     for (ScoreBox box : this.scoreBoxes) {
       if (box.getRegion().enters(from, to) && box.canScore(playerState)) {
         if (box.isCoolingDown(playerState)) {
-          this.getMatch()
+          match
               .getLogger()
               .warning(
                   playerState.getId()
@@ -175,7 +175,7 @@ public class ScoreMatchModule extends MatchModule implements Listener {
       if (!box.getRedeemables().isEmpty()
           && box.getRegion().contains(player.getBukkit())
           && box.canScore(player.getParticipantState())) {
-        this.getMatch()
+        match
             .getScheduler(MatchScope.RUNNING)
             .runTask(
                 new Runnable() {
@@ -227,7 +227,6 @@ public class ScoreMatchModule extends MatchModule implements Listener {
 
     this.scores.put(competitor, event.getNewScore());
 
-    this.match.calculateVictory();
     this.match.calculateVictory();
   }
 }

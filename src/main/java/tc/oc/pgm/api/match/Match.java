@@ -12,35 +12,35 @@ import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 import org.joda.time.Duration;
 import tc.oc.pgm.api.chat.MultiAudience;
+import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.match.event.MatchPhaseChangeEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.match.event.MatchUnloadEvent;
+import tc.oc.pgm.api.module.ModuleContext;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayerResolver;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.features.MatchFeatureContext;
 import tc.oc.pgm.filters.query.Query;
-import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.map.PGMMap;
-import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchModuleContext;
-import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.result.VictoryCondition;
 import tc.oc.server.Scheduler;
 
 /**
- * A PvP game that takes place in a {@link World} loaded with a {@link PGMMap}.
+ * A PvP game that takes place in a {@link World} loaded with a {@link MapContext}.
  *
  * <p>Each {@link Match} should operate like an independent {@link org.bukkit.Server}, and ensure
  * its resources, such as {@link MatchPlayer}s, can only interact with other resources in the same
  * {@link Match}. This should allow multiple {@link Match}es to run concurrently on the same {@link
  * org.bukkit.Server}, as long as resources are cleaned up after {@link #unload()}.
  */
-public interface Match extends MatchPlayerResolver, MultiAudience {
+public interface Match
+    extends MatchPlayerResolver, MultiAudience, ModuleContext<MatchModule>, Comparable<Match> {
 
   /**
    * Get the global {@link Logger} for the {@link Match}.
@@ -57,11 +57,11 @@ public interface Match extends MatchPlayerResolver, MultiAudience {
   String getId();
 
   /**
-   * Get the {@link PGMMap} that is playing for the {@link Match}.
+   * Get the {@link MapContext} that is playing for the {@link Match}.
    *
-   * @return The {@link PGMMap}.
+   * @return The {@link MapContext}.
    */
-  PGMMap getMap();
+  MapContext getMap();
 
   /**
    * Get the {@link World} that represents the {@link Match#getMap()}.
@@ -88,9 +88,7 @@ public interface Match extends MatchPlayerResolver, MultiAudience {
    * @see #getScope()
    * @return If the {@link MatchScope} is {@link MatchScope#LOADED}.
    */
-  default boolean isLoaded() {
-    return getScope() == MatchScope.LOADED;
-  }
+  boolean isLoaded();
 
   /**
    * Attempts to load all {@link MatchModule}s and transition to {@link MatchScope#LOADED}.
@@ -235,36 +233,16 @@ public interface Match extends MatchPlayerResolver, MultiAudience {
    * @param <T> The setting of the module.
    * @return The optional {@link MatchModule}.
    */
-  <T extends MatchModule> Optional<T> getModule(Class<T> moduleClass);
+  <T extends MatchModule> Optional<T> getModuleOpt(Class<T> moduleClass);
 
   @Deprecated
   default <T extends MatchModule> T getMatchModule(Class<T> moduleClass) {
-    return getModule(moduleClass).orElse(null);
+    return getModuleOpt(moduleClass).orElse(null);
   }
 
   @Deprecated
   default <T extends MatchModule> boolean hasMatchModule(Class<T> moduleClass) {
-    return getModule(moduleClass).isPresent();
-  }
-
-  /**
-   * Assert and get a {@link MatchModule} for the {@link Match}.
-   *
-   * @see #getModule(Class)
-   * @param moduleClass The class of the module.
-   * @param <T> The setting of the module.
-   * @return The {@link MatchModule}.
-   * @throws IllegalStateException If the module is not found.
-   */
-  default <T extends MatchModule> T needModule(Class<T> moduleClass) {
-    return getModule(moduleClass)
-        .orElseThrow(
-            () ->
-                new IllegalStateException(
-                    toString()
-                        + " required "
-                        + moduleClass.getSimpleName()
-                        + ", but was not found"));
+    return getModuleOpt(moduleClass).isPresent();
   }
 
   @Deprecated
@@ -299,13 +277,6 @@ public interface Match extends MatchPlayerResolver, MultiAudience {
   CountdownContext getCountdown();
 
   /**
-   * Get the {@link MatchModuleContext} for the {@link Match}.
-   *
-   * @return The {@link MatchModuleContext}.
-   */
-  MatchModuleContext getModuleContext();
-
-  /**
    * Get the {@link MatchFeatureContext} for the {@link Match}.
    *
    * @return The {@link MatchFeatureContext}.
@@ -313,11 +284,11 @@ public interface Match extends MatchPlayerResolver, MultiAudience {
   MatchFeatureContext getFeatureContext();
 
   /**
-   * Get the {@link MapModuleContext} for the {@link Match}.
+   * Get the {@link MapContext} for the {@link Match}.
    *
-   * @return The {@link MapModuleContext}.
+   * @return The {@link MapContext}.
    */
-  MapModuleContext getMapContext();
+  MapContext getMapContext();
 
   /**
    * Get the maximum number of {@link MatchPlayer}s for the {@link Match}.

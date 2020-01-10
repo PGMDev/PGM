@@ -24,11 +24,11 @@ public abstract class AbstractTracker<Info extends TrackerInfo> implements Liste
   protected final TrackerMatchModule tmm;
   private final Class<Info> infoClass;
 
-  protected AbstractTracker(Class<Info> infoClass, TrackerMatchModule tmm) {
+  protected AbstractTracker(Class<Info> infoClass, TrackerMatchModule tmm, Match match) {
     this.infoClass = infoClass;
     this.tmm = tmm;
-    this.logger = ClassLogger.get(tmm.getLogger(), getClass());
-    this.match = tmm.getMatch();
+    this.logger = ClassLogger.get(match.getLogger(), getClass());
+    this.match = match;
   }
 
   protected EntityTracker entities() {

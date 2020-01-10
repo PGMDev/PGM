@@ -6,18 +6,17 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.goals.GoalMatchModule;
-import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.module.ModuleLoadException;
 
-public class FlagMatchModule extends MatchModule implements Listener {
+public class FlagMatchModule implements MatchModule, Listener {
 
   private final ImmutableMap<FlagDefinition, Flag> flags;
 
   public FlagMatchModule(
       Match match, ImmutableList<Net> nets, ImmutableList<FlagDefinition> flagDefinitions)
       throws ModuleLoadException {
-    super(match);
 
     ImmutableMap.Builder<FlagDefinition, Flag> flags = ImmutableMap.builder();
     for (FlagDefinition definition : flagDefinitions) {
@@ -38,7 +37,6 @@ public class FlagMatchModule extends MatchModule implements Listener {
 
   @Override
   public void load() {
-    super.load();
     for (Flag flag : this.flags.values()) {
       flag.load();
     }

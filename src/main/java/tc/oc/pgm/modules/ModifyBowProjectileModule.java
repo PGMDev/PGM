@@ -8,16 +8,16 @@ import org.bukkit.entity.Entity;
 import org.bukkit.potion.PotionEffect;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.map.MapModule;
-import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.map.ProtoVersions;
-import tc.oc.pgm.module.ModuleDescription;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 
-@ModuleDescription(name = "Modify Bow Projectile")
-public class ModifyBowProjectileModule extends MapModule<ModifyBowProjectileMatchModule> {
+public class ModifyBowProjectileModule implements MapModule {
   protected final Class<? extends Entity> cls;
   protected final float velocityMod;
   protected final Set<PotionEffect> potionEffects;
@@ -30,47 +30,48 @@ public class ModifyBowProjectileModule extends MapModule<ModifyBowProjectileMatc
   }
 
   @Override
-  public ModifyBowProjectileMatchModule createMatchModule(Match match) {
+  public MatchModule createMatchModule(Match match) {
     return new ModifyBowProjectileMatchModule(
         match, this.cls, this.velocityMod, this.potionEffects);
   }
 
-  // ---------------------
-  // ---- XML Parsing ----
-  // ---------------------
+  public static class Factory implements MapModuleFactory<ModifyBowProjectileModule> {
+    @Override
+    public ModifyBowProjectileModule parse(MapContext context, Logger logger, Document doc)
+        throws InvalidXMLException {
+      boolean changed = false;
+      Class<? extends Entity> projectile = Arrow.class;
+      float velocityMod = 1;
+      Set<PotionEffect> potionEffects = new HashSet<>();
 
-  public static ModifyBowProjectileModule parse(
-      MapModuleContext context, Logger logger, Document doc) throws InvalidXMLException {
-    boolean changed = false;
-    Class<? extends Entity> projectile = Arrow.class;
-    float velocityMod = 1;
-    Set<PotionEffect> potionEffects = new HashSet<>();
+      for (Element parent : doc.getRootElement().getChildren("modifybowprojectile")) {
+        if (context.getInfo().getProto().isNoOlderThan(ProtoVersions.FILTER_FEATURES)) {
+          throw new InvalidXMLException(
+              "Module is discontinued as of " + ProtoVersions.FILTER_FEATURES.toString(),
+              doc.getRootElement().getChild("modifybowprojectile"));
+        }
 
-    for (Element parent : doc.getRootElement().getChildren("modifybowprojectile")) {
-      if (context.getProto().isNoOlderThan(ProtoVersions.FILTER_FEATURES)) {
-        throw new InvalidXMLException(
-            "Module is discontinued as of " + ProtoVersions.FILTER_FEATURES.toString(),
-            doc.getRootElement().getChild("modifybowprojectile"));
+        Element projectileElement = parent.getChild("projectile");
+        if (projectileElement != null) {
+          projectile = XMLUtils.parseEntityType(projectileElement);
+          changed = true;
+        }
+
+        Element velocityModElement = parent.getChild("velocityMod");
+        if (velocityModElement != null) {
+          velocityMod = XMLUtils.parseNumber(velocityModElement, Float.class);
+          changed = true;
+        }
+
+        for (Element potionElement : parent.getChildren("potion")) {
+          potionEffects.add(XMLUtils.parsePotionEffect(potionElement));
+          changed = true;
+        }
       }
 
-      Element projectileElement = parent.getChild("projectile");
-      if (projectileElement != null) {
-        projectile = XMLUtils.parseEntityType(projectileElement);
-        changed = true;
-      }
-
-      Element velocityModElement = parent.getChild("velocityMod");
-      if (velocityModElement != null) {
-        velocityMod = XMLUtils.parseNumber(velocityModElement, Float.class);
-        changed = true;
-      }
-
-      for (Element potionElement : parent.getChildren("potion")) {
-        potionEffects.add(XMLUtils.parsePotionEffect(potionElement));
-        changed = true;
-      }
+      return !changed
+          ? null
+          : new ModifyBowProjectileModule(projectile, velocityMod, potionEffects);
     }
-
-    return !changed ? null : new ModifyBowProjectileModule(projectile, velocityMod, potionEffects);
   }
 }

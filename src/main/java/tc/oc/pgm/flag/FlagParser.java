@@ -12,13 +12,13 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.joda.time.Duration;
 import tc.oc.component.Component;
+import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.features.FeatureReference;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.kits.Kit;
-import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.points.PointParser;
 import tc.oc.pgm.points.PointProvider;
 import tc.oc.pgm.points.PointProviderAttributes;
@@ -29,7 +29,7 @@ import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
 public class FlagParser {
-  private final MapModuleContext context;
+  private final MapContext context;
   private final Logger logger;
   private final FilterParser filterParser;
   private final PointParser pointParser;
@@ -38,10 +38,10 @@ public class FlagParser {
   private final List<Net> nets = new ArrayList<>();
   private final List<FlagDefinition> flags = new ArrayList<>();
 
-  public FlagParser(MapModuleContext context, Logger logger) {
+  public FlagParser(MapContext context, Logger logger) {
     this.context = context;
     this.logger = logger;
-    this.filterParser = context.getFilterParser();
+    this.filterParser = context.legacy().getFilters();
     this.pointParser = new PointParser(context);
   }
 
@@ -58,7 +58,10 @@ public class FlagParser {
 
     String id = el.getAttributeValue("id");
     FeatureReference<TeamFactory> owner =
-        context.features().createReference(Node.fromAttr(el, "owner"), TeamFactory.class, null);
+        context
+            .legacy()
+            .getFeatures()
+            .createReference(Node.fromAttr(el, "owner"), TeamFactory.class, null);
     boolean sequential = XMLUtils.parseBoolean(el.getAttribute("sequential"), false);
     boolean permanent = XMLUtils.parseBoolean(el.getAttribute("permanent"), false);
     double pointsPerSecond = XMLUtils.parseNumber(el.getAttribute("points-rate"), Double.class, 0D);
@@ -98,7 +101,7 @@ public class FlagParser {
             pointsPerSecond,
             pickupFilter);
     posts.add(post);
-    context.features().addFeature(el, post);
+    context.legacy().getFeatures().addFeature(el, post);
 
     return post;
   }
@@ -106,7 +109,7 @@ public class FlagParser {
   public ImmutableSet<FlagDefinition> parseFlagSet(Node node) throws InvalidXMLException {
     ImmutableSet.Builder<FlagDefinition> flags = ImmutableSet.builder();
     for (String flagId : node.getValue().split("\\s")) {
-      FlagDefinition flag = context.features().get(flagId, FlagDefinition.class);
+      FlagDefinition flag = context.legacy().getFeatures().get(flagId, FlagDefinition.class);
       if (flag == null) {
         throw new InvalidXMLException("No flag with ID '" + flagId + "'", node);
       }
@@ -119,9 +122,12 @@ public class FlagParser {
     checkDeprecatedFilter(el);
 
     String id = el.getAttributeValue("id");
-    Region region = context.getRegionParser().parseRequiredRegionProperty(el, "region");
+    Region region = context.legacy().getRegions().parseRequiredRegionProperty(el, "region");
     FeatureReference<TeamFactory> owner =
-        context.features().createReference(Node.fromAttr(el, "owner"), TeamFactory.class, null);
+        context
+            .legacy()
+            .getFeatures()
+            .createReference(Node.fromAttr(el, "owner"), TeamFactory.class, null);
     double pointsPerCapture = XMLUtils.parseNumber(el.getAttribute("points"), Double.class, 0D);
     boolean sticky = XMLUtils.parseBoolean(el.getAttribute("sticky"), true);
     Filter captureFilter =
@@ -137,7 +143,7 @@ public class FlagParser {
     Node postAttr = Node.fromAttr(el, "post");
     if (postAttr != null) {
       // Posts are all parsed at this point, so we can do an immediate lookup
-      returnPost = context.features().get(postAttr.getValue(), Post.class);
+      returnPost = context.legacy().getFeatures().get(postAttr.getValue(), Post.class);
       if (returnPost == null) {
         throw new InvalidXMLException("No post with ID '" + postAttr.getValue() + "'", postAttr);
       }
@@ -182,7 +188,7 @@ public class FlagParser {
             respawnTogether,
             proximityLocation);
     nets.add(net);
-    context.features().addFeature(el, net);
+    context.legacy().getFeatures().addFeature(el, net);
 
     return net;
   }
@@ -196,7 +202,10 @@ public class FlagParser {
     Boolean required = XMLUtils.parseBoolean(el.getAttribute("required"), null);
     DyeColor color = XMLUtils.parseDyeColor(el.getAttribute("color"), null);
     FeatureReference<TeamFactory> owner =
-        context.features().createReference(Node.fromAttr(el, "owner"), TeamFactory.class, null);
+        context
+            .legacy()
+            .getFeatures()
+            .createReference(Node.fromAttr(el, "owner"), TeamFactory.class, null);
     double pointsPerCapture = XMLUtils.parseNumber(el.getAttribute("points"), Double.class, 0D);
     double pointsPerSecond = XMLUtils.parseNumber(el.getAttribute("points-rate"), Double.class, 0D);
     Filter pickupFilter = filterParser.parseFilterProperty(el, "pickup-filter", null);
@@ -204,9 +213,9 @@ public class FlagParser {
       pickupFilter = filterParser.parseFilterProperty(el, "filter", StaticFilter.ALLOW);
     Filter captureFilter =
         filterParser.parseFilterProperty(el, "capture-filter", StaticFilter.ALLOW);
-    Kit pickupKit = context.getKitParser().parseKitProperty(el, "pickup-kit", null);
-    Kit dropKit = context.getKitParser().parseKitProperty(el, "drop-kit", null);
-    Kit carryKit = context.getKitParser().parseKitProperty(el, "carry-kit", null);
+    Kit pickupKit = context.legacy().getKits().parseKitProperty(el, "pickup-kit", null);
+    Kit dropKit = context.legacy().getKits().parseKitProperty(el, "drop-kit", null);
+    Kit carryKit = context.legacy().getKits().parseKitProperty(el, "carry-kit", null);
     boolean multiCarrier = XMLUtils.parseBoolean(el.getAttribute("shared"), false);
     Component carryMessage = XMLUtils.parseFormattedText(el, "carry-message");
     boolean dropOnWater = XMLUtils.parseBoolean(el.getAttribute("drop-on-water"), true);
@@ -225,7 +234,7 @@ public class FlagParser {
       defaultPost = this.parsePost(elPost);
     } else {
       Node postAttr = Node.fromRequiredAttr(el, "post");
-      defaultPost = context.features().get(postAttr.getValue(), Post.class);
+      defaultPost = context.legacy().getFeatures().get(postAttr.getValue(), Post.class);
       if (defaultPost == null) {
         throw new InvalidXMLException("No post with ID '" + postAttr.getValue() + "'", postAttr);
       }
@@ -254,7 +263,7 @@ public class FlagParser {
             flagProximityMetric,
             netProximityMetric);
     flags.add(flag);
-    context.features().addFeature(el, flag);
+    context.legacy().getFeatures().addFeature(el, flag);
 
     // Parse nested <net>s
     for (Element elNet : el.getChildren("net")) {

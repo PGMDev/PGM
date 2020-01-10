@@ -6,10 +6,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import tc.oc.component.Component;
+import tc.oc.pgm.api.map.ProtoVersions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
-import tc.oc.pgm.map.ProtoVersions;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.util.logging.ClassLogger;
 
@@ -84,6 +84,7 @@ public abstract class SimpleGoal<T extends GoalDefinition> implements Goal<T> {
       return required;
     } else if (getMatch()
         .getMapContext()
+        .getInfo()
         .getProto()
         .isNoOlderThan(ProtoVersions.GOAL_REQUIRED_OPTION)) {
       return true;

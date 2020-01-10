@@ -8,14 +8,12 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.match.MatchModule;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.world.NMSHacks;
 
-public class RageMatchModule extends MatchModule implements Listener {
+public class RageMatchModule implements MatchModule, Listener {
 
-  public RageMatchModule(Match match) {
-    super(match);
-  }
+  public RageMatchModule(Match match) {}
 
   @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
   public void handlePlayerDamage(EntityDamageByEntityEvent event) {

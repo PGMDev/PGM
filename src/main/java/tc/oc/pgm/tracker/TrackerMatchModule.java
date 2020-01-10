@@ -11,27 +11,47 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.projectiles.BlockProjectileSource;
 import org.bukkit.projectiles.ProjectileSource;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.ParticipantState;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.tracker.damage.DamageInfo;
 import tc.oc.pgm.tracker.damage.NullDamageInfo;
 import tc.oc.pgm.tracker.damage.PhysicalInfo;
 import tc.oc.pgm.tracker.damage.TrackerInfo;
-import tc.oc.pgm.tracker.resolvers.*;
-import tc.oc.pgm.tracker.trackers.*;
+import tc.oc.pgm.tracker.resolvers.DamageResolver;
+import tc.oc.pgm.tracker.resolvers.ExplosionDamageResolver;
+import tc.oc.pgm.tracker.resolvers.FallingBlockDamageResolver;
+import tc.oc.pgm.tracker.resolvers.GenericDamageResolver;
+import tc.oc.pgm.tracker.resolvers.PotionDamageResolver;
+import tc.oc.pgm.tracker.trackers.AnvilTracker;
+import tc.oc.pgm.tracker.trackers.BlockTracker;
+import tc.oc.pgm.tracker.trackers.CombatLogTracker;
+import tc.oc.pgm.tracker.trackers.DeathTracker;
+import tc.oc.pgm.tracker.trackers.DispenserTracker;
+import tc.oc.pgm.tracker.trackers.EntityTracker;
+import tc.oc.pgm.tracker.trackers.FallTracker;
+import tc.oc.pgm.tracker.trackers.FireTracker;
+import tc.oc.pgm.tracker.trackers.OwnedMobTracker;
+import tc.oc.pgm.tracker.trackers.ProjectileTracker;
+import tc.oc.pgm.tracker.trackers.SpleefTracker;
+import tc.oc.pgm.tracker.trackers.TNTTracker;
 
-public class TrackerMatchModule extends MatchModule {
+public class TrackerMatchModule implements MatchModule {
 
-  private final EntityTracker entityTracker = new EntityTracker(this);
-  private final BlockTracker blockTracker = new BlockTracker(this);
-  private final FallTracker fallTracker = new FallTracker(this);
-  private final FireTracker fireTracker = new FireTracker(this);
+  private EntityTracker entityTracker;
+  private BlockTracker blockTracker;
+  private FallTracker fallTracker;
+  private FireTracker fireTracker;
 
   private final Set<DamageResolver> damageResolvers = new LinkedHashSet<>();
+  private final Match match;
 
   public TrackerMatchModule(Match match) {
-    super(match);
+    this.match = match;
+    entityTracker = new EntityTracker(match);
+    blockTracker = new BlockTracker(match);
+    fallTracker = new FallTracker(this, match);
+    fireTracker = new FireTracker(this, match);
 
     // Damage resolvers - order is important!
     damageResolvers.add(fallTracker);
@@ -42,18 +62,22 @@ public class TrackerMatchModule extends MatchModule {
     damageResolvers.add(new GenericDamageResolver());
   }
 
+  public Match getMatch() {
+    return match;
+  }
+
   @Override
   public void load() {
     match.addListener(fallTracker, MatchScope.RUNNING);
     match.addListener(fireTracker, MatchScope.RUNNING);
     match.addListener(entityTracker, MatchScope.RUNNING);
     match.addListener(blockTracker, MatchScope.RUNNING);
-    match.addListener(new DispenserTracker(this), MatchScope.RUNNING);
-    match.addListener(new TNTTracker(this), MatchScope.RUNNING);
+    match.addListener(new DispenserTracker(this, match), MatchScope.RUNNING);
+    match.addListener(new TNTTracker(this, match), MatchScope.RUNNING);
     match.addListener(new SpleefTracker(this), MatchScope.RUNNING);
-    match.addListener(new OwnedMobTracker(this), MatchScope.RUNNING);
-    match.addListener(new ProjectileTracker(this), MatchScope.RUNNING);
-    match.addListener(new AnvilTracker(this), MatchScope.RUNNING);
+    match.addListener(new OwnedMobTracker(this, match), MatchScope.RUNNING);
+    match.addListener(new ProjectileTracker(this, match), MatchScope.RUNNING);
+    match.addListener(new AnvilTracker(this, match), MatchScope.RUNNING);
     match.addListener(new CombatLogTracker(this), MatchScope.RUNNING);
     match.addListener(new DeathTracker(this), MatchScope.RUNNING);
   }
@@ -103,7 +127,7 @@ public class TrackerMatchModule extends MatchModule {
   private DamageInfo resolveDamage(
       EntityDamageEvent.DamageCause damageType, Entity victim, @Nullable PhysicalInfo damager) {
     // Filter out observers immediately
-    if (getMatch().getParticipant(victim) == null) return new NullDamageInfo();
+    if (match.getParticipant(victim) == null) return new NullDamageInfo();
 
     for (DamageResolver resolver : damageResolvers) {
       DamageInfo resolvedInfo = resolver.resolveDamage(damageType, victim, damager);

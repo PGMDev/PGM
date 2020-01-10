@@ -14,16 +14,17 @@ import org.bukkit.material.MaterialData;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
 
-public class DestroyableMatchModule extends MatchModule implements Listener {
+public class DestroyableMatchModule implements MatchModule, Listener {
+  protected final Match match;
   protected final Collection<Destroyable> destroyables;
 
   public DestroyableMatchModule(Match match, Collection<Destroyable> destroyables) {
-    super(match);
+    this.match = match;
     this.destroyables = destroyables;
   }
 

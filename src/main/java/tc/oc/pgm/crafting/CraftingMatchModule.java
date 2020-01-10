@@ -10,23 +10,23 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import tc.oc.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.match.MatchModule;
+import tc.oc.pgm.api.match.MatchModule;
 
-public class CraftingMatchModule extends MatchModule implements Listener {
+public class CraftingMatchModule implements MatchModule, Listener {
 
+  private final Match match;
   private final Set<Recipe> customRecipes;
   private final Set<SingleMaterialMatcher> disabledRecipes;
 
   public CraftingMatchModule(
       Match match, Set<Recipe> customRecipes, Set<SingleMaterialMatcher> disabledRecipes) {
-    super(match);
+    this.match = match;
     this.customRecipes = customRecipes;
     this.disabledRecipes = disabledRecipes;
   }
 
   @Override
   public void enable() {
-    super.enable();
     for (Recipe recipe : customRecipes) {
       match.getWorld().addRecipe(recipe);
     }
@@ -38,7 +38,6 @@ public class CraftingMatchModule extends MatchModule implements Listener {
     // to avoid interfering with adjacent matches. If we wait until unload() to reset them,
     // the next match would already be loaded.
     match.getWorld().resetRecipes();
-    super.disable();
   }
 
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)

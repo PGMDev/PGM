@@ -4,15 +4,25 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
 import javax.annotation.Nullable;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.*;
+import org.bukkit.event.entity.EntityCombustByBlockEvent;
+import org.bukkit.event.entity.EntityCombustByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import tc.oc.item.Potions;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -22,22 +32,28 @@ import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.query.DamageQuery;
 import tc.oc.pgm.filters.query.IDamageQuery;
 import tc.oc.pgm.filters.query.IQuery;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.tracker.TrackerMatchModule;
-import tc.oc.pgm.tracker.damage.*;
+import tc.oc.pgm.tracker.damage.DamageInfo;
+import tc.oc.pgm.tracker.damage.EntityInfo;
+import tc.oc.pgm.tracker.damage.ExplosionInfo;
+import tc.oc.pgm.tracker.damage.FallInfo;
+import tc.oc.pgm.tracker.damage.FireInfo;
+import tc.oc.pgm.tracker.damage.GenericDamageInfo;
+import tc.oc.pgm.tracker.damage.ProjectileInfo;
 
 @ListenerScope(MatchScope.RUNNING)
-public class DamageMatchModule extends MatchModule implements Listener {
+public class DamageMatchModule implements MatchModule, Listener {
 
+  private final Match match;
   private final List<Filter> filters;
 
   public DamageMatchModule(Match match, List<Filter> filters) {
-    super(match);
+    this.match = match;
     this.filters = filters;
   }
 
   TrackerMatchModule tracker() {
-    return getMatch().needMatchModule(TrackerMatchModule.class);
+    return match.needMatchModule(TrackerMatchModule.class);
   }
 
   /**
@@ -77,7 +93,7 @@ public class DamageMatchModule extends MatchModule implements Listener {
         }
 
       case ALLY:
-        if (!match.getMap().getInfo().friendlyFire && !isAllowedTeamDamage(damageInfo)) {
+        if (!isAllowedTeamDamage(damageInfo)) {
           return Filter.QueryResponse.DENY;
         }
 
@@ -146,7 +162,7 @@ public class DamageMatchModule extends MatchModule implements Listener {
   MatchPlayer getVictim(Entity entity) {
     if (entity == null) return null;
 
-    MatchPlayer victim = getMatch().getParticipant(entity);
+    MatchPlayer victim = match.getParticipant(entity);
     if (victim != null) {
       return victim;
     } else {
@@ -207,7 +223,7 @@ public class DamageMatchModule extends MatchModule implements Listener {
     if (!Potions.isHarmful(potion)) return;
 
     for (LivingEntity entity : event.getAffectedEntities()) {
-      ParticipantState victim = getMatch().getParticipantState(entity);
+      ParticipantState victim = match.getParticipantState(entity);
       DamageInfo damageInfo =
           tracker().resolveDamage(EntityDamageEvent.DamageCause.MAGIC, entity, potion);
 

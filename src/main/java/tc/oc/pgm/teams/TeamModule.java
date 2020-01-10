@@ -11,26 +11,16 @@ import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.Config;
+import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.map.MapModule;
-import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.module.ModuleDescription;
-import tc.oc.pgm.modules.InfoModule;
-import tc.oc.pgm.start.StartModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.StringUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
-@ModuleDescription(
-    name = "Team",
-    requires = {InfoModule.class, StartModule.class})
-public class TeamModule extends MapModule<TeamMatchModule> {
-
-  private static final MapTag EVENTEAMS_TAG = MapTag.forName("eventeams");
-  private static final MapTag TEAMS_TAG = MapTag.forName("teams");
-
+public class TeamModule implements MapModule<TeamMatchModule> {
   private final Set<TeamFactory> teams;
   private final @Nullable Boolean requireEven;
 
@@ -39,16 +29,28 @@ public class TeamModule extends MapModule<TeamMatchModule> {
     this.requireEven = requireEven;
   }
 
-  @Override
-  public String toString() {
-    return getClass().getSimpleName() + "{teams=[" + Joiner.on(", ").join(teams) + "]}";
+  public static class Factory implements MapModuleFactory<TeamModule> {
+    @Override
+    public TeamModule parse(MapContext context, Logger logger, Document doc)
+        throws InvalidXMLException {
+      Set<TeamFactory> teamFactories = Sets.newLinkedHashSet();
+      Boolean requireEven = null;
+
+      for (Element teamRootElement : doc.getRootElement().getChildren("teams")) {
+        requireEven = XMLUtils.parseBoolean(teamRootElement.getAttribute("even"), requireEven);
+
+        for (Element teamElement : teamRootElement.getChildren("team")) {
+          teamFactories.add(parseTeamDefinition(teamElement, context));
+        }
+      }
+
+      return teamFactories.isEmpty() ? null : new TeamModule(teamFactories, requireEven);
+    }
   }
 
   @Override
-  public void loadTags(Set<MapTag> tags) {
-    tags.add(MapTag.forName(teams.size() + (teams.size() == 1 ? "team" : "teams")));
-    if (requireEven != null && requireEven) tags.add(EVENTEAMS_TAG);
-    tags.add(TEAMS_TAG);
+  public String toString() {
+    return getClass().getSimpleName() + "{teams=[" + Joiner.on(", ").join(teams) + "]}";
   }
 
   @Override
@@ -74,8 +76,7 @@ public class TeamModule extends MapModule<TeamMatchModule> {
   // ---- XML Parsing ----
   // ---------------------
 
-  public TeamFactory parseTeam(Attribute attr, MapModuleContext context)
-      throws InvalidXMLException {
+  public TeamFactory parseTeam(Attribute attr, MapContext context) throws InvalidXMLException {
     if (attr == null) {
       return null;
     }
@@ -88,23 +89,7 @@ public class TeamModule extends MapModule<TeamMatchModule> {
     return team;
   }
 
-  public static TeamModule parse(MapModuleContext context, Logger logger, Document doc)
-      throws InvalidXMLException {
-    Set<TeamFactory> teamFactories = Sets.newLinkedHashSet();
-    Boolean requireEven = null;
-
-    for (Element teamRootElement : doc.getRootElement().getChildren("teams")) {
-      requireEven = XMLUtils.parseBoolean(teamRootElement.getAttribute("even"), requireEven);
-
-      for (Element teamElement : teamRootElement.getChildren("team")) {
-        teamFactories.add(parseTeamDefinition(teamElement, context));
-      }
-    }
-
-    return teamFactories.isEmpty() ? null : new TeamModule(teamFactories, requireEven);
-  }
-
-  private static TeamFactory parseTeamDefinition(Element el, MapModuleContext context)
+  private static TeamFactory parseTeamDefinition(Element el, MapContext context)
       throws InvalidXMLException {
     String id = el.getAttributeValue("id");
 
@@ -145,7 +130,7 @@ public class TeamModule extends MapModule<TeamMatchModule> {
             maxPlayers,
             maxOverfill,
             nameTagVisibility);
-    context.features().addFeature(el, teamFactory);
+    context.legacy().getFeatures().addFeature(el, teamFactory);
 
     return teamFactory;
   }

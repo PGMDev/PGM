@@ -13,36 +13,31 @@ import org.bukkit.util.Vector;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.PlayerParticipationStartEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 
-public class BlitzMatchModule extends MatchModule implements Listener {
+public class BlitzMatchModule implements MatchModule, Listener {
 
-  final BlitzConfig config;
-  public final LifeManager lifeManager;
+  private final Match match;
+  private final BlitzConfig config;
+  private final LifeManager lifeManager;
   private final Set<UUID> eliminatedPlayers = new HashSet<>();
 
   public BlitzMatchModule(Match match, BlitzConfig config) {
-    super(match);
+    this.match = match;
     this.config = config;
     this.lifeManager = new LifeManager(this.config.getNumLives());
   }
 
   @Override
-  public boolean shouldLoad() {
-    return super.shouldLoad() && config.lives != Integer.MAX_VALUE;
-  }
-
-  @Override
   public void load() {
-    super.load();
-    this.getMatch().addVictoryCondition(new BlitzVictoryCondition());
+    match.addVictoryCondition(new BlitzVictoryCondition());
   }
 
   public BlitzConfig getConfig() {
@@ -57,6 +52,10 @@ public class BlitzMatchModule extends MatchModule implements Listener {
   public int getRemainingPlayers(Competitor competitor) {
     // TODO: this becomes a bit more complex when eliminated players are not forced to observers
     return competitor.getPlayers().size();
+  }
+
+  public int getNumOfLives(UUID id) {
+    return lifeManager.getLives(id);
   }
 
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -88,7 +87,7 @@ public class BlitzMatchModule extends MatchModule implements Listener {
           new PersonalizedTranslatable(
               "blitz.join",
               new PersonalizedText(
-                  getMatch().getMapContext().getGame(), net.md_5.bungee.api.ChatColor.AQUA)));
+                  match.getMapContext().getInfo().getGenre(), net.md_5.bungee.api.ChatColor.AQUA)));
     }
   }
 
@@ -142,7 +141,7 @@ public class BlitzMatchModule extends MatchModule implements Listener {
             this.match, player, competitor, player.getBukkit().getLocation());
 
     // wait until the next tick to do this so stat recording and other stuff works
-    getMatch()
+    match
         .getScheduler(MatchScope.RUNNING)
         .runTask(
             new Runnable() {

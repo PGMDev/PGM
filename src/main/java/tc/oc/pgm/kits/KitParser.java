@@ -1,8 +1,21 @@
 package tc.oc.pgm.kits;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.*;
-import java.util.*;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Range;
+import com.google.common.collect.SetMultimap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import org.bukkit.Color;
@@ -13,16 +26,20 @@ import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.*;
+import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.jdom2.Element;
 import org.joda.time.Duration;
+import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.doublejump.DoubleJumpKit;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.kits.tag.Grenade;
 import tc.oc.pgm.kits.tag.ItemTags;
-import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.projectile.ProjectileDefinition;
 import tc.oc.pgm.shield.ShieldKit;
 import tc.oc.pgm.shield.ShieldParameters;
@@ -33,11 +50,11 @@ import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
 public abstract class KitParser {
-  protected final MapModuleContext context;
+  protected final MapContext context;
   protected final Set<AttributeModifier> attributeModifiers = new HashSet<>();
   protected final Set<Kit> kits = new HashSet<>();
 
-  public KitParser(MapModuleContext context) {
+  public KitParser(MapContext context) {
     this.context = context;
   }
 
@@ -96,7 +113,8 @@ public abstract class KitParser {
 
     Boolean force = XMLUtils.parseBoolean(Node.fromAttr(el, "force"));
     Boolean potionParticles = XMLUtils.parseBoolean(Node.fromAttr(el, "potion-particles"));
-    Filter filter = context.getFilterParser().parseFilterProperty(el, "filter", StaticFilter.ALLOW);
+    Filter filter =
+        context.legacy().getFilters().parseFilterProperty(el, "filter", StaticFilter.ALLOW);
 
     kits.add(this.parseClearItemsKit(el)); // must be added before anything else
 
@@ -500,7 +518,11 @@ public abstract class KitParser {
     if (projectileNode != null) {
       ItemTags.PROJECTILE.set(
           itemStack,
-          context.features().createReference(projectileNode, ProjectileDefinition.class).getId());
+          context
+              .legacy()
+              .getFeatures()
+              .createReference(projectileNode, ProjectileDefinition.class)
+              .getId());
       String name = itemStack.getItemMeta().getDisplayName();
       ItemTags.ORIGINAL_NAME.set(itemStack, name != null ? name : "");
     }
@@ -612,7 +634,8 @@ public abstract class KitParser {
       }
       kits.add(kit);
       context
-          .features()
+          .legacy()
+          .getFeatures()
           .addFeature(el, kit); // So we can retrieve the node from KitModule#postParse
     }
     return kits;

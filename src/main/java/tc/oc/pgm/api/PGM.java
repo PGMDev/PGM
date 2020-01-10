@@ -7,75 +7,39 @@ import java.util.logging.Logger;
 import org.bukkit.plugin.Plugin;
 import tc.oc.identity.IdentityProvider;
 import tc.oc.named.NameRenderer;
-import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.match.MatchManager;
-import tc.oc.pgm.development.MapErrorTracker;
-import tc.oc.pgm.map.MapLibrary;
-import tc.oc.pgm.map.PGMMap;
+import tc.oc.pgm.api.match.factory.MatchFactory;
+import tc.oc.pgm.api.module.ModuleRegistry;
 import tc.oc.pgm.prefix.PrefixRegistry;
+import tc.oc.pgm.rotation.MapOrder;
 import tc.oc.pgm.tablist.MatchTabManager;
-import tc.oc.util.SemanticVersion;
 
 /** PvP Game Manager (aka. PGM), the global {@link Plugin} to manage PvP games. */
 public interface PGM extends Plugin {
 
-  /**
-   * Get a datastore that persists between matches and server restarts.
-   *
-   * @return A persistent, synchronous datastore.
-   */
+  Logger getGameLogger();
+
+  ModuleRegistry getModuleRegistry();
+
   Datastore getDatastore();
 
-  /**
-   * Get a cached datastore that persists between matches and server restarts.
-   *
-   * @return {@link #getDatastore()} wrapped in an in-memory cache.
-   */
   Datastore getDatastoreCache();
 
-  /**
-   * Get the specific manager that loads and unloads {@link Match}s.
-   *
-   * @return The {@link MatchManager}.
-   */
+  MatchFactory getMatchFactory();
+
   MatchManager getMatchManager();
 
   MatchTabManager getMatchTabManager();
 
-  /**
-   * Get the specific manager that parses and loads {@link PGMMap}s.
-   *
-   * @return The {@link MapLibrary}.
-   */
   MapLibrary getMapLibrary();
 
-  /**
-   * Get the latest {@link SemanticVersion} that {@link PGMMap}s can support.
-   *
-   * @return The latest {@link PGMMap} {@link SemanticVersion}.
-   */
-  SemanticVersion getMapProtoSupported();
-
-  /**
-   * Get the shared {@link Logger} for all {@link PGMMap}s, separate from the server {@link Logger}.
-   *
-   * @return The {@link PGMMap} {@link Logger}.
-   */
-  Logger getMapLogger();
-
-  /**
-   * Get the error tracker that allows for filtering and clearing of {@link PGMMap} errors.
-   *
-   * @return The {@link MapErrorTracker}.
-   */
-  MapErrorTracker getMapErrorTracker();
+  MapOrder getMapOrder();
 
   PrefixRegistry getPrefixRegistry();
 
-  @Deprecated
   IdentityProvider getIdentityProvider();
 
-  @Deprecated
   NameRenderer getNameRenderer();
 
   AtomicReference<PGM> GLOBAL = new AtomicReference<>(null);

@@ -17,6 +17,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
@@ -24,26 +25,25 @@ import tc.oc.pgm.api.party.event.PartyAddEvent;
 import tc.oc.pgm.api.party.event.PartyRemoveEvent;
 import tc.oc.pgm.api.party.event.PartyRenameEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.events.*;
+import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.util.StringUtils;
 
 @ListenerScope(MatchScope.LOADED)
-public class ScoreboardMatchModule extends MatchModule implements Listener {
+public class ScoreboardMatchModule implements MatchModule, Listener {
 
+  private final Match match;
   protected final Map<Party, Scoreboard> partyScoreboards = new HashMap<>();
   protected final Scoreboard hiddenScoreboard;
 
   public ScoreboardMatchModule(Match match) {
-    super(match);
+    this.match = match;
     this.hiddenScoreboard = PGM.get().getServer().getScoreboardManager().getNewScoreboard();
   }
 
   @Override
   public void load() {
-    super.load();
-    for (Party party : getMatch().getParties()) {
+    for (Party party : match.getParties()) {
       addPartyScoreboard(party);
     }
   }
@@ -53,14 +53,14 @@ public class ScoreboardMatchModule extends MatchModule implements Listener {
   }
 
   protected void updatePartyScoreboardTeam(Party party, Team team, boolean forObservers) {
-    logger.fine("Updating scoreboard team " + toString(team) + " for party " + party);
+    match.getLogger().fine("Updating scoreboard team " + toString(team) + " for party " + party);
 
     team.setDisplayName(party.getName());
     team.setPrefix(party.getColor().toString());
     team.setSuffix(ChatColor.WHITE.toString());
 
     team.setCanSeeFriendlyInvisibles(true);
-    team.setAllowFriendlyFire(getMatch().getMap().getInfo().friendlyFire);
+    team.setAllowFriendlyFire(false);
 
     if (!forObservers && party instanceof Competitor) {
       NameTagVisibility nameTags = ((Competitor) party).getNameTagVisibility();
@@ -73,7 +73,9 @@ public class ScoreboardMatchModule extends MatchModule implements Listener {
 
   protected Team createPartyScoreboardTeam(
       Party party, Scoreboard scoreboard, boolean forObservers) {
-    logger.fine("Creating team for party " + party + " on scoreboard " + toString(scoreboard));
+    match
+        .getLogger()
+        .fine("Creating team for party " + party + " on scoreboard " + toString(scoreboard));
 
     Team team = scoreboard.registerNewTeam(getScoreboardTeamName(party));
     updatePartyScoreboardTeam(party, team, forObservers);
@@ -87,7 +89,9 @@ public class ScoreboardMatchModule extends MatchModule implements Listener {
   protected void addPartyScoreboard(Party newParty) {
     // Create the new party's scoreboard
     Scoreboard newScoreboard = PGM.get().getServer().getScoreboardManager().getNewScoreboard();
-    logger.fine("Created scoreboard " + toString(newScoreboard) + " for party " + newParty);
+    match
+        .getLogger()
+        .fine("Created scoreboard " + toString(newScoreboard) + " for party " + newParty);
 
     // Add all previously existing parties to the new scoreboard (but not the new party)
     for (Party oldParty : partyScoreboards.keySet()) {
@@ -117,18 +121,20 @@ public class ScoreboardMatchModule extends MatchModule implements Listener {
       }
     }
 
-    logger.fine("Removed scoreboard " + toString(scoreboard) + " for party " + party);
+    match.getLogger().fine("Removed scoreboard " + toString(scoreboard) + " for party " + party);
 
     // Remove the leaving party from all other scoreboards
     String name = getScoreboardTeamName(party);
     for (Scoreboard otherScoreboard : getScoreboards()) {
       Team team = otherScoreboard.getTeam(name);
       if (team != null) {
-        logger.fine(
-            "Unregistering team "
-                + toString(team)
-                + " from scoreboard "
-                + toString(otherScoreboard));
+        match
+            .getLogger()
+            .fine(
+                "Unregistering team "
+                    + toString(team)
+                    + " from scoreboard "
+                    + toString(otherScoreboard));
         team.unregister();
       }
     }
@@ -141,24 +147,28 @@ public class ScoreboardMatchModule extends MatchModule implements Listener {
     for (Scoreboard scoreboard : getScoreboards()) {
       if (newParty != null) {
         Team team = scoreboard.getTeam(teamName);
-        logger.fine(
-            "Adding player "
-                + player
-                + " to team "
-                + toString(team)
-                + " on scoreboard "
-                + toString(scoreboard));
+        match
+            .getLogger()
+            .fine(
+                "Adding player "
+                    + player
+                    + " to team "
+                    + toString(team)
+                    + " on scoreboard "
+                    + toString(scoreboard));
         team.addPlayer(
             player.getBukkit()); // This also removes the player from their old team, if any
       } else if (oldParty != null) {
         Team team = scoreboard.getTeam(teamName);
-        logger.fine(
-            "Removing player "
-                + player
-                + " from team "
-                + toString(team)
-                + " on scoreboard "
-                + toString(scoreboard));
+        match
+            .getLogger()
+            .fine(
+                "Removing player "
+                    + player
+                    + " from team "
+                    + toString(team)
+                    + " on scoreboard "
+                    + toString(scoreboard));
         team.removePlayer(player.getBukkit());
       }
     }
@@ -172,10 +182,10 @@ public class ScoreboardMatchModule extends MatchModule implements Listener {
   protected void updatePlayer(MatchPlayer player, Party party, boolean show) {
     if (show) {
       Scoreboard scoreboard = partyScoreboards.get(party);
-      logger.fine("Setting player " + player + " to scoreboard " + toString(scoreboard));
+      match.getLogger().fine("Setting player " + player + " to scoreboard " + toString(scoreboard));
       player.getBukkit().setScoreboard(scoreboard);
     } else {
-      logger.fine("Setting player " + player + " to hidden scoreboard");
+      match.getLogger().fine("Setting player " + player + " to hidden scoreboard");
       player.getBukkit().setScoreboard(getHiddenScoreboard());
     }
   }

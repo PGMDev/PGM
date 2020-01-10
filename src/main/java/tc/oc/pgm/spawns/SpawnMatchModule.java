@@ -26,6 +26,7 @@ import org.jdom2.Element;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.PlayerItemTransferEvent;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
@@ -36,7 +37,6 @@ import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinPartyEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.modules.EventFilterMatchModule;
 import tc.oc.pgm.spawns.states.Joining;
 import tc.oc.pgm.spawns.states.Observing;
@@ -45,8 +45,9 @@ import tc.oc.util.RandomUtils;
 import tc.oc.xml.InvalidXMLException;
 
 @ListenerScope(MatchScope.LOADED)
-public class SpawnMatchModule extends MatchModule implements Listener {
+public class SpawnMatchModule implements MatchModule, Listener {
 
+  private final Match match;
   private final SpawnModule module;
   private final Map<MatchPlayer, State> states = new HashMap<>();
   private final Set<MatchPlayer> transitioningPlayers = new HashSet<>();
@@ -55,9 +56,13 @@ public class SpawnMatchModule extends MatchModule implements Listener {
   private final ObserverToolFactory observerToolFactory;
 
   public SpawnMatchModule(Match match, SpawnModule module) {
-    super(match);
+    this.match = match;
     this.module = module;
     this.observerToolFactory = new ObserverToolFactory(PGM.get());
+  }
+
+  public Match getMatch() {
+    return match;
   }
 
   public RespawnOptions getRespawnOptions() {
@@ -113,7 +118,7 @@ public class SpawnMatchModule extends MatchModule implements Listener {
 
   @Override
   public void load() {
-    this.getMatch()
+    match
         .getScheduler(MatchScope.LOADED)
         .runTaskTimer(
             1,
@@ -129,7 +134,7 @@ public class SpawnMatchModule extends MatchModule implements Listener {
   }
 
   public void transition(MatchPlayer player, @Nullable State oldState, @Nullable State newState) {
-    logger.fine("Transitioning " + player + " from " + oldState + " to " + newState);
+    match.getLogger().fine("Transitioning " + player + " from " + oldState + " to " + newState);
 
     if (transitioningPlayers.contains(player)) {
       throw new IllegalStateException(
@@ -161,17 +166,17 @@ public class SpawnMatchModule extends MatchModule implements Listener {
     }
 
     for (Event event : events) {
-      getMatch().callEvent(event);
+      match.callEvent(event);
     }
   }
 
   public void reportFailedSpawn(Spawn spawn, MatchPlayer player) {
     if (failed.add(spawn)) {
-      Element elSpawn = getMatch().getMapContext().features().getNode(spawn);
+      Element elSpawn = match.getMapContext().legacy().getFeatures().getNode(spawn);
       InvalidXMLException ex =
           new InvalidXMLException(
               "Failed to generate spawn location for " + player.getBukkit().getName(), elSpawn);
-      getMatch().getMap().getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+      match.getMap().getLogger().log(Level.SEVERE, ex.getMessage(), ex);
     }
   }
 
@@ -200,7 +205,7 @@ public class SpawnMatchModule extends MatchModule implements Listener {
   /** Must run before {@link tc.oc.pgm.tracker.trackers.DeathTracker#onPlayerDeath} */
   @EventHandler(priority = EventPriority.LOW)
   public void onVanillaDeath(final PlayerDeathEvent event) {
-    MatchPlayer player = getMatch().getPlayer(event.getEntity());
+    MatchPlayer player = match.getPlayer(event.getEntity());
     if (player == null) return;
 
     State state = states.get(player);
@@ -215,7 +220,7 @@ public class SpawnMatchModule extends MatchModule implements Listener {
 
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
   public void onInventoryClick(final InventoryClickEvent event) {
-    MatchPlayer player = getMatch().getPlayer(event.getWhoClicked());
+    MatchPlayer player = match.getPlayer(event.getWhoClicked());
     if (player != null) {
       State state = states.get(player);
       if (state != null) state.onEvent(event);
@@ -228,7 +233,7 @@ public class SpawnMatchModule extends MatchModule implements Listener {
    */
   @EventHandler(priority = EventPriority.LOW)
   public void onInteract(final PlayerInteractEvent event) {
-    MatchPlayer player = getMatch().getPlayer(event.getPlayer());
+    MatchPlayer player = match.getPlayer(event.getPlayer());
     if (player != null) {
       State state = states.get(player);
       if (state != null) state.onEvent(event);
@@ -237,7 +242,7 @@ public class SpawnMatchModule extends MatchModule implements Listener {
 
   @EventHandler
   public void onAttackEntity(final PlayerAttackEntityEvent event) {
-    MatchPlayer player = getMatch().getPlayer(event.getPlayer());
+    MatchPlayer player = match.getPlayer(event.getPlayer());
     if (player != null) {
       State state = states.get(player);
       if (state != null) state.onEvent(event);
@@ -246,7 +251,7 @@ public class SpawnMatchModule extends MatchModule implements Listener {
 
   @EventHandler
   public void onTransferItem(final PlayerItemTransferEvent event) {
-    MatchPlayer player = getMatch().getPlayer(event.getPlayer());
+    MatchPlayer player = match.getPlayer(event.getPlayer());
     if (player != null) {
       State state = states.get(player);
       if (state != null) state.onEvent(event);
@@ -281,7 +286,7 @@ public class SpawnMatchModule extends MatchModule implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onInitialSpawn(final PlayerInitialSpawnEvent event) {
     // Ensure the player spawns in the match world
-    event.setSpawnLocation(getMatch().getWorld().getSpawnLocation());
+    event.setSpawnLocation(match.getWorld().getSpawnLocation());
   }
 
   @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = false)
@@ -289,7 +294,7 @@ public class SpawnMatchModule extends MatchModule implements Listener {
     // when an observer begins to take fall damage, teleport them to their spawn
     if (event.getEntity() instanceof Player
         && event.getCause() == EntityDamageEvent.DamageCause.VOID) {
-      MatchPlayer player = getMatch().getPlayer(event.getEntity());
+      MatchPlayer player = match.getPlayer(event.getEntity());
       if (player != null && player.isObserving()) {
         Spawn spawn = chooseSpawn(player);
         if (spawn != null) {

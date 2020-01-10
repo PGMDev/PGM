@@ -234,6 +234,7 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
     Player bukkit = getBukkit();
     bukkit.closeInventory();
     resetInventory();
+    bukkit.setArrowsStuck(0);
     bukkit.setExhaustion(0);
     bukkit.setFallDistance(0);
     bukkit.setFireTicks(0);

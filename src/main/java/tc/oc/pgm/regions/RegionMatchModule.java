@@ -1,14 +1,23 @@
 package tc.oc.pgm.regions;
 
-import static tc.oc.pgm.map.ProtoVersions.REGION_PRIORITY_VERSION;
+import static tc.oc.pgm.api.map.ProtoVersions.REGION_PRIORITY_VERSION;
 
 import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.entity.*;
-import org.bukkit.event.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Hanging;
+import org.bukkit.entity.ItemFrame;
+import org.bukkit.entity.LeashHitch;
+import org.bukkit.entity.Painting;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
@@ -26,30 +35,37 @@ import tc.oc.block.BlockVectors;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.event.GeneralizingEvent;
+import tc.oc.pgm.api.map.ProtoVersions;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
-import tc.oc.pgm.events.*;
+import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.filters.Filter.QueryResponse;
-import tc.oc.pgm.filters.query.*;
+import tc.oc.pgm.filters.query.BlockQuery;
+import tc.oc.pgm.filters.query.IBlockQuery;
+import tc.oc.pgm.filters.query.IPlayerQuery;
+import tc.oc.pgm.filters.query.IQuery;
+import tc.oc.pgm.filters.query.PlayerBlockQuery;
+import tc.oc.pgm.filters.query.PlayerQuery;
+import tc.oc.pgm.filters.query.Queries;
 import tc.oc.pgm.flag.event.FlagPickupEvent;
-import tc.oc.pgm.map.ProtoVersions;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.util.MatchPlayers;
 
 @ListenerScope(MatchScope.LOADED)
-public class RegionMatchModule extends MatchModule implements Listener {
+public class RegionMatchModule implements MatchModule, Listener {
 
-  protected final RFAContext rfaContext;
-  protected final boolean useRegionPriority;
+  private final Match match;
+  private final RFAContext rfaContext;
+  private final boolean useRegionPriority;
 
   public RegionMatchModule(Match match, RFAContext rfaContext) {
-    super(match);
+    this.match = match;
     this.rfaContext = rfaContext;
     this.useRegionPriority =
-        this.getMatch().getMap().getInfo().proto.isNoOlderThan(REGION_PRIORITY_VERSION);
+        match.getMap().getInfo().getProto().isNoOlderThan(REGION_PRIORITY_VERSION);
   }
 
   protected void checkEnterLeave(
@@ -352,7 +368,7 @@ public class RegionMatchModule extends MatchModule implements Listener {
         && ((Cancellable) query.getEvent()).isCancelled()
         && query instanceof IPlayerQuery) {
 
-      MatchPlayer player = getMatch().getPlayer(((IPlayerQuery) query).getPlayerId());
+      MatchPlayer player = match.getPlayer(((IPlayerQuery) query).getPlayerId());
       if (player != null) player.sendWarning(rfa.message, false);
     }
   }
@@ -369,7 +385,7 @@ public class RegionMatchModule extends MatchModule implements Listener {
 
   private ParticipantState getActor(BlockTransformEvent event) {
     // Legacy maps assume that all TNT damage is done by "world"
-    if (getMatch().getMap().getInfo().proto.isOlderThan(ProtoVersions.FILTER_OWNED_TNT)
+    if (match.getMap().getInfo().getProto().isOlderThan(ProtoVersions.FILTER_OWNED_TNT)
         && event.getCause() instanceof EntityExplodeEvent) return null;
 
     return ParticipantBlockTransformEvent.getPlayerState(event);

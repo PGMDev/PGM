@@ -168,7 +168,8 @@ public class ChatDispatcher implements Listener {
 
       if (message.startsWith("!")) {
         sendGlobal(player.getMatch(), player, message.substring(1));
-      } else if (message.startsWith("@")) {
+        // FIXME: msg completion performance
+        /*} else if (message.startsWith("@")) {
         final String target = message.substring(1, message.indexOf(" "));
         final MatchPlayer receiver = manager.findPlayer(target, player.getBukkit());
 
@@ -180,7 +181,7 @@ public class ChatDispatcher implements Listener {
               player,
               receiver.getBukkit(),
               message.replace(target, "").substring(1));
-        }
+        }*/
       } else {
         sendDefault(player.getMatch(), player, event.getMessage());
       }

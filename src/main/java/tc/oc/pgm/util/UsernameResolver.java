@@ -86,7 +86,7 @@ public class UsernameResolver {
 
     if (!errors.isEmpty()) {
       PGM.get()
-          .getMapLogger()
+          .getGameLogger()
           .log(
               Level.SEVERE,
               "Could not resolve "

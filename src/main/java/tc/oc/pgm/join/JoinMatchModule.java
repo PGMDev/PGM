@@ -13,47 +13,36 @@ import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchModuleFactory;
 import tc.oc.pgm.match.ObservingParty;
-import tc.oc.pgm.module.ModuleDescription;
-import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.util.components.PeriodFormats;
 
-@ModuleDescription(name = "Join")
 @ListenerScope(MatchScope.LOADED)
-public class JoinMatchModule extends MatchModule implements Listener, JoinHandler {
-
-  public static class Factory implements MatchModuleFactory<JoinMatchModule> {
-    @Override
-    public JoinMatchModule createMatchModule(Match match) throws ModuleLoadException {
-      return new JoinMatchModule(match);
-    }
-  }
+public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
 
   private final Set<JoinGuard> guards = new LinkedHashSet<>();
   private final Set<JoinHandler> handlers = new LinkedHashSet<>();
 
   // Players who have requested to join before match start
   private final QueuedParticipants queuedParticipants;
+  private final Match match;
 
   public JoinMatchModule(Match match) {
-    super(match);
+    this.match = match;
     queuedParticipants = new QueuedParticipants(match);
   }
 
   @Override
   public void load() {
-    super.load();
-    getMatch().addParty(queuedParticipants);
+    match.addParty(queuedParticipants);
   }
 
   public void registerHandler(JoinGuard guard) {
@@ -72,7 +61,7 @@ public class JoinMatchModule extends MatchModule implements Listener, JoinHandle
   public boolean canPriorityKick(MatchPlayer joining) {
     return Config.Join.priorityKick()
         && joining.getBukkit().hasPermission(Permissions.JOIN_FULL)
-        && !getMatch().isRunning();
+        && !match.isRunning();
   }
 
   private Iterable<JoinGuard> allGuards() {
@@ -87,13 +76,13 @@ public class JoinMatchModule extends MatchModule implements Listener, JoinHandle
     }
 
     // Can't join if the match is over
-    if (getMatch().isFinished()) {
+    if (match.isFinished()) {
       return GenericJoinResult.Status.MATCH_FINISHED.toResult();
     }
 
     // If mid-match join is disabled, player cannot join for the first time after the match has
     // started
-    if (getMatch().isRunning() && !Config.Join.midMatch()) {
+    if (match.isRunning() && !Config.Join.midMatch()) {
       return GenericJoinResult.Status.MATCH_STARTED.toResult();
     }
 
@@ -166,9 +155,9 @@ public class JoinMatchModule extends MatchModule implements Listener, JoinHandle
       return false;
     }
 
-    Party observers = getMatch().getDefaultParty();
+    Party observers = match.getDefaultParty();
     leaving.sendMessage(new PersonalizedTranslatable("team.join", observers.getComponentName()));
-    return getMatch().setParty(leaving, observers);
+    return match.setParty(leaving, observers);
   }
 
   public QueuedParticipants getQueuedParticipants() {
@@ -180,7 +169,7 @@ public class JoinMatchModule extends MatchModule implements Listener, JoinHandle
   }
 
   public boolean queueToJoin(MatchPlayer joining) {
-    boolean joined = getMatch().setParty(joining, queuedParticipants);
+    boolean joined = match.setParty(joining, queuedParticipants);
     if (joined) {
       joining.sendMessage(new PersonalizedTranslatable("ffa.join"));
     }
@@ -190,7 +179,7 @@ public class JoinMatchModule extends MatchModule implements Listener, JoinHandle
             new PersonalizedTranslatable("team.join.deferred.request"),
             ChatColor.YELLOW)); // Always show this message
 
-    if (getMatch().hasMatchModule(TeamMatchModule.class)) {
+    if (match.hasMatchModule(TeamMatchModule.class)) {
       // If they are joining a team, show them a scary warning about leaving the match
       joining.sendMessage(
           new PersonalizedText(
@@ -211,7 +200,7 @@ public class JoinMatchModule extends MatchModule implements Listener, JoinHandle
                       ChatColor.RED)),
               ChatColor.DARK_RED));
 
-      TimeLimitMatchModule tlmm = getMatch().getMatchModule(TimeLimitMatchModule.class);
+      TimeLimitMatchModule tlmm = match.getMatchModule(TimeLimitMatchModule.class);
       if (tlmm != null && tlmm.getTimeLimit() != null) {
         joining.sendMessage(
             new PersonalizedText(
@@ -239,7 +228,7 @@ public class JoinMatchModule extends MatchModule implements Listener, JoinHandle
 
   public boolean cancelQueuedJoin(MatchPlayer joining) {
     if (!isQueuedToJoin(joining)) return false;
-    if (getMatch().setParty(joining, getMatch().getDefaultParty())) {
+    if (match.setParty(joining, match.getDefaultParty())) {
       joining.sendMessage(
           new PersonalizedText(
               new PersonalizedTranslatable("team.join.deferred.cancel"), ChatColor.YELLOW));
@@ -259,7 +248,7 @@ public class JoinMatchModule extends MatchModule implements Listener, JoinHandle
 
     // Send any leftover players to obs
     for (MatchPlayer joining : queue.getOrderedPlayers()) {
-      getMatch().setParty(joining, getMatch().getDefaultParty());
+      match.setParty(joining, match.getDefaultParty());
     }
   }
 

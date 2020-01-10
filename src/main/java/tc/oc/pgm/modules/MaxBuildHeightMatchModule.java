@@ -7,13 +7,13 @@ import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.match.MatchModule;
+import tc.oc.pgm.api.match.MatchModule;
 
-public class MaxBuildHeightMatchModule extends MatchModule implements Listener {
-  protected final int buildHeight;
+public class MaxBuildHeightMatchModule implements MatchModule, Listener {
+
+  private final int buildHeight;
 
   public MaxBuildHeightMatchModule(Match match, int buildHeight) {
-    super(match);
     this.buildHeight = buildHeight;
   }
 

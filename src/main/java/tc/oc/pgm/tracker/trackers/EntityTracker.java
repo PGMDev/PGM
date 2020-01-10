@@ -6,13 +6,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.FallingBlock;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
-import tc.oc.pgm.tracker.TrackerMatchModule;
-import tc.oc.pgm.tracker.damage.*;
+import tc.oc.pgm.tracker.damage.EntityInfo;
+import tc.oc.pgm.tracker.damage.FallingBlockInfo;
+import tc.oc.pgm.tracker.damage.MobInfo;
+import tc.oc.pgm.tracker.damage.OwnerInfo;
+import tc.oc.pgm.tracker.damage.PhysicalInfo;
+import tc.oc.pgm.tracker.damage.PlayerInfo;
+import tc.oc.pgm.tracker.damage.ThrownPotionInfo;
+import tc.oc.pgm.tracker.damage.TrackerInfo;
 import tc.oc.util.logging.ClassLogger;
 
 /** Tracks the ownership of {@link Entity}s and resolves damage caused by them */
@@ -22,9 +32,9 @@ public class EntityTracker implements Listener {
   private final Match match;
   private final Map<Entity, TrackerInfo> entities = new HashMap<>();
 
-  public EntityTracker(TrackerMatchModule tmm) {
-    this.logger = ClassLogger.get(tmm.getLogger(), getClass());
-    this.match = tmm.getMatch();
+  public EntityTracker(Match match) {
+    this.logger = ClassLogger.get(match.getLogger(), getClass());
+    this.match = match;
   }
 
   public PhysicalInfo createEntity(Entity entity, @Nullable ParticipantState owner) {

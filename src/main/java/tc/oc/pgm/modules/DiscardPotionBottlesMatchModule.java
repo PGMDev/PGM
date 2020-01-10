@@ -7,15 +7,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.match.MatchModule;
 
 @ListenerScope(MatchScope.RUNNING)
-public class DiscardPotionBottlesMatchModule extends MatchModule implements Listener {
-  public DiscardPotionBottlesMatchModule(Match match) {
-    super(match);
-  }
+public class DiscardPotionBottlesMatchModule implements MatchModule, Listener {
+
+  public DiscardPotionBottlesMatchModule(Match match) {}
 
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   public void onDrinkPotion(final PlayerItemConsumeEvent event) {

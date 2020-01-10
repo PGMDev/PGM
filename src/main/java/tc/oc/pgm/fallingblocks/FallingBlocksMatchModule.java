@@ -23,13 +23,13 @@ import org.bukkit.event.block.BlockFallEvent;
 import tc.oc.material.Materials;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.util.collection.LongDeque;
 
-public class FallingBlocksMatchModule extends MatchModule implements Listener {
+public class FallingBlocksMatchModule implements MatchModule, Listener {
   private static final BlockFace[] NEIGHBORS = {
     BlockFace.WEST, BlockFace.EAST, BlockFace.DOWN, BlockFace.UP, BlockFace.NORTH, BlockFace.SOUTH
   };
@@ -44,9 +44,10 @@ public class FallingBlocksMatchModule extends MatchModule implements Listener {
   private final List<FallingBlocksRule> rules;
   private final TLongObjectMap<TLongObjectMap<ParticipantState>> blockDisturbersByTick =
       new TLongObjectHashMap<>();
+  private final Match match;
 
   public FallingBlocksMatchModule(Match match, List<FallingBlocksRule> rules) {
-    super(match);
+    this.match = match;
     this.rules = rules;
   }
 
@@ -62,23 +63,23 @@ public class FallingBlocksMatchModule extends MatchModule implements Listener {
 
   @Override
   public void enable() {
-    super.enable();
-    getMatch()
+    match
         .getScheduler(MatchScope.RUNNING)
         .runTaskTimer(1, FallingBlocksMatchModule.this::fallCheck);
   }
 
   @Override
   public void disable() {
-    logger.info("Longest search for this match: " + this.visitsWorstTick);
-    super.disable();
+    match.getLogger().info("Longest search for this match: " + this.visitsWorstTick);
   }
 
   private void logError(MaxSearchVisitsExceeded ex) {
-    this.logger.log(
-        Level.SEVERE,
-        "Exceeded max search visits (" + MAX_SEARCH_VISITS_PER_TICK + ") for this tick",
-        ex);
+    match
+        .getLogger()
+        .log(
+            Level.SEVERE,
+            "Exceeded max search visits (" + MAX_SEARCH_VISITS_PER_TICK + ") for this tick",
+            ex);
   }
 
   /**
@@ -94,7 +95,7 @@ public class FallingBlocksMatchModule extends MatchModule implements Listener {
    */
   private boolean isSupported(long pos, TLongSet supported, TLongSet unsupported)
       throws MaxSearchVisitsExceeded {
-    World world = this.getMatch().getWorld();
+    World world = match.getWorld();
 
     LongDeque queue = new LongDeque();
     TLongSet visited = new TLongHashSet();
@@ -207,9 +208,9 @@ public class FallingBlocksMatchModule extends MatchModule implements Listener {
     this.visitsWorstTick = Math.max(this.visitsWorstTick, this.visitsThisTick);
     this.visitsThisTick = 0;
 
-    World world = this.getMatch().getWorld();
+    World world = match.getWorld();
     TLongObjectMap<ParticipantState> blockDisturbers =
-        this.blockDisturbersByTick.remove(this.getMatch().getTick().tick);
+        this.blockDisturbersByTick.remove(match.getTick().tick);
     if (blockDisturbers == null) return;
 
     TLongSet supported = new TLongHashSet();
@@ -248,7 +249,7 @@ public class FallingBlocksMatchModule extends MatchModule implements Listener {
   private void fall(long pos, @Nullable ParticipantState breaker) {
     // Block must be removed BEFORE spawning the FallingBlock, or it will not appear on the client
     // https://bugs.mojang.com/browse/MC-72248
-    Block block = blockAt(this.getMatch().getWorld(), pos);
+    Block block = blockAt(match.getWorld(), pos);
     BlockState oldState = block.getState();
     block.setType(Material.AIR, false);
     FallingBlock fallingBlock =
@@ -257,11 +258,10 @@ public class FallingBlocksMatchModule extends MatchModule implements Listener {
             .spawnFallingBlock(block.getLocation(), oldState.getType(), oldState.getRawData());
 
     BlockFallEvent event = new BlockFallEvent(block, fallingBlock);
-    getMatch()
-        .callEvent(
-            breaker == null
-                ? new BlockTransformEvent(event, block, Material.AIR)
-                : new ParticipantBlockTransformEvent(event, block, Material.AIR, breaker));
+    match.callEvent(
+        breaker == null
+            ? new BlockTransformEvent(event, block, Material.AIR)
+            : new ParticipantBlockTransformEvent(event, block, Material.AIR, breaker));
 
     if (event.isCancelled()) {
       fallingBlock.remove();
@@ -276,7 +276,7 @@ public class FallingBlocksMatchModule extends MatchModule implements Listener {
   private void disturb(long pos, BlockState blockState, @Nullable ParticipantState disturber) {
     FallingBlocksRule rule = this.ruleWithShortestDelay(blockState);
     if (rule != null) {
-      long tick = this.getMatch().getTick().tick + rule.delay;
+      long tick = match.getTick().tick + rule.delay;
       TLongObjectMap<ParticipantState> blockDisturbers = this.blockDisturbersByTick.get(tick);
 
       if (blockDisturbers == null) {

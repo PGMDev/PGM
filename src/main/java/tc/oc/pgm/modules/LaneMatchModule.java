@@ -5,7 +5,11 @@ import com.google.common.collect.Sets;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import org.bukkit.*;
+import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.event.EventHandler;
@@ -20,19 +24,21 @@ import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerBlockTransformEvent;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.Team;
 
-public class LaneMatchModule extends MatchModule implements Listener {
+public class LaneMatchModule implements MatchModule, Listener {
+
+  private final Match match;
   private final Map<Team, Region> lanes;
   private final Set<UUID> voidPlayers = Sets.newHashSet();
 
   public LaneMatchModule(Match match, Map<Team, Region> lanes) {
-    super(match);
+    this.match = match;
     this.lanes = lanes;
   }
 

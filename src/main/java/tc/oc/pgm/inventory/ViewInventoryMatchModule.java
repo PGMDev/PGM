@@ -2,7 +2,12 @@ package tc.oc.pgm.inventory;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -15,18 +20,27 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.inventory.*;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryClickedEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
-import org.bukkit.inventory.*;
+import org.bukkit.inventory.DoubleChestInventory;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.scheduler.BukkitTask;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 import tc.oc.pgm.AllTranslations;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.ObserverInteractEvent;
@@ -36,21 +50,12 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerBlockTransformEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.kits.WalkSpeedKit;
-import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchModuleFactory;
-import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.util.InventoryTrackerEntry;
 import tc.oc.server.BukkitUtils;
 
 @ListenerScope(MatchScope.LOADED)
-public class ViewInventoryMatchModule extends MatchModule implements Listener {
-  public static class Factory implements MatchModuleFactory<ViewInventoryMatchModule> {
-    @Override
-    public ViewInventoryMatchModule createMatchModule(Match match) throws ModuleLoadException {
-      return new ViewInventoryMatchModule(match);
-    }
-  }
+public class ViewInventoryMatchModule implements MatchModule, Listener {
 
   /**
    * Amount of milliseconds after the match begins where players may not add / remove items from
@@ -75,37 +80,31 @@ public class ViewInventoryMatchModule extends MatchModule implements Listener {
     return inventorySlot; // default
   }
 
-  private BukkitTask task;
+  private final Match match;
 
   public ViewInventoryMatchModule(Match match) {
-    super(match);
+    this.match = match;
+    match
+        .getScheduler(MatchScope.RUNNING)
+        .runTaskTimer(
+            Duration.standardSeconds(1),
+            () -> {
+              if (ViewInventoryMatchModule.this.updateQueue.isEmpty()) return;
 
-    task =
-        Bukkit.getScheduler()
-            .runTaskTimer(
-                PGM.get(),
-                new Runnable() {
-                  @Override
-                  public void run() {
-                    if (ViewInventoryMatchModule.this.updateQueue.size() == 0) return;
+              for (Iterator<Map.Entry<String, Instant>> iterator =
+                      ViewInventoryMatchModule.this.updateQueue.entrySet().iterator();
+                  iterator.hasNext(); ) {
+                Map.Entry<String, Instant> entry = iterator.next();
+                if (entry.getValue().isAfterNow()) continue;
 
-                    for (Iterator<Map.Entry<String, Instant>> iterator =
-                            ViewInventoryMatchModule.this.updateQueue.entrySet().iterator();
-                        iterator.hasNext(); ) {
-                      Map.Entry<String, Instant> entry = iterator.next();
-                      if (entry.getValue().isAfterNow()) continue;
+                Player player = Bukkit.getPlayerExact(entry.getKey());
+                if (player != null) {
+                  ViewInventoryMatchModule.this.checkMonitoredInventories(player);
+                }
 
-                      Player player = Bukkit.getPlayerExact(entry.getKey());
-                      if (player != null) {
-                        ViewInventoryMatchModule.this.checkMonitoredInventories(player);
-                      }
-
-                      iterator.remove();
-                    }
-                  }
-                },
-                0,
-                4);
+                iterator.remove();
+              }
+            });
   }
 
   @EventHandler(ignoreCancelled = true)
@@ -269,12 +268,13 @@ public class ViewInventoryMatchModule extends MatchModule implements Listener {
 
   @Override
   public void unload() {
-    task.cancel();
+    monitoredInventories.clear();
+    updateQueue.clear();
   }
 
   public boolean canPreviewInventory(Player viewer, Player holder) {
-    MatchPlayer matchViewer = getMatch().getPlayer(viewer);
-    MatchPlayer matchHolder = getMatch().getPlayer(holder);
+    MatchPlayer matchViewer = match.getPlayer(viewer);
+    MatchPlayer matchHolder = match.getPlayer(holder);
     return matchViewer != null
         && matchHolder != null
         && canPreviewInventory(matchViewer, matchHolder);
@@ -336,7 +336,7 @@ public class ViewInventoryMatchModule extends MatchModule implements Listener {
     if (matchHolder != null && matchHolder.isParticipating()) {
       BlitzMatchModule module = matchHolder.getMatch().getMatchModule(BlitzMatchModule.class);
       if (module != null) {
-        int livesLeft = module.lifeManager.getLives(holder.getUniqueId());
+        int livesLeft = module.getNumOfLives(holder.getUniqueId());
         ItemStack lives = new ItemStack(Material.EGG, livesLeft);
         ItemMeta lifeMeta = lives.getItemMeta();
         String key =

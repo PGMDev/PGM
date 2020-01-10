@@ -15,9 +15,9 @@ import org.bukkit.util.Vector;
 import tc.oc.chunk.ChunkVector;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.match.MatchModule;
 
 /**
  * Keeps a snapshot of the block state of the entire match world at load time, using a copy-on-write
@@ -28,12 +28,13 @@ import tc.oc.pgm.match.MatchModule;
  * BlockTransformEvent}, without exception.
  */
 @ListenerScope(MatchScope.LOADED)
-public class SnapshotMatchModule extends MatchModule implements Listener {
+public class SnapshotMatchModule implements MatchModule, Listener {
 
+  private final Match match;
   private final Map<ChunkVector, ChunkSnapshot> chunkSnapshots = new HashMap<>();
 
   public SnapshotMatchModule(Match match) {
-    super(match);
+    this.match = match;
   }
 
   public MaterialData getOriginalMaterial(int x, int y, int z) {
@@ -50,7 +51,7 @@ public class SnapshotMatchModule extends MatchModule implements Listener {
               chunkSnapshot.getBlockData(
                   chunkPos.getBlockX(), chunkPos.getBlockY(), chunkPos.getBlockZ()));
     } else {
-      return getMatch().getWorld().getBlockAt(x, y, z).getState().getMaterialData();
+      return match.getWorld().getBlockAt(x, y, z).getState().getMaterialData();
     }
   }
 
@@ -59,7 +60,7 @@ public class SnapshotMatchModule extends MatchModule implements Listener {
   }
 
   public BlockState getOriginalBlock(int x, int y, int z) {
-    BlockState state = getMatch().getWorld().getBlockAt(x, y, z).getState();
+    BlockState state = match.getWorld().getBlockAt(x, y, z).getState();
     if (y < 0 || y >= 256) return state;
 
     ChunkVector chunkVector = ChunkVector.ofBlock(x, y, z);
@@ -88,7 +89,7 @@ public class SnapshotMatchModule extends MatchModule implements Listener {
     Chunk chunk = event.getOldState().getChunk();
     ChunkVector chunkVector = ChunkVector.of(chunk);
     if (!chunkSnapshots.containsKey(chunkVector)) {
-      logger.fine("Copying chunk at " + chunkVector);
+      match.getLogger().fine("Copying chunk at " + chunkVector);
       ChunkSnapshot chunkSnapshot = chunk.getChunkSnapshot();
       chunkSnapshot.updateBlock(
           event

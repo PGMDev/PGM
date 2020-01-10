@@ -3,25 +3,30 @@ package tc.oc.pgm.modules;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.map.MapModule;
-import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.module.ModuleDescription;
+import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.xml.InvalidXMLException;
 
-@ModuleDescription(name = "Discard Portion Bottles")
-public class DiscardPotionBottlesModule extends MapModule<DiscardPotionBottlesMatchModule> {
+public class DiscardPotionBottlesModule implements MapModule {
+
   @Override
-  public DiscardPotionBottlesMatchModule createMatchModule(Match match) {
+  public MatchModule createMatchModule(Match match) {
     return new DiscardPotionBottlesMatchModule(match);
   }
 
-  public static DiscardPotionBottlesModule parse(
-      MapModuleContext context, Logger logger, Document doc) {
-    Element el = doc.getRootElement().getChild("keep-potion-bottles");
-    if (el == null) {
-      return new DiscardPotionBottlesModule();
-    }
+  public static class Factory implements MapModuleFactory<DiscardPotionBottlesModule> {
+    @Override
+    public DiscardPotionBottlesModule parse(MapContext context, Logger logger, Document doc)
+        throws InvalidXMLException {
+      Element el = doc.getRootElement().getChild("keep-potion-bottles");
+      if (el == null) {
+        return new DiscardPotionBottlesModule();
+      }
 
-    return null;
+      return null;
+    }
   }
 }

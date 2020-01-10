@@ -9,16 +9,18 @@ import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.util.MatchPlayers;
 
-public class PlayableRegionMatchModule extends MatchModule implements Listener {
-  protected final Region playableRegion;
+public class PlayableRegionMatchModule implements MatchModule, Listener {
+
+  private final Match match;
+  private final Region playableRegion;
 
   public PlayableRegionMatchModule(Match match, Region playableRegion) {
-    super(match);
+    this.match = match;
     this.playableRegion = playableRegion;
   }
 

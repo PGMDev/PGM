@@ -3,14 +3,16 @@ package tc.oc.pgm.modules;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.map.MapModule;
-import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.module.ModuleDescription;
+import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapModuleFactory;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
+import tc.oc.xml.InvalidXMLException;
 
-@ModuleDescription(name = "Time Lock")
-public class TimeLockModule extends MapModule<MatchModule> {
-  protected final boolean lock;
+public class TimeLockModule implements MapModule {
+  private final boolean lock;
 
   public TimeLockModule(boolean lock) {
     this.lock = lock;
@@ -20,14 +22,24 @@ public class TimeLockModule extends MapModule<MatchModule> {
     return this.lock;
   }
 
-  public static TimeLockModule parse(MapModuleContext context, Logger logger, Document doc) {
-    boolean lock = true;
-    Element timelockEl = doc.getRootElement().getChild("timelock");
-    if (timelockEl != null) {
-      if (timelockEl.getTextNormalize().equalsIgnoreCase("off")) {
-        lock = false;
+  public static class Factory implements MapModuleFactory<TimeLockModule> {
+    @Override
+    public TimeLockModule parse(MapContext context, Logger logger, Document doc)
+        throws InvalidXMLException {
+      boolean lock = true;
+      Element timelockEl = doc.getRootElement().getChild("timelock");
+      if (timelockEl != null) {
+        if (timelockEl.getTextNormalize().equalsIgnoreCase("off")) {
+          lock = false;
+        }
       }
+      return new TimeLockModule(lock);
     }
-    return new TimeLockModule(lock);
+  }
+
+  @Override
+  public MatchModule createMatchModule(Match match) throws ModuleLoadException {
+    return null; // FIXME: PGMListener calls the TimeLockModule and asks, should have its own
+    // MatchModule
   }
 }

@@ -65,4 +65,10 @@ public class DatastoreCacheImpl implements Datastore {
   public Settings getSettings(UUID id) {
     return settings.getUnchecked(id);
   }
+
+  @Override
+  public void shutdown() {
+    usernames.invalidateAll();
+    settings.invalidateAll();
+  }
 }

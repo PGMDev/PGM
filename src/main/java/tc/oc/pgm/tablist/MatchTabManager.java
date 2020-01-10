@@ -11,6 +11,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import tc.oc.pgm.Config;
+import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.event.MatchResizeEvent;
 import tc.oc.pgm.api.match.event.MatchUnloadEvent;
@@ -121,9 +122,12 @@ public class MatchTabManager extends TabManager implements Listener {
 
   protected void invalidate(MatchPlayer player) {
     getPlayerEntry(player).invalidate();
-    if (player.getMatch().getMap().getInfo().isAuthor(player.getId())) {
-      MapTabEntry mapEntry = mapEntries.get(player.getMatch());
-      if (mapEntry != null) mapEntry.invalidate();
+    for (Contributor author : player.getMatch().getMap().getInfo().getAuthors()) {
+      if (author.isPlayer(player.getId())) {
+        MapTabEntry mapEntry = mapEntries.get(player.getMatch());
+        if (mapEntry != null) mapEntry.invalidate();
+        break;
+      }
     }
   }
 

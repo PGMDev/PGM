@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jdom2.Element;
 import tc.oc.material.matcher.SingleMaterialMatcher;
-import tc.oc.pgm.map.MapModuleContext;
+import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.XMLUtils;
@@ -17,7 +17,7 @@ public class LegacyFilterParser extends FilterParser {
 
   protected final FilterContext filterContext = new FilterContext();
 
-  public LegacyFilterParser(MapModuleContext context) {
+  public LegacyFilterParser(MapContext context) {
     super(context);
   }
 

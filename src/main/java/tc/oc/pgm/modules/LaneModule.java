@@ -1,17 +1,18 @@
 package tc.oc.pgm.modules;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.map.MapModule;
-import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.module.ModuleDescription;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.teams.Team;
@@ -21,13 +22,7 @@ import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 
-@ModuleDescription(
-    name = "Void Lane",
-    depends = {RegionModule.class, TeamModule.class})
-public class LaneModule extends MapModule<LaneMatchModule> {
-
-  private static final MapTag RACEFORWOOL_TAG = MapTag.forName("raceforwool");
-
+public class LaneModule implements MapModule {
   private final Map<TeamFactory, Region> lanes;
 
   public LaneModule(Map<TeamFactory, Region> lanes) {
@@ -35,12 +30,7 @@ public class LaneModule extends MapModule<LaneMatchModule> {
   }
 
   @Override
-  public void loadTags(Set<MapTag> tags) {
-    tags.add(RACEFORWOOL_TAG);
-  }
-
-  @Override
-  public LaneMatchModule createMatchModule(Match match) {
+  public MatchModule createMatchModule(Match match) {
     Map<Team, Region> lanes = Maps.newHashMapWithExpectedSize(this.lanes.size());
     for (Entry<TeamFactory, Region> entry : this.lanes.entrySet()) {
       lanes.put(
@@ -49,26 +39,30 @@ public class LaneModule extends MapModule<LaneMatchModule> {
     return new LaneMatchModule(match, lanes);
   }
 
-  // ---------------------
-  // ---- XML Parsing ----
-  // ---------------------
-
-  public static LaneModule parse(MapModuleContext context, Logger logger, Document doc)
-      throws InvalidXMLException {
-    Map<TeamFactory, Region> lanes = Maps.newHashMap();
-    TeamModule teamModule = context.getModule(TeamModule.class);
-
-    for (Element laneEl : XMLUtils.flattenElements(doc.getRootElement(), "lanes", "lane")) {
-      TeamFactory team =
-          teamModule.parseTeam(XMLUtils.getRequiredAttribute(laneEl, "team"), context);
-      Region region = context.getRegionParser().parseChildren(laneEl);
-      lanes.put(team, region);
+  public static class Factory implements MapModuleFactory<LaneModule> {
+    @Override
+    public Collection<Class<? extends MapModule>> getSoftDependencies() {
+      return ImmutableList.of(RegionModule.class, TeamModule.class);
     }
 
-    if (lanes.size() > 0) {
-      return new LaneModule(lanes);
-    } else {
-      return null;
+    @Override
+    public LaneModule parse(MapContext context, Logger logger, Document doc)
+        throws InvalidXMLException {
+      Map<TeamFactory, Region> lanes = Maps.newHashMap();
+      TeamModule teamModule = context.getModule(TeamModule.class);
+
+      for (Element laneEl : XMLUtils.flattenElements(doc.getRootElement(), "lanes", "lane")) {
+        TeamFactory team =
+            teamModule.parseTeam(XMLUtils.getRequiredAttribute(laneEl, "team"), context);
+        Region region = context.legacy().getRegions().parseChildren(laneEl);
+        lanes.put(team, region);
+      }
+
+      if (lanes.size() > 0) {
+        return new LaneModule(lanes);
+      } else {
+        return null;
+      }
     }
   }
 }

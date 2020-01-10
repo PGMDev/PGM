@@ -28,6 +28,7 @@ import tc.oc.component.types.PersonalizedText;
 import tc.oc.named.NameStyle;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchVictoryChangeEvent;
 import tc.oc.pgm.api.party.Competitor;
@@ -50,7 +51,6 @@ import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalProximityChangeEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.events.TeamRespawnsChangeEvent;
@@ -59,7 +59,7 @@ import tc.oc.pgm.wool.WoolMatchModule;
 import tc.oc.server.NullCommandSender;
 
 @ListenerScope(MatchScope.LOADED)
-public class SidebarMatchModule extends MatchModule implements Listener {
+public class SidebarMatchModule implements MatchModule, Listener {
 
   public static final int MAX_ROWS = 16; // Max rows on the scoreboard
   public static final int MAX_PREFIX = 16; // Max chars in a team prefix
@@ -84,14 +84,14 @@ public class SidebarMatchModule extends MatchModule implements Listener {
     protected final String[] players = new String[MAX_ROWS];
 
     private Sidebar(Party party) {
-      this.scoreboard =
-          getMatch().needMatchModule(ScoreboardMatchModule.class).getScoreboard(party);
+      this.scoreboard = match.needMatchModule(ScoreboardMatchModule.class).getScoreboard(party);
       this.objective = this.scoreboard.registerNewObjective(IDENTIFIER, "dummy");
       this.objective.setDisplayName(
           StringUtils.left(
               ComponentRenderers.toLegacyText(
-                  new PersonalizedText(
-                      getMatch().getMapContext().getGame(), net.md_5.bungee.api.ChatColor.AQUA),
+                  new PersonalizedText( // FIXME: Genre sidebar probably broken
+                      match.getMapContext().getInfo().getGenre(),
+                      net.md_5.bungee.api.ChatColor.AQUA),
                   NullCommandSender.INSTANCE),
               32));
       this.objective.setDisplaySlot(DisplaySlot.SIDEBAR);
@@ -159,39 +159,39 @@ public class SidebarMatchModule extends MatchModule implements Listener {
     }
   }
 
+  private final Match match;
+
   public SidebarMatchModule(Match match) {
-    super(match);
+    this.match = match;
   }
 
   private boolean hasScores() {
-    return getMatch().getMatchModule(ScoreMatchModule.class) != null;
+    return match.getMatchModule(ScoreMatchModule.class) != null;
   }
 
   private boolean isBlitz() {
-    return getMatch().getMatchModule(BlitzMatchModule.class) != null;
+    return match.getMatchModule(BlitzMatchModule.class) != null;
   }
 
   private boolean isCompactWool() {
-    WoolMatchModule wmm = getMatch().getMatchModule(WoolMatchModule.class);
+    WoolMatchModule wmm = match.getMatchModule(WoolMatchModule.class);
     return wmm != null
         && MAX_ROWS < wmm.getWools().keySet().size() * 2 - 1 + wmm.getWools().values().size();
   }
 
   private void addSidebar(Party party) {
-    logger.fine("Adding sidebar for party " + party);
+    match.getLogger().fine("Adding sidebar for party " + party);
     sidebars.put(party, new Sidebar(party));
   }
 
   @Override
   public void load() {
-    super.load();
-    for (Party party : getMatch().getParties()) addSidebar(party);
+    for (Party party : match.getParties()) addSidebar(party);
     renderSidebarDebounce();
   }
 
   @Override
   public void enable() {
-    super.enable();
     renderSidebarDebounce();
   }
 
@@ -210,7 +210,7 @@ public class SidebarMatchModule extends MatchModule implements Listener {
 
   @EventHandler
   public void removeParty(PartyRemoveEvent event) {
-    logger.fine("Removing sidebar for party " + event.getParty());
+    match.getLogger().fine("Removing sidebar for party " + event.getParty());
     sidebars.remove(event.getParty());
     renderSidebarDebounce();
   }
@@ -309,7 +309,7 @@ public class SidebarMatchModule extends MatchModule implements Listener {
   }
 
   private String renderScore(Competitor competitor, Party viewingParty) {
-    ScoreMatchModule smm = getMatch().needMatchModule(ScoreMatchModule.class);
+    ScoreMatchModule smm = match.needMatchModule(ScoreMatchModule.class);
     String text = ChatColor.WHITE.toString() + (int) smm.getScore(competitor);
     if (smm.hasScoreLimit()) {
       text += ChatColor.DARK_GRAY + "/" + ChatColor.GRAY + smm.getScoreLimit();
@@ -318,12 +318,12 @@ public class SidebarMatchModule extends MatchModule implements Listener {
   }
 
   private String renderBlitz(Competitor competitor, Party viewingParty) {
-    BlitzMatchModule bmm = getMatch().needMatchModule(BlitzMatchModule.class);
+    BlitzMatchModule bmm = match.needMatchModule(BlitzMatchModule.class);
     if (competitor instanceof tc.oc.pgm.teams.Team) {
       return ChatColor.WHITE.toString() + bmm.getRemainingPlayers(competitor);
     } else if (competitor instanceof Tribute && bmm.getConfig().getNumLives() > 1) {
       return ChatColor.WHITE.toString()
-          + bmm.lifeManager.getLives(competitor.getPlayers().iterator().next().getId());
+          + bmm.getNumOfLives(competitor.getPlayers().iterator().next().getId());
     } else {
       return "";
     }
@@ -376,7 +376,7 @@ public class SidebarMatchModule extends MatchModule implements Listener {
 
       // Scores/Blitz
       if (hasScores || isBlitz) {
-        for (Competitor competitor : getMatch().getCompetitors()) {
+        for (Competitor competitor : match.getCompetitors()) {
           String text;
           if (hasScores) {
             text = renderScore(competitor, viewingParty);
@@ -520,7 +520,7 @@ public class SidebarMatchModule extends MatchModule implements Listener {
     private BlinkTask(Goal goal, float rateHz, @Nullable Duration duration) {
       this.goal = goal;
       this.intervalTicks = (long) (10f / rateHz);
-      this.task = getMatch().getScheduler(MatchScope.RUNNING).runTaskTimer(0, intervalTicks, this);
+      this.task = match.getScheduler(MatchScope.RUNNING).runTaskTimer(0, intervalTicks, this);
 
       this.reset(duration);
     }

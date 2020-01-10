@@ -1,6 +1,6 @@
 package tc.oc.pgm.core;
 
-import static tc.oc.pgm.map.ProtoVersions.MODES_IMPLEMENTATION_VERSION;
+import static tc.oc.pgm.api.map.ProtoVersions.MODES_IMPLEMENTATION_VERSION;
 
 import java.util.List;
 import org.bukkit.Material;
@@ -20,6 +20,7 @@ import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -27,20 +28,21 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
 
-public class CoreMatchModule extends MatchModule implements Listener {
+public class CoreMatchModule implements MatchModule, Listener {
+
+  protected final Match match;
   protected final List<Core> cores;
 
   public CoreMatchModule(Match match, List<Core> cores) {
-    super(match);
+    this.match = match;
     this.cores = cores;
   }
 
   @Override
   public void enable() {
-    if (this.match.getMap().getInfo().proto.isOlderThan(MODES_IMPLEMENTATION_VERSION)) {
+    if (this.match.getMap().getInfo().getProto().isOlderThan(MODES_IMPLEMENTATION_VERSION)) {
       CoreConvertMonitor ccm = new CoreConvertMonitor(this);
 
       match.getScheduler(MatchScope.RUNNING).runTaskLater(15 * 60 * 20, ccm); // 15 minutes

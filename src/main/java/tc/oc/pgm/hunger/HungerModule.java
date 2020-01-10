@@ -1,46 +1,42 @@
 package tc.oc.pgm.hunger;
 
-import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.map.MapModule;
-import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.module.ModuleDescription;
+import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.xml.InvalidXMLException;
 
-@ModuleDescription(name = "Hunger")
-public class HungerModule extends MapModule<HungerMatchModule> {
-
-  private static final MapTag NOHUNGER_TAG = MapTag.forName("nohunger");
+public class HungerModule implements MapModule {
 
   @Override
-  public void loadTags(Set<MapTag> tags) {
-    tags.add(NOHUNGER_TAG);
-  }
-
-  @Override
-  public HungerMatchModule createMatchModule(Match match) {
+  public MatchModule createMatchModule(Match match) {
     return new HungerMatchModule(match);
   }
 
-  public static HungerModule parse(MapModuleContext context, Logger logger, Document doc) {
-    boolean on = true;
+  public static class Factory implements MapModuleFactory<HungerModule> {
+    @Override
+    public HungerModule parse(MapContext context, Logger logger, Document doc)
+        throws InvalidXMLException {
+      boolean on = true;
 
-    for (Element hungerRootElement : doc.getRootElement().getChildren("hunger")) {
-      Element hungerDepletionElement = hungerRootElement.getChild("depletion");
-      if (hungerDepletionElement != null) {
-        if (hungerDepletionElement.getValue().equalsIgnoreCase("off")) {
-          on = false;
+      for (Element hungerRootElement : doc.getRootElement().getChildren("hunger")) {
+        Element hungerDepletionElement = hungerRootElement.getChild("depletion");
+        if (hungerDepletionElement != null) {
+          if (hungerDepletionElement.getValue().equalsIgnoreCase("off")) {
+            on = false;
+          }
         }
       }
-    }
 
-    if (!on) {
-      return new HungerModule();
-    } else {
-      return null;
+      if (!on) {
+        return new HungerModule();
+      } else {
+        return null;
+      }
     }
   }
 }

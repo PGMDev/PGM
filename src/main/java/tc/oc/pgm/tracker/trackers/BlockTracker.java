@@ -2,7 +2,11 @@ package tc.oc.pgm.tracker.trackers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.Material;
@@ -16,8 +20,8 @@ import org.bukkit.event.block.BlockPistonEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import tc.oc.pgm.api.event.BlockTransformEvent;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
-import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.damage.BlockInfo;
 import tc.oc.pgm.tracker.damage.OwnerInfo;
 import tc.oc.pgm.tracker.damage.PhysicalInfo;
@@ -31,8 +35,8 @@ public class BlockTracker implements Listener {
   private final Map<Block, TrackerInfo> blocks = new HashMap<>();
   private final Map<Block, Material> materials = new HashMap<>();
 
-  public BlockTracker(TrackerMatchModule tmm) {
-    this.logger = ClassLogger.get(tmm.getLogger(), getClass());
+  public BlockTracker(Match match) {
+    this.logger = ClassLogger.get(match.getLogger(), getClass());
   }
 
   public PhysicalInfo resolveBlock(Block block) {

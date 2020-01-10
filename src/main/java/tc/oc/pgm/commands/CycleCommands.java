@@ -8,11 +8,11 @@ import org.bukkit.command.CommandSender;
 import org.joda.time.Duration;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.pgm.cycle.CycleMatchModule;
-import tc.oc.pgm.map.PGMMap;
+import tc.oc.pgm.rotation.MapOrder;
 
 public class CycleCommands {
 
@@ -25,10 +25,10 @@ public class CycleCommands {
   public static void cycle(
       CommandSender sender,
       Match match,
-      MatchManager matchManager,
+      MapOrder mapOrder,
       Duration countdown,
       @Switch('f') boolean force,
-      @Default("next") @Text PGMMap map)
+      @Default("next") @Text MapInfo map)
       throws CommandException {
     CycleMatchModule cmm = match.needMatchModule(CycleMatchModule.class);
 
@@ -37,8 +37,8 @@ public class CycleCommands {
           AllTranslations.get().translate("command.admin.cycle.matchRunning", sender));
     }
 
-    if (map != null && matchManager.getMapOrder().getNextMap() != map) {
-      matchManager.getMapOrder().setNextMap(map);
+    if (map != null && mapOrder.getNextMap() != map) {
+      mapOrder.setNextMap(map);
     }
     cmm.startCountdown(countdown);
   }
@@ -52,10 +52,10 @@ public class CycleCommands {
   public static void recycle(
       CommandSender sender,
       Match match,
-      MatchManager matchManager,
+      MapOrder mapOrder,
       Duration duration,
       @Switch('f') boolean force)
       throws CommandException {
-    cycle(sender, match, matchManager, duration, force, match.getMap());
+    cycle(sender, match, mapOrder, duration, force, match.getMap().getInfo());
   }
 }

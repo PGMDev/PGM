@@ -1,22 +1,24 @@
 package tc.oc.pgm.kits;
 
 import org.jdom2.Element;
+import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.features.FeatureDefinitionContext;
-import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
 public class FeatureKitParser extends KitParser {
 
-  public FeatureKitParser(MapModuleContext context) {
+  public FeatureKitParser(MapContext context) {
     super(context);
   }
 
   @Override
   public Kit parseReference(Node node, String name) throws InvalidXMLException {
     return context
-        .features()
-        .addReference(new XMLKitReference(context.features(), node, name, KitDefinition.class));
+        .legacy()
+        .getFeatures()
+        .addReference(
+            new XMLKitReference(context.legacy().getFeatures(), node, name, KitDefinition.class));
   }
 
   @Override
@@ -28,7 +30,7 @@ public class FeatureKitParser extends KitParser {
       kit = parseReference(new Node(el), id);
     } else {
       kit = parseDefinition(el);
-      context.features().addFeature(el, (KitDefinition) kit);
+      context.legacy().getFeatures().addFeature(el, (KitDefinition) kit);
     }
 
     return kit;

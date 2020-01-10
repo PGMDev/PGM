@@ -30,6 +30,7 @@ import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -39,10 +40,9 @@ import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.filters.query.IQuery;
 import tc.oc.pgm.filters.query.PlayerBlockQuery;
 import tc.oc.pgm.kits.tag.ItemTags;
-import tc.oc.pgm.match.MatchModule;
 
 @ListenerScope(MatchScope.RUNNING)
-public class ProjectileMatchModule extends MatchModule implements Listener {
+public class ProjectileMatchModule implements MatchModule, Listener {
 
   // Holds the definition for a projectile from immediately before launch to
   // just after the definition is attached as metadata. Bukkit fires various
@@ -51,11 +51,12 @@ public class ProjectileMatchModule extends MatchModule implements Listener {
   // ThreadLocal is not necessary, but it doesn't hurt and it's good form.
   private static final ThreadLocal<ProjectileDefinition> launchingDefinition = new ThreadLocal<>();
 
+  private final Match match;
   private final Set<ProjectileDefinition> projectileDefinitions;
   private Set<ProjectileCooldown> projectileCooldowns = new HashSet<>();
 
   public ProjectileMatchModule(Match match, Set<ProjectileDefinition> projectileDefinitions) {
-    super(match);
+    this.match = match;
     this.projectileDefinitions = projectileDefinitions;
   }
 
@@ -64,8 +65,8 @@ public class ProjectileMatchModule extends MatchModule implements Listener {
     if (event.getAction() == Action.PHYSICAL) return;
 
     Player player = event.getPlayer();
-    MatchPlayer matchPlayer = getMatch().getPlayer(player);
-    ParticipantState playerState = getMatch().getParticipantState(player);
+    MatchPlayer matchPlayer = match.getPlayer(player);
+    ParticipantState playerState = match.getParticipantState(player);
     if (playerState == null) return;
 
     ProjectileDefinition projectileDefinition =
@@ -105,7 +106,7 @@ public class ProjectileMatchModule extends MatchModule implements Listener {
       // Otherwise, we fire our custom event.
       if (!realProjectile) {
         EntityLaunchEvent launchEvent = new EntityLaunchEvent(projectile, event.getPlayer());
-        getMatch().callEvent(launchEvent);
+        match.callEvent(launchEvent);
         if (launchEvent.isCancelled()) {
           projectile.remove();
           return;
@@ -174,7 +175,7 @@ public class ProjectileMatchModule extends MatchModule implements Listener {
     if (hitBlock != null) {
       MatchPlayer player =
           projectile.getShooter() instanceof Player
-              ? getMatch().getPlayer((Player) projectile.getShooter())
+              ? match.getPlayer((Player) projectile.getShooter())
               : null;
       IQuery query =
           player != null
@@ -183,7 +184,7 @@ public class ProjectileMatchModule extends MatchModule implements Listener {
 
       if (filter.query(query).isAllowed()) {
         BlockTransformEvent bte = new BlockTransformEvent(event, hitBlock, Material.AIR);
-        getMatch().callEvent(bte);
+        match.callEvent(bte);
         if (!bte.isCancelled()) {
           hitBlock.setType(Material.AIR);
           projectile.remove();

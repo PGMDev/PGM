@@ -19,22 +19,23 @@ import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.ItemTransferEvent;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerResetEvent;
 import tc.oc.pgm.kits.tag.Grenade;
 import tc.oc.pgm.kits.tag.ItemTags;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.world.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
-public class KitMatchModule extends MatchModule implements Listener {
+public class KitMatchModule implements MatchModule, Listener {
 
+  private final Match match;
   private final SetMultimap<MatchPlayer, ArmorType> lockedArmorSlots = HashMultimap.create();
 
   public KitMatchModule(Match match) {
-    super(match);
+    this.match = match;
   }
 
   @Override
@@ -53,14 +54,14 @@ public class KitMatchModule extends MatchModule implements Listener {
   /** Clear any {@link AttributeModifier}s applied to the player by {@link AttributeKit}s */
   public void clearAttributeModifiers(MatchPlayer player) {
     for (AttributeModifier modifier :
-        getMatch().getMapContext().getKitParser().getAttributeModifiers()) {
+        match.getMapContext().legacy().getKits().getAttributeModifiers()) {
       // ASHCON: player.getBukkit().removeAttributeModifier(modifier);
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerQuit(final PlayerQuitEvent event) {
-    MatchPlayer player = this.getMatch().getPlayer(event.getPlayer());
+    MatchPlayer player = this.match.getPlayer(event.getPlayer());
     if (player != null) {
       this.lockedArmorSlots.removeAll(player);
     }
@@ -74,7 +75,7 @@ public class KitMatchModule extends MatchModule implements Listener {
       return;
     }
 
-    MatchPlayer player = this.getMatch().getPlayer((Player) event.getWhoClicked());
+    MatchPlayer player = this.match.getPlayer((Player) event.getWhoClicked());
     if (player == null
         || !this.lockedArmorSlots.containsEntry(
             player, ArmorType.byInventorySlot(event.getSlot()))) {
@@ -101,7 +102,7 @@ public class KitMatchModule extends MatchModule implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onArmorBreak(final PlayerItemBreakEvent event) {
-    MatchPlayer player = this.getMatch().getPlayer(event.getPlayer());
+    MatchPlayer player = this.match.getPlayer(event.getPlayer());
     if (player == null) {
       return;
     }

@@ -3,6 +3,7 @@ package tc.oc.pgm.match;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -19,6 +20,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -42,7 +44,10 @@ import org.joda.time.Duration;
 import org.joda.time.Instant;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.chat.Audience;
+import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchPhase;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.Tickable;
@@ -53,6 +58,8 @@ import tc.oc.pgm.api.match.event.MatchPhaseChangeEvent;
 import tc.oc.pgm.api.match.event.MatchResizeEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.match.event.MatchUnloadEvent;
+import tc.oc.pgm.api.match.factory.MatchModuleFactory;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.party.event.CompetitorAddEvent;
@@ -77,11 +84,6 @@ import tc.oc.pgm.features.Feature;
 import tc.oc.pgm.features.MatchFeatureContext;
 import tc.oc.pgm.filters.query.MatchQuery;
 import tc.oc.pgm.filters.query.Query;
-import tc.oc.pgm.map.MapModule;
-import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.map.PGMMap;
-import tc.oc.pgm.module.ModuleInfo;
-import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.result.CompetitorVictoryCondition;
 import tc.oc.pgm.result.VictoryCondition;
 import tc.oc.server.Events;
@@ -91,11 +93,12 @@ import tc.oc.util.collection.RankedSet;
 import tc.oc.util.logging.ClassLogger;
 import tc.oc.world.NMSHacks;
 
-public class MatchImpl implements Match, Comparable<Match> {
+public class MatchImpl implements Match {
 
   private final String id;
-  private final WeakReference<PGMMap> map;
+  private final WeakReference<MapContext> map;
   private final WeakReference<World> world;
+  private final Map<Class<? extends MatchModule>, MatchModule> matchModules;
 
   private final ClassLogger logger;
   private final Random random;
@@ -111,7 +114,6 @@ public class MatchImpl implements Match, Comparable<Match> {
   private final AtomicReference<Tick> tick;
   private final CountdownContext countdown;
   private final MatchQuery query;
-  private final MatchModuleContext context;
   private final Map<UUID, MatchPlayer> players;
   private final Map<MatchPlayer, Party> partyChanges;
   private final Set<Party> parties;
@@ -119,10 +121,11 @@ public class MatchImpl implements Match, Comparable<Match> {
   private final RankedSet<Competitor> competitors;
   private final Observers observers;
 
-  protected MatchImpl(String id, PGMMap map, World world) {
+  protected MatchImpl(String id, MapContext map, World world) {
     this.id = checkNotNull(id);
     this.map = new WeakReference<>(checkNotNull(map));
     this.world = new WeakReference<>(checkNotNull(world));
+    this.matchModules = new ConcurrentHashMap<>();
 
     this.logger = ClassLogger.get(PGM.get().getLogger(), getClass());
     this.random = new Random();
@@ -131,7 +134,7 @@ public class MatchImpl implements Match, Comparable<Match> {
     this.state = new AtomicReference<>(MatchPhase.IDLE);
     this.start = new AtomicLong(0);
     this.end = new AtomicLong(0);
-    this.capacity = new AtomicInteger(map.getPersistentContext().getTotalMaxPlayers());
+    this.capacity = new AtomicInteger(map.getInfo().getPlayerLimit());
     this.schedulers = new EnumMap<>(MatchScope.class);
     this.listeners = new EnumMap<>(MatchScope.class);
     this.tickables = new EnumMap<>(MatchScope.class);
@@ -143,7 +146,6 @@ public class MatchImpl implements Match, Comparable<Match> {
     this.tick = new AtomicReference<>(null);
     this.countdown = new SingleCountdownContext(this, logger);
     this.query = new MatchQuery(null, this);
-    this.context = new MatchModuleContext(new MatchFeatureContext());
     this.players = new HashMap<>();
     this.partyChanges = new WeakHashMap<>();
     this.parties = new LinkedHashSet<>();
@@ -158,7 +160,6 @@ public class MatchImpl implements Match, Comparable<Match> {
               return 0;
             });
     this.observers = new Observers(this);
-
     // TODO: Protect against someone else unloading the world, cancel the event
   }
 
@@ -169,7 +170,12 @@ public class MatchImpl implements Match, Comparable<Match> {
 
   @Override
   public MatchScope getScope() {
-    return isRunning() ? MatchScope.RUNNING : loaded.get() ? MatchScope.LOADED : null;
+    return isRunning() ? MatchScope.RUNNING : isLoaded() ? MatchScope.LOADED : null;
+  }
+
+  @Override
+  public boolean isLoaded() {
+    return loaded.get();
   }
 
   @Override
@@ -184,7 +190,7 @@ public class MatchImpl implements Match, Comparable<Match> {
 
       switch (state) {
         case RUNNING:
-          getModuleContext().getAll().forEach(MatchModule::enable);
+          getModules().forEach(MatchModule::enable);
           start.set(System.currentTimeMillis());
           startListeners(MatchScope.RUNNING);
           startTickables(MatchScope.RUNNING);
@@ -203,7 +209,7 @@ public class MatchImpl implements Match, Comparable<Match> {
       // Must wait until after event has been called to close listeners
       if (state == MatchPhase.FINISHED) {
         removeListeners(MatchScope.RUNNING);
-        getModuleContext().getAll().forEach(MatchModule::disable);
+        getModules().forEach(MatchModule::disable);
         end.set(System.currentTimeMillis());
       }
 
@@ -224,7 +230,7 @@ public class MatchImpl implements Match, Comparable<Match> {
   }
 
   @Override
-  public PGMMap getMap() {
+  public MapContext getMap() {
     return map.get();
   }
 
@@ -266,8 +272,18 @@ public class MatchImpl implements Match, Comparable<Match> {
   }
 
   @Override
-  public <T extends MatchModule> Optional<T> getModule(Class<T> moduleClass) {
-    return Optional.ofNullable(getModuleContext().getMatchModule(moduleClass));
+  public Collection<MatchModule> getModules() {
+    return ImmutableList.copyOf(matchModules.values());
+  }
+
+  @Override
+  public <M extends MatchModule> M getModule(Class<? extends M> key) {
+    return (M) matchModules.get(key);
+  }
+
+  @Override
+  public <T extends MatchModule> Optional<T> getModuleOpt(Class<T> moduleClass) {
+    return Optional.ofNullable(getModule(moduleClass));
   }
 
   @Override
@@ -305,7 +321,6 @@ public class MatchImpl implements Match, Comparable<Match> {
       HandlerList handlerList = Events.getEventListeners(eventClass);
 
       // TODO: expand support to other events, such as player, world, entity -- reduce boilerplate
-      // "ifs"
       if (MatchEvent.class.isAssignableFrom(eventClass)) {
         for (final RegisteredListener registeredListener : entry.getValue()) {
           PGM.get()
@@ -348,20 +363,13 @@ public class MatchImpl implements Match, Comparable<Match> {
   }
 
   @Override
-  public MatchModuleContext getModuleContext() {
-    return context;
-  }
-
-  @Override
   public MatchFeatureContext getFeatureContext() {
-    return getModuleContext().matchFeatureContext;
+    return null;
   }
 
   @Override
-  public MapModuleContext getMapContext() {
-    return getMap()
-        .getContext()
-        .orElseThrow(() -> new IllegalStateException("Map context not found (was it unloaded?)"));
+  public MapContext getMapContext() {
+    return map.get();
   }
 
   @Override
@@ -406,6 +414,7 @@ public class MatchImpl implements Match, Comparable<Match> {
     if (player == null) {
       logger.fine("Adding player " + bukkit);
 
+      NMSHacks.forceRespawn(bukkit);
       player = new MatchPlayerImpl(this, bukkit);
       MatchPlayerAddEvent event = new MatchPlayerAddEvent(player, getDefaultParty());
       callEvent(event);
@@ -686,77 +695,47 @@ public class MatchImpl implements Match, Comparable<Match> {
         getPlayers(), Collections.singleton(Audience.get(Bukkit.getConsoleSender())));
   }
 
-  class ModuleLoader extends tc.oc.pgm.module.ModuleLoader<MatchModule> {
-
-    private ModuleLoader() {
-      super(getLogger());
-    }
-
-    @Override
-    protected MatchModule loadModule(ModuleInfo info) throws ModuleLoadException {
-      MatchModuleFactory<?> factory = getMap().getFactoryContext().getMatchModuleFactory(info);
-      if (factory == null) throw new ModuleLoadException(info, "Missing match module factory");
-
-      MatchModule matchModule = factory.createMatchModule(MatchImpl.this);
-      if (!loadMatchModule(matchModule)) return null;
-
-      return matchModule;
-    }
-  }
-
   private boolean loadMatchModule(MatchModule matchModule) throws ModuleLoadException {
     if (matchModule == null) return false;
 
-    try {
-      logger.fine("Loading " + matchModule.getClass().getSimpleName());
+    logger.fine("Loading " + matchModule.getClass().getSimpleName());
 
-      if (context.load(matchModule)) {
-        if (matchModule instanceof Listener && getListenerScope((Listener) matchModule) == null) {
-          logger.warning(
-              matchModule.getClass().getSimpleName()
-                  + " implements Listener but is not annotated with @ListenerScope");
-        }
+    matchModule.load();
 
-        // TODO: Make default scope for listeners/tickables more consistent
-        if (matchModule instanceof Listener) {
-          addListener(
-              (Listener) matchModule, getListenerScope((Listener) matchModule, MatchScope.RUNNING));
-        }
-
-        // TODO: Allow tickable scope to be specified with an annotation
-        if (matchModule instanceof Tickable) {
-          addTickable((Tickable) matchModule, MatchScope.LOADED);
-        }
-        return true;
-
-      } else {
-        logger.fine("Module " + matchModule.getClass().getSimpleName() + " declined to load");
-        return false;
-      }
-    } catch (ModuleLoadException e) {
-      e.fillInModule(ModuleInfo.get(matchModule.getClass()));
-      throw e;
+    if (matchModule instanceof Listener && getListenerScope((Listener) matchModule) == null) {
+      logger.warning(
+          matchModule.getClass().getSimpleName()
+              + " implements Listener but is not annotated with @ListenerScope");
     }
+
+    // TODO: Make default scope for listeners/tickables more consistent
+    if (matchModule instanceof Listener) {
+      addListener(
+          (Listener) matchModule, getListenerScope((Listener) matchModule, MatchScope.RUNNING));
+    }
+
+    // TODO: Allow tickable scope to be specified with an annotation
+    if (matchModule instanceof Tickable) {
+      addTickable((Tickable) matchModule, MatchScope.LOADED);
+    }
+
+    matchModules.put(matchModule.getClass(), matchModule);
+
+    return true;
   }
 
   @Override
   public void load() throws ModuleLoadException {
     try {
-      ModuleLoader loader = new ModuleLoader();
-
-      logger.fine("Loading static match modules...");
-      if (!loader.loadAll(getMap().getFactoryContext().getMatchModules(), true)) {
-        // If loading fails, rethrow the first exception, which should be the only one
-        throw loader.getErrors().iterator().next();
+      logger.fine("Loading match modules...");
+      for (MatchModuleFactory factory :
+          PGM.get().getModuleRegistry().getMatchModuleFactories().values()) {
+        loadMatchModule(factory.createMatchModule(this));
       }
 
       logger.fine("Loading map modules...");
-      for (MapModule module : getMapContext().getModules()) {
-        MatchModule matchModule = module.createMatchModule(this);
-        if (matchModule != null) {
-          loadMatchModule(matchModule);
-          loader.addModule(matchModule);
-        }
+      for (MapModule map : getMapContext().getModules()) {
+        loadMatchModule(map.createMatchModule(this));
       }
 
       for (Feature feature : getFeatureContext().getAll()) {
@@ -801,7 +780,7 @@ public class MatchImpl implements Match, Comparable<Match> {
     getCountdown().cancelAll();
     removeListeners(MatchScope.LOADED);
 
-    for (MatchModule matchModule : getModuleContext().getAll()) {
+    for (MatchModule matchModule : getModules()) {
       try {
         matchModule.unload();
       } catch (Throwable e) {

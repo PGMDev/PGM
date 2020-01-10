@@ -258,4 +258,12 @@ public class DatastoreImpl implements Datastore {
   private Connection getConnection() {
     return connection;
   }
+
+  @Override
+  public void shutdown() {
+    try {
+      getConnection().close();
+    } catch (SQLException e) {
+    }
+  }
 }

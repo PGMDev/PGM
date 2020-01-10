@@ -3,6 +3,7 @@ package tc.oc.pgm;
 import com.google.common.collect.ImmutableList;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Level;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.Configuration;
@@ -25,6 +26,12 @@ public class Config {
       return pgm.getConfig();
     } else {
       return new YamlConfiguration();
+    }
+  }
+
+  public static class Log {
+    public static Level level() {
+      return Level.parse(getConfiguration().getString("log.level", "info").toUpperCase());
     }
   }
 

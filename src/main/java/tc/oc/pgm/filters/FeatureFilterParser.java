@@ -1,14 +1,14 @@
 package tc.oc.pgm.filters;
 
 import org.jdom2.Element;
-import tc.oc.pgm.map.MapModuleContext;
+import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
 public class FeatureFilterParser extends FilterParser {
 
-  public FeatureFilterParser(MapModuleContext context) {
+  public FeatureFilterParser(MapContext context) {
     super(context);
   }
 
@@ -16,7 +16,7 @@ public class FeatureFilterParser extends FilterParser {
   public Filter parse(Element el) throws InvalidXMLException {
     Filter filter = this.parseDynamic(el);
     if (filter instanceof FilterDefinition) {
-      context.features().addFeature(el, (FilterDefinition) filter);
+      context.legacy().getFeatures().addFeature(el, (FilterDefinition) filter);
     }
     return filter;
   }
@@ -24,9 +24,11 @@ public class FeatureFilterParser extends FilterParser {
   @Override
   public Filter parseReference(Node node, String value) throws InvalidXMLException {
     return context
-        .features()
+        .legacy()
+        .getFeatures()
         .addReference(
-            new XMLFilterReference(context.features(), node, value, FilterDefinition.class));
+            new XMLFilterReference(
+                context.legacy().getFeatures(), node, value, FilterDefinition.class));
   }
 
   @MethodParser("filter")

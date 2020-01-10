@@ -29,16 +29,16 @@ import tc.oc.pgm.api.event.BlockPunchEvent;
 import tc.oc.pgm.api.event.BlockTrampleEvent;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.util.Pair;
 import tc.oc.world.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
-public class BlockDropsMatchModule extends MatchModule implements Listener {
+public class BlockDropsMatchModule implements MatchModule, Listener {
   private static final double BASE_FALL_SPEED = 3d;
 
   private final BlockDropsRuleSet ruleSet;
@@ -52,9 +52,10 @@ public class BlockDropsMatchModule extends MatchModule implements Listener {
   // die that do not fire an event e.g. the tick age limit, but this should be
   // rare and they will only leak until the end of the match.
   private final Set<FallingBlock> fallingBlocksThatWillNotLand = new HashSet<>();
+  private final Match match;
 
   public BlockDropsMatchModule(Match match, BlockDropsRuleSet ruleSet) {
-    super(match);
+    this.match = match;
     this.ruleSet = ruleSet;
   }
 
@@ -81,7 +82,7 @@ public class BlockDropsMatchModule extends MatchModule implements Listener {
   }
 
   private void dropItems(BlockDrops drops, Location location, double yield) {
-    Random random = getMatch().getRandom();
+    Random random = match.getRandom();
     for (Pair<Double, ItemStack> entry : drops.items) {
       if (random.nextFloat() < yield * entry.first) {
         location.getWorld().dropItemNaturally(location, entry.second);
@@ -107,7 +108,7 @@ public class BlockDropsMatchModule extends MatchModule implements Listener {
               block,
               drops.replacement.getItemType(),
               drops.replacement.getData());
-      getMatch().callEvent(event);
+      match.callEvent(event);
 
       if (!event.isCancelled()) {
         BlockState state = block.getState();
@@ -146,10 +147,10 @@ public class BlockDropsMatchModule extends MatchModule implements Listener {
         if (drops.fallChance != null
             && oldState.getType().isBlock()
             && oldState.getType() != Material.AIR
-            && this.getMatch().getRandom().nextFloat() < drops.fallChance) {
+            && match.getRandom().nextFloat() < drops.fallChance) {
 
           FallingBlock fallingBlock =
-              this.getMatch()
+              match
                   .getWorld()
                   .spawnFallingBlock(
                       block.getLocation(),
@@ -157,8 +158,7 @@ public class BlockDropsMatchModule extends MatchModule implements Listener {
                       event.getOldState().getRawData());
           fallingBlock.setDropItem(false);
 
-          if (drops.landChance != null
-              && this.getMatch().getRandom().nextFloat() >= drops.landChance) {
+          if (drops.landChance != null && match.getRandom().nextFloat() >= drops.landChance) {
             this.fallingBlocksThatWillNotLand.add(fallingBlock);
           }
 
@@ -194,7 +194,7 @@ public class BlockDropsMatchModule extends MatchModule implements Listener {
         }
 
         // Defer item drops so the explosion doesn't destroy them
-        getMatch()
+        match
             .getScheduler(MatchScope.RUNNING)
             .runTask(
                 new Runnable() {
@@ -234,7 +234,7 @@ public class BlockDropsMatchModule extends MatchModule implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onBlockPunch(BlockPunchEvent event) {
-    final MatchPlayer player = getMatch().getPlayer(event.getPlayer());
+    final MatchPlayer player = match.getPlayer(event.getPlayer());
     if (player == null) return;
 
     RayBlockIntersection hit = event.getIntersection();
@@ -251,7 +251,7 @@ public class BlockDropsMatchModule extends MatchModule implements Listener {
     Object packet =
         NMSHacks.blockCrackParticlesPacket(
             oldMaterial, false, hit.getPosition(), new Vector(), 0, 5);
-    for (MatchPlayer viewer : getMatch().getPlayers()) {
+    for (MatchPlayer viewer : match.getPlayers()) {
       if (viewer.getBukkit().getEyeLocation().toVector().distanceSquared(hit.getPosition())
           < 16 * 16) {
         NMSHacks.sendPacket(viewer.getBukkit(), packet);
@@ -267,7 +267,7 @@ public class BlockDropsMatchModule extends MatchModule implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onBlockTrample(BlockTrampleEvent event) {
-    final MatchPlayer player = getMatch().getPlayer(event.getPlayer());
+    final MatchPlayer player = match.getPlayer(event.getPlayer());
     if (player == null) return;
 
     BlockDrops drops =

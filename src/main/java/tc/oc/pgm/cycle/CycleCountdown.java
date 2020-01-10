@@ -1,33 +1,46 @@
 package tc.oc.pgm.cycle;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import org.joda.time.Duration;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.Config;
+import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.api.map.MapLibrary;
+import tc.oc.pgm.api.map.exception.MapNotFoundException;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchManager;
+import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.countdowns.MatchCountdown;
-import tc.oc.pgm.map.PGMMap;
+import tc.oc.pgm.rotation.MapOrder;
 
 public class CycleCountdown extends MatchCountdown {
   private int preloadTime = Config.Experiments.get().getPreload();
 
-  protected final MatchManager mm;
-  protected PGMMap nextMap;
-  private boolean ended, preloadedNext;
+  private final MapLibrary mapLibrary;
+  private final MatchFactory matchFactory;
+  protected final MapOrder mapOrder;
+  protected MapInfo nextMap;
+  private boolean ended;
+  private CompletableFuture<Match> nextMatch;
 
-  public CycleCountdown(MatchManager mm, Match match) {
+  public CycleCountdown(
+      MatchFactory matchFactory, MapLibrary mapLibrary, MapOrder mapOrder, Match match) {
     super(match);
-    this.mm = mm;
-    this.nextMap = mm.getMapOrder().getNextMap();
+    this.mapOrder = mapOrder;
+    this.nextMap = mapOrder.getNextMap();
+    this.mapLibrary = mapLibrary;
+    this.matchFactory = matchFactory;
   }
 
-  private PGMMap setNextMap(PGMMap map, boolean end) {
+  private MapInfo setNextMap(MapInfo map, boolean end) {
     if (!ended && nextMap != map) {
       nextMap = map;
-      preloadedNext = false;
+      nextMatch = null;
     }
     ended |= end;
     return nextMap;
@@ -36,9 +49,7 @@ public class CycleCountdown extends MatchCountdown {
   @Override
   protected Component formatText() {
     Component mapName =
-        nextMap == null || nextMap.getInfo() == null
-            ? null
-            : new PersonalizedText(nextMap.getInfo().name, ChatColor.AQUA);
+        nextMap == null ? null : new PersonalizedText(nextMap.getName(), ChatColor.AQUA);
 
     PersonalizedTranslatable cycleComponent;
     if (!remaining.isLongerThan(Duration.ZERO)) {
@@ -59,14 +70,15 @@ public class CycleCountdown extends MatchCountdown {
 
   @Override
   public void onTick(Duration remaining, Duration total) {
-    PGMMap next = setNextMap(mm.getMapOrder().getNextMap(), false);
+    MapInfo next = setNextMap(mapOrder.getNextMap(), false);
     super.onTick(remaining, total);
 
-    if (remaining.getStandardSeconds() <= preloadTime && next != null && !preloadedNext) {
-      preloadedNext = true;
+    if (remaining.getStandardSeconds() <= preloadTime && next != null && nextMatch == null) {
       try {
-        mm.createPreMatchAsync(nextMap);
-      } catch (Throwable ignore) {
+        final MapContext context = mapLibrary.getMap(nextMap.getId());
+        nextMatch = matchFactory.createPreMatch(context);
+      } catch (MapNotFoundException e) {
+        PGM.get().getGameLogger().log(Level.SEVERE, "Could not begin cycle to " + nextMap, e);
       }
     }
   }
@@ -74,6 +86,8 @@ public class CycleCountdown extends MatchCountdown {
   @Override
   public void onEnd(Duration total) {
     super.onEnd(total);
-    this.mm.cycleMatch(this.getMatch(), setNextMap(mm.getMapOrder().popNextMap(), true), false);
+
+    setNextMap(mapOrder.popNextMap(), true);
+    matchFactory.createMatch(nextMatch.join(), getMatch().getPlayers());
   }
 }

@@ -1,28 +1,27 @@
 package tc.oc.pgm.spawns;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.joda.time.Duration;
 import tc.oc.component.Component;
+import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.kits.KitModule;
-import tc.oc.pgm.map.MapModule;
-import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.points.PointParser;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 
-@ModuleDescription(
-    name = "spawns",
-    depends = {RegionModule.class, KitModule.class},
-    follows = {TeamModule.class})
-public class SpawnModule extends MapModule<SpawnMatchModule> {
+public class SpawnModule implements MapModule {
 
   public static final Duration MINIMUM_RESPAWN_DELAY = Duration.standardSeconds(2);
   public static final Duration IGNORE_CLICKS_DELAY = Duration.millis(500);
@@ -39,33 +38,42 @@ public class SpawnModule extends MapModule<SpawnMatchModule> {
   }
 
   @Override
-  public SpawnMatchModule createMatchModule(Match match) {
+  public MatchModule createMatchModule(Match match) {
     return new SpawnMatchModule(match, this);
   }
 
-  // ---------------------
-  // ---- XML Parsing ----
-  // ---------------------
-
-  public static SpawnModule parse(MapModuleContext context, Logger logger, Document doc)
-      throws InvalidXMLException {
-    SpawnParser parser = new SpawnParser(context, new PointParser(context));
-    List<Spawn> spawns = Lists.newArrayList();
-
-    for (Element spawnsEl : doc.getRootElement().getChildren("spawns")) {
-      spawns.addAll(parser.parseChildren(spawnsEl, new SpawnAttributes()));
+  public static class Factory implements MapModuleFactory<SpawnModule> {
+    @Override
+    public Collection<Class<? extends MapModule>> getSoftDependencies() {
+      return ImmutableList.of(RegionModule.class, KitModule.class);
     }
 
-    if (parser.getDefaultSpawn() == null) {
-      throw new InvalidXMLException("map must have a single default spawn", doc);
+    @Override
+    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+      return ImmutableList.of(TeamModule.class);
     }
 
-    return new SpawnModule(
-        parser.getDefaultSpawn(), spawns, parseRespawnOptions(context, logger, doc));
+    @Override
+    public SpawnModule parse(MapContext context, Logger logger, Document doc)
+        throws InvalidXMLException {
+      SpawnParser parser = new SpawnParser(context, new PointParser(context));
+      List<Spawn> spawns = Lists.newArrayList();
+
+      for (Element spawnsEl : doc.getRootElement().getChildren("spawns")) {
+        spawns.addAll(parser.parseChildren(spawnsEl, new SpawnAttributes()));
+      }
+
+      if (parser.getDefaultSpawn() == null) {
+        throw new InvalidXMLException("map must have a single default spawn", doc);
+      }
+
+      return new SpawnModule(
+          parser.getDefaultSpawn(), spawns, parseRespawnOptions(context, logger, doc));
+    }
   }
 
   protected static RespawnOptions parseRespawnOptions(
-      MapModuleContext context, Logger logger, Document doc) throws InvalidXMLException {
+      MapContext context, Logger logger, Document doc) throws InvalidXMLException {
     Duration delay = MINIMUM_RESPAWN_DELAY;
     boolean auto = doc.getRootElement().getChild("autorespawn") != null; // Legacy support
     boolean blackout = false;
@@ -85,17 +93,5 @@ public class SpawnModule extends MapModule<SpawnMatchModule> {
     }
 
     return new RespawnOptions(delay, auto, blackout, spectate, bedSpawn, message);
-  }
-
-  @Override
-  public void postParse(MapModuleContext context, Logger logger, Document doc)
-      throws InvalidXMLException {
-    // TODO: Make this feasible and remove null checks in the spawn module
-    // for(Spawn spawn : spawns) {
-    //    if(spawn.pointProvider.canFail()) {
-    //        throw new InvalidXMLException("Spawn is not guaranteed to provide a spawning
-    // location", context.features().getNode(spawn));
-    //    }
-    // }
   }
 }

@@ -1,11 +1,17 @@
 package tc.oc.pgm.regions;
 
-import static tc.oc.pgm.map.ProtoVersions.REGION_FIX_VERSION;
+import static tc.oc.pgm.api.map.ProtoVersions.REGION_FIX_VERSION;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -16,11 +22,11 @@ import org.bukkit.util.Vector;
 import tc.oc.block.BlockVectors;
 import tc.oc.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.filters.AnyFilter;
 import tc.oc.pgm.filters.BlockFilter;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.query.BlockQuery;
-import tc.oc.pgm.map.PGMMap;
 
 /**
  * Region represented by a list of single blocks. This will check if a point is inside the block at
@@ -140,11 +146,11 @@ public class FiniteBlockRegion extends AbstractRegion {
   public static FiniteBlockRegion fromWorld(Region region, World world, Filter materials) {
     List<Block> blocks = new LinkedList<>();
     Bounds bounds = region.getBounds();
-    PGMMap map = PGM.get().getMatchManager().getMatch(world).getMap();
+    MapContext map = PGM.get().getMatchManager().getMatch(world).getMap();
 
     if (region instanceof CuboidRegion
         && map != null
-        && map.getInfo().proto.isOlderThan(REGION_FIX_VERSION)) {
+        && map.getInfo().getProto().isOlderThan(REGION_FIX_VERSION)) {
       // The loops below are incorrect, because they go one block over the max.
       // Unfortunately, we have to keep this around to avoid breaking old maps.
       Vector min = bounds.getMin();

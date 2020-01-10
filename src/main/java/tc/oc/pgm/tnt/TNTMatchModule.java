@@ -21,16 +21,18 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.match.MatchModule;
 
 @ListenerScope(MatchScope.RUNNING)
-public class TNTMatchModule extends MatchModule implements Listener {
+public class TNTMatchModule implements MatchModule, Listener {
+
+  private final Match match;
   private final TNTProperties properties;
 
   public TNTMatchModule(Match match, TNTProperties properties) {
-    super(match);
+    this.match = match;
     this.properties = properties;
   }
 
@@ -48,7 +50,7 @@ public class TNTMatchModule extends MatchModule implements Listener {
         primer != null
             ? new ExplosionPrimeByEntityEvent(tnt, primer)
             : new ExplosionPrimeEvent(tnt);
-    getMatch().callEvent(primeEvent);
+    match.callEvent(primeEvent);
     if (primeEvent.isCancelled()) {
       tnt.remove();
       return false;
@@ -142,15 +144,15 @@ public class TNTMatchModule extends MatchModule implements Listener {
       tntCount = (int) Math.ceil(tntCount * this.properties.dispenserNukeMultiplier);
 
       for (int i = 0; i < tntCount; i++) {
-        TNTPrimed tnt = this.getMatch().getWorld().spawn(dispenser.getLocation(), TNTPrimed.class);
+        TNTPrimed tnt = match.getWorld().spawn(dispenser.getLocation(), TNTPrimed.class);
 
         tnt.setFuseTicks(
             10
-                + this.getMatch()
+                + match
                     .getRandom()
                     .nextInt(10)); // between 0.5 and 1.0 seconds, same as vanilla TNT chaining
 
-        Random random = this.getMatch().getRandom();
+        Random random = match.getRandom();
         Vector velocity =
             new Vector(
                 random.nextGaussian(),

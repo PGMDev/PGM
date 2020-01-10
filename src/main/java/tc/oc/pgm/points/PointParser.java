@@ -7,7 +7,7 @@ import java.util.List;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
-import tc.oc.pgm.map.MapModuleContext;
+import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.regions.*;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.collection.ArrayUtils;
@@ -22,12 +22,12 @@ import tc.oc.xml.Node;
  * treated the same as the root element.
  */
 public class PointParser {
-  final MapModuleContext context;
+  final MapContext context;
   final RegionParser regionParser;
 
-  public PointParser(MapModuleContext context) {
+  public PointParser(MapContext context) {
     this.context = checkNotNull(context);
-    this.regionParser = context.getRegionParser();
+    this.regionParser = context.legacy().getRegions();
   }
 
   private Region validate(Region region, Node node) throws InvalidXMLException {

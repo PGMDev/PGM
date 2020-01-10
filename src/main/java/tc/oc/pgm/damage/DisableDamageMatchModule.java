@@ -10,22 +10,23 @@ import org.bukkit.event.entity.EntityCombustByBlockEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.damage.DamageInfo;
 
 @ListenerScope(MatchScope.RUNNING)
-public class DisableDamageMatchModule extends MatchModule implements Listener {
+public class DisableDamageMatchModule implements MatchModule, Listener {
 
-  protected final SetMultimap<DamageCause, PlayerRelation> causes;
+  private final Match match;
+  private final SetMultimap<DamageCause, PlayerRelation> causes;
 
   public DisableDamageMatchModule(Match match, SetMultimap<DamageCause, PlayerRelation> causes) {
-    super(match);
+    this.match = match;
     this.causes = causes;
   }
 
@@ -56,7 +57,7 @@ public class DisableDamageMatchModule extends MatchModule implements Listener {
 
   @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
   public void handleIgnition(EntityCombustByBlockEvent event) {
-    MatchPlayer victim = getMatch().getParticipant(event.getEntity());
+    MatchPlayer victim = match.getParticipant(event.getEntity());
     if (victim == null) return;
 
     ParticipantState attacker =
@@ -70,7 +71,7 @@ public class DisableDamageMatchModule extends MatchModule implements Listener {
 
   @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
   public void handleDamage(EntityDamageEvent event) {
-    MatchPlayer victim = getMatch().getParticipant(event.getEntity());
+    MatchPlayer victim = match.getParticipant(event.getEntity());
     if (victim == null) return;
 
     DamageInfo damageInfo = match.needMatchModule(TrackerMatchModule.class).resolveDamage(event);

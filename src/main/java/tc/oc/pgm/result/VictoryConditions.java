@@ -1,9 +1,9 @@
 package tc.oc.pgm.result;
 
 import javax.annotation.Nullable;
+import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.goals.GoalsVictoryCondition;
-import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamVictoryCondition;
@@ -12,7 +12,7 @@ import tc.oc.pgm.teams.Teams;
 public class VictoryConditions {
   private VictoryConditions() {}
 
-  public static @Nullable VictoryCondition parse(MapModuleContext context, String raw) {
+  public static @Nullable VictoryCondition parse(MapContext context, String raw) {
     return parse(null, context, raw);
   }
 
@@ -21,7 +21,7 @@ public class VictoryConditions {
   }
 
   private static @Nullable VictoryCondition parse(
-      Match match, MapModuleContext context, @Nullable String raw) {
+      Match match, MapContext context, @Nullable String raw) {
     if (raw == null) return null;
 
     switch (raw.toLowerCase()) {

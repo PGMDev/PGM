@@ -9,8 +9,8 @@ import javax.annotation.Nullable;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
+import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.features.FeatureValidation;
-import tc.oc.pgm.map.MapModuleContext;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.XMLUtils;
@@ -20,9 +20,9 @@ import tc.oc.xml.Node;
 public abstract class RegionParser {
 
   protected final Map<String, Method> methodParsers;
-  protected final MapModuleContext context;
+  protected final MapContext context;
 
-  public RegionParser(MapModuleContext context) {
+  public RegionParser(MapContext context) {
     this.context = context;
     this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
   }

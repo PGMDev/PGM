@@ -10,20 +10,20 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.joda.time.Duration;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
-import tc.oc.pgm.match.MatchModule;
 
-public class FilterMatchModule extends MatchModule implements Listener {
+public class FilterMatchModule implements MatchModule, Listener {
 
+  private final Match match;
   private final SetMultimap<Filter, FilterListener> listeners = HashMultimap.create();
   private final Map<Filter, Filter.QueryResponse> responses = new HashMap<>();
-
   private final PriorityQueue<TimeFilter> timeFilterQueue = new PriorityQueue<>();
 
   public FilterMatchModule(Match match) {
-    super(match);
+    this.match = match;
   }
 
   /**
@@ -37,34 +37,33 @@ public class FilterMatchModule extends MatchModule implements Listener {
 
     Filter.QueryResponse response = responses.get(filter);
     if (response == null) {
-      response = filter.query(getMatch().getQuery());
+      response = filter.query(match.getQuery());
       responses.put(filter, response);
     }
 
-    listener.filterQueryChanged(filter, getMatch().getQuery(), null, response);
+    listener.filterQueryChanged(filter, match.getQuery(), null, response);
   }
 
   @Override
   public void load() {
-    super.load();
-    for (TimeFilter filter : getMatch().getMapContext().features().getAll(TimeFilter.class)) {
+    for (TimeFilter filter :
+        match.getMapContext().legacy().getFeatures().getAll(TimeFilter.class)) {
       timeFilterQueue.add(filter);
     }
   }
 
   @Override
   public void enable() {
-    super.enable();
     checkTimeFilters();
   }
 
   void check(Filter filter) {
-    Filter.QueryResponse newResponse = filter.query(getMatch().getQuery());
+    Filter.QueryResponse newResponse = filter.query(match.getQuery());
     Filter.QueryResponse oldResponse = responses.put(filter, newResponse);
 
     if (oldResponse != newResponse) {
       for (FilterListener listener : listeners.get(filter)) {
-        listener.filterQueryChanged(filter, getMatch().getQuery(), oldResponse, newResponse);
+        listener.filterQueryChanged(filter, match.getQuery(), oldResponse, newResponse);
       }
     }
   }
@@ -76,9 +75,9 @@ public class FilterMatchModule extends MatchModule implements Listener {
   }
 
   void checkTimeFilters() {
-    if (!getMatch().isRunning()) return;
+    if (!match.isRunning()) return;
 
-    Duration now = getMatch().getDuration();
+    Duration now = match.getDuration();
     boolean removed = false;
     TimeFilter next;
     for (; ; ) {
@@ -91,7 +90,7 @@ public class FilterMatchModule extends MatchModule implements Listener {
     if (removed) checkAll();
 
     if (next != null) {
-      getMatch()
+      match
           .getScheduler(MatchScope.RUNNING)
           .runTaskLater(
               next.getTime().minus(now),

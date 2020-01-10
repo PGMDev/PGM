@@ -14,15 +14,16 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.kits.Kit;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 
 @ListenerScope(MatchScope.RUNNING)
-public class ClassMatchModule extends MatchModule implements Listener {
+public class ClassMatchModule implements MatchModule, Listener {
+  private final Match match;
   private final String family;
   private final Map<String, PlayerClass> classes;
   private final Set<PlayerClass> classesByName;
@@ -33,7 +34,7 @@ public class ClassMatchModule extends MatchModule implements Listener {
 
   public ClassMatchModule(
       Match match, String family, Map<String, PlayerClass> classes, PlayerClass defaultClass) {
-    super(match);
+    this.match = match;
     this.family = checkNotNull(family, "family");
     this.classes = checkNotNull(classes, "classes");
     this.defaultClass = checkNotNull(defaultClass, "default class");
@@ -108,7 +109,7 @@ public class ClassMatchModule extends MatchModule implements Listener {
 
   /** Get the class that given player is spawned as or will spawn as next */
   public PlayerClass getPlayingClass(UUID userId) {
-    MatchPlayer player = getMatch().getPlayer(userId);
+    MatchPlayer player = match.getPlayer(userId);
     if (player != null && player.isAlive()) {
       return getLastPlayedClass(userId);
     } else {
