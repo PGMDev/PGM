@@ -33,6 +33,9 @@ public enum SettingValue {
 
   OBSERVERS_ON("observers", "on"), // Show observers
   OBSERVERS_OFF("observers", "off"), // Hide observers
+
+  RAINDROP_SOUNDS_ON("raindrop_sounds", "on"), // Always play raindrop sounds
+  RAINDROP_SOUNDS_OFF("raindrop_sounds", "off"), // Never play raindrop sounds
   ;
 
   private final String key;
