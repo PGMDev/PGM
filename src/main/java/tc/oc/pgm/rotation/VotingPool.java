@@ -41,6 +41,8 @@ public class VotingPool extends MapPool {
 
   /** Ticks scores for all maps, making them go slowly towards DEFAULT_WEIGHT. */
   private void tickScores(PGMMap currentMap) {
+    // If the current map isn't from this pool, ignore ticking
+    if (!mapScores.containsKey(currentMap)) return;
     mapScores.replaceAll(
         (mapScores, value) ->
             value > DEFAULT_WEIGHT
@@ -66,6 +68,11 @@ public class VotingPool extends MapPool {
   @Override
   public void setNextMap(PGMMap map) {
     currentPoll = null;
+  }
+
+  @Override
+  public void unloadPool(Match match) {
+    tickScores(match.getMap());
   }
 
   @Override

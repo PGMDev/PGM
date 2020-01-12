@@ -6,7 +6,9 @@ import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
 import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -28,7 +30,7 @@ public class MapPoolCommands {
   @Command(
       aliases = {"rotation", "rot", "pool"},
       desc = "Shows the maps in the active map pool",
-      usage = "[page] [-p pool] [-s scores]",
+      usage = "[page] [-p pool] [-s scores] [-c chance of vote]",
       help = "Shows all the maps that are currently in the active map pool.")
   public static void rotation(
       Audience audience,
@@ -37,7 +39,8 @@ public class MapPoolCommands {
       @Default("1") int page,
       @Switch('r') String rotationName,
       @Switch('p') String poolName,
-      @Switch('s') boolean scores)
+      @Switch('s') boolean scores,
+      @Switch('c') boolean chance)
       throws CommandException {
     if (rotationName != null) poolName = rotationName;
 
@@ -63,7 +66,18 @@ public class MapPoolCommands {
     title = ComponentUtils.paginate(title, page, pages);
     title = ComponentUtils.horizontalLineHeading(title, ChatColor.BLUE, 250);
 
-    VotingPool votes = scores && mapPool instanceof VotingPool ? (VotingPool) mapPool : null;
+    VotingPool votes =
+        (scores || chance) && mapPool instanceof VotingPool ? (VotingPool) mapPool : null;
+    Map<PGMMap, Double> chances = chance ? new HashMap<>() : null;
+    if (chance && votes != null) {
+      double maxWeight = 0, currWeight;
+      for (PGMMap map : votes.getMaps()) {
+        chances.put(map, currWeight = MapPoll.getWeight(votes.getMapScore(map)));
+        maxWeight += currWeight;
+      }
+      double finalMaxWeight = maxWeight;
+      chances.replaceAll((map, weight) -> weight / finalMaxWeight);
+    }
 
     int nextPos = mapPool instanceof Rotation ? ((Rotation) mapPool).getNextPosition() : -1;
 
@@ -72,8 +86,10 @@ public class MapPoolCommands {
       public String format(PGMMap map, int index) {
         index++;
         String str = (nextPos == index ? ChatColor.DARK_AQUA + "" : "") + index + ". ";
-        if (votes != null)
+        if (votes != null && scores)
           str += ChatColor.YELLOW + SCORE_FORMAT.format(votes.getMapScore(map)) + " ";
+        if (votes != null && chance)
+          str += ChatColor.YELLOW + SCORE_FORMAT.format(chances.get(map)) + " ";
         str += ChatColor.RESET + map.getInfo().getShortDescription(sender);
         return str;
       }
