@@ -111,7 +111,7 @@ import tc.oc.pgm.modules.MobsModule;
 import tc.oc.pgm.modules.ModifyBowProjectileModule;
 import tc.oc.pgm.modules.MultiTradeMatchModule;
 import tc.oc.pgm.modules.PlayableRegionModule;
-import tc.oc.pgm.modules.RaindropSoundsMatchModule;
+import tc.oc.pgm.modules.SoundsMatchModule;
 import tc.oc.pgm.modules.TimeLockModule;
 import tc.oc.pgm.modules.ToolRepairModule;
 import tc.oc.pgm.picker.PickerModule;
@@ -421,7 +421,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     factory.register(ViewInventoryMatchModule.class, new ViewInventoryMatchModule.Factory());
     factory.register(JoinMatchModule.class, new JoinMatchModule.Factory());
     factory.register(CycleMatchModule.class, new CycleMatchModule.Factory());
-    factory.register(RaindropSoundsMatchModule.class, new RaindropSoundsMatchModule.Factory());
+    factory.register(SoundsMatchModule.class, new SoundsMatchModule.Factory());
 
     return factory;
   }

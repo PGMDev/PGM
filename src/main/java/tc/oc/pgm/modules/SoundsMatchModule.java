@@ -14,7 +14,6 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
-import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
 import tc.oc.pgm.match.MatchModule;
@@ -23,59 +22,58 @@ import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.wool.PlayerWoolPlaceEvent;
 
 @ListenerScope(MatchScope.RUNNING)
-public class RaindropSoundsMatchModule extends MatchModule implements Listener {
+public class SoundsMatchModule extends MatchModule implements Listener {
 
-  public static class Factory implements MatchModuleFactory<RaindropSoundsMatchModule> {
+  public static class Factory implements MatchModuleFactory<SoundsMatchModule> {
     @Override
-    public RaindropSoundsMatchModule createMatchModule(Match match) throws ModuleLoadException {
-      return new RaindropSoundsMatchModule(match);
+    public SoundsMatchModule createMatchModule(Match match) throws ModuleLoadException {
+      return new SoundsMatchModule(match);
     }
   }
 
-  private static final Sound SOUND = new Sound("random.levelup", 1f, 1.5f);
+  private static final Sound RAINDROP_SOUND = new Sound("random.levelup", 1f, 1.5f);
 
-  public RaindropSoundsMatchModule(Match match) {
+  public SoundsMatchModule(Match match) {
     super(match);
   }
 
-  private void play(MatchPlayer player) {
-    Settings settings = player.getSettings();
-    if (settings.getValue(SettingKey.RAINDROP_SOUNDS).equals(SettingValue.RAINDROP_SOUNDS_ON)) {
-      player.playSound(SOUND);
+  private void playRaindrop(MatchPlayer player) {
+    if (player.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ON)) {
+      player.playSound(RAINDROP_SOUND);
     }
   }
 
-  private void play(MatchPlayerState playerState) {
-    playerState.getPlayer().ifPresent(this::play);
+  private void playRaindrop(MatchPlayerState playerState) {
+    playerState.getPlayer().ifPresent(this::playRaindrop);
   }
 
-  private void play(Competitor competitor) {
-    competitor.getPlayers().forEach(this::play);
+  private void playRaindrop(Competitor competitor) {
+    competitor.getPlayers().forEach(this::playRaindrop);
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchPlayerDeath(MatchPlayerDeathEvent event) {
     ParticipantState killer = event.getKiller();
     if (killer != null) {
-      play(killer);
+      playRaindrop(killer);
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchFinish(MatchFinishEvent event) {
-    event.getWinners().forEach(this::play);
+    event.getWinners().forEach(this::playRaindrop);
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onGoalTouch(GoalTouchEvent event) {
     ParticipantState player = event.getPlayer();
     if (player != null) {
-      play(player);
+      playRaindrop(player);
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerWoolPlace(PlayerWoolPlaceEvent event) {
-    play(event.getPlayer());
+    playRaindrop(event.getPlayer());
   }
 }

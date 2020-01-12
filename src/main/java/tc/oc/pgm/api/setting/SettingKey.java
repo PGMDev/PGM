@@ -30,10 +30,7 @@ public enum SettingKey {
       player.resetVisibility();
     }
   }, // Changes if observers are visible
-  RAINDROP_SOUNDS(
-      Arrays.asList("raindrop-sounds", "rds"),
-      RAINDROP_SOUNDS_ON,
-      RAINDROP_SOUNDS_OFF), // Changes if raindrop sounds are played
+  SOUNDS("sounds", SOUNDS_ON, SOUNDS_OFF), // Changes if sounds are played
   ;
 
   private final List<String> aliases;
