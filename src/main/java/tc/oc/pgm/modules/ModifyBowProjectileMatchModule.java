@@ -26,6 +26,7 @@ import tc.oc.world.NMSHacks;
 @ListenerScope(MatchScope.RUNNING)
 public class ModifyBowProjectileMatchModule extends MatchModule implements Listener {
   protected final Class<? extends Entity> cls;
+  protected final boolean isProjectile;
   protected final float velocityMod;
   protected final Set<PotionEffect> potionEffects;
   protected final Random random = new Random();
@@ -34,6 +35,7 @@ public class ModifyBowProjectileMatchModule extends MatchModule implements Liste
       Match match, Class<? extends Entity> cls, float velocityMod, Set<PotionEffect> effects) {
     super(match);
     this.cls = cls;
+    this.isProjectile = Projectile.class.isAssignableFrom(this.cls);
     this.velocityMod = velocityMod;
     potionEffects = effects;
   }
@@ -49,7 +51,8 @@ public class ModifyBowProjectileMatchModule extends MatchModule implements Liste
     } else {
       // Replace the projectile
       Projectile oldEntity = (Projectile) event.getProjectile();
-      if (this.cls.isAssignableFrom(Projectile.class)) {
+      if (isProjectile) {
+        //noinspection unchecked
         newProjectile = event.getEntity().launchProjectile((Class<? extends Projectile>) this.cls);
       } else {
         World world = event.getEntity().getWorld();
