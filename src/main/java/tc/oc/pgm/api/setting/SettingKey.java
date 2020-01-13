@@ -30,6 +30,7 @@ public enum SettingKey {
       player.resetVisibility();
     }
   }, // Changes if observers are visible
+  SOUNDS("sounds", SOUNDS_ON, SOUNDS_OFF), // Changes if sounds are played
   ;
 
   private final List<String> aliases;
