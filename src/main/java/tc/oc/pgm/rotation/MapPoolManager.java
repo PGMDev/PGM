@@ -55,8 +55,7 @@ public class MapPoolManager implements PGMMapOrder {
             .filter(MapPool::isEnabled)
             .collect(Collectors.toList());
 
-    MapPool lastActiveMapPool = getMapPoolByName(mapPoolFileConfig.getString("last_active"));
-    setActiveMapPool(lastActiveMapPool);
+    activeMapPool = getMapPoolByName(mapPoolFileConfig.getString("last_active"));
   }
 
   public void saveMapPools() {
@@ -65,10 +64,6 @@ public class MapPoolManager implements PGMMapOrder {
     } catch (IOException e) {
       logger.log(Level.SEVERE, "Could not save next map for future reference", e);
     }
-  }
-
-  private void setActiveMapPool(MapPool activeMapPool) {
-    this.activeMapPool = activeMapPool;
   }
 
   public MapPool getActiveMapPool() {
@@ -82,7 +77,8 @@ public class MapPoolManager implements PGMMapOrder {
   private void updateActiveMapPool(MapPool mapPool, Match match) {
     if (mapPool == activeMapPool) return;
 
-    setActiveMapPool(mapPool);
+    activeMapPool.unloadPool(match);
+    activeMapPool = mapPool;
 
     mapPoolFileConfig.set("last_active", activeMapPool.getName());
     saveMapPools();

@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.map.MapLibrary;
 import tc.oc.pgm.map.PGMMap;
 
@@ -87,6 +88,13 @@ public abstract class MapPool implements PGMMapOrder, Comparable<MapPool> {
    */
   @Override
   public void setNextMap(PGMMap map) {}
+
+  /**
+   * Called when this map pool is going to be switched out
+   *
+   * @param match The match that is currently ending
+   */
+  public void unloadPool(Match match) {};
 
   @Override
   public int compareTo(MapPool o) {
