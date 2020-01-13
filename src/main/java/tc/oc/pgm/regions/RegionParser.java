@@ -61,15 +61,11 @@ public abstract class RegionParser {
   public Region parseChildren(Element parent) throws InvalidXMLException {
     Attribute attrRegion = parent.getAttribute("region");
     Region reference = attrRegion == null ? null : this.parseReference(attrRegion);
-    Region body = this.parseUnion(parent);
+    List<Region> regions = this.parseSubRegions(parent);
 
-    if (reference == null) {
-      return body;
-    } else if (body == EmptyRegion.INSTANCE) {
-      return reference;
-    } else {
-      return new Union(reference, body);
-    }
+    if (reference != null) regions.add(reference);
+
+    return Union.of(regions.toArray(new Region[0]));
   }
 
   public Region[] parseSubRegionsArray(Element parent) throws InvalidXMLException {
@@ -296,12 +292,7 @@ public abstract class RegionParser {
 
   @MethodParser("union")
   public Region parseUnion(Element el) throws InvalidXMLException {
-    Region[] regions = this.parseSubRegionsArray(el);
-    if (regions.length < 1) {
-      return EmptyRegion.INSTANCE;
-    } else {
-      return new Union(regions);
-    }
+    return new Union(this.parseSubRegionsArray(el));
   }
 
   @MethodParser("intersect")
