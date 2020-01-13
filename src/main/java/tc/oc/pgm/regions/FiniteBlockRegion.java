@@ -142,7 +142,13 @@ public class FiniteBlockRegion extends AbstractRegion {
     Bounds bounds = region.getBounds();
     PGMMap map = PGM.get().getMatchManager().getMatch(world).getMap();
 
-    if (region instanceof CuboidRegion
+    // TODO: Fix this, this is a hacky workaround to fix broken maps
+    boolean isCuboidUnionWrapped =
+        region instanceof Union
+            && ((Union) region).getRegions().length == 1
+            && ((Union) region).getRegions()[0] instanceof CuboidRegion;
+
+    if ((region instanceof CuboidRegion || isCuboidUnionWrapped)
         && map != null
         && map.getInfo().proto.isOlderThan(REGION_FIX_VERSION)) {
       // The loops below are incorrect, because they go one block over the max.
