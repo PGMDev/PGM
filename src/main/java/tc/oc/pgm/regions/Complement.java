@@ -4,7 +4,7 @@ import org.bukkit.util.Vector;
 
 public class Complement extends AbstractRegion {
   private final Region original;
-  private final Union subtracted;
+  private final Region subtracted;
 
   public Complement(Region original, Region... subtracted) {
     this.original = original;

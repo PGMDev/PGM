@@ -9,8 +9,10 @@ public class Union extends AbstractRegion {
     this.regions = regions;
   }
 
-  public static Union of(Region... regions) {
-    return new Union(regions);
+  public static Region of(Region... regions) {
+    return regions.length == 0
+        ? EmptyRegion.INSTANCE
+        : regions.length == 1 ? regions[0] : new Union(regions);
   }
 
   public Region[] getRegions() {
