@@ -41,7 +41,15 @@ public class Components {
   }
 
   public static List<Component> fromBungee(BaseComponent[] baseComponents) {
-    return Arrays.stream(baseComponents).map(Component::new).collect(Collectors.toList());
+    return Arrays.stream(baseComponents)
+        .map(Components::convertBaseComponent)
+        .collect(Collectors.toList());
+  }
+
+  private static Component convertBaseComponent(BaseComponent component) {
+    return component instanceof TranslatableComponent
+        ? new PersonalizedTranslatable((TranslatableComponent) component)
+        : new Component(component);
   }
 
   private static final Component SPACE = new PersonalizedText(" ");
