@@ -2,15 +2,12 @@ package tc.oc.pgm.proximity;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
-import java.util.Collection;
-import java.util.Set;
-import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -21,6 +18,10 @@ import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
+
+import java.util.Collection;
+import java.util.Set;
+import java.util.logging.Logger;
 
 public class ProximityAlarmModule implements MapModule {
   private final Set<ProximityAlarmDefinition> definitions;
@@ -41,13 +42,13 @@ public class ProximityAlarmModule implements MapModule {
     }
 
     @Override
-    public ProximityAlarmModule parse(MapContext context, Logger logger, Document doc)
+    public ProximityAlarmModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       Set<ProximityAlarmDefinition> definitions = Sets.newHashSet();
 
       for (Element elAlarm :
           XMLUtils.flattenElements(doc.getRootElement(), "proximity-alarms", "proximity-alarm")) {
-        definitions.add(parseDefinition(context, elAlarm));
+        definitions.add(parseDefinition(factory, elAlarm));
       }
 
       if (definitions.isEmpty()) {
@@ -57,18 +58,18 @@ public class ProximityAlarmModule implements MapModule {
       }
     }
 
-    private static ProximityAlarmDefinition parseDefinition(MapContext context, Element elAlarm)
+    private static ProximityAlarmDefinition parseDefinition(MapFactory factory, Element elAlarm)
         throws InvalidXMLException {
       ProximityAlarmDefinition definition = new ProximityAlarmDefinition();
 
-      FilterParser filterParser = context.legacy().getFilters();
+      FilterParser filterParser = factory.getFilters();
       definition.detectFilter = filterParser.parseRequiredFilterProperty(elAlarm, "detect");
       definition.alertFilter =
           filterParser.parseFilterProperty(
               elAlarm, "notify", new InverseFilter(definition.detectFilter));
 
       definition.detectRegion =
-          context.legacy().getRegions().parseRequiredRegionProperty(elAlarm, "region");
+              factory.getRegions().parseRequiredRegionProperty(elAlarm, "region");
       definition.alertMessage = elAlarm.getAttributeValue("message"); // null = no message
 
       if (definition.alertMessage != null) {

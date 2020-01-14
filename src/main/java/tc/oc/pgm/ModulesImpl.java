@@ -1,12 +1,10 @@
-package tc.oc.pgm.match;
+package tc.oc.pgm;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
-import tc.oc.pgm.api.module.ModuleRegistry;
+import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.blitz.BlitzModule;
 import tc.oc.pgm.blockdrops.BlockDropsModule;
 import tc.oc.pgm.bossbar.BossBarMatchModule;
@@ -71,11 +69,14 @@ import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.wool.WoolModule;
 import tc.oc.pgm.worldborder.WorldBorderModule;
 
-public class ModuleRegistryImpl implements ModuleRegistry {
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-  private static final Map<Class<? extends MapModule>, MapModuleFactory> mapModuleFactories =
+public class ModulesImpl implements Modules {
+
+  private static final Map<Class<? extends MapModule>, MapModuleFactory<? extends MapModule>> mapModuleFactories =
       new ConcurrentHashMap<>();
-  private static final Map<Class<? extends MatchModule>, MatchModuleFactory> matchModuleFactories =
+  private static final Map<Class<? extends MatchModule>, MatchModuleFactory<? extends MatchModule>> matchModuleFactories =
       new ConcurrentHashMap<>();
 
   static {
@@ -84,7 +85,7 @@ public class ModuleRegistryImpl implements ModuleRegistry {
   }
 
   @Override
-  public Map<Class<? extends MapModule>, MapModuleFactory> getMapModuleFactories() {
+  public Map<Class<? extends MapModule>, MapModuleFactory<? extends MapModule>> getMapModuleFactories() {
     return mapModuleFactories;
   }
 
@@ -92,7 +93,7 @@ public class ModuleRegistryImpl implements ModuleRegistry {
     mapModuleFactories.put(TeamModule.class, new TeamModule.Factory());
     mapModuleFactories.put(FreeForAllModule.class, new FreeForAllModule.Factory());
     mapModuleFactories.put(RegionModule.class, new RegionModule.Factory());
-    mapModuleFactories.put(FilterModule.class, new RegionModule.Factory());
+    mapModuleFactories.put(FilterModule.class, new FilterModule.Factory());
     mapModuleFactories.put(SpawnModule.class, new SpawnModule.Factory());
     mapModuleFactories.put(PlayableRegionModule.class, new PlayableRegionModule.Factory());
     mapModuleFactories.put(CoreModule.class, new CoreModule.Factory());
@@ -142,7 +143,7 @@ public class ModuleRegistryImpl implements ModuleRegistry {
   }
 
   @Override
-  public Map<Class<? extends MatchModule>, MatchModuleFactory> getMatchModuleFactories() {
+  public Map<Class<? extends MatchModule>, MatchModuleFactory<? extends MatchModule>> getMatchModuleFactories() {
     return matchModuleFactories;
   }
 
@@ -152,7 +153,7 @@ public class ModuleRegistryImpl implements ModuleRegistry {
         StartMatchModule.class, StartMatchModule::new); // Used to be map module, requires=bossbar
     matchModuleFactories.put(EventFilterMatchModule.class, EventFilterMatchModule::new);
     matchModuleFactories.put(MultiTradeMatchModule.class, MultiTradeMatchModule::new);
-    matchModuleFactories.put(SnapshotMatchModule.class, ShieldMatchModule::new);
+    matchModuleFactories.put(SnapshotMatchModule.class, SnapshotMatchModule::new);
     matchModuleFactories.put(DeathMessageMatchModule.class, DeathMessageMatchModule::new);
     matchModuleFactories.put(TrackerMatchModule.class, TrackerMatchModule::new);
     matchModuleFactories.put(ShieldMatchModule.class, ShieldMatchModule::new);

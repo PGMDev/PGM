@@ -8,8 +8,9 @@ import org.bukkit.scoreboard.NameTagVisibility;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.Config;
-import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.MapInfoExtra;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -18,7 +19,7 @@ import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
-public class FreeForAllModule implements MapModule {
+public class FreeForAllModule implements MapModule, MapInfoExtra {
 
   private final FreeForAllOptions options;
 
@@ -35,6 +36,11 @@ public class FreeForAllModule implements MapModule {
     return new FreeForAllMatchModule(match, options);
   }
 
+  @Override
+  public int getPlayerLimit() {
+    return options.maxPlayers;
+  }
+
   public static class Factory implements MapModuleFactory<FreeForAllModule> {
     @Override
     public Collection<Class<? extends MapModule>> getWeakDependencies() {
@@ -42,11 +48,11 @@ public class FreeForAllModule implements MapModule {
     }
 
     @Override
-    public FreeForAllModule parse(MapContext context, Logger logger, Document doc)
+    public FreeForAllModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       Element elPlayers = doc.getRootElement().getChild("players");
 
-      if (context.hasModule(TeamModule.class)) {
+      if (factory.hasModule(TeamModule.class)) {
         if (elPlayers != null)
           throw new InvalidXMLException("Cannot combine <players> and <teams>", elPlayers);
         return null;

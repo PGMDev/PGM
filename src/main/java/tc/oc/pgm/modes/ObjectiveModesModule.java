@@ -10,8 +10,8 @@ import org.bukkit.material.MaterialData;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.joda.time.Duration;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -36,9 +36,9 @@ public class ObjectiveModesModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<ObjectiveModesModule> {
     @Override
-    public ObjectiveModesModule parse(MapContext context, Logger logger, Document doc)
+    public ObjectiveModesModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      if (context.getInfo().getProto().isOlderThan(MODES_IMPLEMENTATION_VERSION)) {
+      if (factory.getProto().isOlderThan(MODES_IMPLEMENTATION_VERSION)) {
         return null;
       }
 

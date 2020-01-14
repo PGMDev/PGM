@@ -33,9 +33,9 @@ public class MapTabEntry extends DynamicTabEntry {
   @Override
   public BaseComponent getContent(TabView view) {
     Component content =
-        new PersonalizedText(match.getMap().getInfo().getName(), ChatColor.AQUA, ChatColor.BOLD);
+        new PersonalizedText(match.getMap().getName(), ChatColor.AQUA, ChatColor.BOLD);
 
-    Collection<Contributor> authors = match.getMap().getInfo().getAuthors();
+    Collection<Contributor> authors = match.getMap().getAuthors();
     if (!authors.isEmpty()) {
       content =
           new PersonalizedText(

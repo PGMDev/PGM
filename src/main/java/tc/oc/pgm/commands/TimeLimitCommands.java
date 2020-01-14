@@ -66,7 +66,7 @@ public class TimeLimitCommands {
         VictoryCondition result;
         if (resultString != null) {
           try {
-            result = VictoryConditions.parse(match.getMapContext(), resultString);
+            result = VictoryConditions.parse(match, resultString);
           } catch (IllegalArgumentException ex) {
             throw new CommandException("Invalid result or team name: " + resultString);
           }

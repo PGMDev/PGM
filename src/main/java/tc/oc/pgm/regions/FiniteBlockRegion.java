@@ -150,7 +150,7 @@ public class FiniteBlockRegion extends AbstractRegion {
 
     if (region instanceof CuboidRegion
         && map != null
-        && map.getInfo().getProto().isOlderThan(REGION_FIX_VERSION)) {
+        && map.getProto().isOlderThan(REGION_FIX_VERSION)) {
       // The loops below are incorrect, because they go one block over the max.
       // Unfortunately, we have to keep this around to avoid breaking old maps.
       Vector min = bounds.getMin();

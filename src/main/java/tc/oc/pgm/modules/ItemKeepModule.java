@@ -4,8 +4,8 @@ import com.google.common.collect.Sets;
 import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -30,7 +30,7 @@ public class ItemKeepModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<ItemKeepModule> {
     @Override
-    public ItemKeepModule parse(MapContext context, Logger logger, Document doc)
+    public ItemKeepModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       Set<BlockFilter> itemsToKeep = Sets.newHashSet();
       for (Node elItemKeep : Node.fromChildren(doc.getRootElement(), "item-keep", "itemkeep")) {

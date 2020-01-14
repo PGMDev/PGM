@@ -10,8 +10,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -47,11 +47,11 @@ public class BlockDropsModule implements MapModule {
     }
 
     @Override
-    public BlockDropsModule parse(MapContext context, Logger logger, Document doc)
+    public BlockDropsModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       List<BlockDropsRule> rules = new ArrayList<>();
-      FilterParser filterParser = context.legacy().getFilters();
-      RegionParser regionParser = context.legacy().getRegions();
+      FilterParser filterParser = factory.getFilters();
+      RegionParser regionParser = factory.getRegions();
 
       for (Element elRule :
           XMLUtils.flattenElements(
@@ -87,7 +87,7 @@ public class BlockDropsModule implements MapModule {
             items.add(
                 Pair.create(
                     XMLUtils.parseNumber(elItem.getAttribute("chance"), Double.class, 1d),
-                    context.legacy().getKits().parseItem(elItem, false)));
+                    factory.getKits().parseItem(elItem, false)));
           }
         }
 
@@ -109,10 +109,10 @@ public class BlockDropsModule implements MapModule {
   }
 
   @Override
-  public void postParse(MapContext context, Logger logger, Document doc)
+  public void postParse(MapFactory factory, Logger logger, Document doc)
       throws InvalidXMLException {
     // Apply any item-mods to all drops
-    ItemModifyModule imm = context.getModule(ItemModifyModule.class);
+    ItemModifyModule imm = factory.getModule(ItemModifyModule.class);
     if (imm != null) {
       for (BlockDropsRule rule : ruleSet.getRules()) {
         for (Pair<Double, ItemStack> entry : rule.drops.items) {

@@ -1,6 +1,9 @@
 package tc.oc.pgm;
 
 import com.google.common.collect.ImmutableList;
+import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -17,9 +20,12 @@ import org.bukkit.permissions.PermissionDefault;
 import org.joda.time.Duration;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.pgm.events.ConfigLoadEvent;
+import tc.oc.pgm.map.source.FileMapSourceFactory;
 
 public class Config {
+
   public static Configuration getConfiguration() {
     PGM pgm = PGM.get();
     if (pgm != null) {
@@ -32,6 +38,20 @@ public class Config {
   public static class Log {
     public static Level level() {
       return Level.parse(getConfiguration().getString("log.level", "info").toUpperCase());
+    }
+  }
+
+  public static class Maps {
+    public static List<MapSourceFactory> sources() {
+      final List<MapSourceFactory> sources = new LinkedList<>();
+      for (String source : getConfiguration().getStringList("map.sources")) {
+        if (source.equalsIgnoreCase("default")) {
+          // TODO: URLMapSource, DefaultMapSource
+        } else {
+          sources.add(new FileMapSourceFactory(new File(source).getAbsoluteFile()));
+        }
+      }
+      return sources;
     }
   }
 

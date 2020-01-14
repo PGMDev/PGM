@@ -2,7 +2,7 @@ package tc.oc.pgm.kits;
 
 import org.jdom2.Attribute;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
@@ -10,8 +10,8 @@ public class LegacyKitParser extends KitParser {
 
   private final KitContext kitContext = new KitContext();
 
-  public LegacyKitParser(MapContext context) {
-    super(context);
+  public LegacyKitParser(MapFactory factory) {
+    super(factory);
   }
 
   @Override

@@ -64,8 +64,7 @@ public class RegionMatchModule implements MatchModule, Listener {
   public RegionMatchModule(Match match, RFAContext rfaContext) {
     this.match = match;
     this.rfaContext = rfaContext;
-    this.useRegionPriority =
-        match.getMap().getInfo().getProto().isNoOlderThan(REGION_PRIORITY_VERSION);
+    this.useRegionPriority = match.getMap().getProto().isNoOlderThan(REGION_PRIORITY_VERSION);
   }
 
   protected void checkEnterLeave(
@@ -385,7 +384,7 @@ public class RegionMatchModule implements MatchModule, Listener {
 
   private ParticipantState getActor(BlockTransformEvent event) {
     // Legacy maps assume that all TNT damage is done by "world"
-    if (match.getMap().getInfo().getProto().isOlderThan(ProtoVersions.FILTER_OWNED_TNT)
+    if (match.getMap().getProto().isOlderThan(ProtoVersions.FILTER_OWNED_TNT)
         && event.getCause() instanceof EntityExplodeEvent) return null;
 
     return ParticipantBlockTransformEvent.getPlayerState(event);

@@ -90,8 +90,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
           StringUtils.left(
               ComponentRenderers.toLegacyText(
                   new PersonalizedText( // FIXME: Genre sidebar probably broken
-                      match.getMapContext().getInfo().getGenre(),
-                      net.md_5.bungee.api.ChatColor.AQUA),
+                      match.getMapContext().getGenre(), net.md_5.bungee.api.ChatColor.AQUA),
                   NullCommandSender.INSTANCE),
               32));
       this.objective.setDisplaySlot(DisplaySlot.SIDEBAR);

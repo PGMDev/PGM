@@ -8,16 +8,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
 import com.google.common.collect.SetMultimap;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
-import javax.annotation.Nullable;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -34,7 +24,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.jdom2.Element;
 import org.joda.time.Duration;
-import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.doublejump.DoubleJumpKit;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.StaticFilter;
@@ -49,13 +39,24 @@ import tc.oc.util.Pair;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+
 public abstract class KitParser {
-  protected final MapContext context;
+  protected final MapFactory factory;
   protected final Set<AttributeModifier> attributeModifiers = new HashSet<>();
   protected final Set<Kit> kits = new HashSet<>();
 
-  public KitParser(MapContext context) {
-    this.context = context;
+  public KitParser(MapFactory factory) {
+    this.factory = factory;
   }
 
   /**
@@ -114,7 +115,7 @@ public abstract class KitParser {
     Boolean force = XMLUtils.parseBoolean(Node.fromAttr(el, "force"));
     Boolean potionParticles = XMLUtils.parseBoolean(Node.fromAttr(el, "potion-particles"));
     Filter filter =
-        context.legacy().getFilters().parseFilterProperty(el, "filter", StaticFilter.ALLOW);
+            factory.getFilters().parseFilterProperty(el, "filter", StaticFilter.ALLOW);
 
     kits.add(this.parseClearItemsKit(el)); // must be added before anything else
 
@@ -518,8 +519,8 @@ public abstract class KitParser {
     if (projectileNode != null) {
       ItemTags.PROJECTILE.set(
           itemStack,
-          context
-              .legacy()
+              factory
+
               .getFeatures()
               .createReference(projectileNode, ProjectileDefinition.class)
               .getId());
@@ -633,8 +634,8 @@ public abstract class KitParser {
         kit = new RemoveKit(parse(el));
       }
       kits.add(kit);
-      context
-          .legacy()
+      factory
+
           .getFeatures()
           .addFeature(el, kit); // So we can retrieve the node from KitModule#postParse
     }

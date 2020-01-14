@@ -1,18 +1,19 @@
 package tc.oc.pgm.blitz;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.util.List;
-import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
+
+import java.util.List;
+import java.util.logging.Logger;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class BlitzModule implements MapModule {
   final BlitzConfig config;
@@ -41,7 +42,7 @@ public class BlitzModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<BlitzModule> {
     @Override
-    public BlitzModule parse(MapContext context, Logger logger, Document doc)
+    public BlitzModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       List<Element> blitzElements = doc.getRootElement().getChildren("blitz");
       BlitzConfig config = new BlitzConfig(Integer.MAX_VALUE, false);
@@ -52,7 +53,11 @@ public class BlitzModule implements MapModule {
         config = new BlitzConfig(lives, broadcastLives);
       }
 
-      return new BlitzModule(config);
+      if (config.lives != Integer.MAX_VALUE) {
+        return new BlitzModule(config);
+      }
+
+      return null;
     }
   }
 }

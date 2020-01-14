@@ -42,7 +42,7 @@ public class CoreMatchModule implements MatchModule, Listener {
 
   @Override
   public void enable() {
-    if (this.match.getMap().getInfo().getProto().isOlderThan(MODES_IMPLEMENTATION_VERSION)) {
+    if (this.match.getMap().getProto().isOlderThan(MODES_IMPLEMENTATION_VERSION)) {
       CoreConvertMonitor ccm = new CoreConvertMonitor(this);
 
       match.getScheduler(MatchScope.RUNNING).runTaskLater(15 * 60 * 20, ccm); // 15 minutes

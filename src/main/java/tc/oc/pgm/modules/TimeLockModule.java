@@ -3,8 +3,8 @@ package tc.oc.pgm.modules;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -24,7 +24,7 @@ public class TimeLockModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<TimeLockModule> {
     @Override
-    public TimeLockModule parse(MapContext context, Logger logger, Document doc)
+    public TimeLockModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       boolean lock = true;
       Element timelockEl = doc.getRootElement().getChild("timelock");

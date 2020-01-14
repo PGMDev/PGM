@@ -87,7 +87,7 @@ public class BlitzMatchModule implements MatchModule, Listener {
           new PersonalizedTranslatable(
               "blitz.join",
               new PersonalizedText(
-                  match.getMapContext().getInfo().getGenre(), net.md_5.bungee.api.ChatColor.AQUA)));
+                  match.getMapContext().getGenre(), net.md_5.bungee.api.ChatColor.AQUA)));
     }
   }
 

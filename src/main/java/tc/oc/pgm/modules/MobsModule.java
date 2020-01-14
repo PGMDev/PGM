@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -37,13 +37,13 @@ public class MobsModule implements MapModule {
     }
 
     @Override
-    public MobsModule parse(MapContext context, Logger logger, Document doc)
+    public MobsModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      FilterParser filterParser = context.legacy().getFilters();
+      FilterParser filterParser = factory.getFilters();
       Element mobsEl = doc.getRootElement().getChild("mobs");
       Filter mobsFilter = StaticFilter.DENY;
       if (mobsEl != null) {
-        if (context.getInfo().getProto().isNoOlderThan(ProtoVersions.FILTER_FEATURES)) {
+        if (factory.getProto().isNoOlderThan(ProtoVersions.FILTER_FEATURES)) {
           mobsFilter = filterParser.parseRequiredFilterProperty(mobsEl, "filter");
         } else {
           Element filterEl = XMLUtils.getUniqueChild(mobsEl, "filter");

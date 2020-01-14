@@ -9,8 +9,8 @@ import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.joda.time.Duration;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -43,11 +43,11 @@ public class RenewableModule implements MapModule {
     }
 
     @Override
-    public RenewableModule parse(MapContext context, Logger logger, Document doc)
+    public RenewableModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       RenewableModule renewableModule = new RenewableModule();
-      RegionParser regionParser = context.legacy().getRegions();
-      FilterParser filterParser = context.legacy().getFilters();
+      RegionParser regionParser = factory.getRegions();
+      FilterParser filterParser = factory.getFilters();
 
       for (Element elRenewable :
           XMLUtils.flattenElements(doc.getRootElement(), "renewables", "renewable")) {

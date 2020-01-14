@@ -2,7 +2,7 @@ package tc.oc.pgm.regions;
 
 import org.jdom2.Attribute;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
@@ -12,8 +12,8 @@ public class LegacyRegionParser extends RegionParser {
 
   protected final RegionContext regionContext = new RegionContext();
 
-  public LegacyRegionParser(MapContext context) {
-    super(context);
+  public LegacyRegionParser(MapFactory factory) {
+    super(factory);
   }
 
   public Region parse(Element el) throws InvalidXMLException {

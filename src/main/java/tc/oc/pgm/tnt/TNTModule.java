@@ -7,8 +7,8 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.joda.time.Duration;
 import tc.oc.component.Component;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -43,7 +43,7 @@ public class TNTModule implements MapModule {
     }
 
     @Override
-    public TNTModule parse(MapContext context, Logger logger, Document doc)
+    public TNTModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       Float yield = null;
       Float power = null;
@@ -95,7 +95,7 @@ public class TNTModule implements MapModule {
       }
 
       if (!blockDamage) {
-        context
+        factory
             .needModule(RegionModule.class)
             .getRFAContext()
             .prepend(

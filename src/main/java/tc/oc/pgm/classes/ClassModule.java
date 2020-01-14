@@ -16,8 +16,8 @@ import javax.annotation.Nullable;
 import org.bukkit.material.MaterialData;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -64,7 +64,7 @@ public class ClassModule implements MapModule {
     }
 
     @Override
-    public ClassModule parse(MapContext context, Logger logger, Document doc)
+    public ClassModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       List<Element> classElements =
           XMLUtils.flattenElements(doc.getRootElement(), "classes", "class");
@@ -99,7 +99,7 @@ public class ClassModule implements MapModule {
       PlayerClass defaultClass = null;
 
       for (Element classEl : classElements) {
-        PlayerClass cls = parseClass(classEl, context.legacy().getKits(), family);
+        PlayerClass cls = parseClass(classEl, factory.getKits(), family);
 
         if (usedNames.contains(cls.getName().toLowerCase())) {
           throw new InvalidXMLException(

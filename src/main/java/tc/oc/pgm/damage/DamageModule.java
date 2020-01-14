@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -29,13 +29,13 @@ public class DamageModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<DamageModule> {
     @Override
-    public DamageModule parse(MapContext context, Logger logger, Document doc)
+    public DamageModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       List<Filter> filters = new ArrayList<>();
 
       for (Element elDamage : doc.getRootElement().getChildren("damage")) {
         for (Element elFilter : elDamage.getChildren()) {
-          filters.add(context.legacy().getFilters().parse(elFilter));
+          filters.add(factory.getFilters().parse(elFilter));
         }
       }
 

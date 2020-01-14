@@ -1,11 +1,10 @@
 package tc.oc.pgm.controlpoint;
 
-import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.util.Vector;
 import org.jdom2.Element;
 import org.joda.time.Duration;
-import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.filters.AnyFilter;
 import tc.oc.pgm.filters.BlockFilter;
 import tc.oc.pgm.filters.Filter;
@@ -19,6 +18,8 @@ import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
+import java.util.List;
+
 public abstract class ControlPointParser {
   private static final Filter VISUAL_MATERIALS =
       AnyFilter.of(
@@ -29,10 +30,10 @@ public abstract class ControlPointParser {
           new BlockFilter(Material.STAINED_GLASS_PANE));
 
   public static ControlPointDefinition parseControlPoint(
-      MapContext context, Element elControlPoint, boolean koth) throws InvalidXMLException {
+          MapFactory factory, Element elControlPoint, boolean koth) throws InvalidXMLException {
     String id = elControlPoint.getAttributeValue("id");
-    RegionParser regionParser = context.legacy().getRegions();
-    FilterParser filterParser = context.legacy().getFilters();
+    RegionParser regionParser = factory.getRegions();
+    FilterParser filterParser = factory.getFilters();
 
     Region captureRegion =
         regionParser.parseRequiredRegionProperty(elControlPoint, "capture-region", "capture");
@@ -56,9 +57,9 @@ public abstract class ControlPointParser {
 
     String name = elControlPoint.getAttributeValue("name", "Hill");
     TeamFactory initialOwner =
-        context
+            factory
             .getModule(TeamModule.class)
-            .parseTeam(elControlPoint.getAttribute("initial-owner"), context);
+            .parseTeam(elControlPoint.getAttribute("initial-owner"), factory);
     Vector capturableDisplayBeacon = XMLUtils.parseVector(elControlPoint.getAttribute("beacon"));
     Duration timeToCapture =
         XMLUtils.parseDuration(

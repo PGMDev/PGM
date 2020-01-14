@@ -3,16 +3,12 @@ package tc.oc.pgm.destroyable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.material.matcher.SingleMaterialMatcher;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -28,6 +24,11 @@ import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
 
 public class DestroyableModule implements MapModule {
   protected final List<DestroyableFactory> destroyableFactories;
@@ -56,11 +57,11 @@ public class DestroyableModule implements MapModule {
     }
 
     @Override
-    public DestroyableModule parse(MapContext context, Logger logger, Document doc)
+    public DestroyableModule parse(MapFactory context, Logger logger, Document doc)
         throws InvalidXMLException {
       List<DestroyableFactory> destroyables = Lists.newArrayList();
       TeamModule teamModule = context.getModule(TeamModule.class);
-      RegionParser regionParser = context.legacy().getRegions();
+      RegionParser regionParser = context.getRegions();
 
       for (Element destroyableEl :
           XMLUtils.flattenElements(
@@ -79,7 +80,7 @@ public class DestroyableModule implements MapModule {
         }
 
         Region region;
-        if (context.getInfo().getProto().isOlderThan(ProtoVersions.MODULE_SUBELEMENT_VERSION)) {
+        if (context.getProto().isOlderThan(ProtoVersions.MODULE_SUBELEMENT_VERSION)) {
           region = regionParser.parseChildren(destroyableEl);
           regionParser.validate(region, BlockBoundedValidation.INSTANCE, new Node(destroyableEl));
         } else {
@@ -120,7 +121,7 @@ public class DestroyableModule implements MapModule {
                 sparks,
                 repairable);
 
-        context.legacy().getFeatures().addFeature(destroyableEl, factory);
+        context.getFeatures().addFeature(destroyableEl, factory);
         destroyables.add(factory);
       }
 

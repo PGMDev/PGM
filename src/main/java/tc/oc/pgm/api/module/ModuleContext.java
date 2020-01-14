@@ -1,24 +1,53 @@
 package tc.oc.pgm.api.module;
 
-import java.util.Collection;
 import javax.annotation.Nullable;
+import java.util.Map;
 
-public interface ModuleContext<T extends Module> extends Module {
+/**
+ * A contextual collection of {@link Module}s indexed by their class.
+ */
+public interface ModuleContext<M extends Module> {
 
-  Collection<T> getModules();
+  /**
+   * Get a map of {@link Module}s indexed by their class.
+   *
+   * @return A map of {@link Module}s.
+   */
+  Map<Class<? extends M>, M> getModules();
 
+  /**
+   * Get a specific {@link Module} from its class.
+   *
+   * @param key A specific {@link Module} class.
+   * @return A {@link Module} or {@code null} if not found.
+   */
   @Nullable
-  <M extends T> M getModule(Class<? extends M> key);
+  default <N extends M> N getModule(Class<? extends N> key) {
+    return (N) getModules().get(key);
+  }
 
-  default <M extends T> M needModule(Class<? extends M> key) {
-    final M module = getModule(key);
+  /**
+   * Require a specific {@link Module} from its class.
+   *
+   * @param key A specific {@link Module} class.
+   * @return A {@link Module}.
+   * @throws IllegalStateException If not found.
+   */
+  default <N extends M> N needModule(Class<? extends N> key) {
+    final N module = getModule(key);
     if (module == null) {
-      throw new IllegalStateException("Required module " + key + " was not found");
+      throw new IllegalStateException(key.getSimpleName() + " was required, but not found");
     }
     return module;
   }
 
-  default boolean hasModule(Class<? extends T> key) {
+  /**
+   * Get whether this context contains a particular {@link Module}.
+   *
+   * @param key A specific {@link Module} class.
+   * @return Whether the {@link Module} exists.
+   */
+  default boolean hasModule(Class<? extends M> key) {
     return getModule(key) != null;
   }
 }

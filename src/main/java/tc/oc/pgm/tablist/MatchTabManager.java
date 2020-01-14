@@ -122,7 +122,7 @@ public class MatchTabManager extends TabManager implements Listener {
 
   protected void invalidate(MatchPlayer player) {
     getPlayerEntry(player).invalidate();
-    for (Contributor author : player.getMatch().getMap().getInfo().getAuthors()) {
+    for (Contributor author : player.getMatch().getMap().getAuthors()) {
       if (author.isPlayer(player.getId())) {
         MapTabEntry mapEntry = mapEntries.get(player.getMatch());
         if (mapEntry != null) mapEntry.invalidate();

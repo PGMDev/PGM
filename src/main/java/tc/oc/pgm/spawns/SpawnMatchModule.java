@@ -2,14 +2,6 @@ package tc.oc.pgm.spawns;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -22,7 +14,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerAttackEntityEvent;
 import org.bukkit.event.player.PlayerInitialSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.jdom2.Element;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.PlayerItemTransferEvent;
 import tc.oc.pgm.api.match.Match;
@@ -30,6 +21,7 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.event.CompetitorRemoveEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -42,7 +34,15 @@ import tc.oc.pgm.spawns.states.Joining;
 import tc.oc.pgm.spawns.states.Observing;
 import tc.oc.pgm.spawns.states.State;
 import tc.oc.util.RandomUtils;
-import tc.oc.xml.InvalidXMLException;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
 
 @ListenerScope(MatchScope.LOADED)
 public class SpawnMatchModule implements MatchModule, Listener {
@@ -172,11 +172,12 @@ public class SpawnMatchModule implements MatchModule, Listener {
 
   public void reportFailedSpawn(Spawn spawn, MatchPlayer player) {
     if (failed.add(spawn)) {
-      Element elSpawn = match.getMapContext().legacy().getFeatures().getNode(spawn);
-      InvalidXMLException ex =
-          new InvalidXMLException(
-              "Failed to generate spawn location for " + player.getBukkit().getName(), elSpawn);
-      match.getMap().getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+      // Note: PGM no longer keeps Document data after map parsing
+      // Element elSpawn = match.getMapContext().getFeatures().getNode(spawn);
+      ModuleLoadException ex =
+          new ModuleLoadException(
+              "Failed to generate spawn location for " + player.getBukkit().getName());
+      PGM.get().getGameLogger().log(Level.SEVERE, ex.getMessage(), ex);
     }
   }
 

@@ -26,14 +26,14 @@ public class RandomMapOrder implements MapOrder {
 
   private MapInfo getRandomMap() {
     Iterator<Match> iterator = matchManager.getMatches().iterator();
-    MapInfo current = iterator.hasNext() ? iterator.next().getMap().getInfo() : null;
+    MapInfo current = iterator.hasNext() ? iterator.next().getMap() : null;
     List<MapContext> maps = new ArrayList<>(PGM.get().getMapLibrary().getMaps());
     Collections.shuffle(maps);
 
     for (MapContext map : maps) {
-      if (map.getInfo() != current) return map.getInfo();
+      if (map != current) return map;
     }
-    return maps.get(0).getInfo();
+    return maps.get(0);
   }
 
   @Override

@@ -1,13 +1,11 @@
 package tc.oc.pgm.timelimit;
 
-import java.util.logging.Logger;
-import javax.annotation.Nullable;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -16,6 +14,9 @@ import tc.oc.pgm.result.VictoryConditions;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.components.PeriodFormats;
 import tc.oc.xml.InvalidXMLException;
+
+import javax.annotation.Nullable;
+import java.util.logging.Logger;
 
 public class TimeLimitModule implements MapModule {
   private final @Nullable TimeLimit timeLimit;
@@ -31,24 +32,24 @@ public class TimeLimitModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<TimeLimitModule> {
     @Override
-    public TimeLimitModule parse(MapContext context, Logger logger, Document doc)
+    public TimeLimitModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      TimeLimit timeLimit = parseTimeLimit(context, doc.getRootElement());
-      timeLimit = parseLegacyTimeLimit(context, doc.getRootElement(), "score", timeLimit);
-      timeLimit = parseLegacyTimeLimit(context, doc.getRootElement(), "blitz", timeLimit);
+      TimeLimit timeLimit = parseTimeLimit(factory, doc.getRootElement());
+      timeLimit = parseLegacyTimeLimit(factory, doc.getRootElement(), "score", timeLimit);
+      timeLimit = parseLegacyTimeLimit(factory, doc.getRootElement(), "blitz", timeLimit);
 
       // TimeLimitModule always loads
       return new TimeLimitModule(timeLimit);
     }
 
     private static @Nullable TimeLimit parseLegacyTimeLimit(
-        MapContext context, Element el, String legacyTag, TimeLimit oldTimeLimit)
+        MapFactory factory, Element el, String legacyTag, TimeLimit oldTimeLimit)
         throws InvalidXMLException {
       el = el.getChild(legacyTag);
       if (el != null) {
-        TimeLimit newTimeLimit = parseTimeLimit(context, el);
+        TimeLimit newTimeLimit = parseTimeLimit(factory, el);
         if (newTimeLimit != null) {
-          if (context.getInfo().getProto().isNoOlderThan(ProtoVersions.REMOVE_SCORE_TIME_LIMIT)) {
+          if (factory.getProto().isNoOlderThan(ProtoVersions.REMOVE_SCORE_TIME_LIMIT)) {
             throw new InvalidXMLException(
                 "<time> inside <" + legacyTag + "> is no longer supported, use root <time> instead",
                 el);
@@ -64,7 +65,7 @@ public class TimeLimitModule implements MapModule {
       return oldTimeLimit;
     }
 
-    private static @Nullable TimeLimit parseTimeLimit(MapContext context, Element el)
+    private static @Nullable TimeLimit parseTimeLimit(MapFactory factory, Element el)
         throws InvalidXMLException {
       el = el.getChild("time");
       if (el == null) return null;
@@ -72,15 +73,15 @@ public class TimeLimitModule implements MapModule {
       return new TimeLimit(
           el.getAttributeValue("id"),
           PeriodFormats.SHORTHAND.parsePeriod(el.getTextNormalize()).toStandardDuration(),
-          parseVictoryCondition(context, el.getAttribute("result")),
+          parseVictoryCondition(factory, el.getAttribute("result")),
           XMLUtils.parseBoolean(el.getAttribute("show"), true));
     }
 
-    private static VictoryCondition parseVictoryCondition(MapContext context, Attribute attr)
+    private static VictoryCondition parseVictoryCondition(MapFactory factory, Attribute attr)
         throws InvalidXMLException {
       if (attr == null) return null;
       try {
-        return VictoryConditions.parse(context, attr.getValue());
+        return VictoryConditions.parse(factory, attr.getValue());
       } catch (IllegalArgumentException e) {
         throw new InvalidXMLException(e.getMessage(), attr);
       }

@@ -1,9 +1,9 @@
 package tc.oc.pgm.api.map;
 
-import java.util.Collection;
-import javax.annotation.Nullable;
 import org.bukkit.Difficulty;
 import tc.oc.util.SemanticVersion;
+
+import java.util.Collection;
 
 /**
  * Essential information about a map.
@@ -12,7 +12,7 @@ import tc.oc.util.SemanticVersion;
  * should stay in-memory after loading so players can easily list or search for maps they wish to
  * play.
  */
-public interface MapInfo extends Comparable<MapInfo> {
+public interface MapInfo {
 
   /**
    * Get the unique id of the map.
@@ -44,16 +44,6 @@ public interface MapInfo extends Comparable<MapInfo> {
    * @return A name, alphanumeric with spaces are allowed.
    */
   String getName();
-
-  /**
-   * Get the genre of "game mode" of the map.
-   *
-   * <p>Used to override the default sidebar title.
-   *
-   * @return The genre, or {@code null} to auto-detect.
-   */
-  @Nullable
-  String getGenre();
 
   /**
    * Get a short human-readable description of the map's objective.
@@ -96,26 +86,5 @@ public interface MapInfo extends Comparable<MapInfo> {
    *
    * @return The difficulty, or {@code null} for auto-detect.
    */
-  @Nullable
   Difficulty getDifficulty();
-
-  /**
-   * Get the maximum number of players that can participate on each team.
-   *
-   * <p>For free-for-all matches, this should be left empty.
-   *
-   * <p>Sum of all the limits should equal {@link #getPlayerLimit()}.
-   *
-   * @return Maximum number of participants on each team.
-   */
-  Collection<Integer> getTeamLimits();
-
-  /**
-   * Get the maximum number of players that can participate in the map.
-   *
-   * <p>Should be capped at {@link org.bukkit.Bukkit#getMaxPlayers()}.
-   *
-   * @return Maximum number of participants.
-   */
-  int getPlayerLimit();
 }

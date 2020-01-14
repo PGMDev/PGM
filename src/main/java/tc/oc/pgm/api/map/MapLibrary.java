@@ -1,9 +1,10 @@
 package tc.oc.pgm.api.map;
 
+import tc.oc.util.SemanticVersion;
+
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
-import javax.annotation.Nullable;
-import tc.oc.util.SemanticVersion;
 
 /** A library of {@link MapInfo}s and {@link MapContext}s. */
 public interface MapLibrary {
@@ -27,10 +28,10 @@ public interface MapLibrary {
   /**
    * Refresh existing and discover new {@link MapContext}s.
    *
-   * @param force Whether to forcibly bypass caches and discover all {@link MapSource}s.
-   * @return A future when at least 1 map has been found.
+   * @param reset Whether to forcibly bypass caches and discover all {@link MapSource}s.
+   * @return A future when at all maps have attempted to load.
    */
-  CompletableFuture<Boolean> loadMaps(boolean force);
+  CompletableFuture<?> loadNewMaps(boolean reset);
 
   /**
    * Get the latest {@link ProtoVersions} that is supported.

@@ -1,24 +1,25 @@
 package tc.oc.pgm.filters;
 
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.List;
 import org.jdom2.Element;
 import tc.oc.material.matcher.SingleMaterialMatcher;
-import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /** For proto < 1.4 */
 public class LegacyFilterParser extends FilterParser {
 
   protected final FilterContext filterContext = new FilterContext();
 
-  public LegacyFilterParser(MapContext context) {
-    super(context);
+  public LegacyFilterParser(MapFactory factory) {
+    super(factory);
   }
 
   @Override

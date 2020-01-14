@@ -1,9 +1,10 @@
 package tc.oc.pgm.api.map;
 
+import tc.oc.pgm.api.map.exception.MapNotFoundException;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import tc.oc.pgm.api.map.exception.MapNotFoundException;
 
 /** A source where {@link MapContext} documents and files are downloaded. */
 public interface MapSource {

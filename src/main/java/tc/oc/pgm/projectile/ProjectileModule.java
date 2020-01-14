@@ -12,8 +12,8 @@ import org.bukkit.potion.PotionEffect;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.joda.time.Duration;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -40,11 +40,11 @@ public class ProjectileModule implements MapModule {
     }
 
     @Override
-    public ProjectileModule parse(MapContext context, Logger logger, Document doc)
+    public ProjectileModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       ProjectileModule projectileModule = new ProjectileModule();
-      KitParser kitParser = context.legacy().getKits();
-      FilterParser filterParser = context.legacy().getFilters();
+      KitParser kitParser = factory.getKits();
+      FilterParser filterParser = factory.getFilters();
 
       for (Element projectileElement :
           XMLUtils.flattenElements(doc.getRootElement(), "projectiles", "projectile")) {
@@ -84,7 +84,7 @@ public class ProjectileModule implements MapModule {
                 coolDown,
                 throwable);
 
-        context.legacy().getFeatures().addFeature(projectileElement, projectileDefinition);
+        factory.getFeatures().addFeature(projectileElement, projectileDefinition);
         projectileModule.projectileDefinitions.add(projectileDefinition);
       }
 

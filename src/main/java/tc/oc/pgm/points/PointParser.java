@@ -1,18 +1,23 @@
 package tc.oc.pgm.points;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.util.ArrayList;
-import java.util.List;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
-import tc.oc.pgm.regions.*;
+import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.regions.PointRegion;
+import tc.oc.pgm.regions.RandomPointsValidation;
+import tc.oc.pgm.regions.Region;
+import tc.oc.pgm.regions.RegionParser;
+import tc.oc.pgm.regions.Union;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.collection.ArrayUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * PointProvider grammar is a bit strange due to backward compatibility. The root element is what
@@ -22,12 +27,12 @@ import tc.oc.xml.Node;
  * treated the same as the root element.
  */
 public class PointParser {
-  final MapContext context;
+  final MapFactory factory;
   final RegionParser regionParser;
 
-  public PointParser(MapContext context) {
-    this.context = checkNotNull(context);
-    this.regionParser = context.legacy().getRegions();
+  public PointParser(MapFactory factory) {
+    this.factory = checkNotNull(factory);
+    this.regionParser = factory.getRegions();
   }
 
   private Region validate(Region region, Node node) throws InvalidXMLException {

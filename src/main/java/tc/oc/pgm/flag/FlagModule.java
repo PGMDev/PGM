@@ -1,12 +1,9 @@
 package tc.oc.pgm.flag;
 
 import com.google.common.collect.ImmutableList;
-import java.util.Collection;
-import java.util.List;
-import java.util.logging.Logger;
 import org.jdom2.Document;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -15,6 +12,10 @@ import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.xml.InvalidXMLException;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.logging.Logger;
 
 public class FlagModule implements MapModule {
   private final ImmutableList<Post> posts;
@@ -40,19 +41,19 @@ public class FlagModule implements MapModule {
     }
 
     @Override
-    public FlagModule parse(MapContext context, Logger logger, Document doc)
+    public FlagModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      return new FlagParser(context, logger).parse(doc);
+      return new FlagParser(factory).parse(doc);
     }
   }
 
   @Override
-  public void postParse(MapContext context, Logger logger, Document doc)
+  public void postParse(MapFactory factory, Logger logger, Document doc)
       throws InvalidXMLException {
     for (FlagDefinition flag : flags) {
       if (flag.getCarryKit() != null && !flag.getCarryKit().isRemovable()) {
         throw new InvalidXMLException(
-            "carry-kit is not removable", context.legacy().getFeatures().getNode(flag));
+            "carry-kit is not removable", factory.getFeatures().getNode(flag));
       }
     }
   }

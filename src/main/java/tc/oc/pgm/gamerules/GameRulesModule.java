@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -27,7 +27,7 @@ public class GameRulesModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<GameRulesModule> {
     @Override
-    public GameRulesModule parse(MapContext context, Logger logger, Document doc)
+    public GameRulesModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       Map<GameRule, Boolean> gameRules = new HashMap<>();
 

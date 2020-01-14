@@ -56,6 +56,6 @@ public class CycleCommands {
       Duration duration,
       @Switch('f') boolean force)
       throws CommandException {
-    cycle(sender, match, mapOrder, duration, force, match.getMap().getInfo());
+    cycle(sender, match, mapOrder, duration, force, match.getMap());
   }
 }

@@ -6,8 +6,8 @@ import java.util.logging.Logger;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -30,7 +30,7 @@ public class DisableDamageModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<DisableDamageModule> {
     @Override
-    public DisableDamageModule parse(MapContext context, Logger logger, Document doc)
+    public DisableDamageModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       SetMultimap<DamageCause, PlayerRelation> causes = HashMultimap.create();
       DamageParser parser = new DamageParser();

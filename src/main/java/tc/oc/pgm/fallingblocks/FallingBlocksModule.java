@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -40,10 +40,10 @@ public class FallingBlocksModule implements MapModule {
     }
 
     @Override
-    public FallingBlocksModule parse(MapContext context, Logger logger, Document doc)
+    public FallingBlocksModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       List<FallingBlocksRule> rules = new ArrayList<>();
-      FilterParser filterParser = context.legacy().getFilters();
+      FilterParser filterParser = factory.getFilters();
 
       for (Element elRule :
           XMLUtils.flattenElements(doc.getRootElement(), "falling-blocks", "rule")) {

@@ -1,13 +1,11 @@
 package tc.oc.pgm.filters;
 
 import com.google.common.collect.ImmutableList;
-import java.util.Collection;
-import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -17,11 +15,14 @@ import tc.oc.pgm.regions.EverywhereRegion;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.xml.InvalidXMLException;
 
+import java.util.Collection;
+import java.util.logging.Logger;
+
 public class FilterModule implements MapModule {
 
   @Override
   public MatchModule createMatchModule(Match match) {
-    if (match.getMapContext().getInfo().getProto().isOlderThan(ProtoVersions.FILTER_FEATURES)) {
+    if (match.getMapContext().getProto().isOlderThan(ProtoVersions.FILTER_FEATURES)) {
       return null;
     } else {
       return new FilterMatchModule(match);
@@ -35,16 +36,16 @@ public class FilterModule implements MapModule {
     }
 
     @Override
-    public FilterModule parse(MapContext context, Logger logger, Document doc)
+    public FilterModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      boolean unified = context.getInfo().getProto().isNoOlderThan(ProtoVersions.FILTER_FEATURES);
-      FilterParser parser = context.legacy().getFilters();
+      boolean unified = factory.getProto().isNoOlderThan(ProtoVersions.FILTER_FEATURES);
+      FilterParser parser = factory.getFilters();
 
       if (unified) {
-        context.legacy().getFeatures().addFeature(null, "always", StaticFilter.ALLOW);
-        context.legacy().getFeatures().addFeature(null, "never", StaticFilter.DENY);
-        context.legacy().getFeatures().addFeature(null, "everywhere", EverywhereRegion.INSTANCE);
-        context.legacy().getFeatures().addFeature(null, "nowhere", EmptyRegion.INSTANCE);
+        factory.getFeatures().addFeature(null, "always", StaticFilter.ALLOW);
+        factory.getFeatures().addFeature(null, "never", StaticFilter.DENY);
+        factory.getFeatures().addFeature(null, "everywhere", EverywhereRegion.INSTANCE);
+        factory.getFeatures().addFeature(null, "nowhere", EmptyRegion.INSTANCE);
       }
 
       for (Element filtersEl : doc.getRootElement().getChildren("filters")) {

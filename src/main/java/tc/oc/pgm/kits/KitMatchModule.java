@@ -53,10 +53,11 @@ public class KitMatchModule implements MatchModule, Listener {
 
   /** Clear any {@link AttributeModifier}s applied to the player by {@link AttributeKit}s */
   public void clearAttributeModifiers(MatchPlayer player) {
-    for (AttributeModifier modifier :
-        match.getMapContext().legacy().getKits().getAttributeModifiers()) {
-      // ASHCON: player.getBukkit().removeAttributeModifier(modifier);
-    }
+    // FIXME: Bukkit API is not supported
+    /*for (AttributeModifier modifier :
+        match.getMapContext().getKits().getAttributeModifiers()) {
+       player.getBukkit().removeAttributeModifier(modifier);
+    }*/
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

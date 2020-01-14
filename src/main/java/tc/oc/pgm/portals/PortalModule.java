@@ -12,9 +12,9 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -56,11 +56,11 @@ public class PortalModule implements MapModule {
     }
 
     @Override
-    public PortalModule parse(MapContext context, Logger logger, Document doc)
+    public PortalModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       Set<Portal> portals = Sets.newHashSet();
-      RegionParser regionParser = context.legacy().getRegions();
-      RFAContext rfaContext = context.getModule(RegionModule.class).getRFAContext();
+      RegionParser regionParser = factory.getRegions();
+      RFAContext rfaContext = factory.getModule(RegionModule.class).getRFAContext();
       Filter protectionFilter = StaticFilter.DENY;
 
       for (Element portalEl : XMLUtils.flattenElements(doc.getRootElement(), "portals", "portal")) {
@@ -71,7 +71,7 @@ public class PortalModule implements MapModule {
         DoubleProvider dPitch = parseDoubleProvider(portalEl, "pitch", RelativeDoubleProvider.ZERO);
 
         Region region;
-        if (context.getInfo().getProto().isOlderThan(ProtoVersions.MODULE_SUBELEMENT_VERSION)) {
+        if (factory.getProto().isOlderThan(ProtoVersions.MODULE_SUBELEMENT_VERSION)) {
           region = regionParser.parseChildren(portalEl);
         } else {
           region = regionParser.parseRequiredRegionProperty(portalEl, "region");
@@ -82,8 +82,8 @@ public class PortalModule implements MapModule {
                 portalEl, RandomPointsValidation.INSTANCE, "destination");
 
         Filter filter =
-            context
-                .legacy()
+            factory
+
                 .getFilters()
                 .parseFilterProperty(portalEl, "filter", StaticFilter.ALLOW);
 
@@ -115,7 +115,7 @@ public class PortalModule implements MapModule {
         }
 
         portals.add(portal);
-        context.legacy().getFeatures().addFeature(portalEl, portal);
+        factory.getFeatures().addFeature(portalEl, portal);
 
         if (portal.isProtected()) {
           // Protect the entrance

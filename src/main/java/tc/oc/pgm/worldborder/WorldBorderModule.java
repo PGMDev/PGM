@@ -1,14 +1,11 @@
 package tc.oc.pgm.worldborder;
 
 import com.google.common.collect.ImmutableList;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.joda.time.Duration;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -18,6 +15,10 @@ import tc.oc.pgm.filters.TimeFilter;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
 
 public class WorldBorderModule implements MapModule {
 
@@ -34,13 +35,13 @@ public class WorldBorderModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<WorldBorderModule> {
     @Override
-    public WorldBorderModule parse(MapContext context, Logger logger, Document doc)
+    public WorldBorderModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       List<WorldBorder> borders = new ArrayList<>();
       for (Element el :
           XMLUtils.flattenElements(doc.getRootElement(), "world-borders", "world-border")) {
         Filter filter =
-            context.legacy().getFilters().parseFilterProperty(el, "when", StaticFilter.ALLOW);
+            factory.getFilters().parseFilterProperty(el, "when", StaticFilter.ALLOW);
 
         Duration after = XMLUtils.parseDuration(Node.fromAttr(el, "after"));
         if (after != null) {

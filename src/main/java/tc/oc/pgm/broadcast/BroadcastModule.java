@@ -8,8 +8,8 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.joda.time.Duration;
 import tc.oc.component.Component;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -34,7 +34,7 @@ public class BroadcastModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<BroadcastModule> {
     @Override
-    public BroadcastModule parse(MapContext context, Logger logger, Document doc)
+    public BroadcastModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       ArrayListMultimap<Duration, Broadcast> broadcasts = ArrayListMultimap.create();
 
@@ -47,7 +47,7 @@ public class BroadcastModule implements MapModule {
 
           Component message = XMLUtils.parseFormattedText(nodeBroadcast);
 
-          FilterParser filterParser = context.legacy().getFilters();
+          FilterParser filterParser = factory.getFilters();
           Filter filter = filterParser.parseFilterProperty(elBroadcast, "filter");
 
           Duration after =

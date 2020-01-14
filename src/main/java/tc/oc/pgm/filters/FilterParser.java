@@ -2,17 +2,12 @@ package tc.oc.pgm.filters;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Nullable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.classes.ClassModule;
 import tc.oc.pgm.classes.PlayerClass;
@@ -35,15 +30,21 @@ import tc.oc.util.StringUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
+import javax.annotation.Nullable;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 public abstract class FilterParser {
 
   protected final Map<String, Method> methodParsers;
-  protected final MapContext context;
+  protected final MapFactory factory;
   protected final TeamModule teamModule;
 
-  public FilterParser(MapContext context) {
-    this.context = context;
-    this.teamModule = context.getModule(TeamModule.class);
+  public FilterParser(MapFactory factory) {
+    this.factory = factory;
+    this.teamModule = factory.getModule(TeamModule.class);
 
     this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
   }
@@ -66,7 +67,7 @@ public abstract class FilterParser {
   }
 
   public boolean isFilter(Element el) {
-    return methodParsers.containsKey(el.getName()) || context.legacy().getRegions().isRegion(el);
+    return methodParsers.containsKey(el.getName()) || factory.getRegions().isRegion(el);
   }
 
   public List<Element> getFilterChildren(Element parent) {
@@ -99,8 +100,8 @@ public abstract class FilterParser {
       } catch (Exception e) {
         throw InvalidXMLException.coerce(e, new Node(el));
       }
-    } else if (context.legacy().getRegions().isRegion(el)) {
-      return context.legacy().getRegions().parse(el);
+    } else if (factory.getRegions().isRegion(el)) {
+      return factory.getRegions().parse(el);
     } else {
       throw new InvalidXMLException("Unknown filter type: " + el.getName(), el);
     }
@@ -199,7 +200,7 @@ public abstract class FilterParser {
 
   @MethodParser("team")
   public TeamFilter parseTeam(Element el) throws InvalidXMLException {
-    return new TeamFilter(Teams.getTeamRef(new Node(el), this.context));
+    return new TeamFilter(Teams.getTeamRef(new Node(el), this.factory));
   }
 
   @MethodParser("same-team")
@@ -219,7 +220,7 @@ public abstract class FilterParser {
 
   @MethodParser("class")
   public PlayerClassFilter parseClass(Element el) throws InvalidXMLException {
-    ClassModule classes = this.context.getModule(ClassModule.class);
+    ClassModule classes = this.factory.getModule(ClassModule.class);
     if (classes == null) {
       throw new InvalidXMLException("No classes defined", el);
     } else {
@@ -346,7 +347,7 @@ public abstract class FilterParser {
   @MethodParser("objective")
   public GoalFilter parseGoal(Element el) throws InvalidXMLException {
     XMLFeatureReference<? extends GoalDefinition> goal =
-        this.context.legacy().getFeatures().createReference(new Node(el), GoalDefinition.class);
+        this.factory.getFeatures().createReference(new Node(el), GoalDefinition.class);
     boolean anyTeam = XMLUtils.parseBoolean(el.getAttribute("any"), false);
 
     Attribute attrTeam = el.getAttribute("team");
@@ -354,8 +355,8 @@ public abstract class FilterParser {
     if (attrTeam != null) {
       if (anyTeam) throw new InvalidXMLException("Cannot combine attributes 'team' and 'any'", el);
       team =
-          this.context
-              .legacy()
+          this.factory
+
               .getFeatures()
               .createReference(new Node(attrTeam), TeamFactory.class);
     } else {
@@ -369,10 +370,10 @@ public abstract class FilterParser {
       throws InvalidXMLException {
     Node postAttr = Node.fromAttr(el, "post");
     return new FlagStateFilter(
-        this.context.legacy().getFeatures().createReference(new Node(el), FlagDefinition.class),
+        this.factory.getFeatures().createReference(new Node(el), FlagDefinition.class),
         postAttr == null
             ? null
-            : this.context.legacy().getFeatures().createReference(postAttr, Post.class),
+            : this.factory.getFeatures().createReference(postAttr, Post.class),
         state);
   }
 
@@ -399,7 +400,7 @@ public abstract class FilterParser {
   @MethodParser("carrying-flag")
   public CarryingFlagFilter parseCarryingFlag(Element el) throws InvalidXMLException {
     return new CarryingFlagFilter(
-        this.context.legacy().getFeatures().createReference(new Node(el), FlagDefinition.class));
+        this.factory.getFeatures().createReference(new Node(el), FlagDefinition.class));
   }
 
   @MethodParser("cause")
@@ -415,17 +416,17 @@ public abstract class FilterParser {
 
   @MethodParser("carrying")
   public CarryingItemFilter parseHasItem(Element el) throws InvalidXMLException {
-    return new CarryingItemFilter(context.legacy().getKits().parseRequiredItem(el));
+    return new CarryingItemFilter(factory.getKits().parseRequiredItem(el));
   }
 
   @MethodParser("holding")
   public HoldingItemFilter parseHolding(Element el) throws InvalidXMLException {
-    return new HoldingItemFilter(context.legacy().getKits().parseRequiredItem(el));
+    return new HoldingItemFilter(factory.getKits().parseRequiredItem(el));
   }
 
   @MethodParser("wearing")
   public WearingItemFilter parseWearingItem(Element el) throws InvalidXMLException {
-    return new WearingItemFilter(context.legacy().getKits().parseRequiredItem(el));
+    return new WearingItemFilter(factory.getKits().parseRequiredItem(el));
   }
 
   @MethodParser("structural-load")

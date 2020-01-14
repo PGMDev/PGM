@@ -8,8 +8,8 @@ import java.util.Map.Entry;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -46,15 +46,15 @@ public class LaneModule implements MapModule {
     }
 
     @Override
-    public LaneModule parse(MapContext context, Logger logger, Document doc)
+    public LaneModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       Map<TeamFactory, Region> lanes = Maps.newHashMap();
-      TeamModule teamModule = context.getModule(TeamModule.class);
+      TeamModule teamModule = factory.getModule(TeamModule.class);
 
       for (Element laneEl : XMLUtils.flattenElements(doc.getRootElement(), "lanes", "lane")) {
         TeamFactory team =
-            teamModule.parseTeam(XMLUtils.getRequiredAttribute(laneEl, "team"), context);
-        Region region = context.legacy().getRegions().parseChildren(laneEl);
+            teamModule.parseTeam(XMLUtils.getRequiredAttribute(laneEl, "team"), factory);
+        Region region = factory.getRegions().parseChildren(laneEl);
         lanes.put(team, region);
       }
 

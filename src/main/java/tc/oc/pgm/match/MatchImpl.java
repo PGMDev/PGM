@@ -1,35 +1,6 @@
 package tc.oc.pgm.match;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import java.io.File;
-import java.lang.ref.WeakReference;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
-import java.util.WeakHashMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -93,6 +64,35 @@ import tc.oc.util.collection.RankedSet;
 import tc.oc.util.logging.ClassLogger;
 import tc.oc.world.NMSHacks;
 
+import javax.annotation.Nullable;
+import java.io.File;
+import java.lang.ref.WeakReference;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
+import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
 public class MatchImpl implements Match {
 
   private final String id;
@@ -134,7 +134,7 @@ public class MatchImpl implements Match {
     this.state = new AtomicReference<>(MatchPhase.IDLE);
     this.start = new AtomicLong(0);
     this.end = new AtomicLong(0);
-    this.capacity = new AtomicInteger(map.getInfo().getPlayerLimit());
+    this.capacity = new AtomicInteger(map.getPlayerLimit());
     this.schedulers = new EnumMap<>(MatchScope.class);
     this.listeners = new EnumMap<>(MatchScope.class);
     this.tickables = new EnumMap<>(MatchScope.class);
@@ -190,7 +190,7 @@ public class MatchImpl implements Match {
 
       switch (state) {
         case RUNNING:
-          getModules().forEach(MatchModule::enable);
+          getModules().values().forEach(MatchModule::enable);
           start.set(System.currentTimeMillis());
           startListeners(MatchScope.RUNNING);
           startTickables(MatchScope.RUNNING);
@@ -209,7 +209,7 @@ public class MatchImpl implements Match {
       // Must wait until after event has been called to close listeners
       if (state == MatchPhase.FINISHED) {
         removeListeners(MatchScope.RUNNING);
-        getModules().forEach(MatchModule::disable);
+        getModules().values().forEach(MatchModule::disable);
         end.set(System.currentTimeMillis());
       }
 
@@ -272,8 +272,8 @@ public class MatchImpl implements Match {
   }
 
   @Override
-  public Collection<MatchModule> getModules() {
-    return ImmutableList.copyOf(matchModules.values());
+  public Map<Class<? extends MatchModule>, MatchModule> getModules() {
+    return Collections.unmodifiableMap(matchModules);
   }
 
   @Override
@@ -734,7 +734,7 @@ public class MatchImpl implements Match {
       }
 
       logger.fine("Loading map modules...");
-      for (MapModule map : getMapContext().getModules()) {
+      for (MapModule map : getMapContext().getModules().values()) {
         loadMatchModule(map.createMatchModule(this));
       }
 
@@ -780,7 +780,7 @@ public class MatchImpl implements Match {
     getCountdown().cancelAll();
     removeListeners(MatchScope.LOADED);
 
-    for (MatchModule matchModule : getModules()) {
+    for (MatchModule matchModule : getModules().values()) {
       try {
         matchModule.unload();
       } catch (Throwable e) {

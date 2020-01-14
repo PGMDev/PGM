@@ -1,8 +1,12 @@
 package tc.oc.pgm.map.source;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import tc.oc.pgm.api.map.MapSource;
+import tc.oc.pgm.api.map.exception.MapNotFoundException;
+import tc.oc.pgm.api.map.factory.MapSourceFactory;
+import tc.oc.util.FileUtils;
 
-import com.google.common.collect.Iterators;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -11,61 +15,39 @@ import java.io.InputStream;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.annotation.Nullable;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import tc.oc.pgm.api.map.MapSource;
-import tc.oc.pgm.api.map.exception.MapNotFoundException;
-import tc.oc.pgm.api.map.factory.MapSourceFactory;
-import tc.oc.util.FileUtils;
-import tc.oc.util.logging.ClassLogger;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class FileMapSourceFactory implements MapSourceFactory {
 
-  private final Logger logger;
   private final File dir;
-  private final Map<String, MapSource> sources;
+  private final Set<String> seen;
 
-  public FileMapSourceFactory(Logger logger, File dir) {
-    this.logger = ClassLogger.get(checkNotNull(logger), getClass(), dir.toString());
+  public FileMapSourceFactory(File dir) {
     this.dir = checkNotNull(dir).getAbsoluteFile();
-    this.sources = Collections.synchronizedMap(new WeakHashMap<>());
+    this.seen = new HashSet<>();
   }
 
-  private boolean shouldReloadSource(@Nullable MapSource source) {
-    try {
-      return source != null && source.checkForUpdates();
-    } catch (MapNotFoundException e) {
-      logger.log(Level.WARNING, "Skipping map source " + source.getId(), e);
-      sources.remove(source.getId());
-    }
-    return false;
-  }
-
-  private boolean shouldLoadNewSource(@Nullable Path path) {
+  private boolean isSource(@Nullable Path path) {
     return path != null
-        && !sources.containsKey(path.toString())
+        && !seen.contains(path.toString())
         && Files.isDirectory(path)
         && Files.isRegularFile(path.resolve(MapSource.FILE));
   }
 
   @Override
-  public Iterator<MapSource> loadSources() throws MapNotFoundException {
+  public Iterator<? extends MapSource> loadNewSources() throws MapNotFoundException {
     try {
-      return Iterators.filter(
-          Iterators.concat(
-              sources.values().iterator(),
-              Files.walk(dir.toPath(), FileVisitOption.FOLLOW_LINKS)
-                  .filter(this::shouldLoadNewSource)
-                  .map(FileMapSource::new)
-                  .iterator()),
-          this::shouldReloadSource);
+      return Files.walk(dir.toPath(), FileVisitOption.FOLLOW_LINKS)
+          .filter(this::isSource)
+          .map(Path::toString)
+          .peek(seen::add)
+          .map(FileMapSource::new)
+          .iterator();
     } catch (IOException e) {
       throw new MapNotFoundException(e);
     }
@@ -73,7 +55,7 @@ public class FileMapSourceFactory implements MapSourceFactory {
 
   @Override
   public void reset() {
-    sources.clear();
+    seen.clear();
   }
 
   @Override
@@ -89,7 +71,7 @@ public class FileMapSourceFactory implements MapSourceFactory {
 
   @Override
   public String toString() {
-    return new ToStringBuilder(this).append("dir", dir).append("sources", sources.size()).build();
+    return new ToStringBuilder(this).append("dir", dir).append("seen", seen).build();
   }
 
   private static class FileMapSource implements MapSource {
@@ -97,16 +79,16 @@ public class FileMapSourceFactory implements MapSourceFactory {
     private final String path;
     private final AtomicLong modified;
 
-    public FileMapSource(Path path) {
-      this(path.toString());
-    }
-
-    public FileMapSource(String path) {
+    private FileMapSource(String path) {
       this.path = checkNotNull(path);
       this.modified = new AtomicLong(0);
     }
 
-    public File getFile() {
+    private File getDirectory() {
+      return new File(path).getAbsoluteFile();
+    }
+
+    private File getFile() {
       return new File(path, MapSource.FILE).getAbsoluteFile();
     }
 
@@ -117,7 +99,7 @@ public class FileMapSourceFactory implements MapSourceFactory {
 
     @Override
     public void downloadTo(File dir) throws IOException {
-      FileUtils.copy(getFile().getParentFile(), checkNotNull(dir), true);
+      FileUtils.copy(getDirectory(), dir, true);
     }
 
     @Override
@@ -132,17 +114,20 @@ public class FileMapSourceFactory implements MapSourceFactory {
       final File file = getFile();
 
       if (!file.exists()) {
+        throw new MapNotFoundException("Cannot find map source file: " + file.getPath());
+      }
+
+      if (!file.isFile()) {
         throw new MapNotFoundException(
-            "Cannot find map source file", new FileNotFoundException(file.toString()));
+            "Cannot read map source file: " + file.getPath() + " is a directory");
       }
 
       if (!file.canRead()) {
         throw new MapNotFoundException(
-            "Cannot read map source file (likely a file system permissions issue)",
-            new FileNotFoundException(file.toString()));
+            "Cannot read map source file: " + file.getPath() + " (file permissions issue?)");
       }
 
-      return getFile().lastModified() > modified.get();
+      return file.lastModified() > modified.get();
     }
 
     @Override
@@ -162,6 +147,13 @@ public class FileMapSourceFactory implements MapSourceFactory {
           .append("path", path)
           .append("modified", modified.get())
           .build();
+    }
+
+    // FIXME: debug only
+    @Override
+    protected void finalize() throws Throwable {
+      System.out.println("Finalize: " + this.toString());
+      super.finalize();
     }
   }
 }

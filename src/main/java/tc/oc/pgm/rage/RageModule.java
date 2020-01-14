@@ -6,8 +6,8 @@ import java.util.logging.Logger;
 import org.jdom2.Document;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -42,10 +42,10 @@ public class RageModule implements MapModule {
     }
 
     @Override
-    public RageModule parse(MapContext context, Logger logger, Document doc)
+    public RageModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       if (doc.getRootElement().getChild("rage") != null) {
-        return new RageModule(context.hasModule(BlitzModule.class));
+        return new RageModule(factory.hasModule(BlitzModule.class));
       } else {
         return null;
       }

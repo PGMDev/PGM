@@ -1,8 +1,7 @@
 package tc.oc.pgm.api.module;
 
-import com.google.common.reflect.TypeToken;
-import java.util.Collection;
 import javax.annotation.Nullable;
+import java.util.Collection;
 
 /**
  * A generic factory for creating {@link Module}s and their dependencies.
@@ -10,15 +9,6 @@ import javax.annotation.Nullable;
  * @param <M> A specific type of {@link Module}.
  */
 public interface ModuleFactory<M extends Module> {
-
-  /**
-   * Get the {@link Module} class that the factory can create.
-   *
-   * @return The {@link Module} class.
-   */
-  default Class<? extends M> getModuleClass() {
-    return (Class<? extends M>) new TypeToken<M>() {}.getRawType();
-  }
 
   /**
    * Get a collection of {@link Module} classes that must be loaded first.

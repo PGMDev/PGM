@@ -37,12 +37,12 @@ public class MapInfoProvider implements BukkitProvider<MapInfo> {
   @Override
   public MapInfo get(CommandSender sender, CommandArgs args, List<? extends Annotation> annotations)
       throws ArgumentException {
-    MapInfo map = matchManager.getMatch(sender).getMap().getInfo();
+    MapInfo map = matchManager.getMatch(sender).getMap();
 
     if (args.hasNext()) {
       String mapName = getRemainingText(args);
       final MapContext context = mapLibrary.getMap(mapName);
-      if (context != null) map = context.getInfo();
+      if (context != null) map = context;
     } else if (isGoToNext(annotations)) {
       map = mapOrder.getNextMap();
     }

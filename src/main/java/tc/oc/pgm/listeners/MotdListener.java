@@ -53,8 +53,8 @@ public class MotdListener implements Listener {
 
   @EventHandler
   public void onLoad(MatchLoadEvent event) {
-    MOTD_DATA.put(MAP_NAME_KEY, event.getMatch().getMap().getInfo().getName());
-    MOTD_DATA.put(MAP_VERSION_KEY, event.getMatch().getMap().getInfo().getVersion().toString());
+    MOTD_DATA.put(MAP_NAME_KEY, event.getMatch().getMap().getName());
+    MOTD_DATA.put(MAP_VERSION_KEY, event.getMatch().getMap().getVersion().toString());
     ready = true;
   }
 

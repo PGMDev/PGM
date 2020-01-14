@@ -114,7 +114,7 @@ public class MatchAnnouncer implements Listener {
   }
 
   private void sendWelcomeMessage(MatchPlayer viewer) {
-    MapInfo mapInfo = viewer.getMatch().getMap().getInfo();
+    MapInfo mapInfo = viewer.getMatch().getMap();
 
     String title = ChatColor.AQUA.toString() + ChatColor.BOLD + mapInfo.getName();
     viewer.sendMessage(ComponentUtils.horizontalLineHeading(title, ChatColor.WHITE, 200));
@@ -142,7 +142,7 @@ public class MatchAnnouncer implements Listener {
                 .translate(
                     "broadcast.currentlyPlaying",
                     viewer.getBukkit(),
-                    viewer.getMatch().getMap().getInfo().getDescription()
+                    viewer.getMatch().getMap().getDescription()
                         + org.bukkit.ChatColor.DARK_PURPLE));
   }
 }

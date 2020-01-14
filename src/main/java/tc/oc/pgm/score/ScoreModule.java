@@ -4,19 +4,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-import javax.annotation.Nonnull;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.material.matcher.SingleMaterialMatcher;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -31,6 +24,14 @@ import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.SemanticVersion;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
+
+import javax.annotation.Nonnull;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 public class ScoreModule implements MapModule {
   public ScoreModule(@Nonnull ScoreConfig config, @Nonnull Set<ScoreBoxFactory> scoreBoxFactories) {
@@ -75,16 +76,16 @@ public class ScoreModule implements MapModule {
     }
 
     @Override
-    public ScoreModule parse(MapContext context, Logger logger, Document doc)
+    public ScoreModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      SemanticVersion proto = context.getInfo().getProto();
+      SemanticVersion proto = factory.getProto();
 
       List<Element> scoreElements = doc.getRootElement().getChildren("score");
       if (scoreElements.size() == 0) {
         return null;
       }
 
-      RegionParser regionParser = context.legacy().getRegions();
+      RegionParser regionParser = factory.getRegions();
       ScoreConfig config = new ScoreConfig();
       ImmutableSet.Builder<ScoreBoxFactory> scoreBoxFactories = ImmutableSet.builder();
 
@@ -112,8 +113,8 @@ public class ScoreModule implements MapModule {
                   proto.isOlderThan(ProtoVersions.DEFAULT_SCORES_TO_ZERO) ? 1 : 0);
 
           Filter filter =
-              context
-                  .legacy()
+              factory
+
                   .getFilters()
                   .parseFilterProperty(scoreBoxEl, "filter", StaticFilter.ALLOW);
           Map<SingleMaterialMatcher, Double> redeemables = new HashMap<>();

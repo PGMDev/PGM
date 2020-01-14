@@ -6,8 +6,8 @@ import java.util.Set;
 import java.util.logging.Logger;
 import org.bukkit.Material;
 import org.jdom2.Document;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -29,7 +29,7 @@ public class ToolRepairModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<ToolRepairModule> {
     @Override
-    public ToolRepairModule parse(MapContext context, Logger logger, Document doc)
+    public ToolRepairModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       Set<Material> toRepair = Sets.newHashSet();
       for (Node toolRepairElement :

@@ -19,6 +19,7 @@ import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.api.map.MapInfoExtra;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.pgm.rotation.MapOrder;
@@ -65,7 +66,7 @@ public class MapCommands {
     new PrettyPaginatedResult<MapContext>(listHeader, resultsPerPage) {
       @Override
       public String format(MapContext map, int index) {
-        return (index + 1) + ". " + map.getInfo().getDescription();
+        return (index + 1) + ". " + map.getDescription();
       }
     }.display(audience, maps, page);
   }
@@ -115,16 +116,21 @@ public class MapCommands {
       }
     }
 
-    audience.sendMessage(
-        new PersonalizedText(
-            mapInfoLabel("command.map.mapInfo.playerLimit"),
-            new PersonalizedText(String.valueOf(map.getPlayerLimit()), ChatColor.GOLD)));
-
-    if (sender.hasPermission(Permissions.DEBUG)) {
+    if (map instanceof MapInfoExtra) {
       audience.sendMessage(
           new PersonalizedText(
-              mapInfoLabel("command.map.mapInfo.genre"),
-              new PersonalizedText(map.getGenre(), ChatColor.GOLD)));
+              mapInfoLabel("command.map.mapInfo.playerLimit"),
+              new PersonalizedText(
+                  String.valueOf(((MapInfoExtra) map).getPlayerLimit()), ChatColor.GOLD)));
+    }
+
+    if (sender.hasPermission(Permissions.DEBUG)) {
+      if (map instanceof MapInfoExtra) {
+        audience.sendMessage(
+            new PersonalizedText(
+                mapInfoLabel("command.map.mapInfo.genre"),
+                new PersonalizedText(((MapInfoExtra) map).getGenre(), ChatColor.GOLD)));
+      }
       audience.sendMessage(
           new PersonalizedText(
               mapInfoLabel("command.map.mapInfo.proto"),

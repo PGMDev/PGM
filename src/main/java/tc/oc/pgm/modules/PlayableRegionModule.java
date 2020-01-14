@@ -6,9 +6,9 @@ import java.util.logging.Logger;
 import org.bukkit.event.Listener;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -35,13 +35,13 @@ public class PlayableRegionModule implements MapModule, Listener {
     }
 
     @Override
-    public PlayableRegionModule parse(MapContext context, Logger logger, Document doc)
+    public PlayableRegionModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       Element playableRegionElement = doc.getRootElement().getChild("playable");
       if (playableRegionElement != null) {
-        if (context.getInfo().getProto().isOlderThan(ProtoVersions.MODULE_SUBELEMENT_VERSION)) {
+        if (factory.getProto().isOlderThan(ProtoVersions.MODULE_SUBELEMENT_VERSION)) {
           return new PlayableRegionModule(
-              context.legacy().getRegions().parseChildren(playableRegionElement));
+              factory.getRegions().parseChildren(playableRegionElement));
         } else {
           throw new InvalidXMLException(
               "Module is discontinued as of " + ProtoVersions.MODULE_SUBELEMENT_VERSION.toString(),

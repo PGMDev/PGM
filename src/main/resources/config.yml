@@ -7,12 +7,8 @@
 map:
   default: true
   sources:
-    default:
-      priority: 0
-      path: maps/
-  auto-reload:
-    enabled: true
-    reload-when-error: false
+    - default
+    - plugins/PGM/maps/
 
 map-pools:
   enabled: true

@@ -8,8 +8,8 @@ import java.util.logging.Logger;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -48,7 +48,7 @@ public class KillRewardModule implements MapModule {
     }
 
     @Override
-    public KillRewardModule parse(MapContext context, Logger logger, Document doc)
+    public KillRewardModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       ImmutableList.Builder<KillReward> rewards = ImmutableList.builder();
 
@@ -61,15 +61,15 @@ public class KillRewardModule implements MapModule {
               0)) {
         ImmutableList.Builder<ItemStack> items = ImmutableList.builder();
         for (Element itemEl : elKillReward.getChildren("item")) {
-          items.add(context.legacy().getKits().parseItem(itemEl, false));
+          items.add(factory.getKits().parseItem(itemEl, false));
         }
 
         Filter filter =
-            context
-                .legacy()
+            factory
+
                 .getFilters()
                 .parseFilterProperty(elKillReward, "filter", StaticFilter.ALLOW);
-        Kit kit = context.legacy().getKits().parseKitProperty(elKillReward, "kit", KitNode.EMPTY);
+        Kit kit = factory.getKits().parseKitProperty(elKillReward, "kit", KitNode.EMPTY);
 
         rewards.add(new KillReward(items.build(), filter, kit));
       }
@@ -84,10 +84,10 @@ public class KillRewardModule implements MapModule {
   }
 
   @Override
-  public void postParse(MapContext context, Logger logger, Document doc)
+  public void postParse(MapFactory factory, Logger logger, Document doc)
       throws InvalidXMLException {
     // Apply any item-mods to all reward items
-    ItemModifyModule imm = context.getModule(ItemModifyModule.class);
+    ItemModifyModule imm = factory.getModule(ItemModifyModule.class);
     if (imm != null) {
       for (KillReward reward : rewards) {
         for (ItemStack stack : reward.items) {

@@ -8,9 +8,9 @@ import org.bukkit.entity.Entity;
 import org.bukkit.potion.PotionEffect;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -37,7 +37,7 @@ public class ModifyBowProjectileModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<ModifyBowProjectileModule> {
     @Override
-    public ModifyBowProjectileModule parse(MapContext context, Logger logger, Document doc)
+    public ModifyBowProjectileModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       boolean changed = false;
       Class<? extends Entity> projectile = Arrow.class;
@@ -45,7 +45,7 @@ public class ModifyBowProjectileModule implements MapModule {
       Set<PotionEffect> potionEffects = new HashSet<>();
 
       for (Element parent : doc.getRootElement().getChildren("modifybowprojectile")) {
-        if (context.getInfo().getProto().isNoOlderThan(ProtoVersions.FILTER_FEATURES)) {
+        if (factory.getProto().isNoOlderThan(ProtoVersions.FILTER_FEATURES)) {
           throw new InvalidXMLException(
               "Module is discontinued as of " + ProtoVersions.FILTER_FEATURES.toString(),
               doc.getRootElement().getChild("modifybowprojectile"));

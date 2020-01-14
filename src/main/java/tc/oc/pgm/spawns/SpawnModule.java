@@ -2,15 +2,12 @@ package tc.oc.pgm.spawns;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import java.util.Collection;
-import java.util.List;
-import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.joda.time.Duration;
 import tc.oc.component.Component;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -20,6 +17,10 @@ import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.logging.Logger;
 
 public class SpawnModule implements MapModule {
 
@@ -54,9 +55,9 @@ public class SpawnModule implements MapModule {
     }
 
     @Override
-    public SpawnModule parse(MapContext context, Logger logger, Document doc)
+    public SpawnModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      SpawnParser parser = new SpawnParser(context, new PointParser(context));
+      SpawnParser parser = new SpawnParser(factory, new PointParser(factory));
       List<Spawn> spawns = Lists.newArrayList();
 
       for (Element spawnsEl : doc.getRootElement().getChildren("spawns")) {
@@ -68,12 +69,11 @@ public class SpawnModule implements MapModule {
       }
 
       return new SpawnModule(
-          parser.getDefaultSpawn(), spawns, parseRespawnOptions(context, logger, doc));
+          parser.getDefaultSpawn(), spawns, parseRespawnOptions(doc));
     }
   }
 
-  protected static RespawnOptions parseRespawnOptions(
-      MapContext context, Logger logger, Document doc) throws InvalidXMLException {
+  protected static RespawnOptions parseRespawnOptions(Document doc) throws InvalidXMLException {
     Duration delay = MINIMUM_RESPAWN_DELAY;
     boolean auto = doc.getRootElement().getChild("autorespawn") != null; // Legacy support
     boolean blackout = false;

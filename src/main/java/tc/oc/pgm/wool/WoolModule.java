@@ -10,9 +10,9 @@ import org.bukkit.DyeColor;
 import org.bukkit.util.Vector;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -60,20 +60,20 @@ public class WoolModule implements MapModule {
     }
 
     @Override
-    public WoolModule parse(MapContext context, Logger logger, Document doc)
+    public WoolModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       Multimap<TeamFactory, MonumentWoolFactory> woolFactories = ArrayListMultimap.create();
-      TeamModule teamModule = context.getModule(TeamModule.class);
-      RegionParser parser = context.legacy().getRegions();
+      TeamModule teamModule = factory.getModule(TeamModule.class);
+      RegionParser parser = factory.getRegions();
 
       for (Element woolEl : XMLUtils.flattenElements(doc.getRootElement(), "wools", "wool")) {
         String id = woolEl.getAttributeValue("id");
         boolean craftable = Boolean.parseBoolean(woolEl.getAttributeValue("craftable", "true"));
         TeamFactory team =
-            teamModule.parseTeam(XMLUtils.getRequiredAttribute(woolEl, "team"), context);
+            teamModule.parseTeam(XMLUtils.getRequiredAttribute(woolEl, "team"), factory);
         DyeColor color = XMLUtils.parseDyeColor(XMLUtils.getRequiredAttribute(woolEl, "color"));
         Region placement;
-        if (context.getInfo().getProto().isOlderThan(ProtoVersions.MODULE_SUBELEMENT_VERSION)) {
+        if (factory.getProto().isOlderThan(ProtoVersions.MODULE_SUBELEMENT_VERSION)) {
           placement = parser.parseChildren(woolEl);
         } else {
           placement = parser.parseRequiredRegionProperty(woolEl, "monument");
@@ -89,7 +89,7 @@ public class WoolModule implements MapModule {
                 woolEl, "monument", new ProximityMetric(ProximityMetric.Type.CLOSEST_BLOCK, false));
 
         Vector location;
-        if (context.getInfo().getProto().isOlderThan(ProtoVersions.WOOL_LOCATIONS)) {
+        if (factory.getProto().isOlderThan(ProtoVersions.WOOL_LOCATIONS)) {
           // The default location is at infinity, so players/blocks are always an infinite distance
           // from it
           location =
@@ -111,7 +111,7 @@ public class WoolModule implements MapModule {
                 location,
                 placement,
                 craftable);
-        context.legacy().getFeatures().addFeature(woolEl, wool);
+        factory.getFeatures().addFeature(woolEl, wool);
         woolFactories.put(team, wool);
       }
 

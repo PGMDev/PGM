@@ -84,7 +84,6 @@ public abstract class SimpleGoal<T extends GoalDefinition> implements Goal<T> {
       return required;
     } else if (getMatch()
         .getMapContext()
-        .getInfo()
         .getProto()
         .isNoOlderThan(ProtoVersions.GOAL_REQUIRED_OPTION)) {
       return true;

@@ -4,8 +4,8 @@ import java.util.logging.Logger;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -22,11 +22,11 @@ public class KitModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<KitModule> {
     @Override
-    public KitModule parse(MapContext context, Logger logger, Document doc)
+    public KitModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       for (Element kitsElement : doc.getRootElement().getChildren("kits")) {
         for (Element kitElement : kitsElement.getChildren("kit")) {
-          context.legacy().getKits().parse(kitElement);
+          factory.getKits().parse(kitElement);
         }
       }
       return new KitModule();
@@ -34,14 +34,14 @@ public class KitModule implements MapModule {
   }
 
   @Override
-  public void postParse(MapContext context, Logger logger, Document doc)
+  public void postParse(MapFactory factory, Logger logger, Document doc)
       throws InvalidXMLException {
-    ItemModifyModule imm = context.getModule(ItemModifyModule.class);
-    for (Kit kit : context.legacy().getKits().getKits()) {
+    ItemModifyModule imm = factory.getModule(ItemModifyModule.class);
+    for (Kit kit : factory.getKits().getKits()) {
       if (kit instanceof RemoveKit && !((RemoveKit) kit).getKit().isRemovable()) {
         throw new InvalidXMLException(
             "kit is not removable",
-            context.legacy().getFeatures().getNode((FeatureDefinition) kit));
+            factory.getFeatures().getNode((FeatureDefinition) kit));
       }
 
       // Apply any item-mods rules to item kits

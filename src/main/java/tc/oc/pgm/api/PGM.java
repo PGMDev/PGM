@@ -10,7 +10,6 @@ import tc.oc.named.NameRenderer;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.factory.MatchFactory;
-import tc.oc.pgm.api.module.ModuleRegistry;
 import tc.oc.pgm.prefix.PrefixRegistry;
 import tc.oc.pgm.rotation.MapOrder;
 import tc.oc.pgm.tablist.MatchTabManager;
@@ -20,7 +19,7 @@ public interface PGM extends Plugin {
 
   Logger getGameLogger();
 
-  ModuleRegistry getModuleRegistry();
+  Modules getModuleRegistry();
 
   Datastore getDatastore();
 

@@ -1,16 +1,5 @@
 package tc.oc.pgm.match;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.annotation.Nullable;
 import org.bukkit.Difficulty;
 import org.bukkit.Server;
 import org.bukkit.World;
@@ -27,6 +16,18 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.terrain.TerrainModule;
 import tc.oc.util.FileUtils;
 import tc.oc.util.logging.ClassLogger;
+
+import javax.annotation.Nullable;
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class MatchFactoryImpl implements MatchFactory {
 
@@ -47,7 +48,7 @@ public class MatchFactoryImpl implements MatchFactory {
           try {
             return createPreMatchSync(map);
           } catch (Throwable t) {
-            logger.log(Level.SEVERE, "Could not create pre-match for " + map.getInfo(), t);
+            logger.log(Level.SEVERE, "Could not create pre-match for " + map, t);
             return null;
           }
         });
@@ -57,12 +58,15 @@ public class MatchFactoryImpl implements MatchFactory {
     checkNotNull(map);
 
     final String id = Long.toString(count.getAndIncrement());
+    final String name = "match-" + id;
 
-    if (!map.isLoaded()) {
-      map.load(); // Error will be thrown if loading fails
+    final MapSource source = map.getSource();
+    if (source == null) {
+      throw new MapNotFoundException(
+          "Map source was unloaded before it could be downloaded: " + map);
     }
 
-    final File dir = new File(server.getWorldContainer(), id);
+    final File dir = new File(server.getWorldContainer().getAbsoluteFile(), name);
     if (dir.exists()) {
       FileUtils.delete(dir);
     }
@@ -71,15 +75,9 @@ public class MatchFactoryImpl implements MatchFactory {
       throw new IOException("Failed to create temporary world folder " + dir);
     }
 
-    final MapSource source = map.getSource();
-    if (source == null) {
-      throw new MapNotFoundException(
-          "Map source was unloaded before it could be downloaded: " + map.getInfo());
-    }
-
     source.downloadTo(dir); // Error will be throw if map download fails
 
-    final Match match = new MatchImpl(id, map, buildWorld("match-" + id, map));
+    final Match match = new MatchImpl(id, map, buildWorld(name, map));
     logger.log(Level.INFO, "Pre-loaded " + match);
 
     // Allow the match 1 minute to load, otherwise unload and destroy it
@@ -115,7 +113,7 @@ public class MatchFactoryImpl implements MatchFactory {
     world.setSpawnFlags(false, false);
     world.setAutoSave(false);
 
-    final Difficulty difficulty = map.getInfo().getDifficulty();
+    final Difficulty difficulty = map.getDifficulty();
     if (difficulty != null) {
       world.setDifficulty(difficulty);
     } else if (!server.getWorlds().isEmpty()) {
@@ -173,6 +171,10 @@ public class MatchFactoryImpl implements MatchFactory {
 
   private boolean createMatchSync(Match match, @Nullable Iterable<MatchPlayer> players)
       throws Throwable {
+    if (match == null) {
+      return false;
+    }
+
     if (!match.isLoaded()) {
       match.load();
     }
