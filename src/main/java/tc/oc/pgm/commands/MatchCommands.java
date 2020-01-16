@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
-import org.bukkit.ChatColor;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.match.Match;
@@ -24,7 +24,7 @@ import tc.oc.pgm.goals.ProximityGoal;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.util.StringUtils;
+import tc.oc.util.components.ComponentUtils;
 import tc.oc.util.components.PeriodFormats;
 import tc.oc.util.localization.Locales;
 
@@ -39,13 +39,13 @@ public class MatchCommands {
         match.getPhase() == MatchPhase.RUNNING || match.getPhase() == MatchPhase.FINISHED;
 
     sender.sendMessage(
-        StringUtils.dashedChatMessage(
+        ComponentUtils.horizontalLineHeading(
             ChatColor.YELLOW
-                + " "
                 + AllTranslations.get()
                     .translate("command.match.matchInfo.title", sender, match.getId()),
-            ChatColor.STRIKETHROUGH + "-",
-            ChatColor.WHITE.toString()));
+            ChatColor.WHITE,
+            ComponentUtils.MAX_CHAT_WIDTH));
+
     if (haveGameInfo) {
       // show match time
       sender.sendMessage(
