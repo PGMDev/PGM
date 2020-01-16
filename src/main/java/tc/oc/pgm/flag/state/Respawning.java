@@ -56,7 +56,7 @@ public class Respawning extends Spawned implements Returning {
           .sendMessage(
               new PersonalizedTranslatable(
                   "match.flag.willRespawn",
-                  this.flag.getComponentName(),
+                  new PersonalizedText(this.flag.getColoredName()),
                   new PersonalizedText(
                       String.valueOf(respawnTime.getStandardSeconds()),
                       net.md_5.bungee.api.ChatColor.AQUA)));
@@ -85,18 +85,18 @@ public class Respawning extends Spawned implements Returning {
     if (!Duration.ZERO.equals(respawnTime)) {
       this.respawn(
           new PersonalizedTranslatable(
-              "match.flag.respawn", this.flag.getComponentName()));
+              "match.flag.respawn", new PersonalizedText(this.flag.getColoredName())));
     } else if (!this.wasCaptured) {
       // Flag was dropped
       this.respawn(
           new PersonalizedTranslatable(
-              "match.flag.return", this.flag.getComponentName()));
+              "match.flag.return", new PersonalizedText(this.flag.getColoredName())));
     } else if (this.wasDelayed) {
       // Flag was captured and respawn was delayed by a filter, so we announce that the flag has
       // respawned
       this.respawn(
           new PersonalizedTranslatable(
-              "match.flag.respawn", this.flag.getComponentName()));
+              "match.flag.respawn", new PersonalizedText(this.flag.getColoredName())));
     }
   }
 
