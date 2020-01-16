@@ -20,6 +20,7 @@ import tc.oc.named.NameStyle;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
+import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.party.Party;
@@ -35,6 +36,8 @@ public class ChatDispatcher implements Listener {
 
   private final MatchManager manager;
   private final OnlinePlayerMapAdapter<UUID> lastMessagedBy;
+
+  private static final Sound DM_SOUND = new Sound("random.orb", 1f, 1.2f);
 
   public ChatDispatcher(MatchManager manager) {
     this.manager = manager;
@@ -116,6 +119,7 @@ public class ChatDispatcher implements Listener {
         sender.sendMessage(new PersonalizedText(component, ChatColor.RED));
         return;
       }
+      playMessageSound(matchReceiver);
     }
 
     if (sender != null) {
@@ -195,6 +199,12 @@ public class ChatDispatcher implements Listener {
         return;
       default:
         sendGlobal(match, sender, message);
+    }
+  }
+
+  public void playMessageSound(MatchPlayer player) {
+    if (player.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ON)) {
+      player.playSound(DM_SOUND);
     }
   }
 

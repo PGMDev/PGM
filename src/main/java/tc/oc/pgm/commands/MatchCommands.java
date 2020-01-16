@@ -8,18 +8,23 @@ import com.google.common.collect.Multimap;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import org.bukkit.ChatColor;
+import javax.annotation.Nullable;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchPhase;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
 import tc.oc.pgm.goals.Goal;
 import tc.oc.pgm.goals.GoalMatchModule;
+import tc.oc.pgm.goals.ProximityGoal;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.util.StringUtils;
+import tc.oc.util.components.ComponentUtils;
 import tc.oc.util.components.PeriodFormats;
 import tc.oc.util.localization.Locales;
 
@@ -28,18 +33,19 @@ public class MatchCommands {
   @Command(
       aliases = {"matchinfo", "match"},
       desc = "Shows information about the current match")
-  public static void matchInfo(CommandSender sender, Match match) {
+  public static void matchInfo(CommandSender sender, MatchPlayer player, Match match) {
     // indicates whether we have game information from the match yet
     boolean haveGameInfo =
         match.getPhase() == MatchPhase.RUNNING || match.getPhase() == MatchPhase.FINISHED;
 
     sender.sendMessage(
-        StringUtils.dashedChatMessage(
-            ChatColor.DARK_AQUA
-                + " "
-                + AllTranslations.get().translate("command.match.matchInfo.title", sender),
-            ChatColor.STRIKETHROUGH + "-",
-            ChatColor.RED.toString()));
+        ComponentUtils.horizontalLineHeading(
+            ChatColor.YELLOW
+                + AllTranslations.get()
+                    .translate("command.match.matchInfo.title", sender, match.getId()),
+            ChatColor.WHITE,
+            ComponentUtils.MAX_CHAT_WIDTH));
+
     if (haveGameInfo) {
       // show match time
       sender.sendMessage(
@@ -105,11 +111,14 @@ public class MatchCommands {
         Multimap<Team, String> teamGoalTexts = HashMultimap.create();
 
         for (Team team : tmm.getParticipatingTeams()) {
-          for (Goal goal : gmm.getGoals(team)) {
+          for (Goal<?> goal : gmm.getGoals(team)) {
             if (goal.isVisible()) {
-              teamGoalTexts.put(
-                  team,
-                  (goal.isCompleted(team) ? ChatColor.GREEN : ChatColor.DARK_RED) + goal.getName());
+              if (player != null) {
+                teamGoalTexts.put(
+                    team, renderGoal(goal, player.getCompetitor(), player.getParty()));
+              } else {
+                teamGoalTexts.put(team, renderGoal(goal, null, match.getDefaultParty()));
+              }
             }
           }
         }
@@ -140,5 +149,26 @@ public class MatchCommands {
         }
       }
     }
+  }
+
+  // Modified from SidebarMatchModule to make formatting easier
+  private static String renderGoal(
+      Goal<?> goal, @Nullable Competitor competitor, Party viewingParty) {
+    StringBuilder sb = new StringBuilder(" ");
+
+    sb.append(goal.renderSidebarStatusColor(competitor, viewingParty));
+    sb.append(goal.renderSidebarStatusText(competitor, viewingParty));
+
+    if (goal instanceof ProximityGoal) {
+      sb.append(" ");
+      // Show teams their own proximity on shared goals
+      sb.append(((ProximityGoal) goal).renderProximity(competitor, viewingParty));
+    }
+
+    sb.append(" ");
+    sb.append(goal.renderSidebarLabelColor(competitor, viewingParty));
+    sb.append(goal.renderSidebarLabelText(competitor, viewingParty));
+
+    return sb.toString();
   }
 }
