@@ -3,9 +3,8 @@ package tc.oc.pgm.commands;
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Text;
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
@@ -29,17 +28,11 @@ public class ModerationCommands {
 
   private static final int REPORT_COOLDOWN_SECONDS = 15;
 
-  private static final LoadingCache<UUID, Instant> lastReportSent =
+  private static final Cache<UUID, Instant> lastReportSent =
       CacheBuilder.newBuilder()
           .weakKeys()
           .expireAfterWrite(REPORT_COOLDOWN_SECONDS, TimeUnit.SECONDS)
-          .build(
-              new CacheLoader<UUID, Instant>() {
-                @Override
-                public Instant load(UUID uuid) throws Exception {
-                  return Instant.now();
-                }
-              });
+          .build();
 
   @Command(
       aliases = {"report"},
