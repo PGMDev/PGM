@@ -1,8 +1,7 @@
 package tc.oc.pgm.api.module;
 
-import tc.oc.pgm.api.module.exception.ModuleLoadException;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,12 +9,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import javax.annotation.Nullable;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-/**
- * A dependency graph for {@link Module}s and their {@link ModuleFactory}s.
- */
+/** A dependency graph for {@link Module}s and their {@link ModuleFactory}s. */
 public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
     implements ModuleContext<M> {
 

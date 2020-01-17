@@ -1,12 +1,10 @@
 package tc.oc.pgm.api.map;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
+import javax.annotation.Nullable;
 
-/**
- * Additional information about a {@link MapInfo}.
- */
+/** Additional information about a {@link MapInfo}. */
 public interface MapInfoExtra {
 
   /**

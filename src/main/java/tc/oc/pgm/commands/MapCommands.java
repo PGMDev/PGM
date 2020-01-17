@@ -4,6 +4,9 @@ import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Default;
 import com.google.common.collect.ImmutableSortedSet;
+import java.util.Collection;
+import java.util.Set;
+import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.component.Component;
@@ -22,10 +25,6 @@ import tc.oc.pgm.rotation.MapOrder;
 import tc.oc.pgm.util.PrettyPaginatedResult;
 import tc.oc.pgm.util.TranslationUtils;
 import tc.oc.util.components.ComponentUtils;
-
-import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Set;
 
 public class MapCommands {
 
@@ -69,7 +68,15 @@ public class MapCommands {
       @Override
       public String format(MapInfo map, int index) {
         // TODO: fix misc.authorship
-        return (index + 1) + ". " + ChatColor.RED + map.getName() + " " + ChatColor.DARK_PURPLE + TranslationUtils.nameList(NameStyle.FANCY, map.getAuthors()).render(sender).toLegacyText();
+        return (index + 1)
+            + ". "
+            + ChatColor.RED
+            + map.getName()
+            + " "
+            + ChatColor.DARK_PURPLE
+            + TranslationUtils.nameList(NameStyle.FANCY, map.getAuthors())
+                .render(sender)
+                .toLegacyText();
       }
     }.display(audience, maps, page);
   }

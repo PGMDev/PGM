@@ -1,6 +1,10 @@
 package tc.oc.pgm.core;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Collections;
+import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -24,11 +28,6 @@ import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.teams.Team;
 import tc.oc.util.components.Components;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.Set;
-
 public class Core extends TouchableGoal<CoreFactory> implements ModeChangeGoal<CoreFactory> {
 
   protected final FiniteBlockRegion casingRegion;
@@ -48,7 +47,10 @@ public class Core extends TouchableGoal<CoreFactory> implements ModeChangeGoal<C
 
     this.casingRegion =
         FiniteBlockRegion.fromWorld(
-            region, match.getWorld(), match.getMap().getProto(), new SingleMaterialMatcher(this.material));
+            region,
+            match.getWorld(),
+            match.getMap().getProto(),
+            new SingleMaterialMatcher(this.material));
     if (this.casingRegion.getBlocks().isEmpty()) {
       match
           .getLogger()
@@ -59,7 +61,7 @@ public class Core extends TouchableGoal<CoreFactory> implements ModeChangeGoal<C
         FiniteBlockRegion.fromWorld(
             region,
             match.getWorld(),
-                match.getMap().getProto(),
+            match.getMap().getProto(),
             new SingleMaterialMatcher(Material.LAVA, (byte) 0),
             new SingleMaterialMatcher(Material.STATIONARY_LAVA, (byte) 0));
     if (this.lavaRegion.getBlocks().isEmpty()) {

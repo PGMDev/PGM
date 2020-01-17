@@ -1,11 +1,9 @@
 package tc.oc.pgm.api.module;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
+import javax.annotation.Nullable;
 
-/**
- * A generic factory for creating {@link Module}s and their dependencies.
- */
+/** A generic factory for creating {@link Module}s and their dependencies. */
 public interface ModuleFactory<M extends Module> {
 
   /**

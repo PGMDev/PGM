@@ -1,8 +1,8 @@
 package tc.oc.pgm.api.map;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.concurrent.CompletableFuture;
+import javax.annotation.Nullable;
 
 /** A library of {@link MapInfo}s. */
 public interface MapLibrary {

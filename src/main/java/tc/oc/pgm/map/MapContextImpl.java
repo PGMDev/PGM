@@ -1,13 +1,8 @@
 package tc.oc.pgm.map;
 
-import com.google.common.collect.ImmutableList;
-import tc.oc.pgm.api.map.MapContext;
-import tc.oc.pgm.api.map.MapInfo;
-import tc.oc.pgm.api.map.MapInfoExtra;
-import tc.oc.pgm.api.map.MapModule;
-import tc.oc.pgm.api.map.MapSource;
-import tc.oc.pgm.api.module.ModuleContext;
+import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -15,8 +10,12 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.api.map.MapInfoExtra;
+import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.MapSource;
+import tc.oc.pgm.api.module.ModuleContext;
 
 public class MapContextImpl extends MapInfoImpl implements MapContext {
 
@@ -83,7 +82,8 @@ public class MapContextImpl extends MapInfoImpl implements MapContext {
   @Override
   public <N extends MapModule> N getModule(Class<? extends N> key) {
     // FIXME: This is not efficient, but is not currently used anywhere
-    return (N) modules.stream().filter(module -> module.getClass().equals(key)).findFirst().orElse(null);
+    return (N)
+        modules.stream().filter(module -> module.getClass().equals(key)).findFirst().orElse(null);
   }
 
   @Override

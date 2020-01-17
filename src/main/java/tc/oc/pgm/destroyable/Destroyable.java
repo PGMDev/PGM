@@ -2,6 +2,14 @@ package tc.oc.pgm.destroyable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -41,15 +49,6 @@ import tc.oc.util.StringUtils;
 import tc.oc.util.collection.DefaultMapAdapter;
 import tc.oc.util.components.Components;
 import tc.oc.world.NMSHacks;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class Destroyable extends TouchableGoal<DestroyableFactory>
     implements IncrementalGoal<DestroyableFactory>, ModeChangeGoal<DestroyableFactory> {
@@ -105,7 +104,10 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
     this.blockRegion =
         FiniteBlockRegion.fromWorld(
-            definition.getRegion(), match.getWorld(), this.materialPatterns, match.getMap().getProto());
+            definition.getRegion(),
+            match.getWorld(),
+            this.materialPatterns,
+            match.getMap().getProto());
     if (this.blockRegion.getBlocks().isEmpty()) {
       match.getLogger().warning("No destroyable blocks found in destroyable " + this.getName());
     }

@@ -1,9 +1,8 @@
 package tc.oc.pgm.api.map;
 
+import java.util.Collection;
 import org.bukkit.Difficulty;
 import tc.oc.util.SemanticVersion;
-
-import java.util.Collection;
 
 /** Essential information about a map. */
 public interface MapInfo extends Comparable<MapInfo> {

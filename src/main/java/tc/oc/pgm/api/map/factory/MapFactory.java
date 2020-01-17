@@ -12,9 +12,7 @@ import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.util.SemanticVersion;
 
-/**
- * A factory for creating {@link MapInfo}s and {@link MapContext}s.
- */
+/** A factory for creating {@link MapInfo}s and {@link MapContext}s. */
 public interface MapFactory extends ModuleContext<MapModule> {
 
   RegionParser getRegions();

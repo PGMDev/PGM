@@ -5,6 +5,9 @@ import app.ashcon.intake.argument.CommandArgs;
 import app.ashcon.intake.argument.MissingArgumentException;
 import app.ashcon.intake.bukkit.parametric.provider.BukkitProvider;
 import app.ashcon.intake.parametric.annotation.Default;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.List;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.map.MapInfo;
@@ -13,10 +16,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.pgm.rotation.MapOrder;
-
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.List;
 
 public class MapInfoProvider implements BukkitProvider<MapInfo> {
 
@@ -48,7 +47,7 @@ public class MapInfoProvider implements BukkitProvider<MapInfo> {
       map = mapOrder.getNextMap();
     } else {
       final Match match = matchManager.getMatch(sender);
-      if(match != null) map = match.getMap();
+      if (match != null) map = match.getMap();
     }
 
     if (map == null && !isGoToNext(annotations)) {

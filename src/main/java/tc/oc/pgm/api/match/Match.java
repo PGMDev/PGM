@@ -1,5 +1,9 @@
 package tc.oc.pgm.api.match;
 
+import java.util.Collection;
+import java.util.Random;
+import java.util.logging.Logger;
+import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -26,11 +30,6 @@ import tc.oc.pgm.features.MatchFeatureContext;
 import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.result.VictoryCondition;
 import tc.oc.server.Scheduler;
-
-import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Random;
-import java.util.logging.Logger;
 
 /**
  * A PvP game that takes place in a {@link World} loaded with a {@link MapInfo}.

@@ -1,14 +1,11 @@
 package tc.oc.pgm.api.match.factory;
 
+import javax.annotation.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 
-import javax.annotation.Nullable;
-
-/**
- * A factory for creating {@link MatchModule}s.
- */
+/** A factory for creating {@link MatchModule}s. */
 @FunctionalInterface
 public interface MatchModuleFactory<T extends MatchModule> {
 

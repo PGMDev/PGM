@@ -1,5 +1,14 @@
 package tc.oc.pgm.match;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.annotation.Nullable;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -14,16 +23,6 @@ import tc.oc.pgm.terrain.TerrainModule;
 import tc.oc.util.FileUtils;
 import tc.oc.util.ServerThreadLock;
 import tc.oc.util.logging.ClassLogger;
-
-import javax.annotation.Nullable;
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public class MatchFactoryImpl implements MatchFactory {
 
@@ -51,17 +50,17 @@ public class MatchFactoryImpl implements MatchFactory {
     final String name = "match-" + id;
     final File dir = new File(server.getWorldContainer().getAbsoluteFile(), name);
     try {
-        if (dir.exists()) {
-            FileUtils.delete(dir);
-        }
+      if (dir.exists()) {
+        FileUtils.delete(dir);
+      }
 
-        if (!dir.mkdirs()) {
-            throw new IOException("Could not create directories for " + dir.getPath());
-        }
+      if (!dir.mkdirs()) {
+        throw new IOException("Could not create directories for " + dir.getPath());
+      }
 
-        map.getSource().downloadTo(dir);
+      map.getSource().downloadTo(dir);
     } catch (IOException e) {
-        throw new MapNotFoundException(map, "Could not download map files", e);
+      throw new MapNotFoundException(map, "Could not download map files", e);
     }
 
     final Match match = new MatchImpl(id, map, createWorld(name, map));
@@ -81,7 +80,7 @@ public class MatchFactoryImpl implements MatchFactory {
 
     final World world;
     try (final ServerThreadLock lock = ServerThreadLock.acquire()) {
-        world = server.createWorld(creator);
+      world = server.createWorld(creator);
     }
     world.setPVP(true);
     world.setSpawnFlags(false, false);
@@ -99,25 +98,25 @@ public class MatchFactoryImpl implements MatchFactory {
     }
 
     logger.log(Level.INFO, "Loaded: #" + match.getId() + " " + match.getMap().getId());
-    if(players == null) return;
+    if (players == null) return;
 
-    for(MatchPlayer player : players) {
-        final Match oldMatch = player.getMatch();
-        final Player bukkit = player.getBukkit();
+    for (MatchPlayer player : players) {
+      final Match oldMatch = player.getMatch();
+      final Player bukkit = player.getBukkit();
 
-        oldMatch.removePlayer(bukkit);
-        match.addPlayer(bukkit);
+      oldMatch.removePlayer(bukkit);
+      match.addPlayer(bukkit);
 
-        try {
-            if (oldMatch.getPlayers().isEmpty()) {
-                oldMatch.unload();
-                oldMatch.destroy();
+      try {
+        if (oldMatch.getPlayers().isEmpty()) {
+          oldMatch.unload();
+          oldMatch.destroy();
 
-                logger.log(Level.INFO, "Unloaded: #" + oldMatch.getId() + " " + match.getMap().getId());
-            }
-        } catch (Throwable t) {
-            logger.log(Level.SEVERE, "Could not unload empty match", t);
+          logger.log(Level.INFO, "Unloaded: #" + oldMatch.getId() + " " + match.getMap().getId());
         }
+      } catch (Throwable t) {
+        logger.log(Level.SEVERE, "Could not unload empty match", t);
+      }
     }
   }
 }

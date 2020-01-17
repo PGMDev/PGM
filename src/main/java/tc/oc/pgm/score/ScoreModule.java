@@ -95,8 +95,7 @@ public class ScoreModule implements MapModule {
         // tag
         // is not present
         boolean scoreKillsByDefault =
-            proto.isOlderThan(MapProtos.DEFAULT_SCORES_TO_ZERO)
-                && scoreEl.getChild("king") == null;
+            proto.isOlderThan(MapProtos.DEFAULT_SCORES_TO_ZERO) && scoreEl.getChild("king") == null;
         config.deathScore =
             XMLUtils.parseNumber(
                 scoreEl.getChild("deaths"), Integer.class, scoreKillsByDefault ? 1 : 0);

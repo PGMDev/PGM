@@ -5,6 +5,15 @@ import app.ashcon.intake.bukkit.graph.BasicBukkitCommandGraph;
 import app.ashcon.intake.fluent.DispatcherNode;
 import app.ashcon.intake.parametric.AbstractModule;
 import app.ashcon.intake.parametric.provider.EnumProvider;
+import java.io.File;
+import java.sql.SQLException;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.annotation.Nullable;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -82,16 +91,6 @@ import tc.oc.pgm.rotation.MapOrder;
 import tc.oc.pgm.rotation.RandomMapOrder;
 import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.pgm.teams.TeamMatchModule;
-
-import javax.annotation.Nullable;
-import java.io.File;
-import java.sql.SQLException;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, Listener {
 
@@ -173,7 +172,8 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
 
     matchManager = new MatchManagerImpl();
     matchFactory = new MatchFactoryImpl(logger, server);
-    mapOrder = new RandomMapOrder(matchManager); // TODO: RotationManager and use it to get first match
+    mapOrder =
+        new RandomMapOrder(matchManager); // TODO: RotationManager and use it to get first match
     prefixRegistry = new PrefixRegistryImpl();
     matchNameRenderer = new MatchNameRenderer(matchManager);
     nameRenderer = new CachingNameRenderer(matchNameRenderer);
@@ -190,37 +190,41 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
     registerListeners();
     registerCommands();
 
-    getServer().getScheduler().scheduleSyncDelayedTask(PGM.get(), () -> {
-      MapContext map;
-      for(int i = 0 ;; i += 1) {
-        final String id = mapOrder.popNextMap().getId();
-        try {
-          map = mapLibrary.loadExistingMap(id).get(5, TimeUnit.SECONDS);
-          break;
-        } catch (Throwable t) {
-          getLogger().log(Level.WARNING, "Failed to load map: " + id, t);
-          if(i < 5) continue;
-          shutdown("Failed to load any maps", t);
-          return;
-        }
-      }
+    getServer()
+        .getScheduler()
+        .scheduleSyncDelayedTask(
+            PGM.get(),
+            () -> {
+              MapContext map;
+              for (int i = 0; ; i += 1) {
+                final String id = mapOrder.popNextMap().getId();
+                try {
+                  map = mapLibrary.loadExistingMap(id).get(5, TimeUnit.SECONDS);
+                  break;
+                } catch (Throwable t) {
+                  getLogger().log(Level.WARNING, "Failed to load map: " + id, t);
+                  if (i < 5) continue;
+                  shutdown("Failed to load any maps", t);
+                  return;
+                }
+              }
 
-      try {
-        final Match match = matchFactory.createPreMatch(map).join();
-        matchFactory.createMatch(match, null);
-        matchManager.addMatch(match);
-      } catch (Throwable t) {
-        shutdown("Failed to load first match", t);
-      }
-    });
+              try {
+                final Match match = matchFactory.createPreMatch(map).join();
+                matchFactory.createMatch(match, null);
+                matchManager.addMatch(match);
+              } catch (Throwable t) {
+                shutdown("Failed to load first match", t);
+              }
+            });
   }
 
   @Override
   public void onDisable() {
     if (matchTabManager != null) matchTabManager.disable();
-    if(matchManager != null) matchManager.getMatches().iterator().forEachRemaining(Match::unload);
-    if(datastore != null) datastore.shutdown();
-    if(datastoreCache != null) datastoreCache.shutdown();
+    if (matchManager != null) matchManager.getMatches().iterator().forEachRemaining(Match::unload);
+    if (datastore != null) datastore.shutdown();
+    if (datastoreCache != null) datastoreCache.shutdown();
     moduleRegistry = null;
     datastore = null;
     datastoreCache = null;

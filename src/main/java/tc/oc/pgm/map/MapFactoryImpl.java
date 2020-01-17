@@ -1,5 +1,10 @@
 package tc.oc.pgm.map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.Logger;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.jdom2.Document;
 import org.jdom2.input.JDOMParseException;
@@ -29,12 +34,6 @@ import tc.oc.util.SemanticVersion;
 import tc.oc.util.logging.ClassLogger;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.SAXHandler;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.logging.Logger;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? extends MapModule>>
     implements MapFactory {

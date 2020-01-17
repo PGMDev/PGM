@@ -1,6 +1,22 @@
 package tc.oc;
 
+import static tc.oc.util.reflect.ReflectionUtils.readField;
+
 import com.google.common.collect.Lists;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+import java.net.InetAddress;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Handler;
+import java.util.regex.Pattern;
 import net.kencochrane.raven.dsn.Dsn;
 import net.kencochrane.raven.event.EventBuilder;
 import net.kencochrane.raven.event.interfaces.ExceptionInterface;
@@ -47,23 +63,6 @@ import org.fusesource.jansi.AnsiConsole;
 import org.spigotmc.SpigotConfig;
 import tc.oc.pgm.PGMImpl;
 import tc.oc.pgm.api.PGM;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
-import java.net.InetAddress;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Handler;
-import java.util.regex.Pattern;
-
-import static tc.oc.util.reflect.ReflectionUtils.readField;
 
 /** Embedded {@link org.bukkit.Bukkit} server that natively runs {@link PGM}. */
 public class Server extends DedicatedServer {

@@ -2,9 +2,7 @@ package tc.oc.pgm.api.map;
 
 import tc.oc.util.SemanticVersion;
 
-/**
- * Various {@link MapInfo#getProto()} versions that change the default functionality.
- */
+/** Various {@link MapInfo#getProto()} versions that change the default functionality. */
 public interface MapProtos {
   // Version that fixed the off-by-one region bug
   SemanticVersion REGION_FIX_VERSION = new SemanticVersion(1, 3, 1);

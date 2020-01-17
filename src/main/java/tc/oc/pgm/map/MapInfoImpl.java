@@ -1,6 +1,15 @@
 package tc.oc.pgm.map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.ImmutableList;
+import java.text.Normalizer;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
+import javax.annotation.Nullable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -14,16 +23,6 @@ import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.SemanticVersion;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
-
-import javax.annotation.Nullable;
-import java.text.Normalizer;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public class MapInfoImpl implements MapInfo {
 

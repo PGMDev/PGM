@@ -18,8 +18,8 @@ public class Teams {
   private Teams() {}
 
   /**
-   * Lookup a team by name or ID. Prior to {@link MapProtos#FILTER_FEATURES}, teams are looked
-   * up by name.
+   * Lookup a team by name or ID. Prior to {@link MapProtos#FILTER_FEATURES}, teams are looked up by
+   * name.
    */
   public static TeamFactory getTeam(String team, MapFactory factory) {
     TeamFactory teamFactory = factory.getFeatures().get(team, TeamFactory.class);

@@ -6,5 +6,4 @@ package tc.oc.pgm.api.module;
  * @see tc.oc.pgm.api.map.MapModule
  * @see tc.oc.pgm.api.match.MatchModule
  */
-public interface Module {
-}
+public interface Module {}

@@ -1,5 +1,7 @@
 package tc.oc.pgm.api.map;
 
+import java.util.logging.Logger;
+import javax.annotation.Nullable;
 import org.jdom2.Document;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.match.Match;
@@ -8,9 +10,6 @@ import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.Module;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.xml.InvalidXMLException;
-
-import javax.annotation.Nullable;
-import java.util.logging.Logger;
 
 /**
  * A configuration provider that creates {@link MatchModule}s.

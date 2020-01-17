@@ -1,9 +1,8 @@
 package tc.oc.pgm.api.module;
 
-import tc.oc.pgm.api.module.exception.ModuleLoadException;
-
-import javax.annotation.Nullable;
 import java.util.Collection;
+import javax.annotation.Nullable;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 
 /** A contextual collection of {@link Module}s indexed by their class. */
 public interface ModuleContext<M extends Module> {

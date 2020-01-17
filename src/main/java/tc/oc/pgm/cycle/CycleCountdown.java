@@ -1,5 +1,7 @@
 package tc.oc.pgm.cycle;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import org.joda.time.Duration;
 import tc.oc.component.Component;
@@ -13,9 +15,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.rotation.MapOrder;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
 
 public class CycleCountdown extends MatchCountdown {
   private int preloadTime = Config.Experiments.get().getPreload();

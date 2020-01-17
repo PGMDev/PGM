@@ -1,5 +1,7 @@
 package tc.oc.pgm.tablist;
 
+import java.util.Map;
+import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -26,9 +28,6 @@ import tc.oc.pgm.teams.events.TeamResizeEvent;
 import tc.oc.tablist.PlayerTabEntry;
 import tc.oc.tablist.TabManager;
 import tc.oc.util.collection.DefaultMapAdapter;
-
-import javax.annotation.Nullable;
-import java.util.Map;
 
 public class MatchTabManager extends TabManager implements Listener {
   // Moved over to experiments config

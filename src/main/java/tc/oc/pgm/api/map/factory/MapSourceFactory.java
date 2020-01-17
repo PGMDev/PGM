@@ -1,9 +1,8 @@
 package tc.oc.pgm.api.map.factory;
 
+import java.util.Iterator;
 import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.exception.MapNotFoundException;
-
-import java.util.Iterator;
 
 /** A thread-safe factory for creating {@link MapSource}s. */
 public interface MapSourceFactory {

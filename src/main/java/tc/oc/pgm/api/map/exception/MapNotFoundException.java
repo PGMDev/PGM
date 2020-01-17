@@ -1,9 +1,8 @@
 package tc.oc.pgm.api.map.exception;
 
+import javax.annotation.Nullable;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapSource;
-
-import javax.annotation.Nullable;
 
 /** Thrown when a {@link MapSource} cannot find a map. */
 public class MapNotFoundException extends RuntimeException {

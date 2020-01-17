@@ -1,12 +1,11 @@
 package tc.oc.pgm.api.match.factory;
 
+import java.util.concurrent.CompletableFuture;
+import javax.annotation.Nullable;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.player.MatchPlayer;
-
-import javax.annotation.Nullable;
-import java.util.concurrent.CompletableFuture;
 
 /** A thread-safe factory for creating {@link Match}es from {@link MapContext}s. */
 public interface MatchFactory {

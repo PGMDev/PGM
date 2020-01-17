@@ -1,18 +1,8 @@
 package tc.oc.pgm.map;
 
-import com.google.common.collect.Iterators;
-import tc.oc.pgm.api.map.MapContext;
-import tc.oc.pgm.api.map.MapInfo;
-import tc.oc.pgm.api.map.MapLibrary;
-import tc.oc.pgm.api.map.MapSource;
-import tc.oc.pgm.api.map.exception.MapNotFoundException;
-import tc.oc.pgm.api.map.factory.MapFactory;
-import tc.oc.pgm.api.map.factory.MapSourceFactory;
-import tc.oc.pgm.api.module.exception.ModuleLoadException;
-import tc.oc.util.StringUtils;
-import tc.oc.util.logging.ClassLogger;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import javax.annotation.Nullable;
+import com.google.common.collect.Iterators;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,8 +16,17 @@ import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import javax.annotation.Nullable;
+import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.api.map.MapLibrary;
+import tc.oc.pgm.api.map.MapSource;
+import tc.oc.pgm.api.map.exception.MapNotFoundException;
+import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.map.factory.MapSourceFactory;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
+import tc.oc.util.StringUtils;
+import tc.oc.util.logging.ClassLogger;
 
 public class MapLibraryImpl implements MapLibrary {
 
@@ -117,7 +116,8 @@ public class MapLibraryImpl implements MapLibrary {
     return CompletableFuture.supplyAsync(() -> loadMap(entry.source, entry.info.getId()));
   }
 
-  private MapContext loadMap(MapSource source, @Nullable String mapId) throws MapNotFoundException, ModuleLoadException {
+  private MapContext loadMap(MapSource source, @Nullable String mapId)
+      throws MapNotFoundException, ModuleLoadException {
     final MapFactory factory = new MapFactoryImpl(logger, source);
     final MapInfo info;
     final MapContext context;
