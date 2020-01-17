@@ -29,10 +29,7 @@ public class ModerationCommands {
   private static final int REPORT_COOLDOWN_SECONDS = 15;
 
   private static final Cache<UUID, Instant> lastReportSent =
-      CacheBuilder.newBuilder()
-          .weakKeys()
-          .expireAfterWrite(REPORT_COOLDOWN_SECONDS, TimeUnit.SECONDS)
-          .build();
+      CacheBuilder.newBuilder().expireAfterWrite(REPORT_COOLDOWN_SECONDS, TimeUnit.SECONDS).build();
 
   @Command(
       aliases = {"report"},
@@ -55,7 +52,7 @@ public class ModerationCommands {
           throw new CommandException(
               AllTranslations.get()
                   .translate(
-                      "command.report.cooldown",
+                      "command.cooldown",
                       commandSender,
                       ChatColor.AQUA
                           + (secondsRemaining
