@@ -27,11 +27,9 @@ public class FeatureRegionParser extends RegionParser {
   @Override
   public Region parseReference(Attribute attr) throws InvalidXMLException {
     return factory
-
         .getFeatures()
         .addReference(
-            new XMLRegionReference(
-                    factory.getFeatures(), new Node(attr), RegionDefinition.class));
+            new XMLRegionReference(factory.getFeatures(), new Node(attr), RegionDefinition.class));
   }
 
   @MethodParser("region")

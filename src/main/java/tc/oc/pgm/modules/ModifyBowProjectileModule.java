@@ -9,7 +9,7 @@ import org.bukkit.potion.PotionEffect;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.MapModule;
-import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
@@ -45,9 +45,9 @@ public class ModifyBowProjectileModule implements MapModule {
       Set<PotionEffect> potionEffects = new HashSet<>();
 
       for (Element parent : doc.getRootElement().getChildren("modifybowprojectile")) {
-        if (factory.getProto().isNoOlderThan(ProtoVersions.FILTER_FEATURES)) {
+        if (factory.getProto().isNoOlderThan(MapProtos.FILTER_FEATURES)) {
           throw new InvalidXMLException(
-              "Module is discontinued as of " + ProtoVersions.FILTER_FEATURES.toString(),
+              "Module is discontinued as of " + MapProtos.FILTER_FEATURES.toString(),
               doc.getRootElement().getChild("modifybowprojectile"));
         }
 

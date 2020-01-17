@@ -1,7 +1,5 @@
 package tc.oc.pgm.cycle;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import org.joda.time.Duration;
 import tc.oc.component.Component;
@@ -9,14 +7,15 @@ import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
-import tc.oc.pgm.api.map.exception.MapNotFoundException;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.rotation.MapOrder;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
 
 public class CycleCountdown extends MatchCountdown {
   private int preloadTime = Config.Experiments.get().getPreload();
@@ -74,20 +73,23 @@ public class CycleCountdown extends MatchCountdown {
     super.onTick(remaining, total);
 
     if (remaining.getStandardSeconds() <= preloadTime && next != null && nextMatch == null) {
-      try {
-        final MapContext context = mapLibrary.getMap(nextMap.getId());
-        nextMatch = matchFactory.createPreMatch(context);
-      } catch (MapNotFoundException e) {
-        PGM.get().getGameLogger().log(Level.SEVERE, "Could not begin cycle to " + nextMap, e);
-      }
+      nextMatch =
+          mapLibrary
+              .loadExistingMap(nextMap.getId())
+              .thenComposeAsync(matchFactory::createPreMatch);
     }
   }
 
   @Override
   public void onEnd(Duration total) {
     super.onEnd(total);
-
     setNextMap(mapOrder.popNextMap(), true);
-    matchFactory.createMatch(nextMatch.join(), getMatch().getPlayers());
+
+    try {
+      matchFactory.createMatch(nextMatch.join(), getMatch().getPlayers());
+    } catch (Throwable t) {
+      PGM.get().getGameLogger().log(Level.SEVERE, "Could not cycle to map: " + nextMap.getId(), t);
+      nextMatch = null;
+    }
   }
 }

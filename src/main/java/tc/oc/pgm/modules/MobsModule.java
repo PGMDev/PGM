@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.MapModule;
-import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
@@ -43,7 +43,7 @@ public class MobsModule implements MapModule {
       Element mobsEl = doc.getRootElement().getChild("mobs");
       Filter mobsFilter = StaticFilter.DENY;
       if (mobsEl != null) {
-        if (factory.getProto().isNoOlderThan(ProtoVersions.FILTER_FEATURES)) {
+        if (factory.getProto().isNoOlderThan(MapProtos.FILTER_FEATURES)) {
           mobsFilter = filterParser.parseRequiredFilterProperty(mobsEl, "filter");
         } else {
           Element filterEl = XMLUtils.getUniqueChild(mobsEl, "filter");

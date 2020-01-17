@@ -66,7 +66,16 @@ public class MapInfoImpl implements MapInfo {
   }
 
   public MapInfoImpl(MapInfo info) {
-    this(checkNotNull(info).getId(), info.getProto(), info.getVersion(), info.getName(), info.getDescription(), info.getAuthors(), info.getContributors(), info.getRules(), info.getDifficulty());
+    this(
+        checkNotNull(info).getId(),
+        info.getProto(),
+        info.getVersion(),
+        info.getName(),
+        info.getDescription(),
+        info.getAuthors(),
+        info.getContributors(),
+        info.getRules(),
+        info.getDifficulty());
   }
 
   public MapInfoImpl(Element root) throws InvalidXMLException {

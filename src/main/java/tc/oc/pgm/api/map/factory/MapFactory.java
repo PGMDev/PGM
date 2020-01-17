@@ -1,5 +1,6 @@
 package tc.oc.pgm.api.map.factory;
 
+import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.exception.MapNotFoundException;
@@ -12,22 +13,21 @@ import tc.oc.pgm.regions.RegionParser;
 import tc.oc.util.SemanticVersion;
 
 /**
- * A shared map state used during {@link MapModule} loading.
+ * A factory for creating {@link MapInfo}s and {@link MapContext}s.
  */
 public interface MapFactory extends ModuleContext<MapModule> {
 
-    RegionParser getRegions();
+  RegionParser getRegions();
 
-    FilterParser getFilters();
+  FilterParser getFilters();
 
-    KitParser getKits();
+  KitParser getKits();
 
-    FeatureDefinitionContext getFeatures();
+  FeatureDefinitionContext getFeatures();
 
-    SemanticVersion getProto();
+  SemanticVersion getProto();
 
-    MapInfo getInfo();
+  MapInfo buildInfo() throws MapNotFoundException, ModuleLoadException;
 
-    void load() throws MapNotFoundException, ModuleLoadException;
-
+  MapContext buildContext() throws MapNotFoundException, ModuleLoadException;
 }

@@ -319,7 +319,7 @@ public class BlockTransformListener implements Listener {
     BlockState oldState = event.getBlock().getState();
     BlockState newState = BlockStates.toAir(oldState);
     MatchPlayerState igniterState = null;
-    TrackerMatchModule tmm = match.needMatchModule(TrackerMatchModule.class);
+    TrackerMatchModule tmm = match.needModule(TrackerMatchModule.class);
 
     for (BlockFace face : NEIGHBORS) {
       Block neighbor = oldState.getBlock().getRelative(face);
@@ -486,7 +486,7 @@ public class BlockTransformListener implements Listener {
     if (event != null && !event.isCancelled() && event.getDrops() != null) {
       Match match = PGM.get().getMatchManager().getMatch(event.getWorld());
       if (match != null) {
-        BlockDropsMatchModule bdmm = match.getMatchModule(BlockDropsMatchModule.class);
+        BlockDropsMatchModule bdmm = match.getModule(BlockDropsMatchModule.class);
         if (bdmm != null) {
           bdmm.doBlockDrops(event);
         }

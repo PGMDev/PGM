@@ -26,7 +26,7 @@ public class FlagDefinition extends ProximityGoalDefinition {
   }
 
   private final @Nullable DyeColor
-      color; // Flag color, null detects color from the banner at match load time
+      color; // Flag color, null detects color from the banner at match build time
   private final Post defaultPost; // Flag starts the match at this post
   private final @Nullable FeatureReference<TeamFactory>
       owner; // Team that owns the flag, affects various things

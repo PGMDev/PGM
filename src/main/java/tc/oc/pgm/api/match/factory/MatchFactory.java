@@ -1,12 +1,12 @@
 package tc.oc.pgm.api.match.factory;
 
-import java.util.concurrent.CompletableFuture;
-import javax.annotation.Nullable;
-import org.bukkit.entity.Player;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.player.MatchPlayer;
+
+import javax.annotation.Nullable;
+import java.util.concurrent.CompletableFuture;
 
 /** A thread-safe factory for creating {@link Match}es from {@link MapContext}s. */
 public interface MatchFactory {
@@ -21,11 +21,10 @@ public interface MatchFactory {
 
   /**
    * Finishes the creation of a {@link Match}, loading the {@link MatchModule}s and teleporting the
-   * given {@link Player}s to its world.
+   * given {@link MatchPlayer}s to its world.
    *
    * @param match A {@link Match} that was pre-loaded with {@link #createPreMatch(MapContext)}.
    * @param players A collection of {@link MatchPlayer}s to teleport or {@code null} for none.
-   * @return A future that indicates whether the operation was a success.
    */
-  CompletableFuture<Boolean> createMatch(Match match, @Nullable Iterable<MatchPlayer> players);
+  void createMatch(Match match, @Nullable Iterable<MatchPlayer> players);
 }

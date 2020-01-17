@@ -1,10 +1,12 @@
 package tc.oc.pgm.timelimit;
 
+import java.util.logging.Logger;
+import javax.annotation.Nullable;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.MapModule;
-import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
@@ -14,9 +16,6 @@ import tc.oc.pgm.result.VictoryConditions;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.components.PeriodFormats;
 import tc.oc.xml.InvalidXMLException;
-
-import javax.annotation.Nullable;
-import java.util.logging.Logger;
 
 public class TimeLimitModule implements MapModule {
   private final @Nullable TimeLimit timeLimit;
@@ -49,7 +48,7 @@ public class TimeLimitModule implements MapModule {
       if (el != null) {
         TimeLimit newTimeLimit = parseTimeLimit(factory, el);
         if (newTimeLimit != null) {
-          if (factory.getProto().isNoOlderThan(ProtoVersions.REMOVE_SCORE_TIME_LIMIT)) {
+          if (factory.getProto().isNoOlderThan(MapProtos.REMOVE_SCORE_TIME_LIMIT)) {
             throw new InvalidXMLException(
                 "<time> inside <" + legacyTag + "> is no longer supported, use root <time> instead",
                 el);

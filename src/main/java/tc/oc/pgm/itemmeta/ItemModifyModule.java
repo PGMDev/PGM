@@ -45,7 +45,7 @@ public class ItemModifyModule implements MapModule {
 
   @Override
   public MatchModule createMatchModule(Match match) {
-    return new ItemModifyMatchModule(match);
+    return new ItemModifyMatchModule(match, this);
   }
 
   public static class Factory implements MapModuleFactory<ItemModifyModule> {
@@ -60,10 +60,7 @@ public class ItemModifyModule implements MapModule {
         // Always use a PotionMeta so the rule can have potion effects, though it will only apply
         // those to potion items
         PotionMeta meta = (PotionMeta) Bukkit.getItemFactory().getItemMeta(Material.POTION);
-        factory
-
-            .getKits()
-            .parseItemMeta(XMLUtils.getRequiredUniqueChild(elRule, "modify"), meta);
+        factory.getKits().parseItemMeta(XMLUtils.getRequiredUniqueChild(elRule, "modify"), meta);
 
         ItemRule rule = new ItemRule(items, meta);
         rules.add(rule);

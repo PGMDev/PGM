@@ -15,10 +15,8 @@ public class FeatureKitParser extends KitParser {
   @Override
   public Kit parseReference(Node node, String name) throws InvalidXMLException {
     return factory
-
         .getFeatures()
-        .addReference(
-            new XMLKitReference(factory.getFeatures(), node, name, KitDefinition.class));
+        .addReference(new XMLKitReference(factory.getFeatures(), node, name, KitDefinition.class));
   }
 
   @Override

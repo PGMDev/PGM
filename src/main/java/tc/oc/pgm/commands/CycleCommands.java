@@ -30,7 +30,7 @@ public class CycleCommands {
       @Switch('f') boolean force,
       @Default("next") @Text MapInfo map)
       throws CommandException {
-    CycleMatchModule cmm = match.needMatchModule(CycleMatchModule.class);
+    CycleMatchModule cmm = match.needModule(CycleMatchModule.class);
 
     if (match.isRunning() && !force && !cmm.getConfig().runningMatch()) {
       throw new CommandException(

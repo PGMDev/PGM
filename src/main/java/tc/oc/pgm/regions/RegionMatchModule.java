@@ -1,6 +1,6 @@
 package tc.oc.pgm.regions;
 
-import static tc.oc.pgm.api.map.ProtoVersions.REGION_PRIORITY_VERSION;
+import static tc.oc.pgm.api.map.MapProtos.REGION_PRIORITY_VERSION;
 
 import javax.annotation.Nullable;
 import org.bukkit.Location;
@@ -35,7 +35,7 @@ import tc.oc.block.BlockVectors;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.event.GeneralizingEvent;
-import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -384,7 +384,7 @@ public class RegionMatchModule implements MatchModule, Listener {
 
   private ParticipantState getActor(BlockTransformEvent event) {
     // Legacy maps assume that all TNT damage is done by "world"
-    if (match.getMap().getProto().isOlderThan(ProtoVersions.FILTER_OWNED_TNT)
+    if (match.getMap().getProto().isOlderThan(MapProtos.FILTER_OWNED_TNT)
         && event.getCause() instanceof EntityExplodeEvent) return null;
 
     return ParticipantBlockTransformEvent.getPlayerState(event);

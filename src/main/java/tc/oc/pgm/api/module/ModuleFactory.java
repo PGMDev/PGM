@@ -5,8 +5,6 @@ import java.util.Collection;
 
 /**
  * A generic factory for creating {@link Module}s and their dependencies.
- *
- * @param <M> A specific type of {@link Module}.
  */
 public interface ModuleFactory<M extends Module> {
 

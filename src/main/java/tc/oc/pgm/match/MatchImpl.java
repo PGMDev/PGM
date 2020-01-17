@@ -69,13 +69,11 @@ import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -96,7 +94,7 @@ import static com.google.common.base.Preconditions.checkState;
 public class MatchImpl implements Match {
 
   private final String id;
-  private final WeakReference<MapContext> map;
+  private final MapContext map;
   private final WeakReference<World> world;
   private final Map<Class<? extends MatchModule>, MatchModule> matchModules;
 
@@ -120,10 +118,11 @@ public class MatchImpl implements Match {
   private final Set<VictoryCondition> victory;
   private final RankedSet<Competitor> competitors;
   private final Observers observers;
+  private final MatchFeatureContext features;
 
   protected MatchImpl(String id, MapContext map, World world) {
     this.id = checkNotNull(id);
-    this.map = new WeakReference<>(checkNotNull(map));
+    this.map = checkNotNull(map);
     this.world = new WeakReference<>(checkNotNull(world));
     this.matchModules = new ConcurrentHashMap<>();
 
@@ -160,6 +159,7 @@ public class MatchImpl implements Match {
               return 0;
             });
     this.observers = new Observers(this);
+    this.features = new MatchFeatureContext();
     // TODO: Protect against someone else unloading the world, cancel the event
   }
 
@@ -190,7 +190,7 @@ public class MatchImpl implements Match {
 
       switch (state) {
         case RUNNING:
-          getModules().values().forEach(MatchModule::enable);
+          getModules().forEach(MatchModule::enable);
           start.set(System.currentTimeMillis());
           startListeners(MatchScope.RUNNING);
           startTickables(MatchScope.RUNNING);
@@ -209,7 +209,7 @@ public class MatchImpl implements Match {
       // Must wait until after event has been called to close listeners
       if (state == MatchPhase.FINISHED) {
         removeListeners(MatchScope.RUNNING);
-        getModules().values().forEach(MatchModule::disable);
+        getModules().forEach(MatchModule::disable);
         end.set(System.currentTimeMillis());
       }
 
@@ -231,7 +231,7 @@ public class MatchImpl implements Match {
 
   @Override
   public MapContext getMap() {
-    return map.get();
+    return map;
   }
 
   @Override
@@ -272,18 +272,13 @@ public class MatchImpl implements Match {
   }
 
   @Override
-  public Map<Class<? extends MatchModule>, MatchModule> getModules() {
-    return Collections.unmodifiableMap(matchModules);
+  public Collection<MatchModule> getModules() {
+    return Collections.unmodifiableCollection(matchModules.values());
   }
 
   @Override
   public <M extends MatchModule> M getModule(Class<? extends M> key) {
     return (M) matchModules.get(key);
-  }
-
-  @Override
-  public <T extends MatchModule> Optional<T> getModuleOpt(Class<T> moduleClass) {
-    return Optional.ofNullable(getModule(moduleClass));
   }
 
   @Override
@@ -364,12 +359,7 @@ public class MatchImpl implements Match {
 
   @Override
   public MatchFeatureContext getFeatureContext() {
-    return null;
-  }
-
-  @Override
-  public MapContext getMapContext() {
-    return map.get();
+    return features;
   }
 
   @Override
@@ -729,12 +719,12 @@ public class MatchImpl implements Match {
     try {
       logger.fine("Loading match modules...");
       for (MatchModuleFactory factory :
-          PGM.get().getModuleRegistry().getMatchModuleFactories().values()) {
+          PGM.get().getModuleRegistry().getModuleFactories().values()) {
         loadMatchModule(factory.createMatchModule(this));
       }
 
       logger.fine("Loading map modules...");
-      for (MapModule map : getMapContext().getModules().values()) {
+      for (MapModule map : getMap().getModules()) {
         loadMatchModule(map.createMatchModule(this));
       }
 
@@ -780,7 +770,7 @@ public class MatchImpl implements Match {
     getCountdown().cancelAll();
     removeListeners(MatchScope.LOADED);
 
-    for (MatchModule matchModule : getModules().values()) {
+    for (MatchModule matchModule : getModules()) {
       try {
         matchModule.unload();
       } catch (Throwable e) {
@@ -797,8 +787,7 @@ public class MatchImpl implements Match {
     victory.clear();
     competitors.clear();
 
-    // TODO: Forcefully remove objects from the world like entities and chunls
-    map.enqueue();
+    // TODO: Forcefully remove objects from the world like entities and chunks
     world.enqueue();
 
     loaded.compareAndSet(true, false);
@@ -828,11 +817,6 @@ public class MatchImpl implements Match {
     if (oldMatchFolder.exists()) {
       FileUtils.delete(oldMatchFolder);
     }
-  }
-
-  @Override
-  public int compareTo(Match o) {
-    return Comparator.comparing(Match::getDuration).thenComparing(Match::getId).compare(this, o);
   }
 
   @Override

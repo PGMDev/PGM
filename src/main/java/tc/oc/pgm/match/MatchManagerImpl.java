@@ -1,12 +1,7 @@
 package tc.oc.pgm.match;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import java.util.HashMap;
-import java.util.Map;
-import javax.annotation.Nullable;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.PGM;
@@ -14,6 +9,12 @@ import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.MatchPlayer;
+
+import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class MatchManagerImpl implements MatchManager {
 
@@ -43,7 +44,7 @@ public class MatchManagerImpl implements MatchManager {
     PGM.get()
         .getServer()
         .getScheduler()
-        .runTaskLaterAsynchronously(PGM.get(), this::cleanUp, 20 * 10);
+        .runTaskLaterAsynchronously(PGM.get(), this::cleanUp, 20 * 10 /* 10 seconds later */);
   }
 
   @Override

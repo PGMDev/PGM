@@ -35,7 +35,7 @@ public class ControlPointModule implements MapModule {
     for (ControlPointDefinition definition : this.definitions) {
       ControlPoint controlPoint = new ControlPoint(match, definition);
       match.getFeatureContext().add(controlPoint);
-      match.needMatchModule(GoalMatchModule.class).addGoal(controlPoint);
+      match.needModule(GoalMatchModule.class).addGoal(controlPoint);
       controlPoints.add(controlPoint);
     }
 

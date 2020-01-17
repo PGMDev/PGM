@@ -91,7 +91,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     super(definition, match);
     this.nets = nets;
 
-    TeamMatchModule tmm = match.getMatchModule(TeamMatchModule.class);
+    TeamMatchModule tmm = match.getModule(TeamMatchModule.class);
 
     if (definition.getOwner() != null) {
       this.owner = tmm.getTeam(definition.getOwner());

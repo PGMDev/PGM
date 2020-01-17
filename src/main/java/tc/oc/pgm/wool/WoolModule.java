@@ -11,7 +11,7 @@ import org.bukkit.util.Vector;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.MapModule;
-import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
@@ -44,11 +44,11 @@ public class WoolModule implements MapModule {
   public MatchModule createMatchModule(Match match) {
     Multimap<Team, MonumentWool> wools = ArrayListMultimap.create();
     for (Entry<TeamFactory, MonumentWoolFactory> woolEntry : this.woolFactories.entries()) {
-      Team team = match.needMatchModule(TeamMatchModule.class).getTeam(woolEntry.getKey());
+      Team team = match.needModule(TeamMatchModule.class).getTeam(woolEntry.getKey());
       MonumentWool wool = new MonumentWool(woolEntry.getValue(), match);
       match.getFeatureContext().add(wool);
       wools.put(team, wool);
-      match.needMatchModule(GoalMatchModule.class).addGoal(wool);
+      match.needModule(GoalMatchModule.class).addGoal(wool);
     }
     return new WoolMatchModule(match, wools);
   }
@@ -73,7 +73,7 @@ public class WoolModule implements MapModule {
             teamModule.parseTeam(XMLUtils.getRequiredAttribute(woolEl, "team"), factory);
         DyeColor color = XMLUtils.parseDyeColor(XMLUtils.getRequiredAttribute(woolEl, "color"));
         Region placement;
-        if (factory.getProto().isOlderThan(ProtoVersions.MODULE_SUBELEMENT_VERSION)) {
+        if (factory.getProto().isOlderThan(MapProtos.MODULE_SUBELEMENT_VERSION)) {
           placement = parser.parseChildren(woolEl);
         } else {
           placement = parser.parseRequiredRegionProperty(woolEl, "monument");
@@ -89,7 +89,7 @@ public class WoolModule implements MapModule {
                 woolEl, "monument", new ProximityMetric(ProximityMetric.Type.CLOSEST_BLOCK, false));
 
         Vector location;
-        if (factory.getProto().isOlderThan(ProtoVersions.WOOL_LOCATIONS)) {
+        if (factory.getProto().isOlderThan(MapProtos.WOOL_LOCATIONS)) {
           // The default location is at infinity, so players/blocks are always an infinite distance
           // from it
           location =

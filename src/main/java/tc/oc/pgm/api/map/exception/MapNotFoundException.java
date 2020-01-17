@@ -1,16 +1,28 @@
 package tc.oc.pgm.api.map.exception;
 
-import javax.annotation.Nullable;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapSource;
+
+import javax.annotation.Nullable;
 
 /** Thrown when a {@link MapSource} cannot find a map. */
 public class MapNotFoundException extends RuntimeException {
 
   private final @Nullable MapInfo info;
 
-  public MapNotFoundException() {
-    this(null, null, null);
+  public MapNotFoundException(MapInfo info, String message, Throwable cause) {
+    super(
+        info == null ? message : message == null ? info.getId() : info.getId() + ": " + message,
+        cause);
+    this.info = info;
+  }
+
+  public @Nullable MapInfo getMap() {
+    return info;
+  }
+
+  public MapNotFoundException(MapInfo info) {
+    this(info, null, null);
   }
 
   public MapNotFoundException(String message) {
@@ -25,16 +37,7 @@ public class MapNotFoundException extends RuntimeException {
     this(info, message, null);
   }
 
-  public MapNotFoundException(MapInfo info, String message, Throwable cause) {
-    super(message, cause);
-    this.info = info;
-  }
-
   public MapNotFoundException(String message, Throwable cause) {
     this(null, message, cause);
-  }
-
-  public @Nullable MapInfo getMap() {
-    return info;
   }
 }

@@ -1,7 +1,6 @@
 package tc.oc.pgm.controlpoint;
 
 import com.google.common.collect.Lists;
-import java.util.List;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -18,6 +17,8 @@ import tc.oc.pgm.regions.SectorRegion;
 import tc.oc.pgm.renewable.BlockImage;
 import tc.oc.pgm.teams.Team;
 import tc.oc.server.BukkitUtils;
+
+import java.util.List;
 
 /** Displays the status of a ControlPoint by coloring blocks in specified regions */
 public class ControlPointBlockDisplay implements Listener {
@@ -44,7 +45,7 @@ public class ControlPointBlockDisplay implements Listener {
       this.progressDisplayImage = null;
     } else {
       this.progressDisplayRegion =
-          FiniteBlockRegion.fromWorld(progressDisplayRegion, match.getWorld(), visualMaterials);
+          FiniteBlockRegion.fromWorld(progressDisplayRegion, match.getWorld(), visualMaterials, match.getMap().getProto());
       this.progressDisplayImage =
           new BlockImage(match.getWorld(), this.progressDisplayRegion.getBounds());
       this.progressDisplayImage.save();
@@ -55,7 +56,7 @@ public class ControlPointBlockDisplay implements Listener {
       this.controllerDisplayImage = null;
     } else {
       FiniteBlockRegion unfilteredControllerDisplayRegion =
-          FiniteBlockRegion.fromWorld(controllerDisplayRegion, match.getWorld(), visualMaterials);
+          FiniteBlockRegion.fromWorld(controllerDisplayRegion, match.getWorld(), visualMaterials, match.getMap().getProto());
 
       // Ensure the controller and progress display regions do not overlap. The progress display has
       // priority.

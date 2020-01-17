@@ -1,5 +1,6 @@
 package tc.oc.pgm.controlpoint;
 
+import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.util.Vector;
 import org.jdom2.Element;
@@ -18,8 +19,6 @@ import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
-import java.util.List;
-
 public abstract class ControlPointParser {
   private static final Filter VISUAL_MATERIALS =
       AnyFilter.of(
@@ -30,7 +29,7 @@ public abstract class ControlPointParser {
           new BlockFilter(Material.STAINED_GLASS_PANE));
 
   public static ControlPointDefinition parseControlPoint(
-          MapFactory factory, Element elControlPoint, boolean koth) throws InvalidXMLException {
+      MapFactory factory, Element elControlPoint, boolean koth) throws InvalidXMLException {
     String id = elControlPoint.getAttributeValue("id");
     RegionParser regionParser = factory.getRegions();
     FilterParser filterParser = factory.getFilters();
@@ -57,7 +56,7 @@ public abstract class ControlPointParser {
 
     String name = elControlPoint.getAttributeValue("name", "Hill");
     TeamFactory initialOwner =
-            factory
+        factory
             .getModule(TeamModule.class)
             .parseTeam(elControlPoint.getAttribute("initial-owner"), factory);
     Vector capturableDisplayBeacon = XMLUtils.parseVector(elControlPoint.getAttribute("beacon"));

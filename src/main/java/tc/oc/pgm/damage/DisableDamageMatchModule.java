@@ -61,7 +61,7 @@ public class DisableDamageMatchModule implements MatchModule, Listener {
     if (victim == null) return;
 
     ParticipantState attacker =
-        match.needMatchModule(TrackerMatchModule.class).getOwner(event.getCombuster());
+        match.needModule(TrackerMatchModule.class).getOwner(event.getCombuster());
 
     // Disabling FIRE/LAVA damage also prevents setting on fire
     if (!this.canDamage(getBlockDamageCause(event.getCombuster()), victim, attacker)) {
@@ -74,7 +74,7 @@ public class DisableDamageMatchModule implements MatchModule, Listener {
     MatchPlayer victim = match.getParticipant(event.getEntity());
     if (victim == null) return;
 
-    DamageInfo damageInfo = match.needMatchModule(TrackerMatchModule.class).resolveDamage(event);
+    DamageInfo damageInfo = match.needModule(TrackerMatchModule.class).resolveDamage(event);
     if (!canDamage(event.getCause(), victim, damageInfo)) {
       event.setCancelled(true);
     }

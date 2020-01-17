@@ -1,10 +1,10 @@
 package tc.oc.pgm.api.module;
 
-import tc.oc.pgm.api.module.exception.ModuleLoadException;
-
+/**
+ * An immutable code module that can dynamically load and unload.
+ *
+ * @see tc.oc.pgm.api.map.MapModule
+ * @see tc.oc.pgm.api.match.MatchModule
+ */
 public interface Module {
-
-  default void load() throws ModuleLoadException {}
-
-  default void unload() {}
 }

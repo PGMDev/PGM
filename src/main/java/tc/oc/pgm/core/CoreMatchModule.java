@@ -1,6 +1,6 @@
 package tc.oc.pgm.core;
 
-import static tc.oc.pgm.api.map.ProtoVersions.MODES_IMPLEMENTATION_VERSION;
+import static tc.oc.pgm.api.map.MapProtos.MODES_IMPLEMENTATION_VERSION;
 
 import java.util.List;
 import org.bukkit.Material;

@@ -14,7 +14,7 @@ public abstract class OwnedGoal<T extends OwnedGoalDefinition> extends SimpleGoa
 
   public OwnedGoal(T definition, Match match) {
     super(definition, match);
-    this.owner = match.needMatchModule(TeamMatchModule.class).getTeam(definition.getOwner());
+    this.owner = match.needModule(TeamMatchModule.class).getTeam(definition.getOwner());
   }
 
   public @Nullable Team getOwner() {

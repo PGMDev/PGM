@@ -11,7 +11,7 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.xml.InvalidXMLException;
 
-public class TimeLockModule implements MapModule {
+public class TimeLockModule implements MapModule, MatchModule {
   private final boolean lock;
 
   public TimeLockModule(boolean lock) {
@@ -39,7 +39,6 @@ public class TimeLockModule implements MapModule {
 
   @Override
   public MatchModule createMatchModule(Match match) throws ModuleLoadException {
-    return null; // FIXME: PGMListener calls the TimeLockModule and asks, should have its own
-    // MatchModule
+    return this;
   }
 }

@@ -2,6 +2,11 @@ package tc.oc.pgm.filters;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Nullable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
@@ -29,12 +34,6 @@ import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.StringUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
-
-import javax.annotation.Nullable;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public abstract class FilterParser {
 
@@ -354,11 +353,8 @@ public abstract class FilterParser {
     XMLFeatureReference<TeamFactory> team;
     if (attrTeam != null) {
       if (anyTeam) throw new InvalidXMLException("Cannot combine attributes 'team' and 'any'", el);
-      team =
-          this.factory
+      team = this.factory.getFeatures().createReference(new Node(attrTeam), TeamFactory.class);
 
-              .getFeatures()
-              .createReference(new Node(attrTeam), TeamFactory.class);
     } else {
       team = null;
     }
@@ -371,9 +367,7 @@ public abstract class FilterParser {
     Node postAttr = Node.fromAttr(el, "post");
     return new FlagStateFilter(
         this.factory.getFeatures().createReference(new Node(el), FlagDefinition.class),
-        postAttr == null
-            ? null
-            : this.factory.getFeatures().createReference(postAttr, Post.class),
+        postAttr == null ? null : this.factory.getFeatures().createReference(postAttr, Post.class),
         state);
   }
 

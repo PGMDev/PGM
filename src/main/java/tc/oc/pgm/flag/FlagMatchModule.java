@@ -30,7 +30,7 @@ public class FlagMatchModule implements MatchModule, Listener {
       Flag flag = new Flag(match, definition, netsBuilder.build());
       flags.put(definition, flag);
       match.getFeatureContext().add(flag);
-      match.needMatchModule(GoalMatchModule.class).addGoal(flag);
+      match.needModule(GoalMatchModule.class).addGoal(flag);
     }
     this.flags = flags.build();
   }

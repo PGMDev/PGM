@@ -1,6 +1,9 @@
 package tc.oc.pgm.flag;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Collection;
+import java.util.List;
+import java.util.logging.Logger;
 import org.jdom2.Document;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -12,10 +15,6 @@ import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.xml.InvalidXMLException;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.logging.Logger;
 
 public class FlagModule implements MapModule {
   private final ImmutableList<Post> posts;

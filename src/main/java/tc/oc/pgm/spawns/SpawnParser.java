@@ -1,8 +1,11 @@
 package tc.oc.pgm.spawns;
 
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.Nullable;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.filters.AllFilter;
 import tc.oc.pgm.filters.Filter;
@@ -20,10 +23,6 @@ import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
 
 public class SpawnParser {
   protected final MapFactory factory;
@@ -43,7 +42,7 @@ public class SpawnParser {
     attributes = this.parseAttributes(el, attributes);
     List<PointProvider> providers;
 
-    if (factory.getProto().isOlderThan(ProtoVersions.MODULE_SUBELEMENT_VERSION)) {
+    if (factory.getProto().isOlderThan(MapProtos.MODULE_SUBELEMENT_VERSION)) {
       providers = this.pointParser.parse(el, attributes.providerAttributes);
     } else {
       providers =

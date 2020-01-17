@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-/** A source where {@link MapContext} documents and files are downloaded. */
+/** A source where {@link MapInfo} documents and files are downloaded. */
 public interface MapSource {
   String FILE = "map.xml";
 
@@ -33,8 +33,7 @@ public interface MapSource {
   InputStream getDocument() throws IOException;
 
   /**
-   * Get whether any subsequent calls to {@link #getDocument()} will result in a different {@link
-   * InputStream}.
+   * Get whether future calls to {@link #getDocument()} will return different results.
    *
    * @return If there are available updates, resulting in a different document.
    * @throws MapNotFoundException If the document can no longer be found.

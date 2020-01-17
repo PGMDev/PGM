@@ -1,9 +1,13 @@
 package tc.oc.pgm.api.module.exception;
 
-import javax.annotation.Nullable;
 import tc.oc.pgm.api.module.Module;
 
-public class ModuleLoadException extends Exception {
+import javax.annotation.Nullable;
+
+/**
+ * When a {@link Module} or its factory is unable to load.
+ */
+public class ModuleLoadException extends RuntimeException {
 
   private final @Nullable Module instance;
   private final @Nullable Class<? extends Module> key;

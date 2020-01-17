@@ -2,25 +2,26 @@ package tc.oc.pgm.map;
 
 import com.google.common.collect.Iterators;
 import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapSource;
-import tc.oc.pgm.api.map.ProtoVersions;
 import tc.oc.pgm.api.map.exception.MapNotFoundException;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
-import tc.oc.util.SemanticVersion;
 import tc.oc.util.StringUtils;
 import tc.oc.util.logging.ClassLogger;
 
+import javax.annotation.Nullable;
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
@@ -32,37 +33,43 @@ public class MapLibraryImpl implements MapLibrary {
 
   private final Logger logger;
   private final Set<MapSourceFactory> factories;
-  private final Map<String, MapContext> loaded;
+  private final SortedMap<String, MapEntry> maps;
   private final Set<MapSource> failed;
 
-  // FIXME: all maps are loaded and kept, must off-load some and reload
+  private static class MapEntry {
+    private final MapSource source;
+    private final MapInfo info;
+    private final WeakReference<MapContext> context;
+
+    private MapEntry(MapSource source, MapInfo info, MapContext context) {
+      this.source = checkNotNull(source);
+      this.info = checkNotNull(info);
+      this.context = new WeakReference<>(checkNotNull(context));
+    }
+  }
+
   public MapLibraryImpl(Logger logger, Collection<MapSourceFactory> factories) {
     this.logger = ClassLogger.get(checkNotNull(logger), getClass());
     this.factories = Collections.synchronizedSet(new HashSet<>(checkNotNull(factories)));
-    this.loaded = Collections.synchronizedMap(new TreeMap<>());
+    this.maps = Collections.synchronizedSortedMap(new TreeMap<>());
     this.failed = Collections.synchronizedSet(new HashSet<>());
   }
 
   @Override
-  public SemanticVersion getProto() {
-    return ProtoVersions.FILTER_FEATURES;
-  }
-
-  @Override
-  public MapContext getMap(String idOrName) {
+  public MapInfo getMap(String idOrName) {
     idOrName = MapInfoImpl.normalizeName(idOrName);
 
-    final MapContext map = loaded.get(idOrName);
+    MapEntry map = maps.get(idOrName);
     if (map == null) {
-      return StringUtils.bestFuzzyMatch(idOrName, loaded, 0.75);
+      map = StringUtils.bestFuzzyMatch(idOrName, maps, 0.75);
     }
 
-    return map;
+    return map == null ? null : map.info;
   }
 
   @Override
-  public Collection<MapContext> getMaps() {
-    return Collections.unmodifiableCollection(loaded.values());
+  public Iterator<MapInfo> getMaps() {
+    return maps.values().stream().map(entry -> entry.info).iterator();
   }
 
   @Override
@@ -81,41 +88,66 @@ public class MapLibraryImpl implements MapLibrary {
       try {
         sources.add(factory.loadNewSources());
       } catch (MapNotFoundException e) {
-        logger.log(Level.WARNING, "Skipped source: " + factory, e);
         factories.remove();
+        logger.log(Level.WARNING, "Skipped source: " + factory, e);
       }
     }
 
     return CompletableFuture.runAsync(
-        () -> Iterators.concat(sources.iterator()).forEachRemaining(this::addSource));
+        () ->
+            Iterators.concat(sources.iterator())
+                .forEachRemaining(source -> loadMapSafe(source, null)));
   }
 
-  private void addSource(MapSource source) {
-    if (source == null) return;
-    MapFactory factory = null;
-
-    try {
-      factory = new MapFactoryImpl(logger, source);
-      factory.load(); // TODO: lazily load maps based on whether they are set next
-    } catch (ModuleLoadException e) {
-      failed.add(source);
-      logger.log(Level.WARNING, "Skipped map: " + source.getId(), e);
-      return;
-    } catch (MapNotFoundException e) {
-      failed.remove(source);
-      logger.log(Level.WARNING, "Missing map: " + source.getId(), e);
-      return;
+  @Override
+  public CompletableFuture<MapContext> loadExistingMap(String id) {
+    final MapEntry entry = maps.get(id);
+    if (entry == null) {
+      return CompletableFuture.supplyAsync(
+          () -> {
+            throw new MapNotFoundException("Could not find map: " + id);
+          });
     }
 
-    final MapContext context = new MapContextImpl(factory.getInfo(), source, factory);
-    loaded.merge(
-        context.getId(),
-        context,
-        (MapContext old, MapContext now) -> {
-          logger.log(Level.INFO, "Replaced map: " + now.getId());
-          return now;
-        });
-    failed.remove(source);
-    logger.log(Level.INFO, "Loaded map: " + context.getId());
+    final MapContext context = entry.context.get();
+    if (context != null) {
+      return CompletableFuture.completedFuture(context);
+    }
+
+    return CompletableFuture.supplyAsync(() -> loadMap(entry.source, entry.info.getId()));
+  }
+
+  private MapContext loadMap(MapSource source, @Nullable String mapId) throws MapNotFoundException, ModuleLoadException {
+    final MapFactory factory = new MapFactoryImpl(logger, source);
+    final MapInfo info;
+    final MapContext context;
+
+    try {
+      info = factory.buildInfo();
+      context = factory.buildContext();
+    } catch (ModuleLoadException e) {
+      failed.add(source);
+      throw e;
+    } catch (MapNotFoundException e) {
+      failed.remove(source);
+      maps.remove(mapId);
+      throw e;
+    }
+
+    maps.put(info.getId(), new MapEntry(source, info, context));
+    return context;
+  }
+
+  private @Nullable MapContext loadMapSafe(MapSource source, @Nullable String mapId) {
+    try {
+      final MapContext context = loadMap(source, mapId);
+      logger.log(Level.INFO, (mapId == null ? "Loaded map: " : "Replaced map: ") + context.getId());
+      return context;
+    } catch (MapNotFoundException e) {
+      logger.log(Level.WARNING, "Skipped map: " + (mapId == null ? source.getId() : mapId), e);
+    } catch (ModuleLoadException e) {
+      logger.log(Level.WARNING, "Missing map: " + (mapId == null ? source.getId() : mapId), e);
+    }
+    return null;
   }
 }

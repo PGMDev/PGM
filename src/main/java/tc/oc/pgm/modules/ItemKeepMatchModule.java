@@ -78,7 +78,7 @@ public class ItemKeepMatchModule implements MatchModule, Listener {
       this.keptInv.put(player, keptItems);
     }
 
-    KitMatchModule kitMatchModule = this.match.getMatchModule(KitMatchModule.class);
+    KitMatchModule kitMatchModule = this.match.getModule(KitMatchModule.class);
     ItemStack[] wearing = event.getEntity().getInventory().getArmorContents();
     Map<ArmorType, ItemStack> keptArmor = new HashMap<>();
     for (int slot = 0; slot < wearing.length; slot++) {

@@ -1,11 +1,11 @@
 package tc.oc.pgm.rotation;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
@@ -27,10 +27,12 @@ public class RandomMapOrder implements MapOrder {
   private MapInfo getRandomMap() {
     Iterator<Match> iterator = matchManager.getMatches().iterator();
     MapInfo current = iterator.hasNext() ? iterator.next().getMap() : null;
-    List<MapContext> maps = new ArrayList<>(PGM.get().getMapLibrary().getMaps());
+    List<MapInfo> maps =
+        new ArrayList<>(
+            ImmutableList.copyOf(PGM.get().getMapLibrary().getMaps())); // FIXME: performance
     Collections.shuffle(maps);
 
-    for (MapContext map : maps) {
+    for (MapInfo map : maps) {
       if (map != current) return map;
     }
     return maps.get(0);

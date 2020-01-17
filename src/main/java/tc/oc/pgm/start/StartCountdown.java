@@ -28,7 +28,7 @@ public class StartCountdown extends PreMatchCountdown {
     super(match);
     this.huddle = checkNotNull(huddle);
     this.forced = forced;
-    this.tmm = match.getMatchModule(TeamMatchModule.class);
+    this.tmm = match.getModule(TeamMatchModule.class);
   }
 
   protected boolean willHuddle() {

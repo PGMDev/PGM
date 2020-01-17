@@ -20,6 +20,7 @@ import tc.oc.identity.RealIdentity;
 import tc.oc.named.CachingNameRenderer;
 import tc.oc.named.NameRenderer;
 import tc.oc.pgm.api.Datastore;
+import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
@@ -29,7 +30,6 @@ import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.factory.MatchFactory;
-import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
@@ -93,9 +93,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider {
+public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, Listener {
 
   private Logger gameLogger;
   private Modules moduleRegistry;
@@ -138,14 +136,14 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider {
       getConfig().options().copyDefaults(true);
       saveConfig();
     } catch (Throwable t) {
-      logger.log(Level.SEVERE, "Could not load or save configuration", t);
+      logger.log(Level.WARNING, "Failed to create or save configuration", t);
     }
 
     try {
       datastore = new DatastoreImpl(new File(getDataFolder(), "pgm.db"));
       datastoreCache = new DatastoreCacheImpl(datastore);
     } catch (SQLException e) {
-      logger.log(Level.SEVERE, "Could not load SQL database", e);
+      shutdown("Failed to initialize SQL database", e);
       return;
     }
 
@@ -158,50 +156,27 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider {
     // FIXME: Use gameLogger
     mapLibrary = new MapLibraryImpl(logger, Config.Maps.sources());
     try {
-      mapLibrary.loadNewMaps(false).get(15, TimeUnit.SECONDS);
+      mapLibrary.loadNewMaps(false).get(10, TimeUnit.SECONDS);
     } catch (InterruptedException | TimeoutException e) {
-      if (mapLibrary.getMaps().isEmpty()) {
-        logger.log(Level.SEVERE, "Could not load at least 1 map before timeout");
+      if (!mapLibrary.getMaps().hasNext()) {
+        shutdown("Failed to load at least 1 map before timeout", null);
         return;
       }
     } catch (ExecutionException e) {
-      if (mapLibrary.getMaps().isEmpty()) {
-        logger.log(Level.SEVERE, "Could not load any maps", e.getCause());
+      if (!mapLibrary.getMaps().hasNext()) {
+        shutdown("Failed to load any maps", e.getCause());
         return;
       } else {
-        logger.log(Level.WARNING, "Could not load some maps", e.getCause());
+        logger.log(Level.WARNING, "Could not build some maps", e.getCause());
       }
-    }
-
-    final MapContext map;
-    try {
-      map = checkNotNull(mapLibrary.getMaps().iterator().next());
-    } catch (Throwable t) {
-      logger.log(Level.SEVERE, "Could not load at least 1 map after timeout");
-      return;
     }
 
     matchManager = new MatchManagerImpl();
     matchFactory = new MatchFactoryImpl(logger, server);
-    try {
-      final Match match = matchFactory.createPreMatch(map).join();
-      if (!matchFactory.createMatch(match, null).join()) {
-        return;
-      }
-      matchManager.addMatch(match);
-    } catch (Throwable t) {
-      return;
-    }
-
-    mapOrder =
-        new RandomMapOrder(matchManager); // TODO: RotationManager and use it to get first match
-
+    mapOrder = new RandomMapOrder(matchManager); // TODO: RotationManager and use it to get first match
     prefixRegistry = new PrefixRegistryImpl();
     matchNameRenderer = new MatchNameRenderer(matchManager);
     nameRenderer = new CachingNameRenderer(matchNameRenderer);
-
-    registerListeners();
-    registerCommands();
 
     if (Config.PlayerList.enabled()) {
       matchTabManager = new MatchTabManager(this);
@@ -211,16 +186,41 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider {
     if (Config.AutoRestart.enabled()) {
       getServer().getScheduler().runTaskTimer(this, new ShouldRestartTask(this), 0, 20 * 60);
     }
+
+    registerListeners();
+    registerCommands();
+
+    getServer().getScheduler().scheduleSyncDelayedTask(PGM.get(), () -> {
+      MapContext map;
+      for(int i = 0 ;; i += 1) {
+        final String id = mapOrder.popNextMap().getId();
+        try {
+          map = mapLibrary.loadExistingMap(id).get(5, TimeUnit.SECONDS);
+          break;
+        } catch (Throwable t) {
+          getLogger().log(Level.WARNING, "Failed to load map: " + id, t);
+          if(i < 5) continue;
+          shutdown("Failed to load any maps", t);
+          return;
+        }
+      }
+
+      try {
+        final Match match = matchFactory.createPreMatch(map).join();
+        matchFactory.createMatch(match, null);
+        matchManager.addMatch(match);
+      } catch (Throwable t) {
+        shutdown("Failed to load first match", t);
+      }
+    });
   }
 
   @Override
   public void onDisable() {
-    if (matchTabManager != null) {
-      matchTabManager.disable();
-    }
-    matchManager.getMatches().iterator().forEachRemaining(Match::unload);
-    datastore.shutdown();
-    datastoreCache.shutdown();
+    if (matchTabManager != null) matchTabManager.disable();
+    if(matchManager != null) matchManager.getMatches().iterator().forEachRemaining(Match::unload);
+    if(datastore != null) datastore.shutdown();
+    if(datastoreCache != null) datastoreCache.shutdown();
     moduleRegistry = null;
     datastore = null;
     datastoreCache = null;
@@ -235,6 +235,11 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider {
   public void reloadConfig() {
     super.reloadConfig();
     getServer().getPluginManager().callEvent(new ConfigLoadEvent(getConfig()));
+  }
+
+  private void shutdown(String message, @Nullable Throwable cause) {
+    getLogger().log(Level.SEVERE, message, cause);
+    getServer().shutdown();
   }
 
   @Override
@@ -369,6 +374,7 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider {
   }
 
   private void registerListeners() {
+    registerEvents(this);
     registerEvents(prefixRegistry);
     registerEvents(matchNameRenderer);
     registerEvents(new GeneralizingListener(this));

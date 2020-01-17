@@ -136,7 +136,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       match.addParty(team);
     }
 
-    match.needMatchModule(JoinMatchModule.class).registerHandler(this);
+    match.needModule(JoinMatchModule.class).registerHandler(this);
 
     updateMaxPlayers();
     updateReadiness();
@@ -154,7 +154,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     if (match.isRunning()) return;
 
     final int playersQueued =
-        match.needMatchModule(JoinMatchModule.class).getQueuedParticipants().getPlayers().size();
+        match.needModule(JoinMatchModule.class).getQueuedParticipants().getPlayers().size();
     final int playersJoined = match.getParticipants().size();
 
     Team singleTeam = null;
@@ -178,7 +178,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       playersNeeded = teamNeeded;
     }
 
-    final StartMatchModule smm = match.needMatchModule(StartMatchModule.class);
+    final StartMatchModule smm = match.needModule(StartMatchModule.class);
     if (playersNeeded > 0) {
       smm.addUnreadyReason(new NeedMorePlayers(singleTeam, playersNeeded));
 

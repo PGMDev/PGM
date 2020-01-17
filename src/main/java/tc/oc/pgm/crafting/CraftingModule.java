@@ -1,6 +1,12 @@
 package tc.oc.pgm.crafting;
 
 import com.google.common.collect.ImmutableSet;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
+import javax.annotation.Nullable;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
@@ -17,13 +23,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
 
 public class CraftingModule implements MapModule {
 
@@ -90,7 +89,6 @@ public class CraftingModule implements MapModule {
     private ItemStack parseRecipeResult(MapFactory factory, Element elRecipe)
         throws InvalidXMLException {
       return factory
-
           .getKits()
           .parseItem(XMLUtils.getRequiredUniqueChild(elRecipe, "result"), false);
     }

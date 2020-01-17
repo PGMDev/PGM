@@ -18,8 +18,8 @@ public class ItemModifyMatchModule implements MatchModule, Listener {
 
   private final ItemModifyModule imm;
 
-  public ItemModifyMatchModule(Match match) {
-    this.imm = match.getMapContext().needModule(ItemModifyModule.class);
+  public ItemModifyMatchModule(Match match, ItemModifyModule imm) {
+    this.imm = imm;
   }
 
   private boolean applyRules(ItemStack stack) {

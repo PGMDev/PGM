@@ -2,6 +2,9 @@ package tc.oc.pgm.proximity;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.Set;
+import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -18,10 +21,6 @@ import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
-
-import java.util.Collection;
-import java.util.Set;
-import java.util.logging.Logger;
 
 public class ProximityAlarmModule implements MapModule {
   private final Set<ProximityAlarmDefinition> definitions;
@@ -68,8 +67,7 @@ public class ProximityAlarmModule implements MapModule {
           filterParser.parseFilterProperty(
               elAlarm, "notify", new InverseFilter(definition.detectFilter));
 
-      definition.detectRegion =
-              factory.getRegions().parseRequiredRegionProperty(elAlarm, "region");
+      definition.detectRegion = factory.getRegions().parseRequiredRegionProperty(elAlarm, "region");
       definition.alertMessage = elAlarm.getAttributeValue("message"); // null = no message
 
       if (definition.alertMessage != null) {

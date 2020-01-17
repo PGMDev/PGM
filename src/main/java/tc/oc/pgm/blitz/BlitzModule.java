@@ -1,5 +1,9 @@
 package tc.oc.pgm.blitz;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.List;
+import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.MapModule;
@@ -9,11 +13,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
-
-import java.util.List;
-import java.util.logging.Logger;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public class BlitzModule implements MapModule {
   final BlitzConfig config;

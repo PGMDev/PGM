@@ -1,11 +1,14 @@
 package tc.oc.pgm.regions;
 
 import com.google.common.base.Splitter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import tc.oc.component.Component;
-import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.FilterNode;
@@ -15,10 +18,6 @@ import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.SemanticVersion;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class RegionFilterApplicationParser {
   private final MapFactory factory;
@@ -38,7 +37,7 @@ public class RegionFilterApplicationParser {
   }
 
   private boolean useId() {
-    return proto.isNoOlderThan(ProtoVersions.FILTER_FEATURES);
+    return proto.isNoOlderThan(MapProtos.FILTER_FEATURES);
   }
 
   private void add(Element el, RegionFilterApplication rfa) throws InvalidXMLException {

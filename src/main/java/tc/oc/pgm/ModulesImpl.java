@@ -1,10 +1,14 @@
 package tc.oc.pgm;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
-import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.blitz.BlitzModule;
 import tc.oc.pgm.blockdrops.BlockDropsModule;
 import tc.oc.pgm.bossbar.BossBarMatchModule;
@@ -69,15 +73,12 @@ import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.wool.WoolModule;
 import tc.oc.pgm.worldborder.WorldBorderModule;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 public class ModulesImpl implements Modules {
 
-  private static final Map<Class<? extends MapModule>, MapModuleFactory<? extends MapModule>> mapModuleFactories =
-      new ConcurrentHashMap<>();
-  private static final Map<Class<? extends MatchModule>, MatchModuleFactory<? extends MatchModule>> matchModuleFactories =
-      new ConcurrentHashMap<>();
+  private static final Map<Class<? extends MapModule>, MapModuleFactory<? extends MapModule>>
+      mapModuleFactories = new ConcurrentHashMap<>();
+  private static final Map<Class<? extends MatchModule>, MatchModuleFactory<? extends MatchModule>>
+      matchModuleFactories = Collections.synchronizedMap(new LinkedHashMap<>());
 
   static {
     registerMapModuleFactories();
@@ -85,7 +86,8 @@ public class ModulesImpl implements Modules {
   }
 
   @Override
-  public Map<Class<? extends MapModule>, MapModuleFactory<? extends MapModule>> getMapModuleFactories() {
+  public Map<Class<? extends MapModule>, MapModuleFactory<? extends MapModule>>
+      getMapModuleFactories() {
     return mapModuleFactories;
   }
 
@@ -143,14 +145,16 @@ public class ModulesImpl implements Modules {
   }
 
   @Override
-  public Map<Class<? extends MatchModule>, MatchModuleFactory<? extends MatchModule>> getMatchModuleFactories() {
+  public Map<Class<? extends MatchModule>, MatchModuleFactory<? extends MatchModule>>
+      getModuleFactories() {
     return matchModuleFactories;
   }
 
   private static void registerMatchModuleFactories() {
+    // Note: unlike map modules, these are loaded in the order defined below
     matchModuleFactories.put(BossBarMatchModule.class, BossBarMatchModule::new);
     matchModuleFactories.put(
-        StartMatchModule.class, StartMatchModule::new); // Used to be map module, requires=bossbar
+        StartMatchModule.class, StartMatchModule::new); // must build after boss bars
     matchModuleFactories.put(EventFilterMatchModule.class, EventFilterMatchModule::new);
     matchModuleFactories.put(MultiTradeMatchModule.class, MultiTradeMatchModule::new);
     matchModuleFactories.put(SnapshotMatchModule.class, SnapshotMatchModule::new);

@@ -1,10 +1,12 @@
 package tc.oc.pgm.regions;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Collection;
+import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.MapModule;
-import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
@@ -12,9 +14,6 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.kits.KitModule;
 import tc.oc.xml.InvalidXMLException;
-
-import java.util.Collection;
-import java.util.logging.Logger;
 
 public class RegionModule implements MapModule {
   protected final RFAContext rfaContext;
@@ -42,7 +41,7 @@ public class RegionModule implements MapModule {
     public RegionModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       RegionParser parser = factory.getRegions();
-      boolean unified = factory.getProto().isNoOlderThan(ProtoVersions.FILTER_FEATURES);
+      boolean unified = factory.getProto().isNoOlderThan(MapProtos.FILTER_FEATURES);
 
       // If proto >= 1.4 then the filter module will parse all regions
       if (!unified) {

@@ -5,10 +5,11 @@ import org.jdom2.Document;
 import org.jdom2.input.JDOMParseException;
 import org.jdom2.input.SAXBuilder;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.MapSource;
-import tc.oc.pgm.api.map.ProtoVersions;
 import tc.oc.pgm.api.map.exception.MapNotFoundException;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
@@ -35,7 +36,8 @@ import java.util.logging.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? extends MapModule>> implements MapFactory {
+public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? extends MapModule>>
+    implements MapFactory {
 
   private static final SAXBuilder DOCUMENT_FACTORY = new SAXBuilder();
 
@@ -87,20 +89,28 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
       final InvalidXMLException cause = InvalidXMLException.fromJDOM(e, source.getId());
       throw new ModuleLoadException(cause.getMessage(), cause);
     } catch (Throwable t) {
-      throw new ModuleLoadException("Unhandled " + t.getClass().getName() + " from " + source.getId(), t);
+      throw new ModuleLoadException(
+          "Unhandled " + t.getClass().getName() + " from " + source.getId(), t);
     }
   }
 
   @Override
-  public void load() throws ModuleLoadException, MapNotFoundException {
+  public MapInfo buildInfo() throws MapNotFoundException, ModuleLoadException {
+    preLoad();
+    return checkNotNull(info);
+  }
+
+  @Override
+  public MapContext buildContext() throws MapNotFoundException, ModuleLoadException {
+    preLoad();
     try {
-      preLoad();
-      super.load();
-      postLoad();
-    } catch (ModuleLoadException | MapNotFoundException e) {
-      unload();
+      loadAll();
+    } catch (ModuleLoadException e) {
+      unloadAll();
       throw e;
     }
+    postLoad();
+    return new MapContextImpl(info, source, this);
   }
 
   private void postLoad() throws ModuleLoadException {
@@ -108,7 +118,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
       throw new ModuleLoadException(e);
     }
 
-    for (MapModule module : getModules().values()) {
+    for (MapModule module : getModules()) {
       try {
         module.postParse(this, logger, document);
       } catch (InvalidXMLException e) {
@@ -119,32 +129,24 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
 
   @Override
   public String toString() {
-    return new ToStringBuilder(this)
-        .append("id", source.getId())
-        .append("info", info)
-        .build();
-  }
-
-  @Override
-  public MapInfo getInfo() {
-    return info;
+    return new ToStringBuilder(this).append("id", source.getId()).append("info", info).build();
   }
 
   @Override
   public SemanticVersion getProto() {
-    if(info == null) {
+    if (info == null) {
       throw new IllegalStateException("Tried to access proto when info is not loaded");
     }
     return info.getProto();
   }
 
   private boolean isLegacy() {
-    return getProto().isOlderThan(ProtoVersions.FILTER_FEATURES);
+    return getProto().isOlderThan(MapProtos.FILTER_FEATURES);
   }
 
   @Override
   public RegionParser getRegions() {
-    if(regions == null) {
+    if (regions == null) {
       regions = isLegacy() ? new LegacyRegionParser(this) : new FeatureRegionParser(this);
     }
     return regions;
@@ -152,7 +154,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
 
   @Override
   public FilterParser getFilters() {
-    if(filters == null) {
+    if (filters == null) {
       filters = isLegacy() ? new LegacyFilterParser(this) : new FeatureFilterParser(this);
     }
     return filters;
@@ -160,7 +162,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
 
   @Override
   public KitParser getKits() {
-    if(kits == null) {
+    if (kits == null) {
       kits = isLegacy() ? new LegacyKitParser(this) : new FeatureKitParser(this);
     }
     return kits;
@@ -168,10 +170,9 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
 
   @Override
   public FeatureDefinitionContext getFeatures() {
-    if(features == null) {
+    if (features == null) {
       features = new FeatureDefinitionContext();
     }
     return features;
   }
-
 }

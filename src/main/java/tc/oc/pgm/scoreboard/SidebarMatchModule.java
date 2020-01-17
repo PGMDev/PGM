@@ -84,13 +84,13 @@ public class SidebarMatchModule implements MatchModule, Listener {
     protected final String[] players = new String[MAX_ROWS];
 
     private Sidebar(Party party) {
-      this.scoreboard = match.needMatchModule(ScoreboardMatchModule.class).getScoreboard(party);
+      this.scoreboard = match.needModule(ScoreboardMatchModule.class).getScoreboard(party);
       this.objective = this.scoreboard.registerNewObjective(IDENTIFIER, "dummy");
       this.objective.setDisplayName(
           StringUtils.left(
               ComponentRenderers.toLegacyText(
                   new PersonalizedText( // FIXME: Genre sidebar probably broken
-                      match.getMapContext().getGenre(), net.md_5.bungee.api.ChatColor.AQUA),
+                      match.getMap().getGenre(), net.md_5.bungee.api.ChatColor.AQUA),
                   NullCommandSender.INSTANCE),
               32));
       this.objective.setDisplaySlot(DisplaySlot.SIDEBAR);
@@ -165,15 +165,15 @@ public class SidebarMatchModule implements MatchModule, Listener {
   }
 
   private boolean hasScores() {
-    return match.getMatchModule(ScoreMatchModule.class) != null;
+    return match.getModule(ScoreMatchModule.class) != null;
   }
 
   private boolean isBlitz() {
-    return match.getMatchModule(BlitzMatchModule.class) != null;
+    return match.getModule(BlitzMatchModule.class) != null;
   }
 
   private boolean isCompactWool() {
-    WoolMatchModule wmm = match.getMatchModule(WoolMatchModule.class);
+    WoolMatchModule wmm = match.getModule(WoolMatchModule.class);
     return wmm != null
         && MAX_ROWS < wmm.getWools().keySet().size() * 2 - 1 + wmm.getWools().values().size();
   }
@@ -308,7 +308,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
   }
 
   private String renderScore(Competitor competitor, Party viewingParty) {
-    ScoreMatchModule smm = match.needMatchModule(ScoreMatchModule.class);
+    ScoreMatchModule smm = match.needModule(ScoreMatchModule.class);
     String text = ChatColor.WHITE.toString() + (int) smm.getScore(competitor);
     if (smm.hasScoreLimit()) {
       text += ChatColor.DARK_GRAY + "/" + ChatColor.GRAY + smm.getScoreLimit();
@@ -317,7 +317,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
   }
 
   private String renderBlitz(Competitor competitor, Party viewingParty) {
-    BlitzMatchModule bmm = match.needMatchModule(BlitzMatchModule.class);
+    BlitzMatchModule bmm = match.needModule(BlitzMatchModule.class);
     if (competitor instanceof tc.oc.pgm.teams.Team) {
       return ChatColor.WHITE.toString() + bmm.getRemainingPlayers(competitor);
     } else if (competitor instanceof Tribute && bmm.getConfig().getNumLives() > 1) {
@@ -349,7 +349,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
   private void renderSidebar() {
     final boolean hasScores = hasScores();
     final boolean isBlitz = isBlitz();
-    final GoalMatchModule gmm = match.needMatchModule(GoalMatchModule.class);
+    final GoalMatchModule gmm = match.needModule(GoalMatchModule.class);
 
     Set<Competitor> competitorsWithGoals = new HashSet<>();
     List<Goal> sharedGoals = new ArrayList<>();

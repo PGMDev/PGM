@@ -34,7 +34,7 @@ public class TimeLimitCommands {
       String durationString,
       @Fallback(Type.NULL) @Switch('r') String resultString)
       throws CommandException {
-    TimeLimitMatchModule tlmm = match.getMatchModule(TimeLimitMatchModule.class);
+    TimeLimitMatchModule tlmm = match.getModule(TimeLimitMatchModule.class);
     TimeLimit existing = tlmm.getTimeLimit();
 
     if (resultString == null && durationString == null) {

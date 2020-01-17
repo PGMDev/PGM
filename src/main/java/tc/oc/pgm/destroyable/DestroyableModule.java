@@ -3,11 +3,15 @@ package tc.oc.pgm.destroyable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.api.map.MapModule;
-import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
@@ -25,11 +29,6 @@ import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
-
 public class DestroyableModule implements MapModule {
   protected final List<DestroyableFactory> destroyableFactories;
 
@@ -42,7 +41,7 @@ public class DestroyableModule implements MapModule {
     ImmutableList.Builder<Destroyable> destroyables = new ImmutableList.Builder<>();
     for (DestroyableFactory factory : this.destroyableFactories) {
       Destroyable destroyable = new Destroyable(factory, match);
-      match.needMatchModule(GoalMatchModule.class).addGoal(destroyable);
+      match.needModule(GoalMatchModule.class).addGoal(destroyable);
       match.getFeatureContext().add(destroyable);
       destroyables.add(destroyable);
     }
@@ -80,7 +79,7 @@ public class DestroyableModule implements MapModule {
         }
 
         Region region;
-        if (context.getProto().isOlderThan(ProtoVersions.MODULE_SUBELEMENT_VERSION)) {
+        if (context.getProto().isOlderThan(MapProtos.MODULE_SUBELEMENT_VERSION)) {
           region = regionParser.parseChildren(destroyableEl);
           regionParser.validate(region, BlockBoundedValidation.INSTANCE, new Node(destroyableEl));
         } else {

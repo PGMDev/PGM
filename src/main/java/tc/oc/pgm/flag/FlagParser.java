@@ -2,6 +2,9 @@ package tc.oc.pgm.flag;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.Nullable;
 import org.bukkit.DyeColor;
 import org.bukkit.util.Vector;
 import org.jdom2.Document;
@@ -23,10 +26,6 @@ import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
 
 public class FlagParser {
   private final MapFactory factory;
@@ -56,10 +55,7 @@ public class FlagParser {
 
     String id = el.getAttributeValue("id");
     FeatureReference<TeamFactory> owner =
-            factory
-
-            .getFeatures()
-            .createReference(Node.fromAttr(el, "owner"), TeamFactory.class, null);
+        factory.getFeatures().createReference(Node.fromAttr(el, "owner"), TeamFactory.class, null);
     boolean sequential = XMLUtils.parseBoolean(el.getAttribute("sequential"), false);
     boolean permanent = XMLUtils.parseBoolean(el.getAttribute("permanent"), false);
     double pointsPerSecond = XMLUtils.parseNumber(el.getAttribute("points-rate"), Double.class, 0D);
@@ -122,9 +118,7 @@ public class FlagParser {
     String id = el.getAttributeValue("id");
     Region region = factory.getRegions().parseRequiredRegionProperty(el, "region");
     FeatureReference<TeamFactory> owner =
-            factory
-            .getFeatures()
-            .createReference(Node.fromAttr(el, "owner"), TeamFactory.class, null);
+        factory.getFeatures().createReference(Node.fromAttr(el, "owner"), TeamFactory.class, null);
     double pointsPerCapture = XMLUtils.parseNumber(el.getAttribute("points"), Double.class, 0D);
     boolean sticky = XMLUtils.parseBoolean(el.getAttribute("sticky"), true);
     Filter captureFilter =
@@ -199,9 +193,7 @@ public class FlagParser {
     Boolean required = XMLUtils.parseBoolean(el.getAttribute("required"), null);
     DyeColor color = XMLUtils.parseDyeColor(el.getAttribute("color"), null);
     FeatureReference<TeamFactory> owner =
-            factory
-            .getFeatures()
-            .createReference(Node.fromAttr(el, "owner"), TeamFactory.class, null);
+        factory.getFeatures().createReference(Node.fromAttr(el, "owner"), TeamFactory.class, null);
     double pointsPerCapture = XMLUtils.parseNumber(el.getAttribute("points"), Double.class, 0D);
     double pointsPerSecond = XMLUtils.parseNumber(el.getAttribute("points-rate"), Double.class, 0D);
     Filter pickupFilter = filterParser.parseFilterProperty(el, "pickup-filter", null);

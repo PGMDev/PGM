@@ -5,20 +5,11 @@ import tc.oc.util.SemanticVersion;
 
 import java.util.Collection;
 
-/**
- * Essential information about a map.
- *
- * <p>Unlike {@link MapContext} that should be garbage-collected after match load, {@link MapInfo}
- * should stay in-memory after loading so players can easily list or search for maps they wish to
- * play.
- */
-public interface MapInfo {
+/** Essential information about a map. */
+public interface MapInfo extends Comparable<MapInfo> {
 
   /**
    * Get the unique id of the map.
-   *
-   * <p>When another {@link MapInfo} shares the same id, only the most recent {@link #getVersion()}
-   * should be shown.
    *
    * @return A unique id.
    */
@@ -87,4 +78,9 @@ public interface MapInfo {
    * @return The difficulty, or {@code null} for auto-detect.
    */
   Difficulty getDifficulty();
+
+  @Override
+  default int compareTo(MapInfo o) {
+    return getId().compareTo(o.getId());
+  }
 }

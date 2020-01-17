@@ -6,7 +6,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import tc.oc.component.Component;
-import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
@@ -82,14 +82,11 @@ public abstract class SimpleGoal<T extends GoalDefinition> implements Goal<T> {
     Boolean required = getDefinition().isRequired();
     if (required != null) {
       return required;
-    } else if (getMatch()
-        .getMapContext()
-        .getProto()
-        .isNoOlderThan(ProtoVersions.GOAL_REQUIRED_OPTION)) {
+    } else if (getMatch().getMap().getProto().isNoOlderThan(MapProtos.GOAL_REQUIRED_OPTION)) {
       return true;
     } else {
       // Legacy behavior is to require no goals if score module is loaded
-      return !getMatch().hasMatchModule(ScoreMatchModule.class);
+      return !getMatch().hasModule(ScoreMatchModule.class);
     }
   }
 

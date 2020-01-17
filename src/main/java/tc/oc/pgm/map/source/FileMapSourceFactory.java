@@ -1,12 +1,7 @@
 package tc.oc.pgm.map.source;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import tc.oc.pgm.api.map.MapSource;
-import tc.oc.pgm.api.map.exception.MapNotFoundException;
-import tc.oc.pgm.api.map.factory.MapSourceFactory;
-import tc.oc.util.FileUtils;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -19,8 +14,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import javax.annotation.Nullable;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import tc.oc.pgm.api.map.MapSource;
+import tc.oc.pgm.api.map.exception.MapNotFoundException;
+import tc.oc.pgm.api.map.factory.MapSourceFactory;
+import tc.oc.util.FileUtils;
 
 public class FileMapSourceFactory implements MapSourceFactory {
 
@@ -147,13 +146,6 @@ public class FileMapSourceFactory implements MapSourceFactory {
           .append("path", path)
           .append("modified", modified.get())
           .build();
-    }
-
-    // FIXME: debug only
-    @Override
-    protected void finalize() throws Throwable {
-      System.out.println("Finalize: " + this.toString());
-      super.finalize();
     }
   }
 }

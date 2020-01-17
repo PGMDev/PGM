@@ -2,6 +2,9 @@ package tc.oc.pgm.spawns;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import java.util.Collection;
+import java.util.List;
+import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.joda.time.Duration;
@@ -17,10 +20,6 @@ import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.logging.Logger;
 
 public class SpawnModule implements MapModule {
 
@@ -68,8 +67,7 @@ public class SpawnModule implements MapModule {
         throw new InvalidXMLException("map must have a single default spawn", doc);
       }
 
-      return new SpawnModule(
-          parser.getDefaultSpawn(), spawns, parseRespawnOptions(doc));
+      return new SpawnModule(parser.getDefaultSpawn(), spawns, parseRespawnOptions(doc));
     }
   }
 

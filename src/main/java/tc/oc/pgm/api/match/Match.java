@@ -1,10 +1,5 @@
 package tc.oc.pgm.api.match;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Random;
-import java.util.logging.Logger;
-import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -12,7 +7,8 @@ import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 import org.joda.time.Duration;
 import tc.oc.pgm.api.chat.MultiAudience;
-import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.api.map.MapInfoExtra;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.match.event.MatchPhaseChangeEvent;
@@ -31,16 +27,20 @@ import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.result.VictoryCondition;
 import tc.oc.server.Scheduler;
 
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Random;
+import java.util.logging.Logger;
+
 /**
- * A PvP game that takes place in a {@link World} loaded with a {@link MapContext}.
+ * A PvP game that takes place in a {@link World} loaded with a {@link MapInfo}.
  *
  * <p>Each {@link Match} should operate like an independent {@link org.bukkit.Server}, and ensure
  * its resources, such as {@link MatchPlayer}s, can only interact with other resources in the same
  * {@link Match}. This should allow multiple {@link Match}es to run concurrently on the same {@link
  * org.bukkit.Server}, as long as resources are cleaned up after {@link #unload()}.
  */
-public interface Match
-    extends MatchPlayerResolver, MultiAudience, ModuleContext<MatchModule>, Comparable<Match> {
+public interface Match extends MatchPlayerResolver, MultiAudience, ModuleContext<MatchModule> {
 
   /**
    * Get the global {@link Logger} for the {@link Match}.
@@ -57,11 +57,11 @@ public interface Match
   String getId();
 
   /**
-   * Get the {@link MapContext} that is playing for the {@link Match}.
+   * Get the {@link MapInfo} that is playing for the {@link Match}.
    *
-   * @return The {@link MapContext}.
+   * @return The {@link MapInfo}.
    */
-  MapContext getMap();
+  <Map extends MapInfo & MapInfoExtra> Map getMap();
 
   /**
    * Get the {@link World} that represents the {@link Match#getMap()}.
@@ -227,30 +227,6 @@ public interface Match
   Random getRandom();
 
   /**
-   * Try to get a {@link MatchModule}, if one is loaded for the {@link Match}.
-   *
-   * @param moduleClass The class of the module.
-   * @param <T> The setting of the module.
-   * @return The optional {@link MatchModule}.
-   */
-  <T extends MatchModule> Optional<T> getModuleOpt(Class<T> moduleClass);
-
-  @Deprecated
-  default <T extends MatchModule> T getMatchModule(Class<T> moduleClass) {
-    return getModuleOpt(moduleClass).orElse(null);
-  }
-
-  @Deprecated
-  default <T extends MatchModule> boolean hasMatchModule(Class<T> moduleClass) {
-    return getModuleOpt(moduleClass).isPresent();
-  }
-
-  @Deprecated
-  default <T extends MatchModule> T needMatchModule(Class<T> moduleClass) {
-    return needModule(moduleClass);
-  }
-
-  /**
    * Registers a {@link Listener}, but only for the duration of the {@link MatchScope}.
    *
    * @param listener The {@link Listener} to register.
@@ -282,13 +258,6 @@ public interface Match
    * @return The {@link MatchFeatureContext}.
    */
   MatchFeatureContext getFeatureContext();
-
-  /**
-   * Get the {@link MapContext} for the {@link Match}.
-   *
-   * @return The {@link MapContext}.
-   */
-  MapContext getMapContext();
 
   /**
    * Get the maximum number of {@link MatchPlayer}s for the {@link Match}.

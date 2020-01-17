@@ -65,10 +65,7 @@ public class KillRewardModule implements MapModule {
         }
 
         Filter filter =
-            factory
-
-                .getFilters()
-                .parseFilterProperty(elKillReward, "filter", StaticFilter.ALLOW);
+            factory.getFilters().parseFilterProperty(elKillReward, "filter", StaticFilter.ALLOW);
         Kit kit = factory.getKits().parseKitProperty(elKillReward, "kit", KitNode.EMPTY);
 
         rewards.add(new KillReward(items.build(), filter, kit));

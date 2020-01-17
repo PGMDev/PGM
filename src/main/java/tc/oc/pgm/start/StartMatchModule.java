@@ -67,14 +67,14 @@ public class StartMatchModule implements MatchModule, Listener {
     @Override
     public void onEnd(Duration total) {
       super.onEnd(total);
-      match.needMatchModule(CycleMatchModule.class).cycleNow();
+      match.needModule(CycleMatchModule.class).cycleNow();
     }
   }
 
   protected final Match match;
   protected final UnreadyBar unreadyBar;
   protected final Set<UnreadyReason> unreadyReasons = new HashSet<>();
-  protected final BossBarMatchModule bbmm;
+  protected BossBarMatchModule bbmm;
   protected final StartConfig config;
   protected boolean autoStart; // Initialized from config, but is mutable
 
@@ -83,11 +83,13 @@ public class StartMatchModule implements MatchModule, Listener {
     this.unreadyBar = new UnreadyBar();
     this.config = new StartConfig(PGM.get().getConfig());
     this.autoStart = config.autoStart();
-    this.bbmm = match.needMatchModule(BossBarMatchModule.class);
   }
 
   @Override
   public void load() {
+    if (bbmm == null) {
+      bbmm = match.needModule(BossBarMatchModule.class);
+    }
     bbmm.pushBossBar(unreadyBar);
     update();
   }

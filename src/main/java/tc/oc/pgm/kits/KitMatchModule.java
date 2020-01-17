@@ -55,7 +55,7 @@ public class KitMatchModule implements MatchModule, Listener {
   public void clearAttributeModifiers(MatchPlayer player) {
     // FIXME: Bukkit API is not supported
     /*for (AttributeModifier modifier :
-        match.getMapContext().getKits().getAttributeModifiers()) {
+        match.getMap().getKits().getAttributeModifiers()) {
        player.getBukkit().removeAttributeModifier(modifier);
     }*/
   }

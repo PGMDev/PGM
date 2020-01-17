@@ -90,9 +90,9 @@ public class PickerMatchModule implements MatchModule, Listener {
 
   public PickerMatchModule(Match match) {
     this.match = match;
-    this.hasTeams = match.hasMatchModule(TeamMatchModule.class);
-    this.hasClasses = match.hasMatchModule(ClassMatchModule.class);
-    this.isBlitz = match.hasMatchModule(BlitzMatchModule.class);
+    this.hasTeams = match.hasModule(TeamMatchModule.class);
+    this.hasClasses = match.hasModule(ClassMatchModule.class);
+    this.isBlitz = match.hasModule(BlitzMatchModule.class);
   }
 
   protected boolean settingEnabled(MatchPlayer player, boolean playerTriggered) {
@@ -109,11 +109,11 @@ public class PickerMatchModule implements MatchModule, Listener {
 
   private boolean hasJoined(MatchPlayer joining) {
     return joining.isParticipating()
-        || match.needMatchModule(JoinMatchModule.class).isQueuedToJoin(joining);
+        || match.needModule(JoinMatchModule.class).isQueuedToJoin(joining);
   }
 
   private boolean canAutoJoin(MatchPlayer joining) {
-    JoinResult result = match.needMatchModule(JoinMatchModule.class).queryJoin(joining, null);
+    JoinResult result = match.needModule(JoinMatchModule.class).queryJoin(joining, null);
     return result.isSuccess()
         || ((result instanceof GenericJoinResult)
             && ((GenericJoinResult) result).getStatus() == GenericJoinResult.Status.FULL);
@@ -124,7 +124,7 @@ public class PickerMatchModule implements MatchModule, Listener {
   }
 
   private Set<Team> getChoosableTeams(MatchPlayer joining) {
-    TeamMatchModule tmm = match.getMatchModule(TeamMatchModule.class);
+    TeamMatchModule tmm = match.getModule(TeamMatchModule.class);
     if (tmm == null) return Collections.emptySet();
 
     Set<Team> teams = new HashSet<>();
@@ -329,7 +329,7 @@ public class PickerMatchModule implements MatchModule, Listener {
     if (displayName == null) return;
 
     boolean handled = false;
-    final JoinMatchModule jmm = match.needMatchModule(JoinMatchModule.class);
+    final JoinMatchModule jmm = match.needModule(JoinMatchModule.class);
 
     if (hand.getType() == Button.JOIN.material) {
       handled = true;
@@ -511,7 +511,7 @@ public class PickerMatchModule implements MatchModule, Listener {
 
     // Class buttons
     if (hasClasses) {
-      for (PlayerClass cls : match.getMatchModule(ClassMatchModule.class).getClasses()) {
+      for (PlayerClass cls : match.getModule(ClassMatchModule.class).getClasses()) {
         slots.add(createClassButton(player, cls));
       }
     }
@@ -542,7 +542,7 @@ public class PickerMatchModule implements MatchModule, Listener {
 
     meta.setDisplayName(
         (cls.canUse(viewer.getBukkit()) ? ChatColor.GREEN : ChatColor.RED) + cls.getName());
-    if (match.getMatchModule(ClassMatchModule.class).getSelectedClass(viewer.getId()).equals(cls)) {
+    if (match.getModule(ClassMatchModule.class).getSelectedClass(viewer.getId()).equals(cls)) {
       meta.addEnchant(Enchantment.ARROW_INFINITE, 1, true);
     }
 
@@ -587,7 +587,7 @@ public class PickerMatchModule implements MatchModule, Listener {
   }
 
   private ItemStack createTeamJoinButton(final MatchPlayer player, final Team team) {
-    JoinMatchModule jmm = match.needMatchModule(JoinMatchModule.class);
+    JoinMatchModule jmm = match.needModule(JoinMatchModule.class);
 
     ItemStack item = new ItemStack(Button.TEAM_JOIN.material);
     String capacityMessage =
@@ -650,7 +650,7 @@ public class PickerMatchModule implements MatchModule, Listener {
     player.playSound(new Sound("random.click", 1, 2));
 
     if (hasClasses) {
-      ClassMatchModule cmm = player.getMatch().needMatchModule(ClassMatchModule.class);
+      ClassMatchModule cmm = player.getMatch().needModule(ClassMatchModule.class);
       PlayerClass cls = cmm.getPlayerClass(name);
 
       if (cls != null && cls.getIcon().equals(material)) {
@@ -685,7 +685,7 @@ public class PickerMatchModule implements MatchModule, Listener {
     }
 
     if (hasTeams && Button.TEAM_JOIN.matches(material)) {
-      Team team = player.getMatch().needMatchModule(TeamMatchModule.class).bestFuzzyMatch(name, 1);
+      Team team = player.getMatch().needModule(TeamMatchModule.class).bestFuzzyMatch(name, 1);
       if (team != null) {
         this.scheduleClose(player);
         this.scheduleJoin(player, team);
@@ -731,7 +731,7 @@ public class PickerMatchModule implements MatchModule, Listener {
               @Override
               public void run() {
                 if (bukkit.isOnline()) {
-                  match.needMatchModule(JoinMatchModule.class).join(player, team);
+                  match.needModule(JoinMatchModule.class).join(player, team);
                 }
               }
             });
@@ -749,7 +749,7 @@ public class PickerMatchModule implements MatchModule, Listener {
               @Override
               public void run() {
                 if (bukkit.isOnline()) {
-                  match.needMatchModule(JoinMatchModule.class).leave(player);
+                  match.needModule(JoinMatchModule.class).leave(player);
                 }
               }
             });

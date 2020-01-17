@@ -1,19 +1,19 @@
 package tc.oc.pgm.api.module;
 
-import javax.annotation.Nullable;
-import java.util.Map;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 
-/**
- * A contextual collection of {@link Module}s indexed by their class.
- */
+import javax.annotation.Nullable;
+import java.util.Collection;
+
+/** A contextual collection of {@link Module}s indexed by their class. */
 public interface ModuleContext<M extends Module> {
 
   /**
-   * Get a map of {@link Module}s indexed by their class.
+   * Get a sorted collection of {@link Module}s.
    *
-   * @return A map of {@link Module}s.
+   * @return A collection of {@link Module}s.
    */
-  Map<Class<? extends M>, M> getModules();
+  Collection<M> getModules();
 
   /**
    * Get a specific {@link Module} from its class.
@@ -22,9 +22,7 @@ public interface ModuleContext<M extends Module> {
    * @return A {@link Module} or {@code null} if not found.
    */
   @Nullable
-  default <N extends M> N getModule(Class<? extends N> key) {
-    return (N) getModules().get(key);
-  }
+  <N extends M> N getModule(Class<? extends N> key);
 
   /**
    * Require a specific {@link Module} from its class.
@@ -36,7 +34,7 @@ public interface ModuleContext<M extends Module> {
   default <N extends M> N needModule(Class<? extends N> key) {
     final N module = getModule(key);
     if (module == null) {
-      throw new IllegalStateException(key.getSimpleName() + " was required, but not found");
+      throw new ModuleLoadException(key, "was required but not found");
     }
     return module;
   }

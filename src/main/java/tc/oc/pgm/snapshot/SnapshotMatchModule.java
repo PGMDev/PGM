@@ -20,7 +20,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
 
 /**
- * Keeps a snapshot of the block state of the entire match world at load time, using a copy-on-write
+ * Keeps a snapshot of the block state of the entire match world at build time, using a copy-on-write
  * strategy. This module does nothing on its own, but other modules can use it to query for the
  * original world of the map.
  *

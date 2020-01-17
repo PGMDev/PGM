@@ -53,7 +53,7 @@ public class DamageMatchModule implements MatchModule, Listener {
   }
 
   TrackerMatchModule tracker() {
-    return match.needMatchModule(TrackerMatchModule.class);
+    return match.needModule(TrackerMatchModule.class);
   }
 
   /**

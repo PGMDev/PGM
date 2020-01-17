@@ -1,6 +1,9 @@
 package tc.oc.pgm.worldborder;
 
 import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.joda.time.Duration;
@@ -15,10 +18,6 @@ import tc.oc.pgm.filters.TimeFilter;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
 
 public class WorldBorderModule implements MapModule {
 
@@ -40,8 +39,7 @@ public class WorldBorderModule implements MapModule {
       List<WorldBorder> borders = new ArrayList<>();
       for (Element el :
           XMLUtils.flattenElements(doc.getRootElement(), "world-borders", "world-border")) {
-        Filter filter =
-            factory.getFilters().parseFilterProperty(el, "when", StaticFilter.ALLOW);
+        Filter filter = factory.getFilters().parseFilterProperty(el, "when", StaticFilter.ALLOW);
 
         Duration after = XMLUtils.parseDuration(Node.fromAttr(el, "after"));
         if (after != null) {

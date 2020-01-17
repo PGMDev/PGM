@@ -2,13 +2,17 @@ package tc.oc.pgm.core;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.logging.Logger;
 import org.bukkit.Material;
 import org.bukkit.material.MaterialData;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.MapModule;
-import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
@@ -26,11 +30,6 @@ import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.logging.Logger;
-
 public class CoreModule implements MapModule {
   protected final List<CoreFactory> coreFactories;
 
@@ -45,7 +44,7 @@ public class CoreModule implements MapModule {
     for (CoreFactory factory : this.coreFactories) {
       Core core = new Core(factory, match);
       match.getFeatureContext().add(core);
-      match.needMatchModule(GoalMatchModule.class).addGoal(core);
+      match.needModule(GoalMatchModule.class).addGoal(core);
       cores.add(core);
     }
 
@@ -76,7 +75,7 @@ public class CoreModule implements MapModule {
             Teams.getTeam(XMLUtils.getRequiredAttribute(coreEl, "team").getValue(), context);
         Region region;
         RegionParser parser = context.getRegions();
-        if (context.getProto().isOlderThan(ProtoVersions.MODULE_SUBELEMENT_VERSION)) {
+        if (context.getProto().isOlderThan(MapProtos.MODULE_SUBELEMENT_VERSION)) {
           region = parser.parseChildren(coreEl);
           parser.validate(region, BlockBoundedValidation.INSTANCE, new Node(coreEl));
         } else {

@@ -5,26 +5,27 @@ import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A dependency graph for {@link Module}s and their {@link ModuleFactory}s.
- *
- * @param <M> A specific type of {@link Module}.
- * @param <F> A specific type of {@link ModuleFactory}.
  */
-public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>> implements ModuleContext<M> {
+public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
+    implements ModuleContext<M> {
 
   private final Map<Class<? extends M>, F> factories;
-  private Map<Class<? extends M>, M> modules;
+  private Map<Class<? extends M>, M> modulesByClass;
+  private List<M> modulesInOrder;
 
   public ModuleGraph(Map<Class<? extends M>, F> factories) {
     this.factories = factories; // No copies because every graph would have its own copy
-    this.modules = Collections.emptyMap();
+    unloadAll();
   }
 
   /**
@@ -36,11 +37,9 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>> 
    */
   protected abstract @Nullable M createModule(F factory) throws ModuleLoadException;
 
-  protected synchronized void load() throws ModuleLoadException {
-    modules = new ConcurrentHashMap<>();
-
+  protected synchronized void loadAll() throws ModuleLoadException {
     final Stack<ModuleLoadException> errors = new Stack<>();
-    for(Class<? extends M> key : factories.keySet()) {
+    for (Class<? extends M> key : factories.keySet()) {
       load(key, null, errors);
 
       for (ModuleLoadException e : errors) {
@@ -48,15 +47,18 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>> 
       }
     }
 
-    modules = Collections.unmodifiableMap(modules);
+    modulesByClass = Collections.unmodifiableMap(modulesByClass);
+    modulesInOrder = Collections.unmodifiableList(modulesInOrder);
   }
 
-  protected synchronized void unload() {
-    modules = Collections.emptyMap();
+  protected synchronized void unloadAll() {
+    modulesByClass = new HashMap<>();
+    modulesInOrder = new LinkedList<>();
   }
 
-  private F getFactory(Class<? extends M> key, @Nullable Class<? extends M> requiredBy) throws ModuleLoadException {
-    if(checkNotNull(key) == requiredBy) {
+  private F getFactory(Class<? extends M> key, @Nullable Class<? extends M> requiredBy)
+      throws ModuleLoadException {
+    if (checkNotNull(key) == requiredBy) {
       throw new ModuleLoadException(key, "Required itself (is there a circular dependency?)");
     }
 
@@ -77,10 +79,14 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>> 
     return factory;
   }
 
-  private boolean load(Class<? extends M> key, @Nullable Class<? extends M> requiredBy, Stack<ModuleLoadException> errors) throws ModuleLoadException {
+  private boolean load(
+      Class<? extends M> key,
+      @Nullable Class<? extends M> requiredBy,
+      Stack<ModuleLoadException> errors)
+      throws ModuleLoadException {
     final F factory = getFactory(key, requiredBy);
 
-    if(modules.containsKey(key)) {
+    if (modulesByClass.containsKey(key)) {
       return true;
     }
 
@@ -89,9 +95,9 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>> 
       for (Class<? extends M> hardDependency : hardDependencies) {
         if (!load(hardDependency, key, errors)) {
           throw new ModuleLoadException(
-                  key,
-                  hardDependency.getSimpleName() + " is a hard dependency that failed to load",
-                  errors.lastElement());
+              key,
+              hardDependency.getSimpleName() + " is a hard dependency that failed to load",
+              errors.lastElement());
         }
       }
     }
@@ -133,17 +139,19 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>> 
       return false;
     }
 
-    modules.put((Class<? extends M>) module.getClass(), module);
+    modulesInOrder.add(module);
+    modulesByClass.put((Class<? extends M>) module.getClass(), module);
+
     return true;
   }
 
   @Override
   public <N extends M> N getModule(Class<? extends N> key) {
-    return (N) modules.get(key);
+    return (N) modulesByClass.get(key);
   }
 
   @Override
-  public Map<Class<? extends M>, M> getModules() {
-    return modules;
+  public Collection<M> getModules() {
+    return modulesInOrder;
   }
 }

@@ -5,17 +5,18 @@ import app.ashcon.intake.argument.CommandArgs;
 import app.ashcon.intake.argument.MissingArgumentException;
 import app.ashcon.intake.bukkit.parametric.provider.BukkitProvider;
 import app.ashcon.intake.parametric.annotation.Default;
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.List;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.AllTranslations;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.pgm.rotation.MapOrder;
+
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.List;
 
 public class MapInfoProvider implements BukkitProvider<MapInfo> {
 
@@ -37,14 +38,17 @@ public class MapInfoProvider implements BukkitProvider<MapInfo> {
   @Override
   public MapInfo get(CommandSender sender, CommandArgs args, List<? extends Annotation> annotations)
       throws ArgumentException {
-    MapInfo map = matchManager.getMatch(sender).getMap();
+    MapInfo map = null;
 
     if (args.hasNext()) {
       String mapName = getRemainingText(args);
-      final MapContext context = mapLibrary.getMap(mapName);
+      final MapInfo context = mapLibrary.getMap(mapName);
       if (context != null) map = context;
     } else if (isGoToNext(annotations)) {
       map = mapOrder.getNextMap();
+    } else {
+      final Match match = matchManager.getMatch(sender);
+      if(match != null) map = match.getMap();
     }
 
     if (map == null && !isGoToNext(annotations)) {

@@ -4,9 +4,6 @@ import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Default;
 import com.google.common.collect.ImmutableSortedSet;
-import java.util.Collection;
-import java.util.Set;
-import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.component.Component;
@@ -17,13 +14,18 @@ import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.map.Contributor;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapInfoExtra;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.pgm.rotation.MapOrder;
 import tc.oc.pgm.util.PrettyPaginatedResult;
+import tc.oc.pgm.util.TranslationUtils;
+import tc.oc.util.components.ComponentUtils;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Set;
 
 public class MapCommands {
 
@@ -36,10 +38,10 @@ public class MapCommands {
   public static void maplist(
       Audience audience, CommandSender sender, MapLibrary library, @Default("1") int page)
       throws CommandException {
-    final Set<MapContext> maps = ImmutableSortedSet.copyOf(library.getMaps());
+    final Set<MapInfo> maps = ImmutableSortedSet.copyOf(library.getMaps());
 
     int resultsPerPage = 8;
-    int pages = (library.getMaps().size() + resultsPerPage - 1) / resultsPerPage;
+    int pages = (maps.size() + resultsPerPage - 1) / resultsPerPage;
 
     String listHeader =
         ChatColor.BLUE.toString()
@@ -63,10 +65,11 @@ public class MapCommands {
             + " ---------------"
             + ChatColor.RESET;
 
-    new PrettyPaginatedResult<MapContext>(listHeader, resultsPerPage) {
+    new PrettyPaginatedResult<MapInfo>(listHeader, resultsPerPage) {
       @Override
-      public String format(MapContext map, int index) {
-        return (index + 1) + ". " + map.getDescription();
+      public String format(MapInfo map, int index) {
+        // TODO: fix misc.authorship
+        return (index + 1) + ". " + ChatColor.RED + map.getName() + " " + ChatColor.DARK_PURPLE + TranslationUtils.nameList(NameStyle.FANCY, map.getAuthors()).render(sender).toLegacyText();
       }
     }.display(audience, maps, page);
   }
@@ -76,7 +79,7 @@ public class MapCommands {
       desc = "Shows information a certain map",
       usage = "[map name] - defaults to the current map")
   public void map(Audience audience, CommandSender sender, @Text MapInfo map) {
-    audience.sendMessage(map.getName()); // TODO: formatted title?
+    audience.sendMessage(ComponentUtils.horizontalLineHeading(map.getName(), ChatColor.RED, 200));
 
     audience.sendMessage(
         new PersonalizedText(

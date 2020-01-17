@@ -75,7 +75,7 @@ public class Renewable implements Listener, Tickable {
 
   SnapshotMatchModule snapshot() {
     if (snapshotMatchModule == null) {
-      snapshotMatchModule = match.needMatchModule(SnapshotMatchModule.class);
+      snapshotMatchModule = match.needModule(SnapshotMatchModule.class);
     }
     return snapshotMatchModule;
   }

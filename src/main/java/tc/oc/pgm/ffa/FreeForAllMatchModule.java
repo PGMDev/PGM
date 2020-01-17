@@ -114,7 +114,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
 
   @Override
   public void load() {
-    match.needMatchModule(JoinMatchModule.class).registerHandler(this);
+    match.needModule(JoinMatchModule.class).registerHandler(this);
     match.setMaxPlayers(getMaxPlayers());
     updateReadiness();
   }
@@ -131,7 +131,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
 
     int playersNeeded = getMinPlayers() - players;
 
-    final StartMatchModule smm = match.needMatchModule(StartMatchModule.class);
+    final StartMatchModule smm = match.needModule(StartMatchModule.class);
     if (playersNeeded > 0) {
       smm.addUnreadyReason(new NeedMorePlayers(playersNeeded));
     } else {

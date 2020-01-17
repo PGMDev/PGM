@@ -127,13 +127,13 @@ public class AdminCommands {
       perms = Permissions.STOP)
   public static void cancel(CommandSender sender, Match match) {
     if (!match.getCountdown().getAll(TimeLimitCountdown.class).isEmpty()) {
-      TimeLimitMatchModule tlmm = match.getMatchModule(TimeLimitMatchModule.class);
+      TimeLimitMatchModule tlmm = match.getModule(TimeLimitMatchModule.class);
       tlmm.cancel();
       tlmm.setTimeLimit(null);
     }
 
     match.getCountdown().cancelAll();
-    match.needMatchModule(StartMatchModule.class).setAutoStart(false);
+    match.needModule(StartMatchModule.class).setAutoStart(false);
     sender.sendMessage(
         ChatColor.GREEN + AllTranslations.get().translate("command.admin.cancel.success", sender));
   }

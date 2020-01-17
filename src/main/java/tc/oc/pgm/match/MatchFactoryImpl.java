@@ -1,29 +1,25 @@
 package tc.oc.pgm.match;
 
-import org.bukkit.Difficulty;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
 import tc.oc.chunk.NullChunkGenerator;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapContext;
-import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.exception.MapNotFoundException;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.terrain.TerrainModule;
 import tc.oc.util.FileUtils;
+import tc.oc.util.ServerThreadLock;
 import tc.oc.util.logging.ClassLogger;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,62 +39,37 @@ public class MatchFactoryImpl implements MatchFactory {
 
   @Override
   public CompletableFuture<Match> createPreMatch(MapContext map) {
-    return CompletableFuture.supplyAsync(
-        () -> {
-          try {
-            return createPreMatchSync(map);
-          } catch (Throwable t) {
-            logger.log(Level.SEVERE, "Could not create pre-match for " + map, t);
-            return null;
-          }
-        });
+    // FIXME: async world creation leads to deadlock
+    return CompletableFuture.completedFuture(createPreMatchSync(map));
   }
 
-  private Match createPreMatchSync(MapContext map) throws Throwable {
+  private Match createPreMatchSync(MapContext map) throws MapNotFoundException {
     checkNotNull(map);
+    checkNotNull(map.getSource());
 
     final String id = Long.toString(count.getAndIncrement());
     final String name = "match-" + id;
-
-    final MapSource source = map.getSource();
-    if (source == null) {
-      throw new MapNotFoundException(
-          "Map source was unloaded before it could be downloaded: " + map);
-    }
-
     final File dir = new File(server.getWorldContainer().getAbsoluteFile(), name);
-    if (dir.exists()) {
-      FileUtils.delete(dir);
+    try {
+        if (dir.exists()) {
+            FileUtils.delete(dir);
+        }
+
+        if (!dir.mkdirs()) {
+            throw new IOException("Could not create directories for " + dir.getPath());
+        }
+
+        map.getSource().downloadTo(dir);
+    } catch (IOException e) {
+        throw new MapNotFoundException(map, "Could not download map files", e);
     }
 
-    if (!dir.mkdirs()) {
-      throw new IOException("Failed to create temporary world folder " + dir);
-    }
-
-    source.downloadTo(dir); // Error will be throw if map download fails
-
-    final Match match = new MatchImpl(id, map, buildWorld(name, map));
-    logger.log(Level.INFO, "Pre-loaded " + match);
-
-    // Allow the match 1 minute to load, otherwise unload and destroy it
-    server
-        .getScheduler()
-        .runTaskLaterAsynchronously(
-            PGM.get(),
-            () -> {
-              if (!match.isLoaded()) {
-                match.unload();
-                match.destroy();
-
-                logger.log(Level.INFO, "Discarded " + match);
-              }
-            },
-            20 * 60);
-
+    final Match match = new MatchImpl(id, map, createWorld(name, map));
+    logger.log(Level.INFO, "Pre-loaded: #" + match.getId() + " " + match.getMap().getId());
     return match;
   }
 
-  private World buildWorld(String worldName, MapContext map) throws Throwable {
+  private World createWorld(String worldName, MapContext map) {
     WorldCreator creator = server.detectWorld(worldName);
     if (creator == null) creator = new WorldCreator(worldName);
 
@@ -108,96 +79,45 @@ public class MatchFactoryImpl implements MatchFactory {
         .generator(terrain == null ? new NullChunkGenerator() : terrain.getChunkGenerator())
         .seed(terrain == null ? 0 : terrain.getSeed());
 
-    final World world = createWorld(creator);
+    final World world;
+    try (final ServerThreadLock lock = ServerThreadLock.acquire()) {
+        world = server.createWorld(creator);
+    }
     world.setPVP(true);
     world.setSpawnFlags(false, false);
     world.setAutoSave(false);
-
-    final Difficulty difficulty = map.getDifficulty();
-    if (difficulty != null) {
-      world.setDifficulty(difficulty);
-    } else if (!server.getWorlds().isEmpty()) {
-      world.setDifficulty(server.getWorlds().get(0).getDifficulty());
-    }
+    world.setDifficulty(map.getDifficulty());
 
     return world;
   }
 
-  private World createWorld(WorldCreator creator) throws Throwable {
-    if (server.isPrimaryThread()) {
-      return server.createWorld(creator);
-    }
-
-    final CountDownLatch latch = new CountDownLatch(1);
-    final AtomicReference<World> world = new AtomicReference<>();
-    final AtomicReference<Throwable> err = new AtomicReference<>();
-
-    server
-        .getScheduler()
-        .runTask(
-            PGM.get(),
-            () -> {
-              try {
-                world.set(server.createWorld(creator));
-              } catch (Throwable t) {
-                err.set(t);
-              } finally {
-                latch.countDown();
-              }
-            });
-    latch.await();
-
-    final Throwable error = err.get();
-    if (error != null) {
-      throw error;
-    }
-
-    return world.get();
-  }
-
   @Override
-  public CompletableFuture<Boolean> createMatch(
-      Match match, @Nullable Iterable<MatchPlayer> players) {
-    return CompletableFuture.supplyAsync(
-        () -> {
-          try {
-            return createMatchSync(match, players);
-          } catch (Throwable t) {
-            logger.log(Level.SEVERE, "Could not create match for " + match, t);
-            return false;
-          }
-        });
-  }
-
-  private boolean createMatchSync(Match match, @Nullable Iterable<MatchPlayer> players)
-      throws Throwable {
-    if (match == null) {
-      return false;
-    }
-
+  public void createMatch(Match match, @Nullable Iterable<MatchPlayer> players) {
+    if (match == null) return;
     if (!match.isLoaded()) {
       match.load();
     }
 
-    if (players != null) {
-      players.forEach(
-          player -> {
-            final Match other = player.getMatch();
-            final Player bukkit = player.getBukkit();
+    logger.log(Level.INFO, "Loaded: #" + match.getId() + " " + match.getMap().getId());
+    if(players == null) return;
 
-            other.removePlayer(bukkit);
-            match.addPlayer(bukkit);
+    for(MatchPlayer player : players) {
+        final Match oldMatch = player.getMatch();
+        final Player bukkit = player.getBukkit();
 
-            if (other.isLoaded() && other.getPlayers().isEmpty()) {
-              other.unload();
-              other.destroy();
+        oldMatch.removePlayer(bukkit);
+        match.addPlayer(bukkit);
 
-              logger.log(Level.INFO, "Unloaded " + other);
+        try {
+            if (oldMatch.getPlayers().isEmpty()) {
+                oldMatch.unload();
+                oldMatch.destroy();
+
+                logger.log(Level.INFO, "Unloaded: #" + oldMatch.getId() + " " + match.getMap().getId());
             }
-          });
+        } catch (Throwable t) {
+            logger.log(Level.SEVERE, "Could not unload empty match", t);
+        }
     }
-
-    logger.log(Level.INFO, "Loaded " + match);
-    return true;
   }
 }

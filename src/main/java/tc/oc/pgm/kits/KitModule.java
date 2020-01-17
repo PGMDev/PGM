@@ -40,8 +40,7 @@ public class KitModule implements MapModule {
     for (Kit kit : factory.getKits().getKits()) {
       if (kit instanceof RemoveKit && !((RemoveKit) kit).getKit().isRemovable()) {
         throw new InvalidXMLException(
-            "kit is not removable",
-            factory.getFeatures().getNode((FeatureDefinition) kit));
+            "kit is not removable", factory.getFeatures().getNode((FeatureDefinition) kit));
       }
 
       // Apply any item-mods rules to item kits

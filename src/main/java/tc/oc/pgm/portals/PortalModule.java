@@ -13,7 +13,7 @@ import org.jdom2.Element;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.map.MapModule;
-import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
@@ -71,7 +71,7 @@ public class PortalModule implements MapModule {
         DoubleProvider dPitch = parseDoubleProvider(portalEl, "pitch", RelativeDoubleProvider.ZERO);
 
         Region region;
-        if (factory.getProto().isOlderThan(ProtoVersions.MODULE_SUBELEMENT_VERSION)) {
+        if (factory.getProto().isOlderThan(MapProtos.MODULE_SUBELEMENT_VERSION)) {
           region = regionParser.parseChildren(portalEl);
         } else {
           region = regionParser.parseRequiredRegionProperty(portalEl, "region");
@@ -82,10 +82,7 @@ public class PortalModule implements MapModule {
                 portalEl, RandomPointsValidation.INSTANCE, "destination");
 
         Filter filter =
-            factory
-
-                .getFilters()
-                .parseFilterProperty(portalEl, "filter", StaticFilter.ALLOW);
+            factory.getFilters().parseFilterProperty(portalEl, "filter", StaticFilter.ALLOW);
 
         boolean sound = XMLUtils.parseBoolean(portalEl.getAttribute("sound"), true);
         boolean protect = XMLUtils.parseBoolean(portalEl.getAttribute("protect"), false);

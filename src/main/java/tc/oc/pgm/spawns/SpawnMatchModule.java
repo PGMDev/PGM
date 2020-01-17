@@ -2,6 +2,14 @@ package tc.oc.pgm.spawns;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -34,15 +42,6 @@ import tc.oc.pgm.spawns.states.Joining;
 import tc.oc.pgm.spawns.states.Observing;
 import tc.oc.pgm.spawns.states.State;
 import tc.oc.util.RandomUtils;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
 
 @ListenerScope(MatchScope.LOADED)
 public class SpawnMatchModule implements MatchModule, Listener {
@@ -173,7 +172,7 @@ public class SpawnMatchModule implements MatchModule, Listener {
   public void reportFailedSpawn(Spawn spawn, MatchPlayer player) {
     if (failed.add(spawn)) {
       // Note: PGM no longer keeps Document data after map parsing
-      // Element elSpawn = match.getMapContext().getFeatures().getNode(spawn);
+      // Element elSpawn = match.getMap().getFeatures().getNode(spawn);
       ModuleLoadException ex =
           new ModuleLoadException(
               "Failed to generate spawn location for " + player.getBukkit().getName());

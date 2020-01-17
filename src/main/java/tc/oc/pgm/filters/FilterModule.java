@@ -1,10 +1,12 @@
 package tc.oc.pgm.filters;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Collection;
+import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.MapModule;
-import tc.oc.pgm.api.map.ProtoVersions;
+import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
@@ -15,14 +17,11 @@ import tc.oc.pgm.regions.EverywhereRegion;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.xml.InvalidXMLException;
 
-import java.util.Collection;
-import java.util.logging.Logger;
-
 public class FilterModule implements MapModule {
 
   @Override
   public MatchModule createMatchModule(Match match) {
-    if (match.getMapContext().getProto().isOlderThan(ProtoVersions.FILTER_FEATURES)) {
+    if (match.getMap().getProto().isOlderThan(MapProtos.FILTER_FEATURES)) {
       return null;
     } else {
       return new FilterMatchModule(match);
@@ -38,7 +37,7 @@ public class FilterModule implements MapModule {
     @Override
     public FilterModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      boolean unified = factory.getProto().isNoOlderThan(ProtoVersions.FILTER_FEATURES);
+      boolean unified = factory.getProto().isNoOlderThan(MapProtos.FILTER_FEATURES);
       FilterParser parser = factory.getFilters();
 
       if (unified) {

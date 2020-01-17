@@ -3,6 +3,10 @@ package tc.oc.pgm.teams;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.Set;
+import java.util.logging.Logger;
+import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.jdom2.Attribute;
@@ -18,11 +22,6 @@ import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.StringUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
-
-import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Set;
-import java.util.logging.Logger;
 
 public class TeamModule implements MapModule<TeamMatchModule>, MapInfoExtra {
 

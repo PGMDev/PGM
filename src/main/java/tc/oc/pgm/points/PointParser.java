@@ -1,5 +1,9 @@
 package tc.oc.pgm.points;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
@@ -13,11 +17,6 @@ import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.collection.ArrayUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * PointProvider grammar is a bit strange due to backward compatibility. The root element is what

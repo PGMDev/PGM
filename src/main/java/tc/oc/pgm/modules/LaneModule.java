@@ -33,8 +33,7 @@ public class LaneModule implements MapModule {
   public MatchModule createMatchModule(Match match) {
     Map<Team, Region> lanes = Maps.newHashMapWithExpectedSize(this.lanes.size());
     for (Entry<TeamFactory, Region> entry : this.lanes.entrySet()) {
-      lanes.put(
-          match.needMatchModule(TeamMatchModule.class).getTeam(entry.getKey()), entry.getValue());
+      lanes.put(match.needModule(TeamMatchModule.class).getTeam(entry.getKey()), entry.getValue());
     }
     return new LaneMatchModule(match, lanes);
   }

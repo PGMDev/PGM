@@ -8,6 +8,16 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
 import com.google.common.collect.SetMultimap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+import javax.annotation.Nullable;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -38,17 +48,6 @@ import tc.oc.server.BukkitUtils;
 import tc.oc.util.Pair;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
 
 public abstract class KitParser {
   protected final MapFactory factory;
@@ -114,8 +113,7 @@ public abstract class KitParser {
 
     Boolean force = XMLUtils.parseBoolean(Node.fromAttr(el, "force"));
     Boolean potionParticles = XMLUtils.parseBoolean(Node.fromAttr(el, "potion-particles"));
-    Filter filter =
-            factory.getFilters().parseFilterProperty(el, "filter", StaticFilter.ALLOW);
+    Filter filter = factory.getFilters().parseFilterProperty(el, "filter", StaticFilter.ALLOW);
 
     kits.add(this.parseClearItemsKit(el)); // must be added before anything else
 
@@ -519,8 +517,7 @@ public abstract class KitParser {
     if (projectileNode != null) {
       ItemTags.PROJECTILE.set(
           itemStack,
-              factory
-
+          factory
               .getFeatures()
               .createReference(projectileNode, ProjectileDefinition.class)
               .getId());
@@ -635,7 +632,6 @@ public abstract class KitParser {
       }
       kits.add(kit);
       factory
-
           .getFeatures()
           .addFeature(el, kit); // So we can retrieve the node from KitModule#postParse
     }

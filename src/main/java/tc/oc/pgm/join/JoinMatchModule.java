@@ -179,7 +179,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
             new PersonalizedTranslatable("team.join.deferred.request"),
             ChatColor.YELLOW)); // Always show this message
 
-    if (match.hasMatchModule(TeamMatchModule.class)) {
+    if (match.hasModule(TeamMatchModule.class)) {
       // If they are joining a team, show them a scary warning about leaving the match
       joining.sendMessage(
           new PersonalizedText(
@@ -200,7 +200,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
                       ChatColor.RED)),
               ChatColor.DARK_RED));
 
-      TimeLimitMatchModule tlmm = match.getMatchModule(TimeLimitMatchModule.class);
+      TimeLimitMatchModule tlmm = match.getModule(TimeLimitMatchModule.class);
       if (tlmm != null && tlmm.getTimeLimit() != null) {
         joining.sendMessage(
             new PersonalizedText(

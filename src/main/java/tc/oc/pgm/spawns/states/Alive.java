@@ -58,7 +58,7 @@ public class Alive extends Participating {
 
     // Return kept items
     // TODO: Module should do this itself, maybe from ParticipantSpawnEvent
-    ItemKeepMatchModule ikmm = player.getMatch().getMatchModule(ItemKeepMatchModule.class);
+    ItemKeepMatchModule ikmm = player.getMatch().getModule(ItemKeepMatchModule.class);
     if (ikmm != null) {
       ikmm.restoreKeptArmor(player);
       ikmm.restoreKeptInventory(player);
@@ -72,14 +72,14 @@ public class Alive extends Participating {
 
     // Apply class kit(s)
     // TODO: Module should do this itself, maybe from ParticipantSpawnEvent
-    ClassMatchModule cmm = player.getMatch().getMatchModule(ClassMatchModule.class);
+    ClassMatchModule cmm = player.getMatch().getModule(ClassMatchModule.class);
     if (cmm != null) {
       cmm.giveClassKits(player);
     }
 
     // Give kill rewards earned while dead
     // TODO: Module should do this itself, maybe from ParticipantSpawnEvent
-    KillRewardMatchModule kwmm = player.getMatch().getMatchModule(KillRewardMatchModule.class);
+    KillRewardMatchModule kwmm = player.getMatch().getModule(KillRewardMatchModule.class);
     if (kwmm != null) {
       kwmm.giveDeadPlayerRewards(player);
     }

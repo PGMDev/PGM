@@ -230,7 +230,7 @@ public class MatchTabView extends TabView implements Listener {
       this.participantPlayers.clear();
       this.participantPlayers.addAll(this.match.getParticipants());
 
-      this.tmm = this.match.getMatchModule(TeamMatchModule.class);
+      this.tmm = this.match.getModule(TeamMatchModule.class);
       if (this.tmm != null) {
         for (Team team : this.tmm.getTeams()) {
           this.teamPlayers.replaceValues(team, team.getPlayers());

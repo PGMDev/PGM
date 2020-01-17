@@ -2,6 +2,9 @@ package tc.oc.pgm.filters;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.PriorityQueue;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -11,10 +14,6 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.PriorityQueue;
 
 public class FilterMatchModule implements MatchModule, Listener {
 
@@ -49,7 +48,7 @@ public class FilterMatchModule implements MatchModule, Listener {
   public void load() {
     // FIXME: PGM no longer has access to MapFactory at Match time
     /*for (TimeFilter filter :
-        match.getMapContext().getFeatures().getAll(TimeFilter.class)) {
+        match.getMap().getFeatures().getAll(TimeFilter.class)) {
       timeFilterQueue.add(filter);
     }*/
   }

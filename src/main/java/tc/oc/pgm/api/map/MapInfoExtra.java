@@ -4,7 +4,9 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 
-/** Additional information about a {@link MapInfo} provided by a {@link MapModule}. */
+/**
+ * Additional information about a {@link MapInfo}.
+ */
 public interface MapInfoExtra {
 
   /**

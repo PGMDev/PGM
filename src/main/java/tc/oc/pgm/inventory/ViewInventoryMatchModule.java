@@ -334,7 +334,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
 
     MatchPlayer matchHolder = this.match.getPlayer(holder);
     if (matchHolder != null && matchHolder.isParticipating()) {
-      BlitzMatchModule module = matchHolder.getMatch().getMatchModule(BlitzMatchModule.class);
+      BlitzMatchModule module = matchHolder.getMatch().getModule(BlitzMatchModule.class);
       if (module != null) {
         int livesLeft = module.getNumOfLives(holder.getUniqueId());
         ItemStack lives = new ItemStack(Material.EGG, livesLeft);
@@ -360,8 +360,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
                 + AllTranslations.get().translate("specialAbility.flying", viewer));
       }
 
-      DoubleJumpMatchModule djmm =
-          matchHolder.getMatch().getMatchModule(DoubleJumpMatchModule.class);
+      DoubleJumpMatchModule djmm = matchHolder.getMatch().getModule(DoubleJumpMatchModule.class);
       if (djmm != null && djmm.hasKit(matchHolder)) {
         specialLore.add(
             ChatColor.LIGHT_PURPLE
