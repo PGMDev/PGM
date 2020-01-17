@@ -1,7 +1,12 @@
 package tc.oc.pgm.commands;
 
 import app.ashcon.intake.Command;
+import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Text;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Map;
+import java.util.WeakHashMap;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -10,6 +15,7 @@ import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.named.NameStyle;
+import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.match.Match;
@@ -18,16 +24,40 @@ import tc.oc.pgm.events.PlayerReportEvent;
 
 public class ModerationCommands {
 
+  private static final int REPORT_COOLDOWN_SECONDS = 15;
+
+  private final Map<CommandSender, Instant> lastReportSent = new WeakHashMap<>();
+
   @Command(
       aliases = {"report"},
       usage = "<player> <reason>",
       desc = "Report a player who is breaking the rules")
-  public static void report(
+  public void report(
       CommandSender commandSender,
       MatchPlayer matchPlayer,
       Match match,
       Player player,
-      @Text String reason) {
+      @Text String reason)
+      throws CommandException {
+    // Check if player has a cooldown
+    Instant lastReport = lastReportSent.get(commandSender);
+    if (lastReport != null) {
+      Duration timeSinceReport = Duration.between(lastReport, Instant.now());
+      long secondsRemaining = REPORT_COOLDOWN_SECONDS - timeSinceReport.getSeconds();
+      if (secondsRemaining > 0) {
+        throw new CommandException(
+            AllTranslations.get()
+                .translate(
+                    "command.report.cooldown",
+                    commandSender,
+                    ChatColor.AQUA
+                        + (secondsRemaining
+                            + " second"
+                            + (secondsRemaining != 1 ? "s" : "")
+                            + ChatColor.RED)));
+      }
+    }
+
     MatchPlayer accused = match.getPlayer(player);
     PlayerReportEvent event = new PlayerReportEvent(commandSender, accused, reason);
     match.callEvent(event);
@@ -38,6 +68,9 @@ public class ModerationCommands {
       }
       return;
     }
+
+    // Log last time report is submitted, for cooldown check
+    lastReportSent.put(commandSender, Instant.now());
 
     commandSender.sendMessage(
         new PersonalizedText(
