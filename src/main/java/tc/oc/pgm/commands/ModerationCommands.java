@@ -27,7 +27,7 @@ public class ModerationCommands {
 
   private static final int REPORT_COOLDOWN_SECONDS = 15;
 
-  private static final Cache<UUID, Instant> lastReportSent =
+  private static final Cache<UUID, Instant> LAST_REPORT_SENT =
       CacheBuilder.newBuilder().expireAfterWrite(REPORT_COOLDOWN_SECONDS, TimeUnit.SECONDS).build();
 
   @Command(
@@ -43,24 +43,29 @@ public class ModerationCommands {
       throws CommandException {
     if (!commandSender.hasPermission(Permissions.STAFF) && commandSender instanceof Player) {
       // Check for cooldown
-      Instant lastReport = lastReportSent.getIfPresent(matchPlayer.getId());
+      Instant lastReport = LAST_REPORT_SENT.getIfPresent(matchPlayer.getId());
       if (lastReport != null) {
         Duration timeSinceReport = Duration.between(lastReport, Instant.now());
         long secondsRemaining = REPORT_COOLDOWN_SECONDS - timeSinceReport.getSeconds();
         if (secondsRemaining > 0) {
-          Component secondsLeft =
-              new PersonalizedText(
-                      secondsRemaining + " second" + (secondsRemaining != 1 ? "s" : ""))
+          Component secondsComponent = new PersonalizedText("" + secondsRemaining);
+          Component secondsLeftComponent =
+              new PersonalizedTranslatable(
+                      secondsRemaining != 1
+                          ? "countdown.pluralCompound"
+                          : "countdown.singularCompound",
+                      secondsComponent)
+                  .getPersonalizedText()
                   .color(ChatColor.AQUA);
           commandSender.sendMessage(
-              new PersonalizedTranslatable("command.cooldown", secondsLeft)
+              new PersonalizedTranslatable("command.cooldown", secondsLeftComponent)
                   .getPersonalizedText()
                   .color(ChatColor.RED));
           return;
         }
       } else {
         // Player has no cooldown, so add one
-        lastReportSent.put(matchPlayer.getId(), Instant.now());
+        LAST_REPORT_SENT.put(matchPlayer.getId(), Instant.now());
       }
     }
 
