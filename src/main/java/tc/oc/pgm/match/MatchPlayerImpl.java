@@ -46,6 +46,7 @@ import tc.oc.pgm.filters.query.IPlayerQuery;
 import tc.oc.pgm.filters.query.PlayerQuery;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.WalkSpeedKit;
+import tc.oc.util.ViaUtils;
 import tc.oc.util.logging.ClassLogger;
 import tc.oc.world.DeathOverride;
 import tc.oc.world.NMSHacks;
@@ -77,7 +78,7 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
     this.frozen = new AtomicBoolean(false);
     this.dead = new AtomicBoolean(false);
     this.visible = new AtomicBoolean(false);
-    this.protocolVersion = new AtomicInteger(NMSHacks.getProtocolVersion(player));
+    this.protocolVersion = new AtomicInteger(ViaUtils.getProtocolVersion(player));
   }
 
   @Override
@@ -330,11 +331,6 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
                 }
               }
             });
-  }
-
-  @Override
-  public void setProtocolVersion(int protocolVersion) {
-    this.protocolVersion.set(protocolVersion);
   }
 
   @Override
