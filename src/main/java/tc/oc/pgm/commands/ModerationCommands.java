@@ -17,7 +17,6 @@ import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.named.NameStyle;
-import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.match.Match;
@@ -49,16 +48,15 @@ public class ModerationCommands {
         Duration timeSinceReport = Duration.between(lastReport, Instant.now());
         long secondsRemaining = REPORT_COOLDOWN_SECONDS - timeSinceReport.getSeconds();
         if (secondsRemaining > 0) {
-          throw new CommandException(
-              AllTranslations.get()
-                  .translate(
-                      "command.cooldown",
-                      commandSender,
-                      ChatColor.AQUA
-                          + (secondsRemaining
-                              + " second"
-                              + (secondsRemaining != 1 ? "s" : "")
-                              + ChatColor.RED)));
+          Component secondsLeft =
+              new PersonalizedText(
+                      secondsRemaining + " second" + (secondsRemaining != 1 ? "s" : ""))
+                  .color(ChatColor.AQUA);
+          commandSender.sendMessage(
+              new PersonalizedTranslatable("command.cooldown", secondsLeft)
+                  .getPersonalizedText()
+                  .color(ChatColor.RED));
+          return;
         }
       } else {
         // Player has no cooldown, so add one
