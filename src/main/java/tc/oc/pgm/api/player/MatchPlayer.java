@@ -195,6 +195,22 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
   void applyKit(Kit kit, boolean force);
 
   /**
+   * Set the {@link MatchPlayer}'s client protocol version; useful if a plugin like ViaVersion
+   * overrides the protocol version returned by {@link
+   * net.minecraft.server.v1_8_R3.NetworkManager#protocolVersion}
+   *
+   * @param protocolVersion The protocol version
+   */
+  void setProtocolVersion(int protocolVersion);
+
+  /**
+   * Get the protocol version of the {@link MatchPlayer}'s client
+   *
+   * @return The protocol version of the {@link MatchPlayer}'s client
+   */
+  int getProtocolVersion();
+
+  /**
    * Get the {@link Settings} of the {@link MatchPlayer}.
    *
    * @return The cached {@link Settings}.

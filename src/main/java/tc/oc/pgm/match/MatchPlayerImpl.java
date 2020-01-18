@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
@@ -17,6 +18,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.GameMode;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -62,6 +64,7 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
   private final AtomicBoolean frozen;
   private final AtomicBoolean dead;
   private final AtomicBoolean visible;
+  private final AtomicInteger protocolVersion;
 
   public MatchPlayerImpl(Match match, Player player) {
     this.logger =
@@ -75,6 +78,9 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
     this.frozen = new AtomicBoolean(false);
     this.dead = new AtomicBoolean(false);
     this.visible = new AtomicBoolean(false);
+    this.protocolVersion =
+        new AtomicInteger(
+            ((CraftPlayer) player).getHandle().playerConnection.networkManager.protocolVersion);
   }
 
   @Override
@@ -327,6 +333,16 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
                 }
               }
             });
+  }
+
+  @Override
+  public void setProtocolVersion(int protocolVersion) {
+    this.protocolVersion.set(protocolVersion);
+  }
+
+  @Override
+  public int getProtocolVersion() {
+    return protocolVersion.get();
   }
 
   @Override
