@@ -3,6 +3,7 @@ package tc.oc.pgm.commands;
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Default;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSortedSet;
 import java.util.Collection;
 import java.util.Set;
@@ -18,7 +19,6 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.MapInfo;
-import tc.oc.pgm.api.map.MapInfoExtra;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.pgm.rotation.MapOrder;
@@ -127,21 +127,13 @@ public class MapCommands {
       }
     }
 
-    if (map instanceof MapInfoExtra) {
-      audience.sendMessage(
-          new PersonalizedText(
-              mapInfoLabel("command.map.mapInfo.playerLimit"),
-              new PersonalizedText(
-                  String.valueOf(((MapInfoExtra) map).getPlayerLimit()), ChatColor.GOLD)));
-    }
+    audience.sendMessage(
+        new PersonalizedText(
+            mapInfoLabel("command.map.mapInfo.playerLimit"),
+            new PersonalizedText(
+                String.valueOf(Joiner.on(" v ").join(map.getMaxPlayers())), ChatColor.GOLD)));
 
     if (sender.hasPermission(Permissions.DEBUG)) {
-      if (map instanceof MapInfoExtra) {
-        audience.sendMessage(
-            new PersonalizedText(
-                mapInfoLabel("command.map.mapInfo.genre"),
-                new PersonalizedText(((MapInfoExtra) map).getGenre(), ChatColor.GOLD)));
-      }
       audience.sendMessage(
           new PersonalizedText(
               mapInfoLabel("command.map.mapInfo.proto"),

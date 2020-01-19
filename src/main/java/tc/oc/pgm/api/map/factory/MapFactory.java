@@ -10,7 +10,7 @@ import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionParser;
-import tc.oc.util.SemanticVersion;
+import tc.oc.util.Version;
 
 /** A factory for creating {@link MapInfo}s and {@link MapContext}s. */
 public interface MapFactory extends ModuleContext<MapModule> {
@@ -23,9 +23,7 @@ public interface MapFactory extends ModuleContext<MapModule> {
 
   FeatureDefinitionContext getFeatures();
 
-  SemanticVersion getProto();
+  Version getProto();
 
-  MapInfo buildInfo() throws MapNotFoundException, ModuleLoadException;
-
-  MapContext buildContext() throws MapNotFoundException, ModuleLoadException;
+  MapContext load() throws MapNotFoundException, ModuleLoadException;
 }

@@ -133,7 +133,8 @@ public class MatchImpl implements Match {
     this.state = new AtomicReference<>(MatchPhase.IDLE);
     this.start = new AtomicLong(0);
     this.end = new AtomicLong(0);
-    this.capacity = new AtomicInteger(map.getPlayerLimit());
+    this.capacity =
+        new AtomicInteger(map.getMaxPlayers().stream().findFirst().orElse(Bukkit.getMaxPlayers()));
     this.schedulers = new EnumMap<>(MatchScope.class);
     this.listeners = new EnumMap<>(MatchScope.class);
     this.tickables = new EnumMap<>(MatchScope.class);

@@ -26,7 +26,7 @@ import tc.oc.pgm.filters.AnyFilter;
 import tc.oc.pgm.filters.BlockFilter;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.query.BlockQuery;
-import tc.oc.util.SemanticVersion;
+import tc.oc.util.Version;
 
 /**
  * Region represented by a list of single blocks. This will check if a point is inside the block at
@@ -129,10 +129,7 @@ public class FiniteBlockRegion extends AbstractRegion {
   }
 
   public static FiniteBlockRegion fromWorld(
-      Region region,
-      World world,
-      @Nullable SemanticVersion proto,
-      SingleMaterialMatcher... materials) {
+      Region region, World world, @Nullable Version proto, SingleMaterialMatcher... materials) {
     return fromWorld(region, world, Arrays.asList(materials), proto);
   }
 
@@ -140,7 +137,7 @@ public class FiniteBlockRegion extends AbstractRegion {
       Region region,
       World world,
       Collection<SingleMaterialMatcher> materials,
-      @Nullable SemanticVersion proto) {
+      @Nullable Version proto) {
     List<Filter> filters = new ArrayList<>(materials.size());
     for (SingleMaterialMatcher materialPattern : materials) {
       filters.add(new BlockFilter(materialPattern));
@@ -150,7 +147,7 @@ public class FiniteBlockRegion extends AbstractRegion {
 
   @SuppressWarnings("deprecation")
   public static FiniteBlockRegion fromWorld(
-      Region region, World world, Filter materials, @Nullable SemanticVersion proto) {
+      Region region, World world, Filter materials, @Nullable Version proto) {
     List<Block> blocks = new LinkedList<>();
     Bounds bounds = region.getBounds();
 

@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.material.matcher.SingleMaterialMatcher;
-import tc.oc.pgm.api.map.MapInfoExtra;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -31,7 +30,7 @@ import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
-public class DestroyableModule implements MapModule, MapInfoExtra {
+public class DestroyableModule implements MapModule {
   protected final List<DestroyableFactory> destroyableFactories;
 
   public DestroyableModule(List<DestroyableFactory> destroyableFactories) {
@@ -46,11 +45,6 @@ public class DestroyableModule implements MapModule, MapInfoExtra {
   @Override
   public Collection<Class<? extends MatchModule>> getSoftDependencies() {
     return ImmutableList.of(GoalMatchModule.class);
-  }
-
-  @Override
-  public String getGenre() {
-    return "Destroy the Monument";
   }
 
   @Override

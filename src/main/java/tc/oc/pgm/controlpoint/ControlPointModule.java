@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapInfoExtra;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
@@ -21,22 +20,12 @@ import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 
-public class ControlPointModule implements MapModule, MapInfoExtra {
+public class ControlPointModule implements MapModule {
 
   private final List<ControlPointDefinition> definitions;
-  private final boolean mostlyPermanent;
 
   public ControlPointModule(List<ControlPointDefinition> definitions) {
     this.definitions = definitions;
-    this.mostlyPermanent =
-        definitions.stream().filter(ControlPointDefinition::isPermanent).count()
-                / Math.max(definitions.size(), 1)
-            >= 0.5;
-  }
-
-  @Override
-  public String getGenre() {
-    return mostlyPermanent ? "Capture the Point" : "Control the Point";
   }
 
   @Override

@@ -12,7 +12,6 @@ import org.bukkit.event.Listener;
 import org.joda.time.Duration;
 import tc.oc.pgm.api.chat.MultiAudience;
 import tc.oc.pgm.api.map.MapInfo;
-import tc.oc.pgm.api.map.MapInfoExtra;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.match.event.MatchPhaseChangeEvent;
@@ -60,7 +59,7 @@ public interface Match extends MatchPlayerResolver, MultiAudience, ModuleContext
    *
    * @return The {@link MapInfo}.
    */
-  <Map extends MapInfo & MapInfoExtra> Map getMap();
+  MapInfo getMap();
 
   /**
    * Get the {@link World} that represents the {@link Match#getMap()}.

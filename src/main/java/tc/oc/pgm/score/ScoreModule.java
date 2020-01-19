@@ -14,7 +14,6 @@ import javax.annotation.Nonnull;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.material.matcher.SingleMaterialMatcher;
-import tc.oc.pgm.api.map.MapInfoExtra;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -29,22 +28,17 @@ import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.XMLUtils;
-import tc.oc.util.SemanticVersion;
+import tc.oc.util.Version;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
-public class ScoreModule implements MapModule, MapInfoExtra {
+public class ScoreModule implements MapModule {
   public ScoreModule(@Nonnull ScoreConfig config, @Nonnull Set<ScoreBoxFactory> scoreBoxFactories) {
     Preconditions.checkNotNull(config, "score config");
     Preconditions.checkNotNull(scoreBoxFactories, "score box factories");
 
     this.config = config;
     this.scoreBoxFactories = scoreBoxFactories;
-  }
-
-  @Override
-  public String getGenre() {
-    return "Deathmatch";
   }
 
   @Override
@@ -79,7 +73,7 @@ public class ScoreModule implements MapModule, MapInfoExtra {
     @Override
     public ScoreModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      SemanticVersion proto = factory.getProto();
+      Version proto = factory.getProto();
 
       List<Element> scoreElements = doc.getRootElement().getChildren("score");
       if (scoreElements.size() == 0) {

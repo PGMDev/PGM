@@ -11,7 +11,6 @@ import org.bukkit.material.MaterialData;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapInfoExtra;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -31,7 +30,7 @@ import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
-public class CoreModule implements MapModule, MapInfoExtra {
+public class CoreModule implements MapModule {
   protected final List<CoreFactory> coreFactories;
 
   public CoreModule(List<CoreFactory> coreFactories) {
@@ -42,11 +41,6 @@ public class CoreModule implements MapModule, MapInfoExtra {
   @Override
   public Collection<Class> getSoftDependencies() {
     return ImmutableList.of(GoalMatchModule.class);
-  }
-
-  @Override
-  public String getGenre() {
-    return "Leak the Core";
   }
 
   @Override

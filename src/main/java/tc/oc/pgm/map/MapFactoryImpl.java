@@ -31,7 +31,7 @@ import tc.oc.pgm.kits.LegacyKitParser;
 import tc.oc.pgm.regions.FeatureRegionParser;
 import tc.oc.pgm.regions.LegacyRegionParser;
 import tc.oc.pgm.regions.RegionParser;
-import tc.oc.util.SemanticVersion;
+import tc.oc.util.Version;
 import tc.oc.util.logging.ClassLogger;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.SAXHandler;
@@ -92,13 +92,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
   }
 
   @Override
-  public MapInfo buildInfo() throws MapNotFoundException, ModuleLoadException {
-    preLoad();
-    return checkNotNull(info);
-  }
-
-  @Override
-  public MapContext buildContext() throws MapNotFoundException, ModuleLoadException {
+  public MapContext load() throws MapNotFoundException, ModuleLoadException {
     preLoad();
     try {
       loadAll();
@@ -107,7 +101,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
       throw e;
     }
     postLoad();
-    return new MapContextImpl(info, source, this);
+    return new MapContextImpl(info, source, getModules());
   }
 
   private void postLoad() throws ModuleLoadException {
@@ -130,7 +124,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
   }
 
   @Override
-  public SemanticVersion getProto() {
+  public Version getProto() {
     if (info == null) {
       throw new IllegalStateException("Tried to access proto when info is not loaded");
     }

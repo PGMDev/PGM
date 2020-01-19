@@ -10,7 +10,6 @@ import org.bukkit.DyeColor;
 import org.bukkit.util.Vector;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.api.map.MapInfoExtra;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -29,7 +28,7 @@ import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 
-public class WoolModule implements MapModule, MapInfoExtra {
+public class WoolModule implements MapModule {
   protected final Multimap<TeamFactory, MonumentWoolFactory> woolFactories;
 
   public WoolModule(Multimap<TeamFactory, MonumentWoolFactory> woolFactories) {
@@ -40,11 +39,6 @@ public class WoolModule implements MapModule, MapInfoExtra {
   @Override
   public Collection<Class> getSoftDependencies() {
     return ImmutableList.of(GoalMatchModule.class);
-  }
-
-  @Override
-  public String getGenre() {
-    return "Capture the Wool";
   }
 
   public Multimap<TeamFactory, MonumentWoolFactory> getWools() {

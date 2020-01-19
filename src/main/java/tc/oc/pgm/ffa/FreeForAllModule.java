@@ -8,7 +8,6 @@ import org.bukkit.scoreboard.NameTagVisibility;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.Config;
-import tc.oc.pgm.api.map.MapInfoExtra;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
@@ -21,7 +20,7 @@ import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
-public class FreeForAllModule implements MapModule, MapInfoExtra {
+public class FreeForAllModule implements MapModule {
 
   private final FreeForAllOptions options;
 
@@ -41,11 +40,6 @@ public class FreeForAllModule implements MapModule, MapInfoExtra {
   @Override
   public MatchModule createMatchModule(Match match) {
     return new FreeForAllMatchModule(match, options);
-  }
-
-  @Override
-  public int getPlayerLimit() {
-    return options.maxPlayers;
   }
 
   public static class Factory implements MapModuleFactory<FreeForAllModule> {

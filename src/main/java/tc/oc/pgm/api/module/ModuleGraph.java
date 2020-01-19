@@ -5,8 +5,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -19,8 +17,7 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
 
   private final AtomicBoolean loaded;
   private final Map<Class<? extends M>, F> factories;
-  private Map<Class<? extends M>, M> modulesByClass;
-  private List<M> modulesInOrder;
+  private Map<Class<? extends M>, M> modules;
 
   public ModuleGraph(Map factories) {
     this.loaded = new AtomicBoolean(true); // unloadAll will change to false
@@ -50,8 +47,7 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
         }
       }
 
-      modulesByClass = Collections.unmodifiableMap(modulesByClass);
-      modulesInOrder = Collections.unmodifiableList(modulesInOrder);
+      modules = Collections.unmodifiableMap(modules);
     } catch (ModuleLoadException e) {
       unloadAll();
       throw e;
@@ -60,8 +56,7 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
 
   protected void unloadAll() {
     if (loaded.compareAndSet(true, false)) {
-      modulesByClass = new HashMap<>();
-      modulesInOrder = new LinkedList<>();
+      modules = new HashMap<>(factories.size());
     }
   }
 
@@ -111,7 +106,7 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
       return false;
     }
 
-    if (modulesByClass.containsKey(key)) {
+    if (modules.containsKey(key)) {
       return true;
     }
 
@@ -164,23 +159,18 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
       return false;
     }
 
-    modulesInOrder.add(module);
-    modulesByClass.put((Class<? extends M>) module.getClass(), module);
+    modules.put((Class<? extends M>) module.getClass(), module);
 
     return true;
   }
 
   @Override
   public <N extends M> N getModule(Class<? extends N> key) {
-    return (N) modulesByClass.get(key);
+    return (N) modules.get(key);
   }
 
   @Override
   public Collection<M> getModules() {
-    return modulesInOrder;
-  }
-
-  public Map<Class<? extends M>, M> getModulesByClass() {
-    return modulesByClass;
+    return modules.values();
   }
 }

@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -57,7 +58,7 @@ public class MapLibraryImpl implements MapLibrary {
 
   @Override
   public MapInfo getMap(String idOrName) {
-    idOrName = MapInfoImpl.normalizeName(idOrName);
+    idOrName = MapInfo.normalizeName(idOrName);
 
     MapEntry map = maps.get(idOrName);
     if (map == null) {
@@ -76,12 +77,14 @@ public class MapLibraryImpl implements MapLibrary {
   public CompletableFuture<?> loadNewMaps(boolean reset) {
     final List<Iterator<? extends MapSource>> sources = new LinkedList<>();
 
+    // Reload failed maps
     if (reset) {
       failed.clear();
     } else {
       sources.add(failed.iterator());
     }
 
+    // Discover new maps
     final Iterator<MapSourceFactory> factories = this.factories.iterator();
     while (factories.hasNext()) {
       final MapSourceFactory factory = factories.next();
@@ -90,6 +93,20 @@ public class MapLibraryImpl implements MapLibrary {
       } catch (MapNotFoundException e) {
         factories.remove();
         logger.log(Level.WARNING, "Skipped source: " + factory, e);
+      }
+    }
+
+    // Reload existing maps that changed
+    final Iterator<Map.Entry<String, MapEntry>> maps = this.maps.entrySet().iterator();
+    while (maps.hasNext()) {
+      final MapEntry entry = maps.next().getValue();
+      try {
+        if (entry.source.checkForUpdates()) {
+          sources.add(Iterators.singletonIterator(entry.source));
+        }
+      } catch (MapNotFoundException e) {
+        maps.remove();
+        logger.log(Level.WARNING, "Missing map: " + entry.info.getId());
       }
     }
 
@@ -120,12 +137,10 @@ public class MapLibraryImpl implements MapLibrary {
   private MapContext loadMap(MapSource source, @Nullable String mapId)
       throws MapNotFoundException, ModuleLoadException {
     final MapFactory factory = new MapFactoryImpl(logger, source);
-    final MapInfo info;
     final MapContext context;
 
     try {
-      info = factory.buildInfo();
-      context = factory.buildContext();
+      context = factory.load();
     } catch (ModuleLoadException e) {
       failed.add(source);
       throw e;
@@ -135,7 +150,7 @@ public class MapLibraryImpl implements MapLibrary {
       throw e;
     }
 
-    maps.put(info.getId(), new MapEntry(source, info, context));
+    maps.put(context.getId(), new MapEntry(source, context.clone(), context));
     return context;
   }
 

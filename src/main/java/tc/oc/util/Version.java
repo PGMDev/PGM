@@ -5,13 +5,13 @@ import static com.google.common.base.Preconditions.checkArgument;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-public class SemanticVersion implements Comparable<SemanticVersion>, Iterable<Integer> {
+public class Version implements Comparable<Version>, Iterable<Integer> {
 
   private final int major;
   private final int minor;
   private final int patch;
 
-  public SemanticVersion(int major, int minor, int patch) {
+  public Version(int major, int minor, int patch) {
     checkArgument(major >= 0, "version major cannot be negative");
     checkArgument(minor >= 0, "version minor cannot be negative");
     checkArgument(patch >= 0, "version patch cannot be negative");
@@ -27,7 +27,7 @@ public class SemanticVersion implements Comparable<SemanticVersion>, Iterable<In
   }
 
   @Override
-  public int compareTo(SemanticVersion obj) {
+  public int compareTo(Version obj) {
     final Iterator<Integer> other = obj.iterator();
     for (int i : this) {
       final int compare = Integer.compare(i, other.next());
@@ -45,8 +45,8 @@ public class SemanticVersion implements Comparable<SemanticVersion>, Iterable<In
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof SemanticVersion) {
-      return compareTo((SemanticVersion) obj) == 0;
+    if (obj instanceof Version) {
+      return compareTo((Version) obj) == 0;
     }
     return false;
   }
@@ -64,7 +64,7 @@ public class SemanticVersion implements Comparable<SemanticVersion>, Iterable<In
    * Return true if the major versions match and the minor version and patch levels are less or
    * equal to the given version
    */
-  public boolean isNoNewerThan(SemanticVersion spec) {
+  public boolean isNoNewerThan(Version spec) {
     return this.major == spec.major
         && (this.minor < spec.minor || (this.minor == spec.minor && this.patch <= spec.patch));
   }
@@ -73,7 +73,7 @@ public class SemanticVersion implements Comparable<SemanticVersion>, Iterable<In
    * Return true if the major versions match and the minor version and patch levels are greater than
    * the given version
    */
-  public boolean isNewerThan(SemanticVersion spec) {
+  public boolean isNewerThan(Version spec) {
     return this.major == spec.major
         && (this.minor > spec.minor || (this.minor == spec.minor && this.patch > spec.patch));
   }
@@ -82,7 +82,7 @@ public class SemanticVersion implements Comparable<SemanticVersion>, Iterable<In
    * Return true if the major versions match and the minor version and patch levels are greater or
    * equal to the given version
    */
-  public boolean isNoOlderThan(SemanticVersion spec) {
+  public boolean isNoOlderThan(Version spec) {
     return this.major == spec.major
         && (this.minor > spec.minor || (this.minor == spec.minor && this.patch >= spec.patch));
   }
@@ -91,7 +91,7 @@ public class SemanticVersion implements Comparable<SemanticVersion>, Iterable<In
    * Return true if the major versions match and the minor version and patch levels are less than
    * the given version
    */
-  public boolean isOlderThan(SemanticVersion spec) {
+  public boolean isOlderThan(Version spec) {
     return this.major == spec.major
         && (this.minor < spec.minor || (this.minor == spec.minor && this.patch < spec.patch));
   }

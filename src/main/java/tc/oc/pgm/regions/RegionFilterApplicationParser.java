@@ -15,7 +15,7 @@ import tc.oc.pgm.filters.FilterNode;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.util.XMLUtils;
-import tc.oc.util.SemanticVersion;
+import tc.oc.util.Version;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
@@ -24,7 +24,7 @@ public class RegionFilterApplicationParser {
   private final FilterParser filterParser;
   private final RegionParser regionParser;
   private final RFAContext rfaContext;
-  private final SemanticVersion proto;
+  private final Version proto;
 
   public RegionFilterApplicationParser(MapFactory factory, RFAContext rfaContext) {
     this.factory = factory;

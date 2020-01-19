@@ -1,7 +1,6 @@
 package tc.oc.pgm.teams;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import java.util.Collection;
@@ -14,7 +13,6 @@ import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.Config;
-import tc.oc.pgm.api.map.MapInfoExtra;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
@@ -27,18 +25,14 @@ import tc.oc.util.StringUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
-public class TeamModule implements MapModule<TeamMatchModule>, MapInfoExtra {
+public class TeamModule implements MapModule<TeamMatchModule> {
 
   private final Set<TeamFactory> teams;
   private final @Nullable Boolean requireEven;
-  private final Collection<Integer> teamLimits;
-  private final int playerLimit;
 
   public TeamModule(Set<TeamFactory> teams, @Nullable Boolean requireEven) {
     this.teams = teams;
     this.requireEven = requireEven;
-    this.teamLimits = Collections2.transform(teams, TeamFactory::getMaxPlayers);
-    this.playerLimit = teams.stream().mapToInt(TeamFactory::getMaxPlayers).sum();
   }
 
   @Override
@@ -74,16 +68,6 @@ public class TeamModule implements MapModule<TeamMatchModule>, MapInfoExtra {
   public TeamMatchModule createMatchModule(Match match) {
     return new TeamMatchModule(
         match, teams, requireEven != null ? requireEven : Config.Teams.requireEven());
-  }
-
-  @Override
-  public int getPlayerLimit() {
-    return playerLimit;
-  }
-
-  @Override
-  public Collection<Integer> getTeamLimits() {
-    return teamLimits;
   }
 
   /**

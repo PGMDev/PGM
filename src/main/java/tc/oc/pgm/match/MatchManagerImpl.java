@@ -7,7 +7,6 @@ import com.google.common.collect.Iterables;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -16,6 +15,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
+import org.bukkit.Difficulty;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -30,7 +30,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.terrain.TerrainModule;
 import tc.oc.server.Scheduler;
 import tc.oc.util.FileUtils;
 import tc.oc.util.logging.ClassLogger;
@@ -122,12 +121,15 @@ public class MatchManagerImpl implements MatchFactory, MatchManager {
   }
 
   private Future<World> initWorld(String worldName, MapContext map) {
-    final TerrainModule terrain = map.getModule(TerrainModule.class);
+    // FIXME: Terrain access
+    // final TerrainModule terrain = map.getModule(TerrainModule.class);
+    // .generator(terrain == null ? new NullChunkGenerator() : terrain.getChunkGenerator())
+    // .seed(terrain == null ? new Random().nextLong() : terrain.getSeed());
     final WorldCreator creator =
         new WorldCreator(worldName)
             .environment(World.Environment.NORMAL)
-            .generator(terrain == null ? new NullChunkGenerator() : terrain.getChunkGenerator())
-            .seed(terrain == null ? new Random().nextLong() : terrain.getSeed());
+            .generator(new NullChunkGenerator())
+            .seed(0L);
 
     return scheduler.runMainThread(
         () -> {
@@ -135,7 +137,7 @@ public class MatchManagerImpl implements MatchFactory, MatchManager {
           world.setPVP(true);
           world.setSpawnFlags(false, false);
           world.setAutoSave(false);
-          world.setDifficulty(map.getDifficulty());
+          world.setDifficulty(Difficulty.values()[map.getDifficulty()]);
           return world;
         });
   }
