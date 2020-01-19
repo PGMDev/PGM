@@ -1,6 +1,6 @@
 package tc.oc.pgm.listeners;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 
 import java.util.UUID;
 import net.md_5.bungee.api.ChatColor;
