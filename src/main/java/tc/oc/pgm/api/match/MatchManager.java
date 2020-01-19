@@ -7,7 +7,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
 import tc.oc.pgm.api.chat.MultiAudience;
-import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayerResolver;
 
 /** A manager of {@link Match}es. */
@@ -28,14 +27,6 @@ public interface MatchManager extends MatchPlayerResolver, MultiAudience {
    * @return All {@link Match}es, excludes those that are unloaded or destroyed.
    */
   Iterable<Match> getMatches();
-
-  /**
-   * Register a newly loaded {@link Match}.
-   *
-   * @see MatchFactory for how to create a {@link Match}.
-   * @param match A {@link Match} that has been {@link Match#load()}ed.
-   */
-  void addMatch(Match match);
 
   /**
    * Get the {@link Match} for the specified {@link Entity}.

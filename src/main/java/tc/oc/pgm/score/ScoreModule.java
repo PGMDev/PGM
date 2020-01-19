@@ -14,6 +14,7 @@ import javax.annotation.Nonnull;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.api.map.MapInfoExtra;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -32,7 +33,7 @@ import tc.oc.util.SemanticVersion;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
-public class ScoreModule implements MapModule {
+public class ScoreModule implements MapModule, MapInfoExtra {
   public ScoreModule(@Nonnull ScoreConfig config, @Nonnull Set<ScoreBoxFactory> scoreBoxFactories) {
     Preconditions.checkNotNull(config, "score config");
     Preconditions.checkNotNull(scoreBoxFactories, "score box factories");
@@ -41,9 +42,10 @@ public class ScoreModule implements MapModule {
     this.scoreBoxFactories = scoreBoxFactories;
   }
 
-  // FIXME: custom sidebar
-  // private static final Component GAME =
-  //    new PersonalizedTranslatable("match.scoreboard.scores.title");
+  @Override
+  public String getGenre() {
+    return "Deathmatch";
+  }
 
   @Override
   public MatchModule createMatchModule(Match match) {
@@ -65,13 +67,13 @@ public class ScoreModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<ScoreModule> {
     @Override
-    public Collection<Class<? extends MapModule>> getHardDependencies() {
+    public Collection<Class<? extends MapModule>> getSoftDependencies() {
       return ImmutableList.of(RegionModule.class, FilterModule.class);
     }
 
     @Override
     public Collection<Class<? extends MapModule>> getWeakDependencies() {
-      return ImmutableList.of(BlitzModule.class); // GoalModule
+      return ImmutableList.of(BlitzModule.class);
     }
 
     @Override

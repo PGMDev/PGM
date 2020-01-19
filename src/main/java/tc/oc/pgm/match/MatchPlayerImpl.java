@@ -432,4 +432,10 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
         .append("match", getMatch().getId())
         .build();
   }
+
+  @Override
+  protected void finalize() throws Throwable {
+    PGM.get().getLogger().info("Finalize: " + this);
+    super.finalize();
+  }
 }

@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nullable;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 
@@ -16,12 +17,14 @@ import tc.oc.pgm.api.module.exception.ModuleLoadException;
 public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
     implements ModuleContext<M> {
 
+  private final AtomicBoolean loaded;
   private final Map<Class<? extends M>, F> factories;
   private Map<Class<? extends M>, M> modulesByClass;
   private List<M> modulesInOrder;
 
-  public ModuleGraph(Map<Class<? extends M>, F> factories) {
-    this.factories = factories; // No copies because every graph would have its own copy
+  public ModuleGraph(Map factories) {
+    this.loaded = new AtomicBoolean(true); // unloadAll will change to false
+    this.factories = factories; // No copies since every graph would be duplicated
     unloadAll();
   }
 
@@ -34,26 +37,48 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
    */
   protected abstract @Nullable M createModule(F factory) throws ModuleLoadException;
 
-  protected synchronized void loadAll() throws ModuleLoadException {
-    final Stack<ModuleLoadException> errors = new Stack<>();
-    for (Class<? extends M> key : factories.keySet()) {
-      load(key, null, errors);
+  protected void loadAll() throws ModuleLoadException {
+    if (!loaded.compareAndSet(false, true)) return;
 
-      for (ModuleLoadException e : errors) {
-        throw e;
+    try {
+      final Stack<ModuleLoadException> errors = new Stack<>();
+      for (Class<? extends M> key : factories.keySet()) {
+        load(key, null, errors);
+
+        for (ModuleLoadException e : errors) {
+          throw e;
+        }
       }
+
+      modulesByClass = Collections.unmodifiableMap(modulesByClass);
+      modulesInOrder = Collections.unmodifiableList(modulesInOrder);
+    } catch (ModuleLoadException e) {
+      unloadAll();
+      throw e;
+    }
+  }
+
+  protected void unloadAll() {
+    if (loaded.compareAndSet(true, false)) {
+      modulesByClass = new HashMap<>();
+      modulesInOrder = new LinkedList<>();
+    }
+  }
+
+  protected void addFactory(Class<? extends M> key, F factory) {
+    factories.put(key, factory);
+
+    final Stack<ModuleLoadException> errors = new Stack<>();
+    if (loaded.get()) {
+      load(key, null, errors);
     }
 
-    modulesByClass = Collections.unmodifiableMap(modulesByClass);
-    modulesInOrder = Collections.unmodifiableList(modulesInOrder);
+    if (!errors.isEmpty()) {
+      throw errors.get(0);
+    }
   }
 
-  protected synchronized void unloadAll() {
-    modulesByClass = new HashMap<>();
-    modulesInOrder = new LinkedList<>();
-  }
-
-  private F getFactory(Class<? extends M> key, @Nullable Class<? extends M> requiredBy)
+  protected F getFactory(Class<? extends M> key, @Nullable Class<? extends M> requiredBy)
       throws ModuleLoadException {
     if (checkNotNull(key) == requiredBy) {
       throw new ModuleLoadException(key, "Required itself (is there a circular dependency?)");
@@ -82,6 +107,9 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
       Stack<ModuleLoadException> errors)
       throws ModuleLoadException {
     final F factory = getFactory(key, requiredBy);
+    if (factory == null) {
+      return false;
+    }
 
     if (modulesByClass.containsKey(key)) {
       return true;
@@ -150,5 +178,9 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
   @Override
   public Collection<M> getModules() {
     return modulesInOrder;
+  }
+
+  public Map<Class<? extends M>, M> getModulesByClass() {
+    return modulesByClass;
   }
 }

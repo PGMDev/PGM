@@ -33,7 +33,7 @@ public class RegionModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<RegionModule> {
     @Override
-    public Collection<Class<? extends MapModule>> getHardDependencies() {
+    public Collection<Class<? extends MapModule>> getSoftDependencies() {
       return ImmutableList.of(FilterModule.class, KitModule.class);
     }
 

@@ -142,7 +142,6 @@ public class MatchAnnouncer implements Listener {
                 .translate(
                     "broadcast.currentlyPlaying",
                     viewer.getBukkit(),
-                    viewer.getMatch().getMap().getDescription()
-                        + org.bukkit.ChatColor.DARK_PURPLE));
+                    org.bukkit.ChatColor.GOLD + viewer.getMatch().getMap().getName()));
   }
 }

@@ -17,6 +17,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
@@ -149,5 +150,11 @@ public class MapLibraryImpl implements MapLibrary {
       logger.log(Level.WARNING, "Missing map: " + (mapId == null ? source.getId() : mapId), e);
     }
     return null;
+  }
+
+  @Override
+  protected void finalize() throws Throwable {
+    PGM.get().getLogger().info("Finalize: " + this);
+    super.finalize();
   }
 }

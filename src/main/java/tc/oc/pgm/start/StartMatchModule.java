@@ -1,5 +1,6 @@
 package tc.oc.pgm.start;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -21,6 +22,8 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchPhase;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
+import tc.oc.pgm.api.match.factory.MatchModuleFactory;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.bossbar.BossBarMatchModule;
 import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.countdowns.SingleCountdownContext;
@@ -31,6 +34,18 @@ import tc.oc.pgm.events.PlayerLeaveMatchEvent;
 
 @ListenerScope(MatchScope.LOADED)
 public class StartMatchModule implements MatchModule, Listener {
+
+  public static class Factory implements MatchModuleFactory<StartMatchModule> {
+    @Override
+    public Collection<Class<? extends MatchModule>> getSoftDependencies() {
+      return ImmutableList.of(BossBarMatchModule.class);
+    }
+
+    @Override
+    public StartMatchModule createMatchModule(Match match) throws ModuleLoadException {
+      return new StartMatchModule(match);
+    }
+  }
 
   class UnreadyBar extends DynamicBossBar {
     @Override
@@ -78,7 +93,7 @@ public class StartMatchModule implements MatchModule, Listener {
   protected final StartConfig config;
   protected boolean autoStart; // Initialized from config, but is mutable
 
-  public StartMatchModule(Match match) {
+  private StartMatchModule(Match match) {
     this.match = match;
     this.unreadyBar = new UnreadyBar();
     this.config = new StartConfig(PGM.get().getConfig());

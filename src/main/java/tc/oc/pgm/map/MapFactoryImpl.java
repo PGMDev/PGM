@@ -9,6 +9,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.jdom2.Document;
 import org.jdom2.input.JDOMParseException;
 import org.jdom2.input.SAXBuilder;
+import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
@@ -54,10 +55,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
   private FeatureDefinitionContext features;
 
   public MapFactoryImpl(Logger logger, MapSource source) {
-    super(
-        PGM.get()
-            .getModuleRegistry()
-            .getMapModuleFactories()); // Do not copy to avoid N copies of the factories
+    super(Modules.MAP); // Do not copy to avoid N copies of the factories
     this.logger = ClassLogger.get(checkNotNull(logger), getClass(), checkNotNull(source).getId());
     this.source = source;
   }
@@ -173,5 +171,11 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
       features = new FeatureDefinitionContext();
     }
     return features;
+  }
+
+  @Override
+  protected void finalize() throws Throwable {
+    PGM.get().getLogger().info("Finalize: " + this);
+    super.finalize();
   }
 }

@@ -2,7 +2,9 @@ package tc.oc.pgm.scoreboard;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +21,8 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.factory.MatchModuleFactory;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.party.event.PartyAddEvent;
@@ -27,16 +31,30 @@ import tc.oc.pgm.api.party.event.PartyRenameEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
+import tc.oc.pgm.ffa.FreeForAllMatchModule;
+import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.util.StringUtils;
 
 @ListenerScope(MatchScope.LOADED)
 public class ScoreboardMatchModule implements MatchModule, Listener {
 
-  private final Match match;
-  protected final Map<Party, Scoreboard> partyScoreboards = new HashMap<>();
-  protected final Scoreboard hiddenScoreboard;
+  public static class Factory implements MatchModuleFactory<ScoreboardMatchModule> {
+    @Override
+    public Collection<Class<? extends MatchModule>> getWeakDependencies() {
+      return ImmutableList.of(TeamMatchModule.class, FreeForAllMatchModule.class);
+    }
 
-  public ScoreboardMatchModule(Match match) {
+    @Override
+    public ScoreboardMatchModule createMatchModule(Match match) throws ModuleLoadException {
+      return new ScoreboardMatchModule(match);
+    }
+  }
+
+  private final Match match;
+  private final Map<Party, Scoreboard> partyScoreboards = new HashMap<>();
+  private final Scoreboard hiddenScoreboard;
+
+  private ScoreboardMatchModule(Match match) {
     this.match = match;
     this.hiddenScoreboard = PGM.get().getServer().getScoreboardManager().getNewScoreboard();
   }

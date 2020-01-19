@@ -3,10 +3,12 @@ package tc.oc.pgm.controlpoint;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.map.MapInfoExtra;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
@@ -19,17 +21,27 @@ import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 
-public class ControlPointModule implements MapModule {
+public class ControlPointModule implements MapModule, MapInfoExtra {
 
   private final List<ControlPointDefinition> definitions;
+  private final boolean mostlyPermanent;
 
   public ControlPointModule(List<ControlPointDefinition> definitions) {
     this.definitions = definitions;
+    this.mostlyPermanent =
+        definitions.stream().filter(ControlPointDefinition::isPermanent).count()
+                / Math.max(definitions.size(), 1)
+            >= 0.5;
+  }
+
+  @Override
+  public String getGenre() {
+    return mostlyPermanent ? "Capture the Point" : "Control the Point";
   }
 
   @Override
   public MatchModule createMatchModule(Match match) {
-    ImmutableList.Builder<ControlPoint> controlPoints = new ImmutableList.Builder<>();
+    List<ControlPoint> controlPoints = new LinkedList<>();
 
     for (ControlPointDefinition definition : this.definitions) {
       ControlPoint controlPoint = new ControlPoint(match, definition);
@@ -38,14 +50,13 @@ public class ControlPointModule implements MapModule {
       controlPoints.add(controlPoint);
     }
 
-    return new ControlPointMatchModule(match, controlPoints.build());
+    return new ControlPointMatchModule(match, controlPoints);
   }
 
   public static class Factory implements MapModuleFactory<ControlPointModule> {
     @Override
     public Collection<Class<? extends MapModule>> getSoftDependencies() {
-      return ImmutableList.of(
-          TeamModule.class, RegionModule.class, FilterModule.class); // GoalModule
+      return ImmutableList.of(TeamModule.class, RegionModule.class, FilterModule.class);
     }
 
     @Override

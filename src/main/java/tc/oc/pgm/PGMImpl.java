@@ -81,7 +81,6 @@ import tc.oc.pgm.listeners.MotdListener;
 import tc.oc.pgm.listeners.PGMListener;
 import tc.oc.pgm.listeners.WorldProblemListener;
 import tc.oc.pgm.map.MapLibraryImpl;
-import tc.oc.pgm.match.MatchFactoryImpl;
 import tc.oc.pgm.match.MatchManagerImpl;
 import tc.oc.pgm.prefix.PrefixRegistry;
 import tc.oc.pgm.prefix.PrefixRegistryImpl;
@@ -95,7 +94,6 @@ import tc.oc.pgm.teams.TeamMatchModule;
 public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, Listener {
 
   private Logger gameLogger;
-  private Modules moduleRegistry;
   private Datastore datastore;
   private Datastore datastoreCache;
   private MapLibrary mapLibrary;
@@ -123,6 +121,7 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
   @Override
   public void onEnable() {
     PGM.set(this);
+    Modules.registerAll();
 
     final Server server = getServer();
     Permissions.register(server.getPluginManager());
@@ -131,9 +130,14 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
     final Logger logger = getLogger();
     logger.setLevel(Config.Log.level());
 
+    registerEvents(Config.PlayerList.get());
+    registerEvents(Config.Prefixes.get());
+    registerEvents(Config.Experiments.get());
+
     try {
       getConfig().options().copyDefaults(true);
       saveConfig();
+      reloadConfig();
     } catch (Throwable t) {
       logger.log(Level.WARNING, "Failed to create or save configuration", t);
     }
@@ -149,8 +153,6 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
     gameLogger = Logger.getLogger(logger.getName() + ".game");
     gameLogger.setUseParentHandlers(false);
     gameLogger.setParent(logger);
-
-    moduleRegistry = new ModulesImpl();
 
     // FIXME: Use gameLogger
     mapLibrary = new MapLibraryImpl(logger, Config.Maps.sources());
@@ -170,17 +172,31 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
       }
     }
 
-    matchManager = new MatchManagerImpl();
-    matchFactory = new MatchFactoryImpl(logger, server);
+    matchManager = new MatchManagerImpl(logger, server);
+    matchFactory = (MatchFactory) matchManager;
     mapOrder =
         new RandomMapOrder(matchManager); // TODO: RotationManager and use it to get first match
+
+    MapContext map;
+    for (int i = 0; ; i += 1) {
+      final String id = mapOrder.popNextMap().getId();
+      try {
+        map = mapLibrary.loadExistingMap(id).get(5, TimeUnit.SECONDS);
+        break;
+      } catch (Throwable t) {
+        getLogger().log(Level.WARNING, "Failed to load map: " + id, t);
+        if (i < 5) continue;
+        shutdown("Failed to load any maps", t);
+        return;
+      }
+    }
+
     prefixRegistry = new PrefixRegistryImpl();
     matchNameRenderer = new MatchNameRenderer(matchManager);
     nameRenderer = new CachingNameRenderer(matchNameRenderer);
 
     if (Config.PlayerList.enabled()) {
       matchTabManager = new MatchTabManager(this);
-      matchTabManager.enable();
     }
 
     if (Config.AutoRestart.enabled()) {
@@ -190,31 +206,15 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
     registerListeners();
     registerCommands();
 
-    getServer()
-        .getScheduler()
-        .scheduleSyncDelayedTask(
-            PGM.get(),
-            () -> {
-              MapContext map;
-              for (int i = 0; ; i += 1) {
-                final String id = mapOrder.popNextMap().getId();
-                try {
-                  map = mapLibrary.loadExistingMap(id).get(5, TimeUnit.SECONDS);
-                  break;
-                } catch (Throwable t) {
-                  getLogger().log(Level.WARNING, "Failed to load map: " + id, t);
-                  if (i < 5) continue;
-                  shutdown("Failed to load any maps", t);
-                  return;
-                }
-              }
-
+    matchFactory
+        .initMatch(map)
+        .whenComplete(
+            (Match match, Throwable err) -> {
               try {
-                final Match match = matchFactory.createPreMatch(map).join();
-                matchFactory.createMatch(match, null);
-                matchManager.addMatch(match);
+                if (err != null) throw err;
+                matchFactory.moveMatch(null, match);
               } catch (Throwable t) {
-                shutdown("Failed to load first match", t);
+                shutdown("Unable to load match", t);
               }
             });
   }
@@ -225,7 +225,6 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
     if (matchManager != null) matchManager.getMatches().iterator().forEachRemaining(Match::unload);
     if (datastore != null) datastore.shutdown();
     if (datastoreCache != null) datastoreCache.shutdown();
-    moduleRegistry = null;
     datastore = null;
     datastoreCache = null;
     mapLibrary = null;
@@ -262,11 +261,6 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
   }
 
   @Override
-  public Modules getModuleRegistry() {
-    return moduleRegistry;
-  }
-
-  @Override
   public Datastore getDatastore() {
     return datastore;
   }
@@ -278,7 +272,7 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
 
   @Override
   public MatchFactory getMatchFactory() {
-    return null;
+    return matchFactory;
   }
 
   @Override
@@ -378,7 +372,7 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
   }
 
   private void registerListeners() {
-    registerEvents(this);
+    if (matchTabManager != null) registerEvents(matchTabManager);
     registerEvents(prefixRegistry);
     registerEvents(matchNameRenderer);
     registerEvents(new GeneralizingListener(this));
@@ -392,8 +386,5 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
     registerEvents(new WorldProblemListener(this));
     registerEvents(new MatchAnnouncer());
     registerEvents(new MotdListener());
-    registerEvents(Config.PlayerList.get());
-    registerEvents(Config.Prefixes.get());
-    registerEvents(Config.Experiments.get());
   }
 }

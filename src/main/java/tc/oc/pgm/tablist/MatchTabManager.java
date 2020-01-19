@@ -11,6 +11,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import tc.oc.pgm.Config;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.event.MatchResizeEvent;
@@ -30,8 +31,6 @@ import tc.oc.tablist.TabManager;
 import tc.oc.util.collection.DefaultMapAdapter;
 
 public class MatchTabManager extends TabManager implements Listener {
-  // Moved over to experiments config
-  // public static final long RENDER_DELAY = 5;
 
   private final Map<Team, TeamTabEntry> teamEntries =
       new DefaultMapAdapter<>(new TeamTabEntry.Factory(), true);
@@ -46,14 +45,6 @@ public class MatchTabManager extends TabManager implements Listener {
 
   public MatchTabManager(Plugin plugin) {
     super(plugin, new MatchTabView.Factory(), null);
-  }
-
-  void registerEvents(Listener listener) {
-    this.getPlugin().getServer().getPluginManager().registerEvents(listener, this.getPlugin());
-  }
-
-  public void enable() {
-    this.registerEvents(this);
   }
 
   public void disable() {
@@ -95,7 +86,7 @@ public class MatchTabManager extends TabManager implements Listener {
   public @Nullable MatchTabView getView(Player viewer) {
     MatchTabView view = (MatchTabView) super.getView(viewer);
     if (view != null) {
-      this.registerEvents(view);
+      plugin.getServer().getPluginManager().registerEvents(view, PGM.get());
     }
     return view;
   }

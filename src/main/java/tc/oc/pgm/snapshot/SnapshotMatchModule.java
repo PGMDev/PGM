@@ -1,5 +1,7 @@
 package tc.oc.pgm.snapshot;
 
+import com.google.common.collect.ImmutableList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.Chunk;
@@ -17,7 +19,10 @@ import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.factory.MatchModuleFactory;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.renewable.RenewableMatchModule;
 
 /**
  * Keeps a snapshot of the block state of the entire match world at build time, using a
@@ -30,10 +35,22 @@ import tc.oc.pgm.events.ListenerScope;
 @ListenerScope(MatchScope.LOADED)
 public class SnapshotMatchModule implements MatchModule, Listener {
 
+  public static class Factory implements MatchModuleFactory<SnapshotMatchModule> {
+    @Override
+    public Collection<Class<? extends MatchModule>> getSoftDependencies() {
+      return ImmutableList.of(RenewableMatchModule.class);
+    }
+
+    @Override
+    public SnapshotMatchModule createMatchModule(Match match) throws ModuleLoadException {
+      return new SnapshotMatchModule(match);
+    }
+  }
+
   private final Match match;
   private final Map<ChunkVector, ChunkSnapshot> chunkSnapshots = new HashMap<>();
 
-  public SnapshotMatchModule(Match match) {
+  private SnapshotMatchModule(Match match) {
     this.match = match;
   }
 

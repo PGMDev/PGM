@@ -19,8 +19,6 @@ public interface PGM extends Plugin {
 
   Logger getGameLogger();
 
-  Modules getModuleRegistry();
-
   Datastore getDatastore();
 
   Datastore getDatastoreCache();

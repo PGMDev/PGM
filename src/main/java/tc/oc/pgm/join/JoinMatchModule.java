@@ -1,6 +1,8 @@
 package tc.oc.pgm.join;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -16,6 +18,8 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
+import tc.oc.pgm.api.match.factory.MatchModuleFactory;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -28,6 +32,18 @@ import tc.oc.util.components.PeriodFormats;
 @ListenerScope(MatchScope.LOADED)
 public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
 
+  public static class Factory implements MatchModuleFactory<JoinMatchModule> {
+    @Override
+    public Collection<Class<? extends MatchModule>> getWeakDependencies() {
+      return ImmutableList.of(TimeLimitMatchModule.class);
+    }
+
+    @Override
+    public JoinMatchModule createMatchModule(Match match) throws ModuleLoadException {
+      return new JoinMatchModule(match);
+    }
+  }
+
   private final Set<JoinGuard> guards = new LinkedHashSet<>();
   private final Set<JoinHandler> handlers = new LinkedHashSet<>();
 
@@ -35,7 +51,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
   private final QueuedParticipants queuedParticipants;
   private final Match match;
 
-  public JoinMatchModule(Match match) {
+  private JoinMatchModule(Match match) {
     this.match = match;
     queuedParticipants = new QueuedParticipants(match);
   }

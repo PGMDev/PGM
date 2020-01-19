@@ -67,16 +67,17 @@ public class MapCommands {
     new PrettyPaginatedResult<MapInfo>(listHeader, resultsPerPage) {
       @Override
       public String format(MapInfo map, int index) {
-        // TODO: fix misc.authorship
         return (index + 1)
             + ". "
-            + ChatColor.RED
-            + map.getName()
-            + " "
-            + ChatColor.DARK_PURPLE
-            + TranslationUtils.nameList(NameStyle.FANCY, map.getAuthors())
-                .render(sender)
-                .toLegacyText();
+            + AllTranslations.get()
+                .translate(
+                    "misc.authorship",
+                    sender,
+                    ChatColor.GOLD + map.getName() + ChatColor.RESET,
+                    ChatColor.DARK_PURPLE
+                        + TranslationUtils.nameList(NameStyle.FANCY, map.getAuthors())
+                            .render(sender)
+                            .toLegacyText());
       }
     }.display(audience, maps, page);
   }
@@ -163,10 +164,7 @@ public class MapCommands {
     audience.sendMessage(
         ChatColor.DARK_PURPLE
             + AllTranslations.get()
-                .translate(
-                    "command.map.next.success",
-                    sender,
-                    next.getDescription() + ChatColor.DARK_PURPLE));
+                .translate("command.map.next.success", sender, ChatColor.GOLD + next.getName()));
   }
 
   private @Nullable Component formatContribution(Contributor contributor) {

@@ -6,11 +6,7 @@ import tc.oc.pgm.api.module.exception.ModuleLoadException;
 /** An immutable code module that loads and unloads during a {@link Match}. */
 public interface MatchModule extends Module {
 
-  /**
-   * Callback when {@link Match#load()} is executed.
-   *
-   * @throws ModuleLoadException If the module is unable to load.
-   */
+  /** Callback when {@link Match#load()} is executed. */
   default void load() throws ModuleLoadException {}
 
   /** Callback when {@link Match#start()} is executed. */

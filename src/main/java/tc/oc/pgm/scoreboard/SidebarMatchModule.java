@@ -1,8 +1,10 @@
 package tc.oc.pgm.scoreboard;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Ordering;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -31,6 +33,8 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchVictoryChangeEvent;
+import tc.oc.pgm.api.match.factory.MatchModuleFactory;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.party.event.CompetitorScoreChangeEvent;
@@ -60,6 +64,18 @@ import tc.oc.server.NullCommandSender;
 
 @ListenerScope(MatchScope.LOADED)
 public class SidebarMatchModule implements MatchModule, Listener {
+
+  public static class Factory implements MatchModuleFactory<SidebarMatchModule> {
+    @Override
+    public Collection<Class<? extends MatchModule>> getSoftDependencies() {
+      return ImmutableList.of(ScoreboardMatchModule.class);
+    }
+
+    @Override
+    public SidebarMatchModule createMatchModule(Match match) throws ModuleLoadException {
+      return new SidebarMatchModule(match);
+    }
+  }
 
   public static final int MAX_ROWS = 16; // Max rows on the scoreboard
   public static final int MAX_PREFIX = 16; // Max chars in a team prefix

@@ -43,7 +43,7 @@ public class KillRewardModule implements MapModule {
     }
 
     @Override
-    public Collection<Class<? extends MapModule>> getHardDependencies() {
+    public Collection<Class<? extends MapModule>> getSoftDependencies() {
       return ImmutableList.of(KitModule.class);
     }
 

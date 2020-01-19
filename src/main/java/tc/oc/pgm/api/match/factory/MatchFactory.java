@@ -14,16 +14,15 @@ public interface MatchFactory {
    * Begins the creation of a {@link Match}, without actually loading any {@link MatchModule}s.
    *
    * @param map The {@link MapContext} to load.
-   * @return A future {@link Match} or {@code null} if it failed.
    */
-  CompletableFuture<Match> createPreMatch(MapContext map);
+  CompletableFuture<Match> initMatch(MapContext map);
 
   /**
    * Finishes the creation of a {@link Match}, loading the {@link MatchModule}s and teleporting the
    * given {@link MatchPlayer}s to its world.
    *
-   * @param match A {@link Match} that was pre-loaded with {@link #createPreMatch(MapContext)}.
-   * @param players A collection of {@link MatchPlayer}s to teleport or {@code null} for none.
+   * @param oldMatch A {@link Match} to teleport players from or {@code null} for none.
+   * @param match A {@link Match} that was pre-loaded with {@link #initMatch(MapContext)}.
    */
-  void createMatch(Match match, @Nullable Iterable<MatchPlayer> players);
+  void moveMatch(@Nullable Match oldMatch, Match match);
 }

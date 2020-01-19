@@ -1,6 +1,5 @@
 package tc.oc.pgm.controlpoint;
 
-import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.event.HandlerList;
@@ -15,7 +14,7 @@ public class ControlPointMatchModule implements MatchModule {
   private final ControlPointTickTask tickTask;
   private final ControlPointAnnouncer announcer;
 
-  public ControlPointMatchModule(Match match, ImmutableList<ControlPoint> points) {
+  public ControlPointMatchModule(Match match, List<ControlPoint> points) {
     this.match = match;
     this.controlPoints.addAll(points);
 

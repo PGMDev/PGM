@@ -14,6 +14,8 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.join.JoinMatchModule;
+import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
@@ -32,6 +34,11 @@ public class FreeForAllModule implements MapModule, MapInfoExtra {
   }
 
   @Override
+  public Collection<Class<? extends MatchModule>> getHardDependencies() {
+    return ImmutableList.of(JoinMatchModule.class, StartMatchModule.class);
+  }
+
+  @Override
   public MatchModule createMatchModule(Match match) {
     return new FreeForAllMatchModule(match, options);
   }
@@ -44,7 +51,7 @@ public class FreeForAllModule implements MapModule, MapInfoExtra {
   public static class Factory implements MapModuleFactory<FreeForAllModule> {
     @Override
     public Collection<Class<? extends MapModule>> getWeakDependencies() {
-      return ImmutableList.of(TeamModule.class); // requires = StartModule
+      return ImmutableList.of(TeamModule.class);
     }
 
     @Override

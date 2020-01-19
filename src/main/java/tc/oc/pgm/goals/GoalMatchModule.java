@@ -2,6 +2,8 @@ package tc.oc.pgm.goals;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,18 +17,34 @@ import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.factory.MatchModuleFactory;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.event.CompetitorAddEvent;
 import tc.oc.pgm.api.party.event.CompetitorRemoveEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.ffa.FreeForAllMatchModule;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalProximityChangeEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
+import tc.oc.pgm.teams.TeamMatchModule;
 
 @ListenerScope(MatchScope.LOADED)
 public class GoalMatchModule implements MatchModule, Listener {
+
+  public static class Factory implements MatchModuleFactory<GoalMatchModule> {
+    @Override
+    public Collection<Class<? extends MatchModule>> getWeakDependencies() {
+      return ImmutableList.of(TeamMatchModule.class, FreeForAllMatchModule.class);
+    }
+
+    @Override
+    public GoalMatchModule createMatchModule(Match match) throws ModuleLoadException {
+      return new GoalMatchModule(match);
+    }
+  }
 
   protected static final Sound GOOD_SOUND = new Sound("portal.travel", 0.7f, 2f);
   protected static final Sound BAD_SOUND = new Sound("mob.blaze.death", 0.8f, 0.8f);
@@ -37,7 +55,7 @@ public class GoalMatchModule implements MatchModule, Listener {
   protected final Multimap<Goal, Competitor> competitorsByGoal = HashMultimap.create();
   protected final Map<Competitor, GoalProgress> progressByCompetitor = new HashMap<>();
 
-  public GoalMatchModule(Match match) {
+  private GoalMatchModule(Match match) {
     this.match = match;
   }
 
@@ -101,7 +119,7 @@ public class GoalMatchModule implements MatchModule, Listener {
   @EventHandler
   public void onCompetitorRemove(CompetitorRemoveEvent event) {
     goalsByCompetitor.removeAll(event.getCompetitor());
-    for (Goal goal : competitorsByGoal.keySet()) {
+    for (Goal goal : ImmutableSet.copyOf(competitorsByGoal.keySet())) {
       competitorsByGoal.remove(goal, event.getCompetitor());
     }
   }

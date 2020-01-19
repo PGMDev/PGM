@@ -2,9 +2,11 @@ package tc.oc.pgm.picker;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -38,6 +40,8 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
+import tc.oc.pgm.api.match.factory.MatchModuleFactory;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.blitz.BlitzMatchModule;
@@ -58,6 +62,25 @@ import tc.oc.util.components.ComponentUtils;
 
 @ListenerScope(MatchScope.LOADED)
 public class PickerMatchModule implements MatchModule, Listener {
+
+  public static class Factory implements MatchModuleFactory<PickerMatchModule> {
+    @Override
+    public Collection<Class<? extends MatchModule>> getWeakDependencies() {
+      return ImmutableList.of(
+          TeamMatchModule.class, ClassMatchModule.class, BlitzMatchModule.class);
+    }
+
+    @Override
+    public Collection<Class<? extends MatchModule>> getHardDependencies() {
+      return ImmutableList.of(JoinMatchModule.class);
+    }
+
+    @Override
+    public PickerMatchModule createMatchModule(Match match) throws ModuleLoadException {
+      return new PickerMatchModule(match);
+    }
+  }
+
   private static final String OPEN_BUTTON_PREFIX = ChatColor.GREEN + ChatColor.BOLD.toString();
   private static final int OPEN_BUTTON_SLOT = 2;
 
@@ -84,11 +107,11 @@ public class PickerMatchModule implements MatchModule, Listener {
 
   private final Match match;
   private final Set<MatchPlayer> picking = new HashSet<>();
-  private final boolean hasTeams;
-  private final boolean hasClasses;
-  private final boolean isBlitz;
+  private boolean hasTeams;
+  private boolean hasClasses;
+  private boolean isBlitz;
 
-  public PickerMatchModule(Match match) {
+  private PickerMatchModule(Match match) {
     this.match = match;
     this.hasTeams = match.hasModule(TeamMatchModule.class);
     this.hasClasses = match.hasModule(ClassMatchModule.class);

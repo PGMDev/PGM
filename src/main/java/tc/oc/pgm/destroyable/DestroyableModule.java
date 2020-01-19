@@ -10,12 +10,14 @@ import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.api.map.MapInfoExtra;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.blockdrops.BlockDropsMatchModule;
 import tc.oc.pgm.blockdrops.BlockDropsModule;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.ProximityMetric;
@@ -29,11 +31,26 @@ import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
-public class DestroyableModule implements MapModule {
+public class DestroyableModule implements MapModule, MapInfoExtra {
   protected final List<DestroyableFactory> destroyableFactories;
 
   public DestroyableModule(List<DestroyableFactory> destroyableFactories) {
     this.destroyableFactories = destroyableFactories;
+  }
+
+  @Override
+  public Collection<Class> getWeakDependencies() {
+    return ImmutableList.of(BlockDropsMatchModule.class);
+  }
+
+  @Override
+  public Collection<Class<? extends MatchModule>> getSoftDependencies() {
+    return ImmutableList.of(GoalMatchModule.class);
+  }
+
+  @Override
+  public String getGenre() {
+    return "Destroy the Monument";
   }
 
   @Override
@@ -51,8 +68,7 @@ public class DestroyableModule implements MapModule {
   public static class Factory implements MapModuleFactory<DestroyableModule> {
     @Override
     public Collection<Class<? extends MapModule>> getSoftDependencies() {
-      return ImmutableList.of(
-          TeamModule.class, RegionModule.class, BlockDropsModule.class); // GoalModule
+      return ImmutableList.of(TeamModule.class, RegionModule.class, BlockDropsModule.class);
     }
 
     @Override
@@ -65,8 +81,8 @@ public class DestroyableModule implements MapModule {
       for (Element destroyableEl :
           XMLUtils.flattenElements(
               doc.getRootElement(),
-              ImmutableSet.of("destroyables", "giraffes"),
-              ImmutableSet.of("destroyable", "giraffe"))) {
+              ImmutableSet.of("destroyables"),
+              ImmutableSet.of("destroyable"))) {
         TeamFactory owner =
             teamModule.parseTeam(XMLUtils.getRequiredAttribute(destroyableEl, "owner"), context);
         String name = XMLUtils.getRequiredAttribute(destroyableEl, "name").getValue();

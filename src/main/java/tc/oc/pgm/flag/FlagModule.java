@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 import org.jdom2.Document;
+import tc.oc.pgm.api.map.MapInfoExtra;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
@@ -12,11 +13,12 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.filters.FilterModule;
+import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.xml.InvalidXMLException;
 
-public class FlagModule implements MapModule {
+public class FlagModule implements MapModule, MapInfoExtra {
   private final ImmutableList<Post> posts;
   private final ImmutableList<Net> nets;
   private final ImmutableList<FlagDefinition> flags;
@@ -28,6 +30,16 @@ public class FlagModule implements MapModule {
   }
 
   @Override
+  public Collection<Class<? extends MatchModule>> getSoftDependencies() {
+    return ImmutableList.of(GoalMatchModule.class);
+  }
+
+  @Override
+  public String getGenre() {
+    return "Capture the Flag";
+  }
+
+  @Override
   public MatchModule createMatchModule(Match match) throws ModuleLoadException {
     return new FlagMatchModule(match, this.nets, this.flags);
   }
@@ -35,8 +47,7 @@ public class FlagModule implements MapModule {
   public static class Factory implements MapModuleFactory<FlagModule> {
     @Override
     public Collection<Class<? extends MapModule>> getWeakDependencies() {
-      return ImmutableList.of(
-          TeamModule.class, RegionModule.class, FilterModule.class); // GoalModule
+      return ImmutableList.of(TeamModule.class, RegionModule.class, FilterModule.class);
     }
 
     @Override

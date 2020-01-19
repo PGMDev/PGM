@@ -117,7 +117,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
       this.blockDropsRuleSet =
           bdmm.getRuleSet().subsetAffecting(this.materials).subsetAffecting(this.blockRegion);
     } else {
-      this.blockDropsRuleSet = null;
+      this.blockDropsRuleSet = new BlockDropsRuleSet();
     }
 
     this.recalculateHealth();

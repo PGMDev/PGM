@@ -39,10 +39,10 @@ import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.RegisteredListener;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
+import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.map.MapContext;
-import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchPhase;
@@ -56,6 +56,7 @@ import tc.oc.pgm.api.match.event.MatchResizeEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.match.event.MatchUnloadEvent;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
+import tc.oc.pgm.api.module.ModuleGraph;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
@@ -288,7 +289,7 @@ public class MatchImpl implements Match {
   }
 
   private void removeListeners(MatchScope scope) {
-    for (Listener listener : listeners.get(scope)) {
+    for (Listener listener : listeners.getOrDefault(scope, Collections.emptyList())) {
       HandlerList.unregisterAll(listener);
     }
   }
@@ -684,48 +685,65 @@ public class MatchImpl implements Match {
         getPlayers(), Collections.singleton(Audience.get(Bukkit.getConsoleSender())));
   }
 
-  private boolean loadMatchModule(MatchModule matchModule) throws ModuleLoadException {
-    if (matchModule == null) return false;
+  private class ModuleLoader
+      extends ModuleGraph<MatchModule, MatchModuleFactory<? extends MatchModule>> {
 
-    logger.fine("Loading " + matchModule.getClass().getSimpleName());
-
-    matchModule.load();
-
-    if (matchModule instanceof Listener && getListenerScope((Listener) matchModule) == null) {
-      logger.warning(
-          matchModule.getClass().getSimpleName()
-              + " implements Listener but is not annotated with @ListenerScope");
+    private ModuleLoader() throws ModuleLoadException {
+      super(new HashMap<>(Modules.MATCH));
+      getMap().getModules().stream()
+          .forEach(module -> addFactory(Modules.MAP_TO_MATCH.get(module.getClass()), module));
+      loadAll();
     }
 
-    // TODO: Make default scope for listeners/tickables more consistent
-    if (matchModule instanceof Listener) {
-      addListener(
-          (Listener) matchModule, getListenerScope((Listener) matchModule, MatchScope.RUNNING));
+    @Override
+    protected MatchModuleFactory<? extends MatchModule> getFactory(
+        Class<? extends MatchModule> key, @Nullable Class<? extends MatchModule> requiredBy)
+        throws ModuleLoadException {
+      if (key == null) return null;
+      try {
+        return super.getFactory(key, requiredBy);
+      } catch (ModuleLoadException e) {
+        return null;
+      }
     }
 
-    // TODO: Allow tickable scope to be specified with an annotation
-    if (matchModule instanceof Tickable) {
-      addTickable((Tickable) matchModule, MatchScope.LOADED);
+    @Override
+    protected void unloadAll() {
+      super.unloadAll();
+      matchModules.clear();
     }
 
-    matchModules.put(matchModule.getClass(), matchModule);
+    @Override
+    protected MatchModule createModule(MatchModuleFactory factory) throws ModuleLoadException {
+      final MatchModule module = factory.createMatchModule(MatchImpl.this);
+      if (module == null) return null;
 
-    return true;
+      module.load();
+
+      matchModules.put(module.getClass(), module);
+
+      if (module instanceof Listener && getListenerScope((Listener) module) == null) {
+        logger.warning(
+            module.getClass().getSimpleName()
+                + " implements Listener but is not annotated with @ListenerScope");
+      }
+
+      if (module instanceof Listener) {
+        addListener((Listener) module, getListenerScope((Listener) module, MatchScope.RUNNING));
+      }
+
+      if (module instanceof Tickable) {
+        addTickable((Tickable) module, MatchScope.LOADED);
+      }
+
+      return module;
+    }
   }
 
   @Override
   public void load() throws ModuleLoadException {
     try {
-      logger.fine("Loading match modules...");
-      for (MatchModuleFactory factory :
-          PGM.get().getModuleRegistry().getModuleFactories().values()) {
-        loadMatchModule(factory.createMatchModule(this));
-      }
-
-      logger.fine("Loading map modules...");
-      for (MapModule map : getMap().getModules()) {
-        loadMatchModule(map.createMatchModule(this));
-      }
+      new ModuleLoader(); // Will load all map and match modules and throw any errors
 
       for (Feature feature : getFeatureContext().getAll()) {
         if (feature instanceof Listener) {
@@ -752,16 +770,16 @@ public class MatchImpl implements Match {
 
   @Override
   public void unload() {
-    while (players.size() > 0) {
+    while (!players.isEmpty()) {
       removePlayer(Bukkit.getPlayer(players.keySet().iterator().next()));
+    }
+
+    while (!parties.isEmpty()) {
+      removeParty(parties.iterator().next());
     }
 
     if (loaded.getAndSet(false)) {
       callEvent(new MatchUnloadEvent(this));
-    }
-
-    if (parties.contains(observers)) {
-      removeParty(observers);
     }
 
     getScheduler(MatchScope.RUNNING).cancel();
@@ -777,7 +795,7 @@ public class MatchImpl implements Match {
       }
     }
 
-    schedulers.clear();
+    matchModules.clear();
     listeners.clear();
     tickables.clear();
     players.clear();
@@ -787,9 +805,7 @@ public class MatchImpl implements Match {
     competitors.clear();
 
     // TODO: Forcefully remove objects from the world like entities and chunks
-    world.enqueue();
-
-    loaded.compareAndSet(true, false);
+    world.clear();
   }
 
   @Override
@@ -837,5 +853,11 @@ public class MatchImpl implements Match {
         .append("scope", getScope())
         .append("state", getPhase())
         .build();
+  }
+
+  @Override
+  protected void finalize() throws Throwable {
+    PGM.get().getLogger().info("Finalize: " + this);
+    super.finalize();
   }
 }

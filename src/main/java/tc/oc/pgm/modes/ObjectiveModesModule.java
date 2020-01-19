@@ -2,7 +2,9 @@ package tc.oc.pgm.modes;
 
 import static tc.oc.pgm.api.map.MapProtos.MODES_IMPLEMENTATION_VERSION;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
@@ -15,6 +17,7 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.components.PeriodFormats;
 import tc.oc.xml.InvalidXMLException;
@@ -23,10 +26,15 @@ import tc.oc.xml.Node;
 public class ObjectiveModesModule implements MapModule {
 
   private List<Mode> modes;
-  public static final Duration DEFAULT_SHOW_BEFORE = Duration.standardSeconds(60l);
+  public static final Duration DEFAULT_SHOW_BEFORE = Duration.standardSeconds(60L);
 
   private ObjectiveModesModule(List<Mode> modes) {
     this.modes = modes;
+  }
+
+  @Override
+  public Collection<Class<? extends MatchModule>> getSoftDependencies() {
+    return ImmutableList.of(GoalMatchModule.class);
   }
 
   @Override

@@ -10,6 +10,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapInfoExtra;
@@ -26,7 +27,6 @@ public class MapContextImpl extends MapInfoImpl implements MapContext {
   private final List<Integer> teamLimits;
   private final int playerLimit;
 
-  // FIXME: Clone the modulecontext
   public MapContextImpl(MapInfo info, MapSource source, ModuleContext<MapModule> context) {
     super(info);
     this.source = checkNotNull(source);
@@ -89,5 +89,11 @@ public class MapContextImpl extends MapInfoImpl implements MapContext {
   @Override
   public MapSource getSource() {
     return source;
+  }
+
+  @Override
+  protected void finalize() throws Throwable {
+    PGM.get().getLogger().info("Finalize: " + this);
+    super.finalize();
   }
 }

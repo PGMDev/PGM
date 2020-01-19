@@ -17,7 +17,6 @@ public abstract class MatchCountdown extends Countdown {
   protected final Match match;
   protected final BossBarMatchModule bbmm;
   protected Duration remaining, total;
-
   protected final BossBar bossBar;
 
   class CountdownBar extends DynamicBossBar {

@@ -1,5 +1,6 @@
 package tc.oc.pgm.cycle;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
@@ -21,27 +22,31 @@ public class CycleCountdown extends MatchCountdown {
 
   private final MapLibrary mapLibrary;
   private final MatchFactory matchFactory;
-  protected final MapOrder mapOrder;
-  protected MapInfo nextMap;
+  private final MapOrder mapOrder;
+
   private boolean ended;
+  private MapInfo nextMap;
   private CompletableFuture<Match> nextMatch;
 
   public CycleCountdown(
       MatchFactory matchFactory, MapLibrary mapLibrary, MapOrder mapOrder, Match match) {
     super(match);
     this.mapOrder = mapOrder;
-    this.nextMap = mapOrder.getNextMap();
     this.mapLibrary = mapLibrary;
     this.matchFactory = matchFactory;
   }
 
-  private MapInfo setNextMap(MapInfo map, boolean end) {
-    if (!ended && nextMap != map) {
-      nextMap = map;
-      nextMatch = null;
+  private void setNextMap(MapInfo map, boolean end) {
+    if (!ended) {
+      if (!Objects.equals(nextMap, map)) {
+        nextMap = map;
+        nextMatch = null;
+      }
+      if (map != null && nextMatch == null && remaining.getStandardSeconds() <= preloadTime) {
+        nextMatch = mapLibrary.loadExistingMap(map.getId()).thenCompose(matchFactory::initMatch);
+      }
     }
     ended |= end;
-    return nextMap;
   }
 
   @Override
@@ -68,15 +73,8 @@ public class CycleCountdown extends MatchCountdown {
 
   @Override
   public void onTick(Duration remaining, Duration total) {
-    MapInfo next = setNextMap(mapOrder.getNextMap(), false);
+    setNextMap(mapOrder.getNextMap(), false);
     super.onTick(remaining, total);
-
-    if (remaining.getStandardSeconds() <= preloadTime && next != null && nextMatch == null) {
-      nextMatch =
-          mapLibrary
-              .loadExistingMap(nextMap.getId())
-              .thenComposeAsync(matchFactory::createPreMatch);
-    }
   }
 
   @Override
@@ -84,11 +82,15 @@ public class CycleCountdown extends MatchCountdown {
     super.onEnd(total);
     setNextMap(mapOrder.popNextMap(), true);
 
-    try {
-      matchFactory.createMatch(nextMatch.join(), getMatch().getPlayers());
-    } catch (Throwable t) {
-      PGM.get().getGameLogger().log(Level.SEVERE, "Could not cycle to map: " + nextMap.getId(), t);
-      nextMatch = null;
-    }
+    nextMatch.whenComplete(
+        (Match next, Throwable err) -> {
+          try {
+            if (err != null) throw err;
+            matchFactory.moveMatch(match, next);
+          } catch (Throwable t) {
+            PGM.get().getLogger().log(Level.SEVERE, "Unable to cycle match", t);
+            nextMatch = null;
+          }
+        });
   }
 }

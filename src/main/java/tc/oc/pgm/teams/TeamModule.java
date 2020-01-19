@@ -2,6 +2,7 @@ package tc.oc.pgm.teams;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Set;
@@ -18,6 +19,9 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.join.JoinMatchModule;
+import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.StringUtils;
 import tc.oc.xml.InvalidXMLException;
@@ -35,6 +39,11 @@ public class TeamModule implements MapModule<TeamMatchModule>, MapInfoExtra {
     this.requireEven = requireEven;
     this.teamLimits = Collections2.transform(teams, TeamFactory::getMaxPlayers);
     this.playerLimit = teams.stream().mapToInt(TeamFactory::getMaxPlayers).sum();
+  }
+
+  @Override
+  public Collection<Class<? extends MatchModule>> getHardDependencies() {
+    return ImmutableList.of(JoinMatchModule.class, StartMatchModule.class);
   }
 
   public static class Factory implements MapModuleFactory<TeamModule> {
