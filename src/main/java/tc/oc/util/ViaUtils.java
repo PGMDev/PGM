@@ -1,23 +1,16 @@
 package tc.oc.util;
 
-import java.lang.reflect.Method;
-import java.util.logging.Level;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.PGM;
 import tc.oc.world.NMSHacks;
+import us.myles.ViaVersion.api.Via;
 
 public class ViaUtils {
   private static boolean enabled;
-  private static Object viaAPI;
-  private static Method getPlayerVersion;
 
   static {
     try {
-      viaAPI = Class.forName("us.myles.ViaVersion.api.Via").getMethod("getAPI").invoke(null);
-      getPlayerVersion =
-          Class.forName("us.myles.ViaVersion.api.ViaAPI")
-              .getMethod("getPlayerVersion", Object.class);
-      enabled = true;
+      enabled = Class.forName("us.myles.ViaVersion.api.Via") != null;
     } catch (Exception e) {
       PGM.get().getLogger().warning("ViaVersion is not installed");
       enabled = false;
@@ -33,18 +26,10 @@ public class ViaUtils {
    *     href="https://wiki.vg/Protocol_version_numbers">https://wiki.vg/Protocol_version_numbers</a>
    */
   public static int getProtocolVersion(Player player) {
-    int version = NMSHacks.getProtocolVersion(player);
     if (enabled()) {
-      try {
-        return (int) getPlayerVersion.invoke(viaAPI, player);
-      } catch (Exception e) {
-        PGM.get()
-            .getLogger()
-            .log(Level.WARNING, "Could not get player's protocol version from ViaVersion", e);
-        return version;
-      }
+      return Via.getAPI().getPlayerVersion(player);
     } else {
-      return version;
+      return NMSHacks.getProtocolVersion(player);
     }
   }
 }

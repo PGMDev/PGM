@@ -45,6 +45,7 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.gamerules.GameRule;
 import tc.oc.pgm.gamerules.GameRulesModule;
 import tc.oc.pgm.modules.TimeLockModule;
+import tc.oc.util.ViaUtils;
 
 public class PGMListener implements Listener {
   private final Plugin parent;
@@ -71,6 +72,7 @@ public class PGMListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW)
   public void addPlayerOnJoin(final PlayerJoinEvent event) {
+    System.out.println(ViaUtils.getProtocolVersion(event.getPlayer())); // XXX REMOVE THIS
     if (this.mm.getMatch(event.getWorld()) == null) {
       event
           .getPlayer()
