@@ -1,24 +1,23 @@
 package tc.oc.util;
 
 import org.bukkit.entity.Player;
-import tc.oc.pgm.api.PGM;
 import tc.oc.world.NMSHacks;
 import us.myles.ViaVersion.api.Via;
 
 public class ViaUtils {
-  private static boolean enabled;
+  private static final boolean ENABLED;
 
   static {
+    boolean viaLoaded = false;
     try {
-      enabled = Class.forName("us.myles.ViaVersion.api.Via") != null;
-    } catch (Exception e) {
-      PGM.get().getLogger().warning("ViaVersion is not installed");
-      enabled = false;
+      viaLoaded = Class.forName("us.myles.ViaVersion.api.Via") != null;
+    } catch (ClassNotFoundException ignored) {
     }
+    ENABLED = viaLoaded;
   }
 
   public static boolean enabled() {
-    return enabled;
+    return ENABLED;
   }
 
   /**
