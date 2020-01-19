@@ -1,6 +1,7 @@
 package tc.oc.util;
 
 import java.lang.reflect.Method;
+import java.util.logging.Level;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.PGM;
 import tc.oc.world.NMSHacks;
@@ -19,7 +20,6 @@ public class ViaUtils {
       enabled = true;
     } catch (Exception e) {
       PGM.get().getLogger().warning("ViaVersion is not installed");
-      e.printStackTrace();
       enabled = false;
     }
   }
@@ -38,7 +38,9 @@ public class ViaUtils {
       try {
         return (int) getPlayerVersion.invoke(viaAPI, player);
       } catch (Exception e) {
-        e.printStackTrace();
+        PGM.get()
+            .getLogger()
+            .log(Level.WARNING, "Could not get player's protocol version from ViaVersion", e);
         return version;
       }
     } else {

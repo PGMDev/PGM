@@ -14,10 +14,6 @@
             <id>ashcon-app</id>
             <url>https://repo.ashcon.app/content/repositories/snapshots</url>
         </repository>
-        <repository>
-            <id>viaversion-repo</id>
-            <url>https://repo.viaversion.com</url>
-        </repository>
     </repositories>
     <distributionManagement>
         <repository>
@@ -81,11 +77,6 @@
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.28.0</version>
-        </dependency>
-        <dependency>
-            <groupId>us.myles</groupId>
-            <artifactId>viaversion</artifactId>
-            <version>2.2.2</version>
         </dependency>
     </dependencies>
     <build>
