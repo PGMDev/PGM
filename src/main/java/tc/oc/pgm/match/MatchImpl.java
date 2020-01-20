@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -161,7 +162,6 @@ public class MatchImpl implements Match {
             });
     this.observers = new Observers(this);
     this.features = new MatchFeatureContext();
-    // TODO: Protect against someone else unloading the world, cancel the event
   }
 
   @Override
@@ -310,6 +310,39 @@ public class MatchImpl implements Match {
     }
   }
 
+  private class WeakEventExecutor implements EventExecutor {
+    private final WeakReference<RegisteredListener> listener;
+
+    private WeakEventExecutor(RegisteredListener listener) {
+      this.listener = new WeakReference<>(checkNotNull(listener));
+    }
+
+    @Override
+    public void execute(Listener other, Event event) throws EventException {
+      if (((MatchEvent) event).getMatch() == MatchImpl.this) {
+        final RegisteredListener listener = this.listener.get();
+        if (listener != null) {
+          listener.callEvent(event);
+        }
+      }
+    }
+  }
+
+  private class StrongEventExecutor implements EventExecutor {
+    private final RegisteredListener listener;
+
+    private StrongEventExecutor(RegisteredListener listener) {
+      this.listener = checkNotNull(listener);
+    }
+
+    @Override
+    public void execute(Listener other, Event event) throws EventException {
+      if (((MatchEvent) event).getMatch() == MatchImpl.this) {
+        listener.callEvent(event);
+      }
+    }
+  }
+
   private void startListener(Listener listener) {
     for (Map.Entry<Class<? extends Event>, Set<RegisteredListener>> entry :
         PGM.get().getPluginLoader().createRegisteredListeners(listener, PGM.get()).entrySet()) {
@@ -326,14 +359,10 @@ public class MatchImpl implements Match {
                   eventClass,
                   listener,
                   registeredListener.getPriority(),
-                  new EventExecutor() {
-                    @Override
-                    public void execute(Listener listener, Event event) throws EventException {
-                      if (((MatchEvent) event).getMatch() == MatchImpl.this) {
-                        registeredListener.callEvent(event);
-                      }
-                    }
-                  },
+                  registeredListener.getListener() instanceof MatchModule
+                      ? new StrongEventExecutor(registeredListener)
+                      : // FIXME: WeakEventExecutor not working
+                      new StrongEventExecutor(registeredListener),
                   PGM.get());
         }
       } else {
@@ -665,14 +694,32 @@ public class MatchImpl implements Match {
     return new Duration(start.get(), endMs);
   }
 
+  private class TickableTask implements Runnable {
+    private final MatchScope scope;
+
+    private TickableTask(MatchScope scope) {
+      this.scope = checkNotNull(scope);
+    }
+
+    @Override
+    public void run() {
+      final Tick tick = getTick();
+      final Iterator<Tickable> tickables = MatchImpl.this.tickables.get(scope).iterator();
+
+      while (tickables.hasNext()) {
+        final Tickable tickable = tickables.next();
+        try {
+          tickable.tick(MatchImpl.this, tick);
+        } catch (Throwable t) {
+          logger.log(Level.SEVERE, "Could not tick " + tickable, t);
+          tickables.remove();
+        }
+      }
+    }
+  }
+
   private void startTickables(MatchScope scope) {
-    getScheduler(scope)
-        .runTaskTimer(
-            1,
-            () -> {
-              final Tick tick = getTick();
-              tickables.get(scope).forEach(item -> item.tick(this, tick));
-            });
+    getScheduler(scope).runTaskTimer(1L, new TickableTask(scope));
   }
 
   @Nullable
@@ -739,6 +786,12 @@ public class MatchImpl implements Match {
 
       return module;
     }
+
+    @Override
+    protected void finalize() throws Throwable {
+      PGM.get().getLogger().info("FINALIZE: " + this);
+      super.finalize();
+    }
   }
 
   @Override
@@ -804,9 +857,6 @@ public class MatchImpl implements Match {
     parties.clear();
     victory.clear();
     competitors.clear();
-
-    // TODO: Forcefully remove objects from the world like entities and chunks
-    world.clear();
   }
 
   @Override
@@ -819,6 +869,7 @@ public class MatchImpl implements Match {
     }
 
     World world = getWorld();
+    this.world.clear();
     if (world == null) return;
 
     final String worldName = world.getName();
@@ -854,11 +905,5 @@ public class MatchImpl implements Match {
         .append("scope", getScope())
         .append("state", getPhase())
         .build();
-  }
-
-  @Override
-  protected void finalize() throws Throwable {
-    PGM.get().getLogger().info("Finalize: " + this);
-    super.finalize();
   }
 }

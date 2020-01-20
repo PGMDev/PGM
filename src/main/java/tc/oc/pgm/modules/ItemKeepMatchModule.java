@@ -14,12 +14,15 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.filters.BlockFilter;
 import tc.oc.pgm.kits.ArmorType;
 import tc.oc.pgm.kits.KitMatchModule;
 
+@ListenerScope(MatchScope.RUNNING)
 public class ItemKeepMatchModule implements MatchModule, Listener {
 
   private final Match match;

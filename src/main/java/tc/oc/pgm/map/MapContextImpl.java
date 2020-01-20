@@ -6,7 +6,6 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.List;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapModule;
@@ -58,11 +57,5 @@ public class MapContextImpl extends MapInfoImpl implements MapContext {
   public <N extends MapModule> N getModule(Class<? extends N> key) {
     throw new UnsupportedOperationException(
         "Not allowed to query for specific modules in " + getClass().getSimpleName());
-  }
-
-  @Override
-  protected void finalize() throws Throwable {
-    PGM.get().getLogger().info("Finalize: " + this);
-    super.finalize();
   }
 }

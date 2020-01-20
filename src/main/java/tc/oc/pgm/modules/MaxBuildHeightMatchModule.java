@@ -8,7 +8,10 @@ import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.events.ListenerScope;
 
+@ListenerScope(MatchScope.RUNNING)
 public class MaxBuildHeightMatchModule implements MatchModule, Listener {
 
   private final int buildHeight;

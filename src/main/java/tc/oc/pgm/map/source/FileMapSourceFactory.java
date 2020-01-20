@@ -16,7 +16,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.exception.MapNotFoundException;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
@@ -147,12 +146,6 @@ public class FileMapSourceFactory implements MapSourceFactory {
           .append("path", path)
           .append("modified", modified.get())
           .build();
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-      PGM.get().getLogger().info("Finalize: " + this);
-      super.finalize();
     }
   }
 }

@@ -5,12 +5,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Logger;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.jdom2.Document;
 import org.jdom2.input.JDOMParseException;
 import org.jdom2.input.SAXBuilder;
 import tc.oc.pgm.api.Modules;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapModule;
@@ -81,7 +79,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
     } catch (IOException e) {
       throw new MapNotFoundException(info, "Could not read document from " + source.getId(), e);
     } catch (InvalidXMLException e) {
-      throw new ModuleLoadException(e.getMessage(), e); // FIXME: proper formatting
+      throw new ModuleLoadException(e);
     } catch (JDOMParseException e) {
       final InvalidXMLException cause = InvalidXMLException.fromJDOM(e, source.getId());
       throw new ModuleLoadException(cause.getMessage(), cause);
@@ -119,14 +117,9 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
   }
 
   @Override
-  public String toString() {
-    return new ToStringBuilder(this).append("id", source.getId()).append("info", info).build();
-  }
-
-  @Override
   public Version getProto() {
     if (info == null) {
-      throw new IllegalStateException("Tried to access proto when info is not loaded");
+      throw new IllegalStateException("Tried to access map proto before info is loaded");
     }
     return info.getProto();
   }
@@ -165,11 +158,5 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
       features = new FeatureDefinitionContext();
     }
     return features;
-  }
-
-  @Override
-  protected void finalize() throws Throwable {
-    PGM.get().getLogger().info("Finalize: " + this);
-    super.finalize();
   }
 }

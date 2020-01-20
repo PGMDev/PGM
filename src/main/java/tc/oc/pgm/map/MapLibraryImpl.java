@@ -3,7 +3,7 @@ package tc.oc.pgm.map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Iterators;
-import java.lang.ref.WeakReference;
+import java.lang.ref.SoftReference;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -18,7 +18,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
@@ -27,6 +26,7 @@ import tc.oc.pgm.api.map.exception.MapNotFoundException;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
+import tc.oc.pgm.util.UsernameResolver;
 import tc.oc.util.StringUtils;
 import tc.oc.util.logging.ClassLogger;
 
@@ -40,12 +40,12 @@ public class MapLibraryImpl implements MapLibrary {
   private static class MapEntry {
     private final MapSource source;
     private final MapInfo info;
-    private final WeakReference<MapContext> context;
+    private final SoftReference<MapContext> context;
 
     private MapEntry(MapSource source, MapInfo info, MapContext context) {
       this.source = checkNotNull(source);
       this.info = checkNotNull(info);
-      this.context = new WeakReference<>(checkNotNull(context));
+      this.context = new SoftReference<>(checkNotNull(context));
     }
   }
 
@@ -111,9 +111,10 @@ public class MapLibraryImpl implements MapLibrary {
     }
 
     return CompletableFuture.runAsync(
-        () ->
-            Iterators.concat(sources.iterator())
-                .forEachRemaining(source -> loadMapSafe(source, null)));
+            () ->
+                Iterators.concat(sources.iterator())
+                    .forEachRemaining(source -> loadMapSafe(source, null)))
+        .thenRun(UsernameResolver::resolveAll);
   }
 
   @Override
@@ -122,7 +123,7 @@ public class MapLibraryImpl implements MapLibrary {
     if (entry == null) {
       return CompletableFuture.supplyAsync(
           () -> {
-            throw new MapNotFoundException("Could not find map: " + id);
+            throw new MapNotFoundException("Could not find existing map: " + id);
           });
     }
 
@@ -165,11 +166,5 @@ public class MapLibraryImpl implements MapLibrary {
       logger.log(Level.WARNING, "Missing map: " + (mapId == null ? source.getId() : mapId), e);
     }
     return null;
-  }
-
-  @Override
-  protected void finalize() throws Throwable {
-    PGM.get().getLogger().info("Finalize: " + this);
-    super.finalize();
   }
 }

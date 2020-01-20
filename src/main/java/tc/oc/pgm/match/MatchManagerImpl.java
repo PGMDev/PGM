@@ -25,6 +25,7 @@ import tc.oc.chunk.NullChunkGenerator;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.exception.MapNotFoundException;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
@@ -103,7 +104,9 @@ public class MatchManagerImpl implements MatchFactory, MatchManager {
         throw new IOException("Could not create directories for " + dir.getPath());
       }
 
-      map.getSource().downloadTo(dir);
+      final MapSource source = map.getSource();
+      source.checkForUpdates();
+      source.downloadTo(dir);
     } catch (IOException e) {
       throw new MapNotFoundException(map, "Could not download map files", e);
     }
@@ -121,7 +124,7 @@ public class MatchManagerImpl implements MatchFactory, MatchManager {
   }
 
   private Future<World> initWorld(String worldName, MapContext map) {
-    // FIXME: Terrain access
+    // FIXME: terrain access
     // final TerrainModule terrain = map.getModule(TerrainModule.class);
     // .generator(terrain == null ? new NullChunkGenerator() : terrain.getChunkGenerator())
     // .seed(terrain == null ? new Random().nextLong() : terrain.getSeed());

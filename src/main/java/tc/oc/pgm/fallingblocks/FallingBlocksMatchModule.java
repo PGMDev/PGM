@@ -26,9 +26,11 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.util.collection.LongDeque;
 
+@ListenerScope(MatchScope.RUNNING)
 public class FallingBlocksMatchModule implements MatchModule, Listener {
   private static final BlockFace[] NEIGHBORS = {
     BlockFace.WEST, BlockFace.EAST, BlockFace.DOWN, BlockFace.UP, BlockFace.NORTH, BlockFace.SOUTH
