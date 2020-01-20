@@ -9,7 +9,6 @@ import java.util.AbstractMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.joda.time.Duration;
@@ -30,14 +29,6 @@ import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.util.StringUtils;
 
 public class AdminCommands {
-
-  @Command(
-      aliases = {"debugg"},
-      desc = "Nothing")
-  public void debug(CommandSender sender, Match match, PGM pgm) throws CommandException {
-    pgm.getLogger().info(Bukkit.getWorlds().toString());
-    pgm.getLogger().info(pgm.getMatchManager().toString());
-  }
 
   @Command(
       aliases = {"queuerestart", "qr"},

@@ -786,12 +786,6 @@ public class MatchImpl implements Match {
 
       return module;
     }
-
-    @Override
-    protected void finalize() throws Throwable {
-      PGM.get().getLogger().info("FINALIZE: " + this);
-      super.finalize();
-    }
   }
 
   @Override

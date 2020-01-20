@@ -10,7 +10,6 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Difficulty;
 import org.jdom2.Element;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.map.contrib.PlayerContributor;
@@ -60,7 +59,6 @@ public class MapInfoImpl implements MapInfo {
     this.genre = genre == null ? "Match" : genre;
     this.tags = tags == null ? new LinkedList<>() : tags;
     this.players = players == null ? new LinkedList<>() : players;
-    PGM.get().getLogger().info("INIT: " + this);
   }
 
   public MapInfoImpl(MapInfo info) {
