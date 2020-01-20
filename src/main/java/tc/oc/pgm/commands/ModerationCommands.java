@@ -48,7 +48,7 @@ public class ModerationCommands {
         Duration timeSinceReport = Duration.between(lastReport, Instant.now());
         long secondsRemaining = REPORT_COOLDOWN_SECONDS - timeSinceReport.getSeconds();
         if (secondsRemaining > 0) {
-          Component secondsComponent = new PersonalizedText("" + secondsRemaining);
+          Component secondsComponent = new PersonalizedText(Long.toString(secondsRemaining));
           Component secondsLeftComponent =
               new PersonalizedTranslatable(
                       secondsRemaining != 1
