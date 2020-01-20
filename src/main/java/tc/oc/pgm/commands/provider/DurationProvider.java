@@ -27,6 +27,6 @@ public class DurationProvider implements BukkitProvider<Duration> {
           .toStandardDuration()
           .toDuration();
     }
-    return Duration.standardSeconds(30L);
+    return null;
   }
 }
