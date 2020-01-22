@@ -1,14 +1,12 @@
 package tc.oc.pgm.listeners;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -18,27 +16,27 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerListPingEvent;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.map.Contributor;
+import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
-import tc.oc.pgm.map.Contributor;
-import tc.oc.pgm.map.MapInfo;
-import tc.oc.pgm.map.MapPersistentContext;
-import tc.oc.pgm.map.PGMMap;
-import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.rotation.PGMMapOrder;
-import tc.oc.util.logging.ClassLogger;
+import tc.oc.pgm.map.contrib.PlayerContributor;
+import tc.oc.pgm.rotation.MapOrder;
+import tc.oc.util.ClassLogger;
 
 public class ServerPingDataListener implements Listener {
 
   private final MatchManager matchManager;
+  private final MapOrder mapOrder;
   private final Logger logger;
   private final AtomicBoolean ready;
   private final AtomicBoolean legacySportPaper;
   private final LoadingCache<Match, JsonObject> matchCache;
 
-  public ServerPingDataListener(MatchManager matchManager, Logger parentLogger) {
+  public ServerPingDataListener(MatchManager matchManager, MapOrder mapOrder, Logger parentLogger) {
     this.matchManager = checkNotNull(matchManager);
+    this.mapOrder = checkNotNull(mapOrder);
     this.logger = ClassLogger.get(checkNotNull(parentLogger), ServerPingDataListener.class);
     this.ready = new AtomicBoolean();
     this.legacySportPaper = new AtomicBoolean();
@@ -101,40 +99,35 @@ public class ServerPingDataListener implements Listener {
   private void appendNextMap(JsonObject jsonObject) {
     checkNotNull(jsonObject);
 
-    PGMMapOrder mapOrder = this.matchManager.getMapOrder();
-    if (mapOrder != null) {
-      PGMMap nextMap = mapOrder.getNextMap();
+    MapInfo nextMap = mapOrder.getNextMap();
 
-      if (nextMap != null) {
-        JsonObject nextMapObject = new JsonObject();
-        this.serializeMap(nextMap, nextMapObject);
-        jsonObject.add("next_map", nextMapObject);
-      }
+    if (nextMap != null) {
+      JsonObject nextMapObject = new JsonObject();
+      this.serializeMap(nextMap, nextMapObject);
+      jsonObject.add("next_map", nextMapObject);
     }
   }
 
-  private void serializeMap(PGMMap map, JsonObject jsonObject) {
+  private void serializeMap(MapInfo map, JsonObject jsonObject) {
     checkNotNull(map);
     checkNotNull(jsonObject);
 
-    MapInfo mapInfo = map.getInfo();
-    MapPersistentContext persistentContext = map.getPersistentContext();
-
-    jsonObject.addProperty("slug", mapInfo.slug());
-    jsonObject.addProperty("name", mapInfo.name);
-    jsonObject.addProperty("version", mapInfo.version.toString());
-    jsonObject.addProperty("objective", mapInfo.objective);
+    jsonObject.addProperty("slug", map.getId());
+    jsonObject.addProperty("name", map.getName());
+    jsonObject.addProperty("version", map.getVersion().toString());
+    jsonObject.addProperty("objective", map.getDescription());
 
     JsonArray tags = new JsonArray();
-    for (MapTag mapTag : persistentContext.getMapTags()) {
+    // FIXME: map tags
+    /*for (MapTag mapTag : persistentContext.getMapTags()) {
       tags.add(new JsonPrimitive(mapTag.getName()));
-    }
+    }*/
     if (tags.iterator().hasNext()) {
       jsonObject.add("tags", tags);
     }
 
     JsonArray authors = new JsonArray();
-    for (Contributor author : mapInfo.authors) {
+    for (Contributor author : map.getAuthors()) {
       JsonObject authorObject = new JsonObject();
       this.serializeContributor(author, authorObject);
       authors.add(authorObject);
@@ -144,7 +137,7 @@ public class ServerPingDataListener implements Listener {
     }
 
     JsonArray contributors = new JsonArray();
-    for (Contributor contributor : mapInfo.contributors) {
+    for (Contributor contributor : map.getContributors()) {
       JsonObject contributorObject = new JsonObject();
       this.serializeContributor(contributor, contributorObject);
       contributors.add(contributorObject);
@@ -158,16 +151,12 @@ public class ServerPingDataListener implements Listener {
     checkNotNull(contributor, "contributor");
     checkNotNull(jsonObject, "jsonObject");
 
-    UUID playerId = contributor.getPlayerId();
-    if (playerId != null) {
-      jsonObject.addProperty("uuid", playerId.toString());
+    jsonObject.addProperty("name", contributor.getName());
+    if (contributor instanceof PlayerContributor) {
+      jsonObject.addProperty("uuid", ((PlayerContributor) contributor).getId().toString());
     }
 
-    if (contributor.hasName()) {
-      jsonObject.addProperty("name", contributor.getName());
-    }
-
-    if (contributor.hasContribution()) {
+    if (contributor.getContribution() != null) {
       jsonObject.addProperty("contribution", contributor.getContribution());
     }
   }

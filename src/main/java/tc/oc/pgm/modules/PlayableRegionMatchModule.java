@@ -10,10 +10,13 @@ import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.util.MatchPlayers;
 
+@ListenerScope(MatchScope.RUNNING)
 public class PlayableRegionMatchModule implements MatchModule, Listener {
 
   private final Match match;

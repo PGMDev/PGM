@@ -2,12 +2,14 @@ package tc.oc.pgm.tnt;
 
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.joda.time.Duration;
 import tc.oc.component.Component;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
@@ -22,6 +24,8 @@ import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 
 public class TNTModule implements MapModule {
+  private static final Collection<MapTag> TAGS =
+      ImmutableList.of(MapTag.create("autotnt", "Instant TNT", false, true));
   public static final int DEFAULT_DISPENSER_NUKE_LIMIT = 16;
   public static final float DEFAULT_DISPENSER_NUKE_MULTIPLIER = 0.25f;
 
@@ -29,6 +33,11 @@ public class TNTModule implements MapModule {
 
   public TNTModule(TNTProperties properties) {
     this.properties = properties;
+  }
+
+  @Override
+  public Collection<MapTag> getTags() {
+    return properties.instantIgnite ? TAGS : Collections.emptyList();
   }
 
   @Override

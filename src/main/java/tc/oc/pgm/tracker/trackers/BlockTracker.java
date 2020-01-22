@@ -26,7 +26,7 @@ import tc.oc.pgm.tracker.damage.BlockInfo;
 import tc.oc.pgm.tracker.damage.OwnerInfo;
 import tc.oc.pgm.tracker.damage.PhysicalInfo;
 import tc.oc.pgm.tracker.damage.TrackerInfo;
-import tc.oc.util.logging.ClassLogger;
+import tc.oc.util.ClassLogger;
 
 /** Tracks the ownership of {@link Block}s and resolves damage caused by them */
 public class BlockTracker implements Listener {

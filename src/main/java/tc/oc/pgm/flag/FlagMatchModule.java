@@ -4,13 +4,12 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.bukkit.event.Listener;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.goals.GoalMatchModule;
 
-public class FlagMatchModule implements MatchModule, Listener {
+public class FlagMatchModule implements MatchModule {
 
   private final ImmutableMap<FlagDefinition, Flag> flags;
 

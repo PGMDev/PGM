@@ -5,15 +5,8 @@ import app.ashcon.intake.bukkit.graph.BasicBukkitCommandGraph;
 import app.ashcon.intake.fluent.DispatcherNode;
 import app.ashcon.intake.parametric.AbstractModule;
 import app.ashcon.intake.parametric.provider.EnumProvider;
-import java.io.File;
-import java.sql.SQLException;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.annotation.Nullable;
+import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -36,9 +29,11 @@ import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
+import tc.oc.pgm.api.map.exception.MapException;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.factory.MatchFactory;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
@@ -51,6 +46,8 @@ import tc.oc.pgm.commands.GoalCommands;
 import tc.oc.pgm.commands.InventoryCommands;
 import tc.oc.pgm.commands.JoinCommands;
 import tc.oc.pgm.commands.MapCommands;
+import tc.oc.pgm.commands.MapDevCommands;
+import tc.oc.pgm.commands.MapPoolCommands;
 import tc.oc.pgm.commands.MatchCommands;
 import tc.oc.pgm.commands.ModeCommands;
 import tc.oc.pgm.commands.ModerationCommands;
@@ -64,6 +61,7 @@ import tc.oc.pgm.commands.provider.DurationProvider;
 import tc.oc.pgm.commands.provider.MapInfoProvider;
 import tc.oc.pgm.commands.provider.MatchPlayerProvider;
 import tc.oc.pgm.commands.provider.MatchProvider;
+import tc.oc.pgm.commands.provider.SettingKeyProvider;
 import tc.oc.pgm.commands.provider.TeamMatchModuleProvider;
 import tc.oc.pgm.commands.provider.VectorProvider;
 import tc.oc.pgm.db.DatastoreCacheImpl;
@@ -79,6 +77,7 @@ import tc.oc.pgm.listeners.LongRangeTNTListener;
 import tc.oc.pgm.listeners.MatchAnnouncer;
 import tc.oc.pgm.listeners.MotdListener;
 import tc.oc.pgm.listeners.PGMListener;
+import tc.oc.pgm.listeners.ServerPingDataListener;
 import tc.oc.pgm.listeners.WorldProblemListener;
 import tc.oc.pgm.map.MapLibraryImpl;
 import tc.oc.pgm.match.MatchManagerImpl;
@@ -90,6 +89,19 @@ import tc.oc.pgm.rotation.MapOrder;
 import tc.oc.pgm.rotation.RandomMapOrder;
 import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.pgm.teams.TeamMatchModule;
+import tc.oc.xml.InvalidXMLException;
+
+import javax.annotation.Nullable;
+import java.io.File;
+import java.sql.SQLException;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, Listener {
 
@@ -152,10 +164,10 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
 
     gameLogger = Logger.getLogger(logger.getName() + ".game");
     gameLogger.setUseParentHandlers(false);
+    gameLogger.addHandler(new InGameHandler());
     gameLogger.setParent(logger);
 
-    // FIXME: Use gameLogger
-    mapLibrary = new MapLibraryImpl(logger, Config.Maps.sources());
+    mapLibrary = new MapLibraryImpl(gameLogger, Config.Maps.sources());
     try {
       mapLibrary.loadNewMaps(false).get(10, TimeUnit.SECONDS);
     } catch (InterruptedException | TimeoutException e) {
@@ -223,8 +235,6 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
   public void onDisable() {
     if (matchTabManager != null) matchTabManager.disable();
     if (matchManager != null) matchManager.getMatches().iterator().forEachRemaining(Match::unload);
-    if (datastore != null) datastore.shutdown();
-    if (datastoreCache != null) datastoreCache.shutdown();
     datastore = null;
     datastoreCache = null;
     mapLibrary = null;
@@ -333,7 +343,7 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
       bind(Duration.class).toProvider(new DurationProvider());
       bind(TeamMatchModule.class).toProvider(new TeamMatchModuleProvider(getMatchManager()));
       bind(Vector.class).toProvider(new VectorProvider());
-      bind(SettingKey.class).toProvider(new EnumProvider<>(SettingKey.class));
+      bind(SettingKey.class).toProvider(new SettingKeyProvider());
       bind(SettingValue.class).toProvider(new EnumProvider<>(SettingValue.class));
     }
   }
@@ -363,6 +373,10 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
     node.registerCommands(new SettingCommands());
     node.registerCommands(new ModerationCommands());
     node.registerCommands(new ObserverCommands());
+    node.registerCommands(new MapPoolCommands());
+    node.registerCommands(new MapDevCommands());
+    node.registerCommands(new SettingCommands());
+    node.registerCommands(new ModerationCommands());
 
     new BukkitIntake(this, graph).register();
   }
@@ -386,5 +400,69 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
     registerEvents(new WorldProblemListener(this));
     registerEvents(new MatchAnnouncer());
     registerEvents(new MotdListener());
+    registerEvents(new ServerPingDataListener(matchManager, mapOrder, getLogger()));
+  }
+
+  private class InGameHandler extends Handler {
+    // TODO: Keep track of errors and allow for pagination and clearing
+
+    @Override
+    public void publish(LogRecord record) {
+      Bukkit.broadcast(format(record), Permissions.DEBUG);
+    }
+
+    private String format(LogRecord record) {
+      final Throwable thrown = record.getThrown();
+      if (thrown == null) return record.getMessage();
+
+      final MapException missingErr = tryException(MapException.class, thrown);
+      if (missingErr != null) {
+        final MapInfo map = missingErr.getMap();
+        return format(
+            map == null ? null : map.getId(), missingErr.getMessage(), missingErr.getCause());
+      }
+
+      final InvalidXMLException mapErr = tryException(InvalidXMLException.class, thrown);
+      if (mapErr != null) {
+        return format(mapErr.getFullLocation(), mapErr.getMessage(), mapErr.getCause());
+      }
+
+      final ModuleLoadException moduleErr = tryException(ModuleLoadException.class, thrown);
+      if (moduleErr != null) {
+        return format(null, moduleErr.getMessage(), moduleErr.getCause());
+      }
+
+      final StackTraceElement element = thrown.getStackTrace()[0];
+      return format(
+          element.getFileName() + " @ " + element.getLineNumber(),
+          thrown.getMessage(),
+          thrown.getCause());
+    }
+
+    private String format(
+        @Nullable String location, @Nullable String message, @Nullable Throwable cause) {
+      if (location == null) location = "<unknown location>";
+      if (message == null) message = "<unknown message>";
+
+      return ChatColor.AQUA
+          + location
+          + ": "
+          + ChatColor.RED
+          + message
+          + (cause == null ? "" : ", caused by: " + cause.getMessage());
+    }
+
+    private @Nullable <E> E tryException(Class<E> type, @Nullable Throwable thrown) {
+      if (thrown == null) return null;
+      return type.isInstance(thrown) ? (E) thrown : tryException(type, thrown.getCause());
+    }
+
+    @Override
+    public void flush() {
+      // TODO: clear errors
+    }
+
+    @Override
+    public void close() throws SecurityException {}
   }
 }

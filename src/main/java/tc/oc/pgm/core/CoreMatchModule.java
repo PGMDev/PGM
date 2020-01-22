@@ -25,11 +25,13 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
 
+@ListenerScope(MatchScope.RUNNING)
 public class CoreMatchModule implements MatchModule, Listener {
 
   protected final Match match;

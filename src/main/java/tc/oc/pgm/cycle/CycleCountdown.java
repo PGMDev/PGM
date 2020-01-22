@@ -11,29 +11,19 @@ import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
-import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.countdowns.MatchCountdown;
-import tc.oc.pgm.rotation.MapOrder;
 
 public class CycleCountdown extends MatchCountdown {
-  private int preloadTime = Config.Experiments.get().getPreload();
 
-  private final MapLibrary mapLibrary;
-  private final MatchFactory matchFactory;
-  private final MapOrder mapOrder;
-
+  private int preloadTime;
   private boolean ended;
   private MapInfo nextMap;
   private CompletableFuture<Match> nextMatch;
 
-  public CycleCountdown(
-      MatchFactory matchFactory, MapLibrary mapLibrary, MapOrder mapOrder, Match match) {
+  public CycleCountdown(Match match) {
     super(match);
-    this.mapOrder = mapOrder;
-    this.mapLibrary = mapLibrary;
-    this.matchFactory = matchFactory;
+    this.preloadTime = Config.Experiments.get().getPreload();
   }
 
   private void setNextMap(MapInfo map, boolean end) {
@@ -43,7 +33,11 @@ public class CycleCountdown extends MatchCountdown {
         nextMatch = null;
       }
       if (map != null && nextMatch == null && remaining.getStandardSeconds() <= preloadTime) {
-        nextMatch = mapLibrary.loadExistingMap(map.getId()).thenCompose(matchFactory::initMatch);
+        nextMatch =
+            PGM.get()
+                .getMapLibrary()
+                .loadExistingMap(map.getId())
+                .thenCompose(context -> PGM.get().getMatchFactory().initMatch(context));
       }
     }
     ended |= end;
@@ -73,20 +67,20 @@ public class CycleCountdown extends MatchCountdown {
 
   @Override
   public void onTick(Duration remaining, Duration total) {
-    setNextMap(mapOrder.getNextMap(), false);
+    setNextMap(PGM.get().getMapOrder().getNextMap(), false);
     super.onTick(remaining, total);
   }
 
   @Override
   public void onEnd(Duration total) {
     super.onEnd(total);
-    setNextMap(mapOrder.popNextMap(), true);
+    setNextMap(PGM.get().getMapOrder().popNextMap(), true);
 
     nextMatch.whenComplete(
         (Match next, Throwable err) -> {
           try {
             if (err != null) throw err;
-            matchFactory.moveMatch(match, next);
+            PGM.get().getMatchFactory().moveMatch(match, next);
           } catch (Throwable t) {
             PGM.get().getLogger().log(Level.SEVERE, "Unable to cycle match", t);
             nextMatch = null;

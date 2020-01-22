@@ -2,6 +2,7 @@ package tc.oc.pgm.classes;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -17,6 +18,7 @@ import org.bukkit.material.MaterialData;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
@@ -30,6 +32,9 @@ import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
 public class ClassModule implements MapModule {
+
+  private static final Collection<MapTag> TAGS =
+      ImmutableList.of(MapTag.create("classes", "Classes", false, true));
   final String family;
   final Map<String, PlayerClass> classes;
   final PlayerClass defaultClass;
@@ -38,6 +43,11 @@ public class ClassModule implements MapModule {
     this.family = checkNotNull(family, "family");
     this.classes = ImmutableMap.copyOf(checkNotNull(classes, "classes"));
     this.defaultClass = checkNotNull(defaultClass, "default class");
+  }
+
+  @Override
+  public Collection<MapTag> getTags() {
+    return TAGS;
   }
 
   @Override

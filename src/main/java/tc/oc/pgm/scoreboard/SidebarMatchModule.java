@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
@@ -29,6 +30,7 @@ import tc.oc.component.render.ComponentRenderers;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.named.NameStyle;
 import tc.oc.pgm.Config;
+import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -86,6 +88,37 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
   protected @Nullable BukkitTask renderTask;
 
+  private static String renderSidebarTitle(Collection<MapTag> tags) {
+    final List<String> gamemode =
+        tags.stream()
+            .filter(MapTag::isGamemode)
+            .filter(tag -> !tag.isAuxiliary())
+            .map(MapTag::getName)
+            .collect(Collectors.toList());
+    final List<String> auxiliary =
+        tags.stream()
+            .filter(MapTag::isGamemode)
+            .filter(MapTag::isAuxiliary)
+            .map(MapTag::getName)
+            .collect(Collectors.toList());
+
+    String title = "";
+
+    if (gamemode.size() == 1) {
+      title = gamemode.get(0);
+    } else if (gamemode.size() >= 2) {
+      title = "Objectives";
+    }
+
+    if (auxiliary.size() == 1) {
+      title += (title.isEmpty() ? "" : "& ") + auxiliary.get(0);
+    } else if (gamemode.isEmpty() && auxiliary.size() == 2) {
+      title = auxiliary.get(0) + " & " + auxiliary.get(1);
+    }
+
+    return title.isEmpty() ? "Match" : title;
+  }
+
   private class Sidebar {
 
     private static final String IDENTIFIER = "pgm";
@@ -105,8 +138,9 @@ public class SidebarMatchModule implements MatchModule, Listener {
       this.objective.setDisplayName(
           StringUtils.left(
               ComponentRenderers.toLegacyText(
-                  new PersonalizedText( // FIXME: Genre sidebar probably broken
-                      match.getMap().getGenre(), net.md_5.bungee.api.ChatColor.AQUA),
+                  new PersonalizedText(
+                      renderSidebarTitle(match.getMap().getTags()),
+                      net.md_5.bungee.api.ChatColor.AQUA),
                   NullCommandSender.INSTANCE),
               32));
       this.objective.setDisplaySlot(DisplaySlot.SIDEBAR);

@@ -1,5 +1,7 @@
 package tc.oc.pgm.api.map;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.jdom2.Document;
@@ -22,6 +24,15 @@ public interface MapModule<T extends MatchModule> extends Module, MatchModuleFac
   /** @see MatchModuleFactory#createMatchModule(Match) */
   @Nullable
   T createMatchModule(Match match) throws ModuleLoadException;
+
+  /**
+   * Get a collection of {@link MapTag}s to describe this module.
+   *
+   * @return A collection of {@link MapTag}s.
+   */
+  default Collection<MapTag> getTags() {
+    return Collections.emptyList();
+  }
 
   /**
    * Callback when all {@link MapModule}s were successfully loaded.

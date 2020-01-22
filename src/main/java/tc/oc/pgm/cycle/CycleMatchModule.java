@@ -39,15 +39,7 @@ public class CycleMatchModule implements MatchModule, Listener {
   public void startCountdown(@Nullable Duration duration) {
     if (duration == null) duration = config.countdown();
     match.finish();
-    if (Duration.ZERO.equals(duration)) {
-      duration = Duration.standardSeconds(1);
-    }
-    match
-        .getCountdown()
-        .start(
-            new CycleCountdown(
-                PGM.get().getMatchFactory(), PGM.get().getMapLibrary(), mapOrder, match),
-            duration);
+    match.getCountdown().start(new CycleCountdown(match), duration);
   }
 
   @EventHandler

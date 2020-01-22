@@ -15,10 +15,13 @@ import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
 
+@ListenerScope(MatchScope.RUNNING)
 public class DestroyableMatchModule implements MatchModule, Listener {
   protected final Match match;
   protected final Collection<Destroyable> destroyables;

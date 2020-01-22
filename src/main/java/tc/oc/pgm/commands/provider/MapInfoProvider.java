@@ -14,7 +14,6 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
-import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.pgm.rotation.MapOrder;
 
 public class MapInfoProvider implements BukkitProvider<MapInfo> {
@@ -71,10 +70,6 @@ public class MapInfoProvider implements BukkitProvider<MapInfo> {
     }
 
     return mapName.toString();
-  }
-
-  private boolean useRemainingText(List<? extends Annotation> annotations) {
-    return annotations.stream().anyMatch(o -> o instanceof Text);
   }
 
   private boolean isGoToNext(List<? extends Annotation> annotations) {

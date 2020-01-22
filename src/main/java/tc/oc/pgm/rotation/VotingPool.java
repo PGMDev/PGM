@@ -1,12 +1,13 @@
 package tc.oc.pgm.rotation;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.bukkit.configuration.ConfigurationSection;
+import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
-import tc.oc.pgm.map.PGMMap;
 import tc.oc.pgm.restart.RestartManager;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class VotingPool extends MapPool {
 
@@ -18,7 +19,7 @@ public class VotingPool extends MapPool {
   // Amount of maps to display on vote
   private final int VOTE_SIZE;
   private final double ADJUST_FACTOR;
-  private final Map<PGMMap, Double> mapScores = new HashMap<>();
+  private final Map<MapInfo, Double> mapScores = new HashMap<>();
 
   private MapPoll currentPoll;
 
@@ -27,7 +28,7 @@ public class VotingPool extends MapPool {
     VOTE_SIZE = Math.min(MAX_VOTE_OPTIONS, maps.size() - 1);
     ADJUST_FACTOR = 1d / (maps.size() * MAX_VOTE_OPTIONS);
 
-    for (PGMMap map : maps) {
+    for (MapInfo map : maps) {
       mapScores.put(map, DEFAULT_WEIGHT);
     }
   }
@@ -36,12 +37,12 @@ public class VotingPool extends MapPool {
     return currentPoll;
   }
 
-  public double getMapScore(PGMMap map) {
+  public double getMapScore(MapInfo map) {
     return mapScores.get(map);
   }
 
   /** Ticks scores for all maps, making them go slowly towards DEFAULT_WEIGHT. */
-  private void tickScores(PGMMap currentMap) {
+  private void tickScores(MapInfo currentMap) {
     // If the current map isn't from this pool, ignore ticking
     if (!mapScores.containsKey(currentMap)) return;
     mapScores.replaceAll(
@@ -53,21 +54,21 @@ public class VotingPool extends MapPool {
   }
 
   @Override
-  public PGMMap popNextMap() {
+  public MapInfo popNextMap() {
     if (currentPoll == null) return getRandom();
 
-    PGMMap map = currentPoll.finishVote();
+    MapInfo map = currentPoll.finishVote();
     currentPoll = null;
     return map != null ? map : getRandom();
   }
 
   @Override
-  public PGMMap getNextMap() {
+  public MapInfo getNextMap() {
     return null;
   }
 
   @Override
-  public void setNextMap(PGMMap map) {
+  public void setNextMap(MapInfo map) {
     currentPoll = null;
   }
 

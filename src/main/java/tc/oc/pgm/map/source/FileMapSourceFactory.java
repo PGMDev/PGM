@@ -10,14 +10,14 @@ import java.io.InputStream;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import tc.oc.pgm.api.map.MapSource;
-import tc.oc.pgm.api.map.exception.MapNotFoundException;
+import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.util.FileUtils;
 
@@ -28,7 +28,7 @@ public class FileMapSourceFactory implements MapSourceFactory {
 
   public FileMapSourceFactory(File dir) {
     this.dir = checkNotNull(dir).getAbsoluteFile();
-    this.seen = new HashSet<>();
+    this.seen = new ConcurrentSkipListSet<>();
   }
 
   private boolean isSource(@Nullable Path path) {
@@ -39,16 +39,17 @@ public class FileMapSourceFactory implements MapSourceFactory {
   }
 
   @Override
-  public Iterator<? extends MapSource> loadNewSources() throws MapNotFoundException {
+  public Iterator<? extends MapSource> loadNewSources() throws MapMissingException {
     try {
       return Files.walk(dir.toPath(), FileVisitOption.FOLLOW_LINKS)
+          .parallel()
           .filter(this::isSource)
           .map(Path::toString)
           .peek(seen::add)
           .map(FileMapSource::new)
           .iterator();
     } catch (IOException e) {
-      throw new MapNotFoundException(e);
+      throw new MapMissingException(dir.getPath(), "Unable to list map directories", e);
     }
   }
 
@@ -97,33 +98,44 @@ public class FileMapSourceFactory implements MapSourceFactory {
     }
 
     @Override
-    public void downloadTo(File dir) throws IOException {
-      FileUtils.copy(getDirectory(), dir, true);
+    public void downloadTo(File dir) throws MapMissingException {
+      final File src = getDirectory();
+      try {
+        FileUtils.copy(src, dir, true);
+      } catch (IOException e) {
+        throw new MapMissingException(src.getPath(), "Unable to copy map directory", e);
+      }
     }
 
     @Override
-    public InputStream getDocument() throws FileNotFoundException {
+    public InputStream getDocument() throws MapMissingException {
       final File file = getFile();
-      modified.set(file.lastModified());
-      return new FileInputStream(file);
+      try {
+        return new FileInputStream(file);
+      } catch (FileNotFoundException e) {
+        throw new MapMissingException(file.getPath(), "Unable to read map document", e);
+      } finally {
+        modified.set(file.lastModified());
+      }
     }
 
     @Override
-    public boolean checkForUpdates() throws MapNotFoundException {
+    public boolean checkForUpdates() throws MapMissingException {
       final File file = getFile();
 
       if (!file.exists()) {
-        throw new MapNotFoundException("Cannot find map source file: " + file.getPath());
+        throw new MapMissingException(
+            file.getPath(), "Unable to locate the map document (was it moved?)");
       }
 
       if (!file.isFile()) {
-        throw new MapNotFoundException(
-            "Cannot read map source file: " + file.getPath() + " is a directory");
+        throw new MapMissingException(
+            file.getPath(), "Unable to read map document because it is not a file");
       }
 
       if (!file.canRead()) {
-        throw new MapNotFoundException(
-            "Cannot read map source file: " + file.getPath() + " (file permissions issue?)");
+        throw new MapMissingException(
+            file.getPath(), "Unable to read map document (file permissions issue?)");
       }
 
       return file.lastModified() > modified.get();

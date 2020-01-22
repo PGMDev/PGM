@@ -38,7 +38,8 @@ public class SnapshotMatchModule implements MatchModule, Listener {
   public static class Factory implements MatchModuleFactory<SnapshotMatchModule> {
     @Override
     public Collection<Class<? extends MatchModule>> getSoftDependencies() {
-      return ImmutableList.of(RenewableMatchModule.class);
+      return ImmutableList.of(
+          RenewableMatchModule.class); // Only needs to load if Renewables are loaded
     }
 
     @Override

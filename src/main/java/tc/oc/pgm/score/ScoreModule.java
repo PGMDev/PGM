@@ -16,6 +16,7 @@ import org.jdom2.Element;
 import tc.oc.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
+import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
@@ -33,12 +34,23 @@ import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
 public class ScoreModule implements MapModule {
+  private static final MapTag SCORE_TAG = MapTag.create("deathmatch", "Deathmatch", true, false);
+  private static final MapTag BOX_TAG = MapTag.create("scorebox", "Scorebox", true, true);
+
   public ScoreModule(@Nonnull ScoreConfig config, @Nonnull Set<ScoreBoxFactory> scoreBoxFactories) {
     Preconditions.checkNotNull(config, "score config");
     Preconditions.checkNotNull(scoreBoxFactories, "score box factories");
 
     this.config = config;
     this.scoreBoxFactories = scoreBoxFactories;
+  }
+
+  @Override
+  public Collection<MapTag> getTags() {
+    ImmutableList.Builder<MapTag> builder = ImmutableList.builder();
+    if (config.killScore != 0 || config.deathScore != 0) builder.add(SCORE_TAG);
+    if (!scoreBoxFactories.isEmpty()) builder.add(BOX_TAG);
+    return builder.build();
   }
 
   @Override

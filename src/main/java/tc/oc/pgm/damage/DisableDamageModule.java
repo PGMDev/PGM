@@ -57,6 +57,7 @@ public class DisableDamageModule implements MapModule {
           }
         }
       }
+      // Always load due to misc damage handling
       return new DisableDamageModule(causes);
     }
   }

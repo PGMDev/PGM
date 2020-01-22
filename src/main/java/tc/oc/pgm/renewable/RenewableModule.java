@@ -103,7 +103,7 @@ public class RenewableModule implements MapModule {
         renewableModule.renewableDefinitions.add(renewableDefinition);
       }
 
-      return renewableModule;
+      return renewableModule.renewableDefinitions.isEmpty() ? null : renewableModule;
     }
 
     private static Filter parseFilter(FilterParser parser, Element el, String name, Filter def)

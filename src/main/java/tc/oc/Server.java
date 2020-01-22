@@ -259,7 +259,7 @@ public class Server extends DedicatedServer {
         | InstantiationException
         | NoSuchMethodException
         | InvocationTargetException e) {
-      logger.fatal("Could not build plugin '" + mainClass.getName() + "'", e);
+      logger.fatal("Could not load plugin '" + mainClass.getName() + "'", e);
     }
   }
 
@@ -341,7 +341,7 @@ public class Server extends DedicatedServer {
       } catch (NoSuchFieldException | IllegalAccessException e) {
         logger.fatal("Could not toggle plugin state", e);
       } catch (Throwable t) {
-        logger.fatal("Could not build plugin " + plugin.getName(), t);
+        logger.fatal("Could not load plugin " + plugin.getName(), t);
       }
 
       return false;

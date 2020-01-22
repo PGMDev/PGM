@@ -101,10 +101,7 @@ public class BlockDropsModule implements MapModule {
                 new BlockDrops(items, experience, replacement, fallChance, landChance, fallSpeed)));
       }
 
-      // BlockDropsModule must always be loaded, even if there are no rules defined,
-      // otherwise modules that depend on it e.g. DestroyablesModule will be silently
-      // skipped by the module loader. We need better module dependency logic.
-      return new BlockDropsModule(new BlockDropsRuleSet(rules));
+      return rules.isEmpty() ? null : new BlockDropsModule(new BlockDropsRuleSet(rules));
     }
   }
 

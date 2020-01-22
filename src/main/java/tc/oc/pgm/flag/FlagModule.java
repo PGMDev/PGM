@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
@@ -18,6 +19,9 @@ import tc.oc.pgm.teams.TeamModule;
 import tc.oc.xml.InvalidXMLException;
 
 public class FlagModule implements MapModule {
+
+  private static final Collection<MapTag> TAGS =
+      ImmutableList.of(MapTag.create("flag", "Capture the Flag", true, false));
   private final ImmutableList<Post> posts;
   private final ImmutableList<Net> nets;
   private final ImmutableList<FlagDefinition> flags;
@@ -36,6 +40,11 @@ public class FlagModule implements MapModule {
   @Override
   public MatchModule createMatchModule(Match match) throws ModuleLoadException {
     return new FlagMatchModule(match, this.nets, this.flags);
+  }
+
+  @Override
+  public Collection<MapTag> getTags() {
+    return TAGS;
   }
 
   public static class Factory implements MapModuleFactory<FlagModule> {

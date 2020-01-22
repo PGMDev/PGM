@@ -10,8 +10,8 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
+import tc.oc.util.ClassLogger;
 import tc.oc.util.TimeUtils;
-import tc.oc.util.logging.ClassLogger;
 import tc.oc.world.NMSHacks;
 
 public class ShieldPlayerModule implements Tickable {

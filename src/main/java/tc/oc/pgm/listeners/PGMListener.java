@@ -1,6 +1,6 @@
 package tc.oc.pgm.listeners;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.UUID;
 import net.md_5.bungee.api.ChatColor;
@@ -43,7 +43,7 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.gamerules.GameRule;
-import tc.oc.pgm.gamerules.GameRulesModule;
+import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.TimeLockModule;
 
 public class PGMListener implements Listener {
@@ -223,13 +223,11 @@ public class PGMListener implements Listener {
   @EventHandler
   public void unlockTime(final MatchStartEvent event) {
     boolean unlockTime = false;
-    if (!event.getMatch().getMapContext().getModule(TimeLockModule.class).isTimeLocked()) {
+    if (!event.getMatch().getModule(TimeLockModule.class).isTimeLocked()) {
       unlockTime = true;
     }
 
-    GameRulesModule gameRulesModule =
-        event.getMatch().getMapContext().getModule(GameRulesModule.class);
-
+    GameRulesMatchModule gameRulesModule = event.getMatch().getModule(GameRulesMatchModule.class);
     if (gameRulesModule != null
         && gameRulesModule.getGameRules().containsKey(GameRule.DO_DAYLIGHT_CYCLE)) {
       unlockTime = gameRulesModule.getGameRules().get(GameRule.DO_DAYLIGHT_CYCLE);

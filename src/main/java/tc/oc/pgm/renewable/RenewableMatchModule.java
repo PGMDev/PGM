@@ -4,7 +4,7 @@ import java.util.List;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
-import tc.oc.util.logging.ClassLogger;
+import tc.oc.util.ClassLogger;
 
 public class RenewableMatchModule implements MatchModule {
 

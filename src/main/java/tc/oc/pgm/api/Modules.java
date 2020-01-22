@@ -79,6 +79,7 @@ import tc.oc.pgm.modules.ModifyBowProjectileModule;
 import tc.oc.pgm.modules.MultiTradeMatchModule;
 import tc.oc.pgm.modules.PlayableRegionMatchModule;
 import tc.oc.pgm.modules.PlayableRegionModule;
+import tc.oc.pgm.modules.SoundsMatchModule;
 import tc.oc.pgm.modules.TimeLockModule;
 import tc.oc.pgm.modules.ToolRepairMatchModule;
 import tc.oc.pgm.modules.ToolRepairModule;
@@ -167,6 +168,7 @@ public interface Modules {
     register(CycleMatchModule.class, CycleMatchModule::new);
     register(DoubleJumpMatchModule.class, DoubleJumpMatchModule::new);
     register(ArrowRemovalMatchModule.class, ArrowRemovalMatchModule::new);
+    register(SoundsMatchModule.class, new SoundsMatchModule.Factory());
 
     // MatchModules that require other dependencies
     register(GoalMatchModule.class, new GoalMatchModule.Factory());

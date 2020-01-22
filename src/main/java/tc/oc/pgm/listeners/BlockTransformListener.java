@@ -46,7 +46,7 @@ import tc.oc.pgm.events.PlayerBlockTransformEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.Trackers;
 import tc.oc.server.Events;
-import tc.oc.util.logging.ClassLogger;
+import tc.oc.util.ClassLogger;
 import tc.oc.util.reflect.ReflectionUtils;
 
 public class BlockTransformListener implements Listener {

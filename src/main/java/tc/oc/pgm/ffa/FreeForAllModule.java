@@ -9,6 +9,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
@@ -22,6 +23,8 @@ import tc.oc.xml.Node;
 
 public class FreeForAllModule implements MapModule {
 
+  private static final Collection<MapTag> TAGS =
+      ImmutableList.of(MapTag.create("ffa", "Free for All", false, false));
   private final FreeForAllOptions options;
 
   public FreeForAllModule(FreeForAllOptions options) {
@@ -35,6 +38,11 @@ public class FreeForAllModule implements MapModule {
   @Override
   public Collection<Class<? extends MatchModule>> getHardDependencies() {
     return ImmutableList.of(JoinMatchModule.class, StartMatchModule.class);
+  }
+
+  @Override
+  public Collection<MapTag> getTags() {
+    return TAGS;
   }
 
   @Override

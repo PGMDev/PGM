@@ -27,7 +27,7 @@ import tc.oc.pgm.tracker.damage.GenericFallInfo;
 import tc.oc.pgm.tracker.damage.PhysicalInfo;
 import tc.oc.pgm.tracker.event.PlayerSpleefEvent;
 import tc.oc.pgm.tracker.resolvers.DamageResolver;
-import tc.oc.util.logging.ClassLogger;
+import tc.oc.util.ClassLogger;
 
 /** Tracks the state of falls caused by other players and resolves the damage caused by them. */
 public class FallTracker implements Listener, DamageResolver {

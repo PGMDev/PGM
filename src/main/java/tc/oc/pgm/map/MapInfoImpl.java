@@ -5,21 +5,32 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import net.md_5.bungee.api.ChatColor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Difficulty;
 import org.jdom2.Element;
+import tc.oc.component.Component;
+import tc.oc.component.types.PersonalizedText;
+import tc.oc.named.NameStyle;
+import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.map.contrib.PlayerContributor;
 import tc.oc.pgm.map.contrib.PseudonymContributor;
+import tc.oc.pgm.util.TranslationUtils;
 import tc.oc.pgm.util.XMLUtils;
+import tc.oc.server.NullCommandSender;
 import tc.oc.util.Version;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
 public class MapInfoImpl implements MapInfo {
+  private static final int DEFAULT_DIFFICULTY = Difficulty.NORMAL.ordinal();
 
   private final String id;
   private final Version proto;
@@ -30,8 +41,7 @@ public class MapInfoImpl implements MapInfo {
   private final Collection<Contributor> contributors;
   private final Collection<String> rules;
   private final int difficulty;
-  private final String genre;
-  protected final Collection<String> tags;
+  protected final Collection<MapTag> tags;
   protected final Collection<Integer> players;
 
   public MapInfoImpl(
@@ -44,8 +54,7 @@ public class MapInfoImpl implements MapInfo {
       @Nullable Collection<Contributor> contributors,
       @Nullable Collection<String> rules,
       @Nullable Integer difficulty,
-      @Nullable String genre,
-      @Nullable Collection<String> tags,
+      @Nullable Collection<MapTag> tags,
       @Nullable Collection<Integer> players) {
     this.name = checkNotNull(name);
     this.id = checkNotNull(MapInfo.normalizeName(id == null ? name : id));
@@ -55,9 +64,8 @@ public class MapInfoImpl implements MapInfo {
     this.authors = authors == null ? new LinkedList<>() : authors;
     this.contributors = contributors == null ? new LinkedList<>() : contributors;
     this.rules = rules == null ? new LinkedList<>() : rules;
-    this.difficulty = difficulty == null ? Difficulty.NORMAL.ordinal() : difficulty;
-    this.genre = genre == null ? "Match" : genre;
-    this.tags = tags == null ? new LinkedList<>() : tags;
+    this.difficulty = difficulty == null ? DEFAULT_DIFFICULTY : difficulty;
+    this.tags = tags == null ? new TreeSet<>() : tags;
     this.players = players == null ? new LinkedList<>() : players;
   }
 
@@ -72,7 +80,6 @@ public class MapInfoImpl implements MapInfo {
         info.getContributors(),
         info.getRules(),
         info.getDifficulty(),
-        info.getGenre(),
         info.getTags(),
         info.getMaxPlayers());
   }
@@ -93,7 +100,6 @@ public class MapInfoImpl implements MapInfo {
                 "difficulty",
                 Difficulty.NORMAL)
             .ordinal(),
-        null,
         null,
         null);
   }
@@ -144,12 +150,7 @@ public class MapInfoImpl implements MapInfo {
   }
 
   @Override
-  public String getGenre() {
-    return genre;
-  }
-
-  @Override
-  public Collection<String> getTags() {
+  public Collection<MapTag> getTags() {
     return tags;
   }
 
@@ -177,6 +178,22 @@ public class MapInfoImpl implements MapInfo {
   @Override
   public MapInfo clone() {
     return new MapInfoImpl(this);
+  }
+
+  @Override
+  public Component getStyledName(NameStyle style) {
+    return new PersonalizedText(
+        AllTranslations.get()
+            .translate(
+                (input) -> ChatColor.DARK_PURPLE + input,
+                "misc.authorship",
+                NullCommandSender.INSTANCE,
+                ChatColor.GOLD + getName(),
+                TranslationUtils.legacyList(
+                    NullCommandSender.INSTANCE,
+                    (input) -> ChatColor.DARK_PURPLE + input,
+                    (input) -> ChatColor.RED + input,
+                    getAuthors().stream().map(Contributor::getName).collect(Collectors.toList()))));
   }
 
   private static List<String> parseRules(Element root) {

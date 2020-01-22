@@ -12,6 +12,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
+import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
@@ -29,11 +30,19 @@ import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 
 public class WoolModule implements MapModule {
+  private static final Collection<MapTag> TAGS =
+      ImmutableList.of(MapTag.create("wool", "Capture the Wool", true, false));
+
   protected final Multimap<TeamFactory, MonumentWoolFactory> woolFactories;
 
   public WoolModule(Multimap<TeamFactory, MonumentWoolFactory> woolFactories) {
     assert woolFactories.size() > 0;
     this.woolFactories = woolFactories;
+  }
+
+  @Override
+  public Collection<MapTag> getTags() {
+    return TAGS;
   }
 
   @Override

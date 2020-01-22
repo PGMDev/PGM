@@ -39,6 +39,7 @@ public class DamageModule implements MapModule {
         }
       }
 
+      // Always load due to misc damage handling
       return new DamageModule(ImmutableList.copyOf(filters));
     }
   }

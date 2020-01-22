@@ -28,7 +28,7 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.snapshot.SnapshotMatchModule;
-import tc.oc.util.logging.ClassLogger;
+import tc.oc.util.ClassLogger;
 import tc.oc.world.NMSHacks;
 
 public class Renewable implements Listener, Tickable {

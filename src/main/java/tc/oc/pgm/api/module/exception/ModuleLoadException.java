@@ -6,22 +6,11 @@ import tc.oc.pgm.api.module.Module;
 /** When a {@link Module} or its factory is unable to load. */
 public class ModuleLoadException extends RuntimeException {
 
-  private final @Nullable Module instance;
   private final @Nullable Class<? extends Module> key;
 
-  public ModuleLoadException(
-      Module instance, Class<? extends Module> key, String message, Throwable cause) {
-    super(
-        instance != null
-            ? instance.toString() + " failed to load: " + message
-            : key != null ? key.getSimpleName() + " failed to load: " + message : message,
-        cause);
-    this.instance = instance;
-    this.key = key;
-  }
-
   public ModuleLoadException(Class<? extends Module> key, String message, Throwable cause) {
-    this(null, key, message, cause);
+    super(key != null ? key.getSimpleName() + " failed to load: " + message : message, cause);
+    this.key = key;
   }
 
   public ModuleLoadException(Class<? extends Module> key, String message) {

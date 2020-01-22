@@ -22,7 +22,7 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.util.UsernameResolver;
-import tc.oc.util.logging.ClassLogger;
+import tc.oc.util.ClassLogger;
 
 public class DatastoreImpl implements Datastore {
 
@@ -257,13 +257,5 @@ public class DatastoreImpl implements Datastore {
 
   private Connection getConnection() {
     return connection;
-  }
-
-  @Override
-  public void shutdown() {
-    try {
-      getConnection().close();
-    } catch (SQLException e) {
-    }
   }
 }

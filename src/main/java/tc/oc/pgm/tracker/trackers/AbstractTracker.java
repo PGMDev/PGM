@@ -8,7 +8,7 @@ import org.bukkit.event.Listener;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.damage.TrackerInfo;
-import tc.oc.util.logging.ClassLogger;
+import tc.oc.util.ClassLogger;
 
 /**
  * Base class with a few convenience methods that are useful to trackers.

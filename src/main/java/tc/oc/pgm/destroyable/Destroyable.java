@@ -54,7 +54,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     implements IncrementalGoal<DestroyableFactory>, ModeChangeGoal<DestroyableFactory> {
 
   // Block replacement rules in this ruleset will be used to calculate destroyable health
-  protected final BlockDropsRuleSet blockDropsRuleSet;
+  protected BlockDropsRuleSet blockDropsRuleSet;
 
   protected final FiniteBlockRegion blockRegion;
   protected final Set<SingleMaterialMatcher> materialPatterns = new HashSet<>();
@@ -116,8 +116,6 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     if (bdmm != null) {
       this.blockDropsRuleSet =
           bdmm.getRuleSet().subsetAffecting(this.materials).subsetAffecting(this.blockRegion);
-    } else {
-      this.blockDropsRuleSet = new BlockDropsRuleSet();
     }
 
     this.recalculateHealth();
@@ -200,7 +198,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   }
 
   protected boolean isAffectedByBlockReplacementRules() {
-    if (this.blockDropsRuleSet.getRules().isEmpty()) {
+    if (this.blockDropsRuleSet == null || this.blockDropsRuleSet.getRules().isEmpty()) {
       return false;
     }
 

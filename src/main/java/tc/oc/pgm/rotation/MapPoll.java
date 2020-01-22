@@ -2,7 +2,18 @@ package tc.oc.pgm.rotation;
 
 import app.ashcon.intake.CommandException;
 import java.lang.ref.WeakReference;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -16,10 +27,9 @@ import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.map.PGMMap;
-import tc.oc.pgm.maptag.MapTag;
 import tc.oc.world.NMSHacks;
 
 /** Represents a polling process, with a set of options. */
@@ -28,12 +38,12 @@ public class MapPoll {
   private static final String SYMBOL_VOTED = "\u2714"; // ✔
 
   private final WeakReference<Match> match;
-  private final Map<PGMMap, Double> mapScores;
+  private final Map<MapInfo, Double> mapScores;
   private final int voteSize;
 
-  private final Map<PGMMap, Set<UUID>> votes = new HashMap<>();
+  private final Map<MapInfo, Set<UUID>> votes = new HashMap<>();
 
-  MapPoll(Match match, Map<PGMMap, Double> mapScores, int voteSize) {
+  MapPoll(Match match, Map<MapInfo, Double> mapScores, int voteSize) {
     this.match = new WeakReference<>(match);
     this.mapScores = mapScores;
     this.voteSize = voteSize;
@@ -43,19 +53,19 @@ public class MapPoll {
 
   private void selectMaps() {
     // Sorting beforehand, saves future key remaps, as bigger values are placed at the end
-    List<PGMMap> sortedDist =
+    List<MapInfo> sortedDist =
         mapScores.entrySet().stream()
             .sorted(Comparator.comparingDouble(Map.Entry::getValue))
             .map(Map.Entry::getKey)
             .collect(Collectors.toList());
 
-    NavigableMap<Double, PGMMap> cumulativeScores = new TreeMap<>();
+    NavigableMap<Double, MapInfo> cumulativeScores = new TreeMap<>();
     double maxWeight = cummulativeMap(0, sortedDist, cumulativeScores);
 
     for (int i = 0; i < voteSize; i++) {
-      NavigableMap<Double, PGMMap> subMap =
+      NavigableMap<Double, MapInfo> subMap =
           cumulativeScores.tailMap(Math.random() * maxWeight, true);
-      Map.Entry<Double, PGMMap> selected = subMap.pollFirstEntry();
+      Map.Entry<Double, MapInfo> selected = subMap.pollFirstEntry();
 
       if (selected == null) break; // No more maps to poll
       votes.put(selected.getValue(), new HashSet<>()); // Add map to votes
@@ -65,7 +75,7 @@ public class MapPoll {
       double selectedWeight = getWeight(selected.getValue());
       maxWeight -= selectedWeight;
 
-      NavigableMap<Double, PGMMap> temp = new TreeMap<>();
+      NavigableMap<Double, MapInfo> temp = new TreeMap<>();
       cummulativeMap(selected.getKey() - selectedWeight, subMap.values(), temp);
 
       subMap.clear();
@@ -73,7 +83,7 @@ public class MapPoll {
     }
   }
 
-  private double getWeight(PGMMap map) {
+  private double getWeight(MapInfo map) {
     return getWeight(mapScores.get(map));
   }
 
@@ -83,8 +93,8 @@ public class MapPoll {
   }
 
   private double cummulativeMap(
-      double currWeight, Collection<PGMMap> maps, Map<Double, PGMMap> result) {
-    for (PGMMap map : maps) {
+      double currWeight, Collection<MapInfo> maps, Map<Double, MapInfo> result) {
+    for (MapInfo map : maps) {
       double score = getWeight(map);
       if (score > 0) result.put(currWeight += score, map);
     }
@@ -92,10 +102,10 @@ public class MapPoll {
   }
 
   public void sendMessage(MatchPlayer viewer) {
-    for (PGMMap pgmMap : votes.keySet()) viewer.sendMessage(getMapChatComponent(viewer, pgmMap));
+    for (MapInfo pgmMap : votes.keySet()) viewer.sendMessage(getMapChatComponent(viewer, pgmMap));
   }
 
-  private Component getMapChatComponent(MatchPlayer viewer, PGMMap map) {
+  private Component getMapChatComponent(MatchPlayer viewer, MapInfo map) {
     boolean voted = votes.get(map).contains(viewer.getId());
     return new PersonalizedText(
         new PersonalizedText("["),
@@ -103,8 +113,8 @@ public class MapPoll {
             voted ? SYMBOL_VOTED : SYMBOL_IGNORE, voted ? ChatColor.GREEN : ChatColor.DARK_RED),
         new PersonalizedText(" ").bold(!voted), // Fix 1px symbol diff
         new PersonalizedText("" + countVotes(votes.get(map)), ChatColor.YELLOW),
-        new PersonalizedText("] "),
-        new PersonalizedText(map.getInfo().getShortDescription(viewer.getBukkit()) + " "));
+        new PersonalizedText("] "), // FIXME: map fancy name, consider implementing Named
+        new PersonalizedText(map.getName() + " ", ChatColor.GOLD));
   }
 
   public void sendBook(MatchPlayer viewer) {
@@ -122,7 +132,7 @@ public class MapPoll {
             new PersonalizedTranslatable("command.pool.vote.book.header"), ChatColor.DARK_PURPLE));
     content.add(new PersonalizedText("\n\n"));
 
-    for (PGMMap pgmMap : votes.keySet()) content.add(getMapBookComponent(viewer, pgmMap));
+    for (MapInfo pgmMap : votes.keySet()) content.add(getMapBookComponent(viewer, pgmMap));
 
     NMSHacks.setBookPages(meta, new PersonalizedText(content).render(viewer.getBukkit()));
     is.setItemMeta(meta);
@@ -136,7 +146,7 @@ public class MapPoll {
     NMSHacks.openBook(is, viewer.getBukkit());
   }
 
-  private Component getMapBookComponent(MatchPlayer viewer, PGMMap map) {
+  private Component getMapBookComponent(MatchPlayer viewer, MapInfo map) {
     boolean voted = votes.get(map).contains(viewer.getId());
     return new PersonalizedText(
             new PersonalizedText(
@@ -146,10 +156,8 @@ public class MapPoll {
             new PersonalizedText(map.getName() + "\n", ChatColor.BOLD, ChatColor.GOLD))
         .hoverEvent(
             HoverEvent.Action.SHOW_TEXT,
-            new PersonalizedText(
-                    map.getPersistentContext().getMapTags().stream()
-                        .map(MapTag::toString)
-                        .collect(Collectors.joining(" ")),
+            new PersonalizedText( // FIXME: map tags
+                    new LinkedList<String>().stream().collect(Collectors.joining(" ")),
                     ChatColor.YELLOW)
                 .render())
         .clickEvent(ClickEvent.Action.RUN_COMMAND, "/votenext " + map.getName());
@@ -163,7 +171,7 @@ public class MapPoll {
    * @return true if the player is now voting for the map, false otherwise
    * @throws CommandException If the map is not an option in the poll
    */
-  public boolean toggleVote(PGMMap vote, UUID player) throws CommandException {
+  public boolean toggleVote(MapInfo vote, UUID player) throws CommandException {
     Set<UUID> votes = this.votes.get(vote);
     if (votes == null) throw new CommandException(vote.getName() + " is not an option in the poll");
 
@@ -173,7 +181,7 @@ public class MapPoll {
   }
 
   /** @return The map currently winning the vote, null if no vote is running. */
-  private PGMMap getMostVotedMap() {
+  private MapInfo getMostVotedMap() {
     return votes.entrySet().stream()
         .max(Comparator.comparingInt(e -> countVotes(e.getValue())))
         .map(Map.Entry::getKey)
@@ -200,8 +208,8 @@ public class MapPoll {
    *
    * @return The picked map to play after the vote
    */
-  PGMMap finishVote() {
-    PGMMap picked = getMostVotedMap();
+  MapInfo finishVote() {
+    MapInfo picked = getMostVotedMap();
     Match match = this.match.get();
     if (match != null) {
       match.getPlayers().forEach(this::sendMessage);

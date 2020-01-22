@@ -13,6 +13,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
+import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
@@ -31,6 +32,9 @@ import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
 public class CoreModule implements MapModule {
+
+  private static final Collection<MapTag> TAGS =
+      ImmutableList.of(MapTag.create("core", "Destroy the Core", true, false));
   protected final List<CoreFactory> coreFactories;
 
   public CoreModule(List<CoreFactory> coreFactories) {
@@ -54,6 +58,11 @@ public class CoreModule implements MapModule {
     }
 
     return new CoreMatchModule(match, cores.build());
+  }
+
+  @Override
+  public Collection<MapTag> getTags() {
+    return TAGS;
   }
 
   public static class Factory implements MapModuleFactory<CoreModule> {

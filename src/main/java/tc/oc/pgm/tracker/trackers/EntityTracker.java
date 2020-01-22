@@ -23,7 +23,7 @@ import tc.oc.pgm.tracker.damage.PhysicalInfo;
 import tc.oc.pgm.tracker.damage.PlayerInfo;
 import tc.oc.pgm.tracker.damage.ThrownPotionInfo;
 import tc.oc.pgm.tracker.damage.TrackerInfo;
-import tc.oc.util.logging.ClassLogger;
+import tc.oc.util.ClassLogger;
 
 /** Tracks the ownership of {@link Entity}s and resolves damage caused by them */
 public class EntityTracker implements Listener {

@@ -22,6 +22,4 @@ public interface Datastore {
    * @return A {@link Settings}.
    */
   Settings getSettings(UUID uuid);
-
-  void shutdown();
 }

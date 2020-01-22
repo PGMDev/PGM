@@ -25,15 +25,14 @@ import tc.oc.chunk.NullChunkGenerator;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.map.MapContext;
-import tc.oc.pgm.api.map.MapSource;
-import tc.oc.pgm.api.map.exception.MapNotFoundException;
+import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.server.Scheduler;
+import tc.oc.util.ClassLogger;
 import tc.oc.util.FileUtils;
-import tc.oc.util.logging.ClassLogger;
 
 public class MatchManagerImpl implements MatchFactory, MatchManager {
 
@@ -85,10 +84,17 @@ public class MatchManagerImpl implements MatchFactory, MatchManager {
 
   @Override
   public CompletableFuture<Match> initMatch(MapContext map) {
-    return CompletableFuture.supplyAsync(() -> initMatchAsync(map));
+    return CompletableFuture.supplyAsync(
+        () -> {
+          try {
+            return initMatchAsync(map);
+          } catch (MapMissingException e) {
+            throw new RuntimeException(e);
+          }
+        });
   }
 
-  private Match initMatchAsync(MapContext map) throws MapNotFoundException {
+  private Match initMatchAsync(MapContext map) throws MapMissingException {
     checkNotNull(map);
     checkNotNull(map.getSource());
 
@@ -101,21 +107,24 @@ public class MatchManagerImpl implements MatchFactory, MatchManager {
       }
 
       if (!dir.mkdirs()) {
-        throw new IOException("Could not create directories for " + dir.getPath());
+        throw new IOException("Unable to mkdirs world directory");
       }
-
-      final MapSource source = map.getSource();
-      source.checkForUpdates();
-      source.downloadTo(dir);
     } catch (IOException e) {
-      throw new MapNotFoundException(map, "Could not download map files", e);
+      throw new MapMissingException(dir.getPath(), e.getMessage(), e);
+    }
+
+    try {
+      map.getSource().downloadTo(dir);
+    } catch (MapMissingException e) {
+      FileUtils.delete(dir); // Delete the directory if there is a partial download error
+      throw e;
     }
 
     final World world;
     try {
-      world = initWorld(name, map).get(TIMEOUT.getStandardSeconds(), TimeUnit.MINUTES);
+      world = initWorld(name, map).get(TIMEOUT.getStandardSeconds(), TimeUnit.SECONDS);
     } catch (Throwable t) {
-      throw new MapNotFoundException("Could not load world", t);
+      throw new MapMissingException(dir.getPath(), "Unable to create world", t);
     }
 
     final Match match = new MatchImpl(id, map, world);

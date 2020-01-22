@@ -87,9 +87,9 @@ import tc.oc.pgm.result.CompetitorVictoryCondition;
 import tc.oc.pgm.result.VictoryCondition;
 import tc.oc.server.Events;
 import tc.oc.server.Scheduler;
+import tc.oc.util.ClassLogger;
 import tc.oc.util.FileUtils;
 import tc.oc.util.collection.RankedSet;
-import tc.oc.util.logging.ClassLogger;
 import tc.oc.world.NMSHacks;
 
 public class MatchImpl implements Match {

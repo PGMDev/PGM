@@ -2,7 +2,7 @@ package tc.oc.pgm.api.map.factory;
 
 import java.util.Iterator;
 import tc.oc.pgm.api.map.MapSource;
-import tc.oc.pgm.api.map.exception.MapNotFoundException;
+import tc.oc.pgm.api.map.exception.MapMissingException;
 
 /** A thread-safe factory for creating {@link MapSource}s. */
 public interface MapSourceFactory {
@@ -14,9 +14,9 @@ public interface MapSourceFactory {
    * it wants to keep, otherwise it will be garbage collected.
    *
    * @return An iterator of new {@link MapSource}s.
-   * @throws MapNotFoundException If there is an issue discovering.
+   * @throws MapMissingException If there is an issue discovering.
    */
-  Iterator<? extends MapSource> loadNewSources() throws MapNotFoundException;
+  Iterator<? extends MapSource> loadNewSources() throws MapMissingException;
 
   /** Reset any caches so when {@link #loadNewSources()} is next called, it discovers everything. */
   void reset();

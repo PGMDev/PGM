@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Logger;
 import org.jdom2.Document;
+import org.jdom2.JDOMException;
 import org.jdom2.input.JDOMParseException;
 import org.jdom2.input.SAXBuilder;
 import tc.oc.pgm.api.Modules;
@@ -14,7 +15,8 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.MapSource;
-import tc.oc.pgm.api.map.exception.MapNotFoundException;
+import tc.oc.pgm.api.map.exception.MapException;
+import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.module.ModuleGraph;
@@ -29,8 +31,8 @@ import tc.oc.pgm.kits.LegacyKitParser;
 import tc.oc.pgm.regions.FeatureRegionParser;
 import tc.oc.pgm.regions.LegacyRegionParser;
 import tc.oc.pgm.regions.RegionParser;
+import tc.oc.util.ClassLogger;
 import tc.oc.util.Version;
-import tc.oc.util.logging.ClassLogger;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.SAXHandler;
 
@@ -67,7 +69,8 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
     }
   }
 
-  private void preLoad() throws MapNotFoundException, ModuleLoadException {
+  private void preLoad()
+      throws IOException, JDOMException, InvalidXMLException, MapMissingException {
     if (document != null && !source.checkForUpdates()) {
       return; // If a document is present and there are no updates, skip loading again
     }
@@ -75,51 +78,54 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
     try (final InputStream stream = source.getDocument()) {
       document = DOCUMENT_FACTORY.build(stream);
       document.setBaseURI(source.getId());
-      info = new MapInfoImpl(document.getRootElement());
-    } catch (IOException e) {
-      throw new MapNotFoundException(info, "Could not read document from " + source.getId(), e);
-    } catch (InvalidXMLException e) {
-      throw new ModuleLoadException(e);
-    } catch (JDOMParseException e) {
-      final InvalidXMLException cause = InvalidXMLException.fromJDOM(e, source.getId());
-      throw new ModuleLoadException(cause.getMessage(), cause);
-    } catch (Throwable t) {
-      throw new ModuleLoadException(
-          "Unhandled " + t.getClass().getName() + " from " + source.getId(), t);
     }
+
+    info = new MapInfoImpl(document.getRootElement());
   }
 
   @Override
-  public MapContext load() throws MapNotFoundException, ModuleLoadException {
-    preLoad();
+  public MapContext load() throws MapException {
     try {
-      loadAll();
-    } catch (ModuleLoadException e) {
-      unloadAll();
+      preLoad();
+      try {
+        loadAll();
+      } catch (ModuleLoadException e) {
+        if (e.getCause() instanceof InvalidXMLException) {
+          throw e.getCause();
+        }
+        throw e;
+      }
+      postLoad();
+    } catch (MapException e) {
       throw e;
+    } catch (IOException e) {
+      throw new MapException(source, info, "Unable to read map document", e);
+    } catch (ModuleLoadException | InvalidXMLException e) {
+      throw new MapException(source, info, e.getMessage(), e);
+    } catch (JDOMParseException e) {
+      final InvalidXMLException cause = InvalidXMLException.fromJDOM(e, source.getId());
+      throw new MapException(source, info, cause.getMessage(), cause);
+    } catch (Throwable t) {
+      throw new MapException(source, info, "Unhandled " + t.getClass().getName(), t);
     }
-    postLoad();
+
     return new MapContextImpl(info, source, getModules());
   }
 
-  private void postLoad() throws ModuleLoadException {
+  private void postLoad() throws InvalidXMLException {
     for (InvalidXMLException e : getFeatures().resolveReferences()) {
-      throw new ModuleLoadException(e);
+      throw e;
     }
 
     for (MapModule module : getModules()) {
-      try {
-        module.postParse(this, logger, document);
-      } catch (InvalidXMLException e) {
-        throw new ModuleLoadException(e);
-      }
+      module.postParse(this, logger, document);
     }
   }
 
   @Override
   public Version getProto() {
     if (info == null) {
-      throw new IllegalStateException("Tried to access map proto before info is loaded");
+      throw new IllegalStateException("Tried to access map proto before info was loaded");
     }
     return info.getProto();
   }
@@ -158,5 +164,15 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
       features = new FeatureDefinitionContext();
     }
     return features;
+  }
+
+  @Override
+  public void close() {
+    document = null;
+    info = null;
+    regions = null;
+    filters = null;
+    kits = null;
+    features = null;
   }
 }

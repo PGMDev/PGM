@@ -50,6 +50,14 @@ public class ClassMatchModule implements MatchModule, Listener {
     this.classesByName.addAll(this.classes.values());
   }
 
+  @Override
+  public void unload() {
+    classes.clear();
+    classesByName.clear();
+    selectedClasses.clear();
+    lastPlayedClass.clear();
+  }
+
   /**
    * Gets the class family.
    *

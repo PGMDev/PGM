@@ -1,10 +1,11 @@
 package tc.oc.pgm.teams;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
@@ -14,6 +15,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
@@ -26,6 +28,7 @@ import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
 public class TeamModule implements MapModule<TeamMatchModule> {
+  private static final Map<Integer, Collection<MapTag>> TAGS = new ConcurrentHashMap<>();
 
   private final Set<TeamFactory> teams;
   private final @Nullable Boolean requireEven;
@@ -33,6 +36,23 @@ public class TeamModule implements MapModule<TeamMatchModule> {
   public TeamModule(Set<TeamFactory> teams, @Nullable Boolean requireEven) {
     this.teams = teams;
     this.requireEven = requireEven;
+  }
+
+  @Override
+  public Collection<MapTag> getTags() {
+    final int id = teams.size();
+    Collection<MapTag> tags = TAGS.get(id);
+    if (tags == null) {
+      tags =
+          ImmutableList.of(
+              MapTag.create(
+                  id + "team" + (id == 1 ? "" : "s"),
+                  id + " Team" + (id == 1 ? "" : "s"),
+                  false,
+                  true));
+      TAGS.put(id, tags);
+    }
+    return tags;
   }
 
   @Override
@@ -57,11 +77,6 @@ public class TeamModule implements MapModule<TeamMatchModule> {
 
       return teamFactories.isEmpty() ? null : new TeamModule(teamFactories, requireEven);
     }
-  }
-
-  @Override
-  public String toString() {
-    return getClass().getSimpleName() + "{teams=[" + Joiner.on(", ").join(teams) + "]}";
   }
 
   @Override

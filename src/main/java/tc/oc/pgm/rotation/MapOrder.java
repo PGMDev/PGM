@@ -8,6 +8,7 @@ import tc.oc.pgm.api.match.Match;
  * server should play.
  */
 public interface MapOrder {
+
   /**
    * Returns next map to play, and removes it from the queue.
    *

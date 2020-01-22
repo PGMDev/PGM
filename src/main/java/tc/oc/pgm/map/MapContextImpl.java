@@ -10,7 +10,6 @@ import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapSource;
-import tc.oc.pgm.api.map.Taggable;
 import tc.oc.pgm.ffa.FreeForAllModule;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamModule;
@@ -26,9 +25,7 @@ public class MapContextImpl extends MapInfoImpl implements MapContext {
     this.modules = ImmutableList.copyOf(checkNotNull(modules));
 
     for (MapModule module : this.modules) {
-      if (module instanceof Taggable) {
-        this.tags.addAll(((Taggable) module).getTags());
-      }
+      this.tags.addAll(module.getTags());
 
       if (module instanceof TeamModule) {
         this.players.clear();

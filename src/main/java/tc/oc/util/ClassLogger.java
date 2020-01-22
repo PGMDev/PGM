@@ -1,4 +1,4 @@
-package tc.oc.util.logging;
+package tc.oc.util;
 
 import java.util.Objects;
 import java.util.logging.Level;
@@ -17,9 +17,7 @@ import tc.oc.util.collection.ArrayUtils;
  * <p>It also does some horrible things to bypass the logging mess that Bukkit creates.
  *
  * <p>Instances of this class should ONLY be acquired by calling the static {@link #get} methods.
- * These will deduplicate loggers by name, and register them with the java.world.logging subsystem.
- *
- * <p>
+ * These will deduplicate loggers by name, and register them with the java.util.logging subsystem.
  */
 public class ClassLogger extends Logger {
 
@@ -115,10 +113,6 @@ public class ClassLogger extends Logger {
     this.setLevel(null);
   }
 
-  public Level getEffectiveLevel() {
-    return Logging.getEffectiveLevel(this);
-  }
-
   @Override
   public void log(LogRecord record) {
     record.setMessage(this.prefix + record.getMessage());
@@ -127,7 +121,7 @@ public class ClassLogger extends Logger {
     // Check the level ourselves and then promote the record
     // to make sure it gets through.
     if (record.getLevel().intValue() < Level.INFO.intValue()
-        && record.getLevel().intValue() >= getEffectiveLevel().intValue()) {
+        && record.getLevel().intValue() >= this.getLevel().intValue()) {
 
       record.setLevel(Level.INFO);
     }

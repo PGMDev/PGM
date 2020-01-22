@@ -3,10 +3,11 @@ package tc.oc.pgm.api.map;
 import java.text.Normalizer;
 import java.util.Collection;
 import javax.annotation.Nullable;
+import tc.oc.named.Named;
 import tc.oc.util.Version;
 
 /** Essential information about a map. */
-public interface MapInfo extends Comparable<MapInfo>, Cloneable {
+public interface MapInfo extends Named, Comparable<MapInfo>, Cloneable {
 
   /**
    * Get a unique id for the map.
@@ -77,20 +78,11 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
   int getDifficulty();
 
   /**
-   * Get the genre or "game mode" for the map.
-   *
-   * <p>Used to override the default sidebar title.
-   *
-   * @return The genre.
-   */
-  String getGenre();
-
-  /**
    * Get a collection of "hash tags" used to describe the map.
    *
    * @return A collection of tags.
    */
-  Collection<String> getTags();
+  Collection<MapTag> getTags();
 
   /**
    * Get the maximum number of players that can participate on each team.
