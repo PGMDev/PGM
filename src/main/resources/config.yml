@@ -5,10 +5,9 @@
 # whole.  Map-specific configuration should be specified in the map folder.
 
 map:
-  default: true
   sources:
     - default
-    - plugins/PGM/maps/
+    - maps/
 
 map-pools:
   enabled: true

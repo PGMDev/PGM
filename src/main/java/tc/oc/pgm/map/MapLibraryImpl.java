@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
@@ -54,7 +54,7 @@ public class MapLibraryImpl implements MapLibrary {
   public MapLibraryImpl(Logger logger, Collection<MapSourceFactory> factories) {
     this.logger = checkNotNull(logger); // Logger should be visible in-game
     this.factories = new LinkedHashSet<>(checkNotNull(factories));
-    this.maps = Collections.synchronizedSortedMap(new TreeMap<>());
+    this.maps = new ConcurrentSkipListMap<>();
     this.failed = Collections.synchronizedSet(new HashSet<>());
   }
 
@@ -122,6 +122,7 @@ public class MapLibraryImpl implements MapLibrary {
     while (factories.hasNext()) {
       final MapSourceFactory factory = factories.next();
       try {
+        if (reset) factory.reset();
         sources.add(factory.loadNewSources());
       } catch (MapMissingException e) {
         factories.remove();

@@ -27,7 +27,6 @@ import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.map.Contributor;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapTag;
@@ -38,6 +37,13 @@ import tc.oc.util.components.ComponentUtils;
 import tc.oc.util.components.Components;
 
 public class MapCommands {
+
+  @Command(
+      aliases = {"loadnewmaps"},
+      desc = "Loads new maps and outputs any errors")
+  public static void loadNewMaps(MapLibrary library, @Switch('f') boolean force) {
+    library.loadNewMaps(force); // MapLibrary will handle sending output asynchronously
+  }
 
   @Command(
       aliases = {"maplist", "maps", "ml"},
@@ -152,13 +158,6 @@ public class MapCommands {
           new PersonalizedText(
               mapInfoLabel("command.map.mapInfo.proto"),
               new PersonalizedText(map.getProto().toString(), ChatColor.GOLD)));
-
-      if (map instanceof MapContext) {
-        audience.sendMessage(
-            new PersonalizedText(
-                mapInfoLabel("command.map.mapInfo.source"),
-                new PersonalizedText(((MapContext) map).getSource().getId(), ChatColor.GOLD)));
-      }
     }
 
     audience.sendMessage(createTagsComponent(map.getTags()));

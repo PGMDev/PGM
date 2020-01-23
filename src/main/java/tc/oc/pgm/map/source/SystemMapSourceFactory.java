@@ -10,10 +10,8 @@ import java.io.InputStream;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.exception.MapMissingException;
@@ -21,14 +19,11 @@ import tc.oc.util.FileUtils;
 
 public class SystemMapSourceFactory extends PathMapSourceFactory {
 
-  private final File dir;
-  private final int maxDepth;
+  protected final File dir;
 
-  public SystemMapSourceFactory(
-      String path, @Nullable Collection<String> excludes, @Nullable Integer maxDepth) {
-    super(path, excludes);
+  public SystemMapSourceFactory(String path) {
+    super(new File(checkNotNull(path)).getAbsoluteFile().getPath());
     this.dir = new File(path).getAbsoluteFile();
-    this.maxDepth = maxDepth == null ? Integer.MAX_VALUE : Math.max(1, maxDepth);
   }
 
   @Override
@@ -39,10 +34,13 @@ public class SystemMapSourceFactory extends PathMapSourceFactory {
   @Override
   protected Stream<String> loadAllPaths() throws IOException {
     if (!dir.exists() || !dir.isDirectory()) return Stream.empty();
-    return Files.walk(dir.toPath(), maxDepth, FileVisitOption.FOLLOW_LINKS).map(Path::toString);
+
+    return Files.walk(dir.toPath(), FileVisitOption.FOLLOW_LINKS)
+        .map(Path::toAbsolutePath)
+        .map(Path::toString);
   }
 
-  public static class SystemMapSource implements MapSource {
+  protected static class SystemMapSource implements MapSource {
 
     private final String dir;
     private final AtomicLong modified;

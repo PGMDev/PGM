@@ -2,10 +2,8 @@ package tc.oc.pgm.map.source;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.NavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -20,30 +18,18 @@ public abstract class PathMapSourceFactory implements MapSourceFactory {
   // Sources are held with weak reference because the callee is
   // responsible for holding a strong reference.
   private final NavigableMap<String, WeakReference<MapSource>> sources;
+  private final String path;
 
-  protected final String path;
-  protected final Collection<String> excludes;
-
-  protected PathMapSourceFactory(String path, @Nullable Collection<String> excludes) {
+  protected PathMapSourceFactory(String path) {
     this.sources = new ConcurrentSkipListMap<>();
     this.path = checkNotNull(path);
-    this.excludes =
-        excludes == null || excludes.isEmpty()
-            ? ImmutableList.of()
-            : ImmutableList.copyOf(excludes);
   }
 
   protected abstract MapSource loadSource(String dir);
 
   private Stream<MapSource> loadNewSource(@Nullable String path) {
-    if (path == null || sources.containsKey(path)) {
+    if (path == null || !path.startsWith(this.path) || sources.containsKey(path)) {
       return Stream.empty();
-    }
-
-    for (String exclude : excludes) {
-      if (path.startsWith(exclude)) {
-        return Stream.empty();
-      }
     }
 
     final int index = path.indexOf(MapSource.FILE);

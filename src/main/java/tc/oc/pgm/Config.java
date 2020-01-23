@@ -1,8 +1,8 @@
 package tc.oc.pgm;
 
 import com.google.common.collect.ImmutableList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -21,6 +21,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.pgm.events.ConfigLoadEvent;
+import tc.oc.pgm.map.source.DefaultMapSourceFactory;
 import tc.oc.pgm.map.source.SystemMapSourceFactory;
 
 public class Config {
@@ -40,27 +41,39 @@ public class Config {
     }
   }
 
-  public static class Maps {
-    public static List<MapSourceFactory> sources() {
-      final List<MapSourceFactory> sources = new LinkedList<>();
-      for (String source : getConfiguration().getStringList("map.sources")) {
-        if (source.equalsIgnoreCase("default")) {
-          // TODO: URLMapSource, DefaultMapSource
-        } else {
-          sources.add(new SystemMapSourceFactory(source, null, null));
+  public static class Maps implements Listener {
+    private static final Maps INSTANCE = new Maps();
+    private final Map<String, MapSourceFactory> factories = new LinkedHashMap<>();
+
+    @EventHandler
+    public void onConfigLoad(ConfigLoadEvent event) throws InvalidConfigurationException {
+      for (String source : event.getConfig().getStringList("map.sources")) {
+        final MapSourceFactory factory;
+        try {
+          factory =
+              source.equalsIgnoreCase("default")
+                  ? new DefaultMapSourceFactory()
+                  : new SystemMapSourceFactory(source);
+        } catch (Throwable t) {
+          throw new InvalidConfigurationException(t.getMessage(), t.getCause());
         }
+
+        factories.merge(
+            source,
+            factory,
+            (MapSourceFactory old, MapSourceFactory now) -> {
+              old.reset();
+              return now;
+            });
       }
-      return sources;
-    }
-  }
-
-  public static class AutoReload {
-    public static boolean enabled() {
-      return getConfiguration().getBoolean("map.auto-reload.enabled", true);
     }
 
-    public static boolean reloadWhenError() {
-      return getConfiguration().getBoolean("map.auto-reload.reload-when-error", false);
+    public static Maps get() {
+      return INSTANCE;
+    }
+
+    public Collection<MapSourceFactory> getFactories() {
+      return factories.values();
     }
   }
 

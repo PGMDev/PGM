@@ -59,7 +59,6 @@ import tc.oc.pgm.commands.GoalCommands;
 import tc.oc.pgm.commands.InventoryCommands;
 import tc.oc.pgm.commands.JoinCommands;
 import tc.oc.pgm.commands.MapCommands;
-import tc.oc.pgm.commands.MapDevCommands;
 import tc.oc.pgm.commands.MapPoolCommands;
 import tc.oc.pgm.commands.MatchCommands;
 import tc.oc.pgm.commands.ModeCommands;
@@ -134,14 +133,15 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
   public void onEnable() {
     PGM.set(this);
     Modules.registerAll();
+    Permissions.registerAll();
 
     final Server server = getServer();
-    Permissions.register(server.getPluginManager());
     server.getConsoleSender().addAttachment(this, Permissions.ALL.getName(), true);
 
     final Logger logger = getLogger();
     logger.setLevel(Config.Log.level());
 
+    registerEvents(Config.Maps.get());
     registerEvents(Config.PlayerList.get());
     registerEvents(Config.Prefixes.get());
     registerEvents(Config.Experiments.get());
@@ -167,21 +167,23 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
     gameLogger.addHandler(new InGameHandler());
     gameLogger.setParent(logger);
 
-    mapLibrary = new MapLibraryImpl(gameLogger, Config.Maps.sources());
+    mapLibrary = new MapLibraryImpl(gameLogger, Config.Maps.get().getFactories());
     try {
-      mapLibrary.loadNewMaps(false).get(10, TimeUnit.SECONDS);
+      mapLibrary.loadNewMaps(false).get(30, TimeUnit.SECONDS);
     } catch (InterruptedException | TimeoutException e) {
-      if (!mapLibrary.getMaps().hasNext()) {
-        shutdown("Failed to load at least 1 map before timeout", null);
-        return;
-      }
+      // No-op
     } catch (ExecutionException e) {
       if (!mapLibrary.getMaps().hasNext()) {
         shutdown("Failed to load any maps", e.getCause());
         return;
       } else {
-        logger.log(Level.WARNING, "Could not build some maps", e.getCause());
+        logger.log(Level.WARNING, "Could not load some maps", e.getCause());
       }
+    }
+
+    if (!mapLibrary.getMaps().hasNext()) {
+      shutdown("Failed to load at least 1 map before timeout", null);
+      return;
     }
 
     matchManager = new MatchManagerImpl(logger, server);
@@ -368,7 +370,6 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
     node.registerCommands(new ModerationCommands());
     node.registerCommands(new ObserverCommands());
     node.registerCommands(new MapPoolCommands());
-    node.registerCommands(new MapDevCommands());
     node.registerCommands(new SettingCommands());
     node.registerCommands(new ModerationCommands());
 
@@ -402,7 +403,7 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
     @Override
     public void publish(LogRecord record) {
       final String message = format(record);
-      if (message == null) {
+      if (message == null) { // Escalate to plugin logger when unable to format the error
         getLogger().log(record.getLevel(), record.getMessage(), record.getThrown());
       } else {
         Bukkit.broadcast(message, Permissions.DEBUG);
