@@ -111,7 +111,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
     }
 
     if (auxiliary.size() == 1) {
-      title += (title.isEmpty() ? "" : "& ") + auxiliary.get(0);
+      title += (title.isEmpty() ? "" : " & ") + auxiliary.get(0);
     } else if (gamemode.isEmpty() && auxiliary.size() == 2) {
       title = auxiliary.get(0) + " & " + auxiliary.get(1);
     }

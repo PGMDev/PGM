@@ -35,7 +35,7 @@ import tc.oc.xml.Node;
 
 public class ScoreModule implements MapModule {
   private static final MapTag SCORE_TAG = MapTag.create("deathmatch", "Deathmatch", true, false);
-  private static final MapTag BOX_TAG = MapTag.create("scorebox", "Scorebox", true, true);
+  private static final MapTag BOX_TAG = MapTag.create("scorebox", "Scorebox", false, true);
 
   public ScoreModule(@Nonnull ScoreConfig config, @Nonnull Set<ScoreBoxFactory> scoreBoxFactories) {
     Preconditions.checkNotNull(config, "score config");

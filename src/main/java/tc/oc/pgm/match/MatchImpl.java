@@ -3,6 +3,7 @@ package tc.oc.pgm.match;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -146,7 +147,7 @@ public class MatchImpl implements Match {
     this.tick = new AtomicReference<>(null);
     this.countdown = new SingleCountdownContext(this, logger);
     this.query = new MatchQuery(null, this);
-    this.players = new HashMap<>();
+    this.players = new ConcurrentHashMap<>();
     this.partyChanges = new WeakHashMap<>();
     this.parties = new LinkedHashSet<>();
     this.victory = new LinkedHashSet<>();
@@ -391,7 +392,7 @@ public class MatchImpl implements Match {
 
   @Override
   public Collection<MatchPlayer> getPlayers() {
-    return Collections.unmodifiableCollection(players.values());
+    return ImmutableList.copyOf(players.values());
   }
 
   @Override
@@ -582,7 +583,7 @@ public class MatchImpl implements Match {
 
   @Override
   public Collection<VictoryCondition> getVictoryConditions() {
-    return Collections.unmodifiableCollection(victory);
+    return ImmutableList.copyOf(victory);
   }
 
   @Override
@@ -611,12 +612,12 @@ public class MatchImpl implements Match {
 
   @Override
   public Collection<Party> getParties() {
-    return Collections.unmodifiableCollection(parties);
+    return ImmutableList.copyOf(parties);
   }
 
   @Override
   public Collection<Competitor> getCompetitors() {
-    return Collections.unmodifiableCollection(competitors);
+    return ImmutableList.copyOf(competitors);
   }
 
   @Override

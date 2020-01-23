@@ -21,7 +21,7 @@ import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 
-public class ControlPointModule implements MapModule {
+public class ControlPointModule implements MapModule<ControlPointMatchModule> {
 
   private static final Collection<MapTag> TAGS =
       ImmutableList.of(MapTag.create("controlpoint", "Control the Point", true, false));
@@ -32,7 +32,12 @@ public class ControlPointModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public Collection<Class<? extends MatchModule>> getSoftDependencies() {
+    return ImmutableList.of(GoalMatchModule.class);
+  }
+
+  @Override
+  public ControlPointMatchModule createMatchModule(Match match) {
     List<ControlPoint> controlPoints = new LinkedList<>();
 
     for (ControlPointDefinition definition : this.definitions) {
