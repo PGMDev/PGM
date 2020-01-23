@@ -48,20 +48,26 @@ public class MapCommands {
   @Command(
       aliases = {"maplist", "maps", "ml"},
       desc = "Shows the maps that are currently loaded",
-      usage = "[-a <author>] [-p <page>] [[!]#<maptag>...]",
+      usage = "[-a <author>] [-p <page>] [-# <tag1>,<tag2>]",
       help =
           "Shows all the maps that are currently loaded including ones that are not in the rotation.")
   public static void maplist(
       Audience audience,
       CommandSender sender,
       MapLibrary library,
+      @Fallback(Type.NULL) @Switch('t') String tags,
       @Fallback(Type.NULL) @Switch('a') String author,
       @Fallback(Type.NULL) @Switch('p') Integer page)
       throws CommandException {
     if (page == null) page = 1;
 
     Stream<MapInfo> search = Sets.newHashSet(library.getMaps()).stream();
-    // FIXME: Add tag support again
+    if (tags != null) {
+      final Set<String> tagSet =
+          Stream.of(tags.split(",")).map(String::trim).collect(Collectors.toSet());
+      search = search.filter(map -> matchesTags(map, tagSet));
+    }
+
     if (author != null) {
       search = search.filter(map -> matchesAuthor(map, author));
     }
@@ -82,6 +88,16 @@ public class MapCommands {
         return (index + 1) + ". " + map.getStyledName(NameStyle.FANCY).toLegacyText();
       }
     }.display(audience, ImmutableSortedSet.copyOf(maps), page);
+  }
+
+  private static boolean matchesTags(MapInfo map, Set<String> tags) {
+    if (checkNotNull(tags).isEmpty()) return true;
+    for (MapTag tag : checkNotNull(map).getTags()) {
+      if (tags.contains(tag.getId())) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private static boolean matchesAuthor(MapInfo map, String query) {
@@ -173,11 +189,11 @@ public class MapCommands {
         result.extra(Components.space());
       }
 
-      String mapTag = mapTags[i].toString();
+      String mapTag = mapTags[i].getId();
       Component component =
-          new PersonalizedText(mapTag, ChatColor.GOLD)
+          new PersonalizedText("#" + mapTag, ChatColor.GOLD)
               .bold(false)
-              .clickEvent(ClickEvent.Action.RUN_COMMAND, "/maps " + mapTag)
+              .clickEvent(ClickEvent.Action.RUN_COMMAND, "/maps -t " + mapTag)
               .hoverEvent(
                   HoverEvent.Action.SHOW_TEXT,
                   new PersonalizedTranslatable("command.map.mapTag.hover", mapTag).render());

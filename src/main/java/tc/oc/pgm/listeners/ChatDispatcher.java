@@ -4,10 +4,13 @@ import app.ashcon.intake.Command;
 import app.ashcon.intake.argument.ArgumentException;
 import app.ashcon.intake.parametric.annotation.Text;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -29,6 +32,7 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.commands.SettingCommands;
 import tc.oc.pgm.ffa.Tribute;
+import tc.oc.util.StringUtils;
 import tc.oc.util.components.Components;
 import tc.oc.world.OnlinePlayerMapAdapter;
 
@@ -158,6 +162,16 @@ public class ChatDispatcher implements Listener {
     sendDirect(match, sender, receiver.getBukkit(), message);
   }
 
+  private static MatchPlayer getApproximatePlayer(Match match, String query, CommandSender sender) {
+    return StringUtils.bestFuzzyMatch(
+        query,
+        match.getPlayers().stream()
+            .collect(
+                Collectors.toMap(
+                    player -> player.getBukkit().getName(sender), Function.identity())),
+        0.75);
+  }
+
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
   public void onChat(AsyncPlayerChatEvent event) {
     event.setCancelled(true);
@@ -168,11 +182,10 @@ public class ChatDispatcher implements Listener {
 
       if (message.startsWith("!")) {
         sendGlobal(player.getMatch(), player, message.substring(1));
-        // FIXME: msg completion performance
-        /*} else if (message.startsWith("@")) {
+      } else if (message.startsWith("@")) {
         final String target = message.substring(1, message.indexOf(" "));
-        final MatchPlayer receiver = manager.findPlayer(target, player.getBukkit());
-
+        final MatchPlayer receiver =
+            getApproximatePlayer(player.getMatch(), target, player.getBukkit());
         if (receiver == null) {
           player.sendWarning("Could not find player '" + target + "' to send a message", true);
         } else {
@@ -181,7 +194,7 @@ public class ChatDispatcher implements Listener {
               player,
               receiver.getBukkit(),
               message.replace(target, "").substring(1));
-        }*/
+        }
       } else {
         sendDefault(player.getMatch(), player, event.getMessage());
       }
