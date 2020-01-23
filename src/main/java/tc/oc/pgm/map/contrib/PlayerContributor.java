@@ -19,6 +19,7 @@ import tc.oc.pgm.api.player.Username;
 
 public class PlayerContributor implements Contributor {
 
+  private static final String UNKNOWN = "Unknown";
   private final UUID id;
   private final @Nullable String contribution;
   private @Nullable String name;
@@ -42,6 +43,9 @@ public class PlayerContributor implements Contributor {
     if (name == null) {
       name = getUsername().getName();
     }
+    if (name == null) {
+      return UNKNOWN;
+    }
     return name;
   }
 
@@ -58,8 +62,9 @@ public class PlayerContributor implements Contributor {
   @Override
   public Component getStyledName(NameStyle style) {
     final String name = getName();
-    if (name == null) {
-      return new PersonalizedText("Unknown", ChatColor.DARK_AQUA);
+    if (name
+        == UNKNOWN) { // Double equals is intentional so a player with that name does not conflict
+      return new PersonalizedText(UNKNOWN, ChatColor.DARK_AQUA);
     }
     return new PersonalizedPlayer(new RealIdentity(id, name), style);
   }
