@@ -82,7 +82,7 @@ public class CycleCountdown extends MatchCountdown {
             if (err != null) throw err;
             PGM.get().getMatchFactory().moveMatch(match, next);
           } catch (Throwable t) {
-            PGM.get().getLogger().log(Level.SEVERE, "Unable to cycle match", t);
+            PGM.get().getGameLogger().log(Level.SEVERE, "Unable to cycle match", t);
             nextMatch = null;
           }
         });

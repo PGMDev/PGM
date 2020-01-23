@@ -91,6 +91,11 @@ public interface MapInfo extends Named, Comparable<MapInfo>, Cloneable {
    */
   Collection<Integer> getMaxPlayers();
 
+  /**
+   * Create an immutable copy of this info.
+   *
+   * @return A cloned {@link MapInfo}.
+   */
   MapInfo clone();
 
   @Override

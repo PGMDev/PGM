@@ -74,12 +74,15 @@ public class UsernameResolver {
       String name = null;
       try {
         name = resolveSync(id);
-      } catch (IOException e) {
-        errors.put(id, e);
+      } catch (Throwable t) {
+        errors.put(id, t);
       } finally {
         final Consumer<String> listener = QUEUE.remove(id);
         if (listener != null) {
-          listener.accept(name);
+          try {
+            listener.accept(name);
+          } catch (Throwable t) {
+          }
         }
       }
     }

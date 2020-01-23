@@ -17,10 +17,6 @@ public class MapException extends Exception {
     this(location, message, null);
   }
 
-  public MapException(String location, Throwable cause) {
-    this(location, cause.getMessage(), cause);
-  }
-
   public MapException(String location, String message, @Nullable Throwable cause) {
     this(location, null, message, cause);
   }

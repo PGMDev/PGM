@@ -1,7 +1,6 @@
 package tc.oc.pgm;
 
 import com.google.common.collect.ImmutableList;
-import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +21,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.pgm.events.ConfigLoadEvent;
-import tc.oc.pgm.map.source.FileMapSourceFactory;
+import tc.oc.pgm.map.source.SystemMapSourceFactory;
 
 public class Config {
 
@@ -48,7 +47,7 @@ public class Config {
         if (source.equalsIgnoreCase("default")) {
           // TODO: URLMapSource, DefaultMapSource
         } else {
-          sources.add(new FileMapSourceFactory(new File(source).getAbsoluteFile()));
+          sources.add(new SystemMapSourceFactory(source, null, null));
         }
       }
       return sources;

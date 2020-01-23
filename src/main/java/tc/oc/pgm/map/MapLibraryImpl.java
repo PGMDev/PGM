@@ -3,11 +3,13 @@ package tc.oc.pgm.map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Sets;
 import java.lang.ref.SoftReference;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
+import net.md_5.bungee.api.ChatColor;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
@@ -27,12 +30,11 @@ import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.pgm.util.UsernameResolver;
-import tc.oc.util.ClassLogger;
 import tc.oc.util.StringUtils;
 
 public class MapLibraryImpl implements MapLibrary {
 
-  private final Logger logger; // Logger is visible in-game
+  private final Logger logger;
   private final Set<MapSourceFactory> factories;
   private final SortedMap<String, MapEntry> maps;
   private final Set<MapSource> failed;
@@ -50,8 +52,8 @@ public class MapLibraryImpl implements MapLibrary {
   }
 
   public MapLibraryImpl(Logger logger, Collection<MapSourceFactory> factories) {
-    this.logger = ClassLogger.get(checkNotNull(logger), getClass());
-    this.factories = Collections.synchronizedSet(new HashSet<>(checkNotNull(factories)));
+    this.logger = checkNotNull(logger); // Logger should be visible in-game
+    this.factories = new LinkedHashSet<>(checkNotNull(factories));
     this.maps = Collections.synchronizedSortedMap(new TreeMap<>());
     this.failed = Collections.synchronizedSet(new HashSet<>());
   }
@@ -73,6 +75,34 @@ public class MapLibraryImpl implements MapLibrary {
     return maps.values().stream().map(entry -> entry.info).iterator();
   }
 
+  private void logMapError(MapException err) {
+    logger.log(Level.WARNING, err.getMessage(), err);
+  }
+
+  private void logMapSuccess(int fail, int ok) {
+    fail = failed.size() - fail;
+    ok = maps.size() - ok;
+
+    if (fail <= 0 && ok <= 0) {
+      logger.info("No new maps found");
+    } else if (fail <= 0) {
+      logger.info("Loaded " + ChatColor.YELLOW + ok + ChatColor.RESET + " new maps");
+    } else if (ok <= 0) {
+      logger.info("Failed to load " + ChatColor.YELLOW + fail + ChatColor.RESET + " maps");
+    } else {
+      logger.info(
+          "Loaded "
+              + ChatColor.YELLOW
+              + ok
+              + ChatColor.RESET
+              + " new maps, failed to load "
+              + ChatColor.YELLOW
+              + fail
+              + ChatColor.RESET
+              + " maps");
+    }
+  }
+
   @Override
   public CompletableFuture<?> loadNewMaps(boolean reset) {
     final List<Iterator<? extends MapSource>> sources = new LinkedList<>();
@@ -84,6 +114,9 @@ public class MapLibraryImpl implements MapLibrary {
       sources.add(failed.iterator());
     }
 
+    final int fail = failed.size();
+    final int ok = reset ? 0 : maps.size();
+
     // Discover new maps
     final Iterator<MapSourceFactory> factories = this.factories.iterator();
     while (factories.hasNext()) {
@@ -92,11 +125,11 @@ public class MapLibraryImpl implements MapLibrary {
         sources.add(factory.loadNewSources());
       } catch (MapMissingException e) {
         factories.remove();
-        logger.log(Level.WARNING, "Skipped source: " + factory, e);
+        logMapError(e);
       }
     }
 
-    // Reload existing maps that changed
+    // Reload existing maps that have updates
     final Iterator<Map.Entry<String, MapEntry>> maps = this.maps.entrySet().iterator();
     while (maps.hasNext()) {
       final MapEntry entry = maps.next().getValue();
@@ -106,14 +139,16 @@ public class MapLibraryImpl implements MapLibrary {
         }
       } catch (MapMissingException e) {
         maps.remove();
-        logger.log(Level.WARNING, "Missing map: " + entry.info.getId());
+        logMapError(e);
       }
     }
 
     return CompletableFuture.runAsync(
             () ->
-                Iterators.concat(sources.iterator())
-                    .forEachRemaining(source -> loadMapSafe(source, null)))
+                Sets.newHashSet(Iterators.concat(sources.iterator()))
+                    .parallelStream()
+                    .forEach(source -> loadMapSafe(source, null)))
+        .thenRun(() -> logMapSuccess(fail, ok))
         .thenRun(UsernameResolver::resolveAll);
   }
 
@@ -123,15 +158,22 @@ public class MapLibraryImpl implements MapLibrary {
         () -> {
           final MapEntry entry = maps.get(id);
           if (entry == null) {
-            throw new IllegalArgumentException("Unable to find map: " + id);
+            throw new RuntimeException(
+                new MapMissingException(id, "Unable to find map from id (was it deleted?)"));
           }
 
           final MapContext context = entry.context.get();
-          if (context == null) {
-            return loadMapSafe(entry.source, entry.info.getId());
+          try {
+            if (context != null && !entry.source.checkForUpdates()) {
+              return context;
+            }
+          } catch (MapMissingException e) {
+            failed.remove(entry.source);
+            maps.remove(id);
+            throw new RuntimeException(e);
           }
 
-          return context;
+          return loadMapSafe(entry.source, entry.info.getId());
         });
   }
 
@@ -141,28 +183,30 @@ public class MapLibraryImpl implements MapLibrary {
       context = factory.load();
     } catch (MapMissingException e) {
       failed.remove(source);
-      maps.remove(mapId);
+      if (mapId != null) maps.remove(mapId);
       throw e;
     } catch (MapException e) {
       failed.add(source);
       throw e;
-    } catch (Exception e) {
-      throw new MapException("Unhandled " + e.getClass().getName(), e);
+    } catch (Throwable t) {
+      throw new MapException(
+          source,
+          null,
+          "Unhandled " + t.getClass().getName() + ": " + t.getMessage(),
+          t.getCause());
     }
 
     maps.put(context.getId(), new MapEntry(source, context.clone(), context));
+    failed.remove(source);
+
     return context;
   }
 
   private @Nullable MapContext loadMapSafe(MapSource source, @Nullable String mapId) {
     try {
-      final MapContext context = loadMap(source, mapId);
-      logger.log(Level.INFO, (mapId == null ? "Loaded map: " : "Reloaded map: ") + context.getId());
-      return context;
-    } catch (MapMissingException e) {
-      logger.log(Level.WARNING, "Missing map: " + (mapId == null ? source.getId() : mapId), e);
+      return loadMap(source, mapId);
     } catch (MapException e) {
-      logger.log(Level.WARNING, "Skipped map: " + (mapId == null ? source.getId() : mapId), e);
+      logMapError(e);
     }
     return null;
   }

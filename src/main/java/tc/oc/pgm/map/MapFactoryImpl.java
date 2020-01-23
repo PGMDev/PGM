@@ -39,11 +39,13 @@ import tc.oc.xml.SAXHandler;
 public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? extends MapModule>>
     implements MapFactory {
 
-  private static final SAXBuilder DOCUMENT_FACTORY = new SAXBuilder();
-
-  static {
-    DOCUMENT_FACTORY.setSAXHandlerFactory(SAXHandler.FACTORY);
-  }
+  private static final ThreadLocal<SAXBuilder> DOCUMENT_FACTORY =
+      ThreadLocal.withInitial(
+          () -> {
+            final SAXBuilder builder = new SAXBuilder();
+            builder.setSAXHandlerFactory(SAXHandler.FACTORY);
+            return builder;
+          });
 
   private final Logger logger;
   private final MapSource source;
@@ -76,7 +78,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
     }
 
     try (final InputStream stream = source.getDocument()) {
-      document = DOCUMENT_FACTORY.build(stream);
+      document = DOCUMENT_FACTORY.get().build(stream);
       document.setBaseURI(source.getId());
     }
 

@@ -9,8 +9,12 @@ public class ModuleLoadException extends RuntimeException {
   private final @Nullable Class<? extends Module> key;
 
   public ModuleLoadException(Class<? extends Module> key, String message, Throwable cause) {
-    super(key != null ? key.getSimpleName() + " failed to load: " + message : message, cause);
+    super(message, cause);
     this.key = key;
+  }
+
+  public @Nullable Class<? extends Module> getModule() {
+    return key;
   }
 
   public ModuleLoadException(Class<? extends Module> key, String message) {

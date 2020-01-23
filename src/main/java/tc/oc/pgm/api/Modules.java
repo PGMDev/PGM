@@ -4,11 +4,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.Nullable;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
-import tc.oc.pgm.api.module.ModuleFactory;
 import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.blitz.BlitzModule;
 import tc.oc.pgm.blockdrops.BlockDropsMatchModule;
@@ -127,33 +127,18 @@ public interface Modules {
   Map<Class<? extends MapModule>, Class<? extends MatchModule>> MAP_TO_MATCH =
       new ConcurrentHashMap<>();
 
-  static void register(Class<? extends MatchModule> match, MatchModuleFactory factory) {
-    register(null, match, factory);
+  static <M extends MatchModule> void register(Class<M> match, MatchModuleFactory<M> factory) {
+    if (MATCH.containsKey(checkNotNull(match)))
+      throw new IllegalArgumentException(match.getSimpleName() + " was registered twice");
+    MATCH.put(match, checkNotNull(factory));
   }
 
-  static void register(
-      Class<? extends MapModule> map, Class<? extends MatchModule> match, ModuleFactory factory) {
-    checkNotNull(factory);
-    if (map == null) {
-      if (!(factory instanceof MatchModuleFactory)) {
-        throw new IllegalArgumentException(
-            factory.getClass().getSimpleName()
-                + " is not a "
-                + MatchModuleFactory.class.getSimpleName());
-      }
-      MATCH.put(match, (MatchModuleFactory<? extends MatchModule>) factory);
-    } else {
-      if (!(factory instanceof MapModuleFactory)) {
-        throw new IllegalArgumentException(
-            factory.getClass().getSimpleName()
-                + " is not a "
-                + MapModuleFactory.class.getSimpleName());
-      }
-      MAP.put(map, (MapModuleFactory<? extends MapModule>) factory);
-      if (match != null) {
-        MAP_TO_MATCH.put(map, match);
-      }
-    }
+  static <M extends MatchModule, N extends MapModule<M>> void register(
+      Class<N> map, @Nullable Class<M> match, MapModuleFactory<N> factory) {
+    if (MAP.containsKey(checkNotNull(map)) || MAP_TO_MATCH.containsKey(map))
+      throw new IllegalArgumentException(map.getSimpleName() + " was registered twice");
+    MAP.put(map, checkNotNull(factory));
+    if (match != null) MAP_TO_MATCH.put(map, match);
   }
 
   static void registerAll() {

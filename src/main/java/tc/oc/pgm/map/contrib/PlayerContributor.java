@@ -34,7 +34,7 @@ public class PlayerContributor implements Contributor {
   }
 
   public Username getUsername() {
-    return PGM.get().getDatastoreCache().getUsername(id);
+    return PGM.get().getDatastore().getUsername(id);
   }
 
   @Override

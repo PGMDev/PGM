@@ -5,6 +5,18 @@ import app.ashcon.intake.bukkit.graph.BasicBukkitCommandGraph;
 import app.ashcon.intake.fluent.DispatcherNode;
 import app.ashcon.intake.parametric.AbstractModule;
 import app.ashcon.intake.parametric.provider.EnumProvider;
+import java.io.File;
+import java.sql.SQLException;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
@@ -33,6 +45,7 @@ import tc.oc.pgm.api.map.exception.MapException;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.factory.MatchFactory;
+import tc.oc.pgm.api.module.Module;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
@@ -91,23 +104,10 @@ import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.xml.InvalidXMLException;
 
-import javax.annotation.Nullable;
-import java.io.File;
-import java.sql.SQLException;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
-
 public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, Listener {
 
   private Logger gameLogger;
   private Datastore datastore;
-  private Datastore datastoreCache;
   private MapLibrary mapLibrary;
   private MatchFactory matchFactory;
   private MatchManager matchManager;
@@ -156,7 +156,7 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
 
     try {
       datastore = new DatastoreImpl(new File(getDataFolder(), "pgm.db"));
-      datastoreCache = new DatastoreCacheImpl(datastore);
+      datastore = new DatastoreCacheImpl(datastore);
     } catch (SQLException e) {
       shutdown("Failed to initialize SQL database", e);
       return;
@@ -236,7 +236,6 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
     if (matchTabManager != null) matchTabManager.disable();
     if (matchManager != null) matchManager.getMatches().iterator().forEachRemaining(Match::unload);
     datastore = null;
-    datastoreCache = null;
     mapLibrary = null;
     matchManager = null;
     matchTabManager = null;
@@ -273,11 +272,6 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
   @Override
   public Datastore getDatastore() {
     return datastore;
-  }
-
-  @Override
-  public Datastore getDatastoreCache() {
-    return datastoreCache;
   }
 
   @Override
@@ -404,45 +398,54 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
   }
 
   private class InGameHandler extends Handler {
-    // TODO: Keep track of errors and allow for pagination and clearing
 
     @Override
     public void publish(LogRecord record) {
-      Bukkit.broadcast(format(record), Permissions.DEBUG);
+      final String message = format(record);
+      if (message == null) {
+        getLogger().log(record.getLevel(), record.getMessage(), record.getThrown());
+      } else {
+        Bukkit.broadcast(message, Permissions.DEBUG);
+      }
     }
 
     private String format(LogRecord record) {
       final Throwable thrown = record.getThrown();
-      if (thrown == null) return record.getMessage();
-
-      final MapException missingErr = tryException(MapException.class, thrown);
-      if (missingErr != null) {
-        final MapInfo map = missingErr.getMap();
-        return format(
-            map == null ? null : map.getId(), missingErr.getMessage(), missingErr.getCause());
+      if (thrown == null) {
+        return record.getMessage();
       }
 
-      final InvalidXMLException mapErr = tryException(InvalidXMLException.class, thrown);
+      final InvalidXMLException xmlErr = tryException(InvalidXMLException.class, thrown);
+      if (xmlErr != null) {
+        return format(xmlErr.getFullLocation(), xmlErr.getMessage(), xmlErr.getCause());
+      }
+
+      final MapException mapErr = tryException(MapException.class, thrown);
       if (mapErr != null) {
-        return format(mapErr.getFullLocation(), mapErr.getMessage(), mapErr.getCause());
+        return format(mapErr.getLocation(), mapErr.getMessage(), mapErr.getCause());
       }
 
       final ModuleLoadException moduleErr = tryException(ModuleLoadException.class, thrown);
       if (moduleErr != null) {
-        return format(null, moduleErr.getMessage(), moduleErr.getCause());
+        final Class<? extends Module> module = moduleErr.getModule();
+        return format(
+            (module == null ? ModuleLoadException.class : module).getSimpleName(),
+            moduleErr.getMessage(),
+            moduleErr.getCause());
       }
 
-      final StackTraceElement element = thrown.getStackTrace()[0];
-      return format(
-          element.getFileName() + " @ " + element.getLineNumber(),
-          thrown.getMessage(),
-          thrown.getCause());
+      return null;
     }
 
     private String format(
         @Nullable String location, @Nullable String message, @Nullable Throwable cause) {
-      if (location == null) location = "<unknown location>";
+      if (cause != null && Objects.equals(message, cause.getMessage())) cause = null;
       if (message == null) message = "<unknown message>";
+      if (location == null) {
+        location = "<unknown location>";
+      } else {
+        location = location.replace(System.getProperty("user.dir"), "<home>");
+      }
 
       return ChatColor.AQUA
           + location
@@ -458,9 +461,7 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
     }
 
     @Override
-    public void flush() {
-      // TODO: clear errors
-    }
+    public void flush() {}
 
     @Override
     public void close() throws SecurityException {}

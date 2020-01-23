@@ -21,8 +21,6 @@ public interface PGM extends Plugin {
 
   Datastore getDatastore();
 
-  Datastore getDatastoreCache();
-
   MatchFactory getMatchFactory();
 
   MatchManager getMatchManager();
