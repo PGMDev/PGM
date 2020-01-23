@@ -7,6 +7,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -18,6 +19,7 @@ import org.bukkit.event.server.ServerListPingEvent;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
@@ -112,16 +114,15 @@ public class ServerPingDataListener implements Listener {
     checkNotNull(map);
     checkNotNull(jsonObject);
 
-    jsonObject.addProperty("slug", map.getId());
+    jsonObject.addProperty("id", map.getId());
     jsonObject.addProperty("name", map.getName());
     jsonObject.addProperty("version", map.getVersion().toString());
     jsonObject.addProperty("objective", map.getDescription());
 
     JsonArray tags = new JsonArray();
-    // FIXME: map tags
-    /*for (MapTag mapTag : persistentContext.getMapTags()) {
-      tags.add(new JsonPrimitive(mapTag.getName()));
-    }*/
+    for (MapTag mapTag : map.getTags()) {
+      tags.add(new JsonPrimitive(mapTag.getId()));
+    }
     if (tags.iterator().hasNext()) {
       jsonObject.add("tags", tags);
     }

@@ -36,7 +36,6 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.RegisteredListener;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
@@ -310,28 +309,10 @@ public class MatchImpl implements Match {
     }
   }
 
-  private class WeakEventExecutor implements EventExecutor {
-    private final WeakReference<RegisteredListener> listener;
-
-    private WeakEventExecutor(RegisteredListener listener) {
-      this.listener = new WeakReference<>(checkNotNull(listener));
-    }
-
-    @Override
-    public void execute(Listener other, Event event) throws EventException {
-      if (((MatchEvent) event).getMatch() == MatchImpl.this) {
-        final RegisteredListener listener = this.listener.get();
-        if (listener != null) {
-          listener.callEvent(event);
-        }
-      }
-    }
-  }
-
-  private class StrongEventExecutor implements EventExecutor {
+  private class EventExecutor implements org.bukkit.plugin.EventExecutor {
     private final RegisteredListener listener;
 
-    private StrongEventExecutor(RegisteredListener listener) {
+    private EventExecutor(RegisteredListener listener) {
       this.listener = checkNotNull(listener);
     }
 
@@ -359,10 +340,7 @@ public class MatchImpl implements Match {
                   eventClass,
                   listener,
                   registeredListener.getPriority(),
-                  registeredListener.getListener() instanceof MatchModule
-                      ? new StrongEventExecutor(registeredListener)
-                      : // FIXME: WeakEventExecutor not working
-                      new StrongEventExecutor(registeredListener),
+                  new EventExecutor(registeredListener),
                   PGM.get());
         }
       } else {

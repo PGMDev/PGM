@@ -75,6 +75,11 @@ public class MapLibraryImpl implements MapLibrary {
     return maps.values().stream().map(entry -> entry.info).iterator();
   }
 
+  @Override
+  public long getSize() {
+    return maps.size();
+  }
+
   private void logMapError(MapException err) {
     logger.log(Level.WARNING, err.getMessage(), err);
   }

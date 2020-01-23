@@ -1,14 +1,15 @@
 package tc.oc.pgm.rotation;
 
-import com.google.common.collect.ImmutableList;
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
+import java.lang.ref.WeakReference;
+import java.util.ArrayDeque;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.Deque;
 import java.util.List;
+import java.util.Random;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
-import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchManager;
+import tc.oc.pgm.api.map.exception.MapMissingException;
 
 /**
  * A type of {@link MapOrder} which orders maps randomly, setting aleatory maps for pgm to be able
@@ -16,42 +17,57 @@ import tc.oc.pgm.api.match.MatchManager;
  */
 public class RandomMapOrder implements MapOrder {
 
-  private MatchManager matchManager;
-  private MapInfo nextMap;
+  private final Random random;
+  private final Deque<WeakReference<MapInfo>> deque;
 
-  public RandomMapOrder(MatchManager matchManager) {
-    this.matchManager = matchManager;
-    this.nextMap = getRandomMap();
+  public RandomMapOrder() {
+    this.random = new Random();
+    this.deque = new ArrayDeque<>();
   }
 
-  private MapInfo getRandomMap() {
-    Iterator<Match> iterator = matchManager.getMatches().iterator();
-    MapInfo current = iterator.hasNext() ? iterator.next().getMap() : null;
-    List<MapInfo> maps =
-        new ArrayList<>(
-            ImmutableList.copyOf(PGM.get().getMapLibrary().getMaps())); // FIXME: performance
-    Collections.shuffle(maps);
+  private void refresh() {
+    if (!deque.isEmpty()) return; // Only re-populate when deque is empty
 
-    for (MapInfo map : maps) {
-      if (map != current) return map;
-    }
-    return maps.get(0);
+    final List<MapInfo> maps = Lists.newArrayList(PGM.get().getMapLibrary().getMaps());
+    if (maps.isEmpty())
+      throw new RuntimeException(
+          new MapMissingException("map library", "No maps found to set next"));
+
+    Collections.shuffle(maps, random);
+    maps.stream().map(WeakReference::new).forEachOrdered(deque::addLast);
   }
 
   @Override
   public MapInfo popNextMap() {
-    MapInfo map = nextMap;
-    this.nextMap = getRandomMap();
-    return map;
+    final WeakReference<MapInfo> ref = deque.pollFirst();
+    if (ref != null) {
+      final MapInfo info = ref.get();
+      if (info != null) {
+        return info;
+      }
+    }
+
+    refresh();
+    return popNextMap();
   }
 
   @Override
   public MapInfo getNextMap() {
-    return nextMap;
+    final WeakReference<MapInfo> ref = deque.peekFirst();
+    if (ref != null) {
+      final MapInfo info = ref.get();
+      if (info != null) {
+        return info;
+      }
+    }
+
+    refresh();
+    return getNextMap();
   }
 
   @Override
   public void setNextMap(MapInfo map) {
-    this.nextMap = map;
+    // Set next maps are sent to the front of the deque
+    deque.addFirst(new WeakReference<>(map));
   }
 }

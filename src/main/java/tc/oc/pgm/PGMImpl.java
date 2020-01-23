@@ -98,6 +98,7 @@ import tc.oc.pgm.prefix.PrefixRegistryImpl;
 import tc.oc.pgm.restart.RestartListener;
 import tc.oc.pgm.restart.ShouldRestartTask;
 import tc.oc.pgm.rotation.MapOrder;
+import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.RandomMapOrder;
 import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.pgm.teams.TeamMatchModule;
@@ -177,7 +178,7 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
         shutdown("Failed to load any maps", e.getCause());
         return;
       } else {
-        logger.log(Level.WARNING, "Could not load some maps", e.getCause());
+        logger.log(Level.WARNING, "Failed to load some maps", e.getCause());
       }
     }
 
@@ -188,21 +189,28 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
 
     matchManager = new MatchManagerImpl(logger, server);
     matchFactory = (MatchFactory) matchManager;
-    mapOrder =
-        new RandomMapOrder(matchManager); // TODO: RotationManager and use it to get first match
 
-    MapContext map;
-    for (int i = 0; ; i += 1) {
+    if (Config.MapPools.areEnabled()) {
+      mapOrder = new MapPoolManager(logger, new File(getDataFolder(), Config.MapPools.getPath()));
+    } else {
+      mapOrder = new RandomMapOrder();
+    }
+
+    final long size = mapLibrary.getSize();
+    MapContext map = null;
+    for (int i = 0; i < size; i += 1) {
       final String id = mapOrder.popNextMap().getId();
       try {
         map = mapLibrary.loadExistingMap(id).get(5, TimeUnit.SECONDS);
         break;
       } catch (Throwable t) {
         getLogger().log(Level.WARNING, "Failed to load map: " + id, t);
-        if (i < 5) continue;
-        shutdown("Failed to load any maps", t);
-        return;
       }
+    }
+
+    if (map == null) {
+      shutdown("Failed to load any maps from rotations", null);
+      return;
     }
 
     prefixRegistry = new PrefixRegistryImpl();

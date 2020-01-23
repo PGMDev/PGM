@@ -24,6 +24,13 @@ public interface MapLibrary {
   Iterator<MapInfo> getMaps();
 
   /**
+   * Get the number of {@link MapInfo}s.
+   *
+   * @return The number of {@link MapInfo}s.
+   */
+  long getSize();
+
+  /**
    * Reload existing and discover new {@link MapContext}s.
    *
    * @param reset Whether to forcibly reset all {@link MapSource}s.

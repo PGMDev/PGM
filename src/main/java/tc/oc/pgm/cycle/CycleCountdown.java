@@ -74,6 +74,14 @@ public class CycleCountdown extends MatchCountdown {
   @Override
   public void onEnd(Duration total) {
     super.onEnd(total);
+
+    // Attempt to cycle for as many maps there are in the library.
+    // If nothing works the server will be stuck in an idle state
+    // until there is manual intervention.
+    onEndCycle(PGM.get().getMapLibrary().getSize());
+  }
+
+  private void onEndCycle(long retries) {
     setNextMap(PGM.get().getMapOrder().popNextMap(), true);
 
     nextMatch.whenComplete(
@@ -84,6 +92,8 @@ public class CycleCountdown extends MatchCountdown {
           } catch (Throwable t) {
             PGM.get().getGameLogger().log(Level.SEVERE, "Unable to cycle match", t);
             nextMatch = null;
+            ended = false;
+            if (retries > 0) onEndCycle(retries - 1);
           }
         });
   }
