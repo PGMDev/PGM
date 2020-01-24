@@ -55,7 +55,7 @@ public class SoundsMatchModule extends MatchModule implements Listener {
   public void onMatchPlayerDeath(MatchPlayerDeathEvent event) {
     ParticipantState killer = event.getKiller();
     MatchPlayer victim = event.getVictim();
-    if (killer != null && killer.getId() != victim.getId()) {
+    if (killer != null && !killer.getId().equals(victim.getId())) {
       playRaindrop(killer);
     }
   }
