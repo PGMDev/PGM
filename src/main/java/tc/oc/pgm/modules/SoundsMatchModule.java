@@ -44,7 +44,6 @@ public class SoundsMatchModule extends MatchModule implements Listener {
     }
   }
 
-
   private void playSound(MatchPlayerState playerState, Sound sound) {
     playerState.getPlayer().ifPresent(player -> playSound(player, sound));
   }
@@ -52,7 +51,6 @@ public class SoundsMatchModule extends MatchModule implements Listener {
   private void playSound(Competitor competitor, Sound sound) {
     competitor.getPlayers().forEach(player -> playSound(player, sound));
   }
-
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchPlayerDeath(MatchPlayerDeathEvent event) {
