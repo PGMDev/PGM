@@ -59,7 +59,7 @@ public class SoundsMatchModule extends MatchModule implements Listener {
     if (killer != null) {
       if (killer.getId().equals(victim.getId())) {
 
-      } else if (killer.getParty().getName().equals(victim.getParty().getName())) {
+      } else if (killer.getParty().equals(victim.getParty())) {
         playSound(killer, ENDERMAN_SCREAM);
       } else {
         playSound(killer, RAINDROP_SOUND);
