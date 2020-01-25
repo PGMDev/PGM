@@ -214,7 +214,7 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
   /**
    * Get the {@link GameMode} of the {@link MatchPlayer}.
    *
-   * @return
+   * @return the current {@link GameMode}
    */
   GameMode getGameMode();
 
