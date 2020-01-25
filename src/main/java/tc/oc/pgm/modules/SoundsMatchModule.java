@@ -57,12 +57,12 @@ public class SoundsMatchModule extends MatchModule implements Listener {
     ParticipantState killer = event.getKiller();
     MatchPlayer victim = event.getVictim();
     if (killer != null) {
-      if (killer.getId().equals(victim.getId())) {
-
-      } else if (killer.getParty().equals(victim.getParty())) {
-        playSound(killer, ENDERMAN_SCREAM);
-      } else {
-        playSound(killer, RAINDROP_SOUND);
+      if (!killer.getId().equals(victim.getId())) {
+        if (killer.getParty().equals(victim.getParty())) {
+          playSound(killer, ENDERMAN_SCREAM);
+        } else {
+          playSound(killer, RAINDROP_SOUND);
+        }
       }
     }
   }
