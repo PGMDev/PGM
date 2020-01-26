@@ -5,7 +5,6 @@ import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
-import org.apache.commons.lang.WordUtils;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import tc.oc.component.Component;
@@ -31,7 +30,7 @@ public class GamemodeTool implements ObserverTool {
   @Override
   public List<String> getLore(MatchPlayer player) {
     Component gamemode =
-        new PersonalizedText(WordUtils.capitalizeFully(player.getGameMode().name().toLowerCase()))
+        new PersonalizedTranslatable("gameMode." + player.getGameMode().name().toLowerCase())
             .color(ChatColor.AQUA);
     Component lore =
         new PersonalizedTranslatable("observer.tools.gamemode.lore", gamemode)
