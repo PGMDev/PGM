@@ -1,4 +1,4 @@
-package tc.oc.pgm.observers;
+package tc.oc.pgm.gui;
 
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;
@@ -9,9 +9,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import tc.oc.component.Component;
 import tc.oc.component.render.ComponentRenderers;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.gui.InventoryGUI;
 
-public interface ObserverTool {
+public interface InventoryMenuItem {
 
   public Component getName();
 
@@ -21,7 +20,7 @@ public interface ObserverTool {
 
   public Material getMaterial(MatchPlayer player);
 
-  public void onInventoryClick(InventoryGUI menu, MatchPlayer player);
+  public void onInventoryClick(InventoryMenu menu, MatchPlayer player);
 
   default ItemStack createItem(MatchPlayer player) {
     ItemStack stack = new ItemStack(getMaterial(player));

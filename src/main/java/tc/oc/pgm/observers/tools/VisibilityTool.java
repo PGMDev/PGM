@@ -11,10 +11,10 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
-import tc.oc.pgm.gui.InventoryGUI;
-import tc.oc.pgm.observers.ObserverTool;
+import tc.oc.pgm.gui.InventoryMenu;
+import tc.oc.pgm.gui.InventoryMenuItem;
 
-public class VisibilityTool implements ObserverTool {
+public class VisibilityTool implements InventoryMenuItem {
 
   @Override
   public Component getName() {
@@ -48,7 +48,7 @@ public class VisibilityTool implements ObserverTool {
   }
 
   @Override
-  public void onInventoryClick(InventoryGUI menu, MatchPlayer player) {
+  public void onInventoryClick(InventoryMenu menu, MatchPlayer player) {
     toggleObserverVisibility(player);
     menu.refreshWindow(player);
   }

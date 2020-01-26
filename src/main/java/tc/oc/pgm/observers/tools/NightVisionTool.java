@@ -10,10 +10,10 @@ import tc.oc.component.Component;
 import tc.oc.component.render.ComponentRenderers;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.gui.InventoryGUI;
-import tc.oc.pgm.observers.ObserverTool;
+import tc.oc.pgm.gui.InventoryMenu;
+import tc.oc.pgm.gui.InventoryMenuItem;
 
-public class NightVisionTool implements ObserverTool {
+public class NightVisionTool implements InventoryMenuItem {
 
   @Override
   public Component getName() {
@@ -44,7 +44,7 @@ public class NightVisionTool implements ObserverTool {
   }
 
   @Override
-  public void onInventoryClick(InventoryGUI menu, MatchPlayer player) {
+  public void onInventoryClick(InventoryMenu menu, MatchPlayer player) {
     toggleNightVision(player);
     menu.refreshWindow(player);
   }

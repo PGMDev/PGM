@@ -22,7 +22,8 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.gui.InventoryGUI;
+import tc.oc.pgm.gui.InventoryMenu;
+import tc.oc.pgm.gui.InventoryMenuItem;
 import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.match.MatchModuleFactory;
 import tc.oc.pgm.module.ModuleLoadException;
@@ -100,17 +101,17 @@ public class ObserverToolsMatchModule extends MatchModule implements Listener {
   }
 
   public void openMenu(MatchPlayer player) {
-    if (hasUse(player)) {
+    if (canUse(player)) {
       menu.display(player);
     }
   }
 
-  private boolean hasUse(MatchPlayer player) {
+  private boolean canUse(MatchPlayer player) {
     return player.isObserving();
   }
 
   private void refreshKit(MatchPlayer player) {
-    if (hasUse(player)) {
+    if (canUse(player)) {
       player.getInventory().setItem(TOOL_BUTTON_SLOT, createToolItem(player));
     }
   }
@@ -138,19 +139,19 @@ public class ObserverToolsMatchModule extends MatchModule implements Listener {
     return tool;
   }
 
-  public class ObserverToolMenu extends InventoryGUI {
+  public class ObserverToolMenu extends InventoryMenu {
 
     public static final String INVENTORY_TITLE = "observer.tools.title";
     public static final int INVENTORY_ROWS = 1;
 
-    private List<ObserverTool> tools;
+    private List<InventoryMenuItem> tools;
 
     public ObserverToolMenu() {
       super(INVENTORY_TITLE, INVENTORY_ROWS);
       registerTools();
     }
 
-    public List<ObserverTool> getTools() {
+    public List<InventoryMenuItem> getTools() {
       return tools;
     }
 
@@ -174,7 +175,7 @@ public class ObserverToolsMatchModule extends MatchModule implements Listener {
       List<ItemStack> items = Lists.newArrayList();
 
       items.add(null);
-      for (ObserverTool tool : tools) {
+      for (InventoryMenuItem tool : tools) {
         items.add(tool.createItem(player));
         if (items.size() < ROW_WIDTH - 1) {
           items.add(null);

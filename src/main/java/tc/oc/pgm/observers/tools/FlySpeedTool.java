@@ -8,10 +8,10 @@ import tc.oc.component.Component;
 import tc.oc.component.render.ComponentRenderers;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.gui.InventoryGUI;
-import tc.oc.pgm.observers.ObserverTool;
+import tc.oc.pgm.gui.InventoryMenu;
+import tc.oc.pgm.gui.InventoryMenuItem;
 
-public class FlySpeedTool implements ObserverTool {
+public class FlySpeedTool implements InventoryMenuItem {
 
   private static String TRANSLATION_KEY = "observer.tools.flyspeed.";
 
@@ -41,7 +41,7 @@ public class FlySpeedTool implements ObserverTool {
   }
 
   @Override
-  public void onInventoryClick(InventoryGUI menu, MatchPlayer player) {
+  public void onInventoryClick(InventoryMenu menu, MatchPlayer player) {
     incrementSpeed(player);
     menu.refreshWindow(player);
   }
@@ -60,6 +60,8 @@ public class FlySpeedTool implements ObserverTool {
     private ChatColor color;
     private float value;
 
+    private static FlySpeed[] speeds = values();
+
     FlySpeed(ChatColor color, float value) {
       this.color = color;
       this.value = value;
@@ -76,7 +78,7 @@ public class FlySpeedTool implements ObserverTool {
     }
 
     public FlySpeed getNext() {
-      return ordinal() < (values().length - 1) ? values()[ordinal() + 1] : NORMAL;
+      return speeds[(ordinal() + 1) % speeds.length];
     }
 
     public static FlySpeed of(float value) {

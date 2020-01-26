@@ -14,7 +14,7 @@ import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.util.StringUtils;
 
-public abstract class InventoryGUI {
+public abstract class InventoryMenu {
 
   protected static final int ROW_WIDTH = 9; // Number of columns per row
   protected static final int MAX_ROWS = 6; // Max allowed row size
@@ -25,7 +25,7 @@ public abstract class InventoryGUI {
   private final int rows; // The # of rows in the inventory
 
   /**
-   * InventoryGUI: An easy way to make an GUI menu that users can interact with.
+   * InventoryMenu: An easy way to make an GUI menu that users can interact with.
    *
    * <p>See {@link ObserverToolsMatchModule} for an example on implementation
    *
@@ -34,7 +34,7 @@ public abstract class InventoryGUI {
    * @param title - A string that will be translated and made the inventory title
    * @param rows - The amount of rows the inventory will be created with
    */
-  public InventoryGUI(String title, int rows) {
+  public InventoryMenu(String title, int rows) {
     checkArgument(rows > 0 && rows <= MAX_ROWS, "Row size must be between 1 and " + MAX_ROWS);
     this.title = checkNotNull(title);
     this.rows = rows;
