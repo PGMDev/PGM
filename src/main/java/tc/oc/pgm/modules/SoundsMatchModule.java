@@ -32,7 +32,6 @@ public class SoundsMatchModule extends MatchModule implements Listener {
   }
 
   private static final Sound RAINDROP_SOUND = new Sound("random.levelup", 1f, 1.5f);
-  private static final Sound ENDERMAN_SCREAM = new Sound("mob.endermen.scream", 1f, 1.5f);
 
   public SoundsMatchModule(Match match) {
     super(match);
