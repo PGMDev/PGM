@@ -16,12 +16,13 @@ import tc.oc.util.StringUtils;
 
 public abstract class InventoryGUI {
 
-  protected static int ROW_WIDTH = 9; // Number of columns per row
-  protected static int MAX_ROWS = 6; // Max allowed row size
+  protected static final int ROW_WIDTH = 9; // Number of columns per row
+  protected static final int MAX_ROWS = 6; // Max allowed row size
 
-  private Set<MatchPlayer> viewing = Sets.newHashSet(); // Set of players who are viewing the gui
-  private String title; // Title of the inventory
-  private int rows; // The # of rows in the inventory
+  private final Set<MatchPlayer> viewing =
+      Sets.newHashSet(); // Set of players who are viewing the gui
+  private final String title; // Title of the inventory
+  private final int rows; // The # of rows in the inventory
 
   /**
    * InventoryGUI: An easy way to make an GUI menu that users can interact with.
