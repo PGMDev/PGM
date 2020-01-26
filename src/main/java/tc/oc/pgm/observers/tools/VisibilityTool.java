@@ -6,7 +6,6 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import tc.oc.component.Component;
 import tc.oc.component.render.ComponentRenderers;
-import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
@@ -30,7 +29,11 @@ public class VisibilityTool implements ObserverTool {
   @Override
   public List<String> getLore(MatchPlayer player) {
     Component status =
-        new PersonalizedText(isVisible(player) ? "Shown" : "Hidden")
+        new PersonalizedTranslatable(
+                isVisible(player)
+                    ? "observer.tools.visibility.shown"
+                    : "observer.tools.visibility.hidden")
+            .getPersonalizedText()
             .color(isVisible(player) ? ChatColor.GREEN : ChatColor.RED);
     Component lore =
         new PersonalizedTranslatable("observer.tools.visibility.lore", status)

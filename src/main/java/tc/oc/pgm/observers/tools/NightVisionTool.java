@@ -8,7 +8,6 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import tc.oc.component.Component;
 import tc.oc.component.render.ComponentRenderers;
-import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.gui.InventoryGUI;
@@ -29,7 +28,8 @@ public class NightVisionTool implements ObserverTool {
   @Override
   public List<String> getLore(MatchPlayer player) {
     Component status =
-        new PersonalizedText(hasNightVision(player) ? "On" : "Off")
+        new PersonalizedTranslatable(hasNightVision(player) ? "misc.on" : "misc.off")
+            .getPersonalizedText()
             .color(hasNightVision(player) ? ChatColor.GREEN : ChatColor.RED);
     Component lore =
         new PersonalizedTranslatable("observer.tools.nightvision.lore", status)

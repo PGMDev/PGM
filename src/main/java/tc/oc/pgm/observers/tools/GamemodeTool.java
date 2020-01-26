@@ -56,7 +56,8 @@ public class GamemodeTool implements ObserverTool {
     if (player.getGameMode() == GameMode.SPECTATOR) {
       player.sendWarning(getToggleMessage(), true);
     } else if (isCreative(player)) {
-      player.getBukkit().performCommand("!");
+      // Note: This performs the WorldEdit command to ensure the player is not stuck
+      player.getBukkit().performCommand("worldedit:!");
     }
   }
 
@@ -70,7 +71,10 @@ public class GamemodeTool implements ObserverTool {
             .color(ChatColor.AQUA)
             .hoverEvent(
                 HoverEvent.Action.SHOW_TEXT,
-                new PersonalizedText("Click to open tool menu").color(ChatColor.GRAY).render())
+                new PersonalizedTranslatable("observer.tools.gamemode.hover")
+                    .getPersonalizedText()
+                    .color(ChatColor.GRAY)
+                    .render())
             .clickEvent(ClickEvent.Action.RUN_COMMAND, "/tools");
     return new PersonalizedTranslatable("observer.tools.gamemode.warning", command)
         .getPersonalizedText()
