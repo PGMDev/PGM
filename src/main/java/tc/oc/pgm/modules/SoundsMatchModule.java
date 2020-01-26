@@ -3,6 +3,7 @@ package tc.oc.pgm.modules;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
@@ -60,6 +61,7 @@ public class SoundsMatchModule extends MatchModule implements Listener {
       if (!killer.getId().equals(victim.getId())) {
         if (killer.getParty().equals(victim.getParty())) {
           playSound(killer, ENDERMAN_SCREAM);
+          killer.sendWarning(new PersonalizedTranslatable("death.friendlyfire.warning"), false);
         } else {
           playSound(killer, RAINDROP_SOUND);
         }
