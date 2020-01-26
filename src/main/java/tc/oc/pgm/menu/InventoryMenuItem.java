@@ -1,4 +1,4 @@
-package tc.oc.pgm.gui;
+package tc.oc.pgm.menu;
 
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;

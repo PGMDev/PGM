@@ -8,8 +8,8 @@ import tc.oc.component.Component;
 import tc.oc.component.render.ComponentRenderers;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.gui.InventoryMenu;
-import tc.oc.pgm.gui.InventoryMenuItem;
+import tc.oc.pgm.menu.InventoryMenu;
+import tc.oc.pgm.menu.InventoryMenuItem;
 
 public class FlySpeedTool implements InventoryMenuItem {
 

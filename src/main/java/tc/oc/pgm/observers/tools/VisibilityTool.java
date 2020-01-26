@@ -11,8 +11,8 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
-import tc.oc.pgm.gui.InventoryMenu;
-import tc.oc.pgm.gui.InventoryMenuItem;
+import tc.oc.pgm.menu.InventoryMenu;
+import tc.oc.pgm.menu.InventoryMenuItem;
 
 public class VisibilityTool implements InventoryMenuItem {
 
