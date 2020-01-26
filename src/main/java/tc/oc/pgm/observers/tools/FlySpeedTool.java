@@ -3,17 +3,17 @@ package tc.oc.pgm.observers.tools;
 import com.google.common.collect.Lists;
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;
-import org.apache.commons.lang.WordUtils;
 import org.bukkit.Material;
 import tc.oc.component.Component;
 import tc.oc.component.render.ComponentRenderers;
-import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.gui.InventoryGUI;
 import tc.oc.pgm.observers.ObserverTool;
 
 public class FlySpeedTool implements ObserverTool {
+
+  private static String TRANSLATION_KEY = "observer.tools.flyspeed.";
 
   @Override
   public Component getName() {
@@ -70,7 +70,9 @@ public class FlySpeedTool implements ObserverTool {
     }
 
     public Component getName() {
-      return new PersonalizedText(WordUtils.capitalize(this.name().toLowerCase())).color(color);
+      return new PersonalizedTranslatable(TRANSLATION_KEY + this.name().toLowerCase())
+          .getPersonalizedText()
+          .color(color);
     }
 
     public FlySpeed getNext() {

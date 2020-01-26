@@ -1,5 +1,8 @@
 package tc.oc.pgm.gui;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.Sets;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -13,18 +16,27 @@ import tc.oc.util.StringUtils;
 
 public abstract class InventoryGUI {
 
-  /*
-   * Code extracted from PickerMatchModule to allow for reuse
+  protected static int ROW_WIDTH = 9; // Number of columns per row
+  protected static int MAX_ROWS = 6; // Max allowed row size
+
+  private Set<MatchPlayer> viewing = Sets.newHashSet(); // Set of players who are viewing the gui
+  private String title; // Title of the inventory
+  private int rows; // The # of rows in the inventory
+
+  /**
+   * InventoryGUI: An easy way to make an GUI menu that users can interact with.
+   *
+   * <p>See {@link ObserverToolsMatchModule} for an example on implementation
+   *
+   * <p>Note: Code here was extracted from PickerMatchModule to allow for reuse
+   *
+   * @param title - A string that will be translated and made the inventory title
+   * @param rows - The amount of rows the inventory will be created with
    */
-
-  public Set<MatchPlayer> viewing = Sets.newHashSet();
-
-  public String title; // Title of the inventory
-  private int size; // Size of inventory
-
-  public InventoryGUI(String title, int size) {
-    this.title = title;
-    this.size = size;
+  public InventoryGUI(String title, int rows) {
+    checkArgument(rows > 0 && rows <= MAX_ROWS, "Row size must be between 1 and " + MAX_ROWS);
+    this.title = checkNotNull(title);
+    this.rows = rows;
   }
 
   /** Defines how the GUI will display the layout */
@@ -49,6 +61,10 @@ public abstract class InventoryGUI {
 
   public void refreshAll() {
     viewing.forEach(this::refreshWindow);
+  }
+
+  private int getInventorySize() {
+    return ROW_WIDTH * rows;
   }
 
   /**
@@ -122,7 +138,9 @@ public abstract class InventoryGUI {
     closeWindow(player);
     Inventory inv =
         Bukkit.createInventory(
-            player.getBukkit(), size, StringUtils.truncate(getTranslatedTitle(player), 32));
+            player.getBukkit(),
+            getInventorySize(),
+            StringUtils.truncate(getTranslatedTitle(player), 32));
 
     inv.setContents(contents);
     player.getBukkit().openInventory(inv);

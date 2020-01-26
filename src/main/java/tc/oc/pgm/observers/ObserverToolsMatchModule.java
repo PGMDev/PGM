@@ -141,12 +141,12 @@ public class ObserverToolsMatchModule extends MatchModule implements Listener {
   public class ObserverToolMenu extends InventoryGUI {
 
     public static final String INVENTORY_TITLE = "observer.tools.title";
-    public static final int INVENTORY_SIZE = 9;
+    public static final int INVENTORY_ROWS = 1;
 
     private List<ObserverTool> tools;
 
     public ObserverToolMenu() {
-      super(INVENTORY_TITLE, INVENTORY_SIZE);
+      super(INVENTORY_TITLE, INVENTORY_ROWS);
       registerTools();
     }
 
@@ -176,7 +176,7 @@ public class ObserverToolsMatchModule extends MatchModule implements Listener {
       items.add(null);
       for (ObserverTool tool : tools) {
         items.add(tool.createItem(player));
-        if (items.size() < INVENTORY_SIZE - 1) {
+        if (items.size() < ROW_WIDTH - 1) {
           items.add(null);
         }
       }
