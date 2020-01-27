@@ -18,6 +18,7 @@ public class DefaultMapSourceFactory extends SystemMapSourceFactory {
 
   public DefaultMapSourceFactory() {
     super("maps/");
+    dir.mkdir();
     this.downloaded = new AtomicBoolean();
   }
 
@@ -40,7 +41,7 @@ public class DefaultMapSourceFactory extends SystemMapSourceFactory {
       while (entry != null) {
         final File dst = new File(dir, entry.getName());
         final File dst1 = dst.getParentFile();
-        if (!entry.isDirectory() && !dst.exists() && (dst1.exists() || dst1.mkdirs())) {
+        if (!entry.isDirectory() && !dst.exists() && (dst1.exists() || dst1.mkdir())) {
           try (final FileOutputStream output = new FileOutputStream(dst)) {
             int len;
             while ((len = zip.read(buffer)) > 0) {

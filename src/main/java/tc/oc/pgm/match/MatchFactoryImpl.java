@@ -1,5 +1,18 @@
 package tc.oc.pgm.match;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.io.File;
+import java.time.Duration;
+import java.util.Stack;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
 import org.bukkit.Difficulty;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -14,20 +27,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.util.FileUtils;
-
-import java.io.File;
-import java.time.Duration;
-import java.util.Stack;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
   private static final AtomicLong counter = new AtomicLong();
