@@ -22,31 +22,30 @@ public class PlayerContributor implements Contributor {
   private static final String UNKNOWN = "Unknown";
   private final UUID id;
   private final @Nullable String contribution;
-  private @Nullable String name;
+  private @Nullable Username username;
 
   public PlayerContributor(UUID id, @Nullable String contribution) {
     this.id = checkNotNull(id);
     this.contribution = contribution;
-    this.name = getName();
+    getUsername(); // Pre-warm username cache
+  }
+
+  public Username getUsername() {
+    if (username == null) {
+      username = PGM.get().getDatastore().getUsername(id);
+    }
+    return username;
   }
 
   public UUID getId() {
     return id;
   }
 
-  public Username getUsername() {
-    return PGM.get().getDatastore().getUsername(id);
-  }
-
   @Override
   public String getName() {
-    if (name == null) {
-      name = getUsername().getName();
-    }
-    if (name == null) {
-      return UNKNOWN;
-    }
-    return name;
+    final Username username = getUsername();
+    final String name = username == null ? null : username.getName();
+    return name == null ? UNKNOWN : name;
   }
 
   @Override
@@ -88,7 +87,7 @@ public class PlayerContributor implements Contributor {
   public String toString() {
     return new ToStringBuilder(this)
         .append("id", getId())
-        .append("name", name)
+        .append("name", username == null ? "<unknown>" : username.getName())
         .append("desc", getContribution())
         .build();
   }

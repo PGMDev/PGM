@@ -154,8 +154,8 @@ public class MapLibraryImpl implements MapLibrary {
                 Sets.newHashSet(Iterators.concat(sources.iterator()))
                     .parallelStream()
                     .forEach(source -> loadMapSafe(source, null)))
-        .thenRun(() -> logMapSuccess(fail, ok))
-        .thenRun(UsernameResolver::resolveAll);
+        .thenRunAsync(() -> logMapSuccess(fail, ok))
+        .thenRunAsync(UsernameResolver::resolveAll);
   }
 
   @Override
