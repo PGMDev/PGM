@@ -73,6 +73,12 @@ public class CycleCountdown extends MatchCountdown {
   }
 
   @Override
+  public void onCancel(Duration remaining, Duration total) {
+    super.onCancel(remaining, total);
+    setNextMap(null, true);
+  }
+
+  @Override
   public void onEnd(Duration total) {
     super.onEnd(total);
     setNextMap(PGM.get().getMapOrder().popNextMap(), true);

@@ -34,21 +34,25 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
   private final AtomicLong start;
   private final AtomicLong timeout;
   private final Stack<Stage> stages;
-  private final Future<Match> match;
+  private final Future<Match> future;
 
   protected MatchFactoryImpl(String mapId) {
     this.start = new AtomicLong(System.currentTimeMillis());
     this.timeout = new AtomicLong(Config.Experiments.get().getMatchPreLoadSeconds() * 1000L);
     this.stages = new Stack<>();
     this.stages.push(new InitMapStage(checkNotNull(mapId)));
-    this.match = Executors.newWorkStealingPool().submit(this);
+    this.future = Executors.newSingleThreadExecutor().submit(this);
   }
 
-  public Match call() throws Exception {
+  public Match call() {
     try {
       return run();
     } catch (Exception e) {
-      PGM.get().getGameLogger().log(Level.SEVERE, "Unable to create match", e);
+      // Match creation was cancelled, no need to show an error
+      if (e.getCause() instanceof InterruptedException) return null;
+
+      final Throwable err = e.getCause();
+      PGM.get().getGameLogger().log(Level.SEVERE, err.getMessage(), err.getCause());
       throw e;
     }
   }
@@ -63,11 +67,12 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
       // Only wait if the next stage is not done, or
       // the entire factory is not timed out.
-      while (!next.isDone() && !isTimedOut()) {
+      final long delay = stage.delay().toMillis();
+      while (!next.isDone() && start.get() + timeout.get() + delay >= System.currentTimeMillis()) {
         try {
-          Thread.sleep(stage.delay().toMillis());
+          Thread.sleep(delay);
         } catch (InterruptedException e) {
-          return rollback(e);
+          return revert(e);
         }
       }
 
@@ -76,48 +81,51 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
       try {
         done = next.get();
       } catch (ExecutionException | InterruptedException e) {
-        return rollback(e);
+        return revert(e);
       }
 
       // If there is no other stage, commit the match.
       if (done == null) {
         stages.clear();
-        return stage.commit();
+        if (stage instanceof Commitable) {
+          return ((Commitable) stage).commit();
+        }
+        return revert(new IllegalStateException("Unable to load match with an incomplete stage"));
       } else {
         stages.push(done);
       }
     }
 
-    return rollback(
-        new IllegalArgumentException("Match could not be created without an initial stage"));
+    return revert(new IllegalStateException("Unable to load match without an initial stage"));
   }
 
-  private Match rollback(Exception err) {
+  private Match revert(Exception err) {
     while (!stages.empty()) {
-      stages.pop().rollback();
+      final Stage stage = stages.pop();
+      if (stage instanceof Revertable) {
+        ((Revertable) stage).revert();
+      } else {
+        throw new IllegalStateException("Unable to revert a loaded match");
+      }
     }
 
     throw new RuntimeException(err);
   }
 
-  private boolean isTimedOut() {
-    return start.get() + timeout.get() < System.currentTimeMillis();
-  }
-
   @Override
   public boolean cancel(boolean mayInterruptIfRunning) {
     if (isDone()) return false;
-    return match.cancel(mayInterruptIfRunning);
+    return future.cancel(mayInterruptIfRunning);
   }
 
   @Override
   public boolean isCancelled() {
-    return match.isCancelled();
+    return future.isCancelled();
   }
 
   @Override
   public boolean isDone() {
-    return match.isDone();
+    return future.isDone();
   }
 
   @Override
@@ -129,7 +137,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
   public Match get(long duration, TimeUnit unit) throws InterruptedException, ExecutionException {
     final long timeoutNew = Math.max(0, unit.toMillis(duration));
     timeout.getAndUpdate((timeout) -> Math.min(timeout, timeoutNew));
-    return match.get();
+    return future.get();
   }
 
   @Override
@@ -147,28 +155,32 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
      */
     Future<? extends Stage> advance();
 
-    /** Rollback any changes after attempting to {@link #advance()}. */
-    default void rollback() {
-      // No-op by default
-    }
-
     /**
      * Get the duration to wait before the next {@link Stage}.
      *
      * @return Duration to wait.
      */
     default Duration delay() {
-      return Duration.ofSeconds(1);
+      return Duration.ZERO;
     }
+  }
+
+  /** An execution {@link Stage} that can revert its changes. */
+  private interface Revertable {
+
+    /** Revert any changes after attempting to {@link Stage#advance()}. */
+    void revert();
+  }
+
+  /** An execution {@link Stage} that can return a {@link Match}. */
+  private interface Commitable {
 
     /**
-     * Returns the completed {@link Match}, if available.
+     * Returns the completed {@link Match}.
      *
-     * @return A {@link Match} or {@code null} if not available.
+     * @return A {@link Match}.
      */
-    default Match commit() {
-      return null;
-    }
+    Match commit();
   }
 
   /** Stage #1: ensures that a {@link MapContext} is loaded. */
@@ -186,7 +198,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
   }
 
   /** Stage #2: downloads a {@link MapContext} to a local directory. */
-  private static class DownloadMapStage implements Stage {
+  private static class DownloadMapStage implements Stage, Revertable {
     private final MapContext map;
     private File dir;
 
@@ -223,14 +235,14 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
     }
 
     @Override
-    public void rollback() {
+    public void revert() {
       counter.getAndDecrement();
       FileUtils.delete(getDirectory());
     }
   }
 
   /** Stage #3: initializes the {@link World} on the main thread. */
-  private static class InitWorldStage implements Stage {
+  private static class InitWorldStage implements Stage, Revertable {
     private final MapContext map;
     private final String worldName;
 
@@ -264,52 +276,67 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
       return runMainThread(this::advanceSync);
     }
 
-    private boolean rollbackSync() {
+    private boolean revertSync() {
       return PGM.get().getServer().unloadWorld(worldName, false);
     }
 
     @Override
-    public void rollback() {
-      runMainThread(this::rollbackSync);
+    public void revert() {
+      runMainThread(this::revertSync);
     }
 
     @Override
     public Duration delay() {
-      return Duration.ofSeconds(5);
+      return Duration.ofSeconds(3);
     }
   }
 
   /** Stage #4: initializes and loads the {@link Match}. */
-  private static class InitMatchStage implements Stage {
-    private final World world;
-    private final MapContext map;
+  private static class InitMatchStage implements Stage, Revertable, Commitable {
+    private final Match match;
 
     private InitMatchStage(World world, MapContext map) {
-      this.world = checkNotNull(world);
-      this.map = checkNotNull(map);
+      this.match =
+          new MatchImpl(Long.toString(counter.get() - 1), checkNotNull(map), checkNotNull(world));
     }
 
     private MoveMatchStage advanceSync() {
-      final String id = Long.toString(counter.get() - 1);
-      final Match match = new MatchImpl(id, map, world);
-
+      final boolean move = PGM.get().getMatchManager().getMatches().iterator().hasNext();
       match.load();
-
-      return new MoveMatchStage(match);
+      return move ? new MoveMatchStage(match) : null;
     }
 
     @Override
     public Future<? extends Stage> advance() {
       return runMainThread(this::advanceSync);
     }
+
+    private boolean revertSync() {
+      match.unload();
+      match.destroy();
+      return true;
+    }
+
+    @Override
+    public void revert() {
+      runMainThread(this::revertSync);
+    }
+
+    @Override
+    public Match commit() {
+      return match;
+    }
   }
 
   /** Stage #5: teleport {@link Player}s to the {@link Match}, with time delays. */
-  private static class MoveMatchStage implements Stage {
+  private static class MoveMatchStage implements Stage, Commitable {
     private final Match match;
+    private final Duration delay;
 
     private MoveMatchStage(Match match) {
       this.match = checkNotNull(match);
+      this.delay =
+          Duration.ofMillis(1000L / Config.Experiments.get().getPlayerTeleportsPerSecond());
     }
 
     private Stage advanceSync() {
@@ -336,9 +363,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
     @Override
     public Duration delay() {
-      return Duration.ofMillis(
-          Duration.ofSeconds(1).toMillis()
-              / Config.Experiments.get().getPlayerTeleportsPerSecond());
+      return delay;
     }
 
     @Override
