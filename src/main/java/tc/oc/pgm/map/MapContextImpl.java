@@ -10,11 +10,13 @@ import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapSource;
+import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.ffa.FreeForAllModule;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamModule;
 
 public class MapContextImpl extends MapInfoImpl implements MapContext {
+  private static final MapTag TERRAIN = MapTag.create("terrain", "Terrain", false, true);
 
   private final MapSource source;
   private final List<MapModule> modules;
@@ -37,6 +39,10 @@ public class MapContextImpl extends MapInfoImpl implements MapContext {
         this.players.clear();
         this.players.add(((FreeForAllModule) module).getOptions().maxPlayers);
       }
+    }
+
+    if (getWorld().hasTerrain()) {
+      this.tags.add(TERRAIN);
     }
   }
 

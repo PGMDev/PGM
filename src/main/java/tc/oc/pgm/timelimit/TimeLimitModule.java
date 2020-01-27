@@ -1,5 +1,8 @@
 package tc.oc.pgm.timelimit;
 
+import com.google.common.collect.ImmutableList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.jdom2.Attribute;
@@ -7,6 +10,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
+import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
@@ -18,10 +22,17 @@ import tc.oc.util.components.PeriodFormats;
 import tc.oc.xml.InvalidXMLException;
 
 public class TimeLimitModule implements MapModule {
+  private static final Collection<MapTag> TAGS =
+      ImmutableList.of(MapTag.create("timelimit", "Timelimit", false, true));
   private final @Nullable TimeLimit timeLimit;
 
   public TimeLimitModule(@Nullable TimeLimit limit) {
     this.timeLimit = limit;
+  }
+
+  @Override
+  public Collection<MapTag> getTags() {
+    return timeLimit == null ? Collections.emptyList() : TAGS;
   }
 
   @Override

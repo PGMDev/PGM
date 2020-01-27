@@ -47,9 +47,9 @@ public class MapCommands {
   }
 
   @Command(
-      aliases = {"maplist", "maps", "ml"},
+      aliases = {"maps", "maplist", "ml"},
       desc = "Shows the maps that are currently loaded",
-      usage = "[-a <author>] [-# <tag1>,<tag2>]",
+      usage = "[-a <author>] [-t <tag1>,<tag2>]",
       help =
           "Shows all the maps that are currently loaded including ones that are not in the rotation.")
   public static void maplist(
