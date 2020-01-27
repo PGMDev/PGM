@@ -13,7 +13,7 @@ import tc.oc.pgm.development.MapErrorTracker;
 import tc.oc.pgm.map.MapLibrary;
 import tc.oc.pgm.map.PGMMap;
 import tc.oc.pgm.prefix.PrefixRegistry;
-import tc.oc.tablist.TabManager;
+import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.util.SemanticVersion;
 
 /** PvP Game Manager (aka. PGM), the global {@link Plugin} to manage PvP games. */
@@ -40,7 +40,7 @@ public interface PGM extends Plugin {
    */
   MatchManager getMatchManager();
 
-  TabManager getTabManager();
+  MatchTabManager getMatchTabManager();
 
   /**
    * Get the specific manager that parses and loads {@link PGMMap}s.
