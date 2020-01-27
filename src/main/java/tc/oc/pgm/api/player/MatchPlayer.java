@@ -195,6 +195,13 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
   void applyKit(Kit kit, boolean force);
 
   /**
+   * Get the protocol version of the {@link MatchPlayer}'s client
+   *
+   * @return The protocol version of the {@link MatchPlayer}'s client
+   */
+  int getProtocolVersion();
+
+  /**
    * Get the {@link Settings} of the {@link MatchPlayer}.
    *
    * @return The cached {@link Settings}.
