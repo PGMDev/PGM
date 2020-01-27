@@ -202,7 +202,7 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
    */
   void setGameMode(GameMode gameMode);
 
-  /** 
+  /**
    * Get the protocol version of the {@link MatchPlayer}'s client
    *
    * @return The protocol version of the {@link MatchPlayer}'s client
