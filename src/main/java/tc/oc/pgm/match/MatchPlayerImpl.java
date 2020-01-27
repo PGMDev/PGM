@@ -1,5 +1,17 @@
 package tc.oc.pgm.match;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Logger;
+import javax.annotation.Nullable;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -38,19 +50,6 @@ import tc.oc.util.ClassLogger;
 import tc.oc.util.ViaUtils;
 import tc.oc.world.DeathOverride;
 import tc.oc.world.NMSHacks;
-
-import javax.annotation.Nullable;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Logger;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<MatchPlayer> {
 

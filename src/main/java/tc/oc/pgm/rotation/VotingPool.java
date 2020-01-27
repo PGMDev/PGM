@@ -1,13 +1,12 @@
 package tc.oc.pgm.rotation;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.restart.RestartManager;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class VotingPool extends MapPool {
 

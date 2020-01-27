@@ -1,5 +1,6 @@
 package tc.oc.pgm.api.map;
 
+import org.apache.commons.lang3.builder.CompareToBuilder;
 import tc.oc.pgm.map.MapTagImpl;
 
 /** A "#hashtag" that describes a {@link MapInfo} feature. */
@@ -35,7 +36,11 @@ public interface MapTag extends Comparable<MapTag> {
 
   @Override
   default int compareTo(MapTag o) {
-    return getId().compareTo(o.getId());
+    return new CompareToBuilder()
+        .append(isGamemode(), o.isGamemode())
+        .append(isAuxiliary(), o.isAuxiliary())
+        .append(getId(), o.getId())
+        .build();
   }
 
   static MapTag create(String id, String name, boolean gamemode, boolean auxiliary) {
