@@ -5,6 +5,7 @@ package tc.oc.pgm.commands;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
+import org.enginehub.piston.annotation.param.Arg;
 import org.joda.time.Duration;
 
 import tc.oc.pgm.AllTranslations;
@@ -44,7 +45,9 @@ public class AdminCommands {
           desc = "Restart the server at the next opportunity",
           descFooter = "[seconds] - defaults to 30 seconds")
   public void queueRestart(
-          CommandSender sender, Match match, int duration/*TODO Add a default duration*/, @Switch(name = 'f', desc = "force") boolean force)
+          CommandSender sender, Match match,
+          @Arg(desc = "The duration of the countdown before restart", def = "30") int duration,
+          @Switch(name = 'f', desc = "force") boolean force)
   {
     RestartManager.queueRestart(
             "Restart requested via /queuerestart command", Duration.standardSeconds(duration));

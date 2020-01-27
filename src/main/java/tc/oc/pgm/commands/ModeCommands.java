@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.enginehub.piston.annotation.param.Arg;
 import org.joda.time.Duration;
 import org.joda.time.Period;
 import tc.oc.pgm.api.Permissions;
@@ -66,7 +67,9 @@ public class ModeCommands {
       aliases = {"list"},
       desc = "Lists all modes",
       descFooter = "[page]")
-  public static void list(Audience audience, Match match, /*@Default("1")TODO ADD DEFAULT*/ int page)
+  public static void list(
+          Audience audience, Match match,
+          @Arg(desc = "pagenumber of the list of modes", def = "1") int page)
   {
     showList(page, audience, getModes(match));
   }

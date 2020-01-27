@@ -3,6 +3,7 @@ package tc.oc.pgm.commands;
 
 import org.enginehub.piston.annotation.CommandContainer;
 import org.enginehub.piston.annotation.Command;
+import org.enginehub.piston.annotation.param.Arg;
 import org.enginehub.piston.annotation.param.Switch;
 
 import org.bukkit.command.CommandSender;
@@ -29,7 +30,7 @@ public class CycleCommands {
       MatchManager matchManager,
       Duration countdown,
       @Switch(name ='f', desc = "force") boolean force,
-      /*TODO ADD DEFAULT ("NEXT")*/ @Text PGMMap map)
+      @Arg(desc = "The map that end-user wants to cycle to", def = "next") @Text PGMMap map)
   {
     CycleMatchModule cmm = match.needMatchModule(CycleMatchModule.class);
 

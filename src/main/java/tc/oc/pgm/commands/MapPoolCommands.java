@@ -2,6 +2,7 @@ package tc.oc.pgm.commands;
 
 import org.enginehub.piston.annotation.CommandContainer;
 import org.enginehub.piston.annotation.Command;
+import org.enginehub.piston.annotation.param.Arg;
 import org.enginehub.piston.annotation.param.ArgFlag;
 import org.enginehub.piston.annotation.param.Switch;
 import java.text.DecimalFormat;
@@ -37,7 +38,7 @@ public class MapPoolCommands {
       Audience audience,
       CommandSender sender,
       MatchManager matchManager,
-      /*@Default("1")TODO ADD DEFAULT*/ int page,
+      @Arg(desc = "Page number of the map rotation/pool list", def = "1") int page,
       @ArgFlag(name ='r', desc = "Shows which maps is in a specified rotation") String rotationName,
       @ArgFlag(name = 'p', desc = "Shows which maps is in a specified pool") String poolName,
       @Switch(name = 's', desc = "Shows the scores of the maps displayed") boolean scores,
@@ -102,7 +103,8 @@ public class MapPoolCommands {
           aliases = {"rots", "pools"},
           desc = "Shows all the existing rotations and their trigger player counts.")
   public static void rotations(
-      Audience audience, CommandSender sender, MatchManager matchManager, /*@Default("1")TODO ADD DEFAULT*/ int page)
+      Audience audience, CommandSender sender, MatchManager matchManager,
+      @Arg(desc = "Pagenumber of the list of rotations/pools", def = "1") int page)
   {
 
     MapPoolManager mapPoolManager = getMapPoolManager(sender, matchManager);
@@ -148,7 +150,8 @@ public class MapPoolCommands {
       desc = "Skips one or more maps from the current rotation.",
       descFooter = "[positions]")
   public static void skip(
-      CommandSender sender, MatchManager matchManager, /*@Default("1")TODO ADD DEFAULT*/ int positions)
+      CommandSender sender, MatchManager matchManager,
+      @Arg(desc = "The amount of positions end-user wants to skip", def = "1") int positions)
   {
 
     if (positions < 0) {
