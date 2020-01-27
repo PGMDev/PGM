@@ -2,11 +2,9 @@ package tc.oc.pgm.commands;
 
 import static com.google.common.base.Preconditions.*;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.CommandException;
-import app.ashcon.intake.bukkit.parametric.Type;
-import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
-import app.ashcon.intake.parametric.annotation.Switch;
+import org.enginehub.piston.annotation.CommandContainer;
+import org.enginehub.piston.annotation.Command;
+import org.enginehub.piston.annotation.param.ArgFlag;
 import com.google.common.collect.ImmutableSortedSet;
 import java.net.URL;
 import java.util.List;
@@ -40,22 +38,22 @@ import tc.oc.pgm.util.PrettyPaginatedResult;
 import tc.oc.util.components.ComponentUtils;
 import tc.oc.util.components.Components;
 
+@CommandContainer
 public class MapCommands {
 
   @Command(
-      aliases = {"maplist", "maps", "ml"},
-      desc = "Shows the maps that are currently loaded",
-      usage = "[-a <author>] [-p <page>] [[!]#<maptag>...]",
-      help =
-          "Shows all the maps that are currently loaded including ones that are not in the rotation.")
+          name = "maplist",
+          aliases = {"maps", "ml"},
+          desc = "Shows all the maps that are currently loaded including ones that are not in the rotation.",
+          descFooter = "[-a <author>] [-p <page>] [[!]#<maptag>...]")
   public static void maplist(
       Audience audience,
       CommandSender sender,
       MapLibrary library,
       MapTagsCondition mapTags,
-      @Fallback(Type.NULL) @Switch('a') String author,
-      @Fallback(Type.NULL) @Switch('p') Integer page)
-      throws CommandException {
+      @ArgFlag(name = 'a', desc="author") String author,
+      @ArgFlag(name = 'p', desc="page") Integer page)
+{
     if (page == null) page = 1;
 
     Stream<PGMMap> search = library.getMaps().stream().filter(mapTags);
@@ -94,9 +92,10 @@ public class MapCommands {
   }
 
   @Command(
-      aliases = {"mapinfo", "map"},
-      desc = "Shows information a certain map",
-      usage = "[map name] - defaults to the current map")
+          name = "mapinfo",
+          aliases = {"map"},
+          desc = "Shows information a certain map",
+          descFooter = "[map name] - defaults to the current map")
   public void map(Audience audience, CommandSender sender, @Text PGMMap map) {
     MapInfo mapInfo = map.getInfo();
     audience.sendMessage(mapInfo.getFormattedMapTitle());
@@ -244,8 +243,9 @@ public class MapCommands {
   }
 
   @Command(
-      aliases = {"mapnext", "mn", "nextmap", "nm", "next"},
-      desc = "Shows which map is coming up next")
+          name = "mapnext",
+          aliases = {"mn", "nextmap", "nm", "next"},
+          desc = "Shows which map is coming up next")
   public void next(Audience audience, CommandSender sender, MatchManager matchManager) {
     final PGMMap next = matchManager.getMapOrder().getNextMap();
 

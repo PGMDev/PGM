@@ -40,6 +40,7 @@ import tc.oc.pgm.map.PGMMap.MapLogRecord;
 import tc.oc.pgm.util.PrettyPaginatedResult;
 import tc.oc.world.NMSHacks;
 
+@CommandContainer
 public class MapDevelopmentCommands {
 
   @Command(

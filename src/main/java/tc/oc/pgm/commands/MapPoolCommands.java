@@ -2,6 +2,7 @@ package tc.oc.pgm.commands;
 
 import org.enginehub.piston.annotation.CommandContainer;
 import org.enginehub.piston.annotation.Command;
+import org.enginehub.piston.annotation.param.ArgFlag;
 import org.enginehub.piston.annotation.param.Switch;
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -37,8 +38,8 @@ public class MapPoolCommands {
       CommandSender sender,
       MatchManager matchManager,
       /*@Default("1")TODO ADD DEFAULT*/ int page,
-      @Switch(name ='r', desc = "Shows which maps is in a specified rotation") String rotationName,
-      @Switch(name = 'p', desc = "Shows which maps is in a specified pool") String poolName,
+      @ArgFlag(name ='r', desc = "Shows which maps is in a specified rotation") String rotationName,
+      @ArgFlag(name = 'p', desc = "Shows which maps is in a specified pool") String poolName,
       @Switch(name = 's', desc = "Shows the scores of the maps displayed") boolean scores,
       @Switch(name = 'c', desc = "Shows the chance of vote of the maps displayed") boolean chance)
   {

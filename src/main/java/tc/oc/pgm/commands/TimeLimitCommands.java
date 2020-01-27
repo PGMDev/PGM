@@ -1,10 +1,8 @@
 package tc.oc.pgm.commands;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.CommandException;
-import app.ashcon.intake.bukkit.parametric.Type;
-import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
-import app.ashcon.intake.parametric.annotation.Switch;
+import org.enginehub.piston.annotation.CommandContainer;
+import org.enginehub.piston.annotation.Command;
+import org.enginehub.piston.annotation.param.ArgFlag;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.joda.time.Duration;
@@ -20,20 +18,20 @@ import tc.oc.pgm.timelimit.TimeLimit;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.util.components.PeriodFormats;
 
+@CommandContainer
 public class TimeLimitCommands {
 
   @Command(
-      aliases = {"timelimit", "tl"},
-      desc = "Start, update, or cancel a time limit",
-      usage = "cancel | [-r result] [duration]",
-      help = "Result can be 'default', 'objectives', 'tie', or the name of a team",
-      flags = "r")
+          name = "timelimit",
+          aliases = {"tl"},
+          desc = "Start, update, or cancel a time limit. Result can be 'default', 'objectives', 'tie', or the name of a team",
+          descFooter = "cancel | [-r result] [duration]")
   public static void timelimit(
       CommandSender sender,
       Match match,
       String durationString,
-      @Fallback(Type.NULL) @Switch('r') String resultString)
-      throws CommandException {
+      @ArgFlag(name = 'r', desc = "Result")String resultString)
+  {
     TimeLimitMatchModule tlmm = match.getMatchModule(TimeLimitMatchModule.class);
     TimeLimit existing = tlmm.getTimeLimit();
 
@@ -55,7 +53,7 @@ public class TimeLimitCommands {
       }
     } else {
       if (!sender.hasPermission(Permissions.GAMEPLAY)) {
-        throw new CommandException("You don't have permission to do that");
+        throw new SecurityException("You don't have permission to do that");
       }
 
       if ("cancel".equals(durationString)) {
@@ -68,7 +66,7 @@ public class TimeLimitCommands {
           try {
             result = VictoryConditions.parse(match.getMapContext(), resultString);
           } catch (IllegalArgumentException ex) {
-            throw new CommandException("Invalid result or team name: " + resultString);
+            throw new IllegalArgumentException("Invalid result or team name: " + resultString);
           }
         } else if (existing != null) {
           result = existing.getResult();
@@ -81,12 +79,12 @@ public class TimeLimitCommands {
           try {
             duration = PeriodFormats.SHORTHAND.parsePeriod(durationString).toStandardDuration();
           } catch (IllegalArgumentException ex) {
-            throw new CommandException("Invalid time format: " + durationString);
+            throw new IllegalArgumentException("Invalid time format: " + durationString);
           }
         } else if (existing != null) {
           duration = existing.getDuration();
         } else {
-          throw new CommandException("Please specify a duration");
+          throw new IllegalArgumentException("Please specify a duration");
         }
 
         tlmm.cancel();

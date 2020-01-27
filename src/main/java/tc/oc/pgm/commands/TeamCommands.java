@@ -1,11 +1,8 @@
 package tc.oc.pgm.commands;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.CommandException;
-import app.ashcon.intake.bukkit.parametric.Type;
-import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
-import app.ashcon.intake.parametric.annotation.Switch;
-import app.ashcon.intake.parametric.annotation.Text;
+import org.enginehub.piston.annotation.CommandContainer;
+import org.enginehub.piston.annotation.Command;
+import org.enginehub.piston.annotation.param.ArgFlag;
 import java.util.*;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -15,15 +12,18 @@ import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 
+@CommandContainer
 public class TeamCommands {
 
   @Command(
-      aliases = {"myteam", "mt"},
-      desc = "Shows you what team you are on")
-  public static void myTeam(CommandSender sender, MatchPlayer player) throws CommandException {
+          name = "myteam",
+          aliases = {"mt"},
+          desc = "Shows you what team you are on")
+  public static void myTeam(CommandSender sender, MatchPlayer player){
     if (player.getParty() instanceof Team) {
       sender.sendMessage(
           ChatColor.GRAY
@@ -33,16 +33,15 @@ public class TeamCommands {
                       player.getBukkit(),
                       player.getParty().getColoredName() + ChatColor.GRAY));
     } else {
-      throw new CommandException(
+      throw new IllegalStateException(
           AllTranslations.get().translate("command.gameplay.myteam.notOnTeam", sender));
     }
   }
 
   @Command(
-      aliases = {"force"},
+      name = "force",
       desc = "Force a player onto a team",
-      usage = "<player> [team]",
-      perms = Permissions.JOIN_FORCE)
+      descFooter = "<player> [team]")
   public static void force(Match match, TeamMatchModule tmm, Player player, @Text String teamName) {
     MatchPlayer matchPlayer = match.getPlayer(player);
     if (teamName != null) {
@@ -58,13 +57,12 @@ public class TeamCommands {
   }
 
   @Command(
-      aliases = {"shuffle"},
-      desc = "Shuffle the teams",
-      perms = Permissions.JOIN_FORCE)
+      name = "shuffle",
+      desc = "Shuffle the teams")
   public static void shuffle(CommandSender sender, TeamMatchModule tmm, Match match)
-      throws CommandException {
+  {
     if (match.isRunning()) {
-      throw new CommandException(
+      throw new IllegalStateException(
           AllTranslations.get().translate("command.team.shuffle.matchRunning", sender));
     } else {
       List<Team> teams = new ArrayList<>(tmm.getParticipatingTeams());
@@ -78,26 +76,25 @@ public class TeamCommands {
   }
 
   @Command(
-      aliases = {"alias"},
+      name = "alias",
       desc = "Rename a team",
-      usage = "<old name> <new name>",
-      perms = Permissions.GAMEPLAY)
+      descFooter = "<old name> <new name>")
   public static void alias(
       CommandSender sender, TeamMatchModule tmm, Match match, String target, @Text String newName)
-      throws CommandException {
+  {
     Team team = tmm.bestFuzzyMatch(target);
 
     if (team == null) {
-      throw new CommandException(AllTranslations.get().translate("command.teamNotFound", sender));
+      throw new NoSuchElementException(AllTranslations.get().translate("command.teamNotFound", sender));
     }
 
     if (newName.length() > 32) {
-      throw new CommandException("Team name cannot be longer than 32 characters");
+      throw new IllegalArgumentException("Team name cannot be longer than 32 characters");
     }
 
     for (Team t : tmm.getTeams()) {
       if (t.getName().equalsIgnoreCase(newName)) {
-        throw new CommandException(
+        throw new IllegalArgumentException(
             AllTranslations.get().translate("command.team.alias.nameAlreadyUsed", sender, newName));
       }
     }
@@ -109,26 +106,25 @@ public class TeamCommands {
   }
 
   @Command(
-      aliases = {"max", "size"},
-      desc = "Change the maximum size and overfill size of a team.",
-      usage = "<team> (default | [-p max-players] [-o max-overfill])",
-      flags = "po",
-      perms = Permissions.RESIZE)
+          name = "max",
+          aliases= {"size"},
+          desc = "Change the maximum size and overfill size of a team.",
+          descFooter = "<team> (default | [-p max-players] [-o max-overfill])")
   public static void maxPlayers(
       CommandSender sender,
       TeamMatchModule tmm,
       String teamName,
       Optional<String> max,
-      @Fallback(Type.NULL) @Switch('p') Integer maxPlayers,
-      @Fallback(Type.NULL) @Switch('o') Integer maxOverfill)
-      throws CommandException {
+      @ArgFlag(name = 'p', desc = "Define the max amount of players on a team") Integer maxPlayers,
+      @ArgFlag(name = 'o', desc = "Define the max amount of overfill permitted on a team") Integer maxOverfill)
+ {
     Collection<Team> teams = getTeams(sender, tmm, teamName);
 
     if (max.isPresent() && "default".equals(max.get())) {
       teams.forEach(Team::resetMinSize);
     } else {
       if (maxPlayers == null && maxOverfill == null) {
-        throw new CommandException(
+        throw new IllegalArgumentException(
             AllTranslations.get()
                 .translate(
                     "commands.incorrectUsage",
@@ -140,10 +136,10 @@ public class TeamCommands {
         maxPlayers = maxPlayers == null ? team.getMaxPlayers() : maxPlayers;
         maxOverfill = maxOverfill == null ? maxPlayers : maxOverfill;
 
-        if (maxPlayers < 0) throw new CommandException("max-players cannot be less than 0");
+        if (maxPlayers < 0) throw new IllegalArgumentException("max-players cannot be less than 0");
 
         if (maxOverfill < maxPlayers)
-          throw new CommandException("max-overfill cannot be less than max-players");
+          throw new IllegalArgumentException("max-overfill cannot be less than max-players");
 
         team.setMaxSize(maxPlayers, maxOverfill);
       }
@@ -164,19 +160,18 @@ public class TeamCommands {
   }
 
   @Command(
-      aliases = {"min"},
+      name = "min",
       desc = "Change the minimum size of a team.",
-      usage = "<team> (default | <min-players>)",
-      perms = Permissions.RESIZE)
+      descFooter = "<team> (default | <min-players>)")
   public static void min(CommandSender sender, TeamMatchModule tmm, String teamName, String value)
-      throws CommandException {
+  {
     Collection<Team> teams = getTeams(sender, tmm, teamName);
 
     if ("default".equals(value)) {
       teams.forEach(Team::resetMinSize);
     } else {
       int minPlayers = Integer.parseInt(value);
-      if (minPlayers < 0) throw new CommandException("min-players cannot be less than 0");
+      if (minPlayers < 0) throw new IllegalArgumentException("min-players cannot be less than 0");
       teams.forEach(team -> team.setMinSize(minPlayers));
     }
 
@@ -191,7 +186,7 @@ public class TeamCommands {
   }
 
   private static Collection<Team> getTeams(
-      CommandSender sender, TeamMatchModule tmm, String teamName) throws CommandException {
+      CommandSender sender, TeamMatchModule tmm, String teamName){
     Collection<Team> teams;
 
     // Check for all (*) selector
@@ -199,7 +194,7 @@ public class TeamCommands {
     else teams = Collections.singletonList(tmm.bestFuzzyMatch(teamName));
 
     if (teams.size() == 0)
-      throw new CommandException(AllTranslations.get().translate("command.teamNotFound", sender));
+      throw new NoSuchElementException(AllTranslations.get().translate("command.teamNotFound", sender));
 
     return teams;
   }
