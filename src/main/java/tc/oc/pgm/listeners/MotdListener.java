@@ -31,7 +31,9 @@ public class MotdListener implements Listener {
     this.format = Config.Motd.format();
 
     // Ensure there are always default keys
-    final MapInfo map = PGM.get().getMapOrder().getNextMap();
+    MapInfo map = PGM.get().getMapOrder().getNextMap();
+    if (map == null) map = PGM.get().getMapLibrary().getMaps().next();
+
     MOTD_DATA.put(MAP_NAME_KEY, map.getName());
     MOTD_DATA.put(MAP_VERSION_KEY, map.getVersion().toString());
     MOTD_DATA.put(STATE_NAME_KEY, "Idle");
