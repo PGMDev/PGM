@@ -3,9 +3,8 @@ package tc.oc.pgm.match;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.File;
-import java.util.Map;
+import java.time.Duration;
 import java.util.Stack;
-import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -19,10 +18,11 @@ import org.bukkit.Difficulty;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
-import org.bukkit.metadata.FixedMetadataValue;
 import tc.oc.chunk.NullChunkGenerator;
+import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.WorldInfo;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.factory.MatchFactory;
@@ -39,7 +39,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
   protected MatchFactoryImpl(String mapId) {
     this.start = new AtomicLong(System.currentTimeMillis());
-    this.timeout = new AtomicLong(Long.MAX_VALUE);
+    this.timeout = new AtomicLong(Config.Experiments.get().getMatchPreLoadSeconds() * 1000L);
     this.stages = new Stack<>();
     this.stages.push(new InitMapStage(checkNotNull(mapId)));
     this.match = Executors.newWorkStealingPool().submit(this);
@@ -68,7 +68,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
         try {
           Bukkit.broadcastMessage(
               "Sleep: " + stage.getClass().getSimpleName() + " " + stage.delay());
-          Thread.sleep(stage.delay());
+          Thread.sleep(stage.delay().toMillis());
         } catch (InterruptedException e) {
           return rollback(e);
         }
@@ -84,11 +84,9 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
       // If there is no other stage, commit the match.
       if (done == null) {
-        Bukkit.broadcastMessage("Done!");
         stages.clear();
         return stage.commit();
       } else {
-        Bukkit.broadcastMessage("Ok: " + done.getClass().getSimpleName());
         stages.push(done);
       }
     }
@@ -158,12 +156,12 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
     }
 
     /**
-     * Get the number of millis to wait before the next {@link Stage}.
+     * Get the duration to wait before the next {@link Stage}.
      *
-     * @return Number of millis to wait.
+     * @return Duration to wait.
      */
-    default long delay() {
-      return 1000L;
+    default Duration delay() {
+      return Duration.ofSeconds(1);
     }
 
     /**
@@ -193,17 +191,24 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
   /** Stage #2: downloads a {@link MapContext} to a local directory. */
   private static class DownloadMapStage implements Stage {
     private final MapContext map;
+    private File dir;
 
     private DownloadMapStage(MapContext map) {
       this.map = checkNotNull(map);
     }
 
     private File getDirectory() {
-      return new File(PGM.get().getServer().getWorldContainer().getAbsoluteFile(), map.getId());
+      if (dir == null) {
+        dir =
+            new File(
+                PGM.get().getServer().getWorldContainer().getAbsoluteFile(),
+                "match-" + counter.getAndIncrement());
+      }
+      return dir;
     }
 
     private InitWorldStage advanceSync() throws MapMissingException {
-      rollback(); // Always ensure the directory is empty first
+      FileUtils.delete(getDirectory()); // Always ensure the directory is empty first
 
       final File dir = getDirectory();
       if (dir.mkdirs()) {
@@ -222,6 +227,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
     @Override
     public void rollback() {
+      counter.getAndDecrement();
       FileUtils.delete(getDirectory());
     }
   }
@@ -236,32 +242,28 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
       this.worldName = checkNotNull(worldName);
     }
 
-    private InitMatchStage advanceSync() throws IllegalStateException {
+    private Stage advanceSync() throws IllegalStateException {
+      final WorldInfo info = map.getWorld();
       final World world =
           PGM.get()
               .getServer()
               .createWorld(
                   new WorldCreator(worldName)
-                      .environment(World.Environment.NORMAL)
-                      .generator(new NullChunkGenerator())
-                      .seed(0L));
+                      .environment(World.Environment.values()[info.getEnvironment()])
+                      .generator(info.hasTerrain() ? null : new NullChunkGenerator())
+                      .seed(info.getSeed()));
       if (world == null) throw new IllegalStateException("Unable to load a null world");
 
-      world.setMetadata("map", new FixedMetadataValue(PGM.get(), map.getId()));
       world.setPVP(true);
       world.setSpawnFlags(false, false);
       world.setAutoSave(false);
-
-      final Difficulty[] diff = Difficulty.values();
-      if (map.getDifficulty() < diff.length) {
-        world.setDifficulty(diff[Math.max(0, map.getDifficulty())]);
-      }
+      world.setDifficulty(Difficulty.values()[map.getDifficulty()]);
 
       return new InitMatchStage(world, map);
     }
 
     @Override
-    public Future<InitMatchStage> advance() {
+    public Future<Stage> advance() {
       return runMainThread(this::advanceSync);
     }
 
@@ -275,8 +277,8 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
     }
 
     @Override
-    public long delay() {
-      return 5 * 1000L; // 5 seconds
+    public Duration delay() {
+      return Duration.ofSeconds(5);
     }
   }
 
@@ -291,7 +293,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
     }
 
     private MoveMatchStage advanceSync() {
-      final String id = Long.toString(counter.getAndIncrement());
+      final String id = Long.toString(counter.get() - 1);
       final Match match = new MatchImpl(id, map, world);
 
       match.load();
@@ -303,49 +305,31 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
     public Future<? extends Stage> advance() {
       return runMainThread(this::advanceSync);
     }
-
-    @Override
-    public void rollback() {
-      runMainThread(counter::decrementAndGet);
-    }
   }
 
   /** Stage #5: teleport {@link Player}s to the {@link Match}, with time delays. */
   private static class MoveMatchStage implements Stage {
-    private static final long PLAYERS_PER_SECOND = 4;
     private final Match match;
-    private final Map<Player, Match> oldMatches;
 
     private MoveMatchStage(Match match) {
       this.match = checkNotNull(match);
-      this.oldMatches = new WeakHashMap<>();
-
-      for (Match oldMatch : PGM.get().getMatchManager().getMatches()) {
-        for (MatchPlayer player : oldMatch.getPlayers()) {
-          oldMatches.put(player.getBukkit(), oldMatch);
-        }
-      }
-    }
-
-    private Stage advancePlayerSync(Player player, Match oldMatch) {
-      if (match.getPlayer(player) != null) return null;
-
-      Bukkit.broadcastMessage("Teleport: " + player.getName());
-      oldMatch.removePlayer(player);
-      match.addPlayer(player);
-
-      return this;
     }
 
     private Stage advanceSync() {
-      Stage stage = null;
+      for (Match otherMatch : PGM.get().getMatchManager().getMatches()) {
+        if (match.equals(otherMatch)) continue;
+        for (MatchPlayer player : otherMatch.getPlayers()) {
+          final Player bukkit = player.getBukkit();
 
-      for (Map.Entry<Player, Match> entry : oldMatches.entrySet()) {
-        stage = advancePlayerSync(entry.getKey(), entry.getValue());
-        if (stage != null) break;
+          otherMatch.removePlayer(bukkit);
+          match.addPlayer(bukkit);
+
+          return this;
+        }
+        otherMatch.unload();
       }
 
-      return stage;
+      return null;
     }
 
     @Override
@@ -353,25 +337,11 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
       return runMainThread(this::advanceSync);
     }
 
-    private boolean rollbackSync() {
-      if (match.isLoaded()) match.unload();
-
-      for (Map.Entry<Player, Match> entry : oldMatches.entrySet()) {
-        entry.getValue().addPlayer(entry.getKey());
-      }
-      oldMatches.clear();
-
-      return true;
-    }
-
     @Override
-    public void rollback() {
-      runMainThread(this::rollbackSync);
-    }
-
-    @Override
-    public long delay() {
-      return 1000L / PLAYERS_PER_SECOND;
+    public Duration delay() {
+      return Duration.ofMillis(
+          Duration.ofSeconds(1).toMillis()
+              / Config.Experiments.get().getPlayerTeleportsPerSecond());
     }
 
     @Override

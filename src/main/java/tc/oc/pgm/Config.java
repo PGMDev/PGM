@@ -384,9 +384,10 @@ public class Config {
   }
 
   public static class Experiments implements Listener {
-    private int preload;
-    private int tabRenderDelay;
-    private int destroyMatchDelay;
+    private int matchPreLoadSeconds;
+    private int matchDestroySeconds;
+    private int matchTeleportsPerSecond;
+    private int tabRenderTicks;
 
     @EventHandler
     public void onConfigLoad(ConfigLoadEvent event) throws InvalidConfigurationException {
@@ -394,9 +395,10 @@ public class Config {
     }
 
     public void load(ConfigurationSection config) throws InvalidConfigurationException {
-      this.preload = config.getInt("preload-matches", 15);
-      this.tabRenderDelay = config.getInt("tab-render-delay", 5);
-      this.destroyMatchDelay = config.getInt("destroy-match-delay", 100);
+      this.matchPreLoadSeconds = Math.max(0, config.getInt("match-preload-seconds", 10));
+      this.matchDestroySeconds = Math.max(0, config.getInt("match-destroy-seconds", 10));
+      this.matchTeleportsPerSecond = Math.max(1, config.getInt("match-teleports-per-second", 10));
+      this.tabRenderTicks = Math.max(1, config.getInt("tab-render-ticks", 10));
     }
 
     private static final Experiments instance = new Experiments();
@@ -405,16 +407,20 @@ public class Config {
       return instance;
     }
 
-    public int getPreload() {
-      return preload;
+    public int getMatchPreLoadSeconds() {
+      return matchPreLoadSeconds;
     }
 
-    public int getTabRenderDelay() {
-      return tabRenderDelay;
+    public int getMatchDestroySeconds() {
+      return matchDestroySeconds;
     }
 
-    public int getDestroyMatchDelay() {
-      return destroyMatchDelay;
+    public int getTabRenderTicks() {
+      return tabRenderTicks;
+    }
+
+    public int getPlayerTeleportsPerSecond() {
+      return matchTeleportsPerSecond;
     }
   }
 

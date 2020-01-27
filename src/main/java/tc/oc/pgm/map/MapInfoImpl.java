@@ -20,6 +20,7 @@ import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
+import tc.oc.pgm.api.map.WorldInfo;
 import tc.oc.pgm.map.contrib.PlayerContributor;
 import tc.oc.pgm.map.contrib.PseudonymContributor;
 import tc.oc.pgm.util.TranslationUtils;
@@ -30,8 +31,6 @@ import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
 public class MapInfoImpl implements MapInfo {
-  private static final int DEFAULT_DIFFICULTY = Difficulty.NORMAL.ordinal();
-
   private final String id;
   private final Version proto;
   private final Version version;
@@ -41,6 +40,8 @@ public class MapInfoImpl implements MapInfo {
   private final Collection<Contributor> contributors;
   private final Collection<String> rules;
   private final int difficulty;
+  private final WorldInfo world;
+
   protected final Collection<MapTag> tags;
   protected final Collection<Integer> players;
 
@@ -55,7 +56,8 @@ public class MapInfoImpl implements MapInfo {
       @Nullable Collection<String> rules,
       @Nullable Integer difficulty,
       @Nullable Collection<MapTag> tags,
-      @Nullable Collection<Integer> players) {
+      @Nullable Collection<Integer> players,
+      @Nullable WorldInfo world) {
     this.name = checkNotNull(name);
     this.id = checkNotNull(MapInfo.normalizeName(id == null ? name : id));
     this.proto = checkNotNull(proto);
@@ -64,9 +66,10 @@ public class MapInfoImpl implements MapInfo {
     this.authors = authors == null ? new LinkedList<>() : authors;
     this.contributors = contributors == null ? new LinkedList<>() : contributors;
     this.rules = rules == null ? new LinkedList<>() : rules;
-    this.difficulty = difficulty == null ? DEFAULT_DIFFICULTY : difficulty;
+    this.difficulty = difficulty == null ? Difficulty.NORMAL.ordinal() : difficulty;
     this.tags = tags == null ? new TreeSet<>() : tags;
     this.players = players == null ? new LinkedList<>() : players;
+    this.world = world == null ? new WorldInfoImpl() : world;
   }
 
   public MapInfoImpl(MapInfo info) {
@@ -81,7 +84,8 @@ public class MapInfoImpl implements MapInfo {
         info.getRules(),
         info.getDifficulty(),
         info.getTags(),
-        info.getMaxPlayers());
+        info.getMaxPlayers(),
+        info.getWorld());
   }
 
   public MapInfoImpl(Element root) throws InvalidXMLException {
@@ -101,7 +105,8 @@ public class MapInfoImpl implements MapInfo {
                 Difficulty.NORMAL)
             .ordinal(),
         null,
-        null);
+        null,
+        parseWorld(root));
   }
 
   @Override
@@ -157,6 +162,11 @@ public class MapInfoImpl implements MapInfo {
   @Override
   public Collection<Integer> getMaxPlayers() {
     return players;
+  }
+
+  @Override
+  public WorldInfo getWorld() {
+    return world;
   }
 
   @Override
@@ -234,5 +244,10 @@ public class MapInfoImpl implements MapInfo {
       }
     }
     return contributors;
+  }
+
+  private static WorldInfo parseWorld(Element root) throws InvalidXMLException {
+    final Element world = root.getChild("terrain");
+    return world == null ? new WorldInfoImpl() : new WorldInfoImpl(world);
   }
 }

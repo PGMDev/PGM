@@ -13,14 +13,32 @@ import java.util.Map;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.Material;
-import org.bukkit.Physical;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
-import org.bukkit.event.*;
-import org.bukkit.event.block.*;
+import org.bukkit.event.Event;
+import org.bukkit.event.EventException;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.block.BlockFadeEvent;
+import org.bukkit.event.block.BlockFallEvent;
+import org.bukkit.event.block.BlockFormEvent;
+import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.BlockGrowEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockMultiPlaceEvent;
+import org.bukkit.event.block.BlockPistonEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.ExplosionPrimeByEntityEvent;
@@ -81,10 +99,11 @@ public class BlockTransformListener implements Listener {
             new EventExecutor() {
               @Override
               public void execute(Listener listener, Event event) throws EventException {
-                // Ignore the event if it was fron a non-Match world
-                if (event instanceof Physical
-                    && PGM.get().getMatchManager().getMatch(((Physical) event).getWorld()) == null)
-                  return;
+                // REMOVED: Ignore the event if it was fron a non-Match world
+                // if (event instanceof Physical
+                //    && PGM.get().getMatchManager().getMatch(((Physical) event).getWorld()) ==
+                // null)
+                //  return;
 
                 if (!Events.isCancelled(event)) {
                   // At the first priority level, call the event handler method.

@@ -30,6 +30,7 @@ public class PortalMatchModule implements MatchModule, Listener {
     }
 
     MatchPlayer player = this.match.getPlayer(event.getPlayer());
+    if (player == null) return;
 
     for (Portal portal : this.portals) {
       if (portal.teleportEligiblePlayer(

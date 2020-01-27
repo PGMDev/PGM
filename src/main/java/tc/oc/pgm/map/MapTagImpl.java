@@ -1,19 +1,25 @@
 package tc.oc.pgm.map;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.regex.Pattern;
 import tc.oc.pgm.api.map.MapTag;
 
 public class MapTagImpl implements MapTag {
 
-  private static final String HASHTAG = "#";
+  private static final Pattern PATTERN = Pattern.compile("^[a-z0-9_-]+$");
+  private static final String SYMBOL = "#";
+
   private final String id;
   private final String name;
   private final boolean gamemode;
   private final boolean auxiliary;
 
   public MapTagImpl(String id, String name, boolean gamemode, boolean auxiliary) {
-    this.id = checkNotNull(id);
+    checkArgument(
+        PATTERN.matcher(checkNotNull(id)).matches(), name + " must match " + PATTERN.pattern());
+    this.id = id;
     this.name = checkNotNull(name);
     this.gamemode = gamemode;
     this.auxiliary = auxiliary;
@@ -52,6 +58,6 @@ public class MapTagImpl implements MapTag {
 
   @Override
   public String toString() {
-    return HASHTAG + getId();
+    return SYMBOL + getId();
   }
 }

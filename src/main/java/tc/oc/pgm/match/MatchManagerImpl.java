@@ -2,28 +2,34 @@ package tc.oc.pgm.match;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Iterables;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
+import tc.oc.pgm.api.match.event.MatchUnloadEvent;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.util.ClassLogger;
 
 public class MatchManagerImpl implements MatchManager, Listener {
 
+  private final Logger logger;
   private final Map<String, Match> matchById;
   private final Map<String, Match> matchByWorld;
 
-  public MatchManagerImpl() {
+  public MatchManagerImpl(Logger logger) {
+    this.logger = ClassLogger.get(checkNotNull(logger), getClass());
     this.matchById = new ConcurrentHashMap<>();
     this.matchByWorld = new ConcurrentHashMap<>();
   }
@@ -34,6 +40,23 @@ public class MatchManagerImpl implements MatchManager, Listener {
 
     matchById.put(checkNotNull(match).getId(), match);
     matchByWorld.put(checkNotNull(match.getWorld()).getName(), match);
+
+    logger.info("Loaded match-" + match.getId() + " (" + match.getMap().getId() + ")");
+  }
+
+  @EventHandler
+  public void onMatchUnload(MatchUnloadEvent event) {
+    final Match match = event.getMatch();
+
+    matchById.remove(checkNotNull(match).getId());
+    matchByWorld.remove(checkNotNull(match.getWorld()).getName());
+    PGM.get()
+        .getServer()
+        .getScheduler()
+        .runTaskLaterAsynchronously(
+            PGM.get(), match::destroy, Config.Experiments.get().getMatchDestroySeconds() * 20);
+
+    logger.info("Unloaded match-" + match.getId() + " (" + match.getMap().getId() + ")");
   }
 
   @Override
@@ -50,7 +73,7 @@ public class MatchManagerImpl implements MatchManager, Listener {
 
   @Override
   public Iterable<Match> getMatches() {
-    return Iterables.filter(matchById.values(), Match::isLoaded);
+    return Collections.unmodifiableCollection(matchById.values());
   }
 
   @Override

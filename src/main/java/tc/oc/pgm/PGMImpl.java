@@ -100,6 +100,7 @@ import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.RandomMapOrder;
 import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.pgm.teams.TeamMatchModule;
+import tc.oc.util.FileUtils;
 import tc.oc.xml.InvalidXMLException;
 
 public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, Listener {
@@ -184,7 +185,7 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
       return;
     }
 
-    matchManager = new MatchManagerImpl();
+    matchManager = new MatchManagerImpl(logger);
 
     if (Config.MapPools.areEnabled()) {
       mapOrder = new MapPoolManager(logger, new File(getDataFolder(), Config.MapPools.getPath()));
@@ -218,6 +219,12 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
     matchTabManager = null;
     nameRenderer = null;
     prefixRegistry = null;
+
+    for (File dir : getServer().getWorldContainer().listFiles()) {
+      if (dir.isDirectory() && dir.getName().startsWith("match-")) {
+        FileUtils.delete(dir);
+      }
+    }
   }
 
   @Override

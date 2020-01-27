@@ -6,6 +6,7 @@ import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.bukkit.parametric.Type;
 import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
+import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Sets;
@@ -48,23 +49,24 @@ public class MapCommands {
   @Command(
       aliases = {"maplist", "maps", "ml"},
       desc = "Shows the maps that are currently loaded",
-      usage = "[-a <author>] [-p <page>] [-# <tag1>,<tag2>]",
+      usage = "[-a <author>] [-# <tag1>,<tag2>]",
       help =
           "Shows all the maps that are currently loaded including ones that are not in the rotation.")
   public static void maplist(
       Audience audience,
       CommandSender sender,
       MapLibrary library,
+      @Default("1") Integer page,
       @Fallback(Type.NULL) @Switch('t') String tags,
-      @Fallback(Type.NULL) @Switch('a') String author,
-      @Fallback(Type.NULL) @Switch('p') Integer page)
+      @Fallback(Type.NULL) @Switch('a') String author)
       throws CommandException {
-    if (page == null) page = 1;
-
     Stream<MapInfo> search = Sets.newHashSet(library.getMaps()).stream();
     if (tags != null) {
       final Set<String> tagSet =
-          Stream.of(tags.split(",")).map(String::trim).collect(Collectors.toSet());
+          Stream.of(tags.split(","))
+              .map(String::toLowerCase)
+              .map(String::trim)
+              .collect(Collectors.toSet());
       search = search.filter(map -> matchesTags(map, tagSet));
     }
 

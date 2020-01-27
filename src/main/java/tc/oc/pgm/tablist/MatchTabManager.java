@@ -73,7 +73,7 @@ public class MatchTabManager extends TabManager implements Listener {
           this.getPlugin()
               .getServer()
               .getScheduler()
-              .runTaskLater(this.getPlugin(), render, Config.Experiments.get().getTabRenderDelay());
+              .runTaskLater(this.getPlugin(), render, Config.Experiments.get().getTabRenderTicks());
     }
   }
 

@@ -92,6 +92,13 @@ public interface MapInfo extends Named, Comparable<MapInfo>, Cloneable {
   Collection<Integer> getMaxPlayers();
 
   /**
+   * Get the {@link WorldInfo} that describes how to load the map.
+   *
+   * @return The {@link WorldInfo}.
+   */
+  WorldInfo getWorld();
+
+  /**
    * Create an immutable copy of this info.
    *
    * @return A cloned {@link MapInfo}.

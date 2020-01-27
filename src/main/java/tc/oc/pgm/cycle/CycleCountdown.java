@@ -22,18 +22,23 @@ public class CycleCountdown extends MatchCountdown {
 
   public CycleCountdown(Match match) {
     super(match);
-    this.preloadTime = Config.Experiments.get().getPreload();
+    this.preloadTime = Config.Experiments.get().getMatchPreLoadSeconds();
   }
 
   private void setNextMap(MapInfo map, boolean end) {
     if (!ended) {
       if (!Objects.equals(nextMap, map)) {
         nextMap = map;
-        if (nextMatch != null) nextMatch.cancel(true);
+        if (nextMatch != null) {
+          nextMatch.cancel(true);
+        }
         nextMatch = null;
       }
       if (map != null && nextMatch == null && remaining.getStandardSeconds() <= preloadTime) {
         nextMatch = PGM.get().getMatchManager().createMatch(nextMap.getId());
+      }
+      if (end && nextMatch != null) {
+        nextMatch.await();
       }
     }
     ended |= end;
@@ -71,6 +76,5 @@ public class CycleCountdown extends MatchCountdown {
   public void onEnd(Duration total) {
     super.onEnd(total);
     setNextMap(PGM.get().getMapOrder().popNextMap(), true);
-    nextMatch.await();
   }
 }
