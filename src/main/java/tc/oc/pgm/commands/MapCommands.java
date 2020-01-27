@@ -8,9 +8,13 @@ import app.ashcon.intake.bukkit.parametric.Type;
 import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
 import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Sets;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -62,12 +66,19 @@ public class MapCommands {
       throws CommandException {
     Stream<MapInfo> search = Sets.newHashSet(library.getMaps()).stream();
     if (tags != null) {
-      final Set<String> tagSet =
+      final Map<Boolean, List<String>> tagSet =
           Stream.of(tags.split(","))
               .map(String::toLowerCase)
               .map(String::trim)
-              .collect(Collectors.toSet());
-      search = search.filter(map -> matchesTags(map, tagSet));
+              .collect(Collectors.partitioningBy(s -> s.startsWith("!")));
+      search =
+          search.filter(
+              map ->
+                  matchesTags(
+                      map,
+                      tagSet.getOrDefault(false, new LinkedList<>()),
+                      Collections2.transform(
+                          tagSet.getOrDefault(true, new LinkedList<>()), s -> s.substring(1))));
     }
 
     if (author != null) {
@@ -92,14 +103,18 @@ public class MapCommands {
     }.display(audience, ImmutableSortedSet.copyOf(maps), page);
   }
 
-  private static boolean matchesTags(MapInfo map, Set<String> tags) {
-    if (checkNotNull(tags).isEmpty()) return true;
+  private static boolean matchesTags(
+      MapInfo map, Collection<String> posTags, Collection<String> negTags) {
+    int matches = 0;
     for (MapTag tag : checkNotNull(map).getTags()) {
-      if (!tags.contains(tag.getId())) {
+      if (negTags.contains(tag.getId())) {
         return false;
       }
+      if (posTags.contains(tag.getId())) {
+        matches++;
+      }
     }
-    return true;
+    return matches == posTags.size();
   }
 
   private static boolean matchesAuthor(MapInfo map, String query) {
