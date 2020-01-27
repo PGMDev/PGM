@@ -1,5 +1,6 @@
 package tc.oc.pgm.commands.provider;
 
+import app.ashcon.intake.argument.ArgumentException;
 import app.ashcon.intake.argument.CommandArgs;
 import app.ashcon.intake.bukkit.parametric.provider.BukkitProvider;
 import java.lang.annotation.Annotation;
@@ -22,7 +23,12 @@ public class MatchProvider implements BukkitProvider<Match> {
   }
 
   @Override
-  public Match get(CommandSender sender, CommandArgs args, List<? extends Annotation> list) {
-    return matchManager.getMatch(sender);
+  public Match get(CommandSender sender, CommandArgs args, List<? extends Annotation> list)
+      throws ArgumentException {
+    final Match match = matchManager.getMatch(sender);
+    if (match == null) {
+      throw new ArgumentException("You must be in a Match to use this command!");
+    }
+    return match;
   }
 }
