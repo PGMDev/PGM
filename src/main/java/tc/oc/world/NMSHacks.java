@@ -1026,4 +1026,8 @@ public interface NMSHacks {
   static void openBook(org.bukkit.inventory.ItemStack book, Player player) {
     ((CraftPlayer) player).getHandle().openBook(CraftItemStack.asNMSCopy(book));
   }
+
+  static int getProtocolVersion(Player player) {
+    return ((CraftPlayer) player).getHandle().playerConnection.networkManager.protocolVersion;
+  }
 }

@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
@@ -45,6 +46,7 @@ import tc.oc.pgm.filters.query.IPlayerQuery;
 import tc.oc.pgm.filters.query.PlayerQuery;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.WalkSpeedKit;
+import tc.oc.util.ViaUtils;
 import tc.oc.util.logging.ClassLogger;
 import tc.oc.world.DeathOverride;
 import tc.oc.world.NMSHacks;
@@ -62,6 +64,7 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
   private final AtomicBoolean frozen;
   private final AtomicBoolean dead;
   private final AtomicBoolean visible;
+  private final AtomicInteger protocolVersion;
 
   public MatchPlayerImpl(Match match, Player player) {
     this.logger =
@@ -75,6 +78,7 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
     this.frozen = new AtomicBoolean(false);
     this.dead = new AtomicBoolean(false);
     this.visible = new AtomicBoolean(false);
+    this.protocolVersion = new AtomicInteger(ViaUtils.getProtocolVersion(player));
   }
 
   @Override
@@ -327,6 +331,11 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
                 }
               }
             });
+  }
+
+  @Override
+  public int getProtocolVersion() {
+    return protocolVersion.get();
   }
 
   @Override
