@@ -272,7 +272,7 @@ public class LongRangeTNTListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerJoin(final PlayerJoinEvent event) {
-    if (ViaUtils.getProtocolVersion(event.getPlayer()) >= 47) {
+    if (ViaUtils.getProtocolVersion(event.getPlayer()) >= ViaUtils.VERSION_1_8) {
       this.viewsByPlayer.put(event.getPlayer(), new View(event.getPlayer()));
     }
   }

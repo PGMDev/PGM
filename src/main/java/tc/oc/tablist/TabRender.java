@@ -54,7 +54,7 @@ public class TabRender {
   }
 
   private void appendAddition(TabEntry entry, int index) {
-    if (ViaUtils.getProtocolVersion(this.view.getViewer()) < 47) {
+    if (ViaUtils.getProtocolVersion(this.view.getViewer()) < ViaUtils.VERSION_1_8) {
       return;
     }
     Skin skin = entry.getSkin(this.view);
@@ -158,7 +158,7 @@ public class TabRender {
   }
 
   public void updateFakeEntity(TabEntry entry, boolean create) {
-    if (ViaUtils.getProtocolVersion(this.view.getViewer()) < 47) {
+    if (ViaUtils.getProtocolVersion(this.view.getViewer()) < ViaUtils.VERSION_1_8) {
       return;
     }
     Player player = entry.getFakePlayer(this.view);
