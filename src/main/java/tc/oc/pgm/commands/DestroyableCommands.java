@@ -1,9 +1,11 @@
 package tc.oc.pgm.commands;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.CommandException;
+import org.enginehub.piston.annotation.CommandContainer;
+import org.enginehub.piston.annotation.Command;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -13,15 +15,16 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.destroyable.Destroyable;
 import tc.oc.pgm.destroyable.DestroyableMatchModule;
 
+@CommandContainer
 public class DestroyableCommands {
-  private static DestroyableMatchModule matchModule(CommandSender sender) throws CommandException {
+  private static DestroyableMatchModule matchModule(CommandSender sender) {
     Match match = PGM.get().getMatchManager().getMatch(sender);
     DestroyableMatchModule dmm = match.getMatchModule(DestroyableMatchModule.class);
-    if (dmm == null) throw new CommandException("No destroyables");
+    if (dmm == null) throw new NoSuchElementException("No destroyables");
     return dmm;
   }
 
-  private static Destroyable lookup(CommandSender sender, String id) throws CommandException {
+  private static Destroyable lookup(CommandSender sender, String id) throws Exception{//TODO use a more descriptive Exception
     Match match = PGM.get().getMatchManager().getMatch(sender);
 
     Destroyable destroyable = match.getFeatureContext().get(id, Destroyable.class);
@@ -30,28 +33,29 @@ public class DestroyableCommands {
     for (Destroyable feature : match.getFeatureContext().getAll(Destroyable.class)) {
       if (feature.getId().startsWith(id)) {
         if (destroyable != null)
-          throw new CommandException("Multiple destroyables have IDs that start with '" + id + "'");
+          throw new Exception("Multiple destroyables have IDs that start with '" + id + "'");
         destroyable = feature;
       }
     }
     if (destroyable != null) return destroyable;
 
-    throw new CommandException("No destroyable with ID '" + id + "'");
+    throw new NoSuchElementException("No destroyable with ID '" + id + "'");
   }
 
-  private static void assertEditPerms(CommandSender sender) throws CommandException {
+  private static void assertEditPerms(CommandSender sender)  {
     if (!sender.hasPermission(Permissions.GAMEPLAY)) {
-      throw new CommandException("You don't have permission to do that");
+      throw new SecurityException("You don't have permission to do that");
     }
   }
 
   @Command(
-      aliases = {"destroyable", "destroyables"},
-      desc = "Commands for working with destroyables (monuments)",
-      usage = "[id [completion[=(<blocks>|<percent>%)]]]")
+          name= "destroyable",
+          aliases = {"destroyables"},
+          desc = "Commands for working with destroyables (monuments)",
+          descFooter = "[id [completion[=(<blocks>|<percent>%)]]]")
   public static void destroyable(
       CommandSender sender, Optional<String> optionalID, Optional<String> optionalAction)
-      throws CommandException {
+      throws Exception/*See "TODO" 26*/ {
 
     if (!optionalID.isPresent()) {
       list(sender);
@@ -72,12 +76,12 @@ public class DestroyableCommands {
         }
         completion(sender, destroyable);
       } else {
-        throw new CommandException("Invalid action '" + action + "'");
+        throw new IllegalArgumentException("Invalid action '" + action + "'");
       }
     }
   }
 
-  public static void list(CommandSender sender) throws CommandException {
+  public static void list(CommandSender sender) {
     List<String> lines = new ArrayList<>();
     lines.add(ChatColor.GRAY + "Destroyables");
 
@@ -102,7 +106,7 @@ public class DestroyableCommands {
   }
 
   public static void details(CommandSender sender, Destroyable destroyable)
-      throws CommandException {
+       {
     List<String> lines = new ArrayList<>();
 
     lines.add(ChatColor.GRAY + "Destroyable " + ChatColor.AQUA + destroyable.getId());
@@ -121,7 +125,7 @@ public class DestroyableCommands {
   }
 
   public static void completion(CommandSender sender, Destroyable destroyable)
-      throws CommandException {
+       {
     sender.sendMessage(
         ChatColor.GRAY
             + "Destroyable "
@@ -143,7 +147,7 @@ public class DestroyableCommands {
   }
 
   public static void setCompletion(CommandSender sender, Destroyable destroyable, String value)
-      throws CommandException {
+  {
     assertEditPerms(sender);
 
     Double completion;
@@ -164,7 +168,7 @@ public class DestroyableCommands {
         destroyable.setBreaksRequired(breaks);
       }
     } catch (IllegalArgumentException e) {
-      throw new CommandException(e.getMessage());
+      throw new IllegalArgumentException(e.getMessage());
     }
   }
 }
