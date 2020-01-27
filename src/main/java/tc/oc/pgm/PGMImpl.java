@@ -40,7 +40,24 @@ import tc.oc.pgm.blockdrops.BlockDropsModule;
 import tc.oc.pgm.bossbar.BossBarModule;
 import tc.oc.pgm.broadcast.BroadcastModule;
 import tc.oc.pgm.classes.ClassModule;
-import tc.oc.pgm.commands.*;
+import tc.oc.pgm.commands.AdminCommands;
+import tc.oc.pgm.commands.ClassCommands;
+import tc.oc.pgm.commands.CycleCommands;
+import tc.oc.pgm.commands.DestroyableCommands;
+import tc.oc.pgm.commands.FreeForAllCommands;
+import tc.oc.pgm.commands.GoalCommands;
+import tc.oc.pgm.commands.InventoryCommands;
+import tc.oc.pgm.commands.JoinCommands;
+import tc.oc.pgm.commands.MapCommands;
+import tc.oc.pgm.commands.MapDevelopmentCommands;
+import tc.oc.pgm.commands.MapPoolCommands;
+import tc.oc.pgm.commands.MatchCommands;
+import tc.oc.pgm.commands.ModeCommands;
+import tc.oc.pgm.commands.ModerationCommands;
+import tc.oc.pgm.commands.SettingCommands;
+import tc.oc.pgm.commands.StartCommands;
+import tc.oc.pgm.commands.TeamCommands;
+import tc.oc.pgm.commands.TimeLimitCommands;
 import tc.oc.pgm.commands.provider.AudienceProvider;
 import tc.oc.pgm.commands.provider.DurationProvider;
 import tc.oc.pgm.commands.provider.MapTagsConditionProvider;
@@ -143,12 +160,13 @@ import tc.oc.pgm.tnt.TNTModule;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.wool.WoolModule;
 import tc.oc.pgm.worldborder.WorldBorderModule;
+import tc.oc.tablist.TabManager;
 import tc.oc.util.SemanticVersion;
 
 public final class PGMImpl extends JavaPlugin implements PGM {
 
   private MatchManager matchManager;
-  private MatchTabManager matchTabManager;
+  private TabManager tabManager;
 
   private Logger mapLogger;
   private MapErrorTracker mapErrorTracker;
@@ -196,8 +214,8 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     return matchManager;
   }
 
-  public MatchTabManager getMatchTabManager() {
-    return matchTabManager;
+  public TabManager getTabManager() {
+    return tabManager;
   }
 
   public Logger getMapLogger() {
@@ -321,8 +339,8 @@ public final class PGMImpl extends JavaPlugin implements PGM {
             });
 
     if (Config.PlayerList.enabled()) {
-      matchTabManager = new MatchTabManager(this);
-      matchTabManager.enable();
+      tabManager = new MatchTabManager(this);
+      tabManager.enable();
     }
 
     prefixRegistry = new PrefixRegistryImpl();
@@ -335,9 +353,9 @@ public final class PGMImpl extends JavaPlugin implements PGM {
 
   @Override
   public void onDisable() {
-    if (matchTabManager != null) {
-      matchTabManager.disable();
-      matchTabManager = null;
+    if (tabManager != null) {
+      tabManager.disable();
+      tabManager = null;
     }
 
     if (matchManager != null) {

@@ -36,7 +36,7 @@ public class PrefixRegistryImpl implements PrefixRegistry, Listener {
     player.setDisplayName(getPrefixedName(player, matchPlayer.getParty()));
     PGM.get().getNameRenderer().invalidateCache(Identities.current(player));
     final PlayerTabEntry tabEntry =
-        (PlayerTabEntry) PGM.get().getMatchTabManager().getPlayerEntryOrNull(player);
+        (PlayerTabEntry) PGM.get().getTabManager().getPlayerEntryOrNull(player);
     if (tabEntry != null) {
       tabEntry.invalidate();
       tabEntry.refresh();
