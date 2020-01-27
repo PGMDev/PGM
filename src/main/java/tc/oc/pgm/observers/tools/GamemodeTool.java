@@ -5,6 +5,7 @@ import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import tc.oc.component.Component;
@@ -55,8 +56,10 @@ public class GamemodeTool implements InventoryMenuItem {
     if (player.getGameMode() == GameMode.SPECTATOR) {
       player.sendWarning(getToggleMessage(), true);
     } else if (isCreative(player)) {
-      // Note: This performs the WorldEdit command to ensure the player is not stuck
-      player.getBukkit().performCommand("worldedit:!");
+      // Note: When WorldEdit is present, this executes a command to ensure the player is not stuck
+      if (Bukkit.getPluginManager().isPluginEnabled("WorldEdit")) {
+        player.getBukkit().performCommand("worldedit:!");
+      }
     }
   }
 
