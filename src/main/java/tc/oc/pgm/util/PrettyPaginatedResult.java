@@ -1,9 +1,11 @@
 package tc.oc.pgm.util;
 
-import app.ashcon.intake.CommandException;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
+
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.pgm.api.chat.Audience;
 
@@ -62,10 +64,10 @@ public abstract class PrettyPaginatedResult<T> {
    * Format sent to the player if no data is provided
    *
    * @return Formatted message
-   * @throws CommandException default implementation exception
+   *
    */
-  public String formatEmpty() throws CommandException {
-    throw new CommandException("No results match!");
+  public String formatEmpty() {
+    throw new NoSuchElementException("No results match!");
   }
 
   /**
@@ -74,10 +76,10 @@ public abstract class PrettyPaginatedResult<T> {
    * @param audience to display data to
    * @param data to display
    * @param page where the data is located
-   * @throws CommandException no match exceptions
+   *
    */
   public void display(Audience audience, Collection<? extends T> data, int page)
-      throws CommandException {
+      {
     display(audience, new ArrayList<>(data), page);
   }
 
@@ -87,9 +89,9 @@ public abstract class PrettyPaginatedResult<T> {
    * @param audience to display data to
    * @param data to display
    * @param page where the data is located
-   * @throws CommandException no match exceptions
+   *
    */
-  public void display(Audience audience, List<? extends T> data, int page) throws CommandException {
+  public void display(Audience audience, List<? extends T> data, int page) {
     if (data.size() == 0) {
       audience.sendMessage(new PersonalizedText(formatEmpty()));
       return;
@@ -102,7 +104,7 @@ public abstract class PrettyPaginatedResult<T> {
     }
 
     if (page <= 0 || page > maxPages)
-      throw new CommandException("Unknown page selected! " + maxPages + " total pages.");
+      throw new IllegalArgumentException("Unknown page selected! " + maxPages + " total pages.");
 
     StringBuilder message = new StringBuilder(header + "\n");
     for (int i = resultsPerPage * (page - 1);

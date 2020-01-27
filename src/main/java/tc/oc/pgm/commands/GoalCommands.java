@@ -1,7 +1,7 @@
 package tc.oc.pgm.commands;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.CommandException;
+import org.enginehub.piston.annotation.CommandContainer;
+import org.enginehub.piston.annotation.Command;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.ChatColor;
@@ -12,17 +12,18 @@ import tc.oc.pgm.goals.*;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 
+@CommandContainer
 public class GoalCommands {
 
   @Command(
-      aliases = {"proximity"},
-      desc = "Show stats about how close each competitor has been to each objective")
+          name = "proximity",
+          desc = "Show stats about how close each competitor has been to each objective")
   public static void proximity(CommandSender sender, MatchPlayer matchPlayer, Match match)
-      throws CommandException {
+  {
     TeamMatchModule tmm = match.needMatchModule(TeamMatchModule.class);
 
     if (matchPlayer != null && matchPlayer.isParticipating()) {
-      throw new CommandException("The /proximity command is only available to observers");
+      throw new IllegalStateException("The /proximity command is only available to observers");
     }
 
     List<String> lines = new ArrayList<>();

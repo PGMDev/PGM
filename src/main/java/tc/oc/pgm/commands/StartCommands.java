@@ -1,7 +1,7 @@
 package tc.oc.pgm.commands;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.CommandException;
+import org.enginehub.piston.annotation.CommandContainer;
+import org.enginehub.piston.annotation.Command;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -16,23 +16,24 @@ import tc.oc.pgm.start.StartCountdown;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
 
+@CommandContainer
 public class StartCommands {
 
   @Command(
-      aliases = {"start", "begin"},
-      desc = "Queues the start of the match in a certain amount of seconds",
-      usage = "[countdown time] [huddle time]",
-      perms = Permissions.START)
+          name = "start",
+          aliases = {"begin"},
+          desc = "Queues the start of the match in a certain amount of seconds",
+          descFooter = "[countdown time] [huddle time]")
   public static void start(CommandSender sender, Match match, Duration countdown, Duration huddle)
-      throws CommandException {
+  {
     StartMatchModule smm = match.needMatchModule(StartMatchModule.class);
 
     if (match.isRunning()) {
-      throw new CommandException(
+      throw new IllegalStateException(
           AllTranslations.get().translate("command.admin.start.matchRunning", sender));
     }
     if (match.isFinished()) {
-      throw new CommandException(
+      throw new IllegalStateException(
           AllTranslations.get().translate("command.admin.start.matchFinished", sender));
     }
 
@@ -56,12 +57,11 @@ public class StartCommands {
   }
 
   @Command(
-      aliases = {"autostart"},
+      name = "autostart",
       desc = "Enable or disable match auto-start",
-      usage = "[on|off]",
-      perms = Permissions.START)
+      descFooter = "[on|off]")
   public static void autostart(CommandSender sender, Match match, @Nullable String toggle)
-      throws CommandException {
+  {
     StartMatchModule smm = match.needMatchModule(StartMatchModule.class);
 
     boolean autoStart;
@@ -74,7 +74,7 @@ public class StartCommands {
           autoStart = false;
           break;
         default:
-          throw new CommandException("Invalid usage. Use [on|off] as the arguments.");
+          throw new NullPointerException("Invalid usage. Use [on|off] as the arguments.");
       }
     } else {
       autoStart = !smm.isAutoStart();

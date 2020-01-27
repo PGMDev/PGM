@@ -1,7 +1,7 @@
 package tc.oc.pgm.commands;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.argument.ArgumentException;
+import org.enginehub.piston.annotation.CommandContainer;
+import org.enginehub.piston.annotation.Command;
 import com.google.common.collect.Lists;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
@@ -15,16 +15,17 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.util.TranslationUtils;
 
+@CommandContainer
 public class SettingCommands {
 
   @Command(
-      aliases = {"setting"},
+      name = "setting",
       desc = "Get the value of a setting",
-      usage = "[setting name]")
+      descFooter = "[setting name]")
   public static void setting(CommandSender sender, MatchPlayer player, SettingKey key)
-      throws ArgumentException {
+  {
     if (player == null)
-      throw new ArgumentException(AllTranslations.get().translate("command.onlyPlayers", sender));
+      throw new IllegalStateException(AllTranslations.get().translate("command.onlyPlayers", sender));
 
     final SettingValue value = player.getSettings().getValue(key);
 
@@ -44,14 +45,15 @@ public class SettingCommands {
   }
 
   @Command(
-      aliases = {"toggle", "set"},
+      name = "toggle",
+      aliases = {"set"},
       desc = "Toggle or set the value of a setting",
-      usage = "[setting name] <option>")
+      descFooter = "[setting name] <option>")
   public static void toggle(
       CommandSender sender, MatchPlayer player, SettingKey key, @Nullable String query)
-      throws ArgumentException {
+  {
     if (player == null)
-      throw new ArgumentException(AllTranslations.get().translate("command.onlyPlayers", sender));
+      throw new IllegalStateException(AllTranslations.get().translate("command.onlyPlayers", sender));
 
     final Settings setting = player.getSettings();
     final SettingValue old = setting.getValue(key);

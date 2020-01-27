@@ -1,6 +1,6 @@
 package tc.oc.pgm.rotation;
 
-import app.ashcon.intake.CommandException;
+
 import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -161,11 +161,11 @@ public class MapPoll {
    * @param vote The map to vote for/against
    * @param player The player voting
    * @return true if the player is now voting for the map, false otherwise
-   * @throws CommandException If the map is not an option in the poll
+   * @throws NoSuchElementException If the map is not an option in the poll
    */
-  public boolean toggleVote(PGMMap vote, UUID player) throws CommandException {
+  public boolean toggleVote(PGMMap vote, UUID player) {
     Set<UUID> votes = this.votes.get(vote);
-    if (votes == null) throw new CommandException(vote.getName() + " is not an option in the poll");
+    if (votes == null) throw new NoSuchElementException(vote.getName() + " is not an option in the poll");
 
     if (votes.add(player)) return true;
     votes.remove(player);

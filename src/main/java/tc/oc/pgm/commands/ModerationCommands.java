@@ -1,8 +1,7 @@
 package tc.oc.pgm.commands;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.CommandException;
-import app.ashcon.intake.parametric.annotation.Text;
+import org.enginehub.piston.annotation.CommandContainer;
+import org.enginehub.piston.annotation.Command;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.time.Duration;
@@ -13,6 +12,7 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
@@ -23,6 +23,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerReportEvent;
 
+@CommandContainer
 public class ModerationCommands {
 
   private static final int REPORT_COOLDOWN_SECONDS = 15;
@@ -31,16 +32,16 @@ public class ModerationCommands {
       CacheBuilder.newBuilder().expireAfterWrite(REPORT_COOLDOWN_SECONDS, TimeUnit.SECONDS).build();
 
   @Command(
-      aliases = {"report"},
-      usage = "<player> <reason>",
-      desc = "Report a player who is breaking the rules")
+          name = "report",
+          desc = "Report a player who is breaking the rules",
+          descFooter = "<player> <reason>")
   public static void report(
       CommandSender commandSender,
       MatchPlayer matchPlayer,
       Match match,
       Player player,
       @Text String reason)
-      throws CommandException {
+  {
     if (!commandSender.hasPermission(Permissions.STAFF) && commandSender instanceof Player) {
       // Check for cooldown
       Instant lastReport = LAST_REPORT_SENT.getIfPresent(matchPlayer.getId());

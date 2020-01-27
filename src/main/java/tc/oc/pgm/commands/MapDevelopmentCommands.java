@@ -1,10 +1,8 @@
 package tc.oc.pgm.commands;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.CommandException;
-import app.ashcon.intake.parametric.annotation.Default;
-import app.ashcon.intake.parametric.annotation.Switch;
-import app.ashcon.intake.parametric.annotation.Text;
+import org.enginehub.piston.annotation.CommandContainer;
+import org.enginehub.piston.annotation.Command;
+import org.enginehub.piston.annotation.param.Switch;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.io.File;
@@ -14,6 +12,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,6 +22,7 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.PGM;
@@ -43,9 +43,9 @@ import tc.oc.world.NMSHacks;
 public class MapDevelopmentCommands {
 
   @Command(
-      aliases = {"clearerrors", "clearxmlerrors"},
-      desc = "Clears XML errors",
-      perms = Permissions.DEBUG)
+          name = "clearerrors",
+          aliases = {"clearxmlerrors"},
+          desc = "Clears XML errors")
   public static void clearErrorsCommand(CommandSender sender) {
     getErrors().clear();
     sender.sendMessage(
@@ -54,13 +54,13 @@ public class MapDevelopmentCommands {
   }
 
   @Command(
-      aliases = {"errors", "xmlerrors"},
-      usage = "[map] <page>",
-      desc = "Reads back XML errors",
-      perms = Permissions.DEBUG)
+          name = "errors",
+          aliases = {"xmlerrors"},
+          desc = "Reads back XML errors",
+          descFooter = "[map] <page>")
   public static void errorsCommand(
-      CommandSender sender, Audience audience, PGMMap map, @Default("1") int page)
-      throws CommandException {
+      CommandSender sender, Audience audience, PGMMap map, /*@Default("1")TODO ADD DEFAULT*/ int page)
+  {
     Multimap<PGMMap, PGMMap.MapLogRecord> errors = getErrors();
     Multimap<PGMMap, PGMMap.MapLogRecord> filtered = ArrayListMultimap.create();
 
@@ -85,9 +85,9 @@ public class MapDevelopmentCommands {
   }
 
   @Command(
-      aliases = {"loadnewmaps", "findnewmaps", "newmaps"},
-      desc = "Scan for new maps and load them",
-      perms = Permissions.DEBUG)
+          name = "loadnewmaps",
+          aliases = {"findnewmaps", "newmaps", "findmaps"},
+          desc = "Scan for new maps and load them")
   public static void loadNewMaps(CommandSender sender, Audience audience) {
     sender.sendMessage(ChatColor.WHITE + "Scanning for new maps...");
     // Clear errors for maps that failed to load, because we want to see those errors again
@@ -119,12 +119,11 @@ public class MapDevelopmentCommands {
   }
 
   @Command(
-      aliases = "features",
-      desc = "Lists all features by ID and type",
-      usage = "<page>",
-      perms = Permissions.DEBUG)
+          name = "features",
+          desc = "Lists all features by ID and type",
+          descFooter = "<page>")
   public static void featuresCommand(Match match, MatchPlayer player, int page)
-      throws CommandException {
+  {
     new PrettyPaginatedResult<Feature>("Defined Features") {
       @Override
       public String format(Feature feature, int i) {
@@ -141,10 +140,10 @@ public class MapDevelopmentCommands {
   }
 
   @Command(
-      aliases = {"feature", "fl"},
-      desc = "Prints information regarding a specific feature",
-      usage = "[feature]",
-      perms = Permissions.DEBUG)
+          name = "feature",
+          aliases = {"fl"},
+          desc = "Prints information regarding a specific feature",
+          descFooter = "[feature]")
   public static void featureCommand(CommandSender sender, Match match, @Text String featureQuery) {
     if (match == null || match.getFeatureContext().get(featureQuery) == null) {
       sender.sendMessage(
@@ -167,10 +166,10 @@ public class MapDevelopmentCommands {
   }
 
   @Command(
-      aliases = {"velocity", "vel"},
-      desc = "Apply a velocity to a player",
-      usage = "<player> [velocity]",
-      perms = Permissions.DEBUG)
+          name = "velocity",
+          aliases = {"vel"},
+          desc = "Apply a velocity to a player",
+          descFooter = "<player> [velocity]")
   public static void velocity(CommandSender sender, Player target, Vector velocity) {
     sender.sendMessage(
         String.format(
@@ -183,13 +182,13 @@ public class MapDevelopmentCommands {
   }
 
   @Command(
-      aliases = {"filter", "fil"},
-      desc = "Query a filter by ID with yourself or the given player",
-      usage = "<filter> <player>",
-      perms = Permissions.DEBUG)
+          name = "filter",
+          aliases = {"fil"},
+          desc = "Query a filter by ID with yourself or the given player",
+          descFooter = "<filter> <player>")
   public static void filter(
       CommandSender sender, MatchPlayer self, Match match, String id, Player player)
-      throws CommandException {
+  {
     MatchPlayer target = match.getPlayer(player);
     FilterDefinition filter = getFilterDefinition(id, match, sender);
 
@@ -220,12 +219,11 @@ public class MapDevelopmentCommands {
   }
 
   @Command(
-      aliases = {"updatemap", "savemap"},
-      desc = "Updates the original map file to changes in game",
-      flags = "f",
-      perms = Permissions.DEBUG)
-  public static void updateMap(CommandSender sender, Match match, @Switch('f') boolean force)
-      throws CommandException {
+          name = "updatemap",
+          aliases = {"savemap"},
+          desc = "Updates the original map file to changes in game")
+  public static void updateMap(CommandSender sender, Match match, @Switch(name = 'f', desc = "force") boolean force)
+  {
     final PGMMap map = match.getMap();
     final Logger logger = map.getLogger();
 
@@ -268,7 +266,7 @@ public class MapDevelopmentCommands {
             if (empty) {
               logger.info("  empty: " + file.getName());
               if (!file.delete()) {
-                throw new CommandException(
+                throw new UnknownError(
                     AllTranslations.get()
                         .translate("command.map.update.deleteFailed", sender, file.getName()));
               }
@@ -314,7 +312,7 @@ public class MapDevelopmentCommands {
           Files.delete(sourceRegionBackup);
         }
       } catch (IOException e) {
-        throw new CommandException(e.toString());
+        throw new RuntimeException(e.toString());
       }
 
       sender.sendMessage(
@@ -323,10 +321,10 @@ public class MapDevelopmentCommands {
   }
 
   private static FilterDefinition getFilterDefinition(String id, Match match, CommandSender sender)
-      throws CommandException {
+  {
     FilterDefinition feature = match.getMapContext().features().get(id, FilterDefinition.class);
     if (feature == null) {
-      throw new CommandException("No " + FilterDefinition.class.getSimpleName() + " with ID " + id);
+      throw new NoSuchElementException("No " + FilterDefinition.class.getSimpleName() + " with ID " + id);
     }
     return feature;
   }

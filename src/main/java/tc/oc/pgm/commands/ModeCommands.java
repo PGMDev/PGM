@@ -1,9 +1,10 @@
 package tc.oc.pgm.commands;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.CommandException;
-import app.ashcon.intake.parametric.annotation.Default;
+import org.enginehub.piston.annotation.CommandContainer;
+import org.enginehub.piston.annotation.Command;
 import java.util.List;
+import java.util.NoSuchElementException;
+
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -18,10 +19,13 @@ import tc.oc.pgm.modes.ObjectiveModesMatchModule;
 import tc.oc.pgm.util.ModesPaginatedResult;
 import tc.oc.util.components.PeriodFormats;
 
+@CommandContainer
 public class ModeCommands {
 
-  @Command(aliases = "next", desc = "Shows information about the next mode")
-  public static void next(CommandSender sender, Match match) throws CommandException {
+  @Command(
+          name = "next",
+          desc = "Shows information about the next mode")
+  public static void next(CommandSender sender, Match match) {
     ObjectiveModesMatchModule modes = getModes(match);
 
     if (modes == null) {
@@ -58,21 +62,21 @@ public class ModeCommands {
   }
 
   @Command(
-      aliases = {"list", "page"},
+      name = "page",
+      aliases = {"list"},
       desc = "Lists all modes",
-      usage = "[page]")
-  public static void list(Audience audience, Match match, @Default("1") int page)
-      throws CommandException {
+      descFooter = "[page]")
+  public static void list(Audience audience, Match match, /*@Default("1")TODO ADD DEFAULT*/ int page)
+  {
     showList(page, audience, getModes(match));
   }
 
   @Command(
-      aliases = {"push"},
+      name = "push",
       desc = "Reschedules all active mode change countdowns by [seconds]",
-      usage = "[seconds]",
-      perms = Permissions.GAMEPLAY)
+      descFooter = "[seconds]")
   public static void push(CommandSender sender, Match match, Duration seconds)
-      throws CommandException {
+  {
     ObjectiveModesMatchModule modes = getModes(match);
 
     if (modes == null) {
@@ -86,7 +90,7 @@ public class ModeCommands {
     try {
       offset = seconds.toPeriod();
     } catch (IllegalArgumentException e) {
-      throw new CommandException("Invalid time format specified");
+      throw new IllegalArgumentException("Invalid time format specified");
     }
 
     for (ModeChangeCountdown countdown : sortedCountdowns) {
@@ -112,7 +116,7 @@ public class ModeCommands {
   }
 
   private static void showList(int page, Audience audience, ObjectiveModesMatchModule modes)
-      throws CommandException {
+  {
     if (modes == null) {
       throwNoResults();
     } else {
@@ -124,7 +128,7 @@ public class ModeCommands {
     return match.getMatchModule(ObjectiveModesMatchModule.class);
   }
 
-  private static void throwNoResults() throws CommandException {
-    throw new CommandException("No results match!");
+  private static void throwNoResults() {
+    throw new NoSuchElementException("No results match!");
   }
 }

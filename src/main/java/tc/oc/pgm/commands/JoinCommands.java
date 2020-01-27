@@ -1,11 +1,12 @@
 package tc.oc.pgm.commands;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.CommandException;
-import app.ashcon.intake.parametric.annotation.Switch;
-import app.ashcon.intake.parametric.annotation.Text;
+
+import org.enginehub.piston.annotation.CommandContainer;
+import org.enginehub.piston.annotation.Command;
+import org.enginehub.piston.annotation.param.Switch;
 import javax.annotation.Nullable;
 import org.bukkit.command.CommandSender;
+import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
@@ -14,21 +15,23 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.teams.TeamMatchModule;
 
+import java.util.NoSuchElementException;
+
+@CommandContainer
 public class JoinCommands {
 
   @Command(
-      aliases = {"join", "play"},
-      desc = "Joins the current match",
-      usage = "[team] - defaults to random",
-      flags = "f",
-      perms = Permissions.JOIN)
+          name = "join",
+          aliases = {"play"},
+          desc = "Joins the current match",
+          descFooter = "[team] - defaults to random")
   public static void join(
       CommandSender sender,
       Match match,
       MatchPlayer player,
-      @Switch('f') boolean force,
+      @Switch(name = 'f', desc = "force") boolean force,
       @Nullable @Text String team)
-      throws CommandException {
+  {
     JoinMatchModule jmm = match.needMatchModule(JoinMatchModule.class);
     TeamMatchModule tmm = match.getMatchModule(TeamMatchModule.class);
 
@@ -42,7 +45,7 @@ public class JoinCommands {
         // player wants to join a specific team
         chosenParty = tmm.bestFuzzyMatch(team.trim());
         if (chosenParty == null)
-          throw new CommandException(
+          throw new NoSuchElementException(
               AllTranslations.get().translate("command.teamNotFound", sender));
       }
     }
@@ -55,10 +58,10 @@ public class JoinCommands {
   }
 
   @Command(
-      aliases = {"leave", "obs"},
-      desc = "Leaves the current match, placing the sender on the observing team",
-      perms = Permissions.LEAVE)
-  public static void leave(MatchPlayer player, Match match) throws CommandException {
+          name = "leave",
+          aliases = {"obs"},
+          desc = "Leaves the current match, placing the sender on the observing team")
+  public static void leave(MatchPlayer player, Match match){
     match.needMatchModule(JoinMatchModule.class).leave(player);
   }
 }

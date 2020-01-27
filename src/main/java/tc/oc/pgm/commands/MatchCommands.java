@@ -1,6 +1,7 @@
 package tc.oc.pgm.commands;
 
-import app.ashcon.intake.Command;
+import org.enginehub.piston.annotation.CommandContainer;
+import org.enginehub.piston.annotation.Command;
 import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
@@ -28,11 +29,13 @@ import tc.oc.util.components.ComponentUtils;
 import tc.oc.util.components.PeriodFormats;
 import tc.oc.util.localization.Locales;
 
+@CommandContainer
 public class MatchCommands {
 
   @Command(
-      aliases = {"matchinfo", "match"},
-      desc = "Shows information about the current match")
+          name = "matchinfo",
+          aliases = {"match"},
+          desc = "Shows information about the current match")
   public static void matchInfo(CommandSender sender, MatchPlayer player, Match match) {
     // indicates whether we have game information from the match yet
     boolean haveGameInfo =
