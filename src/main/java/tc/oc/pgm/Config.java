@@ -385,7 +385,6 @@ public class Config {
 
   public static class Experiments implements Listener {
     private int preload;
-    private boolean avoidDoubleTp;
     private int tabRenderDelay;
     private int destroyMatchDelay;
 
@@ -395,8 +394,7 @@ public class Config {
     }
 
     public void load(ConfigurationSection config) throws InvalidConfigurationException {
-      this.preload = config.getInt("preload-matches", 3);
-      this.avoidDoubleTp = config.getBoolean("avoid-double-teleport", true);
+      this.preload = config.getInt("preload-matches", 15);
       this.tabRenderDelay = config.getInt("tab-render-delay", 5);
       this.destroyMatchDelay = config.getInt("destroy-match-delay", 100);
     }
@@ -409,10 +407,6 @@ public class Config {
 
     public int getPreload() {
       return preload;
-    }
-
-    public boolean isAvoidDoubleTp() {
-      return avoidDoubleTp;
     }
 
     public int getTabRenderDelay() {

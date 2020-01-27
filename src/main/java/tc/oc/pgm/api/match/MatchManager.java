@@ -7,10 +7,19 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
 import tc.oc.pgm.api.chat.MultiAudience;
+import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayerResolver;
 
 /** A manager of {@link Match}es. */
 public interface MatchManager extends MatchPlayerResolver, MultiAudience {
+
+  /**
+   * Create and register a future {@link Match}.
+   *
+   * @param mapId The unique id of the map or {@code null} for the next map.
+   * @return A future {@link Match}.
+   */
+  MatchFactory createMatch(@Nullable String mapId);
 
   /**
    * Get the {@link Match} for the specified {@link World}.

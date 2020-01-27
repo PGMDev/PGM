@@ -38,13 +38,11 @@ import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
-import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.exception.MapException;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
-import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.module.Module;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -109,7 +107,6 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
   private Logger gameLogger;
   private Datastore datastore;
   private MapLibrary mapLibrary;
-  private MatchFactory matchFactory;
   private MatchManager matchManager;
   private MatchTabManager matchTabManager;
   private MapOrder mapOrder;
@@ -187,30 +184,12 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
       return;
     }
 
-    matchManager = new MatchManagerImpl(logger, server);
-    matchFactory = (MatchFactory) matchManager;
+    matchManager = new MatchManagerImpl();
 
     if (Config.MapPools.areEnabled()) {
       mapOrder = new MapPoolManager(logger, new File(getDataFolder(), Config.MapPools.getPath()));
     } else {
       mapOrder = new RandomMapOrder();
-    }
-
-    final long size = mapLibrary.getSize();
-    MapContext map = null;
-    for (int i = 0; i < size; i += 1) {
-      final String id = mapOrder.popNextMap().getId();
-      try {
-        map = mapLibrary.loadExistingMap(id).get(5, TimeUnit.SECONDS);
-        break;
-      } catch (Throwable t) {
-        getLogger().log(Level.WARNING, "Failed to load map: " + id, t);
-      }
-    }
-
-    if (map == null) {
-      shutdown("Failed to load any maps from rotations", null);
-      return;
     }
 
     prefixRegistry = new PrefixRegistryImpl();
@@ -227,18 +206,6 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
 
     registerListeners();
     registerCommands();
-
-    matchFactory
-        .initMatch(map)
-        .whenComplete(
-            (Match match, Throwable err) -> {
-              try {
-                if (err != null) throw err;
-                matchFactory.moveMatch(null, match);
-              } catch (Throwable t) {
-                shutdown("Unable to load match", t);
-              }
-            });
   }
 
   @Override
@@ -282,11 +249,6 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
   @Override
   public Datastore getDatastore() {
     return datastore;
-  }
-
-  @Override
-  public MatchFactory getMatchFactory() {
-    return matchFactory;
   }
 
   @Override
@@ -389,6 +351,7 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
   }
 
   private void registerListeners() {
+    registerEvents((Listener) matchManager);
     if (matchTabManager != null) registerEvents(matchTabManager);
     registerEvents(prefixRegistry);
     registerEvents(matchNameRenderer);

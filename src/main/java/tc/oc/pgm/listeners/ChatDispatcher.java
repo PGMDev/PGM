@@ -232,7 +232,11 @@ public class ChatDispatcher implements Listener {
     // When a message is empty, this indicates the player wants to change their default chat channel
     if (message == null) {
       try {
-        SettingCommands.toggle(sender.getBukkit(), sender, SettingKey.CHAT, type.getName());
+        SettingCommands.toggle(
+            sender == null ? Bukkit.getConsoleSender() : sender.getBukkit(),
+            sender,
+            SettingKey.CHAT,
+            type.getName());
       } catch (ArgumentException e) {
         // No-op, this is when console tries to change chat settings
       }

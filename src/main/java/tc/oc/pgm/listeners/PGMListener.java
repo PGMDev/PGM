@@ -3,6 +3,8 @@ package tc.oc.pgm.listeners;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.EnderPearl;
@@ -13,6 +15,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -40,19 +43,40 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
+import tc.oc.pgm.commands.MatchCommands;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.gamerules.GameRule;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.TimeLockModule;
+import tc.oc.server.NullCommandSender;
 
 public class PGMListener implements Listener {
   private final Plugin parent;
   private final MatchManager mm;
+  private final AtomicBoolean first;
 
   public PGMListener(Plugin parent, MatchManager mm) {
     this.parent = parent;
     this.mm = mm;
+    this.first = new AtomicBoolean();
+  }
+
+  @EventHandler(ignoreCancelled = true)
+  public void onPrePlayerLogin(final AsyncPlayerPreLoginEvent event) {
+    // Create the first match when the first player tries to login
+    if (event.getLoginResult() == AsyncPlayerPreLoginEvent.Result.ALLOWED
+        && first.compareAndSet(false, true)) {
+      try {
+        mm.createMatch(null).get();
+      } catch (InterruptedException | ExecutionException e) {
+        first.compareAndSet(true, false);
+        event.disallow(
+            AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
+            AllTranslations.get()
+                .translate("incorrectWorld.kickMessage", NullCommandSender.INSTANCE));
+      }
+    }
   }
 
   @EventHandler
@@ -62,9 +86,7 @@ public class PGMListener implements Listener {
       if (event.getPlayer().hasPermission(Permissions.JOIN_FULL)) {
         event.allow();
       } else {
-        event.setKickMessage(
-            AllTranslations.get() // MatchPlayer is not available at this time
-                .translate("serverFull", null));
+        event.setKickMessage(AllTranslations.get().translate("serverFull", event.getPlayer()));
       }
     }
   }
@@ -161,7 +183,7 @@ public class PGMListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void matchInfoOnParticipate(final PlayerPartyChangeEvent event) {
     if (event.getNewParty() instanceof Competitor) {
-      // MatchCommands.sendMatchInfo(event.getPlayer().getBukkit(), event.getMatch());
+      MatchCommands.matchInfo(event.getPlayer().getBukkit(), event.getPlayer(), event.getMatch());
     }
   }
 

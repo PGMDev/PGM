@@ -12,9 +12,11 @@ import org.joda.time.Duration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 
+@ListenerScope(MatchScope.LOADED)
 public class FilterMatchModule implements MatchModule, Listener {
 
   private final Match match;

@@ -1,8 +1,6 @@
 package tc.oc.pgm.cycle;
 
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import org.joda.time.Duration;
 import tc.oc.component.Component;
@@ -12,6 +10,7 @@ import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.countdowns.MatchCountdown;
 
 public class CycleCountdown extends MatchCountdown {
@@ -19,7 +18,7 @@ public class CycleCountdown extends MatchCountdown {
   private int preloadTime;
   private boolean ended;
   private MapInfo nextMap;
-  private CompletableFuture<Match> nextMatch;
+  private MatchFactory nextMatch;
 
   public CycleCountdown(Match match) {
     super(match);
@@ -30,14 +29,11 @@ public class CycleCountdown extends MatchCountdown {
     if (!ended) {
       if (!Objects.equals(nextMap, map)) {
         nextMap = map;
+        if (nextMatch != null) nextMatch.cancel(true);
         nextMatch = null;
       }
       if (map != null && nextMatch == null && remaining.getStandardSeconds() <= preloadTime) {
-        nextMatch =
-            PGM.get()
-                .getMapLibrary()
-                .loadExistingMap(map.getId())
-                .thenCompose(context -> PGM.get().getMatchFactory().initMatch(context));
+        nextMatch = PGM.get().getMatchManager().createMatch(nextMap.getId());
       }
     }
     ended |= end;
@@ -74,27 +70,7 @@ public class CycleCountdown extends MatchCountdown {
   @Override
   public void onEnd(Duration total) {
     super.onEnd(total);
-
-    // Attempt to cycle for as many maps there are in the library.
-    // If nothing works the server will be stuck in an idle state
-    // until there is manual intervention.
-    onEndCycle(PGM.get().getMapLibrary().getSize());
-  }
-
-  private void onEndCycle(long retries) {
     setNextMap(PGM.get().getMapOrder().popNextMap(), true);
-
-    nextMatch.whenComplete(
-        (Match next, Throwable err) -> {
-          try {
-            if (err != null) throw err;
-            PGM.get().getMatchFactory().moveMatch(match, next);
-          } catch (Throwable t) {
-            PGM.get().getGameLogger().log(Level.SEVERE, "Unable to cycle match", t);
-            nextMatch = null;
-            ended = false;
-            if (retries > 0) onEndCycle(retries - 1);
-          }
-        });
+    nextMatch.await();
   }
 }
