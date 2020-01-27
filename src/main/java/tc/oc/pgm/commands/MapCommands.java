@@ -95,11 +95,11 @@ public class MapCommands {
   private static boolean matchesTags(MapInfo map, Set<String> tags) {
     if (checkNotNull(tags).isEmpty()) return true;
     for (MapTag tag : checkNotNull(map).getTags()) {
-      if (tags.contains(tag.getId())) {
-        return true;
+      if (!tags.contains(tag.getId())) {
+        return false;
       }
     }
-    return false;
+    return true;
   }
 
   private static boolean matchesAuthor(MapInfo map, String query) {
