@@ -1,9 +1,10 @@
 package tc.oc.pgm.commands;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.CommandException;
-import app.ashcon.intake.parametric.annotation.Default;
-import app.ashcon.intake.parametric.annotation.Switch;
+
+import org.enginehub.piston.annotation.CommandContainer;
+import org.enginehub.piston.annotation.Command;
+import org.enginehub.piston.annotation.param.Switch;
+
 import org.bukkit.command.CommandSender;
 import org.joda.time.Duration;
 import tc.oc.pgm.AllTranslations;
@@ -14,26 +15,26 @@ import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.pgm.cycle.CycleMatchModule;
 import tc.oc.pgm.map.PGMMap;
 
+
+@CommandContainer
 public class CycleCommands {
 
   @Command(
-      aliases = {"cycle"},
-      desc = "Queues a cycle to the next map in a certain amount of seconds",
-      usage = "[seconds] [mapname]",
-      flags = "f",
-      perms = Permissions.START)
+          name = "cycle",
+          desc = "Queues a cycle to the next map in a certain amount of seconds",
+          descFooter = "[seconds] [mapname]")
   public static void cycle(
       CommandSender sender,
       Match match,
       MatchManager matchManager,
       Duration countdown,
-      @Switch('f') boolean force,
-      @Default("next") @Text PGMMap map)
-      throws CommandException {
+      @Switch(name ='f', desc = "force") boolean force,
+      /*TODO ADD DEFAULT ("NEXT")*/ @Text PGMMap map)
+  {
     CycleMatchModule cmm = match.needMatchModule(CycleMatchModule.class);
 
     if (match.isRunning() && !force && !cmm.getConfig().runningMatch()) {
-      throw new CommandException(
+      throw new IllegalStateException(
           AllTranslations.get().translate("command.admin.cycle.matchRunning", sender));
     }
 
@@ -44,18 +45,17 @@ public class CycleCommands {
   }
 
   @Command(
-      aliases = {"recycle", "rematch"},
-      desc = "Reload (cycle to) the current map",
-      usage = "[seconds]",
-      flags = "f",
-      perms = Permissions.START)
+          name = "recycle",
+          aliases = {"rematch"},
+          desc = "Reload (cycle to) the current map",
+          descFooter = "[seconds]")
   public static void recycle(
       CommandSender sender,
       Match match,
       MatchManager matchManager,
       Duration duration,
-      @Switch('f') boolean force)
-      throws CommandException {
+      @Switch(name ='f', desc = "force") boolean force)
+  {
     cycle(sender, match, matchManager, duration, force, match.getMap());
   }
 }
