@@ -1,10 +1,13 @@
 package tc.oc.pgm.tablist;
 
 import org.bukkit.entity.Player;
-import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.tablist.LegacyTabView;
 import tc.oc.util.collection.DefaultProvider;
 
+/**
+ * The pre-1.8 tab list is severely limited. This is essentially a no-op {@link MatchTabView} for
+ * pre-1.8 clients.
+ */
 public class LegacyMatchTabView extends LegacyTabView {
 
   public static class Factory implements DefaultProvider<Player, LegacyMatchTabView> {
@@ -22,6 +25,4 @@ public class LegacyMatchTabView extends LegacyTabView {
   public void disable() {
     super.disable();
   }
-
-  public void onViewerJoinMatch(PlayerJoinMatchEvent event) {}
 }

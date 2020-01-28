@@ -3,7 +3,6 @@ package tc.oc.tablist;
 import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.util.collection.DefaultProvider;
 
 /**
@@ -39,15 +38,15 @@ public class LegacyTabView extends TabView implements Listener {
   }
 
   public int getWidth() {
-    return 0;
+    return 3;
   }
 
   public int getHeight() {
-    return 0;
+    return 20;
   }
 
   public int getSize() {
-    return 0;
+    return getWidth() * getHeight();
   }
 
   /** Take control of the viewer's player list */
@@ -65,21 +64,6 @@ public class LegacyTabView extends TabView implements Listener {
     }
   }
 
-  public void setSlot(int x, int y, @Nullable TabEntry entry) {}
-
-  public void setHeader(@Nullable TabEntry entry) {}
-
-  public void setFooter(@Nullable TabEntry entry) {}
-
+  @Override
   public void render() {}
-
-  public void renderLayout(TabRender render) {}
-
-  public void renderContent(TabRender render) {}
-
-  public void markSlotsClean() {}
-
-  public void renderHeaderFooter(TabRender render, boolean force) {}
-
-  public void onViewerJoinMatch(PlayerJoinMatchEvent event) {}
 }

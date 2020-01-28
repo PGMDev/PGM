@@ -24,6 +24,7 @@ import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
+import tc.oc.tablist.ListeningTabView;
 import tc.oc.tablist.PlayerTabEntry;
 import tc.oc.tablist.TabManager;
 import tc.oc.tablist.TabView;
@@ -94,8 +95,8 @@ public class MatchTabManager extends TabManager implements Listener {
   @Override
   public @Nullable TabView getView(Player viewer) {
     TabView view = super.getView(viewer);
-    if (view != null && !(view instanceof LegacyMatchTabView)) {
-      this.registerEvents((MatchTabView) view);
+    if (view instanceof ListeningTabView) {
+      this.registerEvents((ListeningTabView) view);
     }
     return view;
   }
@@ -151,8 +152,8 @@ public class MatchTabManager extends TabManager implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onJoinMatch(PlayerJoinMatchEvent event) {
     TabView view = this.getView(event.getPlayer().getBukkit());
-    if (view != null && !(view instanceof LegacyMatchTabView)) {
-      ((MatchTabView) view).onViewerJoinMatch(event);
+    if (view instanceof ListeningTabView) {
+      ((ListeningTabView) view).onViewerJoinMatch(event);
     }
 
     invalidate(event.getPlayer());
