@@ -4,6 +4,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -11,7 +13,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
+import net.minecraft.server.v1_8_R3.WorldServer;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -46,6 +50,12 @@ public class MatchManagerImpl implements MatchManager, Listener {
     matchByWorld.put(checkNotNull(match.getWorld()).getName(), match);
 
     logger.info("Loaded match-" + match.getId() + " (" + match.getMap().getId() + ")");
+
+    if (Config.Experiments.get().shouldUnloadNonMatchWorlds()) {
+      for (World world : PGM.get().getServer().getWorlds()) {
+        onNonMatchUnload(world);
+      }
+    }
   }
 
   @EventHandler
@@ -61,6 +71,31 @@ public class MatchManagerImpl implements MatchManager, Listener {
             PGM.get(), match::destroy, Config.Experiments.get().getMatchDestroySeconds() * 20);
 
     logger.info("Unloaded match-" + match.getId() + " (" + match.getMap().getId() + ")");
+  }
+
+  private void onNonMatchUnload(World world) {
+    final String name = world.getName();
+    if (name.startsWith("match")) return;
+
+    try {
+      final Field server = CraftWorld.class.getDeclaredField("world");
+      server.setAccessible(true);
+
+      final Field dimension = WorldServer.class.getDeclaredField("dimension");
+      dimension.setAccessible(true);
+
+      final Field modifiers = Field.class.getDeclaredField("modifiers");
+      modifiers.setAccessible(true);
+      modifiers.setInt(dimension, dimension.getModifiers() & ~Modifier.FINAL);
+
+      dimension.set(server.get(world), 11);
+    } catch (NoSuchFieldException | IllegalAccessException e) {
+      // No-op, newer version of Java have disabled modifying final fields
+    }
+
+    if (PGM.get().getServer().unloadWorld(name, false)) {
+      logger.info("Unloaded non-match " + name);
+    }
   }
 
   @Override

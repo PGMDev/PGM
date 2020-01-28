@@ -453,6 +453,7 @@ public class Config {
     private int matchDestroySeconds;
     private int matchTeleportsPerSecond;
     private int tabRenderTicks;
+    private boolean unloadNonMatchWorlds;
 
     @EventHandler
     public void onConfigLoad(ConfigLoadEvent event) throws InvalidConfigurationException {
@@ -464,6 +465,7 @@ public class Config {
       this.matchDestroySeconds = Math.max(0, config.getInt("match-destroy-seconds", 10));
       this.matchTeleportsPerSecond = Math.max(1, config.getInt("match-teleports-per-second", 10));
       this.tabRenderTicks = Math.max(1, config.getInt("tab-render-ticks", 10));
+      this.unloadNonMatchWorlds = config.getBoolean("unload-non-match-worlds", true);
     }
 
     private static final Experiments instance = new Experiments();
@@ -486,6 +488,10 @@ public class Config {
 
     public int getPlayerTeleportsPerSecond() {
       return matchTeleportsPerSecond;
+    }
+
+    public boolean shouldUnloadNonMatchWorlds() {
+      return unloadNonMatchWorlds;
     }
   }
 

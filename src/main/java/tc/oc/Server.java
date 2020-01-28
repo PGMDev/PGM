@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
 import java.net.InetAddress;
 import java.util.Iterator;
 import java.util.List;
@@ -22,7 +21,6 @@ import net.minecraft.server.v1_8_R3.DispenserRegistry;
 import net.minecraft.server.v1_8_R3.MinecraftEncryption;
 import net.minecraft.server.v1_8_R3.PropertyManager;
 import net.minecraft.server.v1_8_R3.WorldLoaderServer;
-import net.minecraft.server.v1_8_R3.WorldServer;
 import net.minecraft.server.v1_8_R3.WorldSettings;
 import net.minecraft.server.v1_8_R3.WorldType;
 import org.apache.logging.log4j.Level;
@@ -253,19 +251,6 @@ public class Server extends DedicatedServer {
     final long start = System.nanoTime();
     a(U(), U(), 0 /* seed */, WorldType.FLAT, "" /* generator */);
     final long duration = System.nanoTime() - start;
-
-    try {
-      final Field dimension = WorldServer.class.getDeclaredField("dimension");
-      dimension.setAccessible(true);
-
-      final Field modifiers = Field.class.getDeclaredField("modifiers");
-      modifiers.setAccessible(true);
-      modifiers.setInt(dimension, dimension.getModifiers() & ~Modifier.FINAL);
-
-      dimension.set(worlds.get(0), 11);
-    } catch (NoSuchFieldException | IllegalAccessException e) {
-      logger.warn("Could not change dimension of default world", e);
-    }
 
     logger.info(
         "Done ("

@@ -100,6 +100,7 @@ experiments:
   match-destroy-seconds: 10 # Number of seconds to wait before unloading a world after the match has unloaded
   match-teleports-per-second: 10 # Number of players to teleport per second to a new match on cycle
   tab-render-ticks: 10 # Number of ticks before invalidating the tab list
+  unload-non-match-worlds: true # Unload any worlds that are not associated with a match
 
 sidebar:
   # Messages may be formatted with '&'
