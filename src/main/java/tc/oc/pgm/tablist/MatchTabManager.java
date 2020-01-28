@@ -94,12 +94,8 @@ public class MatchTabManager extends TabManager implements Listener {
   @Override
   public @Nullable TabView getView(Player viewer) {
     TabView view = super.getView(viewer);
-    if (view != null) {
-      if (view instanceof LegacyMatchTabView) {
-        this.registerEvents((LegacyMatchTabView) view);
-      } else {
-        this.registerEvents((MatchTabView) view);
-      }
+    if (view != null && !(view instanceof LegacyMatchTabView)) {
+      this.registerEvents((MatchTabView) view);
     }
     return view;
   }
@@ -155,12 +151,8 @@ public class MatchTabManager extends TabManager implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onJoinMatch(PlayerJoinMatchEvent event) {
     TabView view = this.getView(event.getPlayer().getBukkit());
-    if (view != null) {
-      if (view instanceof LegacyMatchTabView) {
-        ((LegacyMatchTabView) view).onViewerJoinMatch(event);
-      } else {
-        ((MatchTabView) view).onViewerJoinMatch(event);
-      }
+    if (view != null && !(view instanceof LegacyMatchTabView)) {
+      ((MatchTabView) view).onViewerJoinMatch(event);
     }
 
     invalidate(event.getPlayer());
