@@ -17,25 +17,24 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    - name: install
-      if: github.ref == 'refs/heads/master'
+    - name: version
+      run: |
+        mvn versions:set \
+          -DnewVersion=1.8-SNAPSHOT-${GITHUB_REF#refs/heads/}-${GITHUB_SHA::8}
+    - name: deploy-nexus
+      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/beta'
       run: mvn -U deploy -s settings.xml
       env:
         NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
         NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-    - name: version
-      run: |
-        mvn versions:set \
-          -DnewVersion=1.8-SNAPSHOT-${GITHUB_SHA::8}
     - name: install
-      if: github.ref != 'refs/heads/master'
+      if: github.ref != 'refs/heads/master' && github.ref != 'refs/heads/beta'
       run: mvn -U install
-    - name: deploy
+    - name: deploy-docker
       if: success() && github.ref == 'refs/heads/master'
       run: |
         mvn compile jib:build \
           -Djib.to.auth.username=${{ secrets.DOCKER_USERNAME }} \
           -Djib.to.auth.password=${{ secrets.DOCKER_PASSWORD }} \
           -Djib.to.image=${{ secrets.DOCKER_IMAGE }} \
-          -Djib.container.environment=SENTRY_DSN=${{ secrets.SENTRY_DSN }} \
           -Djib.to.tags=latest,$(date +%F)
