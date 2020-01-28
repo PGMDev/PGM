@@ -22,14 +22,17 @@ import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.tablist.TabEntry;
 import tc.oc.tablist.TabView;
 import tc.oc.util.Numbers;
+import tc.oc.util.ViaUtils;
 import tc.oc.util.collection.DefaultProvider;
 
 public class MatchTabView extends TabView implements Listener {
 
-  public static class Factory implements DefaultProvider<Player, MatchTabView> {
+  public static class Factory implements DefaultProvider<Player, TabView> {
     @Override
-    public MatchTabView get(Player key) {
-      return new MatchTabView(key);
+    public TabView get(Player key) {
+      return ViaUtils.getProtocolVersion(key) >= ViaUtils.VERSION_1_8
+          ? new MatchTabView(key)
+          : new LegacyMatchTabView(key);
     }
   }
 
@@ -217,6 +220,7 @@ public class MatchTabView extends TabView implements Listener {
     super.render();
   }
 
+  @Override
   public void onViewerJoinMatch(PlayerJoinMatchEvent event) {
     if (this.getViewer() == event.getPlayer().getBukkit()) {
       this.match = event.getMatch();

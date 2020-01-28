@@ -4,8 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.util.collection.DefaultProvider;
 
 /**
@@ -16,7 +18,7 @@ import tc.oc.util.collection.DefaultProvider;
  * bottom and cannot be seen. The fake team names all start with a '\u0001' character, so they will
  * always come before any real teams.
  */
-public class TabView {
+public class TabView implements Listener {
 
   public static class Factory implements DefaultProvider<Player, TabView> {
     @Override
@@ -364,5 +366,11 @@ public class TabView {
 
   protected void onWorldChange(PlayerChangedWorldEvent event) {
     if (this.viewer == event.getPlayer()) this.respawnFakeEntities();
+  }
+
+  public void onViewerJoinMatch(PlayerJoinMatchEvent event) {
+    if (this.getViewer() == event.getPlayer().getBukkit()) {
+      this.invalidateLayout();
+    }
   }
 }
