@@ -479,26 +479,30 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
       this.start();
     }
 
+    private boolean isRelevant(Throwable err) {
+      if (err == null) return false;
+      for (StackTraceElement element : err.getStackTrace()) {
+        if (element.getClassName().startsWith("tc.oc")) {
+          return true;
+        }
+      }
+      return isRelevant(err.getCause());
+    }
+
     @Override
     public boolean isFiltered(LogEvent event) {
-      return !event.getLevel().lessOrEqual(org.apache.logging.log4j.Level.WARN);
+      return !event.getLevel().lessOrEqual(org.apache.logging.log4j.Level.WARN)
+          || !isRelevant(event.getThrown());
     }
 
     @Override
     protected net.kencochrane.raven.event.Event buildEvent(LogEvent event) {
-      final Throwable err = event.getThrown();
       final EventBuilder builder = new EventBuilder();
+      Throwable err = event.getThrown();
 
       builder.setLevel(formatLevel(event.getLevel()));
       builder.setTimestamp(new Date(event.getMillis()));
       builder.setMessage(event.getMessage().getFormattedMessage());
-
-      if (err != null) {
-        builder.addSentryInterface(new ExceptionInterface(err));
-      } else if (event.getSource() != null) {
-        builder.addSentryInterface(
-            new StackTraceInterface(new StackTraceElement[] {event.getSource()}));
-      }
 
       if (err instanceof EventException) {
         final Event e = ((EventException) err).getEvent();
@@ -524,15 +528,22 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
         if (e instanceof MatchPlayerEvent) {
           builder.addExtra("matchplayer", ((MatchPlayerEvent) e).getPlayer());
         }
+        err = err.getCause();
       }
 
       builder.addTag("os", System.getProperty("os.name"));
       builder.addTag("java", System.getProperty("java.version"));
       builder.addTag("pgm", PGM.get().getDescription().getVersion());
-      builder.addTag("bukkit", PGM.get().getServer().getBukkitVersion());
-      builder.addTag("minecraft", PGM.get().getServer().getVersion());
+      builder.addTag("bukkit", PGM.get().getServer().getVersion());
 
+      if (err != null) {
+        builder.addSentryInterface(new ExceptionInterface(err));
+      } else if (event.getSource() != null) {
+        builder.addSentryInterface(
+            new StackTraceInterface(new StackTraceElement[] {event.getSource()}));
+      }
       raven.runBuilderHelpers(builder);
+
       return builder.build();
     }
   }
