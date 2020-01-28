@@ -3,8 +3,7 @@ package tc.oc.pgm.menu;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Sets;
-import java.util.Set;
+import java.util.WeakHashMap;
 import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
@@ -12,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import tc.oc.component.render.ComponentRenderers;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.observers.ObserverToolsMatchModule;
 import tc.oc.util.StringUtils;
 
 public abstract class InventoryMenu {
@@ -19,8 +19,8 @@ public abstract class InventoryMenu {
   protected static final int ROW_WIDTH = 9; // Number of columns per row
   protected static final int MAX_ROWS = 6; // Max allowed row size
 
-  private final Set<MatchPlayer> viewing =
-      Sets.newHashSet(); // Set of players who are viewing the gui
+  private final WeakHashMap<MatchPlayer, InventoryMenu> viewing =
+      new WeakHashMap<>(); // Map of players who are viewing the gui, along with the menu
   private final String title; // Title of the inventory
   private final int rows; // The # of rows in the inventory
 
@@ -48,12 +48,12 @@ public abstract class InventoryMenu {
   }
 
   public boolean isViewing(MatchPlayer player) {
-    return viewing.contains(player);
+    return viewing.containsKey(player);
   }
 
   public void display(MatchPlayer player) {
     this.showWindow(player);
-    this.viewing.add(player);
+    this.viewing.put(player, this);
   }
 
   public void remove(MatchPlayer player) {
@@ -61,7 +61,7 @@ public abstract class InventoryMenu {
   }
 
   public void refreshAll() {
-    viewing.forEach(this::refreshWindow);
+    viewing.keySet().forEach(this::refreshWindow);
   }
 
   private int getInventorySize() {
@@ -145,7 +145,7 @@ public abstract class InventoryMenu {
 
     inv.setContents(contents);
     player.getBukkit().openInventory(inv);
-    viewing.add(player);
+    viewing.put(player, this);
     return inv;
   }
 }
