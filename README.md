@@ -1,4 +1,4 @@
-PGM
+PGM ![build](https://github.com/Electroid/PGM/workflows/build/badge.svg)
 ===
 
 The original PvP Game Manager for Minecraft.
