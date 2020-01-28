@@ -20,7 +20,7 @@ jobs:
     - name: version
       run: |
         mvn versions:set \
-          -DnewVersion=1.8-SNAPSHOT-${GITHUB_REF#refs/heads/}
+          -DnewVersion=1.8-${GITHUB_REF#refs/heads/}-SNAPSHOT
     - name: nexus
       run: mvn -U deploy -s settings.xml
       env:
