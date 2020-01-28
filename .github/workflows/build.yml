@@ -21,7 +21,7 @@ jobs:
       run: |
         mvn versions:set \
           -DnewVersion=1.8-SNAPSHOT-${GITHUB_REF#refs/heads/}-${GITHUB_SHA::8}
-    - name: deploy-nexus
+    - name: nexus
       if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/beta'
       run: mvn -U deploy -s settings.xml
       env:
@@ -30,7 +30,7 @@ jobs:
     - name: install
       if: github.ref != 'refs/heads/master' && github.ref != 'refs/heads/beta'
       run: mvn -U install
-    - name: deploy-docker
+    - name: docker
       if: success() && github.ref == 'refs/heads/master'
       run: |
         mvn compile jib:build \
