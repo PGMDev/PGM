@@ -1,6 +1,9 @@
 name: build
 on:
   push:
+    branches-ignore:
+      - master
+      - beta
   pull_request:
   repository_dispatch:
 jobs:
