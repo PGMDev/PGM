@@ -1,12 +1,18 @@
 package tc.oc.pgm;
 
 import com.google.common.collect.ImmutableList;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import javax.annotation.Nullable;
+import net.kencochrane.raven.dsn.Dsn;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
@@ -39,15 +45,74 @@ public class Config {
     public static Level level() {
       return Level.parse(getConfiguration().getString("log.level", "info").toUpperCase());
     }
+
+    // Should redirect to the default sentry dsn, used to help find and track bugs in PGM
+    private static final String SENTRY_URL = "https://sentry.ashcon.app/pgm";
+
+    public static @Nullable String sentry() {
+      String dsn = Dsn.dsnLookup();
+      if (dsn != null) return dsn;
+
+      dsn = getConfiguration().getString("log.sentry", null);
+      if (dsn != null && dsn.equalsIgnoreCase("false")) return null;
+      if (dsn != null) return dsn;
+
+      try {
+        final HttpURLConnection http =
+            (HttpURLConnection)
+                (new URL(SENTRY_URL + "/" + PGM.get().getDescription().getVersion())
+                    .openConnection());
+        http.setInstanceFollowRedirects(false);
+        http.setReadTimeout(2000);
+        http.setConnectTimeout(2000);
+        http.connect();
+        final int code = http.getResponseCode();
+        if (code == 301 || code == 302) { // redirect codes
+          return http.getHeaderField("Location");
+        }
+      } catch (IOException e) {
+        // Fail silently if something goes wrong in the future
+      }
+
+      return null;
+    }
   }
 
   public static class Maps implements Listener {
     private static final Maps INSTANCE = new Maps();
     private final Map<String, MapSourceFactory> factories = new LinkedHashMap<>();
 
+    private List<String> migrateFromOld(ConfigurationSection section) {
+      final List<String> sources = new LinkedList<>();
+
+      if (section.getBoolean("default", false)) {
+        sources.add("default");
+      }
+
+      if (section.isConfigurationSection("sources")) {
+        final ConfigurationSection list = section.getConfigurationSection("sources");
+        for (String key : list.getKeys(false)) {
+          final String path = list.getString(key + ".path", null);
+          if (path != null) sources.add(path);
+        }
+      }
+
+      return sources;
+    }
+
     @EventHandler
     public void onConfigLoad(ConfigLoadEvent event) throws InvalidConfigurationException {
-      for (String source : event.getConfig().getStringList("map.sources")) {
+      final Configuration config = event.getConfig();
+
+      // Handle old config formats for now, should be removed later
+      final List<String> oldSources = migrateFromOld(config.getConfigurationSection("map"));
+      if (!oldSources.isEmpty()) {
+        config.set("map", null);
+        config.set("map.sources", oldSources);
+        PGM.get().saveConfig();
+      }
+
+      for (String source : config.getStringList("map.sources")) {
         final MapSourceFactory factory;
         try {
           factory =

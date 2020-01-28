@@ -10,18 +10,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.net.InetAddress;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Handler;
 import java.util.regex.Pattern;
-import net.kencochrane.raven.dsn.Dsn;
-import net.kencochrane.raven.event.EventBuilder;
-import net.kencochrane.raven.event.interfaces.ExceptionInterface;
-import net.kencochrane.raven.event.interfaces.StackTraceInterface;
-import net.kencochrane.raven.log4j2.SentryAppender;
 import net.minecraft.server.v1_8_R3.DedicatedPlayerList;
 import net.minecraft.server.v1_8_R3.DedicatedServer;
 import net.minecraft.server.v1_8_R3.DispenserRegistry;
@@ -33,20 +27,14 @@ import net.minecraft.server.v1_8_R3.WorldSettings;
 import net.minecraft.server.v1_8_R3.WorldType;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.appender.ConsoleAppender;
-import org.bukkit.Physical;
 import org.bukkit.craftbukkit.libs.joptsimple.OptionParser;
 import org.bukkit.craftbukkit.v1_8_R3.LoggerOutputStream;
 import org.bukkit.craftbukkit.v1_8_R3.util.ForwardLogHandler;
 import org.bukkit.craftbukkit.v1_8_R3.util.TerminalConsoleWriterThread;
 import org.bukkit.event.Event;
-import org.bukkit.event.EventException;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityEvent;
-import org.bukkit.event.inventory.InventoryEvent;
-import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.server.PluginEvent;
@@ -142,10 +130,6 @@ public class Server extends DedicatedServer {
       if (appender instanceof ConsoleAppender) {
         logger.removeAppender(appender);
       }
-    }
-
-    if (Dsn.dsnLookup() != null) {
-      logger.addAppender(new Appender());
     }
 
     new Thread(new TerminalConsoleWriterThread(System.out, this.reader)).start();
@@ -357,62 +341,6 @@ public class Server extends DedicatedServer {
     @Override
     public void disablePlugin(Plugin plugin) {
       togglePlugin(plugin, false);
-    }
-  }
-
-  class Appender extends SentryAppender {
-    Appender() {
-      this.start();
-    }
-
-    @Override
-    public boolean isFiltered(LogEvent event) {
-      return !event.getLevel().lessOrEqual(Level.WARN);
-    }
-
-    @Override
-    protected net.kencochrane.raven.event.Event buildEvent(LogEvent event) {
-      final Throwable err = event.getThrown();
-      final EventBuilder builder = new EventBuilder();
-
-      builder.setLevel(formatLevel(event.getLevel()));
-      builder.setTimestamp(new Date(event.getMillis()));
-      builder.setMessage(event.getMessage().getFormattedMessage());
-
-      if (err != null) {
-        builder.addSentryInterface(new ExceptionInterface(err));
-      } else if (event.getSource() != null) {
-        builder.addSentryInterface(
-            new StackTraceInterface(new StackTraceElement[] {event.getSource()}));
-      }
-
-      if (err instanceof EventException) {
-        final Event e = ((EventException) err).getEvent();
-        builder.addExtra("event", e);
-        if (e instanceof Physical) {
-          builder.addExtra("world", ((Physical) e).getWorld().getName());
-        }
-        if (e instanceof PlayerEvent) {
-          builder.addExtra("player", ((PlayerEvent) e).getPlayer().getName());
-        } else if (e instanceof EntityEvent) {
-          builder.addExtra("entity", ((EntityEvent) e).getEntityType());
-        } else if (e instanceof InventoryEvent) {
-          builder.addExtra("inventory", ((InventoryEvent) e).getInventory().getName());
-        }
-      }
-
-      builder.addTag("os", System.getProperty("os.name"));
-      builder.addTag("java", System.getProperty("java.version"));
-      builder.addTag("server", Server.this.getServerModName() + "-" + Server.this.getVersion());
-      if (Server.this.server != null) {
-        for (Plugin plugin : Server.this.server.getPluginManager().getPlugins()) {
-          builder.addTag(
-              "plugin." + plugin.getName().toLowerCase(), plugin.getDescription().getVersion());
-        }
-      }
-
-      raven.runBuilderHelpers(builder);
-      return builder.build();
     }
   }
 }
