@@ -4,7 +4,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.EnderPearl;
@@ -54,28 +55,46 @@ import tc.oc.server.NullCommandSender;
 public class PGMListener implements Listener {
   private final Plugin parent;
   private final MatchManager mm;
-  private final AtomicBoolean first;
+
+  // Single-write, multi-read lock used to create the first match
+  private final ReentrantReadWriteLock lock;
 
   public PGMListener(Plugin parent, MatchManager mm) {
     this.parent = parent;
     this.mm = mm;
-    this.first = new AtomicBoolean();
+    this.lock = new ReentrantReadWriteLock();
   }
 
   @EventHandler(ignoreCancelled = true)
   public void onPrePlayerLogin(final AsyncPlayerPreLoginEvent event) {
-    // Create the first match when the first player tries to login
-    if (event.getLoginResult() == AsyncPlayerPreLoginEvent.Result.ALLOWED
-        && first.compareAndSet(false, true)) {
+    if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED
+        || mm.getMatches().hasNext()) return;
+
+    // Create the match when the first player joins
+    if (lock.writeLock().tryLock()) {
       try {
         mm.createMatch(null).get();
       } catch (InterruptedException | ExecutionException e) {
-        first.compareAndSet(true, false);
-        event.disallow(
-            AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-            AllTranslations.get()
-                .translate("incorrectWorld.kickMessage", NullCommandSender.INSTANCE));
+        // No-op
+      } finally {
+        lock.writeLock().unlock();
       }
+    }
+
+    // If a match is being created, wait until its done
+    try {
+      lock.readLock().tryLock(15, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      // No-op
+    } finally {
+      lock.readLock().unlock();
+    }
+
+    if (!mm.getMatches().hasNext()) {
+      event.disallow(
+          AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
+          AllTranslations.get()
+              .translate("incorrectWorld.kickMessage", NullCommandSender.INSTANCE));
     }
   }
 

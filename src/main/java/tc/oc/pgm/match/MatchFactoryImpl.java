@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.File;
 import java.time.Duration;
+import java.util.Iterator;
 import java.util.Stack;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -49,7 +50,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
       return run();
     } catch (Exception e) {
       // Match creation was cancelled, no need to show an error
-      if (e.getCause() instanceof InterruptedException) return null;
+      if (e.getCause() instanceof InterruptedException) throw e;
 
       final Throwable err = e.getCause();
       PGM.get().getGameLogger().log(Level.SEVERE, err.getMessage(), err.getCause());
@@ -301,7 +302,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
     }
 
     private MoveMatchStage advanceSync() {
-      final boolean move = PGM.get().getMatchManager().getMatches().iterator().hasNext();
+      final boolean move = PGM.get().getMatchManager().getMatches().hasNext();
       match.load();
       return move ? new MoveMatchStage(match) : null;
     }
@@ -340,8 +341,11 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
     }
 
     private Stage advanceSync() {
-      for (Match otherMatch : PGM.get().getMatchManager().getMatches()) {
+      final Iterator<Match> iterator = PGM.get().getMatchManager().getMatches();
+      while (iterator.hasNext()) {
+        final Match otherMatch = iterator.next();
         if (match.equals(otherMatch)) continue;
+
         for (MatchPlayer player : otherMatch.getPlayers()) {
           final Player bukkit = player.getBukkit();
 

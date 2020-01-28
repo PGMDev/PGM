@@ -1,6 +1,7 @@
 package tc.oc.pgm.api.match;
 
-import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
+import java.util.Iterator;
 import javax.annotation.Nullable;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -31,11 +32,11 @@ public interface MatchManager extends MatchPlayerResolver, MultiAudience {
   Match getMatch(@Nullable World world);
 
   /**
-   * Get all the {@link Match}es currently registered and loaded.
+   * Get all the {@link Match}es currently registered.
    *
-   * @return All {@link Match}es, excludes those that are unloaded or destroyed.
+   * @return All {@link Match}es.
    */
-  Iterable<Match> getMatches();
+  Iterator<Match> getMatches();
 
   /**
    * Get the {@link Match} for the specified {@link Entity}.
@@ -61,7 +62,7 @@ public interface MatchManager extends MatchPlayerResolver, MultiAudience {
   @Nullable
   default Match getMatch(@Nullable CommandSender sender) {
     if (sender instanceof Entity) return getMatch((Entity) sender);
-    if (sender instanceof ConsoleCommandSender) return Iterables.getFirst(getMatches(), null);
+    if (sender instanceof ConsoleCommandSender) return Iterators.getNext(getMatches(), null);
     return null;
   }
 }

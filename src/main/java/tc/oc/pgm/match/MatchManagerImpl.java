@@ -2,9 +2,13 @@ package tc.oc.pgm.match;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.World;
@@ -30,8 +34,8 @@ public class MatchManagerImpl implements MatchManager, Listener {
 
   public MatchManagerImpl(Logger logger) {
     this.logger = ClassLogger.get(checkNotNull(logger), getClass());
-    this.matchById = new ConcurrentHashMap<>();
-    this.matchByWorld = new ConcurrentHashMap<>();
+    this.matchById = Collections.synchronizedMap(new LinkedHashMap<>());
+    this.matchByWorld = new HashMap<>();
   }
 
   @EventHandler
@@ -72,24 +76,20 @@ public class MatchManagerImpl implements MatchManager, Listener {
   }
 
   @Override
-  public Iterable<Match> getMatches() {
-    return Collections.unmodifiableCollection(matchById.values());
+  public Iterator<Match> getMatches() {
+    return Iterators.unmodifiableIterator(matchById.values().iterator());
   }
 
   @Override
   public Iterable<? extends Audience> getAudiences() {
-    return getMatches();
+    return Iterables.unmodifiableIterable(matchById.values());
   }
 
   @Override
   public MatchPlayer getPlayer(@Nullable Player bukkit) {
-    // FIXME: determine if this needs to be more efficient with N matches
-    for (Match match : getMatches()) {
-      final MatchPlayer player = match.getPlayer(bukkit);
-      if (player != null) {
-        return player;
-      }
-    }
-    return null;
+    if (bukkit == null) return null;
+    final Match match = getMatch(bukkit.getWorld());
+    if (match == null) return null;
+    return match.getPlayer(bukkit);
   }
 }

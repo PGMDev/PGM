@@ -68,14 +68,18 @@ public class ServerPingDataListener implements Listener {
 
     try {
       JsonObject root = event.getOrCreateExtra(PGM.get());
-      for (Match match : this.matchManager.getMatches()) {
-        String matchId = match.getId();
-        try {
-          root.add(matchId, this.matchCache.get(match));
-        } catch (ExecutionException e) {
-          this.logger.log(Level.SEVERE, "Could not load server ping data for match: " + matchId, e);
-        }
-      }
+      this.matchManager
+          .getMatches()
+          .forEachRemaining(
+              match -> {
+                String matchId = match.getId();
+                try {
+                  root.add(matchId, this.matchCache.get(match));
+                } catch (ExecutionException e) {
+                  this.logger.log(
+                      Level.SEVERE, "Could not load server ping data for match: " + matchId, e);
+                }
+              });
     } catch (NoSuchMethodError ex) {
       legacySportPaper.compareAndSet(false, true);
     }

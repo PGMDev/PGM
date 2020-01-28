@@ -8,12 +8,9 @@ import app.ashcon.intake.bukkit.parametric.Type;
 import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
 import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Sets;
 import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -66,19 +63,17 @@ public class MapCommands {
       throws CommandException {
     Stream<MapInfo> search = Sets.newHashSet(library.getMaps()).stream();
     if (tags != null) {
-      final Map<Boolean, List<String>> tagSet =
+      final Map<Boolean, Set<String>> tagSet =
           Stream.of(tags.split(","))
               .map(String::toLowerCase)
               .map(String::trim)
-              .collect(Collectors.partitioningBy(s -> s.startsWith("!")));
-      search =
-          search.filter(
-              map ->
-                  matchesTags(
-                      map,
-                      tagSet.getOrDefault(false, new LinkedList<>()),
-                      Collections2.transform(
-                          tagSet.getOrDefault(true, new LinkedList<>()), s -> s.substring(1))));
+              .collect(
+                  Collectors.partitioningBy(
+                      s -> s.startsWith("!"),
+                      Collectors.mapping(
+                          (String s) -> s.startsWith("!") ? s.substring(1) : s,
+                          Collectors.toSet())));
+      search = search.filter(map -> matchesTags(map, tagSet.get(false), tagSet.get(true)));
     }
 
     if (author != null) {
@@ -104,17 +99,17 @@ public class MapCommands {
   }
 
   private static boolean matchesTags(
-      MapInfo map, Collection<String> posTags, Collection<String> negTags) {
+      MapInfo map, @Nullable Collection<String> posTags, @Nullable Collection<String> negTags) {
     int matches = 0;
     for (MapTag tag : checkNotNull(map).getTags()) {
-      if (negTags.contains(tag.getId())) {
+      if (negTags != null && negTags.contains(tag.getId())) {
         return false;
       }
-      if (posTags.contains(tag.getId())) {
+      if (posTags != null && posTags.contains(tag.getId())) {
         matches++;
       }
     }
-    return matches == posTags.size();
+    return posTags == null || matches == posTags.size();
   }
 
   private static boolean matchesAuthor(MapInfo map, String query) {

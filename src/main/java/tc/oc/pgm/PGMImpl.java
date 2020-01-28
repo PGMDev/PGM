@@ -212,7 +212,7 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
   @Override
   public void onDisable() {
     if (matchTabManager != null) matchTabManager.disable();
-    if (matchManager != null) matchManager.getMatches().iterator().forEachRemaining(Match::unload);
+    if (matchManager != null) matchManager.getMatches().forEachRemaining(Match::unload);
     datastore = null;
     mapLibrary = null;
     matchManager = null;
