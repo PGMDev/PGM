@@ -6,6 +6,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.map.PGMMap;
+import tc.oc.pgm.restart.RestartManager;
 
 public class VotingPool extends MapPool {
 
@@ -85,6 +86,8 @@ public class VotingPool extends MapPool {
             () -> {
               // Start poll here, to avoid starting it if you set next another map.
               if (manager.getOverriderMap() != null) return;
+              // If there is a restart queued, don't start a vote
+              if (RestartManager.isQueued()) return;
               currentPoll = new MapPoll(match, mapScores, VOTE_SIZE);
               match.getPlayers().forEach(currentPoll::sendBook);
             });
