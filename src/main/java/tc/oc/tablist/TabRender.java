@@ -10,7 +10,6 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
 import org.bukkit.Location;
 import org.bukkit.Skin;
 import org.bukkit.entity.Player;
-import tc.oc.util.ViaUtils;
 import tc.oc.world.NMSHacks;
 
 public class TabRender {
@@ -54,9 +53,6 @@ public class TabRender {
   }
 
   private void appendAddition(TabEntry entry, int index) {
-    if (ViaUtils.getProtocolVersion(this.view.getViewer()) < ViaUtils.VERSION_1_8) {
-      return;
-    }
     Skin skin = entry.getSkin(this.view);
     BaseComponent displayName = this.getContent(entry, index);
     this.addPacket.b.add(
@@ -158,9 +154,6 @@ public class TabRender {
   }
 
   public void updateFakeEntity(TabEntry entry, boolean create) {
-    if (ViaUtils.getProtocolVersion(this.view.getViewer()) < ViaUtils.VERSION_1_8) {
-      return;
-    }
     Player player = entry.getFakePlayer(this.view);
     if (player != null) {
       int entityId = entry.getFakeEntityId(this.view);

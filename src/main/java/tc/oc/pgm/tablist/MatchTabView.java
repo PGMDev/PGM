@@ -220,7 +220,6 @@ public class MatchTabView extends TabView implements Listener {
     super.render();
   }
 
-  @Override
   public void onViewerJoinMatch(PlayerJoinMatchEvent event) {
     if (this.getViewer() == event.getPlayer().getBukkit()) {
       this.match = event.getMatch();
