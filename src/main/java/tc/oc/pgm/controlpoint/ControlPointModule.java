@@ -57,8 +57,13 @@ public class ControlPointModule implements MapModule<ControlPointMatchModule> {
 
   public static class Factory implements MapModuleFactory<ControlPointModule> {
     @Override
+    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+      return ImmutableList.of(TeamModule.class);
+    }
+
+    @Override
     public Collection<Class<? extends MapModule>> getSoftDependencies() {
-      return ImmutableList.of(TeamModule.class, RegionModule.class, FilterModule.class);
+      return ImmutableList.of(RegionModule.class, FilterModule.class);
     }
 
     @Override

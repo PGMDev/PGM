@@ -55,10 +55,11 @@ public abstract class ControlPointParser {
     }
 
     String name = elControlPoint.getAttributeValue("name", "Hill");
+    TeamModule teams = factory.getModule(TeamModule.class);
     TeamFactory initialOwner =
-        factory
-            .getModule(TeamModule.class)
-            .parseTeam(elControlPoint.getAttribute("initial-owner"), factory);
+        teams == null
+            ? null
+            : teams.parseTeam(elControlPoint.getAttribute("initial-owner"), factory);
     Vector capturableDisplayBeacon = XMLUtils.parseVector(elControlPoint.getAttribute("beacon"));
     Duration timeToCapture =
         XMLUtils.parseDuration(

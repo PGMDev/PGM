@@ -8,6 +8,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.controlpoint.events.CapturingTimeChangeEvent;
 import tc.oc.pgm.controlpoint.events.ControllerChangeEvent;
 import tc.oc.pgm.filters.Filter;
@@ -16,7 +17,6 @@ import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.regions.SectorRegion;
 import tc.oc.pgm.renewable.BlockImage;
-import tc.oc.pgm.teams.Team;
 import tc.oc.server.BukkitUtils;
 
 /** Displays the status of a ControlPoint by coloring blocks in specified regions */
@@ -29,7 +29,7 @@ public class ControlPointBlockDisplay implements Listener {
   protected final FiniteBlockRegion controllerDisplayRegion;
   protected final BlockImage controllerDisplayImage;
 
-  protected Team controllingTeam;
+  protected Competitor controllingTeam;
 
   public ControlPointBlockDisplay(Match match, ControlPoint controlPoint) {
     this.match = match;
@@ -80,7 +80,7 @@ public class ControlPointBlockDisplay implements Listener {
    * Change the controller display to the given team's color, or reset the display if team is null
    */
   @SuppressWarnings("deprecation")
-  public void setController(Team controllingTeam) {
+  public void setController(Competitor controllingTeam) {
     if (this.controllingTeam != controllingTeam && this.controllerDisplayRegion != null) {
       if (controllingTeam == null) {
         for (Block block : this.controllerDisplayRegion.getBlocks()) {
@@ -97,7 +97,7 @@ public class ControlPointBlockDisplay implements Listener {
   }
 
   @SuppressWarnings("deprecation")
-  private void setBlock(Block block, Team team) {
+  private void setBlock(Block block, Competitor team) {
     if (this.controlPoint
         .getDefinition()
         .getVisualMaterials()
@@ -111,7 +111,8 @@ public class ControlPointBlockDisplay implements Listener {
     }
   }
 
-  protected void setProgress(Team controllingTeam, Team capturingTeam, double capturingProgress) {
+  protected void setProgress(
+      Competitor controllingTeam, Competitor capturingTeam, double capturingProgress) {
     if (this.progressDisplayRegion != null) {
       Vector center = this.progressDisplayRegion.getBounds().getCenterPoint();
 

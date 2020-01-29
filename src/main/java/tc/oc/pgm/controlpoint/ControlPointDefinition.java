@@ -42,11 +42,11 @@ public class ControlPointDefinition extends GoalDefinition {
   // players on the point
   private final float timeMultiplier;
 
-  // The team that owns the point when the match starts, null for no owner (neutral state)
+  // The team that owns the point when the match starts, null for no owner (neutral state) or ffa
   private final TeamFactory initialOwner;
 
   // Conditions required for a team to capture:
-  public static enum CaptureCondition {
+  public enum CaptureCondition {
     EXCLUSIVE, // Team owns all players on the point
     MAJORITY, // Team owns more than half the players on the point
     LEAD // Team owns more players on the point than any other single team

@@ -23,7 +23,6 @@ import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.pgm.teams.Teams;
 import tc.oc.util.StringUtils;
 import tc.oc.util.collection.DefaultMapAdapter;
 
@@ -46,12 +45,12 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
   // The team that currently owns the point. The goal is completed for this team.
   // If this is null then the point is unowned, either because it is in the
   // neutral state, or because it has no initial owner and has not yet been captured.
-  protected Team controllingTeam = null;
+  protected Competitor controllingTeam = null;
 
   // The team that will own the CP if the current capture is successful.
   // If this is null then either the point is not being captured or it is
   // being "uncaptured" toward the neutral state.
-  protected Team capturingTeam = null;
+  protected Competitor capturingTeam = null;
 
   // Time accumulated towards the owner change. When this passes timeToCaptureMillis,
   // it is reset to zero and the capturingTeam becomes the controllingTeam. When this is zero,
@@ -110,7 +109,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
    * The team that owns (is receiving points from) this ControlPoint, or null if the ControlPoint is
    * unowned.
    */
-  public Team getControllingTeam() {
+  public Competitor getControllingTeam() {
     return this.controllingTeam;
   }
 
@@ -122,7 +121,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
    * capturingTime goes below zero, the capturingTeam changes to the team with the most players on
    * the point, and the point becomes unowned.
    */
-  public Team getCapturingTeam() {
+  public Competitor getCapturingTeam() {
     return this.capturingTeam;
   }
 
@@ -135,7 +134,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
    *
    * @return The team that should be displayed as having partial ownership of the point, if any.
    */
-  public Team getPartialOwner() {
+  public Competitor getPartialOwner() {
     if (this.definition.hasNeutralState() && this.getControllingTeam() != null) {
       return this.getControllingTeam();
     } else {
@@ -270,17 +269,17 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
 
   /** Do a capturing cycle on this ControlPoint over the given duration. */
   protected void tickCapture(Duration duration) {
-    Map<Team, Integer> playerCounts = new DefaultMapAdapter<>(new HashMap<Team, Integer>(), 0);
+    Map<Competitor, Integer> playerCounts = new DefaultMapAdapter<>(new HashMap<>(), 0);
 
     // The teams with the most and second-most capturing players on the point, respectively
-    Team leader = null, runnerUp = null;
+    Competitor leader = null, runnerUp = null;
 
     // The total number of players on the point who are allowed to dominate and not on the leading
     // team
     int defenderCount = 0;
 
     for (MatchPlayer player : this.playerTracker.getPlayersOnPoint()) {
-      Team team = Teams.get(player);
+      Competitor team = player.getCompetitor();
       if (this.canDominate(player)) {
         defenderCount++;
         int playerCount = playerCounts.get(team) + 1;
@@ -334,10 +333,10 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
    * team can be null, which means no team is dominating the point, which can cause the state to
    * change in some configurations.
    */
-  private void dominateAndFireEvents(@Nullable Team dominantTeam, Duration dominantTime) {
+  private void dominateAndFireEvents(@Nullable Competitor dominantTeam, Duration dominantTime) {
     Duration oldCapturingTime = this.capturingTime;
-    Team oldCapturingTeam = this.capturingTeam;
-    Team oldControllingTeam = this.controllingTeam;
+    Competitor oldCapturingTeam = this.capturingTeam;
+    Competitor oldControllingTeam = this.controllingTeam;
 
     this.dominate(dominantTeam, dominantTime);
 
@@ -383,7 +382,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
    * <p>If incremental capturing is disabled, then capturingTimeMillis is reset to zero whenever it
    * stops increasing.
    */
-  private void dominate(Team dominantTeam, Duration dominantTime) {
+  private void dominate(Competitor dominantTeam, Duration dominantTime) {
     if (!this.capturable || !dominantTime.isLongerThan(Duration.ZERO)) {
       return;
     }
@@ -422,7 +421,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
   }
 
   /** Progress toward the neutral state */
-  private void progressUncapture(Team dominantTeam, Duration dominantTime) {
+  private void progressUncapture(Competitor dominantTeam, Duration dominantTime) {
     this.capturingTime = this.capturingTime.plus(dominantTime);
 
     if (!this.capturingTime.isShorterThan(this.definition.getTimeToCapture())) {
@@ -435,7 +434,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
   }
 
   /** Progress toward a new controller */
-  private void progressCapture(Team dominantTeam, Duration dominantTime) {
+  private void progressCapture(Competitor dominantTeam, Duration dominantTime) {
     this.capturingTime = this.capturingTime.plus(dominantTime);
     if (!this.capturingTime.isShorterThan(this.definition.getTimeToCapture())) {
       this.capturingTime = Duration.ZERO;
@@ -449,7 +448,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
   }
 
   /** Regress toward the current state */
-  private void regressCapture(Team dominantTeam, Duration dominantTime) {
+  private void regressCapture(Competitor dominantTeam, Duration dominantTime) {
     boolean crossZero = false;
     if (definition.isIncrementalCapture()) {
       // For incremental points, decrease the capture time
