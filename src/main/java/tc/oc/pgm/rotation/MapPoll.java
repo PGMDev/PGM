@@ -158,7 +158,7 @@ public class MapPoll {
         .hoverEvent(
             HoverEvent.Action.SHOW_TEXT,
             new PersonalizedText(
-                    map.getTags().stream().map(MapTag::getId).collect(Collectors.joining(" ")),
+                    map.getTags().stream().map(MapTag::toString).collect(Collectors.joining(" ")),
                     ChatColor.YELLOW)
                 .render())
         .clickEvent(ClickEvent.Action.RUN_COMMAND, "/votenext " + map.getName());
