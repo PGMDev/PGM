@@ -24,6 +24,7 @@ import org.bukkit.scoreboard.NameTagVisibility;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.tracker.Trackers;
+import tc.oc.util.ViaUtils;
 import tc.oc.world.NMSHacks;
 
 public class LongRangeTNTListener implements Listener {
@@ -271,7 +272,9 @@ public class LongRangeTNTListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerJoin(final PlayerJoinEvent event) {
-    this.viewsByPlayer.put(event.getPlayer(), new View(event.getPlayer()));
+    if (ViaUtils.getProtocolVersion(event.getPlayer()) >= ViaUtils.VERSION_1_8) {
+      this.viewsByPlayer.put(event.getPlayer(), new View(event.getPlayer()));
+    }
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

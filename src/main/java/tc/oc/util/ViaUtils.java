@@ -5,6 +5,11 @@ import tc.oc.world.NMSHacks;
 import us.myles.ViaVersion.api.Via;
 
 public class ViaUtils {
+  /** Minecraft 1.7.6 &ndash; 1.7.10 */
+  public static final int VERSION_1_7 = 5;
+  /** Minecraft 1.8 &ndash; 1.8.9 */
+  public static final int VERSION_1_8 = 47;
+
   private static final boolean ENABLED;
 
   static {
