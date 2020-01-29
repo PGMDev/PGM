@@ -120,8 +120,8 @@ sidebar:
 
 discord:
   # Enable Discord Integration
-   enabled: true
+   enabled: false
   # Discord Token
-   token: "NjcyMTQzNzY2MzExNzk2Nzg5.XjHMtA.jA8kEkvNMZdDZtC9N-ITppgSApQ"
+   token: ""
   # Guild ID of your server
    guild: ""
