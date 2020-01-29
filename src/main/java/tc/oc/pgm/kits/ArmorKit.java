@@ -39,7 +39,7 @@ public class ArmorKit extends AbstractKit {
       if (force || wearing[slot] == null || wearing[slot].getType() == Material.AIR) {
         wearing[slot] = entry.getValue().stack.clone();
 
-        KitMatchModule kitMatchModule = player.getMatch().getMatchModule(KitMatchModule.class);
+        KitMatchModule kitMatchModule = player.getMatch().getModule(KitMatchModule.class);
         if (kitMatchModule != null) {
           kitMatchModule.lockArmorSlot(player, entry.getKey(), entry.getValue().locked);
         }

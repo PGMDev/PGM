@@ -19,14 +19,14 @@ import tc.oc.component.Component;
 import tc.oc.component.render.ComponentRenderers;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.factory.MatchModuleFactory;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchModuleFactory;
 import tc.oc.pgm.menu.InventoryMenu;
 import tc.oc.pgm.menu.InventoryMenuItem;
-import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.observers.tools.FlySpeedTool;
 import tc.oc.pgm.observers.tools.GamemodeTool;
 import tc.oc.pgm.observers.tools.NightVisionTool;
@@ -34,7 +34,7 @@ import tc.oc.pgm.observers.tools.VisibilityTool;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 
 @ListenerScope(MatchScope.LOADED)
-public class ObserverToolsMatchModule extends MatchModule implements Listener {
+public class ObserverToolsMatchModule implements MatchModule, Listener {
 
   public static class Factory implements MatchModuleFactory<ObserverToolsMatchModule> {
     @Override
@@ -49,10 +49,11 @@ public class ObserverToolsMatchModule extends MatchModule implements Listener {
   // Material of tool item item
   public static final Material TOOL_MATERIAL = Material.DIAMOND;
 
+  private final Match match;
   private ObserverToolMenu menu;
 
   public ObserverToolsMatchModule(Match match) {
-    super(match);
+    this.match = match;
     this.menu = new ObserverToolMenu();
   }
 
@@ -67,7 +68,7 @@ public class ObserverToolsMatchModule extends MatchModule implements Listener {
       ItemStack item = event.getPlayer().getItemInHand();
 
       if (item.getType().equals(TOOL_MATERIAL)) {
-        MatchPlayer player = getMatch().getPlayer(event.getPlayer());
+        MatchPlayer player = match.getPlayer(event.getPlayer());
         openMenu(player);
       }
     }
@@ -97,7 +98,7 @@ public class ObserverToolsMatchModule extends MatchModule implements Listener {
   @EventHandler
   public void onInventoryClose(final InventoryCloseEvent event) {
     // Remove viewing of menu upon inventory close
-    menu.remove(getMatch().getPlayer((Player) event.getPlayer()));
+    menu.remove(match.getPlayer((Player) event.getPlayer()));
   }
 
   public void openMenu(MatchPlayer player) {

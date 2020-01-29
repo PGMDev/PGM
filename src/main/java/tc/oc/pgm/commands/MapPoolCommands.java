@@ -14,13 +14,18 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.named.NameStyle;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
-import tc.oc.pgm.api.match.MatchManager;
+import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.map.PGMMap;
-import tc.oc.pgm.rotation.*;
+import tc.oc.pgm.rotation.MapOrder;
+import tc.oc.pgm.rotation.MapPoll;
+import tc.oc.pgm.rotation.MapPool;
+import tc.oc.pgm.rotation.MapPoolManager;
+import tc.oc.pgm.rotation.Rotation;
+import tc.oc.pgm.rotation.VotingPool;
 import tc.oc.pgm.util.PrettyPaginatedResult;
 import tc.oc.util.components.ComponentUtils;
 
@@ -35,7 +40,7 @@ public class MapPoolCommands {
   public static void rotation(
       Audience audience,
       CommandSender sender,
-      MatchManager matchManager,
+      MapOrder mapOrder,
       @Default("1") int page,
       @Switch('r') String rotationName,
       @Switch('p') String poolName,
@@ -44,7 +49,7 @@ public class MapPoolCommands {
       throws CommandException {
     if (rotationName != null) poolName = rotationName;
 
-    MapPoolManager mapPoolManager = getMapPoolManager(sender, matchManager);
+    MapPoolManager mapPoolManager = getMapPoolManager(sender, mapOrder);
     MapPool mapPool =
         poolName == null
             ? mapPoolManager.getActiveMapPool()
@@ -55,7 +60,7 @@ public class MapPoolCommands {
           ChatColor.RED + AllTranslations.get().translate("command.pools.noPoolMatch", sender));
       return;
     }
-    List<PGMMap> maps = mapPool.getMaps();
+    List<MapInfo> maps = mapPool.getMaps();
 
     int resultsPerPage = 8;
     int pages = (maps.size() + resultsPerPage - 1) / resultsPerPage;
@@ -68,10 +73,10 @@ public class MapPoolCommands {
 
     VotingPool votes =
         (scores || chance) && mapPool instanceof VotingPool ? (VotingPool) mapPool : null;
-    Map<PGMMap, Double> chances = chance ? new HashMap<>() : null;
+    Map<MapInfo, Double> chances = chance ? new HashMap<>() : null;
     if (chance && votes != null) {
       double maxWeight = 0, currWeight;
-      for (PGMMap map : votes.getMaps()) {
+      for (MapInfo map : votes.getMaps()) {
         chances.put(map, currWeight = MapPoll.getWeight(votes.getMapScore(map)));
         maxWeight += currWeight;
       }
@@ -81,16 +86,16 @@ public class MapPoolCommands {
 
     int nextPos = mapPool instanceof Rotation ? ((Rotation) mapPool).getNextPosition() : -1;
 
-    new PrettyPaginatedResult<PGMMap>(title, resultsPerPage) {
+    new PrettyPaginatedResult<MapInfo>(title, resultsPerPage) {
       @Override
-      public String format(PGMMap map, int index) {
+      public String format(MapInfo map, int index) {
         index++;
         String str = (nextPos == index ? ChatColor.DARK_AQUA + "" : "") + index + ". ";
         if (votes != null && scores)
           str += ChatColor.YELLOW + SCORE_FORMAT.format(votes.getMapScore(map)) + " ";
         if (votes != null && chance)
           str += ChatColor.YELLOW + SCORE_FORMAT.format(chances.get(map)) + " ";
-        str += ChatColor.RESET + map.getInfo().getShortDescription(sender);
+        str += ChatColor.RESET + "" + map.getStyledName(NameStyle.FANCY).toLegacyText();
         return str;
       }
     }.display(audience, maps, page);
@@ -101,10 +106,10 @@ public class MapPoolCommands {
       desc = "Shows all the existing rotations.",
       help = "Shows all the existing rotations and their trigger player counts.")
   public static void rotations(
-      Audience audience, CommandSender sender, MatchManager matchManager, @Default("1") int page)
+      Audience audience, CommandSender sender, MapOrder mapOrder, @Default("1") int page)
       throws CommandException {
 
-    MapPoolManager mapPoolManager = getMapPoolManager(sender, matchManager);
+    MapPoolManager mapPoolManager = getMapPoolManager(sender, mapOrder);
 
     List<MapPool> mapPools = mapPoolManager.getMapPools();
     if (mapPools.isEmpty()) {
@@ -147,8 +152,7 @@ public class MapPoolCommands {
       desc = "Skips one or more maps from the current rotation.",
       usage = "[positions]",
       perms = Permissions.SETNEXT)
-  public static void skip(
-      CommandSender sender, MatchManager matchManager, @Default("1") int positions)
+  public static void skip(CommandSender sender, MapOrder mapOrder, @Default("1") int positions)
       throws CommandException {
 
     if (positions < 0) {
@@ -157,7 +161,7 @@ public class MapPoolCommands {
       return;
     }
 
-    MapPool pool = getMapPoolManager(sender, matchManager).getActiveMapPool();
+    MapPool pool = getMapPoolManager(sender, mapOrder).getActiveMapPool();
     if (!(pool instanceof Rotation)) {
       sender.sendMessage(
           ChatColor.RED + AllTranslations.get().translate("command.pools.noRotation", sender));
@@ -187,9 +191,9 @@ public class MapPoolCommands {
 
   @Command(aliases = "votenext", desc = "Vote for the next map to play", usage = "map")
   public static void voteNext(
-      MatchPlayer player, CommandSender sender, MatchManager matchManager, @Text PGMMap map)
+      MatchPlayer player, CommandSender sender, MapOrder mapOrder, @Text MapInfo map)
       throws CommandException {
-    MapPool pool = getMapPoolManager(sender, matchManager).getActiveMapPool();
+    MapPool pool = getMapPoolManager(sender, mapOrder).getActiveMapPool();
     MapPoll poll = pool instanceof VotingPool ? ((VotingPool) pool).getCurrentPoll() : null;
     if (poll == null) {
       sender.sendMessage(
@@ -206,10 +210,9 @@ public class MapPoolCommands {
     poll.sendBook(player);
   }
 
-  private static MapPoolManager getMapPoolManager(CommandSender sender, MatchManager matchManager)
+  private static MapPoolManager getMapPoolManager(CommandSender sender, MapOrder mapOrder)
       throws CommandException {
-    if (matchManager.getMapOrder() instanceof MapPoolManager)
-      return (MapPoolManager) matchManager.getMapOrder();
+    if (mapOrder instanceof MapPoolManager) return (MapPoolManager) mapOrder;
 
     throw new CommandException(
         AllTranslations.get().translate("command.pools.mapPoolsDisabled", sender));

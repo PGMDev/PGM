@@ -18,7 +18,7 @@ public class InventoryCommands {
   public static void inventory(CommandSender sender, Player holder, Match match)
       throws CommandException {
     final Player viewer = (Player) sender;
-    final ViewInventoryMatchModule vimm = match.getMatchModule(ViewInventoryMatchModule.class);
+    final ViewInventoryMatchModule vimm = match.getModule(ViewInventoryMatchModule.class);
 
     if (vimm.canPreviewInventory(viewer, holder)) {
       vimm.previewInventory((Player) sender, holder.getInventory());

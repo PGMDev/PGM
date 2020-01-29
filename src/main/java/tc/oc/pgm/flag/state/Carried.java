@@ -105,18 +105,18 @@ public class Carried extends Spawned implements Missing {
     this.helmetLocked =
         this.flag
             .getMatch()
-            .getMatchModule(KitMatchModule.class)
+            .getModule(KitMatchModule.class)
             .lockArmorSlot(this.carrier, ArmorType.HELMET, false);
 
     this.carrier.getBukkit().getInventory().setHelmet(this.flag.getBannerItem().clone());
 
-    SidebarMatchModule smm = this.flag.getMatch().getMatchModule(SidebarMatchModule.class);
+    SidebarMatchModule smm = this.flag.getMatch().getModule(SidebarMatchModule.class);
     if (smm != null) smm.blinkGoal(this.flag, 2, null);
   }
 
   @Override
   public void leaveState() {
-    SidebarMatchModule smm = this.flag.getMatch().getMatchModule(SidebarMatchModule.class);
+    SidebarMatchModule smm = this.flag.getMatch().getModule(SidebarMatchModule.class);
     if (smm != null) smm.stopBlinkingGoal(this.flag);
 
     NMSHacks.sendHotbarMessage(this.carrier.getBukkit(), "");
@@ -126,7 +126,7 @@ public class Carried extends Spawned implements Missing {
 
     this.flag
         .getMatch()
-        .getMatchModule(KitMatchModule.class)
+        .getModule(KitMatchModule.class)
         .lockArmorSlot(this.carrier, ArmorType.HELMET, this.helmetLocked);
 
     Kit kit = this.flag.getDefinition().getDropKit();
@@ -139,7 +139,7 @@ public class Carried extends Spawned implements Missing {
 
   protected Competitor getBeneficiary(TeamFactory owner) {
     if (owner != null) {
-      return this.flag.getMatch().needMatchModule(TeamMatchModule.class).getTeam(owner);
+      return this.flag.getMatch().needModule(TeamMatchModule.class).getTeam(owner);
     } else {
       return this.carrier.getCompetitor();
     }
@@ -193,7 +193,7 @@ public class Carried extends Spawned implements Missing {
       this.carrier.showTitle(new PersonalizedText(), message, 0, 5, 35);
     }
 
-    ScoreMatchModule smm = this.flag.getMatch().getMatchModule(ScoreMatchModule.class);
+    ScoreMatchModule smm = this.flag.getMatch().getModule(ScoreMatchModule.class);
     if (smm != null && this.flag.getDefinition().getPointsPerSecond() > 0) {
       smm.incrementScore(
           this.getBeneficiary(this.flag.getDefinition().getOwner()),
@@ -243,7 +243,7 @@ public class Carried extends Spawned implements Missing {
     this.flag.resetTouches(this.carrier.getCompetitor());
     this.flag.resetProximity(this.carrier.getCompetitor());
 
-    ScoreMatchModule smm = this.flag.getMatch().getMatchModule(ScoreMatchModule.class);
+    ScoreMatchModule smm = this.flag.getMatch().getModule(ScoreMatchModule.class);
     if (smm != null) {
       if (net.getPointsPerCapture() != 0) {
         smm.incrementScore(this.getBeneficiary(net.getOwner()), net.getPointsPerCapture());

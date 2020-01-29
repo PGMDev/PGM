@@ -13,14 +13,32 @@ import java.util.Map;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.Material;
-import org.bukkit.Physical;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
-import org.bukkit.event.*;
-import org.bukkit.event.block.*;
+import org.bukkit.event.Event;
+import org.bukkit.event.EventException;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.block.BlockFadeEvent;
+import org.bukkit.event.block.BlockFallEvent;
+import org.bukkit.event.block.BlockFormEvent;
+import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.BlockGrowEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockMultiPlaceEvent;
+import org.bukkit.event.block.BlockPistonEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.ExplosionPrimeByEntityEvent;
@@ -46,7 +64,7 @@ import tc.oc.pgm.events.PlayerBlockTransformEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.Trackers;
 import tc.oc.server.Events;
-import tc.oc.util.logging.ClassLogger;
+import tc.oc.util.ClassLogger;
 import tc.oc.util.reflect.ReflectionUtils;
 
 public class BlockTransformListener implements Listener {
@@ -81,10 +99,11 @@ public class BlockTransformListener implements Listener {
             new EventExecutor() {
               @Override
               public void execute(Listener listener, Event event) throws EventException {
-                // Ignore the event if it was fron a non-Match world
-                if (event instanceof Physical
-                    && PGM.get().getMatchManager().getMatch(((Physical) event).getWorld()) == null)
-                  return;
+                // REMOVED: Ignore the event if it was fron a non-Match world
+                // if (event instanceof Physical
+                //    && PGM.get().getMatchManager().getMatch(((Physical) event).getWorld()) ==
+                // null)
+                //  return;
 
                 if (!Events.isCancelled(event)) {
                   // At the first priority level, call the event handler method.
@@ -319,7 +338,7 @@ public class BlockTransformListener implements Listener {
     BlockState oldState = event.getBlock().getState();
     BlockState newState = BlockStates.toAir(oldState);
     MatchPlayerState igniterState = null;
-    TrackerMatchModule tmm = match.needMatchModule(TrackerMatchModule.class);
+    TrackerMatchModule tmm = match.needModule(TrackerMatchModule.class);
 
     for (BlockFace face : NEIGHBORS) {
       Block neighbor = oldState.getBlock().getRelative(face);
@@ -486,7 +505,7 @@ public class BlockTransformListener implements Listener {
     if (event != null && !event.isCancelled() && event.getDrops() != null) {
       Match match = PGM.get().getMatchManager().getMatch(event.getWorld());
       if (match != null) {
-        BlockDropsMatchModule bdmm = match.getMatchModule(BlockDropsMatchModule.class);
+        BlockDropsMatchModule bdmm = match.getModule(BlockDropsMatchModule.class);
         if (bdmm != null) {
           bdmm.doBlockDrops(event);
         }

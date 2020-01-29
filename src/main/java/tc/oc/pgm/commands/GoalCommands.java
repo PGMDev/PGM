@@ -19,7 +19,7 @@ public class GoalCommands {
       desc = "Show stats about how close each competitor has been to each objective")
   public static void proximity(CommandSender sender, MatchPlayer matchPlayer, Match match)
       throws CommandException {
-    TeamMatchModule tmm = match.needMatchModule(TeamMatchModule.class);
+    TeamMatchModule tmm = match.needModule(TeamMatchModule.class);
 
     if (matchPlayer != null && matchPlayer.isParticipating()) {
       throw new CommandException("The /proximity command is only available to observers");
@@ -29,7 +29,7 @@ public class GoalCommands {
 
     for (Team team : tmm.getParticipatingTeams()) {
       boolean teamHeader = false;
-      final GoalMatchModule gmm = match.needMatchModule(GoalMatchModule.class);
+      final GoalMatchModule gmm = match.needModule(GoalMatchModule.class);
 
       for (Goal<?> goal : gmm.getGoals(team)) {
         if (goal instanceof TouchableGoal && goal.isVisible()) {

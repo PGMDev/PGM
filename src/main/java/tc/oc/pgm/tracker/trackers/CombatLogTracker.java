@@ -46,8 +46,6 @@ public class CombatLogTracker implements Listener {
   // Minimum water required to stop the player's fall
   private static final int BREAK_FALL_WATER_DEPTH = 3;
 
-  private final Match match;
-
   private static class Damage {
     public final Instant time;
     public final EntityDamageEvent event;
@@ -78,9 +76,7 @@ public class CombatLogTracker implements Listener {
 
   private Map<Player, Damage> recentDamage = new HashMap<>();
 
-  public CombatLogTracker(TrackerMatchModule tmm) {
-    this.match = tmm.getMatch();
-  }
+  public CombatLogTracker(TrackerMatchModule tmm) {}
 
   private static boolean hasFireResistance(LivingEntity entity) {
     for (PotionEffect effect : entity.getActivePotionEffects()) {

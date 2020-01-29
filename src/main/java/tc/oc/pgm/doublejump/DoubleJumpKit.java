@@ -24,7 +24,7 @@ public class DoubleJumpKit extends AbstractKit {
 
   @Override
   public void applyPostEvent(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {
-    DoubleJumpMatchModule djmm = player.getMatch().getMatchModule(DoubleJumpMatchModule.class);
+    DoubleJumpMatchModule djmm = player.getMatch().getModule(DoubleJumpMatchModule.class);
     if (djmm != null) djmm.setKit(player.getBukkit(), this);
   }
 

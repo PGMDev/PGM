@@ -10,6 +10,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerListPingEvent;
 import tc.oc.pgm.Config;
+import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.match.event.MatchPhaseChangeEvent;
 import tc.oc.pgm.events.ConfigLoadEvent;
@@ -25,16 +27,23 @@ public class MotdListener implements Listener {
   private static final Map<String, String> MOTD_DATA = Maps.newHashMap();
   private String format;
 
-  // Show the default MOTD until a match has loaded
-  private boolean ready = false;
-
   public MotdListener() {
     this.format = Config.Motd.format();
+
+    // Ensure there are always default keys
+    MapInfo map = PGM.get().getMapOrder().getNextMap();
+    if (map == null) map = PGM.get().getMapLibrary().getMaps().next();
+
+    MOTD_DATA.put(MAP_NAME_KEY, map.getName());
+    MOTD_DATA.put(MAP_VERSION_KEY, map.getVersion().toString());
+    MOTD_DATA.put(STATE_NAME_KEY, "Idle");
+    MOTD_DATA.put(STATE_NAME_LOWER_KEY, "idle");
+    MOTD_DATA.put(STATE_COLOR_KEY, Config.Motd.Colors.idle().toString());
   }
 
   @EventHandler
   public void onServerListPing(ServerListPingEvent event) {
-    if (!Config.Motd.enabled() || !ready) return;
+    if (!Config.Motd.enabled()) return;
 
     String motd = format;
     // There's no nice named string placeholder system built directly into Java :(.
@@ -53,9 +62,8 @@ public class MotdListener implements Listener {
 
   @EventHandler
   public void onLoad(MatchLoadEvent event) {
-    MOTD_DATA.put(MAP_NAME_KEY, event.getMatch().getMap().getInfo().name);
-    MOTD_DATA.put(MAP_VERSION_KEY, event.getMatch().getMap().getInfo().version.toString());
-    ready = true;
+    MOTD_DATA.put(MAP_NAME_KEY, event.getMatch().getMap().getName());
+    MOTD_DATA.put(MAP_VERSION_KEY, event.getMatch().getMap().getVersion().toString());
   }
 
   @EventHandler(priority = EventPriority.MONITOR)

@@ -30,7 +30,7 @@ public class TeamMatchModuleProvider implements BukkitProvider<TeamMatchModule> 
       CommandSender sender, CommandArgs commandArgs, List<? extends Annotation> list)
       throws ProvisionException {
     TeamMatchModule teamMatchModule =
-        matchManager.getMatch(sender).getMatchModule(TeamMatchModule.class);
+        matchManager.getMatch(sender).getModule(TeamMatchModule.class);
     if (teamMatchModule == null) {
       throw new ProvisionException(AllTranslations.get().translate("command.noTeams", sender));
     }

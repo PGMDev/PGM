@@ -8,6 +8,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockDispenseEntityEvent;
 import org.bukkit.event.entity.ExplosionPrimeByEntityEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
@@ -16,8 +17,8 @@ import tc.oc.pgm.tracker.damage.TNTInfo;
 /** Updates the state of owned TNT blocks and entities */
 public class TNTTracker extends AbstractTracker<TNTInfo> {
 
-  public TNTTracker(TrackerMatchModule tmm) {
-    super(TNTInfo.class, tmm);
+  public TNTTracker(TrackerMatchModule tmm, Match match) {
+    super(TNTInfo.class, tmm, match);
   }
 
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

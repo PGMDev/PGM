@@ -11,6 +11,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import tc.oc.pgm.Config;
+import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.event.MatchResizeEvent;
 import tc.oc.pgm.api.match.event.MatchUnloadEvent;
@@ -31,8 +33,6 @@ import tc.oc.tablist.TabView;
 import tc.oc.util.collection.DefaultMapAdapter;
 
 public class MatchTabManager extends TabManager implements Listener {
-  // Moved over to experiments config
-  // public static final long RENDER_DELAY = 5;
 
   private final Map<Team, TeamTabEntry> teamEntries =
       new DefaultMapAdapter<>(new TeamTabEntry.Factory(), true);
@@ -47,14 +47,6 @@ public class MatchTabManager extends TabManager implements Listener {
 
   public MatchTabManager(Plugin plugin) {
     super(plugin, new MatchTabView.Factory(), null);
-  }
-
-  void registerEvents(Listener listener) {
-    this.getPlugin().getServer().getPluginManager().registerEvents(listener, this.getPlugin());
-  }
-
-  public void enable() {
-    this.registerEvents(this);
   }
 
   public void disable() {
@@ -83,7 +75,7 @@ public class MatchTabManager extends TabManager implements Listener {
           this.getPlugin()
               .getServer()
               .getScheduler()
-              .runTaskLater(this.getPlugin(), render, Config.Experiments.get().getTabRenderDelay());
+              .runTaskLater(this.getPlugin(), render, Config.Experiments.get().getTabRenderTicks());
     }
   }
 
@@ -96,7 +88,7 @@ public class MatchTabManager extends TabManager implements Listener {
   public @Nullable TabView getView(Player viewer) {
     TabView view = super.getView(viewer);
     if (view instanceof ListeningTabView) {
-      this.registerEvents((ListeningTabView) view);
+      plugin.getServer().getPluginManager().registerEvents((ListeningTabView) view, PGM.get());
     }
     return view;
   }
@@ -123,9 +115,12 @@ public class MatchTabManager extends TabManager implements Listener {
 
   protected void invalidate(MatchPlayer player) {
     getPlayerEntry(player).invalidate();
-    if (player.getMatch().getMap().getInfo().isAuthor(player.getId())) {
-      MapTabEntry mapEntry = mapEntries.get(player.getMatch());
-      if (mapEntry != null) mapEntry.invalidate();
+    for (Contributor author : player.getMatch().getMap().getAuthors()) {
+      if (author.isPlayer(player.getId())) {
+        MapTabEntry mapEntry = mapEntries.get(player.getMatch());
+        if (mapEntry != null) mapEntry.invalidate();
+        break;
+      }
     }
   }
 
@@ -137,7 +132,7 @@ public class MatchTabManager extends TabManager implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onMatchUnload(MatchUnloadEvent event) {
-    TeamMatchModule tmm = event.getMatch().getMatchModule(TeamMatchModule.class);
+    TeamMatchModule tmm = event.getMatch().getModule(TeamMatchModule.class);
     if (tmm != null) {
       for (Team team : tmm.getTeams()) {
         this.teamEntries.remove(team);

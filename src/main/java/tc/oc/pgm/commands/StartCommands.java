@@ -25,7 +25,7 @@ public class StartCommands {
       perms = Permissions.START)
   public static void start(CommandSender sender, Match match, Duration countdown, Duration huddle)
       throws CommandException {
-    StartMatchModule smm = match.needMatchModule(StartMatchModule.class);
+    StartMatchModule smm = match.needModule(StartMatchModule.class);
 
     if (match.isRunning()) {
       throw new CommandException(
@@ -62,7 +62,7 @@ public class StartCommands {
       perms = Permissions.START)
   public static void autostart(CommandSender sender, Match match, @Nullable String toggle)
       throws CommandException {
-    StartMatchModule smm = match.needMatchModule(StartMatchModule.class);
+    StartMatchModule smm = match.needModule(StartMatchModule.class);
 
     boolean autoStart;
     if (toggle != null) {

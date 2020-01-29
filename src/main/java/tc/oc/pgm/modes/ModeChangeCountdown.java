@@ -7,6 +7,7 @@ import org.joda.time.Duration;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.timelimit.TimeLimitCountdown;
@@ -16,8 +17,8 @@ public class ModeChangeCountdown extends MatchCountdown implements Comparable<Mo
   private final CountdownContext context;
   private final Mode mode;
 
-  public ModeChangeCountdown(ObjectiveModesMatchModule parent, Mode mode) {
-    super(parent.getMatch());
+  public ModeChangeCountdown(Match match, ObjectiveModesMatchModule parent, Mode mode) {
+    super(match);
 
     this.context = parent.getCountdown();
     this.mode = mode;

@@ -29,8 +29,8 @@ public class JoinCommands {
       @Switch('f') boolean force,
       @Nullable @Text String team)
       throws CommandException {
-    JoinMatchModule jmm = match.needMatchModule(JoinMatchModule.class);
-    TeamMatchModule tmm = match.getMatchModule(TeamMatchModule.class);
+    JoinMatchModule jmm = match.needModule(JoinMatchModule.class);
+    TeamMatchModule tmm = match.getModule(TeamMatchModule.class);
 
     Competitor chosenParty = null;
 
@@ -59,6 +59,6 @@ public class JoinCommands {
       desc = "Leaves the current match, placing the sender on the observing team",
       perms = Permissions.LEAVE)
   public static void leave(MatchPlayer player, Match match) throws CommandException {
-    match.needMatchModule(JoinMatchModule.class).leave(player);
+    match.needModule(JoinMatchModule.class).leave(player);
   }
 }

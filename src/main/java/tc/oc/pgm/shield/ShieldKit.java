@@ -15,7 +15,7 @@ public class ShieldKit extends AbstractKit {
 
   @Override
   protected void applyPostEvent(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {
-    player.getMatch().needMatchModule(ShieldMatchModule.class).applyShield(player, parameters);
+    player.getMatch().needModule(ShieldMatchModule.class).applyShield(player, parameters);
   }
 
   @Override
@@ -25,6 +25,6 @@ public class ShieldKit extends AbstractKit {
 
   @Override
   public void remove(MatchPlayer player) {
-    player.getMatch().needMatchModule(ShieldMatchModule.class).removeShield(player);
+    player.getMatch().needModule(ShieldMatchModule.class).removeShield(player);
   }
 }

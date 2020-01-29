@@ -46,14 +46,14 @@ public class Dropped extends Uncarried implements Missing {
     }
 
     if (TimeUtils.isInfinite(getDuration())) {
-      SidebarMatchModule smm = this.flag.getMatch().getMatchModule(SidebarMatchModule.class);
+      SidebarMatchModule smm = this.flag.getMatch().getModule(SidebarMatchModule.class);
       if (smm != null) smm.blinkGoal(this.flag, 2, null);
     }
   }
 
   @Override
   public void leaveState() {
-    SidebarMatchModule smm = this.flag.getMatch().getMatchModule(SidebarMatchModule.class);
+    SidebarMatchModule smm = this.flag.getMatch().getModule(SidebarMatchModule.class);
     if (smm != null) smm.stopBlinkingGoal(this.flag);
     super.leaveState();
   }

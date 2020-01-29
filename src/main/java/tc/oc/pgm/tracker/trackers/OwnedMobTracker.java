@@ -10,6 +10,7 @@ import org.bukkit.event.block.BlockDispenseEntityEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.event.player.PlayerSpawnEntityEvent;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.projectile.EntityLaunchEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
@@ -20,8 +21,8 @@ public class OwnedMobTracker extends AbstractTracker<MobInfo> {
 
   private WeakReference<Slime> splitter = new WeakReference<>(null);
 
-  public OwnedMobTracker(TrackerMatchModule tmm) {
-    super(MobInfo.class, tmm);
+  public OwnedMobTracker(TrackerMatchModule tmm, Match match) {
+    super(MobInfo.class, tmm, match);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

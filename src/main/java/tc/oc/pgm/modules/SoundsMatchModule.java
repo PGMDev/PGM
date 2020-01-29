@@ -5,8 +5,11 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
+import tc.oc.pgm.api.match.factory.MatchModuleFactory;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
@@ -16,26 +19,19 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
-import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchModuleFactory;
-import tc.oc.pgm.module.ModuleLoadException;
 import tc.oc.pgm.wool.PlayerWoolPlaceEvent;
 
 @ListenerScope(MatchScope.RUNNING)
-public class SoundsMatchModule extends MatchModule implements Listener {
+public class SoundsMatchModule implements MatchModule, Listener {
 
   public static class Factory implements MatchModuleFactory<SoundsMatchModule> {
     @Override
     public SoundsMatchModule createMatchModule(Match match) throws ModuleLoadException {
-      return new SoundsMatchModule(match);
+      return new SoundsMatchModule();
     }
   }
 
   private static final Sound RAINDROP_SOUND = new Sound("random.levelup", 1f, 1.5f);
-
-  public SoundsMatchModule(Match match) {
-    super(match);
-  }
 
   private void playSound(MatchPlayer player, Sound sound) {
     if (player.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ON)) {

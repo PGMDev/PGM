@@ -16,6 +16,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.event.PlayerItemTransferEvent;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -23,16 +24,16 @@ import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.filters.query.DamageQuery;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.tracker.damage.DamageInfo;
 
 @ListenerScope(MatchScope.RUNNING)
-public class KillRewardMatchModule extends MatchModule implements Listener {
+public class KillRewardMatchModule implements MatchModule, Listener {
+  private final Match match;
   protected final ImmutableList<KillReward> killRewards;
   protected final Multimap<MatchPlayer, KillReward> deadPlayerRewards = ArrayListMultimap.create();
 
   public KillRewardMatchModule(Match match, List<KillReward> killRewards) {
-    super(match);
+    this.match = match;
     this.killRewards = ImmutableList.copyOf(killRewards);
   }
 
@@ -75,7 +76,7 @@ public class KillRewardMatchModule extends MatchModule implements Listener {
                 null,
                 clone.getAmount(),
                 null);
-        getMatch().callEvent(event);
+        match.callEvent(event);
         if (!event.isCancelled() && event.getQuantity() > 0) {
           // BEWARE: addItem modifies its argument.. send in the clone!
           clone.setAmount(event.getQuantity());

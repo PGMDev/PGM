@@ -1,26 +1,24 @@
 package tc.oc.pgm.proximity;
 
 import com.google.common.collect.Sets;
-import java.util.Random;
 import java.util.Set;
 import org.bukkit.event.HandlerList;
 import org.bukkit.scheduler.BukkitTask;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
-import tc.oc.pgm.match.MatchModule;
 
-public class ProximityAlarmMatchModule extends MatchModule {
+public class ProximityAlarmMatchModule implements MatchModule {
   private static final long ALARM_INTERVAL = 3;
 
+  private final Match match;
   protected final Set<ProximityAlarm> proximityAlarms = Sets.newHashSet();
   protected BukkitTask task;
 
   public ProximityAlarmMatchModule(Match match, Set<ProximityAlarmDefinition> definitions) {
-    super(match);
-
-    Random random = new Random();
+    this.match = match;
     for (ProximityAlarmDefinition definition : definitions) {
-      proximityAlarms.add(new ProximityAlarm(this.match, definition, random));
+      proximityAlarms.add(new ProximityAlarm(match, definition, match.getRandom()));
     }
   }
 

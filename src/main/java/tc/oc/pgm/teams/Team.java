@@ -65,7 +65,7 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
 
   protected TeamMatchModule module() {
     if (tmm == null) {
-      tmm = getMatch().needMatchModule(TeamMatchModule.class);
+      tmm = getMatch().needModule(TeamMatchModule.class);
     }
     return tmm;
   }
