@@ -1,6 +1,7 @@
 package tc.oc.pgm.observers;
 
 import com.google.common.collect.Lists;
+import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -31,8 +32,6 @@ import tc.oc.pgm.observers.tools.GamemodeTool;
 import tc.oc.pgm.observers.tools.NightVisionTool;
 import tc.oc.pgm.observers.tools.VisibilityTool;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
-
-import java.util.List;
 
 @ListenerScope(MatchScope.LOADED)
 public class ObserverToolsMatchModule implements MatchModule, Listener {

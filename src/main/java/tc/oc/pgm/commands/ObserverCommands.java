@@ -17,7 +17,8 @@ public class ObserverCommands {
   public static void openObserverToolMenu(CommandSender sender, MatchPlayer player)
       throws CommandException {
     if (player.isObserving()) {
-      Optional<ObserverToolsMatchModule> tools =
+
+      final ObserverToolsMatchModule tools =
           player.getMatch().getModule(ObserverToolsMatchModule.class);
 
       tools.ifPresent(
