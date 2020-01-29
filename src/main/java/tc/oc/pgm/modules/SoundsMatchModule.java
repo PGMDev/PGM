@@ -37,44 +37,44 @@ public class SoundsMatchModule extends MatchModule implements Listener {
     super(match);
   }
 
-  private void playRaindrop(MatchPlayer player) {
+  private void playSound(MatchPlayer player, Sound sound) {
     if (player.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ON)) {
-      player.playSound(RAINDROP_SOUND);
+      player.playSound(sound);
     }
   }
 
-  private void playRaindrop(MatchPlayerState playerState) {
-    playerState.getPlayer().ifPresent(this::playRaindrop);
+  private void playSound(MatchPlayerState playerState, Sound sound) {
+    playerState.getPlayer().ifPresent(player -> playSound(player, sound));
   }
 
-  private void playRaindrop(Competitor competitor) {
-    competitor.getPlayers().forEach(this::playRaindrop);
+  private void playSound(Competitor competitor, Sound sound) {
+    competitor.getPlayers().forEach(player -> playSound(player, sound));
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchPlayerDeath(MatchPlayerDeathEvent event) {
     ParticipantState killer = event.getKiller();
     MatchPlayer victim = event.getVictim();
-    if (killer != null && !killer.getId().equals(victim.getId())) {
-      playRaindrop(killer);
+    if (killer != null && !killer.getParty().equals(victim.getParty())) {
+      playSound(killer, RAINDROP_SOUND);
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchFinish(MatchFinishEvent event) {
-    event.getWinners().forEach(this::playRaindrop);
+    event.getWinners().forEach(player -> playSound(player, RAINDROP_SOUND));
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onGoalTouch(GoalTouchEvent event) {
     ParticipantState player = event.getPlayer();
     if (player != null) {
-      playRaindrop(player);
+      playSound(player, RAINDROP_SOUND);
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerWoolPlace(PlayerWoolPlaceEvent event) {
-    playRaindrop(event.getPlayer());
+    playSound(event.getPlayer(), RAINDROP_SOUND);
   }
 }

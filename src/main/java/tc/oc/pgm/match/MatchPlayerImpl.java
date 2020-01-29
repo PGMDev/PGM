@@ -191,7 +191,7 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
     logger.fine("Refreshing gamemode as " + (participating ? "participant" : "observer"));
 
     if (!participating) getBukkit().leaveVehicle();
-    this.getBukkit().setGameMode(participating ? GameMode.SURVIVAL : GameMode.CREATIVE);
+    setGameMode(participating ? GameMode.SURVIVAL : GameMode.CREATIVE);
     this.getBukkit().setAllowFlight(!participating);
     this.getBukkit().spigot().setAffectsSpawning(participating);
     this.getBukkit().spigot().setCollidesWithEntities(participating);
@@ -299,6 +299,11 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
     }
   }
 
+  @Override
+  public void setGameMode(GameMode gameMode) {
+    getBukkit().setGameMode(gameMode);
+  }
+
   /**
    * When max health is lowered by an item attribute or potion effect, the client can go into an
    * inconsistent state that has strange effects, like the death animation playing when the player
@@ -368,6 +373,11 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
   @Override
   public String getPrefixedName() {
     return PGM.get().getPrefixRegistry().getPrefixedName(getBukkit(), getParty());
+  }
+
+  @Override
+  public GameMode getGameMode() {
+    return getBukkit().getGameMode();
   }
 
   @Override
