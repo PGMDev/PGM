@@ -433,7 +433,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
             text = renderBlitz(competitor, viewingParty);
           }
           if (text.length() != 0) text += " ";
-          rows.add(text + competitor.getStyledName(NameStyle.FANCY).toLegacyText());
+          rows.add(text + competitor.getStyledName(NameStyle.FANCY).render().toLegacyText());
         }
 
         if (!competitorsWithGoals.isEmpty() || !sharedGoals.isEmpty()) {
@@ -473,7 +473,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
         firstTeam = false;
 
         // Add a row for the team name
-        rows.add(competitor.getStyledName(NameStyle.FANCY).toLegacyText());
+        rows.add(competitor.getStyledName(NameStyle.FANCY).render().toLegacyText());
 
         if (isCompactWool()) {
           String woolText = " ";
