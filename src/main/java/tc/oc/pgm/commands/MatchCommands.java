@@ -58,8 +58,8 @@ public class MatchCommands {
                   .print(match.getDuration().toPeriod()));
     }
 
-    TeamMatchModule tmm = match.getMatchModule(TeamMatchModule.class);
-    FreeForAllMatchModule ffamm = match.getMatchModule(FreeForAllMatchModule.class);
+    TeamMatchModule tmm = match.getModule(TeamMatchModule.class);
+    FreeForAllMatchModule ffamm = match.getModule(FreeForAllMatchModule.class);
     List<String> teamCountParts = Lists.newArrayList();
 
     if (tmm != null) {
@@ -105,7 +105,7 @@ public class MatchCommands {
 
     sender.sendMessage(Joiner.on(ChatColor.DARK_GRAY + " | ").join(teamCountParts));
 
-    GoalMatchModule gmm = match.getMatchModule(GoalMatchModule.class);
+    GoalMatchModule gmm = match.getModule(GoalMatchModule.class);
     if (haveGameInfo && gmm != null) {
       if (tmm != null && gmm.getGoalsByCompetitor().size() > 0) {
         Multimap<Team, String> teamGoalTexts = HashMultimap.create();
@@ -143,7 +143,7 @@ public class MatchCommands {
         }
       } else {
         // FIXME: this is not the best way to handle scores
-        ScoreMatchModule smm = match.getMatchModule(ScoreMatchModule.class);
+        ScoreMatchModule smm = match.getModule(ScoreMatchModule.class);
         if (smm != null) {
           sender.sendMessage(smm.getStatusMessage());
         }

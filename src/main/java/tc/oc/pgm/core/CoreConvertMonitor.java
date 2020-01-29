@@ -23,16 +23,14 @@ public class CoreConvertMonitor implements Runnable {
       if (name == null) {
         name = this.nextMaterial.toString();
       }
-      this.parent
-          .getMatch()
-          .sendMessage(
-              ChatColor.DARK_AQUA
-                  + "> > > > "
-                  + ChatColor.RED
-                  + name
-                  + " CORE MODE"
-                  + ChatColor.DARK_AQUA
-                  + " < < < <");
+      this.parent.match.sendMessage(
+          ChatColor.DARK_AQUA
+              + "> > > > "
+              + ChatColor.RED
+              + name
+              + " CORE MODE"
+              + ChatColor.DARK_AQUA
+              + " < < < <");
       this.nextMaterial = getNext(this.nextMaterial);
     }
   }

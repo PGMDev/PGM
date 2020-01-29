@@ -52,7 +52,7 @@ public class Tribute implements Competitor {
 
   public Tribute(MatchPlayer player) {
     this.match = player.getMatch();
-    this.ffa = match.needMatchModule(FreeForAllMatchModule.class);
+    this.ffa = match.needModule(FreeForAllMatchModule.class);
 
     this.playerId = player.getId();
     this.username = player.getBukkit().getName();

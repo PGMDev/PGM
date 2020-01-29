@@ -46,8 +46,8 @@ import tc.oc.pgm.filters.query.IPlayerQuery;
 import tc.oc.pgm.filters.query.PlayerQuery;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.WalkSpeedKit;
+import tc.oc.util.ClassLogger;
 import tc.oc.util.ViaUtils;
-import tc.oc.util.logging.ClassLogger;
 import tc.oc.world.DeathOverride;
 import tc.oc.world.NMSHacks;
 
@@ -234,6 +234,7 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
     Player bukkit = getBukkit();
     bukkit.closeInventory();
     resetInventory();
+    bukkit.setArrowsStuck(0);
     bukkit.setExhaustion(0);
     bukkit.setFallDistance(0);
     bukkit.setFireTicks(0);
@@ -345,7 +346,7 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
 
   @Override
   public Settings getSettings() {
-    return PGM.get().getDatastoreCache().getSettings(id);
+    return PGM.get().getDatastore().getSettings(id);
   }
 
   @Override

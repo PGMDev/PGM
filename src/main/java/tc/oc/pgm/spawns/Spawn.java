@@ -28,7 +28,7 @@ public class Spawn implements FeatureDefinition {
   public Location getSpawn(MatchPlayer player) {
     Location location = this.pointProvider.getPoint(player.getMatch(), player.getBukkit());
     if (location == null) {
-      player.getMatch().needMatchModule(SpawnMatchModule.class).reportFailedSpawn(this, player);
+      player.getMatch().needModule(SpawnMatchModule.class).reportFailedSpawn(this, player);
     }
     return location;
   }

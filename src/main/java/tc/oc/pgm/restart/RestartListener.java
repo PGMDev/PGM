@@ -16,7 +16,7 @@ import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.countdowns.SingleCountdownContext;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.util.logging.ClassLogger;
+import tc.oc.util.ClassLogger;
 
 public class RestartListener implements Listener {
 
@@ -51,7 +51,7 @@ public class RestartListener implements Listener {
     if (this.plugin.getServer().getOnlinePlayers().isEmpty()) {
       Bukkit.getServer().shutdown();
     } else {
-      Iterator<Match> iterator = matchManager.getMatches().iterator();
+      Iterator<Match> iterator = matchManager.getMatches();
       Match match = iterator.hasNext() ? iterator.next() : null;
       if (match != null) {
         this.deferral = event.defer(this.plugin);
@@ -74,7 +74,7 @@ public class RestartListener implements Listener {
 
   @EventHandler
   public void onCancelRestart(CancelRestartEvent event) {
-    Iterator<Match> iterator = matchManager.getMatches().iterator();
+    Iterator<Match> iterator = matchManager.getMatches();
     Match match = iterator.hasNext() ? iterator.next() : null;
     if (match != null) {
       SingleCountdownContext ctx = (SingleCountdownContext) match.getCountdown();

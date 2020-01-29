@@ -159,10 +159,7 @@ public abstract class BaseState implements Runnable, State {
   @Override
   public @Nullable Team getController() {
     if (this.post.getOwner() != null) {
-      return this.flag
-          .getMatch()
-          .needMatchModule(TeamMatchModule.class)
-          .getTeam(this.post.getOwner());
+      return this.flag.getMatch().needModule(TeamMatchModule.class).getTeam(this.post.getOwner());
     } else {
       return null;
     }

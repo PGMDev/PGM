@@ -145,7 +145,7 @@ public class ClassCommands {
 
   private static ClassMatchModule getClassModule(Match match, CommandSender sender)
       throws CommandException {
-    ClassMatchModule classModule = match.getMatchModule(ClassMatchModule.class);
+    ClassMatchModule classModule = match.getModule(ClassMatchModule.class);
     if (classModule != null) {
       return classModule;
     } else {

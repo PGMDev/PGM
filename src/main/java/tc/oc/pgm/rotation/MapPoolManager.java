@@ -2,7 +2,8 @@ package tc.oc.pgm.rotation;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -13,14 +14,14 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.map.PGMMap;
 
 /**
  * Manages all the existing {@link MapPool}s, as for maintaining their order, and updating the one
  * {@link PGM} will use after every match depending on the player count (Dynamic Rotations)
  */
-public class MapPoolManager implements PGMMapOrder {
+public class MapPoolManager implements MapOrder {
 
   private Logger logger;
 
@@ -28,8 +29,8 @@ public class MapPoolManager implements PGMMapOrder {
   private FileConfiguration mapPoolFileConfig;
   private List<MapPool> mapPools = new ArrayList<>();
   private MapPool activeMapPool;
-  /** When a {@link PGMMap} is manually set next, it overrides the rotation order * */
-  private PGMMap overriderMap;
+  /** When a {@link MapInfo} is manually set next, it overrides the rotation order * */
+  private MapInfo overriderMap;
 
   public MapPoolManager(Logger logger, File mapPoolsFile) {
     this.mapPoolsFile = mapPoolsFile;
@@ -112,14 +113,14 @@ public class MapPoolManager implements PGMMapOrder {
         .orElse(null);
   }
 
-  protected PGMMap getOverriderMap() {
+  protected MapInfo getOverriderMap() {
     return overriderMap;
   }
 
   @Override
-  public PGMMap popNextMap() {
+  public MapInfo popNextMap() {
     if (overriderMap != null) {
-      PGMMap overrider = overriderMap;
+      MapInfo overrider = overriderMap;
       overriderMap = null;
       return overrider;
     }
@@ -127,14 +128,14 @@ public class MapPoolManager implements PGMMapOrder {
   }
 
   @Override
-  public PGMMap getNextMap() {
+  public MapInfo getNextMap() {
     if (overriderMap != null) return overriderMap;
     if (activeMapPool != null) return activeMapPool.getNextMap();
     return null;
   }
 
   @Override
-  public void setNextMap(PGMMap map) {
+  public void setNextMap(MapInfo map) {
     overriderMap = map;
     activeMapPool.setNextMap(map); // Notify pool a next map has been set
   }

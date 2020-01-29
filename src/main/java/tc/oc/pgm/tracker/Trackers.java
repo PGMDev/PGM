@@ -14,12 +14,12 @@ public final class Trackers {
   private Trackers() {}
 
   static TrackerMatchModule needModule(World world) {
-    return PGM.get().getMatchManager().getMatch(world).needMatchModule(TrackerMatchModule.class);
+    return PGM.get().getMatchManager().getMatch(world).needModule(TrackerMatchModule.class);
   }
 
   static @Nullable TrackerMatchModule getModule(World world) {
     Match match = PGM.get().getMatchManager().getMatch(world);
-    return match == null ? null : match.getMatchModule(TrackerMatchModule.class);
+    return match == null ? null : match.getModule(TrackerMatchModule.class);
   }
 
   public static @Nullable ParticipantState getOwner(Entity entity) {

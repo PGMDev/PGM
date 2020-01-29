@@ -5,16 +5,14 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.match.MatchModule;
 
 @ListenerScope(MatchScope.LOADED)
-public class InternalMatchModule extends MatchModule implements Listener {
+public class InternalMatchModule implements MatchModule, Listener {
 
-  public InternalMatchModule(Match match) {
-    super(match);
-  }
+  public InternalMatchModule(Match match) {}
 
   /** Prevent teleporting outside the map */
   @EventHandler(priority = EventPriority.HIGH)

@@ -1,10 +1,10 @@
 package tc.oc.pgm.rotation;
 
-import java.util.Optional;
 import java.util.logging.Level;
+import javax.annotation.Nullable;
 import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.map.PGMMap;
+import tc.oc.pgm.api.map.MapInfo;
 
 public class Rotation extends MapPool {
 
@@ -13,9 +13,8 @@ public class Rotation extends MapPool {
   public Rotation(MapPoolManager manager, ConfigurationSection section, String name) {
     super(manager, section, name);
 
-    Optional<PGMMap> nextMap =
-        PGM.get().getMapLibrary().getMapByNameOrId(section.getString("next_map"));
-    if (nextMap.isPresent()) this.position = getMapPosition(nextMap.get());
+    @Nullable MapInfo nextMap = PGM.get().getMapLibrary().getMap(section.getString("next_map"));
+    if (nextMap != null) this.position = getMapPosition(nextMap);
     else {
       PGM.get()
           .getLogger()
@@ -37,10 +36,10 @@ public class Rotation extends MapPool {
     return (position + 1) % maps.size();
   }
 
-  private int getMapPosition(PGMMap map) {
+  private int getMapPosition(MapInfo map) {
     int count = 0;
 
-    for (PGMMap pgmMap : maps) {
+    for (MapInfo pgmMap : maps) {
       if (pgmMap.getName().equals(map.getName())) break;
       count++;
     }
@@ -48,7 +47,7 @@ public class Rotation extends MapPool {
     return count;
   }
 
-  private PGMMap getMapInPosition(int position) {
+  private MapInfo getMapInPosition(int position) {
     if (position < 0 || position >= maps.size()) {
       PGM.get()
           .getLogger()
@@ -76,14 +75,14 @@ public class Rotation extends MapPool {
   }
 
   @Override
-  public PGMMap popNextMap() {
-    PGMMap nextMap = getMapInPosition(position);
+  public MapInfo popNextMap() {
+    MapInfo nextMap = getMapInPosition(position);
     advance();
     return nextMap;
   }
 
   @Override
-  public PGMMap getNextMap() {
+  public MapInfo getNextMap() {
     return maps.get(position);
   }
 }

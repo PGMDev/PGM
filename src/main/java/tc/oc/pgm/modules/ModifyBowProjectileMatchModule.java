@@ -1,6 +1,5 @@
 package tc.oc.pgm.modules;
 
-import java.util.Random;
 import java.util.Set;
 import org.bukkit.World;
 import org.bukkit.entity.Arrow;
@@ -17,25 +16,24 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.projectile.EntityLaunchEvent;
 import tc.oc.world.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
-public class ModifyBowProjectileMatchModule extends MatchModule implements Listener {
-  protected final Class<? extends Entity> cls;
-  protected final boolean isProjectile;
-  protected final float velocityMod;
-  protected final Set<PotionEffect> potionEffects;
-  protected final Random random = new Random();
+public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
+
+  private final Match match;
+  private final Class<? extends Entity> cls;
+  private final float velocityMod;
+  private final Set<PotionEffect> potionEffects;
 
   public ModifyBowProjectileMatchModule(
       Match match, Class<? extends Entity> cls, float velocityMod, Set<PotionEffect> effects) {
-    super(match);
+    this.match = match;
     this.cls = cls;
-    this.isProjectile = Projectile.class.isAssignableFrom(this.cls);
     this.velocityMod = velocityMod;
     potionEffects = effects;
   }
@@ -51,8 +49,7 @@ public class ModifyBowProjectileMatchModule extends MatchModule implements Liste
     } else {
       // Replace the projectile
       Projectile oldEntity = (Projectile) event.getProjectile();
-      if (isProjectile) {
-        //noinspection unchecked
+      if (this.cls.isAssignableFrom(Projectile.class)) {
         newProjectile = event.getEntity().launchProjectile((Class<? extends Projectile>) this.cls);
       } else {
         World world = event.getEntity().getWorld();
@@ -84,7 +81,7 @@ public class ModifyBowProjectileMatchModule extends MatchModule implements Liste
     // Tag the projectile as custom
     newProjectile.setMetadata("customProjectile", new FixedMetadataValue(plugin, true));
 
-    getMatch().callEvent(new EntityLaunchEvent(newProjectile, event.getEntity()));
+    match.callEvent(new EntityLaunchEvent(newProjectile, event.getEntity()));
   }
 
   @EventHandler(ignoreCancelled = true)
@@ -102,7 +99,7 @@ public class ModifyBowProjectileMatchModule extends MatchModule implements Liste
         // Reproduce the damage calculation from nms.EntityArrow with the addition of our modifier
         int finalDamage = (int) Math.ceil(speed * damage * this.velocityMod);
         if (critical) {
-          finalDamage += random.nextInt(finalDamage / 2 + 2);
+          finalDamage += match.getRandom().nextInt(finalDamage / 2 + 2);
         }
         event.setDamage(finalDamage);
 

@@ -14,15 +14,15 @@ import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerResetEvent;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.world.OnlinePlayerMapAdapter;
 
 @ListenerScope(MatchScope.RUNNING)
-public class DoubleJumpMatchModule extends MatchModule implements Listener {
+public class DoubleJumpMatchModule implements MatchModule, Listener {
   private class Jumper {
     final Player player;
     final DoubleJumpKit kit;
@@ -34,19 +34,18 @@ public class DoubleJumpMatchModule extends MatchModule implements Listener {
     }
   }
 
+  private final Match match;
   private final OnlinePlayerMapAdapter<Jumper> jumpers;
 
   public DoubleJumpMatchModule(Match match) {
-    super(match);
+    this.match = match;
     this.jumpers = new OnlinePlayerMapAdapter<>(PGM.get());
     this.jumpers.enable();
   }
 
   @Override
   public void enable() {
-    super.enable();
-
-    getMatch()
+    match
         .getScheduler(MatchScope.LOADED)
         .runTaskTimer(
             1,
@@ -66,9 +65,11 @@ public class DoubleJumpMatchModule extends MatchModule implements Listener {
 
   @Override
   public void disable() {
-    this.disableAll();
-
-    super.disable();
+    for (Iterator<Player> iterator = this.jumpers.keySet().iterator(); iterator.hasNext(); ) {
+      Player player = iterator.next();
+      iterator.remove();
+      this.refreshJump(player);
+    }
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -88,14 +89,6 @@ public class DoubleJumpMatchModule extends MatchModule implements Listener {
       this.setCharge(jumper, 1f);
     } else {
       this.jumpers.remove(player);
-      this.refreshJump(player);
-    }
-  }
-
-  public void disableAll() {
-    for (Iterator<Player> iterator = this.jumpers.keySet().iterator(); iterator.hasNext(); ) {
-      Player player = iterator.next();
-      iterator.remove();
       this.refreshJump(player);
     }
   }

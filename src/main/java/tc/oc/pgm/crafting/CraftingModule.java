@@ -16,20 +16,15 @@ import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.map.MapModule;
-import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.map.MapModuleFactory;
-import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.module.ModuleDescription;
-import tc.oc.pgm.module.ModuleLoadException;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 
-@ModuleDescription(name = "Crafting")
-public class CraftingModule extends MapModule<CraftingMatchModule> {
-
-  private static final MapTag CRAFTING_TAG = MapTag.forName("crafting");
+public class CraftingModule implements MapModule {
 
   private final Set<Recipe> customRecipes;
   private final Set<SingleMaterialMatcher> disabledRecipes;
@@ -40,18 +35,13 @@ public class CraftingModule extends MapModule<CraftingMatchModule> {
   }
 
   @Override
-  public void loadTags(Set<MapTag> tags) {
-    if (!customRecipes.isEmpty()) tags.add(CRAFTING_TAG);
-  }
-
-  @Override
-  public CraftingMatchModule createMatchModule(Match match) throws ModuleLoadException {
+  public MatchModule createMatchModule(Match match) {
     return new CraftingMatchModule(match, customRecipes, disabledRecipes);
   }
 
   public static class Factory implements MapModuleFactory<CraftingModule> {
     @Override
-    public @Nullable CraftingModule parse(MapModuleContext context, Logger logger, Document doc)
+    public @Nullable CraftingModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       Set<Recipe> customRecipes = new HashSet<>();
       Set<SingleMaterialMatcher> disabledRecipes = new HashSet<>();
@@ -65,15 +55,15 @@ public class CraftingModule extends MapModule<CraftingMatchModule> {
           Recipe recipe;
           switch (elRecipe.getName()) {
             case "shapeless":
-              recipe = parseShapelessRecipe(context, elRecipe);
+              recipe = parseShapelessRecipe(factory, elRecipe);
               break;
 
             case "shaped":
-              recipe = parseShapedRecipe(context, elRecipe);
+              recipe = parseShapedRecipe(factory, elRecipe);
               break;
 
             case "smelt":
-              recipe = parseSmeltingRecipe(context, elRecipe);
+              recipe = parseSmeltingRecipe(factory, elRecipe);
               break;
 
             default:
@@ -96,16 +86,16 @@ public class CraftingModule extends MapModule<CraftingMatchModule> {
           : new CraftingModule(customRecipes, disabledRecipes);
     }
 
-    private ItemStack parseRecipeResult(MapModuleContext context, Element elRecipe)
+    private ItemStack parseRecipeResult(MapFactory factory, Element elRecipe)
         throws InvalidXMLException {
-      return context
-          .getKitParser()
+      return factory
+          .getKits()
           .parseItem(XMLUtils.getRequiredUniqueChild(elRecipe, "result"), false);
     }
 
-    public Recipe parseShapelessRecipe(MapModuleContext context, Element elRecipe)
+    public Recipe parseShapelessRecipe(MapFactory factory, Element elRecipe)
         throws InvalidXMLException {
-      ShapelessRecipe recipe = new ShapelessRecipe(parseRecipeResult(context, elRecipe));
+      ShapelessRecipe recipe = new ShapelessRecipe(parseRecipeResult(factory, elRecipe));
 
       for (Element elIngredient : XMLUtils.getChildren(elRecipe, "ingredient", "i")) {
         SingleMaterialMatcher item = XMLUtils.parseMaterialPattern(elIngredient);
@@ -125,9 +115,9 @@ public class CraftingModule extends MapModule<CraftingMatchModule> {
       return recipe;
     }
 
-    public Recipe parseShapedRecipe(MapModuleContext context, Element elRecipe)
+    public Recipe parseShapedRecipe(MapFactory factory, Element elRecipe)
         throws InvalidXMLException {
-      ShapedRecipe recipe = new ShapedRecipe(parseRecipeResult(context, elRecipe));
+      ShapedRecipe recipe = new ShapedRecipe(parseRecipeResult(factory, elRecipe));
 
       Element elShape = XMLUtils.getRequiredUniqueChild(elRecipe, "shape");
       List<String> rows = new ArrayList<>(3);
@@ -193,12 +183,12 @@ public class CraftingModule extends MapModule<CraftingMatchModule> {
       return recipe;
     }
 
-    public Recipe parseSmeltingRecipe(MapModuleContext context, Element elRecipe)
+    public Recipe parseSmeltingRecipe(MapFactory factory, Element elRecipe)
         throws InvalidXMLException {
       SingleMaterialMatcher ingredient =
           XMLUtils.parseMaterialPattern(
               XMLUtils.getRequiredUniqueChild(elRecipe, "ingredient", "i"));
-      ItemStack result = parseRecipeResult(context, elRecipe);
+      ItemStack result = parseRecipeResult(factory, elRecipe);
       if (ingredient.dataMatters()) {
         return new FurnaceRecipe(result, ingredient.getMaterialData());
       } else {

@@ -44,7 +44,8 @@ public class ControlPointBlockDisplay implements Listener {
       this.progressDisplayImage = null;
     } else {
       this.progressDisplayRegion =
-          FiniteBlockRegion.fromWorld(progressDisplayRegion, match.getWorld(), visualMaterials);
+          FiniteBlockRegion.fromWorld(
+              progressDisplayRegion, match.getWorld(), visualMaterials, match.getMap().getProto());
       this.progressDisplayImage =
           new BlockImage(match.getWorld(), this.progressDisplayRegion.getBounds());
       this.progressDisplayImage.save();
@@ -55,7 +56,11 @@ public class ControlPointBlockDisplay implements Listener {
       this.controllerDisplayImage = null;
     } else {
       FiniteBlockRegion unfilteredControllerDisplayRegion =
-          FiniteBlockRegion.fromWorld(controllerDisplayRegion, match.getWorld(), visualMaterials);
+          FiniteBlockRegion.fromWorld(
+              controllerDisplayRegion,
+              match.getWorld(),
+              visualMaterials,
+              match.getMap().getProto());
 
       // Ensure the controller and progress display regions do not overlap. The progress display has
       // priority.

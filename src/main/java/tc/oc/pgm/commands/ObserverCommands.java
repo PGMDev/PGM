@@ -2,7 +2,6 @@ package tc.oc.pgm.commands;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
-import java.util.Optional;
 import org.bukkit.command.CommandSender;
 import tc.oc.component.render.ComponentRenderers;
 import tc.oc.component.types.PersonalizedTranslatable;
@@ -17,13 +16,11 @@ public class ObserverCommands {
   public static void openObserverToolMenu(CommandSender sender, MatchPlayer player)
       throws CommandException {
     if (player.isObserving()) {
-      Optional<ObserverToolsMatchModule> tools =
+      final ObserverToolsMatchModule tools =
           player.getMatch().getModule(ObserverToolsMatchModule.class);
-
-      tools.ifPresent(
-          ot -> {
-            ot.openMenu(player);
-          });
+      if (tools != null) {
+        tools.openMenu(player);
+      }
     } else {
       throw new CommandException(
           ComponentRenderers.toLegacyText(

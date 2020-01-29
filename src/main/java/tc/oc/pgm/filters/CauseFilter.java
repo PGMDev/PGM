@@ -76,7 +76,7 @@ public class CauseFilter extends TypedFilter<IMatchQuery> {
       event = ((GeneralizingEvent) event).getCause();
     }
 
-    TrackerMatchModule tracker = query.getMatch().needMatchModule(TrackerMatchModule.class);
+    TrackerMatchModule tracker = query.getMatch().needModule(TrackerMatchModule.class);
 
     EntityDamageEvent.DamageCause damageCause = null;
     DamageInfo damageInfo = null;

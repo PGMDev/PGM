@@ -19,7 +19,7 @@ public class PlayerClassFilter extends TypedFilter<IPlayerQuery> {
 
   @Override
   public QueryResponse queryTyped(IPlayerQuery query) {
-    ClassMatchModule classes = query.getMatch().getMatchModule(ClassMatchModule.class);
+    ClassMatchModule classes = query.getMatch().getModule(ClassMatchModule.class);
     return QueryResponse.fromBoolean(
         classes != null && this.playerClass.equals(classes.getPlayingClass(query.getPlayerId())));
   }

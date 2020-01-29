@@ -47,7 +47,10 @@ public class Core extends TouchableGoal<CoreFactory> implements ModeChangeGoal<C
 
     this.casingRegion =
         FiniteBlockRegion.fromWorld(
-            region, match.getWorld(), new SingleMaterialMatcher(this.material));
+            region,
+            match.getWorld(),
+            match.getMap().getProto(),
+            new SingleMaterialMatcher(this.material));
     if (this.casingRegion.getBlocks().isEmpty()) {
       match
           .getLogger()
@@ -58,6 +61,7 @@ public class Core extends TouchableGoal<CoreFactory> implements ModeChangeGoal<C
         FiniteBlockRegion.fromWorld(
             region,
             match.getWorld(),
+            match.getMap().getProto(),
             new SingleMaterialMatcher(Material.LAVA, (byte) 0),
             new SingleMaterialMatcher(Material.STATIONARY_LAVA, (byte) 0));
     if (this.lavaRegion.getBlocks().isEmpty()) {

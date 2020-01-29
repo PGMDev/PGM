@@ -1,8 +1,11 @@
 package tc.oc.pgm.teams;
 
-import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
@@ -11,25 +14,21 @@ import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.Config;
+import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.MapTag;
+import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.map.MapModule;
-import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.module.ModuleDescription;
-import tc.oc.pgm.modules.InfoModule;
-import tc.oc.pgm.start.StartModule;
+import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.join.JoinMatchModule;
+import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.StringUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
-@ModuleDescription(
-    name = "Team",
-    requires = {InfoModule.class, StartModule.class})
-public class TeamModule extends MapModule<TeamMatchModule> {
-
-  private static final MapTag EVENTEAMS_TAG = MapTag.forName("eventeams");
-  private static final MapTag TEAMS_TAG = MapTag.forName("teams");
+public class TeamModule implements MapModule<TeamMatchModule> {
+  private static final Map<Integer, Collection<MapTag>> TAGS = new ConcurrentHashMap<>();
 
   private final Set<TeamFactory> teams;
   private final @Nullable Boolean requireEven;
@@ -40,15 +39,44 @@ public class TeamModule extends MapModule<TeamMatchModule> {
   }
 
   @Override
-  public String toString() {
-    return getClass().getSimpleName() + "{teams=[" + Joiner.on(", ").join(teams) + "]}";
+  public Collection<MapTag> getTags() {
+    final int id = teams.size();
+    Collection<MapTag> tags = TAGS.get(id);
+    if (tags == null) {
+      tags =
+          ImmutableList.of(
+              MapTag.create(
+                  id + "team" + (id == 1 ? "" : "s"),
+                  id + " Team" + (id == 1 ? "" : "s"),
+                  false,
+                  true));
+      TAGS.put(id, tags);
+    }
+    return tags;
   }
 
   @Override
-  public void loadTags(Set<MapTag> tags) {
-    tags.add(MapTag.forName(teams.size() + (teams.size() == 1 ? "team" : "teams")));
-    if (requireEven != null && requireEven) tags.add(EVENTEAMS_TAG);
-    tags.add(TEAMS_TAG);
+  public Collection<Class<? extends MatchModule>> getHardDependencies() {
+    return ImmutableList.of(JoinMatchModule.class, StartMatchModule.class);
+  }
+
+  public static class Factory implements MapModuleFactory<TeamModule> {
+    @Override
+    public TeamModule parse(MapFactory factory, Logger logger, Document doc)
+        throws InvalidXMLException {
+      Set<TeamFactory> teamFactories = Sets.newLinkedHashSet();
+      Boolean requireEven = null;
+
+      for (Element teamRootElement : doc.getRootElement().getChildren("teams")) {
+        requireEven = XMLUtils.parseBoolean(teamRootElement.getAttribute("even"), requireEven);
+
+        for (Element teamElement : teamRootElement.getChildren("team")) {
+          teamFactories.add(parseTeamDefinition(teamElement, factory));
+        }
+      }
+
+      return teamFactories.isEmpty() ? null : new TeamModule(teamFactories, requireEven);
+    }
   }
 
   @Override
@@ -74,13 +102,12 @@ public class TeamModule extends MapModule<TeamMatchModule> {
   // ---- XML Parsing ----
   // ---------------------
 
-  public TeamFactory parseTeam(Attribute attr, MapModuleContext context)
-      throws InvalidXMLException {
+  public TeamFactory parseTeam(Attribute attr, MapFactory factory) throws InvalidXMLException {
     if (attr == null) {
       return null;
     }
     String name = attr.getValue();
-    TeamFactory team = Teams.getTeam(name, context);
+    TeamFactory team = Teams.getTeam(name, factory);
 
     if (team == null) {
       throw new InvalidXMLException("unknown team '" + name + "'", attr);
@@ -88,23 +115,7 @@ public class TeamModule extends MapModule<TeamMatchModule> {
     return team;
   }
 
-  public static TeamModule parse(MapModuleContext context, Logger logger, Document doc)
-      throws InvalidXMLException {
-    Set<TeamFactory> teamFactories = Sets.newLinkedHashSet();
-    Boolean requireEven = null;
-
-    for (Element teamRootElement : doc.getRootElement().getChildren("teams")) {
-      requireEven = XMLUtils.parseBoolean(teamRootElement.getAttribute("even"), requireEven);
-
-      for (Element teamElement : teamRootElement.getChildren("team")) {
-        teamFactories.add(parseTeamDefinition(teamElement, context));
-      }
-    }
-
-    return teamFactories.isEmpty() ? null : new TeamModule(teamFactories, requireEven);
-  }
-
-  private static TeamFactory parseTeamDefinition(Element el, MapModuleContext context)
+  private static TeamFactory parseTeamDefinition(Element el, MapFactory factory)
       throws InvalidXMLException {
     String id = el.getAttributeValue("id");
 
@@ -145,7 +156,7 @@ public class TeamModule extends MapModule<TeamMatchModule> {
             maxPlayers,
             maxOverfill,
             nameTagVisibility);
-    context.features().addFeature(el, teamFactory);
+    factory.getFeatures().addFeature(el, teamFactory);
 
     return teamFactory;
   }

@@ -9,7 +9,7 @@ import org.bukkit.permissions.Permissible;
 import tc.oc.item.ItemBuilder;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.PGM;
-import tc.oc.util.logging.ClassLogger;
+import tc.oc.util.ClassLogger;
 
 /** Creates some of the items for the observer hotbar */
 public class ObserverToolFactory {

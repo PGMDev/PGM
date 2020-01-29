@@ -20,10 +20,14 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
-import tc.oc.pgm.tracker.damage.*;
+import tc.oc.pgm.tracker.damage.DamageInfo;
+import tc.oc.pgm.tracker.damage.FallInfo;
+import tc.oc.pgm.tracker.damage.FallState;
+import tc.oc.pgm.tracker.damage.GenericFallInfo;
+import tc.oc.pgm.tracker.damage.PhysicalInfo;
 import tc.oc.pgm.tracker.event.PlayerSpleefEvent;
 import tc.oc.pgm.tracker.resolvers.DamageResolver;
-import tc.oc.util.logging.ClassLogger;
+import tc.oc.util.ClassLogger;
 
 /** Tracks the state of falls caused by other players and resolves the damage caused by them. */
 public class FallTracker implements Listener, DamageResolver {
@@ -33,10 +37,10 @@ public class FallTracker implements Listener, DamageResolver {
   private final Match match;
   private final Logger logger;
 
-  public FallTracker(TrackerMatchModule tracker) {
+  public FallTracker(TrackerMatchModule tracker, Match match) {
     this.tracker = tracker;
-    this.match = tracker.getMatch();
-    this.logger = ClassLogger.get(tracker.getLogger(), getClass());
+    this.match = match;
+    this.logger = ClassLogger.get(match.getLogger(), getClass());
   }
 
   @Override

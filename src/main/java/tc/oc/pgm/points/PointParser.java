@@ -7,8 +7,12 @@ import java.util.List;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
-import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.regions.*;
+import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.regions.PointRegion;
+import tc.oc.pgm.regions.RandomPointsValidation;
+import tc.oc.pgm.regions.Region;
+import tc.oc.pgm.regions.RegionParser;
+import tc.oc.pgm.regions.Union;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.collection.ArrayUtils;
 import tc.oc.xml.InvalidXMLException;
@@ -22,12 +26,12 @@ import tc.oc.xml.Node;
  * treated the same as the root element.
  */
 public class PointParser {
-  final MapModuleContext context;
+  final MapFactory factory;
   final RegionParser regionParser;
 
-  public PointParser(MapModuleContext context) {
-    this.context = checkNotNull(context);
-    this.regionParser = context.getRegionParser();
+  public PointParser(MapFactory factory) {
+    this.factory = checkNotNull(factory);
+    this.regionParser = factory.getRegions();
   }
 
   private Region validate(Region region, Node node) throws InvalidXMLException {

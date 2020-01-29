@@ -1,29 +1,27 @@
 package tc.oc.pgm.flag;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
+import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.MapTag;
+import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.filters.FilterModule;
-import tc.oc.pgm.goals.GoalModule;
-import tc.oc.pgm.map.MapModule;
-import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.module.ModuleDescription;
-import tc.oc.pgm.module.ModuleLoadException;
+import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.xml.InvalidXMLException;
 
-@ModuleDescription(
-    name = "Capture the Flag",
-    follows = {TeamModule.class, RegionModule.class, FilterModule.class, GoalModule.class})
-public class FlagModule extends MapModule<FlagMatchModule> {
+public class FlagModule implements MapModule {
 
-  private static final MapTag FLAG_TAG = MapTag.forName("flag");
-
+  private static final Collection<MapTag> TAGS =
+      ImmutableList.of(MapTag.create("flag", "Capture the Flag", true, false));
   private final ImmutableList<Post> posts;
   private final ImmutableList<Net> nets;
   private final ImmutableList<FlagDefinition> flags;
@@ -35,30 +33,40 @@ public class FlagModule extends MapModule<FlagMatchModule> {
   }
 
   @Override
-  public void loadTags(Set<MapTag> tags) {
-    tags.add(FLAG_TAG);
+  public Collection<Class<? extends MatchModule>> getSoftDependencies() {
+    return ImmutableList.of(GoalMatchModule.class);
   }
 
   @Override
-  public FlagMatchModule createMatchModule(Match match) throws ModuleLoadException {
+  public MatchModule createMatchModule(Match match) throws ModuleLoadException {
     return new FlagMatchModule(match, this.nets, this.flags);
   }
-  // ---------------------
-  // ---- XML Parsing ----
-  // ---------------------
 
-  public static FlagModule parse(MapModuleContext context, Logger logger, Document doc)
-      throws InvalidXMLException {
-    return new FlagParser(context, logger).parse(doc);
+  @Override
+  public Collection<MapTag> getTags() {
+    return TAGS;
+  }
+
+  public static class Factory implements MapModuleFactory<FlagModule> {
+    @Override
+    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+      return ImmutableList.of(TeamModule.class, RegionModule.class, FilterModule.class);
+    }
+
+    @Override
+    public FlagModule parse(MapFactory factory, Logger logger, Document doc)
+        throws InvalidXMLException {
+      return new FlagParser(factory).parse(doc);
+    }
   }
 
   @Override
-  public void postParse(MapModuleContext context, Logger logger, Document doc)
+  public void postParse(MapFactory factory, Logger logger, Document doc)
       throws InvalidXMLException {
     for (FlagDefinition flag : flags) {
       if (flag.getCarryKit() != null && !flag.getCarryKit().isRemovable()) {
         throw new InvalidXMLException(
-            "carry-kit is not removable", context.features().getNode(flag));
+            "carry-kit is not removable", factory.getFeatures().getNode(flag));
       }
     }
   }

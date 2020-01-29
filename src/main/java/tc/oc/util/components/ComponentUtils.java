@@ -387,6 +387,10 @@ public class ComponentUtils {
         + Strings.repeat(" ", spaceCount);
   }
 
+  public static String horizontalLineHeading(String text, ChatColor lineColor) {
+    return horizontalLineHeading(text, lineColor, MAX_CHAT_WIDTH);
+  }
+
   public static List<String> wordWrap(String text, int width) {
     ArrayList<String> lines = new ArrayList<>();
     return wordWrap(text, width, lines);

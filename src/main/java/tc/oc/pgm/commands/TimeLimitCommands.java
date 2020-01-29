@@ -34,7 +34,7 @@ public class TimeLimitCommands {
       String durationString,
       @Fallback(Type.NULL) @Switch('r') String resultString)
       throws CommandException {
-    TimeLimitMatchModule tlmm = match.getMatchModule(TimeLimitMatchModule.class);
+    TimeLimitMatchModule tlmm = match.getModule(TimeLimitMatchModule.class);
     TimeLimit existing = tlmm.getTimeLimit();
 
     if (resultString == null && durationString == null) {
@@ -66,7 +66,7 @@ public class TimeLimitCommands {
         VictoryCondition result;
         if (resultString != null) {
           try {
-            result = VictoryConditions.parse(match.getMapContext(), resultString);
+            result = VictoryConditions.parse(match, resultString);
           } catch (IllegalArgumentException ex) {
             throw new CommandException("Invalid result or team name: " + resultString);
           }

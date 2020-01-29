@@ -56,8 +56,7 @@ public class GoalFilter extends TypedFilter<IMatchQuery> {
     } else if (team != null) {
       // Team was explicitly specified
       return QueryResponse.fromBoolean(
-          goal.isCompleted(
-              query.getMatch().needMatchModule(TeamMatchModule.class).getTeam(team.get())));
+          goal.isCompleted(query.getMatch().needModule(TeamMatchModule.class).getTeam(team.get())));
     } else if (query instanceof IPartyQuery) {
       final Party party = ((IPartyQuery) query).getParty();
       // Team is derived from query

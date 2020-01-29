@@ -15,13 +15,14 @@ import org.joda.time.Duration;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.party.Competitor;
-import tc.oc.pgm.map.PGMMap;
 import tc.oc.pgm.restart.CancelRestartEvent;
 import tc.oc.pgm.restart.RequestRestartEvent;
 import tc.oc.pgm.restart.RestartManager;
+import tc.oc.pgm.rotation.MapOrder;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.timelimit.TimeLimitCountdown;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
@@ -92,7 +93,7 @@ public class AdminCommands {
       flags = "f",
       perms = Permissions.SETNEXT)
   public static void setNext(
-      CommandSender sender, @Switch('f') boolean force, @Text PGMMap map, MatchManager matchManager)
+      CommandSender sender, @Switch('f') boolean force, @Text MapInfo map, MapOrder mapOrder)
       throws CommandException {
     MatchManager mm = PGM.get().getMatchManager();
 
@@ -101,7 +102,7 @@ public class AdminCommands {
           AllTranslations.get().translate("command.admin.setNext.restartQueued", sender));
     }
 
-    matchManager.getMapOrder().setNextMap(map);
+    mapOrder.setNextMap(map);
 
     if (RestartManager.isQueued()) {
       RestartManager.cancelRestart();
@@ -117,7 +118,7 @@ public class AdminCommands {
                 .translate(
                     "command.admin.set.success",
                     sender,
-                    ChatColor.GOLD + map.getInfo().name + ChatColor.DARK_PURPLE));
+                    ChatColor.GOLD + map.getName() + ChatColor.DARK_PURPLE));
   }
 
   @Command(
@@ -126,13 +127,13 @@ public class AdminCommands {
       perms = Permissions.STOP)
   public static void cancel(CommandSender sender, Match match) {
     if (!match.getCountdown().getAll(TimeLimitCountdown.class).isEmpty()) {
-      TimeLimitMatchModule tlmm = match.getMatchModule(TimeLimitMatchModule.class);
+      TimeLimitMatchModule tlmm = match.getModule(TimeLimitMatchModule.class);
       tlmm.cancel();
       tlmm.setTimeLimit(null);
     }
 
     match.getCountdown().cancelAll();
-    match.needMatchModule(StartMatchModule.class).setAutoStart(false);
+    match.needModule(StartMatchModule.class).setAutoStart(false);
     sender.sendMessage(
         ChatColor.GREEN + AllTranslations.get().translate("command.admin.cancel.success", sender));
   }

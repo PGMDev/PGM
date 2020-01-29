@@ -1,7 +1,12 @@
 package tc.oc.util;
 
 import com.google.common.base.Strings;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import net.md_5.bungee.api.ChatColor;
 
 public class StringUtils {
@@ -84,7 +89,7 @@ public class StringUtils {
     return builder.toString();
   }
 
-  public static <T> T bestFuzzyMatch(String search, Collection<T> options, double threshold) {
+  public static <T> T bestFuzzyMatch(String search, Iterable<T> options, double threshold) {
     Map<String, T> map = new HashMap<>();
     for (T t : options) {
       map.put(t.toString(), t);

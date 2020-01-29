@@ -17,7 +17,7 @@ public class TeamVictoryCondition extends ImmediateVictoryCondition {
   }
 
   public Team getTeam(Match match) {
-    return match.needMatchModule(TeamMatchModule.class).getTeam(teamDefinition);
+    return match.needModule(TeamMatchModule.class).getTeam(teamDefinition);
   }
 
   @Override

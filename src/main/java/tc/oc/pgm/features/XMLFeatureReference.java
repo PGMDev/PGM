@@ -1,5 +1,6 @@
 package tc.oc.pgm.features;
 
+import java.lang.ref.WeakReference;
 import javax.annotation.Nullable;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
@@ -11,7 +12,7 @@ import tc.oc.xml.Node;
  */
 public class XMLFeatureReference<T extends FeatureDefinition> implements FeatureReference<T> {
   private final FeatureDefinitionContext context;
-  private final Node node;
+  private final WeakReference<Node> node;
   private final String id;
   private final Class<T> type;
 
@@ -24,7 +25,7 @@ public class XMLFeatureReference<T extends FeatureDefinition> implements Feature
   public XMLFeatureReference(
       FeatureDefinitionContext context, Node node, @Nullable String id, Class<T> type) {
     this.context = context;
-    this.node = node;
+    this.node = new WeakReference<>(node);
     this.id = id != null ? id : node.getValueNormalize();
     this.type = type;
   }
@@ -42,6 +43,10 @@ public class XMLFeatureReference<T extends FeatureDefinition> implements Feature
   /** Get the XML node that references the feature */
   @Override
   public Node getNode() {
+    final Node node = this.node.get();
+    if (node == null)
+      throw new IllegalStateException(
+          "Unknown " + this.getTypeName() + " ID '" + id + "' (garbage collected)");
     return node;
   }
 
@@ -61,7 +66,7 @@ public class XMLFeatureReference<T extends FeatureDefinition> implements Feature
     FeatureDefinition feature = this.context.get(id, FeatureDefinition.class);
     if (feature == null) {
       throw new InvalidXMLException(
-          "Unknown " + this.getTypeName() + " ID '" + id + "'", this.node);
+          "Unknown " + this.getTypeName() + " ID '" + id + "'", getNode());
     }
     if (!this.type.isInstance(feature)) {
       throw new InvalidXMLException(
@@ -71,7 +76,7 @@ public class XMLFeatureReference<T extends FeatureDefinition> implements Feature
               + this.getTypeName()
               + " rather than "
               + SelfIdentifyingFeatureDefinition.makeTypeName(feature.getClass()),
-          this.node);
+          getNode());
     }
     this.referent = this.type.cast(feature);
   }

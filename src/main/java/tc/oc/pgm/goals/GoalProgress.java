@@ -75,7 +75,7 @@ public class GoalProgress implements Comparable<GoalProgress> {
     List<Double> progress = new ArrayList<>();
     List<Integer> completionProximity = new ArrayList<>();
     List<Integer> touchProximity = new ArrayList<>();
-    final GoalMatchModule gmm = match.needMatchModule(GoalMatchModule.class);
+    final GoalMatchModule gmm = match.needModule(GoalMatchModule.class);
 
     for (Goal<?> goal : gmm.getGoals(competitor)) {
       if (goal.isRequired()) {

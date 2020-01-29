@@ -1,9 +1,16 @@
 package tc.oc.pgm;
 
 import com.google.common.collect.ImmutableList;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Level;
 import javax.annotation.Nullable;
+import net.kencochrane.raven.dsn.Dsn;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
@@ -16,9 +23,13 @@ import org.bukkit.permissions.PermissionDefault;
 import org.joda.time.Duration;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.pgm.events.ConfigLoadEvent;
+import tc.oc.pgm.map.source.DefaultMapSourceFactory;
+import tc.oc.pgm.map.source.SystemMapSourceFactory;
 
 public class Config {
+
   public static Configuration getConfiguration() {
     PGM pgm = PGM.get();
     if (pgm != null) {
@@ -28,13 +39,76 @@ public class Config {
     }
   }
 
-  public static class AutoReload {
-    public static boolean enabled() {
-      return getConfiguration().getBoolean("map.auto-reload.enabled", true);
+  public static class Log {
+    public static Level level() {
+      return Level.parse(getConfiguration().getString("log.level", "info").toUpperCase());
     }
 
-    public static boolean reloadWhenError() {
-      return getConfiguration().getBoolean("map.auto-reload.reload-when-error", false);
+    // Should redirect to the default sentry dsn, used to help find and track bugs in PGM
+    private static final String SENTRY_URL = "https://sentry.ashcon.app/pgm";
+
+    public static @Nullable String sentry() {
+      String dsn = Dsn.dsnLookup();
+      if (dsn != null) return dsn;
+
+      dsn = getConfiguration().getString("log.sentry", null);
+      if (dsn != null && dsn.equalsIgnoreCase("false")) return null;
+      if (dsn != null) return dsn;
+
+      try {
+        final HttpURLConnection http =
+            (HttpURLConnection)
+                (new URL(SENTRY_URL + "/" + PGM.get().getDescription().getVersion())
+                    .openConnection());
+        http.setInstanceFollowRedirects(false);
+        http.setReadTimeout(2000);
+        http.setConnectTimeout(2000);
+        http.connect();
+        final int code = http.getResponseCode();
+        if (code == 301 || code == 302) { // redirect codes
+          return http.getHeaderField("Location");
+        }
+      } catch (IOException e) {
+        // Fail silently if something goes wrong in the future
+      }
+
+      return null;
+    }
+  }
+
+  public static class Maps implements Listener {
+    private static final Maps INSTANCE = new Maps();
+    private final Map<String, MapSourceFactory> factories = new LinkedHashMap<>();
+
+    @EventHandler
+    public void onConfigLoad(ConfigLoadEvent event) throws InvalidConfigurationException {
+      for (String source : event.getConfig().getStringList("map.sources")) {
+        final MapSourceFactory factory;
+        try {
+          factory =
+              source.equalsIgnoreCase("default")
+                  ? new DefaultMapSourceFactory()
+                  : new SystemMapSourceFactory(source);
+        } catch (Throwable t) {
+          throw new InvalidConfigurationException(t.getMessage(), t.getCause());
+        }
+
+        factories.merge(
+            source,
+            factory,
+            (MapSourceFactory old, MapSourceFactory now) -> {
+              old.reset();
+              return now;
+            });
+      }
+    }
+
+    public static Maps get() {
+      return INSTANCE;
+    }
+
+    public Collection<MapSourceFactory> getFactories() {
+      return factories.values();
     }
   }
 
@@ -345,10 +419,11 @@ public class Config {
   }
 
   public static class Experiments implements Listener {
-    private int preload;
-    private boolean avoidDoubleTp;
-    private int tabRenderDelay;
-    private int destroyMatchDelay;
+    private int matchPreLoadSeconds;
+    private int matchDestroySeconds;
+    private int matchTeleportsPerSecond;
+    private int tabRenderTicks;
+    private boolean unloadNonMatchWorlds;
 
     @EventHandler
     public void onConfigLoad(ConfigLoadEvent event) throws InvalidConfigurationException {
@@ -356,10 +431,11 @@ public class Config {
     }
 
     public void load(ConfigurationSection config) throws InvalidConfigurationException {
-      this.preload = config.getInt("preload-matches", 3);
-      this.avoidDoubleTp = config.getBoolean("avoid-double-teleport", true);
-      this.tabRenderDelay = config.getInt("tab-render-delay", 5);
-      this.destroyMatchDelay = config.getInt("destroy-match-delay", 100);
+      this.matchPreLoadSeconds = Math.max(0, config.getInt("match-preload-seconds", 3));
+      this.matchDestroySeconds = Math.max(0, config.getInt("match-destroy-seconds", 10));
+      this.matchTeleportsPerSecond = Math.max(1, config.getInt("match-teleports-per-second", 10));
+      this.tabRenderTicks = Math.max(1, config.getInt("tab-render-ticks", 10));
+      this.unloadNonMatchWorlds = config.getBoolean("unload-non-match-worlds", true);
     }
 
     private static final Experiments instance = new Experiments();
@@ -368,20 +444,24 @@ public class Config {
       return instance;
     }
 
-    public int getPreload() {
-      return preload;
+    public int getMatchPreLoadSeconds() {
+      return matchPreLoadSeconds;
     }
 
-    public boolean isAvoidDoubleTp() {
-      return avoidDoubleTp;
+    public int getMatchDestroySeconds() {
+      return matchDestroySeconds;
     }
 
-    public int getTabRenderDelay() {
-      return tabRenderDelay;
+    public int getTabRenderTicks() {
+      return tabRenderTicks;
     }
 
-    public int getDestroyMatchDelay() {
-      return destroyMatchDelay;
+    public int getPlayerTeleportsPerSecond() {
+      return matchTeleportsPerSecond;
+    }
+
+    public boolean shouldUnloadNonMatchWorlds() {
+      return unloadNonMatchWorlds;
     }
   }
 

@@ -8,40 +8,40 @@ import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import tc.oc.component.Component;
+import tc.oc.pgm.api.map.MapProtos;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.FilterNode;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.kits.Kit;
-import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.map.ProtoVersions;
 import tc.oc.pgm.util.XMLUtils;
-import tc.oc.util.SemanticVersion;
+import tc.oc.util.Version;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
 public class RegionFilterApplicationParser {
-  private final MapModuleContext context;
+  private final MapFactory factory;
   private final FilterParser filterParser;
   private final RegionParser regionParser;
   private final RFAContext rfaContext;
-  private final SemanticVersion proto;
+  private final Version proto;
 
-  public RegionFilterApplicationParser(MapModuleContext context, RFAContext rfaContext) {
-    this.context = context;
+  public RegionFilterApplicationParser(MapFactory factory, RFAContext rfaContext) {
+    this.factory = factory;
     this.rfaContext = rfaContext;
 
-    this.filterParser = context.getFilterParser();
-    this.regionParser = context.getRegionParser();
+    this.filterParser = factory.getFilters();
+    this.regionParser = factory.getRegions();
 
-    this.proto = context.getProto();
+    this.proto = factory.getProto();
   }
 
   private boolean useId() {
-    return proto.isNoOlderThan(ProtoVersions.FILTER_FEATURES);
+    return proto.isNoOlderThan(MapProtos.FILTER_FEATURES);
   }
 
   private void add(Element el, RegionFilterApplication rfa) throws InvalidXMLException {
-    context.features().addFeature(el, rfa);
+    factory.getFeatures().addFeature(el, rfa);
     rfaContext.add(rfa);
   }
 
@@ -60,12 +60,12 @@ public class RegionFilterApplicationParser {
 
     Filter effectFilter = filterParser.parseFilterProperty(el, "filter");
 
-    Kit kit = context.getKitParser().parseKitProperty(el, "kit");
+    Kit kit = factory.getKits().parseKitProperty(el, "kit");
     if (kit != null) {
       add(el, new RegionFilterApplication(RFAScope.EFFECT, region, effectFilter, kit, false));
     }
 
-    kit = context.getKitParser().parseKitProperty(el, "lend-kit");
+    kit = factory.getKits().parseKitProperty(el, "lend-kit");
     if (kit != null) {
       add(el, new RegionFilterApplication(RFAScope.EFFECT, region, effectFilter, kit, true));
     }

@@ -16,7 +16,7 @@ import tc.oc.pgm.destroyable.DestroyableMatchModule;
 public class DestroyableCommands {
   private static DestroyableMatchModule matchModule(CommandSender sender) throws CommandException {
     Match match = PGM.get().getMatchManager().getMatch(sender);
-    DestroyableMatchModule dmm = match.getMatchModule(DestroyableMatchModule.class);
+    DestroyableMatchModule dmm = match.getModule(DestroyableMatchModule.class);
     if (dmm == null) throw new CommandException("No destroyables");
     return dmm;
   }

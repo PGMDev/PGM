@@ -1,5 +1,7 @@
 package tc.oc.pgm.snapshot;
 
+import com.google.common.collect.ImmutableList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.Chunk;
@@ -15,25 +17,42 @@ import org.bukkit.util.Vector;
 import tc.oc.chunk.ChunkVector;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.factory.MatchModuleFactory;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.match.MatchModule;
+import tc.oc.pgm.renewable.RenewableMatchModule;
 
 /**
- * Keeps a snapshot of the block state of the entire match world at load time, using a copy-on-write
- * strategy. This module does nothing on its own, but other modules can use it to query for the
- * original world of the map.
+ * Keeps a snapshot of the block state of the entire match world at build time, using a
+ * copy-on-write strategy. This module does nothing on its own, but other modules can use it to
+ * query for the original world of the map.
  *
  * <p>The correct functioning of this module depends on EVERY block change firing a {@link
  * BlockTransformEvent}, without exception.
  */
 @ListenerScope(MatchScope.LOADED)
-public class SnapshotMatchModule extends MatchModule implements Listener {
+public class SnapshotMatchModule implements MatchModule, Listener {
 
+  public static class Factory implements MatchModuleFactory<SnapshotMatchModule> {
+    @Override
+    public Collection<Class<? extends MatchModule>> getSoftDependencies() {
+      return ImmutableList.of(
+          RenewableMatchModule.class); // Only needs to load if Renewables are loaded
+    }
+
+    @Override
+    public SnapshotMatchModule createMatchModule(Match match) throws ModuleLoadException {
+      return new SnapshotMatchModule(match);
+    }
+  }
+
+  private final Match match;
   private final Map<ChunkVector, ChunkSnapshot> chunkSnapshots = new HashMap<>();
 
-  public SnapshotMatchModule(Match match) {
-    super(match);
+  private SnapshotMatchModule(Match match) {
+    this.match = match;
   }
 
   public MaterialData getOriginalMaterial(int x, int y, int z) {
@@ -50,7 +69,7 @@ public class SnapshotMatchModule extends MatchModule implements Listener {
               chunkSnapshot.getBlockData(
                   chunkPos.getBlockX(), chunkPos.getBlockY(), chunkPos.getBlockZ()));
     } else {
-      return getMatch().getWorld().getBlockAt(x, y, z).getState().getMaterialData();
+      return match.getWorld().getBlockAt(x, y, z).getState().getMaterialData();
     }
   }
 
@@ -59,7 +78,7 @@ public class SnapshotMatchModule extends MatchModule implements Listener {
   }
 
   public BlockState getOriginalBlock(int x, int y, int z) {
-    BlockState state = getMatch().getWorld().getBlockAt(x, y, z).getState();
+    BlockState state = match.getWorld().getBlockAt(x, y, z).getState();
     if (y < 0 || y >= 256) return state;
 
     ChunkVector chunkVector = ChunkVector.ofBlock(x, y, z);
@@ -88,7 +107,7 @@ public class SnapshotMatchModule extends MatchModule implements Listener {
     Chunk chunk = event.getOldState().getChunk();
     ChunkVector chunkVector = ChunkVector.of(chunk);
     if (!chunkSnapshots.containsKey(chunkVector)) {
-      logger.fine("Copying chunk at " + chunkVector);
+      match.getLogger().fine("Copying chunk at " + chunkVector);
       ChunkSnapshot chunkSnapshot = chunk.getChunkSnapshot();
       chunkSnapshot.updateBlock(
           event

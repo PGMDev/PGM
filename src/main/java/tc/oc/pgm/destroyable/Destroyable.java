@@ -2,7 +2,12 @@ package tc.oc.pgm.destroyable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
@@ -49,7 +54,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     implements IncrementalGoal<DestroyableFactory>, ModeChangeGoal<DestroyableFactory> {
 
   // Block replacement rules in this ruleset will be used to calculate destroyable health
-  protected final BlockDropsRuleSet blockDropsRuleSet;
+  protected BlockDropsRuleSet blockDropsRuleSet;
 
   protected final FiniteBlockRegion blockRegion;
   protected final Set<SingleMaterialMatcher> materialPatterns = new HashSet<>();
@@ -99,17 +104,18 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
     this.blockRegion =
         FiniteBlockRegion.fromWorld(
-            definition.getRegion(), match.getWorld(), this.materialPatterns);
+            definition.getRegion(),
+            match.getWorld(),
+            this.materialPatterns,
+            match.getMap().getProto());
     if (this.blockRegion.getBlocks().isEmpty()) {
       match.getLogger().warning("No destroyable blocks found in destroyable " + this.getName());
     }
 
-    BlockDropsMatchModule bdmm = match.getMatchModule(BlockDropsMatchModule.class);
+    BlockDropsMatchModule bdmm = match.getModule(BlockDropsMatchModule.class);
     if (bdmm != null) {
       this.blockDropsRuleSet =
           bdmm.getRuleSet().subsetAffecting(this.materials).subsetAffecting(this.blockRegion);
-    } else {
-      this.blockDropsRuleSet = null;
     }
 
     this.recalculateHealth();
@@ -192,7 +198,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   }
 
   protected boolean isAffectedByBlockReplacementRules() {
-    if (this.blockDropsRuleSet.getRules().isEmpty()) {
+    if (this.blockDropsRuleSet == null || this.blockDropsRuleSet.getRules().isEmpty()) {
       return false;
     }
 

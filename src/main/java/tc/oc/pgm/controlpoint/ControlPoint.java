@@ -63,7 +63,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
 
     if (this.definition.getInitialOwner() != null) {
       this.controllingTeam =
-          match.needMatchModule(TeamMatchModule.class).getTeam(this.definition.getInitialOwner());
+          match.needModule(TeamMatchModule.class).getTeam(this.definition.getInitialOwner());
     }
 
     this.centerPoint = this.getCaptureRegion().getBounds().getCenterPoint();
@@ -256,7 +256,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
   /** Do a scoring cycle on this ControlPoint over the given duration. */
   protected void tickScore(Duration duration) {
     if (this.getControllingTeam() != null && this.getDefinition().affectsScore()) {
-      ScoreMatchModule scoreMatchModule = this.getMatch().getMatchModule(ScoreMatchModule.class);
+      ScoreMatchModule scoreMatchModule = this.getMatch().getModule(ScoreMatchModule.class);
       if (scoreMatchModule != null) {
         float seconds = this.getMatch().getDuration().getStandardSeconds();
         float initial = this.getDefinition().getPointsPerSecond();

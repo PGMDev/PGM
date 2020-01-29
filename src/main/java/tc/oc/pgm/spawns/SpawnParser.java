@@ -5,14 +5,19 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.jdom2.Element;
+import tc.oc.pgm.api.map.MapProtos;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.filters.AllFilter;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.filters.TeamFilter;
 import tc.oc.pgm.kits.Kit;
-import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.map.ProtoVersions;
-import tc.oc.pgm.points.*;
+import tc.oc.pgm.points.PointParser;
+import tc.oc.pgm.points.PointProvider;
+import tc.oc.pgm.points.PointProviderAttributes;
+import tc.oc.pgm.points.RandomPointProvider;
+import tc.oc.pgm.points.SequentialPointProvider;
+import tc.oc.pgm.points.SpreadPointProvider;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.XMLUtils;
@@ -20,12 +25,12 @@ import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
 public class SpawnParser {
-  protected final MapModuleContext context;
+  protected final MapFactory factory;
   protected final PointParser pointParser;
   protected @Nullable Spawn defaultSpawn;
 
-  public SpawnParser(MapModuleContext context, PointParser pointParser) {
-    this.context = context;
+  public SpawnParser(MapFactory factory, PointParser pointParser) {
+    this.factory = factory;
     this.pointParser = pointParser;
   }
 
@@ -37,7 +42,7 @@ public class SpawnParser {
     attributes = this.parseAttributes(el, attributes);
     List<PointProvider> providers;
 
-    if (context.getProto().isOlderThan(ProtoVersions.MODULE_SUBELEMENT_VERSION)) {
+    if (factory.getProto().isOlderThan(MapProtos.MODULE_SUBELEMENT_VERSION)) {
       providers = this.pointParser.parse(el, attributes.providerAttributes);
     } else {
       providers =
@@ -58,7 +63,7 @@ public class SpawnParser {
     }
 
     Spawn spawn = new Spawn(attributes, provider);
-    context.features().addFeature(el, spawn);
+    factory.getFeatures().addFeature(el, spawn);
     return spawn;
   }
 
@@ -85,7 +90,7 @@ public class SpawnParser {
       throws InvalidXMLException {
     PointProviderAttributes providerAttributes =
         pointParser.parseAttributes(el, parent.providerAttributes);
-    Kit kit = context.getKitParser().parseKitProperty(el, "kit", parent.kit);
+    Kit kit = factory.getKits().parseKitProperty(el, "kit", parent.kit);
 
     boolean sequential = XMLUtils.parseBoolean(el.getAttribute("sequential"), parent.sequential);
     boolean spread = XMLUtils.parseBoolean(el.getAttribute("spread"), parent.spread);
@@ -101,14 +106,14 @@ public class SpawnParser {
 
     Node nodeTeam = Node.fromAttr(el, "team");
     if (nodeTeam != null) {
-      if (!this.context.hasModule(TeamModule.class)) {
+      if (!this.factory.hasModule(TeamModule.class)) {
         throw new InvalidXMLException("no teams defined", nodeTeam);
       }
-      filters.add(new TeamFilter(Teams.getTeamRef(nodeTeam, this.context)));
+      filters.add(new TeamFilter(Teams.getTeamRef(nodeTeam, this.factory)));
       newFilters = true;
     }
 
-    Filter filter = this.context.getFilterParser().parseFilterProperty(el, "filter");
+    Filter filter = this.factory.getFilters().parseFilterProperty(el, "filter");
     if (filter != null) {
       filters.add(filter);
       newFilters = true;

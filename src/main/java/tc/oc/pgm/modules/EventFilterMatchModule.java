@@ -6,14 +6,30 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.*;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockDamageEvent;
-import org.bukkit.event.entity.*;
+import org.bukkit.event.entity.EntityCombustByEntityEvent;
+import org.bukkit.event.entity.EntityCombustEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
+import org.bukkit.event.player.PlayerBedEnterEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
@@ -23,13 +39,13 @@ import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.event.AdventureModeInteractEvent;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.event.ObserverInteractEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerBlockTransformEvent;
-import tc.oc.pgm.match.MatchModule;
 
 /**
  * Listens to many events at low priority and cancels them if the actor is not allowed to interact
@@ -39,14 +55,16 @@ import tc.oc.pgm.match.MatchModule;
  * kept simple.
  */
 @ListenerScope(MatchScope.LOADED)
-public class EventFilterMatchModule extends MatchModule implements Listener {
+public class EventFilterMatchModule implements MatchModule, Listener {
+
+  private final Match match;
 
   public EventFilterMatchModule(Match match) {
-    super(match);
+    this.match = match;
   }
 
   boolean cancel(Cancellable event, @Nullable MatchPlayer actor, @Nullable Component message) {
-    logger.fine("Cancel " + event + " actor=" + actor);
+    match.getLogger().fine("Cancel " + event + " actor=" + actor);
     event.setCancelled(true);
     if (actor != null && message != null) {
       actor.sendWarning(message, true);
@@ -60,10 +78,10 @@ public class EventFilterMatchModule extends MatchModule implements Listener {
       World world,
       @Nullable MatchPlayer actor,
       @Nullable Component message) {
-    if (cancel && getMatch().getWorld().equals(world)) {
+    if (cancel && match.getWorld().equals(world)) {
       return cancel(event, actor, message);
     } else {
-      logger.fine("Allow  " + event + " actor=" + actor);
+      match.getLogger().fine("Allow  " + event + " actor=" + actor);
       return false;
     }
   }
@@ -87,9 +105,9 @@ public class EventFilterMatchModule extends MatchModule implements Listener {
 
     return cancel(
         event,
-        getMatch().getParticipant(entity) == null,
+        match.getParticipant(entity) == null,
         entity.getWorld(),
-        getMatch().getPlayer(entity),
+        match.getPlayer(entity),
         null);
   }
 
@@ -142,7 +160,7 @@ public class EventFilterMatchModule extends MatchModule implements Listener {
         event,
         true,
         event.getPlayer().getWorld(),
-        getMatch().getPlayer(event.getPlayer()),
+        match.getPlayer(event.getPlayer()),
         new PersonalizedTranslatable("match.bed.disabled"));
   }
 
@@ -160,16 +178,15 @@ public class EventFilterMatchModule extends MatchModule implements Listener {
         event.setUseItemInHand(Event.Result.ALLOW);
       }
 
-      MatchPlayer player = getMatch().getPlayer(event.getPlayer());
+      MatchPlayer player = match.getPlayer(event.getPlayer());
       if (player == null) return;
 
       ClickType clickType = convertClick(event.getAction(), event.getPlayer());
       if (clickType == null) return;
 
-      getMatch()
-          .callEvent(
-              new ObserverInteractEvent(
-                  player, clickType, event.getClickedBlock(), null, event.getItem()));
+      match.callEvent(
+          new ObserverInteractEvent(
+              player, clickType, event.getClickedBlock(), null, event.getItem()));
     }
   }
 
@@ -184,17 +201,16 @@ public class EventFilterMatchModule extends MatchModule implements Listener {
   // --------------------------------------
 
   void callObserverInteractEvent(PlayerInteractEntityEvent event) {
-    MatchPlayer player = getMatch().getPlayer(event.getPlayer());
+    MatchPlayer player = match.getPlayer(event.getPlayer());
     if (player == null) return;
 
-    getMatch()
-        .callEvent(
-            new ObserverInteractEvent(
-                player,
-                convertClick(ClickType.RIGHT, event.getPlayer()),
-                null,
-                event.getRightClicked(),
-                event.getPlayer().getItemInHand()));
+    match.callEvent(
+        new ObserverInteractEvent(
+            player,
+            convertClick(ClickType.RIGHT, event.getPlayer()),
+            null,
+            event.getRightClicked(),
+            event.getPlayer().getItemInHand()));
   }
 
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -280,17 +296,16 @@ public class EventFilterMatchModule extends MatchModule implements Listener {
     if (event instanceof EntityDamageByEntityEvent) {
       EntityDamageByEntityEvent entityEvent = (EntityDamageByEntityEvent) event;
       if (cancelUnlessInteracting(event, entityEvent.getDamager())) {
-        MatchPlayer player = getMatch().getPlayer(entityEvent.getDamager());
+        MatchPlayer player = match.getPlayer(entityEvent.getDamager());
         if (player == null) return;
 
-        getMatch()
-            .callEvent(
-                new ObserverInteractEvent(
-                    player,
-                    ClickType.LEFT,
-                    null,
-                    event.getEntity(),
-                    player.getInventory().getItemInHand()));
+        match.callEvent(
+            new ObserverInteractEvent(
+                player,
+                ClickType.LEFT,
+                null,
+                event.getEntity(),
+                player.getInventory().getItemInHand()));
       }
     }
   }
@@ -306,7 +321,7 @@ public class EventFilterMatchModule extends MatchModule implements Listener {
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onPotionSplash(final PotionSplashEvent event) {
     for (LivingEntity entity : event.getAffectedEntities()) {
-      if (entity instanceof Player && getMatch().getParticipant(entity) == null) {
+      if (entity instanceof Player && match.getParticipant(entity) == null) {
         event.setIntensity(entity, 0);
       }
     }
@@ -318,7 +333,7 @@ public class EventFilterMatchModule extends MatchModule implements Listener {
 
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onPlayerDropItem(final PlayerDropItemEvent event) {
-    if (getMatch().getParticipant(event.getPlayer()) == null) {
+    if (match.getParticipant(event.getPlayer()) == null) {
       event.getItemDrop().remove();
     }
   }
