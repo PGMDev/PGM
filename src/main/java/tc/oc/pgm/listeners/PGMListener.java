@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Server;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
@@ -72,6 +73,12 @@ public class PGMListener implements Listener {
 
     // Create the match when the first player joins
     if (lock.writeLock().tryLock()) {
+      // If the server is suspended, need to release so match can be created
+      final Server server = parent.getServer();
+      if (server.isSuspended()) {
+        server.setSuspended(false);
+      }
+
       try {
         mm.createMatch(null).get();
       } catch (InterruptedException | ExecutionException e) {
