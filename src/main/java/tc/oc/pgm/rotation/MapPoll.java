@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -25,9 +24,11 @@ import org.bukkit.inventory.meta.BookMeta;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.named.NameStyle;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.world.NMSHacks;
@@ -113,8 +114,8 @@ public class MapPoll {
             voted ? SYMBOL_VOTED : SYMBOL_IGNORE, voted ? ChatColor.GREEN : ChatColor.DARK_RED),
         new PersonalizedText(" ").bold(!voted), // Fix 1px symbol diff
         new PersonalizedText("" + countVotes(votes.get(map)), ChatColor.YELLOW),
-        new PersonalizedText("] "), // FIXME: map fancy name, consider implementing Named
-        new PersonalizedText(map.getName() + " ", ChatColor.GOLD));
+        new PersonalizedText("] "),
+        map.getStyledName(NameStyle.FANCY));
   }
 
   public void sendBook(MatchPlayer viewer) {
@@ -156,8 +157,8 @@ public class MapPoll {
             new PersonalizedText(map.getName() + "\n", ChatColor.BOLD, ChatColor.GOLD))
         .hoverEvent(
             HoverEvent.Action.SHOW_TEXT,
-            new PersonalizedText( // FIXME: map tags
-                    new LinkedList<String>().stream().collect(Collectors.joining(" ")),
+            new PersonalizedText(
+                    map.getTags().stream().map(MapTag::getId).collect(Collectors.joining(" ")),
                     ChatColor.YELLOW)
                 .render())
         .clickEvent(ClickEvent.Action.RUN_COMMAND, "/votenext " + map.getName());

@@ -6,8 +6,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -82,37 +80,9 @@ public class Config {
     private static final Maps INSTANCE = new Maps();
     private final Map<String, MapSourceFactory> factories = new LinkedHashMap<>();
 
-    private List<String> migrateFromOld(ConfigurationSection section) {
-      final List<String> sources = new LinkedList<>();
-
-      if (section.getBoolean("default", false)) {
-        sources.add("default");
-      }
-
-      if (section.isConfigurationSection("sources")) {
-        final ConfigurationSection list = section.getConfigurationSection("sources");
-        for (String key : list.getKeys(false)) {
-          final String path = list.getString(key + ".path", null);
-          if (path != null) sources.add(path);
-        }
-      }
-
-      return sources;
-    }
-
     @EventHandler
     public void onConfigLoad(ConfigLoadEvent event) throws InvalidConfigurationException {
-      final Configuration config = event.getConfig();
-
-      // Handle old config formats for now, should be removed later
-      final List<String> oldSources = migrateFromOld(config.getConfigurationSection("map"));
-      if (!oldSources.isEmpty()) {
-        config.set("map", null);
-        config.set("map.sources", oldSources);
-        PGM.get().saveConfig();
-      }
-
-      for (String source : config.getStringList("map.sources")) {
+      for (String source : event.getConfig().getStringList("map.sources")) {
         final MapSourceFactory factory;
         try {
           factory =
@@ -461,7 +431,7 @@ public class Config {
     }
 
     public void load(ConfigurationSection config) throws InvalidConfigurationException {
-      this.matchPreLoadSeconds = Math.max(0, config.getInt("match-preload-seconds", 10));
+      this.matchPreLoadSeconds = Math.max(0, config.getInt("match-preload-seconds", 3));
       this.matchDestroySeconds = Math.max(0, config.getInt("match-destroy-seconds", 10));
       this.matchTeleportsPerSecond = Math.max(1, config.getInt("match-teleports-per-second", 10));
       this.tabRenderTicks = Math.max(1, config.getInt("tab-render-ticks", 10));
