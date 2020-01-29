@@ -1,12 +1,16 @@
 package tc.oc.pgm.ffa;
 
+import com.google.common.collect.Lists;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.ChatColor;
+import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -35,6 +39,21 @@ import tc.oc.server.NullCommandSender;
 @ListenerScope(MatchScope.LOADED)
 public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler {
 
+  // 10 different colors that tributes are allowed to have
+  private static final ChatColor[] COLORS =
+      new ChatColor[] {
+        ChatColor.RED,
+        ChatColor.BLUE,
+        ChatColor.GREEN,
+        ChatColor.YELLOW,
+        ChatColor.LIGHT_PURPLE,
+        ChatColor.GOLD,
+        ChatColor.DARK_GREEN,
+        ChatColor.DARK_AQUA,
+        ChatColor.DARK_PURPLE,
+        ChatColor.DARK_RED
+      };
+
   class NeedMorePlayers implements UnreadyReason {
     final int players;
 
@@ -47,11 +66,11 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
       if (players == 1) {
         return new PersonalizedTranslatable(
             "start.needMorePlayers.ffa.singular",
-            new PersonalizedText(String.valueOf(players), ChatColor.AQUA));
+            new PersonalizedText(String.valueOf(players), net.md_5.bungee.api.ChatColor.AQUA));
       } else {
         return new PersonalizedTranslatable(
             "start.needMorePlayers.ffa.plural",
-            new PersonalizedText(String.valueOf(players), ChatColor.AQUA));
+            new PersonalizedText(String.valueOf(players), net.md_5.bungee.api.ChatColor.AQUA));
       }
     }
 
@@ -71,11 +90,16 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
   private @Nullable Integer minPlayers, maxPlayers, maxOverfill;
   private int minPlayersNeeded = Integer.MAX_VALUE;
   private final Map<UUID, Tribute> tributes = new HashMap<>();
+  private final Deque<ChatColor> colors = new ArrayDeque<>();
   private JoinMatchModule jmm;
 
   public FreeForAllMatchModule(Match match, FreeForAllOptions options) {
     this.match = match;
     this.options = options;
+
+    final List<ChatColor> colors = Lists.newArrayList(COLORS);
+    Collections.shuffle(colors);
+    colors.forEach(this.colors::push);
   }
 
   private JoinMatchModule join() {
@@ -148,7 +172,9 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
   protected Tribute getTribute(MatchPlayer player) {
     Tribute tribute = tributes.get(player.getId());
     if (tribute == null) {
-      tribute = new Tribute(player);
+      final ChatColor color = colors.pollFirst();
+      if (color != null) colors.addLast(color);
+      tribute = new Tribute(player, color);
       tributes.put(player.getId(), tribute);
       match.getLogger().fine("Created " + tribute);
     }

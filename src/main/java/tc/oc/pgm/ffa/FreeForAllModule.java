@@ -70,6 +70,7 @@ public class FreeForAllModule implements MapModule {
         int maxPlayers = Bukkit.getMaxPlayers();
         int maxOverfill = maxPlayers;
         NameTagVisibility nameTagVisibility = NameTagVisibility.ALWAYS;
+        boolean colors = false;
 
         if (elPlayers != null) {
           minPlayers =
@@ -82,10 +83,11 @@ public class FreeForAllModule implements MapModule {
           nameTagVisibility =
               XMLUtils.parseNameTagVisibility(
                   Node.fromAttr(elPlayers, "show-name-tags"), nameTagVisibility);
+          colors = XMLUtils.parseBoolean(Node.fromAttr(elPlayers, "colors"), colors);
         }
 
         return new FreeForAllModule(
-            new FreeForAllOptions(minPlayers, maxPlayers, maxOverfill, nameTagVisibility));
+            new FreeForAllOptions(minPlayers, maxPlayers, maxOverfill, nameTagVisibility, colors));
       }
     }
   }
