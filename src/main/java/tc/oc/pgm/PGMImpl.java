@@ -114,6 +114,7 @@ import tc.oc.pgm.modules.PlayableRegionModule;
 import tc.oc.pgm.modules.SoundsMatchModule;
 import tc.oc.pgm.modules.TimeLockModule;
 import tc.oc.pgm.modules.ToolRepairModule;
+import tc.oc.pgm.observers.ObserverToolsMatchModule;
 import tc.oc.pgm.picker.PickerModule;
 import tc.oc.pgm.portals.PortalModule;
 import tc.oc.pgm.prefix.PrefixRegistry;
@@ -422,6 +423,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     factory.register(JoinMatchModule.class, new JoinMatchModule.Factory());
     factory.register(CycleMatchModule.class, new CycleMatchModule.Factory());
     factory.register(SoundsMatchModule.class, new SoundsMatchModule.Factory());
+    factory.register(ObserverToolsMatchModule.class, new ObserverToolsMatchModule.Factory());
 
     return factory;
   }
@@ -495,6 +497,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     node.registerCommands(new MapPoolCommands());
     node.registerCommands(new SettingCommands());
     node.registerCommands(new ModerationCommands());
+    node.registerCommands(new ObserverCommands());
 
     new BukkitIntake(this, graph).register();
   }

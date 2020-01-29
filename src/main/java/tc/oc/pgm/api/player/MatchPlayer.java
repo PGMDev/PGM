@@ -2,6 +2,7 @@ package tc.oc.pgm.api.player;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.PlayerInventory;
@@ -195,6 +196,13 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
   void applyKit(Kit kit, boolean force);
 
   /**
+   * Set the {@link MatchPlayer}'s {@link GameMode}.
+   *
+   * @param gameMode - The gamemode to set
+   */
+  void setGameMode(GameMode gameMode);
+
+  /**
    * Get the protocol version of the {@link MatchPlayer}'s client
    *
    * @return The protocol version of the {@link MatchPlayer}'s client
@@ -209,6 +217,13 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
   Settings getSettings();
 
   String getPrefixedName();
+
+  /**
+   * Get the {@link GameMode} of the {@link MatchPlayer}.
+   *
+   * @return the current {@link GameMode}
+   */
+  GameMode getGameMode();
 
   @Override
   PlayerInventory getInventory();

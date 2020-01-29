@@ -15,6 +15,6 @@ public class GameModeKit extends AbstractKit {
 
   @Override
   protected void applyPostEvent(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {
-    player.getBukkit().setGameMode(gameMode);
+    player.setGameMode(gameMode);
   }
 }
