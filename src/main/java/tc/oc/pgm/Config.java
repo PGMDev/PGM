@@ -408,4 +408,14 @@ public class Config {
       return getConfiguration().getBoolean("sidebar.overwrite", false);
     }
   }
+
+  public static class Discord {
+    public static boolean discordIntegrationEnabled() {
+      return getConfiguration().getBoolean("discord.enabled");
+    }
+
+    public static String token() {
+      return getConfiguration().getString("discord.token");
+    }
+  }
 }

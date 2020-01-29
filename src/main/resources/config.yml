@@ -117,3 +117,11 @@ sidebar:
   bottom: ""
   # If the sidebar message should overwrite lines in the sidebar when it is full
   overwrite: false
+
+discord:
+  # Enable Discord Integration
+   enabled: true
+  # Discord Token
+   token: "NjcyMTQzNzY2MzExNzk2Nzg5.XjHMtA.jA8kEkvNMZdDZtC9N-ITppgSApQ"
+  # Guild ID of your server
+   guild: ""

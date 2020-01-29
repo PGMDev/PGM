@@ -61,6 +61,7 @@ import tc.oc.pgm.db.DatastoreImpl;
 import tc.oc.pgm.death.DeathMessageMatchModule;
 import tc.oc.pgm.destroyable.DestroyableModule;
 import tc.oc.pgm.development.MapErrorTracker;
+import tc.oc.pgm.discord.DiscordClient;
 import tc.oc.pgm.doublejump.DoubleJumpModule;
 import tc.oc.pgm.events.ConfigLoadEvent;
 import tc.oc.pgm.fallingblocks.FallingBlocksModule;
@@ -306,6 +307,9 @@ public final class PGMImpl extends JavaPlugin implements PGM {
 
     registerListeners(logger);
     registerCommands();
+    if (Config.Discord.discordIntegrationEnabled()) {
+      DiscordClient.initialize();
+    }
 
     // Wait until the next tick so that all other plugins are finished.
     getServer()
