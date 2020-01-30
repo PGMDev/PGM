@@ -83,6 +83,7 @@ import tc.oc.pgm.modules.SoundsMatchModule;
 import tc.oc.pgm.modules.TimeLockModule;
 import tc.oc.pgm.modules.ToolRepairMatchModule;
 import tc.oc.pgm.modules.ToolRepairModule;
+import tc.oc.pgm.observers.ObserverToolsMatchModule;
 import tc.oc.pgm.picker.PickerMatchModule;
 import tc.oc.pgm.portals.PortalMatchModule;
 import tc.oc.pgm.portals.PortalModule;
@@ -153,6 +154,7 @@ public interface Modules {
     register(DoubleJumpMatchModule.class, DoubleJumpMatchModule::new);
     register(ArrowRemovalMatchModule.class, ArrowRemovalMatchModule::new);
     register(SoundsMatchModule.class, new SoundsMatchModule.Factory());
+    register(ObserverToolsMatchModule.class, new ObserverToolsMatchModule.Factory());
 
     // MatchModules that require other dependencies
     register(GoalMatchModule.class, new GoalMatchModule.Factory());
