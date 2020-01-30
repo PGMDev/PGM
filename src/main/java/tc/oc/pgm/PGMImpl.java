@@ -506,7 +506,8 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     node.registerCommands(new SettingCommands());
     node.registerCommands(new ModerationCommands());
     node.registerCommands(new ObserverCommands());
-    if (Config.Discord.enabled()) node.registerCommands(new DiscordCommands());
+    if (Config.Discord.enabled())
+      node.registerNode("discord").registerCommands(new DiscordCommands());
 
     new BukkitIntake(this, graph).register();
   }

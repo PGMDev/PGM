@@ -411,14 +411,14 @@ public class Config {
 
   public static class Discord {
     public static boolean enabled() {
-      return getConfiguration().getBoolean("discord.enabled");
+      return getConfiguration().getBoolean("discord.enabled", false);
     }
 
     public static String token() {
       return getConfiguration().getString("discord.token");
     }
 
-    public static String guildid() {
+    public static String guildID() {
       return getConfiguration().getString("discord.guild");
     }
   }
