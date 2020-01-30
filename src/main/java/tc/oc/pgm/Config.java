@@ -410,12 +410,16 @@ public class Config {
   }
 
   public static class Discord {
-    public static boolean discordIntegrationEnabled() {
+    public static boolean enabled() {
       return getConfiguration().getBoolean("discord.enabled");
     }
 
     public static String token() {
       return getConfiguration().getString("discord.token");
+    }
+
+    public static String guildid() {
+      return getConfiguration().getString("discord.guild");
     }
   }
 }

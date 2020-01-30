@@ -12,7 +12,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import javax.security.auth.login.LoginException;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -334,11 +333,11 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     if (Config.AutoRestart.enabled()) {
       getServer().getScheduler().runTaskTimer(this, new ShouldRestartTask(this), 0, 20 * 60);
     }
-    if (Config.Discord.discordIntegrationEnabled()) {
+    if (Config.Discord.enabled()) {
       try {
         DiscordClient.initialize();
       } catch (Exception e) {
-          logger.severe(e.getMessage());
+        logger.severe(e.getMessage());
       }
     }
   }
@@ -507,6 +506,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     node.registerCommands(new SettingCommands());
     node.registerCommands(new ModerationCommands());
     node.registerCommands(new ObserverCommands());
+    if (Config.Discord.enabled()) node.registerCommands(new DiscordCommands());
 
     new BukkitIntake(this, graph).register();
   }
