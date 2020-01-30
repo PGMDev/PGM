@@ -8,7 +8,10 @@ import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import javax.annotation.Nullable;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -25,16 +28,24 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.filters.query.DamageQuery;
 import tc.oc.pgm.tracker.damage.DamageInfo;
+import tc.oc.util.collection.DefaultMapAdapter;
 
 @ListenerScope(MatchScope.RUNNING)
 public class KillRewardMatchModule implements MatchModule, Listener {
   private final Match match;
-  protected final ImmutableList<KillReward> killRewards;
-  protected final Multimap<MatchPlayer, KillReward> deadPlayerRewards = ArrayListMultimap.create();
+  private final Map<UUID, MutableInt> killStreaks;
+  private final ImmutableList<KillReward> killRewards;
+  private final Multimap<UUID, KillReward> deadPlayerRewards;
 
   public KillRewardMatchModule(Match match, List<KillReward> killRewards) {
     this.match = match;
     this.killRewards = ImmutableList.copyOf(killRewards);
+    this.killStreaks = new DefaultMapAdapter<>(key -> new MutableInt(), true);
+    this.deadPlayerRewards = ArrayListMultimap.create();
+  }
+
+  public int getKillStreak(UUID uuid) {
+    return killStreaks.get(uuid).intValue();
   }
 
   private Collection<KillReward> getRewards(
@@ -88,9 +99,17 @@ public class KillRewardMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onDeath(MatchPlayerDeathEvent event) {
-    if (!event.isChallengeKill()) return;
-    ParticipantState killer = event.getKiller();
-    if (killer == null) return;
+    final ParticipantState killer = event.getKiller();
+    if (event.isChallengeKill() && killer != null) {
+      killStreaks.get(killer.getId()).increment();
+    }
+
+    final MatchPlayer victim = event.getVictim();
+    if (victim != null) {
+      killStreaks.get(victim.getId()).setValue(0);
+    }
+
+    if (!event.isChallengeKill() || killer == null) return;
     MatchPlayer onlineKiller = killer.getPlayer().orElse(null);
     if (onlineKiller == null) return;
 
@@ -104,7 +123,7 @@ public class KillRewardMatchModule implements MatchModule, Listener {
       // just give it to them always. Also, if the KW is in itemkeep, they should definitely get it
       // while dead,
       // and this is a relatively simple way to handle that case.
-      deadPlayerRewards.putAll(onlineKiller, rewards);
+      deadPlayerRewards.putAll(onlineKiller.getId(), rewards);
     } else {
       giveRewards(onlineKiller, rewards);
     }
@@ -115,11 +134,12 @@ public class KillRewardMatchModule implements MatchModule, Listener {
    * kits
    */
   public void giveDeadPlayerRewards(MatchPlayer attacker) {
-    giveRewards(attacker, deadPlayerRewards.removeAll(attacker));
+    giveRewards(attacker, deadPlayerRewards.removeAll(attacker.getId()));
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPartyChange(PlayerPartyChangeEvent event) {
-    deadPlayerRewards.removeAll(event.getPlayer());
+    killStreaks.remove(event.getPlayer().getId());
+    deadPlayerRewards.removeAll(event.getPlayer().getId());
   }
 }
