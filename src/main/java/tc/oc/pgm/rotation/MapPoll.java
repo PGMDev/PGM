@@ -31,6 +31,7 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.world.NMSHacks;
 
 /** Represents a polling process, with a set of options. */
@@ -214,6 +215,8 @@ public class MapPoll {
     Match match = this.match.get();
     if (match != null) {
       match.getPlayers().forEach(this::sendMessage);
+      // Announce the map winner to those who want to know
+      announceMapWinner(match, picked);
     }
 
     updateScores();
@@ -224,5 +227,33 @@ public class MapPoll {
     double voters = votes.values().stream().flatMap(Collection::stream).distinct().count();
     if (voters == 0) return;
     votes.forEach((m, v) -> mapScores.put(m, Math.max(v.size() / voters, Double.MIN_VALUE)));
+  }
+
+  private void announceMapWinner(Match match, MapInfo winner) {
+    Component mapName = new PersonalizedText(winner.getName()).bold(true).color(ChatColor.GREEN);
+    Component mapSelect =
+        new PersonalizedTranslatable("poll.winner.subTitle")
+            .getPersonalizedText()
+            .bold(true)
+            .color(ChatColor.GOLD);
+    Component hotBar = new PersonalizedText(mapName, new PersonalizedText(" "), mapSelect);
+
+    match
+        .getPlayers()
+        .forEach(
+            player -> {
+              switch (player.getSettings().getValue(SettingKey.VOTE_WINNER)) {
+                case ANNOUNCE_HOTBAR:
+                  player.sendHotbarMessage(hotBar);
+                  break;
+                case ANNOUNCE_TITLE:
+                  player.showTitle(mapName, mapSelect, 20, 20, 20);
+                  break;
+                default:
+                  // Don't send anything to players who have this turned off
+                  // TODO Maybe?: Perhaps send a chat message here instead of nothing
+                  break;
+              }
+            });
   }
 }

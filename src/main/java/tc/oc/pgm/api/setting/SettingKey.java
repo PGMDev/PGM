@@ -31,6 +31,11 @@ public enum SettingKey {
     }
   }, // Changes if observers are visible
   SOUNDS("sounds", SOUNDS_ON, SOUNDS_OFF), // Changes if sounds are played
+  VOTE_WINNER(
+      "announce",
+      ANNOUNCE_TITLE,
+      ANNOUNCE_HOTBAR,
+      ANNOUNCE_OFF), // Changes how map poll winners are announced
   ;
 
   private final List<String> aliases;
