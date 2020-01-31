@@ -634,7 +634,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPartyChange(PlayerPartyChangeEvent event) {
-    if (event.getNewParty() instanceof Team) {
+    if (event.getOldParty() != null && event.getNewParty() != null) {
       event
           .getPlayer()
           .sendMessage(

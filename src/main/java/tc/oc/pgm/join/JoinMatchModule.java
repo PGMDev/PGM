@@ -172,7 +172,6 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
     }
 
     Party observers = match.getDefaultParty();
-    leaving.sendMessage(new PersonalizedTranslatable("team.join", observers.getComponentName()));
     return match.setParty(leaving, observers);
   }
 
