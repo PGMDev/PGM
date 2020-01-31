@@ -605,6 +605,16 @@ public class MatchImpl implements Match {
   }
 
   @Override
+  public Listener getListener(Class<? extends Listener> listenerClass) {
+    for (Listener listener : listeners.get(getScope())) {
+      if (listener.getClass() == listenerClass) {
+        return listener;
+      }
+    }
+    return null;
+  }
+
+  @Override
   public Party getDefaultParty() {
     return observers;
   }

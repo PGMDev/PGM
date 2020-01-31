@@ -393,4 +393,6 @@ public interface Match extends MatchPlayerResolver, MultiAudience, ModuleContext
    * @return If the {@link Match} was just ended.
    */
   boolean calculateVictory();
+
+  Listener getListener(Class<? extends Listener> listenerClass);
 }

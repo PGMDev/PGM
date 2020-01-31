@@ -27,6 +27,7 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.match.ObservingParty;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
+import tc.oc.pgm.tracker.trackers.CombatLogTracker;
 import tc.oc.util.components.PeriodFormats;
 
 @ListenerScope(MatchScope.LOADED)
@@ -158,6 +159,12 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
 
   public boolean leave(MatchPlayer leaving) {
     if (cancelQueuedJoin(leaving)) return true;
+    Listener combatLogTracker = leaving.getMatch().getListener(CombatLogTracker.class);
+    if (combatLogTracker != null
+        && ((CombatLogTracker) combatLogTracker).getImminentDeath(leaving.getBukkit()) != null) {
+      leaving.sendWarning(new PersonalizedTranslatable("match.noCombatLog"));
+      return true;
+    }
 
     if (leaving.getParty() instanceof ObservingParty) {
       leaving.sendWarning(
