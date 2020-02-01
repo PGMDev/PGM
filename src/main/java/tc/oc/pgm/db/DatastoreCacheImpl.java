@@ -39,12 +39,7 @@ public class DatastoreCacheImpl implements Datastore {
             datastore::getSettings);
     this.discord =
         buildCache(
-            builder ->
-                builder
-                    .weakValues()
-                    .maximumSize(Bukkit.getMaxPlayers())
-                    // .refreshAfterWrite(15, TimeUnit.MINUTES)
-                    .expireAfterAccess(1, TimeUnit.HOURS),
+            builder -> builder.weakValues().expireAfterWrite(15, TimeUnit.MINUTES),
             datastore::getDiscord);
   }
 
