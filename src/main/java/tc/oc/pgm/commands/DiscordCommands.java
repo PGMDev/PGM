@@ -17,11 +17,11 @@ public class DiscordCommands {
       aliases = {"link"},
       desc = "Links a Discord user to your Minecraft account",
       usage = "[username]")
-  public static void link(CommandSender sender, MatchPlayer player, String DiscordTAG)
+  public static void link(CommandSender sender, MatchPlayer player, String DiscordTag)
       throws ArgumentException {
     if (player == null)
       throw new ArgumentException(AllTranslations.get().translate("command.onlyPlayers", sender));
-    User user = DiscordClient.getUserFromTag(DiscordTAG);
+    User user = DiscordClient.getUserFromTag(DiscordTag);
     // TODO: Check if user has linked an account
     UUID uuid = player.getId();
     if (DiscordClient.TOKENS_CACHE.getIfPresent(uuid) == null) {
@@ -38,10 +38,10 @@ public class DiscordCommands {
         DiscordClient.TOKENS_CACHE.put(uuid, token);
         sender.sendMessage(
             ChatColor.GREEN
-                + AllTranslations.get().translate("discord.sentmessage", sender, DiscordTAG));
+                + AllTranslations.get().translate("discord.sentmessage", sender, DiscordTag));
       } else {
         throw new ArgumentException(
-            AllTranslations.get().translate("discord.notfound", sender, DiscordTAG));
+            AllTranslations.get().translate("discord.notfound", sender, DiscordTag));
       }
     } else {
       // TODO: Send error with the timeleft till next command
