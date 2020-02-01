@@ -1,6 +1,7 @@
 package tc.oc.pgm.api;
 
 import java.util.UUID;
+import tc.oc.pgm.api.discord.DiscordUser;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.api.setting.Settings;
 
@@ -22,4 +23,11 @@ public interface Datastore {
    * @return A {@link Settings}.
    */
   Settings getSettings(UUID uuid);
+  /**
+   * Get the Discord Information for a given player {@link UUID}.
+   *
+   * @param uuid The {@link UUID} of a player.
+   * @return A {@link DiscordUser}.
+   */
+  DiscordUser getDiscord(UUID uuid);
 }
