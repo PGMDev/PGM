@@ -1,15 +1,29 @@
 package tc.oc.pgm.api.discord;
 
-import jdk.internal.jline.internal.Nullable;
+import java.util.UUID;
+import javax.annotation.Nullable;
 
+/** Represents the mapping of a {@link UUID} to a DiscordId. */
 public interface DiscordUser {
-  // Gets the Discord username of the user, or null if not registered
+  /**
+   * Get the Discord username of the player.
+   *
+   * @return The username.
+   */
   @Nullable
   String getUsername();
 
-  // Sets the Discord username
+  /**
+   * Change the Discord username of the player.
+   *
+   * @param username The new username.
+   */
   void setUsername(String username);
 
-  // Gets verification token for a user, cached or un-cached
+  /**
+   * Get the verification token of the player.
+   *
+   * @return The token.
+   */
   String getToken();
 }

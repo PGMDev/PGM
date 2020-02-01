@@ -23,6 +23,7 @@ public interface Datastore {
    * @return A {@link Settings}.
    */
   Settings getSettings(UUID uuid);
+
   /**
    * Get the Discord Information for a given player {@link UUID}.
    *
