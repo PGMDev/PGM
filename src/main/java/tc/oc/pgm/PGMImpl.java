@@ -337,7 +337,7 @@ public final class PGMImpl extends JavaPlugin implements PGM {
       try {
         DiscordClient.initialize();
       } catch (Exception e) {
-        logger.severe(e.getMessage());
+        logger.log(Level.WARNING, "Unable to initialize Discord client", e);
       }
     }
   }

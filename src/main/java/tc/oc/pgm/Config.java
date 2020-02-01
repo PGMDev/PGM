@@ -418,7 +418,7 @@ public class Config {
       return getConfiguration().getString("discord.token");
     }
 
-    public static String guildID() {
+    public static String guildId() {
       return getConfiguration().getString("discord.guild");
     }
   }

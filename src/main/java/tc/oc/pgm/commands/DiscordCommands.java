@@ -15,8 +15,8 @@ public class DiscordCommands {
 
   @Command(
       aliases = {"link"},
-      desc = "Gives you a token to verify your account",
-      usage = "[DiscordTAG]")
+      desc = "Links a Discord user to your Minecraft account",
+      usage = "[username]")
   public static void link(CommandSender sender, MatchPlayer player, String DiscordTAG)
       throws ArgumentException {
     if (player == null)
@@ -33,10 +33,11 @@ public class DiscordCommands {
                 .translate(
                     "discord.verify",
                     sender,
+                    sender.getName(),
                     "/discord verify " + token)); // FIXME: Check if DM got delivered, if not Error.
         DiscordClient.TOKENS_CACHE.put(uuid, token);
         sender.sendMessage(
-            ChatColor.GREEN + AllTranslations.get().translate("discord.sentmessage", sender));
+            ChatColor.GREEN + AllTranslations.get().translate("discord.sentmessage", sender, DiscordTAG));
       } else {
         throw new ArgumentException(
             AllTranslations.get().translate("discord.notfound", sender, DiscordTAG));
