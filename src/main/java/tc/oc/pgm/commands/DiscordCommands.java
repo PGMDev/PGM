@@ -37,7 +37,8 @@ public class DiscordCommands {
                     "/discord verify " + token)); // FIXME: Check if DM got delivered, if not Error.
         DiscordClient.TOKENS_CACHE.put(uuid, token);
         sender.sendMessage(
-            ChatColor.GREEN + AllTranslations.get().translate("discord.sentmessage", sender, DiscordTAG));
+            ChatColor.GREEN
+                + AllTranslations.get().translate("discord.sentmessage", sender, DiscordTAG));
       } else {
         throw new ArgumentException(
             AllTranslations.get().translate("discord.notfound", sender, DiscordTAG));
