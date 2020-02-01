@@ -12,20 +12,20 @@ import tc.oc.pgm.Config;
 
 public class DiscordClient {
 
-  private static JDA jda;
-  public static final Cache<UUID, String> TOKENS_CACHE =
+  private JDA jda;
+  public final Cache<UUID, String> TOKENS_CACHE =
       CacheBuilder.newBuilder().expireAfterWrite(15, TimeUnit.MINUTES).build();
 
-  public static void initialize() throws InterruptedException, LoginException {
-    jda = new JDABuilder(Config.Discord.token()).build();
-    jda.awaitReady();
+  public DiscordClient() throws InterruptedException, LoginException {
+    this.jda = new JDABuilder(Config.Discord.token()).build();
+    this.jda.awaitReady();
   }
 
-  public static User getUserFromTag(String tag) {
+  public User getUserFromTag(String tag) {
     return jda.getUserByTag(tag);
   }
 
-  public static void sendMessage(User user, String message) {
+  public void sendMessage(User user, String message) {
     user.openPrivateChannel()
         .submit()
         .thenCompose(channel -> channel.sendMessage(message).submit())

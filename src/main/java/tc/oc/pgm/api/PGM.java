@@ -10,6 +10,7 @@ import tc.oc.named.NameRenderer;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.development.MapErrorTracker;
+import tc.oc.pgm.discord.DiscordClient;
 import tc.oc.pgm.map.MapLibrary;
 import tc.oc.pgm.map.PGMMap;
 import tc.oc.pgm.prefix.PrefixRegistry;
@@ -77,6 +78,8 @@ public interface PGM extends Plugin {
 
   @Deprecated
   NameRenderer getNameRenderer();
+
+  DiscordClient getDiscordClient();
 
   AtomicReference<PGM> GLOBAL = new AtomicReference<>(null);
 

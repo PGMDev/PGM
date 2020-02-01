@@ -163,6 +163,8 @@ public final class PGMImpl extends JavaPlugin implements PGM {
   private Datastore datastore;
   private Datastore datastoreCache;
 
+  private DiscordClient discordClient;
+
   public PGMImpl() {
     super();
   }
@@ -222,6 +224,10 @@ public final class PGMImpl extends JavaPlugin implements PGM {
   @Override
   public SemanticVersion getMapProtoSupported() {
     return ProtoVersions.FILTER_FEATURES;
+  }
+
+  public DiscordClient getDiscordClient() {
+    return discordClient;
   }
 
   @Override
@@ -335,9 +341,9 @@ public final class PGMImpl extends JavaPlugin implements PGM {
     }
     if (Config.Discord.enabled()) {
       try {
-        DiscordClient.initialize();
+        discordClient = new DiscordClient();
       } catch (Exception e) {
-        logger.log(Level.WARNING, "Unable to initialize Discord client", e);
+        logger.log(Level.SEVERE, "Unable to initialize Discord client", e);
       }
     }
   }

@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.User;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.AllTranslations;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.discord.DiscordClient;
 
@@ -21,13 +22,14 @@ public class DiscordCommands {
       throws ArgumentException {
     if (player == null)
       throw new ArgumentException(AllTranslations.get().translate("command.onlyPlayers", sender));
-    User user = DiscordClient.getUserFromTag(DiscordTag);
+    DiscordClient discordClient = PGM.get().getDiscordClient();
+    User user = discordClient.getUserFromTag(DiscordTag);
     // TODO: Check if user has linked an account
     UUID uuid = player.getId();
-    if (DiscordClient.TOKENS_CACHE.getIfPresent(uuid) == null) {
+    if (discordClient.TOKENS_CACHE.getIfPresent(uuid) == null) {
       if (user != null) {
         String token = UUID.randomUUID().toString().replace("-", "");
-        DiscordClient.sendMessage(
+        discordClient.sendMessage(
             user,
             AllTranslations.get()
                 .translate(
@@ -35,7 +37,7 @@ public class DiscordCommands {
                     sender,
                     sender.getName(),
                     "/discord verify " + token)); // FIXME: Check if DM got delivered, if not Error.
-        DiscordClient.TOKENS_CACHE.put(uuid, token);
+        discordClient.TOKENS_CACHE.put(uuid, token);
         sender.sendMessage(
             ChatColor.GREEN
                 + AllTranslations.get().translate("discord.sentmessage", sender, DiscordTag));
@@ -56,15 +58,16 @@ public class DiscordCommands {
       throws ArgumentException {
     if (player == null)
       throw new ArgumentException(AllTranslations.get().translate("command.onlyPlayers", sender));
+    DiscordClient discordClient = PGM.get().getDiscordClient();
     if (token != null) {
       boolean exists =
-          DiscordClient.TOKENS_CACHE.asMap().entrySet().stream()
+          discordClient.TOKENS_CACHE.asMap().entrySet().stream()
               .filter(entry -> token.equals(entry.getValue()))
               .map(Map.Entry::getKey)
               .findFirst()
               .isPresent();
       if (exists) {
-        DiscordClient.TOKENS_CACHE.asMap().entrySet().stream()
+        discordClient.TOKENS_CACHE.asMap().entrySet().stream()
             .filter(entry -> token.equals(entry.getValue()))
             .map(Map.Entry::getKey)
             .findFirst()
