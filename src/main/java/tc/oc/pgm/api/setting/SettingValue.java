@@ -36,10 +36,6 @@ public enum SettingValue {
 
   SOUNDS_ON("sounds", "on"), // Always play sounds
   SOUNDS_OFF("sounds", "off"), // Never play sounds
-
-  ANNOUNCE_TITLE("announce", "title"), // Announce a map poll winner via title
-  ANNOUNCE_HOTBAR("announce", "hotbar"), // Announce a map poll winner via the hotbar
-  ANNOUNCE_OFF("announce", "off"), // Don't announce the winner of a map poll
   ;
 
   private final String key;

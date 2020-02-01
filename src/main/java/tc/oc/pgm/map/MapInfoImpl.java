@@ -15,8 +15,8 @@ import org.bukkit.Difficulty;
 import org.jdom2.Element;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
-import tc.oc.named.NameStyle;
-import tc.oc.pgm.AllTranslations;
+import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.named.MapNameStyle;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
@@ -191,19 +191,41 @@ public class MapInfoImpl implements MapInfo {
   }
 
   @Override
-  public Component getStyledName(NameStyle style) {
-    return new PersonalizedText(
-        AllTranslations.get()
-            .translate(
-                (input) -> ChatColor.DARK_PURPLE + input,
-                "misc.authorship",
+  public Component getStyledMapName(MapNameStyle style, ChatColor mapColor) {
+    Component styledName = null;
+    Component mapName = new PersonalizedText(getName());
+    Component authors =
+        new PersonalizedText(
+            TranslationUtils.legacyList(
                 NullCommandSender.INSTANCE,
-                ChatColor.GOLD + getName(),
-                TranslationUtils.legacyList(
-                    NullCommandSender.INSTANCE,
-                    (input) -> ChatColor.DARK_PURPLE + input,
-                    (input) -> ChatColor.RED + input,
-                    getAuthors().stream().map(Contributor::getName).collect(Collectors.toList()))));
+                (input) -> ChatColor.DARK_PURPLE + input,
+                (input) -> ChatColor.RED + input,
+                getAuthors().stream().map(Contributor::getName).collect(Collectors.toList())));
+
+    if (style.isColor) {
+      mapName = mapName.color(mapColor);
+    }
+
+    if (style.isHighlight) {
+      mapName = mapName.bold(true);
+    }
+
+    if (style.showAuthors) {
+      Component withAuthors =
+          new PersonalizedTranslatable("misc.authorship", mapName, authors)
+              .getPersonalizedText()
+              .color(ChatColor.DARK_PURPLE);
+      styledName = withAuthors;
+    } else {
+      styledName = mapName;
+    }
+
+    return styledName;
+  }
+
+  @Override
+  public Component getStyledMapName(MapNameStyle style) {
+    return getStyledMapName(style, ChatColor.GOLD);
   }
 
   private static List<String> parseRules(Element root) {

@@ -24,6 +24,7 @@ import org.bukkit.command.CommandSender;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.named.MapNameStyle;
 import tc.oc.named.NameStyle;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.Permissions;
@@ -93,7 +94,9 @@ public class MapCommands {
     new PrettyPaginatedResult<MapInfo>(listHeader, resultsPerPage) {
       @Override
       public String format(MapInfo map, int index) {
-        return (index + 1) + ". " + map.getStyledName(NameStyle.FANCY).toLegacyText();
+        return (index + 1)
+            + ". "
+            + map.getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS).toLegacyText();
       }
     }.display(audience, ImmutableSortedSet.copyOf(maps), page);
   }
@@ -261,7 +264,8 @@ public class MapCommands {
                 .translate(
                     "command.map.next.success",
                     sender,
-                    next.getStyledName(NameStyle.FANCY).toLegacyText() + ChatColor.DARK_PURPLE));
+                    next.getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS).toLegacyText()
+                        + ChatColor.DARK_PURPLE));
   }
 
   private @Nullable Component formatContribution(Contributor contributor) {
