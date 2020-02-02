@@ -8,8 +8,8 @@ import org.bukkit.event.Listener;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.named.MapNameStyle;
 import tc.oc.named.NameStyle;
-import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.map.Contributor;
@@ -137,11 +137,10 @@ public class MatchAnnouncer implements Listener {
 
   private void sendCurrentlyPlaying(MatchPlayer viewer) {
     viewer.sendMessage(
-        org.bukkit.ChatColor.DARK_PURPLE
-            + AllTranslations.get()
-                .translate(
-                    "broadcast.currentlyPlaying",
-                    viewer.getBukkit(),
-                    org.bukkit.ChatColor.GOLD + viewer.getMatch().getMap().getName()));
+        new PersonalizedTranslatable(
+                "broadcast.currentlyPlaying",
+                viewer.getMatch().getMap().getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS))
+            .getPersonalizedText()
+            .color(ChatColor.DARK_PURPLE));
   }
 }

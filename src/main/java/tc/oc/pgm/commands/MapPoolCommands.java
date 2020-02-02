@@ -14,7 +14,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.named.NameStyle;
+import tc.oc.named.MapNameStyle;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
@@ -95,7 +95,10 @@ public class MapPoolCommands {
           str += ChatColor.YELLOW + SCORE_FORMAT.format(votes.getMapScore(map)) + " ";
         if (votes != null && chance)
           str += ChatColor.YELLOW + SCORE_FORMAT.format(chances.get(map)) + " ";
-        str += ChatColor.RESET + "" + map.getStyledName(NameStyle.FANCY).toLegacyText();
+        str +=
+            ChatColor.RESET
+                + ""
+                + map.getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS).toLegacyText();
         return str;
       }
     }.display(audience, maps, page);

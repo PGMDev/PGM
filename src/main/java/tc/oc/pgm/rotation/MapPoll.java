@@ -24,19 +24,22 @@ import org.bukkit.inventory.meta.BookMeta;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.named.NameStyle;
+import tc.oc.named.MapNameStyle;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.util.components.Components;
 import tc.oc.world.NMSHacks;
 
 /** Represents a polling process, with a set of options. */
 public class MapPoll {
   private static final String SYMBOL_IGNORE = "\u2715"; // ✕
   private static final String SYMBOL_VOTED = "\u2714"; // ✔
+
+  private static final int TITLE_LENGTH_CUTOFF = 15;
 
   private final WeakReference<Match> match;
   private final Map<MapInfo, Double> mapScores;
@@ -102,11 +105,19 @@ public class MapPoll {
     return currWeight;
   }
 
-  public void sendMessage(MatchPlayer viewer) {
-    for (MapInfo pgmMap : votes.keySet()) viewer.sendMessage(getMapChatComponent(viewer, pgmMap));
+  public void announceWinner(MatchPlayer viewer, MapInfo winner) {
+    for (MapInfo pgmMap : votes.keySet())
+      viewer.sendMessage(getMapChatComponent(viewer, pgmMap, pgmMap.equals(winner)));
+
+    // Check if the winning map name's length suitable for the top title, otherwise subtitle
+    boolean top = winner.getName().length() < TITLE_LENGTH_CUTOFF;
+    Component mapName = winner.getStyledMapName(MapNameStyle.COLOR).bold(true);
+
+    viewer.showTitle(
+        top ? mapName : Components.blank(), top ? Components.blank() : mapName, 5, 60, 5);
   }
 
-  private Component getMapChatComponent(MatchPlayer viewer, MapInfo map) {
+  private Component getMapChatComponent(MatchPlayer viewer, MapInfo map, boolean winner) {
     boolean voted = votes.get(map).contains(viewer.getId());
     return new PersonalizedText(
         new PersonalizedText("["),
@@ -115,7 +126,8 @@ public class MapPoll {
         new PersonalizedText(" ").bold(!voted), // Fix 1px symbol diff
         new PersonalizedText("" + countVotes(votes.get(map)), ChatColor.YELLOW),
         new PersonalizedText("] "),
-        map.getStyledName(NameStyle.FANCY));
+        map.getStyledMapName(
+            winner ? MapNameStyle.HIGHLIGHT_WITH_AUTHORS : MapNameStyle.COLOR_WITH_AUTHORS));
   }
 
   public void sendBook(MatchPlayer viewer) {
@@ -213,7 +225,7 @@ public class MapPoll {
     MapInfo picked = getMostVotedMap();
     Match match = this.match.get();
     if (match != null) {
-      match.getPlayers().forEach(this::sendMessage);
+      match.getPlayers().forEach(player -> announceWinner(player, picked));
     }
 
     updateScores();
