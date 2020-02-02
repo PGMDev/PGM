@@ -31,6 +31,7 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.util.components.Components;
 import tc.oc.world.NMSHacks;
 
 /** Represents a polling process, with a set of options. */
@@ -111,13 +112,9 @@ public class MapPoll {
     // Check if the winning map name's length suitable for the top title, otherwise subtitle
     boolean top = winner.getName().length() < TITLE_LENGTH_CUTOFF;
     Component mapName = new PersonalizedText(winner.getName()).bold(true).color(ChatColor.GREEN);
-    Component winText =
-        new PersonalizedTranslatable(top ? "poll.winner.sub" : "poll.winner.title")
-            .getPersonalizedText()
-            .bold(true)
-            .color(ChatColor.GOLD);
 
-    viewer.showTitle(top ? mapName : winText, top ? winText : mapName, 5, 60, 5);
+    viewer.showTitle(
+        top ? mapName : Components.blank(), top ? Components.blank() : mapName, 5, 60, 5);
   }
 
   private Component getMapChatComponent(MatchPlayer viewer, MapInfo map, boolean winner) {
