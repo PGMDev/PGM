@@ -36,6 +36,7 @@ import tc.oc.pgm.join.JoinHandler;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.join.JoinResult;
 import tc.oc.pgm.join.QueuedParticipants;
+import tc.oc.pgm.match.Observers;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
@@ -634,7 +635,8 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPartyChange(PlayerPartyChangeEvent event) {
-    if (event.getNewParty() instanceof Team) {
+    if (event.getNewParty() instanceof Team
+        || (event.getNewParty() instanceof Observers && event.getOldParty() != null)) {
       event
           .getPlayer()
           .sendMessage(

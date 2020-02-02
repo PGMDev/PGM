@@ -21,7 +21,6 @@ import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.party.Competitor;
-import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.match.ObservingParty;
@@ -171,9 +170,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
       return false;
     }
 
-    Party observers = match.getDefaultParty();
-    leaving.sendMessage(new PersonalizedTranslatable("team.join", observers.getComponentName()));
-    return match.setParty(leaving, observers);
+    return match.setParty(leaving, match.getDefaultParty());
   }
 
   public QueuedParticipants getQueuedParticipants() {

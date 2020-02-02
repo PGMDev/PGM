@@ -15,6 +15,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.FilterModule;
+import tc.oc.pgm.filters.KillStreakFilter;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.itemmeta.ItemModifyModule;
 import tc.oc.pgm.kits.Kit;
@@ -72,7 +73,8 @@ public class KillRewardModule implements MapModule {
       }
 
       ImmutableList<KillReward> list = rewards.build();
-      if (list.isEmpty()) {
+      if (list.isEmpty()
+          && !factory.getFeatures().getAll(KillStreakFilter.class).iterator().hasNext()) {
         return null;
       } else {
         return new KillRewardModule(list);
