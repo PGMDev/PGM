@@ -111,7 +111,7 @@ public class MapPoll {
 
     // Check if the winning map name's length suitable for the top title, otherwise subtitle
     boolean top = winner.getName().length() < TITLE_LENGTH_CUTOFF;
-    Component mapName = new PersonalizedText(winner.getName()).bold(true).color(ChatColor.GREEN);
+    Component mapName = winner.getStyledMapName(MapNameStyle.COLOR).bold(true);
 
     viewer.showTitle(
         top ? mapName : Components.blank(), top ? Components.blank() : mapName, 5, 60, 5);
