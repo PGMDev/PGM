@@ -9,6 +9,7 @@ import tc.oc.identity.IdentityProvider;
 import tc.oc.named.NameRenderer;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.match.MatchManager;
+import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.prefix.PrefixRegistry;
 import tc.oc.pgm.rotation.MapOrder;
 import tc.oc.pgm.tablist.MatchTabManager;
@@ -33,6 +34,8 @@ public interface PGM extends Plugin {
   IdentityProvider getIdentityProvider();
 
   NameRenderer getNameRenderer();
+
+  ChatDispatcher getChatDispatcher();
 
   AtomicReference<PGM> GLOBAL = new AtomicReference<>(null);
 

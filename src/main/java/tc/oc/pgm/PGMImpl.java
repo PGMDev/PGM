@@ -93,6 +93,7 @@ import tc.oc.pgm.commands.provider.VectorProvider;
 import tc.oc.pgm.db.DatastoreCacheImpl;
 import tc.oc.pgm.db.DatastoreImpl;
 import tc.oc.pgm.events.ConfigLoadEvent;
+import tc.oc.pgm.freeze.FreezeListener;
 import tc.oc.pgm.listeners.AntiGriefListener;
 import tc.oc.pgm.listeners.BlockTransformListener;
 import tc.oc.pgm.listeners.ChatDispatcher;
@@ -130,6 +131,7 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
   private MatchNameRenderer matchNameRenderer;
   private NameRenderer nameRenderer;
   private PrefixRegistry prefixRegistry;
+  private ChatDispatcher chatDispatcher;
 
   public PGMImpl() {
     super();
@@ -310,6 +312,11 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
   }
 
   @Override
+  public ChatDispatcher getChatDispatcher() {
+    return chatDispatcher;
+  }
+
+  @Override
   public PrefixRegistry getPrefixRegistry() {
     return prefixRegistry;
   }
@@ -351,9 +358,9 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
     BasicBukkitCommandGraph graph = new BasicBukkitCommandGraph(new CommandModule());
     DispatcherNode node = graph.getRootDispatcherNode();
 
-    final ChatDispatcher chat = new ChatDispatcher(getMatchManager());
-    node.registerCommands(chat);
-    registerEvents(chat);
+    chatDispatcher = new ChatDispatcher(getMatchManager());
+    node.registerCommands(chatDispatcher);
+    registerEvents(chatDispatcher);
 
     node.registerCommands(new MapCommands());
     node.registerCommands(new CycleCommands());
@@ -398,6 +405,7 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
     registerEvents(new MatchAnnouncer());
     registerEvents(new MotdListener());
     registerEvents(new ServerPingDataListener(matchManager, mapOrder, getLogger()));
+    registerEvents(new FreezeListener());
   }
 
   private class InGameHandler extends Handler {

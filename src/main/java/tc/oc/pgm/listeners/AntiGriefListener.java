@@ -171,7 +171,8 @@ public class AntiGriefListener implements Listener {
     // TODO: Update information if locale changes
     ItemMeta meta = shears.getItemMeta();
     meta.setDisplayName(
-        AllTranslations.get().translate("defuse.displayName", event.getPlayer().getBukkit()));
+        ChatColor.RESET
+            + AllTranslations.get().translate("defuse.displayName", event.getPlayer().getBukkit()));
     meta.setLore(
         Lists.newArrayList(
             ChatColor.GRAY

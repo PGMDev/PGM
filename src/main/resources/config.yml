@@ -109,3 +109,7 @@ sidebar:
   bottom: ""
   # If the sidebar message should overwrite lines in the sidebar when it is full
   overwrite: false
+
+moderation:
+  # Allow moderators to freeze players
+  freezing: true

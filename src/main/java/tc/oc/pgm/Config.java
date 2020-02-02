@@ -488,4 +488,10 @@ public class Config {
       return getConfiguration().getBoolean("sidebar.overwrite", false);
     }
   }
+
+  public static class Moderation {
+    public static boolean freezingEnabled() {
+      return getConfiguration().getBoolean("moderation.freezing", true);
+    }
+  }
 }
