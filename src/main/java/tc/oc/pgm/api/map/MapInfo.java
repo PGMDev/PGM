@@ -3,7 +3,6 @@ package tc.oc.pgm.api.map;
 import java.text.Normalizer;
 import java.util.Collection;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.ChatColor;
 import tc.oc.component.Component;
 import tc.oc.named.MapNameStyle;
 import tc.oc.util.Version;
@@ -114,15 +113,6 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
    * @return A new component of the Map name
    */
   Component getStyledMapName(MapNameStyle style);
-
-  /**
-   * Creates a component of the map with styling and optional color for the map
-   *
-   * @param style style - the {@link MapNameStyle} to style name with
-   * @param mapColor - Color to format map with
-   * @return A new component of the Map name
-   */
-  Component getStyledMapName(MapNameStyle style, ChatColor mapColor);
 
   @Override
   default int compareTo(MapInfo o) {

@@ -127,8 +127,7 @@ public class MapPoll {
         new PersonalizedText("" + countVotes(votes.get(map)), ChatColor.YELLOW),
         new PersonalizedText("] "),
         map.getStyledMapName(
-            winner ? MapNameStyle.HIGHLIGHT_WITH_AUTHORS : MapNameStyle.COLOR_WITH_AUTHORS,
-            winner ? ChatColor.GREEN : ChatColor.GOLD));
+            winner ? MapNameStyle.HIGHLIGHT_WITH_AUTHORS : MapNameStyle.COLOR_WITH_AUTHORS));
   }
 
   public void sendBook(MatchPlayer viewer) {

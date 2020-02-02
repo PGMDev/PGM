@@ -191,7 +191,7 @@ public class MapInfoImpl implements MapInfo {
   }
 
   @Override
-  public Component getStyledMapName(MapNameStyle style, ChatColor mapColor) {
+  public Component getStyledMapName(MapNameStyle style) {
     Component styledName = null;
     Component mapName = new PersonalizedText(getName());
     Component authors =
@@ -203,11 +203,11 @@ public class MapInfoImpl implements MapInfo {
                 getAuthors().stream().map(Contributor::getName).collect(Collectors.toList())));
 
     if (style.isColor) {
-      mapName = mapName.color(mapColor);
+      mapName = mapName.color(ChatColor.GOLD);
     }
 
     if (style.isHighlight) {
-      mapName = mapName.bold(true);
+      mapName = mapName.underlined(true);
     }
 
     if (style.showAuthors) {
@@ -221,11 +221,6 @@ public class MapInfoImpl implements MapInfo {
     }
 
     return styledName;
-  }
-
-  @Override
-  public Component getStyledMapName(MapNameStyle style) {
-    return getStyledMapName(style, ChatColor.GOLD);
   }
 
   private static List<String> parseRules(Element root) {
