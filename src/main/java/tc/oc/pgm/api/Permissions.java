@@ -31,7 +31,6 @@ public interface Permissions {
   String STAFF = ROOT + ".staff"; // Considered apart of the staff team
   String RELOAD = ROOT + ".reload"; // Reload the PGM configuration
   String FREEZE = ROOT + ".freeze"; // Can freeze players
-  String FREEZE_EXEMPT = ROOT + ".freeze.exempt"; // Cannot be frozen
 
   // Role-specific permission nodes
   Permission DEFAULT =
@@ -64,7 +63,6 @@ public interface Permissions {
               .put(JOIN_FORCE, true)
               .put(DEFUSE, true)
               .put(FREEZE, true)
-              .put(FREEZE_EXEMPT, true)
               .put(STAFF, true)
               .build());
 

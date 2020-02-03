@@ -9,13 +9,13 @@ import org.bukkit.permissions.Permissible;
 import tc.oc.item.ItemBuilder;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.Permissions;
 import tc.oc.util.ClassLogger;
 
 /** Creates some of the items for the observer hotbar */
 public class ObserverToolFactory {
 
   public static final String EDIT_WAND_PERMISSION = "worldedit.wand";
-  public static final String PLAYER_FREEZER_PERMISSION = "pgm.freeze";
 
   private final Logger logger;
   private final PGM plugin;
@@ -61,6 +61,6 @@ public class ObserverToolFactory {
   }
 
   public boolean canUsePlayerFreezer(Permissible permissible) {
-    return permissible.hasPermission(PLAYER_FREEZER_PERMISSION);
+    return permissible.hasPermission(Permissions.FREEZE);
   }
 }

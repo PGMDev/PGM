@@ -36,11 +36,11 @@ public class FreezeManager {
   }
 
   public void freezePlayer(Player freezer, Player freezee) {
-    if (freezee.hasPermission(Permissions.FREEZE_EXEMPT)) {
+    if (freezee.hasPermission(Permissions.FREEZE)) {
       freezer.sendMessage(
           ChatColor.RED
               + AllTranslations.get()
-                  .translate("freezer.targetIsExempt", freezer, freezee.getName()));
+                  .translate("command.freeze.exempt", freezer, freezee.getName()));
       return;
     }
     frozenPlayers.add(freezee);
