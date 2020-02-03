@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -17,11 +18,14 @@ import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.named.NameStyle;
+import tc.oc.pgm.AllTranslations;
+import tc.oc.pgm.Config;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerReportEvent;
+import tc.oc.pgm.freeze.FreezeManager;
 
 public class ModerationCommands {
 
@@ -107,5 +111,31 @@ public class ModerationCommands {
         .filter(viewer -> viewer.getBukkit().hasPermission(Permissions.ADMINCHAT))
         .forEach(viewer -> viewer.sendMessage(prefixedComponent));
     Audience.get(Bukkit.getConsoleSender()).sendMessage(component);
+  }
+
+  @Command(
+      aliases = {"freeze", "f"},
+      desc = "Freeze a player",
+      usage = "[player]",
+      perms = Permissions.FREEZE)
+  public static void freeze(CommandSender sender, @Nullable Player target) {
+    if (!Config.Moderation.freezingEnabled()) {
+      sender.sendMessage(
+          org.bukkit.ChatColor.RED + AllTranslations.get().translate("freeze.disabled", sender));
+      return;
+    }
+    FreezeManager freezeManager = FreezeManager.get();
+    Player playerSender = (sender instanceof Player) ? (Player) sender : null;
+    if (target == null) {
+      if (playerSender == null) {
+        sender.sendMessage(
+            org.bukkit.ChatColor.RED
+                + AllTranslations.get().translate("command.freeze.mustBePlayer", sender));
+        return;
+      }
+      freezeManager.setFreezeMode(playerSender, !freezeManager.getFreezeMode(playerSender));
+    } else {
+      freezeManager.toggleFreeze(playerSender, target);
+    }
   }
 }

@@ -11,17 +11,14 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.joda.time.Duration;
 import tc.oc.pgm.AllTranslations;
-import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.party.Competitor;
-import tc.oc.pgm.freeze.FreezeManager;
 import tc.oc.pgm.restart.CancelRestartEvent;
 import tc.oc.pgm.restart.RequestRestartEvent;
 import tc.oc.pgm.restart.RestartManager;
@@ -149,31 +146,6 @@ public class AdminCommands {
     PGM.get().reloadConfig();
     sender.sendMessage(
         ChatColor.GREEN + AllTranslations.get().translate("command.admin.pgm", sender));
-  }
-
-  @Command(
-      aliases = {"freeze", "f"},
-      desc = "Freeze a player",
-      usage = "[player]",
-      perms = Permissions.FREEZE)
-  public static void freeze(CommandSender sender, @Nullable Player target) {
-    if (!Config.Moderation.freezingEnabled()) {
-      sender.sendMessage(
-          ChatColor.RED + AllTranslations.get().translate("freeze.disabled", sender));
-      return;
-    }
-    FreezeManager freezeManager = FreezeManager.get();
-    Player playerSender = (sender instanceof Player) ? (Player) sender : null;
-    if (target == null) {
-      if (playerSender == null) {
-        sender.sendMessage(
-            ChatColor.RED + AllTranslations.get().translate("command.freeze.mustBePlayer", sender));
-        return;
-      }
-      freezeManager.setFreezeMode(playerSender, !freezeManager.getFreezeMode(playerSender));
-    } else {
-      freezeManager.toggleFreeze(playerSender, target);
-    }
   }
 
   private static Map<String, Competitor> getCompetitorMap(CommandSender sender, Match match) {
