@@ -1,8 +1,15 @@
-package tc.oc.pgm.db;
+package tc.oc.pgm.datastore;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -10,13 +17,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.datastore.Datastore;
+import tc.oc.pgm.api.datastore.OneTimePin;
+import tc.oc.pgm.api.discord.DiscordId;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
@@ -27,10 +40,20 @@ import tc.oc.util.ClassLogger;
 public class DatastoreImpl implements Datastore {
 
   private final Logger logger;
+  private final Signature signature;
   private final Connection connection;
 
-  public DatastoreImpl(File file) throws SQLException {
+  public DatastoreImpl(File file)
+      throws SQLException, NoSuchAlgorithmException, InvalidKeyException {
     this.logger = ClassLogger.get(PGM.get().getLogger(), DatastoreImpl.class);
+
+    final KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
+    keyPairGen.initialize(1024);
+
+    final KeyPair keyPair = keyPairGen.generateKeyPair();
+    signature = Signature.getInstance("SHA1WithRSA");
+    signature.initSign(keyPair.getPrivate());
+    signature.initVerify(keyPair.getPublic());
 
     try {
       Class.forName("org.sqlite.JDBC"); // Hint maven to shade this class
@@ -46,6 +69,7 @@ public class DatastoreImpl implements Datastore {
 
     initUsername();
     initSettings();
+    initDiscordUser();
   }
 
   @Override
@@ -252,6 +276,158 @@ public class DatastoreImpl implements Datastore {
       }
 
       statement.executeBatch();
+    }
+  }
+
+  @Override
+  public DiscordId getDiscordId(UUID id) {
+    DiscordId user = null;
+    try {
+      user = selectDiscordUser(id);
+    } catch (SQLException e) {
+      logger.log(Level.WARNING, "Could not get discord user for " + id);
+    }
+    return user == null ? new DiscordUserImpl(id, null) : user;
+  }
+
+  private class DiscordUserImpl implements DiscordId {
+    private final UUID id;
+    private Long snowflake;
+
+    private DiscordUserImpl(UUID id, @Nullable Long snowflake) {
+      this.id = checkNotNull(id);
+      this.snowflake = snowflake;
+    }
+
+    @Override
+    public UUID getId() {
+      return id;
+    }
+
+    @Override
+    public Long getSnowflake() {
+      return snowflake;
+    }
+
+    @Override
+    public void setSnowflake(@Nullable Long snowflake) {
+      if (snowflake == null) this.snowflake = null;
+      try {
+        updateDiscordUser(id, snowflake);
+        this.snowflake = snowflake;
+      } catch (SQLException e) {
+        logger.log(
+            Level.WARNING, "Could not update discord snowflake for " + id + ": " + snowflake);
+      }
+    }
+  }
+
+  private void initDiscordUser() throws SQLException {
+    try (final Statement statement = getConnection().createStatement()) {
+
+      statement.addBatch(
+          "CREATE TABLE IF NOT EXISTS discords (id VARCHAR(36) PRIMARY KEY, snowflake INTEGER)");
+      statement.addBatch("DELETE FROM discords WHERE snowflake = 0");
+
+      statement.executeBatch();
+    }
+  }
+
+  private DiscordId selectDiscordUser(UUID id) throws SQLException {
+    try (final PreparedStatement statement =
+        getConnection().prepareStatement("SELECT snowflake FROM discords WHERE id = ? LIMIT 1")) {
+      statement.setString(1, checkNotNull(id).toString());
+
+      try (final ResultSet result = statement.executeQuery()) {
+        if (result.next()) {
+          final long snowflake = result.getLong(1);
+
+          return new DiscordUserImpl(id, snowflake == 0 ? null : snowflake);
+        }
+      }
+    }
+
+    return null;
+  }
+
+  private void updateDiscordUser(UUID id, @Nullable Long snowflake) throws SQLException {
+    try (final PreparedStatement statement =
+        getConnection().prepareStatement("UPDATE discords SET snowflake = ? WHERE id = ?")) {
+
+      statement.setLong(1, snowflake == null ? 0 : snowflake);
+      statement.setString(2, checkNotNull(id).toString());
+
+      statement.executeUpdate();
+    }
+  }
+
+  // Unlike the other Datastore objects, the default implementation of pins
+  // is held in-memory. When PGM supports a distributed Datastore (eg. MySQL),
+  // we may have to revisit this design choice and store the pins in a database.
+  private final List<OneTimePin> pins = new LinkedList<>();
+
+  @Override
+  public OneTimePin getOneTimePin(@Nullable UUID id, @Nullable String pass) {
+    final Iterator<OneTimePin> iterator = pins.iterator();
+    while (iterator.hasNext()) {
+      final OneTimePin pin = iterator.next();
+      if (!pin.isValid()) {
+        iterator.remove();
+      } else if (id == null && Objects.equals(pin.getPin(), pass)) {
+        return pin; // Search by pin
+      } else if (pass == null && Objects.equals(pin.getId(), id)) {
+        return pin; // Search by id
+      }
+    }
+    if (id == null) return null; // No pins found
+    final OneTimePin pin = new OneTimePasswordImpl(id, null);
+    pins.add(pin);
+    return pin;
+  }
+
+  private class OneTimePasswordImpl implements OneTimePin {
+    private final UUID id;
+    private String pin;
+    private boolean valid;
+
+    private OneTimePasswordImpl(UUID id, @Nullable String code) {
+      this.id = checkNotNull(id);
+      if (code != null) {
+        pin = code;
+        return;
+      }
+      final byte[] data = id.toString().getBytes(StandardCharsets.US_ASCII);
+      synchronized (signature) {
+        try {
+          signature.update(data);
+          pin = new String(signature.sign(), StandardCharsets.US_ASCII);
+          valid = true;
+        } catch (SignatureException e) {
+          logger.log(Level.WARNING, "Unable to create one-time-pin", e);
+          pin = Double.toString(new Random().nextGaussian());
+          valid = false;
+        }
+      }
+    }
+
+    @Override
+    public UUID getId() {
+      return id;
+    }
+
+    @Override
+    public String getPin() {
+      return pin;
+    }
+
+    @Override
+    public boolean isValid() {
+      return valid;
+    }
+
+    @Override
+    public void markAsUsed() {
+      valid = false;
     }
   }
 

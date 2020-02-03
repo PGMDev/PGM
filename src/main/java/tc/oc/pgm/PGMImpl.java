@@ -6,6 +6,8 @@ import app.ashcon.intake.fluent.DispatcherNode;
 import app.ashcon.intake.parametric.AbstractModule;
 import app.ashcon.intake.parametric.provider.EnumProvider;
 import java.io.File;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Objects;
@@ -19,13 +21,14 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
+import javax.security.auth.login.LoginException;
 import net.kencochrane.raven.event.EventBuilder;
 import net.kencochrane.raven.event.interfaces.ExceptionInterface;
 import net.kencochrane.raven.event.interfaces.StackTraceInterface;
-import net.md_5.bungee.api.ChatColor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Physical;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
@@ -46,11 +49,11 @@ import tc.oc.identity.IdentityProvider;
 import tc.oc.identity.RealIdentity;
 import tc.oc.named.CachingNameRenderer;
 import tc.oc.named.NameRenderer;
-import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
+import tc.oc.pgm.api.datastore.Datastore;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.exception.MapException;
@@ -90,8 +93,9 @@ import tc.oc.pgm.commands.provider.MatchProvider;
 import tc.oc.pgm.commands.provider.SettingKeyProvider;
 import tc.oc.pgm.commands.provider.TeamMatchModuleProvider;
 import tc.oc.pgm.commands.provider.VectorProvider;
-import tc.oc.pgm.db.DatastoreCacheImpl;
-import tc.oc.pgm.db.DatastoreImpl;
+import tc.oc.pgm.datastore.DatastoreCacheImpl;
+import tc.oc.pgm.datastore.DatastoreImpl;
+import tc.oc.pgm.discord.DiscordManager;
 import tc.oc.pgm.events.ConfigLoadEvent;
 import tc.oc.pgm.listeners.AntiGriefListener;
 import tc.oc.pgm.listeners.BlockTransformListener;
@@ -119,7 +123,7 @@ import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.util.FileUtils;
 import tc.oc.xml.InvalidXMLException;
 
-public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, Listener {
+public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider {
 
   private Logger gameLogger;
   private Datastore datastore;
@@ -181,8 +185,8 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
     try {
       datastore = new DatastoreImpl(new File(getDataFolder(), "pgm.db"));
       datastore = new DatastoreCacheImpl(datastore);
-    } catch (SQLException e) {
-      shutdown("Failed to initialize SQL database", e);
+    } catch (SQLException | InvalidKeyException | NoSuchAlgorithmException e) {
+      shutdown("Failed to initialize SQL datastore", e);
       return;
     }
 
@@ -232,6 +236,15 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
 
     registerListeners();
     registerCommands();
+
+    final String discordToken = Config.Discord.token();
+    if (discordToken != null) {
+      try {
+        registerEvents(new DiscordManager(discordToken));
+      } catch (LoginException e) {
+        e.printStackTrace();
+      }
+    }
   }
 
   @Override
@@ -531,8 +544,8 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, 
 
       builder.addTag("os", System.getProperty("os.name"));
       builder.addTag("java", System.getProperty("java.version"));
-      builder.addTag("pgm", PGM.get().getDescription().getVersion());
-      builder.addTag("bukkit", PGM.get().getServer().getVersion());
+      builder.addTag("pgm", getDescription().getVersion());
+      builder.addTag("bukkit", getServer().getVersion());
 
       if (err != null) {
         builder.addSentryInterface(new ExceptionInterface(err));

@@ -488,4 +488,14 @@ public class Config {
       return getConfiguration().getBoolean("sidebar.overwrite", false);
     }
   }
+
+  public static class Discord {
+    public static String token() {
+      return getConfiguration().getString("discord.token", null);
+    }
+
+    public static String guildId() {
+      return getConfiguration().getString("discord.guild", null);
+    }
+  }
 }
