@@ -27,7 +27,6 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.player.event.ObserverInteractEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.match.ObservingParty;
-import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 
 public class FreezeListener implements Listener {
   private FreezeManager freezeManager;
@@ -76,13 +75,6 @@ public class FreezeListener implements Listener {
         freezeManager.toggleFreeze(
             event.getPlayer().getBukkit(), event.getClickedPlayer().getBukkit());
       }
-    }
-  }
-
-  @EventHandler
-  public void giveKit(final ObserverKitApplyEvent event) {
-    if (event.getPlayer().getBukkit().hasPermission(Permissions.FREEZE)) {
-      freezeManager.assignFreezeItem(event.getPlayer().getBukkit());
     }
   }
 

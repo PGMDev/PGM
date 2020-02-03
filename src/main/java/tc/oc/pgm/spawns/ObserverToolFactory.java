@@ -15,6 +15,7 @@ import tc.oc.util.ClassLogger;
 public class ObserverToolFactory {
 
   public static final String EDIT_WAND_PERMISSION = "worldedit.wand";
+  public static final String PLAYER_FREEZER_PERMISSION = "pgm.freeze";
 
   private final Logger logger;
   private final PGM plugin;
@@ -46,5 +47,20 @@ public class ObserverToolFactory {
 
   public boolean canUseEditWand(Permissible permissible) {
     return permissible.hasPermission(EDIT_WAND_PERMISSION);
+  }
+
+  public ItemStack getPlayerFreezer(Player player) {
+    return new ItemBuilder()
+        .material(Material.ICE)
+        .name(
+            ChatColor.AQUA.toString()
+                + ChatColor.BOLD
+                + AllTranslations.get().translate("freeze.itemName", player))
+        .lore(AllTranslations.get().translate("freeze.itemDescription", player))
+        .get();
+  }
+
+  public boolean canUsePlayerFreezer(Permissible permissible) {
+    return permissible.hasPermission(PLAYER_FREEZER_PERMISSION);
   }
 }

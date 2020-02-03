@@ -1,6 +1,5 @@
 package tc.oc.pgm.freeze;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -8,9 +7,6 @@ import java.util.Set;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
@@ -32,20 +28,6 @@ public class FreezeManager {
 
   private Map<Player, Boolean> freezeModeMap = new HashMap<>();
   private Set<Player> frozenPlayers = new HashSet<>();
-
-  public void assignFreezeItem(Player freezer) {
-    ItemStack item = new ItemStack(Material.ICE);
-    ItemMeta meta = item.getItemMeta();
-    meta.addItemFlags(ItemFlag.values());
-    meta.setDisplayName(
-        ChatColor.AQUA + AllTranslations.get().translate("freeze.itemName", freezer));
-    meta.setLore(
-        Collections.singletonList(
-            AllTranslations.get().translate("freeze.itemDescription", freezer)));
-    item.setItemMeta(meta);
-
-    freezer.getInventory().setItem(6, item);
-  }
 
   public void toggleFreeze(Player freezer, Player freezee) {
     boolean isFrozen = isFrozen(freezee);
@@ -109,7 +91,6 @@ public class FreezeManager {
     MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(player);
     if (matchPlayer == null) return;
     if (matchPlayer.getParty() instanceof ObservingParty) {
-      assignFreezeItem(player);
       player.sendMessage(
           ChatColor.AQUA + AllTranslations.get().translate("freeze.freezeMode", player));
     } else {

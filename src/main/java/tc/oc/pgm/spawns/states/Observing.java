@@ -63,6 +63,10 @@ public class Observing extends State {
         player.getInventory().setItem(1, toolFactory.getEditWand(bukkit));
       }
 
+      if (toolFactory.canUsePlayerFreezer(bukkit)) {
+        player.getInventory().setItem(6, toolFactory.getPlayerFreezer(bukkit));
+      }
+
       // Let other modules give observer items
       player.getMatch().callEvent(new ObserverKitApplyEvent(player));
 
