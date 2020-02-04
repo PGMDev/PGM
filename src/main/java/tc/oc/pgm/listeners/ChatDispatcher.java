@@ -148,7 +148,7 @@ public class ChatDispatcher implements Listener {
   }
 
   @Command(
-      aliases = {"r"},
+      aliases = {"reply", "r"},
       desc = "Reply to a direct message",
       usage = "[message]")
   public void sendReply(Match match, Audience audience, MatchPlayer sender, @Text String message) {
