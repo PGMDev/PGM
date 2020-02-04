@@ -60,5 +60,6 @@ public class VisibilityTool implements InventoryMenuItem {
   public void toggleObserverVisibility(MatchPlayer player) {
     Settings setting = player.getSettings();
     setting.toggleValue(SettingKey.OBSERVERS);
+    SettingKey.OBSERVERS.update(player);
   }
 }
