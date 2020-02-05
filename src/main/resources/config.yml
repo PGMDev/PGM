@@ -110,10 +110,5 @@ sidebar:
   # If the sidebar message should overwrite lines in the sidebar when it is full
   overwrite: false
 
-discord:
-  # Enable Discord Integration
-   enabled: false
-  # Discord Token
-   token: ""
-  # Guild ID of your server
-   guild: ""
+# discord:
+#   token: <insert-token-here>

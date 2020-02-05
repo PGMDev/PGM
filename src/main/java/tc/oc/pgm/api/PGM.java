@@ -8,6 +8,7 @@ import org.bukkit.plugin.Plugin;
 import tc.oc.identity.IdentityProvider;
 import tc.oc.named.NameRenderer;
 import tc.oc.pgm.api.datastore.Datastore;
+import tc.oc.pgm.api.discord.DiscordServer;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.prefix.PrefixRegistry;
@@ -20,6 +21,8 @@ public interface PGM extends Plugin {
   Logger getGameLogger();
 
   Datastore getDatastore();
+
+  DiscordServer getDiscordServer();
 
   MatchManager getMatchManager();
 

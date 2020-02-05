@@ -6,8 +6,6 @@ import app.ashcon.intake.fluent.DispatcherNode;
 import app.ashcon.intake.parametric.AbstractModule;
 import app.ashcon.intake.parametric.provider.EnumProvider;
 import java.io.File;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Objects;
@@ -21,7 +19,6 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import javax.security.auth.login.LoginException;
 import net.kencochrane.raven.event.EventBuilder;
 import net.kencochrane.raven.event.interfaces.ExceptionInterface;
 import net.kencochrane.raven.event.interfaces.StackTraceInterface;
@@ -34,6 +31,7 @@ import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.event.inventory.InventoryEvent;
@@ -54,6 +52,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.datastore.Datastore;
+import tc.oc.pgm.api.discord.DiscordServer;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.exception.MapException;
@@ -71,6 +70,7 @@ import tc.oc.pgm.commands.AdminCommands;
 import tc.oc.pgm.commands.ClassCommands;
 import tc.oc.pgm.commands.CycleCommands;
 import tc.oc.pgm.commands.DestroyableCommands;
+import tc.oc.pgm.commands.DiscordCommands;
 import tc.oc.pgm.commands.FreeForAllCommands;
 import tc.oc.pgm.commands.GoalCommands;
 import tc.oc.pgm.commands.InventoryCommands;
@@ -95,7 +95,7 @@ import tc.oc.pgm.commands.provider.TeamMatchModuleProvider;
 import tc.oc.pgm.commands.provider.VectorProvider;
 import tc.oc.pgm.datastore.DatastoreCacheImpl;
 import tc.oc.pgm.datastore.DatastoreImpl;
-import tc.oc.pgm.discord.DiscordManager;
+import tc.oc.pgm.discord.DiscordServerImpl;
 import tc.oc.pgm.events.ConfigLoadEvent;
 import tc.oc.pgm.listeners.AntiGriefListener;
 import tc.oc.pgm.listeners.BlockTransformListener;
@@ -123,7 +123,7 @@ import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.util.FileUtils;
 import tc.oc.xml.InvalidXMLException;
 
-public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider {
+public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, Listener {
 
   private Logger gameLogger;
   private Datastore datastore;
@@ -134,6 +134,7 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider {
   private MatchNameRenderer matchNameRenderer;
   private NameRenderer nameRenderer;
   private PrefixRegistry prefixRegistry;
+  private DiscordServer discordServer;
 
   public PGMImpl() {
     super();
@@ -169,6 +170,7 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider {
           }
         });
 
+    registerEvents(this);
     registerEvents(Config.Maps.get());
     registerEvents(Config.PlayerList.get());
     registerEvents(Config.Prefixes.get());
@@ -185,7 +187,7 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider {
     try {
       datastore = new DatastoreImpl(new File(getDataFolder(), "pgm.db"));
       datastore = new DatastoreCacheImpl(datastore);
-    } catch (SQLException | InvalidKeyException | NoSuchAlgorithmException e) {
+    } catch (SQLException e) {
       shutdown("Failed to initialize SQL datastore", e);
       return;
     }
@@ -234,17 +236,13 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider {
       getServer().getScheduler().runTaskTimer(this, new ShouldRestartTask(this), 0, 20 * 60);
     }
 
+    if (Config.Discord.enabled()) {
+      discordServer = new DiscordServerImpl(gameLogger);
+      discordServer.connect(Config.Discord.token());
+    }
+
     registerListeners();
     registerCommands();
-
-    final String discordToken = Config.Discord.token();
-    if (discordToken != null) {
-      try {
-        registerEvents(new DiscordManager(discordToken));
-      } catch (LoginException e) {
-        e.printStackTrace();
-      }
-    }
   }
 
   @Override
@@ -298,6 +296,11 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider {
   }
 
   @Override
+  public DiscordServer getDiscordServer() {
+    return discordServer;
+  }
+
+  @Override
   public MapLibrary getMapLibrary() {
     return mapLibrary;
   }
@@ -344,6 +347,8 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider {
       bind(MatchManager.class).toInstance(getMatchManager());
       bind(MapLibrary.class).toInstance(getMapLibrary());
       bind(MapOrder.class).toInstance(getMapOrder());
+      bind(Datastore.class).toInstance(getDatastore());
+      bind(DiscordServer.class).toInstance(getDiscordServer());
     }
 
     private void configureProviders() {
@@ -386,6 +391,7 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider {
     node.registerCommands(new ModerationCommands());
     node.registerCommands(new ObserverCommands());
     node.registerCommands(new MapPoolCommands());
+    node.registerCommands(new DiscordCommands());
 
     new BukkitIntake(this, graph).register();
   }
@@ -399,6 +405,7 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider {
     if (matchTabManager != null) registerEvents(matchTabManager);
     registerEvents(prefixRegistry);
     registerEvents(matchNameRenderer);
+    if (discordServer != null) registerEvents((Listener) discordServer);
     registerEvents(new GeneralizingListener(this));
     new BlockTransformListener(this).registerEvents();
     registerEvents(new PGMListener(this, matchManager));
@@ -411,6 +418,11 @@ public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider {
     registerEvents(new MatchAnnouncer());
     registerEvents(new MotdListener());
     registerEvents(new ServerPingDataListener(matchManager, mapOrder, getLogger()));
+  }
+
+  @EventHandler
+  public void onConfigLoad(ConfigLoadEvent event) {
+    if (discordServer != null) discordServer.connect(Config.Discord.token());
   }
 
   private class InGameHandler extends Handler {

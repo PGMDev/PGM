@@ -3,19 +3,15 @@ package tc.oc.pgm.datastore;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.security.Signature;
-import java.security.SignatureException;
+import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.Duration;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -25,6 +21,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.datastore.Datastore;
@@ -40,20 +37,19 @@ import tc.oc.util.ClassLogger;
 public class DatastoreImpl implements Datastore {
 
   private final Logger logger;
-  private final Signature signature;
+  private final Random random;
   private final Connection connection;
 
-  public DatastoreImpl(File file)
-      throws SQLException, NoSuchAlgorithmException, InvalidKeyException {
+  public DatastoreImpl(File file) throws SQLException {
     this.logger = ClassLogger.get(PGM.get().getLogger(), DatastoreImpl.class);
 
-    final KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
-    keyPairGen.initialize(1024);
-
-    final KeyPair keyPair = keyPairGen.generateKeyPair();
-    signature = Signature.getInstance("SHA1WithRSA");
-    signature.initSign(keyPair.getPrivate());
-    signature.initVerify(keyPair.getPublic());
+    Random random;
+    try {
+      random = SecureRandom.getInstanceStrong();
+    } catch (NoSuchAlgorithmException e) {
+      random = new Random(); // Less secure, but still works
+    }
+    this.random = random;
 
     try {
       Class.forName("org.sqlite.JDBC"); // Hint maven to shade this class
@@ -313,7 +309,7 @@ public class DatastoreImpl implements Datastore {
     public void setSnowflake(@Nullable Long snowflake) {
       if (snowflake == null) this.snowflake = null;
       try {
-        updateDiscordUser(id, snowflake);
+        insertDiscordUser(id, snowflake);
         this.snowflake = snowflake;
       } catch (SQLException e) {
         logger.log(
@@ -350,12 +346,12 @@ public class DatastoreImpl implements Datastore {
     return null;
   }
 
-  private void updateDiscordUser(UUID id, @Nullable Long snowflake) throws SQLException {
+  private void insertDiscordUser(UUID id, @Nullable Long snowflake) throws SQLException {
     try (final PreparedStatement statement =
-        getConnection().prepareStatement("UPDATE discords SET snowflake = ? WHERE id = ?")) {
+        getConnection().prepareStatement("INSERT OR REPLACE INTO discords VALUES (?, ?)")) {
 
-      statement.setLong(1, snowflake == null ? 0 : snowflake);
-      statement.setString(2, checkNotNull(id).toString());
+      statement.setString(1, checkNotNull(id).toString());
+      statement.setLong(2, snowflake == null ? 0 : snowflake);
 
       statement.executeUpdate();
     }
@@ -367,47 +363,34 @@ public class DatastoreImpl implements Datastore {
   private final List<OneTimePin> pins = new LinkedList<>();
 
   @Override
-  public OneTimePin getOneTimePin(@Nullable UUID id, @Nullable String pass) {
+  public OneTimePin getOneTimePin(@Nullable UUID id, @Nullable String code) {
     final Iterator<OneTimePin> iterator = pins.iterator();
     while (iterator.hasNext()) {
       final OneTimePin pin = iterator.next();
       if (!pin.isValid()) {
         iterator.remove();
-      } else if (id == null && Objects.equals(pin.getPin(), pass)) {
+      } else if (id == null && Objects.equals(pin.getPin(), code)) {
         return pin; // Search by pin
-      } else if (pass == null && Objects.equals(pin.getId(), id)) {
+      } else if (code == null && Objects.equals(pin.getId(), id)) {
         return pin; // Search by id
       }
     }
     if (id == null) return null; // No pins found
-    final OneTimePin pin = new OneTimePasswordImpl(id, null);
+    final OneTimePin pin = new OneTimePinImpl(id);
     pins.add(pin);
     return pin;
   }
 
-  private class OneTimePasswordImpl implements OneTimePin {
+  private class OneTimePinImpl implements OneTimePin {
     private final UUID id;
     private String pin;
-    private boolean valid;
+    private long expires;
 
-    private OneTimePasswordImpl(UUID id, @Nullable String code) {
+    private OneTimePinImpl(UUID id) {
       this.id = checkNotNull(id);
-      if (code != null) {
-        pin = code;
-        return;
-      }
-      final byte[] data = id.toString().getBytes(StandardCharsets.US_ASCII);
-      synchronized (signature) {
-        try {
-          signature.update(data);
-          pin = new String(signature.sign(), StandardCharsets.US_ASCII);
-          valid = true;
-        } catch (SignatureException e) {
-          logger.log(Level.WARNING, "Unable to create one-time-pin", e);
-          pin = Double.toString(new Random().nextGaussian());
-          valid = false;
-        }
-      }
+      this.pin =
+          random.ints(2, 100, 1000).mapToObj(Integer::toString).collect(Collectors.joining("-"));
+      this.expires = System.currentTimeMillis() + Duration.ofMinutes(5).toMillis();
     }
 
     @Override
@@ -422,12 +405,12 @@ public class DatastoreImpl implements Datastore {
 
     @Override
     public boolean isValid() {
-      return valid;
+      return System.currentTimeMillis() < expires;
     }
 
     @Override
     public void markAsUsed() {
-      valid = false;
+      expires = System.currentTimeMillis();
     }
   }
 

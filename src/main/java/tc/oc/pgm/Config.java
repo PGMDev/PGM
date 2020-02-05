@@ -490,6 +490,10 @@ public class Config {
   }
 
   public static class Discord {
+    public static boolean enabled() {
+      return token() != null;
+    }
+
     public static String token() {
       return getConfiguration().getString("discord.token", null);
     }
