@@ -38,7 +38,6 @@ import tc.oc.pgm.goals.Contribution;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.teams.Team;
-import tc.oc.server.BukkitUtils;
 
 @ListenerScope(MatchScope.RUNNING)
 public class WoolMatchModule implements MatchModule, Listener {
@@ -182,7 +181,7 @@ public class WoolMatchModule implements MatchModule, Listener {
 
     ParticipantState player = ParticipantBlockTransformEvent.getPlayerState(event);
     if (player != null) { // wool can only be placed by a player
-      Component woolName = BukkitUtils.woolName(wool.getDyeColor());
+      Component woolName = wool.getComponentName();
       if (!isValidWool(wool.getDyeColor(), event.getNewState())) {
         player.sendWarning(new PersonalizedTranslatable("match.wool.placeWrong", woolName), true);
       } else if (wool.getOwner() != player.getParty()) {
@@ -224,7 +223,7 @@ public class WoolMatchModule implements MatchModule, Listener {
                           .translate(
                               "match.wool.craftDisabled",
                               playerHolder.getBukkit(),
-                              BukkitUtils.woolMessage(wool.getDyeColor())));
+                              wool.getComponentName()));
               event.getInventory().setResult(null);
             }
           }
