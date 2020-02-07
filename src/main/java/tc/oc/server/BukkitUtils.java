@@ -12,9 +12,6 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedText;
-import tc.oc.util.components.ComponentUtils;
 
 public interface BukkitUtils {
 
@@ -34,16 +31,6 @@ public interface BukkitUtils {
     }
 
     return result;
-  }
-
-  static String woolMessage(DyeColor color) {
-    return dyeColorToChatColor(color) + color.toString().replace("_", " ") + " WOOL";
-  }
-
-  static Component woolName(DyeColor color) {
-    return new PersonalizedText(
-        color.toString().replace("_", " ") + " WOOL",
-        ComponentUtils.convert(dyeColorToChatColor(color)));
   }
 
   static ItemStack generateBook(String title, String author, List<String> pages) {
