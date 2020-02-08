@@ -87,7 +87,7 @@ public class PickerMatchModule implements MatchModule, Listener {
   private static final int LORE_WIDTH_PIXELS = 120;
   private static final int WIDTH = 9; // Inventory width in slots (for readability)
 
-  enum Button {
+  public enum Button {
     AUTO_JOIN(Material.CHAINMAIL_HELMET),
     TEAM_JOIN(Material.LEATHER_HELMET),
     JOIN(Material.LEATHER_HELMET),
@@ -102,6 +102,13 @@ public class PickerMatchModule implements MatchModule, Listener {
 
     public boolean matches(MaterialData material) {
       return this.material.equals(material.getItemType());
+    }
+
+    public static boolean isButtonMaterial(Material material) {
+      for (Button button : values()) {
+        if (button.material == material) return true;
+      }
+      return false;
     }
   }
 
@@ -346,10 +353,7 @@ public class PickerMatchModule implements MatchModule, Listener {
     if (!canUse(player)) return;
 
     ItemStack hand = event.getPlayer().getItemInHand();
-    if (Items.isNothing(hand)) return;
-
-    String displayName = hand.getItemMeta().getDisplayName();
-    if (displayName == null) return;
+    if (!validatePickerItem(hand)) return;
 
     boolean handled = false;
     final JoinMatchModule jmm = match.needModule(JoinMatchModule.class);
@@ -375,6 +379,14 @@ public class PickerMatchModule implements MatchModule, Listener {
       // update to resync them.
       event.getPlayer().updateInventory();
     }
+  }
+
+  public static boolean validatePickerItem(ItemStack hand) {
+    if (Items.isNothing(hand)) return false;
+
+    if (hand.getItemMeta().getDisplayName() == null) return false;
+
+    return Button.isButtonMaterial(hand.getType());
   }
 
   @EventHandler

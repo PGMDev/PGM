@@ -2,7 +2,6 @@ package tc.oc.pgm.spawns.states;
 
 import java.util.List;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -16,6 +15,7 @@ import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinPartyEvent;
+import tc.oc.pgm.picker.PickerMatchModule;
 import tc.oc.pgm.spawns.ObserverToolFactory;
 import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
@@ -115,7 +115,7 @@ public class Observing extends State {
   @Override
   public void onEvent(PlayerInteractEvent event) {
     super.onEvent(event);
-    if (event.getItem().getType() == Material.LEATHER_HELMET) {
+    if (PickerMatchModule.validatePickerItem(event.getPlayer().getItemInHand())) {
       event.setCancelled(true);
       event.getPlayer().updateInventory();
     }
