@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.event.inventory.ClickType;
 import tc.oc.component.Component;
 import tc.oc.component.render.ComponentRenderers;
 import tc.oc.component.types.PersonalizedTranslatable;
@@ -41,14 +42,14 @@ public class FlySpeedTool implements InventoryMenuItem {
   }
 
   @Override
-  public void onInventoryClick(InventoryMenu menu, MatchPlayer player) {
-    incrementSpeed(player);
-    menu.refreshWindow(player);
-  }
-
-  private void incrementSpeed(MatchPlayer player) {
+  public void onInventoryClick(InventoryMenu menu, MatchPlayer player, ClickType clickType) {
     FlySpeed speed = FlySpeed.of(player.getBukkit().getFlySpeed());
-    player.getBukkit().setFlySpeed(speed.getNext().getValue());
+    if (clickType.isRightClick()) {
+      player.getBukkit().setFlySpeed(speed.getPrev().getValue());
+    } else {
+      player.getBukkit().setFlySpeed(speed.getNext().getValue());
+    }
+    menu.refreshWindow(player);
   }
 
   public static enum FlySpeed {
@@ -79,6 +80,10 @@ public class FlySpeedTool implements InventoryMenuItem {
 
     public FlySpeed getNext() {
       return speeds[(ordinal() + 1) % speeds.length];
+    }
+
+    public FlySpeed getPrev() {
+      return speeds[(ordinal() - 1) % speeds.length];
     }
 
     public static FlySpeed of(float value) {

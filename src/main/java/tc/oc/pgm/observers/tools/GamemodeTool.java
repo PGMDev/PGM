@@ -8,6 +8,7 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.event.inventory.ClickType;
 import tc.oc.component.Component;
 import tc.oc.component.render.ComponentRenderers;
 import tc.oc.component.types.PersonalizedText;
@@ -46,7 +47,7 @@ public class GamemodeTool implements InventoryMenuItem {
   }
 
   @Override
-  public void onInventoryClick(InventoryMenu menu, MatchPlayer player) {
+  public void onInventoryClick(InventoryMenu menu, MatchPlayer player, ClickType clickType) {
     toggleObserverGameMode(player);
     menu.refreshWindow(player);
   }

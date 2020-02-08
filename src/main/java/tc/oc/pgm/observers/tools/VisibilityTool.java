@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.event.inventory.ClickType;
 import tc.oc.component.Component;
 import tc.oc.component.render.ComponentRenderers;
 import tc.oc.component.types.PersonalizedTranslatable;
@@ -48,7 +49,7 @@ public class VisibilityTool implements InventoryMenuItem {
   }
 
   @Override
-  public void onInventoryClick(InventoryMenu menu, MatchPlayer player) {
+  public void onInventoryClick(InventoryMenu menu, MatchPlayer player, ClickType clickType) {
     toggleObserverVisibility(player);
     menu.refreshWindow(player);
   }

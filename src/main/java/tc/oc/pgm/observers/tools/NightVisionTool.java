@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import tc.oc.component.Component;
@@ -44,7 +45,7 @@ public class NightVisionTool implements InventoryMenuItem {
   }
 
   @Override
-  public void onInventoryClick(InventoryMenu menu, MatchPlayer player) {
+  public void onInventoryClick(InventoryMenu menu, MatchPlayer player, ClickType clickType) {
     toggleNightVision(player);
     menu.refreshWindow(player);
   }

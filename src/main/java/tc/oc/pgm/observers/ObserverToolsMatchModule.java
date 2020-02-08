@@ -88,7 +88,7 @@ public class ObserverToolsMatchModule implements MatchModule, Listener {
             .forEach(
                 tool -> {
                   if (clicked.getType().equals(tool.getMaterial(player))) {
-                    tool.onInventoryClick(menu, player);
+                    tool.onInventoryClick(menu, player, event.getClick());
                   }
                 });
       }
