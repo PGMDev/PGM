@@ -488,4 +488,25 @@ public class Config {
       return getConfiguration().getBoolean("sidebar.overwrite", false);
     }
   }
+
+  public static class Moderation {
+
+    // TODO: Decide whether to bundle all together or add option to each command to enable/disable
+    public static boolean enabled() {
+      return getConfiguration().getBoolean("moderation.enabled", false);
+    }
+
+    public static boolean isRuleLinkVisible() {
+      return getConfiguration().getBoolean("moderation.rules-link-visible", false);
+    }
+
+    public static String getRulesLink() {
+      return getConfiguration().getString("moderation.rules-link", "");
+    }
+
+    public static String getServerName() {
+      return ChatColor.translateAlternateColorCodes(
+          '&', getConfiguration().getString("moderation.server-name", ""));
+    }
+  }
 }

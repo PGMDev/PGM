@@ -30,6 +30,10 @@ public interface Permissions {
   String DEBUG = ROOT + ".debug"; // Errors from map loading and debug commands
   String STAFF = ROOT + ".staff"; // Considered apart of the staff team
   String RELOAD = ROOT + ".reload"; // Reload the PGM configuration
+  String KICK = ROOT + ".kick";
+  String WARN = ROOT + ".warn";
+  String MUTE = ROOT + ".mute";
+  String BAN = ROOT + ".ban";
 
   // Role-specific permission nodes
   Permission DEFAULT =

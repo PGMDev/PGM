@@ -111,6 +111,8 @@ public class ChatDispatcher implements Listener {
       desc = "Send a direct message to a player",
       usage = "[player] [message]")
   public void sendDirect(Match match, MatchPlayer sender, Player receiver, @Text String message) {
+    if (sender.isMuted()) return; // TODO: Perhaps send some feedback
+
     MatchPlayer matchReceiver = manager.getPlayer(receiver);
     if (matchReceiver != null) {
       SettingValue option = matchReceiver.getSettings().getValue(SettingKey.MESSAGE);
@@ -243,15 +245,24 @@ public class ChatDispatcher implements Listener {
       return;
     }
 
-    final Component component =
-        new PersonalizedText(
-            Components.format(
-                format,
-                sender == null
-                    ? new PersonalizedText("Console", ChatColor.AQUA, ChatColor.ITALIC)
-                    : sender.getStyledName(NameStyle.FANCY),
-                new PersonalizedText(message.trim())));
-    match.getPlayers().stream().filter(filter).forEach(player -> player.sendMessage(component));
-    Audience.get(Bukkit.getConsoleSender()).sendMessage(component);
+    if (!sender.isMuted()) {
+      final Component component =
+          new PersonalizedText(
+              Components.format(
+                  format,
+                  sender == null
+                      ? new PersonalizedText("Console", ChatColor.AQUA, ChatColor.ITALIC)
+                      : sender.getStyledName(NameStyle.FANCY),
+                  new PersonalizedText(message.trim())));
+      match.getPlayers().stream().filter(filter).forEach(player -> player.sendMessage(component));
+      Audience.get(Bukkit.getConsoleSender()).sendMessage(component);
+    } else {
+      // If the sender has been muted, send feedback
+      Component warning =
+          new PersonalizedTranslatable("moderation.mute.message")
+              .getPersonalizedText()
+              .color(ChatColor.RED);
+      sender.sendWarning(warning, true);
+    }
   }
 }
