@@ -47,6 +47,8 @@ import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.StructureGrowEvent;
+import org.bukkit.material.Door;
+import org.bukkit.material.MaterialData;
 import org.bukkit.material.PistonExtensionMaterial;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
@@ -163,9 +165,42 @@ public class BlockTransformListener implements Listener {
     }
   }
 
-  private void callEvent(final BlockTransformEvent event) {
+  private void handleDoor(BlockTransformEvent event, Door door) {
+    BlockFace relative = door.isTopHalf() ? BlockFace.DOWN : BlockFace.UP;
+    BlockState oldState = event.getOldState().getBlock().getRelative(relative).getState();
+    BlockState newState = event.getBlock().getRelative(relative).getState();
+    BlockTransformEvent toCall;
+    if (event instanceof ParticipantBlockTransformEvent) {
+      toCall =
+          new ParticipantBlockTransformEvent(
+              event, oldState, newState, ((ParticipantBlockTransformEvent) event).getPlayerState());
+    } else if (event instanceof PlayerBlockTransformEvent) {
+      toCall =
+          new PlayerBlockTransformEvent(
+              event, oldState, newState, ((PlayerBlockTransformEvent) event).getPlayerState());
+    } else {
+      toCall = new BlockTransformEvent(event, oldState, newState);
+    }
+    callEvent(toCall, true);
+  }
+
+  private void callEvent(final BlockTransformEvent event, boolean checked) {
+    if (!checked) {
+      MaterialData oldData = event.getOldState().getMaterialData();
+      MaterialData newData = event.getNewState().getMaterialData();
+      if (oldData instanceof Door) {
+        handleDoor(event, (Door) oldData);
+      }
+      if (newData instanceof Door) {
+        handleDoor(event, (Door) newData);
+      }
+    }
     logger.fine("Generated event " + event);
     currentEvents.put(event.getCause(), event);
+  }
+
+  private void callEvent(final BlockTransformEvent event) {
+    callEvent(event, false);
   }
 
   private BlockTransformEvent callEvent(
