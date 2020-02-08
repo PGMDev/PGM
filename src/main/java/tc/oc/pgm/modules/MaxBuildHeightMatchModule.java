@@ -23,7 +23,8 @@ public class MaxBuildHeightMatchModule implements MatchModule, Listener {
   @EventHandler(ignoreCancelled = true)
   public void checkBuildHeight(BlockTransformEvent event) {
     if (event.getNewState().getType() != Material.AIR) {
-      if (event.getNewState().getY() >= this.buildHeight) {
+      if (event.getNewState().getY() + getExtraHeight(event.getNewState().getMaterial())
+          >= this.buildHeight) {
         event.setCancelled(
             true,
             new PersonalizedTranslatable(
@@ -31,6 +32,25 @@ public class MaxBuildHeightMatchModule implements MatchModule, Listener {
                 new PersonalizedText(
                     String.valueOf(buildHeight), net.md_5.bungee.api.ChatColor.AQUA)));
       }
+    }
+  }
+
+  private int getExtraHeight(Material material) {
+    switch (material) {
+      case DARK_OAK_DOOR:
+      case ACACIA_DOOR:
+      case BIRCH_DOOR:
+      case IRON_DOOR:
+      case JUNGLE_DOOR:
+      case SPRUCE_DOOR:
+      case WOOD_DOOR:
+      case WOODEN_DOOR:
+      case STANDING_BANNER:
+      case WALL_BANNER:
+      case BANNER:
+        return 1;
+      default:
+        return 0;
     }
   }
 }
