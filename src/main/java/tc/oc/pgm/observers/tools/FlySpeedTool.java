@@ -83,7 +83,7 @@ public class FlySpeedTool implements InventoryMenuItem {
     }
 
     public FlySpeed getPrev() {
-      return speeds[(ordinal() - 1) % speeds.length];
+      return speeds[(Math.max(0, ordinal() - 1)) % speeds.length];
     }
 
     public static FlySpeed of(float value) {
