@@ -36,21 +36,8 @@ public class MaxBuildHeightMatchModule implements MatchModule, Listener {
   }
 
   private int getExtraHeight(Material material) {
-    switch (material) {
-      case DARK_OAK_DOOR:
-      case ACACIA_DOOR:
-      case BIRCH_DOOR:
-      case IRON_DOOR:
-      case JUNGLE_DOOR:
-      case SPRUCE_DOOR:
-      case WOOD_DOOR:
-      case WOODEN_DOOR:
-      case STANDING_BANNER:
-      case WALL_BANNER:
-      case BANNER:
-        return 1;
-      default:
-        return 0;
-    }
+    if (material.name().contains("DOOR") && !material.name().contains("TRAP")) return 1;
+
+    return 0;
   }
 }
