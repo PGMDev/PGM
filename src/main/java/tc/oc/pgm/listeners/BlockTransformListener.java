@@ -46,6 +46,7 @@ import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.material.PistonExtensionMaterial;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
@@ -216,6 +217,14 @@ public class BlockTransformListener implements Listener {
     BlockState newBlock = BlockStates.cloneWithMaterial(block, contents);
 
     this.callEvent(event, block.getState(), newBlock, event.getPlayer());
+  }
+
+  @EventWrapper
+  public void onStructureGrow(final StructureGrowEvent event) {
+    for (BlockState block : event.getBlocks()) {
+      this.callEvent(
+          new BlockTransformEvent(event, block.getLocation().getBlock().getState(), block));
+    }
   }
 
   @EventWrapper
