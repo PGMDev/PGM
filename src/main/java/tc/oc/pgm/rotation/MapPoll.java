@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
@@ -46,6 +47,9 @@ public class MapPoll {
   private final int voteSize;
 
   private final Map<MapInfo, Set<UUID>> votes = new HashMap<>();
+  // Maps populated during finishVote()
+  private final Map<MapInfo, Integer> finalTotals = new HashMap<>();
+  private final List<MapInfo> finalOrder = new ArrayList<>();
 
   MapPoll(Match match, Map<MapInfo, Double> mapScores, int voteSize) {
     this.match = new WeakReference<>(match);
@@ -106,7 +110,7 @@ public class MapPoll {
   }
 
   public void announceWinner(MatchPlayer viewer, MapInfo winner) {
-    for (MapInfo pgmMap : votes.keySet())
+    for (MapInfo pgmMap : finalOrder)
       viewer.sendMessage(getMapChatComponent(viewer, pgmMap, pgmMap.equals(winner)));
 
     // Check if the winning map name's length suitable for the top title, otherwise subtitle
@@ -124,7 +128,7 @@ public class MapPoll {
         new PersonalizedText(
             voted ? SYMBOL_VOTED : SYMBOL_IGNORE, voted ? ChatColor.GREEN : ChatColor.DARK_RED),
         new PersonalizedText(" ").bold(!voted), // Fix 1px symbol diff
-        new PersonalizedText("" + countVotes(votes.get(map)), ChatColor.YELLOW),
+        new PersonalizedText("" + finalTotals.get(map), ChatColor.YELLOW),
         new PersonalizedText("] "),
         map.getStyledMapName(
             winner ? MapNameStyle.HIGHLIGHT_WITH_AUTHORS : MapNameStyle.COLOR_WITH_AUTHORS));
@@ -193,14 +197,6 @@ public class MapPoll {
     return false;
   }
 
-  /** @return The map currently winning the vote, null if no vote is running. */
-  private MapInfo getMostVotedMap() {
-    return votes.entrySet().stream()
-        .max(Comparator.comparingInt(e -> countVotes(e.getValue())))
-        .map(Map.Entry::getKey)
-        .orElse(null);
-  }
-
   /**
    * Count the amount of votes for a set of uuids. Players with the pgm.premium permission get
    * double votes.
@@ -222,7 +218,16 @@ public class MapPoll {
    * @return The picked map to play after the vote
    */
   MapInfo finishVote() {
-    MapInfo picked = getMostVotedMap();
+    // Cache vote totals, so we don't have to count for each compare
+    for (Entry<MapInfo, Set<UUID>> map : votes.entrySet()) {
+      finalTotals.put(map.getKey(), countVotes(map.getValue()));
+    }
+    // Populate final order
+    finalTotals.entrySet().stream()
+        .sorted(Comparator.comparingInt((e) -> ((Entry<MapInfo, Integer>) e).getValue()).reversed())
+        .forEachOrdered(e -> finalOrder.add(e.getKey()));
+
+    MapInfo picked = finalOrder.isEmpty() ? null : finalOrder.get(0);
     Match match = this.match.get();
     if (match != null) {
       match.getPlayers().forEach(player -> announceWinner(player, picked));
