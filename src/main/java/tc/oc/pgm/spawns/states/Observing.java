@@ -2,9 +2,11 @@ package tc.oc.pgm.spawns.states;
 
 import java.util.List;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.permissions.PermissionAttachment;
 import tc.oc.block.BlockVectors;
@@ -108,5 +110,14 @@ public class Observing extends State {
   public void onEvent(EntityDamageEvent event) {
     super.onEvent(event);
     event.setCancelled(true);
+  }
+
+  @Override
+  public void onEvent(PlayerInteractEvent event) {
+    super.onEvent(event);
+    if (event.getItem().getType() == Material.LEATHER_HELMET) {
+      event.setCancelled(true);
+      event.getPlayer().updateInventory();
+    }
   }
 }
