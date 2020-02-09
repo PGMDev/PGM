@@ -117,7 +117,7 @@ public class LongRangeTNTListener implements Listener {
     }
 
     public boolean show(TNT tnt) {
-      ParticipantState owner = Trackers.getOwnerSafely(tnt.entity);
+      ParticipantState owner = Trackers.getOwner(tnt.entity);
       boolean owned = owner != null && owner.getId().equals(this.player.getUniqueId());
       Slot slot = null;
 

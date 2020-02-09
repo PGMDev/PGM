@@ -75,7 +75,7 @@ public class AntiGriefListener implements Listener {
     }
 
     // check owner
-    MatchPlayer owner = this.mm.getPlayer(Trackers.getOwnerSafely(entity));
+    MatchPlayer owner = this.mm.getPlayer(Trackers.getOwner(entity));
     if (owner == null
         || (owner != clicker && owner.getParty() == clicker.getParty())) { // cannot defuse own TNT
       // defuse TNT
@@ -143,7 +143,7 @@ public class AntiGriefListener implements Listener {
       if (origin.distanceSquared(ent.getLocation()) > radiusSq) continue;
 
       if (ent instanceof TNTPrimed) {
-        ParticipantState player = Trackers.getOwnerSafely(ent);
+        ParticipantState player = Trackers.getOwner(ent);
 
         if (player != null) {
           owners.add(player);
