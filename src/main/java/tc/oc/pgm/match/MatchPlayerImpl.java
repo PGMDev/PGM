@@ -65,7 +65,6 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
   private final AtomicBoolean dead;
   private final AtomicBoolean visible;
   private final AtomicInteger protocolVersion;
-  private final AtomicBoolean muted;
 
   public MatchPlayerImpl(Match match, Player player) {
     this.logger =
@@ -80,7 +79,6 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
     this.dead = new AtomicBoolean(false);
     this.visible = new AtomicBoolean(false);
     this.protocolVersion = new AtomicInteger(ViaUtils.getProtocolVersion(player));
-    this.muted = new AtomicBoolean(false);
   }
 
   @Override
@@ -172,11 +170,6 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
   @Override
   public boolean isFrozen() {
     return frozen.get();
-  }
-
-  @Override
-  public boolean isMuted() {
-    return muted.get();
   }
 
   @Override
@@ -310,11 +303,6 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
   @Override
   public void setGameMode(GameMode gameMode) {
     getBukkit().setGameMode(gameMode);
-  }
-
-  @Override
-  public void setMuted(boolean yes) {
-    this.muted.set(yes);
   }
 
   /**

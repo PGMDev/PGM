@@ -139,14 +139,6 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
   boolean isFrozen();
 
   /**
-   * Get whether the {@link MatchPlayer} us currently muted. Muted players can not send commands to
-   * global or team chat.
-   *
-   * @return Whether the {@link MatchPlayer} is muted.
-   */
-  boolean isMuted();
-
-  /**
    * Get whether the {@link MatchPlayer} can interact with things in the {@link Match}.
    *
    * @return Whether the {@link MatchPlayer} can interact.
@@ -209,13 +201,6 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
    * @param gameMode - The gamemode to set
    */
   void setGameMode(GameMode gameMode);
-
-  /**
-   * Set whether the {@link MatchPlayer} is muted or not.
-   *
-   * @param mute Whether to mute.
-   */
-  void setMuted(boolean mute);
 
   /**
    * Get the protocol version of the {@link MatchPlayer}'s client

@@ -111,14 +111,8 @@ sidebar:
   overwrite: false
 
 moderation:
-  # If the moderation commands/enforcement should be used
-  enabled: true
-  
   # Link to a rules website to display on kick screen
   rules-link: ''
-  
-  # If the rules link is visible on kick screen
-  rules-link-visible: true
   
   # Name of server to display on kick screen header
   # Name may be formatted with '&' color codes
