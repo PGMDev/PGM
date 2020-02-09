@@ -13,29 +13,17 @@ import tc.oc.pgm.tracker.damage.RangedInfo;
 public final class Trackers {
   private Trackers() {}
 
-  static TrackerMatchModule needModule(World world) {
-    return PGM.get().getMatchManager().getMatch(world).needModule(TrackerMatchModule.class);
-  }
-
   static @Nullable TrackerMatchModule getModule(World world) {
     Match match = PGM.get().getMatchManager().getMatch(world);
     return match == null ? null : match.getModule(TrackerMatchModule.class);
   }
 
   public static @Nullable ParticipantState getOwner(Entity entity) {
-    return needModule(entity.getWorld()).getEntityTracker().getOwner(entity);
-  }
-
-  public static @Nullable ParticipantState getOwnerSafely(Entity entity) {
     TrackerMatchModule tmm = getModule(entity.getWorld());
     return tmm == null ? null : tmm.getEntityTracker().getOwner(entity);
   }
 
   public static @Nullable ParticipantState getOwner(Block block) {
-    return needModule(block.getWorld()).getBlockTracker().getOwner(block);
-  }
-
-  public static @Nullable ParticipantState getOwnerSafely(Block block) {
     TrackerMatchModule tmm = getModule(block.getWorld());
     return tmm == null ? null : tmm.getBlockTracker().getOwner(block);
   }
