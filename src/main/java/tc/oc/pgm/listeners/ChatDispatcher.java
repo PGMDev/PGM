@@ -43,6 +43,10 @@ public class ChatDispatcher implements Listener {
 
   private static final Sound DM_SOUND = new Sound("random.orb", 1f, 1.2f);
 
+  private static final String GLOBAL_SYMBOL = "!";
+  private static final String DM_SYMBOL = "@";
+  private static final String ADMIN_CHAT_SYMBOL = "$";
+
   public ChatDispatcher(MatchManager manager) {
     this.manager = manager;
     this.lastMessagedBy = new OnlinePlayerMapAdapter<>(PGM.get());
@@ -97,13 +101,24 @@ public class ChatDispatcher implements Listener {
       return;
     }
 
+    Predicate<MatchPlayer> filter =
+        viewer -> viewer.getBukkit().hasPermission(Permissions.ADMINCHAT);
+
     send(
         match,
         sender,
         message,
         "[" + ChatColor.GOLD + "A" + ChatColor.WHITE + "] {0}: {1}",
-        viewer -> viewer.getBukkit().hasPermission(Permissions.ADMINCHAT),
+        filter,
         SettingValue.CHAT_ADMIN);
+
+    // Play sounds for admin chat
+    if (message != null) {
+      match.getPlayers().stream()
+          .filter(filter) // Initial filter
+          .filter(viewer -> !viewer.equals(sender)) // Don't play sound for sender
+          .forEach(this::playMessageSound);
+    }
   }
 
   @Command(
@@ -180,9 +195,9 @@ public class ChatDispatcher implements Listener {
     if (player != null) {
       final String message = event.getMessage();
 
-      if (message.startsWith("!")) {
+      if (message.startsWith(GLOBAL_SYMBOL)) {
         sendGlobal(player.getMatch(), player, message.substring(1));
-      } else if (message.startsWith("@")) {
+      } else if (message.startsWith(DM_SYMBOL)) {
         final String target = message.substring(1, message.indexOf(" "));
         final MatchPlayer receiver =
             getApproximatePlayer(player.getMatch(), target, player.getBukkit());
@@ -195,6 +210,9 @@ public class ChatDispatcher implements Listener {
               receiver.getBukkit(),
               message.replace(target, "").substring(1));
         }
+      } else if (message.startsWith(ADMIN_CHAT_SYMBOL)
+          && player.getBukkit().hasPermission(Permissions.ADMINCHAT)) {
+        sendAdmin(player.getMatch(), player, event.getMessage().substring(1));
       } else {
         sendDefault(player.getMatch(), player, event.getMessage());
       }
