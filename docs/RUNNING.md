@@ -23,12 +23,7 @@ mkdir plugins
 curl https://pkg.ashcon.app/pgm -Lo plugins/pgm.jar
 ```
 
-4. Add your maps to the maps folder, if you don't have any, skip this step.
-```bash
-cp -r /path/to/map-0/ plugins/PGM/maps/map-0
-```
-
-5. Run the server and enjoy playing PvP games with your friends!
+4. Run the server and enjoy playing PvP games with your friends!
 ```bash
 java -jar sportpaper.jar nogui
 ```
