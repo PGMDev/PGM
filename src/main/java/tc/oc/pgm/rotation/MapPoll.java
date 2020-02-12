@@ -133,8 +133,6 @@ public class MapPoll {
   }
 
   public void sendBook(MatchPlayer viewer) {
-    if (viewer.getSettings().getValue(SettingKey.VOTE_BOOK) == SettingValue.VOTES_OFF) return;
-
     String title = ChatColor.GOLD + "" + ChatColor.BOLD;
     title += AllTranslations.get().translate("command.pool.vote.book.title", viewer.getBukkit());
 
@@ -160,7 +158,9 @@ public class MapPoll {
       viewer.getInventory().setHeldItemSlot(2);
     }
     viewer.getInventory().setItemInHand(is);
-    NMSHacks.openBook(is, viewer.getBukkit());
+    
+    if (viewer.getSettings().getValue(SettingKey.VOTE_BOOK) == SettingValue.VOTES_ON)
+      NMSHacks.openBook(is, viewer.getBukkit());
   }
 
   private Component getMapBookComponent(MatchPlayer viewer, MapInfo map) {
