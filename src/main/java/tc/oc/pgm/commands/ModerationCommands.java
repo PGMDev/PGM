@@ -7,8 +7,10 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -25,6 +27,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.PlayerReportEvent;
+import tc.oc.util.components.Components;
 
 public class ModerationCommands {
 
@@ -119,5 +122,38 @@ public class ModerationCommands {
               viewer.sendMessage(prefixedComponent);
             });
     Audience.get(Bukkit.getConsoleSender()).sendMessage(component);
+  }
+
+  @Command(
+      aliases = {"staff", "mods", "admins"},
+      desc = "List the online staff members")
+  public void staff(CommandSender sender, Match match) {
+    // List of online staff
+    List<Component> onlineStaff =
+        match.getPlayers().stream()
+            .filter(player -> player.getBukkit().hasPermission(Permissions.STAFF))
+            .map(player -> player.getStyledName(NameStyle.FANCY))
+            .collect(Collectors.toList());
+
+    // FORMAT: Online Staff ({count}): {names}
+    Component staffCount =
+        new PersonalizedText(Integer.toString(onlineStaff.size()))
+            .color(onlineStaff.size() >= 1 ? ChatColor.AQUA : ChatColor.RED);
+
+    Component content =
+        onlineStaff.isEmpty()
+            ? new PersonalizedTranslatable("moderation.staff.empty")
+                .getPersonalizedText()
+                .color(ChatColor.RED)
+            : new Component(
+                Components.join(new PersonalizedText(", ").color(ChatColor.GRAY), onlineStaff));
+
+    Component staff =
+        new PersonalizedTranslatable("moderation.staff.name", staffCount, content)
+            .getPersonalizedText()
+            .color(ChatColor.GRAY);
+
+    // Send message
+    sender.sendMessage(staff);
   }
 }
