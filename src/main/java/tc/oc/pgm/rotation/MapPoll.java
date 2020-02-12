@@ -158,7 +158,7 @@ public class MapPoll {
       viewer.getInventory().setHeldItemSlot(2);
     }
     viewer.getInventory().setItemInHand(is);
-    
+
     if (viewer.getSettings().getValue(SettingKey.VOTE_BOOK) == SettingValue.VOTES_ON)
       NMSHacks.openBook(is, viewer.getBukkit());
   }
