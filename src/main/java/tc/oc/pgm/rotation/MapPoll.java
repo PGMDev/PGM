@@ -31,6 +31,8 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.setting.SettingKey;
+import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.util.components.Components;
 import tc.oc.world.NMSHacks;
 
@@ -131,6 +133,8 @@ public class MapPoll {
   }
 
   public void sendBook(MatchPlayer viewer) {
+    if (viewer.getSettings().getValue(SettingKey.VOTE_BOOK) == SettingValue.VOTES_OFF) return;
+
     String title = ChatColor.GOLD + "" + ChatColor.BOLD;
     title += AllTranslations.get().translate("command.pool.vote.book.title", viewer.getBukkit());
 

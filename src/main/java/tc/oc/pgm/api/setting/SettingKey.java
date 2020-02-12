@@ -31,7 +31,8 @@ public enum SettingKey {
     }
   }, // Changes if observers are visible
   SOUNDS("sounds", SOUNDS_ON, SOUNDS_OFF), // Changes if sounds are played
-  ;
+  VOTE_BOOK("vote-book", VOTES_ON, VOTES_OFF) // Changes if the vote book is shown on cycle
+;
 
   private final List<String> aliases;
   private final SettingValue[] values;
