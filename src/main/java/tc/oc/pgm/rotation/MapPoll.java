@@ -159,7 +159,7 @@ public class MapPoll {
     }
     viewer.getInventory().setItemInHand(is);
 
-    if (viewer.getSettings().getValue(SettingKey.VOTE_BOOK) == SettingValue.VOTES_ON)
+    if (viewer.getSettings().getValue(SettingKey.VOTE) == SettingValue.VOTE_ON)
       NMSHacks.openBook(is, viewer.getBukkit());
   }
 
