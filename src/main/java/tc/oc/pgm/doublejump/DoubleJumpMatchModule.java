@@ -13,6 +13,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -97,6 +98,8 @@ public class DoubleJumpMatchModule implements MatchModule, Listener {
   public void onPlayerToggleFlight(final PlayerToggleFlightEvent event) {
     Player player = event.getPlayer();
     Jumper jumper = this.jumpers.get(player);
+    if (player.getGameMode() == GameMode.CREATIVE && player.hasPermission(Permissions.DEBUG))
+      return; // HACK: Allow players who are testing to fly
     if (jumper == null) return;
 
     if (event.isFlying()) {
