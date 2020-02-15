@@ -37,8 +37,8 @@ public enum SettingValue {
   SOUNDS_ON("sounds", "on"), // Always play sounds
   SOUNDS_OFF("sounds", "off"), // Never play sounds
 
-  VOTES_ON("vote_book", "on"), // Show the vote book on cycle
-  VOTES_OFF("vote_book", "off"), // Don't show the vote book on cycle
+  VOTE_ON("vote", "on"), // Show the vote book on cycle
+  VOTE_OFF("vote", "off"), // Don't show the vote book on cycle
   ;
 
   private final String key;
