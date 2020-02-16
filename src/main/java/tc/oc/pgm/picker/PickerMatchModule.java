@@ -337,6 +337,8 @@ public class PickerMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.HIGHEST)
   public void rightClickIcon(final PlayerInteractEvent event) {
+    if (event.getAction() == Action.PHYSICAL) return;
+
     MatchPlayer player = match.getPlayer(event.getPlayer());
     if (player == null) return;
 
