@@ -2,6 +2,7 @@ package tc.oc.pgm.listeners;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.lang.reflect.Array;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -303,5 +304,22 @@ public class PGMListener implements Listener {
         caught.setItemStack(new ItemStack(Material.RAW_FISH));
       }
     }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void DropItemsOnQuit(PlayerQuitEvent event) {
+    Player quitter = event.getPlayer();
+
+    for (ItemStack i : quitter.getInventory().getContents()) {
+      if (i != null) {
+        quitter.getWorld().dropItemNaturally(quitter.getLocation(), i);
+      }
+    }
+    for (ItemStack i : quitter.getInventory().getArmorContents()) {
+      if (i != null) {
+        quitter.getWorld().dropItemNaturally(quitter.getLocation(), i);
+      }
+    }
+    
   }
 }
