@@ -38,8 +38,8 @@ import tc.oc.material.matcher.SingleMaterialMatcher;
 import tc.oc.server.BukkitUtils;
 import tc.oc.util.Numbers;
 import tc.oc.util.Pair;
-import tc.oc.util.SemanticVersion;
 import tc.oc.util.TimeUtils;
+import tc.oc.util.Version;
 import tc.oc.util.collection.ArrayUtils;
 import tc.oc.util.components.Components;
 import tc.oc.util.components.PeriodFormats;
@@ -1132,7 +1132,7 @@ public class XMLUtils {
     return path;
   }
 
-  public static SemanticVersion parseSemanticVersion(Node node) throws InvalidXMLException {
+  public static Version parseSemanticVersion(Node node) throws InvalidXMLException {
     if (node == null) return null;
 
     String[] parts = node.getValueNormalize().split("\\.", 3);
@@ -1145,6 +1145,6 @@ public class XMLUtils {
     int minor = parts.length < 2 ? 0 : parseNumber(node, parts[1], Integer.class);
     int patch = parts.length < 3 ? 0 : parseNumber(node, parts[2], Integer.class);
 
-    return new SemanticVersion(major, minor, patch);
+    return new Version(major, minor, patch);
   }
 }

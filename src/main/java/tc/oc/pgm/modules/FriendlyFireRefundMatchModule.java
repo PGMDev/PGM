@@ -9,17 +9,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.world.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
-public class FriendlyFireRefundMatchModule extends MatchModule implements Listener {
+public class FriendlyFireRefundMatchModule implements MatchModule, Listener {
 
-  public FriendlyFireRefundMatchModule(Match match) {
-    super(match);
-  }
+  public FriendlyFireRefundMatchModule(Match match) {}
 
   @EventHandler(priority = EventPriority.NORMAL)
   public void handleFriendlyFire(EntityDamageByEntityEvent event) {

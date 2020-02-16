@@ -21,6 +21,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.query.IPartyQuery;
 import tc.oc.pgm.filters.query.IPlayerQuery;
 import tc.oc.pgm.filters.query.PartyQuery;
+import tc.oc.server.BukkitUtils;
 
 /**
  * Wraps a single {@link MatchPlayer} in a free-for-all match.
@@ -45,17 +46,19 @@ public class Tribute implements Competitor {
   protected final FreeForAllMatchModule ffa;
   protected final UUID playerId;
   protected final String username;
+  protected final ChatColor color;
   protected final PartyQuery query = new PartyQuery(null, this);
 
   protected @Nullable MatchPlayer player;
   protected Set<MatchPlayer> players = Collections.emptySet();
 
-  public Tribute(MatchPlayer player) {
+  public Tribute(MatchPlayer player, @Nullable ChatColor color) {
     this.match = player.getMatch();
-    this.ffa = match.needMatchModule(FreeForAllMatchModule.class);
+    this.ffa = match.needModule(FreeForAllMatchModule.class);
 
     this.playerId = player.getId();
     this.username = player.getBukkit().getName();
+    this.color = color == null ? TEXT_COLOR : color;
   }
 
   @Override
@@ -99,12 +102,12 @@ public class Tribute implements Competitor {
 
   @Override
   public ChatColor getColor() {
-    return TEXT_COLOR;
+    return color;
   }
 
   @Override
   public Color getFullColor() {
-    return Color.ORANGE;
+    return BukkitUtils.colorOf(color);
   }
 
   @Override
@@ -119,7 +122,7 @@ public class Tribute implements Competitor {
 
   @Override
   public Component getComponentName() {
-    return getStyledName(NameStyle.COLOR);
+    return new PersonalizedText(getColoredName());
   }
 
   @Override

@@ -1,49 +1,42 @@
 package tc.oc.pgm.api.match;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import com.google.common.collect.Iterators;
+import java.util.Iterator;
 import javax.annotation.Nullable;
-import org.bukkit.Physical;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
-import tc.oc.pgm.api.chat.Audience;
-import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.map.MapNotFoundException;
-import tc.oc.pgm.map.PGMMap;
-import tc.oc.pgm.rotation.PGMMapOrder;
+import tc.oc.pgm.api.chat.MultiAudience;
+import tc.oc.pgm.api.match.factory.MatchFactory;
+import tc.oc.pgm.api.player.MatchPlayerResolver;
 
-/** A manager that creates, loads, unloads, and cycles {@link Match}es. */
-public interface MatchManager extends MatchPlayerResolver, Audience {
+/** A manager of {@link Match}es. */
+public interface MatchManager extends MatchPlayerResolver, MultiAudience {
 
   /**
-   * Starts the creation of a new {@link Match} and {@link World} from a {@link PGMMap}, without
-   * loading it.
+   * Create and register a future {@link Match}.
    *
-   * @param map The {@link PGMMap} for the {@link Match}.
-   * @throws Throwable If the match cannot be created.
+   * @param mapId The unique id of the map or {@code null} for the next map.
+   * @return A future {@link Match}.
    */
-  void createPreMatchAsync(PGMMap map) throws Throwable;
-
-  /**
-   * Creates a new {@link Match} and {@link World} from a {@link PGMMap}.
-   *
-   * @param map The {@link PGMMap} for the {@link Match}.
-   * @return The {@link Match} in an unloaded, idle state.
-   * @throws Throwable If the match cannot be created.
-   */
-  Match createMatch(PGMMap map) throws Throwable;
+  MatchFactory createMatch(@Nullable String mapId);
 
   /**
    * Get the {@link Match} for the specified {@link World}.
    *
    * @param world The {@link World} to lookup.
-   * @return The {@link Match} or {@code null} if not found.
+   * @return A {@link Match} or {@code null} if not found.
    */
   @Nullable
   Match getMatch(@Nullable World world);
+
+  /**
+   * Get all the {@link Match}es currently registered.
+   *
+   * @return All {@link Match}es.
+   */
+  Iterator<Match> getMatches();
 
   /**
    * Get the {@link Match} for the specified {@link Entity}.
@@ -68,51 +61,8 @@ public interface MatchManager extends MatchPlayerResolver, Audience {
    */
   @Nullable
   default Match getMatch(@Nullable CommandSender sender) {
-    if (sender instanceof Physical) return getMatch((Entity) sender);
-    if (sender instanceof ConsoleCommandSender) return getMatches().iterator().next();
+    if (sender instanceof Entity) return getMatch((Entity) sender);
+    if (sender instanceof ConsoleCommandSender) return Iterators.getNext(getMatches(), null);
     return null;
   }
-
-  /**
-   * Get all the {@link Match}es currently registered.
-   *
-   * @return All the {@link Match}es.
-   */
-  Collection<Match> getMatches();
-
-  /**
-   * Get all the {@link MatchPlayer}s in all {@link Match}es.
-   *
-   * @return All the {@link MatchPlayer}s.
-   */
-  default Collection<MatchPlayer> getPlayers() {
-    return getMatches().stream()
-        .flatMap(match -> match.getPlayers().stream())
-        .collect(Collectors.toList());
-  }
-
-  /**
-   * Unload and and remove a {@link Match} from the registry.
-   *
-   * @param id The match id to remove.
-   */
-  void unloadMatch(@Nullable String id);
-
-  /**
-   * Unload the old {@link Match} and move all players to a new {@link Match}.
-   *
-   * @param oldMatch The old match to unload.
-   * @param nextMap The map to set next.
-   * @param retry Whether to retry loading new maps.
-   * @return The new match, or empty if a failure occurred.
-   */
-  Optional<Match> cycleMatch(@Nullable Match oldMatch, PGMMap nextMap, boolean retry);
-
-  // TODO: Move to either MapLibrary or MapLoader, this is an orthogonal concern
-  @Deprecated
-  Collection<PGMMap> loadNewMaps() throws MapNotFoundException;
-
-  void setMapOrder(PGMMapOrder pgmMapOrder);
-
-  PGMMapOrder getMapOrder();
 }

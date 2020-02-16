@@ -1,58 +1,40 @@
 package tc.oc.pgm.rage;
 
-import java.util.Set;
+import com.google.common.collect.ImmutableList;
+import java.util.Collection;
 import java.util.logging.Logger;
 import org.jdom2.Document;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.MapTag;
+import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.blitz.BlitzModule;
-import tc.oc.pgm.map.MapModule;
-import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.module.ModuleDescription;
+import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.xml.InvalidXMLException;
 
-@ModuleDescription(
-    name = "Rage",
-    follows = {BlitzModule.class})
-public class RageModule extends MapModule<RageMatchModule> {
-
-  private static final MapTag RAGE_TAG = MapTag.forName("rage");
-
-  private final boolean blitz;
-
-  public RageModule(boolean blitz) {
-    this.blitz = blitz;
-  }
-
-  private static final Component GAME = new PersonalizedTranslatable("match.scoreboard.rage.title");
+public class RageModule implements MapModule {
+  private static final Collection<MapTag> TAGS =
+      ImmutableList.of(MapTag.create("rage", "Rage", true, true));
 
   @Override
-  public Component getGame(MapModuleContext context) {
-    return blitz ? GAME : null;
-  }
-
-  @Override
-  public void loadTags(Set<MapTag> tags) {
-    tags.add(RAGE_TAG);
-  }
-
-  @Override
-  public RageMatchModule createMatchModule(Match match) {
+  public MatchModule createMatchModule(Match match) {
     return new RageMatchModule(match);
   }
 
-  // ---------------------
-  // ---- XML Parsing ----
-  // ---------------------
+  @Override
+  public Collection<MapTag> getTags() {
+    return TAGS;
+  }
 
-  public static RageModule parse(MapModuleContext context, Logger logger, Document doc) {
-
-    if (doc.getRootElement().getChild("rage") != null) {
-      BlitzModule blitzModule = context.needModule(BlitzModule.class);
-      return new RageModule(!blitzModule.isDisabled(null));
-    } else {
-      return null;
+  public static class Factory implements MapModuleFactory<RageModule> {
+    @Override
+    public RageModule parse(MapFactory factory, Logger logger, Document doc)
+        throws InvalidXMLException {
+      if (doc.getRootElement().getChild("rage") != null) {
+        return new RageModule();
+      } else {
+        return null;
+      }
     }
   }
 }

@@ -2,31 +2,29 @@ package tc.oc.pgm.controlpoint;
 
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.MapTag;
+import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.goals.GoalMatchModule;
-import tc.oc.pgm.goals.GoalModule;
-import tc.oc.pgm.map.MapModule;
-import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.module.ModuleDescription;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 
-@ModuleDescription(
-    name = "Control Points",
-    depends = {TeamModule.class, GoalModule.class, RegionModule.class, FilterModule.class})
-public class ControlPointModule extends MapModule<ControlPointMatchModule> {
+public class ControlPointModule implements MapModule<ControlPointMatchModule> {
 
-  private static final MapTag CONTROLPOINT_TAG = MapTag.forName("controlpoint");
-
+  private static final Collection<MapTag> TAGS =
+      ImmutableList.of(MapTag.create("controlpoint", "Control the Point", true, false));
   private final List<ControlPointDefinition> definitions;
 
   public ControlPointModule(List<ControlPointDefinition> definitions) {
@@ -34,49 +32,67 @@ public class ControlPointModule extends MapModule<ControlPointMatchModule> {
   }
 
   @Override
-  public void loadTags(Set<MapTag> tags) {
-    tags.add(CONTROLPOINT_TAG);
+  public Collection<Class<? extends MatchModule>> getSoftDependencies() {
+    return ImmutableList.of(GoalMatchModule.class);
   }
 
   @Override
   public ControlPointMatchModule createMatchModule(Match match) {
-    ImmutableList.Builder<ControlPoint> controlPoints = new ImmutableList.Builder<>();
+    List<ControlPoint> controlPoints = new LinkedList<>();
 
     for (ControlPointDefinition definition : this.definitions) {
       ControlPoint controlPoint = new ControlPoint(match, definition);
       match.getFeatureContext().add(controlPoint);
-      match.needMatchModule(GoalMatchModule.class).addGoal(controlPoint);
+      match.needModule(GoalMatchModule.class).addGoal(controlPoint);
       controlPoints.add(controlPoint);
     }
 
-    return new ControlPointMatchModule(match, controlPoints.build());
+    return new ControlPointMatchModule(match, controlPoints);
   }
 
-  public static ControlPointModule parse(MapModuleContext context, Logger logger, Document doc)
-      throws InvalidXMLException {
-    List<ControlPointDefinition> definitions = new ArrayList<>();
+  @Override
+  public Collection<MapTag> getTags() {
+    return TAGS;
+  }
 
-    for (Element elControlPoint :
-        XMLUtils.flattenElements(doc.getRootElement(), "control-points", "control-point")) {
-      ControlPointDefinition definition =
-          ControlPointParser.parseControlPoint(context, elControlPoint, false);
-      context.features().addFeature(elControlPoint, definition);
-      definitions.add(definition);
+  public static class Factory implements MapModuleFactory<ControlPointModule> {
+    @Override
+    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+      return ImmutableList.of(TeamModule.class);
     }
 
-    for (Element kingEl : doc.getRootElement().getChildren("king")) {
-      for (Element hillEl : XMLUtils.flattenElements(kingEl, "hills", "hill")) {
+    @Override
+    public Collection<Class<? extends MapModule>> getSoftDependencies() {
+      return ImmutableList.of(RegionModule.class, FilterModule.class);
+    }
+
+    @Override
+    public ControlPointModule parse(MapFactory factory, Logger logger, Document doc)
+        throws InvalidXMLException {
+      List<ControlPointDefinition> definitions = new ArrayList<>();
+
+      for (Element elControlPoint :
+          XMLUtils.flattenElements(doc.getRootElement(), "control-points", "control-point")) {
         ControlPointDefinition definition =
-            ControlPointParser.parseControlPoint(context, hillEl, true);
-        context.features().addFeature(kingEl, definition);
+            ControlPointParser.parseControlPoint(factory, elControlPoint, false);
+        factory.getFeatures().addFeature(elControlPoint, definition);
         definitions.add(definition);
       }
-    }
 
-    if (!definitions.isEmpty()) {
-      return new ControlPointModule(definitions);
-    } else {
-      return null;
+      for (Element kingEl : doc.getRootElement().getChildren("king")) {
+        for (Element hillEl : XMLUtils.flattenElements(kingEl, "hills", "hill")) {
+          ControlPointDefinition definition =
+              ControlPointParser.parseControlPoint(factory, hillEl, true);
+          factory.getFeatures().addFeature(kingEl, definition);
+          definitions.add(definition);
+        }
+      }
+
+      if (!definitions.isEmpty()) {
+        return new ControlPointModule(definitions);
+      } else {
+        return null;
+      }
     }
   }
 }

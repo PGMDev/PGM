@@ -4,10 +4,13 @@ import app.ashcon.intake.Command;
 import app.ashcon.intake.argument.ArgumentException;
 import app.ashcon.intake.parametric.annotation.Text;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -29,6 +32,7 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.commands.SettingCommands;
 import tc.oc.pgm.ffa.Tribute;
+import tc.oc.util.StringUtils;
 import tc.oc.util.components.Components;
 import tc.oc.world.OnlinePlayerMapAdapter;
 
@@ -38,6 +42,10 @@ public class ChatDispatcher implements Listener {
   private final OnlinePlayerMapAdapter<UUID> lastMessagedBy;
 
   private static final Sound DM_SOUND = new Sound("random.orb", 1f, 1.2f);
+
+  private static final String GLOBAL_SYMBOL = "!";
+  private static final String DM_SYMBOL = "@";
+  private static final String ADMIN_CHAT_SYMBOL = "$";
 
   public ChatDispatcher(MatchManager manager) {
     this.manager = manager;
@@ -93,13 +101,24 @@ public class ChatDispatcher implements Listener {
       return;
     }
 
+    Predicate<MatchPlayer> filter =
+        viewer -> viewer.getBukkit().hasPermission(Permissions.ADMINCHAT);
+
     send(
         match,
         sender,
         message,
         "[" + ChatColor.GOLD + "A" + ChatColor.WHITE + "] {0}: {1}",
-        viewer -> viewer.getBukkit().hasPermission(Permissions.ADMINCHAT),
+        filter,
         SettingValue.CHAT_ADMIN);
+
+    // Play sounds for admin chat
+    if (message != null) {
+      match.getPlayers().stream()
+          .filter(filter) // Initial filter
+          .filter(viewer -> !viewer.equals(sender)) // Don't play sound for sender
+          .forEach(this::playMessageSound);
+    }
   }
 
   @Command(
@@ -144,7 +163,7 @@ public class ChatDispatcher implements Listener {
   }
 
   @Command(
-      aliases = {"r"},
+      aliases = {"reply", "r"},
       desc = "Reply to a direct message",
       usage = "[message]")
   public void sendReply(Match match, Audience audience, MatchPlayer sender, @Text String message) {
@@ -158,6 +177,16 @@ public class ChatDispatcher implements Listener {
     sendDirect(match, sender, receiver.getBukkit(), message);
   }
 
+  private static MatchPlayer getApproximatePlayer(Match match, String query, CommandSender sender) {
+    return StringUtils.bestFuzzyMatch(
+        query,
+        match.getPlayers().stream()
+            .collect(
+                Collectors.toMap(
+                    player -> player.getBukkit().getName(sender), Function.identity())),
+        0.75);
+  }
+
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
   public void onChat(AsyncPlayerChatEvent event) {
     event.setCancelled(true);
@@ -166,12 +195,12 @@ public class ChatDispatcher implements Listener {
     if (player != null) {
       final String message = event.getMessage();
 
-      if (message.startsWith("!")) {
+      if (message.startsWith(GLOBAL_SYMBOL)) {
         sendGlobal(player.getMatch(), player, message.substring(1));
-      } else if (message.startsWith("@")) {
+      } else if (message.startsWith(DM_SYMBOL)) {
         final String target = message.substring(1, message.indexOf(" "));
-        final MatchPlayer receiver = manager.findPlayer(target, player.getBukkit());
-
+        final MatchPlayer receiver =
+            getApproximatePlayer(player.getMatch(), target, player.getBukkit());
         if (receiver == null) {
           player.sendWarning("Could not find player '" + target + "' to send a message", true);
         } else {
@@ -181,6 +210,9 @@ public class ChatDispatcher implements Listener {
               receiver.getBukkit(),
               message.replace(target, "").substring(1));
         }
+      } else if (message.startsWith(ADMIN_CHAT_SYMBOL)
+          && player.getBukkit().hasPermission(Permissions.ADMINCHAT)) {
+        sendAdmin(player.getMatch(), player, event.getMessage().substring(1));
       } else {
         sendDefault(player.getMatch(), player, event.getMessage());
       }
@@ -218,7 +250,11 @@ public class ChatDispatcher implements Listener {
     // When a message is empty, this indicates the player wants to change their default chat channel
     if (message == null) {
       try {
-        SettingCommands.toggle(sender.getBukkit(), sender, SettingKey.CHAT, type.getName());
+        SettingCommands.toggle(
+            sender == null ? Bukkit.getConsoleSender() : sender.getBukkit(),
+            sender,
+            SettingKey.CHAT,
+            type.getName());
       } catch (ArgumentException e) {
         // No-op, this is when console tries to change chat settings
       }

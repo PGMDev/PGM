@@ -1,16 +1,17 @@
 package tc.oc.pgm.commands;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.bukkit.parametric.Type;
 import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
+import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
 import com.google.common.collect.ImmutableSortedSet;
-import java.net.URL;
-import java.util.List;
-import java.util.Locale;
+import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -23,19 +24,17 @@ import org.bukkit.command.CommandSender;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.named.MapNameStyle;
 import tc.oc.named.NameStyle;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
-import tc.oc.pgm.api.match.MatchManager;
+import tc.oc.pgm.api.map.Contributor;
+import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.api.map.MapLibrary;
+import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.commands.annotations.Text;
-import tc.oc.pgm.map.Contributor;
-import tc.oc.pgm.map.MapInfo;
-import tc.oc.pgm.map.MapLibrary;
-import tc.oc.pgm.map.MapPersistentContext;
-import tc.oc.pgm.map.PGMMap;
-import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.maptag.MapTagsCondition;
+import tc.oc.pgm.rotation.MapOrder;
 import tc.oc.pgm.util.PrettyPaginatedResult;
 import tc.oc.util.components.ComponentUtils;
 import tc.oc.util.components.Components;
@@ -43,27 +42,46 @@ import tc.oc.util.components.Components;
 public class MapCommands {
 
   @Command(
-      aliases = {"maplist", "maps", "ml"},
+      aliases = {"loadnewmaps"},
+      desc = "Loads new maps and outputs any errors")
+  public static void loadNewMaps(MapLibrary library, @Switch('f') boolean force) {
+    library.loadNewMaps(force); // MapLibrary will handle sending output asynchronously
+  }
+
+  @Command(
+      aliases = {"maps", "maplist", "ml"},
       desc = "Shows the maps that are currently loaded",
-      usage = "[-a <author>] [-p <page>] [[!]#<maptag>...]",
+      usage = "[-a <author>] [-t <tag1>,<tag2>]",
       help =
           "Shows all the maps that are currently loaded including ones that are not in the rotation.")
   public static void maplist(
       Audience audience,
       CommandSender sender,
       MapLibrary library,
-      MapTagsCondition mapTags,
-      @Fallback(Type.NULL) @Switch('a') String author,
-      @Fallback(Type.NULL) @Switch('p') Integer page)
+      @Default("1") Integer page,
+      @Fallback(Type.NULL) @Switch('t') String tags,
+      @Fallback(Type.NULL) @Switch('a') String author)
       throws CommandException {
-    if (page == null) page = 1;
+    Stream<MapInfo> search = Sets.newHashSet(library.getMaps()).stream();
+    if (tags != null) {
+      final Map<Boolean, Set<String>> tagSet =
+          Stream.of(tags.split(","))
+              .map(String::toLowerCase)
+              .map(String::trim)
+              .collect(
+                  Collectors.partitioningBy(
+                      s -> s.startsWith("!"),
+                      Collectors.mapping(
+                          (String s) -> s.startsWith("!") ? s.substring(1) : s,
+                          Collectors.toSet())));
+      search = search.filter(map -> matchesTags(map, tagSet.get(false), tagSet.get(true)));
+    }
 
-    Stream<PGMMap> search = library.getMaps().stream().filter(mapTags);
     if (author != null) {
       search = search.filter(map -> matchesAuthor(map, author));
     }
 
-    Set<PGMMap> maps = search.collect(Collectors.toCollection(TreeSet::new));
+    Set<MapInfo> maps = search.collect(Collectors.toCollection(TreeSet::new));
     int resultsPerPage = 8;
     int pages = (maps.size() + resultsPerPage - 1) / resultsPerPage;
 
@@ -73,20 +91,36 @@ public class MapCommands {
     String listHeader =
         ComponentUtils.horizontalLineHeading(title, ChatColor.BLUE, ComponentUtils.MAX_CHAT_WIDTH);
 
-    new PrettyPaginatedResult<PGMMap>(listHeader, resultsPerPage) {
+    new PrettyPaginatedResult<MapInfo>(listHeader, resultsPerPage) {
       @Override
-      public String format(PGMMap map, int index) {
-        return (index + 1) + ". " + map.getInfo().getShortDescription(sender);
+      public String format(MapInfo map, int index) {
+        return (index + 1)
+            + ". "
+            + map.getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS).toLegacyText();
       }
     }.display(audience, ImmutableSortedSet.copyOf(maps), page);
   }
 
-  private static boolean matchesAuthor(PGMMap map, String query) {
-    checkNotNull(map);
-    query = checkNotNull(query).toLowerCase(Locale.ROOT);
+  private static boolean matchesTags(
+      MapInfo map, @Nullable Collection<String> posTags, @Nullable Collection<String> negTags) {
+    int matches = 0;
+    for (MapTag tag : checkNotNull(map).getTags()) {
+      if (negTags != null && negTags.contains(tag.getId())) {
+        return false;
+      }
+      if (posTags != null && posTags.contains(tag.getId())) {
+        matches++;
+      }
+    }
+    return posTags == null || matches == posTags.size();
+  }
 
-    for (Contributor contributor : map.getInfo().getNamedAuthors()) {
-      if (contributor.getName().toLowerCase(Locale.ROOT).contains(query)) {
+  private static boolean matchesAuthor(MapInfo map, String query) {
+    checkNotNull(map);
+    query = checkNotNull(query).toLowerCase();
+
+    for (Contributor contributor : map.getAuthors()) {
+      if (contributor.getName().toLowerCase().contains(query)) {
         return true;
       }
     }
@@ -97,29 +131,27 @@ public class MapCommands {
       aliases = {"mapinfo", "map"},
       desc = "Shows information a certain map",
       usage = "[map name] - defaults to the current map")
-  public void map(Audience audience, CommandSender sender, @Text PGMMap map) {
-    MapInfo mapInfo = map.getInfo();
-    audience.sendMessage(mapInfo.getFormattedMapTitle());
-
-    MapPersistentContext persistentContext = map.getPersistentContext();
-
-    Component edition = new PersonalizedText(mapInfo.getLocalizedEdition(), ChatColor.GOLD);
-    if (!edition.toPlainText().isEmpty()) {
-      audience.sendMessage(
-          new PersonalizedText(mapInfoLabel("command.map.mapInfo.edition"), edition));
-    }
+  public void map(Audience audience, CommandSender sender, @Text MapInfo map) {
+    audience.sendMessage(
+        ComponentUtils.horizontalLineHeading(
+            ChatColor.DARK_AQUA
+                + map.getName()
+                + " "
+                + ChatColor.GRAY
+                + map.getVersion().toString(),
+            ChatColor.RED));
 
     audience.sendMessage(
         new PersonalizedText(
             mapInfoLabel("command.map.mapInfo.objective"),
-            new PersonalizedText(mapInfo.objective, ChatColor.GOLD)));
+            new PersonalizedText(map.getDescription(), ChatColor.GOLD)));
 
-    List<Contributor> authors = mapInfo.getNamedAuthors();
+    Collection<Contributor> authors = map.getAuthors();
     if (authors.size() == 1) {
       audience.sendMessage(
           new PersonalizedText(
               mapInfoLabel("command.map.mapInfo.authorSingular"),
-              formatContribution(authors.get(0))));
+              formatContribution(authors.iterator().next())));
     } else {
       audience.sendMessage(mapInfoLabel("command.map.mapInfo.authorPlural"));
       for (Contributor author : authors) {
@@ -127,7 +159,7 @@ public class MapCommands {
       }
     }
 
-    List<Contributor> contributors = mapInfo.getNamedContributors();
+    Collection<Contributor> contributors = map.getContributors();
     if (!contributors.isEmpty()) {
       audience.sendMessage(mapInfoLabel("command.map.mapInfo.contributors"));
       for (Contributor contributor : contributors) {
@@ -135,98 +167,69 @@ public class MapCommands {
       }
     }
 
-    if (mapInfo.rules.size() > 0) {
+    if (!map.getRules().isEmpty()) {
       audience.sendMessage(mapInfoLabel("command.map.mapInfo.rules"));
 
-      for (int i = 0; i < mapInfo.rules.size(); i++) {
+      int i = 0;
+      for (String rule : map.getRules()) {
         audience.sendMessage(
             new PersonalizedText(
-                new PersonalizedText((i + 1) + ") ", ChatColor.WHITE),
-                new PersonalizedText(mapInfo.rules.get(i), ChatColor.GOLD)));
+                new PersonalizedText(++i + ") ", ChatColor.WHITE),
+                new PersonalizedText(rule, ChatColor.GOLD)));
       }
     }
 
     audience.sendMessage(
         new PersonalizedText(
             mapInfoLabel("command.map.mapInfo.playerLimit"),
-            createPlayerLimitComponent(sender, persistentContext)));
+            createPlayerLimitComponent(sender, map)));
 
     if (sender.hasPermission(Permissions.DEBUG)) {
       audience.sendMessage(
           new PersonalizedText(
-              mapInfoLabel("command.map.mapInfo.genre"),
-              new PersonalizedText(mapInfo.getLocalizedGenre(), ChatColor.GOLD)));
-      audience.sendMessage(
-          new PersonalizedText(
               mapInfoLabel("command.map.mapInfo.proto"),
-              new PersonalizedText(mapInfo.proto.toString(), ChatColor.GOLD)));
-      audience.sendMessage(
-          new PersonalizedText(
-              mapInfoLabel("command.map.mapInfo.folder"),
-              new PersonalizedText(map.getFolder().getRelativePath().toString(), ChatColor.GOLD)));
-      audience.sendMessage(
-          new PersonalizedText(
-              mapInfoLabel("command.map.mapInfo.source"),
-              new PersonalizedText(map.getSource().getPath().toString(), ChatColor.GOLD)));
+              new PersonalizedText(map.getProto().toString(), ChatColor.GOLD)));
     }
 
-    URL xmlLink = map.getFolder().getDescriptionFileUrl();
-    if (xmlLink != null) {
-      audience.sendMessage(
-          new PersonalizedText(
-              new PersonalizedText(ChatColor.DARK_PURPLE, ChatColor.BOLD)
-                  .extra(new PersonalizedTranslatable("command.map.mapInfo.xml"))
-                  .extra(": "),
-              Components.link(xmlLink)
-                  .hoverEvent(
-                      HoverEvent.Action.SHOW_TEXT,
-                      new PersonalizedTranslatable("command.map.mapInfo.sourceCode.tip")
-                          .render())));
-    }
-
-    Set<MapTag> mapTags = persistentContext.getMapTags();
-    audience.sendMessage(createTagsComponent(mapTags).color(ChatColor.YELLOW));
+    audience.sendMessage(createTagsComponent(map.getTags()));
   }
 
-  private static Component createTagsComponent(Set<MapTag> tags) {
+  private Component createTagsComponent(Collection<MapTag> tags) {
     checkNotNull(tags);
 
-    Component result = new PersonalizedText();
+    Component result = mapInfoLabel("command.map.mapInfo.tags");
     MapTag[] mapTags = tags.toArray(new MapTag[0]);
     for (int i = 0; i < mapTags.length; i++) {
       if (i != 0) {
         result.extra(Components.space());
       }
 
-      MapTag mapTag = mapTags[i];
+      String mapTag = mapTags[i].getId();
       Component component =
-          mapTags[i]
-              .getComponentName()
-              .clickEvent(ClickEvent.Action.RUN_COMMAND, "/maplist " + mapTag.toString())
+          new PersonalizedText("#" + mapTag, ChatColor.GOLD)
+              .bold(false)
+              .clickEvent(ClickEvent.Action.RUN_COMMAND, "/maps -t " + mapTag)
               .hoverEvent(
                   HoverEvent.Action.SHOW_TEXT,
-                  new PersonalizedTranslatable("command.map.mapTag.hover", mapTag.toString())
-                      .render());
+                  new PersonalizedTranslatable("command.map.mapTag.hover", mapTag).render());
       result.extra(component);
     }
     return result;
   }
 
-  private static Component createPlayerLimitComponent(
-      CommandSender sender, MapPersistentContext persistentContext) {
+  private static Component createPlayerLimitComponent(CommandSender sender, MapInfo map) {
     checkNotNull(sender);
-    checkNotNull(persistentContext);
+    checkNotNull(map);
 
-    List<Integer> maxPlayers = persistentContext.getMaxPlayers();
+    Collection<Integer> maxPlayers = map.getMaxPlayers();
     if (maxPlayers.isEmpty()) {
       return Components.blank();
     } else if (maxPlayers.size() == 1) {
-      return new PersonalizedText(maxPlayers.get(0).toString(), ChatColor.GOLD);
+      return new PersonalizedText(maxPlayers.iterator().next().toString(), ChatColor.GOLD);
     }
 
-    Component total =
-        new PersonalizedText(
-            Integer.toString(persistentContext.getTotalMaxPlayers()), ChatColor.GOLD);
+    int totalPlayers = maxPlayers.stream().mapToInt(i -> i).sum();
+    Component total = new PersonalizedText(Integer.toString(totalPlayers), ChatColor.GOLD);
 
     String verboseVs =
         " " + AllTranslations.get().translate("command.map.mapInfo.playerLimit.vs", sender) + " ";
@@ -234,7 +237,7 @@ public class MapCommands {
         new PersonalizedText(
             new PersonalizedText("(")
                 .extra(
-                    persistentContext.getMaxPlayers().stream()
+                    maxPlayers.stream()
                         .map(Object::toString)
                         .collect(Collectors.joining(verboseVs)))
                 .extra(")"),
@@ -246,8 +249,8 @@ public class MapCommands {
   @Command(
       aliases = {"mapnext", "mn", "nextmap", "nm", "next"},
       desc = "Shows which map is coming up next")
-  public void next(Audience audience, CommandSender sender, MatchManager matchManager) {
-    final PGMMap next = matchManager.getMapOrder().getNextMap();
+  public void next(Audience audience, CommandSender sender, MapOrder mapOrder) {
+    final MapInfo next = mapOrder.getNextMap();
 
     if (next == null) {
       sender.sendMessage(
@@ -261,12 +264,13 @@ public class MapCommands {
                 .translate(
                     "command.map.next.success",
                     sender,
-                    next.getInfo().getShortDescription(sender) + ChatColor.DARK_PURPLE));
+                    next.getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS).toLegacyText()
+                        + ChatColor.DARK_PURPLE));
   }
 
   private @Nullable Component formatContribution(Contributor contributor) {
     Component c = contributor.getStyledName(NameStyle.FANCY);
-    if (!contributor.hasContribution()) return c;
+    if (contributor.getContribution() == null) return c;
     return new PersonalizedText(
         c,
         new PersonalizedText(ChatColor.GRAY, ChatColor.ITALIC)

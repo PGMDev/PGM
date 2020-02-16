@@ -1,5 +1,6 @@
 package tc.oc.pgm.death;
 
+import java.util.logging.Logger;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -10,29 +11,20 @@ import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.match.MatchModule;
-import tc.oc.pgm.match.MatchModuleFactory;
-import tc.oc.pgm.module.ModuleDescription;
-import tc.oc.pgm.module.ModuleLoadException;
 
-@ModuleDescription(name = "Death Messages")
 @ListenerScope(MatchScope.RUNNING)
-public class DeathMessageMatchModule extends MatchModule implements Listener {
+public class DeathMessageMatchModule implements MatchModule, Listener {
 
-  public static class Factory implements MatchModuleFactory<DeathMessageMatchModule> {
-    @Override
-    public DeathMessageMatchModule createMatchModule(Match match) throws ModuleLoadException {
-      return new DeathMessageMatchModule(match);
-    }
-  }
+  private final Logger logger;
 
   public DeathMessageMatchModule(Match match) {
-    super(match);
+    logger = match.getLogger();
   }
 
   @EventHandler(priority = EventPriority.LOWEST)

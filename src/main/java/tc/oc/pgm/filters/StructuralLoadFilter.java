@@ -29,7 +29,7 @@ public class StructuralLoadFilter extends TypedFilter<IBlockQuery> {
 
   @Override
   protected QueryResponse queryTyped(IBlockQuery query) {
-    FallingBlocksMatchModule fbmm = query.getMatch().getMatchModule(FallingBlocksMatchModule.class);
+    FallingBlocksMatchModule fbmm = query.getMatch().getModule(FallingBlocksMatchModule.class);
     if (fbmm == null) return QueryResponse.ABSTAIN;
 
     int load = fbmm.countUnsupportedNeighbors(query.getBlock().getBlock(), this.threshold);

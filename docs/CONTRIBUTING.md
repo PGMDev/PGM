@@ -3,6 +3,11 @@ Contributing
 
 We're really excited to have you join the community of contributors for the PGM project! Before we jump into the nitty-gritty details, let's go over the design choices and philosophy of the project so we're all on the same page.
 
+Scope
+-----
+
+PvP Game Manager, as the name implies, should focus on providing matchmaking and gameplay functionality rather than administrative features, which other plugins support. There are some exceptions, such as chat or settings, that require explicit interoperability with PGM.
+
 Philosophy
 ----------
 
@@ -16,7 +21,7 @@ You can save a good amount of time during code review if you share your ideas an
 
 3. [**Out-of-the-box**](https://www.smithsonianmag.com/arts-culture/how-steve-jobs-love-of-simplicity-fueled-a-design-revolution-23868877/)
 
-Players, contributors, and server owners should be able to enjoy PGM "out-of-the-box" without any extra plugins or requirements. No website, database, or external API should be required to run a server on your local machine.
+Players, contributors, and server owners should be able to enjoy the core mechanics of PGM "out-of-the-box" without any extra plugins or requirements. No website, database, or external API should be required to run a server on your local machine. Eventually, it should be able to run on any Minecraft server version and be compatible with the most popular Bukkit plugins.
 
 Dependencies
 ------------
@@ -24,7 +29,6 @@ You'll need to make sure your machine has the following dependencies before comp
 
  * [Java 8](https://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html) - the Java Virtual Machine required to run the Minecraft server and PGM plugin.
  * [Maven](https://maven.apache.org/install.html) - a compilation tool to bundle all the Java dependencies into `.jar` file
- * [Docker](https://docs.docker.com/v17.09/engine/installation/) *(optional)* - a container tool to quickly and easily run your changes.
 
 Steps
 ---------

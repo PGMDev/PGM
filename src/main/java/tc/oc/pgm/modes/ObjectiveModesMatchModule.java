@@ -13,29 +13,29 @@ import org.bukkit.event.EventPriority;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.countdowns.CountdownContext;
-import tc.oc.pgm.match.MatchModule;
 
-public class ObjectiveModesMatchModule extends MatchModule {
+public class ObjectiveModesMatchModule implements MatchModule {
 
   private static final Sound SOUND = new Sound("mob.zombie.remedy", 0.15f, 1.2f);
 
+  private final Match match;
   private final List<Mode> modes;
   private final List<ModeChangeCountdown> countdowns;
   private final CountdownContext countdownContext;
 
   public ObjectiveModesMatchModule(Match match, List<Mode> modes) {
-    super(match);
+    this.match = match;
     this.modes = modes;
-
     this.countdowns = new ArrayList<>(this.modes.size());
-    this.countdownContext = new CountdownContext(getMatch(), match.getLogger());
+    this.countdownContext = new CountdownContext(match, match.getLogger());
   }
 
   @Override
   public void load() {
     for (Mode mode : this.modes) {
-      ModeChangeCountdown countdown = new ModeChangeCountdown(this, mode);
+      ModeChangeCountdown countdown = new ModeChangeCountdown(match, this, mode);
       this.countdowns.add(countdown);
     }
   }

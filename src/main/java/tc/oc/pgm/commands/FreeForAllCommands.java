@@ -86,7 +86,7 @@ public class FreeForAllCommands {
 
   private static FreeForAllMatchModule getFfaModule(CommandSender sender, Match match)
       throws CommandException {
-    FreeForAllMatchModule ffaModule = match.getMatchModule(FreeForAllMatchModule.class);
+    FreeForAllMatchModule ffaModule = match.getModule(FreeForAllMatchModule.class);
     if (ffaModule == null) {
       throw new CommandException(
           AllTranslations.get()

@@ -2,13 +2,16 @@ package tc.oc.pgm.tablist;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
 import tc.oc.identity.PlayerIdentityChangeEvent;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.Permissions;
@@ -19,17 +22,21 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.match.ObservingParty;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
+import tc.oc.tablist.ListeningTabView;
 import tc.oc.tablist.TabEntry;
 import tc.oc.tablist.TabView;
 import tc.oc.util.Numbers;
+import tc.oc.util.ViaUtils;
 import tc.oc.util.collection.DefaultProvider;
 
-public class MatchTabView extends TabView implements Listener {
+public class MatchTabView extends TabView implements ListeningTabView {
 
-  public static class Factory implements DefaultProvider<Player, MatchTabView> {
+  public static class Factory implements DefaultProvider<Player, TabView> {
     @Override
-    public MatchTabView get(Player key) {
-      return new MatchTabView(key);
+    public TabView get(Player key) {
+      return ViaUtils.getProtocolVersion(key) >= ViaUtils.VERSION_1_8
+          ? new MatchTabView(key)
+          : new LegacyMatchTabView(key);
     }
   }
 
@@ -217,6 +224,7 @@ public class MatchTabView extends TabView implements Listener {
     super.render();
   }
 
+  @Override
   public void onViewerJoinMatch(PlayerJoinMatchEvent event) {
     if (this.getViewer() == event.getPlayer().getBukkit()) {
       this.match = event.getMatch();
@@ -230,7 +238,7 @@ public class MatchTabView extends TabView implements Listener {
       this.participantPlayers.clear();
       this.participantPlayers.addAll(this.match.getParticipants());
 
-      this.tmm = this.match.getMatchModule(TeamMatchModule.class);
+      this.tmm = this.match.getModule(TeamMatchModule.class);
       if (this.tmm != null) {
         for (Team team : this.tmm.getTeams()) {
           this.teamPlayers.replaceValues(team, team.getPlayers());
@@ -241,6 +249,7 @@ public class MatchTabView extends TabView implements Listener {
     }
   }
 
+  @Override
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onTeamChange(PlayerPartyChangeEvent event) {
     if (this.match != event.getMatch()) return;
@@ -276,6 +285,7 @@ public class MatchTabView extends TabView implements Listener {
     this.invalidateLayout();
   }
 
+  @Override
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onNickChange(PlayerIdentityChangeEvent event) {
     this.invalidateLayout();

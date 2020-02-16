@@ -13,9 +13,9 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerSkinPartsChangeEvent;
 import org.bukkit.plugin.Plugin;
 import tc.oc.identity.PlayerIdentityChangeEvent;
+import tc.oc.util.ClassLogger;
 import tc.oc.util.collection.DefaultMapAdapter;
 import tc.oc.util.collection.DefaultProvider;
-import tc.oc.util.logging.ClassLogger;
 
 /**
  * Custom player list display (for 1.8 and later)

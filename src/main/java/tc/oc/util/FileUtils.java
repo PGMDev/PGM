@@ -29,9 +29,7 @@ public class FileUtils {
   }
 
   private static void copyDirectory(File source, File destination) throws IOException {
-    if (!destination.mkdirs()) {
-      throw new IOException("Failed to create destination directories");
-    }
+    destination.mkdirs();
 
     File[] files = source.listFiles();
 

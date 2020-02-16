@@ -17,7 +17,6 @@ public abstract class MatchCountdown extends Countdown {
   protected final Match match;
   protected final BossBarMatchModule bbmm;
   protected Duration remaining, total;
-
   protected final BossBar bossBar;
 
   class CountdownBar extends DynamicBossBar {
@@ -39,7 +38,7 @@ public abstract class MatchCountdown extends Countdown {
 
   public MatchCountdown(Match match, @Nullable BossBar bossBar) {
     this.match = match;
-    this.bbmm = match.needMatchModule(BossBarMatchModule.class);
+    this.bbmm = match.needModule(BossBarMatchModule.class);
     if (bossBar != null) {
       this.bossBar = bossBar;
     } else {

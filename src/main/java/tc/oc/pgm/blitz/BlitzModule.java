@@ -2,76 +2,59 @@ package tc.oc.pgm.blitz;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.MapTag;
+import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.ffa.FreeForAllModule;
-import tc.oc.pgm.map.MapModule;
-import tc.oc.pgm.map.MapModuleContext;
-import tc.oc.pgm.maptag.MapTag;
-import tc.oc.pgm.module.ModuleDescription;
-import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.xml.InvalidXMLException;
 import tc.oc.xml.Node;
 
-@ModuleDescription(name = "Blitz")
-public class BlitzModule extends MapModule<BlitzMatchModule> {
+public class BlitzModule implements MapModule {
 
-  private static final MapTag BLITZ_TAG = MapTag.forName("blitz");
-
-  final BlitzConfig config;
+  private static final Collection<MapTag> TAGS =
+      ImmutableList.of(MapTag.create("blitz", "Blitz", true, true));
+  private final BlitzConfig config;
 
   public BlitzModule(BlitzConfig config) {
     this.config = checkNotNull(config);
   }
 
   @Override
-  public Component getGame(MapModuleContext context) {
-    if (isDisabled(context)) return null;
-    if (context.hasModule(TeamModule.class)) {
-      return new PersonalizedTranslatable("match.scoreboard.playersRemaining.title");
-    } else if (context.hasModule(FreeForAllModule.class) && config.getNumLives() > 1) {
-      return new PersonalizedTranslatable("match.scoreboard.livesRemaining.title");
-    } else {
-      return new PersonalizedTranslatable("match.scoreboard.blitz.title");
-    }
-  }
-
-  @Override
-  public void loadTags(Set<MapTag> tags) {
-    if (!isDisabled(null)) tags.add(BLITZ_TAG);
-  }
-
-  @Override
   public BlitzMatchModule createMatchModule(Match match) {
-    return new BlitzMatchModule(match, this.config);
+    return new BlitzMatchModule(match, config);
   }
 
-  public boolean isDisabled(MapModuleContext context) {
-    return config.lives == Integer.MAX_VALUE;
+  @Override
+  public Collection<MapTag> getTags() {
+    return TAGS;
   }
 
-  // ---------------------
-  // ---- XML Parsing ----
-  // ---------------------
+  public static class Factory implements MapModuleFactory<BlitzModule> {
+    @Override
+    public BlitzModule parse(MapFactory factory, Logger logger, Document doc)
+        throws InvalidXMLException {
+      List<Element> blitzElements = doc.getRootElement().getChildren("blitz");
+      BlitzConfig config = new BlitzConfig(Integer.MAX_VALUE, false);
 
-  public static BlitzModule parse(MapModuleContext context, Logger logger, Document doc)
-      throws InvalidXMLException {
-    List<Element> blitzElements = doc.getRootElement().getChildren("blitz");
-    BlitzConfig config = new BlitzConfig(Integer.MAX_VALUE, false);
+      for (Element blitzEl : blitzElements) {
+        boolean broadcastLives = XMLUtils.parseBoolean(blitzEl.getChild("broadcastLives"), true);
+        int lives = XMLUtils.parseNumber(Node.fromChildOrAttr(blitzEl, "lives"), Integer.class, 1);
+        config = new BlitzConfig(lives, broadcastLives);
+      }
 
-    for (Element blitzEl : blitzElements) {
-      boolean broadcastLives = XMLUtils.parseBoolean(blitzEl.getChild("broadcastLives"), true);
-      int lives = XMLUtils.parseNumber(Node.fromChildOrAttr(blitzEl, "lives"), Integer.class, 1);
-      config = new BlitzConfig(lives, broadcastLives);
+      if (config.lives != Integer.MAX_VALUE) {
+        return new BlitzModule(config);
+      }
+
+      return null;
     }
-
-    return new BlitzModule(config);
   }
 }

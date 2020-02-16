@@ -2,9 +2,15 @@ package tc.oc.pgm.picker;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -30,9 +36,12 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
+import tc.oc.pgm.api.match.factory.MatchModuleFactory;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.blitz.BlitzMatchModule;
@@ -44,7 +53,6 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.join.GenericJoinResult;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.join.JoinResult;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.pgm.spawns.events.DeathKitApplyEvent;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.teams.Team;
@@ -53,7 +61,26 @@ import tc.oc.util.StringUtils;
 import tc.oc.util.components.ComponentUtils;
 
 @ListenerScope(MatchScope.LOADED)
-public class PickerMatchModule extends MatchModule implements Listener {
+public class PickerMatchModule implements MatchModule, Listener {
+
+  public static class Factory implements MatchModuleFactory<PickerMatchModule> {
+    @Override
+    public Collection<Class<? extends MatchModule>> getWeakDependencies() {
+      return ImmutableList.of(
+          TeamMatchModule.class, ClassMatchModule.class, BlitzMatchModule.class);
+    }
+
+    @Override
+    public Collection<Class<? extends MatchModule>> getHardDependencies() {
+      return ImmutableList.of(JoinMatchModule.class);
+    }
+
+    @Override
+    public PickerMatchModule createMatchModule(Match match) throws ModuleLoadException {
+      return new PickerMatchModule(match);
+    }
+  }
+
   private static final String OPEN_BUTTON_PREFIX = ChatColor.GREEN + ChatColor.BOLD.toString();
   private static final int OPEN_BUTTON_SLOT = 2;
 
@@ -78,16 +105,17 @@ public class PickerMatchModule extends MatchModule implements Listener {
     }
   }
 
+  private final Match match;
   private final Set<MatchPlayer> picking = new HashSet<>();
-  private final boolean hasTeams;
-  private final boolean hasClasses;
-  private final boolean isBlitz;
+  private boolean hasTeams;
+  private boolean hasClasses;
+  private boolean isBlitz;
 
-  public PickerMatchModule(Match match) {
-    super(match);
-    this.hasTeams = match.hasMatchModule(TeamMatchModule.class);
-    this.hasClasses = match.hasMatchModule(ClassMatchModule.class);
-    this.isBlitz = match.hasMatchModule(BlitzMatchModule.class);
+  private PickerMatchModule(Match match) {
+    this.match = match;
+    this.hasTeams = match.hasModule(TeamMatchModule.class);
+    this.hasClasses = match.hasModule(ClassMatchModule.class);
+    this.isBlitz = match.hasModule(BlitzMatchModule.class);
   }
 
   protected boolean settingEnabled(MatchPlayer player, boolean playerTriggered) {
@@ -104,11 +132,11 @@ public class PickerMatchModule extends MatchModule implements Listener {
 
   private boolean hasJoined(MatchPlayer joining) {
     return joining.isParticipating()
-        || getMatch().needMatchModule(JoinMatchModule.class).isQueuedToJoin(joining);
+        || match.needModule(JoinMatchModule.class).isQueuedToJoin(joining);
   }
 
   private boolean canAutoJoin(MatchPlayer joining) {
-    JoinResult result = getMatch().needMatchModule(JoinMatchModule.class).queryJoin(joining, null);
+    JoinResult result = match.needModule(JoinMatchModule.class).queryJoin(joining, null);
     return result.isSuccess()
         || ((result instanceof GenericJoinResult)
             && ((GenericJoinResult) result).getStatus() == GenericJoinResult.Status.FULL);
@@ -119,7 +147,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
   }
 
   private Set<Team> getChoosableTeams(MatchPlayer joining) {
-    TeamMatchModule tmm = getMatch().getMatchModule(TeamMatchModule.class);
+    TeamMatchModule tmm = match.getModule(TeamMatchModule.class);
     if (tmm == null) return Collections.emptySet();
 
     Set<Team> teams = new HashSet<>();
@@ -145,7 +173,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
     if (player == null) return false;
 
     // Player is eliminated from Blitz
-    if (isBlitz && getMatch().isRunning()) return false;
+    if (isBlitz && match.isRunning()) return false;
 
     // Player is not observing or dead
     if (!(player.isObserving() || player.isDead())) return false;
@@ -238,7 +266,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
 
   public void refreshKit(final MatchPlayer player) {
     if (canUse(player)) {
-      logger.fine("Giving kit to " + player);
+      match.getLogger().fine("Giving kit to " + player);
 
       ItemStack stack;
       if (hasJoined(player) && !canOpenWindow(player)) {
@@ -254,7 +282,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
   }
 
   private void refreshKitAll() {
-    for (MatchPlayer player : getMatch().getObservers()) {
+    for (MatchPlayer player : match.getObservers()) {
       refreshKit(player);
     }
   }
@@ -286,7 +314,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
         || event.getCurrentItem().getItemMeta() == null
         || event.getCurrentItem().getItemMeta().getDisplayName() == null) return;
     if (event.getWhoClicked() instanceof Player) {
-      MatchPlayer player = getMatch().getPlayer((Player) event.getWhoClicked());
+      MatchPlayer player = match.getPlayer((Player) event.getWhoClicked());
       if (player == null || !this.picking.contains(player)) return;
 
       this.handleInventoryClick(
@@ -299,20 +327,17 @@ public class PickerMatchModule extends MatchModule implements Listener {
 
   @EventHandler
   public void handleLocaleChange(final PlayerLocaleChangeEvent event) {
-    refreshKit(getMatch().getPlayer(event.getPlayer()));
+    refreshKit(match.getPlayer(event.getPlayer()));
   }
 
   @EventHandler
   public void closeMonitoredInventory(final InventoryCloseEvent event) {
-    this.picking.remove(getMatch().getPlayer((Player) event.getPlayer()));
+    this.picking.remove(match.getPlayer((Player) event.getPlayer()));
   }
 
   @EventHandler(priority = EventPriority.HIGHEST)
   public void rightClickIcon(final PlayerInteractEvent event) {
-    if (!(event.getAction() == Action.RIGHT_CLICK_AIR
-        || event.getAction() == Action.RIGHT_CLICK_BLOCK)) return;
-
-    MatchPlayer player = getMatch().getPlayer(event.getPlayer());
+    MatchPlayer player = match.getPlayer(event.getPlayer());
     if (player == null) return;
 
     if (!canUse(player)) return;
@@ -324,17 +349,20 @@ public class PickerMatchModule extends MatchModule implements Listener {
     if (displayName == null) return;
 
     boolean handled = false;
-    final JoinMatchModule jmm = getMatch().needMatchModule(JoinMatchModule.class);
+    boolean immediate =
+        (event.getAction() == Action.LEFT_CLICK_AIR
+            || event.getAction() == Action.LEFT_CLICK_BLOCK);
+    final JoinMatchModule jmm = match.needModule(JoinMatchModule.class);
 
     if (hand.getType() == Button.JOIN.material) {
       handled = true;
-      if (canOpenWindow(player) && settingEnabled(player, true)) {
+      if (!immediate && canOpenWindow(player) && settingEnabled(player, true)) {
         showWindow(player);
       } else {
         // If there is nothing to pick or setting is disabled, just join immediately
         jmm.join(player, null);
       }
-    } else if (hand.getType() == Button.LEAVE.material) {
+    } else if (hand.getType() == Button.LEAVE.material && !immediate) {
       jmm.leave(player);
     }
 
@@ -506,7 +534,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
 
     // Class buttons
     if (hasClasses) {
-      for (PlayerClass cls : getMatch().getMatchModule(ClassMatchModule.class).getClasses()) {
+      for (PlayerClass cls : match.getModule(ClassMatchModule.class).getClasses()) {
         slots.add(createClassButton(player, cls));
       }
     }
@@ -537,10 +565,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
 
     meta.setDisplayName(
         (cls.canUse(viewer.getBukkit()) ? ChatColor.GREEN : ChatColor.RED) + cls.getName());
-    if (getMatch()
-        .getMatchModule(ClassMatchModule.class)
-        .getSelectedClass(viewer.getId())
-        .equals(cls)) {
+    if (match.getModule(ClassMatchModule.class).getSelectedClass(viewer.getId()).equals(cls)) {
       meta.addEnchant(Enchantment.ARROW_INFINITE, 1, true);
     }
 
@@ -585,7 +610,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
   }
 
   private ItemStack createTeamJoinButton(final MatchPlayer player, final Team team) {
-    JoinMatchModule jmm = getMatch().needMatchModule(JoinMatchModule.class);
+    JoinMatchModule jmm = match.needModule(JoinMatchModule.class);
 
     ItemStack item = new ItemStack(Button.TEAM_JOIN.material);
     String capacityMessage =
@@ -648,7 +673,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
     player.playSound(new Sound("random.click", 1, 2));
 
     if (hasClasses) {
-      ClassMatchModule cmm = player.getMatch().needMatchModule(ClassMatchModule.class);
+      ClassMatchModule cmm = player.getMatch().needModule(ClassMatchModule.class);
       PlayerClass cls = cmm.getPlayerClass(name);
 
       if (cls != null && cls.getIcon().equals(material)) {
@@ -683,7 +708,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
     }
 
     if (hasTeams && Button.TEAM_JOIN.matches(material)) {
-      Team team = player.getMatch().needMatchModule(TeamMatchModule.class).bestFuzzyMatch(name, 1);
+      Team team = player.getMatch().needModule(TeamMatchModule.class).bestFuzzyMatch(name, 1);
       if (team != null) {
         this.scheduleClose(player);
         this.scheduleJoin(player, team);
@@ -729,7 +754,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
               @Override
               public void run() {
                 if (bukkit.isOnline()) {
-                  getMatch().needMatchModule(JoinMatchModule.class).join(player, team);
+                  match.needModule(JoinMatchModule.class).join(player, team);
                 }
               }
             });
@@ -747,7 +772,7 @@ public class PickerMatchModule extends MatchModule implements Listener {
               @Override
               public void run() {
                 if (bukkit.isOnline()) {
-                  getMatch().needMatchModule(JoinMatchModule.class).leave(player);
+                  match.needModule(JoinMatchModule.class).leave(player);
                 }
               }
             });

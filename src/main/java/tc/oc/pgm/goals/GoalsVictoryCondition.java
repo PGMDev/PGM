@@ -24,13 +24,13 @@ public class GoalsVictoryCondition implements VictoryCondition {
 
   @Override
   public int compare(Competitor a, Competitor b) {
-    GoalMatchModule gmm = a.getMatch().needMatchModule(GoalMatchModule.class);
+    GoalMatchModule gmm = a.getMatch().needModule(GoalMatchModule.class);
     return gmm.getProgress(a).compareTo(gmm.getProgress(b));
   }
 
   @Override
   public boolean isCompleted(Match match) {
-    GoalMatchModule gmm = match.needMatchModule(GoalMatchModule.class);
+    GoalMatchModule gmm = match.needModule(GoalMatchModule.class);
     competitors:
     for (Map.Entry<Competitor, Collection<Goal>> entry :
         gmm.getGoalsByCompetitor().asMap().entrySet()) {

@@ -4,14 +4,15 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.match.MatchModule;
+import tc.oc.pgm.api.match.MatchModule;
 
-public class GameRulesMatchModule extends MatchModule {
+public class GameRulesMatchModule implements MatchModule {
 
+  private final Match match;
   private final Map<GameRule, Boolean> gameRules;
 
   public GameRulesMatchModule(Match match, Map<GameRule, Boolean> gameRules) {
-    super(match);
+    this.match = match;
     this.gameRules = Preconditions.checkNotNull(gameRules, "gamerules");
   }
 

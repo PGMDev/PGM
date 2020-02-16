@@ -8,10 +8,9 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 public class SAXHandler extends org.jdom2.input.sax.SAXHandler {
-
   public static final SAXHandlerFactory FACTORY = factory -> new SAXHandler();
 
-  public SAXHandler() {
+  private SAXHandler() {
     super(new JDOMFactory());
   }
 
@@ -28,7 +27,7 @@ public class SAXHandler extends org.jdom2.input.sax.SAXHandler {
     super.endElement(namespaceURI, localName, qName);
   }
 
-  static class JDOMFactory extends LocatedJDOMFactory {
+  private static class JDOMFactory extends LocatedJDOMFactory {
     @Override
     public Element element(int line, int col, String name, Namespace namespace) {
       return new InheritingElement(name, namespace);

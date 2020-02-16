@@ -15,26 +15,27 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.joda.time.Duration;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.filters.query.IQuery;
 import tc.oc.pgm.filters.query.MatchQuery;
 import tc.oc.pgm.goals.events.GoalEvent;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.util.collection.DefaultMapAdapter;
 import tc.oc.world.WorldBorders;
 
 @ListenerScope(MatchScope.LOADED)
-public class WorldBorderMatchModule extends MatchModule implements Listener {
+public class WorldBorderMatchModule implements MatchModule, Listener {
 
+  private final Match match;
   private final List<WorldBorder> borders;
   private final Map<WorldBorder, Boolean> results = new DefaultMapAdapter<>(false);
   private @Nullable WorldBorder appliedBorder;
   private @Nullable Duration appliedAt;
 
   public WorldBorderMatchModule(Match match, List<WorldBorder> borders) {
-    super(match);
+    this.match = match;
     checkNotNull(borders);
     checkArgument(!borders.isEmpty());
     this.borders = borders;
@@ -42,15 +43,13 @@ public class WorldBorderMatchModule extends MatchModule implements Listener {
 
   @Override
   public void load() {
-    super.load();
-
     WorldBorder initial = null;
     for (WorldBorder border : borders) {
       if (!border.isConditional()) initial = border;
     }
 
     if (initial != null) {
-      logger.fine("Initializing with " + initial);
+      match.getLogger().fine("Initializing with " + initial);
       apply(initial);
     } else {
       reset();
@@ -59,9 +58,7 @@ public class WorldBorderMatchModule extends MatchModule implements Listener {
 
   @Override
   public void enable() {
-    super.enable();
-
-    getMatch()
+    match
         .getScheduler(MatchScope.RUNNING)
         .runTaskTimer(
             Duration.ZERO,
@@ -79,24 +76,22 @@ public class WorldBorderMatchModule extends MatchModule implements Listener {
   @Override
   public void disable() {
     freeze();
-
-    super.disable();
   }
 
   private void apply(WorldBorder border) {
-    logger.fine("Applying " + border);
+    match.getLogger().fine("Applying " + border);
 
-    border.apply(getMatch().getWorld().getWorldBorder(), appliedBorder != null);
+    border.apply(match.getWorld().getWorldBorder(), appliedBorder != null);
     appliedBorder = border;
-    appliedAt = getMatch().getDuration();
+    appliedAt = match.getDuration();
   }
 
   private void reset() {
-    logger.fine("Clearing border");
+    match.getLogger().fine("Clearing border");
 
     appliedBorder = null;
     appliedAt = null;
-    getMatch().getWorld().getWorldBorder().reset();
+    match.getWorld().getWorldBorder().reset();
   }
 
   /**
@@ -111,7 +106,7 @@ public class WorldBorderMatchModule extends MatchModule implements Listener {
    * @param event to use for the filter query
    */
   private boolean update(@Nullable Event event) {
-    IQuery query = event == null ? getMatch().getQuery() : new MatchQuery(event, getMatch());
+    IQuery query = event == null ? match.getQuery() : new MatchQuery(event, match);
     WorldBorder lastMatched = null;
     boolean applied = false;
 
@@ -145,18 +140,15 @@ public class WorldBorderMatchModule extends MatchModule implements Listener {
   private void refresh() {
     if (appliedBorder != null) {
       appliedBorder.refresh(
-          getMatch().getWorld().getWorldBorder(), getMatch().getDuration().minus(appliedAt));
+          match.getWorld().getWorldBorder(), match.getDuration().minus(appliedAt));
     }
   }
 
   /** If the current border is moving, stop it in-place */
   private void freeze() {
     if (appliedBorder != null && appliedBorder.isMoving()) {
-      logger.fine("Freezing border " + appliedBorder);
-      getMatch()
-          .getWorld()
-          .getWorldBorder()
-          .setSize(getMatch().getWorld().getWorldBorder().getSize(), 0);
+      match.getLogger().fine("Freezing border " + appliedBorder);
+      match.getWorld().getWorldBorder().setSize(match.getWorld().getWorldBorder().getSize(), 0);
     }
   }
 
@@ -178,7 +170,7 @@ public class WorldBorderMatchModule extends MatchModule implements Listener {
 
   @EventHandler(priority = EventPriority.HIGH)
   public void onPlayerMove(final CoarsePlayerMoveEvent event) {
-    MatchPlayer player = getMatch().getPlayer(event.getPlayer());
+    MatchPlayer player = match.getPlayer(event.getPlayer());
     if (player != null && player.isObserving()) {
       Location location = event.getTo();
       if (WorldBorders.clampToBorder(location)) {

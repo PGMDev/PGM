@@ -46,8 +46,8 @@ import tc.oc.pgm.filters.query.IPlayerQuery;
 import tc.oc.pgm.filters.query.PlayerQuery;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.WalkSpeedKit;
+import tc.oc.util.ClassLogger;
 import tc.oc.util.ViaUtils;
-import tc.oc.util.logging.ClassLogger;
 import tc.oc.world.DeathOverride;
 import tc.oc.world.NMSHacks;
 
@@ -191,7 +191,7 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
     logger.fine("Refreshing gamemode as " + (participating ? "participant" : "observer"));
 
     if (!participating) getBukkit().leaveVehicle();
-    this.getBukkit().setGameMode(participating ? GameMode.SURVIVAL : GameMode.CREATIVE);
+    setGameMode(participating ? GameMode.SURVIVAL : GameMode.CREATIVE);
     this.getBukkit().setAllowFlight(!participating);
     this.getBukkit().spigot().setAffectsSpawning(participating);
     this.getBukkit().spigot().setCollidesWithEntities(participating);
@@ -234,6 +234,7 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
     Player bukkit = getBukkit();
     bukkit.closeInventory();
     resetInventory();
+    bukkit.setArrowsStuck(0);
     bukkit.setExhaustion(0);
     bukkit.setFallDistance(0);
     bukkit.setFireTicks(0);
@@ -299,6 +300,11 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
     }
   }
 
+  @Override
+  public void setGameMode(GameMode gameMode) {
+    getBukkit().setGameMode(gameMode);
+  }
+
   /**
    * When max health is lowered by an item attribute or potion effect, the client can go into an
    * inconsistent state that has strange effects, like the death animation playing when the player
@@ -340,7 +346,7 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
 
   @Override
   public Settings getSettings() {
-    return PGM.get().getDatastoreCache().getSettings(id);
+    return PGM.get().getDatastore().getSettings(id);
   }
 
   @Override
@@ -368,6 +374,11 @@ public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<M
   @Override
   public String getPrefixedName() {
     return PGM.get().getPrefixRegistry().getPrefixedName(getBukkit(), getParty());
+  }
+
+  @Override
+  public GameMode getGameMode() {
+    return getBukkit().getGameMode();
   }
 
   @Override

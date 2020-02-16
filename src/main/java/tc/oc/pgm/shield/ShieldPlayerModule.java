@@ -10,13 +10,12 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
+import tc.oc.util.ClassLogger;
 import tc.oc.util.TimeUtils;
-import tc.oc.util.logging.ClassLogger;
 import tc.oc.world.NMSHacks;
 
 public class ShieldPlayerModule implements Tickable {
 
-  private final ShieldMatchModule smm;
   private final Logger logger;
   private final MatchPlayer player;
   private final Player bukkit;
@@ -29,10 +28,8 @@ public class ShieldPlayerModule implements Tickable {
   // Ticks until next shield recharge.
   private long rechargeTicks;
 
-  public ShieldPlayerModule(
-      ShieldMatchModule smm, MatchPlayer player, ShieldParameters parameters) {
-    this.smm = smm;
-    this.logger = ClassLogger.get(smm.getLogger(), getClass(), player.getBukkit().getName());
+  public ShieldPlayerModule(Logger logger, MatchPlayer player, ShieldParameters parameters) {
+    this.logger = ClassLogger.get(logger, getClass(), player.getBukkit().getName());
     this.player = player;
     this.bukkit = player.getBukkit();
     this.parameters = parameters;

@@ -2,10 +2,8 @@ package tc.oc.pgm.api;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.stream.Stream;
-import org.bukkit.Bukkit;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
-import org.bukkit.plugin.PluginManager;
 
 /** This is a hard-coded list of permissions, that add the basic functionality. */
 public interface Permissions {
@@ -117,14 +115,21 @@ public interface Permissions {
               .put("commandbook.teleport", true)
               .build());
 
-  static void register(PluginManager pluginManager) {
+  static void registerAll() {
     Stream.of(DEFAULT, PREMIUM, MODERATOR, DEVELOPER, ALL, PARTICIPANT, OBSERVER)
-        .forEachOrdered(pluginManager::addPermission);
+        .forEachOrdered(Permissions::register);
+  }
+
+  static Permission register(Permission permission) {
+    PGM.get().getServer().getPluginManager().addPermission(permission);
+    return permission;
   }
 
   static Permission register(String node, PermissionDefault def) {
-    final Permission permission = new Permission(node, def);
-    Bukkit.getServer().getPluginManager().addPermission(permission);
+    Permission permission = PGM.get().getServer().getPluginManager().getPermission(node);
+    if (permission == null) {
+      permission = register(new Permission(node, def));
+    }
     return permission;
   }
 }

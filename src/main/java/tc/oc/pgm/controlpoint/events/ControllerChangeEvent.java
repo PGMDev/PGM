@@ -3,16 +3,16 @@ package tc.oc.pgm.controlpoint.events;
 import javax.annotation.Nullable;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.controlpoint.ControlPoint;
-import tc.oc.pgm.teams.Team;
 
 public class ControllerChangeEvent extends ControlPointEvent {
   private static final HandlerList handlers = new HandlerList();
-  @Nullable private final Team oldController;
-  @Nullable private final Team newController;
+  @Nullable private final Competitor oldController;
+  @Nullable private final Competitor newController;
 
   public ControllerChangeEvent(
-      Match match, ControlPoint hill, Team oldController, Team newController) {
+      Match match, ControlPoint hill, Competitor oldController, Competitor newController) {
     super(match, hill);
     this.oldController = oldController;
     this.newController = newController;
@@ -28,12 +28,12 @@ public class ControllerChangeEvent extends ControlPointEvent {
   }
 
   @Nullable
-  public Team getNewController() {
+  public Competitor getNewController() {
     return newController;
   }
 
   @Nullable
-  public Team getOldController() {
+  public Competitor getOldController() {
     return oldController;
   }
 }

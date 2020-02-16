@@ -121,7 +121,7 @@ public class ModeCommands {
   }
 
   private static ObjectiveModesMatchModule getModes(Match match) {
-    return match.getMatchModule(ObjectiveModesMatchModule.class);
+    return match.getModule(ObjectiveModesMatchModule.class);
   }
 
   private static void throwNoResults() throws CommandException {

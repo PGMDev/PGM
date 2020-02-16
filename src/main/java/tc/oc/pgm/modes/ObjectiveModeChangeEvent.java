@@ -23,7 +23,7 @@ public class ObjectiveModeChangeEvent extends MatchEvent {
     if (this.mode.getName() != null) {
       this.name = this.mode.getName();
     } else {
-      GoalMatchModule wins = getMatch().needMatchModule(GoalMatchModule.class);
+      GoalMatchModule wins = getMatch().needModule(GoalMatchModule.class);
       Collection<Core> cores = wins.getGoals(Core.class).values();
       Collection<Destroyable> destroyables = wins.getGoals(Destroyable.class).values();
 

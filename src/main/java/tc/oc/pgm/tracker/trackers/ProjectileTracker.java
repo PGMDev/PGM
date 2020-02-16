@@ -6,6 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.projectiles.ProjectileSource;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.projectile.EntityLaunchEvent;
 import tc.oc.pgm.projectile.ProjectileDefinition;
 import tc.oc.pgm.projectile.ProjectileMatchModule;
@@ -19,8 +20,8 @@ import tc.oc.pgm.tracker.damage.ProjectileInfo;
  */
 public class ProjectileTracker extends AbstractTracker<ProjectileInfo> {
 
-  public ProjectileTracker(TrackerMatchModule tmm) {
-    super(ProjectileInfo.class, tmm);
+  public ProjectileTracker(TrackerMatchModule tmm, Match match) {
+    super(ProjectileInfo.class, tmm, match);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -38,7 +39,8 @@ public class ProjectileTracker extends AbstractTracker<ProjectileInfo> {
 
   void handleLaunch(Entity projectile, ProjectileSource source) {
     PhysicalInfo projectileInfo = entities().resolveEntity(projectile);
-    if (!(projectileInfo instanceof ProjectileInfo)) {
+    if (!(projectileInfo instanceof ProjectileInfo)
+        || (((ProjectileInfo) projectileInfo).getShooter() == null && source != null)) {
       ProjectileDefinition definition = ProjectileMatchModule.getProjectileDefinition(projectile);
       String customName = definition == null ? null : definition.getName();
       entities()

@@ -1,8 +1,16 @@
 package tc.oc.pgm.ffa;
 
-import java.util.*;
+import com.google.common.collect.Lists;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.ChatColor;
+import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -12,20 +20,39 @@ import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.identity.PlayerIdentityChangeEvent;
 import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.event.PartyRenameEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.join.*;
-import tc.oc.pgm.match.MatchModule;
+import tc.oc.pgm.join.GenericJoinResult;
+import tc.oc.pgm.join.JoinHandler;
+import tc.oc.pgm.join.JoinMatchModule;
+import tc.oc.pgm.join.JoinResult;
+import tc.oc.pgm.join.QueuedParticipants;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
 import tc.oc.server.NullCommandSender;
 
 @ListenerScope(MatchScope.LOADED)
-public class FreeForAllMatchModule extends MatchModule implements Listener, JoinHandler {
+public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler {
+
+  // 10 different colors that tributes are allowed to have
+  private static final ChatColor[] COLORS =
+      new ChatColor[] {
+        ChatColor.RED,
+        ChatColor.BLUE,
+        ChatColor.GREEN,
+        ChatColor.YELLOW,
+        ChatColor.LIGHT_PURPLE,
+        ChatColor.GOLD,
+        ChatColor.DARK_GREEN,
+        ChatColor.DARK_AQUA,
+        ChatColor.DARK_PURPLE,
+        ChatColor.DARK_RED
+      };
 
   class NeedMorePlayers implements UnreadyReason {
     final int players;
@@ -39,11 +66,11 @@ public class FreeForAllMatchModule extends MatchModule implements Listener, Join
       if (players == 1) {
         return new PersonalizedTranslatable(
             "start.needMorePlayers.ffa.singular",
-            new PersonalizedText(String.valueOf(players), ChatColor.AQUA));
+            new PersonalizedText(String.valueOf(players), net.md_5.bungee.api.ChatColor.AQUA));
       } else {
         return new PersonalizedTranslatable(
             "start.needMorePlayers.ffa.plural",
-            new PersonalizedText(String.valueOf(players), ChatColor.AQUA));
+            new PersonalizedText(String.valueOf(players), net.md_5.bungee.api.ChatColor.AQUA));
       }
     }
 
@@ -58,15 +85,21 @@ public class FreeForAllMatchModule extends MatchModule implements Listener, Join
     }
   };
 
+  private final Match match;
   private final FreeForAllOptions options;
   private @Nullable Integer minPlayers, maxPlayers, maxOverfill;
   private int minPlayersNeeded = Integer.MAX_VALUE;
   private final Map<UUID, Tribute> tributes = new HashMap<>();
+  private final Deque<ChatColor> colors = new ArrayDeque<>();
   private JoinMatchModule jmm;
 
   public FreeForAllMatchModule(Match match, FreeForAllOptions options) {
-    super(match);
+    this.match = match;
     this.options = options;
+
+    final List<ChatColor> colors = Lists.newArrayList(COLORS);
+    Collections.shuffle(colors);
+    colors.forEach(this.colors::push);
   }
 
   private JoinMatchModule join() {
@@ -100,24 +133,21 @@ public class FreeForAllMatchModule extends MatchModule implements Listener, Join
   public void setMaxPlayers(@Nullable Integer maxPlayers, @Nullable Integer maxOverfill) {
     this.maxPlayers = maxPlayers;
     this.maxOverfill = maxOverfill;
-    getMatch().setMaxPlayers(getMaxPlayers());
+    match.setMaxPlayers(getMaxPlayers());
   }
 
   @Override
   public void load() {
-    super.load();
-
-    getMatch().needMatchModule(JoinMatchModule.class).registerHandler(this);
-
-    getMatch().setMaxPlayers(getMaxPlayers());
+    match.needModule(JoinMatchModule.class).registerHandler(this);
+    match.setMaxPlayers(getMaxPlayers());
     updateReadiness();
   }
 
   protected void updateReadiness() {
-    if (getMatch().isRunning()) return;
+    if (match.isRunning()) return;
 
     int players = 0;
-    for (Competitor competitor : getMatch().getCompetitors()) {
+    for (Competitor competitor : match.getCompetitors()) {
       if (competitor instanceof Tribute) {
         players += competitor.getPlayers().size();
       }
@@ -125,7 +155,7 @@ public class FreeForAllMatchModule extends MatchModule implements Listener, Join
 
     int playersNeeded = getMinPlayers() - players;
 
-    final StartMatchModule smm = getMatch().needMatchModule(StartMatchModule.class);
+    final StartMatchModule smm = match.needModule(StartMatchModule.class);
     if (playersNeeded > 0) {
       smm.addUnreadyReason(new NeedMorePlayers(playersNeeded));
     } else {
@@ -142,9 +172,11 @@ public class FreeForAllMatchModule extends MatchModule implements Listener, Join
   protected Tribute getTribute(MatchPlayer player) {
     Tribute tribute = tributes.get(player.getId());
     if (tribute == null) {
-      tribute = new Tribute(player);
+      final ChatColor color = colors.pollFirst();
+      if (color != null) colors.addLast(color);
+      tribute = new Tribute(player, color);
       tributes.put(player.getId(), tribute);
-      logger.fine("Created " + tribute);
+      match.getLogger().fine("Created " + tribute);
     }
     return tribute;
   }
@@ -152,7 +184,7 @@ public class FreeForAllMatchModule extends MatchModule implements Listener, Join
   protected boolean canPriorityKick(MatchPlayer joining) {
     if (!join().canPriorityKick(joining)) return false;
 
-    for (MatchPlayer player : getMatch().getParticipants()) {
+    for (MatchPlayer player : match.getParticipants()) {
       if (!join().canPriorityKick(player)) return true;
     }
 
@@ -163,17 +195,17 @@ public class FreeForAllMatchModule extends MatchModule implements Listener, Join
     if (!join().canPriorityKick(joining)) return false;
 
     List<MatchPlayer> kickable = new ArrayList<>();
-    for (MatchPlayer player : getMatch().getParticipants()) {
+    for (MatchPlayer player : match.getParticipants()) {
       if (!join().canPriorityKick(player)) kickable.add(player);
     }
     if (kickable.isEmpty()) return false;
 
-    MatchPlayer kickMe = kickable.get(getMatch().getRandom().nextInt(kickable.size()));
+    MatchPlayer kickMe = kickable.get(match.getRandom().nextInt(kickable.size()));
 
     kickMe.sendWarning(new PersonalizedTranslatable("gameplay.ffa.kickedForPremium"), false);
     kickMe.playSound(new Sound("mob.villager.hit"));
 
-    getMatch().setParty(kickMe, getMatch().getDefaultParty());
+    match.setParty(kickMe, match.getDefaultParty());
 
     return true;
   }
@@ -187,7 +219,7 @@ public class FreeForAllMatchModule extends MatchModule implements Listener, Join
       return GenericJoinResult.Status.REDUNDANT.toResult();
     }
 
-    int players = getMatch().getParticipants().size();
+    int players = match.getParticipants().size();
 
     if (join().canJoinFull(joining)) {
       if (players >= getMaxOverfill() && !canPriorityKick(joining)) {
@@ -250,7 +282,7 @@ public class FreeForAllMatchModule extends MatchModule implements Listener, Join
           new PersonalizedTranslatable("command.gameplay.join.alreadyJoined"), false);
     }
 
-    return getMatch().setParty(joining, getTribute(joining));
+    return match.setParty(joining, getTribute(joining));
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -263,14 +295,13 @@ public class FreeForAllMatchModule extends MatchModule implements Listener, Join
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onIdentityChange(PlayerIdentityChangeEvent event) {
-    MatchPlayer player = getMatch().getPlayer(event.getPlayer());
+    MatchPlayer player = match.getPlayer(event.getPlayer());
     if (player != null && player.getParty() instanceof Tribute) {
-      getMatch()
-          .callEvent(
-              new PartyRenameEvent(
-                  player.getParty(),
-                  event.getOldIdentity().getName(NullCommandSender.INSTANCE),
-                  event.getNewIdentity().getName(NullCommandSender.INSTANCE)));
+      match.callEvent(
+          new PartyRenameEvent(
+              player.getParty(),
+              event.getOldIdentity().getName(NullCommandSender.INSTANCE),
+              event.getNewIdentity().getName(NullCommandSender.INSTANCE)));
     }
   }
 }

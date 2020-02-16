@@ -1,7 +1,9 @@
 package tc.oc.server;
 
-import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
@@ -11,7 +13,6 @@ public class Scheduler {
   private final Plugin plugin;
   private final BukkitScheduler bukkitScheduler;
   private final WeakHashMap<BukkitTask, Object> tasks = new WeakHashMap<>();
-  private final WeakHashMap<Runnable, BukkitTask> tasksByRunnable = new WeakHashMap<>();
   private boolean cancelled;
 
   public Scheduler(Plugin plugin, BukkitScheduler scheduler) {
@@ -84,19 +85,15 @@ public class Scheduler {
         this.bukkitScheduler.runTaskTimer(this.plugin, task, ticks(delay), ticks(interval)));
   }
 
-  /**
-   * Run the given task only if there is no instance of that task's class already scheduled or
-   * running.
-   *
-   * @return The handle of the newly scheduled task, if it was scheduled, otherwise the handle of
-   *     the existing task.
-   */
-  public BukkitTask debounce(Runnable task) {
-    for (Map.Entry<Runnable, BukkitTask> running : tasksByRunnable.entrySet()) {
-      if (task.getClass().isInstance(running.getKey()) && isPending(running.getValue())) {
-        return running.getValue();
+  public <T> Future<T> runMainThread(Callable<T> task) {
+    if (this.plugin.getServer().isPrimaryThread()) {
+      try {
+        return CompletableFuture.completedFuture(task.call());
+      } catch (Exception e) {
+        throw new RuntimeException(e);
       }
+    } else {
+      return bukkitScheduler.callSyncMethod(this.plugin, task);
     }
-    return runTask(task);
   }
 }

@@ -1,11 +1,18 @@
 package tc.oc.pgm.regions;
 
-import static tc.oc.pgm.map.ProtoVersions.REGION_FIX_VERSION;
+import static tc.oc.pgm.api.map.MapProtos.REGION_FIX_VERSION;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -15,12 +22,11 @@ import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import tc.oc.block.BlockVectors;
 import tc.oc.material.matcher.SingleMaterialMatcher;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.filters.AnyFilter;
 import tc.oc.pgm.filters.BlockFilter;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.query.BlockQuery;
-import tc.oc.pgm.map.PGMMap;
+import tc.oc.util.Version;
 
 /**
  * Region represented by a list of single blocks. This will check if a point is inside the block at
@@ -123,28 +129,29 @@ public class FiniteBlockRegion extends AbstractRegion {
   }
 
   public static FiniteBlockRegion fromWorld(
-      Region region, World world, SingleMaterialMatcher... materials) {
-    return fromWorld(region, world, Arrays.asList(materials));
+      Region region, World world, @Nullable Version proto, SingleMaterialMatcher... materials) {
+    return fromWorld(region, world, Arrays.asList(materials), proto);
   }
 
   public static FiniteBlockRegion fromWorld(
-      Region region, World world, Collection<SingleMaterialMatcher> materials) {
+      Region region,
+      World world,
+      Collection<SingleMaterialMatcher> materials,
+      @Nullable Version proto) {
     List<Filter> filters = new ArrayList<>(materials.size());
     for (SingleMaterialMatcher materialPattern : materials) {
       filters.add(new BlockFilter(materialPattern));
     }
-    return fromWorld(region, world, new AnyFilter(filters));
+    return fromWorld(region, world, new AnyFilter(filters), proto);
   }
 
   @SuppressWarnings("deprecation")
-  public static FiniteBlockRegion fromWorld(Region region, World world, Filter materials) {
+  public static FiniteBlockRegion fromWorld(
+      Region region, World world, Filter materials, @Nullable Version proto) {
     List<Block> blocks = new LinkedList<>();
     Bounds bounds = region.getBounds();
-    PGMMap map = PGM.get().getMatchManager().getMatch(world).getMap();
 
-    if (region instanceof CuboidRegion
-        && map != null
-        && map.getInfo().proto.isOlderThan(REGION_FIX_VERSION)) {
+    if (region instanceof CuboidRegion && proto != null && proto.isOlderThan(REGION_FIX_VERSION)) {
       // The loops below are incorrect, because they go one block over the max.
       // Unfortunately, we have to keep this around to avoid breaking old maps.
       Vector min = bounds.getMin();

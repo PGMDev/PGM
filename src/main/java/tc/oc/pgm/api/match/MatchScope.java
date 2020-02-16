@@ -1,7 +1,6 @@
 package tc.oc.pgm.api.match;
 
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.match.MatchModule;
 
 /** Represents the state that {@link MatchModule}s can listen and respond to events. */
 public enum MatchScope {

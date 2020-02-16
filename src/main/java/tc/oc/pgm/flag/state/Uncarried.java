@@ -146,7 +146,7 @@ public abstract class Uncarried extends Spawned {
   protected boolean canPickup(MatchPlayer player) {
     if (this.pickingUp != null) return false; // Prevent infinite recursion
 
-    for (Flag flag : this.flag.getMatch().getMatchModule(FlagMatchModule.class).getFlags()) {
+    for (Flag flag : this.flag.getMatch().getModule(FlagMatchModule.class).getFlags()) {
       if (flag.isCarrying(player)) return false;
     }
 

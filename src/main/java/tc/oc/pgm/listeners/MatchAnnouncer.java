@@ -1,6 +1,6 @@
 package tc.oc.pgm.listeners;
 
-import java.util.List;
+import java.util.Collection;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -8,10 +8,12 @@ import org.bukkit.event.Listener;
 import tc.oc.component.Component;
 import tc.oc.component.types.PersonalizedText;
 import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.named.MapNameStyle;
 import tc.oc.named.NameStyle;
-import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.chat.Sound;
+import tc.oc.pgm.api.map.Contributor;
+import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
@@ -20,8 +22,6 @@ import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
-import tc.oc.pgm.map.Contributor;
-import tc.oc.pgm.map.MapInfo;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.TranslationUtils;
 import tc.oc.util.components.ComponentUtils;
@@ -114,15 +114,15 @@ public class MatchAnnouncer implements Listener {
   }
 
   private void sendWelcomeMessage(MatchPlayer viewer) {
-    MapInfo mapInfo = viewer.getMatch().getMap().getInfo();
+    MapInfo mapInfo = viewer.getMatch().getMap();
 
-    String title = ChatColor.AQUA.toString() + ChatColor.BOLD + mapInfo.name;
+    String title = ChatColor.AQUA.toString() + ChatColor.BOLD + mapInfo.getName();
     viewer.sendMessage(ComponentUtils.horizontalLineHeading(title, ChatColor.WHITE, 200));
 
-    String objective = " " + ChatColor.BLUE + ChatColor.ITALIC + mapInfo.objective;
+    String objective = " " + ChatColor.BLUE + ChatColor.ITALIC + mapInfo.getDescription();
     ComponentUtils.wordWrap(objective, 200).forEach(viewer::sendMessage);
 
-    List<Contributor> authors = mapInfo.getNamedAuthors();
+    Collection<Contributor> authors = mapInfo.getAuthors();
     if (!authors.isEmpty()) {
       viewer.sendMessage(
           new PersonalizedText(" ", ChatColor.DARK_GRAY)
@@ -137,12 +137,10 @@ public class MatchAnnouncer implements Listener {
 
   private void sendCurrentlyPlaying(MatchPlayer viewer) {
     viewer.sendMessage(
-        org.bukkit.ChatColor.DARK_PURPLE
-            + AllTranslations.get()
-                .translate(
-                    "broadcast.currentlyPlaying",
-                    viewer.getBukkit(),
-                    viewer.getMatch().getMap().getInfo().getShortDescription(viewer.getBukkit())
-                        + org.bukkit.ChatColor.DARK_PURPLE));
+        new PersonalizedTranslatable(
+                "broadcast.currentlyPlaying",
+                viewer.getMatch().getMap().getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS))
+            .getPersonalizedText()
+            .color(ChatColor.DARK_PURPLE));
   }
 }

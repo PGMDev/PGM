@@ -15,7 +15,6 @@ import tc.oc.pgm.destroyable.DestroyableContribution;
 import tc.oc.pgm.destroyable.DestroyableDestroyedEvent;
 import tc.oc.pgm.util.TranslationUtils;
 import tc.oc.pgm.wool.PlayerWoolPlaceEvent;
-import tc.oc.server.BukkitUtils;
 import tc.oc.util.components.Components;
 
 public class FormattingListener implements Listener {
@@ -28,7 +27,7 @@ public class FormattingListener implements Listener {
               new PersonalizedTranslatable(
                   "match.complete.wool",
                   event.getPlayer().getStyledName(NameStyle.COLOR),
-                  BukkitUtils.woolName(event.getWool().getDyeColor()),
+                  event.getWool().getComponentName(),
                   event.getPlayer().getParty().getComponentName()));
     }
   }

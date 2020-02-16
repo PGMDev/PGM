@@ -15,22 +15,21 @@ import tc.oc.bossbar.BossBarStack;
 import tc.oc.bossbar.BossBarView;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerLeaveMatchEvent;
-import tc.oc.pgm.match.MatchModule;
 import tc.oc.world.NMSHacks;
 
 @ListenerScope(MatchScope.LOADED)
-public class BossBarMatchModule extends MatchModule implements Listener {
+public class BossBarMatchModule implements MatchModule, Listener {
 
   private final int entityId;
   private final Map<Player, BossBarView> views = new HashMap<>();
   private final BossBarStack stack = new BossBarStack();
 
   public BossBarMatchModule(Match match) {
-    super(match);
     this.entityId = NMSHacks.allocateEntityId(match);
   }
 
@@ -53,7 +52,6 @@ public class BossBarMatchModule extends MatchModule implements Listener {
    * viewer, thus different viewers can see different bars.
    */
   public void pushBossBar(BossBar bar) {
-    logger.fine("Pushing BossBar " + bar);
     stack.push(bar);
   }
 

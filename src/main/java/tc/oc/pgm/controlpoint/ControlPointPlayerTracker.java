@@ -1,7 +1,7 @@
 package tc.oc.pgm.controlpoint;
 
 import com.google.common.collect.Sets;
-import java.util.*;
+import java.util.Set;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -13,10 +13,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
-import tc.oc.pgm.teams.Team;
-import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.MatchPlayers;
-import tc.oc.util.collection.DefaultMapAdapter;
 
 /** Tracks which players are on a control point and answers some queries about them */
 public class ControlPointPlayerTracker implements Listener {
@@ -31,36 +28,6 @@ public class ControlPointPlayerTracker implements Listener {
 
   public Set<MatchPlayer> getPlayersOnPoint() {
     return this.playersOnPoint;
-  }
-
-  /** Get the number of players that each team in the match has on the point */
-  public Map<Team, Integer> getPlayerCountsByTeam() {
-    // calculate how many players from each team are on the hill
-    Map<Team, Integer> counts = new DefaultMapAdapter<>(new HashMap<Team, Integer>(), 0);
-    for (MatchPlayer player : this.getPlayersOnPoint()) {
-      Team team = Teams.get(player);
-      counts.put(team, counts.get(team) + 1);
-    }
-    return counts;
-  }
-
-  /**
-   * Get the number of players that each team in the match has on the point, sorted from most to
-   * least
-   */
-  public List<Map.Entry<Team, Integer>> getSortedPlayerCountsByTeam() {
-    List<Map.Entry<Team, Integer>> counts =
-        new ArrayList<>(this.getPlayerCountsByTeam().entrySet());
-    Collections.sort(
-        counts,
-        new Comparator<Map.Entry<Team, Integer>>() {
-          @Override
-          public int compare(Map.Entry<Team, Integer> o1, Map.Entry<Team, Integer> o2) {
-            return Integer.compare(
-                o2.getValue(), o1.getValue()); // reverse natural ordering of value
-          }
-        });
-    return counts;
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

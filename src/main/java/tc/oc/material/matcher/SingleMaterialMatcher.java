@@ -86,7 +86,7 @@ public class SingleMaterialMatcher implements MaterialMatcher {
     String[] pieces = text.split(":");
     Material material = Material.matchMaterial(pieces[0]);
     if (material == null) {
-      throw new IllegalArgumentException("Could not find world '" + pieces[0] + "'.");
+      throw new IllegalArgumentException("Could not find material '" + pieces[0] + "'.");
     }
     if (pieces.length > 1) {
       try {

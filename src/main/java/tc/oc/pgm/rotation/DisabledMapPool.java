@@ -1,7 +1,7 @@
 package tc.oc.pgm.rotation;
 
 import org.bukkit.configuration.ConfigurationSection;
-import tc.oc.pgm.map.PGMMap;
+import tc.oc.pgm.api.map.MapInfo;
 
 public class DisabledMapPool extends MapPool {
   DisabledMapPool(MapPoolManager manager, ConfigurationSection section, String name) {
@@ -14,12 +14,12 @@ public class DisabledMapPool extends MapPool {
   }
 
   @Override
-  public PGMMap popNextMap() {
+  public MapInfo popNextMap() {
     return getRandom();
   }
 
   @Override
-  public PGMMap getNextMap() {
+  public MapInfo getNextMap() {
     return null;
   }
 }

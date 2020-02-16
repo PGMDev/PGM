@@ -9,18 +9,17 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.match.MatchModule;
 
 @ListenerScope(MatchScope.LOADED)
-public class ItemModifyMatchModule extends MatchModule implements Listener {
+public class ItemModifyMatchModule implements MatchModule, Listener {
 
   private final ItemModifyModule imm;
 
-  public ItemModifyMatchModule(Match match) {
-    super(match);
-    this.imm = match.getMapContext().needModule(ItemModifyModule.class);
+  public ItemModifyMatchModule(Match match, ItemModifyModule imm) {
+    this.imm = imm;
   }
 
   private boolean applyRules(ItemStack stack) {

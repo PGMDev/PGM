@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.joda.time.Duration;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.util.logging.ClassLogger;
+import tc.oc.util.ClassLogger;
 
 public class CountdownContext {
   protected final Match match;

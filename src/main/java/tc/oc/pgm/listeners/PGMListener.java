@@ -1,10 +1,14 @@
 package tc.oc.pgm.listeners;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Server;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
@@ -13,6 +17,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -40,19 +45,64 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
+import tc.oc.pgm.commands.MatchCommands;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.gamerules.GameRule;
-import tc.oc.pgm.gamerules.GameRulesModule;
+import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.TimeLockModule;
+import tc.oc.server.NullCommandSender;
 
 public class PGMListener implements Listener {
   private final Plugin parent;
   private final MatchManager mm;
 
+  // Single-write, multi-read lock used to create the first match
+  private final ReentrantReadWriteLock lock;
+
   public PGMListener(Plugin parent, MatchManager mm) {
     this.parent = parent;
     this.mm = mm;
+    this.lock = new ReentrantReadWriteLock();
+  }
+
+  @EventHandler(ignoreCancelled = true)
+  public void onPrePlayerLogin(final AsyncPlayerPreLoginEvent event) {
+    if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED
+        || mm.getMatches().hasNext()) return;
+
+    // Create the match when the first player joins
+    if (lock.writeLock().tryLock()) {
+      // If the server is suspended, need to release so match can be created
+      final Server server = parent.getServer();
+      if (server.isSuspended()) {
+        server.setSuspended(false);
+      }
+
+      try {
+        mm.createMatch(null).get();
+      } catch (InterruptedException | ExecutionException e) {
+        // No-op
+      } finally {
+        lock.writeLock().unlock();
+      }
+    }
+
+    // If a match is being created, wait until its done
+    try {
+      lock.readLock().tryLock(15, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      // No-op
+    } finally {
+      lock.readLock().unlock();
+    }
+
+    if (!mm.getMatches().hasNext()) {
+      event.disallow(
+          AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
+          AllTranslations.get()
+              .translate("incorrectWorld.kickMessage", NullCommandSender.INSTANCE));
+    }
   }
 
   @EventHandler
@@ -62,9 +112,7 @@ public class PGMListener implements Listener {
       if (event.getPlayer().hasPermission(Permissions.JOIN_FULL)) {
         event.allow();
       } else {
-        event.setKickMessage(
-            AllTranslations.get() // MatchPlayer is not available at this time
-                .translate("serverFull", null));
+        event.setKickMessage(AllTranslations.get().translate("serverFull", event.getPlayer()));
       }
     }
   }
@@ -161,7 +209,7 @@ public class PGMListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void matchInfoOnParticipate(final PlayerPartyChangeEvent event) {
     if (event.getNewParty() instanceof Competitor) {
-      // MatchCommands.sendMatchInfo(event.getPlayer().getBukkit(), event.getMatch());
+      MatchCommands.matchInfo(event.getPlayer().getBukkit(), event.getPlayer(), event.getMatch());
     }
   }
 
@@ -223,13 +271,11 @@ public class PGMListener implements Listener {
   @EventHandler
   public void unlockTime(final MatchStartEvent event) {
     boolean unlockTime = false;
-    if (!event.getMatch().getMapContext().getModule(TimeLockModule.class).isTimeLocked()) {
+    if (!event.getMatch().getModule(TimeLockModule.class).isTimeLocked()) {
       unlockTime = true;
     }
 
-    GameRulesModule gameRulesModule =
-        event.getMatch().getMapContext().getModule(GameRulesModule.class);
-
+    GameRulesMatchModule gameRulesModule = event.getMatch().getModule(GameRulesMatchModule.class);
     if (gameRulesModule != null
         && gameRulesModule.getGameRules().containsKey(GameRule.DO_DAYLIGHT_CYCLE)) {
       unlockTime = gameRulesModule.getGameRules().get(GameRule.DO_DAYLIGHT_CYCLE);
