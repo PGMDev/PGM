@@ -337,8 +337,7 @@ public class PickerMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.HIGHEST)
   public void rightClickIcon(final PlayerInteractEvent event) {
-    if (!(event.getAction() == Action.RIGHT_CLICK_AIR
-        || event.getAction() == Action.RIGHT_CLICK_BLOCK)) return;
+    if (event.getAction() == Action.PHYSICAL) return;
 
     MatchPlayer player = match.getPlayer(event.getPlayer());
     if (player == null) return;
@@ -352,17 +351,20 @@ public class PickerMatchModule implements MatchModule, Listener {
     if (displayName == null) return;
 
     boolean handled = false;
+    boolean immediate =
+        (event.getAction() == Action.LEFT_CLICK_AIR
+            || event.getAction() == Action.LEFT_CLICK_BLOCK);
     final JoinMatchModule jmm = match.needModule(JoinMatchModule.class);
 
     if (hand.getType() == Button.JOIN.material) {
       handled = true;
-      if (canOpenWindow(player) && settingEnabled(player, true)) {
+      if (!immediate && canOpenWindow(player) && settingEnabled(player, true)) {
         showWindow(player);
       } else {
         // If there is nothing to pick or setting is disabled, just join immediately
         jmm.join(player, null);
       }
-    } else if (hand.getType() == Button.LEAVE.material) {
+    } else if (hand.getType() == Button.LEAVE.material && !immediate) {
       jmm.leave(player);
     }
 

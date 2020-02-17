@@ -31,6 +31,8 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.setting.SettingKey;
+import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.util.components.Components;
 import tc.oc.world.NMSHacks;
 
@@ -156,7 +158,9 @@ public class MapPoll {
       viewer.getInventory().setHeldItemSlot(2);
     }
     viewer.getInventory().setItemInHand(is);
-    NMSHacks.openBook(is, viewer.getBukkit());
+
+    if (viewer.getSettings().getValue(SettingKey.VOTE) == SettingValue.VOTE_ON)
+      NMSHacks.openBook(is, viewer.getBukkit());
   }
 
   private Component getMapBookComponent(MatchPlayer viewer, MapInfo map) {
