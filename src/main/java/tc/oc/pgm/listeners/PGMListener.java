@@ -2,12 +2,12 @@ package tc.oc.pgm.listeners;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.lang.reflect.Array;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.entity.EnderPearl;
@@ -48,10 +48,10 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.commands.MatchCommands;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
+import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.gamerules.GameRule;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
-import tc.oc.pgm.match.MatchPlayerImpl;
 import tc.oc.pgm.modules.TimeLockModule;
 import tc.oc.server.NullCommandSender;
 
@@ -310,26 +310,22 @@ public class PGMListener implements Listener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
-  public void DropItemsOnQuit(PlayerQuitEvent event) {
-    Player quitter = event.getPlayer();
-    MatchPlayerImpl matchPlayer = new MatchPlayerImpl(mm.getMatch(quitter), quitter);
-    if (matchPlayer.isParticipating()){
+  public void dropItemsOnQuit(PlayerParticipationStopEvent event) {
+    MatchPlayer quitter = event.getPlayer();
+    Player player = Bukkit.getPlayer(quitter.getId());
 
       for (ItemStack i : quitter.getInventory().getContents()) { //Drop inventory
         if (i != null) {
-          quitter.getWorld().dropItemNaturally(quitter.getLocation(), i);
+          quitter.getWorld().dropItemNaturally(player.getLocation(), i);
         }
       }
 
       ItemStack[] playerArmor = quitter.getInventory().getArmorContents(); //Drop Armor
       for (int i = 0; i < 4 ; i++) {
-        String s = Array.get(playerArmor, i).toString();
-        if(s.toLowerCase().contains("air")){
-          //HACK: Empty armor slots is AIR and cannot be dropped. This skips over these slots.
+        if(playerArmor[i].getType() == Material.AIR){ //Skips empty armor slots
           continue;
         }
-        quitter.getWorld().dropItemNaturally(quitter.getLocation(), playerArmor[i]);
+        quitter.getWorld().dropItemNaturally(player.getLocation(), playerArmor[i]);
       }
-    }
   }
 }
