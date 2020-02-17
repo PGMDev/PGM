@@ -74,7 +74,7 @@
         <dependency>
             <groupId>net.kencochrane.raven</groupId>
             <artifactId>raven-log4j2</artifactId>
-            <version>5.0</version>
+            <version>6.0.0</version>
         </dependency>
         <!-- Fork of Spigot and SportBukkit running Minecraft 1.8 -->
         <dependency>
