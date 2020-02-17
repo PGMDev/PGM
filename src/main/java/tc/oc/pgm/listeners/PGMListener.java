@@ -305,8 +305,6 @@ public class PGMListener implements Listener {
         caught.setItemStack(new ItemStack(Material.RAW_FISH));
       }
     }
-
-
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -314,18 +312,18 @@ public class PGMListener implements Listener {
     MatchPlayer quitter = event.getPlayer();
     Player player = Bukkit.getPlayer(quitter.getId());
 
-      for (ItemStack i : quitter.getInventory().getContents()) { //Drop inventory
-        if (i != null) {
-          quitter.getWorld().dropItemNaturally(player.getLocation(), i);
+      for (ItemStack item : quitter.getInventory().getContents()) { //Drop inventory
+        if (item != null) {
+          quitter.getWorld().dropItemNaturally(player.getLocation(), item);
         }
       }
 
       ItemStack[] playerArmor = quitter.getInventory().getArmorContents(); //Drop Armor
-      for (int i = 0; i < 4 ; i++) {
-        if(playerArmor[i].getType() == Material.AIR){ //Skips empty armor slots
+      for (int item = 0; item < 4 ; item++) {
+        if(playerArmor[item].getType() == Material.AIR){ //Skips empty armor slots
           continue;
         }
-        quitter.getWorld().dropItemNaturally(player.getLocation(), playerArmor[i]);
+        quitter.getWorld().dropItemNaturally(player.getLocation(), playerArmor[item]);
       }
   }
 }
