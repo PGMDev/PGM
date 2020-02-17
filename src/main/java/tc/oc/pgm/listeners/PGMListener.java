@@ -2,6 +2,7 @@ package tc.oc.pgm.listeners;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.lang.reflect.Array;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -50,6 +51,7 @@ import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.gamerules.GameRule;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
+import tc.oc.pgm.match.MatchPlayerImpl;
 import tc.oc.pgm.modules.TimeLockModule;
 import tc.oc.server.NullCommandSender;
 
@@ -301,6 +303,32 @@ public class PGMListener implements Listener {
       Item caught = (Item) event.getCaught();
       if (caught.getItemStack().getType() != Material.RAW_FISH) {
         caught.setItemStack(new ItemStack(Material.RAW_FISH));
+      }
+    }
+
+
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void DropItemsOnQuit(PlayerQuitEvent event) {
+    Player quitter = event.getPlayer();
+    MatchPlayerImpl matchPlayer = new MatchPlayerImpl(mm.getMatch(quitter), quitter);
+    if (matchPlayer.isParticipating()){
+
+      for (ItemStack i : quitter.getInventory().getContents()) { //Drop inventory
+        if (i != null) {
+          quitter.getWorld().dropItemNaturally(quitter.getLocation(), i);
+        }
+      }
+
+      ItemStack[] playerArmor = quitter.getInventory().getArmorContents(); //Drop Armor
+      for (int i = 0; i < 4 ; i++) {
+        String s = Array.get(playerArmor, i).toString();
+        if(s.toLowerCase().contains("air")){
+          //HACK: Empty armor slots is AIR and cannot be dropped. This skips over these slots.
+          continue;
+        }
+        quitter.getWorld().dropItemNaturally(quitter.getLocation(), playerArmor[i]);
       }
     }
   }
