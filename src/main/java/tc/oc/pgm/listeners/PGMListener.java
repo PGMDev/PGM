@@ -310,20 +310,16 @@ public class PGMListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void dropItemsOnQuit(PlayerParticipationStopEvent event) {
     MatchPlayer quitter = event.getPlayer();
-    Player player = Bukkit.getPlayer(quitter.getId());
 
-      for (ItemStack item : quitter.getInventory().getContents()) { //Drop inventory
-        if (item != null) {
-          quitter.getWorld().dropItemNaturally(player.getLocation(), item);
-        }
+      for (ItemStack item : quitter.getInventory().getContents()) {
+        if (item == null || item.getType() == Material.AIR) continue;
+          quitter.getWorld().dropItemNaturally(quitter.getBukkit().getLocation(), item);
+
       }
 
-      ItemStack[] playerArmor = quitter.getInventory().getArmorContents(); //Drop Armor
-      for (int item = 0; item < 4 ; item++) {
-        if(playerArmor[item].getType() == Material.AIR){ //Skips empty armor slots
-          continue;
-        }
-        quitter.getWorld().dropItemNaturally(player.getLocation(), playerArmor[item]);
+      for (ItemStack armor : quitter.getInventory().getArmorContents()) {
+        if(armor == null || armor.getType() == Material.AIR) continue;
+          quitter.getWorld().dropItemNaturally(quitter.getBukkit().getLocation(), armor);
       }
   }
 }
