@@ -7,7 +7,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.entity.EnderPearl;
@@ -310,11 +309,9 @@ public class PGMListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void dropItemsOnQuit(PlayerParticipationStopEvent event) {
     MatchPlayer quitter = event.getPlayer();
-
       for (ItemStack item : quitter.getInventory().getContents()) {
         if (item == null || item.getType() == Material.AIR) continue;
           quitter.getWorld().dropItemNaturally(quitter.getBukkit().getLocation(), item);
-
       }
 
       for (ItemStack armor : quitter.getInventory().getArmorContents()) {
