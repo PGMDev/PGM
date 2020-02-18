@@ -82,7 +82,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
       document.setBaseURI(source.getId());
     }
 
-    info = new MapInfoImpl(document.getRootElement());
+    info = new MapInfoImpl(document.getRootElement(), this.logger);
   }
 
   @Override

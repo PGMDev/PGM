@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
@@ -88,13 +89,13 @@ public class MapInfoImpl implements MapInfo {
         info.getWorld());
   }
 
-  public MapInfoImpl(Element root) throws InvalidXMLException {
+  public MapInfoImpl(Element root, Logger logger) throws InvalidXMLException {
     this(
         checkNotNull(root).getChildTextNormalize("slug"),
         XMLUtils.parseSemanticVersion(Node.fromRequiredAttr(root, "proto")),
         XMLUtils.parseSemanticVersion(Node.fromRequiredChildOrAttr(root, "version")),
         Node.fromRequiredChildOrAttr(root, "name").getValueNormalize(),
-        Node.fromRequiredChildOrAttr(root, "objective", "description").getValueNormalize(),
+        parseObjective(root, logger),
         parseContributors(root, "author"),
         parseContributors(root, "contributor"),
         parseRules(root),
@@ -221,6 +222,16 @@ public class MapInfoImpl implements MapInfo {
     }
 
     return styledName;
+  }
+
+  private static String parseObjective(Element root, Logger logger) throws InvalidXMLException {
+    Node objNode = Node.fromChildOrAttr(root, "objective", "description");
+    if (objNode == null) {
+      logger.warning("Map has no defined objective, defaulting to \"N/A\".");
+      return "N/A";
+    }
+
+    return objNode.getValueNormalize();
   }
 
   private static List<String> parseRules(Element root) {
