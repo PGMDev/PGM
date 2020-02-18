@@ -49,7 +49,7 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
     } else {
       // Replace the projectile
       Projectile oldEntity = (Projectile) event.getProjectile();
-      if (this.cls.isAssignableFrom(Projectile.class)) {
+      if (Projectile.class.isAssignableFrom(this.cls)) {
         newProjectile = event.getEntity().launchProjectile((Class<? extends Projectile>) this.cls);
       } else {
         World world = event.getEntity().getWorld();
