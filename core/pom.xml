@@ -1,0 +1,127 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <relativePath>../pom.xml</relativePath>
+        <version>1.8-SNAPSHOT</version>
+        <groupId>tc.oc</groupId>
+        <artifactId>PGM</artifactId>
+    </parent>
+
+    <name>Core</name>
+    <artifactId>core</artifactId>
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <!-- Various utility classes for Bukkit -->
+        <dependency>
+            <groupId>tc.oc</groupId>
+            <artifactId>util</artifactId>
+            <version>1.8-SNAPSHOT</version>
+        </dependency>
+
+        <!-- Command framework for developing simple commands -->
+        <dependency>
+            <groupId>app.ashcon.intake</groupId>
+            <artifactId>intake-bukkit</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+
+        <!-- Error logging libraries for Sentry integration -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.10.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.kencochrane.raven</groupId>
+            <artifactId>raven</artifactId>
+            <version>5.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.kencochrane.raven</groupId>
+            <artifactId>raven-log4j2</artifactId>
+            <version>5.0</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <resources>
+            <!-- Include the required "plugin.yml" and optional "config.yml" for Bukkit -->
+            <resource>
+                <targetPath>.</targetPath>
+                <directory>${basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*.yml</include>
+                </includes>
+                <!-- Allows for variable substitution, see "plugin.yml" for an example -->
+                <filtering>true</filtering>
+            </resource>
+
+            <!-- Include a fallback set of maps that can be played "out-of-the-box" -->
+            <resource>
+                <targetPath>.</targetPath>
+                <directory>${basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*.zip</include>
+                </includes>
+                <!-- Explicitly disable filtering as it will corrupt the .zip of maps -->
+                <filtering>false</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+                <configuration>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                    <minimizeJar>true</minimizeJar>
+                    <artifactSet>
+                        <excludes>
+                            <exclude>app.ashcon:sportpaper:jar:*</exclude>
+                            <exclude>app.ashcon.intake:intake-core:jar:*</exclude>
+                            <exclude>com.google.code.findbugs:jsr305:jar:*</exclude>
+                        </excludes>
+                    </artifactSet>
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>module-info.class</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Generates .zip resource of default maps provided in the maps/ folder -->
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <tasks>
+                                <zip basedir="../maps/" destfile="${basedir}/src/main/resources/maps.zip"/>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

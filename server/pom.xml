@@ -1,0 +1,123 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <relativePath>../pom.xml</relativePath>
+        <version>1.8-SNAPSHOT</version>
+        <groupId>tc.oc</groupId>
+        <artifactId>PGM</artifactId>
+    </parent>
+
+    <name>Server</name>
+    <artifactId>server</artifactId>
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>tc.oc</groupId>
+            <artifactId>core</artifactId>
+            <version>1.8-SNAPSHOT</version>
+        </dependency>
+
+        <!-- Fork of Spigot and SportBukkit running Minecraft 1.8 -->
+        <dependency>
+            <groupId>app.ashcon</groupId>
+            <artifactId>sportpaper</artifactId>
+            <version>1.8.8-R0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+                <configuration>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                    <minimizeJar>true</minimizeJar>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Ensures that the jar can be run as an independent server -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>tc.oc.pgm.server.PGMServer</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <!-- Generates a /server folder for debugging purposes -->
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <tasks>
+                                <mkdir dir="${basedir}/target/server/"/>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Optionally, builds an "out-of-the-box" PGM server as a Docker image -->
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>1.6.1</version>
+                <configuration>
+                    <from>
+                        <image>shipilev/openjdk-shenandoah:8</image>
+                    </from>
+                    <to>
+                        <image>pgm</image>
+                        <tags>
+                            <tag>latest</tag>
+                        </tags>
+                    </to>
+                    <container>
+                        <jvmFlags>
+                            <jvmFlag>-XX:+UnlockExperimentalVMOptions</jvmFlag>
+                            <jvmFlag>-XX:+UseContainerSupport</jvmFlag>
+                            <jvmFlag>-XX:+AggressiveOpts</jvmFlag>
+                            <jvmFlag>-XX:+UseShenandoahGC</jvmFlag>
+                            <jvmFlag>-XX:+AlwaysPreTouch</jvmFlag>
+                            <jvmFlag>-XX:+ParallelRefProcEnabled</jvmFlag>
+                            <jvmFlag>-XX:+UseLargePagesInMetaspace</jvmFlag>
+                            <jvmFlag>-XX:+UseNUMA</jvmFlag>
+                            <jvmFlag>-XX:-UseBiasedLocking</jvmFlag>
+                            <jvmFlag>-XX:+DisableExplicitGC</jvmFlag>
+                        </jvmFlags>
+                        <ports>
+                            <port>25565/tcp</port>
+                        </ports>
+                        <volumes>
+                            <volume>/server</volume>
+                        </volumes>
+                        <workingDirectory>/server</workingDirectory>
+                    </container>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
