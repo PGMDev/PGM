@@ -12,7 +12,7 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import tc.oc.item.Items;
+import tc.oc.util.bukkit.item.Items;
 
 /**
  * Derived from the names found in {@link net.minecraft.server.CommandReplaceItem}. If we ever

@@ -2,10 +2,10 @@ package tc.oc.pgm.tablist;
 
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
-import tc.oc.component.types.PersonalizedText;
 import tc.oc.pgm.teams.Team;
-import tc.oc.tablist.DynamicTabEntry;
-import tc.oc.tablist.TabView;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.util.bukkit.tablist.DynamicTabEntry;
+import tc.oc.util.bukkit.tablist.TabView;
 import tc.oc.util.collection.DefaultProvider;
 import tc.oc.util.components.ComponentUtils;
 

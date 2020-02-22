@@ -4,9 +4,9 @@ import com.google.common.base.Preconditions;
 import org.bukkit.ChatColor;
 import org.joda.time.Duration;
 import org.joda.time.Period;
-import tc.oc.component.types.PersonalizedText;
 import tc.oc.pgm.modes.ModeChangeCountdown;
 import tc.oc.pgm.modes.ObjectiveModesMatchModule;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.components.Components;
 import tc.oc.util.components.PeriodFormats;
 

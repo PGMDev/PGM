@@ -13,7 +13,6 @@ import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.MapTag;
@@ -30,8 +29,9 @@ import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.Version;
-import tc.oc.xml.InvalidXMLException;
-import tc.oc.xml.Node;
+import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
+import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.util.xml.Node;
 
 public class ScoreModule implements MapModule {
   private static final MapTag SCORE_TAG = MapTag.create("deathmatch", "Deathmatch", true, false);

@@ -9,7 +9,7 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
-import tc.oc.xml.InvalidXMLException;
+import tc.oc.util.xml.InvalidXMLException;
 
 public class TimeLockModule implements MapModule, MatchModule {
   private final boolean lock;

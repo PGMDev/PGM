@@ -4,11 +4,11 @@ import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
-import tc.oc.component.Component;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.features.Feature;
+import tc.oc.util.bukkit.component.Component;
 
 /** TODO: Extract CompletableGoal which flags and CPs don't implement */
 public interface Goal<T extends GoalDefinition> extends Feature<T> {
@@ -38,8 +38,8 @@ public interface Goal<T extends GoalDefinition> extends Feature<T> {
 
   /**
    * Returns true if the goal acts "normally". Normal behavior is defined when the goal is visible
-   * via mediums such as the {@link tc.oc.bossbar.BossBar}, the Scoreboard, and chat. If a call to
-   * this method returns false, this goal will not show up anywhere.
+   * via mediums such as the {@link tc.oc.util.bukkit.bossbar.BossBar}, the Scoreboard, and chat. If
+   * a call to this method returns false, this goal will not show up anywhere.
    *
    * <p>In most cases, this should simply delegate to {@link GoalDefinition#isVisible()}
    */

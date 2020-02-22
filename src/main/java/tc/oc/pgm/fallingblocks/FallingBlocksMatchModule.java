@@ -1,6 +1,6 @@
 package tc.oc.pgm.fallingblocks;
 
-import static tc.oc.block.BlockVectors.*;
+import static tc.oc.util.bukkit.block.BlockVectors.*;
 
 import gnu.trove.iterator.TLongObjectIterator;
 import gnu.trove.map.TLongObjectMap;
@@ -20,7 +20,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockFallEvent;
-import tc.oc.material.Materials;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -28,6 +27,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
+import tc.oc.util.bukkit.material.Materials;
 import tc.oc.util.collection.LongDeque;
 
 @ListenerScope(MatchScope.RUNNING)

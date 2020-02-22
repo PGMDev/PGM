@@ -2,7 +2,7 @@ package tc.oc.pgm.spawns;
 
 import javax.annotation.Nullable;
 import org.joda.time.Duration;
-import tc.oc.component.Component;
+import tc.oc.util.bukkit.component.Component;
 
 public class RespawnOptions {
   public final Duration delay; // Minimum wait time between death and respawn

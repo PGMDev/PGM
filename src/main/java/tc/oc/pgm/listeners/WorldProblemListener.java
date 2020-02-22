@@ -18,11 +18,11 @@ import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.plugin.Plugin;
-import tc.oc.block.BlockVectorSet;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.util.ClassLogger;
+import tc.oc.util.bukkit.block.BlockVectorSet;
+import tc.oc.util.bukkit.world.NMSHacks;
 import tc.oc.util.collection.DefaultMapAdapter;
-import tc.oc.world.NMSHacks;
 
 public class WorldProblemListener implements Listener {
 

@@ -5,11 +5,6 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedText;
-import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.named.MapNameStyle;
-import tc.oc.named.NameStyle;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.map.Contributor;
@@ -24,6 +19,11 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.TranslationUtils;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.util.bukkit.named.MapNameStyle;
+import tc.oc.util.bukkit.named.NameStyle;
 import tc.oc.util.components.ComponentUtils;
 
 public class MatchAnnouncer implements Listener {

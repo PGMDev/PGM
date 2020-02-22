@@ -3,7 +3,6 @@ package tc.oc.pgm.flag.state;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.joda.time.Duration;
-import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.flag.Flag;
@@ -11,6 +10,7 @@ import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.scoreboard.SidebarMatchModule;
 import tc.oc.util.TimeUtils;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
 /**
  * State of a flag after a player drops it on the ground, either by dying or by clicking on the

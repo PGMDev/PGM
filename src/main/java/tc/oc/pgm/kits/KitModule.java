@@ -11,7 +11,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.features.FeatureDefinition;
 import tc.oc.pgm.itemmeta.ItemModifyModule;
-import tc.oc.xml.InvalidXMLException;
+import tc.oc.util.xml.InvalidXMLException;
 
 public class KitModule implements MapModule {
 

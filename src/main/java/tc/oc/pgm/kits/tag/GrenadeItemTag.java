@@ -1,9 +1,9 @@
 package tc.oc.pgm.kits.tag;
 
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
-import tc.oc.item.ItemTag;
-import tc.oc.item.tag.BooleanItemTag;
-import tc.oc.item.tag.FloatItemTag;
+import tc.oc.util.bukkit.item.ItemTag;
+import tc.oc.util.bukkit.item.tag.BooleanItemTag;
+import tc.oc.util.bukkit.item.tag.FloatItemTag;
 
 public class GrenadeItemTag extends ItemTag<Grenade> {
 

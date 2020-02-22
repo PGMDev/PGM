@@ -20,13 +20,13 @@ import org.bukkit.block.BlockState;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
-import tc.oc.block.BlockVectors;
-import tc.oc.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.filters.AnyFilter;
 import tc.oc.pgm.filters.BlockFilter;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.util.Version;
+import tc.oc.util.bukkit.block.BlockVectors;
+import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
 
 /**
  * Region represented by a list of single blocks. This will check if a point is inside the block at

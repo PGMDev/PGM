@@ -20,7 +20,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
-import tc.oc.item.Potions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -40,6 +39,7 @@ import tc.oc.pgm.tracker.damage.FallInfo;
 import tc.oc.pgm.tracker.damage.FireInfo;
 import tc.oc.pgm.tracker.damage.GenericDamageInfo;
 import tc.oc.pgm.tracker.damage.ProjectileInfo;
+import tc.oc.util.bukkit.item.Potions;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DamageMatchModule implements MatchModule, Listener {

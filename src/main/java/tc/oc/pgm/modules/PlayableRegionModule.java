@@ -14,7 +14,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.regions.RegionModule;
-import tc.oc.xml.InvalidXMLException;
+import tc.oc.util.xml.InvalidXMLException;
 
 public class PlayableRegionModule implements MapModule, Listener {
   protected final Region playableRegion;

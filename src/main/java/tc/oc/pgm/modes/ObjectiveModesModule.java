@@ -20,8 +20,8 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.components.PeriodFormats;
-import tc.oc.xml.InvalidXMLException;
-import tc.oc.xml.Node;
+import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.util.xml.Node;
 
 public class ObjectiveModesModule implements MapModule {
 

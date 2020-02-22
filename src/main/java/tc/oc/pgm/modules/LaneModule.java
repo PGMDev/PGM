@@ -20,7 +20,7 @@ import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.XMLUtils;
-import tc.oc.xml.InvalidXMLException;
+import tc.oc.util.xml.InvalidXMLException;
 
 public class LaneModule implements MapModule {
   private final Map<TeamFactory, Region> lanes;

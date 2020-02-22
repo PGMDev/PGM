@@ -35,8 +35,6 @@ import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.world.PortalCreateEvent;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.event.AdventureModeInteractEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -46,6 +44,8 @@ import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.event.ObserverInteractEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerBlockTransformEvent;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
 /**
  * Listens to many events at low priority and cancels them if the actor is not allowed to interact

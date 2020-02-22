@@ -2,8 +2,8 @@ package tc.oc.pgm.features;
 
 import java.lang.ref.WeakReference;
 import javax.annotation.Nullable;
-import tc.oc.xml.InvalidXMLException;
-import tc.oc.xml.Node;
+import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.util.xml.Node;
 
 /**
  * A named feature reference in an XML document. When {@link #resolve()} is called, the feature is

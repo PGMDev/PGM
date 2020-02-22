@@ -22,13 +22,13 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
-import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.material.Materials;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.util.bukkit.material.Materials;
 
 /**
  * Predicts the death of players who disconnect while participating, and simulates the damage and

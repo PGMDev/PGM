@@ -15,10 +15,10 @@ import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.*;
 import org.bukkit.Bukkit;
-import tc.oc.component.Component;
-import tc.oc.component.types.BlankComponent;
-import tc.oc.component.types.PersonalizedText;
-import tc.oc.component.types.PersonalizedTranslatable;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.BlankComponent;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
 /** Utils for working with {@link Component}s */
 public class Components {

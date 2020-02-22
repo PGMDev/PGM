@@ -20,7 +20,7 @@ import tc.oc.pgm.filters.InverseFilter;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.XMLUtils;
-import tc.oc.xml.InvalidXMLException;
+import tc.oc.util.xml.InvalidXMLException;
 
 public class ProximityAlarmModule implements MapModule {
   private final Set<ProximityAlarmDefinition> definitions;

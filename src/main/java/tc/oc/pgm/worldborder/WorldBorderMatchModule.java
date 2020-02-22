@@ -22,8 +22,8 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.filters.query.IQuery;
 import tc.oc.pgm.filters.query.MatchQuery;
 import tc.oc.pgm.goals.events.GoalEvent;
+import tc.oc.util.bukkit.world.WorldBorders;
 import tc.oc.util.collection.DefaultMapAdapter;
-import tc.oc.world.WorldBorders;
 
 @ListenerScope(MatchScope.LOADED)
 public class WorldBorderMatchModule implements MatchModule, Listener {

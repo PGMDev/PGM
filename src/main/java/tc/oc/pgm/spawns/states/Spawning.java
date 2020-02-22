@@ -7,13 +7,13 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerAttackEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedText;
-import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.event.PlayerItemTransferEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
 /** Player is waiting to spawn as a participant */
 public abstract class Spawning extends Participating {

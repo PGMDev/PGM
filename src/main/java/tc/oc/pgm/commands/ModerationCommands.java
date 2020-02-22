@@ -15,10 +15,6 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedText;
-import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.named.NameStyle;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.chat.Sound;
@@ -27,6 +23,10 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.PlayerReportEvent;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.util.bukkit.named.NameStyle;
 import tc.oc.util.components.Components;
 
 public class ModerationCommands {

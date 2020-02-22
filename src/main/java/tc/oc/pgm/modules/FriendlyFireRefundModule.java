@@ -8,8 +8,8 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.util.XMLUtils;
-import tc.oc.xml.InvalidXMLException;
-import tc.oc.xml.Node;
+import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.util.xml.Node;
 
 public class FriendlyFireRefundModule implements MapModule {
   @Override

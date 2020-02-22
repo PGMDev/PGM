@@ -4,8 +4,6 @@ import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.util.Vector;
-import tc.oc.block.BlockVectors;
-import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.match.Match;
@@ -15,6 +13,8 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.util.MatchPlayers;
+import tc.oc.util.bukkit.block.BlockVectors;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
 @ListenerScope(MatchScope.RUNNING)
 public class PlayableRegionMatchModule implements MatchModule, Listener {

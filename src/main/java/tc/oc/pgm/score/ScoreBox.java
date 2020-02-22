@@ -7,12 +7,12 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
-import tc.oc.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.query.PlayerStateQuery;
 import tc.oc.pgm.regions.Region;
+import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
 
 public class ScoreBox {
   private final Region region;

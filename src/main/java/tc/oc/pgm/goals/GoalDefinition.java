@@ -1,10 +1,10 @@
 package tc.oc.pgm.goals;
 
 import javax.annotation.Nullable;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedText;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
 
 /**
  * Definition of a goal/objective feature. Provides a name field, used to identify the goal to

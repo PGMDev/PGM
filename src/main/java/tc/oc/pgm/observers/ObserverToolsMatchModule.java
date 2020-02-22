@@ -15,9 +15,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import tc.oc.component.Component;
-import tc.oc.component.render.ComponentRenderers;
-import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -32,6 +29,9 @@ import tc.oc.pgm.observers.tools.GamemodeTool;
 import tc.oc.pgm.observers.tools.NightVisionTool;
 import tc.oc.pgm.observers.tools.VisibilityTool;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.render.ComponentRenderers;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
 @ListenerScope(MatchScope.LOADED)
 public class ObserverToolsMatchModule implements MatchModule, Listener {

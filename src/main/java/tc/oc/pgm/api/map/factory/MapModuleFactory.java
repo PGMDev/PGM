@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import org.jdom2.Document;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.module.ModuleFactory;
-import tc.oc.xml.InvalidXMLException;
+import tc.oc.util.xml.InvalidXMLException;
 
 /** A factory for creating {@link MapModule}s from a {@link Document}. */
 public interface MapModuleFactory<T extends MapModule> extends ModuleFactory<MapModule> {

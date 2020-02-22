@@ -1,8 +1,8 @@
 package tc.oc.pgm;
 
 import tc.oc.pgm.api.PGM;
-import tc.oc.translations.BaseTranslator;
-import tc.oc.translations.provider.TranslationProvider;
+import tc.oc.util.bukkit.translations.BaseTranslator;
+import tc.oc.util.bukkit.translations.provider.TranslationProvider;
 
 public final class AllTranslations extends BaseTranslator {
 

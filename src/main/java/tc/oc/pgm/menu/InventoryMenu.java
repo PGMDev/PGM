@@ -8,11 +8,11 @@ import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import tc.oc.component.render.ComponentRenderers;
-import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.observers.ObserverToolsMatchModule;
 import tc.oc.util.StringUtils;
+import tc.oc.util.bukkit.component.render.ComponentRenderers;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
 public abstract class InventoryMenu {
 

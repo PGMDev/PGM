@@ -44,10 +44,10 @@ import tc.oc.pgm.projectile.ProjectileDefinition;
 import tc.oc.pgm.shield.ShieldKit;
 import tc.oc.pgm.shield.ShieldParameters;
 import tc.oc.pgm.util.XMLUtils;
-import tc.oc.server.BukkitUtils;
 import tc.oc.util.Pair;
-import tc.oc.xml.InvalidXMLException;
-import tc.oc.xml.Node;
+import tc.oc.util.bukkit.BukkitUtils;
+import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.util.xml.Node;
 
 public abstract class KitParser {
   protected final MapFactory factory;

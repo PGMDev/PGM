@@ -10,8 +10,8 @@ import org.joda.time.Duration;
 import org.joda.time.Instant;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
-import tc.oc.server.Scheduler;
 import tc.oc.util.ClassLogger;
+import tc.oc.util.bukkit.Scheduler;
 
 public class CountdownRunner extends BukkitRunnable {
 

@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.filters.query.IQuery;
-import tc.oc.xml.Node;
+import tc.oc.util.xml.Node;
 
 /** A {@link Filter} that delegates all methods to an XML reference */
 public class XMLFilterReference extends XMLFeatureReference<FilterDefinition> implements Filter {

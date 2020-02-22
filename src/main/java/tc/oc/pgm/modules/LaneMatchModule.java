@@ -18,8 +18,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.util.Vector;
-import tc.oc.block.BlockVectors;
-import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
@@ -32,6 +30,8 @@ import tc.oc.pgm.events.PlayerBlockTransformEvent;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.Team;
+import tc.oc.util.bukkit.block.BlockVectors;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
 @ListenerScope(MatchScope.RUNNING)
 public class LaneMatchModule implements MatchModule, Listener {

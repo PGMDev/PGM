@@ -18,7 +18,6 @@ import org.bukkit.Difficulty;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
-import tc.oc.chunk.NullChunkGenerator;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapContext;
@@ -28,6 +27,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.util.FileUtils;
+import tc.oc.util.bukkit.chunk.NullChunkGenerator;
 
 public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
   private static final AtomicLong counter = new AtomicLong();

@@ -3,8 +3,8 @@ package tc.oc.pgm.kits;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.factory.MapFactory;
-import tc.oc.xml.InvalidXMLException;
-import tc.oc.xml.Node;
+import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.util.xml.Node;
 
 public class LegacyKitParser extends KitParser {
 

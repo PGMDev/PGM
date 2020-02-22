@@ -26,10 +26,10 @@ import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
-import tc.oc.tablist.ListeningTabView;
-import tc.oc.tablist.PlayerTabEntry;
-import tc.oc.tablist.TabManager;
-import tc.oc.tablist.TabView;
+import tc.oc.util.bukkit.tablist.ListeningTabView;
+import tc.oc.util.bukkit.tablist.PlayerTabEntry;
+import tc.oc.util.bukkit.tablist.TabManager;
+import tc.oc.util.bukkit.tablist.TabView;
 import tc.oc.util.collection.DefaultMapAdapter;
 
 public class MatchTabManager extends TabManager implements Listener {

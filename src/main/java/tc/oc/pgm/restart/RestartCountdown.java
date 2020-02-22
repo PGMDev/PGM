@@ -3,11 +3,11 @@ package tc.oc.pgm.restart;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.joda.time.Duration;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedText;
-import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.MatchCountdown;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
 public class RestartCountdown extends MatchCountdown {
 

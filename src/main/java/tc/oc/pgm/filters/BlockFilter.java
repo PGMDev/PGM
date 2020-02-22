@@ -4,8 +4,8 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.material.MaterialData;
-import tc.oc.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.filters.query.IMaterialQuery;
+import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
 
 public class BlockFilter extends TypedFilter<IMaterialQuery> {
   protected final Material type;

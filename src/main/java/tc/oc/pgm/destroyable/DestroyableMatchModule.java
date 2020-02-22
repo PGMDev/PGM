@@ -11,7 +11,6 @@ import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.material.MaterialData;
-import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -20,6 +19,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DestroyableMatchModule implements MatchModule, Listener {

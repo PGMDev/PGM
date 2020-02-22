@@ -21,9 +21,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
-import tc.oc.block.BlockVectors;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.event.BlockTransformEvent;
@@ -38,6 +35,9 @@ import tc.oc.pgm.goals.Contribution;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.teams.Team;
+import tc.oc.util.bukkit.block.BlockVectors;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
 @ListenerScope(MatchScope.RUNNING)
 public class WoolMatchModule implements MatchModule, Listener {

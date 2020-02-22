@@ -5,7 +5,7 @@ import java.util.Map;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.jdom2.Element;
 import tc.oc.pgm.util.MethodParsers;
-import tc.oc.xml.InvalidXMLException;
+import tc.oc.util.xml.InvalidXMLException;
 
 public class DamageParser {
   protected static final Map<String, Method> methodParsers =

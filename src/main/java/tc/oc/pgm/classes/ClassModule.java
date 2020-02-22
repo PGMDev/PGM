@@ -27,9 +27,9 @@ import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.util.XMLUtils;
-import tc.oc.server.BukkitUtils;
-import tc.oc.xml.InvalidXMLException;
-import tc.oc.xml.Node;
+import tc.oc.util.bukkit.BukkitUtils;
+import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.util.xml.Node;
 
 public class ClassModule implements MapModule {
 

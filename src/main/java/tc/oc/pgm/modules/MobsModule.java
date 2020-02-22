@@ -16,7 +16,7 @@ import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.util.XMLUtils;
-import tc.oc.xml.InvalidXMLException;
+import tc.oc.util.xml.InvalidXMLException;
 
 public class MobsModule implements MapModule {
   private final Filter mobsFilter;

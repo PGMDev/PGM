@@ -11,7 +11,6 @@ import org.bukkit.event.entity.EntityCombustByBlockEvent;
 import org.bukkit.event.entity.EntityCombustByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExtinguishEvent;
-import tc.oc.material.Materials;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -22,6 +21,7 @@ import tc.oc.pgm.tracker.damage.EntityInfo;
 import tc.oc.pgm.tracker.damage.FireInfo;
 import tc.oc.pgm.tracker.damage.PhysicalInfo;
 import tc.oc.pgm.tracker.resolvers.DamageResolver;
+import tc.oc.util.bukkit.material.Materials;
 
 /**
  * - Updates the state of owned fire and lava blocks from events - Tracks burning entities that were

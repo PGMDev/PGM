@@ -18,8 +18,8 @@ import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.XMLUtils;
-import tc.oc.xml.InvalidXMLException;
-import tc.oc.xml.Node;
+import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.util.xml.Node;
 
 public class FreeForAllModule implements MapModule {
 

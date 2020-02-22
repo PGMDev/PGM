@@ -12,7 +12,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.util.ClassLogger;
 import tc.oc.util.TimeUtils;
-import tc.oc.world.NMSHacks;
+import tc.oc.util.bukkit.world.NMSHacks;
 
 public class ShieldPlayerModule implements Tickable {
 

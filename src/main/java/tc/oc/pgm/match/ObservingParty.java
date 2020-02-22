@@ -3,11 +3,11 @@ package tc.oc.pgm.match;
 import javax.annotation.Nullable;
 import org.bukkit.Color;
 import org.bukkit.command.CommandSender;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedText;
-import tc.oc.named.NameStyle;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.server.BukkitUtils;
+import tc.oc.util.bukkit.BukkitUtils;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.util.bukkit.named.NameStyle;
 import tc.oc.util.components.ComponentUtils;
 
 public abstract class ObservingParty extends SimpleParty {

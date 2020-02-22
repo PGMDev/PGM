@@ -6,9 +6,9 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import tc.oc.component.Component;
-import tc.oc.component.render.ComponentRenderers;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.render.ComponentRenderers;
 
 public interface InventoryMenuItem {
 

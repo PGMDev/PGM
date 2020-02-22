@@ -30,7 +30,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.material.MaterialData;
-import tc.oc.item.Items;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
@@ -58,6 +57,7 @@ import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.util.StringUtils;
+import tc.oc.util.bukkit.item.Items;
 import tc.oc.util.components.ComponentUtils;
 
 @ListenerScope(MatchScope.LOADED)

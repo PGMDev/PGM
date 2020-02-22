@@ -6,7 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
-import tc.oc.xml.Node;
+import tc.oc.util.xml.Node;
 
 public class XMLKitReference extends XMLFeatureReference<KitDefinition> implements Kit {
 

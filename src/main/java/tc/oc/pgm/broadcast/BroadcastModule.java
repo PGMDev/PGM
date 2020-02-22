@@ -7,7 +7,6 @@ import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.joda.time.Duration;
-import tc.oc.component.Component;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
@@ -17,8 +16,9 @@ import tc.oc.pgm.countdowns.CountdownRunner;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.util.XMLUtils;
-import tc.oc.xml.InvalidXMLException;
-import tc.oc.xml.Node;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.util.xml.Node;
 
 public class BroadcastModule implements MapModule {
   private final Multimap<Duration, Broadcast> broadcasts;

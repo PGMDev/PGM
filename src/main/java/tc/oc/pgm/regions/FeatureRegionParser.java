@@ -6,8 +6,8 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.features.FeatureValidation;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.XMLUtils;
-import tc.oc.xml.InvalidXMLException;
-import tc.oc.xml.Node;
+import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.util.xml.Node;
 
 public class FeatureRegionParser extends RegionParser {
 

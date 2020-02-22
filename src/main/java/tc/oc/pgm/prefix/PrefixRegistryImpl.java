@@ -7,12 +7,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import tc.oc.identity.Identities;
 import tc.oc.pgm.Config.Prefixes;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.tablist.PlayerTabEntry;
+import tc.oc.util.bukkit.identity.Identities;
+import tc.oc.util.bukkit.tablist.PlayerTabEntry;
 
 public class PrefixRegistryImpl implements PrefixRegistry, Listener {
 

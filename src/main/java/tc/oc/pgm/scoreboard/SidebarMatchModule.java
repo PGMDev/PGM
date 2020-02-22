@@ -26,9 +26,6 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.joda.time.Duration;
-import tc.oc.component.render.ComponentRenderers;
-import tc.oc.component.types.PersonalizedText;
-import tc.oc.named.NameStyle;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
@@ -62,7 +59,10 @@ import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.events.TeamRespawnsChangeEvent;
 import tc.oc.pgm.wool.MonumentWool;
 import tc.oc.pgm.wool.WoolMatchModule;
-import tc.oc.server.NullCommandSender;
+import tc.oc.util.bukkit.chat.NullCommandSender;
+import tc.oc.util.bukkit.component.render.ComponentRenderers;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.util.bukkit.named.NameStyle;
 
 @ListenerScope(MatchScope.LOADED)
 public class SidebarMatchModule implements MatchModule, Listener {

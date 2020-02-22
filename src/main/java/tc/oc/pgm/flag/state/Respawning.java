@@ -4,13 +4,13 @@ import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.joda.time.Duration;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedText;
-import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
 /**
  * State of a flag while it is waiting to respawn at a {@link Post} after being {@link Captured}.

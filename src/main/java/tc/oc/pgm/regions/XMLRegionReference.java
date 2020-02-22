@@ -12,7 +12,7 @@ import org.bukkit.util.Vector;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.filters.query.IQuery;
-import tc.oc.xml.Node;
+import tc.oc.util.xml.Node;
 
 public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> implements Region {
 

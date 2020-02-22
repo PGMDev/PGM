@@ -22,8 +22,8 @@ import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.util.XMLUtils;
-import tc.oc.xml.InvalidXMLException;
-import tc.oc.xml.Node;
+import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.util.xml.Node;
 
 public class ProjectileModule implements MapModule {
   Set<ProjectileDefinition> projectileDefinitions = new HashSet<>();

@@ -26,7 +26,7 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerResetEvent;
 import tc.oc.pgm.kits.tag.Grenade;
 import tc.oc.pgm.kits.tag.ItemTags;
-import tc.oc.world.NMSHacks;
+import tc.oc.util.bukkit.world.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
 public class KitMatchModule implements MatchModule, Listener {

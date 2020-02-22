@@ -6,8 +6,6 @@ import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.command.CommandSender;
-import tc.oc.component.Component;
-import tc.oc.named.Named;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -16,6 +14,8 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.query.IPartyQuery;
 import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.match.ObservingParty;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.named.Named;
 
 /**
  * A group of related {@link MatchPlayer}s in a {@link Match}.

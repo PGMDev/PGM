@@ -17,7 +17,7 @@ import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.regions.SectorRegion;
 import tc.oc.pgm.renewable.BlockImage;
-import tc.oc.server.BukkitUtils;
+import tc.oc.util.bukkit.BukkitUtils;
 
 /** Displays the status of a ControlPoint by coloring blocks in specified regions */
 public class ControlPointBlockDisplay implements Listener {

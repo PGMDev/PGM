@@ -9,14 +9,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.bukkit.material.Wool;
 import org.bukkit.util.Vector;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedText;
 import tc.oc.pgm.features.FeatureInfo;
 import tc.oc.pgm.goals.ProximityGoalDefinition;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.teams.TeamFactory;
-import tc.oc.server.BukkitUtils;
+import tc.oc.util.bukkit.BukkitUtils;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.components.ComponentUtils;
 
 @FeatureInfo(name = "wool")

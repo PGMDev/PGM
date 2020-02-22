@@ -1,8 +1,8 @@
 package tc.oc.pgm.features;
 
 import javax.annotation.Nullable;
-import tc.oc.xml.InvalidXMLException;
-import tc.oc.xml.Node;
+import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.util.xml.Node;
 
 /** A reference to a FeatureDefinition that is immediately available. */
 public class ImmediateFeatureReference<T extends FeatureDefinition> implements FeatureReference<T> {

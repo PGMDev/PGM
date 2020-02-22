@@ -8,10 +8,10 @@ import net.md_5.bungee.api.ChatColor;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedText;
-import tc.oc.named.NameStyle;
 import tc.oc.pgm.api.map.Contributor;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.util.bukkit.named.NameStyle;
 
 public class PseudonymContributor implements Contributor {
 

@@ -14,10 +14,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedText;
-import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.identity.PlayerIdentityChangeEvent;
 import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -34,7 +30,11 @@ import tc.oc.pgm.join.JoinResult;
 import tc.oc.pgm.join.QueuedParticipants;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
-import tc.oc.server.NullCommandSender;
+import tc.oc.util.bukkit.chat.NullCommandSender;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.util.bukkit.identity.PlayerIdentityChangeEvent;
 
 @ListenerScope(MatchScope.LOADED)
 public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler {

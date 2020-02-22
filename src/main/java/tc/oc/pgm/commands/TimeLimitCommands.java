@@ -8,9 +8,6 @@ import app.ashcon.intake.parametric.annotation.Switch;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.joda.time.Duration;
-import tc.oc.component.render.ComponentRenderers;
-import tc.oc.component.types.PersonalizedText;
-import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.result.TieVictoryCondition;
@@ -18,6 +15,9 @@ import tc.oc.pgm.result.VictoryCondition;
 import tc.oc.pgm.result.VictoryConditions;
 import tc.oc.pgm.timelimit.TimeLimit;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
+import tc.oc.util.bukkit.component.render.ComponentRenderers;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 import tc.oc.util.components.PeriodFormats;
 
 public class TimeLimitCommands {

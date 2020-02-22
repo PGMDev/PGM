@@ -5,7 +5,7 @@ import tc.oc.pgm.Config;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
-import tc.oc.world.NMSHacks;
+import tc.oc.util.bukkit.world.NMSHacks;
 
 /** Reduce the lifespan of infinity arrows */
 public class ArrowRemovalMatchModule implements MatchModule {

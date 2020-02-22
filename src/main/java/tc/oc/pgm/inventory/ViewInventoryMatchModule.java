@@ -52,7 +52,7 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.util.InventoryTrackerEntry;
-import tc.oc.server.BukkitUtils;
+import tc.oc.util.bukkit.BukkitUtils;
 
 @ListenerScope(MatchScope.LOADED)
 public class ViewInventoryMatchModule implements MatchModule, Listener {

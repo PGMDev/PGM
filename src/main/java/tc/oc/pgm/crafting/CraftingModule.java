@@ -15,14 +15,14 @@ import org.bukkit.inventory.ShapelessRecipe;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.util.XMLUtils;
-import tc.oc.xml.InvalidXMLException;
+import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
+import tc.oc.util.xml.InvalidXMLException;
 
 public class CraftingModule implements MapModule {
 

@@ -6,8 +6,8 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
-import tc.oc.item.Items;
-import tc.oc.material.MaterialMatcher;
+import tc.oc.util.bukkit.item.Items;
+import tc.oc.util.bukkit.material.MaterialMatcher;
 
 public class ItemRule {
   final MaterialMatcher items;

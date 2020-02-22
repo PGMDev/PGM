@@ -24,8 +24,8 @@ import tc.oc.pgm.goals.events.GoalEvent;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.server.BukkitUtils;
 import tc.oc.util.TimeUtils;
+import tc.oc.util.bukkit.BukkitUtils;
 
 /** Base class for all {@link Flag} states */
 public abstract class BaseState implements Runnable, State {

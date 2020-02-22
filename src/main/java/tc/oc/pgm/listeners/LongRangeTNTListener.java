@@ -25,7 +25,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.tracker.Trackers;
 import tc.oc.util.ViaUtils;
-import tc.oc.world.NMSHacks;
+import tc.oc.util.bukkit.world.NMSHacks;
 
 public class LongRangeTNTListener implements Listener {
 

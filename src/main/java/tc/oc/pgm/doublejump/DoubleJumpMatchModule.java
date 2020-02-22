@@ -19,7 +19,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerResetEvent;
-import tc.oc.world.OnlinePlayerMapAdapter;
+import tc.oc.util.bukkit.world.OnlinePlayerMapAdapter;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DoubleJumpMatchModule implements MatchModule, Listener {
