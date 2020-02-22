@@ -5,13 +5,21 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
     <groupId>tc.oc</groupId>
     <artifactId>PGM</artifactId>
     <version>1.8-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>util</module>
+        <module>core</module>
+        <module>server</module>
+    </modules>
+
     <repositories>
         <repository>
-            <id>ashcon-app</id>
+            <id>ashcon-repo</id>
             <url>https://repo.ashcon.app/content/repositories/snapshots</url>
         </repository>
         <repository>
@@ -19,119 +27,15 @@
             <url>https://repo.viaversion.com</url>
         </repository>
     </repositories>
+
     <distributionManagement>
         <repository>
-            <id>ashcon-app</id>
+            <id>ashcon-repo</id>
             <url>https://repo.ashcon.app/content/repositories/snapshots</url>
         </repository>
     </distributionManagement>
-    <dependencies>
-        <!-- Time convience libraries for "Instant" and "Duration" -->
-        <!-- TODO: Use Java 8's standard time libraries -->
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>2.10.1</version>
-        </dependency>
-        <!-- Time formatting library used for parsing durations such as "1h30m" -->
-        <dependency>
-            <groupId>org.ocpsoft.prettytime</groupId>
-            <artifactId>prettytime</artifactId>
-            <version>3.2.5.Final</version>
-        </dependency>
-        <!-- XML parsing library used for all "map.xml" configuration loading -->
-        <dependency>
-            <groupId>org.jdom</groupId>
-            <artifactId>jdom2</artifactId>
-            <version>2.0.5</version>
-        </dependency>
-        <!-- Compile-time library used to generate "Delegate" classes -->
-        <!-- TODO: consider removing because unnecessary added complexity -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.10</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- Sqlite database driver as a persistent datastore -->
-        <dependency>
-            <groupId>org.xerial</groupId>
-            <artifactId>sqlite-jdbc</artifactId>
-            <version>3.28.0</version>
-        </dependency>
-        <!-- Xml parsing library -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>2.10.1</version>
-        </dependency>
-        <!-- Error logging libraries for Sentry integration -->
-        <dependency>
-            <groupId>net.kencochrane.raven</groupId>
-            <artifactId>raven</artifactId>
-            <version>5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>net.kencochrane.raven</groupId>
-            <artifactId>raven-log4j2</artifactId>
-            <version>5.0</version>
-        </dependency>
-        <!-- Fork of Spigot and SportBukkit running Minecraft 1.8 -->
-        <dependency>
-            <groupId>app.ashcon</groupId>
-            <artifactId>sportpaper</artifactId>
-            <version>1.8.8-R0.1-SNAPSHOT</version>
-        </dependency>
-        <!-- Command framework for developing simple commands -->
-        <dependency>
-            <groupId>app.ashcon.intake</groupId>
-            <artifactId>intake-bukkit</artifactId>
-            <version>1.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>us.myles</groupId>
-            <artifactId>viaversion</artifactId>
-            <version>2.2.2</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+
     <build>
-        <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
-        <resources>
-            <!-- Include the required "plugin.yml" and optional "config.yml" for Bukkit -->
-            <resource>
-                <targetPath>.</targetPath>
-                <directory>${basedir}/src/main/resources</directory>
-                 <includes>
-                    <include>**/*.yml</include>
-                </includes>
-                <!-- Allows for variable substitution, see "plugin.yml" for an example -->
-                <filtering>true</filtering>
-            </resource>
-            <!-- Include a fallback set of maps that can be played "out-of-the-box" -->
-            <resource>
-                <targetPath>.</targetPath>
-                <directory>${basedir}/src/main/resources</directory>
-                <includes>
-                    <include>**/*.zip</include>
-                </includes>
-                <!-- Explicitly disable filtering as it will corrupt the .zip of maps -->
-                <filtering>false</filtering>
-            </resource>
-            <!-- Include i18n translation sets for chat messages -->
-            <resource>
-                <directory>src/main/i18n/translations</directory>
-                <includes>
-                    <include>**/*.properties</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>src/main/i18n/templates</directory>
-                <includes>
-                    <include>**/*.properties</include>
-                </includes>
-            </resource>
-        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -142,35 +46,12 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.1</version>
-                <configuration>
-                    <createDependencyReducedPom>false</createDependencyReducedPom>
-                    <minimizeJar>true</minimizeJar>
-                    <artifactSet>
-                        <excludes>
-                            <exclude>app.ashcon:sportpaper:jar:*</exclude>
-                            <exclude>app.ashcon.intake:intake-core:jar:*</exclude>
-                            <exclude>com.google.code.findbugs:jsr305:jar:*</exclude>
-                        </excludes>
-                    </artifactSet>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+
             <!-- Exposes git information to the build environment -->
             <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
-                <version>4.0.0</version>
+                <version>2.2.4</version>
                 <executions>
                     <execution>
                         <phase>validate</phase>
@@ -184,6 +65,7 @@
                     <format>json</format>
                 </configuration>
             </plugin>
+
             <!-- Ensures that code is properly formatted using Google's code style -->
             <plugin>
                 <groupId>com.coveo</groupId>
@@ -200,68 +82,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <!-- Generates .zip resource of default maps provided in the maps/ folder -->
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <phase>generate-resources</phase>
-                        <configuration>
-                            <tasks>
-                                <zip basedir="${basedir}/maps/" destfile="${basedir}/src/main/resources/maps.zip"/>
-                                <mkdir dir="${basedir}/target/server/"/>
-                            </tasks>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- Optionally, builds an "out-of-the-box" PGM server as a Docker image -->
-            <plugin>
-                <groupId>com.google.cloud.tools</groupId>
-                <artifactId>jib-maven-plugin</artifactId>
-                <version>1.6.1</version>
-                <configuration>
-                    <from>
-                        <image>adoptopenjdk:11-jre-openj9</image>
-                    </from>
-                    <to>
-                        <image>pgm</image>
-                        <tags>
-                            <tag>latest</tag>
-                        </tags>
-                    </to>
-                    <container>
-                        <mainClass>tc.oc.util.bukkit.Server</mainClass>
-                        <jvmFlags>
-                            <jvmFlag>-showversion</jvmFlag>
-                            <jvmFlag>-Xaggressive</jvmFlag>
-                            <jvmFlag>-Xfastresolve</jvmFlag>
-                            <jvmFlag>-Xcompressedrefs</jvmFlag>
-                            <jvmFlag>-Xquickstart</jvmFlag>
-                            <jvmFlag>-Xzero</jvmFlag>
-                            <jvmFlag>-Xgcpolicy:metronome</jvmFlag>
-                            <jvmFlag>-Xgc:targetPauseTime=100</jvmFlag>
-                            <jvmFlag>-Xtune:elastic</jvmFlag>
-                            <jvmFlag>-Xtune:virtualized</jvmFlag>
-                            <jvmFlag>-XX:+UseContainerSupport</jvmFlag>
-                        </jvmFlags>
-                        <ports>
-                            <port>25565/tcp</port>
-                        </ports>
-                        <volumes>
-                            <volume>/server</volume>
-                        </volumes>
-                        <workingDirectory>/server</workingDirectory>
-                    </container>
-                    <extraDirectories>
-                        <paths>deploy</paths>
-                    </extraDirectories>
-                </configuration>
             </plugin>
         </plugins>
     </build>
