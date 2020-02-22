@@ -18,8 +18,8 @@ import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.filters.TimeFilter;
 import tc.oc.pgm.util.XMLUtils;
-import tc.oc.xml.InvalidXMLException;
-import tc.oc.xml.Node;
+import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.util.xml.Node;
 
 public class WorldBorderModule implements MapModule {
   private final Collection<MapTag> TAGS =

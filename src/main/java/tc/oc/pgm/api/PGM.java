@@ -5,13 +5,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import org.bukkit.plugin.Plugin;
-import tc.oc.identity.IdentityProvider;
-import tc.oc.named.NameRenderer;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.prefix.PrefixRegistry;
 import tc.oc.pgm.rotation.MapOrder;
 import tc.oc.pgm.tablist.MatchTabManager;
+import tc.oc.util.bukkit.identity.IdentityProvider;
+import tc.oc.util.bukkit.named.NameRenderer;
 
 /** PvP Game Manager (aka. PGM), the global {@link Plugin} to manage PvP games. */
 public interface PGM extends Plugin {

@@ -7,15 +7,15 @@ import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedText;
-import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.named.NameStyle;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.tracker.Trackers;
 import tc.oc.pgm.tracker.damage.*;
 import tc.oc.pgm.util.TranslationUtils;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.util.bukkit.named.NameStyle;
 import tc.oc.util.components.Components;
 
 public class DeathMessageBuilder {

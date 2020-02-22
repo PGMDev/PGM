@@ -6,12 +6,12 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import tc.oc.component.Component;
-import tc.oc.component.render.ComponentRenderers;
-import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.menu.InventoryMenu;
 import tc.oc.pgm.menu.InventoryMenuItem;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.render.ComponentRenderers;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
 public class NightVisionTool implements InventoryMenuItem {
 

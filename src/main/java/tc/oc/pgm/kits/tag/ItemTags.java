@@ -1,7 +1,7 @@
 package tc.oc.pgm.kits.tag;
 
-import tc.oc.item.tag.BooleanItemTag;
-import tc.oc.item.tag.StringItemTag;
+import tc.oc.util.bukkit.item.tag.BooleanItemTag;
+import tc.oc.util.bukkit.item.tag.StringItemTag;
 
 public class ItemTags {
 

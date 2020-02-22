@@ -12,7 +12,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
-import tc.oc.identity.PlayerIdentityChangeEvent;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
@@ -22,11 +21,12 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.match.ObservingParty;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.tablist.ListeningTabView;
-import tc.oc.tablist.TabEntry;
-import tc.oc.tablist.TabView;
 import tc.oc.util.Numbers;
 import tc.oc.util.ViaUtils;
+import tc.oc.util.bukkit.identity.PlayerIdentityChangeEvent;
+import tc.oc.util.bukkit.tablist.ListeningTabView;
+import tc.oc.util.bukkit.tablist.TabEntry;
+import tc.oc.util.bukkit.tablist.TabView;
 import tc.oc.util.collection.DefaultProvider;
 
 public class MatchTabView extends TabView implements ListeningTabView {

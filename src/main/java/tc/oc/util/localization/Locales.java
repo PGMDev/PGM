@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import tc.oc.translations.provider.TranslationProvider;
+import tc.oc.util.bukkit.translations.provider.TranslationProvider;
 
 public final class Locales {
 

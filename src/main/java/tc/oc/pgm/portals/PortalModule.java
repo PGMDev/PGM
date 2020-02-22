@@ -10,8 +10,6 @@ import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -32,7 +30,9 @@ import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.regions.TranslatedRegion;
 import tc.oc.pgm.regions.Union;
 import tc.oc.pgm.util.XMLUtils;
-import tc.oc.xml.InvalidXMLException;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.util.xml.InvalidXMLException;
 
 public class PortalModule implements MapModule {
   private static final Component PROTECT_MESSAGE =

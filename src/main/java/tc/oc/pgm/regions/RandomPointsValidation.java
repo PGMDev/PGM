@@ -1,8 +1,8 @@
 package tc.oc.pgm.regions;
 
 import tc.oc.pgm.features.FeatureValidation;
-import tc.oc.xml.InvalidXMLException;
-import tc.oc.xml.Node;
+import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.util.xml.Node;
 
 public class RandomPointsValidation implements FeatureValidation<RegionDefinition> {
   public static final RandomPointsValidation INSTANCE = new RandomPointsValidation();

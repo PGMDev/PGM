@@ -29,24 +29,24 @@ import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import org.joda.time.Duration;
-import tc.oc.component.Component;
-import tc.oc.material.MaterialMatcher;
-import tc.oc.material.matcher.AllMaterialMatcher;
-import tc.oc.material.matcher.BlockMaterialMatcher;
-import tc.oc.material.matcher.CompoundMaterialMatcher;
-import tc.oc.material.matcher.SingleMaterialMatcher;
-import tc.oc.server.BukkitUtils;
 import tc.oc.util.Numbers;
 import tc.oc.util.Pair;
 import tc.oc.util.TimeUtils;
 import tc.oc.util.Version;
+import tc.oc.util.bukkit.BukkitUtils;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.material.MaterialMatcher;
+import tc.oc.util.bukkit.material.matcher.AllMaterialMatcher;
+import tc.oc.util.bukkit.material.matcher.BlockMaterialMatcher;
+import tc.oc.util.bukkit.material.matcher.CompoundMaterialMatcher;
+import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
+import tc.oc.util.bukkit.world.NMSHacks;
 import tc.oc.util.collection.ArrayUtils;
 import tc.oc.util.components.Components;
 import tc.oc.util.components.PeriodFormats;
-import tc.oc.world.NMSHacks;
-import tc.oc.xml.InheritingElement;
-import tc.oc.xml.InvalidXMLException;
-import tc.oc.xml.Node;
+import tc.oc.util.xml.InheritingElement;
+import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.util.xml.Node;
 
 // TODO: move to tc.oc.xml
 public class XMLUtils {

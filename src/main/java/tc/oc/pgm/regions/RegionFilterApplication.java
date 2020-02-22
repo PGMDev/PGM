@@ -2,10 +2,10 @@ package tc.oc.pgm.regions;
 
 import javax.annotation.Nullable;
 import org.bukkit.util.Vector;
-import tc.oc.component.Component;
 import tc.oc.pgm.features.FeatureDefinition;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.kits.Kit;
+import tc.oc.util.bukkit.component.Component;
 
 public class RegionFilterApplication implements FeatureDefinition {
   public final RFAScope scope;

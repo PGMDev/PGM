@@ -28,7 +28,7 @@ import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.features.MatchFeatureContext;
 import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.result.VictoryCondition;
-import tc.oc.server.Scheduler;
+import tc.oc.util.bukkit.Scheduler;
 
 /**
  * A PvP game that takes place in a {@link World} loaded with a {@link MapInfo}.

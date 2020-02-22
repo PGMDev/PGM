@@ -10,11 +10,11 @@ import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import tc.oc.component.types.PersonalizedText;
 import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.countdowns.CountdownContext;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
 
 public class ObjectiveModesMatchModule implements MatchModule {
 

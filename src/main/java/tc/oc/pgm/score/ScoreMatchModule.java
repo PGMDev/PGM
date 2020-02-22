@@ -17,9 +17,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.Vector;
 import org.joda.time.Instant;
-import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.material.matcher.SingleMaterialMatcher;
-import tc.oc.named.NameStyle;
 import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.event.PlayerItemTransferEvent;
@@ -32,6 +29,9 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
+import tc.oc.util.bukkit.named.NameStyle;
 import tc.oc.util.collection.DefaultMapAdapter;
 
 @ListenerScope(MatchScope.RUNNING)

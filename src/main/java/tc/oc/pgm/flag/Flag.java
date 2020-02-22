@@ -23,11 +23,6 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.util.BlockVector;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedText;
-import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.material.Materials;
-import tc.oc.named.NameStyle;
 import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
@@ -56,7 +51,12 @@ import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.server.BukkitUtils;
+import tc.oc.util.bukkit.BukkitUtils;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.util.bukkit.material.Materials;
+import tc.oc.util.bukkit.named.NameStyle;
 import tc.oc.util.components.ComponentUtils;
 
 public class Flag extends TouchableGoal<FlagDefinition> implements Listener {

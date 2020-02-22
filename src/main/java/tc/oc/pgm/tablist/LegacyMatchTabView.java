@@ -1,7 +1,7 @@
 package tc.oc.pgm.tablist;
 
 import org.bukkit.entity.Player;
-import tc.oc.tablist.LegacyTabView;
+import tc.oc.util.bukkit.tablist.LegacyTabView;
 import tc.oc.util.collection.DefaultProvider;
 
 /**

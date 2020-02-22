@@ -10,9 +10,6 @@ import org.bukkit.event.player.PlayerInitialSpawnEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
-import tc.oc.bossbar.BossBar;
-import tc.oc.bossbar.BossBarStack;
-import tc.oc.bossbar.BossBarView;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -20,7 +17,10 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerLeaveMatchEvent;
-import tc.oc.world.NMSHacks;
+import tc.oc.util.bukkit.bossbar.BossBar;
+import tc.oc.util.bukkit.bossbar.BossBarStack;
+import tc.oc.util.bukkit.bossbar.BossBarView;
+import tc.oc.util.bukkit.world.NMSHacks;
 
 @ListenerScope(MatchScope.LOADED)
 public class BossBarMatchModule implements MatchModule, Listener {

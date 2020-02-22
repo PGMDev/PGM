@@ -2,8 +2,8 @@ package tc.oc.pgm.filters;
 
 import org.bukkit.Material;
 import org.bukkit.material.MaterialData;
-import tc.oc.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.filters.query.IMaterialQuery;
+import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
 
 public class MaterialFilter extends TypedFilter<IMaterialQuery> {
   private final SingleMaterialMatcher pattern;

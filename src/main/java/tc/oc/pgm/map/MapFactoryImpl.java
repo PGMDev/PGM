@@ -33,8 +33,8 @@ import tc.oc.pgm.regions.LegacyRegionParser;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.util.ClassLogger;
 import tc.oc.util.Version;
-import tc.oc.xml.InvalidXMLException;
-import tc.oc.xml.SAXHandler;
+import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.util.xml.SAXHandler;
 
 public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? extends MapModule>>
     implements MapFactory {

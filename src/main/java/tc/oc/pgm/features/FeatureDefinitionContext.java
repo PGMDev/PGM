@@ -6,8 +6,8 @@ import com.google.common.collect.SetMultimap;
 import java.util.*;
 import javax.annotation.Nullable;
 import org.jdom2.Element;
-import tc.oc.xml.InvalidXMLException;
-import tc.oc.xml.Node;
+import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.util.xml.Node;
 
 public class FeatureDefinitionContext {
 

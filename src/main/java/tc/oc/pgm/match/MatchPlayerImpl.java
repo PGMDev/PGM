@@ -23,10 +23,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedPlayer;
-import tc.oc.identity.Identities;
-import tc.oc.named.NameStyle;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.chat.MultiAudience;
@@ -48,8 +44,12 @@ import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.util.ClassLogger;
 import tc.oc.util.ViaUtils;
-import tc.oc.world.DeathOverride;
-import tc.oc.world.NMSHacks;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedPlayer;
+import tc.oc.util.bukkit.identity.Identities;
+import tc.oc.util.bukkit.named.NameStyle;
+import tc.oc.util.bukkit.world.DeathOverride;
+import tc.oc.util.bukkit.world.NMSHacks;
 
 public class MatchPlayerImpl implements MatchPlayer, MultiAudience, Comparable<MatchPlayer> {
 

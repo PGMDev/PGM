@@ -3,9 +3,9 @@ package tc.oc.pgm.api.map;
 import java.text.Normalizer;
 import java.util.Collection;
 import javax.annotation.Nullable;
-import tc.oc.component.Component;
-import tc.oc.named.MapNameStyle;
 import tc.oc.util.Version;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.named.MapNameStyle;
 
 /** Essential information about a map. */
 public interface MapInfo extends Comparable<MapInfo>, Cloneable {

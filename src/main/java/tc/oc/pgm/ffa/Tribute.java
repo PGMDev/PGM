@@ -8,12 +8,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.command.CommandSender;
 import org.bukkit.scoreboard.NameTagVisibility;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedPlayer;
-import tc.oc.component.types.PersonalizedText;
-import tc.oc.identity.Identities;
-import tc.oc.named.NameStyle;
-import tc.oc.named.Names;
 import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
@@ -21,7 +15,13 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.query.IPartyQuery;
 import tc.oc.pgm.filters.query.IPlayerQuery;
 import tc.oc.pgm.filters.query.PartyQuery;
-import tc.oc.server.BukkitUtils;
+import tc.oc.util.bukkit.BukkitUtils;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedPlayer;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.util.bukkit.identity.Identities;
+import tc.oc.util.bukkit.named.NameStyle;
+import tc.oc.util.bukkit.named.Names;
 
 /**
  * Wraps a single {@link MatchPlayer} in a free-for-all match.

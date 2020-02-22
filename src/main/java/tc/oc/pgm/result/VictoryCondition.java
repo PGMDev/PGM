@@ -1,9 +1,9 @@
 package tc.oc.pgm.result;
 
 import java.util.Comparator;
-import tc.oc.component.Component;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
+import tc.oc.util.bukkit.component.Component;
 
 /**
  * A condition used to decide if a {@link Competitor} has won the {@link Match}, and for measuring

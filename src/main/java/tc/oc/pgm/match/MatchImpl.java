@@ -85,12 +85,12 @@ import tc.oc.pgm.filters.query.MatchQuery;
 import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.result.CompetitorVictoryCondition;
 import tc.oc.pgm.result.VictoryCondition;
-import tc.oc.server.Events;
-import tc.oc.server.Scheduler;
 import tc.oc.util.ClassLogger;
 import tc.oc.util.FileUtils;
+import tc.oc.util.bukkit.Events;
+import tc.oc.util.bukkit.Scheduler;
+import tc.oc.util.bukkit.world.NMSHacks;
 import tc.oc.util.collection.RankedSet;
-import tc.oc.world.NMSHacks;
 
 public class MatchImpl implements Match {
 

@@ -30,8 +30,6 @@ import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.util.Vector;
-import tc.oc.block.BlockStates;
-import tc.oc.block.BlockVectors;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.event.GeneralizingEvent;
@@ -53,6 +51,8 @@ import tc.oc.pgm.filters.query.PlayerQuery;
 import tc.oc.pgm.filters.query.Queries;
 import tc.oc.pgm.flag.event.FlagPickupEvent;
 import tc.oc.pgm.util.MatchPlayers;
+import tc.oc.util.bukkit.block.BlockStates;
+import tc.oc.util.bukkit.block.BlockVectors;
 
 @ListenerScope(MatchScope.LOADED)
 public class RegionMatchModule implements MatchModule, Listener {

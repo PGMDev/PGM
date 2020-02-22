@@ -20,11 +20,6 @@ import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
-import tc.oc.block.BlockVectors;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.material.matcher.SingleMaterialMatcher;
-import tc.oc.named.NameStyle;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
@@ -46,9 +41,14 @@ import tc.oc.pgm.modes.ModeUtils;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.teams.Team;
 import tc.oc.util.StringUtils;
+import tc.oc.util.bukkit.block.BlockVectors;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
+import tc.oc.util.bukkit.named.NameStyle;
+import tc.oc.util.bukkit.world.NMSHacks;
 import tc.oc.util.collection.DefaultMapAdapter;
 import tc.oc.util.components.Components;
-import tc.oc.world.NMSHacks;
 
 public class Destroyable extends TouchableGoal<DestroyableFactory>
     implements IncrementalGoal<DestroyableFactory>, ModeChangeGoal<DestroyableFactory> {

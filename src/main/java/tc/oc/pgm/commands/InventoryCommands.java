@@ -4,10 +4,10 @@ import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import tc.oc.component.render.ComponentRenderers;
-import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.inventory.ViewInventoryMatchModule;
+import tc.oc.util.bukkit.component.render.ComponentRenderers;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
 public class InventoryCommands {
 

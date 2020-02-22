@@ -11,16 +11,16 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedPlayer;
-import tc.oc.identity.Identity;
-import tc.oc.named.NameStyle;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.chat.MultiAudience;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedPlayer;
+import tc.oc.util.bukkit.identity.Identity;
+import tc.oc.util.bukkit.named.NameStyle;
 
 public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
 

@@ -53,8 +53,6 @@ import org.bukkit.material.PistonExtensionMaterial;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
-import tc.oc.block.BlockStates;
-import tc.oc.material.Materials;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
@@ -66,8 +64,10 @@ import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.events.PlayerBlockTransformEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.Trackers;
-import tc.oc.server.Events;
 import tc.oc.util.ClassLogger;
+import tc.oc.util.bukkit.Events;
+import tc.oc.util.bukkit.block.BlockStates;
+import tc.oc.util.bukkit.material.Materials;
 import tc.oc.util.reflect.ReflectionUtils;
 
 public class BlockTransformListener implements Listener {

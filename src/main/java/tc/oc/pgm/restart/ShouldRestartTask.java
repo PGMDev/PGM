@@ -3,7 +3,7 @@ package tc.oc.pgm.restart;
 import org.bukkit.plugin.Plugin;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
-import tc.oc.server.ConfigUtils;
+import tc.oc.util.bukkit.ConfigUtils;
 
 /**
  * Periodically check if the server has exceeded the maximum uptime or memory usage limits and if so

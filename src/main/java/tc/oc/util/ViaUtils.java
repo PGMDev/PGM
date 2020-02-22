@@ -1,7 +1,7 @@
 package tc.oc.util;
 
 import org.bukkit.entity.Player;
-import tc.oc.world.NMSHacks;
+import tc.oc.util.bukkit.world.NMSHacks;
 import us.myles.ViaVersion.api.Via;
 
 public class ViaUtils {

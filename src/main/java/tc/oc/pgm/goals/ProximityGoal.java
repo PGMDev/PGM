@@ -8,7 +8,6 @@ import org.bukkit.block.BlockState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import tc.oc.block.BlockVectors;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.match.Match;
@@ -22,6 +21,7 @@ import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalProximityChangeEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
+import tc.oc.util.bukkit.block.BlockVectors;
 import tc.oc.util.collection.DefaultMapAdapter;
 import tc.oc.util.components.ComponentUtils;
 

@@ -10,9 +10,9 @@ import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
-import tc.oc.block.BlockVectors;
 import tc.oc.pgm.filters.TypedFilter;
 import tc.oc.pgm.filters.query.ILocationQuery;
+import tc.oc.util.bukkit.block.BlockVectors;
 
 public abstract class AbstractRegion extends TypedFilter<ILocationQuery>
     implements RegionDefinition {

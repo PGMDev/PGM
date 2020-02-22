@@ -210,7 +210,8 @@
                         <phase>generate-resources</phase>
                         <configuration>
                             <tasks>
-                                <zip basedir="${basedir}/maps/" destfile="${basedir}/src/main/resources/maps.zip" />
+                                <zip basedir="${basedir}/maps/" destfile="${basedir}/src/main/resources/maps.zip"/>
+                                <mkdir dir="${basedir}/target/server/"/>
                             </tasks>
                         </configuration>
                         <goals>
@@ -235,7 +236,7 @@
                         </tags>
                     </to>
                     <container>
-                        <mainClass>tc.oc.Server</mainClass>
+                        <mainClass>tc.oc.util.bukkit.Server</mainClass>
                         <jvmFlags>
                             <jvmFlag>-showversion</jvmFlag>
                             <jvmFlag>-Xaggressive</jvmFlag>

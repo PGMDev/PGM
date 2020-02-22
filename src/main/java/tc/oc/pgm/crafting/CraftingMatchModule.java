@@ -8,9 +8,9 @@ import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
-import tc.oc.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
 
 public class CraftingMatchModule implements MatchModule, Listener {
 

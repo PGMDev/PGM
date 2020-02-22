@@ -3,11 +3,11 @@ package tc.oc.pgm.events;
 import javax.annotation.Nullable;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedText;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerEvent;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
 
 public abstract class PlayerParticipationEvent extends MatchPlayerEvent implements Cancellable {
 

@@ -4,14 +4,14 @@ import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.scheduler.BukkitTask;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedText;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
-import tc.oc.tablist.DynamicTabEntry;
-import tc.oc.tablist.TabView;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.util.bukkit.tablist.DynamicTabEntry;
+import tc.oc.util.bukkit.tablist.TabView;
 import tc.oc.util.collection.DefaultProvider;
 import tc.oc.util.components.PeriodFormats;
 

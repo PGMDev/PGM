@@ -10,10 +10,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.Vector;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.material.matcher.SingleMaterialMatcher;
-import tc.oc.named.NameStyle;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayerState;
@@ -26,6 +22,10 @@ import tc.oc.pgm.regions.CuboidRegion;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.teams.Team;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
+import tc.oc.util.bukkit.named.NameStyle;
 import tc.oc.util.components.Components;
 
 public class Core extends TouchableGoal<CoreFactory> implements ModeChangeGoal<CoreFactory> {

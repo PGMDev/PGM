@@ -1,7 +1,7 @@
 package tc.oc.pgm.api.chat;
 
 import javax.annotation.Nullable;
-import tc.oc.component.Component;
+import tc.oc.util.bukkit.component.Component;
 
 /** Represents multiple {@link Audience} members that receive the same messages. */
 @FunctionalInterface

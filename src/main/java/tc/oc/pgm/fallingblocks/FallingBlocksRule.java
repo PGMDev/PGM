@@ -4,9 +4,9 @@ import javax.annotation.Nullable;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
-import tc.oc.material.Materials;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.query.BlockQuery;
+import tc.oc.util.bukkit.material.Materials;
 
 public class FallingBlocksRule {
   public static final int DEFAULT_DELAY = 2;

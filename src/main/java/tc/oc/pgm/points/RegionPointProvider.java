@@ -8,10 +8,10 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.Vector;
-import tc.oc.block.BlockVectors;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.regions.Region;
-import tc.oc.world.WorldBorders;
+import tc.oc.util.bukkit.block.BlockVectors;
+import tc.oc.util.bukkit.world.WorldBorders;
 
 public class RegionPointProvider implements PointProvider {
 

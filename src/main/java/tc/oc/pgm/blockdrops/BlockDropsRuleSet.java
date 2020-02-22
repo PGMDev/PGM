@@ -11,7 +11,6 @@ import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
-import tc.oc.block.BlockStates;
 import tc.oc.pgm.api.event.BlockPunchEvent;
 import tc.oc.pgm.api.event.BlockTrampleEvent;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -21,7 +20,8 @@ import tc.oc.pgm.filters.query.MaterialQuery;
 import tc.oc.pgm.filters.query.Queries;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.util.Pair;
-import tc.oc.world.NMSHacks;
+import tc.oc.util.bukkit.block.BlockStates;
+import tc.oc.util.bukkit.world.NMSHacks;
 
 public class BlockDropsRuleSet {
   private final ImmutableList<BlockDropsRule> rules;

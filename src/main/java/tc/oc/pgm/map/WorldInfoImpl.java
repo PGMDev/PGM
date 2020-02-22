@@ -8,8 +8,8 @@ import org.bukkit.World;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.WorldInfo;
 import tc.oc.pgm.util.XMLUtils;
-import tc.oc.xml.InvalidXMLException;
-import tc.oc.xml.Node;
+import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.util.xml.Node;
 
 public class WorldInfoImpl implements WorldInfo {
   private static final Random random = new Random();

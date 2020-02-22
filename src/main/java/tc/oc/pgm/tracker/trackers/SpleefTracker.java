@@ -9,7 +9,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerOnGroundEvent;
-import tc.oc.material.Materials;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -17,6 +16,7 @@ import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.damage.*;
 import tc.oc.pgm.tracker.event.PlayerSpleefEvent;
+import tc.oc.util.bukkit.material.Materials;
 
 /**
  * Tracks blocks broken by players and fires a {@link PlayerSpleefEvent} when it appears to cause a

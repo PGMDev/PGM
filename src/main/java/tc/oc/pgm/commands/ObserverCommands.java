@@ -3,10 +3,10 @@ package tc.oc.pgm.commands;
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import org.bukkit.command.CommandSender;
-import tc.oc.component.render.ComponentRenderers;
-import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.observers.ObserverToolsMatchModule;
+import tc.oc.util.bukkit.component.render.ComponentRenderers;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
 public class ObserverCommands {
 

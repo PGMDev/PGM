@@ -40,12 +40,6 @@ import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 import org.joda.time.Duration;
-import tc.oc.component.render.MatchNameRenderer;
-import tc.oc.identity.Identity;
-import tc.oc.identity.IdentityProvider;
-import tc.oc.identity.RealIdentity;
-import tc.oc.named.CachingNameRenderer;
-import tc.oc.named.NameRenderer;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
@@ -117,7 +111,13 @@ import tc.oc.pgm.rotation.RandomMapOrder;
 import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.util.FileUtils;
-import tc.oc.xml.InvalidXMLException;
+import tc.oc.util.bukkit.component.render.MatchNameRenderer;
+import tc.oc.util.bukkit.identity.Identity;
+import tc.oc.util.bukkit.identity.IdentityProvider;
+import tc.oc.util.bukkit.identity.RealIdentity;
+import tc.oc.util.bukkit.named.CachingNameRenderer;
+import tc.oc.util.bukkit.named.NameRenderer;
+import tc.oc.util.xml.InvalidXMLException;
 
 public final class PGMImpl extends JavaPlugin implements PGM, IdentityProvider, Listener {
 

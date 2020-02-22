@@ -4,13 +4,13 @@ import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 import org.joda.time.Duration;
-import tc.oc.bossbar.BossBar;
-import tc.oc.bossbar.DynamicBossBar;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedText;
-import tc.oc.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.bossbar.BossBarMatchModule;
+import tc.oc.util.bukkit.bossbar.BossBar;
+import tc.oc.util.bukkit.bossbar.DynamicBossBar;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 import tc.oc.util.components.PeriodFormats;
 
 public abstract class MatchCountdown extends Countdown {

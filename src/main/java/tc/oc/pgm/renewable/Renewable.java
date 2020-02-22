@@ -16,10 +16,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
-import tc.oc.block.BlockFaces;
-import tc.oc.block.BlockVectorSet;
-import tc.oc.block.BlockVectors;
-import tc.oc.material.MaterialCounter;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.Tickable;
@@ -29,7 +25,11 @@ import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.snapshot.SnapshotMatchModule;
 import tc.oc.util.ClassLogger;
-import tc.oc.world.NMSHacks;
+import tc.oc.util.bukkit.block.BlockFaces;
+import tc.oc.util.bukkit.block.BlockVectorSet;
+import tc.oc.util.bukkit.block.BlockVectors;
+import tc.oc.util.bukkit.material.MaterialCounter;
+import tc.oc.util.bukkit.world.NMSHacks;
 
 public class Renewable implements Listener, Tickable {
 

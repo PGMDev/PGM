@@ -4,15 +4,15 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedText;
-import tc.oc.component.types.PersonalizedTranslatable;
-import tc.oc.named.NameStyle;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.util.TranslationUtils;
-import tc.oc.tablist.DynamicTabEntry;
-import tc.oc.tablist.TabView;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.util.bukkit.named.NameStyle;
+import tc.oc.util.bukkit.tablist.DynamicTabEntry;
+import tc.oc.util.bukkit.tablist.TabView;
 import tc.oc.util.collection.DefaultProvider;
 
 public class MapTabEntry extends DynamicTabEntry {

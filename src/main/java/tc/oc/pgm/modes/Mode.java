@@ -4,8 +4,8 @@ import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.material.MaterialData;
 import org.joda.time.Duration;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedText;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
 
 public class Mode {
 

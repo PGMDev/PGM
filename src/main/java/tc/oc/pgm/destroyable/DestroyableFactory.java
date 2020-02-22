@@ -2,12 +2,12 @@ package tc.oc.pgm.destroyable;
 
 import java.util.Set;
 import javax.annotation.Nullable;
-import tc.oc.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.features.FeatureInfo;
 import tc.oc.pgm.goals.ProximityGoalDefinition;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.teams.TeamFactory;
+import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
 
 @FeatureInfo(name = "destroyable")
 public class DestroyableFactory extends ProximityGoalDefinition {

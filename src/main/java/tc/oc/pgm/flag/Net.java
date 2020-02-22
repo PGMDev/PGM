@@ -3,13 +3,13 @@ package tc.oc.pgm.flag;
 import com.google.common.collect.ImmutableSet;
 import javax.annotation.Nullable;
 import org.bukkit.util.Vector;
-import tc.oc.component.Component;
 import tc.oc.pgm.features.FeatureInfo;
 import tc.oc.pgm.features.FeatureReference;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.teams.TeamFactory;
+import tc.oc.util.bukkit.component.Component;
 
 @FeatureInfo(name = "net")
 public class Net extends SelfIdentifyingFeatureDefinition {

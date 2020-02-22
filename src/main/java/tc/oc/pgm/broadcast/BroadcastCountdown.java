@@ -1,11 +1,11 @@
 package tc.oc.pgm.broadcast;
 
 import org.joda.time.Duration;
-import tc.oc.component.Component;
-import tc.oc.component.types.BlankComponent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.countdowns.MatchCountdown;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.BlankComponent;
 
 public class BroadcastCountdown extends MatchCountdown {
   private final Broadcast broadcast;

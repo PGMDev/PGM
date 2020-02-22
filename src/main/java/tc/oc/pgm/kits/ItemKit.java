@@ -9,8 +9,8 @@ import java.util.Map.Entry;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import tc.oc.item.Items;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.util.bukkit.item.Items;
 
 public class ItemKit implements KitDefinition {
 

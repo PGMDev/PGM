@@ -1,10 +1,10 @@
 package tc.oc.pgm.score;
 
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedText;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.result.VictoryCondition;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
 
 public class ScoreVictoryCondition implements VictoryCondition {
 

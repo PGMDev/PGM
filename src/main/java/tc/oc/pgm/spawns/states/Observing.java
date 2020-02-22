@@ -14,7 +14,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.material.Door;
 import org.bukkit.permissions.PermissionAttachment;
-import tc.oc.block.BlockVectors;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
@@ -25,6 +24,7 @@ import tc.oc.pgm.spawns.ObserverToolFactory;
 import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
+import tc.oc.util.bukkit.block.BlockVectors;
 
 public class Observing extends State {
 

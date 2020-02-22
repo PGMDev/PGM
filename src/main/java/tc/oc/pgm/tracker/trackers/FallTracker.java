@@ -13,7 +13,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerOnGroundEvent;
-import tc.oc.material.Materials;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -28,6 +27,7 @@ import tc.oc.pgm.tracker.damage.PhysicalInfo;
 import tc.oc.pgm.tracker.event.PlayerSpleefEvent;
 import tc.oc.pgm.tracker.resolvers.DamageResolver;
 import tc.oc.util.ClassLogger;
+import tc.oc.util.bukkit.material.Materials;
 
 /** Tracks the state of falls caused by other players and resolves the damage caused by them. */
 public class FallTracker implements Listener, DamageResolver {

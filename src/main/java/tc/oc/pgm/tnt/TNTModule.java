@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.joda.time.Duration;
-import tc.oc.component.Component;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -21,7 +20,8 @@ import tc.oc.pgm.regions.RFAScope;
 import tc.oc.pgm.regions.RegionFilterApplication;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.util.XMLUtils;
-import tc.oc.xml.InvalidXMLException;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.xml.InvalidXMLException;
 
 public class TNTModule implements MapModule {
   private static final Collection<MapTag> TAGS =

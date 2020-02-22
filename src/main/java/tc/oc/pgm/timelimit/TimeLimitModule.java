@@ -19,7 +19,7 @@ import tc.oc.pgm.result.VictoryCondition;
 import tc.oc.pgm.result.VictoryConditions;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.components.PeriodFormats;
-import tc.oc.xml.InvalidXMLException;
+import tc.oc.util.xml.InvalidXMLException;
 
 public class TimeLimitModule implements MapModule {
   private static final Collection<MapTag> TAGS =

@@ -1,6 +1,6 @@
 package tc.oc.pgm.start;
 
-import tc.oc.component.Component;
+import tc.oc.util.bukkit.component.Component;
 
 /**
  * Other modules can register instances of this with {@link StartMatchModule} to preempt match start

@@ -12,7 +12,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.world.NMSHacks;
+import tc.oc.util.bukkit.world.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
 public class FriendlyFireRefundMatchModule implements MatchModule, Listener {

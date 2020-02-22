@@ -19,7 +19,7 @@ import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.XMLUtils;
-import tc.oc.xml.InvalidXMLException;
+import tc.oc.util.xml.InvalidXMLException;
 
 public class ControlPointModule implements MapModule<ControlPointMatchModule> {
 

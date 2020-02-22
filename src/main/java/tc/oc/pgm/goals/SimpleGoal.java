@@ -5,13 +5,13 @@ import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
-import tc.oc.component.Component;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.util.ClassLogger;
+import tc.oc.util.bukkit.component.Component;
 
 /** Basic {@link Goal} implementation with fields for the definition and match */
 public abstract class SimpleGoal<T extends GoalDefinition> implements Goal<T> {

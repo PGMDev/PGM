@@ -16,7 +16,7 @@ import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.teams.TeamModule;
-import tc.oc.xml.InvalidXMLException;
+import tc.oc.util.xml.InvalidXMLException;
 
 public class FlagModule implements MapModule {
 

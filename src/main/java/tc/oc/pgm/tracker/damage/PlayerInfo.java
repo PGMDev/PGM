@@ -3,10 +3,10 @@ package tc.oc.pgm.tracker.damage;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.annotation.Nullable;
-import tc.oc.component.Component;
-import tc.oc.named.NameStyle;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.named.NameStyle;
 
 public class PlayerInfo implements OwnerInfo, MeleeInfo, PhysicalInfo {
 

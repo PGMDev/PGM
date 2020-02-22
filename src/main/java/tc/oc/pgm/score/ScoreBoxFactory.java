@@ -2,10 +2,10 @@ package tc.oc.pgm.score;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import tc.oc.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.regions.Region;
+import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
 
 public class ScoreBoxFactory {
   private final Region region;

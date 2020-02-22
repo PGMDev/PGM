@@ -15,8 +15,8 @@ import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.regions.Union;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.collection.ArrayUtils;
-import tc.oc.xml.InvalidXMLException;
-import tc.oc.xml.Node;
+import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.util.xml.Node;
 
 /**
  * PointProvider grammar is a bit strange due to backward compatibility. The root element is what

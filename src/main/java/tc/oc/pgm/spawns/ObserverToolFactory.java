@@ -6,10 +6,10 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.Permissible;
-import tc.oc.item.ItemBuilder;
 import tc.oc.pgm.AllTranslations;
 import tc.oc.pgm.api.PGM;
 import tc.oc.util.ClassLogger;
+import tc.oc.util.bukkit.item.ItemBuilder;
 
 /** Creates some of the items for the observer hotbar */
 public class ObserverToolFactory {

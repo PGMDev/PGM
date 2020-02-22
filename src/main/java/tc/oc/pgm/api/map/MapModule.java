@@ -11,7 +11,7 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.Module;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
-import tc.oc.xml.InvalidXMLException;
+import tc.oc.util.xml.InvalidXMLException;
 
 /**
  * A configuration provider that creates {@link MatchModule}s.

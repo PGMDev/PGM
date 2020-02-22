@@ -13,9 +13,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.joda.time.Duration;
-import tc.oc.bossbar.DynamicBossBar;
-import tc.oc.component.Component;
-import tc.oc.component.types.PersonalizedText;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -31,6 +28,9 @@ import tc.oc.pgm.cycle.CycleMatchModule;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerLeaveMatchEvent;
+import tc.oc.util.bukkit.bossbar.DynamicBossBar;
+import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
 
 @ListenerScope(MatchScope.LOADED)
 public class StartMatchModule implements MatchModule, Listener {

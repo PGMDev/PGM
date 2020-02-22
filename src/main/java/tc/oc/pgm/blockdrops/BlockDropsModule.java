@@ -25,8 +25,8 @@ import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.Pair;
-import tc.oc.xml.InvalidXMLException;
-import tc.oc.xml.Node;
+import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.util.xml.Node;
 
 public class BlockDropsModule implements MapModule {
   private final BlockDropsRuleSet ruleSet;
