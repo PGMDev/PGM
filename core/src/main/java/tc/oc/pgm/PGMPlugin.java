@@ -9,7 +9,6 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -28,7 +27,6 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Physical;
 import org.bukkit.Server;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.Listener;
@@ -112,14 +110,10 @@ import tc.oc.pgm.rotation.RandomMapOrder;
 import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.util.FileUtils;
-import tc.oc.util.bukkit.identity.Identity;
-import tc.oc.util.bukkit.identity.IdentityProvider;
-import tc.oc.util.bukkit.identity.RealIdentity;
-import tc.oc.util.bukkit.named.CachingNameRenderer;
-import tc.oc.util.bukkit.named.NameRenderer;
+import tc.oc.util.bukkit.named.Names;
 import tc.oc.util.xml.InvalidXMLException;
 
-public class PGMPlugin extends JavaPlugin implements PGM, IdentityProvider, Listener {
+public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
   private Logger gameLogger;
   private Datastore datastore;
@@ -128,7 +122,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, IdentityProvider, List
   private MatchTabManager matchTabManager;
   private MapOrder mapOrder;
   private MatchNameRenderer matchNameRenderer;
-  private NameRenderer nameRenderer;
   private PrefixRegistry prefixRegistry;
 
   public PGMPlugin() {
@@ -220,7 +213,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, IdentityProvider, List
 
     prefixRegistry = new PrefixRegistryImpl();
     matchNameRenderer = new MatchNameRenderer(matchManager);
-    nameRenderer = new CachingNameRenderer(matchNameRenderer);
+    Names.setRenderer(matchNameRenderer);
 
     if (Config.PlayerList.enabled()) {
       matchTabManager = new MatchTabManager(this);
@@ -242,7 +235,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, IdentityProvider, List
     mapLibrary = null;
     matchManager = null;
     matchTabManager = null;
-    nameRenderer = null;
     prefixRegistry = null;
 
     // Sometimes match folders need to be cleaned up due to de-syncs
@@ -262,16 +254,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, IdentityProvider, List
   private void shutdown(String message, @Nullable Throwable cause) {
     getLogger().log(Level.WARNING, message, cause);
     getServer().shutdown();
-  }
-
-  @Override
-  public Identity getIdentity(Player player) {
-    return new RealIdentity(player.getUniqueId(), player.getName());
-  }
-
-  @Override
-  public Identity getIdentity(UUID playerId, String username, @Nullable String nickname) {
-    return new RealIdentity(playerId, username);
   }
 
   @Override
@@ -305,18 +287,8 @@ public class PGMPlugin extends JavaPlugin implements PGM, IdentityProvider, List
   }
 
   @Override
-  public NameRenderer getNameRenderer() {
-    return nameRenderer;
-  }
-
-  @Override
   public PrefixRegistry getPrefixRegistry() {
     return prefixRegistry;
-  }
-
-  @Override
-  public IdentityProvider getIdentityProvider() {
-    return this;
   }
 
   private class CommandModule extends AbstractModule {

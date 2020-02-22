@@ -12,6 +12,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.util.bukkit.identity.Identities;
+import tc.oc.util.bukkit.named.Names;
 import tc.oc.util.bukkit.tablist.PlayerTabEntry;
 
 public class PrefixRegistryImpl implements PrefixRegistry, Listener {
@@ -34,7 +35,7 @@ public class PrefixRegistryImpl implements PrefixRegistry, Listener {
       return;
     }
     player.setDisplayName(getPrefixedName(player, matchPlayer.getParty()));
-    PGM.get().getNameRenderer().invalidateCache(Identities.current(player));
+    Names.renderer().invalidateCache(Identities.current(player));
     final PlayerTabEntry tabEntry =
         (PlayerTabEntry) PGM.get().getMatchTabManager().getPlayerEntryOrNull(player);
     if (tabEntry != null) {

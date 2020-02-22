@@ -10,8 +10,6 @@ import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.prefix.PrefixRegistry;
 import tc.oc.pgm.rotation.MapOrder;
 import tc.oc.pgm.tablist.MatchTabManager;
-import tc.oc.util.bukkit.identity.IdentityProvider;
-import tc.oc.util.bukkit.named.NameRenderer;
 
 /** PvP Game Manager (aka. PGM), the global {@link Plugin} to manage PvP games. */
 public interface PGM extends Plugin {
@@ -29,10 +27,6 @@ public interface PGM extends Plugin {
   MapOrder getMapOrder();
 
   PrefixRegistry getPrefixRegistry();
-
-  IdentityProvider getIdentityProvider();
-
-  NameRenderer getNameRenderer();
 
   AtomicReference<PGM> GLOBAL = new AtomicReference<>(null);
 
