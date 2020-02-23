@@ -11,12 +11,12 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.tracker.Trackers;
 import tc.oc.pgm.tracker.damage.*;
-import tc.oc.pgm.util.TranslationUtils;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.Components;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 import tc.oc.util.bukkit.named.NameStyle;
+import tc.oc.util.bukkit.translations.TranslationUtils;
 
 public class DeathMessageBuilder {
 

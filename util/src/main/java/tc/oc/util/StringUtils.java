@@ -1,17 +1,13 @@
 package tc.oc.util;
 
-import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import net.md_5.bungee.api.ChatColor;
 
 public class StringUtils {
-  public static final int GUARANTEED_NO_WRAP_CHAT_PAGE_WIDTH =
-      55; // Will never wrap, even with the largest characters
 
   /**
    * Shorthand for listToEnglishCompound(list, "", "").
@@ -135,36 +131,6 @@ public class StringUtils {
 
   public static String substring(String text, int begin, int end) {
     return text.substring(Math.min(text.length(), begin), Math.min(text.length(), end));
-  }
-
-  public static String dashedChatMessage(String message, String dash, String dashPrefix) {
-    return dashedChatMessage(message, dash, dashPrefix, null);
-  }
-
-  public static String dashedChatMessage(
-      String message, String dash, String dashPrefix, String messagePrefix) {
-    message = " " + message + " ";
-    int dashCount =
-        (GUARANTEED_NO_WRAP_CHAT_PAGE_WIDTH - ChatColor.stripColor(message).length() - 2)
-            / (dash.length() * 2);
-    String dashes = dashCount >= 0 ? Strings.repeat(dash, dashCount) : "";
-
-    StringBuffer builder = new StringBuffer();
-    if (dashCount > 0) {
-      builder.append(dashPrefix).append(dashes).append(ChatColor.RESET);
-    }
-
-    if (messagePrefix != null) {
-      builder.append(messagePrefix);
-    }
-
-    builder.append(message);
-
-    if (dashCount > 0) {
-      builder.append(ChatColor.RESET).append(dashPrefix).append(dashes);
-    }
-
-    return builder.toString();
   }
 
   /**

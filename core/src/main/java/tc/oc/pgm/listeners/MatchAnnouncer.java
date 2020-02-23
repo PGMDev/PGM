@@ -18,13 +18,13 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.teams.Team;
-import tc.oc.pgm.util.TranslationUtils;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.ComponentUtils;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 import tc.oc.util.bukkit.named.MapNameStyle;
 import tc.oc.util.bukkit.named.NameStyle;
+import tc.oc.util.bukkit.translations.TranslationUtils;
 
 public class MatchAnnouncer implements Listener {
 

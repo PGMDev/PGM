@@ -4,7 +4,6 @@ import com.google.common.cache.CacheLoader;
 import java.util.List;
 import javax.annotation.Nullable;
 import tc.oc.util.bukkit.translations.provider.TranslationProvider;
-import tc.oc.util.localization.Locales;
 
 /**
  * {@link CacheLoader} that finds the best match from a {@link List} of {@link TranslationProvider}s

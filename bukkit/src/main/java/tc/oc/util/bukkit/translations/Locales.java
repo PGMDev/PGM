@@ -1,11 +1,14 @@
-package tc.oc.util.localization;
+package tc.oc.util.bukkit.translations;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.MissingResourceException;
+import java.util.Set;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import tc.oc.util.bukkit.translations.provider.TranslationProvider;
 
 public final class Locales {
 
@@ -44,12 +47,13 @@ public final class Locales {
    * @param providers to check locale support
    * @return {@link Set} of supported {@link Locale}
    */
-  public static Set<Locale> getSupportedLocales(Collection<TranslationProvider> providers) {
+  public static Set<Locale> getSupportedLocales(
+      Collection<tc.oc.util.bukkit.translations.provider.TranslationProvider> providers) {
     Set<Locale> locales = new HashSet<>();
     locales.add(DEFAULT_LOCALE);
     locales.add(new Locale("af", "ZA"));
     for (Locale locale : Locale.getAvailableLocales()) {
-      for (TranslationProvider provider : providers) {
+      for (tc.oc.util.bukkit.translations.provider.TranslationProvider provider : providers) {
         try {
           provider.getTranslations(locale);
           locales.add(locale);

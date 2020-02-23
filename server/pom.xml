@@ -17,14 +17,6 @@
             <artifactId>core</artifactId>
             <version>1.8-SNAPSHOT</version>
         </dependency>
-
-        <!-- Fork of Spigot and SportBukkit running Minecraft 1.8 -->
-        <dependency>
-            <groupId>app.ashcon</groupId>
-            <artifactId>sportpaper</artifactId>
-            <version>1.8.8-R0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -35,6 +27,12 @@
                 <configuration>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <minimizeJar>true</minimizeJar>
+                    <artifactSet>
+                        <includes>
+                            <include>app.ashcon:sportpaper:*</include>
+                            <include>tc.oc:core:*</include>
+                        </includes>
+                    </artifactSet>
                 </configuration>
                 <executions>
                     <execution>

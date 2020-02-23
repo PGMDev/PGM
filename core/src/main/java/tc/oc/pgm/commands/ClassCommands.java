@@ -12,6 +12,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.PlayerClass;
 import tc.oc.util.StringUtils;
+import tc.oc.util.bukkit.component.ComponentUtils;
 import tc.oc.util.bukkit.translations.AllTranslations;
 
 public class ClassCommands {
@@ -97,7 +98,7 @@ public class ClassCommands {
     final PlayerClass senderClass = classModule.getSelectedClass(bukkit.getUniqueId());
 
     sender.sendMessage(
-        StringUtils.dashedChatMessage(
+        ComponentUtils.dashedChatMessage(
             ChatColor.GOLD + AllTranslations.get().translate("command.class.list.title", sender),
             "-",
             ChatColor.RED.toString()));
@@ -133,7 +134,7 @@ public class ClassCommands {
 
     if (doesntHave) {
       sender.sendMessage(
-          StringUtils.dashedChatMessage(
+          ComponentUtils.dashedChatMessage(
               ChatColor.GOLD
                   + AllTranslations.get()
                       .translate("command.class.list.shop", sender)

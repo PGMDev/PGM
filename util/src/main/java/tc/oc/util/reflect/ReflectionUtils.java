@@ -1,17 +1,20 @@
 package tc.oc.util.reflect;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import javax.annotation.Nullable;
-import org.apache.commons.lang.ClassUtils;
 
 public class ReflectionUtils {
   private ReflectionUtils() {}
@@ -313,64 +316,6 @@ public class ReflectionUtils {
     } finally {
       field.setAccessible(wasAccessible);
     }
-  }
-
-  public static Method resolveMethod(
-      boolean privateAccess, Class<?> cls, String name, Class<?>... params)
-      throws NoSuchMethodException {
-    // Try for an exact match first
-    if (privateAccess) {
-      try {
-        return cls.getDeclaredMethod(name, params);
-      } catch (NoSuchMethodException ignored) {
-      }
-    }
-
-    try {
-      return cls.getMethod(name, params);
-    } catch (NoSuchMethodException ignored) {
-    }
-
-    // Find the best overload
-    Method bestMethod = null;
-    float bestCost = Float.POSITIVE_INFINITY;
-
-    if (privateAccess) {
-      for (Method method : cls.getDeclaredMethods()) {
-        if (!name.equals(method.getName())) continue;
-        if (!ClassUtils.isAssignable(params, method.getParameterTypes(), true)) continue;
-
-        if (bestMethod == null
-            || MemberUtils.getTotalTransformationCost(params, method.getParameterTypes())
-                < bestCost) {
-          bestMethod = method;
-        }
-      }
-    }
-
-    for (Method method : cls.getMethods()) {
-      if (!name.equals(method.getName())) continue;
-      if (!ClassUtils.isAssignable(params, method.getParameterTypes(), true)) continue;
-
-      if (bestMethod == null
-          || MemberUtils.getTotalTransformationCost(params, method.getParameterTypes())
-              < bestCost) {
-        bestMethod = method;
-      }
-    }
-
-    if (bestMethod == null) {
-      throw new NoSuchMethodException(
-          "No method callable with "
-              + cls.getName()
-              + "."
-              + name
-              + "("
-              + Joiner.on(", ").join(params)
-              + ")");
-    }
-
-    return bestMethod;
   }
 
   /** Return a collection of all methods in the given class that have the given annotation */

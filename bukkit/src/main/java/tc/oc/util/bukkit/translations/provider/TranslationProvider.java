@@ -11,7 +11,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import tc.oc.util.localization.Locales;
+import tc.oc.util.bukkit.translations.Locales;
 
 /** A class retrieves translations from a {@link ResourceBundle} */
 @SuppressWarnings("UnstableApiUsage")

@@ -1,4 +1,4 @@
-package tc.oc.util.localization;
+package tc.oc.util.bukkit.translations;
 
 import com.google.common.collect.ForwardingMap;
 import java.util.HashMap;
