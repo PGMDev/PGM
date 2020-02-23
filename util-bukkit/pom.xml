@@ -3,17 +3,17 @@
     <parent>
         <relativePath>../pom.xml</relativePath>
         <version>1.8-SNAPSHOT</version>
-        <groupId>tc.oc</groupId>
+        <groupId>tc.oc.pgm</groupId>
         <artifactId>PGM</artifactId>
     </parent>
 
-    <name>Bukkit</name>
-    <artifactId>bukkit</artifactId>
+    <name>Util (Bukkit)</name>
+    <artifactId>util-bukkit</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
-            <groupId>tc.oc</groupId>
+            <groupId>tc.oc.pgm</groupId>
             <artifactId>util</artifactId>
             <version>1.8-SNAPSHOT</version>
         </dependency>

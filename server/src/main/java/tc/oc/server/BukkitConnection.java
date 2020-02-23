@@ -1,4 +1,4 @@
-package tc.oc.util.bukkit.server;
+package tc.oc.server;
 
 import static tc.oc.util.reflect.ReflectionUtils.readField;
 
