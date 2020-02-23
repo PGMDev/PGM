@@ -38,28 +38,28 @@
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>2.10.1</version>
+            <version>2.10.5</version>
         </dependency>
 
         <!-- Time formatting library used for parsing durations such as "1h30m" -->
         <dependency>
             <groupId>org.ocpsoft.prettytime</groupId>
             <artifactId>prettytime</artifactId>
-            <version>3.2.5.Final</version>
+            <version>4.0.3.Final</version>
         </dependency>
 
         <!-- XML parsing library used for all "map.xml" configuration loading -->
         <dependency>
             <groupId>org.jdom</groupId>
             <artifactId>jdom2</artifactId>
-            <version>2.0.5</version>
+            <version>2.0.6</version>
         </dependency>
 
         <!-- Sqlite database driver as a persistent datastore -->
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.28.0</version>
+            <version>3.30.1</version>
         </dependency>
     </dependencies>
 </project>

@@ -9,10 +9,14 @@ import tc.oc.util.bukkit.identity.Identity;
 public class Names {
   private Names() {}
 
-  private static NameRenderer renderer = new NicknameRenderer();
+  private static NameRenderer renderer;
+
+  static {
+    setRenderer(new NicknameRenderer());
+  }
 
   public static void setRenderer(NameRenderer renderer) {
-    Names.renderer = renderer;
+    Names.renderer = new CachingNameRenderer(renderer);
   }
 
   /** Get the current (global) {@link NameRenderer} */

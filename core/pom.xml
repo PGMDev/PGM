@@ -1,6 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <properties>
+        <project.pluginClass>tc.oc.pgm.PGMPlugin</project.pluginClass>
+    </properties>
+
     <parent>
         <relativePath>../pom.xml</relativePath>
         <version>1.8-SNAPSHOT</version>
@@ -18,14 +22,6 @@
             <groupId>tc.oc</groupId>
             <artifactId>bukkit</artifactId>
             <version>1.8-SNAPSHOT</version>
-        </dependency>
-
-        <!-- Fork of Spigot and SportBukkit running Minecraft 1.8 -->
-        <dependency>
-            <groupId>app.ashcon</groupId>
-            <artifactId>sportpaper</artifactId>
-            <version>1.8.8-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
         </dependency>
 
         <!-- Command framework for developing simple commands -->
@@ -71,14 +67,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.2.2</version>
                 <configuration>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <minimizeJar>true</minimizeJar>
                     <artifactSet>
                         <excludes>
-                            <exclude>tc.oc:util:*</exclude>
-                            <exclude>tc.oc:bukkit:*</exclude>
                             <exclude>app.ashcon:sportpaper:*</exclude>
                             <exclude>com.google.guava:guava:*</exclude>
                             <exclude>com.google.code.findbugs:annotations:*</exclude>
@@ -102,11 +96,24 @@
                 <version>1.8</version>
                 <executions>
                     <execution>
+                        <id>maps</id>
                         <phase>generate-resources</phase>
                         <configuration>
                             <tasks>
                                 <zip basedir="../maps/" destfile="${basedir}/src/main/resources/maps.zip"/>
                             </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jar</id>
+                        <phase>install</phase>
+                        <configuration>
+                            <target>
+                                <copy file="${basedir}/target/${project.build.finalName}.jar" tofile="../target/PGM-Plugin.jar"/>
+                            </target>
                         </configuration>
                         <goals>
                             <goal>run</goal>
