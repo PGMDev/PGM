@@ -6,6 +6,8 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelException;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
@@ -14,9 +16,11 @@ import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.socket.ServerSocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.haproxy.HAProxyMessage;
 import io.netty.handler.codec.haproxy.HAProxyMessageDecoder;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.List;
 import net.minecraft.server.v1_8_R3.EnumProtocolDirection;
 import net.minecraft.server.v1_8_R3.HandshakeListener;
@@ -85,7 +89,10 @@ public class BukkitConnection extends ServerConnection {
 
                     setupPipeline(channel.pipeline());
                     if (proxyProtocol) {
-                      channel.pipeline().addFirst("proxy_protocol", new HAProxyMessageDecoder());
+                      channel
+                          .pipeline()
+                          .addFirst("haproxy_inspector", new HAProxySourceAddressDecoder());
+                      channel.pipeline().addFirst("haproxy_decoder", new HAProxyMessageDecoder());
                     }
                   }
                 })
@@ -96,5 +103,20 @@ public class BukkitConnection extends ServerConnection {
 
     readField(ServerConnection.class, BukkitConnection.this, List.class, "g")
         .add(channel); // List<ChannelFuture>
+  }
+
+  protected static class HAProxySourceAddressDecoder extends ChannelInboundHandlerAdapter {
+    @Override
+    public void channelRead(ChannelHandlerContext context, Object message) throws Exception {
+      if (message instanceof HAProxyMessage) {
+        final HAProxyMessage header = (HAProxyMessage) message;
+        context.pipeline().get(NetworkManager.class).l =
+            new InetSocketAddress(header.sourceAddress(), header.sourcePort());
+        return;
+      } else if (context.pipeline().get(HAProxyMessageDecoder.class) == null) {
+        context.pipeline().remove(this);
+      }
+      super.channelRead(context, message);
+    }
   }
 }
