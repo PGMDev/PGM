@@ -190,11 +190,13 @@ public class BukkitServer extends DedicatedServer implements Runnable {
     c(propertyManager.getInt("max-build-height", 256)); // setBuildHeight
     c(propertyManager.getString("server-ip", "0.0.0.0")); // setServerIp
 
-    String mode = propertyManager.getString("online-mode", "online");
+    final String mode = propertyManager.getString("server-mode", "online");
     if (mode.equalsIgnoreCase("bungee")) {
       SpigotConfig.bungee = true;
     }
-    setOnlineMode(mode.equalsIgnoreCase("online") || mode.equalsIgnoreCase("true"));
+    final boolean online = mode.equalsIgnoreCase("online") || mode.equalsIgnoreCase("true");
+    propertyManager.setProperty("online-mode", online);
+    setOnlineMode(online);
   }
 
   protected void setupServer() {
