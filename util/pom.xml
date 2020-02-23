@@ -3,7 +3,7 @@
     <parent>
         <relativePath>../pom.xml</relativePath>
         <version>1.8-SNAPSHOT</version>
-        <groupId>tc.oc</groupId>
+        <groupId>tc.oc.pgm</groupId>
         <artifactId>PGM</artifactId>
     </parent>
 

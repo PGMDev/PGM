@@ -8,7 +8,7 @@
     <parent>
         <relativePath>../pom.xml</relativePath>
         <version>1.8-SNAPSHOT</version>
-        <groupId>tc.oc</groupId>
+        <groupId>tc.oc.pgm</groupId>
         <artifactId>PGM</artifactId>
     </parent>
 
@@ -19,8 +19,8 @@
     <dependencies>
         <!-- Various utility classes for Bukkit -->
         <dependency>
-            <groupId>tc.oc</groupId>
-            <artifactId>bukkit</artifactId>
+            <groupId>tc.oc.pgm</groupId>
+            <artifactId>util-bukkit</artifactId>
             <version>1.8-SNAPSHOT</version>
         </dependency>
 

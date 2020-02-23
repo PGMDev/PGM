@@ -3,7 +3,7 @@
     <parent>
         <relativePath>../pom.xml</relativePath>
         <version>1.8-SNAPSHOT</version>
-        <groupId>tc.oc</groupId>
+        <groupId>tc.oc.pgm</groupId>
         <artifactId>PGM</artifactId>
     </parent>
 
@@ -13,7 +13,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>tc.oc</groupId>
+            <groupId>tc.oc.pgm</groupId>
             <artifactId>core</artifactId>
             <version>1.8-SNAPSHOT</version>
         </dependency>
@@ -45,8 +45,8 @@
                     <minimizeJar>false</minimizeJar>
                     <artifactSet>
                         <excludes>
-                            <exclude>tc.oc:util:*</exclude>
-                            <exclude>tc.oc:bukkit:*</exclude>
+                            <exclude>tc.oc.pgm:util:*</exclude>
+                            <exclude>tc.oc.pgm:util-bukkit:*</exclude>
                             <exclude>app.ashcon.intake:intake-bukkit:*</exclude>
                             <exclude>com.google.guava:guava:*</exclude>
                             <exclude>com.google.code.findbugs:annotations:*</exclude>
@@ -57,7 +57,7 @@
                     </artifactSet>
                     <filters>
                         <filter>
-                            <artifact>tc.oc:core:*</artifact>
+                            <artifact>tc.oc.pgm:core:*</artifact>
                             <excludes>
                                 <exclude>org/jdom2/**</exclude>
                             </excludes>
@@ -83,7 +83,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>tc.oc.util.bukkit.server.BukkitServer</mainClass>
+                            <mainClass>tc.oc.server.BukkitServer</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
