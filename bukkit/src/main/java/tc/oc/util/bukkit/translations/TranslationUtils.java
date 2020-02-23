@@ -1,7 +1,12 @@
-package tc.oc.pgm.util;
+package tc.oc.util.bukkit.translations;
 
 import com.google.common.collect.Collections2;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.NavigableSet;
+import java.util.TreeSet;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import org.bukkit.command.CommandSender;
@@ -11,10 +16,7 @@ import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 import tc.oc.util.bukkit.named.NameStyle;
 import tc.oc.util.bukkit.named.Named;
 import tc.oc.util.bukkit.named.StyledNameFunction;
-import tc.oc.util.bukkit.translations.AllTranslations;
-import tc.oc.util.bukkit.translations.Translator;
 import tc.oc.util.bukkit.translations.provider.TranslationProvider;
-import tc.oc.util.localization.Locales;
 
 public class TranslationUtils {
 

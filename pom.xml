@@ -13,6 +13,7 @@
 
     <modules>
         <module>util</module>
+        <module>bukkit</module>
         <module>core</module>
         <module>server</module>
     </modules>

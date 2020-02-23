@@ -1,0 +1,61 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <relativePath>../pom.xml</relativePath>
+        <version>1.8-SNAPSHOT</version>
+        <groupId>tc.oc</groupId>
+        <artifactId>PGM</artifactId>
+    </parent>
+
+    <name>Bukkit</name>
+    <artifactId>bukkit</artifactId>
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>tc.oc</groupId>
+            <artifactId>util</artifactId>
+            <version>1.8-SNAPSHOT</version>
+        </dependency>
+
+        <!-- Fork of Spigot and SportBukkit running Minecraft 1.8 -->
+        <dependency>
+            <groupId>app.ashcon</groupId>
+            <artifactId>sportpaper</artifactId>
+            <version>1.8.8-R0.1-SNAPSHOT</version>
+        </dependency>
+
+        <!-- Multi-protocol library for future Minecraft versions -->
+        <dependency>
+            <groupId>us.myles</groupId>
+            <artifactId>viaversion</artifactId>
+            <version>2.2.2</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Compile-time library used to generate "Delegate" classes -->
+        <!-- TODO: consider removing because unnecessary added complexity -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.10</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/i18n/translations</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/i18n/templates</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
+</project>

@@ -1,16 +1,12 @@
 package tc.oc.pgm;
 
 import com.google.common.collect.ImmutableList;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import javax.annotation.Nullable;
-import net.kencochrane.raven.dsn.Dsn;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
@@ -42,37 +38,6 @@ public class Config {
   public static class Log {
     public static Level level() {
       return Level.parse(getConfiguration().getString("log.level", "info").toUpperCase());
-    }
-
-    // Should redirect to the default sentry dsn, used to help find and track bugs in PGM
-    private static final String SENTRY_URL = "https://sentry.ashcon.app/pgm";
-
-    public static @Nullable String sentry() {
-      String dsn = Dsn.dsnLookup();
-      if (dsn != null) return dsn;
-
-      dsn = getConfiguration().getString("log.sentry", null);
-      if (dsn != null && dsn.equalsIgnoreCase("false")) return null;
-      if (dsn != null) return dsn;
-
-      try {
-        final HttpURLConnection http =
-            (HttpURLConnection)
-                (new URL(SENTRY_URL + "/" + PGM.get().getDescription().getVersion())
-                    .openConnection());
-        http.setInstanceFollowRedirects(false);
-        http.setReadTimeout(2000);
-        http.setConnectTimeout(2000);
-        http.connect();
-        final int code = http.getResponseCode();
-        if (code == 301 || code == 302) { // redirect codes
-          return http.getHeaderField("Location");
-        }
-      } catch (IOException e) {
-        // Fail silently if something goes wrong in the future
-      }
-
-      return null;
     }
   }
 

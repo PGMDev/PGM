@@ -7,9 +7,7 @@ import app.ashcon.intake.parametric.AbstractModule;
 import app.ashcon.intake.parametric.provider.EnumProvider;
 import java.io.File;
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -18,21 +16,10 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import net.kencochrane.raven.event.EventBuilder;
-import net.kencochrane.raven.event.interfaces.ExceptionInterface;
-import net.kencochrane.raven.event.interfaces.StackTraceInterface;
 import net.md_5.bungee.api.ChatColor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LogEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.Physical;
 import org.bukkit.Server;
-import org.bukkit.event.Event;
-import org.bukkit.event.EventException;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityEvent;
-import org.bukkit.event.inventory.InventoryEvent;
-import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -48,12 +35,9 @@ import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.exception.MapException;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
-import tc.oc.pgm.api.match.event.MatchEvent;
 import tc.oc.pgm.api.module.Module;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
-import tc.oc.pgm.api.party.event.PartyEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.player.event.MatchPlayerEvent;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.commands.AdminCommands;
@@ -148,15 +132,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
     final Logger logger = getLogger();
     logger.setLevel(Config.Log.level());
-
-    CompletableFuture.runAsync(
-        () -> {
-          final String dsn = Config.Log.sentry();
-          if (dsn != null) {
-            ((org.apache.logging.log4j.core.Logger) LogManager.getRootLogger())
-                .addAppender(new SentryAppender(dsn));
-          }
-        });
 
     registerEvents(Config.Maps.get());
     registerEvents(Config.PlayerList.get());
@@ -440,81 +415,5 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
     @Override
     public void close() throws SecurityException {}
-  }
-
-  private class SentryAppender extends net.kencochrane.raven.log4j2.SentryAppender {
-
-    private SentryAppender(String dsn) {
-      this.setDsn(dsn);
-      this.start();
-    }
-
-    private boolean isRelevant(Throwable err) {
-      if (err == null) return false;
-      for (StackTraceElement element : err.getStackTrace()) {
-        if (element.getClassName().startsWith("tc.oc")) {
-          return true;
-        }
-      }
-      return isRelevant(err.getCause());
-    }
-
-    @Override
-    public boolean isFiltered(LogEvent event) {
-      return !event.getLevel().lessOrEqual(org.apache.logging.log4j.Level.WARN)
-          || !isRelevant(event.getThrown());
-    }
-
-    @Override
-    protected net.kencochrane.raven.event.Event buildEvent(LogEvent event) {
-      final EventBuilder builder = new EventBuilder();
-      Throwable err = event.getThrown();
-
-      builder.setLevel(formatLevel(event.getLevel()));
-      builder.setTimestamp(new Date(event.getMillis()));
-      builder.setMessage(event.getMessage().getFormattedMessage());
-
-      if (err instanceof EventException) {
-        final Event e = ((EventException) err).getEvent();
-        builder.addExtra("event", e);
-        if (e instanceof Physical) {
-          builder.addExtra("world", ((Physical) e).getWorld().getName());
-        }
-        if (e instanceof PlayerEvent) {
-          builder.addExtra("player", ((PlayerEvent) e).getPlayer().getName());
-        }
-        if (e instanceof EntityEvent) {
-          builder.addExtra("entity", ((EntityEvent) e).getEntityType());
-        }
-        if (e instanceof InventoryEvent) {
-          builder.addExtra("inventory", ((InventoryEvent) e).getInventory().getName());
-        }
-        if (e instanceof MatchEvent) {
-          builder.addExtra("match", ((MatchEvent) e).getMatch());
-        }
-        if (e instanceof PartyEvent) {
-          builder.addExtra("party", ((PartyEvent) e).getParty());
-        }
-        if (e instanceof MatchPlayerEvent) {
-          builder.addExtra("matchplayer", ((MatchPlayerEvent) e).getPlayer());
-        }
-        err = err.getCause();
-      }
-
-      builder.addTag("os", System.getProperty("os.name"));
-      builder.addTag("java", System.getProperty("java.version"));
-      builder.addTag("pgm", PGM.get().getDescription().getVersion());
-      builder.addTag("bukkit", PGM.get().getServer().getVersion());
-
-      if (err != null) {
-        builder.addSentryInterface(new ExceptionInterface(err));
-      } else if (event.getSource() != null) {
-        builder.addSentryInterface(
-            new StackTraceInterface(new StackTraceElement[] {event.getSource()}));
-      }
-      raven.runBuilderHelpers(builder);
-
-      return builder.build();
-    }
   }
 }

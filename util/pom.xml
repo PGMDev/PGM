@@ -12,6 +12,27 @@
     <packaging>jar</packaging>
 
     <dependencies>
+        <!-- Google's common libraries, must be same version as Minecraft server -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>17.0</version>
+        </dependency>
+
+        <!-- Provides annotations such as @Nullable -->
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>annotations</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
+        <!-- Performance library for fast collections -->
+        <dependency>
+            <groupId>net.sf.trove4j</groupId>
+            <artifactId>trove4j</artifactId>
+            <version>3.0.3</version>
+        </dependency>
+
         <!-- Time convience libraries for "Instant" and "Duration" -->
         <!-- TODO: Use Java 8's standard time libraries -->
         <dependency>
@@ -40,65 +61,5 @@
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.28.0</version>
         </dependency>
-
-        <!-- Fork of Spigot and SportBukkit running Minecraft 1.8 -->
-        <dependency>
-            <groupId>app.ashcon</groupId>
-            <artifactId>sportpaper</artifactId>
-            <version>1.8.8-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- Multi-protocol library for future Minecraft versions -->
-        <dependency>
-            <groupId>us.myles</groupId>
-            <artifactId>viaversion</artifactId>
-            <version>2.2.2</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- Compile-time library used to generate "Delegate" classes -->
-        <!-- TODO: consider removing because unnecessary added complexity -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.10</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
-    <build>
-        <resources>
-            <resource>
-                <directory>src/main/i18n/translations</directory>
-                <includes>
-                    <include>**/*.properties</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>src/main/i18n/templates</directory>
-                <includes>
-                    <include>**/*.properties</include>
-                </includes>
-            </resource>
-        </resources>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.1</version>
-                <configuration>
-                    <createDependencyReducedPom>false</createDependencyReducedPom>
-                    <minimizeJar>true</minimizeJar>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>

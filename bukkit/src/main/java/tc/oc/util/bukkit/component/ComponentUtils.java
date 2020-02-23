@@ -7,6 +7,7 @@ import net.md_5.bungee.api.ChatColor;
 
 public class ComponentUtils {
 
+  public static final int GUARANTEED_NO_WRAP_CHAT_PAGE_WIDTH = 55;
   public static final int MAX_CHAT_WIDTH = 300;
 
   /**
@@ -430,6 +431,36 @@ public class ComponentUtils {
     }
 
     return lines;
+  }
+
+  public static String dashedChatMessage(String message, String dash, String dashPrefix) {
+    return dashedChatMessage(message, dash, dashPrefix, null);
+  }
+
+  public static String dashedChatMessage(
+      String message, String dash, String dashPrefix, String messagePrefix) {
+    message = " " + message + " ";
+    int dashCount =
+        (GUARANTEED_NO_WRAP_CHAT_PAGE_WIDTH - ChatColor.stripColor(message).length() - 2)
+            / (dash.length() * 2);
+    String dashes = dashCount >= 0 ? Strings.repeat(dash, dashCount) : "";
+
+    StringBuffer builder = new StringBuffer();
+    if (dashCount > 0) {
+      builder.append(dashPrefix).append(dashes).append(ChatColor.RESET);
+    }
+
+    if (messagePrefix != null) {
+      builder.append(messagePrefix);
+    }
+
+    builder.append(message);
+
+    if (dashCount > 0) {
+      builder.append(ChatColor.RESET).append(dashPrefix).append(dashes);
+    }
+
+    return builder.toString();
   }
 
   /**

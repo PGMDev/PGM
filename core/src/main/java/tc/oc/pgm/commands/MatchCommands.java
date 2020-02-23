@@ -26,7 +26,7 @@ import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.util.bukkit.component.ComponentUtils;
 import tc.oc.util.bukkit.component.PeriodFormats;
 import tc.oc.util.bukkit.translations.AllTranslations;
-import tc.oc.util.localization.Locales;
+import tc.oc.util.bukkit.translations.Locales;
 
 public class MatchCommands {
 

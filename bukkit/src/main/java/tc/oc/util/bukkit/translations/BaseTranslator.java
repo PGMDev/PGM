@@ -13,8 +13,6 @@ import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.command.CommandSender;
 import tc.oc.util.bukkit.translations.provider.TranslationProvider;
-import tc.oc.util.localization.LocaleMatcher;
-import tc.oc.util.localization.Locales;
 
 /** A base implementation of a {@link Translator} */
 @SuppressWarnings("UnstableApiUsage")
