@@ -12,8 +12,8 @@ bukkit:
     # Disable garbage collection of chunks
     period-in-ticks: 0
   ticks-per:
-    # Only save chunks every hour
-    autosave: 72000
+    # Never save chunks
+    autosave: 999999
 spigot:
   settings:
     # Must be changed to true for Bungee
@@ -30,7 +30,7 @@ spigot:
     # Disable timings log messages
     verbose: false
   stats:
-    # Do not save acheivements
+    # Do not save achievements
     disable-saving: true
     forced-stats:
       # Console warns that if saving is disabled, this must be enabled

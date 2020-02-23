@@ -1,5 +1,4 @@
 name: PGM
-prefix: PGM
-main: tc.oc.pgm.PGMImpl
+main: ${project.pluginClass}
 version: ${project.version}-${git.commit.id.abbrev}
 softdepend: [ViaVersion]
