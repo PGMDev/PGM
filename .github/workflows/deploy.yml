@@ -30,7 +30,7 @@ jobs:
     - name: docker
       if: success()
       run: |
-        mvn compile jib:build \
+        mvn -pl server compile jib:build \
           -Djib.to.auth.username=${{ secrets.DOCKER_USERNAME }} \
           -Djib.to.auth.password=${{ secrets.DOCKER_PASSWORD }} \
           -Djib.to.image=${{ secrets.DOCKER_IMAGE }} \
