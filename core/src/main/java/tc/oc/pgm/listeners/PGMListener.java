@@ -43,6 +43,7 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.commands.MatchCommands;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
+import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.gamerules.GameRule;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
@@ -302,6 +303,20 @@ public class PGMListener implements Listener {
       if (caught.getItemStack().getType() != Material.RAW_FISH) {
         caught.setItemStack(new ItemStack(Material.RAW_FISH));
       }
+    }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void dropItemsOnQuit(PlayerParticipationStopEvent event) {
+    MatchPlayer quitter = event.getPlayer();
+    for (ItemStack item : quitter.getInventory().getContents()) {
+      if (item == null || item.getType() == Material.AIR) continue;
+      quitter.getWorld().dropItemNaturally(quitter.getBukkit().getLocation(), item);
+    }
+
+    for (ItemStack armor : quitter.getInventory().getArmorContents()) {
+      if (armor == null || armor.getType() == Material.AIR) continue;
+      quitter.getWorld().dropItemNaturally(quitter.getBukkit().getLocation(), armor);
     }
   }
 }
