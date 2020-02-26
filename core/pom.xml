@@ -79,6 +79,20 @@
                             <exclude>net.sf.trove4j:trove4j:*</exclude>
                         </excludes>
                     </artifactSet>
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>META-INF/**</exclude>
+                            </excludes>
+                        </filter>
+                        <filter>
+                            <artifact>tc.oc.pgm:util*:*</artifact>
+                            <excludes>
+                                <exclude>git.properties</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
                 </configuration>
                 <executions>
                     <execution>
