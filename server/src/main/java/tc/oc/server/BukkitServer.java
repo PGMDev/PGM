@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.util.Iterator;
 import java.util.logging.Handler;
@@ -14,7 +13,6 @@ import net.minecraft.server.v1_8_R3.DedicatedPlayerList;
 import net.minecraft.server.v1_8_R3.DedicatedServer;
 import net.minecraft.server.v1_8_R3.DispenserRegistry;
 import net.minecraft.server.v1_8_R3.MinecraftEncryption;
-import net.minecraft.server.v1_8_R3.MinecraftServer;
 import net.minecraft.server.v1_8_R3.WorldSettings;
 import net.minecraft.server.v1_8_R3.WorldType;
 import org.apache.log4j.BasicConfigurator;
@@ -236,14 +234,6 @@ public class BukkitServer extends DedicatedServer implements Runnable {
   }
 
   protected void setupListener() throws IOException {
-    try {
-      final Field field = MinecraftServer.class.getDeclaredField("q");
-      field.setAccessible(true);
-      field.set(this, new BukkitConnection(this));
-    } catch (Throwable t) {
-      logger.log(Level.WARN, "Unable to create custom listener, defaulting to legacy", t);
-    }
-
     aq().a(InetAddress.getByName(getServerIp()), R());
   }
 }

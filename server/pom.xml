@@ -18,14 +18,6 @@
             <version>1.8-SNAPSHOT</version>
         </dependency>
 
-        <!-- Codec library for supporting proxy protocol -->
-        <!-- FIXME: Properly filter classes so only haproxy codec is included -->
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-codec-haproxy</artifactId>
-            <version>4.0.29.Final</version>
-        </dependency>
-
         <!-- Older version of log4j logging library that barely works -->
         <dependency>
             <groupId>log4j</groupId>
@@ -57,9 +49,16 @@
                     </artifactSet>
                     <filters>
                         <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>META-INF/**</exclude>
+                            </excludes>
+                        </filter>
+                        <filter>
                             <artifact>tc.oc.pgm:core:*</artifact>
                             <excludes>
                                 <exclude>org/jdom2/**</exclude>
+                                <exclude>git.properties</exclude>
                             </excludes>
                         </filter>
                     </filters>
