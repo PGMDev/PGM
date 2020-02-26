@@ -3,6 +3,8 @@ package tc.oc.pgm.listeners;
 import app.ashcon.intake.Command;
 import app.ashcon.intake.argument.ArgumentException;
 import app.ashcon.intake.parametric.annotation.Text;
+import com.google.common.collect.Sets;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -41,6 +43,8 @@ public class ChatDispatcher implements Listener {
   private final MatchManager manager;
   private final OnlinePlayerMapAdapter<UUID> lastMessagedBy;
 
+  private final Set<UUID> muted;
+
   private static final Sound DM_SOUND = new Sound("random.orb", 1f, 1.2f);
 
   private static final String GLOBAL_SYMBOL = "!";
@@ -50,6 +54,19 @@ public class ChatDispatcher implements Listener {
   public ChatDispatcher(MatchManager manager) {
     this.manager = manager;
     this.lastMessagedBy = new OnlinePlayerMapAdapter<>(PGM.get());
+    this.muted = Sets.newHashSet();
+  }
+
+  public void addMuted(MatchPlayer player) {
+    this.muted.add(player.getId());
+  }
+
+  public void removeMuted(MatchPlayer player) {
+    this.muted.remove(player.getId());
+  }
+
+  public boolean isMuted(MatchPlayer player) {
+    return muted.contains(player.getId());
   }
 
   @Command(
@@ -126,6 +143,10 @@ public class ChatDispatcher implements Listener {
       desc = "Send a direct message to a player",
       usage = "[player] [message]")
   public void sendDirect(Match match, MatchPlayer sender, Player receiver, @Text String message) {
+    if (isMuted(sender)) {
+      sendMutedMessage(sender);
+      return;
+    }
     MatchPlayer matchReceiver = manager.getPlayer(receiver);
     if (matchReceiver != null) {
       SettingValue option = matchReceiver.getSettings().getValue(SettingKey.MESSAGE);
@@ -261,6 +282,10 @@ public class ChatDispatcher implements Listener {
       return;
     }
 
+    if (isMuted(sender)) {
+      sendMutedMessage(sender);
+      return;
+    }
     final Component component =
         new PersonalizedText(
             Components.format(
@@ -271,5 +296,14 @@ public class ChatDispatcher implements Listener {
                 new PersonalizedText(message.trim())));
     match.getPlayers().stream().filter(filter).forEach(player -> player.sendMessage(component));
     Audience.get(Bukkit.getConsoleSender()).sendMessage(component);
+  }
+
+  private void sendMutedMessage(MatchPlayer player) {
+    Component warning =
+        new PersonalizedTranslatable("moderation.mute.message")
+            .getPersonalizedText()
+            .color(ChatColor.RED);
+
+    player.sendWarning(warning, true);
   }
 }

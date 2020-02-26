@@ -12,7 +12,8 @@ public enum NameStyle {
   TAB(
       true, true, true, true, true, false, true,
       true), // Color, flair, friend status, nick status, death status
-  VERBOSE(true, true, true, true, true, true, false, true); // Fancy plus nickname
+  VERBOSE(true, true, true, true, true, true, false, true), // Fancy plus nickname
+  CONCISE(true, true, true, true, true, true, false, false); // Verbose, but removes teleport
 
   public final boolean isColor;
   public final boolean showPrefix;
