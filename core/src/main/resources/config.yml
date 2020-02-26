@@ -109,3 +109,14 @@ sidebar:
   bottom: ""
   # If the sidebar message should overwrite lines in the sidebar when it is full
   overwrite: false
+  
+# Note: All moderation fields may be formatted with '&' color codes
+moderation:
+  # Name of server to display on kick screen header
+  server-name: ''
+
+  # Link to a rules website to display on kick screens
+  rules-link: ''
+    
+  # Last message line shown on ban/temp-ban kick screen
+  appeal-msg: ''

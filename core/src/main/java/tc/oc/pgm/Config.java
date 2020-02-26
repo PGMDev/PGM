@@ -453,4 +453,29 @@ public class Config {
       return getConfiguration().getBoolean("sidebar.overwrite", false);
     }
   }
+
+  public static class Moderation {
+
+    public static boolean isRuleLinkVisible() {
+      return getRulesLink().length() > 0;
+    }
+
+    public static String getRulesLink() {
+      return getConfiguration().getString("moderation.rules-link", "");
+    }
+
+    public static String getServerName() {
+      return ChatColor.translateAlternateColorCodes(
+          '&', getConfiguration().getString("moderation.server-name", ""));
+    }
+
+    public static String getAppealMessage() {
+      return ChatColor.translateAlternateColorCodes(
+          '&', getConfiguration().getString("moderation.appeal-msg", ""));
+    }
+
+    public static boolean isAppealVisible() {
+      return getAppealMessage().length() > 0;
+    }
+  }
 }
