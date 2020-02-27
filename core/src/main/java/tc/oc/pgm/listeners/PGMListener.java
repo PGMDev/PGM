@@ -308,6 +308,8 @@ public class PGMListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void dropItemsOnQuit(PlayerParticipationStopEvent event) {
+    if (!event.getMatch().isRunning()) return;
+
     MatchPlayer quitter = event.getPlayer();
     for (ItemStack item : quitter.getInventory().getContents()) {
       if (item == null || item.getType() == Material.AIR) continue;
