@@ -263,12 +263,6 @@ public class ModerationCommands {
         if (player.getAddress().getAddress().getHostAddress().equals(address)) {
           // Kick players with same IP
           if (punish(PunishmentType.BAN, matchPlayer, sender, reason, silent)) {
-            banPlayer(
-                matchPlayer.getBukkit(),
-                reason,
-                formatPunisherName(sender, matchPlayer.getMatch()),
-                null);
-
             player.kickPlayer(
                 formatPunishmentScreen(
                     PunishmentType.BAN,
