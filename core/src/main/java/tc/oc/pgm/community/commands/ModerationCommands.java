@@ -19,6 +19,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
@@ -90,6 +91,7 @@ public class ModerationCommands {
   @Command(
       aliases = {"mute", "m"},
       usage = "<player> <reason> -s (silent) -w (warn)",
+      flags = "sw",
       desc = "Mute a player",
       perms = Permissions.MUTE)
   public void mute(
@@ -152,6 +154,7 @@ public class ModerationCommands {
       aliases = {"warn", "w"},
       usage = "<player> <reason> -s (silent)",
       desc = "Warn a player for bad behavior",
+      flags = "s",
       perms = Permissions.WARN)
   public void warn(
       CommandSender sender,
@@ -170,6 +173,7 @@ public class ModerationCommands {
       aliases = {"kick", "k"},
       usage = "<player> <reason> -s (silent)",
       desc = "Kick a player from the server",
+      flags = "s",
       perms = Permissions.KICK)
   public void kick(
       CommandSender sender,
@@ -189,6 +193,7 @@ public class ModerationCommands {
       aliases = {"ban", "permban", "pb"},
       usage = "<player> <reason> -s (silent)",
       desc = "Ban a player from the server forever",
+      flags = "s",
       perms = Permissions.BAN)
   public void ban(
       CommandSender sender,
@@ -208,6 +213,7 @@ public class ModerationCommands {
       aliases = {"tempban", "tban", "tb"},
       usage = "<player> <time> <reason> -s (silent)",
       desc = "Ban a player from the server for a period of time",
+      flags = "-s",
       perms = Permissions.BAN)
   public void tempBan(
       CommandSender sender,
@@ -227,8 +233,9 @@ public class ModerationCommands {
 
   @Command(
       aliases = {"ipban", "banip", "ipb"},
-      usage = "<player|ip address> <reason>",
+      usage = "<player|ip address> <reason> -s (silent)",
       desc = "IP Ban a player from the server",
+      flags = "s",
       perms = Permissions.BAN)
   public void ipBan(
       CommandSender sender,
@@ -263,6 +270,12 @@ public class ModerationCommands {
         if (player.getAddress().getAddress().getHostAddress().equals(address)) {
           // Kick players with same IP
           if (punish(PunishmentType.BAN, matchPlayer, sender, reason, silent)) {
+            banPlayer(
+                matchPlayer.getBukkit(),
+                reason,
+                formatPunisherName(sender, matchPlayer.getMatch()),
+                null);
+
             player.kickPlayer(
                 formatPunishmentScreen(
                     PunishmentType.BAN,
@@ -304,9 +317,10 @@ public class ModerationCommands {
       if (event.getCancelMessage() != null) {
         issuer.sendMessage(event.getCancelMessage());
       }
-    } else if (!silent) {
-      broadcastPunishment(event);
     }
+
+    broadcastPunishment(event);
+
     return !event.isCancelled();
   }
 
@@ -441,7 +455,8 @@ public class ModerationCommands {
         event.getSender(),
         event.getPlayer(),
         event.getReason(),
-        event.isSilent());
+        event.isSilent(),
+        event.getDuration());
   }
 
   /*
@@ -453,13 +468,31 @@ public class ModerationCommands {
       CommandSender sender,
       MatchPlayer target,
       String reason,
-      boolean silent) {
+      boolean silent,
+      Duration length) {
+
+    Component reasonPrefix = type.getPunishmentPrefix();
+
+    if (!length.isZero()) {
+      Component time =
+          new PersonalizedText(
+                  ComponentRenderers.toLegacyText(
+                      PeriodFormats.briefNaturalApproximate(
+                          org.joda.time.Duration.standardSeconds(length.getSeconds())),
+                      sender))
+              .color(ChatColor.DARK_PURPLE);
+
+      reasonPrefix =
+          new PersonalizedText(
+              type.getPunishmentPrefix(), new PersonalizedText(" - ").color(ChatColor.GOLD), time);
+    }
+
     Component prefix =
         new PersonalizedText(
             new PersonalizedText("[").color(ChatColor.GOLD),
-            type.getPunishmentPrefix(),
+            reasonPrefix,
             new PersonalizedText("]").color(ChatColor.GOLD));
-    Component targetName = target.getStyledName(NameStyle.FANCY);
+    Component targetName = target.getStyledName(NameStyle.CONCISE);
     Component reasonMsg = ModerationCommands.formatPunishmentReason(reason);
     Component formattedMsg =
         new PersonalizedText(
@@ -474,8 +507,17 @@ public class ModerationCommands {
     if (!silent) {
       match.sendMessage(formattedMsg);
     } else {
-      // if silent flag present, only notify sender
-      sender.sendMessage(formattedMsg);
+      // When -s flag is present, only broadcast to staff
+      Component prefixedMsg =
+          new PersonalizedText(
+              new PersonalizedText("["),
+              new PersonalizedText("A", ChatColor.GOLD),
+              new PersonalizedText("] "),
+              formattedMsg);
+      match.getPlayers().stream()
+          .filter(viewer -> viewer.getBukkit().hasPermission(Permissions.ADMINCHAT))
+          .forEach(viewer -> viewer.sendMessage(prefixedMsg));
+      Audience.get(Bukkit.getConsoleSender()).sendMessage(prefixedMsg);
     }
   }
 
