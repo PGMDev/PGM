@@ -90,8 +90,8 @@ public class ModerationCommands {
 
   @Command(
       aliases = {"mute", "m"},
-      usage = "<player> <reason> -s (silent) -w (warn)",
-      flags = "sw",
+      usage = "<player> <reason> -w (warn)",
+      flags = "w",
       desc = "Mute a player",
       perms = Permissions.MUTE)
   public void mute(
@@ -99,7 +99,6 @@ public class ModerationCommands {
       Player target,
       Match match,
       @Text String reason,
-      @Switch('s') boolean silent,
       @Switch('w') boolean warn) {
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
 
@@ -114,10 +113,10 @@ public class ModerationCommands {
 
     // if -w flag, also warn the player but don't broadcast warning
     if (warn) {
-      warn(sender, target, match, reason, true);
+      warn(sender, target, match, reason);
     }
 
-    if (punish(PunishmentType.MUTE, targetMatchPlayer, sender, reason, silent)) {
+    if (punish(PunishmentType.MUTE, targetMatchPlayer, sender, reason, true)) {
       chat.addMuted(targetMatchPlayer);
     }
   }
@@ -152,19 +151,13 @@ public class ModerationCommands {
 
   @Command(
       aliases = {"warn", "w"},
-      usage = "<player> <reason> -s (silent)",
+      usage = "<player> <reason>",
       desc = "Warn a player for bad behavior",
-      flags = "s",
       perms = Permissions.WARN)
-  public void warn(
-      CommandSender sender,
-      Player target,
-      Match match,
-      @Text String reason,
-      @Switch('s') boolean silent) {
+  public void warn(CommandSender sender, Player target, Match match, @Text String reason) {
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
 
-    if (punish(PunishmentType.WARN, targetMatchPlayer, sender, reason, silent)) {
+    if (punish(PunishmentType.WARN, targetMatchPlayer, sender, reason, true)) {
       sendWarning(targetMatchPlayer, reason);
     }
   }
@@ -471,34 +464,26 @@ public class ModerationCommands {
       boolean silent,
       Duration length) {
 
-    Component reasonPrefix = type.getPunishmentPrefix();
-
-    if (!length.isZero()) {
-      Component time =
-          new PersonalizedText(
-                  ComponentRenderers.toLegacyText(
-                      PeriodFormats.briefNaturalApproximate(
-                          org.joda.time.Duration.standardSeconds(length.getSeconds())),
-                      sender))
-              .color(ChatColor.DARK_PURPLE);
-
-      reasonPrefix =
-          new PersonalizedText(
-              type.getPunishmentPrefix(), new PersonalizedText(" - ").color(ChatColor.GOLD), time);
-    }
-
     Component prefix =
         new PersonalizedText(
-            new PersonalizedText("[").color(ChatColor.GOLD),
-            reasonPrefix,
-            new PersonalizedText("]").color(ChatColor.GOLD));
+            type.getPunishmentPrefix(),
+            !length.isZero()
+                ? new PersonalizedText(
+                    BROADCAST_DIV,
+                    new PersonalizedText(
+                            ComponentRenderers.toLegacyText(
+                                PeriodFormats.briefNaturalApproximate(
+                                    org.joda.time.Duration.standardSeconds(length.getSeconds())),
+                                sender))
+                        .color(ChatColor.DARK_PURPLE))
+                : Components.blank());
     Component targetName = target.getStyledName(NameStyle.CONCISE);
     Component reasonMsg = ModerationCommands.formatPunishmentReason(reason);
     Component formattedMsg =
         new PersonalizedText(
-            prefix,
-            Components.space(),
             ModerationCommands.formatPunisherName(sender, match),
+            BROADCAST_DIV,
+            prefix,
             BROADCAST_DIV,
             targetName,
             BROADCAST_DIV,
