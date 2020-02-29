@@ -306,7 +306,7 @@ public class PGMListener implements Listener {
     }
   }
 
-  @EventHandler(priority = EventPriority.MONITOR)
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void dropItemsOnQuit(PlayerParticipationStopEvent event) {
     MatchPlayer quitter = event.getPlayer();
     if (!quitter.isAlive()) return;
