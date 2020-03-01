@@ -184,8 +184,8 @@ public class ModerationCommands {
 
   @Command(
       aliases = {"ban", "permban", "pb"},
-      usage = "<player> <reason> -s (silent)",
-      desc = "Ban a player from the server forever",
+      usage = "<player> <reason> -s (silent) -t (time)",
+      desc = "Ban an online player from the server",
       flags = "s",
       perms = Permissions.BAN)
   public void ban(
@@ -193,34 +193,21 @@ public class ModerationCommands {
       Player target,
       Match match,
       @Text String reason,
-      @Switch('s') boolean silent) {
+      @Switch('s') boolean silent,
+      @Switch('t') String length)
+      throws CommandException {
+    Duration banLength = parseBanLength(length);
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
     Component senderName = formatPunisherName(sender, match);
-    if (punish(PunishmentType.BAN, targetMatchPlayer, sender, reason, silent)) {
-      banPlayer(target, reason, senderName, null);
-      target.kickPlayer(formatPunishmentScreen(PunishmentType.BAN, senderName, reason, null));
-    }
-  }
-
-  @Command(
-      aliases = {"tempban", "tban", "tb"},
-      usage = "<player> <time> <reason> -s (silent)",
-      desc = "Ban a player from the server for a period of time",
-      flags = "-s",
-      perms = Permissions.BAN)
-  public void tempBan(
-      CommandSender sender,
-      Player target,
-      Match match,
-      Duration banLength,
-      @Text String reason,
-      @Switch('s') boolean silent) {
-    MatchPlayer targetMatchPlayer = match.getPlayer(target);
     if (punish(PunishmentType.BAN, targetMatchPlayer, sender, reason, banLength, silent)) {
-      banPlayer(target, reason, formatPunisherName(sender, match), Instant.now().plus(banLength));
+      banPlayer(
+          target.getName(),
+          reason,
+          senderName,
+          !banLength.isZero() ? Instant.now().plus(banLength) : null);
       target.kickPlayer(
           formatPunishmentScreen(
-              PunishmentType.BAN, formatPunisherName(sender, match), reason, banLength));
+              PunishmentType.BAN, senderName, reason, banLength.isZero() ? null : banLength));
     }
   }
 
@@ -279,6 +266,53 @@ public class ModerationCommands {
                   new PersonalizedText(address).color(ChatColor.RED).italic(true))
               .color(ChatColor.GRAY));
     }
+  }
+
+  @Command(
+      aliases = {"offlineban", "offban", "ob"},
+      usage = "<player> <reason> -t (length)",
+      desc = "Ban an offline player from the server",
+      flags = "t",
+      perms = Permissions.BAN)
+  public void offlineBan(
+      CommandSender sender,
+      MatchManager manager,
+      String target,
+      @Text String reason,
+      @Switch('t') String length)
+      throws CommandException {
+    Duration duration = parseBanLength(length);
+
+    banPlayer(
+        target,
+        reason,
+        formatPunisherName(sender, manager.getMatch(sender)),
+        !duration.isZero() ? Instant.now().plus(duration) : null);
+    broadcastPunishment(
+        PunishmentType.BAN,
+        manager.getMatch(sender),
+        sender,
+        new PersonalizedText(target).color(ChatColor.DARK_AQUA),
+        reason,
+        true,
+        duration);
+  }
+
+  private Duration parseBanLength(String length) throws CommandException {
+    Duration duration = Duration.ZERO;
+    if (length != null) {
+      try {
+        duration =
+            Duration.ofSeconds(
+                PeriodFormats.SHORTHAND
+                    .parsePeriod(length)
+                    .toStandardDuration()
+                    .getStandardSeconds());
+      } catch (IllegalArgumentException ex) {
+        throw new CommandException("Invalid time format: " + length);
+      }
+    }
+    return duration;
   }
 
   private boolean punish(
@@ -440,7 +474,7 @@ public class ModerationCommands {
         event.getType(),
         event.getPlayer().getMatch(),
         event.getSender(),
-        event.getPlayer(),
+        event.getPlayer().getStyledName(NameStyle.CONCISE),
         event.getReason(),
         event.isSilent(),
         event.getDuration());
@@ -453,25 +487,28 @@ public class ModerationCommands {
       PunishmentType type,
       Match match,
       CommandSender sender,
-      MatchPlayer target,
+      Component target,
       String reason,
       boolean silent,
       Duration length) {
 
-    Component prefix =
-        new PersonalizedText(
-            type.getPunishmentPrefix(),
-            !length.isZero()
-                ? new PersonalizedText(
-                    BROADCAST_DIV,
-                    new PersonalizedText(
-                            ComponentRenderers.toLegacyText(
-                                PeriodFormats.briefNaturalApproximate(
-                                    org.joda.time.Duration.standardSeconds(length.getSeconds())),
-                                sender))
-                        .color(ChatColor.DARK_PURPLE))
-                : Components.blank());
-    Component targetName = target.getStyledName(NameStyle.CONCISE);
+    Component prefix = type.getPunishmentPrefix();
+    if (!length.isZero()) {
+      String time =
+          ComponentRenderers.toLegacyText(
+              PeriodFormats.briefNaturalApproximate(
+                  org.joda.time.Duration.standardSeconds(length.getSeconds())),
+              sender);
+      prefix =
+          new PersonalizedText(
+              time.lastIndexOf('s') != -1
+                  ? new PersonalizedText(time.substring(0, time.lastIndexOf('s')))
+                      .extra(Components.space())
+                      .color(ChatColor.RED)
+                  : Components.blank(),
+              type.getPunishmentPrefix());
+    }
+
     Component reasonMsg = ModerationCommands.formatPunishmentReason(reason);
     Component formattedMsg =
         new PersonalizedText(
@@ -479,7 +516,7 @@ public class ModerationCommands {
             BROADCAST_DIV,
             prefix,
             BROADCAST_DIV,
-            targetName,
+            target,
             BROADCAST_DIV,
             reasonMsg);
 
@@ -505,12 +542,12 @@ public class ModerationCommands {
    * NOTE: Will use this if not handled by other plugins
    */
   private void banPlayer(
-      Player target, String reason, Component source, @Nullable Instant expires) {
+      String target, String reason, Component source, @Nullable Instant expires) {
     Bukkit.getBanList(BanList.Type.NAME)
         .addBan(
-            target.getName(),
+            target,
             reason,
             expires != null ? Date.from(expires) : null,
-            ComponentRenderers.toLegacyText(source, target));
+            ComponentRenderers.toLegacyText(source, Bukkit.getConsoleSender()));
   }
 }
