@@ -42,7 +42,7 @@ public class ModerationCommands {
   private static final Component WARN_SYMBOL =
       new PersonalizedText(" \u26a0 ").color(ChatColor.YELLOW);
   private static final Component BROADCAST_DIV =
-      new PersonalizedText(" \u00BB ").color(ChatColor.GOLD);
+      new PersonalizedText(" \u00BB ").color(ChatColor.GRAY);
   private static final Component CONSOLE_NAME =
       new PersonalizedTranslatable("console")
           .getPersonalizedText()
@@ -197,17 +197,25 @@ public class ModerationCommands {
       @Switch('t') String length)
       throws CommandException {
     Duration banLength = parseBanLength(length);
+    boolean tempBan = !banLength.isZero();
+
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
     Component senderName = formatPunisherName(sender, match);
-    if (punish(PunishmentType.BAN, targetMatchPlayer, sender, reason, banLength, silent)) {
+    if (punish(
+        tempBan ? PunishmentType.TEMP_BAN : PunishmentType.BAN,
+        targetMatchPlayer,
+        sender,
+        reason,
+        banLength,
+        silent)) {
       banPlayer(
-          target.getName(),
-          reason,
-          senderName,
-          !banLength.isZero() ? Instant.now().plus(banLength) : null);
+          target.getName(), reason, senderName, tempBan ? Instant.now().plus(banLength) : null);
       target.kickPlayer(
           formatPunishmentScreen(
-              PunishmentType.BAN, senderName, reason, banLength.isZero() ? null : banLength));
+              tempBan ? PunishmentType.TEMP_BAN : PunishmentType.BAN,
+              senderName,
+              reason,
+              tempBan ? banLength : null));
     }
   }
 
@@ -282,14 +290,15 @@ public class ModerationCommands {
       @Switch('t') String length)
       throws CommandException {
     Duration duration = parseBanLength(length);
+    boolean tempBan = !duration.isZero();
 
     banPlayer(
         target,
         reason,
         formatPunisherName(sender, manager.getMatch(sender)),
-        !duration.isZero() ? Instant.now().plus(duration) : null);
+        tempBan ? Instant.now().plus(duration) : null);
     broadcastPunishment(
-        PunishmentType.BAN,
+        tempBan ? PunishmentType.TEMP_BAN : PunishmentType.BAN,
         manager.getMatch(sender),
         sender,
         new PersonalizedText(target).color(ChatColor.DARK_AQUA),
@@ -349,7 +358,8 @@ public class ModerationCommands {
     MUTE(false),
     WARN(false),
     KICK(true),
-    BAN(true);
+    BAN(true),
+    TEMP_BAN(true);
 
     private String PREFIX_TRANSLATE_KEY = "moderation.type.";
     private String SCREEN_TRANSLATE_KEY = "moderation.screen.";
@@ -363,7 +373,13 @@ public class ModerationCommands {
     public Component getPunishmentPrefix() {
       return new PersonalizedTranslatable(PREFIX_TRANSLATE_KEY + name().toLowerCase())
           .getPersonalizedText()
-          .color(ChatColor.RED);
+          .color(ChatColor.GOLD);
+    }
+
+    public Component getPunishmentPrefix(Component time) {
+      return new PersonalizedTranslatable(PREFIX_TRANSLATE_KEY + name().toLowerCase(), time)
+          .getPersonalizedText()
+          .color(ChatColor.GOLD);
     }
 
     public Component getScreenComponent(Component reason) {
@@ -500,13 +516,11 @@ public class ModerationCommands {
                   org.joda.time.Duration.standardSeconds(length.getSeconds())),
               sender);
       prefix =
-          new PersonalizedText(
+          type.getPunishmentPrefix(
               time.lastIndexOf('s') != -1
                   ? new PersonalizedText(time.substring(0, time.lastIndexOf('s')))
-                      .extra(Components.space())
-                      .color(ChatColor.RED)
-                  : Components.blank(),
-              type.getPunishmentPrefix());
+                      .color(ChatColor.GOLD)
+                  : Components.blank());
     }
 
     Component reasonMsg = ModerationCommands.formatPunishmentReason(reason);
