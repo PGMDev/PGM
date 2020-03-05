@@ -41,23 +41,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.prefix.PrefixRegistry;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
-import tc.oc.pgm.commands.AdminCommands;
-import tc.oc.pgm.commands.ClassCommands;
-import tc.oc.pgm.commands.CycleCommands;
-import tc.oc.pgm.commands.DestroyableCommands;
-import tc.oc.pgm.commands.FreeForAllCommands;
-import tc.oc.pgm.commands.GoalCommands;
-import tc.oc.pgm.commands.InventoryCommands;
-import tc.oc.pgm.commands.JoinCommands;
-import tc.oc.pgm.commands.MapCommands;
-import tc.oc.pgm.commands.MapPoolCommands;
-import tc.oc.pgm.commands.MatchCommands;
-import tc.oc.pgm.commands.ModeCommands;
-import tc.oc.pgm.commands.ObserverCommands;
-import tc.oc.pgm.commands.SettingCommands;
-import tc.oc.pgm.commands.StartCommands;
-import tc.oc.pgm.commands.TeamCommands;
-import tc.oc.pgm.commands.TimeLimitCommands;
+import tc.oc.pgm.commands.*;
 import tc.oc.pgm.commands.provider.AudienceProvider;
 import tc.oc.pgm.commands.provider.DurationProvider;
 import tc.oc.pgm.commands.provider.MapInfoProvider;
@@ -321,6 +305,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     node.registerCommands(new SettingCommands());
     node.registerCommands(new ObserverCommands());
     node.registerCommands(new MapPoolCommands());
+    node.registerCommands(new StatCommands());
 
     // TODO: Community commands
     final ModerationCommands modCommands = new ModerationCommands(chat, getMatchManager());
