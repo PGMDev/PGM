@@ -69,6 +69,10 @@ public class ChatDispatcher implements Listener {
     return muted.contains(player.getId());
   }
 
+  public Set<UUID> getMutedUUIDs() {
+    return muted;
+  }
+
   @Command(
       aliases = {"g", "all"},
       desc = "Send a message to everyone",

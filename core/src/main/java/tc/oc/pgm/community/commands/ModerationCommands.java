@@ -2,6 +2,9 @@ package tc.oc.pgm.community.commands;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
+import app.ashcon.intake.bukkit.parametric.Type;
+import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
+import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
 import com.google.common.collect.Lists;
@@ -10,9 +13,13 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import org.bukkit.BanEntry;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -26,6 +33,7 @@ import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.community.events.PlayerPunishmentEvent;
 import tc.oc.pgm.listeners.ChatDispatcher;
+import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.ComponentRenderers;
 import tc.oc.util.bukkit.component.ComponentUtils;
@@ -90,18 +98,11 @@ public class ModerationCommands {
 
   @Command(
       aliases = {"mute", "m"},
-      usage = "<player> <reason> -w (warn)",
-      flags = "w",
+      usage = "<player> <reason>",
       desc = "Mute a player",
       perms = Permissions.MUTE)
-  public void mute(
-      CommandSender sender,
-      Player target,
-      Match match,
-      @Text String reason,
-      @Switch('w') boolean warn) {
+  public void mute(CommandSender sender, Player target, Match match, @Text String reason) {
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
-
     if (chat.isMuted(targetMatchPlayer)) {
       sender.sendMessage(
           new PersonalizedTranslatable(
@@ -111,14 +112,45 @@ public class ModerationCommands {
       return;
     }
 
-    // if -w flag, also warn the player but don't broadcast warning
-    if (warn) {
-      warn(sender, target, match, reason);
-    }
+    // Send a warning to the player to identify mute reason
+    warn(sender, target, match, reason);
 
     if (punish(PunishmentType.MUTE, targetMatchPlayer, sender, reason, true)) {
       chat.addMuted(targetMatchPlayer);
     }
+  }
+
+  @Command(
+      aliases = {"mutes", "mutelist"},
+      desc = "List of muted players",
+      perms = Permissions.MUTE)
+  public void listMutes(CommandSender sender, MatchManager manager) throws CommandException {
+    Set<UUID> mutes = chat.getMutedUUIDs();
+    List<Component> onlineMutes =
+        mutes.stream()
+            .filter(u -> (manager.getPlayer(u) != null))
+            .map(manager::getPlayer)
+            .map(p -> p.getStyledName(NameStyle.CONCISE))
+            .collect(Collectors.toList());
+    if (onlineMutes.isEmpty()) {
+      throw new CommandException(
+          ComponentRenderers.toLegacyText(
+              new PersonalizedTranslatable("moderation.mute.none"), sender));
+    }
+
+    Component names =
+        new Component(
+            Components.join(new PersonalizedText(", ").color(ChatColor.GRAY), onlineMutes));
+    Component message =
+        new PersonalizedText(
+            new PersonalizedTranslatable("moderation.mute.list")
+                .getPersonalizedText()
+                .color(ChatColor.GOLD),
+            new PersonalizedText(" (").color(ChatColor.GRAY),
+            new PersonalizedText(Integer.toString(onlineMutes.size())).color(ChatColor.YELLOW),
+            new PersonalizedText("): ").color(ChatColor.GRAY),
+            names);
+    sender.sendMessage(message);
   }
 
   @Command(
@@ -156,7 +188,6 @@ public class ModerationCommands {
       perms = Permissions.WARN)
   public void warn(CommandSender sender, Player target, Match match, @Text String reason) {
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
-
     if (punish(PunishmentType.WARN, targetMatchPlayer, sender, reason, true)) {
       sendWarning(targetMatchPlayer, reason);
     }
@@ -305,6 +336,242 @@ public class ModerationCommands {
         reason,
         true,
         duration);
+  }
+
+  @Command(
+      aliases = {"alts", "listalts"},
+      usage = "[target] (page)",
+      desc = "List online players on the same IP",
+      perms = Permissions.STAFF)
+  public void alts(
+      Audience audience,
+      CommandSender sender,
+      MatchManager manager,
+      @Fallback(Type.NULL) Player target,
+      @Default("1") int page)
+      throws CommandException {
+    if (target != null) {
+      MatchPlayer targetMP = manager.getPlayer(target);
+      List<MatchPlayer> alts = getAltAccounts(target, manager);
+      if (alts.isEmpty()) {
+        sender.sendMessage(
+            new PersonalizedTranslatable(
+                    "moderation.commands.noAlts", targetMP.getStyledName(NameStyle.FANCY))
+                .getPersonalizedText()
+                .color(ChatColor.RED));
+      } else {
+        sender.sendMessage(formatAltAccountList(targetMP, alts));
+      }
+    } else {
+      List<Component> altAccounts = Lists.newArrayList();
+      List<MatchPlayer> accountedFor = Lists.newArrayList();
+
+      for (Player player : Bukkit.getOnlinePlayers()) {
+        MatchPlayer targetMP = manager.getPlayer(player);
+        List<MatchPlayer> alts = getAltAccounts(player, manager);
+
+        if (alts.isEmpty() || accountedFor.contains(targetMP)) {
+          continue;
+        } else {
+          altAccounts.add(formatAltAccountList(targetMP, alts));
+          accountedFor.add(targetMP);
+          accountedFor.addAll(alts);
+        }
+      }
+
+      int perPage = 8;
+      int pages = (altAccounts.size() + perPage - 1) / perPage;
+
+      Component pageNum =
+          new PersonalizedTranslatable(
+                  "command.paginatedResult.page",
+                  new PersonalizedText(Integer.toString(page)).color(ChatColor.DARK_AQUA),
+                  new PersonalizedText(Integer.toString(pages)).color(ChatColor.DARK_AQUA))
+              .getPersonalizedText()
+              .color(ChatColor.GRAY);
+
+      Component headerText =
+          new PersonalizedTranslatable("moderation.alts.header")
+              .getPersonalizedText()
+              .color(ChatColor.DARK_AQUA);
+
+      Component header =
+          new PersonalizedText(
+              headerText,
+              new PersonalizedText(" (").color(ChatColor.GRAY),
+              new PersonalizedText(Integer.toString(altAccounts.size())).color(ChatColor.DARK_AQUA),
+              new PersonalizedText(") » Page ").color(ChatColor.GRAY),
+              pageNum);
+
+      Component formattedHeader =
+          new PersonalizedText(
+              ComponentUtils.horizontalLineHeading(
+                  ComponentRenderers.toLegacyText(header, sender), ChatColor.BLUE));
+
+      new PrettyPaginatedComponentResults<Component>(formattedHeader, perPage) {
+        @Override
+        public Component format(Component data, int index) {
+          return data;
+        }
+
+        @Override
+        public Component formatEmpty() throws CommandException {
+          throw new CommandException("No alternate accounts found!");
+        }
+      }.display(audience, altAccounts, page);
+    }
+  }
+
+  @Command(
+      aliases = {"baninfo", "lookup", "l"},
+      usage = "[player] -u (if input is UUID)",
+      desc = "Lookup baninfo about a player",
+      perms = Permissions.STAFF)
+  public void banInfo(CommandSender sender, String target, @Switch('u') boolean uuid)
+      throws CommandException {
+    BanEntry ban = Bukkit.getBanList(BanList.Type.NAME).getBanEntry(target);
+
+    if (ban != null) {
+      Component header =
+          new PersonalizedText(
+              new PersonalizedTranslatable("moderation.records.header")
+                  .getPersonalizedText()
+                  .color(ChatColor.GRAY),
+              new PersonalizedText(" » ").color(ChatColor.GOLD),
+              new PersonalizedText(target).color(ChatColor.DARK_AQUA).italic(true));
+      new PersonalizedTranslatable(
+              "moderation.records.header", new PersonalizedText(target).color(ChatColor.DARK_AQUA))
+          .getPersonalizedText()
+          .color(ChatColor.DARK_GREEN);
+      boolean expires = ban.getExpiration() != null;
+      Component banType =
+          new PersonalizedTranslatable("moderation.type.ban")
+              .getPersonalizedText()
+              .color(ChatColor.GOLD);
+      Component expireDate = Components.blank();
+      if (expires) {
+        // If ban has already expired, show nothing
+        if (ban.getExpiration().toInstant().isBefore(Instant.now())) {
+          throw new CommandException(
+              ComponentRenderers.toLegacyText(
+                  new PersonalizedTranslatable(
+                      "moderation.records.lookupNone",
+                      new PersonalizedText(target).color(ChatColor.DARK_AQUA)),
+                  sender));
+        }
+
+        String length =
+            ComponentRenderers.toLegacyText(
+                PeriodFormats.briefNaturalApproximate(
+                    org.joda.time.Instant.ofEpochSecond(
+                        ban.getCreated().toInstant().getEpochSecond()),
+                    org.joda.time.Instant.ofEpochSecond(
+                        ban.getExpiration().toInstant().getEpochSecond())),
+                sender);
+        String remaining =
+            ComponentRenderers.toLegacyText(
+                PeriodFormats.briefNaturalApproximate(
+                    org.joda.time.Instant.now(),
+                    org.joda.time.Instant.ofEpochSecond(
+                        ban.getExpiration().toInstant().getEpochSecond())),
+                sender);
+
+        banType =
+            new PersonalizedTranslatable(
+                    "moderation.type.temp_ban",
+                    new PersonalizedText(
+                        length.lastIndexOf('s') != -1
+                            ? length.substring(0, length.lastIndexOf('s'))
+                            : length))
+                .getPersonalizedText()
+                .color(ChatColor.GOLD);
+        expireDate =
+            new PersonalizedTranslatable(
+                    "moderation.screen.expires",
+                    new PersonalizedText(remaining).color(ChatColor.YELLOW))
+                .getPersonalizedText()
+                .color(ChatColor.GRAY);
+      }
+
+      String createdAgo =
+          ComponentRenderers.toLegacyText(
+              PeriodFormats.relativePastApproximate(
+                  org.joda.time.Instant.ofEpochSecond(
+                      ban.getCreated().toInstant().getEpochSecond())),
+              sender);
+
+      Component banTypeFormatted =
+          new PersonalizedTranslatable("moderation.records.type", banType)
+              .getPersonalizedText()
+              .color(ChatColor.GRAY);
+
+      Component reason =
+          new PersonalizedTranslatable(
+                  "moderation.records.reason",
+                  new PersonalizedText(ban.getReason()).color(ChatColor.RED))
+              .getPersonalizedText()
+              .color(ChatColor.GRAY);
+      Component source =
+          new PersonalizedText(
+              new PersonalizedTranslatable(
+                      "moderation.screen.signoff",
+                      new PersonalizedText(ban.getSource()).color(ChatColor.AQUA))
+                  .getPersonalizedText()
+                  .color(ChatColor.GRAY),
+              Components.space(),
+              new PersonalizedText(createdAgo).color(ChatColor.GRAY));
+
+      sender.sendMessage(
+          ComponentUtils.horizontalLineHeading(
+              ComponentRenderers.toLegacyText(header, sender), ChatColor.DARK_PURPLE));
+      sender.sendMessage(banTypeFormatted);
+      sender.sendMessage(reason);
+      sender.sendMessage(source);
+      if (expires) {
+        sender.sendMessage(expireDate);
+      }
+
+    } else {
+      throw new CommandException(
+          ComponentRenderers.toLegacyText(
+              new PersonalizedTranslatable(
+                  "moderation.records.lookupNone",
+                  new PersonalizedText(target).color(ChatColor.DARK_AQUA)),
+              sender));
+    }
+  }
+
+  private Component formatAltAccountList(MatchPlayer target, List<MatchPlayer> alts) {
+    BaseComponent names =
+        Components.join(
+            new PersonalizedText(", ").color(ChatColor.GRAY),
+            alts.stream()
+                .map(mp -> mp.getStyledName(NameStyle.CONCISE))
+                .collect(Collectors.toList()));
+    Component size = new PersonalizedText(Integer.toString(alts.size())).color(ChatColor.YELLOW);
+
+    return new PersonalizedText(
+        new PersonalizedText("[").color(ChatColor.GOLD),
+        target.getStyledName(NameStyle.VERBOSE),
+        new PersonalizedText("] ").color(ChatColor.GOLD),
+        new PersonalizedText("(").color(ChatColor.GRAY),
+        size,
+        new PersonalizedText("): ").color(ChatColor.GRAY),
+        new Component(names));
+  }
+
+  private List<MatchPlayer> getAltAccounts(Player target, MatchManager manager) {
+    List<MatchPlayer> sameIPs = Lists.newArrayList();
+    String address = target.getAddress().getAddress().getHostAddress();
+
+    for (Player other : Bukkit.getOnlinePlayers()) {
+      if (other.getAddress().getAddress().getHostAddress().equals(address)
+          && !other.equals(target)) {
+        sameIPs.add(manager.getPlayer(other));
+      }
+    }
+
+    return sameIPs;
   }
 
   private Duration parseBanLength(String length) throws CommandException {
