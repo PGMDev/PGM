@@ -25,15 +25,18 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.Config;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.community.events.PlayerPunishmentEvent;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
+import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.ComponentRenderers;
 import tc.oc.util.bukkit.component.ComponentUtils;
@@ -225,9 +228,8 @@ public class ModerationCommands {
       Match match,
       @Text String reason,
       @Switch('s') boolean silent,
-      @Switch('t') String length)
+      @Switch('t') Duration banLength)
       throws CommandException {
-    Duration banLength = parseBanLength(length);
     boolean tempBan = !banLength.isZero();
 
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
@@ -289,6 +291,11 @@ public class ModerationCommands {
         if (player.getAddress().getAddress().getHostAddress().equals(address)) {
           // Kick players with same IP
           if (punish(PunishmentType.BAN, matchPlayer, sender, reason, silent)) {
+
+            // Ban username to prevent rejoining
+            banPlayer(
+                player.getName(), reason, formatPunisherName(sender, matchPlayer.getMatch()), null);
+
             player.kickPlayer(
                 formatPunishmentScreen(
                     PunishmentType.BAN,
@@ -318,9 +325,8 @@ public class ModerationCommands {
       MatchManager manager,
       String target,
       @Text String reason,
-      @Switch('t') String length)
+      @Switch('t') Duration duration)
       throws CommandException {
-    Duration duration = parseBanLength(length);
     boolean tempBan = !duration.isZero();
 
     banPlayer(
@@ -340,27 +346,27 @@ public class ModerationCommands {
 
   @Command(
       aliases = {"alts", "listalts"},
-      usage = "[target] (page)",
+      usage = "[target] [page]",
       desc = "List online players on the same IP",
       perms = Permissions.STAFF)
   public void alts(
       Audience audience,
       CommandSender sender,
       MatchManager manager,
-      @Fallback(Type.NULL) Player target,
+      @Fallback(Type.NULL) Player targetPl,
       @Default("1") int page)
       throws CommandException {
-    if (target != null) {
-      MatchPlayer targetMP = manager.getPlayer(target);
-      List<MatchPlayer> alts = getAltAccounts(target, manager);
+    if (targetPl != null) {
+      MatchPlayer target = manager.getPlayer(targetPl);
+      List<MatchPlayer> alts = getAltAccounts(targetPl, manager);
       if (alts.isEmpty()) {
         sender.sendMessage(
             new PersonalizedTranslatable(
-                    "moderation.commands.noAlts", targetMP.getStyledName(NameStyle.FANCY))
+                    "moderation.commands.noAlts", target.getStyledName(NameStyle.FANCY))
                 .getPersonalizedText()
                 .color(ChatColor.RED));
       } else {
-        sender.sendMessage(formatAltAccountList(targetMP, alts));
+        sender.sendMessage(formatAltAccountList(target, alts));
       }
     } else {
       List<Component> altAccounts = Lists.newArrayList();
@@ -424,120 +430,126 @@ public class ModerationCommands {
 
   @Command(
       aliases = {"baninfo", "lookup", "l"},
-      usage = "[player] -u (if input is UUID)",
+      usage = "[player/uuid]",
       desc = "Lookup baninfo about a player",
       perms = Permissions.STAFF)
-  public void banInfo(CommandSender sender, String target, @Switch('u') boolean uuid)
-      throws CommandException {
+  public void banInfo(CommandSender sender, String target) throws CommandException {
+
+    if (!XMLUtils.USERNAME_REGEX.matcher(target).matches()) {
+      UUID uuid = UUID.fromString(target);
+      Username username = PGM.get().getDatastore().getUsername(uuid);
+      if (username.getName() != null) {
+        target = username.getName();
+      } else {
+        throw new CommandException(
+            ComponentRenderers.toLegacyText(
+                new PersonalizedTranslatable(
+                        "commands.invalid.target",
+                        new PersonalizedText(target).color(ChatColor.AQUA))
+                    .getPersonalizedText()
+                    .color(ChatColor.RED),
+                sender));
+      }
+    }
+
     BanEntry ban = Bukkit.getBanList(BanList.Type.NAME).getBanEntry(target);
 
-    if (ban != null) {
-      Component header =
-          new PersonalizedText(
-              new PersonalizedTranslatable("moderation.records.header")
-                  .getPersonalizedText()
-                  .color(ChatColor.GRAY),
-              new PersonalizedText(" » ").color(ChatColor.GOLD),
-              new PersonalizedText(target).color(ChatColor.DARK_AQUA).italic(true));
-      new PersonalizedTranslatable(
-              "moderation.records.header", new PersonalizedText(target).color(ChatColor.DARK_AQUA))
-          .getPersonalizedText()
-          .color(ChatColor.DARK_GREEN);
-      boolean expires = ban.getExpiration() != null;
-      Component banType =
-          new PersonalizedTranslatable("moderation.type.ban")
-              .getPersonalizedText()
-              .color(ChatColor.GOLD);
-      Component expireDate = Components.blank();
-      if (expires) {
-        // If ban has already expired, show nothing
-        if (ban.getExpiration().toInstant().isBefore(Instant.now())) {
-          throw new CommandException(
-              ComponentRenderers.toLegacyText(
-                  new PersonalizedTranslatable(
-                      "moderation.records.lookupNone",
-                      new PersonalizedText(target).color(ChatColor.DARK_AQUA)),
-                  sender));
-        }
-
-        String length =
-            ComponentRenderers.toLegacyText(
-                PeriodFormats.briefNaturalApproximate(
-                    org.joda.time.Instant.ofEpochSecond(
-                        ban.getCreated().toInstant().getEpochSecond()),
-                    org.joda.time.Instant.ofEpochSecond(
-                        ban.getExpiration().toInstant().getEpochSecond())),
-                sender);
-        String remaining =
-            ComponentRenderers.toLegacyText(
-                PeriodFormats.briefNaturalApproximate(
-                    org.joda.time.Instant.now(),
-                    org.joda.time.Instant.ofEpochSecond(
-                        ban.getExpiration().toInstant().getEpochSecond())),
-                sender);
-
-        banType =
-            new PersonalizedTranslatable(
-                    "moderation.type.temp_ban",
-                    new PersonalizedText(
-                        length.lastIndexOf('s') != -1
-                            ? length.substring(0, length.lastIndexOf('s'))
-                            : length))
-                .getPersonalizedText()
-                .color(ChatColor.GOLD);
-        expireDate =
-            new PersonalizedTranslatable(
-                    "moderation.screen.expires",
-                    new PersonalizedText(remaining).color(ChatColor.YELLOW))
-                .getPersonalizedText()
-                .color(ChatColor.GRAY);
-      }
-
-      String createdAgo =
-          ComponentRenderers.toLegacyText(
-              PeriodFormats.relativePastApproximate(
-                  org.joda.time.Instant.ofEpochSecond(
-                      ban.getCreated().toInstant().getEpochSecond())),
-              sender);
-
-      Component banTypeFormatted =
-          new PersonalizedTranslatable("moderation.records.type", banType)
-              .getPersonalizedText()
-              .color(ChatColor.GRAY);
-
-      Component reason =
-          new PersonalizedTranslatable(
-                  "moderation.records.reason",
-                  new PersonalizedText(ban.getReason()).color(ChatColor.RED))
-              .getPersonalizedText()
-              .color(ChatColor.GRAY);
-      Component source =
-          new PersonalizedText(
-              new PersonalizedTranslatable(
-                      "moderation.screen.signoff",
-                      new PersonalizedText(ban.getSource()).color(ChatColor.AQUA))
-                  .getPersonalizedText()
-                  .color(ChatColor.GRAY),
-              Components.space(),
-              new PersonalizedText(createdAgo).color(ChatColor.GRAY));
-
-      sender.sendMessage(
-          ComponentUtils.horizontalLineHeading(
-              ComponentRenderers.toLegacyText(header, sender), ChatColor.DARK_PURPLE));
-      sender.sendMessage(banTypeFormatted);
-      sender.sendMessage(reason);
-      sender.sendMessage(source);
-      if (expires) {
-        sender.sendMessage(expireDate);
-      }
-
-    } else {
+    if (ban == null
+        || ban.getExpiration() != null && ban.getExpiration().toInstant().isBefore(Instant.now())) {
       throw new CommandException(
           ComponentRenderers.toLegacyText(
               new PersonalizedTranslatable(
                   "moderation.records.lookupNone",
                   new PersonalizedText(target).color(ChatColor.DARK_AQUA)),
               sender));
+    }
+
+    Component header =
+        new PersonalizedText(
+            new PersonalizedTranslatable("moderation.records.header")
+                .getPersonalizedText()
+                .color(ChatColor.GRAY),
+            new PersonalizedText(" » ").color(ChatColor.GOLD),
+            new PersonalizedText(target).color(ChatColor.DARK_AQUA).italic(true));
+    new PersonalizedTranslatable(
+            "moderation.records.header", new PersonalizedText(target).color(ChatColor.DARK_AQUA))
+        .getPersonalizedText()
+        .color(ChatColor.DARK_GREEN);
+    boolean expires = ban.getExpiration() != null;
+    Component banType =
+        new PersonalizedTranslatable("moderation.type.ban")
+            .getPersonalizedText()
+            .color(ChatColor.GOLD);
+    Component expireDate = Components.blank();
+    if (expires) {
+      String length =
+          ComponentRenderers.toLegacyText(
+              PeriodFormats.briefNaturalApproximate(
+                  org.joda.time.Instant.ofEpochSecond(
+                      ban.getCreated().toInstant().getEpochSecond()),
+                  org.joda.time.Instant.ofEpochSecond(
+                      ban.getExpiration().toInstant().getEpochSecond())),
+              sender);
+      String remaining =
+          ComponentRenderers.toLegacyText(
+              PeriodFormats.briefNaturalApproximate(
+                  org.joda.time.Instant.now(),
+                  org.joda.time.Instant.ofEpochSecond(
+                      ban.getExpiration().toInstant().getEpochSecond())),
+              sender);
+
+      banType =
+          new PersonalizedTranslatable(
+                  "moderation.type.temp_ban",
+                  new PersonalizedText(
+                      length.lastIndexOf('s') != -1
+                          ? length.substring(0, length.lastIndexOf('s'))
+                          : length))
+              .getPersonalizedText()
+              .color(ChatColor.GOLD);
+      expireDate =
+          new PersonalizedTranslatable(
+                  "moderation.screen.expires",
+                  new PersonalizedText(remaining).color(ChatColor.YELLOW))
+              .getPersonalizedText()
+              .color(ChatColor.GRAY);
+    }
+
+    String createdAgo =
+        ComponentRenderers.toLegacyText(
+            PeriodFormats.relativePastApproximate(
+                org.joda.time.Instant.ofEpochSecond(ban.getCreated().toInstant().getEpochSecond())),
+            sender);
+
+    Component banTypeFormatted =
+        new PersonalizedTranslatable("moderation.records.type", banType)
+            .getPersonalizedText()
+            .color(ChatColor.GRAY);
+
+    Component reason =
+        new PersonalizedTranslatable(
+                "moderation.records.reason",
+                new PersonalizedText(ban.getReason()).color(ChatColor.RED))
+            .getPersonalizedText()
+            .color(ChatColor.GRAY);
+    Component source =
+        new PersonalizedText(
+            new PersonalizedTranslatable(
+                    "moderation.screen.signoff",
+                    new PersonalizedText(ban.getSource()).color(ChatColor.AQUA))
+                .getPersonalizedText()
+                .color(ChatColor.GRAY),
+            Components.space(),
+            new PersonalizedText(createdAgo).color(ChatColor.GRAY));
+
+    sender.sendMessage(
+        ComponentUtils.horizontalLineHeading(
+            ComponentRenderers.toLegacyText(header, sender), ChatColor.DARK_PURPLE));
+    sender.sendMessage(banTypeFormatted);
+    sender.sendMessage(reason);
+    sender.sendMessage(source);
+    if (expires) {
+      sender.sendMessage(expireDate);
     }
   }
 
@@ -572,23 +584,6 @@ public class ModerationCommands {
     }
 
     return sameIPs;
-  }
-
-  private Duration parseBanLength(String length) throws CommandException {
-    Duration duration = Duration.ZERO;
-    if (length != null) {
-      try {
-        duration =
-            Duration.ofSeconds(
-                PeriodFormats.SHORTHAND
-                    .parsePeriod(length)
-                    .toStandardDuration()
-                    .getStandardSeconds());
-      } catch (IllegalArgumentException ex) {
-        throw new CommandException("Invalid time format: " + length);
-      }
-    }
-    return duration;
   }
 
   private boolean punish(

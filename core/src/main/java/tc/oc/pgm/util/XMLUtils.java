@@ -878,7 +878,7 @@ public class XMLUtils {
     }
   }
 
-  private static final Pattern USERNAME_REGEX = Pattern.compile("[a-zA-Z0-9_]{1,16}");
+  public static final Pattern USERNAME_REGEX = Pattern.compile("[a-zA-Z0-9_]{1,16}");
 
   public static String parseUsername(@Nullable Node node) throws InvalidXMLException {
     if (node == null) return null;
