@@ -1,5 +1,6 @@
 package tc.oc.pgm.modules;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -25,7 +26,6 @@ import tc.oc.util.bukkit.component.ComponentUtils;
 import tc.oc.util.bukkit.component.Components;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.nms.NMSHacks;
 import tc.oc.util.bukkit.translations.AllTranslations;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -57,15 +57,13 @@ public class StatsMatchModule implements MatchModule, Listener {
       killstreak = 0;
     }
 
-    private DecimalFormat decimalFormatBowshot = new DecimalFormat("#");
-
     private void setLongestBowKill(double distance) {
-      if (distance > longestBowKill) {
-        longestBowKill = Integer.parseInt(decimalFormatBowshot.format(Math.round(distance)));
+      if (new BigDecimal(distance).compareTo(new BigDecimal(longestBowKill)) > 0) {
+        longestBowKill = (int) distance;
       }
     }
 
-    private DecimalFormat decimalFormatKd = new DecimalFormat("#.##");
+    private final DecimalFormat decimalFormatKd = new DecimalFormat("#.##");
 
     Component getBasicStatsMessage() {
       String kd;
@@ -85,53 +83,25 @@ public class StatsMatchModule implements MatchModule, Listener {
     }
   }
 
-  private static Map<UUID, PlayerStats> allPlayerStats;
-
-  public StatsMatchModule() {
-    allPlayerStats = new HashMap<>();
-  }
+  private static final Map<UUID, PlayerStats> allPlayerStats = new HashMap<>();
 
   @EventHandler
   public void onPlayerDeath(MatchPlayerDeathEvent event) {
+    Match match = event.getMatch();
     MatchPlayer victim = event.getVictim();
     MatchPlayer murderer = null;
-    if (event.getKiller() != null) {
+
+    if (event.getKiller() != null)
       murderer = event.getKiller().getParty().getPlayer(event.getKiller().getId());
-    }
+
     UUID victimUUID = victim.getId();
     PlayerStats victimStats = allPlayerStats.get(victimUUID);
 
-    if (victimStats == null) {
-      allPlayerStats.put(victimUUID, new PlayerStats());
-      victimStats = allPlayerStats.get(victimUUID);
-    }
+    if (PlayerStatsDoesNotExist(victimUUID)) victimStats = putNewPlayer(victimUUID);
 
     victimStats.onDeath();
 
-    PlayerStats finalVictimStats = victimStats;
-    // Without this delay the "Press LShift to dismount" message from the death minecart will
-    // override the stats message.
-    int victimTaskId =
-        event
-            .getMatch()
-            .getScheduler(MatchScope.LOADED)
-            .runTaskTimer(
-                0,
-                5,
-                () -> {
-                  NMSHacks.sendHotbarMessage(
-                      victim.getBukkit(), finalVictimStats.getBasicStatsMessage());
-                })
-            .getTaskId();
-
-    event
-        .getMatch()
-        .getScheduler(MatchScope.LOADED)
-        .runTaskLater(
-            70,
-            () -> {
-              Bukkit.getScheduler().cancelTask(victimTaskId);
-            });
+    sendLongHotbarMessage(victim, match, victimStats.getBasicStatsMessage());
 
     if (murderer != null
         && PlayerRelation.get(victim.getParticipantState(), murderer) != PlayerRelation.ALLY
@@ -139,10 +109,7 @@ public class StatsMatchModule implements MatchModule, Listener {
       UUID murdererUUID = murderer.getId();
       PlayerStats murdererStats = allPlayerStats.get(murdererUUID);
 
-      if (murdererStats == null) {
-        allPlayerStats.put(murdererUUID, new PlayerStats());
-        murdererStats = allPlayerStats.get(murdererUUID);
-      }
+      if (PlayerStatsDoesNotExist(murdererUUID)) murdererStats = putNewPlayer(murdererUUID);
 
       if (event.getDamageInfo() instanceof ProjectileInfo) {
         murdererStats.setLongestBowKill(
@@ -150,33 +117,11 @@ public class StatsMatchModule implements MatchModule, Listener {
                 .getState()
                 .getLocation()
                 .distance(((ProjectileInfo) event.getDamageInfo()).getOrigin()));
-
-        murdererStats.onMurder();
-
-        MatchPlayer finalMurderer = murderer;
-        PlayerStats finalMurdererStats = murdererStats;
-        int murdererTaskId =
-            event
-                .getMatch()
-                .getScheduler(MatchScope.LOADED)
-                .runTaskTimer(
-                    0,
-                    5,
-                    () -> {
-                      NMSHacks.sendHotbarMessage(
-                          finalMurderer.getBukkit(), finalMurdererStats.getBasicStatsMessage());
-                    })
-                .getTaskId();
-
-        event
-            .getMatch()
-            .getScheduler(MatchScope.LOADED)
-            .runTaskLater(
-                70,
-                () -> {
-                  Bukkit.getScheduler().cancelTask(murdererTaskId);
-                });
       }
+
+      murdererStats.onMurder();
+
+      sendLongHotbarMessage(murderer, match, murdererStats.getBasicStatsMessage());
     }
   }
 
@@ -192,9 +137,7 @@ public class StatsMatchModule implements MatchModule, Listener {
       UUID playerUUID = mapEntry.getKey();
       PlayerStats playerStats = mapEntry.getValue();
 
-      if (allPlayerStats.get(playerUUID) == null) {
-        allPlayerStats.put(playerUUID, new PlayerStats());
-      }
+      if (PlayerStatsDoesNotExist(playerUUID)) playerStats = putNewPlayer(playerUUID);
 
       allKills.put(playerUUID, playerStats.kills);
       allKillstreaks.put(playerUUID, playerStats.killstreakMax);
@@ -202,11 +145,12 @@ public class StatsMatchModule implements MatchModule, Listener {
       allBowshots.put(playerUUID, playerStats.longestBowKill);
     }
 
-    Component killMessage = getKillsMessage(sortStats(allKills), match);
-    Component killstreakMessage = getKillstreakMessage(sortStats(allKillstreaks), match);
-    Component deathMessage = getDeathsMessage(sortStats(allDeaths), match);
+    Component killMessage = getMessage("stats.kills", sortStats(allKills), match, ChatColor.GREEN);
+    Component killstreakMessage =
+        getMessage("stats.killstreak", sortStats(allKillstreaks), match, ChatColor.GREEN);
+    Component deathMessage = getMessage("stats.death", sortStats(allDeaths), match, ChatColor.RED);
     TopResult bestBowshot = sortStats(allBowshots);
-    Component bowshotMessage = getBowshotMessage(bestBowshot, match);
+    Component bowshotMessage = getMessage("stats.bowshot", bestBowshot, match, ChatColor.YELLOW);
 
     for (MatchPlayer viewer : match.getPlayers()) {
       viewer.sendMessage(
@@ -220,8 +164,7 @@ public class StatsMatchModule implements MatchModule, Listener {
       viewer.sendMessage(killMessage);
       viewer.sendMessage(killstreakMessage);
       viewer.sendMessage(deathMessage);
-      if (bestBowshot.stat != 0)
-        viewer.sendMessage(bowshotMessage); // Prevent from showing if bows are not used
+      if (bestBowshot.stat != 0) viewer.sendMessage(bowshotMessage);
     }
   }
 
@@ -240,44 +183,40 @@ public class StatsMatchModule implements MatchModule, Listener {
       topResult.stat = 0;
       return topResult;
     }
+
     topResult.uuid = mapEntry.getKey();
     topResult.stat = mapEntry.getValue();
+
     return topResult;
   }
 
-  Component getKillsMessage(TopResult topResult, Match match) {
-    return new Component(
-        new PersonalizedTranslatable(
-                "stats.kills",
-                playerName(match, topResult.uuid),
-                new PersonalizedText(Integer.toString(topResult.stat), ChatColor.GREEN))
-            .render());
+  private void sendLongHotbarMessage(MatchPlayer player, Match match, Component message) {
+    int taskId =
+        match
+            .getScheduler(MatchScope.LOADED)
+            .runTaskTimer(
+                0,
+                5,
+                () -> {
+                  player.sendHotbarMessage(message);
+                })
+            .getTaskId();
+
+    match
+        .getScheduler(MatchScope.LOADED)
+        .runTaskLater(
+            20 * 4,
+            () -> {
+              Bukkit.getScheduler().cancelTask(taskId);
+            });
   }
 
-  Component getKillstreakMessage(TopResult topResult, Match match) {
+  Component getMessage(String messageKey, TopResult topResult, Match match, ChatColor color) {
     return new Component(
         new PersonalizedTranslatable(
-                "stats.killstreak",
+                messageKey,
                 playerName(match, topResult.uuid),
-                new PersonalizedText(Integer.toString(topResult.stat), ChatColor.GREEN))
-            .render());
-  }
-
-  Component getDeathsMessage(TopResult topResult, Match match) {
-    return new Component(
-        new PersonalizedTranslatable(
-                "stats.deaths",
-                playerName(match, topResult.uuid),
-                new PersonalizedText(Integer.toString(topResult.stat), ChatColor.RED))
-            .render());
-  }
-
-  Component getBowshotMessage(TopResult topResult, Match match) {
-    return new Component(
-        new PersonalizedTranslatable(
-                "stats.bowshot",
-                playerName(match, topResult.uuid),
-                new PersonalizedText(Integer.toString(topResult.stat), ChatColor.YELLOW))
+                new PersonalizedText(Integer.toString(topResult.stat), color).render())
             .render());
   }
 
@@ -292,8 +231,17 @@ public class StatsMatchModule implements MatchModule, Listener {
     return new PersonalizedText(match.getPlayer(playerUUID).getBukkit().getDisplayName());
   }
 
+  public static boolean PlayerStatsDoesNotExist(UUID player) {
+    return allPlayerStats.get(player) == null;
+  }
+
+  private static PlayerStats putNewPlayer(UUID player) {
+    allPlayerStats.put(player, new PlayerStats());
+    return allPlayerStats.get(player);
+  }
+
   public static Component getBasicStatsMessage(UUID player) {
-    if (allPlayerStats.get(player) == null) allPlayerStats.put(player, new PlayerStats());
+    if (PlayerStatsDoesNotExist(player)) return putNewPlayer(player).getBasicStatsMessage();
     return allPlayerStats.get(player).getBasicStatsMessage();
   }
 }
