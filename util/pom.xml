@@ -45,7 +45,7 @@
         <dependency>
             <groupId>org.ocpsoft.prettytime</groupId>
             <artifactId>prettytime</artifactId>
-            <version>4.0.3.Final</version>
+            <version>4.0.4.Final</version>
         </dependency>
 
         <!-- XML parsing library used for all "map.xml" configuration loading -->
