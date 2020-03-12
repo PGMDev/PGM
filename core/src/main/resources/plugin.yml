@@ -1,4 +1,7 @@
-name: PGM
+name: ${project.parent.name}
+description: ${project.parent.description}
 main: ${project.pluginClass}
+softdepend: ${project.pluginSoftDepedencies}
 version: ${project.version}-${git.commit.id.abbrev}
-softdepend: [ViaVersion]
+website: ${project.parent.url}
+author: ${project.author}
