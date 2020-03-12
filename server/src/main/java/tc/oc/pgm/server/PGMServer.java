@@ -1,4 +1,4 @@
-package tc.oc.server;
+package tc.oc.pgm.server;
 
 import com.google.common.collect.Lists;
 import java.io.File;
@@ -13,6 +13,7 @@ import net.minecraft.server.v1_8_R3.DedicatedPlayerList;
 import net.minecraft.server.v1_8_R3.DedicatedServer;
 import net.minecraft.server.v1_8_R3.DispenserRegistry;
 import net.minecraft.server.v1_8_R3.MinecraftEncryption;
+import net.minecraft.server.v1_8_R3.WorldLoaderServer;
 import net.minecraft.server.v1_8_R3.WorldSettings;
 import net.minecraft.server.v1_8_R3.WorldType;
 import org.apache.log4j.BasicConfigurator;
@@ -37,11 +38,11 @@ import org.spigotmc.SpigotConfig;
  * <p>Most of this code is lifted from {@link DedicatedServer#init()}, and is broken up into
  * different methods to allow for customization.
  */
-public class BukkitServer extends DedicatedServer implements Runnable {
+public class PGMServer extends DedicatedServer implements Runnable {
 
   public static void main(String[] args) throws InvalidDescriptionException {
     BasicConfigurator.configure();
-    new BukkitServer(
+    new PGMServer(
             new PluginDescriptionFile(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("plugin.yml")))
         .run();
@@ -52,7 +53,7 @@ public class BukkitServer extends DedicatedServer implements Runnable {
   protected Logger logger;
   protected boolean init;
 
-  public BukkitServer(PluginDescriptionFile... plugins) {
+  public PGMServer(PluginDescriptionFile... plugins) {
     super(
         new OptionParser() {
           {
@@ -135,14 +136,14 @@ public class BukkitServer extends DedicatedServer implements Runnable {
       }
     }
 
-    new Thread(new TerminalConsoleWriterThread(System.out, this.reader)).start();
-
+    new Thread(new TerminalConsoleWriterThread(System.out, reader)).start();
     System.setOut(new PrintStream(new LoggerOutputStream(logger, Level.INFO), true));
     System.setErr(new PrintStream(new LoggerOutputStream(logger, Level.WARN), true));
+
     BasicConfigurator.resetConfiguration();
 
     try {
-      return (Logger) BukkitServer.class.getField("LOGGER").get(BukkitServer.class);
+      return (Logger) PGMServer.class.getField("LOGGER").get(PGMServer.class);
     } catch (IllegalAccessException | NoSuchFieldException e) {
       // No-op
     }
@@ -156,7 +157,7 @@ public class BukkitServer extends DedicatedServer implements Runnable {
             () -> {
               try {
                 while (!isStopped() && isRunning()) {
-                  final String command = reader.readLine("", null);
+                  final String command = reader.readLine(">", null);
                   if (command != null && !command.trim().isEmpty()) {
                     issueCommand(command, this);
                   }
@@ -221,7 +222,7 @@ public class BukkitServer extends DedicatedServer implements Runnable {
   }
 
   protected void setupWorld() {
-    convertable = new EmptyConvertable();
+    convertable = new WorldLoaderServer(server.getWorldContainer());
 
     final long start = System.nanoTime();
     a(U(), U(), 0 /* seed */, WorldType.FLAT, "" /* generator */);

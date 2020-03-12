@@ -3,6 +3,7 @@
 
     <properties>
         <project.pluginClass>tc.oc.pgm.PGMPlugin</project.pluginClass>
+        <project.pluginSoftDepedencies>[ViaVersion]</project.pluginSoftDepedencies>
     </properties>
 
     <parent>
@@ -77,6 +78,7 @@
                             <exclude>com.google.guava:guava:*</exclude>
                             <exclude>com.google.code.findbugs:annotations:*</exclude>
                             <exclude>net.sf.trove4j:trove4j:*</exclude>
+                            <exclude>org.xerial:sqlite-jdbc:*</exclude>
                         </excludes>
                     </artifactSet>
                     <filters>
@@ -84,12 +86,6 @@
                             <artifact>*:*</artifact>
                             <excludes>
                                 <exclude>META-INF/**</exclude>
-                            </excludes>
-                        </filter>
-                        <filter>
-                            <artifact>tc.oc.pgm:util*:*</artifact>
-                            <excludes>
-                                <exclude>git.properties</exclude>
                             </excludes>
                         </filter>
                     </filters>

@@ -1,10 +1,27 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.author>Ashcon Partovi</project.author>
     </properties>
+
+    <name>PGM</name>
+    <description>The original PvP Game Manager for Minecraft</description>
+    <inceptionYear>2011</inceptionYear>
+
+    <url>https://github.com/Electroid/PGM</url>
+    <scm>
+        <connection>scm:git:git://github.com/Electroid/PGM</connection>
+    </scm>
+
+    <developers>
+        <developer>
+            <name>${project.author}</name>
+        </developer>
+    </developers>
 
     <groupId>tc.oc.pgm</groupId>
     <artifactId>PGM</artifactId>
@@ -25,7 +42,7 @@
         </repository>
         <repository>
             <id>viaversion-repo</id>
-            <url>https://repo.viaversion.com</url>
+            <url>https://repo.ashcon.app/content/repositories/viaversion</url>
         </repository>
     </repositories>
 
@@ -42,10 +59,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
             </plugin>
 
             <!-- Exposes git information to the build environment -->
@@ -55,19 +68,18 @@
                 <version>2.2.4</version>
                 <executions>
                     <execution>
-                        <phase>validate</phase>
                         <goals>
                             <goal>revision</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
-                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
-                    <format>json</format>
+                    <failOnNoGitDirectory>false</failOnNoGitDirectory>
+                    <failOnUnableToExtractRepoInfo>false</failOnUnableToExtractRepoInfo>
                 </configuration>
             </plugin>
 
-            <!-- Ensures that code is properly formatted using Google's code style -->
+            <!-- Modifies code to be properly formatted with Google's code style -->
             <plugin>
                 <groupId>com.coveo</groupId>
                 <artifactId>fmt-maven-plugin</artifactId>
@@ -77,9 +89,8 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>validate</phase>
                         <goals>
-                            <goal>check</goal>
+                            <goal>format</goal>
                         </goals>
                     </execution>
                 </executions>
