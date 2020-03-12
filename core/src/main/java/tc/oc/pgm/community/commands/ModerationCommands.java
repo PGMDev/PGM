@@ -230,7 +230,7 @@ public class ModerationCommands {
       @Switch('s') boolean silent,
       @Switch('t') Duration banLength)
       throws CommandException {
-    boolean tempBan = !banLength.isZero();
+    boolean tempBan = banLength != null && !banLength.isZero();
 
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
     Component senderName = formatPunisherName(sender, match);
@@ -327,7 +327,7 @@ public class ModerationCommands {
       @Text String reason,
       @Switch('t') Duration duration)
       throws CommandException {
-    boolean tempBan = !duration.isZero();
+    boolean tempBan = duration != null && !duration.isZero();
 
     banPlayer(
         target,
@@ -603,7 +603,7 @@ public class ModerationCommands {
       Duration duration,
       boolean silent) {
     PlayerPunishmentEvent event =
-        new PlayerPunishmentEvent(issuer, target, type, reason, duration, silent);
+        new PlayerPunishmentEvent(issuer, target, type, reason, duration == null ? Duration.ZERO : duration, silent);
     target.getMatch().callEvent(event);
     if (event.isCancelled()) {
       if (event.getCancelMessage() != null) {
@@ -616,7 +616,7 @@ public class ModerationCommands {
     return !event.isCancelled();
   }
 
-  public static enum PunishmentType {
+  public enum PunishmentType {
     MUTE(false),
     WARN(false),
     KICK(true),
