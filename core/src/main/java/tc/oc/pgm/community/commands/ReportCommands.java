@@ -202,7 +202,7 @@ public class ReportCommands {
     Component formattedHeader =
         new PersonalizedText(
             ComponentUtils.horizontalLineHeading(
-                ComponentRenderers.toLegacyText(header, sender), ChatColor.WHITE));
+                ComponentRenderers.toLegacyText(header, sender), ChatColor.DARK_GRAY));
 
     new PrettyPaginatedComponentResults<Report>(formattedHeader, perPage) {
       @Override
