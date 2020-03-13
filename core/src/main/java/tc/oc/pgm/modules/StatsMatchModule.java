@@ -1,6 +1,5 @@
 package tc.oc.pgm.modules;
 
-import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -35,8 +34,15 @@ public class StatsMatchModule implements MatchModule, Listener {
 
     @Override
     public StatsMatchModule createMatchModule(Match match) throws ModuleLoadException {
-      return new StatsMatchModule();
+      return new StatsMatchModule(match);
     }
+  }
+
+  Match match;
+  private static final Map<UUID, PlayerStats> allPlayerStats = new HashMap<>();
+
+  StatsMatchModule(Match match){
+    this.match = match;
   }
 
   public static class PlayerStats {
@@ -58,7 +64,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     }
 
     private void setLongestBowKill(double distance) {
-      if (new BigDecimal(distance).compareTo(new BigDecimal(longestBowKill)) > 0) {
+      if (distance > longestBowKill) {
         longestBowKill = (int) distance;
       }
     }
@@ -83,11 +89,8 @@ public class StatsMatchModule implements MatchModule, Listener {
     }
   }
 
-  private static final Map<UUID, PlayerStats> allPlayerStats = new HashMap<>();
-
   @EventHandler
   public void onPlayerDeath(MatchPlayerDeathEvent event) {
-    Match match = event.getMatch();
     MatchPlayer victim = event.getVictim();
     MatchPlayer murderer = null;
 
@@ -101,7 +104,7 @@ public class StatsMatchModule implements MatchModule, Listener {
 
     victimStats.onDeath();
 
-    sendLongHotbarMessage(victim, match, victimStats.getBasicStatsMessage());
+    sendLongHotbarMessage(victim, victimStats.getBasicStatsMessage());
 
     if (murderer != null
         && PlayerRelation.get(victim.getParticipantState(), murderer) != PlayerRelation.ALLY
@@ -121,13 +124,12 @@ public class StatsMatchModule implements MatchModule, Listener {
 
       murdererStats.onMurder();
 
-      sendLongHotbarMessage(murderer, match, murdererStats.getBasicStatsMessage());
+      sendLongHotbarMessage(murderer, murdererStats.getBasicStatsMessage());
     }
   }
 
   @EventHandler
   public void onMatchEnd(MatchFinishEvent event) {
-    Match match = event.getMatch();
     Map<UUID, Integer> allKills = new HashMap<>();
     Map<UUID, Integer> allKillstreaks = new HashMap<>();
     Map<UUID, Integer> allDeaths = new HashMap<>();
@@ -145,12 +147,13 @@ public class StatsMatchModule implements MatchModule, Listener {
       allBowshots.put(playerUUID, playerStats.longestBowKill);
     }
 
-    Component killMessage = getMessage("stats.kills", sortStats(allKills), match, ChatColor.GREEN);
+    Component killMessage = getMessage("stats.kills", sortStats(allKills), ChatColor.GREEN);
     Component killstreakMessage =
-        getMessage("stats.killstreak", sortStats(allKillstreaks), match, ChatColor.GREEN);
-    Component deathMessage = getMessage("stats.death", sortStats(allDeaths), match, ChatColor.RED);
+        getMessage("stats.killstreak", sortStats(allKillstreaks), ChatColor.GREEN);
+    Component deathMessage = getMessage("stats.deaths", sortStats(allDeaths), ChatColor.RED);
     TopResult bestBowshot = sortStats(allBowshots);
-    Component bowshotMessage = getMessage("stats.bowshot", bestBowshot, match, ChatColor.YELLOW);
+    String bowMessageKey = (bestBowshot.stat == 1) ? "stats.bowshot.block" : "stats.bowshot.blocks";
+    Component bowshotMessage = getMessage(bowMessageKey, bestBowshot, ChatColor.YELLOW);
 
     for (MatchPlayer viewer : match.getPlayers()) {
       viewer.sendMessage(
@@ -190,7 +193,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     return topResult;
   }
 
-  private void sendLongHotbarMessage(MatchPlayer player, Match match, Component message) {
+  private void sendLongHotbarMessage(MatchPlayer player, Component message) {
     int taskId =
         match
             .getScheduler(MatchScope.LOADED)
@@ -211,16 +214,16 @@ public class StatsMatchModule implements MatchModule, Listener {
             });
   }
 
-  Component getMessage(String messageKey, TopResult topResult, Match match, ChatColor color) {
+  Component getMessage(String messageKey, TopResult topResult, ChatColor color) {
     return new Component(
         new PersonalizedTranslatable(
                 messageKey,
-                playerName(match, topResult.uuid),
+                playerName(topResult.uuid),
                 new PersonalizedText(Integer.toString(topResult.stat), color).render())
             .render());
   }
 
-  private PersonalizedText playerName(Match match, UUID playerUUID) {
+  private PersonalizedText playerName(UUID playerUUID) {
     if (Bukkit.getPlayer(playerUUID) == null) {
       if (Bukkit.getOfflinePlayer(playerUUID).getName() == null) {
         return new PersonalizedText("Noone", ChatColor.MAGIC, ChatColor.BLACK);
