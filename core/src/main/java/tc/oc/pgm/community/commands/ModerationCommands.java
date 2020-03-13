@@ -603,7 +603,8 @@ public class ModerationCommands {
       Duration duration,
       boolean silent) {
     PlayerPunishmentEvent event =
-        new PlayerPunishmentEvent(issuer, target, type, reason, duration == null ? Duration.ZERO : duration, silent);
+        new PlayerPunishmentEvent(
+            issuer, target, type, reason, duration == null ? Duration.ZERO : duration, silent);
     target.getMatch().callEvent(event);
     if (event.isCancelled()) {
       if (event.getCancelMessage() != null) {
@@ -686,8 +687,6 @@ public class ModerationCommands {
         new PersonalizedText(
             ComponentUtils.horizontalLine(ChatColor.DARK_GRAY, ComponentUtils.MAX_CHAT_WIDTH));
 
-    Component rules = new PersonalizedText(Config.Moderation.getRulesLink()).color(ChatColor.AQUA);
-
     lines.add(header); // Header Line (server name) - START
     lines.add(Components.blank());
     lines.add(type.getScreenComponent(formatPunishmentReason(reason))); // The reason
@@ -713,6 +712,8 @@ public class ModerationCommands {
 
     // Link to rules for review by player
     if (Config.Moderation.isRuleLinkVisible()) {
+      Component rules = new PersonalizedText(Config.Moderation.getRulesLink());
+
       lines.add(Components.blank());
       lines.add(
           new PersonalizedTranslatable("moderation.screen.rulesLink", rules)
@@ -771,7 +772,7 @@ public class ModerationCommands {
       Duration length) {
 
     Component prefix = type.getPunishmentPrefix();
-    if (!length.isZero()) {
+    if (length != null && !length.isZero()) {
       String time =
           ComponentRenderers.toLegacyText(
               PeriodFormats.briefNaturalApproximate(
