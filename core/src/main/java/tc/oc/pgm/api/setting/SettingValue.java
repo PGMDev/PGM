@@ -34,8 +34,9 @@ public enum SettingValue {
   OBSERVERS_ON("observers", "on"), // Show observers
   OBSERVERS_OFF("observers", "off"), // Hide observers
 
-  SOUNDS_ON("sounds", "on"), // Always play sounds
-  SOUNDS_OFF("sounds", "off"), // Never play sounds
+  SOUNDS_ALL("sounds", "all"), // Play all sounds
+  SOUNDS_DM("sounds", "messages"), // Only play DM sounds
+  SOUNDS_NONE("sounds", "none"), // Never play sounds
 
   VOTE_ON("vote", "on"), // Show the vote book on cycle
   VOTE_OFF("vote", "off"), // Don't show the vote book on cycle

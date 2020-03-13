@@ -31,6 +31,7 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.commands.SettingCommands;
 import tc.oc.pgm.ffa.Tribute;
 import tc.oc.util.StringUtils;
+import tc.oc.util.bukkit.BukkitUtils;
 import tc.oc.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.Components;
@@ -46,10 +47,15 @@ public class ChatDispatcher implements Listener {
   private final Set<UUID> muted;
 
   private static final Sound DM_SOUND = new Sound("random.orb", 1f, 1.2f);
+  private static final Sound AC_SOUND = new Sound("random.orb", 1f, 0.7f);
 
   private static final String GLOBAL_SYMBOL = "!";
   private static final String DM_SYMBOL = "@";
   private static final String ADMIN_CHAT_SYMBOL = "$";
+
+  public static final String ADMIN_CHAT_PREFIX =
+      "[" + ChatColor.DARK_RED + "A" + ChatColor.WHITE + "]";
+  private static final String DM_CHAT_PREFIX = "[" + ChatColor.GOLD + "DM" + ChatColor.WHITE + "]";
 
   public ChatDispatcher(MatchManager manager) {
     this.manager = manager;
@@ -128,8 +134,8 @@ public class ChatDispatcher implements Listener {
     send(
         match,
         sender,
-        message,
-        "[" + ChatColor.GOLD + "A" + ChatColor.WHITE + "] {0}: {1}",
+        BukkitUtils.colorize(message),
+        ADMIN_CHAT_PREFIX + " {0}: {1}",
         filter,
         SettingValue.CHAT_ADMIN);
 
@@ -138,7 +144,7 @@ public class ChatDispatcher implements Listener {
       match.getPlayers().stream()
           .filter(filter) // Initial filter
           .filter(viewer -> !viewer.equals(sender)) // Don't play sound for sender
-          .forEach(this::playMessageSound);
+          .forEach(pl -> playSound(pl, AC_SOUND));
     }
   }
 
@@ -172,7 +178,7 @@ public class ChatDispatcher implements Listener {
                 .color(ChatColor.RED));
         return; // Only allow staff to message muted players
       } else {
-        playMessageSound(matchReceiver);
+        playSound(matchReceiver, DM_SOUND);
       }
     }
 
@@ -184,7 +190,7 @@ public class ChatDispatcher implements Listener {
         match,
         sender,
         message,
-        "[" + ChatColor.GOLD + "DM" + ChatColor.WHITE + "] {0}: {1}",
+        DM_CHAT_PREFIX + " {0}: {1}",
         viewer -> viewer.getBukkit().equals(receiver),
         null);
 
@@ -192,7 +198,7 @@ public class ChatDispatcher implements Listener {
         match,
         manager.getPlayer(receiver), // Allow for cross-match messages
         message,
-        "[" + ChatColor.GOLD + "DM" + ChatColor.WHITE + "] -> {0}: {1}",
+        DM_CHAT_PREFIX + " -> {0}: {1}",
         viewer -> viewer.getBukkit().equals(sender.getBukkit()),
         null);
   }
@@ -269,9 +275,11 @@ public class ChatDispatcher implements Listener {
     }
   }
 
-  public void playMessageSound(MatchPlayer player) {
-    if (player.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ON)) {
-      player.playSound(DM_SOUND);
+  public void playSound(MatchPlayer player, Sound sound) {
+    SettingValue value = player.getSettings().getValue(SettingKey.SOUNDS);
+    if ((sound.equals(AC_SOUND) && value.equals(SettingValue.SOUNDS_ALL))
+        || (sound.equals(DM_SOUND) && !value.equals(SettingValue.SOUNDS_NONE))) {
+      player.playSound(sound);
     }
   }
 

@@ -30,7 +30,7 @@ public enum SettingKey {
       player.resetVisibility();
     }
   }, // Changes if observers are visible
-  SOUNDS("sounds", SOUNDS_ON, SOUNDS_OFF), // Changes if sounds are played
+  SOUNDS("sounds", SOUNDS_ALL, SOUNDS_DM, SOUNDS_NONE), // Changes when sounds are played
   VOTE("vote", VOTE_ON, VOTE_OFF), // Changes if the vote book is shown on cycle
   ;
 

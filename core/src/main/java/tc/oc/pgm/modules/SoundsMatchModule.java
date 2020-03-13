@@ -34,7 +34,7 @@ public class SoundsMatchModule implements MatchModule, Listener {
   private static final Sound RAINDROP_SOUND = new Sound("random.levelup", 1f, 1.5f);
 
   private void playSound(MatchPlayer player, Sound sound) {
-    if (player.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ON)) {
+    if (player.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ALL)) {
       player.playSound(sound);
     }
   }
