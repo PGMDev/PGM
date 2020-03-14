@@ -53,8 +53,7 @@ public class ChatDispatcher implements Listener {
   private static final String DM_SYMBOL = "@";
   private static final String ADMIN_CHAT_SYMBOL = "$";
 
-  public static final String ADMIN_CHAT_PREFIX =
-      "[" + ChatColor.DARK_RED + "A" + ChatColor.WHITE + "]";
+  public static final String ADMIN_CHAT_PREFIX = "[" + ChatColor.RED + "A" + ChatColor.WHITE + "]";
   private static final String DM_CHAT_PREFIX = "[" + ChatColor.GOLD + "DM" + ChatColor.WHITE + "]";
 
   public ChatDispatcher(MatchManager manager) {
