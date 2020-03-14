@@ -481,7 +481,7 @@ public class Config {
   public static class Fireworks {
 
     public static boolean postMatchEnabled() {
-      return getConfiguration().getBoolean("fireworks.post-match", false);
+      return getConfiguration().getBoolean("fireworks.post-match", true);
     }
 
     public static boolean goalsEnabled() {

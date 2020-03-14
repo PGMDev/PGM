@@ -123,6 +123,6 @@ moderation:
   
 fireworks:
   # Post-match fireworks fire above the winners of the current match
-  post-match: false
+  post-match: true
   # Goals spawn fireworks when objectives are completed
   goals: true
