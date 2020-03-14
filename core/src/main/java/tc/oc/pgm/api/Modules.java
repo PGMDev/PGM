@@ -39,6 +39,7 @@ import tc.oc.pgm.ffa.FreeForAllMatchModule;
 import tc.oc.pgm.ffa.FreeForAllModule;
 import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.filters.FilterModule;
+import tc.oc.pgm.fireworks.FireworkMatchModule;
 import tc.oc.pgm.flag.FlagMatchModule;
 import tc.oc.pgm.flag.FlagModule;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
@@ -155,6 +156,7 @@ public interface Modules {
     register(ArrowRemovalMatchModule.class, ArrowRemovalMatchModule::new);
     register(SoundsMatchModule.class, new SoundsMatchModule.Factory());
     register(ObserverToolsMatchModule.class, new ObserverToolsMatchModule.Factory());
+    register(FireworkMatchModule.class, FireworkMatchModule::new);
 
     // MatchModules that require other dependencies
     register(GoalMatchModule.class, new GoalMatchModule.Factory());

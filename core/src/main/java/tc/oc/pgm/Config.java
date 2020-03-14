@@ -477,4 +477,15 @@ public class Config {
       return getAppealMessage().length() > 0;
     }
   }
+
+  public static class Fireworks {
+
+    public static boolean postMatchEnabled() {
+      return getConfiguration().getBoolean("fireworks.post-match", true);
+    }
+
+    public static boolean goalsEnabled() {
+      return getConfiguration().getBoolean("fireworks.goals", true);
+    }
+  }
 }
