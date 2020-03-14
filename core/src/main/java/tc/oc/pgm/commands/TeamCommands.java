@@ -7,15 +7,17 @@ import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
 import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
 import java.util.*;
-import org.bukkit.ChatColor;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.util.bukkit.named.NameStyle;
 import tc.oc.util.bukkit.translations.AllTranslations;
 
 public class TeamCommands {
@@ -43,8 +45,14 @@ public class TeamCommands {
       desc = "Force a player onto a team",
       usage = "<player> [team]",
       perms = Permissions.JOIN_FORCE)
-  public static void force(Match match, TeamMatchModule tmm, Player player, @Text String teamName) {
+  public static void force(
+      CommandSender sender,
+      Match match,
+      TeamMatchModule tmm,
+      Player player,
+      @Text String teamName) {
     MatchPlayer matchPlayer = match.getPlayer(player);
+    Party oldParty = matchPlayer.getParty();
     if (teamName != null) {
       if (teamName.trim().toLowerCase().startsWith("obs")) {
         match.setParty(matchPlayer, match.getDefaultParty());
@@ -55,6 +63,14 @@ public class TeamCommands {
     } else {
       tmm.forceJoin(matchPlayer, null);
     }
+    sender.sendMessage(
+        new PersonalizedTranslatable(
+                "command.team.force.success",
+                matchPlayer.getStyledName(NameStyle.FANCY),
+                matchPlayer.getParty().getComponentName(),
+                oldParty.getComponentName())
+            .getPersonalizedText()
+            .color(ChatColor.GRAY));
   }
 
   @Command(

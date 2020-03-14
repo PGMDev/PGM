@@ -1,5 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
+    <properties>
+        <project.mainClass>tc.oc.pgm.server.PGMServer</project.mainClass>
+    </properties>
+
     <parent>
         <relativePath>../pom.xml</relativePath>
         <version>1.8-SNAPSHOT</version>
@@ -37,8 +42,8 @@
                     <minimizeJar>false</minimizeJar>
                     <artifactSet>
                         <excludes>
-                            <exclude>tc.oc.pgm:util:*</exclude>
                             <exclude>tc.oc.pgm:util-bukkit:*</exclude>
+                            <exclude>tc.oc.pgm:util:*</exclude>
                             <exclude>app.ashcon.intake:intake-bukkit:*</exclude>
                             <exclude>com.google.guava:guava:*</exclude>
                             <exclude>com.google.code.findbugs:annotations:*</exclude>
@@ -52,16 +57,21 @@
                             <artifact>*:*</artifact>
                             <excludes>
                                 <exclude>META-INF/**</exclude>
+                                <exclude>module-info.class</exclude>
                             </excludes>
                         </filter>
                         <filter>
                             <artifact>tc.oc.pgm:core:*</artifact>
                             <excludes>
                                 <exclude>org/jdom2/**</exclude>
-                                <exclude>git.properties</exclude>
                             </excludes>
                         </filter>
                     </filters>
+                    <transformers>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <mainClass>${project.mainClass}</mainClass>
+                        </transformer>
+                    </transformers>
                 </configuration>
                 <executions>
                     <execution>
@@ -71,21 +81,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-
-            <!-- Ensures that the jar can be run as an independent server -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.2.0</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <mainClass>tc.oc.server.BukkitServer</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
             </plugin>
 
             <!-- Generates a /server folder for debugging purposes -->

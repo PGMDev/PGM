@@ -1,4 +1,4 @@
-package tc.oc.server;
+package tc.oc.pgm.server;
 
 import net.minecraft.server.v1_8_R3.PropertyManager;
 import org.bukkit.craftbukkit.libs.joptsimple.OptionSet;

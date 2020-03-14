@@ -23,6 +23,7 @@ import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.pgm.events.ConfigLoadEvent;
 import tc.oc.pgm.map.source.DefaultMapSourceFactory;
 import tc.oc.pgm.map.source.SystemMapSourceFactory;
+import tc.oc.util.bukkit.BukkitUtils;
 
 public class Config {
 
@@ -461,17 +462,15 @@ public class Config {
     }
 
     public static String getRulesLink() {
-      return getConfiguration().getString("moderation.rules-link", "");
+      return BukkitUtils.colorize(getConfiguration().getString("moderation.rules-link", ""));
     }
 
     public static String getServerName() {
-      return ChatColor.translateAlternateColorCodes(
-          '&', getConfiguration().getString("moderation.server-name", ""));
+      return BukkitUtils.colorize(getConfiguration().getString("moderation.server-name", ""));
     }
 
     public static String getAppealMessage() {
-      return ChatColor.translateAlternateColorCodes(
-          '&', getConfiguration().getString("moderation.appeal-msg", ""));
+      return BukkitUtils.colorize(getConfiguration().getString("moderation.appeal-msg", ""));
     }
 
     public static boolean isAppealVisible() {

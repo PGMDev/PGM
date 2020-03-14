@@ -69,6 +69,10 @@ public class ChatDispatcher implements Listener {
     return muted.contains(player.getId());
   }
 
+  public Set<UUID> getMutedUUIDs() {
+    return muted;
+  }
+
   @Command(
       aliases = {"g", "all"},
       desc = "Send a message to everyone",
@@ -159,7 +163,17 @@ public class ChatDispatcher implements Listener {
         sender.sendMessage(new PersonalizedText(component, ChatColor.RED));
         return;
       }
-      playMessageSound(matchReceiver);
+
+      if (isMuted(matchReceiver) && !sender.getBukkit().hasPermission(Permissions.STAFF)) {
+        sender.sendMessage(
+            new PersonalizedTranslatable(
+                    "moderation.mute.target", matchReceiver.getStyledName(NameStyle.CONCISE))
+                .getPersonalizedText()
+                .color(ChatColor.RED));
+        return; // Only allow staff to message muted players
+      } else {
+        playMessageSound(matchReceiver);
+      }
     }
 
     if (sender != null) {
