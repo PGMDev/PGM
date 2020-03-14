@@ -54,21 +54,6 @@ public class FireworkMatchModule implements MatchModule, Listener {
   private static final int ROCKET_POWER =
       2; // Power applied to rockets (how high they go), 1 = low, 2 = medium, 3 = high
 
-  private static final int WOOL_PLACE_COUNT = 6;
-  private static final double WOOL_PLACE_RADIUS = 2;
-
-  private static final int CORE_LEAK_COUNT = 8;
-  private static final double CORE_LEAK_RADIUS = 1.5;
-
-  private static final int DESTROYABLE_BREAK_COUNT = 4;
-  private static final double DESTROYABLE_BREAK_RADIUS = 3;
-
-  private static final int CONTROL_POINT_COUNT = 8;
-  private static final double CONTROL_POINT_RADIUS = 1;
-
-  private static final int FLAG_CAPTURE_COUNT = 6;
-  private static final double FLAG_CAPTURE_RADIUS = 1;
-
   public static List<FireworkEffect.Type> FIREWORK_TYPES =
       ImmutableList.<FireworkEffect.Type>builder()
           .add(Type.BALL)
@@ -132,6 +117,9 @@ public class FireworkMatchModule implements MatchModule, Listener {
     }
   }
 
+  private static final int WOOL_PLACE_COUNT = 6;
+  private static final double WOOL_PLACE_RADIUS = 2;
+
   @EventHandler(priority = EventPriority.MONITOR)
   public void onWoolPlace(final PlayerWoolPlaceEvent event) {
     if (GOALS_ENABLED && event.getWool().isVisible()) {
@@ -143,6 +131,9 @@ public class FireworkMatchModule implements MatchModule, Listener {
           ROCKET_POWER);
     }
   }
+
+  private static final int CORE_LEAK_COUNT = 8;
+  private static final double CORE_LEAK_RADIUS = 1.5;
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onCoreLeak(final CoreLeakEvent event) {
@@ -157,6 +148,9 @@ public class FireworkMatchModule implements MatchModule, Listener {
     }
   }
 
+  private static final int DESTROYABLE_BREAK_COUNT = 4;
+  private static final double DESTROYABLE_BREAK_RADIUS = 3;
+
   @EventHandler(priority = EventPriority.MONITOR)
   public void onDestroyableBreak(final DestroyableDestroyedEvent event) {
     if (GOALS_ENABLED && event.getDestroyable().isVisible()) {
@@ -170,6 +164,9 @@ public class FireworkMatchModule implements MatchModule, Listener {
     }
   }
 
+  private static final int CONTROL_POINT_COUNT = 8;
+  private static final double CONTROL_POINT_RADIUS = 1;
+
   @EventHandler(priority = EventPriority.MONITOR)
   public void onHillCapture(final ControllerChangeEvent event) {
     if (GOALS_ENABLED && event.getControlPoint().isVisible() && event.getNewController() != null) {
@@ -182,6 +179,9 @@ public class FireworkMatchModule implements MatchModule, Listener {
           ROCKET_POWER);
     }
   }
+
+  private static final int FLAG_CAPTURE_COUNT = 6;
+  private static final double FLAG_CAPTURE_RADIUS = 1;
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onFlagCapture(final FlagCaptureEvent event) {
