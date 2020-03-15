@@ -34,6 +34,7 @@ import tc.oc.util.StringUtils;
 import tc.oc.util.bukkit.BukkitUtils;
 import tc.oc.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.ComponentRenderers;
 import tc.oc.util.bukkit.component.Components;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
@@ -53,8 +54,7 @@ public class ChatDispatcher implements Listener {
   private static final String DM_SYMBOL = "@";
   private static final String ADMIN_CHAT_SYMBOL = "$";
 
-  public static final String ADMIN_CHAT_PREFIX = "[" + ChatColor.RED + "A" + ChatColor.WHITE + "]";
-  private static final String DM_CHAT_PREFIX = "[" + ChatColor.GOLD + "DM" + ChatColor.WHITE + "]";
+  public static final String ADMIN_CHAT_PREFIX = "[" + ChatColor.GOLD + "A" + ChatColor.WHITE + "]";
 
   public ChatDispatcher(MatchManager manager) {
     this.manager = manager;
@@ -189,7 +189,7 @@ public class ChatDispatcher implements Listener {
         match,
         sender,
         message,
-        DM_CHAT_PREFIX + " {0}: {1}",
+        ComponentRenderers.toLegacyText(formatPrivateMessage("command.message.from"), receiver),
         viewer -> viewer.getBukkit().equals(receiver),
         null);
 
@@ -197,7 +197,8 @@ public class ChatDispatcher implements Listener {
         match,
         manager.getPlayer(receiver), // Allow for cross-match messages
         message,
-        DM_CHAT_PREFIX + " -> {0}: {1}",
+        ComponentRenderers.toLegacyText(
+            formatPrivateMessage("command.message.to"), manager.getPlayer(receiver).getBukkit()),
         viewer -> viewer.getBukkit().equals(sender.getBukkit()),
         null);
   }
@@ -215,6 +216,12 @@ public class ChatDispatcher implements Listener {
     }
 
     sendDirect(match, sender, receiver.getBukkit(), message);
+  }
+
+  private static PersonalizedText formatPrivateMessage(String key) {
+    return new PersonalizedText(
+        new PersonalizedTranslatable(key).getPersonalizedText().color(ChatColor.GRAY).italic(true),
+        new PersonalizedText(" {0}: {1}"));
   }
 
   private static MatchPlayer getApproximatePlayer(Match match, String query, CommandSender sender) {
