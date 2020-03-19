@@ -38,7 +38,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     }
   }
 
-  Match match;
+  private final Match match;
   private static final Map<UUID, PlayerStats> allPlayerStats = new HashMap<>();
 
   StatsMatchModule(Match match){
@@ -100,7 +100,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     UUID victimUUID = victim.getId();
     PlayerStats victimStats = allPlayerStats.get(victimUUID);
 
-    if (PlayerStatsDoesNotExist(victimUUID)) victimStats = putNewPlayer(victimUUID);
+    if (hasNoStats(victimUUID)) victimStats = putNewPlayer(victimUUID);
 
     victimStats.onDeath();
 
@@ -112,7 +112,7 @@ public class StatsMatchModule implements MatchModule, Listener {
       UUID murdererUUID = murderer.getId();
       PlayerStats murdererStats = allPlayerStats.get(murdererUUID);
 
-      if (PlayerStatsDoesNotExist(murdererUUID)) murdererStats = putNewPlayer(murdererUUID);
+      if (hasNoStats(murdererUUID)) murdererStats = putNewPlayer(murdererUUID);
 
       if (event.getDamageInfo() instanceof ProjectileInfo) {
         murdererStats.setLongestBowKill(
@@ -139,7 +139,7 @@ public class StatsMatchModule implements MatchModule, Listener {
       UUID playerUUID = mapEntry.getKey();
       PlayerStats playerStats = mapEntry.getValue();
 
-      if (PlayerStatsDoesNotExist(playerUUID)) playerStats = putNewPlayer(playerUUID);
+      if (hasNoStats(playerUUID)) playerStats = putNewPlayer(playerUUID);
 
       allKills.put(playerUUID, playerStats.kills);
       allKillstreaks.put(playerUUID, playerStats.killstreakMax);
@@ -234,7 +234,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     return new PersonalizedText(match.getPlayer(playerUUID).getBukkit().getDisplayName());
   }
 
-  public static boolean PlayerStatsDoesNotExist(UUID player) {
+  public static boolean hasNoStats(UUID player) {
     return allPlayerStats.get(player) == null;
   }
 
@@ -244,7 +244,7 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   public static Component getBasicStatsMessage(UUID player) {
-    if (PlayerStatsDoesNotExist(player)) return putNewPlayer(player).getBasicStatsMessage();
+    if (hasNoStats(player)) return putNewPlayer(player).getBasicStatsMessage();
     return allPlayerStats.get(player).getBasicStatsMessage();
   }
 }
