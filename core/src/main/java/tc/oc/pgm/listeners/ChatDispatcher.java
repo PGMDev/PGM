@@ -237,7 +237,7 @@ public class ChatDispatcher implements Listener {
   }
 
   @Command(
-      aliases = {"say", "send", "sendteam"},
+      aliases = {"s", "say", "send", "sendteam"},
       desc = "Send a message to a specfic team chat",
       usage = "[team] [message]",
       perms = Permissions.STAFF)
