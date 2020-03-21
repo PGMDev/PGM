@@ -91,11 +91,11 @@ public abstract class SimpleGoal<T extends GoalDefinition> implements Goal<T> {
   }
 
   public ChatColor renderSidebarStatusColor(@Nullable Competitor competitor, Party viewer) {
-    return isCompleted(competitor) ? COLOR_COMPLETE : COLOR_INCOMPLETE;
+    return isCompleted() ? COLOR_COMPLETE : COLOR_INCOMPLETE;
   }
 
   public String renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
-    return isCompleted(competitor) ? SYMBOL_COMPLETE : SYMBOL_INCOMPLETE;
+    return isCompleted() ? SYMBOL_COMPLETE : SYMBOL_INCOMPLETE;
   }
 
   public ChatColor renderSidebarLabelColor(@Nullable Competitor competitor, Party viewer) {
