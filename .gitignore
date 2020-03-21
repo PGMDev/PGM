@@ -34,3 +34,17 @@ Commons/core/src/main/i18n/translations/*
 
 # Minecraft generated files
 maps.zip
+banned-ips.json
+banned-players.json
+ops.json
+help.yml
+server.properties
+sportpaper.yml
+update
+usercache.json
+whitelist.json
+logs/
+plugins/
+world/
+world_nether/
+world_the_end/
