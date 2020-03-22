@@ -13,17 +13,23 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.BanEntry;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
@@ -46,7 +52,7 @@ import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 import tc.oc.util.bukkit.named.NameStyle;
 
-public class ModerationCommands {
+public class ModerationCommands implements Listener {
 
   private static final Sound WARN_SOUND = new Sound("mob.enderdragon.growl", 1f, 1f);
 
@@ -61,9 +67,26 @@ public class ModerationCommands {
           .italic(true);
 
   private final ChatDispatcher chat;
+  private final MatchManager manager;
 
-  public ModerationCommands(ChatDispatcher chat) {
+  private final List<BannedAccountInfo> recentBans;
+
+  public ModerationCommands(ChatDispatcher chat, MatchManager manager) {
     this.chat = chat;
+    this.manager = manager;
+    this.recentBans = Lists.newArrayList();
+  }
+
+  private void cacheRecentBan(Player banned, Component punisher) {
+    this.recentBans.add(new BannedAccountInfo(banned, punisher));
+  }
+
+  private void removeCachedBan(BannedAccountInfo info) {
+    recentBans.remove(info);
+  }
+
+  private Optional<BannedAccountInfo> getBanWithMatchingIP(String address) {
+    return recentBans.stream().filter(b -> b.isSameAddress(address)).findFirst();
   }
 
   @Command(
@@ -243,6 +266,7 @@ public class ModerationCommands {
         silent)) {
       banPlayer(
           target.getName(), reason, senderName, tempBan ? Instant.now().plus(banLength) : null);
+      cacheRecentBan(target, formatPunisherName(sender, match));
       target.kickPlayer(
           formatPunishmentScreen(
               tempBan ? PunishmentType.TEMP_BAN : PunishmentType.BAN,
@@ -315,7 +339,7 @@ public class ModerationCommands {
   }
 
   @Command(
-      aliases = {"offlineban", "offban", "ob"},
+      aliases = {"offlineban", "offban"},
       usage = "<player> <reason> -t (length)",
       desc = "Ban an offline player from the server",
       flags = "t",
@@ -328,20 +352,25 @@ public class ModerationCommands {
       @Switch('t') Duration duration)
       throws CommandException {
     boolean tempBan = duration != null && !duration.isZero();
+    PunishmentType type = tempBan ? PunishmentType.TEMP_BAN : PunishmentType.BAN;
+    Component punisher = formatPunisherName(sender, manager.getMatch(sender));
 
-    banPlayer(
-        target,
-        reason,
-        formatPunisherName(sender, manager.getMatch(sender)),
-        tempBan ? Instant.now().plus(duration) : null);
+    banPlayer(target, reason, punisher, tempBan ? Instant.now().plus(duration) : null);
     broadcastPunishment(
-        tempBan ? PunishmentType.TEMP_BAN : PunishmentType.BAN,
+        type,
         manager.getMatch(sender),
         sender,
         new PersonalizedText(target).color(ChatColor.DARK_AQUA),
         reason,
         true,
         duration);
+
+    // Check if target is online, cache and kick after ban
+    Player player = Bukkit.getPlayerExact(target);
+    if (player != null) {
+      cacheRecentBan(player, punisher);
+      player.kickPlayer(formatPunishmentScreen(type, punisher, reason, tempBan ? duration : null));
+    }
   }
 
   @Command(
@@ -814,6 +843,48 @@ public class ModerationCommands {
     }
   }
 
+  private static class BannedAccountInfo {
+    private Instant time;
+    private String userName;
+    private String address;
+    private Component punisher;
+
+    public BannedAccountInfo(Player player, Component punisher) {
+      this.time = Instant.now();
+      this.userName = player.getName();
+      this.address = player.getAddress().getAddress().getHostAddress();
+      this.punisher = punisher;
+    }
+
+    public String getUserName() {
+      return userName;
+    }
+
+    public String getAddress() {
+      return address;
+    }
+
+    public boolean isSameAddress(String other) {
+      return address.equals(other);
+    }
+
+    public Component getPunisher() {
+      return punisher;
+    }
+
+    public Component getHoverMessage() {
+      Component timeAgo =
+          PeriodFormats.relativePastApproximate(
+                  org.joda.time.Instant.ofEpochMilli(time.toEpochMilli()))
+              .color(ChatColor.DARK_AQUA);
+
+      return new PersonalizedTranslatable(
+              "moderation.events.similarIP.hover", getPunisher(), timeAgo)
+          .getPersonalizedText()
+          .color(ChatColor.GRAY);
+    }
+  }
+
   /*
    * Bukkit method of banning players
    * NOTE: Will use this if not handled by other plugins
@@ -826,5 +897,53 @@ public class ModerationCommands {
             reason,
             expires != null ? Date.from(expires) : null,
             ComponentRenderers.toLegacyText(source, Bukkit.getConsoleSender()));
+  }
+
+  // On login of accounts whose IP match a recently banned player, alert staff.
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onLogin(PlayerJoinEvent event) {
+    Optional<BannedAccountInfo> ban =
+        getBanWithMatchingIP(event.getPlayer().getAddress().getAddress().getHostAddress());
+
+    ban.ifPresent(
+        info -> {
+          if (!isBanStillValid(event.getPlayer())) {
+            removeCachedBan(info);
+          }
+
+          final MatchPlayer matchPlayer = manager.getPlayer(event.getPlayer());
+          final Match match = matchPlayer.getMatch();
+
+          match.getPlayers().stream()
+              .filter(viewer -> viewer.getBukkit().hasPermission(Permissions.ADMINCHAT))
+              .forEach(
+                  viewer ->
+                      viewer.sendMessage(
+                          formatAltAccountBroadcast(info, matchPlayer, viewer.getBukkit())));
+          Audience.get(Bukkit.getConsoleSender())
+              .sendMessage(formatAltAccountBroadcast(info, matchPlayer, Bukkit.getConsoleSender()));
+        });
+  }
+
+  private boolean isBanStillValid(Player player) {
+    return Bukkit.getBanList(BanList.Type.NAME).isBanned(player.getName());
+  }
+
+  private Component formatAltAccountBroadcast(
+      BannedAccountInfo info, MatchPlayer player, CommandSender viewer) {
+    Component message =
+        new PersonalizedText(
+            // TODO: Use ChatDispatcher ac variable for prefix (from PR #356) once merged
+            new PersonalizedText(
+                new PersonalizedText("["),
+                new PersonalizedText("A", ChatColor.GOLD),
+                new PersonalizedText("] ")),
+            new PersonalizedTranslatable(
+                    "moderation.events.similarIP",
+                    player.getStyledName(NameStyle.FANCY),
+                    new PersonalizedText(info.getUserName()).color(ChatColor.DARK_AQUA))
+                .getPersonalizedText()
+                .color(ChatColor.GRAY));
+    return message.hoverEvent(HoverEvent.Action.SHOW_TEXT, info.getHoverMessage().render(viewer));
   }
 }
