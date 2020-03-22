@@ -322,7 +322,10 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     node.registerCommands(new MapPoolCommands());
 
     // TODO: Community commands
-    node.registerCommands(new ModerationCommands(chat));
+    final ModerationCommands modCommands = new ModerationCommands(chat, getMatchManager());
+    node.registerCommands(modCommands);
+    registerEvents(modCommands);
+
     node.registerCommands(new ReportCommands());
 
     new BukkitIntake(this, graph).register();
