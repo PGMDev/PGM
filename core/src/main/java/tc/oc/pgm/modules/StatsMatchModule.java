@@ -39,7 +39,7 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   private final Match match;
-  private static final Map<UUID, PlayerStats> allPlayerStats = new HashMap<>();
+  private final Map<UUID, PlayerStats> allPlayerStats = new HashMap<>();
 
   StatsMatchModule(Match match){
     this.match = match;
@@ -171,7 +171,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     }
   }
 
-  private static class TopResult {
+  private class TopResult {
     UUID uuid;
     int stat;
   }
@@ -234,16 +234,16 @@ public class StatsMatchModule implements MatchModule, Listener {
     return new PersonalizedText(match.getPlayer(playerUUID).getBukkit().getDisplayName());
   }
 
-  public static boolean hasNoStats(UUID player) {
+  public boolean hasNoStats(UUID player) {
     return allPlayerStats.get(player) == null;
   }
 
-  private static PlayerStats putNewPlayer(UUID player) {
+  private PlayerStats putNewPlayer(UUID player) {
     allPlayerStats.put(player, new PlayerStats());
     return allPlayerStats.get(player);
   }
 
-  public static Component getBasicStatsMessage(UUID player) {
+  public Component getBasicStatsMessage(UUID player) {
     if (hasNoStats(player)) return putNewPlayer(player).getBasicStatsMessage();
     return allPlayerStats.get(player).getBasicStatsMessage();
   }
