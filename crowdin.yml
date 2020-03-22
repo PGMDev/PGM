@@ -1,0 +1,10 @@
+project_identifier: pgm
+api_key_env: CROWDIN_API_KEY
+preserve_hierarchy: false
+files:
+  - source: /util-bukkit/src/main/i18n/templates/*.properties
+    translation: /util-bukkit/src/main/i18n/translations/%file_name%_%locale_with_underscore%.%file_extension%
+    ignore:
+      - '**/server.properties'
+commit_message: Update %original_file_name% translations
+append_commit_message: false
