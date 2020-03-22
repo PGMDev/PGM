@@ -236,45 +236,6 @@ public class ChatDispatcher implements Listener {
     sendDirect(match, sender, receiver.getBukkit(), message);
   }
 
-  @Command(
-      aliases = {"s", "say", "send", "sendteam"},
-      desc = "Send a message to a specfic team chat",
-      usage = "[team] [message]",
-      perms = Permissions.STAFF)
-  public void sendOtherTeamChat(
-      MatchPlayer player, Match match, String targetParty, @Text String message) {
-    Party party = getApproximateParty(match, targetParty);
-
-    if (party == null) {
-      player.sendWarning(
-          new PersonalizedTranslatable(
-              "commands.chat.send.noParty", new PersonalizedText(message).color(ChatColor.AQUA)));
-      return;
-    }
-
-    if (match.isFinished() || party instanceof Tribute) {
-      player.sendWarning(new PersonalizedTranslatable("commands.chat.send.finished"));
-      return;
-    }
-
-    if (!player.isObserving()) {
-      player.sendWarning(new PersonalizedTranslatable("commands.chat.send.notObs"));
-      return;
-    }
-
-    // Same format as team chat command
-    send(
-        match,
-        player,
-        message,
-        party.getChatPrefix().toLegacyText() + PREFIX_FORMAT,
-        viewer ->
-            party.equals(viewer.getParty())
-                || (viewer.isObserving()
-                    && viewer.getBukkit().hasPermission(Permissions.ADMINCHAT)),
-        SettingValue.CHAT_TEAM);
-  }
-
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
   public void onChat(AsyncPlayerChatEvent event) {
     event.setCancelled(true);
@@ -366,14 +327,6 @@ public class ChatDispatcher implements Listener {
                 new PersonalizedText(message.trim())));
     match.getPlayers().stream().filter(filter).forEach(player -> player.sendMessage(component));
     Audience.get(Bukkit.getConsoleSender()).sendMessage(component);
-  }
-
-  private Party getApproximateParty(Match match, String query) {
-    return StringUtils.bestFuzzyMatch(
-        query,
-        match.getParties().stream()
-            .collect(Collectors.toMap(party -> party.getName(), Function.identity())),
-        0.75);
   }
 
   private MatchPlayer getApproximatePlayer(Match match, String query, CommandSender sender) {
