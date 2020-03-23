@@ -158,7 +158,7 @@ public interface Modules {
     register(SoundsMatchModule.class, new SoundsMatchModule.Factory());
     register(ObserverToolsMatchModule.class, new ObserverToolsMatchModule.Factory());
     register(FireworkMatchModule.class, FireworkMatchModule::new);
-    register(StatsMatchModule.class, new StatsMatchModule.Factory());
+    register(StatsMatchModule.class, StatsMatchModule::new);
 
     // MatchModules that require other dependencies
     register(GoalMatchModule.class, new GoalMatchModule.Factory());

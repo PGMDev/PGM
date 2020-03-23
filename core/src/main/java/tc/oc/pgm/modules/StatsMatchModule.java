@@ -30,18 +30,11 @@ import tc.oc.util.bukkit.translations.AllTranslations;
 @ListenerScope(MatchScope.RUNNING)
 public class StatsMatchModule implements MatchModule, Listener {
 
-  public static class Factory implements MatchModuleFactory<StatsMatchModule> {
-
-    @Override
-    public StatsMatchModule createMatchModule(Match match) throws ModuleLoadException {
-      return new StatsMatchModule(match);
-    }
-  }
 
   private final Match match;
   private final Map<UUID, PlayerStats> allPlayerStats = new HashMap<>();
 
-  StatsMatchModule(Match match){
+  public StatsMatchModule(Match match){
     this.match = match;
   }
 
@@ -65,7 +58,7 @@ public class StatsMatchModule implements MatchModule, Listener {
 
     private void setLongestBowKill(double distance) {
       if (distance > longestBowKill) {
-        longestBowKill = (int) distance;
+        longestBowKill = (int) Math.ceil(distance);
       }
     }
 
@@ -151,8 +144,8 @@ public class StatsMatchModule implements MatchModule, Listener {
     Component killstreakMessage =
         getMessage("stats.killstreak", sortStats(allKillstreaks), ChatColor.GREEN);
     Component deathMessage = getMessage("stats.deaths", sortStats(allDeaths), ChatColor.RED);
-    TopResult bestBowshot = sortStats(allBowshots);
-    String bowMessageKey = (bestBowshot.stat == 1) ? "stats.bowshot.block" : "stats.bowshot.blocks";
+    Map.Entry<UUID, Integer> bestBowshot = sortStats(allBowshots);
+    String bowMessageKey = (bestBowshot.getValue() == 1) ? "stats.bowshot.block" : "stats.bowshot.blocks";
     Component bowshotMessage = getMessage(bowMessageKey, bestBowshot, ChatColor.YELLOW);
 
     for (MatchPlayer viewer : match.getPlayers()) {
@@ -167,30 +160,12 @@ public class StatsMatchModule implements MatchModule, Listener {
       viewer.sendMessage(killMessage);
       viewer.sendMessage(killstreakMessage);
       viewer.sendMessage(deathMessage);
-      if (bestBowshot.stat != 0) viewer.sendMessage(bowshotMessage);
+      if (bestBowshot.getValue() != 0) viewer.sendMessage(bowshotMessage);
     }
   }
 
-  private class TopResult {
-    UUID uuid;
-    int stat;
-  }
-
-  private TopResult sortStats(Map<UUID, Integer> map) {
-    Map.Entry<UUID, Integer> mapEntry =
-        map.entrySet().stream().max(Comparator.comparingInt(Map.Entry::getValue)).orElse(null);
-    TopResult topResult = new TopResult();
-
-    if (mapEntry == null) { // Should never happen, but acts as a failsafe
-      topResult.uuid = UUID.fromString("3c7db14d-ac4b-4e35-b2c6-3b2237f382be");
-      topResult.stat = 0;
-      return topResult;
-    }
-
-    topResult.uuid = mapEntry.getKey();
-    topResult.stat = mapEntry.getValue();
-
-    return topResult;
+  private Map.Entry<UUID, Integer> sortStats(Map<UUID, Integer> map) {
+    return map.entrySet().stream().max(Comparator.comparingInt(Map.Entry::getValue)).orElse(null);
   }
 
   private void sendLongHotbarMessage(MatchPlayer player, Component message) {
@@ -200,33 +175,28 @@ public class StatsMatchModule implements MatchModule, Listener {
             .runTaskTimer(
                 0,
                 5,
-                () -> {
-                  player.sendHotbarMessage(message);
-                })
-            .getTaskId();
+                () -> player.sendHotbarMessage(message)).getTaskId();
 
     match
         .getScheduler(MatchScope.LOADED)
         .runTaskLater(
             20 * 4,
-            () -> {
-              Bukkit.getScheduler().cancelTask(taskId);
-            });
+            () -> Bukkit.getScheduler().cancelTask(taskId));
   }
 
-  Component getMessage(String messageKey, TopResult topResult, ChatColor color) {
+  Component getMessage(String messageKey, Map.Entry<UUID, Integer> mapEntry, ChatColor color) {
     return new Component(
         new PersonalizedTranslatable(
                 messageKey,
-                playerName(topResult.uuid),
-                new PersonalizedText(Integer.toString(topResult.stat), color).render())
+                playerName(mapEntry.getKey()),
+                new PersonalizedText(Integer.toString(mapEntry.getValue()), color).render())
             .render());
   }
 
   private PersonalizedText playerName(UUID playerUUID) {
     if (Bukkit.getPlayer(playerUUID) == null) {
       if (Bukkit.getOfflinePlayer(playerUUID).getName() == null) {
-        return new PersonalizedText("Noone", ChatColor.MAGIC, ChatColor.BLACK);
+        return new PersonalizedText("Unknown", ChatColor.MAGIC, ChatColor.BLACK);
       }
       return new PersonalizedText(
           Bukkit.getOfflinePlayer(playerUUID).getName(), ChatColor.DARK_AQUA);

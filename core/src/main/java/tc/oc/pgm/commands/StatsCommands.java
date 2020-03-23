@@ -9,7 +9,7 @@ import tc.oc.pgm.modules.StatsMatchModule;
 import tc.oc.util.bukkit.component.ComponentUtils;
 import tc.oc.util.bukkit.translations.AllTranslations;
 
-public class StatCommands {
+public class StatsCommands {
 
   @Command(
       aliases = {"stats"},
