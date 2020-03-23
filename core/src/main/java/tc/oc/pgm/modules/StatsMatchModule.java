@@ -13,8 +13,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
-import tc.oc.pgm.api.match.factory.MatchModuleFactory;
-import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
