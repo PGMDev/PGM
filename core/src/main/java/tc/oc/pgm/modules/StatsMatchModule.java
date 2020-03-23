@@ -16,8 +16,10 @@ import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
+import tc.oc.pgm.api.setting.SettingKey;
+import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.tracker.damage.ProjectileInfo;
+import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.ComponentUtils;
 import tc.oc.util.bukkit.component.Components;
@@ -28,11 +30,10 @@ import tc.oc.util.bukkit.translations.AllTranslations;
 @ListenerScope(MatchScope.RUNNING)
 public class StatsMatchModule implements MatchModule, Listener {
 
-
   private final Match match;
   private final Map<UUID, PlayerStats> allPlayerStats = new HashMap<>();
 
-  public StatsMatchModule(Match match){
+  public StatsMatchModule(Match match) {
     this.match = match;
   }
 
@@ -88,18 +89,21 @@ public class StatsMatchModule implements MatchModule, Listener {
     if (event.getKiller() != null)
       murderer = event.getKiller().getParty().getPlayer(event.getKiller().getId());
 
-    UUID victimUUID = victim.getId();
-    PlayerStats victimStats = allPlayerStats.get(victimUUID);
+    if (victim.getSettings().getValue(SettingKey.STATS).equals(SettingValue.STATS_ON)) {
+      UUID victimUUID = victim.getId();
+      PlayerStats victimStats = allPlayerStats.get(victimUUID);
 
-    if (hasNoStats(victimUUID)) victimStats = putNewPlayer(victimUUID);
+      if (hasNoStats(victimUUID)) victimStats = putNewPlayer(victimUUID);
 
-    victimStats.onDeath();
+      victimStats.onDeath();
 
-    sendLongHotbarMessage(victim, victimStats.getBasicStatsMessage());
+      sendLongHotbarMessage(victim, victimStats.getBasicStatsMessage());
+    }
 
     if (murderer != null
         && PlayerRelation.get(victim.getParticipantState(), murderer) != PlayerRelation.ALLY
-        && PlayerRelation.get(victim.getParticipantState(), murderer) != PlayerRelation.SELF) {
+        && PlayerRelation.get(victim.getParticipantState(), murderer) != PlayerRelation.SELF
+        && murderer.getSettings().getValue(SettingKey.STATS).equals(SettingValue.STATS_ON)) {
       UUID murdererUUID = murderer.getId();
       PlayerStats murdererStats = allPlayerStats.get(murdererUUID);
 
@@ -143,7 +147,8 @@ public class StatsMatchModule implements MatchModule, Listener {
         getMessage("stats.killstreak", sortStats(allKillstreaks), ChatColor.GREEN);
     Component deathMessage = getMessage("stats.deaths", sortStats(allDeaths), ChatColor.RED);
     Map.Entry<UUID, Integer> bestBowshot = sortStats(allBowshots);
-    String bowMessageKey = (bestBowshot.getValue() == 1) ? "stats.bowshot.block" : "stats.bowshot.blocks";
+    String bowMessageKey =
+        (bestBowshot.getValue() == 1) ? "stats.bowshot.block" : "stats.bowshot.blocks";
     Component bowshotMessage = getMessage(bowMessageKey, bestBowshot, ChatColor.YELLOW);
 
     for (MatchPlayer viewer : match.getPlayers()) {
@@ -170,16 +175,12 @@ public class StatsMatchModule implements MatchModule, Listener {
     int taskId =
         match
             .getScheduler(MatchScope.LOADED)
-            .runTaskTimer(
-                0,
-                5,
-                () -> player.sendHotbarMessage(message)).getTaskId();
+            .runTaskTimer(0, 5, () -> player.sendHotbarMessage(message))
+            .getTaskId();
 
     match
         .getScheduler(MatchScope.LOADED)
-        .runTaskLater(
-            20 * 4,
-            () -> Bukkit.getScheduler().cancelTask(taskId));
+        .runTaskLater(20 * 4, () -> Bukkit.getScheduler().cancelTask(taskId));
   }
 
   Component getMessage(String messageKey, Map.Entry<UUID, Integer> mapEntry, ChatColor color) {
