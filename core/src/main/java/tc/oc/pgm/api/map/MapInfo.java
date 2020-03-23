@@ -3,7 +3,6 @@ package tc.oc.pgm.api.map;
 import java.text.Normalizer;
 import java.util.Collection;
 import javax.annotation.Nullable;
-
 import org.bukkit.command.CommandSender;
 import tc.oc.util.Version;
 import tc.oc.util.bukkit.component.Component;

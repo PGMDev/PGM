@@ -43,7 +43,7 @@ public class MatchTabManager extends TabManager implements Listener {
       new DefaultMapAdapter<>(new FreeForAllTabEntry.Factory(), true);
 
   private BukkitTask renderTask;
-  private PlayerOrder.Factory playerOrderFactory;
+  private PlayerOrderFactory playerOrderFactory;
 
   public MatchTabManager(Plugin plugin) {
     super(plugin, new MatchTabView.Factory(), null);
@@ -125,8 +125,12 @@ public class MatchTabManager extends TabManager implements Listener {
     }
   }
 
-  protected PlayerOrder.Factory getPlayerOrderFactory() {
+  protected PlayerOrderFactory getPlayerOrderFactory() {
     return playerOrderFactory;
+  }
+
+  public void setPlayerOrderFactory(PlayerOrderFactory factory) {
+    this.playerOrderFactory = factory;
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
