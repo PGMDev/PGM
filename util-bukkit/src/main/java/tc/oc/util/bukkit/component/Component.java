@@ -14,6 +14,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 
@@ -124,17 +125,21 @@ public class Component implements PersonalizedComponent {
     return this;
   }
 
+  public Component extra(@Nullable CommandSender viewer, Component... extras) {
+    return this.extra(Arrays.asList(extras), viewer);
+  }
+
   public Component extra(Component... extras) {
-    return this.extra(Arrays.asList(extras));
+    return this.extra(null, extras);
   }
 
   public Component extra(String extra) {
     return this.extra(new PersonalizedText(extra));
   }
 
-  public Component extra(Collection<Component> extras) {
+  public Component extra(Collection<Component> extras, @Nullable CommandSender viewer) {
     List<BaseComponent> components = new ArrayList<>(extras.size());
-    for (Component extra : extras) components.add(extra.render());
+    for (Component extra : extras) components.add(extra.render(viewer));
     if (this.getExtra() == null) {
       this.setExtra(components);
     } else {

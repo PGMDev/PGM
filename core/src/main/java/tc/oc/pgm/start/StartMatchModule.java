@@ -30,7 +30,6 @@ import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerLeaveMatchEvent;
 import tc.oc.util.bukkit.bossbar.DynamicBossBar;
 import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
 
 @ListenerScope(MatchScope.LOADED)
 public class StartMatchModule implements MatchModule, Listener {
@@ -139,7 +138,7 @@ public class StartMatchModule implements MatchModule, Listener {
     if (unreadyReasons.isEmpty()) {
       return null;
     } else {
-      return new PersonalizedText(unreadyReasons.iterator().next().getReason(), ChatColor.RED);
+      return unreadyReasons.iterator().next().getReason().color(ChatColor.RED);
     }
   }
 

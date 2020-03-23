@@ -55,7 +55,10 @@ public class PersonalizedTranslatable extends Component {
       // Found a TranslatableComponent with one of our keys
       List<Component> with = new ArrayList<>(component.getWith().size());
       for (BaseComponent extra : component.getWith()) with.add(new Component(extra));
-      return new PersonalizedText(Components.format(pattern, with)).render(viewer);
+
+      BaseComponent finalComponent = new PersonalizedText(Components.format(pattern, with)).render(viewer);
+      Components.copyFormat(component, finalComponent);
+      return finalComponent;
     } else {
       // Fallback
       TranslatableComponent replacement = new TranslatableComponent(component);

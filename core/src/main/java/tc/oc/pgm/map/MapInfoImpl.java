@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Difficulty;
+import org.bukkit.command.CommandSender;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.MapInfo;
@@ -191,13 +192,13 @@ public class MapInfoImpl implements MapInfo {
   }
 
   @Override
-  public Component getStyledMapName(MapNameStyle style) {
+  public Component getStyledMapName(MapNameStyle style, @Nullable CommandSender viewer) {
     Component styledName = null;
     Component mapName = new PersonalizedText(getName());
     Component authors =
         new PersonalizedText(
             TranslationUtils.legacyList(
-                NullCommandSender.INSTANCE,
+                viewer,
                 (input) -> ChatColor.DARK_PURPLE + input,
                 (input) -> ChatColor.RED + input,
                 getAuthors().stream().map(Contributor::getName).collect(Collectors.toList())));

@@ -48,12 +48,9 @@ public class MatchAnnouncer implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchBegin(final MatchStartEvent event) {
     Match match = event.getMatch();
-    match.sendMessage(
-        new PersonalizedText(
-            new PersonalizedTranslatable("broadcast.matchStart"), ChatColor.GREEN));
+    match.sendMessage(new PersonalizedTranslatable("broadcast.matchStart").color(ChatColor.GREEN));
 
-    Component go =
-        new PersonalizedText(new PersonalizedTranslatable("broadcast.go"), ChatColor.GREEN);
+    Component go = new PersonalizedTranslatable("broadcast.go").color(ChatColor.GREEN);
     for (MatchPlayer player : match.getParticipants()) {
       player.showTitle(go, null, 0, 5, 15);
     }
@@ -82,17 +79,13 @@ public class MatchAnnouncer implements Listener {
           // Winner
           viewer.playSound(SOUND_MATCH_WIN);
           if (viewer.getParty() instanceof Team) {
-            subtitle =
-                new PersonalizedText(
-                    new PersonalizedTranslatable("broadcast.gameOver.teamWon"), ChatColor.GREEN);
+            subtitle = new PersonalizedTranslatable("broadcast.gameOver.teamWon").color(ChatColor.GREEN);
           }
         } else if (viewer.getParty() instanceof Competitor) {
           // Loser
           viewer.playSound(SOUND_MATCH_LOSE);
           if (viewer.getParty() instanceof Team) {
-            subtitle =
-                new PersonalizedText(
-                    new PersonalizedTranslatable("broadcast.gameOver.teamLost"), ChatColor.RED);
+            subtitle = new PersonalizedTranslatable("broadcast.gameOver.teamLost").color(ChatColor.RED);
           }
         } else {
           // Observer
@@ -126,7 +119,7 @@ public class MatchAnnouncer implements Listener {
     if (!authors.isEmpty()) {
       viewer.sendMessage(
           new PersonalizedText(" ", ChatColor.DARK_GRAY)
-              .extra(
+              .extra(viewer.getBukkit(),
                   new PersonalizedTranslatable(
                       "broadcast.welcomeMessage.createdBy",
                       TranslationUtils.nameList(NameStyle.FANCY, authors))));
@@ -137,10 +130,9 @@ public class MatchAnnouncer implements Listener {
 
   private void sendCurrentlyPlaying(MatchPlayer viewer) {
     viewer.sendMessage(
-        new PersonalizedTranslatable(
-                "broadcast.currentlyPlaying",
-                viewer.getMatch().getMap().getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS))
-            .getPersonalizedText()
-            .color(ChatColor.DARK_PURPLE));
+            new PersonalizedTranslatable(
+                    "broadcast.currentlyPlaying",
+                    viewer.getMatch().getMap().getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS, viewer.getBukkit()))
+                    .color(ChatColor.DARK_PURPLE));
   }
 }

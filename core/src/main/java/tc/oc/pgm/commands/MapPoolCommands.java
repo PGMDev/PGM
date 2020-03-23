@@ -98,7 +98,7 @@ public class MapPoolCommands {
         str +=
             ChatColor.RESET
                 + ""
-                + map.getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS).toLegacyText();
+                + map.getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS, sender).toLegacyText();
         return str;
       }
     }.display(audience, maps, page);
