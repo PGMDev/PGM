@@ -229,7 +229,7 @@ public class MatchTabView extends TabView implements ListeningTabView {
       this.match = event.getMatch();
       this.matchPlayer = event.getPlayer();
 
-      this.playerOrder = new PlayerOrder(this.matchPlayer);
+      this.playerOrder = getManager().getPlayerOrderFactory().getOrder(this.matchPlayer);
       this.teamOrder = new TeamOrder(this.matchPlayer);
 
       this.observerPlayers.clear();
