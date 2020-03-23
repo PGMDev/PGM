@@ -187,7 +187,7 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
 
   @Override
   public String renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
-    if (this.isCompleted(competitor)) {
+    if (this.isCompleted()) {
       return SYMBOL_WOOL_COMPLETE;
     } else if (shouldShowTouched(competitor, viewer)) {
       return SYMBOL_WOOL_TOUCHED;

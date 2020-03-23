@@ -9,7 +9,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
 /** Countdown to team huddle, or match start if huddle is disabled */
@@ -37,10 +36,9 @@ public class StartCountdown extends PreMatchCountdown {
 
   @Override
   protected Component formatText() {
-    return new PersonalizedText(
-        new PersonalizedTranslatable(
-            "countdown.matchStart.message", secondsRemaining(ChatColor.DARK_RED)),
-        ChatColor.GREEN);
+    return new PersonalizedTranslatable(
+            "countdown.matchStart.message", secondsRemaining(ChatColor.DARK_RED))
+            .color(ChatColor.GREEN);
   }
 
   @Override

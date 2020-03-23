@@ -26,7 +26,9 @@ public class PlayerAudience extends CommandSenderAudience {
       Component title, Component subtitle, int inTicks, int stayTicks, int outTicks) {
     title = title == null ? new PersonalizedText("") : title;
     subtitle = subtitle == null ? new PersonalizedText("") : subtitle;
-    getPlayer().showTitle(title.render(), subtitle.render(), inTicks, stayTicks, outTicks);
+
+    Player player = getPlayer();
+    player.showTitle(title.render(player), subtitle.render(player), inTicks, stayTicks, outTicks);
   }
 
   @Override

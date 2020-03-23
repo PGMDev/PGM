@@ -97,7 +97,7 @@ public abstract class Spawning extends Participating {
   }
 
   public void updateTitle() {
-    player.showTitle(getTitle(), new PersonalizedText(getSubtitle(), ChatColor.GREEN), 0, 3, 3);
+    player.showTitle(getTitle(), getSubtitle().color(ChatColor.GREEN), 0, 3, 3);
   }
 
   protected abstract Component getTitle();

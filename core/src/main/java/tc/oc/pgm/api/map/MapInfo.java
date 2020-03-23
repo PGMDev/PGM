@@ -3,6 +3,8 @@ package tc.oc.pgm.api.map;
 import java.text.Normalizer;
 import java.util.Collection;
 import javax.annotation.Nullable;
+
+import org.bukkit.command.CommandSender;
 import tc.oc.util.Version;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.named.MapNameStyle;
@@ -110,9 +112,10 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
    * Creates a component of the map name with styling
    *
    * @param style - the {@link MapNameStyle} to style name with
+   * @param viewer - the {@link CommandSender} viewer
    * @return A new component of the Map name
    */
-  Component getStyledMapName(MapNameStyle style);
+  Component getStyledMapName(MapNameStyle style, CommandSender viewer);
 
   @Override
   default int compareTo(MapInfo o) {

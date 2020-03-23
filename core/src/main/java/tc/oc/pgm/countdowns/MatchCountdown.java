@@ -95,7 +95,7 @@ public abstract class MatchCountdown extends Countdown {
     invalidateBossBar();
 
     if (showChat()) {
-      getMatch().sendMessage(formatText().toLegacyText());
+      getMatch().sendMessage(formatText());
     }
 
     if (showTitle()) {
