@@ -56,7 +56,8 @@ public class PersonalizedTranslatable extends Component {
       List<Component> with = new ArrayList<>(component.getWith().size());
       for (BaseComponent extra : component.getWith()) with.add(new Component(extra));
 
-      BaseComponent finalComponent = new PersonalizedText(Components.format(pattern, with)).render(viewer);
+      BaseComponent finalComponent =
+          new PersonalizedText(Components.format(pattern, with)).render(viewer);
       Components.copyFormat(component, finalComponent);
       return finalComponent;
     } else {

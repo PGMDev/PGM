@@ -38,7 +38,7 @@ public class StartCountdown extends PreMatchCountdown {
   protected Component formatText() {
     return new PersonalizedTranslatable(
             "countdown.matchStart.message", secondsRemaining(ChatColor.DARK_RED))
-            .color(ChatColor.GREEN);
+        .color(ChatColor.GREEN);
   }
 
   @Override

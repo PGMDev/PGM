@@ -19,7 +19,7 @@ public class RestartCountdown extends MatchCountdown {
     if (remaining.isLongerThan(Duration.ZERO)) {
       return new PersonalizedTranslatable(
               "broadcast.serverRestart.message", secondsRemaining(ChatColor.DARK_RED))
-              .color(ChatColor.AQUA);
+          .color(ChatColor.AQUA);
     } else {
       return new PersonalizedTranslatable("broadcast.serverRestart.kickMsg").color(ChatColor.RED);
     }

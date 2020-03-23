@@ -56,7 +56,7 @@ public class ModeChangeCountdown extends MatchCountdown implements Comparable<Mo
             "match.objectiveMode.countdown",
             getMode().getComponentName(),
             secondsRemaining(ChatColor.AQUA))
-            .color(ChatColor.DARK_AQUA);
+        .color(ChatColor.DARK_AQUA);
   }
 
   @Override
