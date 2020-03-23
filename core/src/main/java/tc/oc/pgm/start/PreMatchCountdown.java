@@ -1,10 +1,10 @@
 package tc.oc.pgm.start;
 
 import org.joda.time.Duration;
-import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchPhase;
 import tc.oc.pgm.countdowns.MatchCountdown;
+import tc.oc.util.bukkit.chat.Sound;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
 /** Common base for countdowns leading up to match start */

@@ -3,9 +3,9 @@ package tc.oc.pgm.api.player;
 import java.util.Optional;
 import java.util.UUID;
 import org.bukkit.Location;
-import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
+import tc.oc.util.bukkit.chat.Audience;
 import tc.oc.util.bukkit.named.Named;
 
 /**

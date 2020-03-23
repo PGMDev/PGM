@@ -46,10 +46,13 @@
                             <exclude>tc.oc.pgm:util:*</exclude>
                             <exclude>app.ashcon.intake:intake-bukkit:*</exclude>
                             <exclude>com.google.guava:guava:*</exclude>
+                            <exclude>com.google.code.gson:gson:*</exclude>
                             <exclude>com.google.code.findbugs:annotations:*</exclude>
                             <exclude>net.sf.trove4j:trove4j:*</exclude>
+                            <exclude>org.checkerframework:checker-qual:*</exclude>
                             <exclude>org.xerial:sqlite-jdbc:*</exclude>
                             <exclude>joda-time:joda-time:*</exclude>
+                            <exclude>net.kyori:*:*</exclude>
                         </excludes>
                     </artifactSet>
                     <filters>
@@ -64,6 +67,7 @@
                             <artifact>tc.oc.pgm:core:*</artifact>
                             <excludes>
                                 <exclude>org/jdom2/**</exclude>
+                                <exclude>com/google/gson/**</exclude>
                             </excludes>
                         </filter>
                     </filters>

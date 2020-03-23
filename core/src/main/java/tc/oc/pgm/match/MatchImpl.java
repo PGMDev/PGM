@@ -42,7 +42,6 @@ import org.joda.time.Duration;
 import org.joda.time.Instant;
 import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -89,6 +88,7 @@ import tc.oc.util.ClassLogger;
 import tc.oc.util.FileUtils;
 import tc.oc.util.bukkit.Events;
 import tc.oc.util.bukkit.Scheduler;
+import tc.oc.util.bukkit.chat.Audience;
 import tc.oc.util.bukkit.nms.NMSHacks;
 import tc.oc.util.collection.RankedSet;
 

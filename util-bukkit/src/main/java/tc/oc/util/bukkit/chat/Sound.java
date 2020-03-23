@@ -1,4 +1,4 @@
-package tc.oc.pgm.api.chat;
+package tc.oc.util.bukkit.chat;
 
 import javax.annotation.Nullable;
 import org.bukkit.util.Vector;

@@ -192,7 +192,7 @@ public class MapInfoImpl implements MapInfo {
 
   @Override
   public Component getStyledMapName(MapNameStyle style, @Nullable CommandSender viewer) {
-    Component styledName = null;
+    Component styledName;
     Component mapName = new PersonalizedText(getName());
     Component authors =
         new PersonalizedText(

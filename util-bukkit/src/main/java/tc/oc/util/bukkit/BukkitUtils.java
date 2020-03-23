@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import org.bukkit.*;
 import org.bukkit.inventory.ItemFactory;
 import org.bukkit.inventory.ItemStack;
@@ -14,6 +15,19 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
 
 public interface BukkitUtils {
+
+  AtomicReference<Plugin> PLUGIN = new AtomicReference<>();
+
+  @Deprecated
+  static Plugin getPlugin() {
+    // HACK: Sometimes util code needs to access a Plugin,
+    // we assume it to be PGM for now, but there should be a formal
+    // way of registering this in the future.
+    if (PLUGIN.get() == null) {
+      PLUGIN.set(Bukkit.getPluginManager().getPlugin("PGM"));
+    }
+    return PLUGIN.get();
+  }
 
   ItemFactory FACTORY = Bukkit.getServer().getItemFactory();
 

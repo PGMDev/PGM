@@ -18,11 +18,11 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.util.RayBlockIntersection;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.event.BlockPunchEvent;
 import tc.oc.pgm.api.event.BlockTrampleEvent;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.util.bukkit.block.BlockVectors;
+import tc.oc.util.bukkit.chat.Audience;
 
 /**
  * Translates standard Bukkit events into a few extra events: {@link CoarsePlayerMoveEvent} {@link

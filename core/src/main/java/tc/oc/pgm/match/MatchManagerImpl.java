@@ -21,7 +21,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
@@ -29,6 +28,7 @@ import tc.oc.pgm.api.match.event.MatchUnloadEvent;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.util.ClassLogger;
+import tc.oc.util.bukkit.chat.Audience;
 
 public class MatchManagerImpl implements MatchManager, Listener {
 

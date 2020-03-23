@@ -8,7 +8,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.command.CommandSender;
 import org.bukkit.scoreboard.NameTagVisibility;
-import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -16,6 +15,8 @@ import tc.oc.pgm.filters.query.IPartyQuery;
 import tc.oc.pgm.filters.query.IPlayerQuery;
 import tc.oc.pgm.filters.query.PartyQuery;
 import tc.oc.util.bukkit.BukkitUtils;
+import tc.oc.util.bukkit.chat.Audience;
+import tc.oc.util.bukkit.chat.MultiAudience;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.types.PersonalizedPlayer;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
@@ -38,7 +39,7 @@ import tc.oc.util.bukkit.named.Names;
  * <p>Attempting to add the wrong player, or add multiple players, will throw {@link
  * UnsupportedOperationException}.
  */
-public class Tribute implements Competitor {
+public class Tribute implements Competitor, MultiAudience {
 
   public static final ChatColor TEXT_COLOR = ChatColor.YELLOW;
 
@@ -186,43 +187,8 @@ public class Tribute implements Competitor {
   }
 
   @Override
-  public void sendMessage(String message) {
-    if (player != null) player.sendMessage(message);
-  }
-
-  @Override
-  public void sendMessage(Component message) {
-    if (player != null) player.sendMessage(message);
-  }
-
-  @Override
-  public void sendWarning(String message, boolean audible) {
-    if (player != null) player.sendWarning(message, audible);
-  }
-
-  @Override
-  public void sendWarning(Component message, boolean audible) {
-    if (player != null) player.sendWarning(message, audible);
-  }
-
-  @Override
-  public void playSound(Sound sound) {
-    if (player != null) player.playSound(sound);
-  }
-
-  @Override
-  public void showTitle(
-      @Nullable Component title,
-      @Nullable Component subtitle,
-      int inTicks,
-      int stayTicks,
-      int outTicks) {
-    if (player != null) player.showTitle(title, subtitle, inTicks, stayTicks, outTicks);
-  }
-
-  @Override
-  public void sendHotbarMessage(Component message) {
-    if (player != null) player.sendHotbarMessage(message);
+  public Iterable<? extends Audience> getAudiences() {
+    return player == null ? Collections.emptyList() : Collections.singleton(player);
   }
 
   /**

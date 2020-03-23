@@ -32,6 +32,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionEffectTypeWrapper;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.util.Vector;
+import tc.oc.util.StringUtils;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.reflect.ReflectionUtils;
@@ -440,6 +441,38 @@ public interface NMSHacks {
   static void updateBoss(Player player, int entityId, String name, float health) {
     EntityMetadata data = createBossMetadata(name, health);
     sendPacket(player, new PacketPlayOutEntityMetadata(entityId, data.dataWatcher, true));
+  }
+
+  class BossBarState {
+    public static final String KEY = "bossbar";
+    static final float HEALTH = 300;
+    static final double DISTANCE = 50;
+    static final float ANGLE = 20;
+    static final int LENGTH = 64;
+
+    int entityId; // -1 indicates not spawned
+
+    public void update(Player player, @Nullable String message, float progress) {
+      if (message == null && entityId >= 0) {
+        destroyEntities(player, entityId);
+        entityId = -1;
+      } else if (message != null) {
+        // Keep the boss barely alive, to avoid the death animation
+        progress = Math.max(0F, Math.min(1F, progress)) * (HEALTH - 0.1F) + 0.1F;
+        // Keep the message within the allowed length, to avoid crashes
+        message = StringUtils.truncate(message, LENGTH);
+
+        if (entityId >= 0) {
+          updateBoss(player, entityId, message, progress);
+        } else {
+          final Location location = player.getLocation();
+          location.setPitch(location.getPitch() - ANGLE);
+          location.add(location.getDirection().multiply(DISTANCE));
+
+          spawnWither(player, entityId, location, message, progress);
+        }
+      }
+    }
   }
 
   static void spawnObject(
