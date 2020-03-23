@@ -9,7 +9,6 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -23,6 +22,7 @@ import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
+import tc.oc.util.bukkit.chat.Sound;
 
 /** Player is alive and participating */
 public class Alive extends Participating {

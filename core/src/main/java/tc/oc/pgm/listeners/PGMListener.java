@@ -48,7 +48,6 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.gamerules.GameRule;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.TimeLockModule;
-import tc.oc.util.bukkit.chat.NullCommandSender;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
@@ -101,8 +100,7 @@ public class PGMListener implements Listener {
     if (!mm.getMatches().hasNext()) {
       event.disallow(
           AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-          AllTranslations.get()
-              .translate("incorrectWorld.kickMessage", NullCommandSender.INSTANCE));
+          AllTranslations.get().translate("incorrectWorld.kickMessage", null));
     }
   }
 

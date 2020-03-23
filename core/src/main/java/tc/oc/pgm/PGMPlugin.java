@@ -29,7 +29,6 @@ import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
-import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.exception.MapException;
@@ -95,6 +94,7 @@ import tc.oc.pgm.rotation.RandomMapOrder;
 import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.util.FileUtils;
+import tc.oc.util.bukkit.chat.Audience;
 import tc.oc.util.bukkit.named.Names;
 import tc.oc.util.xml.InvalidXMLException;
 
@@ -282,9 +282,10 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     }
 
     private void configureProviders() {
-      bind(Audience.class).toProvider(new AudienceProvider());
+      final MatchPlayerProvider playerProvider = new MatchPlayerProvider(getMatchManager());
+      bind(MatchPlayer.class).toProvider(playerProvider);
+      bind(Audience.class).toProvider(new AudienceProvider(playerProvider));
       bind(Match.class).toProvider(new MatchProvider(getMatchManager()));
-      bind(MatchPlayer.class).toProvider(new MatchPlayerProvider(getMatchManager()));
       bind(MapInfo.class)
           .toProvider(new MapInfoProvider(getMatchManager(), getMapLibrary(), getMapOrder()));
       bind(Duration.class).toProvider(new DurationProvider());

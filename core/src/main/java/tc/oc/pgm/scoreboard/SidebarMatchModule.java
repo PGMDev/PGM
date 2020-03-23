@@ -59,7 +59,6 @@ import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.events.TeamRespawnsChangeEvent;
 import tc.oc.pgm.wool.MonumentWool;
 import tc.oc.pgm.wool.WoolMatchModule;
-import tc.oc.util.bukkit.chat.NullCommandSender;
 import tc.oc.util.bukkit.component.ComponentRenderers;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.named.NameStyle;
@@ -141,7 +140,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
                   new PersonalizedText(
                       renderSidebarTitle(match.getMap().getTags()),
                       net.md_5.bungee.api.ChatColor.AQUA),
-                  NullCommandSender.INSTANCE),
+                  null),
               32));
       this.objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 

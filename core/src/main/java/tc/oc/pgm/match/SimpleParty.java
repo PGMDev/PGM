@@ -3,13 +3,13 @@ package tc.oc.pgm.match;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
-import tc.oc.pgm.api.chat.Audience;
-import tc.oc.pgm.api.chat.MultiAudience;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.query.IPartyQuery;
 import tc.oc.pgm.filters.query.PartyQuery;
+import tc.oc.util.bukkit.chat.Audience;
+import tc.oc.util.bukkit.chat.MultiAudience;
 
 /** Represents a simple {@link Party} with a set of {@link MatchPlayer}s. */
 public abstract class SimpleParty implements Party, MultiAudience {

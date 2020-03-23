@@ -1,12 +1,10 @@
 package tc.oc.util.bukkit.nms;
 
-import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
-import org.bukkit.plugin.Plugin;
+import tc.oc.util.bukkit.BukkitUtils;
 
 /**
  * A somewhat hacky mechanism for faking an entity's death. The name rendering system checks this
@@ -15,15 +13,6 @@ import org.bukkit.plugin.Plugin;
 public interface DeathOverride {
 
   String METADATA_KEY = "isDead";
-  AtomicReference<Plugin> PLUGIN_KEY = new AtomicReference<>();
-
-  static Plugin getKey() {
-    if (PLUGIN_KEY.get() == null) {
-      // FIXME: util should not be accessing PGM
-      PLUGIN_KEY.set(Bukkit.getPluginManager().getPlugin("PGM"));
-    }
-    return PLUGIN_KEY.get();
-  }
 
   /**
    * Set or clear a metadata flag on the given entity that overrides their default alive/dead
@@ -31,9 +20,9 @@ public interface DeathOverride {
    */
   static void setDead(Entity player, @Nullable Boolean dead) {
     if (dead != null) {
-      player.setMetadata(METADATA_KEY, new FixedMetadataValue(getKey(), dead));
+      player.setMetadata(METADATA_KEY, new FixedMetadataValue(BukkitUtils.getPlugin(), dead));
     } else {
-      player.removeMetadata(METADATA_KEY, getKey());
+      player.removeMetadata(METADATA_KEY, BukkitUtils.getPlugin());
     }
   }
 
@@ -42,7 +31,7 @@ public interface DeathOverride {
    * falling back to {@link Entity#isDead}.
    */
   static boolean isDead(Entity player) {
-    MetadataValue value = player.getMetadata(METADATA_KEY, getKey());
+    MetadataValue value = player.getMetadata(METADATA_KEY, BukkitUtils.getPlugin());
     if (value != null) {
       return value.asBoolean();
     } else {

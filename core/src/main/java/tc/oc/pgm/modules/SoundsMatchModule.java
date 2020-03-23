@@ -3,7 +3,6 @@ package tc.oc.pgm.modules;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -20,6 +19,7 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
 import tc.oc.pgm.wool.PlayerWoolPlaceEvent;
+import tc.oc.util.bukkit.chat.Sound;
 
 @ListenerScope(MatchScope.RUNNING)
 public class SoundsMatchModule implements MatchModule, Listener {

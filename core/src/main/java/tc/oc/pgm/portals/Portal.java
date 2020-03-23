@@ -7,13 +7,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.FeatureDefinition;
 import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.regions.Region;
+import tc.oc.util.bukkit.chat.Sound;
 
 public class Portal implements FeatureDefinition {
   protected final Region region;

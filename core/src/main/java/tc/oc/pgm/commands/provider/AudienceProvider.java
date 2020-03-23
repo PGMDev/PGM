@@ -5,9 +5,16 @@ import app.ashcon.intake.bukkit.parametric.provider.BukkitProvider;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import org.bukkit.command.CommandSender;
-import tc.oc.pgm.api.chat.Audience;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.util.bukkit.chat.Audience;
 
 public class AudienceProvider implements BukkitProvider<Audience> {
+
+  private final MatchPlayerProvider provider;
+
+  public AudienceProvider(MatchPlayerProvider provider) {
+    this.provider = provider;
+  }
 
   @Override
   public boolean isProvided() {
@@ -16,6 +23,10 @@ public class AudienceProvider implements BukkitProvider<Audience> {
 
   @Override
   public Audience get(CommandSender sender, CommandArgs args, List<? extends Annotation> list) {
-    return Audience.get(sender);
+    final MatchPlayer player = provider.get(sender, args, list);
+    if (player == null) {
+      return Audience.get(sender);
+    }
+    return player;
   }
 }

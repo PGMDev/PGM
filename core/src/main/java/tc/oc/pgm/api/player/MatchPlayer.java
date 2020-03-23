@@ -6,7 +6,6 @@ import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.PlayerInventory;
-import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.party.Competitor;
@@ -15,6 +14,7 @@ import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.filters.query.IPlayerQuery;
 import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.kits.Kit;
+import tc.oc.util.bukkit.chat.Audience;
 import tc.oc.util.bukkit.named.Named;
 
 /**

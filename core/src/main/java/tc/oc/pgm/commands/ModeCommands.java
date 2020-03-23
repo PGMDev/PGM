@@ -10,12 +10,12 @@ import org.bukkit.command.CommandSender;
 import org.joda.time.Duration;
 import org.joda.time.Period;
 import tc.oc.pgm.api.Permissions;
-import tc.oc.pgm.api.chat.Audience;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.modes.ModeChangeCountdown;
 import tc.oc.pgm.modes.ObjectiveModesMatchModule;
 import tc.oc.pgm.util.ModesPaginatedResult;
+import tc.oc.util.bukkit.chat.Audience;
 import tc.oc.util.bukkit.component.PeriodFormats;
 
 public class ModeCommands {

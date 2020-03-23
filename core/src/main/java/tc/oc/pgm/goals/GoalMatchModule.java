@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import tc.oc.pgm.api.chat.Sound;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -30,6 +29,7 @@ import tc.oc.pgm.goals.events.GoalProximityChangeEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
 import tc.oc.pgm.teams.TeamMatchModule;
+import tc.oc.util.bukkit.chat.Sound;
 
 @ListenerScope(MatchScope.LOADED)
 public class GoalMatchModule implements MatchModule, Listener {

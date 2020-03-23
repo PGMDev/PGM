@@ -79,6 +79,7 @@
                             <exclude>com.google.code.findbugs:annotations:*</exclude>
                             <exclude>net.sf.trove4j:trove4j:*</exclude>
                             <exclude>org.xerial:sqlite-jdbc:*</exclude>
+                            <exclude>org.checkerframework:checker-qual:*</exclude>
                         </excludes>
                     </artifactSet>
                     <filters>
