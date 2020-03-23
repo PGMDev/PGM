@@ -8,7 +8,7 @@ import org.bukkit.event.block.EntityBlockFormEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
-import tc.oc.pgm.tracker.damage.AnvilInfo;
+import tc.oc.pgm.tracker.info.AnvilInfo;
 
 /**
  * Updates the state of owned anvil blocks and entities.

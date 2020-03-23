@@ -13,7 +13,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 
-public class PlayerQuery extends Query implements IPlayerQuery {
+public class PlayerQuery extends Query implements tc.oc.pgm.api.filter.query.PlayerQuery {
 
   private final MatchPlayer player;
 

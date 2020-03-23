@@ -2,7 +2,7 @@ package tc.oc.pgm.api.match.event;
 
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.result.VictoryCondition;
+import tc.oc.pgm.api.party.VictoryCondition;
 
 /** Called when the current {@link VictoryCondition} of a {@link Match} changes. */
 public class MatchVictoryChangeEvent extends MatchEvent {

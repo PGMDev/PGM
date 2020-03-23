@@ -2,8 +2,8 @@ package tc.oc.pgm.spawns;
 
 import com.google.common.base.Optional;
 import org.bukkit.Location;
+import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.features.FeatureDefinition;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.points.PointProvider;
 

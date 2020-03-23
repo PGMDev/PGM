@@ -2,10 +2,10 @@ package tc.oc.pgm.core;
 
 import javax.annotation.Nullable;
 import org.bukkit.material.MaterialData;
-import tc.oc.pgm.features.FeatureInfo;
+import tc.oc.pgm.api.feature.FeatureInfo;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.goals.ProximityGoalDefinition;
 import tc.oc.pgm.goals.ProximityMetric;
-import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.teams.TeamFactory;
 
 @FeatureInfo(name = "core")

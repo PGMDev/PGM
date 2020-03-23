@@ -10,11 +10,12 @@ import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.filter.query.LocationQuery;
+import tc.oc.pgm.api.region.RegionDefinition;
 import tc.oc.pgm.filters.TypedFilter;
-import tc.oc.pgm.filters.query.ILocationQuery;
 import tc.oc.util.bukkit.block.BlockVectors;
 
-public abstract class AbstractRegion extends TypedFilter<ILocationQuery>
+public abstract class AbstractRegion extends TypedFilter<LocationQuery>
     implements RegionDefinition {
 
   @Override
@@ -106,12 +107,12 @@ public abstract class AbstractRegion extends TypedFilter<ILocationQuery>
   }
 
   @Override
-  public Class<? extends ILocationQuery> getQueryType() {
-    return ILocationQuery.class;
+  public Class<? extends LocationQuery> getQueryType() {
+    return LocationQuery.class;
   }
 
   @Override
-  protected QueryResponse queryTyped(ILocationQuery query) {
+  protected QueryResponse queryTyped(LocationQuery query) {
     return QueryResponse.fromBoolean(contains(query.getLocation()));
   }
 }

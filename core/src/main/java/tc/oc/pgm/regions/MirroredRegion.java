@@ -1,6 +1,7 @@
 package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.Region;
 
 public class MirroredRegion extends TransformedRegion {
   // Reflection plane equation is: v · normal = offset

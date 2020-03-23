@@ -7,10 +7,11 @@ import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.Event;
 import org.bukkit.material.MaterialData;
+import tc.oc.pgm.api.filter.query.BlockQuery;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 
-public class PlayerBlockQuery extends PlayerStateQuery implements IBlockQuery {
+public class PlayerBlockQuery extends PlayerStateQuery implements BlockQuery {
 
   private final BlockState block;
 

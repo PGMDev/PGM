@@ -3,7 +3,7 @@ package tc.oc.pgm.points;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.List;
-import tc.oc.pgm.regions.Region;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.regions.Union;
 
 public abstract class AggregatePointProvider implements PointProvider {

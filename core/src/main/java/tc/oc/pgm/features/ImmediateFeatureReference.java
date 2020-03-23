@@ -1,6 +1,8 @@
 package tc.oc.pgm.features;
 
 import javax.annotation.Nullable;
+import tc.oc.pgm.api.feature.FeatureDefinition;
+import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.util.xml.InvalidXMLException;
 import tc.oc.util.xml.Node;
 

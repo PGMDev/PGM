@@ -1,6 +1,7 @@
 package tc.oc.pgm.filters;
 
-import tc.oc.pgm.filters.query.IQuery;
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.query.Query;
 
 /** Deny if the child filter allows, otherwise abstain. */
 public class DenyFilter extends SingleFilterFunction {
@@ -10,7 +11,7 @@ public class DenyFilter extends SingleFilterFunction {
   }
 
   @Override
-  public QueryResponse query(IQuery query) {
+  public QueryResponse query(Query query) {
     switch (filter.query(query)) {
       case ALLOW:
         return QueryResponse.DENY;

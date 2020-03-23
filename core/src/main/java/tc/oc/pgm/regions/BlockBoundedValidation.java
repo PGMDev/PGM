@@ -1,6 +1,7 @@
 package tc.oc.pgm.regions;
 
-import tc.oc.pgm.features.FeatureValidation;
+import tc.oc.pgm.api.feature.FeatureValidation;
+import tc.oc.pgm.api.region.RegionDefinition;
 import tc.oc.util.xml.InvalidXMLException;
 import tc.oc.util.xml.Node;
 

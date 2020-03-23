@@ -12,9 +12,9 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
+import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.tracker.TrackerMatchModule;
-import tc.oc.pgm.tracker.damage.DamageInfo;
-import tc.oc.pgm.tracker.damage.GenericDamageInfo;
+import tc.oc.pgm.tracker.info.GenericDamageInfo;
 import tc.oc.util.ClassLogger;
 
 /**

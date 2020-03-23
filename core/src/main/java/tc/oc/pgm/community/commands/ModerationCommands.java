@@ -40,7 +40,6 @@ import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.community.events.PlayerPunishmentEvent;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
-import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.bukkit.chat.Audience;
 import tc.oc.util.bukkit.chat.Sound;
 import tc.oc.util.bukkit.component.Component;
@@ -51,6 +50,7 @@ import tc.oc.util.bukkit.component.PeriodFormats;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 import tc.oc.util.bukkit.named.NameStyle;
+import tc.oc.util.xml.XMLUtils;
 
 public class ModerationCommands implements Listener {
 

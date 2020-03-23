@@ -3,6 +3,7 @@ package tc.oc.pgm.regions;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.util.collection.ContextStore;
 
 /**

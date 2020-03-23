@@ -23,6 +23,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
@@ -35,8 +36,6 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.PlayerResetEvent;
-import tc.oc.pgm.filters.query.IPlayerQuery;
-import tc.oc.pgm.filters.query.PlayerQuery;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.util.ClassLogger;
@@ -58,7 +57,7 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   private final UUID id;
   private final WeakReference<Player> bukkit;
   private final AtomicReference<Party> party;
-  private final AtomicReference<IPlayerQuery> query;
+  private final AtomicReference<PlayerQuery> query;
   private final AtomicBoolean frozen;
   private final AtomicBoolean dead;
   private final AtomicBoolean visible;
@@ -128,7 +127,7 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   }
 
   @Override
-  public IPlayerQuery getQuery() {
+  public PlayerQuery getQuery() {
     return query.get();
   }
 
@@ -350,7 +349,7 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   @Override
   public void internalSetParty(Party newParty) {
     if (party.compareAndSet(getParty(), newParty)) {
-      query.set(new PlayerQuery(null, this));
+      query.set(new tc.oc.pgm.filters.query.PlayerQuery(null, this));
     }
   }
 

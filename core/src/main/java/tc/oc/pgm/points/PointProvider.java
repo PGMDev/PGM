@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.regions.Region;
+import tc.oc.pgm.api.region.Region;
 
 public interface PointProvider {
 

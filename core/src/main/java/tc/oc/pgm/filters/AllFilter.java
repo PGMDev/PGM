@@ -2,7 +2,8 @@ package tc.oc.pgm.filters;
 
 import java.util.Arrays;
 import java.util.Collection;
-import tc.oc.pgm.filters.query.IQuery;
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.query.Query;
 
 public class AllFilter extends MultiFilterFunction {
 
@@ -11,7 +12,7 @@ public class AllFilter extends MultiFilterFunction {
   }
 
   @Override
-  public QueryResponse query(IQuery query) {
+  public QueryResponse query(Query query) {
     // returns true if all the filters match
     QueryResponse response = QueryResponse.ABSTAIN;
     for (Filter filter : this.filters) {

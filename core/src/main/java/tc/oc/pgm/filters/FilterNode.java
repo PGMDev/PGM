@@ -3,7 +3,8 @@ package tc.oc.pgm.filters;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import tc.oc.pgm.filters.query.IQuery;
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.query.Query;
 
 @Deprecated
 public class FilterNode implements Filter {
@@ -19,11 +20,11 @@ public class FilterNode implements Filter {
   }
 
   @Override
-  public Class<? extends IQuery> getQueryType() {
-    return IQuery.class;
+  public Class<? extends Query> getQueryType() {
+    return Query.class;
   }
 
-  protected boolean matches(Collection<Filter> matchers, IQuery query) {
+  protected boolean matches(Collection<Filter> matchers, Query query) {
     for (Filter matcher : matchers) {
       if (matcher.query(query) == QueryResponse.ALLOW) {
         return true;
@@ -32,7 +33,7 @@ public class FilterNode implements Filter {
     return false;
   }
 
-  public QueryResponse queryParents(IQuery query) {
+  public QueryResponse queryParents(Query query) {
     QueryResponse response = QueryResponse.ABSTAIN;
     for (Filter parent : this.parents) {
       QueryResponse parentResponse = parent.query(query);
@@ -44,7 +45,7 @@ public class FilterNode implements Filter {
   }
 
   @Override
-  public QueryResponse query(IQuery query) {
+  public QueryResponse query(Query query) {
     if (matches(deniedMatchers, query)) {
       return QueryResponse.DENY;
     } else if (matches(allowedMatchers, query)) {

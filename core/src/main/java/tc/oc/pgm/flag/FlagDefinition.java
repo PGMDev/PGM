@@ -3,11 +3,11 @@ package tc.oc.pgm.flag;
 import java.util.Collection;
 import javax.annotation.Nullable;
 import org.bukkit.DyeColor;
+import tc.oc.pgm.api.feature.FeatureInfo;
+import tc.oc.pgm.api.feature.FeatureReference;
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.features.FeatureInfo;
-import tc.oc.pgm.features.FeatureReference;
-import tc.oc.pgm.filters.Filter;
-import tc.oc.pgm.filters.query.IQuery;
 import tc.oc.pgm.goals.ProximityGoalDefinition;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.kits.Kit;
@@ -172,12 +172,12 @@ public class FlagDefinition extends ProximityGoalDefinition {
     return (Flag) super.getGoal(match);
   }
 
-  public boolean canPickup(IQuery query) {
+  public boolean canPickup(Query query) {
     return getPickupFilter().query(query).isAllowed()
         && getDefaultPost().getPickupFilter().query(query).isAllowed();
   }
 
-  public boolean canCapture(IQuery query, Collection<Net> nets) {
+  public boolean canCapture(Query query, Collection<Net> nets) {
     if (getCaptureFilter().query(query).isDenied()) return false;
     for (Net net : nets) {
       if (net.getCaptureFilter().query(query).isAllowed()) return true;

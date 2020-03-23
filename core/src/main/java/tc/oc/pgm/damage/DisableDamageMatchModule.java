@@ -15,9 +15,9 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.PlayerRelation;
+import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.tracker.TrackerMatchModule;
-import tc.oc.pgm.tracker.damage.DamageInfo;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DisableDamageMatchModule implements MatchModule, Listener {

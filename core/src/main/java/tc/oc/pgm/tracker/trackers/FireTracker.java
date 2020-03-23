@@ -14,13 +14,13 @@ import org.bukkit.event.entity.EntityExtinguishEvent;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.api.tracker.DamageResolver;
+import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
-import tc.oc.pgm.tracker.damage.BlockInfo;
-import tc.oc.pgm.tracker.damage.EntityInfo;
-import tc.oc.pgm.tracker.damage.FireInfo;
-import tc.oc.pgm.tracker.damage.PhysicalInfo;
-import tc.oc.pgm.tracker.resolvers.DamageResolver;
+import tc.oc.pgm.tracker.info.BlockInfo;
+import tc.oc.pgm.tracker.info.EntityInfo;
+import tc.oc.pgm.tracker.info.FireInfo;
 import tc.oc.util.bukkit.material.Materials;
 
 /**

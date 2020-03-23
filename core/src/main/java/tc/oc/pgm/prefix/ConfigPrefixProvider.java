@@ -7,6 +7,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.Config.Prefixes;
 import tc.oc.pgm.Config.Prefixes.Prefix;
+import tc.oc.pgm.api.event.PrefixChangeEvent;
+import tc.oc.pgm.api.prefix.PrefixProvider;
 
 public class ConfigPrefixProvider implements PrefixProvider {
 

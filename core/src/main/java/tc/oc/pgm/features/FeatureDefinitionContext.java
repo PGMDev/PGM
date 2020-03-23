@@ -6,6 +6,9 @@ import com.google.common.collect.SetMultimap;
 import java.util.*;
 import javax.annotation.Nullable;
 import org.jdom2.Element;
+import tc.oc.pgm.api.feature.FeatureDefinition;
+import tc.oc.pgm.api.feature.FeatureReference;
+import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.util.xml.InvalidXMLException;
 import tc.oc.util.xml.Node;
 

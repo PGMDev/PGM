@@ -13,9 +13,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import tc.oc.pgm.api.event.BlockPunchEvent;
 import tc.oc.pgm.api.event.BlockTrampleEvent;
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.player.ParticipantState;
-import tc.oc.pgm.filters.Filter;
-import tc.oc.pgm.filters.query.IQuery;
 import tc.oc.pgm.filters.query.MaterialQuery;
 import tc.oc.pgm.filters.query.Queries;
 import tc.oc.pgm.regions.FiniteBlockRegion;
@@ -110,7 +110,7 @@ public class BlockDropsRuleSet {
       if (rule.region != null && !rule.region.contains(block)) continue;
 
       if (rule.filter != null) {
-        IQuery query = Queries.block(event, playerState, block);
+        Query query = Queries.block(event, playerState, block);
         if (!rule.filter.query(query).isAllowed()) continue;
       }
 

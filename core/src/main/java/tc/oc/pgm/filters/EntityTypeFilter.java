@@ -2,9 +2,9 @@ package tc.oc.pgm.filters;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import tc.oc.pgm.filters.query.IEntityTypeQuery;
+import tc.oc.pgm.api.filter.query.EntityTypeQuery;
 
-public class EntityTypeFilter extends TypedFilter<IEntityTypeQuery> {
+public class EntityTypeFilter extends TypedFilter<EntityTypeQuery> {
   private final Class<? extends Entity> type;
 
   public EntityTypeFilter(Class<? extends Entity> type) {
@@ -20,12 +20,12 @@ public class EntityTypeFilter extends TypedFilter<IEntityTypeQuery> {
   }
 
   @Override
-  public Class<? extends IEntityTypeQuery> getQueryType() {
-    return IEntityTypeQuery.class;
+  public Class<? extends EntityTypeQuery> getQueryType() {
+    return EntityTypeQuery.class;
   }
 
   @Override
-  protected QueryResponse queryTyped(IEntityTypeQuery query) {
+  protected QueryResponse queryTyped(EntityTypeQuery query) {
     return QueryResponse.fromBoolean(type.isAssignableFrom(query.getEntityType()));
   }
 

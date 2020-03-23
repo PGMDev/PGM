@@ -8,12 +8,11 @@ import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.command.CommandSender;
 import org.bukkit.scoreboard.NameTagVisibility;
+import tc.oc.pgm.api.filter.query.PartyQuery;
+import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.filters.query.IPartyQuery;
-import tc.oc.pgm.filters.query.IPlayerQuery;
-import tc.oc.pgm.filters.query.PartyQuery;
 import tc.oc.util.bukkit.BukkitUtils;
 import tc.oc.util.bukkit.chat.Audience;
 import tc.oc.util.bukkit.chat.MultiAudience;
@@ -48,7 +47,8 @@ public class Tribute implements Competitor, MultiAudience {
   protected final UUID playerId;
   protected final String username;
   protected final ChatColor color;
-  protected final PartyQuery query = new PartyQuery(null, this);
+  protected final tc.oc.pgm.filters.query.PartyQuery query =
+      new tc.oc.pgm.filters.query.PartyQuery(null, this);
 
   protected @Nullable MatchPlayer player;
   protected Set<MatchPlayer> players = Collections.emptySet();
@@ -193,11 +193,11 @@ public class Tribute implements Competitor, MultiAudience {
 
   /**
    * If the player is online and participating, this delegates to {@link MatchPlayer#getQuery()}.
-   * Otherwise it returns an {@link IPlayerQuery}, which knows about the player's identity, but has
+   * Otherwise it returns an {@link PlayerQuery}, which knows about the player's identity, but has
    * no properties related to physical presence in the match.
    */
   @Override
-  public IPartyQuery getQuery() {
-    return player != null ? (IPartyQuery) player.getQuery() : query;
+  public PartyQuery getQuery() {
+    return player != null ? (PartyQuery) player.getQuery() : query;
   }
 }

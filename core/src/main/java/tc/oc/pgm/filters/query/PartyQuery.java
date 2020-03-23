@@ -7,7 +7,7 @@ import org.bukkit.event.Event;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 
-public class PartyQuery extends Query implements IPartyQuery {
+public class PartyQuery extends Query implements tc.oc.pgm.api.filter.query.PartyQuery {
 
   private final Party party;
 

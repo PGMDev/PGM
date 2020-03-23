@@ -6,6 +6,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.joda.time.Duration;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -13,7 +14,6 @@ import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.restart.RestartManager;
-import tc.oc.pgm.rotation.MapOrder;
 
 @ListenerScope(MatchScope.LOADED)
 public class CycleMatchModule implements MatchModule, Listener {

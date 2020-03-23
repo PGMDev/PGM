@@ -1,6 +1,8 @@
 package tc.oc.pgm.filters;
 
 import org.jdom2.Element;
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.util.xml.InvalidXMLException;

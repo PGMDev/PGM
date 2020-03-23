@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import org.bukkit.event.Event;
 import tc.oc.pgm.api.match.Match;
 
-public class MatchQuery extends Query implements IMatchQuery {
+public class MatchQuery extends Query implements tc.oc.pgm.api.filter.query.MatchQuery {
 
   private final Match match;
 

@@ -8,7 +8,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.PlayerRelation;
-import tc.oc.pgm.tracker.damage.DamageInfo;
+import tc.oc.pgm.api.tracker.info.DamageInfo;
 
 /** Called when {@link MatchPlayer} dies, the victim is the {@link #getPlayer()}. */
 public class MatchPlayerDeathEvent extends MatchPlayerEvent {

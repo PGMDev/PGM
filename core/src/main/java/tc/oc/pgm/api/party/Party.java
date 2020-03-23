@@ -6,11 +6,11 @@ import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.command.CommandSender;
+import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.party.event.PartyRenameEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.filters.query.IPartyQuery;
 import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.match.ObservingParty;
 import tc.oc.util.bukkit.chat.Audience;
@@ -53,7 +53,7 @@ public interface Party extends Audience, Named {
    *
    * @return The exclusive {@link Query}.
    */
-  IPartyQuery getQuery();
+  PartyQuery getQuery();
 
   /**
    * Get the name of the {@link Party}, which cannot change during {@link Match} time.

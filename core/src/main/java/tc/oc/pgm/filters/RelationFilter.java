@@ -1,9 +1,9 @@
 package tc.oc.pgm.filters;
 
+import tc.oc.pgm.api.filter.query.DamageQuery;
 import tc.oc.pgm.api.player.PlayerRelation;
-import tc.oc.pgm.filters.query.IDamageQuery;
 
-public class RelationFilter extends TypedFilter<IDamageQuery> {
+public class RelationFilter extends TypedFilter<DamageQuery> {
 
   private final PlayerRelation relation;
 
@@ -12,12 +12,12 @@ public class RelationFilter extends TypedFilter<IDamageQuery> {
   }
 
   @Override
-  public Class<? extends IDamageQuery> getQueryType() {
-    return IDamageQuery.class;
+  public Class<? extends DamageQuery> getQueryType() {
+    return DamageQuery.class;
   }
 
   @Override
-  protected QueryResponse queryTyped(IDamageQuery query) {
+  protected QueryResponse queryTyped(DamageQuery query) {
     return QueryResponse.fromBoolean(
         relation.are(query.getVictim(), query.getDamageInfo().getAttacker()));
   }

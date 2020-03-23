@@ -2,6 +2,7 @@ package tc.oc.pgm.regions;
 
 import org.bukkit.Chunk;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.Region;
 
 public class Regions {
   private Regions() {}

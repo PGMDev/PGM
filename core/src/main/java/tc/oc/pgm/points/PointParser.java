@@ -8,15 +8,15 @@ import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.regions.PointRegion;
 import tc.oc.pgm.regions.RandomPointsValidation;
-import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.regions.Union;
-import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.collection.ArrayUtils;
 import tc.oc.util.xml.InvalidXMLException;
 import tc.oc.util.xml.Node;
+import tc.oc.util.xml.XMLUtils;
 
 /**
  * PointProvider grammar is a bit strange due to backward compatibility. The root element is what

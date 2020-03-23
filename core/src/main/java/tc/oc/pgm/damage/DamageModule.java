@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
-import tc.oc.pgm.filters.Filter;
 import tc.oc.util.xml.InvalidXMLException;
 
 public class DamageModule implements MapModule {

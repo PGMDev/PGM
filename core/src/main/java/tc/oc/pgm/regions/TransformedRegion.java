@@ -3,6 +3,7 @@ package tc.oc.pgm.regions;
 import java.util.Random;
 import javax.annotation.Nullable;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.Region;
 
 public abstract class TransformedRegion extends AbstractRegion {
 

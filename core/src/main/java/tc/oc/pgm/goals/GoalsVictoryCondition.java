@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
-import tc.oc.pgm.result.VictoryCondition;
+import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 

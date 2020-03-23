@@ -12,6 +12,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.classes.ClassModule;
@@ -30,10 +31,10 @@ import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
-import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.StringUtils;
 import tc.oc.util.xml.InvalidXMLException;
 import tc.oc.util.xml.Node;
+import tc.oc.util.xml.XMLUtils;
 
 public abstract class FilterParser {
 

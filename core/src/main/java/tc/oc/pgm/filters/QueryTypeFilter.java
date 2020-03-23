@@ -1,21 +1,22 @@
 package tc.oc.pgm.filters;
 
-import tc.oc.pgm.filters.query.IQuery;
+import tc.oc.pgm.api.filter.FilterDefinition;
+import tc.oc.pgm.api.filter.query.Query;
 
 public class QueryTypeFilter implements FilterDefinition {
-  protected final Class<? extends IQuery> type;
+  protected final Class<? extends Query> type;
 
-  public QueryTypeFilter(Class<? extends IQuery> type) {
+  public QueryTypeFilter(Class<? extends Query> type) {
     this.type = type;
   }
 
   @Override
-  public Class<? extends IQuery> getQueryType() {
-    return IQuery.class;
+  public Class<? extends Query> getQueryType() {
+    return Query.class;
   }
 
   @Override
-  public QueryResponse query(IQuery query) {
+  public QueryResponse query(Query query) {
     return QueryResponse.fromBoolean(type.isInstance(query));
   }
 

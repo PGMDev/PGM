@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 import org.joda.time.Duration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
-import tc.oc.pgm.result.VictoryCondition;
+import tc.oc.pgm.api.party.VictoryCondition;
 
 public class TimeLimitMatchModule implements MatchModule {
   private final Match match;

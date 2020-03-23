@@ -4,10 +4,11 @@ import javax.annotation.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.potion.PotionEffectType;
-import tc.oc.pgm.tracker.damage.GenericPotionInfo;
-import tc.oc.pgm.tracker.damage.PhysicalInfo;
-import tc.oc.pgm.tracker.damage.PotionInfo;
-import tc.oc.pgm.tracker.damage.ProjectileInfo;
+import tc.oc.pgm.api.tracker.DamageResolver;
+import tc.oc.pgm.api.tracker.info.PhysicalInfo;
+import tc.oc.pgm.api.tracker.info.PotionInfo;
+import tc.oc.pgm.tracker.info.GenericPotionInfo;
+import tc.oc.pgm.tracker.info.ProjectileInfo;
 
 public class PotionDamageResolver implements DamageResolver {
 

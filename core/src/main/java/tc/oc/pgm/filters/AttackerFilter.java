@@ -1,11 +1,12 @@
 package tc.oc.pgm.filters;
 
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.query.DamageQuery;
 import tc.oc.pgm.api.player.ParticipantState;
-import tc.oc.pgm.filters.query.IDamageQuery;
 import tc.oc.pgm.filters.query.MatchQuery;
 import tc.oc.pgm.filters.query.PlayerStateQuery;
 
-public class AttackerFilter extends TypedFilter<IDamageQuery> {
+public class AttackerFilter extends TypedFilter<DamageQuery> {
 
   private final Filter child;
 
@@ -14,12 +15,12 @@ public class AttackerFilter extends TypedFilter<IDamageQuery> {
   }
 
   @Override
-  public Class<? extends IDamageQuery> getQueryType() {
-    return IDamageQuery.class;
+  public Class<? extends DamageQuery> getQueryType() {
+    return DamageQuery.class;
   }
 
   @Override
-  protected QueryResponse queryTyped(IDamageQuery query) {
+  protected QueryResponse queryTyped(DamageQuery query) {
     ParticipantState attacker = query.getDamageInfo().getAttacker();
     if (attacker == null) {
       // It's not at all clear what is the best thing to do in this case,

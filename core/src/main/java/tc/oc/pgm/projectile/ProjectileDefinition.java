@@ -5,8 +5,8 @@ import javax.annotation.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.potion.PotionEffect;
 import org.joda.time.Duration;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
-import tc.oc.pgm.filters.Filter;
 
 public class ProjectileDefinition extends SelfIdentifyingFeatureDefinition {
   protected @Nullable String name;

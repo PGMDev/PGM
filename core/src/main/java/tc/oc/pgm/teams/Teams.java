@@ -3,12 +3,12 @@ package tc.oc.pgm.teams;
 import static tc.oc.pgm.api.map.MapProtos.FILTER_FEATURES;
 
 import javax.annotation.Nullable;
+import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.features.FeatureReference;
 import tc.oc.pgm.features.ImmediateFeatureReference;
 import tc.oc.util.xml.InvalidXMLException;
 import tc.oc.util.xml.Node;

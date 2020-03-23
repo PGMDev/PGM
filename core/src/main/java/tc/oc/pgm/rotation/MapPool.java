@@ -10,6 +10,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
+import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 
 /** Rotation of maps, a type of {@link MapOrder} */

@@ -2,11 +2,11 @@ package tc.oc.pgm.filters;
 
 import com.google.common.base.Preconditions;
 import javax.annotation.Nullable;
+import tc.oc.pgm.api.feature.FeatureReference;
+import tc.oc.pgm.api.filter.query.MatchQuery;
+import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
-import tc.oc.pgm.features.FeatureReference;
-import tc.oc.pgm.filters.query.IMatchQuery;
-import tc.oc.pgm.filters.query.IPartyQuery;
 import tc.oc.pgm.goals.Goal;
 import tc.oc.pgm.goals.GoalDefinition;
 import tc.oc.pgm.teams.TeamFactory;
@@ -18,7 +18,7 @@ import tc.oc.pgm.teams.TeamMatchModule;
  * query. If the anyTeam flag is set, then the filter matches when any team has completed the
  * objective.
  */
-public class GoalFilter extends TypedFilter<IMatchQuery> {
+public class GoalFilter extends TypedFilter<MatchQuery> {
   private final FeatureReference<? extends GoalDefinition> goal;
 
   // Null means get the team from the query parameter
@@ -39,12 +39,12 @@ public class GoalFilter extends TypedFilter<IMatchQuery> {
   }
 
   @Override
-  public Class<? extends IMatchQuery> getQueryType() {
-    return IMatchQuery.class;
+  public Class<? extends MatchQuery> getQueryType() {
+    return MatchQuery.class;
   }
 
   @Override
-  protected QueryResponse queryTyped(IMatchQuery query) {
+  protected QueryResponse queryTyped(MatchQuery query) {
     Goal<? extends GoalDefinition> goal = this.goal.get().getGoal(query.getMatch());
     if (goal == null) {
       return QueryResponse.ABSTAIN;
@@ -57,8 +57,8 @@ public class GoalFilter extends TypedFilter<IMatchQuery> {
       // Team was explicitly specified
       return QueryResponse.fromBoolean(
           goal.isCompleted(query.getMatch().needModule(TeamMatchModule.class).getTeam(team.get())));
-    } else if (query instanceof IPartyQuery) {
-      final Party party = ((IPartyQuery) query).getParty();
+    } else if (query instanceof PartyQuery) {
+      final Party party = ((PartyQuery) query).getParty();
       // Team is derived from query
       return QueryResponse.fromBoolean(
           party instanceof Competitor && goal.isCompleted((Competitor) party));

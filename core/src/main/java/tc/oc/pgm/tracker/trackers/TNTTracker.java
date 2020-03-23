@@ -12,7 +12,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
-import tc.oc.pgm.tracker.damage.TNTInfo;
+import tc.oc.pgm.tracker.info.TNTInfo;
 
 /** Updates the state of owned TNT blocks and entities */
 public class TNTTracker extends AbstractTracker<TNTInfo> {

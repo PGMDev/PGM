@@ -6,9 +6,10 @@ import javax.annotation.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.filter.query.EntityTypeQuery;
 import tc.oc.pgm.api.match.Match;
 
-public class EntityQuery extends Query implements IEntityTypeQuery {
+public class EntityQuery extends Query implements EntityTypeQuery {
 
   private final Entity entity;
 

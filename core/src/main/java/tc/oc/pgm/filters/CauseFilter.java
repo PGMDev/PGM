@@ -16,11 +16,14 @@ import org.bukkit.event.player.PlayerBucketFillEvent;
 import tc.oc.pgm.api.event.BlockPunchEvent;
 import tc.oc.pgm.api.event.BlockTrampleEvent;
 import tc.oc.pgm.api.event.GeneralizingEvent;
-import tc.oc.pgm.filters.query.IMatchQuery;
+import tc.oc.pgm.api.filter.query.MatchQuery;
+import tc.oc.pgm.api.tracker.info.*;
+import tc.oc.pgm.api.tracker.info.PotionInfo;
 import tc.oc.pgm.tracker.TrackerMatchModule;
-import tc.oc.pgm.tracker.damage.*;
+import tc.oc.pgm.tracker.info.ItemInfo;
+import tc.oc.pgm.tracker.info.ProjectileInfo;
 
-public class CauseFilter extends TypedFilter<IMatchQuery> {
+public class CauseFilter extends TypedFilter<MatchQuery> {
 
   // TODO: add other causes like growth, flow, mob, machine, etc.
   public enum Cause {
@@ -61,16 +64,16 @@ public class CauseFilter extends TypedFilter<IMatchQuery> {
   }
 
   @Override
-  public Class<? extends IMatchQuery> getQueryType() {
-    return IMatchQuery.class;
+  public Class<? extends MatchQuery> getQueryType() {
+    return MatchQuery.class;
   }
 
   @Override
-  protected QueryResponse queryTyped(IMatchQuery query) {
+  protected QueryResponse queryTyped(MatchQuery query) {
     return QueryResponse.fromBoolean(matches(query));
   }
 
-  private boolean matches(IMatchQuery query) {
+  private boolean matches(MatchQuery query) {
     Event event = query.getEvent();
     if (event instanceof GeneralizingEvent) {
       event = ((GeneralizingEvent) event).getCause();

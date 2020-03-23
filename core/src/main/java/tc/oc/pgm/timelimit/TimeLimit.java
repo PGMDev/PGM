@@ -4,11 +4,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.annotation.Nullable;
 import org.joda.time.Duration;
+import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
-import tc.oc.pgm.features.FeatureInfo;
+import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
-import tc.oc.pgm.result.VictoryCondition;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.PeriodFormats;
 import tc.oc.util.bukkit.component.types.PersonalizedText;

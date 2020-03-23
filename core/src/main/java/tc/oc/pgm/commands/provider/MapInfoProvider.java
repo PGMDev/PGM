@@ -11,9 +11,9 @@ import java.util.List;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
+import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
-import tc.oc.pgm.rotation.MapOrder;
 import tc.oc.util.bukkit.translations.AllTranslations;
 
 public class MapInfoProvider implements BukkitProvider<MapInfo> {

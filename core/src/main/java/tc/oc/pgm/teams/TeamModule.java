@@ -22,10 +22,10 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.start.StartMatchModule;
-import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.StringUtils;
 import tc.oc.util.xml.InvalidXMLException;
 import tc.oc.util.xml.Node;
+import tc.oc.util.xml.XMLUtils;
 
 public class TeamModule implements MapModule<TeamMatchModule> {
   private static final Map<Integer, Collection<MapTag>> TAGS = new ConcurrentHashMap<>();

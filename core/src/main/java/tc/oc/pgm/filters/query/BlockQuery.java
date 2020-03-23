@@ -19,7 +19,7 @@ import tc.oc.pgm.api.match.Match;
  * The other properties are created lazily, to gain a bit of efficiency when querying filters that
  * don't check them.
  */
-public class BlockQuery extends Query implements IBlockQuery {
+public class BlockQuery extends Query implements tc.oc.pgm.api.filter.query.BlockQuery {
 
   private final World world;
   private final int x, y, z;

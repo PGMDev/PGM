@@ -1,14 +1,14 @@
 package tc.oc.pgm.filters;
 
 import javax.annotation.Nullable;
-import tc.oc.pgm.features.FeatureReference;
-import tc.oc.pgm.filters.query.IMatchQuery;
+import tc.oc.pgm.api.feature.FeatureReference;
+import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.FlagDefinition;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.state.State;
 
-public class FlagStateFilter extends TypedFilter<IMatchQuery> {
+public class FlagStateFilter extends TypedFilter<MatchQuery> {
 
   private final FeatureReference<? extends FlagDefinition> flag;
   private final @Nullable FeatureReference<? extends Post> post;
@@ -24,12 +24,12 @@ public class FlagStateFilter extends TypedFilter<IMatchQuery> {
   }
 
   @Override
-  public Class<? extends IMatchQuery> getQueryType() {
-    return IMatchQuery.class;
+  public Class<? extends MatchQuery> getQueryType() {
+    return MatchQuery.class;
   }
 
   @Override
-  protected QueryResponse queryTyped(IMatchQuery query) {
+  protected QueryResponse queryTyped(MatchQuery query) {
     Flag flag = this.flag.get().getGoal(query.getMatch());
     if (flag == null) return QueryResponse.ABSTAIN; // Match probably has not fully loaded yet
     return QueryResponse.fromBoolean(

@@ -8,7 +8,7 @@ import org.bukkit.entity.Entity;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
-import tc.oc.pgm.tracker.damage.RangedInfo;
+import tc.oc.pgm.api.tracker.info.RangedInfo;
 
 public final class Trackers {
   private Trackers() {}

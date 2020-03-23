@@ -11,7 +11,7 @@ import org.bukkit.util.Vector;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.regions.Region;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.util.MatchPlayers;
 

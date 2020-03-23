@@ -4,12 +4,12 @@ import java.util.logging.Logger;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
-import tc.oc.pgm.features.FeatureDefinition;
 import tc.oc.pgm.itemmeta.ItemModifyModule;
 import tc.oc.util.xml.InvalidXMLException;
 

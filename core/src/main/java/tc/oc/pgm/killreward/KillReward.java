@@ -2,7 +2,7 @@ package tc.oc.pgm.killreward;
 
 import com.google.common.collect.ImmutableList;
 import org.bukkit.inventory.ItemStack;
-import tc.oc.pgm.filters.Filter;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.kits.Kit;
 
 public class KillReward {

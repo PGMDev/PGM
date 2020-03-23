@@ -24,10 +24,10 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
+import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.filters.query.DamageQuery;
-import tc.oc.pgm.tracker.damage.DamageInfo;
 import tc.oc.util.collection.DefaultMapAdapter;
 
 @ListenerScope(MatchScope.RUNNING)

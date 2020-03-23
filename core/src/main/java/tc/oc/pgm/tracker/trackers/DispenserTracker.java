@@ -6,7 +6,7 @@ import org.bukkit.event.EventPriority;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
-import tc.oc.pgm.tracker.damage.DispenserInfo;
+import tc.oc.pgm.tracker.info.DispenserInfo;
 
 /**
  * Updates the state of owned dispensers. The ownership of dispensed things is handled by other

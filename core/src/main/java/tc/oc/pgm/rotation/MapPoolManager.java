@@ -14,6 +14,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.util.bukkit.translations.AllTranslations;
 

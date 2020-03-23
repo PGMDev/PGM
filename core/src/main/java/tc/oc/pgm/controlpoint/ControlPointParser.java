@@ -5,19 +5,19 @@ import org.bukkit.Material;
 import org.bukkit.util.Vector;
 import org.jdom2.Element;
 import org.joda.time.Duration;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.AnyFilter;
 import tc.oc.pgm.filters.BlockFilter;
-import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.regions.BlockBoundedValidation;
-import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamModule;
-import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.xml.InvalidXMLException;
 import tc.oc.util.xml.Node;
+import tc.oc.util.xml.XMLUtils;
 
 public abstract class ControlPointParser {
   private static final Filter VISUAL_MATERIALS =

@@ -2,8 +2,8 @@ package tc.oc.pgm.filters;
 
 import com.google.common.base.Preconditions;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.filters.query.IPlayerQuery;
 
 public abstract class ParticipantItemFilter extends ParticipantFilter {
   protected final ItemStack base;
@@ -16,7 +16,7 @@ public abstract class ParticipantItemFilter extends ParticipantFilter {
   protected abstract ItemStack[] getItems(MatchPlayer player);
 
   @Override
-  protected QueryResponse queryPlayer(IPlayerQuery query, MatchPlayer player) {
+  protected QueryResponse queryPlayer(PlayerQuery query, MatchPlayer player) {
     for (ItemStack item : getItems(player)) {
       if (item == null) continue;
 

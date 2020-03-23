@@ -15,14 +15,14 @@ import org.bukkit.event.Listener;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
-import tc.oc.pgm.tracker.damage.EntityInfo;
-import tc.oc.pgm.tracker.damage.FallingBlockInfo;
-import tc.oc.pgm.tracker.damage.MobInfo;
-import tc.oc.pgm.tracker.damage.OwnerInfo;
-import tc.oc.pgm.tracker.damage.PhysicalInfo;
-import tc.oc.pgm.tracker.damage.PlayerInfo;
-import tc.oc.pgm.tracker.damage.ThrownPotionInfo;
-import tc.oc.pgm.tracker.damage.TrackerInfo;
+import tc.oc.pgm.api.tracker.info.OwnerInfo;
+import tc.oc.pgm.api.tracker.info.PhysicalInfo;
+import tc.oc.pgm.api.tracker.info.TrackerInfo;
+import tc.oc.pgm.tracker.info.EntityInfo;
+import tc.oc.pgm.tracker.info.FallingBlockInfo;
+import tc.oc.pgm.tracker.info.MobInfo;
+import tc.oc.pgm.tracker.info.PlayerInfo;
+import tc.oc.pgm.tracker.info.ThrownPotionInfo;
 import tc.oc.util.ClassLogger;
 
 /** Tracks the ownership of {@link Entity}s and resolves damage caused by them */

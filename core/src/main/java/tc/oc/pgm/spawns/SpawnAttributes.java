@@ -1,6 +1,6 @@
 package tc.oc.pgm.spawns;
 
-import tc.oc.pgm.filters.Filter;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.points.PointProviderAttributes;

@@ -5,9 +5,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import javax.annotation.Nullable;
 import org.bukkit.event.Event;
 import tc.oc.pgm.api.player.ParticipantState;
-import tc.oc.pgm.tracker.damage.DamageInfo;
+import tc.oc.pgm.api.tracker.info.DamageInfo;
 
-public class DamageQuery extends PlayerStateQuery implements IDamageQuery {
+public class DamageQuery extends PlayerStateQuery
+    implements tc.oc.pgm.api.filter.query.DamageQuery {
 
   private final ParticipantState victim;
   private final DamageInfo damageInfo;

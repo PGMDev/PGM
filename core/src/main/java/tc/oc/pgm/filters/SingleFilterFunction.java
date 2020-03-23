@@ -2,7 +2,9 @@ package tc.oc.pgm.filters;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import tc.oc.pgm.filters.query.IQuery;
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.FilterDefinition;
+import tc.oc.pgm.api.filter.query.Query;
 
 /** A filter that transforms the result of a single child filter */
 public abstract class SingleFilterFunction implements FilterDefinition {
@@ -14,7 +16,7 @@ public abstract class SingleFilterFunction implements FilterDefinition {
   }
 
   @Override
-  public Class<? extends IQuery> getQueryType() {
+  public Class<? extends Query> getQueryType() {
     return filter.getQueryType();
   }
 

@@ -4,7 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.bukkit.util.Vector;
 import org.joda.time.Duration;
-import tc.oc.pgm.filters.Filter;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.filters.StaticFilter;
 
 /** Parameters for the world border. */

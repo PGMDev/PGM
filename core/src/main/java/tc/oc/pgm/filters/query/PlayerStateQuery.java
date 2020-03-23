@@ -8,12 +8,13 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
 
-public class PlayerStateQuery extends Query implements IPlayerQuery {
+public class PlayerStateQuery extends Query implements PlayerQuery {
 
   protected final MatchPlayerState playerState;
 

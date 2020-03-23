@@ -33,6 +33,10 @@ import org.bukkit.util.Vector;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.event.GeneralizingEvent;
+import tc.oc.pgm.api.filter.Filter.QueryResponse;
+import tc.oc.pgm.api.filter.query.BlockQuery;
+import tc.oc.pgm.api.filter.query.PlayerQuery;
+import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -41,13 +45,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
-import tc.oc.pgm.filters.Filter.QueryResponse;
-import tc.oc.pgm.filters.query.BlockQuery;
-import tc.oc.pgm.filters.query.IBlockQuery;
-import tc.oc.pgm.filters.query.IPlayerQuery;
-import tc.oc.pgm.filters.query.IQuery;
 import tc.oc.pgm.filters.query.PlayerBlockQuery;
-import tc.oc.pgm.filters.query.PlayerQuery;
 import tc.oc.pgm.filters.query.Queries;
 import tc.oc.pgm.flag.event.FlagPickupEvent;
 import tc.oc.pgm.util.MatchPlayers;
@@ -71,7 +69,8 @@ public class RegionMatchModule implements MatchModule, Listener {
       Event event, MatchPlayer player, @Nullable Location from, Location to) {
     if (player == null || !player.canInteract()) return;
 
-    PlayerQuery query = new PlayerQuery(event, player);
+    tc.oc.pgm.filters.query.PlayerQuery query =
+        new tc.oc.pgm.filters.query.PlayerQuery(event, player);
 
     if (this.useRegionPriority) {
       // We need to handle both scopes in the same loop, because the priority order can interleave
@@ -124,7 +123,7 @@ public class RegionMatchModule implements MatchModule, Listener {
 
     Vector from = event.getBlockFrom().toVector();
     Vector to = event.getBlockTo().toVector();
-    IQuery query = new PlayerQuery(event, player);
+    Query query = new tc.oc.pgm.filters.query.PlayerQuery(event, player);
 
     for (RegionFilterApplication rfa : this.rfaContext.get(RFAScope.EFFECT)) {
       if (rfa.velocity == null && rfa.kit == null) continue;
@@ -167,9 +166,9 @@ public class RegionMatchModule implements MatchModule, Listener {
       againstBlock = ((PlayerBucketEmptyEvent) event.getCause()).getBlockClicked().getState();
     }
 
-    IBlockQuery breakQuery = Queries.block(event, actor, event.getOldState());
-    IBlockQuery placeQuery = Queries.block(event, actor, event.getNewState());
-    IBlockQuery againstQuery =
+    BlockQuery breakQuery = Queries.block(event, actor, event.getOldState());
+    BlockQuery placeQuery = Queries.block(event, actor, event.getNewState());
+    BlockQuery againstQuery =
         againstBlock == null ? null : Queries.block(event, actor, againstBlock);
 
     if (this.useRegionPriority) {
@@ -225,7 +224,8 @@ public class RegionMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   public void checkBlockPhysics(final BlockPhysicsEvent event) {
-    BlockQuery query = new BlockQuery(event, event.getBlock().getState());
+    tc.oc.pgm.filters.query.BlockQuery query =
+        new tc.oc.pgm.filters.query.BlockQuery(event, event.getBlock().getState());
     for (RegionFilterApplication rfa : this.rfaContext.get(RFAScope.BLOCK_PHYSICS)) {
       if (rfa.region.contains(event.getBlock()) && processQuery(rfa, query)) break;
     }
@@ -333,7 +333,7 @@ public class RegionMatchModule implements MatchModule, Listener {
   }
 
   private void handleHangingPlace(Event event, BlockState blockState, Entity placer) {
-    IQuery query = makeBlockQuery(event, placer, blockState);
+    Query query = makeBlockQuery(event, placer, blockState);
 
     for (RegionFilterApplication rfa : this.rfaContext.get(RFAScope.BLOCK_PLACE)) {
       if (rfa.region.contains(blockState)) {
@@ -349,7 +349,7 @@ public class RegionMatchModule implements MatchModule, Listener {
     BlockState blockState = getHangingBlockState(hanging);
     if (blockState == null) return;
 
-    IQuery query = makeBlockQuery(event, breaker, blockState);
+    Query query = makeBlockQuery(event, breaker, blockState);
 
     for (RegionFilterApplication rfa : this.rfaContext.get(RFAScope.BLOCK_BREAK)) {
       if (rfa.region.contains(blockState)) {
@@ -361,25 +361,25 @@ public class RegionMatchModule implements MatchModule, Listener {
     }
   }
 
-  private void sendCancelMessage(RegionFilterApplication rfa, IQuery query) {
+  private void sendCancelMessage(RegionFilterApplication rfa, Query query) {
     if (rfa.message != null
         && query.getEvent() instanceof Cancellable
         && ((Cancellable) query.getEvent()).isCancelled()
-        && query instanceof IPlayerQuery) {
+        && query instanceof PlayerQuery) {
 
-      MatchPlayer player = match.getPlayer(((IPlayerQuery) query).getPlayerId());
+      MatchPlayer player = match.getPlayer(((PlayerQuery) query).getPlayerId());
       if (player != null) player.sendWarning(rfa.message, false);
     }
   }
 
-  private IQuery makeBlockQuery(Event event, Entity entity, BlockState block) {
+  private Query makeBlockQuery(Event event, Entity entity, BlockState block) {
     if (entity instanceof Player) {
       MatchPlayer player = this.match.getPlayer((Player) entity);
       if (MatchPlayers.canInteract(player)) {
         return new PlayerBlockQuery(event, player, block);
       }
     }
-    return new BlockQuery(event, block);
+    return new tc.oc.pgm.filters.query.BlockQuery(event, block);
   }
 
   private ParticipantState getActor(BlockTransformEvent event) {
@@ -415,7 +415,7 @@ public class RegionMatchModule implements MatchModule, Listener {
    *
    * @return false if the query abstained, otherwise true
    */
-  protected static boolean processQuery(RegionFilterApplication rfa, IQuery query) {
+  protected static boolean processQuery(RegionFilterApplication rfa, Query query) {
     if (rfa.filter == null) {
       return false;
     }

@@ -9,6 +9,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.joda.time.Duration;
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.FilterListener;
+import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -29,10 +32,10 @@ public class FilterMatchModule implements MatchModule, Listener {
   }
 
   /**
-   * Listen for changes in the response by the given filter to a global {@link
-   * tc.oc.pgm.filters.query.IMatchQuery}. See {@link FilterListener} for more details. Currently,
-   * only global queries are supported, and only {@link TimeFilter}s, {@link GoalFilter}s, {@link
-   * FlagStateFilter}s, and {@link CarryingFlagFilter}s are guaranteed to notify for all changes.
+   * Listen for changes in the response by the given filter to a global {@link MatchQuery}. See
+   * {@link FilterListener} for more details. Currently, only global queries are supported, and only
+   * {@link TimeFilter}s, {@link GoalFilter}s, {@link FlagStateFilter}s, and {@link
+   * CarryingFlagFilter}s are guaranteed to notify for all changes.
    */
   public void listen(Filter filter, FilterListener listener) {
     listeners.put(filter, listener);

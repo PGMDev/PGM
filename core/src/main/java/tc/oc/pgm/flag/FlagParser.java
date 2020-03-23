@@ -10,9 +10,10 @@ import org.bukkit.util.Vector;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.joda.time.Duration;
+import tc.oc.pgm.api.feature.FeatureReference;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
-import tc.oc.pgm.features.FeatureReference;
-import tc.oc.pgm.filters.Filter;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.goals.ProximityMetric;
@@ -20,12 +21,11 @@ import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.points.PointParser;
 import tc.oc.pgm.points.PointProvider;
 import tc.oc.pgm.points.PointProviderAttributes;
-import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.teams.TeamFactory;
-import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.xml.InvalidXMLException;
 import tc.oc.util.xml.Node;
+import tc.oc.util.xml.XMLUtils;
 
 public class FlagParser {
   private final MapFactory factory;

@@ -2,8 +2,9 @@ package tc.oc.pgm.regions;
 
 import javax.annotation.Nullable;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.features.FeatureDefinition;
-import tc.oc.pgm.filters.Filter;
+import tc.oc.pgm.api.feature.FeatureDefinition;
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.util.bukkit.component.Component;
 

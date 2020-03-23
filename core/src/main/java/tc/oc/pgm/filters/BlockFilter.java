@@ -4,10 +4,10 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.material.MaterialData;
-import tc.oc.pgm.filters.query.IMaterialQuery;
+import tc.oc.pgm.api.filter.query.MaterialQuery;
 import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
 
-public class BlockFilter extends TypedFilter<IMaterialQuery> {
+public class BlockFilter extends TypedFilter<MaterialQuery> {
   protected final Material type;
   protected final byte data; // values outside of the range 0 <= data < 16 indicate no preference
 
@@ -25,12 +25,12 @@ public class BlockFilter extends TypedFilter<IMaterialQuery> {
   }
 
   @Override
-  public Class<? extends IMaterialQuery> getQueryType() {
-    return IMaterialQuery.class;
+  public Class<? extends MaterialQuery> getQueryType() {
+    return MaterialQuery.class;
   }
 
   @Override
-  protected QueryResponse queryTyped(IMaterialQuery query) {
+  protected QueryResponse queryTyped(MaterialQuery query) {
     return QueryResponse.fromBoolean(matches(query.getMaterial()));
   }
 

@@ -1,9 +1,9 @@
 package tc.oc.pgm.filters;
 
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-import tc.oc.pgm.filters.query.IEntitySpawnQuery;
+import tc.oc.pgm.api.filter.query.EntitySpawnQuery;
 
-public class SpawnReasonFilter extends TypedFilter<IEntitySpawnQuery> {
+public class SpawnReasonFilter extends TypedFilter<EntitySpawnQuery> {
   protected final SpawnReason reason;
 
   public SpawnReasonFilter(SpawnReason reason) {
@@ -11,12 +11,12 @@ public class SpawnReasonFilter extends TypedFilter<IEntitySpawnQuery> {
   }
 
   @Override
-  public Class<? extends IEntitySpawnQuery> getQueryType() {
-    return IEntitySpawnQuery.class;
+  public Class<? extends EntitySpawnQuery> getQueryType() {
+    return EntitySpawnQuery.class;
   }
 
   @Override
-  protected QueryResponse queryTyped(IEntitySpawnQuery query) {
+  protected QueryResponse queryTyped(EntitySpawnQuery query) {
     return QueryResponse.fromBoolean(reason == query.getSpawnReason());
   }
 

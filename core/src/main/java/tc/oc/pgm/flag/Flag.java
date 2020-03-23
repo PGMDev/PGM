@@ -24,13 +24,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.util.BlockVector;
 import tc.oc.pgm.api.event.BlockTransformEvent;
+import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
-import tc.oc.pgm.filters.query.IQuery;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.flag.state.BaseState;
@@ -46,7 +47,6 @@ import tc.oc.pgm.points.AngleProvider;
 import tc.oc.pgm.points.PointProvider;
 import tc.oc.pgm.points.StaticAngleProvider;
 import tc.oc.pgm.regions.PointRegion;
-import tc.oc.pgm.regions.Region;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
@@ -102,7 +102,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     ImmutableSet.Builder<Team> capturersBuilder = ImmutableSet.builder();
     if (tmm != null) {
       for (Team team : tmm.getTeams()) {
-        IQuery query = team.getQuery();
+        Query query = team.getQuery();
         if (getDefinition().canPickup(query) && canCapture(query)) {
           capturersBuilder.add(team);
         }
@@ -322,12 +322,12 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     }
   }
 
-  public boolean canPickup(IQuery query, Post post) {
+  public boolean canPickup(Query query, Post post) {
     return getDefinition().getPickupFilter().query(query).isAllowed()
         && post.getPickupFilter().query(query).isAllowed();
   }
 
-  public boolean canPickup(IQuery query) {
+  public boolean canPickup(Query query) {
     return canPickup(query, state.getPost());
   }
 
@@ -335,12 +335,12 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     return canPickup(player.getQuery(), post);
   }
 
-  public boolean canCapture(IQuery query, Net net) {
+  public boolean canCapture(Query query, Net net) {
     return getDefinition().getCaptureFilter().query(query).isAllowed()
         && net.getCaptureFilter().query(query).isAllowed();
   }
 
-  public boolean canCapture(IQuery query) {
+  public boolean canCapture(Query query) {
     return getDefinition().canCapture(query, getNets());
   }
 

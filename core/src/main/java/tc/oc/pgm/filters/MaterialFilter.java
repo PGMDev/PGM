@@ -2,10 +2,10 @@ package tc.oc.pgm.filters;
 
 import org.bukkit.Material;
 import org.bukkit.material.MaterialData;
-import tc.oc.pgm.filters.query.IMaterialQuery;
+import tc.oc.pgm.api.filter.query.MaterialQuery;
 import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
 
-public class MaterialFilter extends TypedFilter<IMaterialQuery> {
+public class MaterialFilter extends TypedFilter<MaterialQuery> {
   private final SingleMaterialMatcher pattern;
 
   public MaterialFilter(MaterialData materialData) {
@@ -21,12 +21,12 @@ public class MaterialFilter extends TypedFilter<IMaterialQuery> {
   }
 
   @Override
-  public Class<? extends IMaterialQuery> getQueryType() {
-    return IMaterialQuery.class;
+  public Class<? extends MaterialQuery> getQueryType() {
+    return MaterialQuery.class;
   }
 
   @Override
-  protected QueryResponse queryTyped(IMaterialQuery query) {
+  protected QueryResponse queryTyped(MaterialQuery query) {
     return QueryResponse.fromBoolean(this.pattern.matches(query.getMaterial()));
   }
 

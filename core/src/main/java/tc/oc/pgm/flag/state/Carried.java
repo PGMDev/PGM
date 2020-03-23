@@ -11,12 +11,12 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
-import tc.oc.pgm.filters.query.IQuery;
 import tc.oc.pgm.filters.query.PlayerStateQuery;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.FlagDefinition;
@@ -74,7 +74,7 @@ public class Carried extends Spawned implements Missing {
   @Override
   public Iterable<Location> getProximityLocations(ParticipantState player) {
     if (isCarrying(player)) {
-      final IQuery query = new PlayerStateQuery(player);
+      final Query query = new PlayerStateQuery(player);
       return IterableUtils.transfilter(
           flag.getNets(),
           new Function<Net, Location>() {

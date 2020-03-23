@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 import org.bukkit.event.Event;
 import org.bukkit.material.MaterialData;
 
-public class MaterialQuery extends Query implements IMaterialQuery {
+public class MaterialQuery extends Query implements tc.oc.pgm.api.filter.query.MaterialQuery {
 
   private final MaterialData material;
 

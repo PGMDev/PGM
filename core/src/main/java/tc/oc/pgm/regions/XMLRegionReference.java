@@ -9,9 +9,11 @@ import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.filter.query.Query;
+import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.api.region.RegionDefinition;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
-import tc.oc.pgm.filters.query.IQuery;
 import tc.oc.util.xml.Node;
 
 public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> implements Region {
@@ -115,12 +117,12 @@ public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> im
   }
 
   @Override
-  public Class<? extends IQuery> getQueryType() {
+  public Class<? extends Query> getQueryType() {
     return get().getQueryType();
   }
 
   @Override
-  public QueryResponse query(IQuery query) {
+  public QueryResponse query(Query query) {
     return get().query(query);
   }
 }

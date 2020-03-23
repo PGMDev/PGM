@@ -26,10 +26,10 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.kits.KitParser;
-import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.bukkit.BukkitUtils;
 import tc.oc.util.xml.InvalidXMLException;
 import tc.oc.util.xml.Node;
+import tc.oc.util.xml.XMLUtils;
 
 public class ClassModule implements MapModule {
 

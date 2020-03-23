@@ -34,20 +34,20 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.jdom2.Element;
 import org.joda.time.Duration;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.doublejump.DoubleJumpKit;
-import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.kits.tag.Grenade;
 import tc.oc.pgm.kits.tag.ItemTags;
 import tc.oc.pgm.projectile.ProjectileDefinition;
 import tc.oc.pgm.shield.ShieldKit;
 import tc.oc.pgm.shield.ShieldParameters;
-import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.Pair;
 import tc.oc.util.bukkit.BukkitUtils;
 import tc.oc.util.xml.InvalidXMLException;
 import tc.oc.util.xml.Node;
+import tc.oc.util.xml.XMLUtils;
 
 public abstract class KitParser {
   protected final MapFactory factory;

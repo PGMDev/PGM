@@ -1,6 +1,7 @@
 package tc.oc.pgm.filters;
 
-import tc.oc.pgm.filters.query.IQuery;
+import tc.oc.pgm.api.filter.FilterDefinition;
+import tc.oc.pgm.api.filter.query.Query;
 
 public class StaticFilter implements FilterDefinition {
   protected final QueryResponse response;
@@ -10,12 +11,12 @@ public class StaticFilter implements FilterDefinition {
   }
 
   @Override
-  public Class<? extends IQuery> getQueryType() {
-    return IQuery.class;
+  public Class<? extends Query> getQueryType() {
+    return Query.class;
   }
 
   @Override
-  public QueryResponse query(IQuery query) {
+  public QueryResponse query(Query query) {
     return response;
   }
 

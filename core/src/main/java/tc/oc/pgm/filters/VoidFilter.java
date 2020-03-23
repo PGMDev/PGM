@@ -2,19 +2,19 @@ package tc.oc.pgm.filters;
 
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
-import tc.oc.pgm.filters.query.IBlockQuery;
+import tc.oc.pgm.api.filter.query.BlockQuery;
 import tc.oc.pgm.listeners.WorldProblemListener;
 
 /** Matches blocks that have only air/void below them */
-public class VoidFilter extends TypedFilter<IBlockQuery> {
+public class VoidFilter extends TypedFilter<BlockQuery> {
 
   @Override
-  public Class<? extends IBlockQuery> getQueryType() {
-    return IBlockQuery.class;
+  public Class<? extends BlockQuery> getQueryType() {
+    return BlockQuery.class;
   }
 
   @Override
-  protected QueryResponse queryTyped(IBlockQuery query) {
+  protected QueryResponse queryTyped(BlockQuery query) {
     BlockState block = query.getBlock();
     return QueryResponse.fromBoolean(
         block.getY() == 0

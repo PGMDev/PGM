@@ -2,9 +2,9 @@ package tc.oc.pgm.renewable;
 
 import org.bukkit.block.BlockState;
 import org.bukkit.material.MaterialData;
-import tc.oc.pgm.filters.Filter;
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.query.BlockQuery;
-import tc.oc.pgm.regions.Region;
 
 public class RenewableDefinition {
   public Region region;

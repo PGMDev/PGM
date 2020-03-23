@@ -9,6 +9,7 @@ import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.joda.time.Duration;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
@@ -16,15 +17,14 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.AllFilter;
 import tc.oc.pgm.filters.AnyFilter;
-import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.regions.EverywhereRegion;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
-import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.util.xml.XMLUtils;
 
 public class RenewableModule implements MapModule {
   private static final double DEFAULT_AVOID_PLAYERS_RANGE = 2d;

@@ -9,13 +9,16 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerOnGroundEvent;
+import tc.oc.pgm.api.event.PlayerSpleefEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.tracker.info.*;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
-import tc.oc.pgm.tracker.damage.*;
-import tc.oc.pgm.tracker.event.PlayerSpleefEvent;
+import tc.oc.pgm.tracker.info.ExplosionInfo;
+import tc.oc.pgm.tracker.info.PlayerInfo;
+import tc.oc.pgm.tracker.info.SpleefInfo;
 import tc.oc.util.bukkit.material.Materials;
 
 /**

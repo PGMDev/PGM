@@ -1,6 +1,7 @@
 package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.Region;
 
 public class Union extends AbstractRegion {
   private final Region[] regions;

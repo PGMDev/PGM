@@ -7,7 +7,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
-public class EntitySpawnQuery extends EntityQuery implements IEntitySpawnQuery {
+public class EntitySpawnQuery extends EntityQuery
+    implements tc.oc.pgm.api.filter.query.EntitySpawnQuery {
 
   private final CreatureSpawnEvent.SpawnReason spawnReason;
 

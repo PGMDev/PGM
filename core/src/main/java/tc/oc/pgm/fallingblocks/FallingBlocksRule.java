@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
-import tc.oc.pgm.filters.Filter;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.util.bukkit.material.Materials;
 

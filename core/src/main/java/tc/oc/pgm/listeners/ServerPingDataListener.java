@@ -19,12 +19,12 @@ import org.bukkit.event.server.ServerListPingEvent;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.map.contrib.PlayerContributor;
-import tc.oc.pgm.rotation.MapOrder;
 import tc.oc.util.ClassLogger;
 
 public class ServerPingDataListener implements Listener {

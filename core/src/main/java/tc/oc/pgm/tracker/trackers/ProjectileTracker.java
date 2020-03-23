@@ -7,12 +7,12 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.projectiles.ProjectileSource;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.projectile.EntityLaunchEvent;
 import tc.oc.pgm.projectile.ProjectileDefinition;
 import tc.oc.pgm.projectile.ProjectileMatchModule;
 import tc.oc.pgm.tracker.TrackerMatchModule;
-import tc.oc.pgm.tracker.damage.PhysicalInfo;
-import tc.oc.pgm.tracker.damage.ProjectileInfo;
+import tc.oc.pgm.tracker.info.ProjectileInfo;
 
 /**
  * Updates the state of launched projectiles with info about the shooter. Uses {@link Entity}

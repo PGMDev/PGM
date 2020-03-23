@@ -6,7 +6,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import org.joda.time.Duration;
-import tc.oc.pgm.filters.Filter;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.util.bukkit.chat.Sound;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.types.PersonalizedText;

@@ -1,7 +1,7 @@
 package tc.oc.pgm.filters;
 
+import tc.oc.pgm.api.filter.query.BlockQuery;
 import tc.oc.pgm.fallingblocks.FallingBlocksMatchModule;
-import tc.oc.pgm.filters.query.IBlockQuery;
 
 /**
  * Tests the number of other gravity blocks that the queried block is supporting. This filter will
@@ -14,7 +14,7 @@ import tc.oc.pgm.filters.query.IBlockQuery;
  *
  * <p>The XML documentation should note all of this.
  */
-public class StructuralLoadFilter extends TypedFilter<IBlockQuery> {
+public class StructuralLoadFilter extends TypedFilter<BlockQuery> {
 
   private final int threshold;
 
@@ -23,12 +23,12 @@ public class StructuralLoadFilter extends TypedFilter<IBlockQuery> {
   }
 
   @Override
-  public Class<? extends IBlockQuery> getQueryType() {
-    return IBlockQuery.class;
+  public Class<? extends BlockQuery> getQueryType() {
+    return BlockQuery.class;
   }
 
   @Override
-  protected QueryResponse queryTyped(IBlockQuery query) {
+  protected QueryResponse queryTyped(BlockQuery query) {
     FallingBlocksMatchModule fbmm = query.getMatch().getModule(FallingBlocksMatchModule.class);
     if (fbmm == null) return QueryResponse.ABSTAIN;
 

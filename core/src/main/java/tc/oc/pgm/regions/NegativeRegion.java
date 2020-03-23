@@ -1,6 +1,7 @@
 package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.Region;
 
 public class NegativeRegion extends AbstractRegion {
   protected final Region region;

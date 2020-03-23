@@ -1,6 +1,7 @@
 package tc.oc.pgm.filters;
 
-import tc.oc.pgm.filters.query.IQuery;
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.query.Query;
 
 /** Abstain if the child filter abstains, otherwise return the opposite of the child. */
 public class InverseFilter extends SingleFilterFunction {
@@ -10,7 +11,7 @@ public class InverseFilter extends SingleFilterFunction {
   }
 
   @Override
-  public QueryResponse query(IQuery query) {
+  public QueryResponse query(Query query) {
     switch (this.filter.query(query)) {
       case ALLOW:
         return QueryResponse.DENY;

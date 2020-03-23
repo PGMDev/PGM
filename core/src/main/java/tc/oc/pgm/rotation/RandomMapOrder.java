@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Random;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 
 /**

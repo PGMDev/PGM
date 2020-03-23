@@ -1,6 +1,8 @@
 package tc.oc.pgm.features;
 
 import javax.annotation.Nullable;
+import tc.oc.pgm.api.feature.FeatureDefinition;
+import tc.oc.pgm.api.feature.FeatureInfo;
 
 /** A {@link FeatureDefinition} that knows its own ID */
 public abstract class SelfIdentifyingFeatureDefinition implements FeatureDefinition {

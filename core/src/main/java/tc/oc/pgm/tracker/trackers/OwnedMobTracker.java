@@ -14,7 +14,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.projectile.EntityLaunchEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
-import tc.oc.pgm.tracker.damage.MobInfo;
+import tc.oc.pgm.tracker.info.MobInfo;
 
 /** Updates the state of owned mobs with info about the owner. */
 public class OwnedMobTracker extends AbstractTracker<MobInfo> {

@@ -29,15 +29,15 @@ import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.BlockTransformEvent;
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.filters.Filter;
 import tc.oc.pgm.filters.query.BlockQuery;
-import tc.oc.pgm.filters.query.IQuery;
 import tc.oc.pgm.filters.query.PlayerBlockQuery;
 import tc.oc.pgm.kits.tag.ItemTags;
 
@@ -177,7 +177,7 @@ public class ProjectileMatchModule implements MatchModule, Listener {
           projectile.getShooter() instanceof Player
               ? match.getPlayer((Player) projectile.getShooter())
               : null;
-      IQuery query =
+      Query query =
           player != null
               ? new PlayerBlockQuery(event, player, hitBlock.getState())
               : new BlockQuery(event, hitBlock);

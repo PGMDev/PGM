@@ -20,7 +20,6 @@ import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.WorldInfo;
 import tc.oc.pgm.map.contrib.PlayerContributor;
 import tc.oc.pgm.map.contrib.PseudonymContributor;
-import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.Version;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
@@ -29,6 +28,7 @@ import tc.oc.util.bukkit.named.MapNameStyle;
 import tc.oc.util.bukkit.translations.TranslationUtils;
 import tc.oc.util.xml.InvalidXMLException;
 import tc.oc.util.xml.Node;
+import tc.oc.util.xml.XMLUtils;
 
 public class MapInfoImpl implements MapInfo {
   private final String id;

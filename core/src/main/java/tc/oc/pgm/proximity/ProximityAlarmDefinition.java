@@ -1,7 +1,7 @@
 package tc.oc.pgm.proximity;
 
-import tc.oc.pgm.filters.Filter;
-import tc.oc.pgm.regions.Region;
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.region.Region;
 
 public class ProximityAlarmDefinition {
   public Region detectRegion; // Region in which players are detected

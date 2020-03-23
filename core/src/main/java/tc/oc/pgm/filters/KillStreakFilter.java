@@ -2,8 +2,8 @@ package tc.oc.pgm.filters;
 
 import com.google.common.collect.BoundType;
 import com.google.common.collect.Range;
+import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.filters.query.IPlayerQuery;
 import tc.oc.pgm.killreward.KillRewardMatchModule;
 
 public class KillStreakFilter extends ParticipantFilter {
@@ -16,7 +16,7 @@ public class KillStreakFilter extends ParticipantFilter {
   }
 
   @Override
-  protected QueryResponse queryPlayer(IPlayerQuery query, MatchPlayer player) {
+  protected QueryResponse queryPlayer(PlayerQuery query, MatchPlayer player) {
     int streak =
         player.getMatch().needModule(KillRewardMatchModule.class).getKillStreak(player.getId());
     if (this.repeat && streak > 0) {

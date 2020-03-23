@@ -14,12 +14,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.joda.time.Duration;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
+import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.filters.query.IQuery;
 import tc.oc.pgm.filters.query.MatchQuery;
 import tc.oc.pgm.goals.events.GoalEvent;
 import tc.oc.util.bukkit.WorldBorders;
@@ -106,7 +106,7 @@ public class WorldBorderMatchModule implements MatchModule, Listener {
    * @param event to use for the filter query
    */
   private boolean update(@Nullable Event event) {
-    IQuery query = event == null ? match.getQuery() : new MatchQuery(event, match);
+    Query query = event == null ? match.getQuery() : new MatchQuery(event, match);
     WorldBorder lastMatched = null;
     boolean applied = false;
 

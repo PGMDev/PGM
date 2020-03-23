@@ -3,6 +3,7 @@ package tc.oc.pgm.result;
 import javax.annotation.Nullable;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.goals.GoalsVictoryCondition;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamVictoryCondition;

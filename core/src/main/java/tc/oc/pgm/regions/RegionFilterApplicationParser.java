@@ -7,17 +7,18 @@ import java.util.List;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
-import tc.oc.pgm.filters.Filter;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.FilterNode;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.kits.Kit;
-import tc.oc.pgm.util.XMLUtils;
 import tc.oc.util.Version;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.xml.InvalidXMLException;
 import tc.oc.util.xml.Node;
+import tc.oc.util.xml.XMLUtils;
 
 public class RegionFilterApplicationParser {
   private final MapFactory factory;

@@ -20,25 +20,24 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.query.DamageQuery;
+import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.PlayerRelation;
+import tc.oc.pgm.api.tracker.info.DamageInfo;
+import tc.oc.pgm.api.tracker.info.FallInfo;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.filters.Filter;
-import tc.oc.pgm.filters.query.DamageQuery;
-import tc.oc.pgm.filters.query.IDamageQuery;
-import tc.oc.pgm.filters.query.IQuery;
 import tc.oc.pgm.tracker.TrackerMatchModule;
-import tc.oc.pgm.tracker.damage.DamageInfo;
-import tc.oc.pgm.tracker.damage.EntityInfo;
-import tc.oc.pgm.tracker.damage.ExplosionInfo;
-import tc.oc.pgm.tracker.damage.FallInfo;
-import tc.oc.pgm.tracker.damage.FireInfo;
-import tc.oc.pgm.tracker.damage.GenericDamageInfo;
-import tc.oc.pgm.tracker.damage.ProjectileInfo;
+import tc.oc.pgm.tracker.info.EntityInfo;
+import tc.oc.pgm.tracker.info.ExplosionInfo;
+import tc.oc.pgm.tracker.info.FireInfo;
+import tc.oc.pgm.tracker.info.GenericDamageInfo;
+import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.util.bukkit.item.Potions;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -103,15 +102,15 @@ public class DamageMatchModule implements MatchModule, Listener {
   }
 
   /** Get a query for the given damage event */
-  public IDamageQuery getQuery(
+  public DamageQuery getQuery(
       @Nullable Cancellable event, ParticipantState victim, DamageInfo damageInfo) {
-    return DamageQuery.victimDefault((Event) event, victim, damageInfo);
+    return tc.oc.pgm.filters.query.DamageQuery.victimDefault((Event) event, victim, damageInfo);
   }
 
   /** Query the custom damage filters with the given damage event */
   public Filter.QueryResponse queryRules(
       @Nullable Cancellable event, ParticipantState victim, DamageInfo damageInfo) {
-    IQuery query = getQuery(event, victim, damageInfo);
+    Query query = getQuery(event, victim, damageInfo);
 
     for (Filter filter : filters) {
       Filter.QueryResponse response = filter.query(query);

@@ -1,9 +1,11 @@
 package tc.oc.pgm.filters;
 
 import javax.annotation.Nullable;
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.FilterDefinition;
+import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
-import tc.oc.pgm.filters.query.IQuery;
 import tc.oc.util.xml.Node;
 
 /** A {@link Filter} that delegates all methods to an XML reference */
@@ -23,12 +25,12 @@ public class XMLFilterReference extends XMLFeatureReference<FilterDefinition> im
   }
 
   @Override
-  public Class<? extends IQuery> getQueryType() {
+  public Class<? extends Query> getQueryType() {
     return get().getQueryType();
   }
 
   @Override
-  public QueryResponse query(IQuery query) {
+  public QueryResponse query(Query query) {
     return get().query(query);
   }
 }
