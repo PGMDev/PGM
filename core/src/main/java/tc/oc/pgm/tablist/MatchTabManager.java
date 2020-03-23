@@ -1,5 +1,7 @@
 package tc.oc.pgm.tablist;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Map;
 import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
@@ -47,7 +49,7 @@ public class MatchTabManager extends TabManager implements Listener {
 
   public MatchTabManager(Plugin plugin) {
     super(plugin, new MatchTabView.Factory(), null);
-    playerOrderFactory = new PlayerOrder.Factory();
+    playerOrderFactory = PlayerOrder::new;
   }
 
   public void disable() {
@@ -130,7 +132,7 @@ public class MatchTabManager extends TabManager implements Listener {
   }
 
   public void setPlayerOrderFactory(PlayerOrderFactory factory) {
-    this.playerOrderFactory = factory;
+    this.playerOrderFactory = checkNotNull(factory);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

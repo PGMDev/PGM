@@ -12,12 +12,6 @@ import tc.oc.pgm.api.player.MatchPlayer;
  * viewer 2. friends 3. staff 4. other flair ranks 5. alphabetical
  */
 public class PlayerOrder implements Comparator<MatchPlayer> {
-  public static class Factory implements PlayerOrderFactory {
-    @Override
-    public PlayerOrder getOrder(MatchPlayer viewer) {
-      return new PlayerOrder(viewer);
-    }
-  }
 
   private final MatchPlayer viewer;
 

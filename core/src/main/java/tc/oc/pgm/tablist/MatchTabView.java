@@ -25,6 +25,7 @@ import tc.oc.util.Numbers;
 import tc.oc.util.bukkit.ViaUtils;
 import tc.oc.util.bukkit.identity.PlayerIdentityChangeEvent;
 import tc.oc.util.bukkit.tablist.TabEntry;
+import tc.oc.util.bukkit.tablist.TabManager;
 import tc.oc.util.bukkit.tablist.TabView;
 import tc.oc.util.collection.DefaultProvider;
 
@@ -51,6 +52,18 @@ public class MatchTabView extends TabView implements ListeningTabView {
 
   public MatchTabView(Player viewer) {
     super(viewer);
+  }
+
+  @Override
+  public void enable(TabManager manager) {
+    if (manager instanceof MatchTabManager) {
+      this.playerOrder =
+          ((MatchTabManager) manager).getPlayerOrderFactory().getOrder(this.matchPlayer);
+    } else if (playerOrder == null) {
+      this.playerOrder = new PlayerOrder(this.matchPlayer);
+    }
+
+    super.enable(manager);
   }
 
   @Override
@@ -229,7 +242,6 @@ public class MatchTabView extends TabView implements ListeningTabView {
       this.match = event.getMatch();
       this.matchPlayer = event.getPlayer();
 
-      this.playerOrder = getManager().getPlayerOrderFactory().getOrder(this.matchPlayer);
       this.teamOrder = new TeamOrder(this.matchPlayer);
 
       this.observerPlayers.clear();
