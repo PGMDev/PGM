@@ -31,6 +31,8 @@ import tc.oc.util.bukkit.chunk.NullChunkGenerator;
 
 public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
   private static final AtomicLong counter = new AtomicLong();
+  private static final Difficulty[] difficulties = Difficulty.values();
+  private static final World.Environment[] environments = World.Environment.values();
 
   private final AtomicLong start;
   private final AtomicLong timeout;
@@ -254,20 +256,24 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
     private Stage advanceSync() throws IllegalStateException {
       final WorldInfo info = map.getWorld();
+      WorldCreator creator = PGM.get().getServer().detectWorld(worldName);
+      if (creator == null) {
+        creator = new WorldCreator(worldName);
+      }
       final World world =
           PGM.get()
               .getServer()
               .createWorld(
-                  new WorldCreator(worldName)
-                      .environment(World.Environment.values()[info.getEnvironment()])
+                  creator
+                      .environment(environments[info.getEnvironment()])
                       .generator(info.hasTerrain() ? null : new NullChunkGenerator())
-                      .seed(info.getSeed()));
+                      .seed(info.hasTerrain() ? info.getSeed() : creator.seed()));
       if (world == null) throw new IllegalStateException("Unable to load a null world");
 
       world.setPVP(true);
       world.setSpawnFlags(false, false);
       world.setAutoSave(false);
-      world.setDifficulty(Difficulty.values()[map.getDifficulty()]);
+      world.setDifficulty(difficulties[map.getDifficulty()]);
 
       return new InitMatchStage(world, map);
     }
