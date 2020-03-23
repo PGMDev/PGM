@@ -31,8 +31,10 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.commands.SettingCommands;
 import tc.oc.pgm.ffa.Tribute;
 import tc.oc.util.StringUtils;
+import tc.oc.util.bukkit.BukkitUtils;
 import tc.oc.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.util.bukkit.component.Component;
+import tc.oc.util.bukkit.component.ComponentRenderers;
 import tc.oc.util.bukkit.component.Components;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
@@ -46,10 +48,26 @@ public class ChatDispatcher implements Listener {
   private final Set<UUID> muted;
 
   private static final Sound DM_SOUND = new Sound("random.orb", 1f, 1.2f);
+  private static final Sound AC_SOUND = new Sound("random.orb", 1f, 0.7f);
 
   private static final String GLOBAL_SYMBOL = "!";
   private static final String DM_SYMBOL = "@";
   private static final String ADMIN_CHAT_SYMBOL = "$";
+
+  private static final Component CONSOLE =
+      new PersonalizedTranslatable("console")
+          .getPersonalizedText()
+          .color(ChatColor.DARK_AQUA)
+          .italic(true);
+
+  private static final String GLOBAL_FORMAT = "<{0}>: {1}";
+  private static final String PREFIX_FORMAT = "{0}: {1}";
+
+  public static final PersonalizedText ADMIN_CHAT_PREFIX =
+      new PersonalizedText(
+          new PersonalizedText("["),
+          new PersonalizedText("A").color(ChatColor.GOLD),
+          new PersonalizedText("] "));
 
   public ChatDispatcher(MatchManager manager) {
     this.manager = manager;
@@ -66,7 +84,7 @@ public class ChatDispatcher implements Listener {
   }
 
   public boolean isMuted(MatchPlayer player) {
-    return muted.contains(player.getId());
+    return player != null ? muted.contains(player.getId()) : false;
   }
 
   public Set<UUID> getMutedUUIDs() {
@@ -78,7 +96,7 @@ public class ChatDispatcher implements Listener {
       desc = "Send a message to everyone",
       usage = "[message]")
   public void sendGlobal(Match match, MatchPlayer sender, @Nullable @Text String message) {
-    send(match, sender, message, "<{0}>: {1}", viewer -> true, SettingValue.CHAT_GLOBAL);
+    send(match, sender, message, GLOBAL_FORMAT, viewer -> true, SettingValue.CHAT_GLOBAL);
   }
 
   @Command(
@@ -98,7 +116,7 @@ public class ChatDispatcher implements Listener {
         match,
         sender,
         message,
-        party.getChatPrefix().toLegacyText() + "{0}: {1}",
+        party.getChatPrefix().toLegacyText() + PREFIX_FORMAT,
         viewer ->
             party.equals(viewer.getParty())
                 || (viewer.isObserving()
@@ -116,9 +134,7 @@ public class ChatDispatcher implements Listener {
     if (sender != null && !sender.getBukkit().hasPermission(Permissions.ADMINCHAT)) {
       sender.getSettings().resetValue(SettingKey.CHAT);
       SettingKey.CHAT.update(sender);
-      sender.sendWarning(
-          "You do not have permissions for admin chat, your chat setting has now been reset",
-          true); // TODO: translate
+      sender.sendWarning(new PersonalizedTranslatable("commands.adminchat.noperms"), true);
       return;
     }
 
@@ -128,8 +144,8 @@ public class ChatDispatcher implements Listener {
     send(
         match,
         sender,
-        message,
-        "[" + ChatColor.GOLD + "A" + ChatColor.WHITE + "] {0}: {1}",
+        message != null ? BukkitUtils.colorize(message) : message,
+        ADMIN_CHAT_PREFIX.toLegacyText() + PREFIX_FORMAT,
         filter,
         SettingValue.CHAT_ADMIN);
 
@@ -138,12 +154,12 @@ public class ChatDispatcher implements Listener {
       match.getPlayers().stream()
           .filter(filter) // Initial filter
           .filter(viewer -> !viewer.equals(sender)) // Don't play sound for sender
-          .forEach(this::playMessageSound);
+          .forEach(pl -> playSound(pl, AC_SOUND));
     }
   }
 
   @Command(
-      aliases = {"msg", "tell"},
+      aliases = {"msg", "tell", "pm", "dm"},
       desc = "Send a direct message to a player",
       usage = "[player] [message]")
   public void sendDirect(Match match, MatchPlayer sender, Player receiver, @Text String message) {
@@ -172,7 +188,7 @@ public class ChatDispatcher implements Listener {
                 .color(ChatColor.RED));
         return; // Only allow staff to message muted players
       } else {
-        playMessageSound(matchReceiver);
+        playSound(matchReceiver, DM_SOUND);
       }
     }
 
@@ -180,21 +196,30 @@ public class ChatDispatcher implements Listener {
       lastMessagedBy.put(receiver, sender.getId());
     }
 
+    // Send message to receiver
     send(
         match,
         sender,
         message,
-        "[" + ChatColor.GOLD + "DM" + ChatColor.WHITE + "] {0}: {1}",
+        formatPrivateMessage("commands.message.from", matchReceiver.getBukkit()),
         viewer -> viewer.getBukkit().equals(receiver),
         null);
 
+    // Send message to the sender
     send(
         match,
         manager.getPlayer(receiver), // Allow for cross-match messages
         message,
-        "[" + ChatColor.GOLD + "DM" + ChatColor.WHITE + "] -> {0}: {1}",
+        formatPrivateMessage("commands.message.to", sender.getBukkit()),
         viewer -> viewer.getBukkit().equals(sender.getBukkit()),
         null);
+  }
+
+  private String formatPrivateMessage(String key, CommandSender viewer) {
+    Component action =
+        new PersonalizedTranslatable(key).getPersonalizedText().color(ChatColor.GRAY).italic(true);
+    return ComponentRenderers.toLegacyText(
+        new PersonalizedText(action, new PersonalizedText(" {0}: {1}")), viewer);
   }
 
   @Command(
@@ -204,22 +229,11 @@ public class ChatDispatcher implements Listener {
   public void sendReply(Match match, Audience audience, MatchPlayer sender, @Text String message) {
     final MatchPlayer receiver = manager.getPlayer(lastMessagedBy.get(sender.getBukkit()));
     if (receiver == null) {
-      audience.sendWarning(
-          new PersonalizedText("Did not find a message to reply to, use /msg")); // TODO: translate
+      audience.sendWarning(new PersonalizedTranslatable("commands.message.noReply"));
       return;
     }
 
     sendDirect(match, sender, receiver.getBukkit(), message);
-  }
-
-  private static MatchPlayer getApproximatePlayer(Match match, String query, CommandSender sender) {
-    return StringUtils.bestFuzzyMatch(
-        query,
-        match.getPlayers().stream()
-            .collect(
-                Collectors.toMap(
-                    player -> player.getBukkit().getName(sender), Function.identity())),
-        0.75);
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
@@ -237,7 +251,10 @@ public class ChatDispatcher implements Listener {
         final MatchPlayer receiver =
             getApproximatePlayer(player.getMatch(), target, player.getBukkit());
         if (receiver == null) {
-          player.sendWarning("Could not find player '" + target + "' to send a message", true);
+          player.sendWarning(
+              new PersonalizedTranslatable(
+                  "commands.message.noTarget", new PersonalizedText(target)),
+              true);
         } else {
           sendDirect(
               player.getMatch(),
@@ -269,9 +286,11 @@ public class ChatDispatcher implements Listener {
     }
   }
 
-  public void playMessageSound(MatchPlayer player) {
-    if (player.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ON)) {
-      player.playSound(DM_SOUND);
+  public void playSound(MatchPlayer player, Sound sound) {
+    SettingValue value = player.getSettings().getValue(SettingKey.SOUNDS);
+    if ((sound.equals(AC_SOUND) && value.equals(SettingValue.SOUNDS_ALL))
+        || (sound.equals(DM_SOUND) && !value.equals(SettingValue.SOUNDS_NONE))) {
+      player.playSound(sound);
     }
   }
 
@@ -304,12 +323,20 @@ public class ChatDispatcher implements Listener {
         new PersonalizedText(
             Components.format(
                 format,
-                sender == null
-                    ? new PersonalizedText("Console", ChatColor.AQUA, ChatColor.ITALIC)
-                    : sender.getStyledName(NameStyle.FANCY),
+                sender == null ? CONSOLE : sender.getStyledName(NameStyle.FANCY),
                 new PersonalizedText(message.trim())));
     match.getPlayers().stream().filter(filter).forEach(player -> player.sendMessage(component));
     Audience.get(Bukkit.getConsoleSender()).sendMessage(component);
+  }
+
+  private MatchPlayer getApproximatePlayer(Match match, String query, CommandSender sender) {
+    return StringUtils.bestFuzzyMatch(
+        query,
+        match.getPlayers().stream()
+            .collect(
+                Collectors.toMap(
+                    player -> player.getBukkit().getName(sender), Function.identity())),
+        0.75);
   }
 
   private void sendMutedMessage(MatchPlayer player) {
