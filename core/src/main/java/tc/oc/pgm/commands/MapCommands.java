@@ -96,7 +96,7 @@ public class MapCommands {
       public String format(MapInfo map, int index) {
         return (index + 1)
             + ". "
-            + map.getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS).toLegacyText();
+            + map.getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS, sender).toLegacyText();
       }
     }.display(audience, ImmutableSortedSet.copyOf(maps), page);
   }
@@ -264,7 +264,7 @@ public class MapCommands {
                 .translate(
                     "command.map.next.success",
                     sender,
-                    next.getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS).toLegacyText()
+                    next.getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS, sender).toLegacyText()
                         + ChatColor.DARK_PURPLE));
   }
 

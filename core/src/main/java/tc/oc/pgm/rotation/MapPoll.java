@@ -113,7 +113,7 @@ public class MapPoll {
 
     // Check if the winning map name's length suitable for the top title, otherwise subtitle
     boolean top = winner.getName().length() < TITLE_LENGTH_CUTOFF;
-    Component mapName = winner.getStyledMapName(MapNameStyle.COLOR).bold(true);
+    Component mapName = winner.getStyledMapName(MapNameStyle.COLOR, viewer.getBukkit()).bold(true);
 
     viewer.showTitle(
         top ? mapName : Components.blank(), top ? Components.blank() : mapName, 5, 60, 5);
@@ -129,7 +129,7 @@ public class MapPoll {
         new PersonalizedText("" + countVotes(votes.get(map)), ChatColor.YELLOW),
         new PersonalizedText("] "),
         map.getStyledMapName(
-            winner ? MapNameStyle.HIGHLIGHT_WITH_AUTHORS : MapNameStyle.COLOR_WITH_AUTHORS));
+            winner ? MapNameStyle.HIGHLIGHT_WITH_AUTHORS : MapNameStyle.COLOR_WITH_AUTHORS, viewer.getBukkit()));
   }
 
   public void sendBook(MatchPlayer viewer) {

@@ -9,7 +9,6 @@ import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.timelimit.TimeLimitCountdown;
 import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
 public class ModeChangeCountdown extends MatchCountdown implements Comparable<ModeChangeCountdown> {
@@ -53,12 +52,11 @@ public class ModeChangeCountdown extends MatchCountdown implements Comparable<Mo
 
   @Override
   protected Component formatText() {
-    return new PersonalizedText(
-        new PersonalizedTranslatable(
+    return new PersonalizedTranslatable(
             "match.objectiveMode.countdown",
             getMode().getComponentName(),
-            secondsRemaining(ChatColor.AQUA)),
-        ChatColor.DARK_AQUA);
+            secondsRemaining(ChatColor.AQUA))
+            .color(ChatColor.DARK_AQUA);
   }
 
   @Override

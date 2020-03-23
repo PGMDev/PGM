@@ -63,7 +63,7 @@ public class CycleCountdown extends MatchCountdown {
               : new PersonalizedTranslatable("countdown.cycle.message.no_map", secs);
     }
 
-    return new PersonalizedText(cycleComponent, ChatColor.DARK_AQUA);
+    return cycleComponent.color(ChatColor.DARK_AQUA);
   }
 
   @Override
