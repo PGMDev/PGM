@@ -40,6 +40,9 @@ public enum SettingValue {
 
   VOTE_ON("vote", "on"), // Show the vote book on cycle
   VOTE_OFF("vote", "off"), // Don't show the vote book on cycle
+
+  STATS_ON("stats", "on"), // Track stats
+  STATS_OFF("stats", "off"), // Don't track stats
   ;
 
   private final String key;
