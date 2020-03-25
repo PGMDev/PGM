@@ -68,7 +68,7 @@ public class StatsMatchModule implements MatchModule, Listener {
       if (deaths == 0) {
         kd = "0";
       } else {
-        kd = decimalFormatKd.format(kills / deaths);
+        kd = decimalFormatKd.format(kills / (double) deaths);
       }
       return new Component(
           new PersonalizedTranslatable(
