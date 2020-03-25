@@ -12,12 +12,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import tc.oc.util.bukkit.translations.Locales;
+import tc.oc.util.translate.UTF8Control;
 
 /** A class retrieves translations from a {@link ResourceBundle} */
 @SuppressWarnings("UnstableApiUsage")
 public class TranslationProvider {
 
   private final LoadingCache<Locale, Map<String, String>> cachedLocales;
+  private final UTF8Control control = new UTF8Control();
   private String name;
 
   public TranslationProvider(String name) {
@@ -98,7 +100,7 @@ public class TranslationProvider {
    * @return {@link Map} of translations
    */
   public Map<String, String> getTranslations(Locale locale) {
-    ResourceBundle bundle = ResourceBundle.getBundle(getName(), locale);
+    ResourceBundle bundle = ResourceBundle.getBundle(getName(), locale, this.control);
     return Collections.list(bundle.getKeys()).stream()
         .map(key -> new SimpleImmutableEntry<>(key, bundle.getString(key)))
         .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
