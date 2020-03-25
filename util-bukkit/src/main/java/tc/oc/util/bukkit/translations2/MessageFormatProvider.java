@@ -7,6 +7,8 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import tc.oc.util.translate.UTF8Control;
+
 import java.text.MessageFormat;
 import java.util.Comparator;
 import java.util.Locale;
@@ -24,6 +26,7 @@ public class MessageFormatProvider {
   private final Locale defaultLocale;
   private final LoadingCache<Locale, Locale> localeCache;
   private final Table<String, Locale, MessageFormat> formatTable;
+  private final UTF8Control control = new UTF8Control();
 
   public MessageFormatProvider(@Nullable String resourceName, Locale defaultLocale) {
     this.defaultLocale = checkNotNull(defaultLocale);
@@ -44,7 +47,7 @@ public class MessageFormatProvider {
       try {
         final String path =
             resourceName == null || resourceName.isEmpty() ? lang : resourceName + "_" + lang;
-        bundle = ResourceBundle.getBundle(path, locale);
+        bundle = ResourceBundle.getBundle(path, locale, this.control);
       } catch (MissingResourceException e) {
         continue;
       }
