@@ -19,6 +19,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.projectile.EntityLaunchEvent;
 import tc.oc.util.bukkit.chat.Sound;
@@ -134,7 +135,10 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
           Projectile customProjectile = (Projectile) projectile;
           if (customProjectile.getShooter() instanceof Player) {
             Player bukkitShooter = (Player) customProjectile.getShooter();
-            SoundsMatchModule.playSound(match.getPlayer(bukkitShooter), PROJECTILE_SOUND);
+            MatchPlayer shooter = match.getPlayer(bukkitShooter);
+            if (shooter != null) {
+              shooter.playSound(PROJECTILE_SOUND);
+            }
           }
         }
       }
