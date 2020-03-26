@@ -7,8 +7,11 @@ import java.util.Map;
 import java.util.UUID;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -32,6 +35,9 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   private final Match match;
   private final Map<UUID, PlayerStats> allPlayerStats = new HashMap<>();
+  // Since Bukkit#getOfflinePlayer reads the cached user files, and those files have an expire date
+  // + will be wiped if X amount of players join, we need a seperate cache for players with stats
+  private final Map<UUID, Player> cachedPlayers = new HashMap<>();
 
   public StatsMatchModule(Match match) {
     this.match = match;
@@ -167,6 +173,19 @@ public class StatsMatchModule implements MatchModule, Listener {
     }
   }
 
+  @EventHandler
+  public void onPlayerLeave(PlayerQuitEvent event) {
+    Player player = event.getPlayer();
+    if (allPlayerStats.containsKey(player.getUniqueId()))
+      cachedPlayers.put(player.getUniqueId(), player);
+  }
+
+  @EventHandler
+  public void onPlayerJoin(PlayerJoinEvent event) {
+    UUID playerUUID = event.getPlayer().getUniqueId();
+    cachedPlayers.remove(playerUUID);
+  }
+
   private Map.Entry<UUID, Integer> sortStats(Map<UUID, Integer> map) {
     return map.entrySet().stream().max(Comparator.comparingInt(Map.Entry::getValue)).orElse(null);
   }
@@ -194,11 +213,10 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   private PersonalizedText playerName(UUID playerUUID) {
     if (Bukkit.getPlayer(playerUUID) == null) {
-      if (Bukkit.getOfflinePlayer(playerUUID).getName() == null) {
+      if (cachedPlayers.get(playerUUID) == null) {
         return new PersonalizedText("Unknown", ChatColor.MAGIC, ChatColor.BLACK);
       }
-      return new PersonalizedText(
-          Bukkit.getOfflinePlayer(playerUUID).getName(), ChatColor.DARK_AQUA);
+      return new PersonalizedText(cachedPlayers.get(playerUUID).getName(), ChatColor.DARK_AQUA);
     }
     return new PersonalizedText(match.getPlayer(playerUUID).getBukkit().getDisplayName());
   }
