@@ -38,7 +38,7 @@ public class DeathMessageMatchModule implements MatchModule, Listener {
 
     DeathMessageBuilder builder =
         new DeathMessageBuilder(event.getVictim(), event.getDamageInfo(), logger);
-    Component message = new PersonalizedText(builder.getMessage(), ChatColor.GRAY);
+    Component message = builder.getMessage().color(ChatColor.GRAY);
 
     if (event.isPredicted()) {
       message.extra(
@@ -51,12 +51,12 @@ public class DeathMessageMatchModule implements MatchModule, Listener {
           if (event.isInvolved(viewer)) {
             viewer.sendMessage(message);
           } else if (event.isTeamKill() && viewer.getBukkit().hasPermission(Permissions.STAFF)) {
-            viewer.sendMessage(new PersonalizedText(message, ChatColor.ITALIC));
+            viewer.sendMessage(new PersonalizedText(message.render(viewer.getBukkit())).italic(true));
           }
           break;
         case DEATH_ALL:
           if (event.isInvolved(viewer)) {
-            viewer.sendMessage(new PersonalizedText(message, ChatColor.BOLD));
+            viewer.sendMessage(new PersonalizedText(message.render(viewer.getBukkit())).bold(true));
           } else {
             viewer.sendMessage(message);
           }
