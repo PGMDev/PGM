@@ -152,4 +152,16 @@ public class MapPoolManager implements MapOrder {
 
     activeMapPool.matchEnded(match);
   }
+
+  /**
+   * Checks all loaded {@link MapPool}s for a given {@link MapInfo} and returns all {@link MapPool}s
+   * that contains it
+   */
+  public List<MapPool> contains(MapInfo map) {
+    List<MapPool> containedIn = new ArrayList<>();
+    for (MapPool mapPool : this.mapPools) {
+      if (mapPool.getMaps().contains(map)) containedIn.add(mapPool);
+    }
+    return containedIn;
+  }
 }
