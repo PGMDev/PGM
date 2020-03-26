@@ -5,6 +5,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,6 +21,7 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.projectile.EntityLaunchEvent;
+import tc.oc.util.bukkit.chat.Sound;
 import tc.oc.util.bukkit.nms.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -29,6 +31,8 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
   private final Class<? extends Entity> cls;
   private final float velocityMod;
   private final Set<PotionEffect> potionEffects;
+
+  private static final Sound PROJECTILE_SOUND = new Sound("random.successful_hit", 0.18f, 0.45f);
 
   public ModifyBowProjectileMatchModule(
       Match match, Class<? extends Entity> cls, float velocityMod, Set<PotionEffect> effects) {
@@ -122,6 +126,16 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
           velocity.setZ(
               velocity.getZ() + projectileVelocity.getZ() * knockback * 0.6 / horizontalSpeed);
           event.getEntity().setVelocity(velocity);
+        }
+
+        // If the projectile is not an arrow, play an impact sound.
+        if (event.getEntity() instanceof Player
+            && (projectile instanceof Projectile && !(projectile instanceof Arrow))) {
+          Projectile customProjectile = (Projectile) projectile;
+          if (customProjectile.getShooter() instanceof Player) {
+            Player bukkitShooter = (Player) customProjectile.getShooter();
+            SoundsMatchModule.playSound(match.getPlayer(bukkitShooter), PROJECTILE_SOUND);
+          }
         }
       }
 
