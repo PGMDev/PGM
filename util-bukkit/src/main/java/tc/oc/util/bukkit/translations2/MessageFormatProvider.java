@@ -7,14 +7,13 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import tc.oc.util.translate.UTF8Control;
-
 import java.text.MessageFormat;
 import java.util.Comparator;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import javax.annotation.Nullable;
+import tc.oc.util.translate.UTF8Control;
 
 /**
  * Provides {@link MessageFormat} translations based on {@link Locale}.

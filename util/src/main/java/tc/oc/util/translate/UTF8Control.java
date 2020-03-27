@@ -10,42 +10,41 @@ import java.util.Locale;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
-
 /**
- * A {@link java.util.ResourceBundle.Control} implementation which allows reading of .properties files encoded with UTF-8.
+ * A {@link java.util.ResourceBundle.Control} implementation which allows reading of .properties
+ * files encoded with UTF-8.
  *
- * See https://stackoverflow.com/a/4660195 for more details.
+ * <p>See https://stackoverflow.com/a/4660195 for more details.
  */
 public class UTF8Control extends ResourceBundle.Control {
-    public ResourceBundle newBundle
-            (String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
-            throws IllegalAccessException, InstantiationException, IOException
-    {
-        // The below is a copy of the default implementation.
-        String bundleName = toBundleName(baseName, locale);
-        String resourceName = toResourceName(bundleName, "properties");
-        ResourceBundle bundle = null;
-        InputStream stream = null;
-        if (reload) {
-            URL url = loader.getResource(resourceName);
-            if (url != null) {
-                URLConnection connection = url.openConnection();
-                if (connection != null) {
-                    connection.setUseCaches(false);
-                    stream = connection.getInputStream();
-                }
-            }
-        } else {
-            stream = loader.getResourceAsStream(resourceName);
+  public ResourceBundle newBundle(
+      String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
+      throws IllegalAccessException, InstantiationException, IOException {
+    // The below is a copy of the default implementation.
+    String bundleName = toBundleName(baseName, locale);
+    String resourceName = toResourceName(bundleName, "properties");
+    ResourceBundle bundle = null;
+    InputStream stream = null;
+    if (reload) {
+      URL url = loader.getResource(resourceName);
+      if (url != null) {
+        URLConnection connection = url.openConnection();
+        if (connection != null) {
+          connection.setUseCaches(false);
+          stream = connection.getInputStream();
         }
-        if (stream != null) {
-            try {
-                // Only this line is changed to make it to read properties files as UTF-8.
-                bundle = new PropertyResourceBundle(new InputStreamReader(stream, StandardCharsets.UTF_8));
-            } finally {
-                stream.close();
-            }
-        }
-        return bundle;
+      }
+    } else {
+      stream = loader.getResourceAsStream(resourceName);
     }
+    if (stream != null) {
+      try {
+        // Only this line is changed to make it to read properties files as UTF-8.
+        bundle = new PropertyResourceBundle(new InputStreamReader(stream, StandardCharsets.UTF_8));
+      } finally {
+        stream.close();
+      }
+    }
+    return bundle;
+  }
 }
