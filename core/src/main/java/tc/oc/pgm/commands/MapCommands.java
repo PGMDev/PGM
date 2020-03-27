@@ -21,6 +21,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.command.CommandSender;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.MapInfo;
@@ -28,6 +29,8 @@ import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.commands.annotations.Text;
+import tc.oc.pgm.rotation.MapPool;
+import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.util.PrettyPaginatedResult;
 import tc.oc.util.bukkit.chat.Audience;
 import tc.oc.util.bukkit.component.Component;
@@ -192,6 +195,21 @@ public class MapCommands {
     }
 
     audience.sendMessage(createTagsComponent(map.getTags()));
+
+    if (PGM.get().getMapOrder() instanceof MapPoolManager) {
+      String mapPools =
+          ((MapPoolManager) PGM.get().getMapOrder())
+              .getMapPools().stream()
+                  .filter(pool -> pool.getMaps().contains(map))
+                  .map(MapPool::getName)
+                  .collect(Collectors.joining(", "));
+      if (!mapPools.isEmpty()) {
+        audience.sendMessage(
+            new PersonalizedText(
+                mapInfoLabel("command.map.mapInfo.pools"),
+                new PersonalizedText(mapPools).color(ChatColor.GOLD).bold(false)));
+      }
+    }
   }
 
   private Component createTagsComponent(Collection<MapTag> tags) {
