@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -198,12 +197,17 @@ public class MapCommands {
     audience.sendMessage(createTagsComponent(map.getTags()));
 
     if (PGM.get().getMapOrder() instanceof MapPoolManager) {
-      List<MapPool> mapPools = ((MapPoolManager) PGM.get().getMapOrder()).contains(map);
+      String mapPools =
+          ((MapPoolManager) PGM.get().getMapOrder())
+              .getMapPools().stream()
+                  .filter(pool -> pool.getMaps().contains(map))
+                  .map(MapPool::getName)
+                  .collect(Collectors.joining(", "));
       if (!mapPools.isEmpty()) {
         audience.sendMessage(
             new PersonalizedText(
-                mapInfoLabel("command.map.mapInfo.containedInMapPools"),
-                createContainedInMapPoolsComponent(mapPools).bold(false)));
+                mapInfoLabel("command.map.mapInfo.pools"),
+                new PersonalizedText(mapPools).color(ChatColor.GOLD).bold(false)));
       }
     }
   }
@@ -258,17 +262,6 @@ public class MapCommands {
             ChatColor.GRAY);
 
     return total.extra(" ").extra(verbose);
-  }
-
-  private Component createContainedInMapPoolsComponent(List<MapPool> mapPools) {
-    PersonalizedText pools = new PersonalizedText();
-    int iteration = 1;
-    for (MapPool mapPool : mapPools) {
-      pools.extra(mapPool.getName());
-      if (mapPools.size() > iteration) pools.extra(", ");
-      iteration++;
-    }
-    return new PersonalizedText(pools, ChatColor.GOLD);
   }
 
   @Command(
