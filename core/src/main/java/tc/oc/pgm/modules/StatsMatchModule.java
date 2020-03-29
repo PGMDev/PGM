@@ -37,7 +37,7 @@ public class StatsMatchModule implements MatchModule, Listener {
   private final Map<UUID, PlayerStats> allPlayerStats = new HashMap<>();
   // Since Bukkit#getOfflinePlayer reads the cached user files, and those files have an expire date
   // + will be wiped if X amount of players join, we need a seperate cache for players with stats
-  private final Map<UUID, Player> cachedPlayers = new HashMap<>();
+  private final Map<UUID, String> cachedUsernames = new HashMap<>();
 
   public StatsMatchModule(Match match) {
     this.match = match;
@@ -131,6 +131,9 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   @EventHandler
   public void onMatchEnd(MatchFinishEvent event) {
+
+    if (allPlayerStats.isEmpty()) return;
+
     Map<UUID, Integer> allKills = new HashMap<>();
     Map<UUID, Integer> allKillstreaks = new HashMap<>();
     Map<UUID, Integer> allDeaths = new HashMap<>();
@@ -183,13 +186,13 @@ public class StatsMatchModule implements MatchModule, Listener {
   public void onPlayerLeave(PlayerQuitEvent event) {
     Player player = event.getPlayer();
     if (allPlayerStats.containsKey(player.getUniqueId()))
-      cachedPlayers.put(player.getUniqueId(), player);
+      cachedUsernames.put(player.getUniqueId(), player.getName());
   }
 
   @EventHandler
   public void onPlayerJoin(PlayerJoinEvent event) {
     UUID playerUUID = event.getPlayer().getUniqueId();
-    cachedPlayers.remove(playerUUID);
+    cachedUsernames.remove(playerUUID);
   }
 
   private Map.Entry<UUID, Integer> sortStats(Map<UUID, Integer> map) {
@@ -219,10 +222,10 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   private PersonalizedText playerName(UUID playerUUID) {
     if (Bukkit.getPlayer(playerUUID) == null) {
-      if (cachedPlayers.get(playerUUID) == null) {
+      if (cachedUsernames.get(playerUUID) == null) {
         return new PersonalizedText("Unknown", ChatColor.MAGIC, ChatColor.BLACK);
       }
-      return new PersonalizedText(cachedPlayers.get(playerUUID).getName(), ChatColor.DARK_AQUA);
+      return new PersonalizedText(cachedUsernames.get(playerUUID), ChatColor.DARK_AQUA);
     }
     return new PersonalizedText(match.getPlayer(playerUUID).getBukkit().getDisplayName());
   }
