@@ -239,6 +239,9 @@ public class ChatDispatcher implements Listener {
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
   public void onChat(AsyncPlayerChatEvent event) {
+    // Ignore test messages from method "send"
+    if (event.getMessage().contains("8af5859a-1d6e-4fbd-ae5f-4c63ff630fa4")) return;
+
     event.setCancelled(true);
 
     final MatchPlayer player = manager.getPlayer(event.getPlayer());
@@ -302,6 +305,25 @@ public class ChatDispatcher implements Listener {
       String format,
       Predicate<MatchPlayer> filter,
       @Nullable SettingValue type) {
+
+    // Cancel the message if some other plugin cancels chat events for this player
+    if (sender != null) {
+      AsyncPlayerChatEvent event =
+          new AsyncPlayerChatEvent(
+              false,
+              sender.getBukkit(),
+              // This message prevents PGM from sending the test as a message
+              message + " 8af5859a-1d6e-4fbd-ae5f-4c63ff630fa4",
+              match.getPlayers().stream()
+                  .filter(filter)
+                  .map(MatchPlayer::getBukkit)
+                  .collect(Collectors.toSet()));
+
+      match.callEvent(event);
+
+      if (event.isCancelled()) return;
+    }
+
     // When a message is empty, this indicates the player wants to change their default chat channel
     if (message == null) {
       try {
