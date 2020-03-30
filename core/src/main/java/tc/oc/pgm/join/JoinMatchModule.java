@@ -101,8 +101,6 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
       return GenericJoinResult.Status.MATCH_STARTED.toResult();
     }
 
-
-
     for (JoinGuard guard : allGuards()) {
       JoinResult result = guard.queryJoin(joining, chosenParty);
       if (result != null) return result;
