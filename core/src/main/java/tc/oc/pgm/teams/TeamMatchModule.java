@@ -26,6 +26,7 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.events.PlayerJoinPartyEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.join.GenericJoinResult;
 import tc.oc.pgm.join.JoinHandler;
@@ -33,7 +34,6 @@ import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.join.JoinResult;
 import tc.oc.pgm.join.QueuedParticipants;
 import tc.oc.pgm.match.Observers;
-import tc.oc.pgm.modules.TeamRestrictMatchModule;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
@@ -119,6 +119,9 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   private final JoinMatchModule jmm;
   private final Match match;
+
+  private final Map<UUID, Party> playerTeamMap = new HashMap<>();
+
 
   public TeamMatchModule(Match match, Set<TeamFactory> teamFactories, boolean requireEven) {
     this.match = match;
@@ -378,7 +381,12 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
    * joined a team.
    */
   public @Nullable Team getLastTeam(UUID playerId) {
-    return match.getModule(TeamRestrictMatchModule.class).getLastTeam(playerId);
+    Party lastParty = playerTeamMap.get(playerId);
+    if (lastParty instanceof Team) {
+      return (Team) lastParty;
+    } else {
+      return null;
+    }
   }
 
   /** What would happen if the given player tried to join the given team right now? */
@@ -644,6 +652,20 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
               new PersonalizedTranslatable("team.join", event.getNewParty().getComponentName()));
     }
     updateReadiness();
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void addPlayerToMatch(PlayerJoinPartyEvent event) {
+    UUID playerID = event.getPlayer().getId();
+    if (playerTeamMap.containsKey(playerID)
+            && !event
+            .getNewParty()
+            .isObserving()) { // If player was previously on team but joins obs, keep previous team
+      playerTeamMap.replace(playerID, event.getNewParty());
+
+    } else if (!playerTeamMap.containsKey(playerID)) {
+      playerTeamMap.put(playerID, event.getNewParty());
+    }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
