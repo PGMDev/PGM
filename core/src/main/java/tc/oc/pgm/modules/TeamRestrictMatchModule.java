@@ -15,12 +15,12 @@ import tc.oc.pgm.events.PlayerJoinPartyEvent;
 import tc.oc.pgm.teams.Team;
 
 @ListenerScope(MatchScope.LOADED)
-public class TeamRestrictModule implements MatchModule, Listener {
+public class TeamRestrictMatchModule implements MatchModule, Listener {
 
   private final Match match;
   private final Map<UUID, Party> playerTeamMap = new HashMap<>();
 
-  public TeamRestrictModule(Match match) {
+  public TeamRestrictMatchModule(Match match) {
     this.match = match;
   }
 

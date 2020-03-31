@@ -33,7 +33,7 @@ import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.join.JoinResult;
 import tc.oc.pgm.join.QueuedParticipants;
 import tc.oc.pgm.match.Observers;
-import tc.oc.pgm.modules.TeamRestrictModule;
+import tc.oc.pgm.modules.TeamRestrictMatchModule;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
@@ -378,7 +378,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
    * joined a team.
    */
   public @Nullable Team getLastTeam(UUID playerId) {
-    return match.getModule(TeamRestrictModule.class).getLastTeam(playerId);
+    return match.getModule(TeamRestrictMatchModule.class).getLastTeam(playerId);
   }
 
   /** What would happen if the given player tried to join the given team right now? */
