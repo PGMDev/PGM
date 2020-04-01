@@ -3,10 +3,13 @@ package tc.oc.pgm.listeners;
 import app.ashcon.intake.Command;
 import app.ashcon.intake.argument.ArgumentException;
 import app.ashcon.intake.parametric.annotation.Text;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Sets;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -41,12 +44,22 @@ import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 import tc.oc.util.bukkit.named.NameStyle;
 
+/**
+ * A {@link AsyncPlayerChatEvent} will be called for each message sent trough the methods in this
+ * class
+ */
 public class ChatDispatcher implements Listener {
 
   private final MatchManager manager;
   private final OnlinePlayerMapAdapter<UUID> lastMessagedBy;
 
   private final Set<UUID> muted;
+
+  // A cache used to prevent double messages when calling events.
+  // The value of this Cache is not important for anything
+  @SuppressWarnings("UnstableApiUsage")
+  private final Cache<AsyncPlayerChatEvent, String> messageCache =
+      CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.SECONDS).build();
 
   private static final Sound DM_SOUND = new Sound("random.orb", 1f, 1.2f);
   private static final Sound AC_SOUND = new Sound("random.orb", 1f, 0.7f);
@@ -239,8 +252,12 @@ public class ChatDispatcher implements Listener {
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
   public void onChat(AsyncPlayerChatEvent event) {
-    // Ignore test messages from method "send"
-    if (event.getMessage().contains("8af5859a-1d6e-4fbd-ae5f-4c63ff630fa4")) return;
+
+    // Ignore if present in cache to prevent double sending of messages
+    if (messageCache.getIfPresent(event) != null) {
+      messageCache.invalidate(event);
+      return;
+    }
 
     event.setCancelled(true);
 
@@ -306,18 +323,20 @@ public class ChatDispatcher implements Listener {
       Predicate<MatchPlayer> filter,
       @Nullable SettingValue type) {
 
-    // Cancel the message if some other plugin cancels chat events for this player
+    // Call a chatevent for each message, will cancel the message if the event is canceled by
+    // anything except PGM
     if (sender != null) {
       AsyncPlayerChatEvent event =
           new AsyncPlayerChatEvent(
               false,
               sender.getBukkit(),
-              // This message prevents PGM from sending the test as a message
-              message + " 8af5859a-1d6e-4fbd-ae5f-4c63ff630fa4",
+              message,
               match.getPlayers().stream()
                   .filter(filter)
                   .map(MatchPlayer::getBukkit)
                   .collect(Collectors.toSet()));
+
+      messageCache.put(event, "boring message");
 
       match.callEvent(event);
 
