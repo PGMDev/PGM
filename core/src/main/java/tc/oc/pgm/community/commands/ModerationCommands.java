@@ -136,7 +136,7 @@ public class ModerationCommands implements Listener {
   public void sendFrozenList(CommandSender sender, Match match) {
     FreezeMatchModule fmm = match.getModule(FreezeMatchModule.class);
 
-    if (fmm.getFrozenPlayers().isEmpty()) {
+    if (fmm.getFrozenPlayers().isEmpty() && fmm.getOfflineFrozenCount() < 1) {
       sender.sendMessage(
           new PersonalizedTranslatable("command.freeze.list.none")
               .getPersonalizedText()
@@ -144,22 +144,32 @@ public class ModerationCommands implements Listener {
       return;
     }
 
-    Component count =
-        new PersonalizedText(Integer.toString(fmm.getFrozenPlayers().size()), ChatColor.AQUA);
-    Component names =
-        new Component(
-            Components.join(
-                new PersonalizedText(", ").color(ChatColor.GRAY),
-                fmm.getFrozenPlayers().stream()
-                    .map(m -> m.getStyledName(NameStyle.FANCY))
-                    .collect(Collectors.toList())));
+    // Online Players
+    if (!fmm.getFrozenPlayers().isEmpty()) {
+      Component names =
+          new Component(
+              Components.join(
+                  new PersonalizedText(", ").color(ChatColor.GRAY),
+                  fmm.getFrozenPlayers().stream()
+                      .map(m -> m.getStyledName(NameStyle.FANCY))
+                      .collect(Collectors.toList())));
+      sender.sendMessage(
+          formatFrozenList("command.freeze.list", fmm.getFrozenPlayers().size(), names));
+    }
 
-    Component message =
-        new PersonalizedTranslatable("command.freeze.list", count, names)
-            .getPersonalizedText()
-            .color(ChatColor.GRAY);
+    // Offline Players
+    if (fmm.getOfflineFrozenCount() > 0) {
+      Component names = new PersonalizedText(fmm.getOfflineFrozenNames());
+      sender.sendMessage(
+          formatFrozenList("command.freeze.list.offline", fmm.getOfflineFrozenCount(), names));
+    }
+  }
 
-    sender.sendMessage(message);
+  private Component formatFrozenList(String key, int count, Component names) {
+    return new PersonalizedTranslatable(
+            key, new PersonalizedText(Integer.toString(count), ChatColor.AQUA), names)
+        .getPersonalizedText()
+        .color(ChatColor.GRAY);
   }
 
   @Command(
@@ -167,7 +177,7 @@ public class ModerationCommands implements Listener {
       usage = "<player>",
       desc = "Freeze a player",
       perms = Permissions.STAFF)
-  public void freeze(CommandSender sender, Match match, Player target) {
+  public void freeze(CommandSender sender, Match match, Player target) throws CommandException {
     setFreeze(sender, match, target, true);
   }
 
@@ -176,16 +186,36 @@ public class ModerationCommands implements Listener {
       usage = "<player>",
       desc = "Unfreeze a player",
       perms = Permissions.STAFF)
-  public void unFreeze(CommandSender sender, Match match, Player target) {
+  public void unFreeze(CommandSender sender, Match match, Player target) throws CommandException {
     setFreeze(sender, match, target, false);
   }
 
-  private void setFreeze(CommandSender sender, Match match, Player target, boolean freeze) {
+  private void setFreeze(CommandSender sender, Match match, Player target, boolean freeze)
+      throws CommandException {
     FreezeMatchModule fmm = match.getModule(FreezeMatchModule.class);
     MatchPlayer player = match.getPlayer(target);
 
+    Component alreadyFrozen =
+        new PersonalizedTranslatable(
+                "command.freeze.already.frozen",
+                match.getPlayer(target).getStyledName(NameStyle.FANCY))
+            .getPersonalizedText()
+            .color(ChatColor.GRAY);
+    Component alreadyThawed =
+        new PersonalizedTranslatable(
+                "command.freeze.already.thaw",
+                match.getPlayer(target).getStyledName(NameStyle.FANCY))
+            .getPersonalizedText()
+            .color(ChatColor.GRAY);
+
     if (player != null) {
-      fmm.getFreeze().setFrozen(sender, player, freeze);
+      if (fmm.isFrozen(player) && freeze) {
+        throw new CommandException(ComponentRenderers.toLegacyText(alreadyFrozen, sender));
+      } else if (!fmm.isFrozen(player) && !freeze) {
+        throw new CommandException(ComponentRenderers.toLegacyText(alreadyThawed, sender));
+      } else {
+        fmm.setFrozen(sender, player, freeze);
+      }
     }
   }
 

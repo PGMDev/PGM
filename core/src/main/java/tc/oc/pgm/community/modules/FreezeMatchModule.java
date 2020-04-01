@@ -1,9 +1,12 @@
 package tc.oc.pgm.community.modules;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
@@ -70,19 +73,31 @@ public class FreezeMatchModule implements MatchModule, Listener {
     this.freeze = new Freeze();
   }
 
-  public Freeze getFreeze() {
-    return freeze;
+  public void setFrozen(@Nullable CommandSender freezer, MatchPlayer freezee, boolean frozen) {
+    freeze.setFrozen(freezer, freezee, frozen);
   }
 
   public List<MatchPlayer> getFrozenPlayers() {
     return freeze.frozenPlayers.values().stream().collect(Collectors.toList());
   }
 
+  public int getOfflineFrozenCount() {
+    return freeze.getOfflineCount();
+  }
+
+  public String getOfflineFrozenNames() {
+    return freeze.getOfflineFrozenNames();
+  }
+
+  public boolean isFrozen(MatchPlayer player) {
+    return freeze.isFrozen(player.getBukkit());
+  }
+
   private ItemStack getFreezeTool(CommandSender viewer) {
     ItemStack stack = new ItemStack(TOOL_MATERIAL);
     ItemMeta meta = stack.getItemMeta();
     meta.setDisplayName(
-        ChatColor.DARK_AQUA
+        ChatColor.WHITE
             + ChatColor.BOLD.toString()
             + AllTranslations.get().translate("freeze.itemName", viewer));
     meta.addItemFlags(ItemFlag.values());
@@ -123,7 +138,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
     }
   }
 
-  private static final List<String> ALLOWED_CMDS = Lists.newArrayList("/msg", "/r");
+  private static final List<String> ALLOWED_CMDS = Lists.newArrayList("/msg", "/r", "/tell");
 
   @EventHandler(priority = EventPriority.HIGH)
   public void onPlayerCommand(final PlayerCommandPreprocessEvent event) {
@@ -168,6 +183,13 @@ public class FreezeMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onVehicleExit(final VehicleExitEvent event) {
     if (freeze.isFrozen(event.getExited())) {
+      event.setCancelled(true);
+    }
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onVehicleDamage(final VehicleDamageEvent event) {
+    if (freeze.isFrozen(event.getAttacker())) {
       event.setCancelled(true);
     }
   }
@@ -230,17 +252,10 @@ public class FreezeMatchModule implements MatchModule, Listener {
     }
   }
 
-  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-  public void onVehicleDamage(final VehicleDamageEvent event) {
-    if (freeze.isFrozen(event.getAttacker())) {
-      event.setCancelled(true);
-    }
-  }
-
   @EventHandler
   public void onPlayerJoin(PlayerJoinEvent event) {
     if (freeze.isCached(event.getPlayer().getUniqueId())) {
-      freeze.removeCachedUUID(event.getPlayer().getUniqueId());
+      freeze.removeCachedPlayer(event.getPlayer().getUniqueId());
       freeze.setFrozen(Bukkit.getConsoleSender(), match.getPlayer(event.getPlayer()), true);
     }
   }
@@ -248,7 +263,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
   @EventHandler
   public void onPlayerQuit(PlayerQuitEvent event) {
     if (freeze.isFrozen(event.getPlayer())) {
-      freeze.cacheUUID(event.getPlayer().getUniqueId());
+      freeze.cachePlayer(event.getPlayer());
     }
   }
 
@@ -258,23 +273,33 @@ public class FreezeMatchModule implements MatchModule, Listener {
     private final Sound THAW_SOUND = new Sound("mob.enderdragon.growl", 1f, 2f);
 
     private final OnlinePlayerMapAdapter<MatchPlayer> frozenPlayers;
-    private final List<UUID> offlineFrozenCache;
+    private final Cache<UUID, String> offlineFrozenCache =
+        CacheBuilder.newBuilder().expireAfterWrite(3, TimeUnit.MINUTES).build();
 
     public Freeze() {
       this.frozenPlayers = new OnlinePlayerMapAdapter<MatchPlayer>(PGM.get());
-      this.offlineFrozenCache = Lists.newArrayList();
     }
 
-    private void cacheUUID(UUID uuid) {
-      this.offlineFrozenCache.add(uuid);
+    private void cachePlayer(Player player) {
+      this.offlineFrozenCache.put(player.getUniqueId(), player.getName());
     }
 
-    private void removeCachedUUID(UUID uuid) {
-      this.offlineFrozenCache.remove(uuid);
+    private void removeCachedPlayer(UUID uuid) {
+      this.offlineFrozenCache.invalidate(uuid);
     }
 
     private boolean isCached(UUID uuid) {
-      return this.offlineFrozenCache.contains(uuid);
+      return this.offlineFrozenCache.getIfPresent(uuid) != null;
+    }
+
+    private String getOfflineFrozenNames() {
+      return offlineFrozenCache.asMap().values().stream()
+          .map(name -> ChatColor.DARK_AQUA + name)
+          .collect(Collectors.joining(ChatColor.GRAY + ", "));
+    }
+
+    private int getOfflineCount() {
+      return Math.toIntExact(offlineFrozenCache.size());
     }
 
     public boolean isFrozen(Entity player) {
