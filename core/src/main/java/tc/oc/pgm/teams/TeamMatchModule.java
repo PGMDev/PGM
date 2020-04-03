@@ -120,7 +120,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
   private final JoinMatchModule jmm;
   private final Match match;
 
-  private final Map<UUID, Party> playerTeamMap = new HashMap<>();
+  private final Map<UUID, Team> playerTeamMap = new HashMap<>();
 
 
   public TeamMatchModule(Match match, Set<TeamFactory> teamFactories, boolean requireEven) {
@@ -381,12 +381,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
    * joined a team.
    */
   public @Nullable Team getLastTeam(UUID playerId) {
-    Party lastParty = playerTeamMap.get(playerId);
-    if (lastParty instanceof Team) {
-      return (Team) lastParty;
-    } else {
-      return null;
-    }
+    return playerTeamMap.get(playerId);
   }
 
   /** What would happen if the given player tried to join the given team right now? */
@@ -656,15 +651,19 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void addPlayerToMatch(PlayerJoinPartyEvent event) {
+    if (!(event.getNewParty() instanceof Team)){
+      return;
+    }
     UUID playerID = event.getPlayer().getId();
+    Team newTeam = (Team) event.getNewParty();
     if (playerTeamMap.containsKey(playerID)
             && !event
             .getNewParty()
             .isObserving()) { // If player was previously on team but joins obs, keep previous team
-      playerTeamMap.replace(playerID, event.getNewParty());
+      playerTeamMap.replace(playerID, newTeam);
 
     } else if (!playerTeamMap.containsKey(playerID)) {
-      playerTeamMap.put(playerID, event.getNewParty());
+      playerTeamMap.put(playerID, newTeam);
     }
   }
 
