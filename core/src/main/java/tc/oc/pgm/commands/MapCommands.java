@@ -47,7 +47,7 @@ import tc.oc.pgm.util.text.TextTranslations;
 public class MapCommands {
 
   @Command(
-      aliases = {"loadnewmaps"},
+      aliases = {"loadnewmaps", "findnewmaps", "newmaps"},
       desc = "Loads new maps and outputs any errors")
   public static void loadNewMaps(MapLibrary library, @Switch('f') boolean force) {
     library.loadNewMaps(force); // MapLibrary will handle sending output asynchronously
