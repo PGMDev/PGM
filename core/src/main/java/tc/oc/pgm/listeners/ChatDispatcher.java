@@ -323,23 +323,25 @@ public class ChatDispatcher implements Listener {
       Predicate<MatchPlayer> filter,
       @Nullable SettingValue type) {
 
-    // Call a chatevent for each message, will cancel the message if the event is canceled by
-    // anything except PGM
+    Set<Player> recipients =
+        match.getPlayers().stream()
+            .filter(filter)
+            .map(MatchPlayer::getBukkit)
+            .collect(Collectors.toSet());
+
+    // Call a chatevent for each message, will listen for any changes done by anything other than
+    // PGM and adjust if necessary
     if (sender != null) {
       AsyncPlayerChatEvent event =
-          new AsyncPlayerChatEvent(
-              false,
-              sender.getBukkit(),
-              message,
-              match.getPlayers().stream()
-                  .filter(filter)
-                  .map(MatchPlayer::getBukkit)
-                  .collect(Collectors.toSet()));
+          new AsyncPlayerChatEvent(false, sender.getBukkit(), message, recipients);
 
-      messageCache.put(event, "boring message");
+      messageCache.put(event, ""); // The value in the Cache is not used for anything
 
       match.callEvent(event);
 
+      if (!event.getMessage().equals(message)) message = event.getMessage();
+      if (!event.getRecipients().equals(recipients)) recipients = event.getRecipients();
+      if (!event.getFormat().equals(format)) format = event.getFormat();
       if (event.isCancelled()) return;
     }
 
@@ -367,7 +369,7 @@ public class ChatDispatcher implements Listener {
                 format,
                 sender == null ? CONSOLE : sender.getStyledName(NameStyle.FANCY),
                 new PersonalizedText(message.trim())));
-    match.getPlayers().stream().filter(filter).forEach(player -> player.sendMessage(component));
+    recipients.forEach(player -> player.sendMessage(component));
     Audience.get(Bukkit.getConsoleSender()).sendMessage(component);
   }
 
