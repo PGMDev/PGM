@@ -14,9 +14,9 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.prefix.PrefixProvider;
 import tc.oc.pgm.api.prefix.PrefixRegistry;
+import tc.oc.pgm.events.PlayerJoinMatchEvent;
+import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.tablist.MatchTabManager;
-import tc.oc.util.bukkit.identity.Identities;
-import tc.oc.util.bukkit.named.Names;
 import tc.oc.util.bukkit.tablist.PlayerTabEntry;
 
 public class PrefixRegistryImpl implements PrefixRegistry, Listener {
@@ -27,6 +27,18 @@ public class PrefixRegistryImpl implements PrefixRegistry, Listener {
     this.prefixProvider = Prefixes.enabled() ? new ConfigPrefixProvider() : null;
   }
 
+  @EventHandler
+  public void onJoinMatch(PlayerJoinMatchEvent event) {
+    Player player = event.getPlayer().getBukkit();
+    player.setDisplayName(getPrefixedName(player, event.getNewParty()));
+  }
+
+  @EventHandler
+  public void onPartyChange(PlayerPartyChangeEvent event) {
+    Player player = event.getPlayer().getBukkit();
+    player.setDisplayName(getPrefixedName(player, event.getNewParty()));
+  }
+
   @Override
   @EventHandler
   public void onPrefixChange(PrefixChangeEvent event) {
@@ -34,12 +46,11 @@ public class PrefixRegistryImpl implements PrefixRegistry, Listener {
       return;
     }
     final Player player = Bukkit.getPlayer(event.getUUID());
-    final MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(event.getUUID());
+    final MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(player);
     if (matchPlayer == null) {
       return;
     }
     player.setDisplayName(getPrefixedName(player, matchPlayer.getParty()));
-    Names.renderer().invalidateCache(Identities.current(player));
     final MatchTabManager tabManager = PGM.get().getMatchTabManager();
     if (tabManager != null) {
       final PlayerTabEntry tabEntry = (PlayerTabEntry) tabManager.getPlayerEntryOrNull(player);

@@ -86,7 +86,6 @@ import tc.oc.pgm.listeners.ServerPingDataListener;
 import tc.oc.pgm.listeners.WorldProblemListener;
 import tc.oc.pgm.map.MapLibraryImpl;
 import tc.oc.pgm.match.MatchManagerImpl;
-import tc.oc.pgm.match.MatchNameRenderer;
 import tc.oc.pgm.prefix.PrefixRegistryImpl;
 import tc.oc.pgm.restart.RestartListener;
 import tc.oc.pgm.restart.ShouldRestartTask;
@@ -96,7 +95,6 @@ import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.util.FileUtils;
 import tc.oc.util.bukkit.chat.Audience;
-import tc.oc.util.bukkit.named.Names;
 import tc.oc.util.xml.InvalidXMLException;
 
 public class PGMPlugin extends JavaPlugin implements PGM, Listener {
@@ -107,7 +105,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   private MatchManager matchManager;
   private MatchTabManager matchTabManager;
   private MapOrder mapOrder;
-  private MatchNameRenderer matchNameRenderer;
   private PrefixRegistry prefixRegistry;
 
   public PGMPlugin() {
@@ -189,8 +186,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     }
 
     prefixRegistry = new PrefixRegistryImpl();
-    matchNameRenderer = new MatchNameRenderer(matchManager);
-    Names.setRenderer(matchNameRenderer);
 
     if (Config.PlayerList.enabled()) {
       matchTabManager = new MatchTabManager(this);
@@ -342,7 +337,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     registerEvents((Listener) matchManager);
     if (matchTabManager != null) registerEvents(matchTabManager);
     registerEvents(prefixRegistry);
-    registerEvents(matchNameRenderer);
     registerEvents(new GeneralizingListener(this));
     new BlockTransformListener(this).registerEvents();
     registerEvents(new PGMListener(this, matchManager));

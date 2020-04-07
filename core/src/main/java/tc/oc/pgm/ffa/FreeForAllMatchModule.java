@@ -18,7 +18,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
-import tc.oc.pgm.api.party.event.PartyRenameEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
@@ -33,7 +32,6 @@ import tc.oc.util.bukkit.chat.Sound;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.identity.PlayerIdentityChangeEvent;
 
 @ListenerScope(MatchScope.LOADED)
 public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler {
@@ -290,17 +288,5 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
       event.getPlayer().sendMessage(new PersonalizedTranslatable("ffa.join"));
     }
     updateReadiness();
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR)
-  public void onIdentityChange(PlayerIdentityChangeEvent event) {
-    MatchPlayer player = match.getPlayer(event.getPlayer());
-    if (player != null && player.getParty() instanceof Tribute) {
-      match.callEvent(
-          new PartyRenameEvent(
-              player.getParty(),
-              event.getOldIdentity().getRealName(),
-              event.getNewIdentity().getRealName()));
-    }
   }
 }

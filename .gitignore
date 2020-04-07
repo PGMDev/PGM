@@ -1,5 +1,5 @@
 # Maven generated files
-target
+target/
 dependency-reduced-pom.xml
 
 # Mac OSX generated files
@@ -29,11 +29,7 @@ dependency-reduced-pom.xml
 xcuserdata
 *class
 
-# CrowdIn files
-Commons/core/src/main/i18n/translations/*
-
 # Minecraft generated files
-maps.zip
 banned-ips.json
 banned-players.json
 ops.json
@@ -48,3 +44,8 @@ plugins/
 world/
 world_nether/
 world_the_end/
+wepif.yml
+
+# PGM generated files
+match-*/
+maps.zip

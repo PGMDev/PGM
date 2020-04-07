@@ -23,7 +23,6 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.util.Numbers;
 import tc.oc.util.bukkit.ViaUtils;
-import tc.oc.util.bukkit.identity.PlayerIdentityChangeEvent;
 import tc.oc.util.bukkit.tablist.TabEntry;
 import tc.oc.util.bukkit.tablist.TabManager;
 import tc.oc.util.bukkit.tablist.TabView;
@@ -293,12 +292,6 @@ public class MatchTabView extends TabView implements ListeningTabView {
       this.teamPlayers.put((Team) event.getNewParty(), event.getPlayer());
     }
 
-    this.invalidateLayout();
-  }
-
-  @Override
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onNickChange(PlayerIdentityChangeEvent event) {
     this.invalidateLayout();
   }
 }

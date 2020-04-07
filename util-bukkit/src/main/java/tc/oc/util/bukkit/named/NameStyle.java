@@ -1,8 +1,8 @@
 package tc.oc.util.bukkit.named;
 
 /**
- * The formatting properties for each different context in which names are displayed. Unlike {@link
- * NameType}, this varies only by context, and is independent of the viewer.
+ * The formatting properties for each different context in which names are displayed. This varies
+ * only by context, and is independent of the viewer.
  */
 public enum NameStyle {
   PLAIN(false, false, false, false, false, false, false, false), // No formatting
