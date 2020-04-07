@@ -13,7 +13,6 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerSkinPartsChangeEvent;
 import org.bukkit.plugin.Plugin;
 import tc.oc.util.ClassLogger;
-import tc.oc.util.bukkit.identity.PlayerIdentityChangeEvent;
 import tc.oc.util.collection.DefaultMapAdapter;
 import tc.oc.util.collection.DefaultProvider;
 
@@ -134,14 +133,6 @@ public class TabManager implements Listener {
   public void onWorldChange(PlayerChangedWorldEvent event) {
     TabView view = this.getViewOrNull(event.getPlayer());
     if (view != null) view.onWorldChange(event);
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onNickChange(PlayerIdentityChangeEvent event) {
-    TabEntry entry = this.getPlayerEntryOrNull(event.getPlayer());
-    if (entry instanceof PlayerTabEntry) {
-      ((PlayerTabEntry) entry).onNickChange(event);
-    }
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

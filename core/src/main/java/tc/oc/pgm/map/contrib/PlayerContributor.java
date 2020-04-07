@@ -8,13 +8,13 @@ import net.md_5.bungee.api.ChatColor;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.bukkit.Bukkit;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.types.PersonalizedPlayer;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.identity.RealIdentity;
 import tc.oc.util.bukkit.named.NameStyle;
 
 public class PlayerContributor implements Contributor {
@@ -65,7 +65,7 @@ public class PlayerContributor implements Contributor {
         == UNKNOWN) { // Double equals is intentional so a player with that name does not conflict
       return new PersonalizedText(UNKNOWN, ChatColor.DARK_AQUA);
     }
-    return new PersonalizedPlayer(new RealIdentity(id, name), style);
+    return new PersonalizedPlayer(Bukkit.getPlayer(id), name, style);
   }
 
   @Override
