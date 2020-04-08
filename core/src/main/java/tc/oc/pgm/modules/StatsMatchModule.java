@@ -72,7 +72,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     Component getBasicStatsMessage() {
       String kd;
       if (deaths == 0) {
-        kd = "0";
+        kd = Double.toString(kills);
       } else {
         kd = decimalFormatKd.format(kills / (double) deaths);
       }
