@@ -1,6 +1,7 @@
 package tc.oc.pgm.api;
 
 import java.util.UUID;
+import tc.oc.pgm.api.map.PoolActivity;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.api.setting.Settings;
 
@@ -22,4 +23,12 @@ public interface Datastore {
    * @return A {@link Settings}.
    */
   Settings getSettings(UUID uuid);
+
+  /**
+   * Get the activity related to a defined map pool.
+   *
+   * @param poolName The name of a defined map pool.
+   * @return A {@link PoolActivity}.
+   */
+  PoolActivity getPoolActivity(String poolName);
 }

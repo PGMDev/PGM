@@ -7,14 +7,17 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
+import tc.oc.pgm.api.map.PoolActivity;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.util.bukkit.translations.AllTranslations;
 
@@ -26,16 +29,17 @@ public class MapPoolManager implements MapOrder {
 
   private Logger logger;
 
-  private File mapPoolsFile;
   private FileConfiguration mapPoolFileConfig;
   private List<MapPool> mapPools = new ArrayList<>();
   private MapPool activeMapPool;
   /** When a {@link MapInfo} is manually set next, it overrides the rotation order * */
   private MapInfo overriderMap;
 
-  public MapPoolManager(Logger logger, File mapPoolsFile) {
-    this.mapPoolsFile = mapPoolsFile;
+  private Datastore database;
+
+  public MapPoolManager(Logger logger, File mapPoolsFile, Datastore database) {
     this.logger = logger;
+    this.database = database;
 
     if (!mapPoolsFile.exists()) {
       try {
@@ -50,6 +54,10 @@ public class MapPoolManager implements MapOrder {
     loadMapPools();
   }
 
+  public @Nullable String getNextMapForPool(String poolName) {
+    return database.getPoolActivity(poolName).getNextMap();
+  }
+
   private void loadMapPools() {
     mapPools =
         mapPoolFileConfig.getConfigurationSection("pools").getKeys(false).stream()
@@ -57,15 +65,37 @@ public class MapPoolManager implements MapOrder {
             .filter(MapPool::isEnabled)
             .collect(Collectors.toList());
 
-    activeMapPool = getMapPoolByName(mapPoolFileConfig.getString("last_active"));
+    mapPools.stream()
+        .forEach(
+            pool -> {
+              PoolActivity pa = database.getPoolActivity(pool.getName());
+              if (pa.isLastActive()) {
+                activeMapPool = pool;
+                logger.log(Level.INFO, "Resuming last active map pool (" + pool.getName() + ")");
+              }
+            });
+
+    if (activeMapPool == null) {
+      logger.log(Level.WARNING, "No active map pool was found, defaulting to first defined pool.");
+      if (mapPools.get(0) != null) {
+        activeMapPool = mapPools.get(0);
+      } else {
+        logger.log(Level.SEVERE, "Failed to find any defined map pool!");
+      }
+    }
   }
 
   public void saveMapPools() {
-    try {
-      mapPoolFileConfig.save(mapPoolsFile);
-    } catch (IOException e) {
-      logger.log(Level.SEVERE, "Could not save next map for future reference", e);
-    }
+    mapPools.stream()
+        .forEach(
+            pool -> {
+              String nextMap = null;
+              if (pool instanceof Rotation) {
+                nextMap = pool.getNextMap().getName();
+              }
+              boolean active = activeMapPool.getName().equalsIgnoreCase(pool.getName());
+              database.getPoolActivity(pool.getName()).updatePool(nextMap, active);
+            });
   }
 
   public MapPool getActiveMapPool() {
@@ -77,13 +107,12 @@ public class MapPoolManager implements MapOrder {
   }
 
   private void updateActiveMapPool(MapPool mapPool, Match match) {
+    saveMapPools();
+
     if (mapPool == activeMapPool) return;
 
     activeMapPool.unloadPool(match);
     activeMapPool = mapPool;
-
-    mapPoolFileConfig.set("last_active", activeMapPool.getName());
-    saveMapPools();
 
     match.sendMessage(
         ChatColor.WHITE

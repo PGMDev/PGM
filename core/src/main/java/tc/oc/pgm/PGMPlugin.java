@@ -180,7 +180,9 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     matchManager = new MatchManagerImpl(logger);
 
     if (Config.MapPools.areEnabled()) {
-      mapOrder = new MapPoolManager(logger, new File(getDataFolder(), Config.MapPools.getPath()));
+      mapOrder =
+          new MapPoolManager(
+              logger, new File(getDataFolder(), Config.MapPools.getPath()), datastore);
     } else {
       mapOrder = new RandomMapOrder();
     }
