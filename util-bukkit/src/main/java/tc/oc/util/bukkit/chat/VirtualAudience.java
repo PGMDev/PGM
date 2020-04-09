@@ -47,7 +47,7 @@ public interface VirtualAudience extends Audience {
    * @see #renderMessage(net.kyori.text.Component)
    * @see #renderMessageLegacy(net.kyori.text.Component)
    */
-  ComponentProvider TRANSLATION_PROVIDER = new ComponentProvider(null, Locale.US);
+  ComponentProvider TRANSLATION_PROVIDER = new ComponentProvider("strings", Locale.US);
 
   @Override
   default void sendMessage(net.kyori.text.Component message) {
