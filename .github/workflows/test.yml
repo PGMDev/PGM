@@ -5,7 +5,7 @@ on:
     - created
 jobs:
   test:
-    timeout-minutes: 20
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
     - id: check
