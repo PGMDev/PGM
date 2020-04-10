@@ -160,26 +160,26 @@ public class StatsMatchModule implements MatchModule, Listener {
         (bestBowshot.getValue() == 1) ? "stats.bowshot.block" : "stats.bowshot.blocks";
     Component bowshotMessage = getMessage(bowMessageKey, bestBowshot, ChatColor.YELLOW);
 
-    match.getScheduler(MatchScope.LOADED).runTaskLater(
-            20 * 6, //NOTE: This is 1 second after the votebook appears
+    match
+        .getScheduler(MatchScope.LOADED)
+        .runTaskLater(
+            20 * 6, // NOTE: This is 1 second after the votebook appears
             () -> {
-      for (MatchPlayer viewer : match.getPlayers()) {
-        viewer.sendMessage(
-                Components.fromLegacyText(
+              for (MatchPlayer viewer : match.getPlayers()) {
+                viewer.sendMessage(
+                    Components.fromLegacyText(
                         ComponentUtils.horizontalLineHeading(
-                                ChatColor.YELLOW
-                                        + AllTranslations.get().translate("stats.best", viewer.getBukkit()),
-                                ChatColor.WHITE,
-                                ComponentUtils.MAX_CHAT_WIDTH)));
+                            ChatColor.YELLOW
+                                + AllTranslations.get().translate("stats.best", viewer.getBukkit()),
+                            ChatColor.WHITE,
+                            ComponentUtils.MAX_CHAT_WIDTH)));
 
-        viewer.sendMessage(killMessage);
-        viewer.sendMessage(killstreakMessage);
-        viewer.sendMessage(deathMessage);
-        if (bestBowshot.getValue() != 0) viewer.sendMessage(bowshotMessage);
-        }
-      }
-    );
-
+                viewer.sendMessage(killMessage);
+                viewer.sendMessage(killstreakMessage);
+                viewer.sendMessage(deathMessage);
+                if (bestBowshot.getValue() != 0) viewer.sendMessage(bowshotMessage);
+              }
+            });
   }
 
   @EventHandler
@@ -216,7 +216,9 @@ public class StatsMatchModule implements MatchModule, Listener {
         new PersonalizedTranslatable(
                 messageKey,
                 playerName(mapEntry.getKey()),
-                new PersonalizedText(Integer.toString(mapEntry.getValue()), color).bold(true).render())
+                new PersonalizedText(Integer.toString(mapEntry.getValue()), color)
+                    .bold(true)
+                    .render())
             .render());
   }
 

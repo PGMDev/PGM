@@ -122,7 +122,6 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   private final Map<UUID, Team> playerTeamMap = new HashMap<>();
 
-
   public TeamMatchModule(Match match, Set<TeamFactory> teamFactories, boolean requireEven) {
     this.match = match;
     this.teams = new HashSet<>(teamFactories.size());
@@ -651,13 +650,13 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void addPlayerToMatch(PlayerJoinPartyEvent event) {
-    if (!(event.getNewParty() instanceof Team)){
+    if (!(event.getNewParty() instanceof Team)) {
       return;
     }
     UUID playerID = event.getPlayer().getId();
     Team newTeam = (Team) event.getNewParty();
     if (playerTeamMap.containsKey(playerID)
-            && !event
+        && !event
             .getNewParty()
             .isObserving()) { // If player was previously on team but joins obs, keep previous team
       playerTeamMap.replace(playerID, newTeam);
