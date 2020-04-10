@@ -1,0 +1,5 @@
+name: 'Run Server'
+description: 'Run a PGM server.'
+runs:
+  using: 'node12'
+  main: 'index.js'

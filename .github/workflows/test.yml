@@ -1,0 +1,30 @@
+name: test
+on:
+  issue_comment:
+    types:
+    - created
+jobs:
+  test:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+    - id: check
+      name: check
+      uses: khan/pull-request-comment-trigger@master
+      with:
+        trigger: /pgm
+        prefix_only: true
+    - name: checkout
+      if: steps.check.outputs.triggered == 'true'
+      uses: actions/checkout@v1
+    - name: setup
+      if: steps.check.outputs.triggered == 'true'
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: build
+      if: steps.check.outputs.triggered == 'true'
+      run: mvn install
+    - name: run
+      if: steps.check.outputs.triggered == 'true'
+      uses: ./.github/actions/server

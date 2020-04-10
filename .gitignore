@@ -49,3 +49,6 @@ wepif.yml
 # PGM generated files
 match-*/
 maps.zip
+
+# Javascript files
+node_modules/
