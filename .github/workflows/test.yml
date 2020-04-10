@@ -25,6 +25,15 @@ jobs:
     - name: build
       if: steps.check.outputs.triggered == 'true'
       run: mvn install
+    - name: action
+      if: steps.check.outputs.triggered == 'true'
+      uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+    - name: download
+      if: steps.check.outputs.triggered == 'true'
+      working-directory: ./.github/actions/server
+      run: npm install
     - name: run
       if: steps.check.outputs.triggered == 'true'
       uses: ./.github/actions/server
