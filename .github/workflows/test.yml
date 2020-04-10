@@ -37,11 +37,10 @@ jobs:
       uses: haythem/public-ip@v1
     - name: comment
       if: steps.check.outputs.triggered == 'true'
-      uses: unsplash/comment-on-pr@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: peter-evans/create-or-update-comment@v1.3.0
       with:
-        msg: Creating a test server at **${{ steps.ip.outputs.ipv4 }}**
+        issue-number: ${{ github.event.issue.id }}
+        body: Creating a test server at **${{ steps.ip.outputs.ipv4 }}**
     - name: run
       if: steps.check.outputs.triggered == 'true'
       run: docker run -t --rm --network host pgm
