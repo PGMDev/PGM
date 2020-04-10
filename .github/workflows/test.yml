@@ -5,10 +5,11 @@ on:
     - created
 jobs:
   test:
-    timeout-minutes: 20
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
     - id: check
+      name: check
       uses: khan/pull-request-comment-trigger@master
       with:
         trigger: /test
@@ -16,27 +17,31 @@ jobs:
         prefix_only: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - id: checkout
+    - name: checkout
       if: steps.check.outputs.triggered == 'true'
       uses: actions/checkout@v1
-    - id: setup
+    - name: setup
       if: steps.check.outputs.triggered == 'true'
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    - id: build
+    - name: build
+      if: steps.check.outputs.triggered == 'true'
+      run: mvn install
+    - name: compile
       if: steps.check.outputs.triggered == 'true'
       run: mvn -pl server compile jib:dockerBuild
     - id: ip
+      name: ip
       if: steps.check.outputs.triggered == 'true'
       uses: haythem/public-ip@v1
-    - id: comment
+    - name: comment
       if: steps.check.outputs.triggered == 'true'
       uses: unsplash/comment-on-pr@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         msg: Creating a test server at **${{ steps.ip.outputs.ipv4 }}**
-    - id: run
+    - name: run
       if: steps.check.outputs.triggered == 'true'
       run: docker run -t --rm --network host pgm
