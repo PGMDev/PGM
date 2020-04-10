@@ -4,6 +4,7 @@ import app.ashcon.intake.Command;
 import app.ashcon.intake.argument.ArgumentException;
 import app.ashcon.intake.parametric.annotation.Text;
 import com.google.common.collect.Sets;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -62,6 +63,9 @@ public class ChatDispatcher implements Listener {
 
   private static final String GLOBAL_FORMAT = "<{0}>: {1}";
   private static final String PREFIX_FORMAT = "{0}: {1}";
+
+  private static final Predicate<MatchPlayer> AC_FILTER =
+      viewer -> viewer.getBukkit().hasPermission(Permissions.ADMINCHAT);
 
   public static final PersonalizedText ADMIN_CHAT_PREFIX =
       new PersonalizedText(
@@ -138,21 +142,18 @@ public class ChatDispatcher implements Listener {
       return;
     }
 
-    Predicate<MatchPlayer> filter =
-        viewer -> viewer.getBukkit().hasPermission(Permissions.ADMINCHAT);
-
     send(
         match,
         sender,
         message != null ? BukkitUtils.colorize(message) : message,
         ADMIN_CHAT_PREFIX.toLegacyText() + PREFIX_FORMAT,
-        filter,
+        AC_FILTER,
         SettingValue.CHAT_ADMIN);
 
     // Play sounds for admin chat
     if (message != null) {
       match.getPlayers().stream()
-          .filter(filter) // Initial filter
+          .filter(AC_FILTER) // Initial filter
           .filter(viewer -> !viewer.equals(sender)) // Don't play sound for sender
           .forEach(pl -> playSound(pl, AC_SOUND));
     }
@@ -346,5 +347,32 @@ public class ChatDispatcher implements Listener {
             .color(ChatColor.RED);
 
     player.sendWarning(warning, true);
+  }
+
+  public static void broadcastAdminChatMessage(Component message, Match match) {
+    broadcastAdminChatMessage(message, match, Optional.empty());
+  }
+
+  public static void broadcastAdminChatMessage(
+      Component message, Match match, Optional<Sound> sound) {
+    Component formatted = new PersonalizedText(ADMIN_CHAT_PREFIX, message);
+    match.getPlayers().stream()
+        .filter(AC_FILTER)
+        .forEach(
+            mp -> {
+              // If provided a sound, play if setting allows
+              sound.ifPresent(
+                  s -> {
+                    if (canPlaySound(mp)) {
+                      mp.playSound(s);
+                    }
+                  });
+              mp.sendMessage(formatted);
+            });
+    Audience.get(Bukkit.getConsoleSender()).sendMessage(formatted);
+  }
+
+  private static boolean canPlaySound(MatchPlayer viewer) {
+    return viewer.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ALL);
   }
 }

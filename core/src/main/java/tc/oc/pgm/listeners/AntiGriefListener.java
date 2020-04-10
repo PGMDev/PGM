@@ -1,7 +1,7 @@
 package tc.oc.pgm.listeners;
 
-import com.google.common.collect.Lists;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -171,9 +171,11 @@ public class AntiGriefListener implements Listener {
     // TODO: Update information if locale changes
     ItemMeta meta = shears.getItemMeta();
     meta.setDisplayName(
-        AllTranslations.get().translate("defuse.displayName", event.getPlayer().getBukkit()));
+        ChatColor.RED
+            + ChatColor.BOLD.toString()
+            + AllTranslations.get().translate("defuse.displayName", event.getPlayer().getBukkit()));
     meta.setLore(
-        Lists.newArrayList(
+        Collections.singletonList(
             ChatColor.GRAY
                 + AllTranslations.get()
                     .translate("defuse.tooltip", event.getPlayer().getBukkit())));

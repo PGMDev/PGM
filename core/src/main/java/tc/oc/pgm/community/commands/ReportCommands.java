@@ -13,19 +13,17 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.HoverEvent.Action;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.setting.SettingKey;
-import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.PlayerReportEvent;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
@@ -126,25 +124,8 @@ public class ReportCommands {
             accused.getStyledName(NameStyle.FANCY),
             matchPlayer.getStyledName(NameStyle.CONCISE)));
 
-    final Component prefixedComponent =
-        new PersonalizedText(
-            new PersonalizedText(ChatDispatcher.ADMIN_CHAT_PREFIX),
-            new PersonalizedText(component, ChatColor.YELLOW));
-
-    match.getPlayers().stream()
-        .filter(viewer -> viewer.getBukkit().hasPermission(Permissions.ADMINCHAT))
-        .forEach(
-            viewer -> {
-              // Play sound for viewers of reports
-              if (viewer
-                  .getSettings()
-                  .getValue(SettingKey.SOUNDS)
-                  .equals(SettingValue.SOUNDS_ALL)) {
-                viewer.playSound(REPORT_NOTIFY_SOUND);
-              }
-              viewer.sendMessage(prefixedComponent);
-            });
-    Audience.get(Bukkit.getConsoleSender()).sendMessage(component);
+    ChatDispatcher.broadcastAdminChatMessage(
+        new PersonalizedText(component, ChatColor.YELLOW), match, Optional.of(REPORT_NOTIFY_SOUND));
   }
 
   @Command(
