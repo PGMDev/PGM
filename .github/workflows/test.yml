@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: check
     timeout-minutes: 15
-    if: jobs.check.steps.check.outputs.triggered == 'true'
+    if: steps.check.outputs.triggered == 'true'
     steps:
     - id: checkout
       uses: actions/checkout@v1
