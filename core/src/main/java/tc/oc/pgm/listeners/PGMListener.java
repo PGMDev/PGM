@@ -31,6 +31,7 @@ import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.MatchScope;
@@ -292,6 +293,14 @@ public class PGMListener implements Listener {
         .getMatch()
         .getWorld()
         .setGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE.getValue(), Boolean.toString(false));
+  }
+
+  @EventHandler
+  public void freezeWorld(final BlockTransformEvent event) {
+    Match match = this.mm.getMatch(event.getWorld());
+    if (match != null && match.isFinished()) {
+      event.setCancelled(true);
+    }
   }
 
   @EventHandler

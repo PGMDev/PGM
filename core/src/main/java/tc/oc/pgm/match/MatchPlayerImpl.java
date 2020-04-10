@@ -43,7 +43,6 @@ import tc.oc.util.bukkit.ViaUtils;
 import tc.oc.util.bukkit.chat.PlayerAudience;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.types.PersonalizedPlayer;
-import tc.oc.util.bukkit.identity.Identities;
 import tc.oc.util.bukkit.named.NameStyle;
 import tc.oc.util.bukkit.nms.DeathOverride;
 import tc.oc.util.bukkit.nms.NMSHacks;
@@ -109,8 +108,7 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
     } else if (party instanceof Competitor) {
       return getParticipantState();
     } else {
-      return new MatchPlayerStateImpl(
-          getMatch(), Identities.current(getBukkit()), party, getBukkit().getLocation());
+      return new MatchPlayerStateImpl(this);
     }
   }
 
@@ -121,8 +119,7 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
     if (competitor == null) {
       return null;
     } else {
-      return new ParticipantStateImpl(
-          getMatch(), Identities.current(getBukkit()), getParty(), getBukkit().getLocation());
+      return new ParticipantStateImpl(this);
     }
   }
 

@@ -121,7 +121,7 @@ public class ReportCommands {
         new Report(
             player.getName(),
             reason,
-            accused.getStyledName(NameStyle.CONCISE),
+            accused.getStyledName(NameStyle.FANCY),
             matchPlayer.getStyledName(NameStyle.CONCISE)));
 
     ChatDispatcher.broadcastAdminChatMessage(
@@ -190,24 +190,23 @@ public class ReportCommands {
     new PrettyPaginatedComponentResults<Report>(formattedHeader, perPage) {
       @Override
       public Component format(Report data, int index) {
+
+        Component reporter =
+            new PersonalizedTranslatable("moderation.reports.hover", data.getSenderName())
+                .color(ChatColor.GRAY);
+
         Component timeAgo =
             PeriodFormats.relativePastApproximate(
                     org.joda.time.Instant.ofEpochMilli(data.getTimeSent().toEpochMilli()))
                 .color(ChatColor.DARK_AQUA);
-        Component hover =
-            new PersonalizedTranslatable("moderation.reports.hover", data.getSenderName())
-                .getPersonalizedText()
-                .color(ChatColor.GRAY);
 
-        Component formatted =
-            new PersonalizedText(
-                timeAgo,
-                new PersonalizedText(": ").color(ChatColor.GRAY),
-                data.getTargetName(),
-                new PersonalizedText(" « ").color(ChatColor.YELLOW),
-                new PersonalizedText(data.getReason()).italic(true).color(ChatColor.WHITE));
-
-        return formatted.hoverEvent(Action.SHOW_TEXT, hover.render(sender));
+        return new PersonalizedText(
+            new PersonalizedText(timeAgo.render(sender))
+                .hoverEvent(Action.SHOW_TEXT, reporter.render(sender)),
+            new PersonalizedText(": ").color(ChatColor.GRAY),
+            data.getTargetName(),
+            new PersonalizedText(" « ").color(ChatColor.YELLOW),
+            new PersonalizedText(data.getReason()).italic(true).color(ChatColor.WHITE));
       }
     }.display(audience, reportList, page);
   }

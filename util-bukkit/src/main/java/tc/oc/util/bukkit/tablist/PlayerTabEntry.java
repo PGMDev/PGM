@@ -7,7 +7,6 @@ import org.bukkit.Skin;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.util.bukkit.component.types.PersonalizedPlayer;
-import tc.oc.util.bukkit.identity.PlayerIdentityChangeEvent;
 import tc.oc.util.bukkit.named.NameStyle;
 import tc.oc.util.bukkit.nms.NMSHacks;
 import tc.oc.util.collection.DefaultProvider;
@@ -73,18 +72,6 @@ public class PlayerTabEntry extends DynamicTabEntry {
   @Override
   public @Nullable Skin getSkin(TabView view) {
     return this.player.getSkin();
-  }
-
-  // Dispatched by TabManager
-  protected void onNickChange(PlayerIdentityChangeEvent event) {
-    if (this.player == event.getPlayer()) {
-      // PlayerComponents are bound to an Identity, and we always want to show
-      // the player's current Identity, so we have to replace the PlayerComponent
-      // when the player's identity changes.
-      this.content = null;
-      this.invalidate();
-      this.refresh();
-    }
   }
 
   // Dispatched by TabManager

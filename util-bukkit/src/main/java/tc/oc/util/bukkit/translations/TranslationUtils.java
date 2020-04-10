@@ -15,7 +15,6 @@ import tc.oc.util.bukkit.component.Components;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 import tc.oc.util.bukkit.named.NameStyle;
 import tc.oc.util.bukkit.named.Named;
-import tc.oc.util.bukkit.named.StyledNameFunction;
 import tc.oc.util.bukkit.translations.provider.TranslationProvider;
 
 public class TranslationUtils {
@@ -150,7 +149,8 @@ public class TranslationUtils {
       case 1:
         return names.iterator().next().getStyledName(style);
       default:
-        return combineComponents(Collections2.transform(names, new StyledNameFunction(style)));
+        return combineComponents(
+            Collections2.transform(names, named -> named.getStyledName(style)));
     }
   }
 

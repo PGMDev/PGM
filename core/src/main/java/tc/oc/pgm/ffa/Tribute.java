@@ -19,9 +19,7 @@ import tc.oc.util.bukkit.chat.MultiAudience;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.types.PersonalizedPlayer;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.identity.Identities;
 import tc.oc.util.bukkit.named.NameStyle;
-import tc.oc.util.bukkit.named.Names;
 
 /**
  * Wraps a single {@link MatchPlayer} in a free-for-all match.
@@ -93,7 +91,7 @@ public class Tribute implements Competitor, MultiAudience {
 
   @Override
   public String getName(@Nullable CommandSender viewer) {
-    return Names.text(player.getBukkit(), viewer);
+    return username;
   }
 
   @Override
@@ -128,7 +126,7 @@ public class Tribute implements Competitor, MultiAudience {
 
   @Override
   public Component getStyledName(NameStyle style) {
-    return new PersonalizedPlayer(Identities.current(player.getBukkit()), style);
+    return new PersonalizedPlayer(player == null ? null : player.getBukkit(), username, style);
   }
 
   @Override

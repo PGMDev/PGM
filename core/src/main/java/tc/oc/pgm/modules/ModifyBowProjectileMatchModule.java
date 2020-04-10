@@ -136,7 +136,7 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
           if (customProjectile.getShooter() instanceof Player) {
             Player bukkitShooter = (Player) customProjectile.getShooter();
             MatchPlayer shooter = match.getPlayer(bukkitShooter);
-            if (shooter != null) {
+            if (shooter != null && event.getEntity() != null) {
               shooter.playSound(PROJECTILE_SOUND);
             }
           }
