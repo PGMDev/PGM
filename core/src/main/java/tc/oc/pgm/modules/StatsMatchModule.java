@@ -7,8 +7,11 @@ import java.util.Map;
 import java.util.UUID;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -32,6 +35,9 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   private final Match match;
   private final Map<UUID, PlayerStats> allPlayerStats = new HashMap<>();
+  // Since Bukkit#getOfflinePlayer reads the cached user files, and those files have an expire date
+  // + will be wiped if X amount of players join, we need a seperate cache for players with stats
+  private final Map<UUID, String> cachedUsernames = new HashMap<>();
 
   public StatsMatchModule(Match match) {
     this.match = match;
@@ -66,9 +72,9 @@ public class StatsMatchModule implements MatchModule, Listener {
     Component getBasicStatsMessage() {
       String kd;
       if (deaths == 0) {
-        kd = "0";
+        kd = Double.toString(kills);
       } else {
-        kd = decimalFormatKd.format(kills / deaths);
+        kd = decimalFormatKd.format(kills / (double) deaths);
       }
       return new Component(
           new PersonalizedTranslatable(
@@ -125,6 +131,9 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   @EventHandler
   public void onMatchEnd(MatchFinishEvent event) {
+
+    if (allPlayerStats.isEmpty()) return;
+
     Map<UUID, Integer> allKills = new HashMap<>();
     Map<UUID, Integer> allKillstreaks = new HashMap<>();
     Map<UUID, Integer> allDeaths = new HashMap<>();
@@ -151,20 +160,39 @@ public class StatsMatchModule implements MatchModule, Listener {
         (bestBowshot.getValue() == 1) ? "stats.bowshot.block" : "stats.bowshot.blocks";
     Component bowshotMessage = getMessage(bowMessageKey, bestBowshot, ChatColor.YELLOW);
 
-    for (MatchPlayer viewer : match.getPlayers()) {
-      viewer.sendMessage(
-          Components.fromLegacyText(
-              ComponentUtils.horizontalLineHeading(
-                  ChatColor.YELLOW
-                      + AllTranslations.get().translate("stats.best", viewer.getBukkit()),
-                  ChatColor.WHITE,
-                  ComponentUtils.MAX_CHAT_WIDTH)));
+    match.getScheduler(MatchScope.LOADED).runTaskLater(
+            20 * 6, //NOTE: This is 1 second after the votebook appears
+            () -> {
+      for (MatchPlayer viewer : match.getPlayers()) {
+        viewer.sendMessage(
+                Components.fromLegacyText(
+                        ComponentUtils.horizontalLineHeading(
+                                ChatColor.YELLOW
+                                        + AllTranslations.get().translate("stats.best", viewer.getBukkit()),
+                                ChatColor.WHITE,
+                                ComponentUtils.MAX_CHAT_WIDTH)));
 
-      viewer.sendMessage(killMessage);
-      viewer.sendMessage(killstreakMessage);
-      viewer.sendMessage(deathMessage);
-      if (bestBowshot.getValue() != 0) viewer.sendMessage(bowshotMessage);
-    }
+        viewer.sendMessage(killMessage);
+        viewer.sendMessage(killstreakMessage);
+        viewer.sendMessage(deathMessage);
+        if (bestBowshot.getValue() != 0) viewer.sendMessage(bowshotMessage);
+        }
+      }
+    );
+
+  }
+
+  @EventHandler
+  public void onPlayerLeave(PlayerQuitEvent event) {
+    Player player = event.getPlayer();
+    if (allPlayerStats.containsKey(player.getUniqueId()))
+      cachedUsernames.put(player.getUniqueId(), player.getName());
+  }
+
+  @EventHandler
+  public void onPlayerJoin(PlayerJoinEvent event) {
+    UUID playerUUID = event.getPlayer().getUniqueId();
+    cachedUsernames.remove(playerUUID);
   }
 
   private Map.Entry<UUID, Integer> sortStats(Map<UUID, Integer> map) {
@@ -188,17 +216,16 @@ public class StatsMatchModule implements MatchModule, Listener {
         new PersonalizedTranslatable(
                 messageKey,
                 playerName(mapEntry.getKey()),
-                new PersonalizedText(Integer.toString(mapEntry.getValue()), color).render())
+                new PersonalizedText(Integer.toString(mapEntry.getValue()), color).bold(true).render())
             .render());
   }
 
   private PersonalizedText playerName(UUID playerUUID) {
     if (Bukkit.getPlayer(playerUUID) == null) {
-      if (Bukkit.getOfflinePlayer(playerUUID).getName() == null) {
+      if (cachedUsernames.get(playerUUID) == null) {
         return new PersonalizedText("Unknown", ChatColor.MAGIC, ChatColor.BLACK);
       }
-      return new PersonalizedText(
-          Bukkit.getOfflinePlayer(playerUUID).getName(), ChatColor.DARK_AQUA);
+      return new PersonalizedText(cachedUsernames.get(playerUUID), ChatColor.DARK_AQUA);
     }
     return new PersonalizedText(match.getPlayer(playerUUID).getBukkit().getDisplayName());
   }
