@@ -4,7 +4,8 @@ on:
     types:
     - created
 jobs:
-  check:
+  test:
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     steps:
     - id: check
@@ -15,27 +16,27 @@ jobs:
         prefix_only: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  test:
-    runs-on: ubuntu-latest
-    needs: check
-    timeout-minutes: 20
-    if: steps.check.outputs.triggered == 'true'
-    steps:
     - id: checkout
+      if: steps.check.outputs.triggered == 'true'
       uses: actions/checkout@v1
     - id: setup
+      if: steps.check.outputs.triggered == 'true'
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
     - id: build
+      if: steps.check.outputs.triggered == 'true'
       run: mvn -pl server compile jib:dockerBuild
     - id: ip
+      if: steps.check.outputs.triggered == 'true'
       uses: haythem/public-ip@v1
     - id: comment
+      if: steps.check.outputs.triggered == 'true'
       uses: unsplash/comment-on-pr@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         msg: Creating a test server at **${{ steps.ip.outputs.ipv4 }}**
     - id: run
+      if: steps.check.outputs.triggered == 'true'
       run: docker run -t --rm --network host pgm
