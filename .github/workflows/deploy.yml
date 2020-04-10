@@ -17,6 +17,8 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
+    - name: format
+      run: mvn com.coveo:fmt-maven-plugin:check
     - name: version
       if: github.ref != '/refs/heads/master'
       run: |
