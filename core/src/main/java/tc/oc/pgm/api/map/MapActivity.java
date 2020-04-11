@@ -3,7 +3,7 @@ package tc.oc.pgm.api.map;
 import javax.annotation.Nullable;
 
 /* Represents data related to persisting map pool info between server restarts */
-public interface PoolActivity {
+public interface MapActivity {
 
   /**
    * Get the name of the map pool.
@@ -17,21 +17,21 @@ public interface PoolActivity {
    *
    * @return The name of a map
    */
-  public String getNextMap();
+  public String getMapName();
 
   /**
    * Whether this map pool was the last active. If the map pool was the last active, it will be
    * resumed upon server restart.
    *
-   * @return Whether the map pool was last active
+   * @return Whether the map pool is active
    */
-  public boolean isLastActive();
+  public boolean isActive();
 
   /**
-   * Updates the map pool activity in the {@link Datastore}
+   * Updates the map activity in the {@link Datastore}
    *
-   * @param nextMap Name of next map if rotation based.
-   * @param active If this pool is the currently active one
+   * @param nextMap Name of next map (if rotation based).
+   * @param active If this pool is currently active.
    */
-  public void updatePool(@Nullable String nextMap, boolean active);
+  public void update(@Nullable String nextMap, boolean active);
 }

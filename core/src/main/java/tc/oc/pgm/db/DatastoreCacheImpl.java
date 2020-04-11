@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.bukkit.Bukkit;
 import tc.oc.pgm.api.Datastore;
-import tc.oc.pgm.api.map.PoolActivity;
+import tc.oc.pgm.api.map.MapActivity;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.api.setting.Settings;
 
@@ -16,7 +16,7 @@ public class DatastoreCacheImpl implements Datastore {
 
   private final LoadingCache<UUID, Username> usernames;
   private final LoadingCache<UUID, Settings> settings;
-  private final LoadingCache<String, PoolActivity> mapPools;
+  private final LoadingCache<String, MapActivity> mapPools;
 
   public DatastoreCacheImpl(Datastore datastore) {
     this.usernames =
@@ -38,7 +38,7 @@ public class DatastoreCacheImpl implements Datastore {
                     .expireAfterAccess(1, TimeUnit.HOURS),
             datastore::getSettings);
 
-    this.mapPools = buildCache(builder -> builder.weakValues(), datastore::getPoolActivity);
+    this.mapPools = buildCache(builder -> builder.weakValues(), datastore::getMapActivity);
   }
 
   // FIXME: Potential deadlock as a result of async loading, removed temporarily
@@ -71,7 +71,7 @@ public class DatastoreCacheImpl implements Datastore {
   }
 
   @Override
-  public PoolActivity getPoolActivity(String poolName) {
+  public MapActivity getMapActivity(String poolName) {
     return mapPools.getUnchecked(poolName);
   }
 }

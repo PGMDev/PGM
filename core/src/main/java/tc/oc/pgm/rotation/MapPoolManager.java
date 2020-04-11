@@ -15,9 +15,9 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.map.MapActivity;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
-import tc.oc.pgm.api.map.PoolActivity;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.util.bukkit.translations.AllTranslations;
 
@@ -55,7 +55,7 @@ public class MapPoolManager implements MapOrder {
   }
 
   public @Nullable String getNextMapForPool(String poolName) {
-    return database.getPoolActivity(poolName).getNextMap();
+    return database.getMapActivity(poolName).getMapName();
   }
 
   private void loadMapPools() {
@@ -68,8 +68,8 @@ public class MapPoolManager implements MapOrder {
     mapPools.stream()
         .forEach(
             pool -> {
-              PoolActivity pa = database.getPoolActivity(pool.getName());
-              if (pa.isLastActive()) {
+              MapActivity ma = database.getMapActivity(pool.getName());
+              if (ma.isActive()) {
                 activeMapPool = pool;
                 logger.log(Level.INFO, "Resuming last active map pool (" + pool.getName() + ")");
               }
@@ -94,7 +94,7 @@ public class MapPoolManager implements MapOrder {
                 nextMap = pool.getNextMap().getName();
               }
               boolean active = activeMapPool.getName().equalsIgnoreCase(pool.getName());
-              database.getPoolActivity(pool.getName()).updatePool(nextMap, active);
+              database.getMapActivity(pool.getName()).update(nextMap, active);
             });
   }
 

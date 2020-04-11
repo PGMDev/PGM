@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.map.PoolActivity;
+import tc.oc.pgm.api.map.MapActivity;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
@@ -47,7 +47,7 @@ public class DatastoreImpl implements Datastore {
 
     initUsername();
     initSettings();
-    initPoolActivity();
+    initMapActivity();
   }
 
   @Override
@@ -258,11 +258,11 @@ public class DatastoreImpl implements Datastore {
   }
 
   @Override
-  public PoolActivity getPoolActivity(String name) {
-    PoolActivity activity = null;
+  public MapActivity getMapActivity(String name) {
+    MapActivity activity = null;
 
     try {
-      activity = selectMapPool(name);
+      activity = selectMapActivity(name);
     } catch (SQLException e) {
       logger.log(
           Level.WARNING,
@@ -271,19 +271,19 @@ public class DatastoreImpl implements Datastore {
     }
 
     if (activity == null) {
-      activity = new PoolActivityImpl(name, null, false);
+      activity = new MapActivityImpl(name, null, false);
     }
 
     return activity;
   }
 
-  private class PoolActivityImpl implements PoolActivity {
+  private class MapActivityImpl implements MapActivity {
 
     private String name;
     private String nextMap;
     private boolean active;
 
-    public PoolActivityImpl(String name, @Nullable String nextMap, boolean active) {
+    public MapActivityImpl(String name, @Nullable String nextMap, boolean active) {
       this.name = name;
       this.nextMap = nextMap;
       this.active = active;
@@ -295,29 +295,29 @@ public class DatastoreImpl implements Datastore {
     }
 
     @Override
-    public String getNextMap() {
+    public String getMapName() {
       return nextMap;
     }
 
     @Override
-    public boolean isLastActive() {
+    public boolean isActive() {
       return active;
     }
 
     @Override
-    public void updatePool(String nextMap, boolean active) {
+    public void update(String nextMap, boolean active) {
       this.nextMap = nextMap;
       this.active = active;
 
       try {
-        updateMapPool(name, getNextMap(), isLastActive());
+        updateMapActivity(name, getMapName(), isActive());
       } catch (SQLException e) {
         logger.log(Level.WARNING, "Unable to update pool activity for " + name, e);
       }
     }
   }
 
-  private void initPoolActivity() throws SQLException {
+  private void initMapActivity() throws SQLException {
     try (final Statement statement = getConnection().createStatement()) {
       statement.addBatch(
           "CREATE TABLE IF NOT EXISTS pools (name VARCHAR(255) PRIMARY KEY, next_map VARCHAR(255), last_active BOOLEAN)");
@@ -325,8 +325,8 @@ public class DatastoreImpl implements Datastore {
     }
   }
 
-  private PoolActivity selectMapPool(String name) throws SQLException {
-    PoolActivity activity = null;
+  private MapActivity selectMapActivity(String name) throws SQLException {
+    MapActivity activity = null;
 
     try (final PreparedStatement statement =
         getConnection().prepareStatement("SELECT * FROM pools WHERE name = ? LIMIT 1")) {
@@ -337,14 +337,14 @@ public class DatastoreImpl implements Datastore {
           final String next_map = result.getString(2);
           final boolean active = result.getBoolean(3);
 
-          return new PoolActivityImpl(name, next_map, active);
+          return new MapActivityImpl(name, next_map, active);
         }
       }
     }
     return activity;
   }
 
-  private void updateMapPool(String name, @Nullable String nextMap, boolean active)
+  private void updateMapActivity(String name, @Nullable String nextMap, boolean active)
       throws SQLException {
     try (final PreparedStatement statement =
         getConnection().prepareStatement("INSERT OR REPLACE INTO pools VALUES (?, ?, ?)")) {
