@@ -36,8 +36,12 @@ jobs:
       env:
         NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
         NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+    - name: artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: PGM.jar
+        path: target/PGM-Plugin.jar
     - name: docker
-      if: success()
       run: |
         mvn -pl server compile jib:build \
           -Djib.to.auth.username=${{ secrets.DOCKER_USERNAME }} \

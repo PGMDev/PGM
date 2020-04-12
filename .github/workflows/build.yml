@@ -23,3 +23,8 @@ jobs:
       run: mvn com.coveo:fmt-maven-plugin:check
     - name: build
       run: mvn install
+    - name: artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: PGM.jar
+        path: target/PGM-Plugin.jar
