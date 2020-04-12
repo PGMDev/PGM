@@ -341,7 +341,6 @@ public class ChatDispatcher implements Listener {
 
       if (!event.getMessage().equals(message)) message = event.getMessage();
       if (!event.getRecipients().equals(recipients)) recipients = event.getRecipients();
-      if (!event.getFormat().equals(format)) format = event.getFormat();
       if (event.isCancelled()) return;
     }
 
