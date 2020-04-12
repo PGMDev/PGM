@@ -3,10 +3,13 @@ package tc.oc.pgm.listeners;
 import app.ashcon.intake.Command;
 import app.ashcon.intake.argument.ArgumentException;
 import app.ashcon.intake.parametric.annotation.Text;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Sets;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -36,7 +39,6 @@ import tc.oc.util.bukkit.chat.Audience;
 import tc.oc.util.bukkit.chat.Sound;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.ComponentRenderers;
-import tc.oc.util.bukkit.component.Components;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 import tc.oc.util.bukkit.named.NameStyle;
@@ -61,8 +63,8 @@ public class ChatDispatcher implements Listener {
           .color(ChatColor.DARK_AQUA)
           .italic(true);
 
-  private static final String GLOBAL_FORMAT = "<{0}>: {1}";
-  private static final String PREFIX_FORMAT = "{0}: {1}";
+  private static final String GLOBAL_FORMAT = "<%s>: %s";
+  private static final String PREFIX_FORMAT = "%s: %s";
 
   private static final Predicate<MatchPlayer> AC_FILTER =
       viewer -> viewer.getBukkit().hasPermission(Permissions.ADMINCHAT);
@@ -164,6 +166,7 @@ public class ChatDispatcher implements Listener {
       desc = "Send a direct message to a player",
       usage = "[player] [message]")
   public void sendDirect(Match match, MatchPlayer sender, Player receiver, @Text String message) {
+    if (sender == null) return;
     if (isMuted(sender)) {
       sendMutedMessage(sender);
       return;
@@ -220,7 +223,7 @@ public class ChatDispatcher implements Listener {
     Component action =
         new PersonalizedTranslatable(key).getPersonalizedText().color(ChatColor.GRAY).italic(true);
     return ComponentRenderers.toLegacyText(
-        new PersonalizedText(action, new PersonalizedText(" {0}: {1}")), viewer);
+        new PersonalizedText(action, new PersonalizedText(" " + PREFIX_FORMAT)), viewer);
   }
 
   @Command(
@@ -228,6 +231,7 @@ public class ChatDispatcher implements Listener {
       desc = "Reply to a direct message",
       usage = "[message]")
   public void sendReply(Match match, Audience audience, MatchPlayer sender, @Text String message) {
+    if (sender == null) return;
     final MatchPlayer receiver = manager.getPlayer(lastMessagedBy.get(sender.getBukkit()));
     if (receiver == null) {
       audience.sendWarning(new PersonalizedTranslatable("commands.message.noReply"));
@@ -239,7 +243,12 @@ public class ChatDispatcher implements Listener {
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
   public void onChat(AsyncPlayerChatEvent event) {
-    event.setCancelled(true);
+    if (CHAT_EVENT_CACHE.getIfPresent(event) == null) {
+      event.setCancelled(true);
+    } else {
+      CHAT_EVENT_CACHE.invalidate(event);
+      return;
+    }
 
     final MatchPlayer player = manager.getPlayer(event.getPlayer());
     if (player != null) {
@@ -295,21 +304,21 @@ public class ChatDispatcher implements Listener {
     }
   }
 
+  private static final Cache<AsyncPlayerChatEvent, Boolean> CHAT_EVENT_CACHE =
+      CacheBuilder.newBuilder().weakKeys().expireAfterWrite(15, TimeUnit.SECONDS).build();
+
   public void send(
       Match match,
       MatchPlayer sender,
-      @Nullable String message,
+      @Nullable String text,
       String format,
       Predicate<MatchPlayer> filter,
       @Nullable SettingValue type) {
     // When a message is empty, this indicates the player wants to change their default chat channel
-    if (message == null) {
+    if (text == null) {
       try {
         SettingCommands.toggle(
-            sender == null ? Bukkit.getConsoleSender() : sender.getBukkit(),
-            sender,
-            SettingKey.CHAT,
-            type.getName());
+            sender == null ? null : sender.getBukkit(), sender, SettingKey.CHAT, type.getName());
       } catch (ArgumentException e) {
         // No-op, this is when console tries to change chat settings
       }
@@ -320,14 +329,41 @@ public class ChatDispatcher implements Listener {
       sendMutedMessage(sender);
       return;
     }
-    final Component component =
-        new PersonalizedText(
-            Components.format(
-                format,
-                sender == null ? CONSOLE : sender.getStyledName(NameStyle.FANCY),
-                new PersonalizedText(message.trim())));
-    match.getPlayers().stream().filter(filter).forEach(player -> player.sendMessage(component));
-    Audience.get(Bukkit.getConsoleSender()).sendMessage(component);
+
+    final String message = text.trim();
+
+    if (sender != null) {
+      Bukkit.getScheduler()
+          .runTaskAsynchronously(
+              PGM.get(),
+              () -> {
+                final AsyncPlayerChatEvent event =
+                    new AsyncPlayerChatEvent(
+                        false,
+                        sender.getBukkit(),
+                        message,
+                        match.getPlayers().stream()
+                            .filter(filter)
+                            .map(MatchPlayer::getBukkit)
+                            .collect(Collectors.toSet()));
+                event.setFormat(format);
+                CHAT_EVENT_CACHE.put(event, true);
+                match.callEvent(event);
+
+                if (event.isCancelled()) {
+                  return;
+                }
+
+                final String finalMessage =
+                    String.format(event.getFormat(), sender.getBukkit().getDisplayName(), message);
+                event.getRecipients().forEach(player -> player.sendMessage(finalMessage));
+              });
+      return;
+    }
+
+    final String finalMessage =
+        String.format(format, CONSOLE.toLegacyText() + ChatColor.RESET, message);
+    match.getPlayers().stream().filter(filter).forEach(player -> player.sendMessage(finalMessage));
   }
 
   private MatchPlayer getApproximatePlayer(Match match, String query, CommandSender sender) {
