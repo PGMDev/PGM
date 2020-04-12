@@ -4,9 +4,7 @@
 # Each new rotation or voted pool should follow the same configuration structure, within this file
 #
 # NOTE: Map names are case-sensitive
-#
-# Record for the last active map pool on the server, so that it can be resumed upon shutdown/restart
-last_active: default
+
 
 pools:
   default:
@@ -14,11 +12,6 @@ pools:
     type: ordered
     enabled: true
     players: 1
-    # next_map helps the server resume rotations in the position they were before a server shutdown/restart
-    # and is only used for ordered map pools.
-    # The next map for default is the first map in it's map list.
-    # This only applies when the server creates the map-pools.yml file for the first time
-    next_map: Airship Battle
     maps:
       - Airship Battle
       - Harb
