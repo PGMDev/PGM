@@ -1,5 +1,7 @@
 package tc.oc.pgm.flag.state;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
@@ -9,8 +11,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitTask;
-import org.joda.time.Duration;
-import org.joda.time.Instant;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Party;
@@ -89,7 +89,7 @@ public abstract class BaseState implements Runnable, State {
       if (Duration.ZERO.equals(duration)) {
         this.finishCountdown();
       } else if (!TimeUtils.isInfinite(duration)) {
-        this.remainingTicks = duration.getMillis() / 50;
+        this.remainingTicks = TimeUtils.toTicks(duration);
       }
     }
   }

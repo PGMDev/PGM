@@ -7,6 +7,7 @@ import app.ashcon.intake.parametric.AbstractModule;
 import app.ashcon.intake.parametric.provider.EnumProvider;
 import java.io.File;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -24,7 +25,6 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
@@ -358,10 +358,13 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     @Override
     public void publish(LogRecord record) {
       final String message = format(record);
-      if (message == null) { // Escalate to plugin logger when unable to format the error
-        getLogger().log(record.getLevel(), record.getMessage(), record.getThrown());
-      } else {
+
+      if (message != null) {
         Bukkit.broadcast(message, Permissions.DEBUG);
+      }
+
+      if (message == null || message.contains("Unhandled")) {
+        getLogger().log(record.getLevel(), record.getMessage(), record.getThrown());
       }
     }
 

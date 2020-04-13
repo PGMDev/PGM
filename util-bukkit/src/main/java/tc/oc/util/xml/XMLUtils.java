@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -33,7 +34,6 @@ import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
-import org.joda.time.Duration;
 import tc.oc.util.Numbers;
 import tc.oc.util.Pair;
 import tc.oc.util.TimeUtils;
@@ -41,7 +41,6 @@ import tc.oc.util.Version;
 import tc.oc.util.bukkit.BukkitUtils;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.Components;
-import tc.oc.util.bukkit.component.PeriodFormats;
 import tc.oc.util.bukkit.material.MaterialMatcher;
 import tc.oc.util.bukkit.material.matcher.AllMaterialMatcher;
 import tc.oc.util.bukkit.material.matcher.BlockMaterialMatcher;
@@ -439,12 +438,7 @@ public class XMLUtils {
       return def;
     }
     try {
-      String value = node.getValueNormalize();
-      if ("oo".equals(value)) {
-        return TimeUtils.INFINITE_DURATION;
-      } else {
-        return PeriodFormats.SHORTHAND.parsePeriod(node.getValue()).toStandardDuration();
-      }
+      return TimeUtils.parseDuration(node.getValueNormalize());
     } catch (IllegalArgumentException | UnsupportedOperationException e) {
       throw new InvalidXMLException("invalid time format", node, e);
     }
@@ -469,7 +463,7 @@ public class XMLUtils {
   public static Duration parseTickDuration(Node node, String text) throws InvalidXMLException {
     if ("oo".equals(text)) return TimeUtils.INFINITE_DURATION;
     try {
-      return Duration.millis(Integer.parseInt(text) * 50);
+      return Duration.ofMillis(Integer.parseInt(text) * 50);
     } catch (NumberFormatException e) {
       return parseDuration(node);
     }
@@ -486,7 +480,7 @@ public class XMLUtils {
   public static Duration parseSecondDuration(Node node, String text) throws InvalidXMLException {
     if ("oo".equals(text)) return TimeUtils.INFINITE_DURATION;
     try {
-      return Duration.standardSeconds(Integer.parseInt(text));
+      return Duration.ofSeconds(Integer.parseInt(text));
     } catch (NumberFormatException e) {
       return parseDuration(node);
     }
@@ -765,13 +759,7 @@ public class XMLUtils {
 
   private static PotionEffect createPotionEffect(
       PotionEffectType type, Duration duration, int amplifier, boolean ambient) {
-    return new PotionEffect(
-        type,
-        duration == TimeUtils.INFINITE_DURATION
-            ? Integer.MAX_VALUE
-            : (int) (duration.getMillis() / 50),
-        amplifier,
-        ambient);
+    return new PotionEffect(type, (int) TimeUtils.toTicks(duration), amplifier, ambient);
   }
 
   public static PotionEffect parsePotionEffect(Element el) throws InvalidXMLException {

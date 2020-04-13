@@ -3,6 +3,7 @@ package tc.oc.pgm.worldborder;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -12,7 +13,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerTeleportEvent;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
@@ -62,7 +62,7 @@ public class WorldBorderMatchModule implements MatchModule, Listener {
         .getScheduler(MatchScope.RUNNING)
         .runTaskTimer(
             Duration.ZERO,
-            Duration.standardSeconds(1),
+            Duration.ofSeconds(1),
             new Runnable() {
               @Override
               public void run() {

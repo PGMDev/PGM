@@ -1,8 +1,8 @@
 package tc.oc.pgm.cycle;
 
+import java.time.Duration;
 import java.util.Objects;
 import net.md_5.bungee.api.ChatColor;
-import org.joda.time.Duration;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
@@ -34,7 +34,7 @@ public class CycleCountdown extends MatchCountdown {
         }
         nextMatch = null;
       }
-      if (map != null && nextMatch == null && remaining.getStandardSeconds() <= preloadTime) {
+      if (map != null && nextMatch == null && remaining.getSeconds() <= preloadTime) {
         nextMatch = PGM.get().getMatchManager().createMatch(nextMap.getId());
       }
       if (end && nextMatch != null) {
@@ -50,7 +50,7 @@ public class CycleCountdown extends MatchCountdown {
         nextMap == null ? null : new PersonalizedText(nextMap.getName(), ChatColor.AQUA);
 
     PersonalizedTranslatable cycleComponent;
-    if (!remaining.isLongerThan(Duration.ZERO)) {
+    if (remaining.isZero()) {
       cycleComponent =
           mapName != null
               ? new PersonalizedTranslatable("countdown.cycle.complete", mapName)

@@ -1,6 +1,7 @@
 package tc.oc.pgm;
 
 import com.google.common.collect.ImmutableList;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -16,7 +17,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
@@ -94,7 +94,7 @@ public class Config {
     }
 
     public static Duration time() {
-      return Duration.standardSeconds(getConfiguration().getInt("restart.time", 30)); // seconds
+      return Duration.ofSeconds(getConfiguration().getInt("restart.time", 30)); // seconds
     }
 
     public static int matchLimit() {

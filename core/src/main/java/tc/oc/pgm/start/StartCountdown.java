@@ -2,12 +2,13 @@ package tc.oc.pgm.start;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.time.Duration;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
@@ -15,7 +16,7 @@ import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 public class StartCountdown extends PreMatchCountdown {
 
   // At this duration before match start, broadcast a warning if teams will be auto-balanced
-  private static final Duration BALANCE_WARNING_TIME = Duration.standardSeconds(15);
+  private static final Duration BALANCE_WARNING_TIME = Duration.ofSeconds(15);
   // TODO: Avoid coupling to the team module, either by subclassing this countdown,
   // or implementing some kind of countdown listener system.
   private final @Nullable TeamMatchModule tmm;
@@ -31,7 +32,7 @@ public class StartCountdown extends PreMatchCountdown {
   }
 
   protected boolean willHuddle() {
-    return huddle.isLongerThan(Duration.ZERO);
+    return !huddle.isZero();
   }
 
   @Override
@@ -57,7 +58,7 @@ public class StartCountdown extends PreMatchCountdown {
   public void onTick(Duration remaining, Duration total) {
     super.onTick(remaining, total);
 
-    if (remaining.getStandardSeconds() >= 1 && remaining.getStandardSeconds() <= 3) {
+    if (remaining.getSeconds() >= 1 && remaining.getSeconds() <= 3) {
       // Auto-balance runs at match start as well, but try to run it a few seconds in advance
       if (this.tmm != null && !this.autoBalanced) {
         this.autoBalanced = true;
@@ -68,7 +69,7 @@ public class StartCountdown extends PreMatchCountdown {
     if (this.tmm != null
         && !this.autoBalanced
         && !this.balanceWarningSent
-        && !remaining.isLongerThan(BALANCE_WARNING_TIME)) {
+        && !TimeUtils.isLongerThan(remaining, BALANCE_WARNING_TIME)) {
       for (Team team : this.tmm.getParticipatingTeams()) {
         if (team.isStacked()) {
           this.balanceWarningSent = true;

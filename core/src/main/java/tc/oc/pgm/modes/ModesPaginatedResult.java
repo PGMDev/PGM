@@ -1,13 +1,11 @@
-package tc.oc.pgm.util;
+package tc.oc.pgm.modes;
 
 import com.google.common.base.Preconditions;
+import java.time.Duration;
 import org.bukkit.ChatColor;
-import org.joda.time.Duration;
-import org.joda.time.Period;
-import tc.oc.pgm.modes.ModeChangeCountdown;
-import tc.oc.pgm.modes.ObjectiveModesMatchModule;
+import tc.oc.pgm.util.PrettyPaginatedResult;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.component.Components;
-import tc.oc.util.bukkit.component.PeriodFormats;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 
 /** Class used to display a paginated list of monument modes */
@@ -23,13 +21,13 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
   @Override
   public String format(ModeChangeCountdown countdown, int index) {
     String materialName = countdown.getMode().getPreformattedMaterialName();
-    Period timeFromStart = countdown.getMode().getAfter().toPeriod();
+    Duration timeFromStart = countdown.getMode().getAfter();
 
     StringBuilder builder = new StringBuilder();
 
     builder.append(ChatColor.GOLD).append(index + 1).append(". ");
     builder.append(ChatColor.LIGHT_PURPLE).append(materialName).append(" - ");
-    builder.append(ChatColor.AQUA).append(PeriodFormats.COLONS.print(timeFromStart));
+    builder.append(ChatColor.AQUA).append(TimeUtils.formatDuration(timeFromStart));
 
     if (countdown.getMatch().isRunning()) {
       builder
@@ -48,8 +46,8 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
   }
 
   /**
-   * Formats a {@link ModeChangeCountdown} to the following format 'm:ss' and appends 'left' to the
-   * text
+   * Formats a {@link tc.oc.pgm.modes.ModeChangeCountdown} to the following format 'm:ss' and
+   * appends 'left' to the text
    *
    * @param countdown to format
    * @return Formatted text
@@ -60,7 +58,7 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
 
     if (countdown.getMatch().isRunning()) {
       if (this.isRunning(countdown)) {
-        builder.append(PeriodFormats.COLONS.print(currentTimeLeft.toPeriod())).append(" left");
+        builder.append(TimeUtils.formatDuration(currentTimeLeft)).append(" left");
       } else {
         builder.append("0:00 left");
       }
@@ -71,11 +69,11 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
 
   private boolean isRunning(ModeChangeCountdown countdown) {
     Duration timeLeft = this.modes.getCountdown().getTimeLeft(countdown);
-    return timeLeft != null && timeLeft.getStandardSeconds() > 0;
+    return timeLeft != null && timeLeft.getSeconds() > 0;
   }
 
   private boolean isExpired(ModeChangeCountdown countdown) {
     Duration timeLeft = this.modes.getCountdown().getTimeLeft(countdown);
-    return timeLeft != null && timeLeft.getStandardSeconds() <= 0;
+    return timeLeft != null && timeLeft.getSeconds() <= 0;
   }
 }

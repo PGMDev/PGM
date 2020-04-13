@@ -1,5 +1,6 @@
 package tc.oc.util.bukkit;
 
+import java.time.Duration;
 import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -7,7 +8,7 @@ import java.util.concurrent.Future;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
-import org.joda.time.Duration;
+import tc.oc.util.TimeUtils;
 
 public class Scheduler {
   private final Plugin plugin;
@@ -22,10 +23,6 @@ public class Scheduler {
 
   public Scheduler(Plugin plugin) {
     this(plugin, plugin.getServer().getScheduler());
-  }
-
-  private static long ticks(Duration duration) {
-    return (duration.getMillis() + 49) / 50;
   }
 
   private BukkitTask register(final BukkitTask task) {
@@ -65,7 +62,8 @@ public class Scheduler {
   }
 
   public BukkitTask runTaskLater(Duration delay, Runnable task) {
-    return this.register(this.bukkitScheduler.runTaskLater(this.plugin, task, ticks(delay)));
+    return this.register(
+        this.bukkitScheduler.runTaskLater(this.plugin, task, TimeUtils.toTicks(delay)));
   }
 
   public BukkitTask runTaskTimer(long interval, Runnable task) {
@@ -77,12 +75,14 @@ public class Scheduler {
   }
 
   public BukkitTask runTaskTimer(Duration interval, Runnable task) {
-    return this.register(this.bukkitScheduler.runTaskTimer(this.plugin, task, 0L, ticks(interval)));
+    return this.register(
+        this.bukkitScheduler.runTaskTimer(this.plugin, task, 0L, TimeUtils.toTicks(interval)));
   }
 
   public BukkitTask runTaskTimer(Duration delay, Duration interval, Runnable task) {
     return this.register(
-        this.bukkitScheduler.runTaskTimer(this.plugin, task, ticks(delay), ticks(interval)));
+        this.bukkitScheduler.runTaskTimer(
+            this.plugin, task, TimeUtils.toTicks(delay), TimeUtils.toTicks(interval)));
   }
 
   public <T> Future<T> runMainThread(Callable<T> task) {

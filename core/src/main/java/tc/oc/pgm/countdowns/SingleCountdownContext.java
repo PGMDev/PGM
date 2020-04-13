@@ -1,8 +1,8 @@
 package tc.oc.pgm.countdowns;
 
+import java.time.Duration;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.match.Match;
 
 public class SingleCountdownContext extends CountdownContext {

@@ -11,16 +11,15 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.util.Vector;
-import org.joda.time.Duration;
 import tc.oc.util.Numbers;
 import tc.oc.util.TimeUtils;
-import tc.oc.util.bukkit.component.PeriodFormats;
 
 public abstract class ConfigUtils {
 
@@ -43,10 +42,8 @@ public abstract class ConfigUtils {
     String str = config.getString(key);
     if (str == null) {
       return def;
-    } else if ("oo".equals(str)) {
-      return TimeUtils.INFINITE_DURATION;
     } else {
-      return PeriodFormats.SHORTHAND.parsePeriod(str).toStandardDuration();
+      return TimeUtils.parseDuration(str);
     }
   }
 

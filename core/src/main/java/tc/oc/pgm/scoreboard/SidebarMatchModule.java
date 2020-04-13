@@ -3,6 +3,7 @@ package tc.oc.pgm.scoreboard;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Ordering;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,7 +26,6 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
-import org.joda.time.Duration;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
@@ -59,6 +59,7 @@ import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.events.TeamRespawnsChangeEvent;
 import tc.oc.pgm.wool.MonumentWool;
 import tc.oc.pgm.wool.WoolMatchModule;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.component.ComponentRenderers;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.named.NameStyle;
@@ -297,7 +298,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
   public void goalStatusChange(final GoalStatusChangeEvent event) {
     if (event.getGoal() instanceof Destroyable
         && ((Destroyable) event.getGoal()).getShowProgress()) {
-      blinkGoal(event.getGoal(), 3, Duration.standardSeconds(1));
+      blinkGoal(event.getGoal(), 3, Duration.ofSeconds(1));
     } else {
       renderSidebarDebounce();
     }
@@ -574,7 +575,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
     }
 
     public void reset(@Nullable Duration duration) {
-      this.ticksRemaining = duration == null ? null : duration.getMillis() / 50;
+      this.ticksRemaining = duration == null ? null : TimeUtils.toTicks(duration);
     }
 
     public void stop() {

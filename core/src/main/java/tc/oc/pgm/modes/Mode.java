@@ -1,9 +1,9 @@
 package tc.oc.pgm.modes;
 
+import java.time.Duration;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.material.MaterialData;
-import org.joda.time.Duration;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 

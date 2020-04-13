@@ -24,6 +24,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.util.TimeUtils;
 
 @ListenerScope(MatchScope.RUNNING)
 public class TNTMatchModule implements MatchModule, Listener {
@@ -42,7 +43,7 @@ public class TNTMatchModule implements MatchModule, Listener {
 
   public int getFuseTicks() {
     assert this.properties.fuse != null;
-    return (int) (this.properties.fuse.getMillis() / 50);
+    return (int) TimeUtils.toTicks(this.properties.fuse);
   }
 
   private boolean callPrimeEvent(TNTPrimed tnt, @Nullable Entity primer) {

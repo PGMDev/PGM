@@ -1,8 +1,8 @@
 package tc.oc.pgm.controlpoint;
 
+import java.time.Duration;
 import javax.annotation.Nullable;
 import org.bukkit.util.BlockVector;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;

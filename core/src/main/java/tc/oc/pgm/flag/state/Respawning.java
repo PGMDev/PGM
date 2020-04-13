@@ -1,9 +1,9 @@
 package tc.oc.pgm.flag.state;
 
+import java.time.Duration;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.Post;
@@ -58,7 +58,7 @@ public class Respawning extends Spawned implements Returning {
                   "match.flag.willRespawn",
                   this.flag.getComponentName(),
                   new PersonalizedText(
-                      String.valueOf(respawnTime.getStandardSeconds()),
+                      String.valueOf(respawnTime.getSeconds()),
                       net.md_5.bungee.api.ChatColor.AQUA)));
     }
   }

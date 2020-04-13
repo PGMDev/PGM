@@ -1,13 +1,14 @@
 package tc.oc.pgm.modes;
 
+import java.time.Duration;
 import java.util.Set;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.timelimit.TimeLimitCountdown;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
@@ -71,12 +72,12 @@ public class ModeChangeCountdown extends MatchCountdown implements Comparable<Mo
 
     for (TimeLimitCountdown limit : timeLimitCountdowns) {
       // Don't show the countdown if it wont happen before the match ends
-      if (countdowns.getTimeLeft(limit).isShorterThan(remaining)) {
+      if (TimeUtils.isShorterThan(countdowns.getTimeLeft(limit), remaining)) {
         return false;
       }
     }
 
-    return remaining.getStandardSeconds() < this.mode.getShowBefore().getStandardSeconds();
+    return remaining.getSeconds() < this.mode.getShowBefore().getSeconds();
   }
 
   @Override

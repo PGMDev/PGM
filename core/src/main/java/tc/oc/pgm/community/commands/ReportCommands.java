@@ -197,7 +197,7 @@ public class ReportCommands {
 
         Component timeAgo =
             PeriodFormats.relativePastApproximate(
-                    org.joda.time.Instant.ofEpochMilli(data.getTimeSent().toEpochMilli()))
+                    java.time.Instant.ofEpochMilli(data.getTimeSent().toEpochMilli()))
                 .color(ChatColor.DARK_AQUA);
 
         return new PersonalizedText(

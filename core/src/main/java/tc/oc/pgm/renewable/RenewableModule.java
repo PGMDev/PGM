@@ -1,6 +1,7 @@
 package tc.oc.pgm.renewable;
 
 import com.google.common.collect.ImmutableList;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -8,7 +9,6 @@ import java.util.logging.Logger;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -74,7 +74,7 @@ public class RenewableModule implements MapModule {
         } else {
           if (attrInterval != null) {
             Duration interval = XMLUtils.parseDuration(attrInterval);
-            renewableDefinition.renewalsPerSecond = 1000f / interval.getMillis();
+            renewableDefinition.renewalsPerSecond = 1000f / interval.toMillis();
             renewableDefinition.rateScaled = true;
           } else {
             renewableDefinition.renewalsPerSecond = 1f;

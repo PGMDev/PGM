@@ -23,10 +23,9 @@ import tc.oc.pgm.goals.ProximityGoal;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.component.ComponentUtils;
-import tc.oc.util.bukkit.component.PeriodFormats;
 import tc.oc.util.bukkit.translations.AllTranslations;
-import tc.oc.util.bukkit.translations.Locales;
 
 public class MatchCommands {
 
@@ -53,9 +52,7 @@ public class MatchCommands {
               + AllTranslations.get().translate("command.match.matchInfo.time", sender)
               + ": "
               + ChatColor.GOLD
-              + PeriodFormats.COLONS_PRECISE
-                  .withLocale(Locales.getLocale(sender))
-                  .print(match.getDuration().toPeriod()));
+              + TimeUtils.formatDuration(match.getDuration()));
     }
 
     TeamMatchModule tmm = match.getModule(TeamMatchModule.class);
