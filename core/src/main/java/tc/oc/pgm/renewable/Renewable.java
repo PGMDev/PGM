@@ -279,7 +279,7 @@ public class Renewable implements Listener, Tickable {
     }
 
     if (definition.sound) {
-      NMSHacks.playBlockPlaceSound(match.getWorld(), pos, material.getItemType(), 1f);
+      // TODO: find bukkit api to do this
     }
 
     return true;

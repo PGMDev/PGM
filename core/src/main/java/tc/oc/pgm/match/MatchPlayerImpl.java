@@ -17,6 +17,9 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.GameMode;
 import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -51,6 +54,8 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
 
   // TODO: Probably should be moved to a better location
   private static final int FROZEN_VEHICLE_ENTITY_ID = NMSHacks.allocateEntityId();
+  private static final Attribute[] ATTRIBUTES = Attribute.values();
+
   private final Logger logger;
   private final Match match;
   private final UUID id;
@@ -251,7 +256,15 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
       }
     }
 
-    NMSHacks.resetAttributes(bukkit);
+    for (Attribute attribute : ATTRIBUTES) {
+      AttributeInstance attributes = bukkit.getAttribute(attribute);
+      if (attributes == null) continue;
+
+      for (AttributeModifier modifier : attributes.getModifiers()) {
+        attributes.removeModifier(modifier);
+      }
+    }
+
     NMSHacks.setAbsorption(bukkit, 0);
 
     // we only reset bed spawn here so people don't have to see annoying messages when they respawn

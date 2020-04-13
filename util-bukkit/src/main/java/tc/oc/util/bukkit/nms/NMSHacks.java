@@ -15,7 +15,6 @@ import org.bukkit.*;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Skull;
-import org.bukkit.craftbukkit.v1_8_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.*;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
@@ -32,7 +31,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionEffectTypeWrapper;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.util.Vector;
-import tc.oc.util.StringUtils;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.reflect.ReflectionUtils;
@@ -40,8 +38,7 @@ import tc.oc.util.reflect.ReflectionUtils;
 public interface NMSHacks {
 
   static EntityTrackerEntry getTrackerEntry(net.minecraft.server.v1_8_R3.Entity nms) {
-    return (EntityTrackerEntry)
-        ((WorldServer) nms.getWorld()).getTracker().trackedEntities.get(nms.getId());
+    return ((WorldServer) nms.getWorld()).getTracker().trackedEntities.get(nms.getId());
   }
 
   static EntityTrackerEntry getTrackerEntry(Entity entity) {
@@ -61,29 +58,8 @@ public interface NMSHacks {
     }
   }
 
-  static void setFireworksExpectedLifespan(Firework firework, int ticks) {
-    ((CraftFirework) firework).getHandle().expectedLifespan = ticks;
-  }
-
-  static void setFireworksTicksFlown(Firework firework, int ticks) {
-    EntityFireworks entityFirework = ((CraftFirework) firework).getHandle();
-    entityFirework.ticksFlown = ticks;
-  }
-
-  static void instantFireworks(Player player, Firework firework) {
-    sendPacket(
-        player, new PacketPlayOutEntityStatus(((CraftFirework) firework).getHandle(), (byte) 17));
-  }
-
-  static void skipFireworksLaunch(Firework firework) {
-    setFireworksExpectedLifespan(firework, 2);
-    setFireworksTicksFlown(firework, 2);
-    sendEntityMetadataToViewers(firework, false);
-  }
-
   /** Check all of the given villagers trades and replace any with invalid data */
-  static boolean fixVillagerTrades(Villager villager) {
-    boolean changed = false;
+  static void fixVillagerTrades(Villager villager) {
     EntityVillager nms = ((CraftVillager) villager).getHandle();
     MerchantRecipeList offers = nms.getOffers(null);
 
@@ -93,7 +69,6 @@ public interface NMSHacks {
         // If the buy1 or sell slots are null, then trying to serialize the
         // villager will generate an NPE. Assume it's a terminal recipe with
         // invalid items, and replace it with a working recipe.
-        changed = true;
         MerchantRecipe newRecipe =
             new MerchantRecipe(
                 new ItemStack(Blocks.BARRIER), // Buy slot 1
@@ -111,8 +86,6 @@ public interface NMSHacks {
         offers.set(i, newRecipe);
       }
     }
-
-    return changed;
   }
 
   static void openVillagerTrade(Player bukkitPlayer, Villager bukkitVillager) {
@@ -130,49 +103,9 @@ public interface NMSHacks {
     player.openTrade(newVillager);
   }
 
-  static boolean hasPowerEnchanment(Arrow bukkitArrow) {
-    EntityArrow arrow = ((CraftArrow) bukkitArrow).getHandle();
-    return arrow.j() > 2.0D;
-  }
-
   static boolean hasInfinityEnchanment(Arrow bukkitArrow) {
     EntityArrow arrow = ((CraftArrow) bukkitArrow).getHandle();
     return arrow.fromPlayer == 2; // ELECTROID: EntityArrow.PickupStatus.DISALLOWED;
-  }
-
-  static void playCustomSound(
-      World bukkitWorld, Location location, String sound, Float volume, Float pitch) {
-    WorldServer world = ((CraftWorld) bukkitWorld).getHandle();
-    world.makeSound(location.getX(), location.getY(), location.getZ(), sound, volume, pitch);
-  }
-
-  static void playCustomSound(Player bukkitPlayer, String sound, Float volume, Float pitch) {
-    EntityPlayer player = ((CraftPlayer) bukkitPlayer).getHandle();
-    sendPacket(
-        bukkitPlayer,
-        new PacketPlayOutNamedSoundEffect(
-            sound, player.locX, player.locY, player.locZ, volume, pitch));
-  }
-
-  static void resetAttributes(org.bukkit.entity.LivingEntity bukkitEntity) {
-    EntityLiving entity = ((CraftLivingEntity) bukkitEntity).getHandle();
-    List<IAttribute> attributes =
-        Lists.newArrayList(
-            GenericAttributes.maxHealth,
-            GenericAttributes.FOLLOW_RANGE,
-            GenericAttributes.c,
-            GenericAttributes.MOVEMENT_SPEED,
-            GenericAttributes.ATTACK_DAMAGE);
-
-    for (IAttribute attribute : attributes) {
-      AttributeInstance instance = entity.getAttributeMap().a(attribute);
-      if (instance != null) {
-        for (Object obj : instance.c()) {
-          AttributeModifier modifier = (AttributeModifier) obj;
-          instance.c(modifier);
-        }
-      }
-    }
   }
 
   static void sendPacket(Player bukkitPlayer, Object packet) {
@@ -188,11 +121,6 @@ public interface NMSHacks {
     for (EntityPlayer viewer : ((Set<EntityPlayer>) entry.trackedPlayers)) {
       viewer.playerConnection.sendPacket((Packet) packet);
     }
-  }
-
-  static Packet velocityPacket(Entity entity, Vector velocity) {
-    return new PacketPlayOutEntityVelocity(
-        entity.getEntityId(), velocity.getX(), velocity.getY(), velocity.getZ());
   }
 
   static PacketPlayOutPlayerInfo.PlayerInfoData playerListPacketData(
@@ -400,10 +328,6 @@ public interface NMSHacks {
     }
   }
 
-  static EntityMetadata getEntityMetadata(Entity entity) {
-    return new EntityMetadata(((CraftEntity) entity).getHandle().getDataWatcher());
-  }
-
   static EntityMetadata createBossMetadata(String name, float health) {
     EntityMetadata data = createEntityMetadata();
     setEntityMetadata(data, (byte) 0x20, (short) 300);
@@ -416,12 +340,6 @@ public interface NMSHacks {
     DataWatcher watcher = data.dataWatcher;
     watcher.a(20, 890); // Invulnerability countdown
     return data;
-  }
-
-  static void spawnDragon(
-      Player player, int entityId, Location location, String name, float health) {
-    EntityMetadata data = createBossMetadata(name, health);
-    spawnLivingEntity(player, EntityType.ENDER_DRAGON, entityId, location, data);
   }
 
   static void spawnWither(
@@ -441,72 +359,6 @@ public interface NMSHacks {
   static void updateBoss(Player player, int entityId, String name, float health) {
     EntityMetadata data = createBossMetadata(name, health);
     sendPacket(player, new PacketPlayOutEntityMetadata(entityId, data.dataWatcher, true));
-  }
-
-  class BossBarState {
-    public static final String KEY = "bossbar";
-    static final float HEALTH = 300;
-    static final double DISTANCE = 50;
-    static final float ANGLE = 20;
-    static final int LENGTH = 64;
-
-    int entityId; // -1 indicates not spawned
-
-    public void update(Player player, @Nullable String message, float progress) {
-      if (message == null && entityId >= 0) {
-        destroyEntities(player, entityId);
-        entityId = -1;
-      } else if (message != null) {
-        // Keep the boss barely alive, to avoid the death animation
-        progress = Math.max(0F, Math.min(1F, progress)) * (HEALTH - 0.1F) + 0.1F;
-        // Keep the message within the allowed length, to avoid crashes
-        message = StringUtils.truncate(message, LENGTH);
-
-        if (entityId >= 0) {
-          updateBoss(player, entityId, message, progress);
-        } else {
-          final Location location = player.getLocation();
-          location.setPitch(location.getPitch() - ANGLE);
-          location.add(location.getDirection().multiply(DISTANCE));
-
-          spawnWither(player, entityId, location, message, progress);
-        }
-      }
-    }
-  }
-
-  static void spawnObject(
-      Player player,
-      byte type,
-      int entityId,
-      Location location,
-      int objectData,
-      short velX,
-      short velY,
-      short velZ) {
-    sendPacket(player, spawnObjectPacket(type, entityId, location, objectData, velX, velY, velZ));
-  }
-
-  static PacketPlayOutSpawnEntity spawnObjectPacket(
-      byte type,
-      int entityId,
-      Location location,
-      int objectData,
-      short velX,
-      short velY,
-      short velZ) {
-    return new PacketPlayOutSpawnEntity(
-        entityId,
-        location.getX(),
-        location.getY(),
-        location.getZ(),
-        velX,
-        velY,
-        velZ,
-        (int) location.getPitch(),
-        (int) location.getYaw(),
-        type,
-        objectData);
   }
 
   static Packet spawnPlayerPacket(int entityId, UUID uuid, Location location, Player player) {
@@ -554,27 +406,8 @@ public interface NMSHacks {
         metadata.dataWatcher);
   }
 
-  static void entityLook(Player player, int entityId, Location location) {
-    sendPacket(
-        player,
-        new PacketPlayOutEntity.PacketPlayOutEntityLook(
-            entityId,
-            (byte) (location.getYaw() * 256 / 360), // Yaw
-            (byte) (location.getPitch() * 256 / 360), // Pitch
-            true)); // On Ground
-  }
-
   static void entityAttach(Player player, int entityID, int vehicleID, boolean leash) {
     sendPacket(player, new PacketPlayOutAttachEntity(entityID, vehicleID, leash));
-  }
-
-  static Packet relativeMoveEntityPacket(int entityId, Vector delta) {
-    return new PacketPlayOutEntity.PacketPlayOutRelEntityMove(
-        entityId,
-        (byte) (delta.getX() * 32d),
-        (byte) (delta.getY() * 32d),
-        (byte) (delta.getZ() * 32d),
-        false);
   }
 
   static Packet teleportEntityPacket(int entityId, Location location) {
@@ -606,16 +439,6 @@ public interface NMSHacks {
   static Packet entityMetadataPacket(int entityId, EntityMetadata metadata, boolean complete) {
     return new PacketPlayOutEntityMetadata(
         entityId, metadata.dataWatcher, complete); // true = all values, false = only dirty values
-  }
-
-  static void sendEntityMetadata(
-      Player player, int entityId, EntityMetadata metadata, boolean complete) {
-    sendPacket(player, entityMetadataPacket(entityId, metadata, complete));
-  }
-
-  /** Immediately send the given entity's metadata to all viewers in range */
-  static void sendEntityMetadataToViewers(Entity entity, boolean complete) {
-    sendPacketToViewers(entity, entityMetadataPacket(entity, complete));
   }
 
   static EntityMetadata createEntityMetadata() {
@@ -674,37 +497,8 @@ public interface NMSHacks {
     metadata.dataWatcher.a(10, (byte) flags);
   }
 
-  static void setArmorStandAngles(
-      EntityMetadata metadata, int slot, float pitch, float yaw, float roll) {
-    metadata.dataWatcher.a(11 + slot, new Vector3f(pitch, yaw, roll));
-  }
-
-  static void initArmorStandAngles(EntityMetadata metadata) {
-    for (int slot = 0; slot < 6; slot++) {
-      setArmorStandAngles(metadata, slot, 0f, 0f, 0f);
-    }
-  }
-
-  static void setAgeableMetadata(EntityMetadata metadata, int age) {
-    metadata.dataWatcher.a(12, (Integer) age);
-  }
-
   static Packet entityEquipmentPacket(int entityId, int slot, org.bukkit.inventory.ItemStack item) {
     return new PacketPlayOutEntityEquipment(entityId, slot, CraftItemStack.asNMSCopy(item));
-  }
-
-  static void setSkinPartsMetadata(EntityMetadata metadata, Set<Skin.Part> skinParts) {
-    DataWatcher dataWatcher = metadata.dataWatcher;
-    dataWatcher.a(10, (byte) Skins.flagsFromParts(skinParts));
-  }
-
-  static void setHumanEntityMetadata(
-      EntityMetadata metadata, Set<Skin.Part> skinParts, float absorptionHearts, int score) {
-    DataWatcher dataWatcher = metadata.dataWatcher;
-    dataWatcher.a(10, (byte) Skins.flagsFromParts(skinParts));
-    // dataWatcher.a(16, (byte) 0); // TODO: Hide cape
-    dataWatcher.a(17, (float) absorptionHearts);
-    dataWatcher.a(18, (int) score);
   }
 
   static void playEffect(World bukkitWorld, Vector pos, int effectId, int data) {
@@ -716,16 +510,6 @@ public interface NMSHacks {
   @SuppressWarnings("deprecation")
   static void playBlockBreakEffect(World bukkitWorld, Vector pos, org.bukkit.Material material) {
     playEffect(bukkitWorld, pos, 2001, material.getId());
-  }
-
-  static void playBlockPlaceSound(
-      World bukkitWorld, Vector pos, org.bukkit.Material material, float volume) {
-    if (!material.isBlock()) {
-      return;
-    }
-
-    String sound = CraftMagicNumbers.getBlock(material).stepSound.getPlaceSound();
-    playCustomSound(bukkitWorld, pos.toLocation(bukkitWorld), sound, volume, 1f);
   }
 
   /**
@@ -746,15 +530,6 @@ public interface NMSHacks {
     return nmsBlock != null
         && (nmsBlock.getMaterial().isAlwaysDestroyable()
             || (nmsTool != null && nmsTool.canDestroySpecialBlock(nmsBlock)));
-  }
-
-  /** Get the "damage" field of an arrow */
-  static double getArrowDamage(Arrow arrow) {
-    return ((CraftArrow) arrow).getHandle().j();
-  }
-
-  static void setArrowDamage(Arrow arrow, double damage) {
-    ((CraftArrow) arrow).getHandle().b(damage);
   }
 
   static long getMonotonicTime(World world) {
@@ -795,10 +570,6 @@ public interface NMSHacks {
     sendPacket(player, packet);
   }
 
-  static void sendSystemMessage(Player player, BaseComponent[] message) {
-    sendMessage(player, message, 1);
-  }
-
   // Only legacy formatting actually works, even though the packet uses components.
   // If this is ever fixed, the methods below can be changed to pass the components through.
   static void sendHotbarMessage(Player player, String message) {
@@ -807,14 +578,6 @@ public interface NMSHacks {
 
   static void sendHotbarMessage(Player player, Component message) {
     sendHotbarMessage(player, message.toLegacyText());
-  }
-
-  static void sendHotbarMessage(Player player, Component[] message) {
-    BaseComponent[] legacy = new BaseComponent[message.length];
-    for (int i = 0; i < message.length; i++) {
-      legacy[i] = new PersonalizedText(message[i].toLegacyText()).render(player);
-    }
-    sendMessage(player, legacy, 2);
   }
 
   static void enableArmorSlots(ArmorStand armorStand, boolean enabled) {
@@ -859,23 +622,6 @@ public interface NMSHacks {
         material.getItemTypeId() + (material.getData() << 12));
   }
 
-  // taken from PlayerList.moveToWorld, tries to find bed spawn
-  static @Nullable Location getBedSpawn(Player player) {
-    EntityPlayer entity = ((CraftPlayer) player).getHandle();
-    CraftWorld world = (CraftWorld) entity.server.server.getWorld(entity.spawnWorld);
-    BlockPosition pos = entity.getBed();
-
-    if (world != null && pos != null) {
-      pos = EntityHuman.getBed(world.getHandle(), pos, entity.isRespawnForced());
-
-      if (pos != null) {
-        return new Location(world, pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
-      }
-    }
-
-    return null;
-  }
-
   static void showBorderWarning(Player player, boolean show) {
     WorldBorder border = new WorldBorder();
     border.setWarningDistance(show ? Integer.MAX_VALUE : 0);
@@ -883,19 +629,6 @@ public interface NMSHacks {
         player,
         new PacketPlayOutWorldBorder(
             border, PacketPlayOutWorldBorder.EnumWorldBorderAction.SET_WARNING_BLOCKS));
-  }
-
-  /** Kill the given player without generating any combat events */
-  static void killWithoutCombat(Player player) {
-    EntityPlayer handle = ((CraftPlayer) player).getHandle();
-
-    // Clear the combat tracker so we don't generate a death.
-    // The player needs to be "dead" for the tracker to clear.
-    handle.dead = true;
-    handle.bs().g();
-    handle.dead = false;
-
-    handle.die(null);
   }
 
   static void playDeathAnimation(Player player) {
@@ -927,26 +660,6 @@ public interface NMSHacks {
     }
 
     sendPacketToViewers(player, packet);
-  }
-
-  /**
-   * Guess if the given world is a "weapon" by checking for any modifier of the attack damage
-   * attribute.
-   */
-  static boolean isWeapon(org.bukkit.Material material) {
-    return material != null
-        && material != org.bukkit.Material.AIR
-        && !CraftMagicNumbers.getItem(material).i().get("generic.attackDamage").isEmpty();
-  }
-
-  /**
-   * Guess if the given item is a "weapon" by checking for any modifier of the attack damage
-   * attribute.
-   */
-  static boolean isWeapon(org.bukkit.inventory.ItemStack stack) {
-    return stack != null
-        && stack.getType() != org.bukkit.Material.AIR
-        && !CraftItemStack.asNMSCopy(stack).B().get("generic.attackDamage").isEmpty();
   }
 
   static ItemStack asNMS(org.bukkit.inventory.ItemStack bukkit) {
@@ -1039,14 +752,6 @@ public interface NMSHacks {
 
   static double getAbsorption(LivingEntity entity) {
     return ((CraftLivingEntity) entity).getHandle().getAbsorptionHearts();
-  }
-
-  static boolean isChunkEmpty(org.bukkit.Chunk chunk) {
-    for (ChunkSection chunkSections : ((CraftChunk) chunk).getHandle().getSections()) {
-      if (chunkSections != null && !chunkSections.a()) return false;
-    }
-
-    return true;
   }
 
   static void setBookPages(BookMeta book, BaseComponent... pages) {
