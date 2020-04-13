@@ -1,15 +1,9 @@
 package tc.oc.util.bukkit.chat;
 
-import static tc.oc.util.bukkit.nms.NMSHacks.BossBarState;
-
 import javax.annotation.Nullable;
 import net.kyori.text.adapter.bukkit.TextAdapter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
-import org.bukkit.plugin.Plugin;
-import tc.oc.util.bukkit.BukkitUtils;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.nms.NMSHacks;
@@ -38,17 +32,7 @@ public interface PlayerAudience extends VirtualAudience {
 
   @Override
   default void showBossbar(@Nullable net.kyori.text.Component message, float progress) {
-    final Player player = getAudience();
-    final Plugin plugin = BukkitUtils.getPlugin();
-
-    MetadataValue meta = player.getMetadata(BossBarState.KEY, plugin);
-    if (meta == null || meta.value() == null) {
-      meta = new FixedMetadataValue(plugin, new BossBarState());
-      player.setMetadata(BossBarState.KEY, meta);
-    }
-
-    final BossBarState bar = (BossBarState) meta.value();
-    bar.update(player, message == null ? null : renderMessageLegacy(message), progress);
+    // TODO
   }
 
   @Override
