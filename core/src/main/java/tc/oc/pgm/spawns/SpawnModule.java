@@ -2,12 +2,12 @@ package tc.oc.pgm.spawns;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
@@ -17,14 +17,15 @@ import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.points.PointParser;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.teams.TeamModule;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.xml.InvalidXMLException;
 import tc.oc.util.xml.XMLUtils;
 
 public class SpawnModule implements MapModule {
 
-  public static final Duration MINIMUM_RESPAWN_DELAY = Duration.standardSeconds(2);
-  public static final Duration IGNORE_CLICKS_DELAY = Duration.millis(500);
+  public static final Duration MINIMUM_RESPAWN_DELAY = Duration.ofSeconds(2);
+  public static final Duration IGNORE_CLICKS_DELAY = Duration.ofMillis(500);
 
   protected final Spawn defaultSpawn;
   protected final List<Spawn> spawns;
@@ -87,7 +88,7 @@ public class SpawnModule implements MapModule {
       bedSpawn = XMLUtils.parseBoolean(elRespawn.getAttribute("bed"), bedSpawn);
       message = XMLUtils.parseFormattedText(elRespawn, "message", message);
 
-      if (delay.isShorterThan(MINIMUM_RESPAWN_DELAY)) delay = MINIMUM_RESPAWN_DELAY;
+      if (TimeUtils.isShorterThan(delay, MINIMUM_RESPAWN_DELAY)) delay = MINIMUM_RESPAWN_DELAY;
     }
 
     return new RespawnOptions(delay, auto, blackout, spectate, bedSpawn, message);

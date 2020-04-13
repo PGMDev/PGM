@@ -2,6 +2,8 @@ package tc.oc.pgm.destroyable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,8 +20,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
-import org.joda.time.Duration;
-import org.joda.time.Instant;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
@@ -63,7 +63,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   // The percentage of blocks that must be broken for the entire Destroyable to be destroyed.
   protected double destructionRequired;
 
-  protected final Duration SPARK_COOLDOWN = Duration.millis(75);
+  protected final Duration SPARK_COOLDOWN = Duration.ofMillis(75);
   protected Instant lastSparkTime;
 
   /**
@@ -342,8 +342,8 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
         float chance =
             this.lastSparkTime == null
                 ? 1.0f
-                : ((float) (now.getMillis() - this.lastSparkTime.getMillis())
-                    / (float) SPARK_COOLDOWN.getMillis());
+                : ((float) (now.toEpochMilli() - this.lastSparkTime.toEpochMilli())
+                    / (float) SPARK_COOLDOWN.toMillis());
         if (this.match.getRandom().nextFloat() < chance) {
           this.lastSparkTime = now;
 

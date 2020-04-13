@@ -7,8 +7,8 @@ import org.bukkit.scheduler.BukkitTask;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.PeriodFormats;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.tablist.DynamicTabEntry;
 import tc.oc.util.bukkit.tablist.TabView;
@@ -68,7 +68,7 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
                 + ": ",
             ChatColor.GRAY),
         new PersonalizedText(
-            PeriodFormats.COLONS.print(this.match.getDuration().toPeriod()),
+            TimeUtils.formatDuration(match.getDuration()),
             this.match.isRunning() ? ChatColor.GREEN : ChatColor.GOLD));
 
     if (server != null) {

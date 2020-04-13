@@ -1,6 +1,6 @@
 package tc.oc.pgm.countdowns;
 
-import org.joda.time.Duration;
+import java.time.Duration;
 
 public abstract class Countdown {
 

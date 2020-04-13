@@ -1,7 +1,8 @@
 package tc.oc.pgm.filters;
 
-import org.joda.time.Duration;
+import java.time.Duration;
 import tc.oc.pgm.api.filter.query.MatchQuery;
+import tc.oc.util.TimeUtils;
 
 public class TimeFilter extends TypedFilter<MatchQuery> implements Comparable<TimeFilter> {
   private final Duration duration;
@@ -17,7 +18,8 @@ public class TimeFilter extends TypedFilter<MatchQuery> implements Comparable<Ti
 
   @Override
   protected QueryResponse queryTyped(MatchQuery query) {
-    return QueryResponse.fromBoolean(!query.getMatch().getDuration().isShorterThan(duration));
+    return QueryResponse.fromBoolean(
+        !TimeUtils.isShorterThan(query.getMatch().getDuration(), duration));
   }
 
   public Duration getTime() {

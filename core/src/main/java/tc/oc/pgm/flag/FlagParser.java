@@ -2,6 +2,7 @@ package tc.oc.pgm.flag;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -9,7 +10,6 @@ import org.bukkit.DyeColor;
 import org.bukkit.util.Vector;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;

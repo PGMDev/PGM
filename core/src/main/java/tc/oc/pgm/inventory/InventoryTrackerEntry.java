@@ -1,4 +1,4 @@
-package tc.oc.pgm.util;
+package tc.oc.pgm.inventory;
 
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.PlayerInventory;

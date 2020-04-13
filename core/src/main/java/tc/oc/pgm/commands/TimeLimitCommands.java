@@ -5,9 +5,9 @@ import app.ashcon.intake.CommandException;
 import app.ashcon.intake.bukkit.parametric.Type;
 import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
 import app.ashcon.intake.parametric.annotation.Switch;
+import java.time.Duration;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.VictoryCondition;
@@ -15,8 +15,8 @@ import tc.oc.pgm.result.TieVictoryCondition;
 import tc.oc.pgm.result.VictoryConditions;
 import tc.oc.pgm.timelimit.TimeLimit;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.component.ComponentRenderers;
-import tc.oc.util.bukkit.component.PeriodFormats;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
@@ -44,7 +44,7 @@ public class TimeLimitCommands {
               ChatColor.YELLOW
                   + "The match ended with "
                   + ChatColor.AQUA
-                  + PeriodFormats.COLONS_PRECISE.print(tlmm.getFinalRemaining().toPeriod())
+                  + TimeUtils.formatDuration(tlmm.getFinalRemaining())
                   + ChatColor.YELLOW
                   + " remaining");
         } else {
@@ -79,7 +79,7 @@ public class TimeLimitCommands {
         Duration duration;
         if (durationString != null) {
           try {
-            duration = PeriodFormats.SHORTHAND.parsePeriod(durationString).toStandardDuration();
+            duration = TimeUtils.parseDuration(durationString);
           } catch (IllegalArgumentException ex) {
             throw new CommandException("Invalid time format: " + durationString);
           }
@@ -120,8 +120,7 @@ public class TimeLimitCommands {
                 new PersonalizedTranslatable(
                     "timeLimit.commandOutput",
                     new PersonalizedText(
-                        PeriodFormats.COLONS_PRECISE.print(duration.toPeriod()),
-                        net.md_5.bungee.api.ChatColor.AQUA),
+                        TimeUtils.formatDuration(duration), net.md_5.bungee.api.ChatColor.AQUA),
                     result.getDescription(match))));
   }
 }

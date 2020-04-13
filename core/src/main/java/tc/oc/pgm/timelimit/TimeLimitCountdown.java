@@ -1,8 +1,8 @@
 package tc.oc.pgm.timelimit;
 
+import java.time.Duration;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.util.bukkit.chat.Sound;
@@ -52,7 +52,7 @@ public class TimeLimitCountdown extends MatchCountdown {
     super.onTick(remaining, total);
 
     if (this.timeLimit.getShow()) {
-      long secondsLeft = remaining.getStandardSeconds();
+      long secondsLeft = remaining.getSeconds();
       if (secondsLeft > 30) {
         // Beep for chat messages before the last 30 seconds
         if (this.showChat()) {

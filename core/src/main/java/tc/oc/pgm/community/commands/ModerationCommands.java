@@ -632,16 +632,15 @@ public class ModerationCommands implements Listener {
       String length =
           ComponentRenderers.toLegacyText(
               PeriodFormats.briefNaturalApproximate(
-                  org.joda.time.Instant.ofEpochSecond(
-                      ban.getCreated().toInstant().getEpochSecond()),
-                  org.joda.time.Instant.ofEpochSecond(
+                  java.time.Instant.ofEpochSecond(ban.getCreated().toInstant().getEpochSecond()),
+                  java.time.Instant.ofEpochSecond(
                       ban.getExpiration().toInstant().getEpochSecond())),
               sender);
       String remaining =
           ComponentRenderers.toLegacyText(
               PeriodFormats.briefNaturalApproximate(
-                  org.joda.time.Instant.now(),
-                  org.joda.time.Instant.ofEpochSecond(
+                  java.time.Instant.now(),
+                  java.time.Instant.ofEpochSecond(
                       ban.getExpiration().toInstant().getEpochSecond())),
               sender);
 
@@ -665,7 +664,7 @@ public class ModerationCommands implements Listener {
     String createdAgo =
         ComponentRenderers.toLegacyText(
             PeriodFormats.relativePastApproximate(
-                org.joda.time.Instant.ofEpochSecond(ban.getCreated().toInstant().getEpochSecond())),
+                java.time.Instant.ofEpochSecond(ban.getCreated().toInstant().getEpochSecond())),
             sender);
 
     Component banTypeFormatted =
@@ -842,8 +841,7 @@ public class ModerationCommands implements Listener {
     // If punishment expires, inform user when
     if (expires != null) {
       Component timeLeft =
-          PeriodFormats.briefNaturalApproximate(
-              org.joda.time.Duration.standardSeconds(expires.getSeconds()));
+          PeriodFormats.briefNaturalApproximate(java.time.Duration.ofSeconds(expires.getSeconds()));
       lines.add(
           new PersonalizedTranslatable("moderation.screen.expires", timeLeft)
               .getPersonalizedText()
@@ -923,7 +921,7 @@ public class ModerationCommands implements Listener {
       String time =
           ComponentRenderers.toLegacyText(
               PeriodFormats.briefNaturalApproximate(
-                  org.joda.time.Duration.standardSeconds(length.getSeconds())),
+                  java.time.Duration.ofSeconds(length.getSeconds())),
               sender);
       prefix =
           type.getPunishmentPrefix(
@@ -983,8 +981,7 @@ public class ModerationCommands implements Listener {
 
     public Component getHoverMessage() {
       Component timeAgo =
-          PeriodFormats.relativePastApproximate(
-                  org.joda.time.Instant.ofEpochMilli(time.toEpochMilli()))
+          PeriodFormats.relativePastApproximate(java.time.Instant.ofEpochMilli(time.toEpochMilli()))
               .color(ChatColor.DARK_AQUA);
 
       return new PersonalizedTranslatable(

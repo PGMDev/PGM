@@ -1,11 +1,11 @@
 package tc.oc.pgm.countdowns;
 
 import com.google.common.collect.ImmutableSet;
+import java.time.Duration;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.util.ClassLogger;
 
@@ -20,7 +20,7 @@ public class CountdownContext {
   }
 
   public void start(Countdown countdown, int seconds) {
-    this.start(countdown, Duration.standardSeconds(seconds));
+    this.start(countdown, Duration.ofSeconds(seconds));
   }
 
   public void start(Countdown countdown, Duration duration) {
@@ -68,7 +68,7 @@ public class CountdownContext {
 
   public Duration getTimeLeft(Countdown countdown) {
     CountdownRunner runner = this.runners.get(countdown);
-    return runner == null ? null : Duration.standardSeconds(runner.getSecondsRemaining());
+    return runner == null ? null : Duration.ofSeconds(runner.getSecondsRemaining());
   }
 
   public boolean isRunning(Countdown countdown) {

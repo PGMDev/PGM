@@ -1,10 +1,10 @@
 package tc.oc.pgm.controlpoint;
 
+import java.time.Duration;
 import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.util.Vector;
 import org.jdom2.Element;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
@@ -62,8 +62,7 @@ public abstract class ControlPointParser {
             : teams.parseTeam(elControlPoint.getAttribute("initial-owner"), factory);
     Vector capturableDisplayBeacon = XMLUtils.parseVector(elControlPoint.getAttribute("beacon"));
     Duration timeToCapture =
-        XMLUtils.parseDuration(
-            elControlPoint.getAttribute("capture-time"), Duration.standardSeconds(30));
+        XMLUtils.parseDuration(elControlPoint.getAttribute("capture-time"), Duration.ofSeconds(30));
 
     float timeMultiplier =
         XMLUtils.parseNumber(

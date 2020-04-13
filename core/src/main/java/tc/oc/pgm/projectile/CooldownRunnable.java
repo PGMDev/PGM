@@ -1,8 +1,8 @@
 package tc.oc.pgm.projectile;
 
+import java.time.Duration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.kits.tag.ItemTags;
@@ -29,21 +29,21 @@ public class CooldownRunnable extends BukkitRunnable {
       String projectileId = ItemTags.PROJECTILE.get(item);
       if (projectileId != null
           && projectileId.equals(projectileCooldown.getProjectileDefinition().getId())) {
-        if (timeLeft.getMillis() == 0) {
+        if (timeLeft.isZero()) {
           projectileCooldown.resetItemName(item);
         } else {
           // Only update countdown text every 1 second until the last second in which it updates
           // every tick.
           // Not updating the last tenth ms to prevent the countdown text being 0.0.
-          if (timeLeft.getStandardSeconds() != lastUpdateSeconds
-              || (timeLeft.getMillis() < 1000 && timeLeft.getMillis() >= 100)) {
+          if (timeLeft.getSeconds() != lastUpdateSeconds
+              || (timeLeft.toMillis() < 1000 && timeLeft.toMillis() >= 100)) {
             projectileCooldown.setItemCoutdownName(item);
           }
         }
       }
     }
 
-    if (timeLeft.getMillis() == 0) projectileCooldown.end();
-    lastUpdateSeconds = (int) timeLeft.getStandardSeconds();
+    if (timeLeft.isZero()) projectileCooldown.end();
+    lastUpdateSeconds = (int) timeLeft.getSeconds();
   }
 }

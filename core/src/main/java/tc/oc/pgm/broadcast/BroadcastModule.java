@@ -2,11 +2,11 @@ package tc.oc.pgm.broadcast;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import java.time.Duration;
 import java.util.logging.Logger;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -15,6 +15,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.countdowns.CountdownRunner;
 import tc.oc.pgm.filters.FilterParser;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.xml.InvalidXMLException;
 import tc.oc.util.xml.Node;
@@ -71,10 +72,11 @@ public class BroadcastModule implements MapModule {
             count = Integer.MAX_VALUE;
           }
 
-          if (every != null && every.isShorterThan(CountdownRunner.MIN_REPEAT_INTERVAL)) {
+          if (every != null
+              && TimeUtils.isShorterThan(every, CountdownRunner.MIN_REPEAT_INTERVAL)) {
             throw new InvalidXMLException(
                 "Repeat interval must be at least "
-                    + CountdownRunner.MIN_REPEAT_INTERVAL.getMillis()
+                    + CountdownRunner.MIN_REPEAT_INTERVAL.toMillis()
                     + " milliseconds",
                 attrEvery);
           }

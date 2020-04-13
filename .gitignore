@@ -45,7 +45,10 @@ world/
 world_nether/
 world_the_end/
 wepif.yml
+crash-reports/
 
 # PGM generated files
 match-*/
 maps.zip
+maps/
+

@@ -3,10 +3,10 @@ package tc.oc.pgm.score;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import javax.annotation.Nullable;
-import org.joda.time.Duration;
-import org.joda.time.Instant;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -64,7 +64,7 @@ public class ScoreBox {
 
   public boolean isCoolingDown(MatchPlayerState player) {
     Instant lastScore = this.getLastScoreTime(player);
-    return lastScore != null && lastScore.plus(Duration.standardSeconds(1)).isAfter(Instant.now());
+    return lastScore != null && lastScore.plus(Duration.ofSeconds(1)).isAfter(Instant.now());
   }
 
   public void setLastScoreTime(MatchPlayerState player, Instant time) {

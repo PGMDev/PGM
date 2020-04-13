@@ -2,10 +2,10 @@ package tc.oc.pgm.commands;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
+import java.time.Duration;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.start.StartCountdown;
@@ -23,7 +23,8 @@ public class StartCommands {
       desc = "Queues the start of the match in a certain amount of seconds",
       usage = "[countdown time] [huddle time]",
       perms = Permissions.START)
-  public static void start(CommandSender sender, Match match, Duration countdown, Duration huddle)
+  public static void start(
+      CommandSender sender, Match match, Duration countdown, @Nullable Duration huddle)
       throws CommandException {
     StartMatchModule smm = match.needModule(StartMatchModule.class);
 
@@ -38,7 +39,7 @@ public class StartCommands {
 
     if (smm.canStart(true)) {
       match.getCountdown().cancelAll(StartCountdown.class);
-      smm.forceStartCountdown(countdown, huddle);
+      smm.forceStartCountdown(countdown, huddle == null ? Duration.ZERO : huddle);
     } else {
       ComponentRenderers.send(
           sender,

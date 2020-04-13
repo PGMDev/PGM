@@ -1,7 +1,8 @@
 package tc.oc.pgm.spawns;
 
+import java.time.Duration;
 import javax.annotation.Nullable;
-import org.joda.time.Duration;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.component.Component;
 
 public class RespawnOptions {
@@ -21,7 +22,7 @@ public class RespawnOptions {
       boolean bedSpawn,
       @Nullable Component message) {
     this.delay = delay;
-    this.delayTicks = Math.max(delay.getMillis() / 50, 20);
+    this.delayTicks = Math.max(TimeUtils.toTicks(delay), 20);
     this.auto = auto;
     this.blackout = blackout;
     this.spectate = spectate;

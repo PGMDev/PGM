@@ -1,6 +1,6 @@
 package tc.oc.pgm.start;
 
-import org.joda.time.Duration;
+import java.time.Duration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchPhase;
 import tc.oc.pgm.countdowns.MatchCountdown;
@@ -25,7 +25,7 @@ public abstract class PreMatchCountdown extends MatchCountdown {
   @Override
   public void onTick(Duration remaining, Duration total) {
     super.onTick(remaining, total);
-    if (remaining.getStandardSeconds() >= 1 && remaining.getStandardSeconds() <= 3) {
+    if (remaining.getSeconds() >= 1 && remaining.getSeconds() <= 3) {
       getMatch().playSound(COUNT_SOUND);
     }
   }
@@ -39,8 +39,6 @@ public abstract class PreMatchCountdown extends MatchCountdown {
 
   @Override
   protected boolean showTitle() {
-    return (remaining.isLongerThan(Duration.ZERO)
-            && !remaining.isLongerThan(Duration.standardSeconds(3)))
-        || super.showTitle();
+    return (!remaining.isZero() && remaining.getSeconds() <= 3) || super.showTitle();
   }
 }

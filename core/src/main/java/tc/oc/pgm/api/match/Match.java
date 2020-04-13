@@ -1,5 +1,6 @@
 package tc.oc.pgm.api.match;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Random;
 import java.util.logging.Logger;
@@ -9,7 +10,6 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;

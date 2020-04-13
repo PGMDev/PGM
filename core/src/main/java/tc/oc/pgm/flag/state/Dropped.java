@@ -1,8 +1,9 @@
 package tc.oc.pgm.flag.state;
 
+import java.time.Duration;
+import java.time.Instant;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.flag.Flag;
@@ -19,7 +20,7 @@ import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 public class Dropped extends Uncarried implements Missing {
 
   // Minimum time between a player dropping the flag and picking it up again
-  private static final Duration PICKUP_DELAY = Duration.standardSeconds(2);
+  private static final Duration PICKUP_DELAY = Duration.ofSeconds(2);
 
   private final MatchPlayer dropper;
 
@@ -79,7 +80,7 @@ public class Dropped extends Uncarried implements Missing {
   @Override
   protected boolean canPickup(MatchPlayer player) {
     return super.canPickup(player)
-        && (player != this.dropper || this.enterTime.plus(PICKUP_DELAY).isBeforeNow());
+        && (player != this.dropper || this.enterTime.plus(PICKUP_DELAY).isBefore(Instant.now()));
   }
 
   @Override

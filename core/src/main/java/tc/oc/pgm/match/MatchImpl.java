@@ -7,6 +7,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -38,8 +40,6 @@ import org.bukkit.event.EventException;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredListener;
-import org.joda.time.Duration;
-import org.joda.time.Instant;
 import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.feature.Feature;
@@ -660,16 +660,17 @@ public class MatchImpl implements Match {
 
   @Override
   public Duration getDuration() {
-    if (start.get() <= 0) {
+    long start = this.start.get();
+    if (start <= 0) {
       return Duration.ZERO;
     }
 
-    long endMs = end.get();
-    if (endMs <= 0) {
-      endMs = System.currentTimeMillis();
+    long end = this.end.get();
+    if (end <= 0) {
+      end = System.currentTimeMillis();
     }
 
-    return new Duration(start.get(), endMs);
+    return Duration.ofMillis(end - start);
   }
 
   private class TickableTask implements Runnable {

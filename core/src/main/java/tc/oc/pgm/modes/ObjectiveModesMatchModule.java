@@ -82,7 +82,7 @@ public class ObjectiveModesMatchModule implements MatchModule {
                     return ObjectiveModesMatchModule.this
                             .getCountdown()
                             .getTimeLeft(countdown)
-                            .getStandardSeconds()
+                            .getSeconds()
                         > 0;
                   }
                 }));

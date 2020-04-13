@@ -3,20 +3,19 @@ package tc.oc.pgm.commands;
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Default;
+import java.time.Duration;
 import java.util.List;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.joda.time.Duration;
-import org.joda.time.Period;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.modes.ModeChangeCountdown;
+import tc.oc.pgm.modes.ModesPaginatedResult;
 import tc.oc.pgm.modes.ObjectiveModesMatchModule;
-import tc.oc.pgm.util.ModesPaginatedResult;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.chat.Audience;
-import tc.oc.util.bukkit.component.PeriodFormats;
 
 public class ModeCommands {
 
@@ -39,7 +38,7 @@ public class ModeCommands {
 
         if (timeLeft == null) {
           builder.append(ChatColor.GOLD).append(next.getMode().getPreformattedMaterialName());
-        } else if (timeLeft.getStandardSeconds() >= 0) {
+        } else if (timeLeft.getSeconds() >= 0) {
           builder
               .append(ChatColor.GOLD)
               .append(WordUtils.capitalize(next.getMode().getPreformattedMaterialName()))
@@ -71,7 +70,7 @@ public class ModeCommands {
       desc = "Reschedules all active mode change countdowns by [seconds]",
       usage = "[seconds]",
       perms = Permissions.GAMEPLAY)
-  public static void push(CommandSender sender, Match match, Duration seconds)
+  public static void push(CommandSender sender, Match match, Duration duration)
       throws CommandException {
     ObjectiveModesMatchModule modes = getModes(match);
 
@@ -82,31 +81,24 @@ public class ModeCommands {
     CountdownContext countdowns = modes.getCountdown();
     List<ModeChangeCountdown> sortedCountdowns = modes.getSortedCountdowns();
 
-    Period offset;
-    try {
-      offset = seconds.toPeriod();
-    } catch (IllegalArgumentException e) {
-      throw new CommandException("Invalid time format specified");
-    }
-
     for (ModeChangeCountdown countdown : sortedCountdowns) {
-      if (countdowns.getTimeLeft(countdown).getStandardSeconds() > 0) {
+      if (countdowns.getTimeLeft(countdown).getSeconds() > 0) {
         Duration oldDelay = countdowns.getTimeLeft(countdown);
-        Duration newDelay = oldDelay.plus(offset.toStandardDuration());
+        Duration newDelay = oldDelay.plus(duration);
 
         countdowns.cancel(countdown);
-        countdowns.start(countdown, (int) newDelay.getStandardSeconds());
+        countdowns.start(countdown, (int) newDelay.getSeconds());
       }
     }
 
     StringBuilder builder = new StringBuilder(ChatColor.GOLD + "All modes have been pushed ");
-    if (offset.toStandardDuration().getStandardSeconds() >= 0) {
-      builder.append("forwards ");
-    } else {
+    if (duration.isNegative()) {
       builder.append("backwards ");
+    } else {
+      builder.append("forwards ");
     }
 
-    builder.append("by ").append(PeriodFormats.COLONS.print(offset));
+    builder.append("by ").append(TimeUtils.formatDuration(duration));
 
     sender.sendMessage(builder.toString());
   }

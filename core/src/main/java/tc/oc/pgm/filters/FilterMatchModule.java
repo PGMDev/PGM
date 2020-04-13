@@ -2,13 +2,13 @@ package tc.oc.pgm.filters;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterListener;
 import tc.oc.pgm.api.filter.query.MatchQuery;
@@ -18,6 +18,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
+import tc.oc.util.TimeUtils;
 
 @ListenerScope(MatchScope.LOADED)
 public class FilterMatchModule implements MatchModule, Listener {
@@ -88,7 +89,7 @@ public class FilterMatchModule implements MatchModule, Listener {
     TimeFilter next;
     for (; ; ) {
       next = timeFilterQueue.peek();
-      if (next == null || next.getTime().isLongerThan(now)) break;
+      if (next == null || TimeUtils.isLongerThan(next.getTime(), now)) break;
       timeFilterQueue.remove();
       removed = true;
     }

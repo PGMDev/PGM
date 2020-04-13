@@ -1,14 +1,14 @@
 package tc.oc.pgm.doublejump;
 
+import java.time.Duration;
 import java.util.List;
 import org.bukkit.inventory.ItemStack;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.kits.AbstractKit;
 
 public class DoubleJumpKit extends AbstractKit {
   public static final float DEFAULT_POWER = 3f; // mainly for backward compatibility
-  public static final Duration DEFAULT_RECHARGE = Duration.millis(2500);
+  public static final Duration DEFAULT_RECHARGE = Duration.ofMillis(2500);
 
   protected final boolean enabled;
   protected final float power; // 1 power is roughly a normal vanilla jump
@@ -29,7 +29,7 @@ public class DoubleJumpKit extends AbstractKit {
   }
 
   public float chargePerTick() {
-    return 50F / this.rechargeTime.getMillis();
+    return 50F / this.rechargeTime.toMillis();
   }
 
   public boolean needsRecharge() {
