@@ -312,6 +312,7 @@ public class PickerMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
   public void cancelArmorEquip(ObserverInteractEvent event) {
+    if (event == null) { return;}
     if (event.getClickType() == ClickType.RIGHT
         && event.getClickedItem().getType() == Button.TEAM_JOIN.material) {
       event.setCancelled(true);
