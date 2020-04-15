@@ -196,7 +196,8 @@ public abstract class TaskExecutorService implements ScheduledExecutorService {
 
       int taskId;
       if (periodic) {
-        taskId = runPeriodicTask(this, delay, TimeUtils.toTicks(period, unit));
+        taskId =
+            runPeriodicTask(this, TimeUtils.toTicks(delay, unit), TimeUtils.toTicks(period, unit));
       } else {
         taskId = runTask(this, TimeUtils.toTicks(delay, unit));
       }
