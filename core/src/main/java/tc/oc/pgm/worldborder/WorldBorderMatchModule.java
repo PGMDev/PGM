@@ -6,6 +6,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.event.Event;
@@ -59,18 +60,14 @@ public class WorldBorderMatchModule implements MatchModule, Listener {
   @Override
   public void enable() {
     match
-        .getScheduler(MatchScope.RUNNING)
-        .runTaskTimer(
-            Duration.ZERO,
-            Duration.ofSeconds(1),
-            new Runnable() {
-              @Override
-              public void run() {
-                if (!update(null)) {
-                  refresh();
-                }
-              }
-            });
+        .getExecutor(MatchScope.RUNNING)
+        .scheduleWithFixedDelay(
+            () -> {
+              if (!update(null)) refresh();
+            },
+            0,
+            1,
+            TimeUnit.SECONDS);
   }
 
   @Override

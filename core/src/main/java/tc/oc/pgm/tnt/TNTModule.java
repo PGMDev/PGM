@@ -64,8 +64,10 @@ public class TNTModule implements MapModule {
       float dispenserNukeMultiplier = DEFAULT_DISPENSER_NUKE_MULTIPLIER;
       boolean licensing = true;
       boolean friendlyDefuse = true;
+      boolean exists = false;
 
       for (Element tntElement : doc.getRootElement().getChildren("tnt")) {
+        exists = true;
         instantIgnite =
             XMLUtils.parseBoolean(
                 XMLUtils.getUniqueChild(tntElement, "instantignite"), instantIgnite);
@@ -117,17 +119,19 @@ public class TNTModule implements MapModule {
                     false));
       }
 
-      return new TNTModule(
-          new TNTProperties(
-              yield,
-              power,
-              instantIgnite,
-              blockDamage,
-              fuse,
-              dispenserNukeLimit,
-              dispenserNukeMultiplier,
-              licensing,
-              friendlyDefuse));
+      return exists
+          ? new TNTModule(
+              new TNTProperties(
+                  yield,
+                  power,
+                  instantIgnite,
+                  blockDamage,
+                  fuse,
+                  dispenserNukeLimit,
+                  dispenserNukeMultiplier,
+                  licensing,
+                  friendlyDefuse))
+          : null;
     }
   }
 }

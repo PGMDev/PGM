@@ -2,6 +2,7 @@ package tc.oc.pgm.rotation;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
@@ -80,9 +81,8 @@ public class VotingPool extends MapPool {
   public void matchEnded(Match match) {
     tickScores(match.getMap());
     match
-        .getScheduler(MatchScope.LOADED)
-        .runTaskLater(
-            20 * 5,
+        .getExecutor(MatchScope.LOADED)
+        .schedule(
             () -> {
               // Start poll here, to avoid starting it if you set next another map.
               if (manager.getOverriderMap() != null) return;
@@ -90,6 +90,8 @@ public class VotingPool extends MapPool {
               if (RestartManager.isQueued()) return;
               currentPoll = new MapPoll(match, mapScores, VOTE_SIZE);
               match.getPlayers().forEach(currentPoll::sendBook);
-            });
+            },
+            5,
+            TimeUnit.SECONDS);
   }
 }

@@ -11,7 +11,6 @@ public class ControlPointMatchModule implements MatchModule {
 
   private final Match match;
   private final List<ControlPoint> controlPoints = new ArrayList<>();
-  private final ControlPointTickTask tickTask;
   private final ControlPointAnnouncer announcer;
 
   public ControlPointMatchModule(Match match, List<ControlPoint> points) {
@@ -19,7 +18,7 @@ public class ControlPointMatchModule implements MatchModule {
     this.controlPoints.addAll(points);
 
     this.announcer = new ControlPointAnnouncer(this.match);
-    this.tickTask = new ControlPointTickTask(this.match, this.controlPoints);
+    match.addTickable(new ControlPointTickTask(this.controlPoints), MatchScope.RUNNING);
   }
 
   @Override
@@ -36,15 +35,5 @@ public class ControlPointMatchModule implements MatchModule {
       controlPoint.unregisterEvents();
     }
     HandlerList.unregisterAll(this.announcer);
-  }
-
-  @Override
-  public void enable() {
-    this.tickTask.start();
-  }
-
-  @Override
-  public void disable() {
-    this.tickTask.stop();
   }
 }

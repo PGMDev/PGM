@@ -2,10 +2,11 @@ package tc.oc.pgm.projectile;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
@@ -18,7 +19,7 @@ public class ProjectileCooldown {
   private final ProjectileDefinition projectileDefinition;
   private Instant endTime = null;
   private final BukkitRunnable runnable = new CooldownRunnable(this);
-  private BukkitTask runnableTask = null;
+  private Future<?> runnableTask = null;
 
   public ProjectileCooldown(MatchPlayer matchPlayer, ProjectileDefinition projectileDefinition) {
     this.matchPlayer = matchPlayer;
@@ -39,11 +40,7 @@ public class ProjectileCooldown {
   }
 
   public boolean isActive() {
-    return this.runnableTask != null
-        && this.matchPlayer
-            .getMatch()
-            .getScheduler(MatchScope.RUNNING)
-            .isPending(this.runnableTask);
+    return this.runnableTask != null && !runnableTask.isDone();
   }
 
   public void start() {
@@ -51,14 +48,14 @@ public class ProjectileCooldown {
 
     this.endTime = Instant.now().plus(projectileDefinition.coolDown);
     this.runnableTask =
-        this.matchPlayer
+        matchPlayer
             .getMatch()
-            .getScheduler(MatchScope.RUNNING)
-            .runTaskTimer(0l, 1l, this.runnable);
+            .getExecutor(MatchScope.RUNNING)
+            .scheduleAtFixedRate(this.runnable, 0, TimeUtils.TICK, TimeUnit.MILLISECONDS);
   }
 
   public void end() {
-    this.runnableTask.cancel();
+    this.runnableTask.cancel(true);
   }
 
   public ProjectileDefinition getProjectileDefinition() {

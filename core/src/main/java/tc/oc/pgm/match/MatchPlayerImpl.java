@@ -6,6 +6,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -42,6 +43,7 @@ import tc.oc.pgm.events.PlayerResetEvent;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.util.ClassLogger;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.ViaUtils;
 import tc.oc.util.bukkit.chat.PlayerAudience;
 import tc.oc.util.bukkit.component.Component;
@@ -331,19 +333,17 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
       getInventory().addItem(stack);
     }
 
-    getMatch()
-        .getScheduler(MatchScope.LOADED)
-        .runTaskLater(
-            1,
-            new Runnable() {
-              @Override
-              public void run() {
-                final Player bukkit = getBukkit();
-                if (bukkit.isOnline() && !isDead() && bukkit.getMaxHealth() < 20) {
-                  bukkit.setHealth(Math.min(bukkit.getHealth(), bukkit.getMaxHealth()));
-                }
+    match
+        .getExecutor(MatchScope.LOADED)
+        .schedule(
+            () -> {
+              final Player bukkit = getBukkit();
+              if (bukkit.isOnline() && !isDead() && bukkit.getMaxHealth() < 20) {
+                bukkit.setHealth(Math.min(bukkit.getHealth(), bukkit.getMaxHealth()));
               }
-            });
+            },
+            TimeUtils.TICK,
+            TimeUnit.MILLISECONDS);
   }
 
   @Override

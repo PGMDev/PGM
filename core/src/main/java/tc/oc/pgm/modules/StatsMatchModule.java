@@ -5,6 +5,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -161,9 +163,8 @@ public class StatsMatchModule implements MatchModule, Listener {
     Component bowshotMessage = getMessage(bowMessageKey, bestBowshot, ChatColor.YELLOW);
 
     match
-        .getScheduler(MatchScope.LOADED)
-        .runTaskLater(
-            20 * 6, // NOTE: This is 1 second after the votebook appears
+        .getExecutor(MatchScope.LOADED)
+        .schedule(
             () -> {
               for (MatchPlayer viewer : match.getPlayers()) {
                 viewer.sendMessage(
@@ -179,7 +180,9 @@ public class StatsMatchModule implements MatchModule, Listener {
                 viewer.sendMessage(deathMessage);
                 if (bestBowshot.getValue() != 0) viewer.sendMessage(bowshotMessage);
               }
-            });
+            },
+            5 + 1, // NOTE: This is 1 second after the votebook appears
+            TimeUnit.SECONDS);
   }
 
   @EventHandler
@@ -200,15 +203,13 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   private void sendLongHotbarMessage(MatchPlayer player, Component message) {
-    int taskId =
+    Future<?> task =
         match
-            .getScheduler(MatchScope.LOADED)
-            .runTaskTimer(0, 5, () -> player.sendHotbarMessage(message))
-            .getTaskId();
+            .getExecutor(MatchScope.LOADED)
+            .scheduleWithFixedDelay(
+                () -> player.sendHotbarMessage(message), 0, 1, TimeUnit.SECONDS);
 
-    match
-        .getScheduler(MatchScope.LOADED)
-        .runTaskLater(20 * 4, () -> Bukkit.getScheduler().cancelTask(taskId));
+    match.getExecutor(MatchScope.LOADED).schedule(() -> task.cancel(true), 4, TimeUnit.SECONDS);
   }
 
   Component getMessage(String messageKey, Map.Entry<UUID, Integer> mapEntry, ChatColor color) {

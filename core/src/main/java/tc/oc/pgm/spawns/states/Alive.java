@@ -150,23 +150,20 @@ public class Alive extends Participating {
     // when the player dies from a potion effect. I have no idea why it happens,
     // but this fixes it. We could investigate a better fix at some point.
     smm.getMatch()
-        .getScheduler(MatchScope.LOADED)
-        .runTask(
-            new Runnable() {
-              @Override
-              public void run() {
-                if (bukkit.isOnline()) {
-                  bukkit.addPotionEffect(
-                      new PotionEffect(
-                          PotionEffectType.BLINDNESS,
-                          options.blackout ? Integer.MAX_VALUE : 21,
-                          0,
-                          true,
-                          false),
-                      true);
-                  bukkit.addPotionEffect(
-                      new PotionEffect(PotionEffectType.CONFUSION, 100, 0, true, false), true);
-                }
+        .getExecutor(MatchScope.LOADED)
+        .execute(
+            () -> {
+              if (bukkit.isOnline()) {
+                bukkit.addPotionEffect(
+                    new PotionEffect(
+                        PotionEffectType.BLINDNESS,
+                        options.blackout ? Integer.MAX_VALUE : 21,
+                        0,
+                        true,
+                        false),
+                    true);
+                bukkit.addPotionEffect(
+                    new PotionEffect(PotionEffectType.CONFUSION, 100, 0, true, false), true);
               }
             });
   }

@@ -2,6 +2,7 @@ package tc.oc.pgm.tracker.trackers;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
@@ -19,6 +20,7 @@ import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ExplosionInfo;
 import tc.oc.pgm.tracker.info.PlayerInfo;
 import tc.oc.pgm.tracker.info.SpleefInfo;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.material.Materials;
 
 /**
@@ -68,18 +70,17 @@ public class SpleefTracker implements Listener {
     brokenBlocks.put(block, info);
 
     match
-        .getScheduler(MatchScope.RUNNING)
-        .runTaskLater(
-            MAX_SPLEEF_TICKS + 1,
-            new Runnable() {
-              public void run() {
-                // Only remove the BrokenBlock if it's the same one we added. It may have been
-                // replaced since then.
-                if (info == brokenBlocks.get(block)) {
-                  brokenBlocks.remove(block);
-                }
+        .getExecutor(MatchScope.RUNNING)
+        .schedule(
+            () -> {
+              // Only remove the BrokenBlock if it's the same one we added. It may have been
+              // replaced since then.
+              if (info == brokenBlocks.get(block)) {
+                brokenBlocks.remove(block);
               }
-            });
+            },
+            (MAX_SPLEEF_TICKS + 1) * TimeUtils.TICK,
+            TimeUnit.MILLISECONDS);
   }
 
   @EventHandler(priority = EventPriority.MONITOR)

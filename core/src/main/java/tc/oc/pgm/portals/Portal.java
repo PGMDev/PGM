@@ -181,33 +181,29 @@ public class Portal implements FeatureDefinition {
     }
 
     // Defer because some things break if a player teleports during a move event
-    player
-        .getMatch()
-        .getScheduler(MatchScope.LOADED)
-        .runTask(
-            new Runnable() {
-              @Override
-              public void run() {
-                if (!bukkit.isOnline()) return;
+    match
+        .getExecutor(MatchScope.LOADED)
+        .execute(
+            () -> {
+              if (!bukkit.isOnline()) return;
 
-                // Use ENDER_PEARL as the cause so that this teleport is treated
-                // as an "in-game" movement
-                if (delta == null) {
-                  bukkit.teleport(destinationClone, PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
-                } else {
-                  bukkit.teleportRelative(
-                      delta, deltaYaw, deltaPitch, PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
-                }
+              // Use ENDER_PEARL as the cause so that this teleport is treated
+              // as an "in-game" movement
+              if (delta == null) {
+                bukkit.teleport(destinationClone, PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
+              } else {
+                bukkit.teleportRelative(
+                    delta, deltaYaw, deltaPitch, PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
+              }
 
-                // Reset fall distance
-                bukkit.setFallDistance(0);
+              // Reset fall distance
+              bukkit.setFallDistance(0);
 
-                if (Portal.this.sound) {
-                  for (MatchPlayer listener : match.getPlayers()) {
-                    if (listener.getBukkit().canSee(player.getBukkit())) {
-                      listener.playSound(
-                          new Sound("mob.endermen.portal", 1f, 1f, destinationClone.toVector()));
-                    }
+              if (Portal.this.sound) {
+                for (MatchPlayer listener : match.getPlayers()) {
+                  if (listener.getBukkit().canSee(player.getBukkit())) {
+                    listener.playSound(
+                        new Sound("mob.endermen.portal", 1f, 1f, destinationClone.toVector()));
                   }
                 }
               }

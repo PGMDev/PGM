@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
@@ -48,8 +49,8 @@ public class FireworkMatchModule implements MatchModule, Listener {
   private static final boolean GOALS_ENABLED = Config.Fireworks.goalsEnabled();
 
   private static final int ROCKET_COUNT = 5; // Maximum rockets to launch at once, one per player
-  private static final int INITIAL_DELAY = 40; // Ticks before starting to launch rockets
-  private static final int FREQUENCY = 40; // Ticks between rocket launches
+  private static final int INITIAL_DELAY = 2; // Seconds before starting to launch rockets
+  private static final int FREQUENCY = 2; // Seconds between rocket launches
   private static final int ITERATION_COUNT = 15; // Amount of times rockets are launched
   private static final int ROCKET_POWER =
       2; // Power applied to rockets (how high they go), 1 = low, 2 = medium, 3 = high
@@ -70,8 +71,12 @@ public class FireworkMatchModule implements MatchModule, Listener {
   public void onMatchEnd(final MatchFinishEvent event) {
     if (!POST_ENABLED) return;
     match
-        .getScheduler(MatchScope.LOADED)
-        .runTaskTimer(INITIAL_DELAY, FREQUENCY, new FireworkRunner(match, event.getWinners()));
+        .getExecutor(MatchScope.LOADED)
+        .scheduleAtFixedRate(
+            new FireworkRunner(match, event.getWinners()),
+            INITIAL_DELAY,
+            FREQUENCY,
+            TimeUnit.SECONDS);
   }
 
   private static class FireworkRunner implements Runnable {

@@ -195,14 +195,8 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
 
         // Defer item drops so the explosion doesn't destroy them
         match
-            .getScheduler(MatchScope.RUNNING)
-            .runTask(
-                new Runnable() {
-                  @Override
-                  public void run() {
-                    dropItems(drops, newState.getLocation(), yield);
-                  }
-                });
+            .getExecutor(MatchScope.RUNNING)
+            .execute(() -> dropItems(drops, newState.getLocation(), yield));
       } else {
         MatchPlayer player = ParticipantBlockTransformEvent.getParticipant(event);
         if (player == null

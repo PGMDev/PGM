@@ -27,6 +27,7 @@ import tc.oc.pgm.api.event.PlayerItemTransferEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
@@ -34,6 +35,7 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.event.CompetitorRemoveEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
+import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinPartyEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
@@ -44,7 +46,7 @@ import tc.oc.pgm.spawns.states.State;
 import tc.oc.util.RandomUtils;
 
 @ListenerScope(MatchScope.LOADED)
-public class SpawnMatchModule implements MatchModule, Listener {
+public class SpawnMatchModule implements MatchModule, Listener, Tickable {
 
   private final Match match;
   private final SpawnModule module;
@@ -113,23 +115,6 @@ public class SpawnMatchModule implements MatchModule, Listener {
         return null;
       }
     }
-  }
-
-  @Override
-  public void load() {
-    match
-        .getScheduler(MatchScope.LOADED)
-        .runTaskTimer(
-            1,
-            new Runnable() {
-              @Override
-              public void run() {
-                // Copy states so they can transition without concurrent modification
-                for (State state : ImmutableList.copyOf(states.values())) {
-                  state.tick();
-                }
-              }
-            });
   }
 
   public void transition(MatchPlayer player, @Nullable State oldState, @Nullable State newState) {
@@ -317,6 +302,14 @@ public class SpawnMatchModule implements MatchModule, Listener {
       if (!spawn.attributes.persistent) {
         unique.remove(competitor);
       }
+    }
+  }
+
+  @Override
+  public void tick(Match match, Tick tick) {
+    // Copy states so they can transition without concurrent modification
+    for (State state : ImmutableList.copyOf(states.values())) {
+      state.tick();
     }
   }
 }

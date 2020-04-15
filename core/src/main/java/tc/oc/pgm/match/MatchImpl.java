@@ -23,6 +23,8 @@ import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -86,9 +88,10 @@ import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.result.CompetitorVictoryCondition;
 import tc.oc.util.ClassLogger;
 import tc.oc.util.FileUtils;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.Events;
-import tc.oc.util.bukkit.Scheduler;
 import tc.oc.util.bukkit.chat.Audience;
+import tc.oc.util.bukkit.concurrent.BukkitExecutorService;
 import tc.oc.util.bukkit.nms.NMSHacks;
 import tc.oc.util.collection.RankedSet;
 
@@ -107,7 +110,7 @@ public class MatchImpl implements Match {
   private final AtomicLong start;
   private final AtomicLong end;
   private final AtomicInteger capacity;
-  private final EnumMap<MatchScope, Scheduler> schedulers;
+  private final EnumMap<MatchScope, ScheduledExecutorService> executors;
   private final EnumMap<MatchScope, Collection<Listener>> listeners;
   private final EnumMap<MatchScope, Collection<Tickable>> tickables;
   private final AtomicReference<Tick> tick;
@@ -135,11 +138,11 @@ public class MatchImpl implements Match {
     this.start = new AtomicLong(0);
     this.end = new AtomicLong(0);
     this.capacity = new AtomicInteger(map.getMaxPlayers().stream().mapToInt(i -> i).sum());
-    this.schedulers = new EnumMap<>(MatchScope.class);
+    this.executors = new EnumMap<>(MatchScope.class);
     this.listeners = new EnumMap<>(MatchScope.class);
     this.tickables = new EnumMap<>(MatchScope.class);
     for (MatchScope scope : MatchScope.values()) {
-      schedulers.put(scope, new Scheduler(PGM.get()));
+      executors.put(scope, new BukkitExecutorService(PGM.get(), false));
       listeners.put(scope, new LinkedList<>());
       tickables.put(scope, new CopyOnWriteArraySet<>());
     }
@@ -198,7 +201,7 @@ public class MatchImpl implements Match {
           break;
         case FINISHED:
           calculateVictory();
-          getScheduler(MatchScope.RUNNING).cancel();
+          getExecutor(MatchScope.RUNNING).shutdownNow();
           getCountdown().cancelAll();
           callEvent(new MatchFinishEvent(this, competitors.getRank(0)));
           break;
@@ -235,8 +238,8 @@ public class MatchImpl implements Match {
   }
 
   @Override
-  public Scheduler getScheduler(MatchScope scope) {
-    return schedulers.get(scope);
+  public ScheduledExecutorService getExecutor(MatchScope scope) {
+    return executors.get(scope);
   }
 
   @Override
@@ -698,7 +701,8 @@ public class MatchImpl implements Match {
   }
 
   private void startTickables(MatchScope scope) {
-    getScheduler(scope).runTaskTimer(1L, new TickableTask(scope));
+    getExecutor(scope)
+        .scheduleAtFixedRate(new TickableTask(scope), 0, TimeUtils.TICK, TimeUnit.MILLISECONDS);
   }
 
   @Nullable
@@ -809,8 +813,8 @@ public class MatchImpl implements Match {
       callEvent(new MatchUnloadEvent(this));
     }
 
-    getScheduler(MatchScope.RUNNING).cancel();
-    getScheduler(MatchScope.LOADED).cancel();
+    getExecutor(MatchScope.RUNNING).shutdownNow();
+    getExecutor(MatchScope.LOADED).shutdownNow();
     getCountdown().cancelAll();
     removeListeners(MatchScope.LOADED);
 

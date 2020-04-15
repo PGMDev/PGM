@@ -388,7 +388,7 @@ public class Config {
     private int matchPreLoadSeconds;
     private int matchDestroySeconds;
     private int matchTeleportsPerSecond;
-    private int tabRenderTicks;
+    private int tabRenderSeconds;
     private boolean unloadNonMatchWorlds;
 
     @EventHandler
@@ -400,7 +400,7 @@ public class Config {
       this.matchPreLoadSeconds = Math.max(0, config.getInt("match-preload-seconds", 3));
       this.matchDestroySeconds = Math.max(0, config.getInt("match-destroy-seconds", 10));
       this.matchTeleportsPerSecond = Math.max(1, config.getInt("match-teleports-per-second", 10));
-      this.tabRenderTicks = Math.max(1, config.getInt("tab-render-ticks", 10));
+      this.tabRenderSeconds = Math.max(1, config.getInt("tab-render-seconds", 1));
       this.unloadNonMatchWorlds = config.getBoolean("unload-non-match-worlds", true);
     }
 
@@ -418,8 +418,8 @@ public class Config {
       return matchDestroySeconds;
     }
 
-    public int getTabRenderTicks() {
-      return tabRenderTicks;
+    public int getTabRenderSeconds() {
+      return tabRenderSeconds;
     }
 
     public int getPlayerTeleportsPerSecond() {
