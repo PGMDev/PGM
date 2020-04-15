@@ -14,7 +14,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.FilterParser;
-import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.util.xml.InvalidXMLException;
 import tc.oc.util.xml.XMLUtils;
 
@@ -41,7 +40,7 @@ public class MobsModule implements MapModule {
         throws InvalidXMLException {
       FilterParser filterParser = factory.getFilters();
       Element mobsEl = doc.getRootElement().getChild("mobs");
-      Filter mobsFilter = StaticFilter.DENY;
+      Filter mobsFilter = null;
       if (mobsEl != null) {
         if (factory.getProto().isNoOlderThan(MapProtos.FILTER_FEATURES)) {
           mobsFilter = filterParser.parseRequiredFilterProperty(mobsEl, "filter");
@@ -52,7 +51,7 @@ public class MobsModule implements MapModule {
           }
         }
       }
-      return new MobsModule(mobsFilter);
+      return mobsFilter == null ? null : new MobsModule(mobsFilter);
     }
   }
 }

@@ -3,6 +3,7 @@ package tc.oc.pgm.scoreboard;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Ordering;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.lang.StringUtils;
@@ -20,12 +23,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
-import org.joda.time.Duration;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
@@ -59,6 +60,7 @@ import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.events.TeamRespawnsChangeEvent;
 import tc.oc.pgm.wool.MonumentWool;
 import tc.oc.pgm.wool.WoolMatchModule;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.component.ComponentRenderers;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.named.NameStyle;
@@ -85,7 +87,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
   protected final Map<Party, Sidebar> sidebars = new HashMap<>();
   protected final Map<Goal, BlinkTask> blinkingGoals = new HashMap<>();
 
-  protected @Nullable BukkitTask renderTask;
+  protected @Nullable Future<?> renderTask;
 
   private static String renderSidebarTitle(Collection<MapTag> tags) {
     final List<String> gamemode =
@@ -297,7 +299,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
   public void goalStatusChange(final GoalStatusChangeEvent event) {
     if (event.getGoal() instanceof Destroyable
         && ((Destroyable) event.getGoal()).getShowProgress()) {
-      blinkGoal(event.getGoal(), 3, Duration.standardSeconds(1));
+      blinkGoal(event.getGoal(), 3, Duration.ofSeconds(1));
     } else {
       renderSidebarDebounce();
     }
@@ -379,18 +381,14 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
   private void renderSidebarDebounce() {
     // Debounced render
-    if (this.renderTask == null
-        || !match.getScheduler(MatchScope.LOADED).isPending(this.renderTask)) {
+    if (this.renderTask == null || renderTask.isDone()) {
       this.renderTask =
           match
-              .getScheduler(MatchScope.LOADED)
-              .runTask(
-                  new Runnable() {
-                    @Override
-                    public void run() {
-                      SidebarMatchModule.this.renderTask = null;
-                      SidebarMatchModule.this.renderSidebar();
-                    }
+              .getExecutor(MatchScope.LOADED)
+              .submit(
+                  () -> {
+                    this.renderTask = null;
+                    this.renderSidebar();
                   });
     }
   }
@@ -558,7 +556,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
   private class BlinkTask implements Runnable {
 
-    private final BukkitTask task;
+    private final Future<?> task;
     private final Goal goal;
     private final long intervalTicks;
 
@@ -568,17 +566,21 @@ public class SidebarMatchModule implements MatchModule, Listener {
     private BlinkTask(Goal goal, float rateHz, @Nullable Duration duration) {
       this.goal = goal;
       this.intervalTicks = (long) (10f / rateHz);
-      this.task = match.getScheduler(MatchScope.RUNNING).runTaskTimer(0, intervalTicks, this);
+      this.task =
+          match
+              .getExecutor(MatchScope.RUNNING)
+              .scheduleWithFixedDelay(
+                  this, 0, intervalTicks * TimeUtils.TICK, TimeUnit.MILLISECONDS);
 
       this.reset(duration);
     }
 
     public void reset(@Nullable Duration duration) {
-      this.ticksRemaining = duration == null ? null : duration.getMillis() / 50;
+      this.ticksRemaining = duration == null ? null : TimeUtils.toTicks(duration);
     }
 
     public void stop() {
-      this.task.cancel();
+      this.task.cancel(true);
       SidebarMatchModule.this.blinkingGoals.remove(this.goal);
       renderSidebarDebounce();
     }
@@ -592,7 +594,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
       if (this.ticksRemaining != null) {
         this.ticksRemaining -= this.intervalTicks;
         if (this.ticksRemaining <= 0) {
-          this.task.cancel();
+          this.task.cancel(true);
           SidebarMatchModule.this.blinkingGoals.remove(this.goal);
         }
       }

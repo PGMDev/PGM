@@ -50,6 +50,7 @@
                             <exclude>com.google.code.findbugs:annotations:*</exclude>
                             <exclude>net.sf.trove4j:trove4j:*</exclude>
                             <exclude>org.checkerframework:checker-qual:*</exclude>
+                            <exclude>net.jcip:jcip-annotations:*</exclude>
                             <exclude>org.xerial:sqlite-jdbc:*</exclude>
                             <exclude>joda-time:joda-time:*</exclude>
                             <exclude>net.kyori:*:*</exclude>

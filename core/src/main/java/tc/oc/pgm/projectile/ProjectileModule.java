@@ -1,6 +1,7 @@
 package tc.oc.pgm.projectile;
 
 import com.google.common.collect.ImmutableList;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -11,7 +12,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.potion.PotionEffect;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;

@@ -2,6 +2,7 @@ package tc.oc.pgm.api;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
@@ -29,6 +30,10 @@ public interface PGM extends Plugin {
   MapOrder getMapOrder();
 
   PrefixRegistry getPrefixRegistry();
+
+  ScheduledExecutorService getExecutor();
+
+  ScheduledExecutorService getAsyncExecutor();
 
   AtomicReference<PGM> GLOBAL = new AtomicReference<>(null);
 

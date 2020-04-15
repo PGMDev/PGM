@@ -1,6 +1,5 @@
 package tc.oc.pgm.match;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collections;
@@ -19,23 +18,22 @@ import tc.oc.util.bukkit.chat.Audience;
 import tc.oc.util.bukkit.chat.MultiAudience;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.types.PersonalizedPlayer;
-import tc.oc.util.bukkit.identity.Identity;
 import tc.oc.util.bukkit.named.NameStyle;
 
 public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
 
   private final Match match;
-  private final Identity identity;
+  private final String username;
+  private final UUID uuid;
   private final Party party;
   private final Vector location;
 
-  protected MatchPlayerStateImpl(Match match, Identity identity, Party party, Location location) {
-    this.match = checkNotNull(match);
-    this.identity = checkNotNull(identity);
-    this.party = checkNotNull(party);
-    checkArgument(
-        location.getWorld().equals(match.getWorld()), "location and match world must be the same");
-    this.location = checkNotNull(location).toVector();
+  protected MatchPlayerStateImpl(MatchPlayer player) {
+    this.match = checkNotNull(player).getMatch();
+    this.username = player.getBukkit().getName();
+    this.uuid = player.getId();
+    this.party = checkNotNull(player.getParty());
+    this.location = player.getBukkit().getLocation().toVector();
   }
 
   @Override
@@ -50,7 +48,7 @@ public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
 
   @Override
   public UUID getId() {
-    return identity.getPlayerId();
+    return uuid;
   }
 
   @Override
@@ -65,7 +63,8 @@ public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
 
   @Override
   public Component getStyledName(NameStyle style) {
-    return new PersonalizedPlayer(identity, style);
+    MatchPlayer player = match.getPlayer(uuid);
+    return new PersonalizedPlayer(player == null ? null : player.getBukkit(), username, style);
   }
 
   @Override

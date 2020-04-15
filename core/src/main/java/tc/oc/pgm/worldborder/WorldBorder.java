@@ -2,8 +2,8 @@ package tc.oc.pgm.worldborder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.time.Duration;
 import org.bukkit.util.Vector;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.filters.StaticFilter;
 
@@ -53,11 +53,11 @@ public class WorldBorder {
     bukkit.setDamageAmount(damage);
     bukkit.setDamageBuffer(buffer);
     bukkit.setWarningDistance((int) Math.round(warningDistance));
-    bukkit.setWarningTime((int) warningTime.getStandardSeconds());
+    bukkit.setWarningTime((int) warningTime.getSeconds());
     bukkit.setCenter(center.getX(), center.getZ());
 
     if (transition && isMoving()) {
-      bukkit.setSize(size, Math.max(0, duration.getStandardSeconds()));
+      bukkit.setSize(size, Math.max(0, duration.getSeconds()));
     } else {
       bukkit.setSize(size);
     }
@@ -65,7 +65,7 @@ public class WorldBorder {
 
   public void refresh(org.bukkit.WorldBorder bukkit, Duration elapsed) {
     if (isMoving()) {
-      bukkit.setSize(size, Math.max(0, duration.minus(elapsed).getStandardSeconds()));
+      bukkit.setSize(size, Math.max(0, duration.minus(elapsed).getSeconds()));
     }
   }
 }

@@ -1,31 +1,24 @@
 package tc.oc.pgm.controlpoint;
 
+import java.time.Duration;
 import java.util.List;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.Tickable;
+import tc.oc.pgm.api.time.Tick;
+import tc.oc.util.TimeUtils;
 
-public class ControlPointTickTask implements Runnable {
-  private static final Duration INTERVAL = Duration.millis(100); // milliseconds, two ticks
-
-  private final Match match;
+public class ControlPointTickTask implements Tickable {
   private final List<ControlPoint> controlPoints;
+  private final Duration tick = Duration.ofMillis(TimeUtils.TICK);
 
-  public ControlPointTickTask(Match match, List<ControlPoint> controlPoints) {
-    this.match = match;
+  public ControlPointTickTask(List<ControlPoint> controlPoints) {
     this.controlPoints = controlPoints;
   }
 
-  public void start() {
-    this.match.getScheduler(MatchScope.RUNNING).runTaskTimer(0, INTERVAL.getMillis() / 50, this);
-  }
-
-  public void stop() {}
-
   @Override
-  public void run() {
+  public void tick(Match match, Tick tick) {
     for (ControlPoint controlPoint : this.controlPoints) {
-      controlPoint.tick(INTERVAL);
+      controlPoint.tick(this.tick);
     }
   }
 }

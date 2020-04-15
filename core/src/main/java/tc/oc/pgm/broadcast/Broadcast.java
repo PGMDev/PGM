@@ -2,10 +2,10 @@ package tc.oc.pgm.broadcast;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.time.Duration;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.util.bukkit.chat.Sound;
 import tc.oc.util.bukkit.component.Component;

@@ -1,6 +1,7 @@
 package tc.oc.pgm.listeners;
 
 import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -37,11 +38,12 @@ public class MatchAnnouncer implements Listener {
     if (Config.Broadcast.enabled()) {
       final Match match = event.getMatch();
       match
-          .getScheduler(MatchScope.LOADED)
-          .runTaskTimer(
+          .getExecutor(MatchScope.LOADED)
+          .scheduleWithFixedDelay(
+              () -> match.getPlayers().forEach(this::sendCurrentlyPlaying),
               0,
-              Config.Broadcast.frequency() * 20,
-              () -> match.getPlayers().forEach(this::sendCurrentlyPlaying));
+              Config.Broadcast.frequency(),
+              TimeUnit.SECONDS);
     }
   }
 

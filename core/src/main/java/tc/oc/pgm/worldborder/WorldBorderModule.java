@@ -1,13 +1,13 @@
 package tc.oc.pgm.worldborder;
 
 import com.google.common.collect.ImmutableList;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapTag;
@@ -67,8 +67,7 @@ public class WorldBorderModule implements MapModule {
                 XMLUtils.parseNumber(Node.fromAttr(el, "damage"), Double.class, 0.2d),
                 XMLUtils.parseNumber(Node.fromAttr(el, "buffer"), Double.class, 5d),
                 XMLUtils.parseNumber(Node.fromAttr(el, "warning-distance"), Double.class, 5d),
-                XMLUtils.parseDuration(
-                    Node.fromAttr(el, "warning-time"), Duration.standardSeconds(15)));
+                XMLUtils.parseDuration(Node.fromAttr(el, "warning-time"), Duration.ofSeconds(15)));
 
         borders.add(border);
       }

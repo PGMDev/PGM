@@ -3,6 +3,7 @@ package tc.oc.pgm.modes;
 import static tc.oc.pgm.api.map.MapProtos.MODES_IMPLEMENTATION_VERSION;
 
 import com.google.common.collect.ImmutableList;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -11,14 +12,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.material.MaterialData;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.goals.GoalMatchModule;
-import tc.oc.util.bukkit.component.PeriodFormats;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.xml.InvalidXMLException;
 import tc.oc.util.xml.Node;
 import tc.oc.util.xml.XMLUtils;
@@ -26,7 +26,7 @@ import tc.oc.util.xml.XMLUtils;
 public class ObjectiveModesModule implements MapModule {
 
   private List<Mode> modes;
-  public static final Duration DEFAULT_SHOW_BEFORE = Duration.standardSeconds(60L);
+  public static final Duration DEFAULT_SHOW_BEFORE = Duration.ofSeconds(60L);
 
   private ObjectiveModesModule(List<Mode> modes) {
     this.modes = modes;
@@ -63,12 +63,7 @@ public class ObjectiveModesModule implements MapModule {
 
         MaterialData material =
             XMLUtils.parseBlockMaterialData(Node.fromRequiredAttr(modeEl, "material"));
-        long seconds =
-            PeriodFormats.SHORTHAND
-                .parsePeriod(modeEl.getAttributeValue("after"))
-                .toStandardSeconds()
-                .getSeconds();
-        Duration after = new Duration(seconds * 1000 /*millis*/);
+        Duration after = TimeUtils.parseDuration(modeEl.getAttributeValue("after"));
         String name = modeEl.getAttributeValue("name");
         if (name != null) {
           name = ChatColor.translateAlternateColorCodes('`', name);
@@ -76,9 +71,7 @@ public class ObjectiveModesModule implements MapModule {
 
         String showBeforeRaw = modeEl.getAttributeValue("show-before");
         Duration showBefore =
-            showBeforeRaw != null
-                ? PeriodFormats.SHORTHAND.parsePeriod(showBeforeRaw).toStandardDuration()
-                : DEFAULT_SHOW_BEFORE;
+            showBeforeRaw != null ? TimeUtils.parseDuration(showBeforeRaw) : DEFAULT_SHOW_BEFORE;
 
         // Legacy
         boolean legacyShowBossBar = XMLUtils.parseBoolean(modeEl.getAttribute("boss-bar"), true);
@@ -89,8 +82,7 @@ public class ObjectiveModesModule implements MapModule {
         for (Mode mode : parsedModes) {
           if (mode.getAfter().equals(after)) {
             throw new InvalidXMLException(
-                "Already scheduled a mode for " + after.toStandardSeconds().getSeconds() + "s",
-                modeEl);
+                "Already scheduled a mode for " + after.getSeconds() + "s", modeEl);
           }
         }
         parsedModes.add(new Mode(material, after, name, showBefore));

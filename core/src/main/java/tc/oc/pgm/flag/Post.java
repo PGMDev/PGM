@@ -3,11 +3,11 @@ package tc.oc.pgm.flag;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableList;
+import java.time.Duration;
 import java.util.Random;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filter;
@@ -19,7 +19,7 @@ import tc.oc.pgm.teams.TeamFactory;
 
 @FeatureInfo(name = "post")
 public class Post extends SelfIdentifyingFeatureDefinition {
-  public static final Duration DEFAULT_RETURN_TIME = Duration.standardSeconds(30);
+  public static final Duration DEFAULT_RETURN_TIME = Duration.ofSeconds(30);
   public static final double DEFAULT_RESPAWN_SPEED = 8;
 
   private static final int MAX_SPAWN_ATTEMPTS = 100;
@@ -82,7 +82,7 @@ public class Post extends SelfIdentifyingFeatureDefinition {
     if (respawnTime != null) {
       return respawnTime;
     } else if (respawnSpeed != null) {
-      return Duration.standardSeconds(Math.round(distance / respawnSpeed));
+      return Duration.ofSeconds(Math.round(distance / respawnSpeed));
     } else {
       return Duration.ZERO;
     }

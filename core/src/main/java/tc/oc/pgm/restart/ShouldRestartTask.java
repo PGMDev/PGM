@@ -1,8 +1,9 @@
 package tc.oc.pgm.restart;
 
+import java.time.Duration;
+import java.time.Instant;
 import org.bukkit.plugin.Plugin;
-import org.joda.time.Duration;
-import org.joda.time.Instant;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.ConfigUtils;
 
 /**
@@ -37,8 +38,8 @@ public class ShouldRestartTask implements Runnable {
   }
 
   private boolean uptimeLimit() {
-    Duration uptime = new Duration(this.startTime, Instant.now());
-    return this.uptimeLimit != null && uptime.isLongerThan(this.uptimeLimit);
+    Duration uptime = Duration.between(this.startTime, Instant.now());
+    return this.uptimeLimit != null && TimeUtils.isLongerThan(uptime, this.uptimeLimit);
   }
 
   private boolean memoryLimit() {

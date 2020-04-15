@@ -30,6 +30,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerLoginEvent.Result;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
@@ -38,6 +40,7 @@ import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.community.events.PlayerPunishmentEvent;
+import tc.oc.pgm.community.modules.FreezeMatchModule;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.util.bukkit.chat.Audience;
@@ -89,6 +92,10 @@ public class ModerationCommands implements Listener {
     return recentBans.stream().filter(b -> b.isSameAddress(address)).findFirst();
   }
 
+  private Optional<BannedAccountInfo> getBanWithMatchingName(String name) {
+    return recentBans.stream().filter(b -> b.getUserName().equalsIgnoreCase(name)).findFirst();
+  }
+
   @Command(
       aliases = {"staff", "mods", "admins"},
       desc = "List the online staff members")
@@ -120,6 +127,96 @@ public class ModerationCommands implements Listener {
 
     // Send message
     sender.sendMessage(staff);
+  }
+
+  @Command(
+      aliases = {"frozenlist", "fls", "flist"},
+      desc = "View a list of frozen players",
+      perms = Permissions.STAFF)
+  public void sendFrozenList(CommandSender sender, Match match) {
+    FreezeMatchModule fmm = match.getModule(FreezeMatchModule.class);
+
+    if (fmm.getFrozenPlayers().isEmpty() && fmm.getOfflineFrozenCount() < 1) {
+      sender.sendMessage(
+          new PersonalizedTranslatable("command.freeze.list.none")
+              .getPersonalizedText()
+              .color(ChatColor.RED));
+      return;
+    }
+
+    // Online Players
+    if (!fmm.getFrozenPlayers().isEmpty()) {
+      Component names =
+          new Component(
+              Components.join(
+                  new PersonalizedText(", ").color(ChatColor.GRAY),
+                  fmm.getFrozenPlayers().stream()
+                      .map(m -> m.getStyledName(NameStyle.FANCY))
+                      .collect(Collectors.toList())));
+      sender.sendMessage(
+          formatFrozenList("command.freeze.list", fmm.getFrozenPlayers().size(), names));
+    }
+
+    // Offline Players
+    if (fmm.getOfflineFrozenCount() > 0) {
+      Component names = new PersonalizedText(fmm.getOfflineFrozenNames());
+      sender.sendMessage(
+          formatFrozenList("command.freeze.list.offline", fmm.getOfflineFrozenCount(), names));
+    }
+  }
+
+  private Component formatFrozenList(String key, int count, Component names) {
+    return new PersonalizedTranslatable(
+            key, new PersonalizedText(Integer.toString(count), ChatColor.AQUA), names)
+        .getPersonalizedText()
+        .color(ChatColor.GRAY);
+  }
+
+  @Command(
+      aliases = {"freeze", "fz", "f"},
+      usage = "<player>",
+      desc = "Freeze a player",
+      perms = Permissions.STAFF)
+  public void freeze(CommandSender sender, Match match, Player target) throws CommandException {
+    setFreeze(sender, match, target, true);
+  }
+
+  @Command(
+      aliases = {"unfreeze", "uf"},
+      usage = "<player>",
+      desc = "Unfreeze a player",
+      perms = Permissions.STAFF)
+  public void unFreeze(CommandSender sender, Match match, Player target) throws CommandException {
+    setFreeze(sender, match, target, false);
+  }
+
+  private void setFreeze(CommandSender sender, Match match, Player target, boolean freeze)
+      throws CommandException {
+    FreezeMatchModule fmm = match.getModule(FreezeMatchModule.class);
+    MatchPlayer player = match.getPlayer(target);
+
+    Component alreadyFrozen =
+        new PersonalizedTranslatable(
+                "command.freeze.already.frozen",
+                match.getPlayer(target).getStyledName(NameStyle.FANCY))
+            .getPersonalizedText()
+            .color(ChatColor.GRAY);
+    Component alreadyThawed =
+        new PersonalizedTranslatable(
+                "command.freeze.already.thaw",
+                match.getPlayer(target).getStyledName(NameStyle.FANCY))
+            .getPersonalizedText()
+            .color(ChatColor.GRAY);
+
+    if (player != null) {
+      if (fmm.isFrozen(player) && freeze) {
+        throw new CommandException(ComponentRenderers.toLegacyText(alreadyFrozen, sender));
+      } else if (!fmm.isFrozen(player) && !freeze) {
+        throw new CommandException(ComponentRenderers.toLegacyText(alreadyThawed, sender));
+      } else {
+        fmm.setFrozen(sender, player, freeze);
+      }
+    }
   }
 
   @Command(
@@ -296,6 +393,8 @@ public class ModerationCommands implements Listener {
     if (targetPlayer != null) {
       // If target is a player, fetch their IP and use that
       address = targetPlayer.getAddress().getAddress().getHostAddress();
+    } else if (getBanWithMatchingName(target).isPresent()) {
+      address = getBanWithMatchingName(target).get().getAddress();
     }
 
     // Validate if the IP is a valid IP
@@ -309,6 +408,7 @@ public class ModerationCommands implements Listener {
               ComponentRenderers.toLegacyText(
                   formatPunisherName(sender, manager.getMatch(sender)), sender));
 
+      int onlineBans = 0;
       // Check all online players to find those with same IP.
       for (Player player : Bukkit.getOnlinePlayers()) {
         MatchPlayer matchPlayer = manager.getPlayer(player);
@@ -326,9 +426,27 @@ public class ModerationCommands implements Listener {
                     formatPunisherName(sender, manager.getMatch(sender)),
                     reason,
                     null));
+            onlineBans++;
           }
         }
       }
+
+      Component formattedTarget = new PersonalizedText(target).color(ChatColor.DARK_AQUA);
+      if (onlineBans > 0) {
+        sender.sendMessage(
+            new PersonalizedTranslatable(
+                    "moderation.commands.banIP.alts",
+                    formattedTarget,
+                    new PersonalizedText(Integer.toString(onlineBans)).color(ChatColor.AQUA))
+                .getPersonalizedText()
+                .color(ChatColor.RED));
+      } else {
+        sender.sendMessage(
+            new PersonalizedTranslatable("moderation.commands.banIP", formattedTarget)
+                .getPersonalizedText()
+                .color(ChatColor.RED));
+      }
+
     } else {
       sender.sendMessage(
           new PersonalizedTranslatable(
@@ -514,16 +632,15 @@ public class ModerationCommands implements Listener {
       String length =
           ComponentRenderers.toLegacyText(
               PeriodFormats.briefNaturalApproximate(
-                  org.joda.time.Instant.ofEpochSecond(
-                      ban.getCreated().toInstant().getEpochSecond()),
-                  org.joda.time.Instant.ofEpochSecond(
+                  java.time.Instant.ofEpochSecond(ban.getCreated().toInstant().getEpochSecond()),
+                  java.time.Instant.ofEpochSecond(
                       ban.getExpiration().toInstant().getEpochSecond())),
               sender);
       String remaining =
           ComponentRenderers.toLegacyText(
               PeriodFormats.briefNaturalApproximate(
-                  org.joda.time.Instant.now(),
-                  org.joda.time.Instant.ofEpochSecond(
+                  java.time.Instant.now(),
+                  java.time.Instant.ofEpochSecond(
                       ban.getExpiration().toInstant().getEpochSecond())),
               sender);
 
@@ -547,7 +664,7 @@ public class ModerationCommands implements Listener {
     String createdAgo =
         ComponentRenderers.toLegacyText(
             PeriodFormats.relativePastApproximate(
-                org.joda.time.Instant.ofEpochSecond(ban.getCreated().toInstant().getEpochSecond())),
+                java.time.Instant.ofEpochSecond(ban.getCreated().toInstant().getEpochSecond())),
             sender);
 
     Component banTypeFormatted =
@@ -724,8 +841,7 @@ public class ModerationCommands implements Listener {
     // If punishment expires, inform user when
     if (expires != null) {
       Component timeLeft =
-          PeriodFormats.briefNaturalApproximate(
-              org.joda.time.Duration.standardSeconds(expires.getSeconds()));
+          PeriodFormats.briefNaturalApproximate(java.time.Duration.ofSeconds(expires.getSeconds()));
       lines.add(
           new PersonalizedTranslatable("moderation.screen.expires", timeLeft)
               .getPersonalizedText()
@@ -805,7 +921,7 @@ public class ModerationCommands implements Listener {
       String time =
           ComponentRenderers.toLegacyText(
               PeriodFormats.briefNaturalApproximate(
-                  org.joda.time.Duration.standardSeconds(length.getSeconds())),
+                  java.time.Duration.ofSeconds(length.getSeconds())),
               sender);
       prefix =
           type.getPunishmentPrefix(
@@ -830,16 +946,7 @@ public class ModerationCommands implements Listener {
       match.sendMessage(formattedMsg);
     } else {
       // When -s flag is present, only broadcast to staff
-      Component prefixedMsg =
-          new PersonalizedText(
-              new PersonalizedText("["),
-              new PersonalizedText("A", ChatColor.GOLD),
-              new PersonalizedText("] "),
-              formattedMsg);
-      match.getPlayers().stream()
-          .filter(viewer -> viewer.getBukkit().hasPermission(Permissions.ADMINCHAT))
-          .forEach(viewer -> viewer.sendMessage(prefixedMsg));
-      Audience.get(Bukkit.getConsoleSender()).sendMessage(prefixedMsg);
+      ChatDispatcher.broadcastAdminChatMessage(formattedMsg, match);
     }
   }
 
@@ -874,8 +981,7 @@ public class ModerationCommands implements Listener {
 
     public Component getHoverMessage() {
       Component timeAgo =
-          PeriodFormats.relativePastApproximate(
-                  org.joda.time.Instant.ofEpochMilli(time.toEpochMilli()))
+          PeriodFormats.relativePastApproximate(java.time.Instant.ofEpochMilli(time.toEpochMilli()))
               .color(ChatColor.DARK_AQUA);
 
       return new PersonalizedTranslatable(
@@ -909,41 +1015,65 @@ public class ModerationCommands implements Listener {
         info -> {
           if (!isBanStillValid(event.getPlayer())) {
             removeCachedBan(info);
+            return;
           }
 
           final MatchPlayer matchPlayer = manager.getPlayer(event.getPlayer());
           final Match match = matchPlayer.getMatch();
 
-          match.getPlayers().stream()
-              .filter(viewer -> viewer.getBukkit().hasPermission(Permissions.ADMINCHAT))
-              .forEach(
-                  viewer ->
-                      viewer.sendMessage(
-                          formatAltAccountBroadcast(info, matchPlayer, viewer.getBukkit())));
-          Audience.get(Bukkit.getConsoleSender())
-              .sendMessage(formatAltAccountBroadcast(info, matchPlayer, Bukkit.getConsoleSender()));
+          ChatDispatcher.broadcastAdminChatMessage(
+              formatAltAccountBroadcast(info, matchPlayer), match);
         });
   }
 
-  private boolean isBanStillValid(Player player) {
-    return Bukkit.getBanList(BanList.Type.NAME).isBanned(player.getName());
+  @EventHandler(priority = EventPriority.LOWEST)
+  public void onPreLogin(PlayerLoginEvent event) {
+    // Format kick screen for banned players
+    if (event.getResult().equals(Result.KICK_BANNED)) {
+      String formatted =
+          getPunishmentScreenFromName(event.getPlayer(), event.getPlayer().getName());
+      if (formatted != null) {
+        event.setKickMessage(formatted);
+      }
+    }
   }
 
-  private Component formatAltAccountBroadcast(
-      BannedAccountInfo info, MatchPlayer player, CommandSender viewer) {
+  public String getPunishmentScreenFromName(Player viewer, String name) {
+    if (isBanStillValid(name)) {
+      BanEntry ban = Bukkit.getBanList(BanList.Type.NAME).getBanEntry(name);
+      PunishmentType type =
+          ban.getExpiration() != null ? PunishmentType.TEMP_BAN : PunishmentType.BAN;
+
+      Duration length =
+          type.equals(PunishmentType.TEMP_BAN)
+              ? Duration.between(Instant.now(), ban.getExpiration().toInstant())
+              : null;
+
+      return formatPunishmentScreen(
+          type,
+          new PersonalizedText(ban.getSource()).color(ChatColor.AQUA),
+          ban.getReason(),
+          length);
+    }
+    return null;
+  }
+
+  private boolean isBanStillValid(String name) {
+    return Bukkit.getBanList(BanList.Type.NAME).isBanned(name);
+  }
+
+  private boolean isBanStillValid(Player player) {
+    return isBanStillValid(player.getName());
+  }
+
+  private Component formatAltAccountBroadcast(BannedAccountInfo info, MatchPlayer player) {
     Component message =
-        new PersonalizedText(
-            // TODO: Use ChatDispatcher ac variable for prefix (from PR #356) once merged
-            new PersonalizedText(
-                new PersonalizedText("["),
-                new PersonalizedText("A", ChatColor.GOLD),
-                new PersonalizedText("] ")),
-            new PersonalizedTranslatable(
-                    "moderation.events.similarIP",
-                    player.getStyledName(NameStyle.FANCY),
-                    new PersonalizedText(info.getUserName()).color(ChatColor.DARK_AQUA))
-                .getPersonalizedText()
-                .color(ChatColor.GRAY));
-    return message.hoverEvent(HoverEvent.Action.SHOW_TEXT, info.getHoverMessage().render(viewer));
+        new PersonalizedTranslatable(
+                "moderation.events.similarIP",
+                player.getStyledName(NameStyle.FANCY),
+                new PersonalizedText(info.getUserName()).color(ChatColor.DARK_AQUA))
+            .getPersonalizedText()
+            .color(ChatColor.GRAY);
+    return message.hoverEvent(HoverEvent.Action.SHOW_TEXT, info.getHoverMessage().render());
   }
 }

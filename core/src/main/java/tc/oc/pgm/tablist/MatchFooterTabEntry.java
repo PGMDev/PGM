@@ -1,14 +1,15 @@
 package tc.oc.pgm.tablist;
 
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
-import org.bukkit.scheduler.BukkitTask;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.PeriodFormats;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.tablist.DynamicTabEntry;
 import tc.oc.util.bukkit.tablist.TabView;
@@ -25,7 +26,7 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
   }
 
   private final Match match;
-  private @Nullable BukkitTask tickTask;
+  private @Nullable Future<?> tickTask;
 
   public MatchFooterTabEntry(Match match) {
     this.match = match;
@@ -36,7 +37,10 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
     super.addToView(view);
     if (this.tickTask == null) {
       Runnable tick = MatchFooterTabEntry.this::invalidate;
-      this.tickTask = match.getScheduler(MatchScope.LOADED).runTaskTimer(5, 20, tick);
+      this.tickTask =
+          match
+              .getExecutor(MatchScope.LOADED)
+              .scheduleWithFixedDelay(tick, 0, TimeUtils.TICK * 5, TimeUnit.MILLISECONDS);
     }
   }
 
@@ -44,7 +48,7 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
   public void removeFromView(TabView view) {
     super.removeFromView(view);
     if (!this.hasViews() && this.tickTask != null) {
-      this.tickTask.cancel();
+      this.tickTask.cancel(true);
       this.tickTask = null;
     }
   }
@@ -68,7 +72,7 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
                 + ": ",
             ChatColor.GRAY),
         new PersonalizedText(
-            PeriodFormats.COLONS.print(this.match.getDuration().toPeriod()),
+            TimeUtils.formatDuration(match.getDuration()),
             this.match.isRunning() ? ChatColor.GREEN : ChatColor.GOLD));
 
     if (server != null) {

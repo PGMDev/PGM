@@ -1,84 +1,50 @@
 package tc.oc.util.bukkit.component;
 
-import org.joda.time.*;
-import org.joda.time.chrono.ISOChronology;
-import org.joda.time.format.PeriodFormatter;
-import org.joda.time.format.PeriodFormatterBuilder;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.Period;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
+import java.util.List;
+import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
 public class PeriodFormats {
-  public static final PeriodFormatter SHORTHAND =
-      new PeriodFormatterBuilder()
-          .appendYears()
-          .appendSuffix("y")
-          .appendMonths()
-          .appendSuffix("mo")
-          .appendDays()
-          .appendSuffix("d")
-          .appendHours()
-          .appendSuffix("h")
-          .appendMinutes()
-          .appendSuffix("m")
-          .appendSecondsWithOptionalMillis()
-          .appendSuffix("s")
-          .appendSecondsWithOptionalMillis() // numbers with no units assumed to be seconds
-          .toFormatter();
-
-  public static final PeriodFormatter COLONS =
-      new PeriodFormatterBuilder()
-          .appendHours()
-          .appendSeparatorIfFieldsBefore(":")
-          .minimumPrintedDigits(2)
-          .printZeroAlways()
-          .appendMinutes()
-          .appendSeparator(":")
-          .minimumPrintedDigits(2)
-          .appendSeconds()
-          .toFormatter();
-
-  public static final PeriodFormatter COLONS_PRECISE =
-      new PeriodFormatterBuilder()
-          .appendHours()
-          .appendSeparatorIfFieldsBefore(":")
-          .minimumPrintedDigits(2)
-          .printZeroAlways()
-          .appendMinutes()
-          .appendSeparator(":")
-          .minimumPrintedDigits(2)
-          .appendSecondsWithMillis()
-          .toFormatter();
-
-  public static final PeriodFormatter COUNTDOWN =
-      new PeriodFormatterBuilder()
-          .appendHours()
-          .appendSuffix(" hr ")
-          .appendMinutes()
-          .appendSuffix(" min ")
-          .appendSecondsWithOptionalMillis()
-          .appendSuffix(" sec")
-          .toFormatter();
 
   // The time units that we have translations for
-  private static final DurationField[] UNITS =
-      new DurationField[] {
-        DurationFieldType.days().getField(ISOChronology.getInstance()),
-        DurationFieldType.hours().getField(ISOChronology.getInstance()),
-        DurationFieldType.minutes().getField(ISOChronology.getInstance()),
-        DurationFieldType.seconds().getField(ISOChronology.getInstance()),
-        DurationFieldType.millis().getField(ISOChronology.getInstance())
+  private static final TemporalUnit[] UNITS =
+      new TemporalUnit[] {
+        ChronoUnit.DAYS, ChronoUnit.HOURS, ChronoUnit.MINUTES, ChronoUnit.SECONDS, ChronoUnit.MILLIS
       };
 
   /** Return the key for the localized description of the given time interval */
-  public static String periodKey(DurationFieldType unit, long quantity) {
-    if (unit == DurationFieldType.days()) {
+  private static String periodKey(TemporalUnit unit, long quantity) {
+    if (unit == ChronoUnit.DAYS) {
       return quantity == 1 ? "time.interval.day" : "time.interval.days";
-    } else if (unit == DurationFieldType.hours()) {
+    } else if (unit == ChronoUnit.HOURS) {
       return quantity == 1 ? "time.interval.hour" : "time.interval.hours";
-    } else if (unit == DurationFieldType.minutes()) {
+    } else if (unit == ChronoUnit.MINUTES) {
       return quantity == 1 ? "time.interval.minute" : "time.interval.minutes";
-    } else if (unit == DurationFieldType.seconds()) {
+    } else if (unit == ChronoUnit.SECONDS) {
       return quantity == 1 ? "time.interval.second" : "time.interval.seconds";
-    } else if (unit == DurationFieldType.millis()) {
+    } else if (unit == ChronoUnit.MILLIS) {
       return quantity == 1 ? "time.interval.millisecond" : "time.interval.milliseconds";
+    } else {
+      throw new IllegalArgumentException("Unsupported time unit: " + unit);
+    }
+  }
+
+  private static long periodAmount(TemporalUnit unit, Duration duration) {
+    if (unit == ChronoUnit.DAYS) {
+      return duration.toDays();
+    } else if (unit == ChronoUnit.HOURS) {
+      return duration.toHours();
+    } else if (unit == ChronoUnit.MINUTES) {
+      return duration.toMinutes();
+    } else if (unit == ChronoUnit.SECONDS) {
+      return duration.getSeconds();
+    } else if (unit == ChronoUnit.MILLIS) {
+      return duration.toMillis();
     } else {
       throw new IllegalArgumentException("Unsupported time unit: " + unit);
     }
@@ -88,28 +54,28 @@ public class PeriodFormats {
    * Return the key for the localized description of the given time period, which must contain
    * exactly one field.
    */
-  public static String periodKey(Period period) {
-    if (period.size() != 1) {
-      throw new IllegalArgumentException("Periods with multiple fields are not supported");
+  private static String periodKey(Period period) {
+    List<TemporalUnit> units = period.getUnits();
+    if (units.size() != 1) {
+      throw new IllegalArgumentException("Periods with multiple units are not supported");
     }
-    DurationFieldType unit = period.getFieldType(0);
+    TemporalUnit unit = units.get(0);
     return periodKey(unit, period.get(unit));
   }
 
   /** Return a localized description of the given time interval. */
-  public static Component formatPeriod(DurationFieldType unit, long quantity) {
-    return new tc.oc.util.bukkit.component.types.PersonalizedTranslatable(
-        periodKey(unit, quantity),
-        new tc.oc.util.bukkit.component.types.PersonalizedText(String.valueOf(quantity)));
+  public static Component formatPeriod(TemporalUnit unit, long quantity) {
+    return new PersonalizedTranslatable(
+        periodKey(unit, quantity), new PersonalizedText(String.valueOf(quantity)));
   }
 
   /**
    * Return a localized description of the given time period, which must contain exactly one field.
    */
   public static Component formatPeriod(Period period) {
-    return new tc.oc.util.bukkit.component.types.PersonalizedTranslatable(
+    return new PersonalizedTranslatable(
         periodKey(period),
-        new tc.oc.util.bukkit.component.types.PersonalizedText(String.valueOf(period.getValue(0))));
+        new PersonalizedText(String.valueOf(period.get(period.getUnits().get(0)))));
   }
 
   /**
@@ -118,14 +84,14 @@ public class PeriodFormats {
    * value. The interval must be non-zero.
    */
   public static Component briefNaturalPrecise(Duration duration) {
-    if (duration.getMillis() == 0) {
-      throw new IllegalArgumentException("Duration cannot be zero");
+    if (duration.isZero() || duration.isNegative()) {
+      throw new IllegalArgumentException("Duration must be positive");
     }
 
-    long ms = duration.getMillis();
-    for (DurationField unit : UNITS) {
-      if (ms % unit.getUnitMillis() == 0) {
-        return formatPeriod(unit.getType(), unit.getValue(duration.getMillis()));
+    long ms = duration.toMillis();
+    for (TemporalUnit unit : UNITS) {
+      if (ms % unit.getDuration().toMillis() == 0) {
+        return formatPeriod(unit, periodAmount(unit, duration));
       }
     }
     throw new IllegalStateException();
@@ -136,21 +102,21 @@ public class PeriodFormats {
    * into the interval at least the given number of times. The interval must be non-zero.
    */
   public static Component briefNaturalApproximate(Duration duration, long minQuantity) {
-    if (duration.getMillis() == 0) {
-      throw new IllegalArgumentException("Duration cannot be zero");
+    if (duration.isZero() || duration.isNegative()) {
+      throw new IllegalArgumentException("Duration must be positive");
     }
 
-    for (DurationField unit : UNITS) {
-      long quantity = unit.getValue(duration.getMillis());
+    for (TemporalUnit unit : UNITS) {
+      long quantity = periodAmount(unit, duration);
       if (quantity >= minQuantity) {
-        return formatPeriod(unit.getType(), quantity);
+        return formatPeriod(unit, quantity);
       }
     }
     throw new IllegalStateException();
   }
 
   public static Component briefNaturalApproximate(Instant begin, Instant end, long minQuantity) {
-    return briefNaturalApproximate(new Duration(begin, end), minQuantity);
+    return briefNaturalApproximate(Duration.between(begin, end), minQuantity);
   }
 
   /**
@@ -167,6 +133,6 @@ public class PeriodFormats {
 
   public static Component relativePastApproximate(Instant then) {
     return new tc.oc.util.bukkit.component.types.PersonalizedTranslatable(
-        "time.ago", briefNaturalApproximate(new Duration(then, Instant.now())));
+        "time.ago", briefNaturalApproximate(Duration.between(then, Instant.now())));
   }
 }

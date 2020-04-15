@@ -13,6 +13,7 @@ import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.SpawnModule;
 import tc.oc.pgm.spawns.events.DeathKitApplyEvent;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
@@ -105,7 +106,7 @@ public class Dead extends Spawning {
 
   public void requestSpawn() {
     if (player.getMatch().getTick().tick - deathTick
-        >= SpawnModule.IGNORE_CLICKS_DELAY.getMillis() / 50) {
+        >= TimeUtils.toTicks(SpawnModule.IGNORE_CLICKS_DELAY)) {
       super.requestSpawn();
     }
   }

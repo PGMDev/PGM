@@ -1,10 +1,10 @@
 package tc.oc.pgm.cycle;
 
+import java.time.Duration;
 import javax.annotation.Nullable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;

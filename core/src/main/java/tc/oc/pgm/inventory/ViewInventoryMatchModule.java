@@ -2,12 +2,15 @@ package tc.oc.pgm.inventory;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -36,8 +39,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
-import org.joda.time.Duration;
-import org.joda.time.Instant;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -50,7 +51,7 @@ import tc.oc.pgm.events.PlayerBlockTransformEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
-import tc.oc.pgm.util.InventoryTrackerEntry;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.BukkitUtils;
 import tc.oc.util.bukkit.translations.AllTranslations;
 
@@ -61,12 +62,11 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
    * Amount of milliseconds after the match begins where players may not add / remove items from
    * chests.
    */
-  public static final Duration CHEST_PROTECT_TIME = Duration.standardSeconds(2);
+  public static final Duration CHEST_PROTECT_TIME = Duration.ofSeconds(2);
 
-  public static final Duration TICK = Duration.millis(50);
+  public static final Duration TICK = Duration.ofMillis(50);
 
-  protected final HashMap<String, InventoryTrackerEntry> monitoredInventories =
-      new HashMap<String, InventoryTrackerEntry>();
+  protected final HashMap<String, InventoryTrackerEntry> monitoredInventories = new HashMap<>();
   protected final HashMap<String, Instant> updateQueue = Maps.newHashMap();
 
   public static int getInventoryPreviewSlot(int inventorySlot) {
@@ -85,26 +85,25 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
   public ViewInventoryMatchModule(Match match) {
     this.match = match;
     match
-        .getScheduler(MatchScope.RUNNING)
-        .runTaskTimer(
-            Duration.standardSeconds(1),
-            () -> {
-              if (ViewInventoryMatchModule.this.updateQueue.isEmpty()) return;
+        .getExecutor(MatchScope.RUNNING)
+        .scheduleWithFixedDelay(this::checkAllMonitoredInventories, 0, 1, TimeUnit.SECONDS);
+  }
 
-              for (Iterator<Map.Entry<String, Instant>> iterator =
-                      ViewInventoryMatchModule.this.updateQueue.entrySet().iterator();
-                  iterator.hasNext(); ) {
-                Map.Entry<String, Instant> entry = iterator.next();
-                if (entry.getValue().isAfterNow()) continue;
+  private void checkAllMonitoredInventories() {
+    if (updateQueue.isEmpty()) return;
 
-                Player player = Bukkit.getPlayerExact(entry.getKey());
-                if (player != null) {
-                  ViewInventoryMatchModule.this.checkMonitoredInventories(player);
-                }
+    for (Iterator<Map.Entry<String, Instant>> iterator = updateQueue.entrySet().iterator();
+        iterator.hasNext(); ) {
+      Map.Entry<String, Instant> entry = iterator.next();
+      if (entry.getValue().isAfter(Instant.now())) continue;
 
-                iterator.remove();
-              }
-            });
+      Player player = Bukkit.getPlayerExact(entry.getKey());
+      if (player != null) {
+        checkMonitoredInventories(player);
+      }
+
+      iterator.remove();
+    }
   }
 
   @EventHandler(ignoreCancelled = true)
@@ -120,7 +119,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
         // started
         if (!player.canInteract()
             || (player.getMatch().isRunning()
-                && player.getMatch().getDuration().isShorterThan(CHEST_PROTECT_TIME))) {
+                && TimeUtils.isShorterThan(player.getMatch().getDuration(), CHEST_PROTECT_TIME))) {
           event.setCancelled(true);
         }
       }

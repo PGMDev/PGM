@@ -1,10 +1,11 @@
 package tc.oc.pgm.restart;
 
+import java.time.Duration;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.MatchCountdown;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
@@ -16,7 +17,7 @@ public class RestartCountdown extends MatchCountdown {
 
   @Override
   protected Component formatText() {
-    if (remaining.isLongerThan(Duration.ZERO)) {
+    if (TimeUtils.isLongerThan(remaining, Duration.ZERO)) {
       return new PersonalizedTranslatable(
               "broadcast.serverRestart.message", secondsRemaining(ChatColor.DARK_RED))
           .color(ChatColor.AQUA);

@@ -1,12 +1,12 @@
 package tc.oc.pgm.controlpoint;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.event.HandlerList;
 import org.bukkit.util.Vector;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
@@ -24,6 +24,7 @@ import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.util.StringUtils;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.collection.DefaultMapAdapter;
 
 public class ControlPoint extends SimpleGoal<ControlPointDefinition>
@@ -153,8 +154,8 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
    */
   @Override
   public double getCompletion() {
-    return (double) this.capturingTime.getMillis()
-        / (double) this.definition.getTimeToCapture().getMillis();
+    return this.capturingTime.getSeconds()
+        / (double) this.definition.getTimeToCapture().getSeconds();
   }
 
   @Override
@@ -233,7 +234,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
   }
 
   public float getEffectivePointsPerSecond() {
-    float seconds = this.getMatch().getDuration().getStandardSeconds();
+    float seconds = this.getMatch().getDuration().getSeconds();
     float initial = this.getDefinition().getPointsPerSecond();
     float growth = this.getDefinition().getPointsGrowth();
     return (float) (initial * Math.pow(2, seconds / growth));
@@ -242,9 +243,9 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
   private Duration calculateDominateTime(int lead, Duration duration) {
     // Don't scale time if only one player is present, don't zero duration if multiplier is zero
     float msTime =
-        duration.getMillis() * (1 + (lead - 1) * this.getDefinition().getTimeMultiplier());
+        duration.toMillis() * (1 + (lead - 1) * this.getDefinition().getTimeMultiplier());
 
-    return Duration.millis(Math.round(msTime));
+    return Duration.ofMillis(Math.round(msTime));
   }
 
   public void tick(Duration duration) {
@@ -257,12 +258,12 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
     if (this.getControllingTeam() != null && this.getDefinition().affectsScore()) {
       ScoreMatchModule scoreMatchModule = this.getMatch().getModule(ScoreMatchModule.class);
       if (scoreMatchModule != null) {
-        float seconds = this.getMatch().getDuration().getStandardSeconds();
+        float seconds = this.getMatch().getDuration().getSeconds();
         float initial = this.getDefinition().getPointsPerSecond();
         float growth = this.getDefinition().getPointsGrowth();
         float rate = (float) (initial * Math.pow(2, seconds / growth));
         scoreMatchModule.incrementScore(
-            this.getControllingTeam(), rate * duration.getMillis() / 1000d);
+            this.getControllingTeam(), rate * duration.toMillis() / 1000);
       }
     }
   }
@@ -383,7 +384,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
    * stops increasing.
    */
   private void dominate(Competitor dominantTeam, Duration dominantTime) {
-    if (!this.capturable || !dominantTime.isLongerThan(Duration.ZERO)) {
+    if (!this.capturable || !TimeUtils.isLongerThan(dominantTime, Duration.ZERO)) {
       return;
     }
 
@@ -424,7 +425,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
   private void progressUncapture(Competitor dominantTeam, Duration dominantTime) {
     this.capturingTime = this.capturingTime.plus(dominantTime);
 
-    if (!this.capturingTime.isShorterThan(this.definition.getTimeToCapture())) {
+    if (!TimeUtils.isShorterThan(this.capturingTime, this.definition.getTimeToCapture())) {
       // If uncapture is complete, recurse with the dominant team's remaining time
       dominantTime = this.capturingTime.minus(this.definition.getTimeToCapture());
       this.capturingTime = Duration.ZERO;
@@ -436,7 +437,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
   /** Progress toward a new controller */
   private void progressCapture(Competitor dominantTeam, Duration dominantTime) {
     this.capturingTime = this.capturingTime.plus(dominantTime);
-    if (!this.capturingTime.isShorterThan(this.definition.getTimeToCapture())) {
+    if (!TimeUtils.isShorterThan(this.capturingTime, this.definition.getTimeToCapture())) {
       this.capturingTime = Duration.ZERO;
       this.controllingTeam = this.capturingTeam;
       this.capturingTeam = null;
@@ -452,7 +453,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
     boolean crossZero = false;
     if (definition.isIncrementalCapture()) {
       // For incremental points, decrease the capture time
-      if (this.capturingTime.isLongerThan(dominantTime)) {
+      if (TimeUtils.isLongerThan(this.capturingTime, dominantTime)) {
         this.capturingTime = this.capturingTime.minus(dominantTime);
       } else {
         dominantTime = dominantTime.minus(this.capturingTime);

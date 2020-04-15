@@ -1,7 +1,7 @@
 package tc.oc.pgm.broadcast;
 
 import com.google.common.collect.Multimap;
-import org.joda.time.Duration;
+import java.time.Duration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.countdowns.CountdownContext;

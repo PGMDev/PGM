@@ -1,12 +1,12 @@
 package tc.oc.pgm.tnt;
 
 import com.google.common.collect.ImmutableList;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -19,6 +19,7 @@ import tc.oc.pgm.regions.EverywhereRegion;
 import tc.oc.pgm.regions.RFAScope;
 import tc.oc.pgm.regions.RegionFilterApplication;
 import tc.oc.pgm.regions.RegionModule;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.component.Component;
 import tc.oc.util.xml.InvalidXMLException;
 import tc.oc.util.xml.XMLUtils;
@@ -63,8 +64,10 @@ public class TNTModule implements MapModule {
       float dispenserNukeMultiplier = DEFAULT_DISPENSER_NUKE_MULTIPLIER;
       boolean licensing = true;
       boolean friendlyDefuse = true;
+      boolean exists = false;
 
       for (Element tntElement : doc.getRootElement().getChildren("tnt")) {
+        exists = true;
         instantIgnite =
             XMLUtils.parseBoolean(
                 XMLUtils.getUniqueChild(tntElement, "instantignite"), instantIgnite);
@@ -94,7 +97,7 @@ public class TNTModule implements MapModule {
         if (fuseElement != null) {
           fuse = XMLUtils.parseDuration(fuseElement, fuse);
 
-          if (fuse.isLongerThan(Duration.standardSeconds(4))) {
+          if (TimeUtils.isLongerThan(fuse, Duration.ofSeconds(4))) {
             // TNT disappears on the client after 4 seconds, no way to extend it
             // If this is ever really needed, we could spawn new entities on the client every 4
             // seconds
@@ -116,17 +119,19 @@ public class TNTModule implements MapModule {
                     false));
       }
 
-      return new TNTModule(
-          new TNTProperties(
-              yield,
-              power,
-              instantIgnite,
-              blockDamage,
-              fuse,
-              dispenserNukeLimit,
-              dispenserNukeMultiplier,
-              licensing,
-              friendlyDefuse));
+      return exists
+          ? new TNTModule(
+              new TNTProperties(
+                  yield,
+                  power,
+                  instantIgnite,
+                  blockDamage,
+                  fuse,
+                  dispenserNukeLimit,
+                  dispenserNukeMultiplier,
+                  licensing,
+                  friendlyDefuse))
+          : null;
     }
   }
 }

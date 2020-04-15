@@ -13,7 +13,7 @@ public class Rotation extends MapPool {
   public Rotation(MapPoolManager manager, ConfigurationSection section, String name) {
     super(manager, section, name);
 
-    @Nullable MapInfo nextMap = PGM.get().getMapLibrary().getMap(section.getString("next_map"));
+    @Nullable MapInfo nextMap = PGM.get().getMapLibrary().getMap(manager.getNextMapForPool(name));
     if (nextMap != null) this.position = getMapPosition(nextMap);
     else {
       PGM.get()
@@ -70,7 +70,6 @@ public class Rotation extends MapPool {
 
   public void advance(int positions) {
     position = (position + positions) % maps.size();
-    configSection.set("next_map", getMapInPosition(position).getName());
     manager.saveMapPools();
   }
 

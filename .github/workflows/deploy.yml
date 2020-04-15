@@ -17,18 +17,31 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
+    - name: cache
+      uses: actions/cache@v1
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+    - name: format
+      run: mvn com.coveo:fmt-maven-plugin:check
     - name: version
       if: github.ref != '/refs/heads/master'
       run: |
         mvn versions:set \
           -DnewVersion=1.8-${GITHUB_REF#refs/heads/}-SNAPSHOT
     - name: nexus
-      run: mvn -U deploy -s settings.xml
+      run: mvn deploy -s settings.xml
       env:
         NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
         NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+    - name: artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: PGM.jar
+        path: target/PGM-Plugin.jar
     - name: docker
-      if: success()
       run: |
         mvn -pl server compile jib:build \
           -Djib.to.auth.username=${{ secrets.DOCKER_USERNAME }} \

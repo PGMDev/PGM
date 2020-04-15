@@ -90,7 +90,7 @@ public class ServerPingDataListener implements Listener {
     checkNotNull(jsonObject);
 
     jsonObject.addProperty("state", match.getPhase().toString());
-    jsonObject.addProperty("duration", match.getDuration().getStandardSeconds());
+    jsonObject.addProperty("duration", match.getDuration().getSeconds());
     jsonObject.addProperty("observers", match.getObservers().size());
     jsonObject.addProperty("participants", match.getParticipants().size());
     jsonObject.addProperty("max_players", match.getMaxPlayers());

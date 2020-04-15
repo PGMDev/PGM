@@ -1,59 +1,84 @@
 package tc.oc.util;
 
-import java.util.Date;
-import org.joda.time.DateTimeConstants;
-import org.joda.time.Duration;
-import org.joda.time.Instant;
+import java.time.Duration;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
+import java.util.concurrent.TimeUnit;
 
 public class TimeUtils {
-  public static final Duration INFINITE_DURATION = Duration.millis(Long.MAX_VALUE);
-  public static final Instant INF_FUTURE = new Instant(Long.MAX_VALUE);
-  public static final Instant INF_PAST = new Instant(Long.MIN_VALUE);
+  public static final long TICK = 50;
+  public static final long MAX_TICK = Integer.MAX_VALUE;
+  public static final Duration INFINITE_DURATION = ChronoUnit.FOREVER.getDuration();
 
-  public static boolean isInfinite(Duration duration) {
-    return duration.getMillis() == Long.MAX_VALUE;
-  }
+  private static final String DURATION_MINUTES_FORMAT = "%02d:%02d";
+  private static final String DURATION_HOURS_FORMAT = "%d:" + DURATION_MINUTES_FORMAT;
 
-  public static boolean isInfFuture(Instant instant) {
-    return instant.getMillis() == Long.MAX_VALUE;
-  }
-
-  public static boolean isInfPast(Instant instant) {
-    return instant.getMillis() == Long.MIN_VALUE;
-  }
-
-  public static boolean isInfFuture(Date date) {
-    return date.getYear() > 8000; // Hacky, but needs to match Ruby's Time::INF_FUTURE
-  }
-
-  public static boolean isInfPast(Date date) {
-    return date.getYear() < -10000;
-  }
-
-  public static Instant toInstant(Date date) {
-    if (isInfFuture(date)) {
-      return INF_FUTURE;
-    } else if (isInfPast(date)) {
-      return INF_PAST;
+  public static String formatDuration(Duration duration) {
+    long secs = duration.getSeconds();
+    if (secs >= 3600) {
+      return String.format(DURATION_HOURS_FORMAT, secs / 3600, (secs % 3600) / 60, (secs % 60));
     } else {
-      return new Instant(date);
+      return String.format(DURATION_MINUTES_FORMAT, (secs % 3600) / 60, (secs % 60));
     }
   }
 
-  public static long daysRoundingUp(Duration duration) {
-    return (duration.getMillis() + DateTimeConstants.MILLIS_PER_DAY - 1)
-        / DateTimeConstants.MILLIS_PER_DAY;
+  public static String formatDurationShort(Duration duration) {
+    long secs = duration.getSeconds();
+    if (secs >= 60) {
+      return (secs % 3600) / 60 + "m";
+    } else if (secs >= 1) {
+      return secs + "s";
+    } else {
+      return "<1s";
+    }
+  }
+
+  public static Duration parseDuration(String text) {
+    if (text.equalsIgnoreCase("oo")) {
+      return INFINITE_DURATION;
+    }
+
+    text = text.toLowerCase();
+
+    int index = text.indexOf("d"); // days
+    if (index > 0) {
+      text = "p" + text.substring(0, ++index) + "t" + text.substring(++index);
+    } else {
+      text = "pt" + text;
+    }
+
+    try {
+      return Duration.parse(text);
+    } catch (DateTimeParseException e) {
+      throw new IllegalArgumentException("Unable to parse '" + text + "' into a duration", e);
+    }
+  }
+
+  public static boolean isInfinite(Duration duration) {
+    return duration.compareTo(INFINITE_DURATION) >= 0;
   }
 
   public static long toTicks(Duration duration) {
-    return duration.getMillis() / 50;
+    try {
+      return duration.toMillis() / TICK;
+    } catch (ArithmeticException e) {
+      return MAX_TICK;
+    }
   }
 
-  public static Duration min(Duration a, Duration b) {
-    return a.compareTo(b) <= 0 ? a : b;
+  public static long toTicks(long amount, TimeUnit unit) {
+    try {
+      return unit.toMillis(amount) / TICK;
+    } catch (ArithmeticException e) {
+      return MAX_TICK;
+    }
   }
 
-  public static Duration max(Duration a, Duration b) {
-    return a.compareTo(b) >= 0 ? a : b;
+  public static boolean isShorterThan(Duration a, Duration b) {
+    return a.compareTo(b) < 0;
+  }
+
+  public static boolean isLongerThan(Duration a, Duration b) {
+    return a.compareTo(b) > 0;
   }
 }

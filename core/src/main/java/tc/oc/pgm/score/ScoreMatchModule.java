@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.Vector;
-import org.joda.time.Instant;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.event.PlayerItemTransferEvent;
 import tc.oc.pgm.api.match.Match;
@@ -176,15 +176,12 @@ public class ScoreMatchModule implements MatchModule, Listener {
           && box.getRegion().contains(player.getBukkit())
           && box.canScore(player.getParticipantState())) {
         match
-            .getScheduler(MatchScope.RUNNING)
-            .runTask(
-                new Runnable() {
-                  @Override
-                  public void run() {
-                    if (player.getBukkit().isOnline()) {
-                      double points = redeemItems(box, player.getInventory());
-                      ScoreMatchModule.this.playerScore(box, player, points);
-                    }
+            .getExecutor(MatchScope.RUNNING)
+            .execute(
+                () -> {
+                  if (player.getBukkit().isOnline()) {
+                    double points = redeemItems(box, player.getInventory());
+                    ScoreMatchModule.this.playerScore(box, player, points);
                   }
                 });
       }

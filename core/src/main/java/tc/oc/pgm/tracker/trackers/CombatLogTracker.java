@@ -1,5 +1,7 @@
 package tc.oc.pgm.tracker.trackers;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,8 +22,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.joda.time.Duration;
-import org.joda.time.Instant;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -38,7 +38,7 @@ import tc.oc.util.bukkit.material.Materials;
  */
 public class CombatLogTracker implements Listener {
   // Logout within this time since last damage is considered combat log
-  private static final Duration RECENT_DAMAGE_THRESHOLD = Duration.standardSeconds(3);
+  private static final Duration RECENT_DAMAGE_THRESHOLD = Duration.ofSeconds(3);
 
   // Maximum height player can fall without taking damage
   private static final double SAFE_FALL_DISTANCE = 2;

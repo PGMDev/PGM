@@ -25,9 +25,8 @@ public class MessageFormatProvider {
   private final Locale defaultLocale;
   private final LoadingCache<Locale, Locale> localeCache;
   private final Table<String, Locale, MessageFormat> formatTable;
-  private final UTF8Control control = new UTF8Control();
 
-  public MessageFormatProvider(@Nullable String resourceName, Locale defaultLocale) {
+  public MessageFormatProvider(String resourceName, Locale defaultLocale) {
     this.defaultLocale = checkNotNull(defaultLocale);
     this.formatTable = HashBasedTable.create();
     this.localeCache =
@@ -40,13 +39,13 @@ public class MessageFormatProvider {
                   }
                 });
 
+    final UTF8Control utf8 = new UTF8Control();
     for (Locale locale : Locale.getAvailableLocales()) {
       final String lang = locale.toLanguageTag().replaceAll("-", "_");
       final ResourceBundle bundle;
       try {
-        final String path =
-            resourceName == null || resourceName.isEmpty() ? lang : resourceName + "_" + lang;
-        bundle = ResourceBundle.getBundle(path, locale, this.control);
+        final String path = locale.equals(defaultLocale) ? resourceName : resourceName + "_" + lang;
+        bundle = ResourceBundle.getBundle(path, locale, utf8);
       } catch (MissingResourceException e) {
         continue;
       }
@@ -83,7 +82,7 @@ public class MessageFormatProvider {
       return format;
     } catch (Throwable t) {
       // Extra safe-guard since translations are a critical path
-      return new MessageFormat("<missing translation \'" + key + "\'>", locale);
+      return new MessageFormat("<missing translation \"" + key + "\">", locale);
     }
   }
 

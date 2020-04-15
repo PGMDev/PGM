@@ -1,9 +1,9 @@
 package tc.oc.pgm.start;
 
+import java.time.Duration;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;

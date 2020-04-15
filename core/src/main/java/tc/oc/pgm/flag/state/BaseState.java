@@ -1,6 +1,10 @@
 package tc.oc.pgm.flag.state;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -8,9 +12,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.scheduler.BukkitTask;
-import org.joda.time.Duration;
-import org.joda.time.Instant;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Party;
@@ -34,7 +35,7 @@ public abstract class BaseState implements Runnable, State {
   protected final Post post;
   protected final Instant enterTime;
   protected @Nullable Long remainingTicks;
-  private BukkitTask task;
+  private Future<?> task;
 
   protected BaseState(Flag flag, Post post) {
     this.flag = flag;
@@ -59,12 +60,16 @@ public abstract class BaseState implements Runnable, State {
    * returns.
    */
   public void enterState() {
-    this.task = this.flag.getMatch().getScheduler(MatchScope.LOADED).runTaskTimer(1, 1, this);
+    this.task =
+        this.flag
+            .getMatch()
+            .getExecutor(MatchScope.LOADED)
+            .scheduleWithFixedDelay(this, TimeUtils.TICK, TimeUtils.TICK, TimeUnit.MILLISECONDS);
   }
 
   public void leaveState() {
     if (this.task != null) {
-      this.task.cancel();
+      this.task.cancel(true);
       this.task = null;
     }
   }
@@ -89,7 +94,7 @@ public abstract class BaseState implements Runnable, State {
       if (Duration.ZERO.equals(duration)) {
         this.finishCountdown();
       } else if (!TimeUtils.isInfinite(duration)) {
-        this.remainingTicks = duration.getMillis() / 50;
+        this.remainingTicks = TimeUtils.toTicks(duration);
       }
     }
   }

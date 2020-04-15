@@ -1,7 +1,7 @@
 package tc.oc.pgm.tnt;
 
+import java.time.Duration;
 import javax.annotation.Nullable;
-import org.joda.time.Duration;
 
 public class TNTProperties {
   public final @Nullable Float yield;

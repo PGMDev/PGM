@@ -2,15 +2,15 @@ package tc.oc.pgm.timelimit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.time.Duration;
 import javax.annotation.Nullable;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.PeriodFormats;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
@@ -71,7 +71,7 @@ public class TimeLimit extends SelfIdentifyingFeatureDefinition implements Victo
 
   @Override
   public Component getDescription(Match match) {
-    Component time = new PersonalizedText(PeriodFormats.SHORTHAND.print(duration.toPeriod()));
+    Component time = new PersonalizedText(TimeUtils.formatDuration(duration));
     if (result == null) {
       return new PersonalizedTranslatable("timeLimit.description.generic", time);
     } else {

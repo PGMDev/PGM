@@ -1,9 +1,5 @@
 name: build
 on:
-  push:
-    branches-ignore:
-      - master
-      - beta
   pull_request:
   repository_dispatch:
 jobs:
@@ -16,5 +12,19 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
+    - name: cache
+      uses: actions/cache@v1
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+    - name: format
+      run: mvn com.coveo:fmt-maven-plugin:check
     - name: build
-      run: mvn -U install
+      run: mvn install
+    - name: artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: PGM.jar
+        path: target/PGM-Plugin.jar

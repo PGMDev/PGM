@@ -23,7 +23,6 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.projectile.EntityLaunchEvent;
 import tc.oc.util.bukkit.chat.Sound;
-import tc.oc.util.bukkit.nms.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
@@ -79,7 +78,7 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
         newProjectile.setMetadata(
             "knockback", new FixedMetadataValue(plugin, arrow.getKnockbackStrength()));
         newProjectile.setMetadata(
-            "damage", new FixedMetadataValue(plugin, NMSHacks.getArrowDamage(arrow)));
+            "damage", new FixedMetadataValue(plugin, arrow.spigot().getDamage()));
       }
     }
 
@@ -136,7 +135,7 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
           if (customProjectile.getShooter() instanceof Player) {
             Player bukkitShooter = (Player) customProjectile.getShooter();
             MatchPlayer shooter = match.getPlayer(bukkitShooter);
-            if (shooter != null) {
+            if (shooter != null && event.getEntity() != null) {
               shooter.playSound(PROJECTILE_SOUND);
             }
           }

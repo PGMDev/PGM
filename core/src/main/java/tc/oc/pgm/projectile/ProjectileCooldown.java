@@ -1,16 +1,17 @@
 package tc.oc.pgm.projectile;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
-import org.joda.time.Duration;
-import org.joda.time.Instant;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.kits.tag.ItemTags;
-import tc.oc.util.bukkit.component.PeriodFormats;
+import tc.oc.util.TimeUtils;
 
 public class ProjectileCooldown {
   private final MatchPlayer matchPlayer;
@@ -18,7 +19,7 @@ public class ProjectileCooldown {
   private final ProjectileDefinition projectileDefinition;
   private Instant endTime = null;
   private final BukkitRunnable runnable = new CooldownRunnable(this);
-  private BukkitTask runnableTask = null;
+  private Future<?> runnableTask = null;
 
   public ProjectileCooldown(MatchPlayer matchPlayer, ProjectileDefinition projectileDefinition) {
     this.matchPlayer = matchPlayer;
@@ -27,32 +28,19 @@ public class ProjectileCooldown {
   }
 
   public Duration getTimeLeft() {
-    if (endTime == null || endTime.isBeforeNow()) {
+    if (endTime == null || endTime.isBefore(Instant.now())) {
       return Duration.ZERO;
     } else {
-      return new Duration(Instant.now(), endTime);
+      return Duration.between(Instant.now(), endTime);
     }
   }
 
   public String getTimeLeftString() {
-    if (this.getTimeLeft().getMillis() < 1000) {
-      // display only tenths of seconds
-      return this.getTimeLeft()
-          .toPeriod()
-          .toString(PeriodFormats.COUNTDOWN)
-          .substring(0, 3)
-          .concat(" sec");
-    } else {
-      return this.getTimeLeft().toPeriod().withMillis(0).toString(PeriodFormats.COUNTDOWN);
-    }
+    return TimeUtils.formatDurationShort(getTimeLeft());
   }
 
   public boolean isActive() {
-    return this.runnableTask != null
-        && this.matchPlayer
-            .getMatch()
-            .getScheduler(MatchScope.RUNNING)
-            .isPending(this.runnableTask);
+    return this.runnableTask != null && !runnableTask.isDone();
   }
 
   public void start() {
@@ -60,14 +48,14 @@ public class ProjectileCooldown {
 
     this.endTime = Instant.now().plus(projectileDefinition.coolDown);
     this.runnableTask =
-        this.matchPlayer
+        matchPlayer
             .getMatch()
-            .getScheduler(MatchScope.RUNNING)
-            .runTaskTimer(0l, 1l, this.runnable);
+            .getExecutor(MatchScope.RUNNING)
+            .scheduleAtFixedRate(this.runnable, 0, TimeUtils.TICK, TimeUnit.MILLISECONDS);
   }
 
   public void end() {
-    this.runnableTask.cancel();
+    this.runnableTask.cancel(true);
   }
 
   public ProjectileDefinition getProjectileDefinition() {

@@ -1,15 +1,15 @@
 package tc.oc.pgm.countdowns;
 
+import java.time.Duration;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.bossbar.BossBarMatchModule;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.bossbar.BossBar;
 import tc.oc.util.bukkit.bossbar.DynamicBossBar;
 import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.PeriodFormats;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 
@@ -32,7 +32,7 @@ public abstract class MatchCountdown extends Countdown {
 
     @Override
     public float getMeter(Player viewer) {
-      return Duration.ZERO.equals(total) ? 0f : (float) remaining.getMillis() / total.getMillis();
+      return total.isZero() ? 0f : (float) remaining.toMillis() / total.toMillis();
     }
   };
 
@@ -57,7 +57,7 @@ public abstract class MatchCountdown extends Countdown {
   protected abstract Component formatText();
 
   protected boolean showChat() {
-    long secondsLeft = remaining.getStandardSeconds();
+    long secondsLeft = remaining.getSeconds();
     return secondsLeft > 0
         && (secondsLeft % 300 == 0
             || // every 5 minutes
@@ -101,8 +101,7 @@ public abstract class MatchCountdown extends Countdown {
     if (showTitle()) {
       getMatch()
           .showTitle(
-              new PersonalizedText(
-                  String.valueOf(remaining.getStandardSeconds()), ChatColor.YELLOW),
+              new PersonalizedText(String.valueOf(remaining.getSeconds()), ChatColor.YELLOW),
               new PersonalizedText(""),
               0,
               5,
@@ -138,7 +137,7 @@ public abstract class MatchCountdown extends Countdown {
   }
 
   protected ChatColor urgencyColor() {
-    long seconds = remaining.getStandardSeconds();
+    long seconds = remaining.getSeconds();
     if (seconds > 60) {
       return ChatColor.GREEN;
     } else if (seconds > 30) {
@@ -151,7 +150,7 @@ public abstract class MatchCountdown extends Countdown {
   }
 
   protected Component secondsRemaining(ChatColor color) {
-    long seconds = remaining.getStandardSeconds();
+    long seconds = remaining.getSeconds();
     if (seconds == 1) {
       return new PersonalizedTranslatable(
           "countdown.singularCompound", new PersonalizedText("1", color));
@@ -162,10 +161,10 @@ public abstract class MatchCountdown extends Countdown {
   }
 
   protected String colonTime() {
-    return PeriodFormats.COLONS.print(remaining.toPeriod());
+    return TimeUtils.formatDuration(remaining);
   }
 
   protected float bossBarProgress(Duration remaining, Duration total) {
-    return Duration.ZERO.equals(total) ? 0f : (float) remaining.getMillis() / total.getMillis();
+    return total.isZero() ? 0f : (float) remaining.toMillis() / total.toMillis();
   }
 }

@@ -33,21 +33,6 @@
             <version>3.0.3</version>
         </dependency>
 
-        <!-- Time convience libraries for "Instant" and "Duration" -->
-        <!-- TODO: Use Java 8's standard time libraries -->
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>2.10.5</version>
-        </dependency>
-
-        <!-- Time formatting library used for parsing durations such as "1h30m" -->
-        <dependency>
-            <groupId>org.ocpsoft.prettytime</groupId>
-            <artifactId>prettytime</artifactId>
-            <version>4.0.4.Final</version>
-        </dependency>
-
         <!-- XML parsing library used for all "map.xml" configuration loading -->
         <dependency>
             <groupId>org.jdom</groupId>

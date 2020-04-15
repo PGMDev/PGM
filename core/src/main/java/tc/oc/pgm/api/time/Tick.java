@@ -1,7 +1,7 @@
 package tc.oc.pgm.api.time;
 
+import java.time.Instant;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.joda.time.Instant;
 
 /** Represents a Minecraft server {@link Tick}. */
 public final class Tick implements Comparable<Tick> {

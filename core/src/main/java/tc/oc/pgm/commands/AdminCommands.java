@@ -5,6 +5,7 @@ import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
+import java.time.Duration;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -13,7 +14,6 @@ import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.joda.time.Duration;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
@@ -43,7 +43,7 @@ public class AdminCommands {
       CommandSender sender, Match match, @Default("30") int duration, @Switch('f') boolean force)
       throws CommandException {
     RestartManager.queueRestart(
-        "Restart requested via /queuerestart command", Duration.standardSeconds(duration));
+        "Restart requested via /queuerestart command", Duration.ofSeconds(duration));
 
     sender.sendMessage(
         ChatColor.RED + "Server will restart automatically at the next safe opportunity.");

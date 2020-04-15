@@ -13,19 +13,17 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.HoverEvent.Action;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.setting.SettingKey;
-import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.PlayerReportEvent;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
@@ -123,28 +121,11 @@ public class ReportCommands {
         new Report(
             player.getName(),
             reason,
-            accused.getStyledName(NameStyle.CONCISE),
+            accused.getStyledName(NameStyle.FANCY),
             matchPlayer.getStyledName(NameStyle.CONCISE)));
 
-    final Component prefixedComponent =
-        new PersonalizedText(
-            new PersonalizedText(ChatDispatcher.ADMIN_CHAT_PREFIX),
-            new PersonalizedText(component, ChatColor.YELLOW));
-
-    match.getPlayers().stream()
-        .filter(viewer -> viewer.getBukkit().hasPermission(Permissions.ADMINCHAT))
-        .forEach(
-            viewer -> {
-              // Play sound for viewers of reports
-              if (viewer
-                  .getSettings()
-                  .getValue(SettingKey.SOUNDS)
-                  .equals(SettingValue.SOUNDS_ALL)) {
-                viewer.playSound(REPORT_NOTIFY_SOUND);
-              }
-              viewer.sendMessage(prefixedComponent);
-            });
-    Audience.get(Bukkit.getConsoleSender()).sendMessage(component);
+    ChatDispatcher.broadcastAdminChatMessage(
+        new PersonalizedText(component, ChatColor.YELLOW), match, Optional.of(REPORT_NOTIFY_SOUND));
   }
 
   @Command(
@@ -209,24 +190,23 @@ public class ReportCommands {
     new PrettyPaginatedComponentResults<Report>(formattedHeader, perPage) {
       @Override
       public Component format(Report data, int index) {
-        Component timeAgo =
-            PeriodFormats.relativePastApproximate(
-                    org.joda.time.Instant.ofEpochMilli(data.getTimeSent().toEpochMilli()))
-                .color(ChatColor.DARK_AQUA);
-        Component hover =
+
+        Component reporter =
             new PersonalizedTranslatable("moderation.reports.hover", data.getSenderName())
-                .getPersonalizedText()
                 .color(ChatColor.GRAY);
 
-        Component formatted =
-            new PersonalizedText(
-                timeAgo,
-                new PersonalizedText(": ").color(ChatColor.GRAY),
-                data.getTargetName(),
-                new PersonalizedText(" « ").color(ChatColor.YELLOW),
-                new PersonalizedText(data.getReason()).italic(true).color(ChatColor.WHITE));
+        Component timeAgo =
+            PeriodFormats.relativePastApproximate(
+                    java.time.Instant.ofEpochMilli(data.getTimeSent().toEpochMilli()))
+                .color(ChatColor.DARK_AQUA);
 
-        return formatted.hoverEvent(Action.SHOW_TEXT, hover.render(sender));
+        return new PersonalizedText(
+            new PersonalizedText(timeAgo.render(sender))
+                .hoverEvent(Action.SHOW_TEXT, reporter.render(sender)),
+            new PersonalizedText(": ").color(ChatColor.GRAY),
+            data.getTargetName(),
+            new PersonalizedText(" « ").color(ChatColor.YELLOW),
+            new PersonalizedText(data.getReason()).italic(true).color(ChatColor.WHITE));
       }
     }.display(audience, reportList, page);
   }

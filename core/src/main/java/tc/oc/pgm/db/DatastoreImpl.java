@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.map.MapActivity;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
@@ -46,6 +47,7 @@ public class DatastoreImpl implements Datastore {
 
     initUsername();
     initSettings();
+    initMapActivity();
   }
 
   @Override
@@ -252,6 +254,104 @@ public class DatastoreImpl implements Datastore {
       }
 
       statement.executeBatch();
+    }
+  }
+
+  @Override
+  public MapActivity getMapActivity(String name) {
+    MapActivity activity = null;
+
+    try {
+      activity = selectMapActivity(name);
+    } catch (SQLException e) {
+      logger.log(
+          Level.WARNING,
+          "Could not find pool activity for " + name + ". Creating default data now",
+          e);
+    }
+
+    if (activity == null) {
+      activity = new MapActivityImpl(name, null, false);
+    }
+
+    return activity;
+  }
+
+  private class MapActivityImpl implements MapActivity {
+
+    private String name;
+    private String nextMap;
+    private boolean active;
+
+    public MapActivityImpl(String name, @Nullable String nextMap, boolean active) {
+      this.name = name;
+      this.nextMap = nextMap;
+      this.active = active;
+    }
+
+    @Override
+    public String getPoolName() {
+      return name;
+    }
+
+    @Override
+    public String getMapName() {
+      return nextMap;
+    }
+
+    @Override
+    public boolean isActive() {
+      return active;
+    }
+
+    @Override
+    public void update(String nextMap, boolean active) {
+      this.nextMap = nextMap;
+      this.active = active;
+
+      try {
+        updateMapActivity(name, getMapName(), isActive());
+      } catch (SQLException e) {
+        logger.log(Level.WARNING, "Unable to update pool activity for " + name, e);
+      }
+    }
+  }
+
+  private void initMapActivity() throws SQLException {
+    try (final Statement statement = getConnection().createStatement()) {
+      statement.addBatch(
+          "CREATE TABLE IF NOT EXISTS pools (name VARCHAR(255) PRIMARY KEY, next_map VARCHAR(255), last_active BOOLEAN)");
+      statement.executeBatch();
+    }
+  }
+
+  private MapActivity selectMapActivity(String name) throws SQLException {
+    MapActivity activity = null;
+
+    try (final PreparedStatement statement =
+        getConnection().prepareStatement("SELECT * FROM pools WHERE name = ? LIMIT 1")) {
+      statement.setString(1, checkNotNull(name));
+
+      try (final ResultSet result = statement.executeQuery()) {
+        if (result.next()) {
+          final String next_map = result.getString(2);
+          final boolean active = result.getBoolean(3);
+
+          return new MapActivityImpl(name, next_map, active);
+        }
+      }
+    }
+    return activity;
+  }
+
+  private void updateMapActivity(String name, @Nullable String nextMap, boolean active)
+      throws SQLException {
+    try (final PreparedStatement statement =
+        getConnection().prepareStatement("INSERT OR REPLACE INTO pools VALUES (?, ?, ?)")) {
+      statement.setString(1, name);
+      statement.setString(2, nextMap);
+      statement.setBoolean(3, active);
+      statement.executeUpdate();
     }
   }
 

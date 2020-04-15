@@ -1,10 +1,10 @@
 package tc.oc.pgm.restart;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nullable;
-import org.joda.time.Duration;
-import org.joda.time.Instant;
 
 public class RestartManager {
 
