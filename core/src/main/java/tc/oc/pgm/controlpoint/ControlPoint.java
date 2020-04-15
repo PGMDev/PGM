@@ -262,7 +262,8 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
         float initial = this.getDefinition().getPointsPerSecond();
         float growth = this.getDefinition().getPointsGrowth();
         float rate = (float) (initial * Math.pow(2, seconds / growth));
-        scoreMatchModule.incrementScore(this.getControllingTeam(), rate * duration.getSeconds());
+        scoreMatchModule.incrementScore(
+            this.getControllingTeam(), rate * duration.toMillis() / 1000);
       }
     }
   }
