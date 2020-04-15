@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -57,6 +58,7 @@ import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.util.StringUtils;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.chat.Sound;
 import tc.oc.util.bukkit.component.ComponentUtils;
 import tc.oc.util.bukkit.item.Items;
@@ -366,7 +368,18 @@ public class PickerMatchModule implements MatchModule, Listener {
     if (hand.getType() == Button.JOIN.material) {
       handled = true;
       if (!immediate && canOpenWindow(player) && settingEnabled(player, true)) {
-        showWindow(player);
+        // Bukkit glitch where opening an inv will cause the helmet to be placed even though
+        // setUseItemInHand is false.
+        // Solution is to schedule inv opening 1 tick after canceling event
+        match
+            .getExecutor(MatchScope.LOADED)
+            .schedule(
+                () -> {
+                  showWindow(player);
+                },
+                TimeUtils.TICK,
+                TimeUnit.MILLISECONDS);
+
       } else {
         // If there is nothing to pick or setting is disabled, just join immediately
         jmm.join(player, null);
