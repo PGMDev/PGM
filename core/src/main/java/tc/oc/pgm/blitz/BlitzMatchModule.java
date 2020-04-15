@@ -140,17 +140,14 @@ public class BlitzMatchModule implements MatchModule, Listener {
 
     // wait until the next tick to do this so stat recording and other stuff works
     match
-        .getScheduler(MatchScope.RUNNING)
-        .runTask(
-            new Runnable() {
-              @Override
-              public void run() {
-                match.callEvent(eliminatedEvent);
-                if (player.getParty() instanceof Competitor) {
-                  match.setParty(player, match.getDefaultParty());
-                }
-                match.calculateVictory();
+        .getExecutor(MatchScope.RUNNING)
+        .execute(
+            () -> {
+              match.callEvent(eliminatedEvent);
+              if (player.getParty() instanceof Competitor) {
+                match.setParty(player, match.getDefaultParty());
               }
+              match.calculateVictory();
             });
   }
 }

@@ -2,7 +2,6 @@ package tc.oc.pgm.listeners;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -34,7 +33,6 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
-import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
@@ -43,7 +41,6 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.commands.MatchCommands;
-import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.gamerules.GameRule;
@@ -184,26 +181,6 @@ public class PGMListener implements Listener {
         viewer.sendMessage(new PersonalizedText(component, ChatColor.YELLOW));
       }
     }
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR)
-  public void sendWelcomeMessage(final PlayerJoinMatchEvent event) {
-    final Match match = event.getMatch();
-    final UUID viewerId = event.getPlayer().getId();
-    match
-        .getScheduler(MatchScope.LOADED)
-        .runTaskLater(
-            5L,
-            new Runnable() {
-              @Override
-              public void run() {
-                MatchPlayer viewer = match.getPlayer(viewerId);
-                if (viewer == null) return;
-
-                // FIXME: welcome message
-                // match.sendWelcomeMessage(viewer);
-              }
-            });
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

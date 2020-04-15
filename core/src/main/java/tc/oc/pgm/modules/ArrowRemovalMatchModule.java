@@ -1,5 +1,6 @@
 package tc.oc.pgm.modules;
 
+import java.util.concurrent.TimeUnit;
 import org.bukkit.entity.Arrow;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.match.Match;
@@ -21,15 +22,15 @@ public class ArrowRemovalMatchModule implements MatchModule {
   @Override
   public void enable() {
     match
-        .getScheduler(MatchScope.RUNNING)
-        .runTaskTimer(
-            0,
-            20,
-            () -> {
-              for (Arrow arrow : match.getWorld().getEntitiesByClass(Arrow.class)) {
-                if (arrow.getTicksLived() >= maxTicks && NMSHacks.hasInfinityEnchanment(arrow))
-                  arrow.remove();
-              }
-            });
+        .getExecutor(MatchScope.RUNNING)
+        .scheduleWithFixedDelay(
+            this::removeOldArrows, 0, Config.ArrowRemoval.delay(), TimeUnit.SECONDS);
+  }
+
+  private void removeOldArrows() {
+    for (Arrow arrow : match.getWorld().getEntitiesByClass(Arrow.class)) {
+      if (arrow.getTicksLived() >= maxTicks && NMSHacks.hasInfinityEnchanment(arrow))
+        arrow.remove();
+    }
   }
 }

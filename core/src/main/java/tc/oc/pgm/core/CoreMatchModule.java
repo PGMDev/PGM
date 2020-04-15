@@ -3,6 +3,7 @@ package tc.oc.pgm.core;
 import static tc.oc.pgm.api.map.MapProtos.MODES_IMPLEMENTATION_VERSION;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.minecart.ExplosiveMinecart;
@@ -47,8 +48,8 @@ public class CoreMatchModule implements MatchModule, Listener {
     if (this.match.getMap().getProto().isOlderThan(MODES_IMPLEMENTATION_VERSION)) {
       CoreConvertMonitor ccm = new CoreConvertMonitor(this);
 
-      match.getScheduler(MatchScope.RUNNING).runTaskLater(15 * 60 * 20, ccm); // 15 minutes
-      match.getScheduler(MatchScope.RUNNING).runTaskLater(20 * 60 * 20, ccm); // 20 minutes
+      match.getExecutor(MatchScope.RUNNING).schedule(ccm, 15, TimeUnit.MINUTES);
+      match.getExecutor(MatchScope.RUNNING).schedule(ccm, 20, TimeUnit.MINUTES);
     }
   }
 

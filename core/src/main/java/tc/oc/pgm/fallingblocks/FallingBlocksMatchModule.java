@@ -24,14 +24,16 @@ import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.util.bukkit.material.Materials;
 import tc.oc.util.collection.LongDeque;
 
 @ListenerScope(MatchScope.RUNNING)
-public class FallingBlocksMatchModule implements MatchModule, Listener {
+public class FallingBlocksMatchModule implements MatchModule, Listener, Tickable {
   private static final BlockFace[] NEIGHBORS = {
     BlockFace.WEST, BlockFace.EAST, BlockFace.DOWN, BlockFace.UP, BlockFace.NORTH, BlockFace.SOUTH
   };
@@ -64,10 +66,8 @@ public class FallingBlocksMatchModule implements MatchModule, Listener {
   }
 
   @Override
-  public void enable() {
-    match
-        .getScheduler(MatchScope.RUNNING)
-        .runTaskTimer(1, FallingBlocksMatchModule.this::fallCheck);
+  public void tick(Match match, Tick tick) {
+    fallCheck();
   }
 
   @Override

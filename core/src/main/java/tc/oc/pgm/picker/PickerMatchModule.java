@@ -295,16 +295,12 @@ public class PickerMatchModule implements MatchModule, Listener {
     if (!settingEnabled(player, false)) return;
 
     if (canOpenWindow(player)) {
-      event
-          .getMatch()
-          .getScheduler(MatchScope.LOADED)
-          .runTask(
-              new Runnable() {
-                @Override
-                public void run() {
-                  if (player.getBukkit().isOnline()) {
-                    showWindow(player);
-                  }
+      match
+          .getExecutor(MatchScope.LOADED)
+          .execute(
+              () -> {
+                if (player.getBukkit().isOnline()) {
+                  showWindow(player);
                 }
               });
     }
@@ -743,17 +739,13 @@ public class PickerMatchModule implements MatchModule, Listener {
   private void scheduleClose(final MatchPlayer player) {
     final Player bukkit = player.getBukkit();
 
-    player
-        .getMatch()
-        .getScheduler(MatchScope.LOADED)
-        .runTask(
-            new Runnable() {
-              @Override
-              public void run() {
-                if (bukkit.isOnline()) {
-                  bukkit.getOpenInventory().getTopInventory().clear();
-                  bukkit.closeInventory();
-                }
+    match
+        .getExecutor(MatchScope.LOADED)
+        .execute(
+            () -> {
+              if (bukkit.isOnline()) {
+                bukkit.getOpenInventory().getTopInventory().clear();
+                bukkit.closeInventory();
               }
             });
   }
@@ -762,16 +754,12 @@ public class PickerMatchModule implements MatchModule, Listener {
     if (team == player.getParty() || (team == null && hasJoined(player))) return;
 
     final Player bukkit = player.getBukkit();
-    player
-        .getMatch()
-        .getScheduler(MatchScope.LOADED)
-        .runTask(
-            new Runnable() {
-              @Override
-              public void run() {
-                if (bukkit.isOnline()) {
-                  match.needModule(JoinMatchModule.class).join(player, team);
-                }
+    match
+        .getExecutor(MatchScope.LOADED)
+        .execute(
+            () -> {
+              if (bukkit.isOnline()) {
+                match.needModule(JoinMatchModule.class).join(player, team);
               }
             });
   }
@@ -780,30 +768,17 @@ public class PickerMatchModule implements MatchModule, Listener {
     if (!hasJoined(player)) return;
 
     final Player bukkit = player.getBukkit();
-    player
-        .getMatch()
-        .getScheduler(MatchScope.LOADED)
-        .runTask(
-            new Runnable() {
-              @Override
-              public void run() {
-                if (bukkit.isOnline()) {
-                  match.needModule(JoinMatchModule.class).leave(player);
-                }
+    match
+        .getExecutor(MatchScope.LOADED)
+        .execute(
+            () -> {
+              if (bukkit.isOnline()) {
+                match.needModule(JoinMatchModule.class).leave(player);
               }
             });
   }
 
   private void scheduleRefresh(final MatchPlayer viewer) {
-    viewer
-        .getMatch()
-        .getScheduler(MatchScope.LOADED)
-        .runTask(
-            new Runnable() {
-              @Override
-              public void run() {
-                refreshWindow(viewer);
-              }
-            });
+    match.getExecutor(MatchScope.LOADED).execute(() -> refreshWindow(viewer));
   }
 }

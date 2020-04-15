@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import net.minecraft.server.v1_8_R3.WorldServer;
@@ -65,10 +66,9 @@ public class MatchManagerImpl implements MatchManager, Listener {
     matchById.remove(checkNotNull(match).getId());
     matchByWorld.remove(checkNotNull(match.getWorld()).getName());
     PGM.get()
-        .getServer()
-        .getScheduler()
-        .runTaskLaterAsynchronously(
-            PGM.get(), match::destroy, Config.Experiments.get().getMatchDestroySeconds() * 20);
+        .getAsyncExecutor()
+        .schedule(
+            match::destroy, Config.Experiments.get().getMatchDestroySeconds(), TimeUnit.SECONDS);
 
     logger.info("Unloaded match-" + match.getId() + " (" + match.getMap().getId() + ")");
   }

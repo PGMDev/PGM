@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.concurrent.TimeUnit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -98,15 +99,9 @@ public class FilterMatchModule implements MatchModule, Listener {
 
     if (next != null) {
       match
-          .getScheduler(MatchScope.RUNNING)
-          .runTaskLater(
-              next.getTime().minus(now),
-              new Runnable() {
-                @Override
-                public void run() {
-                  checkTimeFilters();
-                }
-              });
+          .getExecutor(MatchScope.RUNNING)
+          .schedule(
+              this::checkTimeFilters, next.getTime().minus(now).toMillis(), TimeUnit.MILLISECONDS);
     }
   }
 

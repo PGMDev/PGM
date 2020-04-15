@@ -3,9 +3,13 @@ package tc.oc.util;
 import java.time.Duration;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.TimeUnit;
 
 public class TimeUtils {
+  public static final long TICK = 50;
+  public static final long MAX_TICK = Integer.MAX_VALUE;
   public static final Duration INFINITE_DURATION = ChronoUnit.FOREVER.getDuration();
+
   private static final String DURATION_MINUTES_FORMAT = "%02d:%02d";
   private static final String DURATION_HOURS_FORMAT = "%d:" + DURATION_MINUTES_FORMAT;
 
@@ -56,9 +60,17 @@ public class TimeUtils {
 
   public static long toTicks(Duration duration) {
     try {
-      return (duration.toMillis() + 49) / 50;
+      return duration.toMillis() / TICK;
     } catch (ArithmeticException e) {
-      return Integer.MAX_VALUE;
+      return MAX_TICK;
+    }
+  }
+
+  public static long toTicks(long amount, TimeUnit unit) {
+    try {
+      return unit.toMillis(amount) / TICK;
+    } catch (ArithmeticException e) {
+      return MAX_TICK;
     }
   }
 

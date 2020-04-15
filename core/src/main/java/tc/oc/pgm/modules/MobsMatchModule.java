@@ -34,11 +34,14 @@ public class MobsMatchModule implements MatchModule, Listener {
 
   @EventHandler(ignoreCancelled = true)
   public void checkSpawn(final CreatureSpawnEvent event) {
-    if (!(event.getEntity() instanceof ArmorStand)) {
-      QueryResponse response =
-          this.mobsFilter.query(
-              new EntitySpawnQuery(event, event.getEntity(), event.getSpawnReason()));
-      event.setCancelled(response.isDenied());
+    if (event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.CUSTOM
+        || event.getEntity() instanceof ArmorStand) {
+      return;
     }
+
+    QueryResponse response =
+        this.mobsFilter.query(
+            new EntitySpawnQuery(event, event.getEntity(), event.getSpawnReason()));
+    event.setCancelled(response.isDenied());
   }
 }

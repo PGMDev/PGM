@@ -2,15 +2,13 @@ package tc.oc.pgm.proximity;
 
 import com.google.common.collect.Sets;
 import java.util.Set;
-import org.bukkit.event.HandlerList;
+import java.util.concurrent.TimeUnit;
 import org.bukkit.scheduler.BukkitTask;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 
 public class ProximityAlarmMatchModule implements MatchModule {
-  private static final long ALARM_INTERVAL = 3;
-
   private final Match match;
   protected final Set<ProximityAlarm> proximityAlarms = Sets.newHashSet();
   protected BukkitTask task;
@@ -28,28 +26,16 @@ public class ProximityAlarmMatchModule implements MatchModule {
       this.match.addListener(proximityAlarm, MatchScope.RUNNING);
     }
 
-    this.task =
-        this.match
-            .getScheduler(MatchScope.RUNNING)
-            .runTaskTimer(
-                ALARM_INTERVAL,
-                new Runnable() {
-                  @Override
-                  public void run() {
-                    for (ProximityAlarm proximityAlarm :
-                        ProximityAlarmMatchModule.this.proximityAlarms) {
-                      proximityAlarm.showAlarm();
-                    }
-                  }
-                });
-  }
-
-  @Override
-  public void disable() {
-    this.task.cancel();
-
-    for (ProximityAlarm proximityAlarm : this.proximityAlarms) {
-      HandlerList.unregisterAll(proximityAlarm);
-    }
+    match
+        .getExecutor(MatchScope.RUNNING)
+        .scheduleWithFixedDelay(
+            () -> {
+              for (ProximityAlarm proximityAlarm : ProximityAlarmMatchModule.this.proximityAlarms) {
+                proximityAlarm.showAlarm();
+              }
+            },
+            0,
+            1,
+            TimeUnit.SECONDS);
   }
 }
