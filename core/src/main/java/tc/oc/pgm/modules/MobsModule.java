@@ -41,7 +41,7 @@ public class MobsModule implements MapModule {
         throws InvalidXMLException {
       FilterParser filterParser = factory.getFilters();
       Element mobsEl = doc.getRootElement().getChild("mobs");
-      Filter mobsFilter = StaticFilter.DENY;
+      Filter mobsFilter = null;
       if (mobsEl != null) {
         if (factory.getProto().isNoOlderThan(MapProtos.FILTER_FEATURES)) {
           mobsFilter = filterParser.parseRequiredFilterProperty(mobsEl, "filter");
@@ -52,7 +52,7 @@ public class MobsModule implements MapModule {
           }
         }
       }
-      return new MobsModule(mobsFilter);
+      return mobsFilter == null ? null : new MobsModule(mobsFilter);
     }
   }
 }
