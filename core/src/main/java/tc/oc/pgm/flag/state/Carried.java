@@ -306,13 +306,10 @@ public class Carried extends Spawned implements Missing {
       event.setCurrentItem(null);
       this.flag
           .getMatch()
-          .getScheduler(MatchScope.RUNNING)
-          .runTask(
-              new Runnable() {
-                @Override
-                public void run() {
-                  if (isCurrent()) dropFlag();
-                }
+          .getExecutor(MatchScope.RUNNING)
+          .execute(
+              () -> {
+                if (isCurrent()) dropFlag();
               });
     }
   }

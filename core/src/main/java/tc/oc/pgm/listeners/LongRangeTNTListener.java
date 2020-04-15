@@ -1,6 +1,7 @@
 package tc.oc.pgm.listeners;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import org.bukkit.Effect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -19,11 +20,11 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.NameTagVisibility;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.tracker.Trackers;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.ViaUtils;
 import tc.oc.util.bukkit.nms.NMSHacks;
 
@@ -216,14 +217,14 @@ public class LongRangeTNTListener implements Listener {
     }
   }
 
-  private final Plugin plugin;
+  private final PGM plugin;
 
   private final Slot[] slots = new Slot[MAX_FAKE_TNT];
 
   private final Map<Player, View> viewsByPlayer = new HashMap<>();
   private final Map<TNTPrimed, TNT> tntByEntity = new HashMap<>();
 
-  public LongRangeTNTListener(Plugin plugin) {
+  public LongRangeTNTListener(PGM plugin) {
     this.plugin = plugin;
 
     for (int i = 0; i < slots.length; i++) {
@@ -231,18 +232,8 @@ public class LongRangeTNTListener implements Listener {
     }
 
     this.plugin
-        .getServer()
-        .getScheduler()
-        .runTaskTimer(
-            this.plugin,
-            new Runnable() {
-              @Override
-              public void run() {
-                tick();
-              }
-            },
-            0,
-            1);
+        .getExecutor()
+        .scheduleWithFixedDelay(this::tick, 0, TimeUtils.TICK, TimeUnit.MILLISECONDS);
   }
 
   public void tick() {

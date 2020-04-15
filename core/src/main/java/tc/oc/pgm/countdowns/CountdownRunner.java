@@ -3,16 +3,16 @@ package tc.oc.pgm.countdowns;
 import com.google.common.base.Preconditions;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.util.ClassLogger;
 import tc.oc.util.TimeUtils;
-import tc.oc.util.bukkit.Scheduler;
 
 public class CountdownRunner extends BukkitRunnable {
 
@@ -30,7 +30,7 @@ public class CountdownRunner extends BukkitRunnable {
   // The remaining seconds that will be passed to onTick for the next cycle
   private long secondsRemaining;
 
-  private BukkitTask task = null;
+  private Future<?> task = null;
 
   public CountdownRunner(@Nonnull Match match, Logger parentLogger, @Nonnull Countdown countdown) {
     Preconditions.checkNotNull(match, "match");
@@ -70,7 +70,7 @@ public class CountdownRunner extends BukkitRunnable {
       this.secondsRemaining = remaining.getSeconds();
       this.countdown.onStart(remaining, this.getTotalTime());
 
-      this.task = this.getScheduler().runTask(this);
+      this.task = match.getExecutor(MatchScope.LOADED).submit(this);
     }
 
     return this;
@@ -90,13 +90,9 @@ public class CountdownRunner extends BukkitRunnable {
 
   protected void stop() {
     if (this.task != null) {
-      this.task.cancel();
+      this.task.cancel(true);
       this.task = null;
     }
-  }
-
-  protected Scheduler getScheduler() {
-    return match.getScheduler(MatchScope.LOADED);
   }
 
   public @Nullable Instant getStart() {
@@ -132,8 +128,7 @@ public class CountdownRunner extends BukkitRunnable {
 
     if (this.secondsRemaining >= 0) {
       // If there are cycles left, schedule the next run
-      long ticks = ticksRemaining - this.secondsRemaining * 20;
-      this.task = this.getScheduler().runTaskLater(ticks < 1 ? 1 : ticks, this);
+      this.task = match.getExecutor(MatchScope.LOADED).schedule(this, 1, TimeUnit.SECONDS);
     } else {
       // Otherwise, finish the countdown
       logger.fine("Ending countdown " + countdown);

@@ -2,6 +2,7 @@ package tc.oc.pgm.tracker.trackers;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.Location;
@@ -27,6 +28,7 @@ import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.FallState;
 import tc.oc.pgm.tracker.info.GenericFallInfo;
 import tc.oc.util.ClassLogger;
+import tc.oc.util.TimeUtils;
 import tc.oc.util.bukkit.material.Materials;
 
 /** Tracks the state of falls caused by other players and resolves the damage caused by them. */
@@ -120,16 +122,15 @@ public class FallTracker implements Listener, DamageResolver {
 
   void scheduleCheckFallTimeout(final FallState fall, final long delay) {
     match
-        .getScheduler(MatchScope.RUNNING)
-        .runTaskLater(
-            delay + 1,
-            new Runnable() {
-              public void run() {
-                if (!fall.isEnded) {
-                  checkFallTimeout(fall);
-                }
+        .getExecutor(MatchScope.RUNNING)
+        .schedule(
+            () -> {
+              if (!fall.isEnded) {
+                checkFallTimeout(fall);
               }
-            });
+            },
+            (delay + 1) * TimeUtils.TICK,
+            TimeUnit.MILLISECONDS);
   }
 
   /**

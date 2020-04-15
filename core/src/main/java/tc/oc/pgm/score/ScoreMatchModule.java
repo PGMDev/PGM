@@ -176,15 +176,12 @@ public class ScoreMatchModule implements MatchModule, Listener {
           && box.getRegion().contains(player.getBukkit())
           && box.canScore(player.getParticipantState())) {
         match
-            .getScheduler(MatchScope.RUNNING)
-            .runTask(
-                new Runnable() {
-                  @Override
-                  public void run() {
-                    if (player.getBukkit().isOnline()) {
-                      double points = redeemItems(box, player.getInventory());
-                      ScoreMatchModule.this.playerScore(box, player, points);
-                    }
+            .getExecutor(MatchScope.RUNNING)
+            .execute(
+                () -> {
+                  if (player.getBukkit().isOnline()) {
+                    double points = redeemItems(box, player.getInventory());
+                    ScoreMatchModule.this.playerScore(box, player, points);
                   }
                 });
       }

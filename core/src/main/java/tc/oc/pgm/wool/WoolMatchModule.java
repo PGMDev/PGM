@@ -5,6 +5,7 @@ import com.google.common.collect.Multimap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -58,7 +59,7 @@ public class WoolMatchModule implements MatchModule, Listener {
   // layout of the wools in the inventory. This is used to refill the container with wools.
   private final Map<Inventory, Map<Integer, ItemStack>> woolChests = new HashMap<>();
 
-  private static final long REFILL_INTERVAL_TICKS = 600;
+  private static final int REFILL_INTERVAL = 30; // seconds
 
   public WoolMatchModule(Match match, Multimap<Team, MonumentWool> wools) {
     this.match = match;
@@ -68,8 +69,9 @@ public class WoolMatchModule implements MatchModule, Listener {
   @Override
   public void enable() {
     match
-        .getScheduler(MatchScope.RUNNING)
-        .runTaskTimer(0, REFILL_INTERVAL_TICKS, WoolMatchModule.this::refillOneWoolPerContainer);
+        .getExecutor(MatchScope.RUNNING)
+        .scheduleWithFixedDelay(
+            this::refillOneWoolPerContainer, 0, REFILL_INTERVAL, TimeUnit.SECONDS);
   }
 
   public Multimap<Team, MonumentWool> getWools() {

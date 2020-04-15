@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -65,8 +66,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
 
   public static final Duration TICK = Duration.ofMillis(50);
 
-  protected final HashMap<String, InventoryTrackerEntry> monitoredInventories =
-      new HashMap<String, InventoryTrackerEntry>();
+  protected final HashMap<String, InventoryTrackerEntry> monitoredInventories = new HashMap<>();
   protected final HashMap<String, Instant> updateQueue = Maps.newHashMap();
 
   public static int getInventoryPreviewSlot(int inventorySlot) {
@@ -85,26 +85,25 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
   public ViewInventoryMatchModule(Match match) {
     this.match = match;
     match
-        .getScheduler(MatchScope.RUNNING)
-        .runTaskTimer(
-            Duration.ofSeconds(1),
-            () -> {
-              if (ViewInventoryMatchModule.this.updateQueue.isEmpty()) return;
+        .getExecutor(MatchScope.RUNNING)
+        .scheduleWithFixedDelay(this::checkAllMonitoredInventories, 0, 1, TimeUnit.SECONDS);
+  }
 
-              for (Iterator<Map.Entry<String, Instant>> iterator =
-                      ViewInventoryMatchModule.this.updateQueue.entrySet().iterator();
-                  iterator.hasNext(); ) {
-                Map.Entry<String, Instant> entry = iterator.next();
-                if (entry.getValue().isAfter(Instant.now())) continue;
+  private void checkAllMonitoredInventories() {
+    if (updateQueue.isEmpty()) return;
 
-                Player player = Bukkit.getPlayerExact(entry.getKey());
-                if (player != null) {
-                  ViewInventoryMatchModule.this.checkMonitoredInventories(player);
-                }
+    for (Iterator<Map.Entry<String, Instant>> iterator = updateQueue.entrySet().iterator();
+        iterator.hasNext(); ) {
+      Map.Entry<String, Instant> entry = iterator.next();
+      if (entry.getValue().isAfter(Instant.now())) continue;
 
-                iterator.remove();
-              }
-            });
+      Player player = Bukkit.getPlayerExact(entry.getKey());
+      if (player != null) {
+        checkMonitoredInventories(player);
+      }
+
+      iterator.remove();
+    }
   }
 
   @EventHandler(ignoreCancelled = true)

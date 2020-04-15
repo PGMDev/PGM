@@ -3,6 +3,8 @@ package tc.oc.pgm.tablist;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Map;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,7 +13,6 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitTask;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.Contributor;
@@ -44,7 +45,7 @@ public class MatchTabManager extends TabManager implements Listener {
   private final Map<Match, FreeForAllTabEntry> freeForAllEntries =
       new DefaultMapAdapter<>(new FreeForAllTabEntry.Factory(), true);
 
-  private BukkitTask renderTask;
+  private Future<?> renderTask;
   private PlayerOrderFactory playerOrderFactory;
 
   public MatchTabManager(Plugin plugin) {
@@ -54,7 +55,7 @@ public class MatchTabManager extends TabManager implements Listener {
 
   public void disable() {
     if (this.renderTask != null) {
-      this.renderTask.cancel();
+      this.renderTask.cancel(true);
       this.renderTask = null;
     }
 
@@ -75,10 +76,9 @@ public class MatchTabManager extends TabManager implements Listener {
             }
           };
       this.renderTask =
-          this.getPlugin()
-              .getServer()
-              .getScheduler()
-              .runTaskLater(this.getPlugin(), render, Config.Experiments.get().getTabRenderTicks());
+          PGM.get()
+              .getExecutor()
+              .schedule(render, Config.Experiments.get().getTabRenderSeconds(), TimeUnit.SECONDS);
     }
   }
 

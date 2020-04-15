@@ -16,13 +16,16 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerResetEvent;
 import tc.oc.util.bukkit.OnlinePlayerMapAdapter;
 
 @ListenerScope(MatchScope.RUNNING)
-public class DoubleJumpMatchModule implements MatchModule, Listener {
+public class DoubleJumpMatchModule implements MatchModule, Listener, Tickable {
+
   private class Jumper {
     final Player player;
     final DoubleJumpKit kit;
@@ -44,23 +47,15 @@ public class DoubleJumpMatchModule implements MatchModule, Listener {
   }
 
   @Override
-  public void enable() {
-    match
-        .getScheduler(MatchScope.LOADED)
-        .runTaskTimer(
-            1,
-            new Runnable() {
-              public void run() {
-                for (Map.Entry<Player, Jumper> entry : jumpers.entrySetCopy()) {
-                  Player player = entry.getKey();
-                  Jumper jumper = entry.getValue();
-                  if (player.isOnGround() || jumper.kit.rechargeInAir || jumper.charge > 0f) {
-                    setCharge(jumper, jumper.charge + jumper.kit.chargePerTick());
-                    refreshJump(player);
-                  }
-                }
-              }
-            });
+  public void tick(Match match, Tick tick) {
+    for (Map.Entry<Player, Jumper> entry : jumpers.entrySetCopy()) {
+      Player player = entry.getKey();
+      Jumper jumper = entry.getValue();
+      if (player.isOnGround() || jumper.kit.rechargeInAir || jumper.charge > 0f) {
+        setCharge(jumper, jumper.charge + jumper.kit.chargePerTick());
+        refreshJump(player);
+      }
+    }
   }
 
   @Override

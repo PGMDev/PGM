@@ -3,6 +3,7 @@ package tc.oc.pgm.api.match;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Random;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
@@ -27,7 +28,6 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.features.MatchFeatureContext;
 import tc.oc.pgm.filters.query.Query;
-import tc.oc.util.bukkit.Scheduler;
 import tc.oc.util.bukkit.chat.MultiAudience;
 
 /**
@@ -184,15 +184,15 @@ public interface Match extends MatchPlayerResolver, MultiAudience, ModuleContext
   }
 
   /**
-   * Get a reusable {@link Scheduler} that is bound to a {@link MatchScope}.
+   * Get a task scheduler.
    *
    * <p>Once the {@link Match} exits the given {@link MatchScope}, all tasks scheduled for that
-   * {@link MatchScope} are cancelled and the {@link Scheduler} rejects any new tasks.
+   * {@link MatchScope} are cancelled and the scheduler rejects any new tasks.
    *
-   * @param scope The {@link MatchScope} to bind tasks to.
-   * @return The {@link MatchScope}-bound {@link Scheduler}.
+   * @param scope A match scope.
+   * @return A scheduler.
    */
-  Scheduler getScheduler(MatchScope scope);
+  ScheduledExecutorService getExecutor(MatchScope scope);
 
   /**
    * Sends an {@link Event} to the {@link Bukkit} event-bus.

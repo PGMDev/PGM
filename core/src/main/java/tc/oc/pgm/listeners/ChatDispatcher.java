@@ -333,9 +333,9 @@ public class ChatDispatcher implements Listener {
     final String message = text.trim();
 
     if (sender != null) {
-      Bukkit.getScheduler()
-          .runTaskAsynchronously(
-              PGM.get(),
+      PGM.get()
+          .getAsyncExecutor()
+          .execute(
               () -> {
                 final AsyncPlayerChatEvent event =
                     new AsyncPlayerChatEvent(
