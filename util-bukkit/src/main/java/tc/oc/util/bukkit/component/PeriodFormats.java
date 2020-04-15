@@ -34,6 +34,22 @@ public class PeriodFormats {
     }
   }
 
+  private static long periodAmount(TemporalUnit unit, Duration duration) {
+    if (unit == ChronoUnit.DAYS) {
+      return duration.toDays();
+    } else if (unit == ChronoUnit.HOURS) {
+      return duration.toHours();
+    } else if (unit == ChronoUnit.MINUTES) {
+      return duration.toMinutes();
+    } else if (unit == ChronoUnit.SECONDS) {
+      return duration.getSeconds();
+    } else if (unit == ChronoUnit.MILLIS) {
+      return duration.toMillis();
+    } else {
+      throw new IllegalArgumentException("Unsupported time unit: " + unit);
+    }
+  }
+
   /**
    * Return the key for the localized description of the given time period, which must contain
    * exactly one field.
@@ -75,7 +91,7 @@ public class PeriodFormats {
     long ms = duration.toMillis();
     for (TemporalUnit unit : UNITS) {
       if (ms % unit.getDuration().toMillis() == 0) {
-        return formatPeriod(unit, duration.get(unit));
+        return formatPeriod(unit, periodAmount(unit, duration));
       }
     }
     throw new IllegalStateException();
@@ -91,7 +107,7 @@ public class PeriodFormats {
     }
 
     for (TemporalUnit unit : UNITS) {
-      long quantity = duration.get(unit);
+      long quantity = periodAmount(unit, duration);
       if (quantity >= minQuantity) {
         return formatPeriod(unit, quantity);
       }
