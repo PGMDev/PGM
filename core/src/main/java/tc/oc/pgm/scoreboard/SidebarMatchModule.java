@@ -336,7 +336,9 @@ public class SidebarMatchModule implements MatchModule, Listener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
-  public void matchEnd(MatchFinishEvent event) { renderSidebarDebounce();}
+  public void matchEnd(MatchFinishEvent event) {
+    renderSidebarDebounce();
+  }
 
   private String renderGoal(Goal<?> goal, @Nullable Competitor competitor, Party viewingParty) {
     StringBuilder sb = new StringBuilder(" ");
