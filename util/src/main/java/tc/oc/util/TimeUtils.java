@@ -38,19 +38,23 @@ public class TimeUtils {
       return INFINITE_DURATION;
     }
 
-    text = text.toLowerCase();
-
     int index = text.indexOf("d"); // days
+    String format;
     if (index > 0) {
-      text = "p" + text.substring(0, ++index) + "t" + text.substring(++index);
+      format = "p" + text.substring(0, ++index) + "t" + text.substring(++index);
     } else {
-      text = "pt" + text;
+      format = "pt" + text;
     }
 
     try {
-      return Duration.parse(text);
-    } catch (DateTimeParseException e) {
-      throw new IllegalArgumentException("Unable to parse '" + text + "' into a duration", e);
+      return Duration.parse(format);
+    } catch (DateTimeParseException e1) {
+      // Fallback to parsing as a fractional number of seconds
+      try {
+        return Duration.ofMillis((long) Double.parseDouble(text) * 1000);
+      } catch (NumberFormatException e2) {
+        throw new IllegalArgumentException("Unable to parse '" + text + "' into a duration", e1);
+      }
     }
   }
 
