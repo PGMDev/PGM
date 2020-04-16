@@ -99,7 +99,7 @@ experiments:
   match-preload-seconds: 3 # Number of seconds to pre-load a match and its world before cycle
   match-destroy-seconds: 10 # Number of seconds to wait before unloading a world after the match has unloaded
   match-teleports-per-second: 10 # Number of players to teleport per second to a new match on cycle
-  tab-render-ticks: 10 # Number of ticks before invalidating the tab list
+  tab-render-seconds: 1 # Number of seconds before invalidating the tab list
   unload-non-match-worlds: true # Unload any worlds that are not associated with a match
 
 sidebar:
@@ -109,7 +109,7 @@ sidebar:
   bottom: ""
   # If the sidebar message should overwrite lines in the sidebar when it is full
   overwrite: false
-  
+
 # Note: All moderation fields may be formatted with '&' color codes
 moderation:
   # Name of server to display on kick screen header
@@ -117,10 +117,10 @@ moderation:
 
   # Link to a rules website to display on kick screens
   rules-link: ''
-    
+
   # Last message line shown on ban/temp-ban kick screen
   appeal-msg: ''
-  
+
 fireworks:
   # Post-match fireworks fire above the winners of the current match
   post-match: true

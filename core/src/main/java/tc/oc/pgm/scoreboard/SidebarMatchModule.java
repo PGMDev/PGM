@@ -32,6 +32,7 @@ import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchVictoryChangeEvent;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
@@ -331,6 +332,11 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void resultChange(MatchVictoryChangeEvent event) {
+    renderSidebarDebounce();
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void matchEnd(MatchFinishEvent event) {
     renderSidebarDebounce();
   }
 

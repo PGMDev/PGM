@@ -1,14 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <properties>
-        <project.pluginClass>tc.oc.pgm.PGMPlugin</project.pluginClass>
-        <project.pluginSoftDepedencies>[ViaVersion]</project.pluginSoftDepedencies>
+        <project.mainClass>tc.oc.pgm.PGMPlugin</project.mainClass>
     </properties>
 
     <parent>
         <relativePath>../pom.xml</relativePath>
-        <version>1.8-SNAPSHOT</version>
+        <version>0.8-SNAPSHOT</version>
         <groupId>tc.oc.pgm</groupId>
         <artifactId>PGM</artifactId>
     </parent>
@@ -22,46 +22,16 @@
         <dependency>
             <groupId>tc.oc.pgm</groupId>
             <artifactId>util-bukkit</artifactId>
-            <version>1.8-SNAPSHOT</version>
-        </dependency>
-
-        <!-- Command framework for developing simple commands -->
-        <!-- TODO: Move to github.com/EngineHub/Piston -->
-        <dependency>
-            <groupId>app.ashcon.intake</groupId>
-            <artifactId>intake-bukkit</artifactId>
-            <version>1.1-SNAPSHOT</version>
-            <!-- FIXME: Intake does not properly shade :( -->
-            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
+            <version>0.8-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>
+        <finalName>PGM-${project.version}-${git.commit.id.abbrev}</finalName>
         <resources>
-            <!-- Include the required "plugin.yml" and optional "config.yml" for Bukkit -->
+            <!-- Include the required plugin.yml and config.yml for Bukkit -->
             <resource>
-                <targetPath>.</targetPath>
                 <directory>${basedir}/src/main/resources</directory>
-                <includes>
-                    <include>**/*.yml</include>
-                </includes>
-                <!-- Allows for variable substitution, see "plugin.yml" for an example -->
                 <filtering>true</filtering>
-            </resource>
-
-            <!-- Include a fallback set of maps that can be played "out-of-the-box" -->
-            <resource>
-                <targetPath>.</targetPath>
-                <directory>${basedir}/src/main/resources</directory>
-                <includes>
-                    <include>**/*.zip</include>
-                </includes>
-                <!-- Explicitly disable filtering as it will corrupt the .zip of maps -->
-                <filtering>false</filtering>
             </resource>
         </resources>
         <plugins>
@@ -73,15 +43,12 @@
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <minimizeJar>true</minimizeJar>
                     <artifactSet>
-                        <excludes>
-                            <exclude>app.ashcon:sportpaper:*</exclude>
-                            <exclude>com.google.guava:guava:*</exclude>
-                            <exclude>com.google.code.findbugs:annotations:*</exclude>
-                            <exclude>net.sf.trove4j:trove4j:*</exclude>
-                            <exclude>org.xerial:sqlite-jdbc:*</exclude>
-                            <exclude>org.checkerframework:checker-qual:*</exclude>
-                            <exclude>net.jcip:jcip-annotations:*</exclude>
-                        </excludes>
+                        <includes>
+                            <include>tc.oc.pgm:*:*</include>
+                            <include>org.jdom:jdom2:*</include>
+                            <include>net.kyori:text-*:*</include>
+                            <include>app.ashcon.intake:intake-*:*</include>
+                        </includes>
                     </artifactSet>
                     <filters>
                         <filter>
@@ -102,7 +69,7 @@
                 </executions>
             </plugin>
 
-            <!-- Generates .zip resource of default maps provided in the maps/ folder -->
+            <!-- Generate a .zip resource of default maps provided in the maps/ folder -->
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.8</version>
@@ -121,10 +88,11 @@
                     </execution>
                     <execution>
                         <id>jar</id>
-                        <phase>install</phase>
+                        <phase>package</phase>
                         <configuration>
                             <target>
-                                <copy file="${basedir}/target/${project.build.finalName}.jar" tofile="../target/PGM-Plugin.jar"/>
+                                <copy file="${basedir}/target/${project.build.finalName}.jar"
+                                      tofile="../target/PGM.jar"/>
                             </target>
                         </configuration>
                         <goals>

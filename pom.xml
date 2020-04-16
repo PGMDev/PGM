@@ -5,27 +5,30 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.author>Ashcon Partovi</project.author>
     </properties>
 
     <name>PGM</name>
-    <description>The original PvP Game Manager for Minecraft</description>
+    <description>The original PvP Game Manager for Minecraft.</description>
     <inceptionYear>2011</inceptionYear>
 
     <url>https://github.com/Electroid/PGM</url>
+    <issueManagement>
+        <url>https://github.com/Electroid/PGM/issues</url>
+    </issueManagement>
     <scm>
         <connection>scm:git:git://github.com/Electroid/PGM</connection>
     </scm>
 
     <developers>
         <developer>
-            <name>${project.author}</name>
+            <id>electroid</id>
+            <name>Ashcon Partovi</name>
         </developer>
     </developers>
 
     <groupId>tc.oc.pgm</groupId>
     <artifactId>PGM</artifactId>
-    <version>1.8-SNAPSHOT</version>
+    <version>0.8-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -42,7 +45,7 @@
         </repository>
         <repository>
             <id>viaversion-repo</id>
-            <url>https://repo.ashcon.app/content/repositories/viaversion</url>
+            <url>https://repo.viaversion.com</url>
         </repository>
     </repositories>
 
@@ -52,6 +55,33 @@
             <url>https://repo.ashcon.app/content/repositories/snapshots</url>
         </repository>
     </distributionManagement>
+
+    <dependencies>
+        <!-- Google's common libraries, must be same version as the Minecraft server -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>17.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Provides annotations such as @Nullable -->
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>annotations</artifactId>
+            <version>3.0.1u2</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Compile-time library used to generate "Delegate" classes -->
+        <!-- TODO: remove after deprecation of tc.oc.util.bukkit.Component -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.12</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
@@ -79,7 +109,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Modifies code to be properly formatted with Google's code style -->
+            <!-- Validates that code is properly formatted with Google's code style -->
             <plugin>
                 <groupId>com.coveo</groupId>
                 <artifactId>fmt-maven-plugin</artifactId>
@@ -90,10 +120,22 @@
                 <executions>
                     <execution>
                         <goals>
-                            <goal>format</goal>
+                            <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <!-- Prevent .zip resources from getting filtered and corrupted -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <nonFilteredFileExtensions>
+                        <nonFilteredFileExtension>zip</nonFilteredFileExtension>
+                    </nonFilteredFileExtensions>
+                </configuration>
             </plugin>
         </plugins>
     </build>

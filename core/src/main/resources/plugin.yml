@@ -1,7 +1,7 @@
 name: PGM
-description: ${description}
-main: ${project.pluginClass}
-softdepend: ${project.pluginSoftDepedencies}
-version: ${version}-${git.commit.id.abbrev}
-website: ${url}
-author: ${project.author}
+softdepend: [ViaVersion]
+author: Ashcon Partovi
+description: ${project.parent.description}
+main: ${project.mainClass}
+version: ${project.version} (git-${git.commit.id.abbrev})
+website: ${project.parent.url}
