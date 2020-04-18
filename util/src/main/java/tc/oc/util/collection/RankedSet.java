@@ -144,4 +144,18 @@ public class RankedSet<E> extends ForwardingSet<E> {
     invalidateRanking();
     super.clear();
   }
+
+  @Override
+  public <T> T[] toArray(T[] array) {
+    Iterator<E> iterator = iterator();
+    for (int i = 0; i < array.length && iterator.hasNext(); i++) {
+      array[i] = (T) iterator.next();
+    }
+    return array;
+  }
+
+  @Override
+  public Object[] toArray() {
+    return toArray(new Object[size()]);
+  }
 }
