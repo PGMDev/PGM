@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -119,7 +120,7 @@ public class MatchImpl implements Match {
   private final Map<UUID, MatchPlayer> players;
   private final Map<MatchPlayer, Party> partyChanges;
   private final Set<Party> parties;
-  private final Set<VictoryCondition> victory;
+  private final RankedSet<VictoryCondition> victory;
   private final RankedSet<Competitor> competitors;
   private final Observers observers;
   private final MatchFeatureContext features;
@@ -152,7 +153,7 @@ public class MatchImpl implements Match {
     this.players = new ConcurrentHashMap<>();
     this.partyChanges = new WeakHashMap<>();
     this.parties = new LinkedHashSet<>();
-    this.victory = new LinkedHashSet<>();
+    this.victory = new RankedSet<>(Comparator.comparing(VictoryCondition::getPriority));
     this.competitors =
         new RankedSet<>(
             (Competitor a, Competitor b) -> {
@@ -200,10 +201,11 @@ public class MatchImpl implements Match {
           callEvent(new MatchStartEvent(this));
           break;
         case FINISHED:
-          calculateVictory();
+          calculateVictory(); // Winners must be calculated and saved prior to cancel.
+          Set<Competitor> winners = competitors.getRank(0);
           getExecutor(MatchScope.RUNNING).shutdownNow();
           getCountdown().cancelAll();
-          callEvent(new MatchFinishEvent(this, competitors.getRank(0)));
+          callEvent(new MatchFinishEvent(this, winners));
           break;
       }
 
