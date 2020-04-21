@@ -19,7 +19,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
-import tc.oc.util.TimeUtils;
+import tc.oc.pgm.util.TimeUtils;
 
 @ListenerScope(MatchScope.LOADED)
 public class FilterMatchModule implements MatchModule, Listener {

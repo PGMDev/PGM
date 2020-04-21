@@ -8,7 +8,7 @@ import tc.oc.pgm.flag.Net;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 /**
  * Flag is looking for a place to respawn after being captured. This phase can be delayed by a

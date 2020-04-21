@@ -25,7 +25,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.map.contrib.PlayerContributor;
-import tc.oc.util.ClassLogger;
+import tc.oc.pgm.util.ClassLogger;
 
 public class ServerPingDataListener implements Listener {
 

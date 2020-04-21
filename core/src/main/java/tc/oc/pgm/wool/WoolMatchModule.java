@@ -35,10 +35,10 @@ import tc.oc.pgm.goals.Contribution;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.teams.Team;
-import tc.oc.util.bukkit.block.BlockVectors;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.translations.AllTranslations;
+import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.translations.AllTranslations;
 
 @ListenerScope(MatchScope.RUNNING)
 public class WoolMatchModule implements MatchModule, Listener {

@@ -46,10 +46,10 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.gamerules.GameRule;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.TimeLockModule;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.translations.AllTranslations;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.translations.AllTranslations;
 
 public class PGMListener implements Listener {
   private final Plugin parent;

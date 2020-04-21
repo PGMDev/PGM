@@ -1,9 +1,9 @@
 package tc.oc.pgm.goals;
 
 import org.jdom2.Element;
-import tc.oc.util.xml.InvalidXMLException;
-import tc.oc.util.xml.Node;
-import tc.oc.util.xml.XMLUtils;
+import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ProximityMetric {
   public static enum Type {

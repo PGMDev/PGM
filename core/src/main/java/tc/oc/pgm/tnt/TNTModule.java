@@ -19,10 +19,10 @@ import tc.oc.pgm.regions.EverywhereRegion;
 import tc.oc.pgm.regions.RFAScope;
 import tc.oc.pgm.regions.RegionFilterApplication;
 import tc.oc.pgm.regions.RegionModule;
-import tc.oc.util.TimeUtils;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.xml.InvalidXMLException;
-import tc.oc.util.xml.XMLUtils;
+import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.XMLUtils;
 
 public class TNTModule implements MapModule {
   private static final Collection<MapTag> TAGS =

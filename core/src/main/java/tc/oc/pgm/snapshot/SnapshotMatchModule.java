@@ -22,7 +22,7 @@ import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.renewable.RenewableMatchModule;
-import tc.oc.util.bukkit.chunk.ChunkVector;
+import tc.oc.pgm.util.chunk.ChunkVector;
 
 /**
  * Keeps a snapshot of the block state of the entire match world at build time, using a

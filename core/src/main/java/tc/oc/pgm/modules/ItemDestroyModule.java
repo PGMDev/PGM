@@ -10,9 +10,9 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.BlockFilter;
-import tc.oc.util.xml.InvalidXMLException;
-import tc.oc.util.xml.Node;
-import tc.oc.util.xml.XMLUtils;
+import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ItemDestroyModule implements MapModule {
   protected final Set<BlockFilter> itemsToRemove;

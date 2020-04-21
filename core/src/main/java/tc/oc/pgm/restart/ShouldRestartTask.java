@@ -3,8 +3,8 @@ package tc.oc.pgm.restart;
 import java.time.Duration;
 import java.time.Instant;
 import org.bukkit.plugin.Plugin;
-import tc.oc.util.TimeUtils;
-import tc.oc.util.bukkit.ConfigUtils;
+import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.bukkit.ConfigUtils;
 
 /**
  * Periodically check if the server has exceeded the maximum uptime or memory usage limits and if so

@@ -14,7 +14,7 @@ import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.api.region.RegionDefinition;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
-import tc.oc.util.xml.Node;
+import tc.oc.pgm.util.xml.Node;
 
 public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> implements Region {
 

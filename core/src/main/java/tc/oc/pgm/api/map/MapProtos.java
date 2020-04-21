@@ -1,6 +1,6 @@
 package tc.oc.pgm.api.map;
 
-import tc.oc.util.Version;
+import tc.oc.pgm.util.Version;
 
 /** Various {@link MapInfo#getProto()} versions that introduce breaking syntax changes. */
 public interface MapProtos {

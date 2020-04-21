@@ -49,8 +49,8 @@ import tc.oc.pgm.filters.query.PlayerBlockQuery;
 import tc.oc.pgm.filters.query.Queries;
 import tc.oc.pgm.flag.event.FlagPickupEvent;
 import tc.oc.pgm.util.MatchPlayers;
-import tc.oc.util.bukkit.block.BlockStates;
-import tc.oc.util.bukkit.block.BlockVectors;
+import tc.oc.pgm.util.block.BlockStates;
+import tc.oc.pgm.util.block.BlockVectors;
 
 @ListenerScope(MatchScope.LOADED)
 public class RegionMatchModule implements MatchModule, Listener {

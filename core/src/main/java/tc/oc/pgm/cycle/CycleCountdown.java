@@ -9,9 +9,9 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.countdowns.MatchCountdown;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 public class CycleCountdown extends MatchCountdown {
 

@@ -19,10 +19,10 @@ import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.api.Permissions;
-import tc.oc.util.ClassLogger;
-import tc.oc.util.bukkit.block.BlockVectorSet;
-import tc.oc.util.bukkit.nms.NMSHacks;
-import tc.oc.util.collection.DefaultMapAdapter;
+import tc.oc.pgm.util.ClassLogger;
+import tc.oc.pgm.util.block.BlockVectorSet;
+import tc.oc.pgm.util.collection.DefaultMapAdapter;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public class WorldProblemListener implements Listener {
 

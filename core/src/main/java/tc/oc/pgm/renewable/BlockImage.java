@@ -8,7 +8,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 import tc.oc.pgm.regions.Bounds;
-import tc.oc.util.collection.DefaultMapAdapter;
+import tc.oc.pgm.util.collection.DefaultMapAdapter;
 
 /**
  * Array-backed volume of block states (id:data pairs) with fixed size and location. All positions

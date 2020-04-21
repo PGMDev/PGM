@@ -10,10 +10,10 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.translations.AllTranslations;
-import tc.oc.util.bukkit.translations.TranslationUtils;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.translations.TranslationUtils;
 
 public class SettingCommands {
 

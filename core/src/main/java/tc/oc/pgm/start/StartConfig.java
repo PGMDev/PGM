@@ -4,7 +4,7 @@ import java.time.Duration;
 import javax.annotation.Nullable;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
-import tc.oc.util.bukkit.ConfigUtils;
+import tc.oc.pgm.util.bukkit.ConfigUtils;
 
 public class StartConfig {
   private final ConfigurationSection config;

@@ -9,9 +9,9 @@ import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
 import tc.oc.pgm.api.tracker.info.RangedInfo;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.Components;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.Components;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 public class ProjectileInfo implements PhysicalInfo, DamageInfo, RangedInfo {
 

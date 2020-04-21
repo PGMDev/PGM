@@ -14,10 +14,10 @@ import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.goals.ProximityGoalDefinition;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.teams.TeamFactory;
-import tc.oc.util.bukkit.BukkitUtils;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.ComponentUtils;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.ComponentUtils;
+import tc.oc.pgm.util.component.types.PersonalizedText;
 
 @FeatureInfo(name = "wool")
 public class MonumentWoolFactory extends ProximityGoalDefinition {

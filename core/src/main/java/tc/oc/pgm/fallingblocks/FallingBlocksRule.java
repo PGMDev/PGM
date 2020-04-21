@@ -6,7 +6,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.filters.query.BlockQuery;
-import tc.oc.util.bukkit.material.Materials;
+import tc.oc.pgm.util.material.Materials;
 
 public class FallingBlocksRule {
   public static final int DEFAULT_DELAY = 2;

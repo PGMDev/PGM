@@ -19,7 +19,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DestroyableMatchModule implements MatchModule, Listener {

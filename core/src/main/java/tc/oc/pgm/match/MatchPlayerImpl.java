@@ -42,15 +42,15 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.PlayerResetEvent;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.WalkSpeedKit;
-import tc.oc.util.ClassLogger;
-import tc.oc.util.TimeUtils;
-import tc.oc.util.bukkit.ViaUtils;
-import tc.oc.util.bukkit.chat.PlayerAudience;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.types.PersonalizedPlayer;
-import tc.oc.util.bukkit.named.NameStyle;
-import tc.oc.util.bukkit.nms.DeathOverride;
-import tc.oc.util.bukkit.nms.NMSHacks;
+import tc.oc.pgm.util.ClassLogger;
+import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.bukkit.ViaUtils;
+import tc.oc.pgm.util.chat.PlayerAudience;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.types.PersonalizedPlayer;
+import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.nms.DeathOverride;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<MatchPlayer> {
 

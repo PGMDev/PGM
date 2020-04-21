@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.util.bukkit.translations.AllTranslations;
+import tc.oc.pgm.util.translations.AllTranslations;
 
 public class TeamMatchModuleProvider implements BukkitProvider<TeamMatchModule> {
 

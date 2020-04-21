@@ -4,9 +4,9 @@ import java.text.Normalizer;
 import java.util.Collection;
 import javax.annotation.Nullable;
 import org.bukkit.command.CommandSender;
-import tc.oc.util.Version;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.named.MapNameStyle;
+import tc.oc.pgm.util.Version;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.named.MapNameStyle;
 
 /** Essential information about a map. */
 public interface MapInfo extends Comparable<MapInfo>, Cloneable {

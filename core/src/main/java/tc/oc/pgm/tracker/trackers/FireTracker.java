@@ -21,7 +21,7 @@ import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.BlockInfo;
 import tc.oc.pgm.tracker.info.EntityInfo;
 import tc.oc.pgm.tracker.info.FireInfo;
-import tc.oc.util.bukkit.material.Materials;
+import tc.oc.pgm.util.material.Materials;
 
 /**
  * - Updates the state of owned fire and lava blocks from events - Tracks burning entities that were

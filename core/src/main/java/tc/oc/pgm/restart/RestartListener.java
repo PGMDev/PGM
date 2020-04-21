@@ -16,7 +16,7 @@ import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.countdowns.SingleCountdownContext;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.util.ClassLogger;
+import tc.oc.pgm.util.ClassLogger;
 
 public class RestartListener implements Listener {
 

@@ -3,7 +3,7 @@ package tc.oc.pgm.api.event;
 import javax.annotation.Nullable;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
-import tc.oc.util.bukkit.component.Component;
+import tc.oc.pgm.util.component.Component;
 
 /** Extension of {@link Cancellable} to allow for {@link Component} error messages. */
 public abstract class ExtendedCancellable extends Event implements Cancellable {

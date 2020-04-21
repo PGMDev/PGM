@@ -18,10 +18,10 @@ import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.FlagMatchModule;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.event.FlagPickupEvent;
-import tc.oc.util.bukkit.block.BlockStates;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.material.Materials;
-import tc.oc.util.bukkit.nms.NMSHacks;
+import tc.oc.pgm.util.block.BlockStates;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.material.Materials;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 /** Base class for flag states in which the banner is placed on the ground somewhere as a block */
 public abstract class Uncarried extends Spawned {

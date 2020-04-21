@@ -15,7 +15,7 @@ import tc.oc.pgm.classes.ClassModule;
 import tc.oc.pgm.regions.EmptyRegion;
 import tc.oc.pgm.regions.EverywhereRegion;
 import tc.oc.pgm.teams.TeamModule;
-import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.InvalidXMLException;
 
 public class FilterModule implements MapModule {
 

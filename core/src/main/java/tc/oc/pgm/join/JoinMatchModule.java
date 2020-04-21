@@ -24,9 +24,9 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.match.ObservingParty;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
-import tc.oc.util.bukkit.component.PeriodFormats;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.component.PeriodFormats;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 @ListenerScope(MatchScope.LOADED)
 public class JoinMatchModule implements MatchModule, Listener, JoinHandler {

@@ -38,7 +38,7 @@ import tc.oc.pgm.tracker.info.ExplosionInfo;
 import tc.oc.pgm.tracker.info.FireInfo;
 import tc.oc.pgm.tracker.info.GenericDamageInfo;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
-import tc.oc.util.bukkit.item.Potions;
+import tc.oc.pgm.util.item.Potions;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DamageMatchModule implements MatchModule, Listener {

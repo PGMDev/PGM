@@ -13,7 +13,7 @@ import org.bukkit.util.Vector;
 import tc.oc.pgm.api.filter.query.LocationQuery;
 import tc.oc.pgm.api.region.RegionDefinition;
 import tc.oc.pgm.filters.TypedFilter;
-import tc.oc.util.bukkit.block.BlockVectors;
+import tc.oc.pgm.util.block.BlockVectors;
 
 public abstract class AbstractRegion extends TypedFilter<LocationQuery>
     implements RegionDefinition {

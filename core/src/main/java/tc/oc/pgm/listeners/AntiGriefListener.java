@@ -25,11 +25,11 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.tnt.TNTMatchModule;
 import tc.oc.pgm.tracker.Trackers;
-import tc.oc.util.bukkit.component.ComponentRenderers;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.named.NameStyle;
-import tc.oc.util.bukkit.translations.AllTranslations;
-import tc.oc.util.bukkit.translations.TranslationUtils;
+import tc.oc.pgm.util.component.ComponentRenderers;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.translations.TranslationUtils;
 
 public class AntiGriefListener implements Listener {
 

@@ -11,10 +11,10 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.start.StartCountdown;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
-import tc.oc.util.bukkit.component.ComponentRenderers;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.translations.AllTranslations;
+import tc.oc.pgm.util.component.ComponentRenderers;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.translations.AllTranslations;
 
 public class StartCommands {
 

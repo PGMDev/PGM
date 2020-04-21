@@ -2,7 +2,7 @@ package tc.oc.pgm.api.party;
 
 import java.util.Comparator;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.util.bukkit.component.Component;
+import tc.oc.pgm.util.component.Component;
 
 /**
  * A condition used to decide if a {@link tc.oc.pgm.api.party.Competitor} has won the {@link Match},

@@ -28,10 +28,10 @@ import tc.oc.pgm.join.JoinResult;
 import tc.oc.pgm.join.QueuedParticipants;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
-import tc.oc.util.bukkit.chat.Sound;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.chat.Sound;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 @ListenerScope(MatchScope.LOADED)
 public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler {

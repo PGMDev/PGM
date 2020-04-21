@@ -22,8 +22,8 @@ import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.kits.KitNode;
 import tc.oc.pgm.regions.RegionModule;
-import tc.oc.util.xml.InvalidXMLException;
-import tc.oc.util.xml.XMLUtils;
+import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.XMLUtils;
 
 public class KillRewardModule implements MapModule {
   protected final ImmutableList<KillReward> rewards;

@@ -28,11 +28,11 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.util.bukkit.chat.Sound;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
-import tc.oc.util.bukkit.named.NameStyle;
-import tc.oc.util.collection.DefaultMapAdapter;
+import tc.oc.pgm.util.chat.Sound;
+import tc.oc.pgm.util.collection.DefaultMapAdapter;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.named.NameStyle;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ScoreMatchModule implements MatchModule, Listener {

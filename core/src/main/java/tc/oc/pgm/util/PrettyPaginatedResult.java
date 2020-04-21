@@ -4,8 +4,8 @@ import app.ashcon.intake.CommandException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import tc.oc.util.bukkit.chat.Audience;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.component.types.PersonalizedText;
 
 /**
  * Class used to display a paginated list of items that are formatted

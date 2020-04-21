@@ -4,8 +4,8 @@ import java.time.Duration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchPhase;
 import tc.oc.pgm.countdowns.MatchCountdown;
-import tc.oc.util.bukkit.chat.Sound;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.chat.Sound;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 /** Common base for countdowns leading up to match start */
 public abstract class PreMatchCountdown extends MatchCountdown {

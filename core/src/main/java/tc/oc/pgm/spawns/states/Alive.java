@@ -22,7 +22,7 @@ import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
-import tc.oc.util.bukkit.chat.Sound;
+import tc.oc.pgm.util.chat.Sound;
 
 /** Player is alive and participating */
 public class Alive extends Participating {

@@ -21,9 +21,9 @@ import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalProximityChangeEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
-import tc.oc.util.bukkit.block.BlockVectors;
-import tc.oc.util.bukkit.component.ComponentUtils;
-import tc.oc.util.collection.DefaultMapAdapter;
+import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.collection.DefaultMapAdapter;
+import tc.oc.pgm.util.component.ComponentUtils;
 
 public abstract class ProximityGoal<T extends ProximityGoalDefinition> extends OwnedGoal<T>
     implements Listener {

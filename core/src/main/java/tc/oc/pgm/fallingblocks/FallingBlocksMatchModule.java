@@ -1,6 +1,8 @@
 package tc.oc.pgm.fallingblocks;
 
-import static tc.oc.util.bukkit.block.BlockVectors.*;
+import static tc.oc.pgm.util.block.BlockVectors.blockAt;
+import static tc.oc.pgm.util.block.BlockVectors.encodePos;
+import static tc.oc.pgm.util.block.BlockVectors.neighborPos;
 
 import gnu.trove.iterator.TLongObjectIterator;
 import gnu.trove.map.TLongObjectMap;
@@ -29,8 +31,8 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
-import tc.oc.util.bukkit.material.Materials;
-import tc.oc.util.collection.LongDeque;
+import tc.oc.pgm.util.collection.LongDeque;
+import tc.oc.pgm.util.material.Materials;
 
 @ListenerScope(MatchScope.RUNNING)
 public class FallingBlocksMatchModule implements MatchModule, Listener, Tickable {

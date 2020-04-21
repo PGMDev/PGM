@@ -43,17 +43,17 @@ import tc.oc.pgm.community.events.PlayerPunishmentEvent;
 import tc.oc.pgm.community.modules.FreezeMatchModule;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
-import tc.oc.util.bukkit.chat.Audience;
-import tc.oc.util.bukkit.chat.Sound;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.ComponentRenderers;
-import tc.oc.util.bukkit.component.ComponentUtils;
-import tc.oc.util.bukkit.component.Components;
-import tc.oc.util.bukkit.component.PeriodFormats;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.named.NameStyle;
-import tc.oc.util.xml.XMLUtils;
+import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.chat.Sound;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.ComponentRenderers;
+import tc.oc.pgm.util.component.ComponentUtils;
+import tc.oc.pgm.util.component.Components;
+import tc.oc.pgm.util.component.PeriodFormats;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ModerationCommands implements Listener {
 

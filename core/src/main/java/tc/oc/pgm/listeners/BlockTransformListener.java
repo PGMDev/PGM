@@ -64,10 +64,10 @@ import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.events.PlayerBlockTransformEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.Trackers;
-import tc.oc.util.ClassLogger;
-import tc.oc.util.bukkit.Events;
-import tc.oc.util.bukkit.block.BlockStates;
-import tc.oc.util.bukkit.material.Materials;
+import tc.oc.pgm.util.ClassLogger;
+import tc.oc.pgm.util.block.BlockStates;
+import tc.oc.pgm.util.bukkit.Events;
+import tc.oc.pgm.util.material.Materials;
 
 public class BlockTransformListener implements Listener {
   private static final BlockFace[] NEIGHBORS = {

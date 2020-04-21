@@ -28,13 +28,13 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.Components;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.named.MapNameStyle;
-import tc.oc.util.bukkit.nms.NMSHacks;
-import tc.oc.util.bukkit.translations.AllTranslations;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.Components;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.named.MapNameStyle;
+import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.translations.AllTranslations;
 
 /** Represents a polling process, with a set of options. */
 public class MapPoll {

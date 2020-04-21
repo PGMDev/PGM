@@ -13,7 +13,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.kits.KitModule;
-import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.InvalidXMLException;
 
 public class RegionModule implements MapModule {
   protected final RFAContext rfaContext;

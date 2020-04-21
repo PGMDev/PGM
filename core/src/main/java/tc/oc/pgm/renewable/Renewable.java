@@ -24,12 +24,12 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.snapshot.SnapshotMatchModule;
-import tc.oc.util.ClassLogger;
-import tc.oc.util.bukkit.block.BlockFaces;
-import tc.oc.util.bukkit.block.BlockVectorSet;
-import tc.oc.util.bukkit.block.BlockVectors;
-import tc.oc.util.bukkit.material.MaterialCounter;
-import tc.oc.util.bukkit.nms.NMSHacks;
+import tc.oc.pgm.util.ClassLogger;
+import tc.oc.pgm.util.block.BlockFaces;
+import tc.oc.pgm.util.block.BlockVectorSet;
+import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.material.MaterialCounter;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public class Renewable implements Listener, Tickable {
 

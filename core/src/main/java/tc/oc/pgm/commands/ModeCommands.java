@@ -14,8 +14,8 @@ import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.modes.ModeChangeCountdown;
 import tc.oc.pgm.modes.ModesPaginatedResult;
 import tc.oc.pgm.modes.ObjectiveModesMatchModule;
-import tc.oc.util.TimeUtils;
-import tc.oc.util.bukkit.chat.Audience;
+import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.chat.Audience;
 
 public class ModeCommands {
 

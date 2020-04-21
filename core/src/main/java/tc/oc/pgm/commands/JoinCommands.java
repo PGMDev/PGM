@@ -12,7 +12,7 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.util.bukkit.translations.AllTranslations;
+import tc.oc.pgm.util.translations.AllTranslations;
 
 public class JoinCommands {
 

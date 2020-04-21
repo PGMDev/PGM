@@ -21,7 +21,7 @@
         <!-- Various utility classes for Bukkit -->
         <dependency>
             <groupId>tc.oc.pgm</groupId>
-            <artifactId>util-bukkit</artifactId>
+            <artifactId>util</artifactId>
             <version>0.8-SNAPSHOT</version>
         </dependency>
     </dependencies>
@@ -58,6 +58,20 @@
                             </excludes>
                         </filter>
                     </filters>
+                    <relocations combine.children="append">
+                        <relocation>
+                            <pattern>app.ashcon</pattern>
+                            <shadedPattern>tc.oc.pgm.lib.app.ashcon</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>net.kyori</pattern>
+                            <shadedPattern>tc.oc.pgm.lib.net.kyori</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>org.jdom2</pattern>
+                            <shadedPattern>tc.oc.pgm.lib.org.jdom2</shadedPattern>
+                        </relocation>
+                    </relocations>
                 </configuration>
                 <executions>
                     <execution>

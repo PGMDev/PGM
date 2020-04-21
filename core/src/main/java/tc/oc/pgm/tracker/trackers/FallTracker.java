@@ -27,9 +27,9 @@ import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.FallState;
 import tc.oc.pgm.tracker.info.GenericFallInfo;
-import tc.oc.util.ClassLogger;
-import tc.oc.util.TimeUtils;
-import tc.oc.util.bukkit.material.Materials;
+import tc.oc.pgm.util.ClassLogger;
+import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.material.Materials;
 
 /** Tracks the state of falls caused by other players and resolves the damage caused by them. */
 public class FallTracker implements Listener, DamageResolver {

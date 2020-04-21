@@ -40,15 +40,15 @@ import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.modes.ModeUtils;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.teams.Team;
-import tc.oc.util.StringUtils;
-import tc.oc.util.bukkit.block.BlockVectors;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.Components;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
-import tc.oc.util.bukkit.named.NameStyle;
-import tc.oc.util.bukkit.nms.NMSHacks;
-import tc.oc.util.collection.DefaultMapAdapter;
+import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.collection.DefaultMapAdapter;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.Components;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public class Destroyable extends TouchableGoal<DestroyableFactory>
     implements IncrementalGoal<DestroyableFactory>, ModeChangeGoal<DestroyableFactory> {

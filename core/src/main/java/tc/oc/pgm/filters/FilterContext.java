@@ -6,7 +6,7 @@ import tc.oc.pgm.api.filter.query.BlockQuery;
 import tc.oc.pgm.api.filter.query.EntitySpawnQuery;
 import tc.oc.pgm.api.filter.query.EntityTypeQuery;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
-import tc.oc.util.collection.ContextStore;
+import tc.oc.pgm.util.collection.ContextStore;
 
 public class FilterContext extends ContextStore<Filter> {
   public FilterContext() {

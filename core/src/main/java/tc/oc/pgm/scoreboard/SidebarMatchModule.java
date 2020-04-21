@@ -59,12 +59,12 @@ import tc.oc.pgm.goals.events.GoalTouchEvent;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.events.TeamRespawnsChangeEvent;
+import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.component.ComponentRenderers;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.wool.MonumentWool;
 import tc.oc.pgm.wool.WoolMatchModule;
-import tc.oc.util.TimeUtils;
-import tc.oc.util.bukkit.component.ComponentRenderers;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.named.NameStyle;
 
 @ListenerScope(MatchScope.LOADED)
 public class SidebarMatchModule implements MatchModule, Listener {

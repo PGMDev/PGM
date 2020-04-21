@@ -12,7 +12,7 @@ import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.query.PlayerStateQuery;
-import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 
 public class ScoreBox {
   private final Region region;

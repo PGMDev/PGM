@@ -22,10 +22,10 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.match.ObservingParty;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.util.bukkit.ViaUtils;
-import tc.oc.util.bukkit.tablist.TabEntry;
-import tc.oc.util.bukkit.tablist.TabManager;
-import tc.oc.util.bukkit.tablist.TabView;
+import tc.oc.pgm.util.bukkit.ViaUtils;
+import tc.oc.pgm.util.tablist.TabEntry;
+import tc.oc.pgm.util.tablist.TabManager;
+import tc.oc.pgm.util.tablist.TabView;
 
 public class MatchTabView extends TabView implements ListeningTabView {
 

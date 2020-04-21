@@ -51,9 +51,9 @@ import tc.oc.pgm.events.PlayerBlockTransformEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
-import tc.oc.util.TimeUtils;
-import tc.oc.util.bukkit.BukkitUtils;
-import tc.oc.util.bukkit.translations.AllTranslations;
+import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.translations.AllTranslations;
 
 @ListenerScope(MatchScope.LOADED)
 public class ViewInventoryMatchModule implements MatchModule, Listener {

@@ -9,7 +9,7 @@ import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionParser;
-import tc.oc.util.Version;
+import tc.oc.pgm.util.Version;
 
 /** A factory for creating {@link MapInfo}s and {@link MapContext}s. */
 public interface MapFactory extends ModuleContext<MapModule>, AutoCloseable {

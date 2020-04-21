@@ -6,7 +6,7 @@ import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.kits.Kit;
-import tc.oc.util.bukkit.component.Component;
+import tc.oc.pgm.util.component.Component;
 
 public class RegionFilterApplication implements FeatureDefinition {
   public final RFAScope scope;

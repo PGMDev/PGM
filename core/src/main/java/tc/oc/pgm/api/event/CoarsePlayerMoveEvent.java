@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerMoveEvent;
-import tc.oc.util.bukkit.block.BlockVectors;
+import tc.oc.pgm.util.block.BlockVectors;
 
 /**
  * Wraps a {@link PlayerMoveEvent} when the {@link Player} crosses a {@link org.bukkit.block.Block}

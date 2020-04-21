@@ -5,7 +5,7 @@ import org.bukkit.DyeColor;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 /** A goal with an owning team. Match-time companion to {@link OwnedGoal} */
 public abstract class OwnedGoal<T extends OwnedGoalDefinition> extends SimpleGoal<T> {

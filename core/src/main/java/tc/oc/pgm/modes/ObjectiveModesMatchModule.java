@@ -13,8 +13,8 @@ import org.bukkit.event.EventPriority;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.countdowns.CountdownContext;
-import tc.oc.util.bukkit.chat.Sound;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.pgm.util.chat.Sound;
+import tc.oc.pgm.util.component.types.PersonalizedText;
 
 public class ObjectiveModesMatchModule implements MatchModule {
 

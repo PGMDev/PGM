@@ -24,10 +24,10 @@ import tc.oc.pgm.kits.ApplyItemKitEvent;
 import tc.oc.pgm.kits.ApplyKitEvent;
 import tc.oc.pgm.kits.ArmorKit;
 import tc.oc.pgm.teams.Team;
-import tc.oc.util.bukkit.BukkitUtils;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.named.NameStyle;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.named.NameStyle;
 
 public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
     implements Goal<MonumentWoolFactory> {

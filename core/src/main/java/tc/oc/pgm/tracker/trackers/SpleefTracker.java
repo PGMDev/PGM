@@ -20,8 +20,8 @@ import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ExplosionInfo;
 import tc.oc.pgm.tracker.info.PlayerInfo;
 import tc.oc.pgm.tracker.info.SpleefInfo;
-import tc.oc.util.TimeUtils;
-import tc.oc.util.bukkit.material.Materials;
+import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.material.Materials;
 
 /**
  * Tracks blocks broken by players and fires a {@link PlayerSpleefEvent} when it appears to cause a

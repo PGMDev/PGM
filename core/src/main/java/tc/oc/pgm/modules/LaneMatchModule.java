@@ -29,9 +29,9 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerBlockTransformEvent;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.Team;
-import tc.oc.util.bukkit.block.BlockVectors;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.translations.AllTranslations;
+import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.translations.AllTranslations;
 
 @ListenerScope(MatchScope.RUNNING)
 public class LaneMatchModule implements MatchModule, Listener {

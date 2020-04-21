@@ -23,8 +23,8 @@ import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.regions.EverywhereRegion;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
-import tc.oc.util.xml.InvalidXMLException;
-import tc.oc.util.xml.XMLUtils;
+import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.XMLUtils;
 
 public class RenewableModule implements MapModule {
   private static final double DEFAULT_AVOID_PLAYERS_RANGE = 2d;

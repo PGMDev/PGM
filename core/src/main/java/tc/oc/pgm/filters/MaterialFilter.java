@@ -3,7 +3,7 @@ package tc.oc.pgm.filters;
 import org.bukkit.Material;
 import org.bukkit.material.MaterialData;
 import tc.oc.pgm.api.filter.query.MaterialQuery;
-import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 
 public class MaterialFilter extends TypedFilter<MaterialQuery> {
   private final SingleMaterialMatcher pattern;

@@ -7,7 +7,7 @@ import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.goals.ProximityGoalDefinition;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.teams.TeamFactory;
-import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 
 @FeatureInfo(name = "destroyable")
 public class DestroyableFactory extends ProximityGoalDefinition {

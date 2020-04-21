@@ -13,9 +13,9 @@ import tc.oc.pgm.regions.PointRegion;
 import tc.oc.pgm.regions.RandomPointsValidation;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.regions.Union;
-import tc.oc.util.xml.InvalidXMLException;
-import tc.oc.util.xml.Node;
-import tc.oc.util.xml.XMLUtils;
+import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.XMLUtils;
 
 /**
  * PointProvider grammar is a bit strange due to backward compatibility. The root element is what

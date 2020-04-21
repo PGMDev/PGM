@@ -5,8 +5,8 @@ import app.ashcon.intake.CommandException;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.observers.ObserverToolsMatchModule;
-import tc.oc.util.bukkit.component.ComponentRenderers;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.component.ComponentRenderers;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 public class ObserverCommands {
 

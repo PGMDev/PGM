@@ -20,9 +20,9 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
-import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
-import tc.oc.util.xml.InvalidXMLException;
-import tc.oc.util.xml.XMLUtils;
+import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.XMLUtils;
 
 public class CraftingModule implements MapModule {
 

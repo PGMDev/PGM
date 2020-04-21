@@ -3,7 +3,7 @@ package tc.oc.pgm.cycle;
 import java.time.Duration;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
-import tc.oc.util.bukkit.ConfigUtils;
+import tc.oc.pgm.util.bukkit.ConfigUtils;
 
 public class CycleConfig {
   public static final Duration DEFAULT_COUNTDOWN = Duration.ofSeconds(15);

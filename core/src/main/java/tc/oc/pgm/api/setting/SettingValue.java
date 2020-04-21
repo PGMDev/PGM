@@ -6,7 +6,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import tc.oc.util.StringUtils;
+import tc.oc.pgm.util.StringUtils;
 
 /**
  * Values of a particular {@link SettingKey}, a toggleable setting.

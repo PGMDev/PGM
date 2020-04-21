@@ -28,8 +28,8 @@ import tc.oc.pgm.cycle.CycleMatchModule;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerLeaveMatchEvent;
-import tc.oc.util.bukkit.bossbar.DynamicBossBar;
-import tc.oc.util.bukkit.component.Component;
+import tc.oc.pgm.util.bossbar.DynamicBossBar;
+import tc.oc.pgm.util.component.Component;
 
 @ListenerScope(MatchScope.LOADED)
 public class StartMatchModule implements MatchModule, Listener {

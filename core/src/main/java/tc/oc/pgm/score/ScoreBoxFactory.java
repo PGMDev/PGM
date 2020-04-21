@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
-import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 
 public class ScoreBoxFactory {
   private final Region region;

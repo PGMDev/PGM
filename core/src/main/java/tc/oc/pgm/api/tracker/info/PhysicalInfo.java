@@ -1,6 +1,6 @@
 package tc.oc.pgm.api.tracker.info;
 
-import tc.oc.util.bukkit.component.Component;
+import tc.oc.pgm.util.component.Component;
 
 public interface PhysicalInfo extends OwnerInfo {
   String getIdentifier();

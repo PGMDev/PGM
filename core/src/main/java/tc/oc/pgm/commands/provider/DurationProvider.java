@@ -8,7 +8,7 @@ import java.lang.annotation.Annotation;
 import java.time.Duration;
 import java.util.List;
 import org.bukkit.command.CommandSender;
-import tc.oc.util.TimeUtils;
+import tc.oc.pgm.util.TimeUtils;
 
 public class DurationProvider implements BukkitProvider<Duration> {
 

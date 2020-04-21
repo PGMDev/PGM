@@ -4,9 +4,9 @@ import com.google.common.base.Preconditions;
 import java.time.Duration;
 import org.bukkit.ChatColor;
 import tc.oc.pgm.util.PrettyPaginatedResult;
-import tc.oc.util.TimeUtils;
-import tc.oc.util.bukkit.component.Components;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
+import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.component.Components;
+import tc.oc.pgm.util.component.types.PersonalizedText;
 
 /** Class used to display a paginated list of monument modes */
 public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountdown> {

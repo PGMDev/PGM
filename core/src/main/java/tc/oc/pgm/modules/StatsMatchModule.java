@@ -25,12 +25,12 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.ComponentUtils;
-import tc.oc.util.bukkit.component.Components;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.translations.AllTranslations;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.ComponentUtils;
+import tc.oc.pgm.util.component.Components;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.translations.AllTranslations;
 
 @ListenerScope(MatchScope.RUNNING)
 public class StatsMatchModule implements MatchModule, Listener {

@@ -23,7 +23,7 @@ import tc.oc.pgm.tracker.info.FallingBlockInfo;
 import tc.oc.pgm.tracker.info.MobInfo;
 import tc.oc.pgm.tracker.info.PlayerInfo;
 import tc.oc.pgm.tracker.info.ThrownPotionInfo;
-import tc.oc.util.ClassLogger;
+import tc.oc.pgm.util.ClassLogger;
 
 /** Tracks the ownership of {@link Entity}s and resolves damage caused by them */
 public class EntityTracker implements Listener {

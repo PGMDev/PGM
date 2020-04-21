@@ -5,11 +5,11 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.Components;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.nms.NMSHacks;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.Components;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public class ItemInfo extends OwnerInfoBase implements PhysicalInfo {
 

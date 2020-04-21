@@ -20,15 +20,15 @@ import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.WorldInfo;
 import tc.oc.pgm.map.contrib.PlayerContributor;
 import tc.oc.pgm.map.contrib.PseudonymContributor;
-import tc.oc.util.Version;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.named.MapNameStyle;
-import tc.oc.util.bukkit.translations.TranslationUtils;
-import tc.oc.util.xml.InvalidXMLException;
-import tc.oc.util.xml.Node;
-import tc.oc.util.xml.XMLUtils;
+import tc.oc.pgm.util.Version;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.named.MapNameStyle;
+import tc.oc.pgm.util.translations.TranslationUtils;
+import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.XMLUtils;
 
 public class MapInfoImpl implements MapInfo {
   private final String id;

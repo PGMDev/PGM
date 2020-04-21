@@ -6,12 +6,12 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.bossbar.BossBarMatchModule;
-import tc.oc.util.TimeUtils;
-import tc.oc.util.bukkit.bossbar.BossBar;
-import tc.oc.util.bukkit.bossbar.DynamicBossBar;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.bossbar.BossBar;
+import tc.oc.pgm.util.bossbar.DynamicBossBar;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 public abstract class MatchCountdown extends Countdown {
   protected final Match match;

@@ -11,7 +11,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.kits.tag.ItemTags;
-import tc.oc.util.TimeUtils;
+import tc.oc.pgm.util.TimeUtils;
 
 public class ProjectileCooldown {
   private final MatchPlayer matchPlayer;

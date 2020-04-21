@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.Region;
-import tc.oc.util.collection.ContextStore;
+import tc.oc.pgm.util.collection.ContextStore;
 
 /**
  * Class that manages many named regions.

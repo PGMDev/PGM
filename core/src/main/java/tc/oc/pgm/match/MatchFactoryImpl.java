@@ -26,8 +26,8 @@ import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.util.FileUtils;
-import tc.oc.util.bukkit.chunk.NullChunkGenerator;
+import tc.oc.pgm.util.FileUtils;
+import tc.oc.pgm.util.chunk.NullChunkGenerator;
 
 public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
   private static final AtomicLong counter = new AtomicLong();

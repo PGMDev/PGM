@@ -87,14 +87,14 @@ import tc.oc.pgm.features.MatchFeatureContext;
 import tc.oc.pgm.filters.query.MatchQuery;
 import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.result.CompetitorVictoryCondition;
-import tc.oc.util.ClassLogger;
-import tc.oc.util.FileUtils;
-import tc.oc.util.TimeUtils;
-import tc.oc.util.bukkit.Events;
-import tc.oc.util.bukkit.chat.Audience;
-import tc.oc.util.bukkit.concurrent.BukkitExecutorService;
-import tc.oc.util.bukkit.nms.NMSHacks;
-import tc.oc.util.collection.RankedSet;
+import tc.oc.pgm.util.ClassLogger;
+import tc.oc.pgm.util.FileUtils;
+import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.bukkit.Events;
+import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.collection.RankedSet;
+import tc.oc.pgm.util.concurrent.BukkitExecutorService;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public class MatchImpl implements Match {
 

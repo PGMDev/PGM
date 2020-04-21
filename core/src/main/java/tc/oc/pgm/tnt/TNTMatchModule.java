@@ -24,7 +24,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.util.TimeUtils;
+import tc.oc.pgm.util.TimeUtils;
 
 @ListenerScope(MatchScope.RUNNING)
 public class TNTMatchModule implements MatchModule, Listener {

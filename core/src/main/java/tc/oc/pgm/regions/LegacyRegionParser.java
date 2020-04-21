@@ -5,8 +5,8 @@ import org.jdom2.Element;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.util.MethodParser;
-import tc.oc.util.xml.InvalidXMLException;
-import tc.oc.util.xml.XMLUtils;
+import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.XMLUtils;
 
 /** For proto < 1.4 */
 public class LegacyRegionParser extends RegionParser {

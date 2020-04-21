@@ -36,9 +36,9 @@ import tc.oc.pgm.destroyable.DestroyableDestroyedEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
 import tc.oc.pgm.regions.Bounds;
+import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.wool.PlayerWoolPlaceEvent;
-import tc.oc.util.bukkit.BukkitUtils;
-import tc.oc.util.bukkit.block.BlockVectors;
 
 @ListenerScope(MatchScope.LOADED)
 public class FireworkMatchModule implements MatchModule, Listener {

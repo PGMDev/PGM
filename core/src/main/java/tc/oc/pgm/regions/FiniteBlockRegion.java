@@ -25,9 +25,9 @@ import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.AnyFilter;
 import tc.oc.pgm.filters.BlockFilter;
 import tc.oc.pgm.filters.query.BlockQuery;
-import tc.oc.util.Version;
-import tc.oc.util.bukkit.block.BlockVectors;
-import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.Version;
+import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 
 /**
  * Region represented by a list of single blocks. This will check if a point is inside the block at

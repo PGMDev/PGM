@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.exception.MapMissingException;
-import tc.oc.util.FileUtils;
+import tc.oc.pgm.util.FileUtils;
 
 public class SystemMapSourceFactory extends PathMapSourceFactory {
 

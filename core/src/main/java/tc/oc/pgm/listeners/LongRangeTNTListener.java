@@ -24,9 +24,9 @@ import org.bukkit.scoreboard.NameTagVisibility;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.tracker.Trackers;
-import tc.oc.util.TimeUtils;
-import tc.oc.util.bukkit.ViaUtils;
-import tc.oc.util.bukkit.nms.NMSHacks;
+import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.bukkit.ViaUtils;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public class LongRangeTNTListener implements Listener {
 

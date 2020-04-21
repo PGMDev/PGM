@@ -23,9 +23,9 @@ import tc.oc.pgm.goals.ProximityGoal;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.util.TimeUtils;
-import tc.oc.util.bukkit.component.ComponentUtils;
-import tc.oc.util.bukkit.translations.AllTranslations;
+import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.component.ComponentUtils;
+import tc.oc.pgm.util.translations.AllTranslations;
 
 public class MatchCommands {
 

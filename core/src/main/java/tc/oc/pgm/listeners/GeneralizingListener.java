@@ -21,8 +21,8 @@ import org.bukkit.util.Vector;
 import tc.oc.pgm.api.event.BlockPunchEvent;
 import tc.oc.pgm.api.event.BlockTrampleEvent;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
-import tc.oc.util.bukkit.block.BlockVectors;
-import tc.oc.util.bukkit.chat.Audience;
+import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.chat.Audience;
 
 /**
  * Translates standard Bukkit events into a few extra events: {@link CoarsePlayerMoveEvent} {@link

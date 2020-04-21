@@ -10,8 +10,8 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.ImmediateFeatureReference;
-import tc.oc.util.xml.InvalidXMLException;
-import tc.oc.util.xml.Node;
+import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
 
 public class Teams {
 

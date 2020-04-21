@@ -29,7 +29,7 @@ import tc.oc.pgm.goals.events.GoalProximityChangeEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.util.bukkit.chat.Sound;
+import tc.oc.pgm.util.chat.Sound;
 
 @ListenerScope(MatchScope.LOADED)
 public class GoalMatchModule implements MatchModule, Listener {

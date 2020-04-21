@@ -13,7 +13,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.region.Region;
-import tc.oc.util.bukkit.chat.Sound;
+import tc.oc.pgm.util.chat.Sound;
 
 public class Portal implements FeatureDefinition {
   protected final Region region;

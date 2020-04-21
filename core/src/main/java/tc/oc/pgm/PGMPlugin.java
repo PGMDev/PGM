@@ -94,10 +94,10 @@ import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.RandomMapOrder;
 import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.util.FileUtils;
-import tc.oc.util.bukkit.chat.Audience;
-import tc.oc.util.bukkit.concurrent.BukkitExecutorService;
-import tc.oc.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.FileUtils;
+import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.concurrent.BukkitExecutorService;
+import tc.oc.pgm.util.xml.InvalidXMLException;
 
 public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 

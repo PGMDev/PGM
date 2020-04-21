@@ -31,10 +31,10 @@ import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
-import tc.oc.util.StringUtils;
-import tc.oc.util.xml.InvalidXMLException;
-import tc.oc.util.xml.Node;
-import tc.oc.util.xml.XMLUtils;
+import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.XMLUtils;
 
 public abstract class FilterParser {
 

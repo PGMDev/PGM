@@ -9,7 +9,7 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayerResolver;
-import tc.oc.util.bukkit.chat.MultiAudience;
+import tc.oc.pgm.util.chat.MultiAudience;
 
 /** A manager of {@link Match}es. */
 public interface MatchManager extends MatchPlayerResolver, MultiAudience {

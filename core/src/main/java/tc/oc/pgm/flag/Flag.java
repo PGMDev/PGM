@@ -50,14 +50,14 @@ import tc.oc.pgm.regions.PointRegion;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.util.bukkit.BukkitUtils;
-import tc.oc.util.bukkit.chat.Sound;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.ComponentUtils;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.material.Materials;
-import tc.oc.util.bukkit.named.NameStyle;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.chat.Sound;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.ComponentUtils;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.material.Materials;
+import tc.oc.pgm.util.named.NameStyle;
 
 public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 

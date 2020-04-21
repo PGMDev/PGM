@@ -23,7 +23,7 @@ import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.pgm.events.ConfigLoadEvent;
 import tc.oc.pgm.map.source.DefaultMapSourceFactory;
 import tc.oc.pgm.map.source.SystemMapSourceFactory;
-import tc.oc.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 public class Config {
 

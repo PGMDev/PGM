@@ -20,8 +20,8 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.filters.query.MaterialQuery;
 import tc.oc.pgm.filters.query.Queries;
 import tc.oc.pgm.regions.FiniteBlockRegion;
-import tc.oc.util.bukkit.block.BlockStates;
-import tc.oc.util.bukkit.nms.NMSHacks;
+import tc.oc.pgm.util.block.BlockStates;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public class BlockDropsRuleSet {
   private final ImmutableList<BlockDropsRule> rules;

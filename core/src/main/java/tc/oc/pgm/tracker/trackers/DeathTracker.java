@@ -15,7 +15,7 @@ import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.GenericDamageInfo;
-import tc.oc.util.ClassLogger;
+import tc.oc.pgm.util.ClassLogger;
 
 /**
  * - Resolves all damage done to players and tracks the most recent one - Wraps {@link

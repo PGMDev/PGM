@@ -1,7 +1,7 @@
 package tc.oc.pgm.features;
 
 import tc.oc.pgm.api.feature.Feature;
-import tc.oc.util.collection.ContextStore;
+import tc.oc.pgm.util.collection.ContextStore;
 
 public class MatchFeatureContext extends ContextStore<Feature> {
 

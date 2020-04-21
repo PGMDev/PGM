@@ -24,7 +24,7 @@ import tc.oc.pgm.spawns.ObserverToolFactory;
 import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
-import tc.oc.util.bukkit.block.BlockVectors;
+import tc.oc.pgm.util.block.BlockVectors;
 
 public class Observing extends State {
 

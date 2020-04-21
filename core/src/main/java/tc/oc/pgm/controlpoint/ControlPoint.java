@@ -23,9 +23,9 @@ import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.util.StringUtils;
-import tc.oc.util.TimeUtils;
-import tc.oc.util.collection.DefaultMapAdapter;
+import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.collection.DefaultMapAdapter;
 
 public class ControlPoint extends SimpleGoal<ControlPointDefinition>
     implements IncrementalGoal<ControlPointDefinition> {

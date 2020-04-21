@@ -51,13 +51,13 @@ import tc.oc.pgm.community.commands.ModerationCommands;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
-import tc.oc.util.bukkit.OnlinePlayerMapAdapter;
-import tc.oc.util.bukkit.chat.Sound;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.Components;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.named.NameStyle;
-import tc.oc.util.bukkit.translations.AllTranslations;
+import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
+import tc.oc.pgm.util.chat.Sound;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.Components;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.translations.AllTranslations;
 
 @ListenerScope(MatchScope.LOADED)
 public class FreezeMatchModule implements MatchModule, Listener {

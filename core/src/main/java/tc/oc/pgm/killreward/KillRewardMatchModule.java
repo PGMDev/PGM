@@ -28,7 +28,7 @@ import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.filters.query.DamageQuery;
-import tc.oc.util.collection.DefaultMapAdapter;
+import tc.oc.pgm.util.collection.DefaultMapAdapter;
 
 @ListenerScope(MatchScope.RUNNING)
 public class KillRewardMatchModule implements MatchModule, Listener {

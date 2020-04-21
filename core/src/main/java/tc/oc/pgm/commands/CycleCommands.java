@@ -12,7 +12,7 @@ import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.pgm.cycle.CycleMatchModule;
-import tc.oc.util.bukkit.translations.AllTranslations;
+import tc.oc.pgm.util.translations.AllTranslations;
 
 public class CycleCommands {
 

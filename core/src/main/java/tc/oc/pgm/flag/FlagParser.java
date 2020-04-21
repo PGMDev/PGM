@@ -22,10 +22,10 @@ import tc.oc.pgm.points.PointParser;
 import tc.oc.pgm.points.PointProvider;
 import tc.oc.pgm.points.PointProviderAttributes;
 import tc.oc.pgm.teams.TeamFactory;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.xml.InvalidXMLException;
-import tc.oc.util.xml.Node;
-import tc.oc.util.xml.XMLUtils;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.XMLUtils;
 
 public class FlagParser {
   private final MapFactory factory;

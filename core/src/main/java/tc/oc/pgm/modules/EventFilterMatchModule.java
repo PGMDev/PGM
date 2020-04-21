@@ -44,8 +44,8 @@ import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.event.ObserverInteractEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerBlockTransformEvent;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 /**
  * Listens to many events at low priority and cancels them if the actor is not allowed to interact

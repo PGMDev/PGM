@@ -33,7 +33,7 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.util.StringUtils;
+import tc.oc.pgm.util.StringUtils;
 
 @ListenerScope(MatchScope.LOADED)
 public class ScoreboardMatchModule implements MatchModule, Listener {

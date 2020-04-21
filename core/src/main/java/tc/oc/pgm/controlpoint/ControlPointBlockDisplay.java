@@ -17,7 +17,7 @@ import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.regions.SectorRegion;
 import tc.oc.pgm.renewable.BlockImage;
-import tc.oc.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 /** Displays the status of a ControlPoint by coloring blocks in specified regions */
 public class ControlPointBlockDisplay implements Listener {

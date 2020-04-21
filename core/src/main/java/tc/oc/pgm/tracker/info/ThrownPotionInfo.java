@@ -5,10 +5,10 @@ import org.bukkit.entity.ThrownPotion;
 import org.bukkit.potion.PotionEffectType;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.item.Potions;
-import tc.oc.util.bukkit.nms.NMSHacks;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.item.Potions;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public class ThrownPotionInfo extends EntityInfo implements PotionInfo {
 

@@ -10,7 +10,7 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.util.bukkit.item.Items;
+import tc.oc.pgm.util.item.Items;
 
 public class ItemKit implements KitDefinition {
 

@@ -16,7 +16,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
-import tc.oc.util.bukkit.chat.Sound;
+import tc.oc.pgm.util.chat.Sound;
 
 public class ProximityAlarm implements Listener {
   private static final long MESSAGE_INTERVAL = 5000;

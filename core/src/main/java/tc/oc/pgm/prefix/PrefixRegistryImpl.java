@@ -17,7 +17,7 @@ import tc.oc.pgm.api.prefix.PrefixRegistry;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.tablist.MatchTabManager;
-import tc.oc.util.bukkit.tablist.PlayerTabEntry;
+import tc.oc.pgm.util.tablist.PlayerTabEntry;
 
 public class PrefixRegistryImpl implements PrefixRegistry, Listener {
 

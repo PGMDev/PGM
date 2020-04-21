@@ -8,9 +8,9 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.timelimit.TimeLimitCountdown;
-import tc.oc.util.TimeUtils;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 public class ModeChangeCountdown extends MatchCountdown implements Comparable<ModeChangeCountdown> {
 

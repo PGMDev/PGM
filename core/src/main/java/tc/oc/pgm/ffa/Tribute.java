@@ -13,13 +13,13 @@ import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.util.bukkit.BukkitUtils;
-import tc.oc.util.bukkit.chat.Audience;
-import tc.oc.util.bukkit.chat.MultiAudience;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.types.PersonalizedPlayer;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.named.NameStyle;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.chat.MultiAudience;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.types.PersonalizedPlayer;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.named.NameStyle;
 
 /**
  * Wraps a single {@link MatchPlayer} in a free-for-all match.

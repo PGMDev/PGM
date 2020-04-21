@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.Random;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
-import tc.oc.util.bukkit.block.CuboidBlockIterator;
+import tc.oc.pgm.util.block.CuboidBlockIterator;
 
 public class Bounds implements Cloneable {
   protected final Vector min;

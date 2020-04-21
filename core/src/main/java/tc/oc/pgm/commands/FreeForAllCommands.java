@@ -11,7 +11,7 @@ import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
-import tc.oc.util.bukkit.translations.AllTranslations;
+import tc.oc.pgm.util.translations.AllTranslations;
 
 public class FreeForAllCommands {
 

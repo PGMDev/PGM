@@ -1,7 +1,7 @@
 package tc.oc.pgm.server;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static tc.oc.util.reflect.ReflectionUtils.readField;
+import static tc.oc.pgm.util.reflect.ReflectionUtils.readField;
 
 import java.io.File;
 import java.lang.reflect.Field;

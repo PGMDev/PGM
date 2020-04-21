@@ -8,7 +8,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
-import tc.oc.util.bukkit.nms.NMSHacks;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 /**
  * Base class for flag states in which the banner is physically present somewhere in the map (i.e.

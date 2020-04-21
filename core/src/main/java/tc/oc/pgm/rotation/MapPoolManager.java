@@ -19,7 +19,7 @@ import tc.oc.pgm.api.map.MapActivity;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.util.bukkit.translations.AllTranslations;
+import tc.oc.pgm.util.translations.AllTranslations;
 
 /**
  * Manages all the existing {@link MapPool}s, as for maintaining their order, and updating the one

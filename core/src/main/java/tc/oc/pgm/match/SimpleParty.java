@@ -7,8 +7,8 @@ import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.util.bukkit.chat.Audience;
-import tc.oc.util.bukkit.chat.MultiAudience;
+import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.chat.MultiAudience;
 
 /** Represents a simple {@link Party} with a set of {@link MatchPlayer}s. */
 public abstract class SimpleParty implements Party, MultiAudience {

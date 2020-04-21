@@ -2,7 +2,7 @@ package tc.oc.pgm.filters;
 
 import java.time.Duration;
 import tc.oc.pgm.api.filter.query.MatchQuery;
-import tc.oc.util.TimeUtils;
+import tc.oc.pgm.util.TimeUtils;
 
 public class TimeFilter extends TypedFilter<MatchQuery> implements Comparable<TimeFilter> {
   private final Duration duration;

@@ -1,7 +1,7 @@
 package tc.oc.pgm.tablist;
 
 import org.bukkit.entity.Player;
-import tc.oc.util.bukkit.tablist.LegacyTabView;
+import tc.oc.pgm.util.tablist.LegacyTabView;
 
 /**
  * The pre-1.8 tab list is severely limited. This is essentially a no-op {@link MatchTabView} for

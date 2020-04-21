@@ -8,7 +8,8 @@ import tc.oc.pgm.api.feature.Feature;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
-import tc.oc.util.bukkit.component.Component;
+import tc.oc.pgm.util.bossbar.BossBar;
+import tc.oc.pgm.util.component.Component;
 
 /** TODO: Extract CompletableGoal which flags and CPs don't implement */
 public interface Goal<T extends GoalDefinition> extends Feature<T> {
@@ -38,8 +39,8 @@ public interface Goal<T extends GoalDefinition> extends Feature<T> {
 
   /**
    * Returns true if the goal acts "normally". Normal behavior is defined when the goal is visible
-   * via mediums such as the {@link tc.oc.util.bukkit.bossbar.BossBar}, the Scoreboard, and chat. If
-   * a call to this method returns false, this goal will not show up anywhere.
+   * via mediums such as the {@link BossBar}, the Scoreboard, and chat. If a call to this method
+   * returns false, this goal will not show up anywhere.
    *
    * <p>In most cases, this should simply delegate to {@link GoalDefinition#isVisible()}
    */

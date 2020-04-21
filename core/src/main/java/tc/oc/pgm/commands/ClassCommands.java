@@ -11,9 +11,9 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.PlayerClass;
-import tc.oc.util.StringUtils;
-import tc.oc.util.bukkit.component.ComponentUtils;
-import tc.oc.util.bukkit.translations.AllTranslations;
+import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.component.ComponentUtils;
+import tc.oc.pgm.util.translations.AllTranslations;
 
 public class ClassCommands {
 

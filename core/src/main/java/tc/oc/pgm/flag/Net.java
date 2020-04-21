@@ -9,7 +9,7 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.teams.TeamFactory;
-import tc.oc.util.bukkit.component.Component;
+import tc.oc.pgm.util.component.Component;
 
 @FeatureInfo(name = "net")
 public class Net extends SelfIdentifyingFeatureDefinition {

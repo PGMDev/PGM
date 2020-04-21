@@ -33,7 +33,6 @@
 
     <modules>
         <module>util</module>
-        <module>util-bukkit</module>
         <module>core</module>
         <module>server</module>
     </modules>
@@ -57,20 +56,22 @@
     </distributionManagement>
 
     <dependencies>
-        <!-- Google's common libraries, must be same version as the Minecraft server -->
+        <!-- Fork of Spigot and SportBukkit running Minecraft 1.8 -->
+        <!-- TODO: support non-1.8 and non-SportPaper Bukkit servers -->
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>17.0</version>
-            <scope>provided</scope>
+            <groupId>app.ashcon</groupId>
+            <artifactId>sportpaper</artifactId>
+            <version>1.8.8-R0.1-SNAPSHOT</version>
+            <scope>compile</scope> <!-- Remember to exclude in shading -->
         </dependency>
 
-        <!-- Provides annotations such as @Nullable -->
+        <!-- Multi-protocol library for future Minecraft versions -->
         <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>annotations</artifactId>
-            <version>3.0.1u2</version>
+            <groupId>us.myles</groupId>
+            <artifactId>viaversion</artifactId>
+            <version>2.2.2</version>
             <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <!-- Compile-time library used to generate "Delegate" classes -->
@@ -80,6 +81,44 @@
             <artifactId>lombok</artifactId>
             <version>1.18.12</version>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- XML parsing library used for all "map.xml" configuration loading -->
+        <dependency>
+            <groupId>org.jdom</groupId>
+            <artifactId>jdom2</artifactId>
+            <version>2.0.6</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Text library for creating messages in Minecraft -->
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>text-api</artifactId>
+            <version>3.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>text-adapter-bukkit</artifactId>
+            <version>3.0.3</version>
+            <scope>compile</scope>
+            <!-- Exclude Spigot APIs since we already provide Bukkit -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.spigotmc</groupId>
+                    <artifactId>spigot-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Framework for defining and parsing commands -->
+        <!-- TODO: move to EngineHub/Piston or Mojang/brigadier -->
+        <dependency>
+            <groupId>app.ashcon.intake</groupId>
+            <artifactId>intake-bukkit</artifactId>
+            <version>1.2-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

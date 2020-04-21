@@ -17,10 +17,10 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerLeaveMatchEvent;
-import tc.oc.util.bukkit.bossbar.BossBar;
-import tc.oc.util.bukkit.bossbar.BossBarStack;
-import tc.oc.util.bukkit.bossbar.BossBarView;
-import tc.oc.util.bukkit.nms.NMSHacks;
+import tc.oc.pgm.util.bossbar.BossBar;
+import tc.oc.pgm.util.bossbar.BossBarStack;
+import tc.oc.pgm.util.bossbar.BossBarView;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 @ListenerScope(MatchScope.LOADED)
 public class BossBarMatchModule implements MatchModule, Listener {

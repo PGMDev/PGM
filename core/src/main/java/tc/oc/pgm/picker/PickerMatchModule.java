@@ -56,11 +56,11 @@ import tc.oc.pgm.spawns.events.DeathKitApplyEvent;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.util.StringUtils;
-import tc.oc.util.bukkit.chat.Sound;
-import tc.oc.util.bukkit.component.ComponentUtils;
-import tc.oc.util.bukkit.item.Items;
-import tc.oc.util.bukkit.translations.AllTranslations;
+import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.chat.Sound;
+import tc.oc.pgm.util.component.ComponentUtils;
+import tc.oc.pgm.util.item.Items;
+import tc.oc.pgm.util.translations.AllTranslations;
 
 @ListenerScope(MatchScope.LOADED)
 public class PickerMatchModule implements MatchModule, Listener {

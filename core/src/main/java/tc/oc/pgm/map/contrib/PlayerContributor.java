@@ -12,10 +12,10 @@ import org.bukkit.Bukkit;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.player.Username;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.types.PersonalizedPlayer;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.named.NameStyle;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.types.PersonalizedPlayer;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.named.NameStyle;
 
 public class PlayerContributor implements Contributor {
 

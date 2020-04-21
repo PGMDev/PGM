@@ -27,8 +27,8 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.material.Materials;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.material.Materials;
 
 /**
  * Predicts the death of players who disconnect while participating, and simulates the damage and

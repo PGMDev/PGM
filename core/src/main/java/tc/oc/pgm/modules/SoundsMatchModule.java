@@ -18,8 +18,8 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
+import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.wool.PlayerWoolPlaceEvent;
-import tc.oc.util.bukkit.chat.Sound;
 
 @ListenerScope(MatchScope.RUNNING)
 public class SoundsMatchModule implements MatchModule, Listener {

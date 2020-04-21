@@ -8,8 +8,8 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.ComponentRenderers;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.ComponentRenderers;
 
 public interface InventoryMenuItem {
 

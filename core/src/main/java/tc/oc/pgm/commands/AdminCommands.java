@@ -27,9 +27,9 @@ import tc.oc.pgm.restart.RestartManager;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.timelimit.TimeLimitCountdown;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
-import tc.oc.util.StringUtils;
-import tc.oc.util.bukkit.chat.Audience;
-import tc.oc.util.bukkit.translations.AllTranslations;
+import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.translations.AllTranslations;
 
 public class AdminCommands {
 

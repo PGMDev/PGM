@@ -22,8 +22,8 @@ import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
+import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.UsernameResolver;
-import tc.oc.util.ClassLogger;
 
 public class DatastoreImpl implements Datastore {
 

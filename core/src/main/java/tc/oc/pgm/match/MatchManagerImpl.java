@@ -28,8 +28,8 @@ import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.match.event.MatchUnloadEvent;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.util.ClassLogger;
-import tc.oc.util.bukkit.chat.Audience;
+import tc.oc.pgm.util.ClassLogger;
+import tc.oc.pgm.util.chat.Audience;
 
 public class MatchManagerImpl implements MatchManager, Listener {
 

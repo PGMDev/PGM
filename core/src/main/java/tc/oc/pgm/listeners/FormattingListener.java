@@ -9,13 +9,13 @@ import tc.oc.pgm.core.CoreLeakEvent;
 import tc.oc.pgm.destroyable.Destroyable;
 import tc.oc.pgm.destroyable.DestroyableContribution;
 import tc.oc.pgm.destroyable.DestroyableDestroyedEvent;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.Components;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.translations.TranslationUtils;
 import tc.oc.pgm.wool.PlayerWoolPlaceEvent;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.Components;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.named.NameStyle;
-import tc.oc.util.bukkit.translations.TranslationUtils;
 
 public class FormattingListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)

@@ -32,16 +32,16 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.commands.SettingCommands;
 import tc.oc.pgm.ffa.Tribute;
-import tc.oc.util.StringUtils;
-import tc.oc.util.bukkit.BukkitUtils;
-import tc.oc.util.bukkit.OnlinePlayerMapAdapter;
-import tc.oc.util.bukkit.chat.Audience;
-import tc.oc.util.bukkit.chat.Sound;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.ComponentRenderers;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
-import tc.oc.util.bukkit.named.NameStyle;
+import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
+import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.chat.Sound;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.ComponentRenderers;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.named.NameStyle;
 
 public class ChatDispatcher implements Listener {
 

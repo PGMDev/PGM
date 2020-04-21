@@ -20,9 +20,9 @@ import tc.oc.pgm.points.SequentialPointProvider;
 import tc.oc.pgm.points.SpreadPointProvider;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.teams.Teams;
-import tc.oc.util.xml.InvalidXMLException;
-import tc.oc.util.xml.Node;
-import tc.oc.util.xml.XMLUtils;
+import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.XMLUtils;
 
 public class SpawnParser {
   protected final MapFactory factory;

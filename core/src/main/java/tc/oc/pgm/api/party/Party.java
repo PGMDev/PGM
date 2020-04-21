@@ -13,9 +13,9 @@ import tc.oc.pgm.api.party.event.PartyRenameEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.match.ObservingParty;
-import tc.oc.util.bukkit.chat.Audience;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.named.Named;
+import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.named.Named;
 
 /**
  * A group of related {@link MatchPlayer}s in a {@link Match}.

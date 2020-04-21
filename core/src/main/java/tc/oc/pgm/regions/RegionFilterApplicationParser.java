@@ -14,11 +14,11 @@ import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.FilterNode;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.kits.Kit;
-import tc.oc.util.Version;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.xml.InvalidXMLException;
-import tc.oc.util.xml.Node;
-import tc.oc.util.xml.XMLUtils;
+import tc.oc.pgm.util.Version;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.XMLUtils;
 
 public class RegionFilterApplicationParser {
   private final MapFactory factory;

@@ -29,8 +29,8 @@ import tc.oc.pgm.api.map.exception.MapException;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
+import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.UsernameResolver;
-import tc.oc.util.StringUtils;
 
 public class MapLibraryImpl implements MapLibrary {
 

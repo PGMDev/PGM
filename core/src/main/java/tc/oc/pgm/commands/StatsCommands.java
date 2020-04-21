@@ -9,8 +9,8 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.modules.StatsMatchModule;
-import tc.oc.util.bukkit.component.ComponentUtils;
-import tc.oc.util.bukkit.translations.AllTranslations;
+import tc.oc.pgm.util.component.ComponentUtils;
+import tc.oc.pgm.util.translations.AllTranslations;
 
 public class StatsCommands {
 

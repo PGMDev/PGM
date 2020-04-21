@@ -8,10 +8,10 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.teams.Team;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.PeriodFormats;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.PeriodFormats;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 /** Optional countdown between teams being finalized and match starting */
 public class HuddleCountdown extends PreMatchCountdown implements Listener {

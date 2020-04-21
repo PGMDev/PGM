@@ -21,7 +21,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerResetEvent;
-import tc.oc.util.bukkit.OnlinePlayerMapAdapter;
+import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DoubleJumpMatchModule implements MatchModule, Listener, Tickable {

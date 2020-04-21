@@ -8,12 +8,12 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
-import tc.oc.util.TimeUtils;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.tablist.DynamicTabEntry;
-import tc.oc.util.bukkit.tablist.TabView;
-import tc.oc.util.bukkit.translations.AllTranslations;
+import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.tablist.DynamicTabEntry;
+import tc.oc.pgm.util.tablist.TabView;
+import tc.oc.pgm.util.translations.AllTranslations;
 
 public class MatchFooterTabEntry extends DynamicTabEntry {
 

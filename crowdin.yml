@@ -2,9 +2,7 @@ project_identifier: pgm
 api_key_env: CROWDIN_API_KEY
 preserve_hierarchy: false
 files:
-  - source: /util-bukkit/src/main/i18n/templates/en_US.properties
-    translation: /util-bukkit/src/main/i18n/translations/%locale_with_underscore%.%file_extension%
-  - source: /util-bukkit/src/main/i18n/templates/strings.properties
-    translation: /util-bukkit/src/main/i18n/translations/%file_name%_%locale_with_underscore%.%file_extension%
+  - source: /util/src/main/i18n/templates/strings.properties
+    translation: /util/src/main/i18n/translations/%file_name%_%locale_with_underscore%.%file_extension%
 commit_message: Update %language% translations
 append_commit_message: false

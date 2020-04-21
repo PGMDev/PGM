@@ -6,7 +6,7 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.util.bukkit.chat.Audience;
+import tc.oc.pgm.util.chat.Audience;
 
 public class AudienceProvider implements BukkitProvider<Audience> {
 

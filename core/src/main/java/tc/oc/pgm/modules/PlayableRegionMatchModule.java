@@ -13,8 +13,8 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.util.MatchPlayers;
-import tc.oc.util.bukkit.block.BlockVectors;
-import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 @ListenerScope(MatchScope.RUNNING)
 public class PlayableRegionMatchModule implements MatchModule, Listener {

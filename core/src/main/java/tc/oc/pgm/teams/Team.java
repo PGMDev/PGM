@@ -17,11 +17,11 @@ import tc.oc.pgm.join.GenericJoinResult;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.match.SimpleParty;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
-import tc.oc.util.bukkit.BukkitUtils;
-import tc.oc.util.bukkit.component.Component;
-import tc.oc.util.bukkit.component.ComponentUtils;
-import tc.oc.util.bukkit.component.types.PersonalizedText;
-import tc.oc.util.bukkit.named.NameStyle;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.ComponentUtils;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.named.NameStyle;
 
 /**
  * Mutable class to represent a team created from a TeamInfo instance that is tied to a specific
