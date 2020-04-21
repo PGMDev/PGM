@@ -1,15 +1,14 @@
 package tc.oc.pgm.blockdrops;
 
-import com.google.common.collect.ImmutableList;
-import java.util.List;
+import com.google.common.collect.ImmutableMap;
+import java.util.Map;
 import javax.annotation.Nullable;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
-import tc.oc.util.Pair;
 
 /** The result of breaking a block */
 public class BlockDrops {
-  public final ImmutableList<Pair<Double, ItemStack>> items; // probability -> item
+  public final ImmutableMap<ItemStack, Double> items; // probability -> item
   public final int experience;
   public final @Nullable MaterialData replacement;
   public final @Nullable Float fallChance;
@@ -17,13 +16,13 @@ public class BlockDrops {
   public final @Nullable Double fallSpeed;
 
   public BlockDrops(
-      List<Pair<Double, ItemStack>> items,
+      Map<ItemStack, Double> items,
       int experience,
       @Nullable MaterialData replacement,
       @Nullable Float fallChance,
       @Nullable Float landChance,
       @Nullable Double fallSpeed) {
-    this.items = ImmutableList.copyOf(items);
+    this.items = ImmutableMap.copyOf(items);
     this.experience = experience;
     this.replacement = replacement;
     this.fallChance = fallChance;

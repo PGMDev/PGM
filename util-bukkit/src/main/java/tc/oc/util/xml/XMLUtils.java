@@ -10,11 +10,13 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -34,8 +36,6 @@ import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
-import tc.oc.util.Numbers;
-import tc.oc.util.Pair;
 import tc.oc.util.TimeUtils;
 import tc.oc.util.Version;
 import tc.oc.util.bukkit.BukkitUtils;
@@ -47,7 +47,6 @@ import tc.oc.util.bukkit.material.matcher.BlockMaterialMatcher;
 import tc.oc.util.bukkit.material.matcher.CompoundMaterialMatcher;
 import tc.oc.util.bukkit.material.matcher.SingleMaterialMatcher;
 import tc.oc.util.bukkit.nms.NMSHacks;
-import tc.oc.util.collection.ArrayUtils;
 
 // TODO: remove dependency on bukkit packages
 public class XMLUtils {
@@ -135,10 +134,8 @@ public class XMLUtils {
         });
   }
 
-  public static Element getUniqueChild(Element parent, String name, String... aliases)
+  public static Element getUniqueChild(Element parent, String... aliases)
       throws InvalidXMLException {
-    aliases = ArrayUtils.append(aliases, name);
-
     List<Element> children = new ArrayList<>();
     for (String alias : aliases) {
       children.addAll(parent.getChildren(alias));
@@ -150,27 +147,23 @@ public class XMLUtils {
     return children.isEmpty() ? null : children.get(0);
   }
 
-  public static Element getRequiredUniqueChild(Element parent, String name, String... aliases)
+  public static Element getRequiredUniqueChild(Element parent, String... aliases)
       throws InvalidXMLException {
-    aliases = ArrayUtils.append(aliases, name);
-
     List<Element> children = new ArrayList<>();
     for (String alias : aliases) {
       children.addAll(parent.getChildren(alias));
     }
 
     if (children.size() > 1) {
-      throw new InvalidXMLException("multiple '" + name + "' tags not allowed", parent);
+      throw new InvalidXMLException("multiple '" + aliases[0] + "' tags not allowed", parent);
     } else if (children.isEmpty()) {
-      throw new InvalidXMLException("child tag '" + name + "' is required", parent);
+      throw new InvalidXMLException("child tag '" + aliases[0] + "' is required", parent);
     }
     return children.get(0);
   }
 
-  public static Attribute getRequiredAttribute(Element el, String name, String... aliases)
+  public static Attribute getRequiredAttribute(Element el, String... aliases)
       throws InvalidXMLException {
-    aliases = ArrayUtils.append(aliases, name);
-
     Attribute attr = null;
     for (String alias : aliases) {
       Attribute a = el.getAttribute(alias);
@@ -190,7 +183,7 @@ public class XMLUtils {
     }
 
     if (attr == null) {
-      throw new InvalidXMLException("attribute '" + name + "' is required", el);
+      throw new InvalidXMLException("attribute '" + aliases[0] + "' is required", el);
     }
 
     return attr;
@@ -227,10 +220,70 @@ public class XMLUtils {
     return attr == null ? def : parseBoolean(new Node(attr));
   }
 
+  /**
+   * Get the value of the given numeric type that best represents positive infinity.
+   *
+   * @throws ReflectiveOperationException if this fails, which should not happen with the primitive
+   *     types
+   */
+  private static <T extends Number> T positiveInfinity(Class<T> type)
+      throws ReflectiveOperationException {
+    try {
+      return type.cast(type.getField("POSITIVE_INFINITY").get(null));
+    } catch (NoSuchFieldException e) {
+      return type.cast(type.getField("MAX_VALUE").get(null));
+    }
+  }
+
+  /**
+   * Get the value of the given numeric type that best represents negative infinity.
+   *
+   * @throws ReflectiveOperationException if this fails, which should not happen with the primitive
+   *     types
+   */
+  private static <T extends Number> T negativeInfinity(Class<T> type)
+      throws ReflectiveOperationException {
+    try {
+      return type.cast(type.getField("NEGATIVE_INFINITY").get(null));
+    } catch (NoSuchFieldException e) {
+      return type.cast(type.getField("MIN_VALUE").get(null));
+    }
+  }
+
+  /**
+   * Try to parse the given text as a number of the given type
+   *
+   * @param text string representation of a number
+   * @param type numeric type to parse
+   * @param infinity whether infinities should be allowed
+   * @return a parsed number
+   * @throws NumberFormatException if a number could not be parsed for whatever reason
+   */
+  public static <T extends Number> T parseNumber(String text, Class<T> type, boolean infinity)
+      throws NumberFormatException {
+    try {
+      if (infinity) {
+        String trimmed = text.trim();
+        if ("oo".equals(trimmed) || "+oo".equals(trimmed)) {
+          return positiveInfinity(type);
+        } else if ("-oo".equals(trimmed)) {
+          return negativeInfinity(type);
+        }
+      }
+      return type.cast(type.getMethod("valueOf", String.class).invoke(null, text));
+    } catch (ReflectiveOperationException e) {
+      if (e.getCause() instanceof NumberFormatException) {
+        throw (NumberFormatException) e.getCause();
+      } else {
+        throw new IllegalArgumentException("cannot parse type " + type.getName(), e);
+      }
+    }
+  }
+
   public static <T extends Number> T parseNumber(
       Node node, String text, Class<T> type, boolean infinity) throws InvalidXMLException {
     try {
-      return Numbers.parse(text, type, infinity);
+      return parseNumber(text, type, infinity);
     } catch (NumberFormatException e) {
       throw new InvalidXMLException("Invalid number '" + text + "'", node);
     }
@@ -1029,7 +1082,7 @@ public class XMLUtils {
     return node == null ? def : parseAttributeOperation(node);
   }
 
-  public static Pair<String, AttributeModifier> parseCompactAttributeModifier(
+  public static Map.Entry<String, AttributeModifier> parseCompactAttributeModifier(
       Node node, String text) throws InvalidXMLException {
     String[] parts = text.split(":");
 
@@ -1041,10 +1094,11 @@ public class XMLUtils {
     AttributeModifier.Operation operation = parseAttributeOperation(node, parts[1]);
     double amount = parseNumber(node, parts[2], Double.class);
 
-    return Pair.create(attribute.getName(), new AttributeModifier("FromXML", amount, operation));
+    return new AbstractMap.SimpleImmutableEntry<>(
+        attribute.getName(), new AttributeModifier("FromXML", amount, operation));
   }
 
-  public static Pair<String, AttributeModifier> parseAttributeModifier(Element el)
+  public static Map.Entry<String, AttributeModifier> parseAttributeModifier(Element el)
       throws InvalidXMLException {
     String attribute = parseAttribute(new Node(el)).getName();
     double amount = parseNumber(Node.fromRequiredAttr(el, "amount"), Double.class);
@@ -1052,7 +1106,8 @@ public class XMLUtils {
         parseAttributeOperation(
             Node.fromAttr(el, "operation"), AttributeModifier.Operation.ADD_NUMBER);
 
-    return Pair.create(attribute, new AttributeModifier("FromXML", amount, operation));
+    return new AbstractMap.SimpleImmutableEntry<>(
+        attribute, new AttributeModifier("FromXML", amount, operation));
   }
 
   public static GameMode parseGameMode(Node node, String text) throws InvalidXMLException {

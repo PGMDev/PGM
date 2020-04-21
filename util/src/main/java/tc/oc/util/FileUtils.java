@@ -7,7 +7,9 @@ import java.io.IOException;
 /**
  * Source: http://www.crazysquirrel.com/computing/java/basics/java-file-and-directory-copying.jspx
  */
-public class FileUtils {
+public final class FileUtils {
+  private FileUtils() {}
+
   public static void copy(File source, File destination) throws IOException {
     copy(source, destination, false);
   }

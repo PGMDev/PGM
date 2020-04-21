@@ -3,21 +3,12 @@ package tc.oc.util.bukkit.tablist;
 import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import tc.oc.util.collection.DefaultProvider;
 
 /**
  * The pre-1.8 tab list is severely limited. This is essentially a no-op {@link TabView} for pre-1.8
  * clients.
  */
 public class LegacyTabView extends TabView implements Listener {
-
-  public static class Factory implements DefaultProvider<Player, LegacyTabView> {
-    @Override
-    public LegacyTabView get(Player key) {
-      return new LegacyTabView(key);
-    }
-  }
-
   // The single player seeing this view
   private final Player viewer;
 

@@ -15,8 +15,12 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
 
   private final MatchPlayer viewer;
 
-  PlayerOrder(MatchPlayer viewer) {
+  public PlayerOrder(MatchPlayer viewer) {
     this.viewer = viewer;
+  }
+
+  public MatchPlayer getViewer() {
+    return viewer;
   }
 
   @Override

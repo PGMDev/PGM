@@ -9,7 +9,6 @@ import org.bukkit.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.util.bukkit.component.types.PersonalizedPlayer;
 import tc.oc.util.bukkit.named.NameStyle;
 import tc.oc.util.bukkit.nms.NMSHacks;
-import tc.oc.util.collection.DefaultProvider;
 
 /**
  * {@link TabEntry} showing a {@link Player}'s name and skin.
@@ -19,12 +18,6 @@ import tc.oc.util.collection.DefaultProvider;
  * will be spawned with a copy of the real player's metadata.
  */
 public class PlayerTabEntry extends DynamicTabEntry {
-  public static class Factory implements DefaultProvider<Player, PlayerTabEntry> {
-    @Override
-    public PlayerTabEntry get(Player key) {
-      return new PlayerTabEntry(key);
-    }
-  }
 
   private static UUID randomUUIDVersion2SameDefaultSkin(UUID original) {
     // Parity of UUID.hashCode determines if the player's default skin is Steve/Alex

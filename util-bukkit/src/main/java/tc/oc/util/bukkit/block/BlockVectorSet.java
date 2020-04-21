@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 import org.bukkit.util.BlockVector;
-import tc.oc.util.collection.DefaultProvider;
 
 /**
  * Optimized implementation of a set of block locations. Coordinates are encoded into a single long
@@ -188,13 +187,5 @@ public class BlockVectorSet implements Set<BlockVector> {
    */
   public BlockVector getAt(int n) {
     return decodePos(getEncodedAt(n));
-  }
-
-  /** For your convenience, a factory that creates empty {@link BlockVectorSet}s */
-  public static class Factory<T> implements DefaultProvider<T, BlockVectorSet> {
-    @Override
-    public BlockVectorSet get(T key) {
-      return new BlockVectorSet();
-    }
   }
 }

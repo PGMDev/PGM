@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Adapt a Map to return a default value for missing keys. The default value can be constant or
@@ -13,42 +14,33 @@ import java.util.Set;
 public class DefaultMapAdapter<K, V> implements Map<K, V> {
 
   private final Map<K, V> map;
-  private final DefaultProvider<? super K, ? extends V> defaultProvider;
+  private final Function<? super K, ? extends V> defaultProvider;
   private final boolean putDefault;
 
   public DefaultMapAdapter(
-      Map<K, V> map, DefaultProvider<? super K, ? extends V> defaultProvider, boolean putDefault) {
+      Map<K, V> map, Function<? super K, ? extends V> defaultProvider, boolean putDefault) {
     this.defaultProvider = defaultProvider;
     this.map = map;
     this.putDefault = putDefault;
   }
 
   public DefaultMapAdapter(Map<K, V> map, final V defaultValue, boolean putDefault) {
-    this(
-        map,
-        new DefaultProvider<K, V>() {
-          @Override
-          public V get(Object key) {
-            return defaultValue;
-          }
-        },
-        putDefault);
+    this(map, key -> defaultValue, putDefault);
   }
 
   public DefaultMapAdapter(final V defaultValue, boolean putDefault) {
-    this(new HashMap<K, V>(), defaultValue, putDefault);
+    this(new HashMap<>(), defaultValue, putDefault);
   }
 
-  public DefaultMapAdapter(
-      DefaultProvider<? super K, ? extends V> defaultProvider, boolean putDefault) {
-    this(new HashMap<K, V>(), defaultProvider, putDefault);
+  public DefaultMapAdapter(Function<? super K, ? extends V> defaultProvider, boolean putDefault) {
+    this(new HashMap<>(), defaultProvider, putDefault);
   }
 
   public DefaultMapAdapter(Map<K, V> map, final V defaultValue) {
     this(map, defaultValue, false);
   }
 
-  public DefaultMapAdapter(Map<K, V> map, DefaultProvider<? super K, ? extends V> defaultProvider) {
+  public DefaultMapAdapter(Map<K, V> map, Function<? super K, ? extends V> defaultProvider) {
     this(map, defaultProvider, false);
   }
 
@@ -56,7 +48,7 @@ public class DefaultMapAdapter<K, V> implements Map<K, V> {
     this(defaultValue, false);
   }
 
-  public DefaultMapAdapter(DefaultProvider<? super K, ? extends V> defaultProvider) {
+  public DefaultMapAdapter(Function<? super K, ? extends V> defaultProvider) {
     this(defaultProvider, false);
   }
 
@@ -64,7 +56,7 @@ public class DefaultMapAdapter<K, V> implements Map<K, V> {
   public V get(Object key) {
     V value = this.map.get(key);
     if (value == null) {
-      value = this.defaultProvider.get((K) key);
+      value = this.defaultProvider.apply((K) key);
       if (this.putDefault) this.map.put((K) key, value);
     }
     return value;
@@ -73,7 +65,7 @@ public class DefaultMapAdapter<K, V> implements Map<K, V> {
   public V getOrDefault(K key) {
     V value = this.map.get(key);
     if (value == null) {
-      value = this.defaultProvider.get(key);
+      value = this.defaultProvider.apply(key);
     }
     return value;
   }
@@ -81,7 +73,7 @@ public class DefaultMapAdapter<K, V> implements Map<K, V> {
   public V getOrCreate(K key) {
     V value = this.map.get(key);
     if (value == null) {
-      value = this.defaultProvider.get(key);
+      value = this.defaultProvider.apply(key);
       this.map.put(key, value);
     }
     return value;
@@ -140,7 +132,7 @@ public class DefaultMapAdapter<K, V> implements Map<K, V> {
    */
   public V put(K key, V value) {
     V previous = map.put(key, value);
-    return previous != null ? previous : this.defaultProvider.get(key);
+    return previous != null ? previous : this.defaultProvider.apply(key);
   }
 
   public V putNoDefault(K key, V value) {

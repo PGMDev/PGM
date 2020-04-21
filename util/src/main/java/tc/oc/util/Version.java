@@ -2,11 +2,7 @@ package tc.oc.util;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import java.util.Iterator;
-import java.util.stream.Stream;
-
-public class Version implements Comparable<Version>, Iterable<Integer> {
-
+public final class Version implements Comparable<Version> {
   private final int major;
   private final int minor;
   private final int patch;
@@ -22,20 +18,11 @@ public class Version implements Comparable<Version>, Iterable<Integer> {
   }
 
   @Override
-  public Iterator<Integer> iterator() {
-    return Stream.of(major, minor, patch).iterator();
-  }
-
-  @Override
-  public int compareTo(Version obj) {
-    final Iterator<Integer> other = obj.iterator();
-    for (int i : this) {
-      final int compare = Integer.compare(i, other.next());
-      if (compare != 0) {
-        return compare;
-      }
-    }
-    return 0;
+  public int compareTo(Version other) {
+    int diff = major - other.major;
+    if (diff == 0) diff = minor - other.minor;
+    if (diff == 0) diff = patch - other.patch;
+    return diff;
   }
 
   @Override
@@ -58,24 +45,6 @@ public class Version implements Comparable<Version>, Iterable<Integer> {
     } else {
       return major + "." + minor + "." + patch;
     }
-  }
-
-  /**
-   * Return true if the major versions match and the minor version and patch levels are less or
-   * equal to the given version
-   */
-  public boolean isNoNewerThan(Version spec) {
-    return this.major == spec.major
-        && (this.minor < spec.minor || (this.minor == spec.minor && this.patch <= spec.patch));
-  }
-
-  /**
-   * Return true if the major versions match and the minor version and patch levels are greater than
-   * the given version
-   */
-  public boolean isNewerThan(Version spec) {
-    return this.major == spec.major
-        && (this.minor > spec.minor || (this.minor == spec.minor && this.patch > spec.patch));
   }
 
   /**

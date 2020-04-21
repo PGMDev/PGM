@@ -9,8 +9,12 @@ public class TeamOrder implements Comparator<Team> {
 
   private final MatchPlayer viewer;
 
-  TeamOrder(MatchPlayer viewer) {
+  public TeamOrder(MatchPlayer viewer) {
     this.viewer = viewer;
+  }
+
+  public MatchPlayer getViewer() {
+    return viewer;
   }
 
   @Override

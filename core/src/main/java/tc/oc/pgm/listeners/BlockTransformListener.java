@@ -5,12 +5,12 @@ import com.google.common.collect.ListMultimap;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -68,7 +68,6 @@ import tc.oc.util.ClassLogger;
 import tc.oc.util.bukkit.Events;
 import tc.oc.util.bukkit.block.BlockStates;
 import tc.oc.util.bukkit.material.Materials;
-import tc.oc.util.reflect.ReflectionUtils;
 
 public class BlockTransformListener implements Listener {
   private static final BlockFace[] NEIGHBORS = {
@@ -92,58 +91,64 @@ public class BlockTransformListener implements Listener {
 
   public void registerEvents() {
     // Find all the @EventWrapper methods in this class and register them at EVERY priority level.
-    for (final Method method :
-        ReflectionUtils.getAnnotatedMethods(getClass(), EventWrapper.class)) {
-      final Class<? extends Event> eventClass =
-          method.getParameterTypes()[0].asSubclass(Event.class);
+    Stream.of(getClass().getMethods())
+        .filter(method -> method.getAnnotation(EventWrapper.class) != null)
+        .forEach(
+            method -> {
+              final Class<? extends Event> eventClass =
+                  method.getParameterTypes()[0].asSubclass(Event.class);
 
-      for (final EventPriority priority : EventPriority.values()) {
-        EventExecutor executor =
-            new EventExecutor() {
-              @Override
-              public void execute(Listener listener, Event event) throws EventException {
-                // REMOVED: Ignore the event if it was fron a non-Match world
-                // if (event instanceof Physical
-                //    && PGM.get().getMatchManager().getMatch(((Physical) event).getWorld()) ==
-                // null)
-                //  return;
+              for (final EventPriority priority : EventPriority.values()) {
+                EventExecutor executor =
+                    new EventExecutor() {
+                      @Override
+                      public void execute(Listener listener, Event event) throws EventException {
+                        // REMOVED: Ignore the event if it was fron a non-Match world
+                        // if (event instanceof Physical
+                        //    && PGM.get().getMatchManager().getMatch(((Physical) event).getWorld())
+                        // ==
+                        // null)
+                        //  return;
 
-                if (!Events.isCancelled(event)) {
-                  // At the first priority level, call the event handler method.
-                  // If it decides to generate a BlockTransformEvent, it will be stored in
-                  // currentEvents.
-                  if (priority == EventPriority.LOWEST) {
-                    if (eventClass.isInstance(event)) {
-                      try {
-                        method.invoke(listener, event);
-                      } catch (InvocationTargetException ex) {
-                        throw new EventException(ex.getCause(), event);
-                      } catch (Throwable t) {
-                        throw new EventException(t, event);
+                        if (!Events.isCancelled(event)) {
+                          // At the first priority level, call the event handler method.
+                          // If it decides to generate a BlockTransformEvent, it will be stored in
+                          // currentEvents.
+                          if (priority == EventPriority.LOWEST) {
+                            if (eventClass.isInstance(event)) {
+                              try {
+                                method.invoke(listener, event);
+                              } catch (InvocationTargetException ex) {
+                                throw new EventException(ex.getCause(), event);
+                              } catch (Throwable t) {
+                                throw new EventException(t, event);
+                              }
+                            }
+                          }
+                        }
+
+                        // Check for cached events and dispatch them at the current priority level
+                        // only.
+                        // The BTE needs to be dispatched even after it's cancelled, because we DO
+                        // have
+                        // listeners that depend on receiving cancelled events e.g. WoolMatchModule.
+                        for (BlockTransformEvent bte : currentEvents.get(event)) {
+                          Events.callEvent(bte, priority);
+                        }
+
+                        // After dispatching the last priority level, clean up the cached events and
+                        // do
+                        // post-event stuff.
+                        // This needs to happen even if the event is cancelled.
+                        if (priority == EventPriority.MONITOR) {
+                          finishCauseEvent(event);
+                        }
                       }
-                    }
-                  }
-                }
+                    };
 
-                // Check for cached events and dispatch them at the current priority level only.
-                // The BTE needs to be dispatched even after it's cancelled, because we DO have
-                // listeners that depend on receiving cancelled events e.g. WoolMatchModule.
-                for (BlockTransformEvent bte : currentEvents.get(event)) {
-                  Events.callEvent(bte, priority);
-                }
-
-                // After dispatching the last priority level, clean up the cached events and do
-                // post-event stuff.
-                // This needs to happen even if the event is cancelled.
-                if (priority == EventPriority.MONITOR) {
-                  finishCauseEvent(event);
-                }
+                pm.registerEvent(eventClass, this, priority, executor, plugin, false);
               }
-            };
-
-        pm.registerEvent(eventClass, this, priority, executor, plugin, false);
-      }
-    }
+            });
   }
 
   private void finishCauseEvent(Event causeEvent) {

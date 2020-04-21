@@ -19,7 +19,6 @@ import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.material.MaterialData;
 import tc.oc.pgm.blockdrops.BlockDrops;
 import tc.oc.util.bukkit.block.BlockStates;
-import tc.oc.util.reflect.ReflectionUtils;
 
 /** Called when a {@link Block} transforms from one {@link BlockState} to another. */
 public class BlockTransformEvent extends GeneralizingEvent {
@@ -151,12 +150,10 @@ public class BlockTransformEvent extends GeneralizingEvent {
   public final boolean isManual() {
     final Event event = getCause();
 
-    if (ReflectionUtils.instanceOfAny(
-        event,
-        BlockPlaceEvent.class,
-        BlockBreakEvent.class,
-        PlayerBucketEmptyEvent.class,
-        PlayerBucketFillEvent.class)) return true;
+    if (event instanceof BlockPlaceEvent
+        || event instanceof BlockBreakEvent
+        || event instanceof PlayerBucketEmptyEvent
+        || event instanceof PlayerBucketFillEvent) return true;
 
     if (event instanceof BlockIgniteEvent) {
       BlockIgniteEvent igniteEvent = (BlockIgniteEvent) event;

@@ -13,7 +13,6 @@ import tc.oc.pgm.regions.PointRegion;
 import tc.oc.pgm.regions.RandomPointsValidation;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.regions.Union;
-import tc.oc.util.collection.ArrayUtils;
 import tc.oc.util.xml.InvalidXMLException;
 import tc.oc.util.xml.Node;
 import tc.oc.util.xml.XMLUtils;
@@ -41,9 +40,8 @@ public class PointParser {
 
   /** Parse any number of {@link PointProvider}s in attributes or children of the given names. */
   public List<PointProvider> parseMultiProperty(
-      Element el, PointProviderAttributes attributes, String name, String... aliases)
+      Element el, PointProviderAttributes attributes, String... aliases)
       throws InvalidXMLException {
-    aliases = ArrayUtils.append(aliases, name);
     attributes = parseAttributes(el, attributes);
 
     List<PointProvider> providers = new ArrayList<>();

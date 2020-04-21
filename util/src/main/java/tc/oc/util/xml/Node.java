@@ -1,16 +1,15 @@
 package tc.oc.util.xml;
 
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import javax.annotation.Nullable;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.located.Located;
-import tc.oc.util.collection.ArrayUtils;
 
 /**
  * A hybrid wrapper for either an {@link Element} or an {@link Attribute}, enabling both of them to
@@ -137,9 +136,7 @@ public class Node {
    * Return a new Node wrapping an Attribute of the given Element matching one of the given names,
    * or null if the given Element has no matching Attributes.
    */
-  public static @Nullable Node fromAttr(Element el, String name, String... aliases)
-      throws InvalidXMLException {
-    aliases = ArrayUtils.append(aliases, name);
+  public static @Nullable Node fromAttr(Element el, String... aliases) throws InvalidXMLException {
     Node node = null;
     for (String alias : aliases) {
       node = wrapUnique(node, true, alias, el.getAttribute(alias));
@@ -151,55 +148,27 @@ public class Node {
    * Return a new Node wrapping the named Attribute of the given Element. If the Attribute does not
    * exist, throw an InvalidXMLException complaining about it.
    */
-  public static Node fromRequiredAttr(Element el, String name, String... aliases)
-      throws InvalidXMLException {
-    Node node = fromAttr(el, name, aliases);
+  public static Node fromRequiredAttr(Element el, String... aliases) throws InvalidXMLException {
+    Node node = fromAttr(el, aliases);
     if (node == null) {
-      throw new InvalidXMLException("attribute '" + name + "' is required", el);
+      throw new InvalidXMLException("attribute '" + aliases[0] + "' is required", el);
     }
     return node;
   }
 
-  public static List<Node> fromAttrs(List<Node> nodes, Element el, String name, String... aliases)
+  public static List<Node> fromChildren(List<Node> nodes, Element el, String... aliases)
       throws InvalidXMLException {
-    aliases = ArrayUtils.append(aliases, name);
-    for (String alias : aliases) {
-      Attribute attr = el.getAttribute(alias);
-      if (attr != null) nodes.add(new Node(attr));
-    }
-    return nodes;
-  }
-
-  public static List<Node> fromAttrs(Element el, String name, String... aliases)
-      throws InvalidXMLException {
-    return fromAttrs(new ArrayList<Node>(), el, name, aliases);
-  }
-
-  public static List<Node> fromAttrs(Element el) throws InvalidXMLException {
-    return Lists.transform(
-        el.getAttributes(),
-        new Function<Attribute, Node>() {
-          @Override
-          public Node apply(Attribute attribute) {
-            return new Node(attribute);
-          }
-        });
-  }
-
-  public static List<Node> fromChildren(
-      List<Node> nodes, Element el, String name, String... aliases) throws InvalidXMLException {
-    aliases = ArrayUtils.append(aliases, name);
+    Set<String> aliasSet = Sets.newHashSet(aliases);
     for (Element child : el.getChildren()) {
-      if (ArrayUtils.contains(aliases, child.getName())) {
+      if (aliasSet.contains(child.getName())) {
         nodes.add(new Node(child));
       }
     }
     return nodes;
   }
 
-  public static List<Node> fromChildren(Element el, String name, String... aliases)
-      throws InvalidXMLException {
-    return fromChildren(new ArrayList<Node>(), el, name, aliases);
+  public static List<Node> fromChildren(Element el, String... aliases) throws InvalidXMLException {
+    return fromChildren(new ArrayList<>(), el, aliases);
   }
 
   public static @Nullable Node fromNullable(Element el) {
@@ -210,9 +179,8 @@ public class Node {
     return attr == null ? null : new Node(attr);
   }
 
-  public static @Nullable Node fromChildOrAttr(
-      Element el, boolean unique, String name, String... aliases) throws InvalidXMLException {
-    aliases = ArrayUtils.append(aliases, name);
+  public static @Nullable Node fromChildOrAttr(Element el, boolean unique, String... aliases)
+      throws InvalidXMLException {
     Node node = null;
     for (String alias : aliases) {
       node = wrapUnique(node, unique, alias, el.getAttribute(alias));
@@ -223,32 +191,23 @@ public class Node {
     return node;
   }
 
-  public static @Nullable Node fromChildOrAttr(Element el, String name, String... aliases)
+  public static @Nullable Node fromChildOrAttr(Element el, String... aliases)
       throws InvalidXMLException {
-    return fromChildOrAttr(el, true, name, aliases);
+    return fromChildOrAttr(el, true, aliases);
   }
 
-  public static @Nullable Node fromLastChildOrAttr(Element el, String name, String... aliases)
+  public static @Nullable Node fromLastChildOrAttr(Element el, String... aliases)
       throws InvalidXMLException {
-    return fromChildOrAttr(el, false, name, aliases);
+    return fromChildOrAttr(el, false, aliases);
   }
 
-  public static Node fromRequiredChildOrAttr(Element el, String name, String... aliases)
+  public static Node fromRequiredChildOrAttr(Element el, String... aliases)
       throws InvalidXMLException {
-    Node node = fromChildOrAttr(el, name, aliases);
+    Node node = fromChildOrAttr(el, aliases);
     if (node == null) {
-      throw new InvalidXMLException("attribute or child element '" + name + "' is required", el);
+      throw new InvalidXMLException(
+          "attribute or child element '" + aliases[0] + "' is required", el);
     }
     return node;
-  }
-
-  public static List<Node> fromChildrenOrAttrs(
-      List<Node> nodes, Element el, String name, String... aliases) throws InvalidXMLException {
-    return fromChildren(fromAttrs(new ArrayList<Node>(), el, name, aliases), el, name, aliases);
-  }
-
-  public static List<Node> fromChildrenOrAttrs(Element el, String name, String... aliases)
-      throws InvalidXMLException {
-    return fromChildrenOrAttrs(new ArrayList<Node>(), el, name, aliases);
   }
 }

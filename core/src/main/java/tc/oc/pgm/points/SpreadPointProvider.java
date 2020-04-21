@@ -8,7 +8,6 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.util.RandomUtils;
 
 /** Get 16 points from each child and choose the farthest point from any enemy */
 public class SpreadPointProvider extends AggregatePointProvider {
@@ -50,7 +49,8 @@ public class SpreadPointProvider extends AggregatePointProvider {
       }
     }
 
-    return RandomUtils.element(match.getRandom(), bestPoints);
+    int index = (int) Math.floor(match.getRandom().nextInt(bestPoints.size()));
+    return bestPoints.get(index);
   }
 
   @Override

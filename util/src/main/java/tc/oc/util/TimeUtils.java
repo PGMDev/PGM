@@ -5,7 +5,9 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
-public class TimeUtils {
+public final class TimeUtils {
+  private TimeUtils() {}
+
   public static final long TICK = 50;
   public static final long MAX_TICK = Integer.MAX_VALUE;
   public static final Duration INFINITE_DURATION = ChronoUnit.FOREVER.getDuration();

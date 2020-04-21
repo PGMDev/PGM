@@ -1,8 +1,9 @@
 package tc.oc.pgm.flag.state;
 
-import com.google.common.base.Function;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -39,7 +40,6 @@ import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.component.types.PersonalizedTranslatable;
 import tc.oc.util.bukkit.named.NameStyle;
 import tc.oc.util.bukkit.nms.NMSHacks;
-import tc.oc.util.collection.IterableUtils;
 
 /** State of a flag when a player has picked it up and is wearing the banner on their head. */
 public class Carried extends Spawned implements Missing {
@@ -75,18 +75,17 @@ public class Carried extends Spawned implements Missing {
   public Iterable<Location> getProximityLocations(ParticipantState player) {
     if (isCarrying(player)) {
       final Query query = new PlayerStateQuery(player);
-      return IterableUtils.transfilter(
-          flag.getNets(),
-          new Function<Net, Location>() {
-            @Override
-            public Location apply(Net net) {
-              if (net.getCaptureFilter().query(query).isAllowed()) {
-                return net.getProximityLocation().toLocation(flag.getMatch().getWorld());
-              } else {
-                return null;
-              }
-            }
-          });
+      return flag.getNets().stream()
+          .flatMap(
+              net -> {
+                if (net.getCaptureFilter().query(query).isAllowed()) {
+                  return Stream.of(
+                      net.getProximityLocation().toLocation(flag.getMatch().getWorld()));
+                } else {
+                  return Stream.empty();
+                }
+              })
+          .collect(Collectors.toList());
     } else {
       return super.getProximityLocations(player);
     }

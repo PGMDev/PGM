@@ -13,16 +13,8 @@ import tc.oc.util.bukkit.named.NameStyle;
 import tc.oc.util.bukkit.tablist.DynamicTabEntry;
 import tc.oc.util.bukkit.tablist.TabView;
 import tc.oc.util.bukkit.translations.TranslationUtils;
-import tc.oc.util.collection.DefaultProvider;
 
 public class MapTabEntry extends DynamicTabEntry {
-
-  public static class Factory implements DefaultProvider<Match, MapTabEntry> {
-    @Override
-    public MapTabEntry get(Match key) {
-      return new MapTabEntry(key);
-    }
-  }
 
   private final Match match;
 

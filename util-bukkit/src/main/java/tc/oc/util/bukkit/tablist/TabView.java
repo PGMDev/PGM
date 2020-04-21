@@ -6,7 +6,6 @@ import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import tc.oc.util.collection.DefaultProvider;
 
 /**
  * A single player's tab list. When this view is enabled, it creates a scoreboard team for each slot
@@ -17,13 +16,6 @@ import tc.oc.util.collection.DefaultProvider;
  * always come before any real teams.
  */
 public class TabView {
-
-  public static class Factory implements DefaultProvider<Player, TabView> {
-    @Override
-    public TabView get(Player key) {
-      return new TabView(key);
-    }
-  }
 
   private static final int WIDTH = 4, HEIGHT = 20;
   private final int size, headerSlot, footerSlot;

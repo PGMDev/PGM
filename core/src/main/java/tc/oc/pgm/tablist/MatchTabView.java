@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -21,18 +22,16 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.match.ObservingParty;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.util.Numbers;
 import tc.oc.util.bukkit.ViaUtils;
 import tc.oc.util.bukkit.tablist.TabEntry;
 import tc.oc.util.bukkit.tablist.TabManager;
 import tc.oc.util.bukkit.tablist.TabView;
-import tc.oc.util.collection.DefaultProvider;
 
 public class MatchTabView extends TabView implements ListeningTabView {
 
-  public static class Factory implements DefaultProvider<Player, TabView> {
+  public static class Factory implements Function<Player, TabView> {
     @Override
-    public TabView get(Player key) {
+    public TabView apply(Player key) {
       return ViaUtils.getProtocolVersion(key) >= ViaUtils.VERSION_1_8
           ? new MatchTabView(key)
           : new LegacyMatchTabView(key);
@@ -136,7 +135,7 @@ public class MatchTabView extends TabView implements ListeningTabView {
 
       // Minimum rows required to show all staff observers, including a blank row
       int observerRows =
-          Math.min(availableRows, 1 + Numbers.divideRoundingUp(observingStaff, this.getWidth()));
+          Math.min(availableRows, 1 + divideRoundingUp(observingStaff, this.getWidth()));
 
       if (tmm != null) {
         // Size of the largest team
@@ -153,14 +152,12 @@ public class MatchTabView extends TabView implements ListeningTabView {
         // including the header row
         int teamRows =
             Math.min(
-                availableRows - observerRows,
-                1 + Numbers.divideRoundingUp(maxTeamSize, columnsPerTeam));
+                availableRows - observerRows, 1 + divideRoundingUp(maxTeamSize, columnsPerTeam));
 
         // Expand observer rows until all observers are showing
         observerRows =
             Math.min(
-                availableRows - teamRows,
-                1 + Numbers.divideRoundingUp(observingPlayers, this.getWidth()));
+                availableRows - teamRows, 1 + divideRoundingUp(observingPlayers, this.getWidth()));
 
         // If there is somehow only one observer row, it's only the blank row, so it might as well
         // be zero
@@ -193,13 +190,13 @@ public class MatchTabView extends TabView implements ListeningTabView {
         int participantRows =
             Math.min(
                 availableRows - observerRows,
-                1 + Numbers.divideRoundingUp(participantPlayers.size(), this.getWidth()));
+                1 + divideRoundingUp(participantPlayers.size(), this.getWidth()));
 
         // Expand observer rows until all observers are showing
         observerRows =
             Math.min(
                 availableRows - participantRows,
-                1 + Numbers.divideRoundingUp(observingPlayers, this.getWidth()));
+                1 + divideRoundingUp(observingPlayers, this.getWidth()));
 
         // Expand participant rows to fill whatever if left
         participantRows = availableRows - observerRows;
@@ -293,5 +290,9 @@ public class MatchTabView extends TabView implements ListeningTabView {
     }
 
     this.invalidateLayout();
+  }
+
+  private static int divideRoundingUp(int numerator, int denominator) {
+    return (numerator + denominator - 1) / denominator;
   }
 }

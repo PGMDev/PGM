@@ -1,8 +1,9 @@
 package tc.oc.pgm.blockdrops;
 
 import com.google.common.collect.ImmutableList;
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
 import org.bukkit.block.Block;
@@ -19,16 +20,11 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.filters.query.MaterialQuery;
 import tc.oc.pgm.filters.query.Queries;
 import tc.oc.pgm.regions.FiniteBlockRegion;
-import tc.oc.util.Pair;
 import tc.oc.util.bukkit.block.BlockStates;
 import tc.oc.util.bukkit.nms.NMSHacks;
 
 public class BlockDropsRuleSet {
   private final ImmutableList<BlockDropsRule> rules;
-
-  public BlockDropsRuleSet() {
-    this(ImmutableList.<BlockDropsRule>of());
-  }
 
   public BlockDropsRuleSet(List<BlockDropsRule> rules) {
     this.rules = ImmutableList.copyOf(rules);
@@ -86,7 +82,7 @@ public class BlockDropsRuleSet {
       BlockState block,
       MaterialData material,
       @Nullable ParticipantState playerState) {
-    List<Pair<Double, ItemStack>> items = new ArrayList<>();
+    Map<ItemStack, Double> items = new LinkedHashMap<>();
     MaterialData replacement = null;
     Float fallChance = null;
     Float landChance = null;
@@ -133,7 +129,7 @@ public class BlockDropsRuleSet {
       }
 
       if (rule.dropOnWrongTool || rightToolUsed) {
-        items.addAll(rule.drops.items);
+        items.putAll(rule.drops.items);
         experience += rule.drops.experience;
       }
     }

@@ -9,6 +9,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
 import com.google.common.collect.SetMultimap;
 import java.time.Duration;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -43,7 +44,6 @@ import tc.oc.pgm.kits.tag.ItemTags;
 import tc.oc.pgm.projectile.ProjectileDefinition;
 import tc.oc.pgm.shield.ShieldKit;
 import tc.oc.pgm.shield.ShieldParameters;
-import tc.oc.util.Pair;
 import tc.oc.util.bukkit.BukkitUtils;
 import tc.oc.util.xml.InvalidXMLException;
 import tc.oc.util.xml.Node;
@@ -311,15 +311,15 @@ public abstract class KitParser {
     Node attr = Node.fromAttr(el, "attribute", "attributes");
     if (attr != null) {
       for (String modifierText : Splitter.on(";").split(attr.getValue())) {
-        Pair<String, AttributeModifier> mod =
+        Map.Entry<String, AttributeModifier> mod =
             XMLUtils.parseCompactAttributeModifier(attr, modifierText);
-        modifiers.put(mod.first, mod.second);
+        modifiers.put(mod.getKey(), mod.getValue());
       }
     }
 
     for (Element elAttribute : el.getChildren("attribute")) {
-      Pair<String, AttributeModifier> mod = XMLUtils.parseAttributeModifier(elAttribute);
-      modifiers.put(mod.first, mod.second);
+      Map.Entry<String, AttributeModifier> mod = XMLUtils.parseAttributeModifier(elAttribute);
+      modifiers.put(mod.getKey(), mod.getValue());
     }
 
     return modifiers;
@@ -526,8 +526,8 @@ public abstract class KitParser {
     }
   }
 
-  public Pair<Enchantment, Integer> parseEnchantment(Element el) throws InvalidXMLException {
-    return Pair.create(
+  public Map.Entry<Enchantment, Integer> parseEnchantment(Element el) throws InvalidXMLException {
+    return new AbstractMap.SimpleImmutableEntry<>(
         XMLUtils.parseEnchantment(new Node(el)),
         XMLUtils.parseNumber(Node.fromAttr(el, "level"), Integer.class, 1));
   }
@@ -550,8 +550,8 @@ public abstract class KitParser {
     }
 
     for (Element elEnchantment : el.getChildren("enchantment")) {
-      Pair<Enchantment, Integer> entry = parseEnchantment(elEnchantment);
-      enchantments.put(entry.first, entry.second);
+      Map.Entry<Enchantment, Integer> entry = parseEnchantment(elEnchantment);
+      enchantments.put(entry.getKey(), entry.getValue());
     }
 
     return enchantments;

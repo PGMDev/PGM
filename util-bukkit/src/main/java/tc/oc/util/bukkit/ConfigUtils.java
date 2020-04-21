@@ -17,8 +17,6 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.util.Vector;
-import tc.oc.util.Numbers;
 import tc.oc.util.TimeUtils;
 
 public abstract class ConfigUtils {
@@ -54,24 +52,6 @@ public abstract class ConfigUtils {
           "Config value " + key + ": percentage must be between 0 and 1");
     }
     return percent;
-  }
-
-  public static Vector getVector(ConfigurationSection section, String key, Vector def) {
-    Object o = section.get(key);
-    if (o == null) {
-      return def;
-    } else if (o instanceof List) {
-      List v = (List) o;
-      return new Vector(
-          Numbers.coerce(v.get(0), Double.class, true),
-          Numbers.coerce(v.get(1), Double.class, true),
-          Numbers.coerce(v.get(2), Double.class, true));
-    } else if (o instanceof ConfigurationSection) {
-      ConfigurationSection v = (ConfigurationSection) o;
-      return new Vector(v.getDouble("x"), v.getDouble("y"), v.getDouble("z"));
-    } else {
-      throw new IllegalArgumentException("Cannot coerce " + o.getClass() + " to vector");
-    }
   }
 
   public static Path getPath(ConfigurationSection section, String key, Path def) {

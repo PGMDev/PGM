@@ -1,14 +1,18 @@
 package tc.oc.util.collection;
 
 import com.google.common.collect.Maps;
-import java.util.*;
-import java.util.Map.Entry;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
-public class ContextStore<T> implements Iterable<Entry<String, T>> {
-  protected final Map<String, T> store = Maps.newLinkedHashMap();
+public class ContextStore<T> implements Iterable<Map.Entry<String, T>> {
+  protected final Map<String, T> store = Maps.newTreeMap();
 
   @Override
-  public Iterator<Entry<String, T>> iterator() {
+  public Iterator<Map.Entry<String, T>> iterator() {
     return this.store.entrySet().iterator();
   }
 
@@ -67,7 +71,7 @@ public class ContextStore<T> implements Iterable<Entry<String, T>> {
    * @note This method will look up the exact equality operator then the .equals method.
    */
   public String getName(T obj) {
-    for (Entry<String, T> entry : this.store.entrySet()) {
+    for (Map.Entry<String, T> entry : this.store.entrySet()) {
       if (entry.getValue() == obj || entry.getValue().equals(obj)) {
         return entry.getKey();
       }

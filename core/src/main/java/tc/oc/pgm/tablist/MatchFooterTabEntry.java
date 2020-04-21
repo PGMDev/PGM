@@ -14,16 +14,8 @@ import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.tablist.DynamicTabEntry;
 import tc.oc.util.bukkit.tablist.TabView;
 import tc.oc.util.bukkit.translations.AllTranslations;
-import tc.oc.util.collection.DefaultProvider;
 
 public class MatchFooterTabEntry extends DynamicTabEntry {
-
-  public static class Factory implements DefaultProvider<Match, MatchFooterTabEntry> {
-    @Override
-    public MatchFooterTabEntry get(Match key) {
-      return new MatchFooterTabEntry(key);
-    }
-  }
 
   private final Match match;
   private @Nullable Future<?> tickTask;

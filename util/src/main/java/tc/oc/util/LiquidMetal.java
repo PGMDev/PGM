@@ -5,7 +5,9 @@ package tc.oc.util;
  *
  * @author Steve Anton
  */
-public class LiquidMetal {
+public final class LiquidMetal {
+  private LiquidMetal() {}
+
   public static final double SCORE_NO_MATCH = 0.0;
   public static final double SCORE_MATCH = 1.0;
   public static final double SCORE_TRAILING = 0.8;

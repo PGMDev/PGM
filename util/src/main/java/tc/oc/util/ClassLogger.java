@@ -6,7 +6,6 @@ import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import tc.oc.util.collection.ArrayUtils;
 
 /**
  * Logger that is created by giving it a class and an explicit parent logger. The name of the logger
@@ -19,7 +18,7 @@ import tc.oc.util.collection.ArrayUtils;
  * <p>Instances of this class should ONLY be acquired by calling the static {@link #get} methods.
  * These will deduplicate loggers by name, and register them with the java.util.logging subsystem.
  */
-public class ClassLogger extends Logger {
+public final class ClassLogger extends Logger {
 
   private final String prefix;
 
@@ -45,7 +44,8 @@ public class ClassLogger extends Logger {
       name = parent.getName() + "." + namedAncestor.getSimpleName();
     }
     if (klass.isAnonymousClass()) {
-      name += "." + ArrayUtils.fromEnd(klass.getName().split("\\."), 0);
+      String[] names = klass.getName().split("\\.");
+      name += "." + names[names.length - 1];
     }
     if (instanceKey != null) {
       name += "." + instanceKey;

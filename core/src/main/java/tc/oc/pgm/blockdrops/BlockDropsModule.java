@@ -4,7 +4,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
@@ -23,7 +25,6 @@ import tc.oc.pgm.itemmeta.ItemModifyModule;
 import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
-import tc.oc.util.Pair;
 import tc.oc.util.xml.InvalidXMLException;
 import tc.oc.util.xml.Node;
 import tc.oc.util.xml.XMLUtils;
@@ -81,13 +82,12 @@ public class BlockDropsModule implements MapModule {
         int experience =
             XMLUtils.parseNumber(Node.fromChildOrAttr(elRule, "experience"), Integer.class, 0);
 
-        List<Pair<Double, ItemStack>> items = new ArrayList<>();
+        Map<ItemStack, Double> items = new LinkedHashMap<>();
         for (Element elDrops : elRule.getChildren("drops")) {
           for (Element elItem : elDrops.getChildren("item")) {
-            items.add(
-                Pair.create(
-                    XMLUtils.parseNumber(elItem.getAttribute("chance"), Double.class, 1d),
-                    factory.getKits().parseItem(elItem, false)));
+            items.put(
+                factory.getKits().parseItem(elItem, false),
+                XMLUtils.parseNumber(elItem.getAttribute("chance"), Double.class, 1d));
           }
         }
 
@@ -112,8 +112,8 @@ public class BlockDropsModule implements MapModule {
     ItemModifyModule imm = factory.getModule(ItemModifyModule.class);
     if (imm != null) {
       for (BlockDropsRule rule : ruleSet.getRules()) {
-        for (Pair<Double, ItemStack> entry : rule.drops.items) {
-          imm.applyRules(entry.second);
+        for (Map.Entry<ItemStack, Double> entry : rule.drops.items.entrySet()) {
+          imm.applyRules(entry.getKey());
         }
       }
     }

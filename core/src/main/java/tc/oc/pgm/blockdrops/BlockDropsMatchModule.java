@@ -1,6 +1,7 @@
 package tc.oc.pgm.blockdrops;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import org.bukkit.GameMode;
@@ -34,7 +35,6 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
-import tc.oc.util.Pair;
 import tc.oc.util.bukkit.nms.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -83,9 +83,9 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
 
   private void dropItems(BlockDrops drops, Location location, double yield) {
     Random random = match.getRandom();
-    for (Pair<Double, ItemStack> entry : drops.items) {
-      if (random.nextFloat() < yield * entry.first) {
-        location.getWorld().dropItemNaturally(location, entry.second);
+    for (Map.Entry<ItemStack, Double> entry : drops.items.entrySet()) {
+      if (random.nextFloat() < yield * entry.getValue()) {
+        location.getWorld().dropItemNaturally(location, entry.getKey());
       }
     }
   }

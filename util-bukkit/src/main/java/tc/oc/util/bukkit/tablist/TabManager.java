@@ -1,7 +1,9 @@
 package tc.oc.util.bukkit.tablist;
 
 import java.util.Map;
+import java.util.function.Function;
 import java.util.logging.Logger;
+
 import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,7 +16,6 @@ import org.bukkit.event.player.PlayerSkinPartsChangeEvent;
 import org.bukkit.plugin.Plugin;
 import tc.oc.util.ClassLogger;
 import tc.oc.util.collection.DefaultMapAdapter;
-import tc.oc.util.collection.DefaultProvider;
 
 /**
  * Custom player list display (for 1.8 and later)
@@ -39,107 +40,110 @@ import tc.oc.util.collection.DefaultProvider;
  * make the TabEntry dirty state very difficult to track.
  */
 public class TabManager implements Listener {
-  protected final Logger logger;
-  protected final Plugin plugin;
-  final DefaultMapAdapter<Player, TabView> enabledViews;
+    protected final Logger logger;
+    protected final Plugin plugin;
+    final DefaultMapAdapter<Player, TabView> enabledViews;
 
-  final DefaultMapAdapter<Player, TabEntry> playerEntries;
-  final Map<Integer, TabEntry> blankEntries =
-      new DefaultMapAdapter<Integer, TabEntry>(new BlankTabEntry.Factory(), true);
+    final DefaultMapAdapter<Player, TabEntry> playerEntries;
+    final Map<Integer, TabEntry> blankEntries =
+            new DefaultMapAdapter<Integer, TabEntry>(key -> new BlankTabEntry(), true);
 
-  boolean dirty;
+    boolean dirty;
 
-  public TabManager(
-      Plugin plugin,
-      @Nullable DefaultProvider<Player, ? extends TabView> viewProvider,
-      @Nullable DefaultProvider<Player, ? extends TabEntry> playerEntryProvider) {
+    public TabManager(
+            Plugin plugin,
+            @Nullable Function<Player, ? extends TabView> viewProvider,
+            @Nullable Function<Player, ? extends TabEntry> playerEntryProvider) {
 
-    if (viewProvider == null) viewProvider = new TabView.Factory();
-    if (playerEntryProvider == null) playerEntryProvider = new PlayerTabEntry.Factory();
+        if(viewProvider == null) viewProvider = TabView::new;
+        if(playerEntryProvider == null) playerEntryProvider = PlayerTabEntry::new;
 
-    this.logger = ClassLogger.get(plugin.getLogger(), getClass());
-    this.plugin = plugin;
-    this.enabledViews = new DefaultMapAdapter<>(viewProvider, true);
-    this.playerEntries = new DefaultMapAdapter<>(playerEntryProvider, true);
-  }
-
-  public TabManager(Plugin plugin) {
-    this(plugin, null, null);
-  }
-
-  public Plugin getPlugin() {
-    return plugin;
-  }
-
-  public @Nullable TabView getViewOrNull(Player viewer) {
-    return this.enabledViews.getOrNull(viewer);
-  }
-
-  public @Nullable TabView getView(Player viewer) {
-    return this.enabledViews.get(viewer);
-  }
-
-  protected void removeView(TabView view) {
-    if (this.enabledViews.remove(view.getViewer()) != null) view.disable();
-  }
-
-  public @Nullable TabEntry getPlayerEntryOrNull(Player player) {
-    return this.playerEntries.getOrNull(player);
-  }
-
-  public TabEntry getPlayerEntry(Player player) {
-    return this.playerEntries.get(player);
-  }
-
-  public TabEntry removePlayerEntry(Player player) {
-    return this.playerEntries.remove(player);
-  }
-
-  protected TabEntry getBlankEntry(int index) {
-    return this.blankEntries.get(index);
-  }
-
-  protected void invalidate() {
-    this.dirty = true;
-  }
-
-  public void render() {
-    if (this.dirty) {
-      for (TabView view : this.enabledViews.values()) {
-        view.render();
-      }
-
-      this.dirty = false;
+        this.logger = ClassLogger.get(plugin.getLogger(), getClass());
+        this.plugin = plugin;
+        this.enabledViews = new DefaultMapAdapter<>(viewProvider, true);
+        this.playerEntries = new DefaultMapAdapter<>(playerEntryProvider, true);
     }
-  }
 
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onQuit(PlayerQuitEvent event) {
-    TabView view = this.getViewOrNull(event.getPlayer());
-    if (view != null) {
-      view.disable();
-      this.removeView(view);
+    public TabManager(Plugin plugin) {
+        this(plugin, null, null);
     }
-    this.removePlayerEntry(event.getPlayer());
-  }
 
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onRespawn(PlayerRespawnEvent event) {
-    TabView view = this.getViewOrNull(event.getPlayer());
-    if (view != null) view.onRespawn(event);
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onWorldChange(PlayerChangedWorldEvent event) {
-    TabView view = this.getViewOrNull(event.getPlayer());
-    if (view != null) view.onWorldChange(event);
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onSkinPartsChange(PlayerSkinPartsChangeEvent event) {
-    TabEntry entry = this.getPlayerEntryOrNull(event.getPlayer());
-    if (entry instanceof PlayerTabEntry) {
-      ((PlayerTabEntry) entry).onSkinPartsChange(event);
+    public Plugin getPlugin() {
+        return plugin;
     }
-  }
+
+    public @Nullable
+    TabView getViewOrNull(Player viewer) {
+        return this.enabledViews.getOrNull(viewer);
+    }
+
+    public @Nullable
+    TabView getView(Player viewer) {
+        return this.enabledViews.get(viewer);
+    }
+
+    protected void removeView(TabView view) {
+        if(this.enabledViews.remove(view.getViewer()) != null) view.disable();
+    }
+
+    public @Nullable
+    TabEntry getPlayerEntryOrNull(Player player) {
+        return this.playerEntries.getOrNull(player);
+    }
+
+    public TabEntry getPlayerEntry(Player player) {
+        return this.playerEntries.get(player);
+    }
+
+    public TabEntry removePlayerEntry(Player player) {
+        return this.playerEntries.remove(player);
+    }
+
+    protected TabEntry getBlankEntry(int index) {
+        return this.blankEntries.get(index);
+    }
+
+    protected void invalidate() {
+        this.dirty = true;
+    }
+
+    public void render() {
+        if(this.dirty) {
+            for(TabView view : this.enabledViews.values()) {
+                view.render();
+            }
+
+            this.dirty = false;
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onQuit(PlayerQuitEvent event) {
+        TabView view = this.getViewOrNull(event.getPlayer());
+        if(view != null) {
+            view.disable();
+            this.removeView(view);
+        }
+        this.removePlayerEntry(event.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onRespawn(PlayerRespawnEvent event) {
+        TabView view = this.getViewOrNull(event.getPlayer());
+        if(view != null) view.onRespawn(event);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onWorldChange(PlayerChangedWorldEvent event) {
+        TabView view = this.getViewOrNull(event.getPlayer());
+        if(view != null) view.onWorldChange(event);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onSkinPartsChange(PlayerSkinPartsChangeEvent event) {
+        TabEntry entry = this.getPlayerEntryOrNull(event.getPlayer());
+        if(entry instanceof PlayerTabEntry) {
+            ((PlayerTabEntry) entry).onSkinPartsChange(event);
+        }
+    }
 }

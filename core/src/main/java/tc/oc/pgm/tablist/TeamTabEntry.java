@@ -7,16 +7,8 @@ import tc.oc.util.bukkit.component.ComponentUtils;
 import tc.oc.util.bukkit.component.types.PersonalizedText;
 import tc.oc.util.bukkit.tablist.DynamicTabEntry;
 import tc.oc.util.bukkit.tablist.TabView;
-import tc.oc.util.collection.DefaultProvider;
 
 public class TeamTabEntry extends DynamicTabEntry {
-
-  public static class Factory implements DefaultProvider<Team, TeamTabEntry> {
-    @Override
-    public TeamTabEntry get(Team key) {
-      return new TeamTabEntry(key);
-    }
-  }
 
   private final Team team;
 

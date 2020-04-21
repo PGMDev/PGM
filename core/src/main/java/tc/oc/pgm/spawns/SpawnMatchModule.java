@@ -43,7 +43,6 @@ import tc.oc.pgm.modules.EventFilterMatchModule;
 import tc.oc.pgm.spawns.states.Joining;
 import tc.oc.pgm.spawns.states.Observing;
 import tc.oc.pgm.spawns.states.State;
-import tc.oc.util.RandomUtils;
 
 @ListenerScope(MatchScope.LOADED)
 public class SpawnMatchModule implements MatchModule, Listener, Tickable {
@@ -108,7 +107,7 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
       List<Spawn> potential = getSpawns(player);
       potential.removeAll(unique.values());
       if (!potential.isEmpty()) {
-        Spawn spawn = RandomUtils.element(match.getRandom(), potential);
+        Spawn spawn = potential.get(match.getRandom().nextInt(potential.size()));
         if (spawn.attributes.exclusive) unique.put(competitor, spawn);
         return spawn;
       } else {

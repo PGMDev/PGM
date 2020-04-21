@@ -31,7 +31,7 @@ public class WorldProblemListener implements Listener {
   private final Logger logger;
   private final SetMultimap<World, Chunk> repairedChunks = HashMultimap.create();
   private static final Map<World, BlockVectorSet> block36Locations =
-      new DefaultMapAdapter<>(new BlockVectorSet.Factory<>(), true);
+      new DefaultMapAdapter<>(world -> new BlockVectorSet(), true);
 
   public WorldProblemListener(Plugin plugin) {
     this.logger = ClassLogger.get(plugin.getLogger(), getClass());

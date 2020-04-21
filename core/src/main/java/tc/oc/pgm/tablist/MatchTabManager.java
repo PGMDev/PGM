@@ -37,13 +37,13 @@ import tc.oc.util.collection.DefaultMapAdapter;
 public class MatchTabManager extends TabManager implements Listener {
 
   private final Map<Team, TeamTabEntry> teamEntries =
-      new DefaultMapAdapter<>(new TeamTabEntry.Factory(), true);
+      new DefaultMapAdapter<>(TeamTabEntry::new, true);
   private final Map<Match, MapTabEntry> mapEntries =
-      new DefaultMapAdapter<>(new MapTabEntry.Factory(), true);
+      new DefaultMapAdapter<>(MapTabEntry::new, true);
   private final Map<Match, MatchFooterTabEntry> footerEntries =
-      new DefaultMapAdapter<>(new MatchFooterTabEntry.Factory(), true);
+      new DefaultMapAdapter<>(MatchFooterTabEntry::new, true);
   private final Map<Match, FreeForAllTabEntry> freeForAllEntries =
-      new DefaultMapAdapter<>(new FreeForAllTabEntry.Factory(), true);
+      new DefaultMapAdapter<>(FreeForAllTabEntry::new, true);
 
   private Future<?> renderTask;
   private PlayerOrderFactory playerOrderFactory;
