@@ -25,7 +25,6 @@ import org.bukkit.event.player.PlayerLoginEvent.Result;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.vehicle.VehicleMoveEvent;
 import org.bukkit.event.vehicle.VehicleUpdateEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -284,7 +283,7 @@ public class PGMListener implements Listener {
   }
 
   @EventHandler
-  public void freezeVehicle(final VehicleUpdateEvent event)  {
+  public void freezeVehicle(final VehicleUpdateEvent event) {
     Match match = this.mm.getMatch(event.getWorld());
     if (match != null && match.isFinished()) {
       event.getVehicle().setVelocity(new Vector());
