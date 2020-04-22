@@ -332,7 +332,7 @@ public class ModerationCommands implements Listener {
     if (punish(PunishmentType.KICK, targetMatchPlayer, sender, reason, silent)) {
       target.kickPlayer(
           formatPunishmentScreen(
-              PunishmentType.KICK, formatPunisherName(sender, match), reason, null));
+              PunishmentType.KICK, formatStaffName(sender, match), reason, null));
     }
   }
 
@@ -353,7 +353,7 @@ public class ModerationCommands implements Listener {
     boolean tempBan = banLength != null && !banLength.isZero();
 
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
-    Component senderName = formatPunisherName(sender, match);
+    Component senderName = formatStaffName(sender, match);
     if (punish(
         tempBan ? PunishmentType.TEMP_BAN : PunishmentType.BAN,
         targetMatchPlayer,
@@ -363,7 +363,7 @@ public class ModerationCommands implements Listener {
         silent)) {
       banPlayer(
           target.getName(), reason, senderName, tempBan ? Instant.now().plus(banLength) : null);
-      cacheRecentBan(target, formatPunisherName(sender, match));
+      cacheRecentBan(target, formatStaffName(sender, match));
       target.kickPlayer(
           formatPunishmentScreen(
               tempBan ? PunishmentType.TEMP_BAN : PunishmentType.BAN,
@@ -406,7 +406,7 @@ public class ModerationCommands implements Listener {
               reason,
               null,
               ComponentRenderers.toLegacyText(
-                  formatPunisherName(sender, manager.getMatch(sender)), sender));
+                  formatStaffName(sender, manager.getMatch(sender)), sender));
 
       int onlineBans = 0;
       // Check all online players to find those with same IP.
@@ -418,12 +418,12 @@ public class ModerationCommands implements Listener {
 
             // Ban username to prevent rejoining
             banPlayer(
-                player.getName(), reason, formatPunisherName(sender, matchPlayer.getMatch()), null);
+                player.getName(), reason, formatStaffName(sender, matchPlayer.getMatch()), null);
 
             player.kickPlayer(
                 formatPunishmentScreen(
                     PunishmentType.BAN,
-                    formatPunisherName(sender, manager.getMatch(sender)),
+                    formatStaffName(sender, manager.getMatch(sender)),
                     reason,
                     null));
             onlineBans++;
@@ -471,7 +471,7 @@ public class ModerationCommands implements Listener {
       throws CommandException {
     boolean tempBan = duration != null && !duration.isZero();
     PunishmentType type = tempBan ? PunishmentType.TEMP_BAN : PunishmentType.BAN;
-    Component punisher = formatPunisherName(sender, manager.getMatch(sender));
+    Component punisher = formatStaffName(sender, manager.getMatch(sender));
 
     banPlayer(target, reason, punisher, tempBan ? Instant.now().plus(duration) : null);
     broadcastPunishment(
@@ -802,7 +802,7 @@ public class ModerationCommands implements Listener {
   /*
    * Format Punisher Name
    */
-  public static Component formatPunisherName(CommandSender sender, Match match) {
+  public static Component formatStaffName(CommandSender sender, Match match) {
     if (sender != null && sender instanceof Player) {
       MatchPlayer matchPlayer = match.getPlayer((Player) sender);
       if (matchPlayer != null) return matchPlayer.getStyledName(NameStyle.FANCY);
@@ -934,7 +934,7 @@ public class ModerationCommands implements Listener {
     Component reasonMsg = ModerationCommands.formatPunishmentReason(reason);
     Component formattedMsg =
         new PersonalizedText(
-            ModerationCommands.formatPunisherName(sender, match),
+            ModerationCommands.formatStaffName(sender, match),
             BROADCAST_DIV,
             prefix,
             BROADCAST_DIV,

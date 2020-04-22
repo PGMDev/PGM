@@ -5,6 +5,7 @@ import app.ashcon.intake.bukkit.graph.BasicBukkitCommandGraph;
 import app.ashcon.intake.fluent.DispatcherNode;
 import app.ashcon.intake.parametric.AbstractModule;
 import app.ashcon.intake.parametric.provider.EnumProvider;
+import com.google.common.collect.Lists;
 import java.io.File;
 import java.sql.SQLException;
 import java.time.Duration;
@@ -191,7 +192,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
           new MapPoolManager(
               logger, new File(getDataFolder(), Config.MapPools.getPath()), datastore);
     } else {
-      mapOrder = new RandomMapOrder();
+      mapOrder = new RandomMapOrder(Lists.newArrayList(mapLibrary.getMaps()));
     }
 
     prefixRegistry = new PrefixRegistryImpl();

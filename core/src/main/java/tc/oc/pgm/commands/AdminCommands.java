@@ -12,23 +12,30 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
-import org.bukkit.ChatColor;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.community.commands.ModerationCommands;
+import tc.oc.pgm.cycle.CycleCountdown;
+import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.restart.CancelRestartEvent;
 import tc.oc.pgm.restart.RequestRestartEvent;
 import tc.oc.pgm.restart.RestartManager;
+import tc.oc.pgm.rotation.MapPool;
+import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.timelimit.TimeLimitCountdown;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.translations.AllTranslations;
 
 public class AdminCommands {
@@ -96,10 +103,12 @@ public class AdminCommands {
       flags = "f",
       perms = Permissions.SETNEXT)
   public static void setNext(
-      CommandSender sender, @Switch('f') boolean force, @Text MapInfo map, MapOrder mapOrder)
+      CommandSender sender,
+      @Switch('f') boolean force,
+      @Text MapInfo map,
+      MapOrder mapOrder,
+      Match match)
       throws CommandException {
-    MatchManager mm = PGM.get().getMatchManager();
-
     if (RestartManager.isQueued() && !force) {
       throw new CommandException(
           AllTranslations.get().translate("command.admin.setNext.restartQueued", sender));
@@ -115,13 +124,61 @@ public class AdminCommands {
                   .translate("command.admin.cancelRestart.restartUnqueued", sender));
     }
 
-    sender.sendMessage(
-        ChatColor.DARK_PURPLE
-            + AllTranslations.get()
-                .translate(
-                    "command.admin.set.success",
-                    sender,
-                    ChatColor.GOLD + map.getName() + ChatColor.DARK_PURPLE));
+    Component mapName = new PersonalizedText(map.getName()).color(ChatColor.DARK_PURPLE);
+    Component successful =
+        new PersonalizedTranslatable(
+                "command.admin.set.success",
+                ModerationCommands.formatStaffName(sender, match),
+                mapName)
+            .getPersonalizedText()
+            .color(ChatColor.GRAY);
+    ChatDispatcher.broadcastAdminChatMessage(successful, match);
+  }
+
+  @Command(
+      aliases = {"setpool", "setrot"},
+      desc = "Set a custom map pool or revert to dynamic",
+      usage = "[pool name] -r (revert to dynamic)",
+      flags = "r",
+      perms = Permissions.SETNEXT)
+  public static void setPool(
+      CommandSender sender,
+      Match match,
+      MapOrder mapOrder,
+      @Nullable String poolName,
+      @Switch('r') boolean reset)
+      throws CommandException {
+    if (!match.getCountdown().getAll(CycleCountdown.class).isEmpty()) {
+      sender.sendMessage(
+          new PersonalizedTranslatable("command.admin.setPool.activeCycle")
+              .getPersonalizedText()
+              .color(ChatColor.RED));
+      return;
+    }
+    MapPoolManager mapPoolManager = MapPoolCommands.getMapPoolManager(sender, mapOrder);
+    MapPool newPool =
+        reset
+            ? mapPoolManager.getAppropriateDynamicPool(match).orElse(null)
+            : mapPoolManager.getMapPoolByName(poolName);
+
+    if (newPool == null) {
+      Component noPoolError =
+          new PersonalizedTranslatable("command.pools.noPoolMatch")
+              .getPersonalizedText()
+              .color(ChatColor.RED);
+      sender.sendMessage(noPoolError);
+    } else {
+      if (newPool.equals(mapPoolManager.getActiveMapPool())) {
+        sender.sendMessage(
+            new PersonalizedTranslatable(
+                    "command.pools.set.matching",
+                    new PersonalizedText(newPool.getName()).color(ChatColor.LIGHT_PURPLE))
+                .getPersonalizedText()
+                .color(ChatColor.GRAY));
+        return;
+      }
+      mapPoolManager.updateActiveMapPool(newPool, match, true, sender);
+    }
   }
 
   @Command(

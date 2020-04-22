@@ -309,7 +309,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
     public void setFrozen(@Nullable CommandSender freezer, MatchPlayer freezee, boolean frozen) {
       freezee.setFrozen(frozen);
 
-      Component senderName = ModerationCommands.formatPunisherName(freezer, freezee.getMatch());
+      Component senderName = ModerationCommands.formatStaffName(freezer, freezee.getMatch());
 
       if (frozen) {
         freeze(freezee, senderName);
