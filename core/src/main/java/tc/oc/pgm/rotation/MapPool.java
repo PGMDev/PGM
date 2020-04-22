@@ -33,7 +33,7 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
         return new Rotation(manager, section, key);
       case "voted":
         return new VotingPool(manager, section, key);
-      case "random":
+      case "shuffled":
         return new RandomMapPool(manager, section, key);
       default:
         PGM.get().getLogger().severe("Invalid map pool type for " + key + ": '" + type + "'");

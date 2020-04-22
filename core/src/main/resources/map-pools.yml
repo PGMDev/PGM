@@ -7,7 +7,7 @@
 
 pools:
   default:
-    # Allowed types: ordered (rotation), voted (voted map pool), random (randomly selected maps)
+    # Allowed types: ordered (rotation), voted (voted map pool), shuffled (randomly selected order)
     type: ordered
     enabled: true
     dynamic: true # If set to true, map pool will be considered when adjusting to best fit player size.
