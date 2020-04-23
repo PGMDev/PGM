@@ -13,6 +13,15 @@ import tc.oc.pgm.util.block.BlockFaces;
 
 public interface Materials {
 
+  static Material parseMaterial(String text) {
+    // Since Bukkit changed SNOW_BALL changed to SNOWBALL, support both
+    if (text.matches("(?)snow_?ball")) {
+      text = text.contains("_") ? "snowball" : "snow_ball";
+    }
+
+    return Material.matchMaterial(text);
+  }
+
   static boolean isWeapon(Material material) {
     if (material == null) return false;
 

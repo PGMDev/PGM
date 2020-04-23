@@ -42,6 +42,7 @@ import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.Components;
 import tc.oc.pgm.util.material.MaterialMatcher;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.material.matcher.AllMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.BlockMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
@@ -672,7 +673,7 @@ public final class XMLUtils {
   }
 
   public static Material parseMaterial(Node node, String text) throws InvalidXMLException {
-    Material material = Material.matchMaterial(text);
+    Material material = Materials.parseMaterial(text);
     if (material == null) {
       throw new InvalidXMLException("Unknown material '" + text + "'", node);
     }
