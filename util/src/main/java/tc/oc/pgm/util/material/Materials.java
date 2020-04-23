@@ -1,6 +1,7 @@
 package tc.oc.pgm.util.material;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Banner;
@@ -200,5 +201,12 @@ public interface Materials {
     location.setYaw(
         BlockFaces.faceToYaw(((org.bukkit.material.Banner) block.getData()).getFacing()));
     return location;
+  }
+
+  static void playBreakEffect(Location location, MaterialData material) {
+    location
+        .getWorld()
+        .playEffect(
+            location, Effect.STEP_SOUND, material.getItemTypeId() + (material.getData() << 12));
   }
 }

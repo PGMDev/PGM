@@ -35,7 +35,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.material.Materials;
 
 @ListenerScope(MatchScope.RUNNING)
 public class BlockDropsMatchModule implements MatchModule, Listener {
@@ -239,20 +239,9 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
 
     MaterialData oldMaterial = hit.getBlock().getState().getData();
     replaceBlock(drops, hit.getBlock(), player);
-
-    // Play a fake punching effect if the block is punchable. Use raw particles instead of
-    // playBlockBreakEffect so the position is precise rather than in the block center.
-    Object packet =
-        NMSHacks.blockCrackParticlesPacket(
-            oldMaterial, false, hit.getPosition(), new Vector(), 0, 5);
-    for (MatchPlayer viewer : match.getPlayers()) {
-      if (viewer.getBukkit().getEyeLocation().toVector().distanceSquared(hit.getPosition())
-          < 16 * 16) {
-        NMSHacks.sendPacket(viewer.getBukkit(), packet);
-      }
-    }
-
     Location location = hit.getPosition().toLocation(hit.getBlock().getWorld());
+
+    Materials.playBreakEffect(location, oldMaterial);
     dropItems(drops, location, 1d);
     dropExperience(drops, location);
   }
