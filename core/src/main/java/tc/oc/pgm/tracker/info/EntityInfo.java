@@ -9,9 +9,8 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.Components;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.translation.MinecraftKeys;
 
 public class EntityInfo extends OwnerInfoBase implements PhysicalInfo {
 
@@ -55,19 +54,7 @@ public class EntityInfo extends OwnerInfoBase implements PhysicalInfo {
     if (getCustomName() != null) {
       return Components.fromLegacyText(getCustomName());
     } else {
-      String key;
-      switch (getEntityType()) {
-        case PRIMED_TNT:
-          key = "tile.tnt.name";
-          break;
-
-        default:
-          key = NMSHacks.getTranslationKey(getEntityType());
-          break;
-      }
-      return key != null
-          ? new PersonalizedTranslatable(key)
-          : new PersonalizedText(getEntityType().getName());
+      return new PersonalizedTranslatable(MinecraftKeys.getEntity(getEntityType()));
     }
   }
 

@@ -11,7 +11,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import tc.oc.pgm.util.translate.UTF8Control;
+import tc.oc.pgm.util.translation.UTF8Control;
 import tc.oc.pgm.util.translations.Locales;
 
 /** A class retrieves translations from a {@link ResourceBundle} */

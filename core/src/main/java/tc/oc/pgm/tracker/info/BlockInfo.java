@@ -6,9 +6,8 @@ import org.bukkit.material.MaterialData;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.translation.MinecraftKeys;
 
 public class BlockInfo extends OwnerInfoBase implements PhysicalInfo {
 
@@ -42,10 +41,7 @@ public class BlockInfo extends OwnerInfoBase implements PhysicalInfo {
 
   @Override
   public Component getLocalizedName() {
-    String key = NMSHacks.getTranslationKey(getMaterial());
-    return key != null
-        ? new PersonalizedTranslatable(key)
-        : new PersonalizedText(getMaterial().getItemType().name());
+    return new PersonalizedTranslatable(MinecraftKeys.getMaterial(getMaterial().getItemType()));
   }
 
   @Override

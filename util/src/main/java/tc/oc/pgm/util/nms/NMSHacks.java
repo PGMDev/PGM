@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
 import net.minecraft.server.v1_8_R3.*;
-import net.minecraft.server.v1_8_R3.Item;
 import net.minecraft.server.v1_8_R3.WorldBorder;
 import org.bukkit.*;
 import org.bukkit.Material;
@@ -19,7 +18,6 @@ import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.*;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftMetaBook;
-import org.bukkit.craftbukkit.v1_8_R3.potion.CraftPotionEffectType;
 import org.bukkit.craftbukkit.v1_8_R3.scoreboard.CraftTeam;
 import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers;
 import org.bukkit.craftbukkit.v1_8_R3.util.Skins;
@@ -28,7 +26,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.potion.PotionEffectTypeWrapper;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.util.component.Component;
@@ -646,66 +643,6 @@ public interface NMSHacks {
     }
 
     sendPacketToViewers(player, packet);
-  }
-
-  static ItemStack asNMS(org.bukkit.inventory.ItemStack bukkit) {
-    if (bukkit instanceof CraftItemStack) {
-      return ((CraftItemStack) bukkit).getHandle();
-    } else {
-      return CraftItemStack.asNMSCopy(bukkit);
-    }
-  }
-
-  static String getKey(org.bukkit.Material material) {
-    MinecraftKey key = Item.REGISTRY.c(Item.getById(material.getId()));
-    return key == null ? null : key.toString();
-  }
-
-  static String getTranslationKey(org.bukkit.inventory.ItemStack stack) {
-    ItemStack nms = asNMS(stack);
-    return nms == null ? null : nms.getItem().k(nms) + ".name";
-  }
-
-  static String getTranslationKey(Block nmsBlock) {
-    return nmsBlock.a() + ".name";
-  }
-
-  // Some world cannot be made into NMS ItemStacks (e.g. Lava),
-  // so try to make them directly into blocks instead.
-  static String getBlockTranslationKey(org.bukkit.Material material) {
-    Block nmsBlock = CraftMagicNumbers.getBlock(material);
-    return nmsBlock == null ? null : getTranslationKey(nmsBlock);
-  }
-
-  static String getTranslationKey(org.bukkit.Material material) {
-    String key = getTranslationKey(new org.bukkit.inventory.ItemStack(material));
-    return key != null ? key : getBlockTranslationKey(material);
-  }
-
-  static String getTranslationKey(MaterialData material) {
-    String key = getTranslationKey(material.toItemStack(1));
-    return key != null ? key : getBlockTranslationKey(material.getItemType());
-  }
-
-  static String getTranslationKey(org.bukkit.entity.Entity entity) {
-    net.minecraft.server.v1_8_R3.Entity nms = ((CraftEntity) entity).getHandle();
-    String key = EntityTypes.b(nms);
-    if (key == null) key = "generic";
-    return "entity." + key + ".name";
-  }
-
-  static String getTranslationKey(org.bukkit.entity.EntityType entity) {
-    return "entity." + entity.getName() + ".name";
-  }
-
-  static String getTranslationKey(PotionEffectType effect) {
-    if (effect instanceof CraftPotionEffectType) {
-      return ((CraftPotionEffectType) effect).getHandle().a();
-    } else if (effect instanceof PotionEffectTypeWrapper) {
-      return getTranslationKey(((PotionEffectTypeWrapper) effect).getType());
-    } else {
-      return "potion.empty";
-    }
   }
 
   static org.bukkit.enchantments.Enchantment getEnchantment(String key) {

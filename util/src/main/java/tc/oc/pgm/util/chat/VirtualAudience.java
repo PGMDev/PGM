@@ -8,7 +8,7 @@ import net.kyori.text.format.TextColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.ComponentRenderers;
-import tc.oc.pgm.util.translations2.ComponentProvider;
+import tc.oc.pgm.util.translation.ComponentProvider;
 
 /** An {@link Audience} that represents a virtual {@link CommandSender}. */
 @FunctionalInterface

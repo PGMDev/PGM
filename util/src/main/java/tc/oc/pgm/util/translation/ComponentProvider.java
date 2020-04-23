@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.translations2;
+package tc.oc.pgm.util.translation;
 
 import java.util.Locale;
 import javax.annotation.Nullable;

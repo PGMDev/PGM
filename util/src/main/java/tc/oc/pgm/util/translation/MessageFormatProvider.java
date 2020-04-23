@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.translations2;
+package tc.oc.pgm.util.translation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -13,7 +13,6 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import javax.annotation.Nullable;
-import tc.oc.pgm.util.translate.UTF8Control;
 
 /**
  * Provides {@link MessageFormat} translations based on {@link Locale}.

@@ -13,6 +13,46 @@ import tc.oc.pgm.util.block.BlockFaces;
 
 public interface Materials {
 
+  static boolean isWeapon(Material material) {
+    if (material == null) return false;
+
+    switch (material) {
+        // Sword
+      case WOOD_SWORD:
+      case STONE_SWORD:
+      case GOLD_SWORD:
+      case IRON_SWORD:
+      case DIAMOND_SWORD:
+        // Axe
+      case WOOD_AXE:
+      case STONE_AXE:
+      case GOLD_AXE:
+      case IRON_AXE:
+      case DIAMOND_AXE:
+        // Pickaxe
+      case WOOD_PICKAXE:
+      case STONE_PICKAXE:
+      case GOLD_PICKAXE:
+      case IRON_PICKAXE:
+      case DIAMOND_PICKAXE:
+        // Spade
+      case WOOD_SPADE:
+      case STONE_SPADE:
+      case GOLD_SPADE:
+      case IRON_SPADE:
+      case DIAMOND_SPADE:
+        // Hoe
+      case WOOD_HOE:
+      case STONE_HOE:
+      case GOLD_HOE:
+      case IRON_HOE:
+      case DIAMOND_HOE:
+        return true;
+      default:
+        return false;
+    }
+  }
+
   static boolean isSolid(Material material) {
     if (material == null) {
       return false;

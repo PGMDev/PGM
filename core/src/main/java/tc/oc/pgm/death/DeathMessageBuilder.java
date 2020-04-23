@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.EntityType;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.*;
@@ -26,6 +25,7 @@ import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.Components;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.translations.TranslationUtils;
 
@@ -183,7 +183,8 @@ public class DeathMessageBuilder {
   }
 
   boolean item(ItemInfo itemInfo) {
-    if (itemInfo.getItem().getType() != Material.AIR && option("item")) {
+    // TODO: Bukkit 1.13+ should be able to handle more than just weapons
+    if (Materials.isWeapon(itemInfo.getItem().getType()) && option("item")) {
       weapon = itemInfo.getLocalizedName();
       return true;
     }
@@ -317,18 +318,20 @@ public class DeathMessageBuilder {
 
     require("projectile");
 
-    if (projectile.getProjectile() instanceof EntityInfo
-        && ((EntityInfo) projectile.getProjectile()).getEntityType() == EntityType.ARROW) {
-      // "shot by arrow" is redundant
-      attack(projectile.getShooter(), null);
+    PhysicalInfo info = projectile.getProjectile();
+    if (info instanceof EntityInfo) {
+      switch (((EntityInfo) info).getEntityType()) {
+        case ARROW:
+        case WITHER_SKULL:
+          info = null; // "shot by arrow" is redundant
+          break;
+      }
     } else {
-      attack(projectile.getShooter(), projectile.getProjectile());
-      weapon =
-          projectile
-              .getLocalizedName(); // Projectile name may be different than entity name e.g. custom
-      // projectile
+      // Projectile name may be different than entity name e.g. custom projectile
+      weapon = projectile.getLocalizedName();
     }
 
+    attack(projectile.getShooter(), info);
     ranged(projectile, distanceReference);
   }
 

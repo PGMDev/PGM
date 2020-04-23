@@ -7,7 +7,7 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.translation.MinecraftKeys;
 
 public class FallingBlockInfo extends EntityInfo implements DamageInfo {
 
@@ -33,7 +33,7 @@ public class FallingBlockInfo extends EntityInfo implements DamageInfo {
 
   @Override
   public Component getLocalizedName() {
-    return new PersonalizedTranslatable(NMSHacks.getTranslationKey(getMaterial()));
+    return new PersonalizedTranslatable(MinecraftKeys.getMaterial(getMaterial()));
   }
 
   @Override

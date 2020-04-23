@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.translate;
+package tc.oc.pgm.util.translation;
 
 import java.io.IOException;
 import java.io.InputStream;

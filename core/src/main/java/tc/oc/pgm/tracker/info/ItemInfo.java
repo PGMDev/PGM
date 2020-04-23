@@ -7,9 +7,8 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.Components;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.translation.MinecraftKeys;
 
 public class ItemInfo extends OwnerInfoBase implements PhysicalInfo {
 
@@ -44,10 +43,7 @@ public class ItemInfo extends OwnerInfoBase implements PhysicalInfo {
       }
     }
 
-    String key = NMSHacks.getTranslationKey(getItem());
-    return key != null
-        ? new PersonalizedTranslatable(key)
-        : new PersonalizedText(getItem().getType().name());
+    return new PersonalizedTranslatable(MinecraftKeys.getMaterial(getItem().getType()));
   }
 
   @Override

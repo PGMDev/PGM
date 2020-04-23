@@ -6,7 +6,7 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.translation.MinecraftKeys;
 
 public class GenericPotionInfo implements PotionInfo {
 
@@ -29,7 +29,7 @@ public class GenericPotionInfo implements PotionInfo {
 
   @Override
   public Component getLocalizedName() {
-    return new PersonalizedTranslatable(NMSHacks.getTranslationKey(getPotionEffect()));
+    return new PersonalizedTranslatable(MinecraftKeys.getPotion(getPotionEffect()));
   }
 
   @Override
