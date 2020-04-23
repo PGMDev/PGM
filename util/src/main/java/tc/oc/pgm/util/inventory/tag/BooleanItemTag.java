@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.item.tag;
+package tc.oc.pgm.util.inventory.tag;
 
 import org.bukkit.inventory.ItemStack;
 

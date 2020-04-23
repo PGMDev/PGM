@@ -38,7 +38,7 @@ import tc.oc.pgm.tracker.info.ExplosionInfo;
 import tc.oc.pgm.tracker.info.FireInfo;
 import tc.oc.pgm.tracker.info.GenericDamageInfo;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
-import tc.oc.pgm.util.item.Potions;
+import tc.oc.pgm.util.inventory.PotionClassifier;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DamageMatchModule implements MatchModule, Listener {
@@ -219,7 +219,7 @@ public class DamageMatchModule implements MatchModule, Listener {
   @EventHandler(ignoreCancelled = true)
   public void onPotionSplash(final PotionSplashEvent event) {
     ThrownPotion potion = event.getPotion();
-    if (!Potions.isHarmful(potion)) return;
+    if (!PotionClassifier.isHarmful(potion)) return;
 
     for (LivingEntity entity : event.getAffectedEntities()) {
       ParticipantState victim = match.getParticipantState(entity);

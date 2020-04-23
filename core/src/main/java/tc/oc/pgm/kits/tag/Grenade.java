@@ -5,7 +5,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.Metadatable;
 import org.bukkit.plugin.Plugin;
-import tc.oc.pgm.util.item.tag.ItemTag;
+import tc.oc.pgm.util.inventory.tag.ItemTag;
 
 public class Grenade {
   public final float power;

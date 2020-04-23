@@ -7,7 +7,7 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.item.Potions;
+import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.translation.MinecraftKeys;
 
 public class ThrownPotionInfo extends EntityInfo implements PotionInfo {
@@ -16,7 +16,7 @@ public class ThrownPotionInfo extends EntityInfo implements PotionInfo {
 
   public ThrownPotionInfo(ThrownPotion entity, @Nullable ParticipantState owner) {
     super(entity, owner);
-    this.effectType = Potions.getPrimaryEffectType(entity.getItem());
+    this.effectType = InventoryUtils.getPrimaryEffectType(entity.getItem());
   }
 
   public ThrownPotionInfo(ThrownPotion entity) {

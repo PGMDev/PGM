@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.item;
+package tc.oc.pgm.util.inventory;
 
 import java.util.Arrays;
 import org.bukkit.Material;

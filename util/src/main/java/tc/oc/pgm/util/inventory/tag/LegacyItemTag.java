@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.item.tag;
+package tc.oc.pgm.util.inventory.tag;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;

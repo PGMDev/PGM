@@ -59,7 +59,7 @@ import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.component.ComponentUtils;
-import tc.oc.pgm.util.item.Items;
+import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.translations.AllTranslations;
 
 @ListenerScope(MatchScope.LOADED)
@@ -352,7 +352,7 @@ public class PickerMatchModule implements MatchModule, Listener {
     if (!canUse(player)) return;
 
     ItemStack hand = event.getPlayer().getItemInHand();
-    if (Items.isNothing(hand)) return;
+    if (InventoryUtils.isNothing(hand)) return;
 
     String displayName = hand.getItemMeta().getDisplayName();
     if (displayName == null) return;

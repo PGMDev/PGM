@@ -1,12 +1,14 @@
 package tc.oc.pgm.itemmeta;
 
+import com.google.common.collect.Sets;
 import java.util.Set;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
-import tc.oc.pgm.util.item.Items;
+import org.bukkit.util.ImmutableMaterialSet;
+import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
 public class ItemRule {
@@ -23,7 +25,7 @@ public class ItemRule {
   }
 
   public void apply(ItemStack stack) {
-    Items.addPotionEffects(stack, this.meta.getCustomEffects());
+    InventoryUtils.addEffects(stack, this.meta.getCustomEffects());
 
     ItemMeta meta = stack.getItemMeta();
     if (meta != null) {
@@ -38,7 +40,7 @@ public class ItemRule {
       Set<ItemFlag> flags = this.meta.getItemFlags();
       meta.addItemFlags(flags.toArray(new ItemFlag[flags.size()]));
 
-      Items.addEnchantments(meta, this.meta.getEnchants());
+      InventoryUtils.addEnchantments(meta, this.meta.getEnchants());
 
       for (String attribute : this.meta.getModifiedAttributes()) {
         for (AttributeModifier modifier : this.meta.getAttributeModifiers(attribute)) {
@@ -47,10 +49,17 @@ public class ItemRule {
       }
 
       if (this.meta.spigot().isUnbreakable()) meta.spigot().setUnbreakable(true);
-      meta.setCanDestroy(Items.unionMaterials(meta.getCanDestroy(), this.meta.getCanDestroy()));
-      meta.setCanPlaceOn(Items.unionMaterials(meta.getCanPlaceOn(), this.meta.getCanPlaceOn()));
+      meta.setCanDestroy(unionMaterials(meta.getCanDestroy(), this.meta.getCanDestroy()));
+      meta.setCanPlaceOn(unionMaterials(meta.getCanPlaceOn(), this.meta.getCanPlaceOn()));
 
       stack.setItemMeta(meta);
     }
+  }
+
+  private static ImmutableMaterialSet unionMaterials(
+      ImmutableMaterialSet a, ImmutableMaterialSet b) {
+    if (a.containsAll(b)) return a;
+    if (b.containsAll(a)) return b;
+    return ImmutableMaterialSet.of(Sets.union(a, b));
   }
 }
