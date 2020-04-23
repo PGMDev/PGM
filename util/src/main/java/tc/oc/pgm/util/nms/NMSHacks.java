@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
@@ -33,6 +34,8 @@ import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
 
 public interface NMSHacks {
+
+  AtomicInteger ENTITY_IDS = new AtomicInteger(Integer.MAX_VALUE);
 
   static EntityTrackerEntry getTrackerEntry(net.minecraft.server.v1_8_R3.Entity nms) {
     return ((WorldServer) nms.getWorld()).getTracker().trackedEntities.get(nms.getId());
@@ -279,25 +282,9 @@ public interface NMSHacks {
     return teamPacket(4, name, null, null, null, false, false, null, players);
   }
 
-  /** Entity Spawning and Metadata */
   static int allocateEntityId() {
-    return allocateEntityId(null);
+    return ENTITY_IDS.decrementAndGet();
   }
-
-  static int allocateEntityId(@Nullable Object context) {
-    Integer i = null;
-    if (context != null) {
-      i = ENTITY_IDS.get(context);
-    }
-    if (i == null) {
-      i = Bukkit.allocateEntityId();
-      if (context != null) ENTITY_IDS.put(context, i);
-    }
-    return i;
-  }
-
-  // FIXME: Ensure map size does not grow forever
-  Map<Object, Integer> ENTITY_IDS = new WeakHashMap<>();
 
   static class EntityMetadata {
     public final DataWatcher dataWatcher;
