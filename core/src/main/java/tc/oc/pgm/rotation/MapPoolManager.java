@@ -2,6 +2,8 @@ package tc.oc.pgm.rotation;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +25,7 @@ import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.events.MapPoolAdjustEvent;
+import tc.oc.pgm.util.TimeUtils;
 
 /**
  * Manages all the existing {@link MapPool}s, as for maintaining their order, and updating the one
@@ -35,6 +38,10 @@ public class MapPoolManager implements MapOrder {
   private FileConfiguration mapPoolFileConfig;
   private List<MapPool> mapPools = new ArrayList<>();
   private MapPool activeMapPool;
+
+  /* If a time limit is added via /setpool <name> -t [time], then after this duration the map pool will revert automaticly */
+  private Duration poolTimeLimit = null;
+  private Instant poolStartTime = null;
 
   /** When a {@link MapInfo} is manually set next, it overrides the rotation order * */
   private MapInfo overriderMap;
@@ -113,22 +120,37 @@ public class MapPoolManager implements MapOrder {
   }
 
   private void updateActiveMapPool(MapPool mapPool, Match match) {
-    updateActiveMapPool(mapPool, match, false, null);
+    updateActiveMapPool(mapPool, match, false, null, null);
   }
 
   public void updateActiveMapPool(
-      MapPool mapPool, Match match, boolean force, @Nullable CommandSender sender) {
+      MapPool mapPool,
+      Match match,
+      boolean force,
+      @Nullable CommandSender sender,
+      @Nullable Duration timeLimit) {
     saveMapPools();
 
     if (mapPool == activeMapPool) return;
 
     activeMapPool.unloadPool(match);
 
-    // Call a MapPoolAdjustEvent so plugins can listen when map pool has changed
-    match.callEvent(new MapPoolAdjustEvent(activeMapPool, mapPool, match, force, sender));
-
     // Set new active pool
     activeMapPool = mapPool;
+
+    if (!activeMapPool.isDynamic()) {
+      poolStartTime = Instant.now();
+      if (timeLimit != null) {
+        poolTimeLimit = timeLimit;
+      }
+    } else {
+      poolStartTime = null;
+      poolTimeLimit = null;
+    }
+
+    // Call a MapPoolAdjustEvent so plugins can listen when map pool has changed
+    match.callEvent(
+        new MapPoolAdjustEvent(activeMapPool, mapPool, match, force, sender, poolTimeLimit));
   }
 
   /**
@@ -176,7 +198,7 @@ public class MapPoolManager implements MapOrder {
     int obs =
         match.getModule(BlitzMatchModule.class) != null
             ? (int) (match.getObservers().size() * 0.85)
-            : (match.getObservers().size() / 2);
+            : (int) (match.getObservers().size() * 0.5);
     int activePlayers = match.getPlayers().size() - obs;
     return mapPools.stream()
         .filter(rot -> activePlayers >= rot.getPlayers())
@@ -192,10 +214,14 @@ public class MapPoolManager implements MapOrder {
   }
 
   private boolean shouldRevert(Match match) {
-    return Config.MapPools.areStaffRequired()
-        && !match.getPlayers().stream()
-            .filter(mp -> mp.getBukkit().hasPermission(Permissions.STAFF))
-            .findAny()
-            .isPresent();
+    return (Config.MapPools.areStaffRequired()
+            && !match.getPlayers().stream()
+                .filter(mp -> mp.getBukkit().hasPermission(Permissions.STAFF))
+                .findAny()
+                .isPresent())
+        || !activeMapPool.isDynamic()
+            && poolTimeLimit != null
+            && TimeUtils.isLongerThan(
+                Duration.between(poolStartTime, Instant.now()), poolTimeLimit);
   }
 }

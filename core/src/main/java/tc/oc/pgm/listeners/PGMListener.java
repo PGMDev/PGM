@@ -42,14 +42,15 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.commands.MatchCommands;
-import tc.oc.pgm.community.commands.ModerationCommands;
 import tc.oc.pgm.events.MapPoolAdjustEvent;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.gamerules.GameRule;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.TimeLockModule;
+import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.PeriodFormats;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.translations.AllTranslations;
@@ -315,14 +316,21 @@ public class PGMListener implements Listener {
     if (event.isForced()) {
       Component poolName =
           new PersonalizedText(event.getNewPool().getName()).color(ChatColor.LIGHT_PURPLE);
-      Component staffName = ModerationCommands.formatStaffName(event.getSender(), event.getMatch());
-      Component rotationForce =
-          new PersonalizedTranslatable("pools.poolChange.force", poolName, staffName)
-              .getPersonalizedText()
-              .color(ChatColor.GRAY);
-      ChatDispatcher.broadcastAdminChatMessage(rotationForce, event.getMatch());
+      Component staffName =
+          UsernameFormatUtils.formatStaffName(event.getSender(), event.getMatch());
+      PersonalizedTranslatable forced =
+          new PersonalizedTranslatable("pools.poolChange.force", poolName, staffName);
+      if (event.getTimeLimit() != null) {
+        Component time =
+            PeriodFormats.briefNaturalApproximate(event.getTimeLimit()).color(ChatColor.GREEN);
+        forced =
+            new PersonalizedTranslatable("pools.poolChange.force.timed", poolName, time, staffName);
+      }
+      ChatDispatcher.broadcastAdminChatMessage(
+          forced.getPersonalizedText().color(ChatColor.GRAY), event.getMatch());
     }
 
+    // Broadcast map pool changes due to size
     if (event.getNewPool().isDynamic()) {
       event
           .getMatch()

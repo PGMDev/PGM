@@ -1,5 +1,6 @@
 package tc.oc.pgm.events;
 
+import java.time.Duration;
 import javax.annotation.Nullable;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Event;
@@ -15,19 +16,22 @@ public class MapPoolAdjustEvent extends Event {
   private final Match match;
 
   private final boolean forced;
-  private final CommandSender sender;
+  private final @Nullable CommandSender sender;
+  private final @Nullable Duration timeLimit;
 
   public MapPoolAdjustEvent(
       MapPool oldMapPool,
       MapPool newMapPool,
       Match match,
       boolean forced,
-      @Nullable CommandSender sender) {
+      @Nullable CommandSender sender,
+      @Nullable Duration timeLimit) {
     this.oldPool = oldMapPool;
     this.newPool = newMapPool;
     this.match = match;
     this.forced = forced;
     this.sender = sender;
+    this.timeLimit = timeLimit;
   }
 
   public MapPool getOldPool() {
@@ -48,6 +52,10 @@ public class MapPoolAdjustEvent extends Event {
 
   public CommandSender getSender() {
     return sender;
+  }
+
+  public Duration getTimeLimit() {
+    return timeLimit;
   }
 
   private static final HandlerList handlers = new HandlerList();

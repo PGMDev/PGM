@@ -20,7 +20,6 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
-import tc.oc.pgm.community.commands.ModerationCommands;
 import tc.oc.pgm.cycle.CycleCountdown;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.restart.CancelRestartEvent;
@@ -32,6 +31,7 @@ import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.timelimit.TimeLimitCountdown;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedText;
@@ -128,7 +128,7 @@ public class AdminCommands {
     Component successful =
         new PersonalizedTranslatable(
                 "command.admin.set.success",
-                ModerationCommands.formatStaffName(sender, match),
+                UsernameFormatUtils.formatStaffName(sender, match),
                 mapName)
             .getPersonalizedText()
             .color(ChatColor.GRAY);
@@ -138,7 +138,7 @@ public class AdminCommands {
   @Command(
       aliases = {"setpool", "setrot"},
       desc = "Set a custom map pool or revert to dynamic",
-      usage = "[pool name] -r (revert to dynamic)",
+      usage = "[pool name] -r (revert to dynamic) -t (time limit for map pool)",
       flags = "r",
       perms = Permissions.SETNEXT)
   public static void setPool(
@@ -146,7 +146,8 @@ public class AdminCommands {
       Match match,
       MapOrder mapOrder,
       @Nullable String poolName,
-      @Switch('r') boolean reset)
+      @Switch('r') boolean reset,
+      @Switch('t') Duration timeLimit)
       throws CommandException {
     if (!match.getCountdown().getAll(CycleCountdown.class).isEmpty()) {
       sender.sendMessage(
@@ -162,11 +163,12 @@ public class AdminCommands {
             : mapPoolManager.getMapPoolByName(poolName);
 
     if (newPool == null) {
-      Component noPoolError =
-          new PersonalizedTranslatable("command.pools.noPoolMatch")
+      Component error =
+          new PersonalizedTranslatable(
+                  reset ? "command.pools.noDynamic " : "command.pools.noPoolMatch")
               .getPersonalizedText()
               .color(ChatColor.RED);
-      sender.sendMessage(noPoolError);
+      sender.sendMessage(error);
     } else {
       if (newPool.equals(mapPoolManager.getActiveMapPool())) {
         sender.sendMessage(
@@ -177,7 +179,7 @@ public class AdminCommands {
                 .color(ChatColor.GRAY));
         return;
       }
-      mapPoolManager.updateActiveMapPool(newPool, match, true, sender);
+      mapPoolManager.updateActiveMapPool(newPool, match, true, sender, timeLimit);
     }
   }
 
