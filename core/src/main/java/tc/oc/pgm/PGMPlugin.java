@@ -80,7 +80,6 @@ import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.listeners.FormattingListener;
 import tc.oc.pgm.listeners.GeneralizingListener;
 import tc.oc.pgm.listeners.ItemTransferListener;
-import tc.oc.pgm.listeners.LongRangeTNTListener;
 import tc.oc.pgm.listeners.MatchAnnouncer;
 import tc.oc.pgm.listeners.MotdListener;
 import tc.oc.pgm.listeners.PGMListener;
@@ -366,7 +365,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     registerEvents(new FormattingListener());
     registerEvents(new AntiGriefListener(matchManager));
     registerEvents(new ItemTransferListener());
-    registerEvents(new LongRangeTNTListener(this));
     registerEvents(new RestartListener(this, matchManager));
     registerEvents(new WorldProblemListener(this));
     registerEvents(new MatchAnnouncer());
