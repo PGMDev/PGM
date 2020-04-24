@@ -14,7 +14,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.DeathOverride;
 
 /**
  * A component that renders as a player's name.
@@ -73,7 +72,7 @@ public class PersonalizedPlayer extends Component {
       displayName = displayName.substring(displayName.indexOf(realName) - 2);
     }
 
-    if (style.showDeath && DeathOverride.isDead(player)) {
+    if (style.showDeath && isDead(player)) {
       displayName =
           displayName.replaceFirst(realName, ChatColor.DARK_GRAY + realName + ChatColor.RESET);
     }
@@ -93,5 +92,9 @@ public class PersonalizedPlayer extends Component {
     }
 
     return component;
+  }
+
+  private boolean isDead(Player player) {
+    return player.hasMetadata("isDead") || player.isDead();
   }
 }

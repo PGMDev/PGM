@@ -417,7 +417,12 @@ public class MatchImpl implements Match {
     if (player == null) {
       logger.fine("Adding player " + bukkit);
 
-      NMSHacks.forceRespawn(bukkit);
+      // If the bukkit player is dead, force them back into the world
+      if (bukkit.isDead()) {
+        bukkit.leaveVehicle();
+        bukkit.spigot().respawn();
+      }
+
       player = new MatchPlayerImpl(this, bukkit);
       MatchPlayerAddEvent event = new MatchPlayerAddEvent(player, getDefaultParty());
       callEvent(event);
