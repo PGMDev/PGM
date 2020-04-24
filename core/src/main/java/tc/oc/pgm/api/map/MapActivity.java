@@ -1,6 +1,7 @@
 package tc.oc.pgm.api.map;
 
 import javax.annotation.Nullable;
+import tc.oc.pgm.api.Datastore;
 
 /* Represents data related to persisting map pool info between server restarts */
 public interface MapActivity {

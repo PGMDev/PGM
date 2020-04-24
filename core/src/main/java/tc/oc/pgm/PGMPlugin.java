@@ -71,7 +71,8 @@ import tc.oc.pgm.commands.provider.VectorProvider;
 import tc.oc.pgm.community.commands.ModerationCommands;
 import tc.oc.pgm.community.commands.ReportCommands;
 import tc.oc.pgm.db.DatastoreCacheImpl;
-import tc.oc.pgm.db.DatastoreImpl;
+import tc.oc.pgm.db.sql.SQLDatastore;
+import tc.oc.pgm.db.sql.SQLiteDriver;
 import tc.oc.pgm.events.ConfigLoadEvent;
 import tc.oc.pgm.listeners.AntiGriefListener;
 import tc.oc.pgm.listeners.BlockTransformListener;
@@ -153,7 +154,8 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     asyncExecutorService = new BukkitExecutorService(this, true);
 
     try {
-      datastore = new DatastoreImpl(new File(getDataFolder(), "pgm.db"));
+      SQLiteDriver driver = new SQLiteDriver(new File(getDataFolder(), "pgm.db"));
+      datastore = new SQLDatastore(driver);
       datastore = new DatastoreCacheImpl(datastore);
     } catch (SQLException e) {
       shutdown("Failed to initialize SQL database", e);
