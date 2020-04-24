@@ -27,7 +27,6 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
-import org.bukkit.util.Vector;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
@@ -42,19 +41,6 @@ public interface NMSHacks {
 
   static EntityTrackerEntry getTrackerEntry(Entity entity) {
     return getTrackerEntry(((CraftEntity) entity).getHandle());
-  }
-
-  static void forceRespawn(Player player) {
-    if (player.isDead()) {
-      if (player.getVehicle() != null) {
-        player.getVehicle().eject();
-      }
-      PacketPlayInClientCommand packet =
-          new PacketPlayInClientCommand(
-              PacketPlayInClientCommand.EnumClientCommand.PERFORM_RESPAWN);
-      CraftPlayer cplayer = (CraftPlayer) player;
-      packet.a(cplayer.getHandle().playerConnection);
-    }
   }
 
   static void sendPacket(Player bukkitPlayer, Object packet) {
@@ -396,28 +382,6 @@ public interface NMSHacks {
 
   static void sendHotbarMessage(Player player, Component message) {
     sendHotbarMessage(player, message.toLegacyText());
-  }
-
-  static Object particlesPacket(
-      String name,
-      boolean longRange,
-      Vector pos,
-      Vector offset,
-      float data,
-      int count,
-      int... extra) {
-    return new PacketPlayOutWorldParticles(
-        EnumParticle.valueOf(EnumParticle.class, name),
-        longRange,
-        (float) pos.getX(),
-        (float) pos.getY(),
-        (float) pos.getZ(),
-        (float) offset.getX(),
-        (float) offset.getY(),
-        (float) offset.getZ(),
-        data,
-        count,
-        extra);
   }
 
   static void showBorderWarning(Player player, boolean show) {
