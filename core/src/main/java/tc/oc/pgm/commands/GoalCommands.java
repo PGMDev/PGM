@@ -15,7 +15,7 @@ import tc.oc.pgm.teams.TeamMatchModule;
 public class GoalCommands {
 
   @Command(
-      aliases = {"proximity"},
+      aliases = {"proximity", "prox"},
       desc = "Show stats about how close each competitor has been to each objective")
   public static void proximity(CommandSender sender, MatchPlayer matchPlayer, Match match)
       throws CommandException {
