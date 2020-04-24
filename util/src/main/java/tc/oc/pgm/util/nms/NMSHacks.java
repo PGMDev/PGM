@@ -57,11 +57,6 @@ public interface NMSHacks {
     }
   }
 
-  static boolean hasInfinityEnchanment(Arrow bukkitArrow) {
-    EntityArrow arrow = ((CraftArrow) bukkitArrow).getHandle();
-    return arrow.fromPlayer == 2; // ELECTROID: EntityArrow.PickupStatus.DISALLOWED;
-  }
-
   static void sendPacket(Player bukkitPlayer, Object packet) {
     if (bukkitPlayer.isOnline()) {
       EntityPlayer nmsPlayer = ((CraftPlayer) bukkitPlayer).getHandle();
