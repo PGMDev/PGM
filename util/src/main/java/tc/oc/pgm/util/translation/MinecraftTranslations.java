@@ -3,14 +3,16 @@ package tc.oc.pgm.util.translation;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.potion.PotionEffectType;
 import tc.oc.pgm.util.StringUtils;
 
 /** Provides access to Minecraft translation keys that are maintained by Mojang. */
-public final class MinecraftKeys {
-  private MinecraftKeys() {}
+public final class MinecraftTranslations {
+  private MinecraftTranslations() {}
 
   private static final String ENTITY_KEY = "entity.%s.name";
   private static final String MATERIAL_KEY = "item.%s.name";
@@ -38,12 +40,12 @@ public final class MinecraftKeys {
           .put("potion.damageResistance", "potion.resistance")
           .build();
 
-  public static String getEntity(EntityType entity) {
+  public static Component getEntity(EntityType entity) {
     return getKey(ENTITY_KEY, entity.getName());
   }
 
   // TODO: Bukkit 1.13+ exposes NamespaceKey, which is significantly more accurate than this
-  public static String getMaterial(Material material) {
+  public static Component getMaterial(Material material) {
     String name = material.name();
     for (Map.Entry<Pattern, String> entry : MATERIAL_REPLACEMENTS.entrySet()) {
       name = entry.getKey().matcher(name).replaceAll(entry.getValue());
@@ -52,12 +54,12 @@ public final class MinecraftKeys {
     return getKey(MATERIAL_KEY, StringUtils.camelCase(name, true));
   }
 
-  public static String getPotion(PotionEffectType potion) {
+  public static Component getPotion(PotionEffectType potion) {
     return getKey(POTION_KEY, StringUtils.camelCase(potion.getName()));
   }
 
-  private static String getKey(String format, String name) {
+  private static Component getKey(String format, String name) {
     final String key = String.format(format, name);
-    return KEY_EXCEPTIONS.getOrDefault(key, key);
+    return TranslatableComponent.of(KEY_EXCEPTIONS.getOrDefault(key, key));
   }
 }

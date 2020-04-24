@@ -3,14 +3,13 @@ package tc.oc.pgm.tracker.info;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.Components;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.translation.MinecraftKeys;
+import tc.oc.pgm.util.translation.MinecraftTranslations;
 
 public class EntityInfo extends OwnerInfoBase implements PhysicalInfo {
 
@@ -50,11 +49,11 @@ public class EntityInfo extends OwnerInfoBase implements PhysicalInfo {
   }
 
   @Override
-  public Component getLocalizedName() {
+  public Component getName() {
     if (getCustomName() != null) {
-      return Components.fromLegacyText(getCustomName());
+      return LegacyComponentSerializer.legacy().deserialize(getCustomName());
     } else {
-      return new PersonalizedTranslatable(MinecraftKeys.getEntity(getEntityType()));
+      return MinecraftTranslations.getEntity(getEntityType());
     }
   }
 
