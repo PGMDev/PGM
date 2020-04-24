@@ -358,17 +358,6 @@ public interface NMSHacks {
     metadata.dataWatcher.a(10, (byte) flags);
   }
 
-  static void playEffect(World bukkitWorld, Vector pos, int effectId, int data) {
-    WorldServer world = ((CraftWorld) bukkitWorld).getHandle();
-    world.triggerEffect(
-        effectId, new BlockPosition(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ()), data);
-  }
-
-  @SuppressWarnings("deprecation")
-  static void playBlockBreakEffect(World bukkitWorld, Vector pos, org.bukkit.Material material) {
-    playEffect(bukkitWorld, pos, 2001, material.getId());
-  }
-
   /**
    * Test if the given tool is capable of "efficiently" mining the given block.
    *
