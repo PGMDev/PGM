@@ -14,7 +14,7 @@ public final class MinecraftKeys {
 
   private static final String ENTITY_KEY = "entity.%s.name";
   private static final String MATERIAL_KEY = "item.%s.name";
-  private static final String POTION_KEY = "effect.%s";
+  private static final String POTION_KEY = "potion.%s";
 
   private static final Map<Pattern, String> MATERIAL_REPLACEMENTS =
       ImmutableMap.<Pattern, String>builder()
@@ -31,11 +31,11 @@ public final class MinecraftKeys {
           .put("item.sand.name", "tile.sand.name")
           .put("item.gravel.name", "tile.gravel.name")
           .put("item.lava.name", "tile.lava.name")
-          .put("effect.speed", "effect.moveSpeed")
-          .put("effect.slow", "effect.moveSlowdown")
-          .put("effect.fastDigging", "effect.digSpeed")
-          .put("effect.slowDigging", "effect.digSlowdown")
-          .put("effect.damageResistance", "effect.resistance")
+          .put("potion.speed", "potion.moveSpeed")
+          .put("potion.slow", "potion.moveSlowdown")
+          .put("potion.fastDigging", "potion.digSpeed")
+          .put("potion.slowDigging", "potion.digSlowdown")
+          .put("potion.damageResistance", "potion.resistance")
           .build();
 
   public static String getEntity(EntityType entity) {

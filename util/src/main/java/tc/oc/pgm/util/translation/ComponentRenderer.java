@@ -5,29 +5,28 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
+import com.google.common.collect.RowSortedTable;
+import com.google.common.collect.TreeBasedTable;
 import java.text.MessageFormat;
-import java.util.Comparator;
-import java.util.Locale;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
+import java.util.*;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.renderer.TranslatableComponentRenderer;
 
-/**
- * Provides {@link MessageFormat} translations based on {@link Locale}.
- *
- * @see #getFormat(Locale, String)
- */
-public class MessageFormatProvider {
+/** Renders {@link Component}s based on a {@link Locale}. */
+public final class ComponentRenderer extends TranslatableComponentRenderer<Locale> {
+
+  public static final ComponentRenderer INSTANCE = new ComponentRenderer("strings", Locale.US);
 
   private final Locale defaultLocale;
   private final LoadingCache<Locale, Locale> localeCache;
-  private final Table<String, Locale, MessageFormat> formatTable;
+  private final RowSortedTable<String, Locale, MessageFormat> formatTable;
 
-  public MessageFormatProvider(String resourceName, Locale defaultLocale) {
+  private ComponentRenderer(String resourceName, Locale defaultLocale) {
     this.defaultLocale = checkNotNull(defaultLocale);
-    this.formatTable = HashBasedTable.create();
+    this.formatTable =
+        TreeBasedTable.create(
+            String::compareToIgnoreCase, Comparator.comparing(Locale::toLanguageTag));
     this.localeCache =
         CacheBuilder.newBuilder()
             .build(
@@ -50,19 +49,20 @@ public class MessageFormatProvider {
       }
 
       for (String key : bundle.keySet()) {
-        formatTable.put(key, locale, new MessageFormat(bundle.getString(key), locale));
+        // Single quotes are a special escape keyword for MessageFormat, so they need to be escaped
+        final String format = bundle.getString(key).replaceAll("'", "''");
+
+        formatTable.put(key, locale, new MessageFormat(format, locale));
       }
     }
   }
 
-  /**
-   * Get a {@link MessageFormat} for a given key and locale.
-   *
-   * @param locale The locale.
-   * @param key The translation key.
-   * @return A message format.
-   */
-  public MessageFormat getFormat(Locale locale, String key) {
+  public SortedSet<String> getKeys() {
+    return formatTable.rowKeySet();
+  }
+
+  @Override
+  protected MessageFormat translation(Locale locale, String key) {
     try {
       locale = localeCache.get(locale);
       MessageFormat format = formatTable.get(key, locale);
@@ -74,14 +74,13 @@ public class MessageFormatProvider {
         }
 
         // Non-default locale has no translation, so switch to the default locale
-        format = getFormat(defaultLocale, key);
+        format = translation(defaultLocale, key);
         formatTable.put(key, locale, format);
       }
 
       return format;
     } catch (Throwable t) {
-      // Extra safe-guard since translations are a critical path
-      return new MessageFormat("<missing translation \"" + key + "\">", locale);
+      return null; // Fallback to a client translation, provided by Mojang
     }
   }
 

@@ -1,14 +1,14 @@
 package tc.oc.pgm.util.chat;
 
-import java.util.Locale;
 import javax.annotation.Nullable;
 import net.kyori.text.TextComponent;
 import net.kyori.text.adapter.bukkit.TextAdapter;
 import net.kyori.text.format.TextColor;
+import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.ComponentRenderers;
-import tc.oc.pgm.util.translation.ComponentProvider;
+import tc.oc.pgm.util.translation.ComponentRenderer;
 
 /** An {@link Audience} that represents a virtual {@link CommandSender}. */
 @FunctionalInterface
@@ -28,7 +28,7 @@ public interface VirtualAudience extends Audience {
    * @return A rendered message.
    */
   default net.kyori.text.Component renderMessage(net.kyori.text.Component message) {
-    return TRANSLATION_PROVIDER.getComponent(message, getAudience().getLocale());
+    return ComponentRenderer.INSTANCE.render(message, getAudience().getLocale());
   }
 
   /**
@@ -38,16 +38,8 @@ public interface VirtualAudience extends Audience {
    * @return A rendered message, as "legacy" Minecraft text.
    */
   default String renderMessageLegacy(net.kyori.text.Component message) {
-    return TRANSLATION_PROVIDER.getLegacy(message, getAudience().getLocale());
+    return LegacyComponentSerializer.legacy().serialize(renderMessage(message));
   }
-
-  /**
-   * A global, static translator of messages with the default locale as English.
-   *
-   * @see #renderMessage(net.kyori.text.Component)
-   * @see #renderMessageLegacy(net.kyori.text.Component)
-   */
-  ComponentProvider TRANSLATION_PROVIDER = new ComponentProvider("strings", Locale.US);
 
   @Override
   default void sendMessage(net.kyori.text.Component message) {

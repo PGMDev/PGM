@@ -16,7 +16,7 @@ import java.util.ResourceBundle;
  *
  * <p>See https://stackoverflow.com/a/4660195 for more details.
  */
-public class UTF8Control extends ResourceBundle.Control {
+public final class UTF8Control extends ResourceBundle.Control {
   public ResourceBundle newBundle(
       String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
       throws IOException {
