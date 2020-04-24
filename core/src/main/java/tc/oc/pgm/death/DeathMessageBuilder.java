@@ -11,6 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.api.tracker.info.*;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
 import tc.oc.pgm.tracker.Trackers;
@@ -49,22 +50,32 @@ public class DeathMessageBuilder {
   private final Logger logger;
   private final MatchPlayer victim;
   private final @Nullable ParticipantState killer;
+  private final boolean predicted;
 
   private String key;
   private Component weapon = TextComponent.empty();
   private Component mob = TextComponent.empty();
   private Long distance;
 
-  public DeathMessageBuilder(MatchPlayer victim, DamageInfo damageInfo, Logger logger) {
-    this.victim = victim;
-    this.killer = damageInfo.getAttacker();
+  public DeathMessageBuilder(MatchPlayerDeathEvent event, Logger logger) {
+    this.victim = event.getVictim();
+    this.killer = event.getDamageInfo().getAttacker();
+    this.predicted = event.isPredicted();
     this.logger = logger;
 
-    build(damageInfo);
+    build(event.getDamageInfo());
   }
 
   public Component getMessage() {
-    return TranslatableComponent.of(key, getArgs());
+    Component message = TranslatableComponent.of(key, getArgs());
+
+    if (predicted)
+      message =
+          message
+              .append(TextComponent.space())
+              .append(TranslatableComponent.of("death.predictedSuffix"));
+
+    return message;
   }
 
   Component[] getArgs() {

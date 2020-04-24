@@ -2,8 +2,6 @@ package tc.oc.pgm.death;
 
 import java.util.logging.Logger;
 import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
 import net.kyori.text.format.TextDecoration;
 import org.bukkit.event.EventHandler;
@@ -37,15 +35,8 @@ public class DeathMessageMatchModule implements MatchModule, Listener {
   public void handleDeathBroadcast(MatchPlayerDeathEvent event) {
     if (!event.getMatch().isRunning()) return;
 
-    DeathMessageBuilder builder =
-        new DeathMessageBuilder(event.getVictim(), event.getDamageInfo(), logger);
+    DeathMessageBuilder builder = new DeathMessageBuilder(event, logger);
     Component message = builder.getMessage().color(TextColor.GRAY);
-
-    if (event.isPredicted()) {
-      message
-          .append(TextComponent.space())
-          .append(TranslatableComponent.of("death.predictedSuffix"));
-    }
 
     for (MatchPlayer viewer : event.getMatch().getPlayers()) {
       switch (viewer.getSettings().getValue(SettingKey.DEATH)) {
