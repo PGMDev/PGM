@@ -1,8 +1,10 @@
 package tc.oc.pgm.db.sql;
 
 import java.sql.SQLException;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import javax.annotation.Nullable;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapActivity;
 
 public class SQLMapActivity implements MapActivity {
@@ -35,10 +37,20 @@ public class SQLMapActivity implements MapActivity {
   }
 
   @Override
-  public void update(String nextMap, boolean active) {
+  public void updateSync(String nextMap, boolean active) {
     this.nextMap = nextMap;
     this.active = active;
+    tryUpdate();
+  }
 
+  @Override
+  public void update(@Nullable String nextMap, boolean active) {
+    this.nextMap = nextMap;
+    this.active = active;
+    PGM.get().getAsyncExecutor().schedule(this::tryUpdate, 0, TimeUnit.SECONDS);
+  }
+
+  private void tryUpdate() {
     try {
       driver.updateMapActivity(name, getMapName(), isActive());
     } catch (SQLException e) {

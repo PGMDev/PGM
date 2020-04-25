@@ -35,6 +35,7 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.api.setting.DefaultSettings;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
@@ -68,6 +69,7 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   private final AtomicBoolean dead;
   private final AtomicBoolean visible;
   private final AtomicInteger protocolVersion;
+  private AtomicReference<Settings> settings;
 
   public MatchPlayerImpl(Match match, Player player) {
     this.logger =
@@ -82,6 +84,8 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
     this.dead = new AtomicBoolean(false);
     this.visible = new AtomicBoolean(false);
     this.protocolVersion = new AtomicInteger(ViaUtils.getProtocolVersion(player));
+    this.settings = new AtomicReference<>(new DefaultSettings(id));
+    PGM.get().getDatastore().getSettings(id, (fetched) -> settings.set(fetched));
   }
 
   @Override
@@ -353,7 +357,7 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
 
   @Override
   public Settings getSettings() {
-    return PGM.get().getDatastore().getSettings(id);
+    return settings.get();
   }
 
   @Override

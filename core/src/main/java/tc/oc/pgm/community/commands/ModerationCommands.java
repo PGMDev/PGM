@@ -38,7 +38,6 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.community.events.PlayerPunishmentEvent;
 import tc.oc.pgm.community.modules.FreezeMatchModule;
 import tc.oc.pgm.listeners.ChatDispatcher;
@@ -580,30 +579,39 @@ public class ModerationCommands implements Listener {
       usage = "[player/uuid]",
       desc = "Lookup baninfo about a player",
       perms = Permissions.STAFF)
-  public void banInfo(CommandSender sender, String target) throws CommandException {
+  public void banInfoCmd(CommandSender sender, String target) {
 
     if (!XMLUtils.USERNAME_REGEX.matcher(target).matches()) {
       UUID uuid = UUID.fromString(target);
-      Username username = PGM.get().getDatastore().getUsername(uuid);
-      if (username.getName() != null) {
-        target = username.getName();
-      } else {
-        throw new CommandException(
-            ComponentRenderers.toLegacyText(
-                new PersonalizedTranslatable(
-                        "commands.invalid.target",
-                        new PersonalizedText(target).color(ChatColor.AQUA))
-                    .getPersonalizedText()
-                    .color(ChatColor.RED),
-                sender));
-      }
+      PGM.get()
+          .getDatastore()
+          .getUsername(
+              uuid,
+              (username) -> {
+                if (username.getName() != null) {
+                  banInfo(sender, username.getName());
+                } else {
+                  sender.sendMessage(
+                      ComponentRenderers.toLegacyText(
+                          new PersonalizedTranslatable(
+                                  "commands.invalid.target",
+                                  new PersonalizedText(target).color(ChatColor.AQUA))
+                              .getPersonalizedText()
+                              .color(ChatColor.RED),
+                          sender));
+                }
+              });
+    } else {
+      banInfo(sender, target);
     }
+  }
 
+  private void banInfo(CommandSender sender, String target) {
     BanEntry ban = Bukkit.getBanList(BanList.Type.NAME).getBanEntry(target);
 
     if (ban == null
         || ban.getExpiration() != null && ban.getExpiration().toInstant().isBefore(Instant.now())) {
-      throw new CommandException(
+      sender.sendMessage(
           ComponentRenderers.toLegacyText(
               new PersonalizedTranslatable(
                   "moderation.records.lookupNone",

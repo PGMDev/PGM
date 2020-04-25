@@ -22,18 +22,16 @@ public class PlayerContributor implements Contributor {
   private static final String UNKNOWN = "Unknown";
   private final UUID id;
   private final @Nullable String contribution;
-  private @Nullable Username username;
+  private final @Nullable Username username;
 
   public PlayerContributor(UUID id, @Nullable String contribution) {
     this.id = checkNotNull(id);
     this.contribution = contribution;
-    getUsername(); // Pre-warm username cache
+    // Network call but this is instantiated in an async context
+    this.username = PGM.get().getDatastore().getUsername(id);
   }
 
   public Username getUsername() {
-    if (username == null) {
-      username = PGM.get().getDatastore().getUsername(id);
-    }
     return username;
   }
 

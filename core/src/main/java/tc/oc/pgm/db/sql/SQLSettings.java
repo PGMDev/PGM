@@ -4,7 +4,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.sql.SQLException;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
@@ -39,7 +41,7 @@ public class SQLSettings implements Settings {
   }
 
   @Override
-  public void setValue(SettingKey key, SettingValue value) {
+  public void setValueSync(SettingKey key, SettingValue value) {
     try {
       if (bit == 0) {
         driver.insertSettings(id, 0);
@@ -54,6 +56,11 @@ public class SQLSettings implements Settings {
           .log(
               Level.WARNING, "Could not update settings for " + id + " of " + key + " to " + value);
     }
+  }
+
+  @Override
+  public void setValue(SettingKey key, SettingValue value) {
+    PGM.get().getAsyncExecutor().schedule(() -> setValueSync(key, value), 0, TimeUnit.SECONDS);
   }
 
   public static int bitSettings(SettingValue value) {

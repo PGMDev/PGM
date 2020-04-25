@@ -18,6 +18,7 @@ public class DatastoreCacheImpl implements Datastore {
   private final LoadingCache<UUID, Settings> settings;
   private final LoadingCache<String, MapActivity> mapPools;
 
+  // TODO: Short-circuit async implementations
   public DatastoreCacheImpl(Datastore datastore) {
     this.usernames =
         buildCache(

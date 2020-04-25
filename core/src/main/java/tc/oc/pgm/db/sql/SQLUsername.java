@@ -6,8 +6,11 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import javax.annotation.Nullable;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.util.UsernameResolver;
 
@@ -37,7 +40,7 @@ public class SQLUsername implements Username {
   }
 
   @Override
-  public boolean setName(@Nullable String name) {
+  public boolean setNameSync(@Nullable String name) {
     if (Objects.equals(this.name, name)) return true;
 
     try {
@@ -50,5 +53,29 @@ public class SQLUsername implements Username {
     }
 
     return false;
+  }
+
+  @Override
+  public void setName(@Nullable String name, @Nullable Consumer<Boolean> callback) {
+    if (Objects.equals(this.name, name)) {
+      callback.accept(true);
+      return;
+    }
+
+    this.name = name;
+    PGM.get()
+        .getAsyncExecutor()
+        .schedule(
+            () -> {
+              try {
+                driver.updateUsername(id, name);
+              } catch (SQLException e) {
+                driver
+                    .getLogger()
+                    .log(Level.WARNING, "Could not update username for " + id + " to " + name, e);
+              }
+            },
+            0,
+            TimeUnit.SECONDS);
   }
 }

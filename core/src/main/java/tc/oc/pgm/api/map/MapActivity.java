@@ -29,7 +29,15 @@ public interface MapActivity {
   public boolean isActive();
 
   /**
-   * Updates the map activity in the {@link Datastore}
+   * Updates the map activity in the {@link Datastore} synchronously
+   *
+   * @param nextMap Name of next map (if rotation based).
+   * @param active If this pool is currently active.
+   */
+  public void updateSync(@Nullable String nextMap, boolean active);
+
+  /**
+   * Updates the map activity in the {@link Datastore} asynchronously
    *
    * @param nextMap Name of next map (if rotation based).
    * @param active If this pool is currently active.

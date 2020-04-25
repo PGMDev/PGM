@@ -1,6 +1,7 @@
 package tc.oc.pgm.api.player;
 
 import java.util.UUID;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
 /** Represents the mapping of a {@link UUID} to a username. */
@@ -22,10 +23,27 @@ public interface Username {
   String getName();
 
   /**
-   * Change the username of the player.
+   * Change the username of the player. Operation occurs synchronously.
    *
    * @param name The new username or null.
    * @return Whether the operation was successful.
    */
-  boolean setName(@Nullable String name);
+  boolean setNameSync(@Nullable String name);
+
+  /**
+   * Change the username of the player. Operation occurs asynchronously.
+   *
+   * @param name The new username or null.
+   * @param callback Callback that consumes whether the operation was successful or not.
+   */
+  void setName(@Nullable String name, @Nullable Consumer<Boolean> callback);
+
+  /**
+   * Change the username of the player. Operation occurs asynchronously.
+   *
+   * @param name The new username or null.
+   */
+  default void setName(@Nullable String name) {
+    setName(name, null);
+  }
 }

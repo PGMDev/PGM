@@ -33,6 +33,7 @@ public class SQLDatastore implements Datastore {
     } catch (SQLException e) {
       logger.log(Level.WARNING, "Could not get username for " + id, e);
     }
+
     return username == null ? new SQLUsername(driver, id, null, null) : username;
   }
 
