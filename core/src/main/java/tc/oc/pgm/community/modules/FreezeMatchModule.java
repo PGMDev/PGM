@@ -47,10 +47,10 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.ObserverInteractEvent;
-import tc.oc.pgm.community.commands.ModerationCommands;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
+import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.component.Component;
@@ -309,7 +309,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
     public void setFrozen(@Nullable CommandSender freezer, MatchPlayer freezee, boolean frozen) {
       freezee.setFrozen(frozen);
 
-      Component senderName = ModerationCommands.formatPunisherName(freezer, freezee.getMatch());
+      Component senderName = UsernameFormatUtils.formatStaffName(freezer, freezee.getMatch());
 
       if (frozen) {
         freeze(freezee, senderName);

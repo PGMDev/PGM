@@ -23,6 +23,8 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
   protected final List<MapInfo> maps;
   protected final int players;
 
+  protected final boolean dynamic;
+
   public static MapPool of(MapPoolManager manager, FileConfiguration config, String key) {
     ConfigurationSection section = config.getConfigurationSection("pools." + key);
     String type = section.getString("type").toLowerCase();
@@ -31,6 +33,8 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
         return new Rotation(manager, section, key);
       case "voted":
         return new VotingPool(manager, section, key);
+      case "shuffled":
+        return new RandomMapPool(manager, section, key);
       default:
         PGM.get().getLogger().severe("Invalid map pool type for " + key + ": '" + type + "'");
         return new DisabledMapPool(manager, section, key);
@@ -43,6 +47,7 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
     this.name = name;
     this.enabled = section.getBoolean("enabled");
     this.players = section.getInt("players");
+    this.dynamic = section.getBoolean("dynamic", true);
 
     MapLibrary library = PGM.get().getMapLibrary();
     List<MapInfo> mapList =
@@ -68,6 +73,10 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
 
   public boolean isEnabled() {
     return enabled;
+  }
+
+  public boolean isDynamic() {
+    return dynamic;
   }
 
   public List<MapInfo> getMaps() {

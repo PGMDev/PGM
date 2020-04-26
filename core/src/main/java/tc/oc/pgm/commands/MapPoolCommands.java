@@ -9,6 +9,7 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -33,11 +34,11 @@ public class MapPoolCommands {
   private static final DecimalFormat SCORE_FORMAT = new DecimalFormat("00.00%");
 
   @Command(
-      aliases = {"rotation", "rot", "pool"},
+      aliases = {"pool", "rotation", "rot"},
       desc = "Shows the maps in the active map pool",
       usage = "[page] [-p pool] [-s scores] [-c chance of vote]",
       help = "Shows all the maps that are currently in the active map pool.")
-  public static void rotation(
+  public static void pool(
       Audience audience,
       CommandSender sender,
       MapOrder mapOrder,
@@ -105,11 +106,16 @@ public class MapPoolCommands {
   }
 
   @Command(
-      aliases = {"rotations", "rots", "pools"},
-      desc = "Shows all the existing rotations.",
-      help = "Shows all the existing rotations and their trigger player counts.")
-  public static void rotations(
-      Audience audience, CommandSender sender, MapOrder mapOrder, @Default("1") int page)
+      aliases = {"pools", "rotations", "rots"},
+      desc = "Shows all the existing map pools.",
+      help = "Shows all the existing map pools and their trigger player counts if applicable.",
+      flags = "d")
+  public static void pools(
+      Audience audience,
+      CommandSender sender,
+      MapOrder mapOrder,
+      @Default("1") int page,
+      @Switch('d') boolean dynamicOnly)
       throws CommandException {
 
     MapPoolManager mapPoolManager = getMapPoolManager(sender, mapOrder);
@@ -119,6 +125,10 @@ public class MapPoolCommands {
       sender.sendMessage(
           ChatColor.RED + AllTranslations.get().translate("command.pools.noMapPools", sender));
       return;
+    }
+
+    if (dynamicOnly) {
+      mapPools = mapPools.stream().filter(MapPool::isDynamic).collect(Collectors.toList());
     }
 
     int resultsPerPage = 8;
@@ -135,17 +145,30 @@ public class MapPoolCommands {
             mapPoolManager.getActiveMapPool().getName().equals(mapPool.getName())
                 ? ChatColor.GREEN + "» "
                 : "» ";
+
+        String maps =
+            " ("
+                + ChatColor.DARK_GREEN
+                + "Maps: "
+                + ChatColor.WHITE
+                + Integer.toString(mapPool.getMaps().size())
+                + ChatColor.DARK_AQUA
+                + ")";
+        String players =
+            " ("
+                + ChatColor.AQUA
+                + "Players: "
+                + ChatColor.WHITE
+                + mapPool.getPlayers()
+                + ChatColor.DARK_AQUA
+                + ")";
+
         return arrow
             + ChatColor.GOLD
             + mapPool.getName()
             + ChatColor.DARK_AQUA
-            + " ("
-            + ChatColor.AQUA
-            + "Players: "
-            + ChatColor.WHITE
-            + mapPool.getPlayers()
-            + ChatColor.DARK_AQUA
-            + ")";
+            + maps
+            + (mapPool.isDynamic() ? players : "");
       }
     }.display(audience, mapPools, page);
   }
@@ -213,7 +236,7 @@ public class MapPoolCommands {
     poll.sendBook(player);
   }
 
-  private static MapPoolManager getMapPoolManager(CommandSender sender, MapOrder mapOrder)
+  public static MapPoolManager getMapPoolManager(CommandSender sender, MapOrder mapOrder)
       throws CommandException {
     if (mapOrder instanceof MapPoolManager) return (MapPoolManager) mapOrder;
 

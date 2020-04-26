@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Random;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.map.exception.MapMissingException;
@@ -20,16 +19,18 @@ public class RandomMapOrder implements MapOrder {
 
   private final Random random;
   private final Deque<WeakReference<MapInfo>> deque;
+  private List<MapInfo> origMaps;
 
-  public RandomMapOrder() {
+  public RandomMapOrder(List<MapInfo> maps) {
     this.random = new Random();
     this.deque = new ArrayDeque<>();
+    this.origMaps = maps;
   }
 
   private void refresh() {
     if (!deque.isEmpty()) return; // Only re-populate when deque is empty
 
-    final List<MapInfo> maps = Lists.newArrayList(PGM.get().getMapLibrary().getMaps());
+    final List<MapInfo> maps = Lists.newArrayList(origMaps);
     if (maps.isEmpty())
       throw new RuntimeException(
           new MapMissingException("map library", "No maps found to set next"));

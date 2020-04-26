@@ -2,24 +2,30 @@ package tc.oc.pgm.rotation;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import tc.oc.pgm.Config;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapActivity;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.blitz.BlitzMatchModule;
+import tc.oc.pgm.events.MapPoolAdjustEvent;
+import tc.oc.pgm.util.TimeUtils;
 
 /**
  * Manages all the existing {@link MapPool}s, as for maintaining their order, and updating the one
@@ -32,6 +38,11 @@ public class MapPoolManager implements MapOrder {
   private FileConfiguration mapPoolFileConfig;
   private List<MapPool> mapPools = new ArrayList<>();
   private MapPool activeMapPool;
+
+  /* If a time limit is added via /setpool <name> -t [time], then after this duration the map pool will revert automaticly */
+  private Duration poolTimeLimit = null;
+  private Instant poolStartTime = null;
+
   /** When a {@link MapInfo} is manually set next, it overrides the rotation order * */
   private MapInfo overriderMap;
 
@@ -69,18 +80,18 @@ public class MapPoolManager implements MapOrder {
         .forEach(
             pool -> {
               MapActivity ma = database.getMapActivity(pool.getName());
-              if (ma.isActive()) {
+              if (ma.isActive() && !pool.isDynamic()) {
                 activeMapPool = pool;
                 logger.log(Level.INFO, "Resuming last active map pool (" + pool.getName() + ")");
               }
             });
 
     if (activeMapPool == null) {
-      logger.log(Level.WARNING, "No active map pool was found, defaulting to first defined pool.");
-      if (mapPools.get(0) != null) {
-        activeMapPool = mapPools.get(0);
-      } else {
-        logger.log(Level.SEVERE, "Failed to find any defined map pool!");
+      logger.log(Level.WARNING, "No active map pool was found, defaulting to first dynamic pool.");
+      activeMapPool = mapPools.stream().filter(mp -> mp.isDynamic()).findFirst().orElse(null);
+
+      if (activeMapPool == null) {
+        logger.log(Level.SEVERE, "Failed to find any dynamic map pool!");
       }
     }
   }
@@ -93,7 +104,9 @@ public class MapPoolManager implements MapOrder {
               if (pool instanceof Rotation) {
                 nextMap = pool.getNextMap().getName();
               }
-              boolean active = activeMapPool.getName().equalsIgnoreCase(pool.getName());
+              boolean active =
+                  activeMapPool.getName().equalsIgnoreCase(pool.getName())
+                      && activeMapPool.isDynamic();
               database.getMapActivity(pool.getName()).update(nextMap, active);
             });
   }
@@ -107,26 +120,37 @@ public class MapPoolManager implements MapOrder {
   }
 
   private void updateActiveMapPool(MapPool mapPool, Match match) {
+    updateActiveMapPool(mapPool, match, false, null, null);
+  }
+
+  public void updateActiveMapPool(
+      MapPool mapPool,
+      Match match,
+      boolean force,
+      @Nullable CommandSender sender,
+      @Nullable Duration timeLimit) {
     saveMapPools();
 
     if (mapPool == activeMapPool) return;
 
     activeMapPool.unloadPool(match);
+
+    // Set new active pool
     activeMapPool = mapPool;
 
-    match.sendMessage(
-        ChatColor.WHITE
-            + "["
-            + ChatColor.GOLD
-            + "Rotations"
-            + ChatColor.WHITE
-            + "] "
-            + ChatColor.GREEN
-            + AllTranslations.get()
-                .translate(
-                    "pools.poolChange",
-                    Bukkit.getConsoleSender(),
-                    (ChatColor.AQUA + mapPool.getName() + ChatColor.GREEN)));
+    if (!activeMapPool.isDynamic()) {
+      poolStartTime = Instant.now();
+      if (timeLimit != null) {
+        poolTimeLimit = timeLimit;
+      }
+    } else {
+      poolStartTime = null;
+      poolTimeLimit = null;
+    }
+
+    // Call a MapPoolAdjustEvent so plugins can listen when map pool has changed
+    match.callEvent(
+        new MapPoolAdjustEvent(activeMapPool, mapPool, match, force, sender, poolTimeLimit));
   }
 
   /**
@@ -170,15 +194,34 @@ public class MapPoolManager implements MapOrder {
     activeMapPool.setNextMap(map); // Notify pool a next map has been set
   }
 
+  public Optional<MapPool> getAppropriateDynamicPool(Match match) {
+    int obs =
+        match.getModule(BlitzMatchModule.class) != null
+            ? (int) (match.getObservers().size() * 0.85)
+            : (int) (match.getObservers().size() * 0.5);
+    int activePlayers = match.getPlayers().size() - obs;
+    return mapPools.stream()
+        .filter(rot -> activePlayers >= rot.getPlayers())
+        .max(MapPool::compareTo);
+  }
+
   @Override
   public void matchEnded(Match match) {
-    int activePlayers = match.getPlayers().size() - (match.getObservers().size() / 2);
-
-    mapPools.stream()
-        .filter(rot -> activePlayers >= rot.getPlayers())
-        .max(MapPool::compareTo)
-        .ifPresent(pool -> updateActiveMapPool(pool, match));
-
+    if (activeMapPool.isDynamic() || shouldRevert(match)) {
+      getAppropriateDynamicPool(match).ifPresent(pool -> updateActiveMapPool(pool, match));
+    }
     activeMapPool.matchEnded(match);
+  }
+
+  private boolean shouldRevert(Match match) {
+    return (Config.MapPools.areStaffRequired()
+            && !match.getPlayers().stream()
+                .filter(mp -> mp.getBukkit().hasPermission(Permissions.STAFF))
+                .findAny()
+                .isPresent())
+        || !activeMapPool.isDynamic()
+            && poolTimeLimit != null
+            && TimeUtils.isLongerThan(
+                Duration.between(poolStartTime, Instant.now()), poolTimeLimit);
   }
 }

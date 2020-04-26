@@ -37,14 +37,18 @@ public class Rotation extends MapPool {
   }
 
   private int getMapPosition(MapInfo map) {
-    int count = 0;
-
-    for (MapInfo pgmMap : maps) {
-      if (pgmMap.getName().equals(map.getName())) break;
-      count++;
+    for (int i = 0; i < maps.size(); i++) {
+      if (maps.get(i).getName().equals(map.getName())) {
+        return i;
+      }
     }
 
-    return count;
+    PGM.get()
+        .getLogger()
+        .log(
+            Level.SEVERE,
+            "Could not resolve next map from rotations. Resuming on initial position: 0");
+    return 0;
   }
 
   private MapInfo getMapInPosition(int position) {
