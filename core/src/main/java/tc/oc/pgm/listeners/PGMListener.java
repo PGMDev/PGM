@@ -26,8 +26,10 @@ import org.bukkit.event.player.PlayerLoginEvent.Result;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.vehicle.VehicleUpdateEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.util.Vector;
 import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
@@ -281,6 +283,14 @@ public class PGMListener implements Listener {
     Match match = this.mm.getMatch(event.getWorld());
     if (match != null && match.isFinished()) {
       event.setCancelled(true);
+    }
+  }
+
+  @EventHandler
+  public void freezeVehicle(final VehicleUpdateEvent event) {
+    Match match = this.mm.getMatch(event.getWorld());
+    if (match != null && match.isFinished()) {
+      event.getVehicle().setVelocity(new Vector());
     }
   }
 
