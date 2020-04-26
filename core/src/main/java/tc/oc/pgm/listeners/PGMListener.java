@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.entity.EnderPearl;
@@ -43,12 +44,15 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.commands.MatchCommands;
+import tc.oc.pgm.events.MapPoolAdjustEvent;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.gamerules.GameRule;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.TimeLockModule;
+import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.PeriodFormats;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.translations.AllTranslations;
@@ -313,6 +317,46 @@ public class PGMListener implements Listener {
     for (ItemStack armor : quitter.getInventory().getArmorContents()) {
       if (armor == null || armor.getType() == Material.AIR) continue;
       quitter.getWorld().dropItemNaturally(quitter.getBukkit().getLocation(), armor);
+    }
+  }
+
+  @EventHandler
+  public void announceDynamicMapPoolChange(MapPoolAdjustEvent event) {
+    // Send feedback to staff, alerting them that the map pool has changed by force
+    if (event.isForced()) {
+      Component poolName =
+          new PersonalizedText(event.getNewPool().getName()).color(ChatColor.LIGHT_PURPLE);
+      Component staffName =
+          UsernameFormatUtils.formatStaffName(event.getSender(), event.getMatch());
+      PersonalizedTranslatable forced =
+          new PersonalizedTranslatable("pools.poolChange.force", poolName, staffName);
+      if (event.getTimeLimit() != null) {
+        Component time =
+            PeriodFormats.briefNaturalApproximate(event.getTimeLimit()).color(ChatColor.GREEN);
+        forced =
+            new PersonalizedTranslatable("pools.poolChange.force.timed", poolName, time, staffName);
+      }
+      ChatDispatcher.broadcastAdminChatMessage(
+          forced.getPersonalizedText().color(ChatColor.GRAY), event.getMatch());
+    }
+
+    // Broadcast map pool changes due to size
+    if (event.getNewPool().isDynamic()) {
+      event
+          .getMatch()
+          .sendMessage(
+              ChatColor.WHITE
+                  + "["
+                  + ChatColor.GOLD
+                  + "Rotations"
+                  + ChatColor.WHITE
+                  + "] "
+                  + ChatColor.GREEN
+                  + AllTranslations.get()
+                      .translate(
+                          "pools.poolChange",
+                          Bukkit.getConsoleSender(),
+                          (ChatColor.AQUA + event.getNewPool().getName() + ChatColor.GREEN)));
     }
   }
 }

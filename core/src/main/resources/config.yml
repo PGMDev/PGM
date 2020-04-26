@@ -12,7 +12,8 @@ map:
 map-pools:
   enabled: true
   path: map-pools.yml
-
+  require-staff: true          # Requires at least one online staff (pgm.staff) to stay on non-dynamic pool, will revert to dynamic pool if none are found.
+  
 restart:
   enabled: true
   uptime: 3h

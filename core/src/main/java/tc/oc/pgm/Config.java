@@ -86,6 +86,10 @@ public class Config {
     public static String getPath() {
       return getConfiguration().getString("map-pools.path");
     }
+
+    public static boolean areStaffRequired() {
+      return getConfiguration().getBoolean("map-pools.require-staff", true);
+    }
   }
 
   public static class AutoRestart {
