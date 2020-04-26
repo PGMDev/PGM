@@ -31,7 +31,7 @@ public class ObserverToolFactory {
             ChatColor.BLUE.toString()
                 + ChatColor.BOLD
                 + AllTranslations.get().translate("teleportTool.displayName", player))
-        .get();
+        .build();
   }
 
   public ItemStack getEditWand(Player player) {
@@ -41,7 +41,7 @@ public class ObserverToolFactory {
             ChatColor.DARK_PURPLE.toString()
                 + ChatColor.BOLD
                 + AllTranslations.get().translate("editWand.displayName", player))
-        .get();
+        .build();
   }
 
   public boolean canUseEditWand(Permissible permissible) {

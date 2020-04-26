@@ -14,15 +14,13 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
-import tc.oc.pgm.util.item.tag.BooleanItemTag;
+import tc.oc.pgm.util.item.tag.ItemTag;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class ItemModifyModule implements MapModule {
-  private static final BooleanItemTag APPLIED = new BooleanItemTag("custom-meta-applied", false);
-
+public class ItemModifyModule implements MapModule<ItemModifyMatchModule> {
+  private static final ItemTag<Boolean> APPLIED = ItemTag.newBoolean("custom-meta-applied");
   private final List<ItemRule> rules;
 
   public ItemModifyModule(List<ItemRule> rules) {
@@ -30,7 +28,7 @@ public class ItemModifyModule implements MapModule {
   }
 
   public boolean applyRules(ItemStack stack) {
-    if (stack == null || stack.getType() == Material.AIR || APPLIED.get(stack)) {
+    if (stack == null || stack.getType() == Material.AIR || APPLIED.has(stack)) {
       return false;
     } else {
       APPLIED.set(stack, true);
@@ -44,7 +42,7 @@ public class ItemModifyModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public ItemModifyMatchModule createMatchModule(Match match) {
     return new ItemModifyMatchModule(match, this);
   }
 

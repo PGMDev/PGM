@@ -536,20 +536,6 @@ public interface NMSHacks {
     return ((CraftWorld) world).getHandle().getTime();
   }
 
-  static void createExplosion(
-      Entity entity, Location loc, float power, boolean fire, boolean destroy) {
-    ((CraftWorld) loc.getWorld())
-        .getHandle()
-        .createExplosion(
-            ((CraftEntity) entity).getHandle(),
-            loc.getX(),
-            loc.getY(),
-            loc.getZ(),
-            power,
-            fire,
-            destroy);
-  }
-
   /**
    * Test if a {@link Skull} has a cached skin. If this returns false, the skull will likely try to
    * fetch its skin the next time it is loaded.

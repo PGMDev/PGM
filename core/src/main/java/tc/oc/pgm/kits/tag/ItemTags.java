@@ -1,13 +1,12 @@
 package tc.oc.pgm.kits.tag;
 
-import tc.oc.pgm.util.item.tag.BooleanItemTag;
-import tc.oc.pgm.util.item.tag.StringItemTag;
+import tc.oc.pgm.util.item.tag.ItemTag;
 
 public class ItemTags {
 
-  public static final BooleanItemTag PREVENT_SHARING = new BooleanItemTag("prevent-sharing", false);
-  public static final StringItemTag PROJECTILE = new StringItemTag("projectile", null);
-  public static final StringItemTag ORIGINAL_NAME = new StringItemTag("original-name", null);
+  public static final ItemTag<Boolean> PREVENT_SHARING = ItemTag.newBoolean("prevent-sharing");
+  public static final ItemTag<String> PROJECTILE = ItemTag.newString("projectile");
+  public static final ItemTag<String> ORIGINAL_NAME = ItemTag.newString("original-name");
 
   private ItemTags() {}
 }
