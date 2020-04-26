@@ -43,6 +43,11 @@ public class Rotation extends MapPool {
       }
     }
 
+    PGM.get()
+        .getLogger()
+        .log(
+            Level.SEVERE,
+            "Could not resolve next map from rotations. Resuming on initial position: 0");
     return 0;
   }
 
