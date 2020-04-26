@@ -151,7 +151,7 @@ public class Carried extends Spawned implements Missing {
         message = this.flag.getDefinition().getCarryMessage();
       } else {
         message =
-            new PersonalizedTranslatable("flag.carrying.you", this.flag.getComponentName());
+            new PersonalizedTranslatable("flag.carrying", this.flag.getComponentName());
       }
 
       message.setColor(net.md_5.bungee.api.ChatColor.AQUA);
@@ -235,7 +235,7 @@ public class Carried extends Spawned implements Missing {
         .getMatch()
         .sendMessage(
             new PersonalizedTranslatable(
-                    "flag.capture",
+                    "flag.capture.player",
                 this.flag.getComponentName(),
                 this.carrier.getStyledName(NameStyle.COLOR)));
 

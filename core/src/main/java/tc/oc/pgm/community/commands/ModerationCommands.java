@@ -670,7 +670,7 @@ public class ModerationCommands implements Listener {
             sender);
 
     Component banTypeFormatted =
-        new PersonalizedTranslatable("moderation.type", banType)
+        new PersonalizedTranslatable("moderation.type.mainComponent", banType)
             .getPersonalizedText()
             .color(ChatColor.GRAY);
 

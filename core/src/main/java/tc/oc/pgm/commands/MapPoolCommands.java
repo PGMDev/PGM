@@ -183,7 +183,7 @@ public class MapPoolCommands {
 
     if (positions < 0) {
       sender.sendMessage(
-          ChatColor.RED + AllTranslations.get().translate("maps.pools.skip.noNegative", sender));
+          ChatColor.RED + AllTranslations.get().translate("admin.skip.pools.noNegative", sender));
       return;
     }
 
@@ -210,7 +210,7 @@ public class MapPoolCommands {
             + ChatColor.GREEN
             + AllTranslations.get()
                 .translate(
-                        "maps.pools.skip.message",
+                        "admin.skip.pools.success",
                     sender,
                     (ChatColor.AQUA.toString() + positions + ChatColor.GREEN)));
   }

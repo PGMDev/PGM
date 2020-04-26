@@ -94,7 +94,7 @@ public class FormattingListener implements Listener {
           .getMatch()
           .sendMessage(
               new PersonalizedTranslatable(
-                      "destroyable.complete.owned.player",
+                      "destroyable.complete",
                   credit,
                   destroyable.getComponentName(),
                   destroyable.getOwner().getComponentName()));
