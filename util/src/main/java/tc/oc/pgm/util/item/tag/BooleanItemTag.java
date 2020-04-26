@@ -1,26 +1,28 @@
 package tc.oc.pgm.util.item.tag;
 
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
-import tc.oc.pgm.util.item.ItemTag;
+import org.bukkit.inventory.ItemStack;
 
-public class BooleanItemTag extends ItemTag<Boolean> {
+/** An item tag that stores boolean values. */
+final class BooleanItemTag implements ItemTag<Boolean> {
 
-  public BooleanItemTag(String name, Boolean defaultValue) {
-    super(name, defaultValue);
+  private final ItemTag<String> itemTag;
+
+  BooleanItemTag(ItemTag<String> itemTag) {
+    this.itemTag = itemTag;
   }
 
   @Override
-  protected boolean hasPrimitive(NBTTagCompound tag) {
-    return tag.hasKeyOfType(name, 1);
+  public Boolean get(ItemStack item) {
+    return "1".equals(itemTag.get(item)) ? true : null;
   }
 
   @Override
-  protected Boolean getPrimitive(NBTTagCompound tag) {
-    return tag.getBoolean(name);
+  public void set(ItemStack item, Boolean value) {
+    itemTag.set(item, value ? "1" : "0");
   }
 
   @Override
-  protected void setPrimitive(NBTTagCompound tag, Boolean value) {
-    tag.setBoolean(name, value);
+  public void clear(ItemStack item) {
+    itemTag.clear(item);
   }
 }

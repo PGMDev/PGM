@@ -26,7 +26,6 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerResetEvent;
 import tc.oc.pgm.kits.tag.Grenade;
 import tc.oc.pgm.kits.tag.ItemTags;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
 public class KitMatchModule implements MatchModule, Listener {
@@ -154,12 +153,14 @@ public class KitMatchModule implements MatchModule, Listener {
     if (event.getEntity().getShooter() instanceof Player) {
       Grenade grenade = Grenade.get(event.getEntity());
       if (grenade != null) {
-        NMSHacks.createExplosion(
-            event.getEntity(),
-            event.getEntity().getLocation(),
-            grenade.power,
-            grenade.fire,
-            grenade.destroy);
+        event
+            .getWorld()
+            .createExplosion(
+                event.getEntity(),
+                event.getEntity().getLocation(),
+                grenade.power,
+                grenade.fire,
+                grenade.destroy);
         event.getEntity().remove();
       }
     }
@@ -167,7 +168,7 @@ public class KitMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void playerDropItem(PlayerDropItemEvent event) {
-    if (ItemTags.PREVENT_SHARING.get(event.getItemDrop().getItemStack())) {
+    if (ItemTags.PREVENT_SHARING.has(event.getItemDrop().getItemStack())) {
       event.getItemDrop().remove();
     }
   }
@@ -175,7 +176,7 @@ public class KitMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void checkItemTransfer(ItemTransferEvent event) {
     if (event.getType() == ItemTransferEvent.Type.PLACE
-        && ItemTags.PREVENT_SHARING.get(event.getItemStack())) {
+        && ItemTags.PREVENT_SHARING.has(event.getItemStack())) {
       event.setCancelled(true);
     }
   }

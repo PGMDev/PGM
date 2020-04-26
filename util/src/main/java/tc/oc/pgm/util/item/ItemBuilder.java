@@ -1,7 +1,6 @@
 package tc.oc.pgm.util.item;
 
 import java.util.Arrays;
-import javax.annotation.Nullable;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -9,53 +8,52 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.MaterialData;
 
-/**
- * A nice way to build {@link ItemStack}s
- *
- * <p>TODO: attributes, canPlaceOn, canDestroy, color, potion effects, etc.
- */
+/** A nice way to build {@link ItemStack}s. */
 public class ItemBuilder {
 
-  private final ItemStack stack = new ItemStack(Material.AIR);
-  private @Nullable ItemMeta meta;
+  protected final ItemStack item;
+  private ItemMeta meta;
 
-  public ItemStack get() {
-    if (meta != null) {
-      stack.setItemMeta(meta);
-      meta = null;
-    }
-    return stack;
+  public ItemBuilder() {
+    this(new ItemStack(Material.AIR));
   }
 
-  public ItemStack copy() {
-    return get().clone();
+  public ItemBuilder(ItemStack item) {
+    this.item = item;
+    this.meta = item.getItemMeta();
   }
 
   protected ItemMeta meta() {
-    if (meta == null) {
-      meta = stack.getItemMeta();
-    }
-    return meta;
+    return meta == null ? meta = item.getItemMeta() : meta;
+  }
+
+  public ItemStack build() {
+    item.setItemMeta(meta);
+    return item;
+  }
+
+  public ItemStack copy() {
+    return build().clone();
   }
 
   public ItemBuilder material(Material material) {
-    stack.setType(material);
+    item.setType(material);
     return this;
   }
 
   public ItemBuilder material(MaterialData material) {
-    stack.setType(material.getItemType());
-    stack.setData(material);
+    item.setType(material.getItemType());
+    item.setData(material);
     return this;
   }
 
   public ItemBuilder amount(int amount) {
-    stack.setAmount(amount);
+    item.setAmount(amount);
     return this;
   }
 
   public ItemBuilder durability(int durability) {
-    stack.setDurability((short) durability);
+    item.setDurability((short) durability);
     return this;
   }
 
