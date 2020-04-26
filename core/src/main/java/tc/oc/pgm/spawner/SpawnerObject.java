@@ -7,4 +7,6 @@ public interface SpawnerObject {
     void spawn(Location location);
 
     boolean isTracked();
+
+    int spawnCount();
 }

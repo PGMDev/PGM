@@ -1,6 +1,7 @@
 package tc.oc.pgm.spawner;
 
 import com.google.common.collect.ImmutableList;
+import org.bukkit.potion.PotionEffect;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -14,6 +15,9 @@ import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.spawner.objects.SpawnerObjectEntity;
+import tc.oc.pgm.spawner.objects.SpawnerObjectPotion;
+import tc.oc.pgm.spawner.objects.SpawnerObjectTNT;
+import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
@@ -53,7 +57,6 @@ public class SpawnerModule implements MapModule {
                spawnerDefinition.spawnRegion = regionParser.parseRequiredRegionProperty(element, "spawn-region");
                spawnerDefinition.playerRegion = regionParser.parseRequiredRegionProperty(element, "player-region");
                spawnerDefinition.id = element.getAttributeValue("id");
-               spawnerDefinition.count = XMLUtils.parseNumber(element.getAttribute("count"), Integer.class);
                Attribute delay = element.getAttribute("delay");
                Attribute minDelay = element.getAttribute("min-delay");
                Attribute maxDelay = element.getAttribute("max-delay");
@@ -71,17 +74,29 @@ public class SpawnerModule implements MapModule {
                }
 
                spawnerDefinition.maxEntities = XMLUtils.parseNumber(element.getAttribute("max-entities"), Integer.class, Integer.MAX_VALUE);
-               // TODO Parse filters
+               // TODO Filters?
 
                 List<SpawnerObject> objects = new ArrayList<>();
-                for (Element object : XMLUtils.getChildren(element, "entity", "item", "tnt", "potion")) {
-                   switch (object.getName()) {
+                for (Element object : XMLUtils.getChildren(element, "entity", "item", "tnt", "effect")) {
+                    int count;
+                    switch (object.getName()) {
                        case "entity":
-                           SpawnerObjectEntity entity = new SpawnerObjectEntity(XMLUtils.parseEntityType(object));
+                           count = XMLUtils.parseNumber(object.getAttribute("count"), Integer.class, 1);
+                           SpawnerObjectEntity entity = new SpawnerObjectEntity(XMLUtils.parseEntityType(object), count);
                            objects.add(entity);
                            break;
                        case "tnt":
-
+                            Duration fuse =  XMLUtils.parseDuration(object.getAttribute("fuse"));
+                            float power =  XMLUtils.parseNumber(object.getAttribute("power"), Float.class);
+                            count = XMLUtils.parseNumber(object.getAttribute("count"), Integer.class, 1);
+                           SpawnerObjectTNT tnt = new SpawnerObjectTNT(power, (int) TimeUtils.toTicks(fuse), count);
+                           objects.add(tnt);
+                           break;
+                       case "effect":
+                           PotionEffect effect = XMLUtils.parsePotionEffect(object);
+                           count = XMLUtils.parseNumber(object.getAttribute("count"), Integer.class, 1);
+                           SpawnerObjectPotion potion = new SpawnerObjectPotion(count, effect);
+                           objects.add(potion);
                            break;
                    }
                 }

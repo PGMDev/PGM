@@ -14,7 +14,6 @@ public class SpawnerDefinition {
     public Region playerRegion;
     public int maxEntities;
     public Duration minDelay, maxDelay, delay;
-    public Filter filter;
     public List<SpawnerObject> objects;
 
 }
