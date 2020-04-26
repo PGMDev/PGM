@@ -2,7 +2,6 @@ package tc.oc.pgm.spawner.objects;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.metadata.FixedMetadataValue;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.spawner.SpawnerModule;
@@ -23,7 +22,7 @@ public class SpawnerObjectEntity implements SpawnerObject {
     public void spawn(Location location) {
         for (int i = 0; i < spawnCount; i++){
             Entity spawned = location.getWorld().spawn(location, entity);
-            spawned.setMetadata(SpawnerModule.ATTRIBUTE_KEY, new FixedMetadataValue(PGM.get(), "Spawner Entity"));
+            spawned.setMetadata(SpawnerModule.METADATA_KEY, new FixedMetadataValue(PGM.get(), "Spawner Entity"));
         }
 
     }

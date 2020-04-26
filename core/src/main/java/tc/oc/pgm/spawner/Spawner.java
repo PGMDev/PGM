@@ -6,6 +6,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.ItemDespawnEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
@@ -53,7 +55,7 @@ public class Spawner implements Listener, Tickable {
                 Vector randomSpawnLoc = definition.spawnRegion.getRandom(RANDOM);
                 object.spawn(new Location(match.getWorld(), randomSpawnLoc.getX(), randomSpawnLoc.getY(), randomSpawnLoc.getZ()));
                 if (object.isTracked()){
-                    spawnedEntities++;
+                    spawnedEntities = spawnedEntities + object.spawnCount();
                 }
             }
             generateDelay();
@@ -74,18 +76,27 @@ public class Spawner implements Listener, Tickable {
 
 
     private boolean canSpawn() {
-        if (spawnedEntities >= definition.maxEntities || trackedPlayers.size() == 0){
-            return false;
-        }
-        else {
-            return true;
-        }
+        return spawnedEntities < definition.maxEntities && trackedPlayers.size() != 0;
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDeath(EntityDeathEvent event){
-        if (event.getEntity().getMetadata(SpawnerModule.ATTRIBUTE_KEY, PGM.get()) != null){
+        if (event.getEntity().getMetadata(SpawnerModule.METADATA_KEY, PGM.get()) != null){
            spawnedEntities--;
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onItemDespawn(ItemDespawnEvent event){
+        if (event.getEntity().getMetadata(SpawnerModule.METADATA_KEY, PGM.get()) != null){
+            spawnedEntities = spawnedEntities - event.getEntity().getItemStack().getAmount();
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerPickup(PlayerPickupItemEvent event){
+        if (event.getItem().getMetadata(SpawnerModule.METADATA_KEY, PGM.get()) != null){
+            spawnedEntities = spawnedEntities - event.getItem().getItemStack().getAmount();
         }
     }
 

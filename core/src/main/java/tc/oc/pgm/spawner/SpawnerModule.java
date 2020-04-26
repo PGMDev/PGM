@@ -1,6 +1,7 @@
 package tc.oc.pgm.spawner;
 
 import com.google.common.collect.ImmutableList;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -12,9 +13,11 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.FilterParser;
+import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.spawner.objects.SpawnerObjectEntity;
+import tc.oc.pgm.spawner.objects.SpawnerObjectItem;
 import tc.oc.pgm.spawner.objects.SpawnerObjectPotion;
 import tc.oc.pgm.spawner.objects.SpawnerObjectTNT;
 import tc.oc.pgm.util.TimeUtils;
@@ -30,7 +33,7 @@ import java.util.logging.Logger;
 public class SpawnerModule implements MapModule {
 
     private static final List<SpawnerDefinition> spawnerDefinitions = new ArrayList<>();
-    public static final String ATTRIBUTE_KEY = "PGM_SPAWNER_OBJECT";
+    public static final String METADATA_KEY = "PGM_SPAWNER_OBJECT";
 
 
     @Override
@@ -49,7 +52,7 @@ public class SpawnerModule implements MapModule {
                 throws InvalidXMLException {
             SpawnerModule spawnerModule = new SpawnerModule();
             RegionParser regionParser = factory.getRegions();
-            FilterParser filterParser = factory.getFilters();
+            KitParser kitParser = factory.getKits();
 
             for (Element element :
                     XMLUtils.flattenElements(doc.getRootElement(), "spawners", "spawner")) {
@@ -98,6 +101,11 @@ public class SpawnerModule implements MapModule {
                            SpawnerObjectPotion potion = new SpawnerObjectPotion(count, effect);
                            objects.add(potion);
                            break;
+                        case "item":
+                            ItemStack stack = kitParser.parseItem(object, false);
+                            SpawnerObjectItem item = new SpawnerObjectItem(stack);
+                            objects.add(item);
+                            break;
                    }
                 }
                 spawnerDefinition.objects = objects;
