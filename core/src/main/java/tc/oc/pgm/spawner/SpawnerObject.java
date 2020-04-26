@@ -4,9 +4,9 @@ import org.bukkit.Location;
 
 public interface SpawnerObject {
 
-    void spawn(Location location);
+  void spawn(Location location);
 
-    boolean isTracked();
+  boolean isTracked();
 
-    int spawnCount();
+  int spawnCount();
 }

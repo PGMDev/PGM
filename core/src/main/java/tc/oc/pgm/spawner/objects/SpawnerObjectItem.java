@@ -10,28 +10,27 @@ import tc.oc.pgm.spawner.SpawnerObject;
 
 public class SpawnerObjectItem implements SpawnerObject {
 
-    private int count;
-    private ItemStack stack;
+  private int count;
+  private ItemStack stack;
 
-    public SpawnerObjectItem(ItemStack stack) {
-        this.count = stack.getAmount();
-        this.stack = stack;
-    }
+  public SpawnerObjectItem(ItemStack stack) {
+    this.count = stack.getAmount();
+    this.stack = stack;
+  }
 
-    @Override
-    public void spawn(Location location) {
-            Item item = location.getWorld().dropItem(location, stack);
-            item.setMetadata(SpawnerModule.METADATA_KEY, new FixedMetadataValue(PGM.get(), "Spawner Item"));
-        
-    }
+  @Override
+  public void spawn(Location location) {
+    Item item = location.getWorld().dropItem(location, stack);
+    item.setMetadata(SpawnerModule.METADATA_KEY, new FixedMetadataValue(PGM.get(), "Spawner Item"));
+  }
 
-    @Override
-    public boolean isTracked() {
-        return true;
-    }
+  @Override
+  public boolean isTracked() {
+    return true;
+  }
 
-    @Override
-    public int spawnCount() {
-        return count;
-    }
+  @Override
+  public int spawnCount() {
+    return count;
+  }
 }
