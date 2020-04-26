@@ -151,7 +151,7 @@ public class Carried extends Spawned implements Missing {
         message = this.flag.getDefinition().getCarryMessage();
       } else {
         message =
-            new PersonalizedTranslatable("match.flag.carrying.you", this.flag.getComponentName());
+            new PersonalizedTranslatable("flag.carrying.you", this.flag.getComponentName());
       }
 
       message.setColor(net.md_5.bungee.api.ChatColor.AQUA);
@@ -163,12 +163,12 @@ public class Carried extends Spawned implements Missing {
       } else if (this.deniedByFlag != null) {
         message =
             new PersonalizedTranslatable(
-                "match.flag.captureDenied.byFlag",
+                    "flag.captureDenied.byFlag",
                 this.flag.getComponentName(),
                 this.deniedByFlag.getComponentName());
       } else {
         message =
-            new PersonalizedTranslatable("match.flag.captureDenied", this.flag.getComponentName());
+            new PersonalizedTranslatable("flag.captureDenied", this.flag.getComponentName());
       }
 
       message.setColor(net.md_5.bungee.api.ChatColor.RED);
@@ -229,13 +229,13 @@ public class Carried extends Spawned implements Missing {
 
   protected void captureFlag(Net net) {
     this.carrier.sendMessage(
-        new PersonalizedTranslatable("match.flag.capture.you", this.flag.getComponentName()));
+        new PersonalizedTranslatable("flag.capture.you", this.flag.getComponentName()));
 
     this.flag
         .getMatch()
         .sendMessage(
             new PersonalizedTranslatable(
-                "match.flag.capture",
+                    "flag.capture",
                 this.flag.getComponentName(),
                 this.carrier.getStyledName(NameStyle.COLOR)));
 

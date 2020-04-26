@@ -244,7 +244,7 @@ public class PickerMatchModule implements MatchModule, Listener {
         Lists.newArrayList(
             ChatColor.DARK_PURPLE
                 + AllTranslations.get()
-                    .translate("teamSelection.picker.tooltip", player.getBukkit())));
+                    .translate("observer.picker.tooltip", player.getBukkit())));
 
     stack.setItemMeta(meta);
     return stack;
@@ -256,11 +256,11 @@ public class PickerMatchModule implements MatchModule, Listener {
     ItemMeta meta = stack.getItemMeta();
     meta.setDisplayName(
         OPEN_BUTTON_PREFIX
-            + AllTranslations.get().translate("leave.picker.displayName", player.getBukkit()));
+            + AllTranslations.get().translate("observer.picker.displayName.leave", player.getBukkit()));
     meta.setLore(
         Lists.newArrayList(
             ChatColor.DARK_PURPLE
-                + AllTranslations.get().translate("leave.picker.tooltip", player.getBukkit())));
+                + AllTranslations.get().translate("observer.picker.tooltipObserver", player.getBukkit())));
 
     stack.setItemMeta(meta);
     return stack;
@@ -605,14 +605,14 @@ public class PickerMatchModule implements MatchModule, Listener {
         ChatColor.GRAY.toString()
             + ChatColor.BOLD
             + AllTranslations.get()
-                .translate("teamSelection.picker.autoJoin.displayName", viewer.getBukkit()));
+                .translate("observer.picker.autoJoin.displayName", viewer.getBukkit()));
     autojoinMeta.setLore(
         Lists.newArrayList(
             this.getTeamSizeDescription(
                 viewer.getMatch().getParticipants().size(), viewer.getMatch().getMaxPlayers()),
             ChatColor.AQUA
                 + AllTranslations.get()
-                    .translate("teamSelection.picker.autoJoin.tooltip", viewer.getBukkit())));
+                    .translate("observer.picker.autoJoin.tooltip", viewer.getBukkit())));
     autojoin.setItemMeta(autojoinMeta);
 
     return autojoin;
@@ -633,28 +633,28 @@ public class PickerMatchModule implements MatchModule, Listener {
           lore.add(
               ChatColor.GREEN
                   + AllTranslations.get()
-                      .translate("teamSelection.picker.clickToJoin", player.getBukkit()));
+                      .translate("observer.picker.clickToJoin", player.getBukkit()));
           break;
 
         case REJOINED:
           lore.add(
               ChatColor.GREEN
                   + AllTranslations.get()
-                      .translate("teamSelection.picker.clickToRejoin", player.getBukkit()));
+                      .translate("observer.picker.clickToRejoin", player.getBukkit()));
           break;
 
         case CHOICE_DENIED:
           lore.add(
               ChatColor.GOLD
                   + AllTranslations.get()
-                      .translate("teamSelection.picker.noPermissions", player.getBukkit()));
+                      .translate("observer.picker.noPermissions", player.getBukkit()));
           break;
 
         case FULL:
           lore.add(
               ChatColor.DARK_RED
                   + AllTranslations.get()
-                      .translate("teamSelection.picker.capacity", player.getBukkit()));
+                      .translate("observer.picker.capacity", player.getBukkit()));
           break;
       }
     }
@@ -695,7 +695,7 @@ public class PickerMatchModule implements MatchModule, Listener {
                 ChatColor.GOLD
                     + AllTranslations.get()
                         .translate(
-                            "command.class.select.confirm",
+                                "class.success",
                             player.getBukkit(),
                             ChatColor.GREEN + name));
             scheduleRefresh(player);
@@ -703,7 +703,7 @@ public class PickerMatchModule implements MatchModule, Listener {
             player.sendMessage(
                 ChatColor.RED
                     + AllTranslations.get()
-                        .translate("command.class.stickyClass", player.getBukkit()));
+                        .translate("class.stickyClass", player.getBukkit()));
           }
         }
 

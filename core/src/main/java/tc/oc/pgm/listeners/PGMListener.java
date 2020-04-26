@@ -104,7 +104,7 @@ public class PGMListener implements Listener {
     if (!mm.getMatches().hasNext()) {
       event.disallow(
           AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-          AllTranslations.get().translate("incorrectWorld.kickMessage", null));
+          AllTranslations.get().translate("system.incorrectWorldKickMessage", null));
     }
   }
 
@@ -115,7 +115,7 @@ public class PGMListener implements Listener {
       if (event.getPlayer().hasPermission(Permissions.JOIN_FULL)) {
         event.allow();
       } else {
-        event.setKickMessage(AllTranslations.get().translate("serverFull", event.getPlayer()));
+        event.setKickMessage(AllTranslations.get().translate("system.serverFull", event.getPlayer()));
       }
     }
   }
@@ -128,7 +128,7 @@ public class PGMListener implements Listener {
           .kickPlayer(
               ChatColor.RED
                   + AllTranslations.get()
-                      .translate("incorrectWorld.kickMessage", event.getPlayer()));
+                      .translate("system.incorrectWorldKickMessage", event.getPlayer()));
       this.parent
           .getLogger()
           .info(
@@ -151,7 +151,7 @@ public class PGMListener implements Listener {
       event.setJoinMessage(null);
       MatchPlayer player = match.getPlayer(event.getPlayer());
       if (player != null) {
-        announceJoinOrLeave(player, "broadcast.joinMessage");
+        announceJoinOrLeave(player, "system.joinMessage");
       }
     }
   }
@@ -164,7 +164,7 @@ public class PGMListener implements Listener {
     if (event.getQuitMessage() != null) {
       MatchPlayer player = match.getPlayer(event.getPlayer());
       if (player != null) {
-        announceJoinOrLeave(player, "broadcast.leaveMessage");
+        announceJoinOrLeave(player, "system.leaveMessage");
       }
       event.setQuitMessage(null);
     }

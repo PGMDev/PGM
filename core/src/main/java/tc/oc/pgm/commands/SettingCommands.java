@@ -30,12 +30,12 @@ public class SettingCommands {
 
     player.sendMessage(
         new PersonalizedTranslatable(
-            "command.setting.get",
+                "setting.get",
             new PersonalizedText(key.getName()),
             new PersonalizedText(value.getName(), ChatColor.GREEN)));
     player.sendMessage(
         new PersonalizedTranslatable(
-            "command.setting.options",
+                "setting.options",
             TranslationUtils.legacyList(
                 sender,
                 (input) -> ChatColor.WHITE + input,
@@ -68,13 +68,13 @@ public class SettingCommands {
     if (old == value) {
       player.sendMessage(
           new PersonalizedTranslatable(
-              "command.setting.get",
+                  "setting.get",
               new PersonalizedText(key.getName()),
               new PersonalizedText(old.getName(), ChatColor.GREEN)));
     } else {
       player.sendMessage(
           new PersonalizedTranslatable(
-              "command.setting.set",
+                  "setting.set",
               new PersonalizedText(key.getName()),
               new PersonalizedText(old.getName(), ChatColor.GRAY),
               new PersonalizedText(value.getName(), ChatColor.GREEN)));

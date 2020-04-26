@@ -30,11 +30,11 @@ public class StartCommands {
 
     if (match.isRunning()) {
       throw new CommandException(
-          AllTranslations.get().translate("command.admin.start.matchRunning", sender));
+          AllTranslations.get().translate("admin.start.matchRunning", sender));
     }
     if (match.isFinished()) {
       throw new CommandException(
-          AllTranslations.get().translate("command.admin.start.matchFinished", sender));
+          AllTranslations.get().translate("admin.start.matchFinished", sender));
     }
 
     if (smm.canStart(true)) {
@@ -44,7 +44,7 @@ public class StartCommands {
       ComponentRenderers.send(
           sender,
           new PersonalizedText(
-              new PersonalizedTranslatable("command.admin.start.unknownState"),
+              new PersonalizedTranslatable("admin.start.unknownState"),
               net.md_5.bungee.api.ChatColor.RED));
       for (UnreadyReason reason : smm.getUnreadyReasons(true)) {
         ComponentRenderers.send(
@@ -86,12 +86,12 @@ public class StartCommands {
     if (autoStart) {
       sender.sendMessage(
           ChatColor.GREEN
-              + AllTranslations.get().translate("command.admin.autoStartEnabled", sender));
+              + AllTranslations.get().translate("admin.autoStart.enabled", sender));
       smm.autoStartCountdown();
     } else {
       sender.sendMessage(
           ChatColor.BLUE
-              + AllTranslations.get().translate("command.admin.autoStartDisabled", sender));
+              + AllTranslations.get().translate("admin.autoStart.disabled", sender));
     }
   }
 }

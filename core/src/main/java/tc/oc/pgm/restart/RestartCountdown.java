@@ -19,10 +19,10 @@ public class RestartCountdown extends MatchCountdown {
   protected Component formatText() {
     if (TimeUtils.isLongerThan(remaining, Duration.ZERO)) {
       return new PersonalizedTranslatable(
-              "broadcast.serverRestart.message", secondsRemaining(ChatColor.DARK_RED))
+              "system.serverRestart.broadcast", secondsRemaining(ChatColor.DARK_RED))
           .color(ChatColor.AQUA);
     } else {
-      return new PersonalizedTranslatable("broadcast.serverRestart.kickMsg").color(ChatColor.RED);
+      return new PersonalizedTranslatable("system.serverRestart.kickMsg").color(ChatColor.RED);
     }
   }
 

@@ -66,7 +66,7 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
   @Override
   public Component getTouchMessage(ParticipantState toucher, boolean self) {
     return new PersonalizedTranslatable(
-        self ? "match.touch.wool.you" : "match.touch.wool.teamSuffix",
+        self ? "wool.touch.you" : "wool.touch.player",
         toucher.getStyledName(NameStyle.COLOR),
         getComponentName(),
         toucher.getParty().getComponentName());

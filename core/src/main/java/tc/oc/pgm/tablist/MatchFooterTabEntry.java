@@ -60,7 +60,7 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
 
     content.extra(
         new PersonalizedText(
-            AllTranslations.get().translate("command.match.matchInfo.time", view.getViewer())
+            AllTranslations.get().translate("match.matchInfo.time", view.getViewer())
                 + ": ",
             ChatColor.GRAY),
         new PersonalizedText(

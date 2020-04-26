@@ -210,7 +210,7 @@ public class CombatLogTracker implements Listener {
   public void onParticipationStop(PlayerParticipationStopEvent event) {
     if (event.getMatch().isRunning()
         && this.getImminentDeath(event.getPlayer().getBukkit()) != null) {
-      event.cancel(new PersonalizedTranslatable("match.noCombatLog"));
+      event.cancel(new PersonalizedTranslatable("match.leave.denied.noCombatLog"));
       event.setCancelled(true);
     }
   }

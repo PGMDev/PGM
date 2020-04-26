@@ -201,10 +201,10 @@ public class ScoreMatchModule implements MatchModule, Listener {
 
     match.sendMessage(
         new PersonalizedTranslatable(
-            "match.score.scorebox",
+                "gamemode.scorebox.scored",
             player.getStyledName(NameStyle.COLOR),
             new PersonalizedTranslatable(
-                wholePoints == 1 ? "points.singularCompound" : "points.pluralCompound",
+                wholePoints == 1 ? "gamemode.scorebox.point" : "gamemode.scorebox.points",
                 ChatColor.DARK_AQUA + String.valueOf(wholePoints) + ChatColor.GRAY),
             player.getParty().getStyledName(NameStyle.COLOR)));
     player.playSound(new Sound("random.levelup"));

@@ -52,7 +52,7 @@ public class Captured extends BaseState implements Returning {
             .getMatch()
             .sendMessage(
                 new PersonalizedTranslatable(
-                    "match.flag.respawnTogether", this.flag.getComponentName()));
+                        "flag.respawnTogether", this.flag.getComponentName()));
       }
     }
 

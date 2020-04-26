@@ -134,7 +134,7 @@ public class ModerationCommands implements Listener {
 
     if (fmm.getFrozenPlayers().isEmpty() && fmm.getOfflineFrozenCount() < 1) {
       sender.sendMessage(
-          new PersonalizedTranslatable("command.freeze.list.none")
+          new PersonalizedTranslatable("moderation.freeze.frozenList.none")
               .getPersonalizedText()
               .color(ChatColor.RED));
       return;
@@ -150,14 +150,14 @@ public class ModerationCommands implements Listener {
                       .map(m -> m.getStyledName(NameStyle.FANCY))
                       .collect(Collectors.toList())));
       sender.sendMessage(
-          formatFrozenList("command.freeze.list", fmm.getFrozenPlayers().size(), names));
+          formatFrozenList("moderation.freeze.frozenList.online", fmm.getFrozenPlayers().size(), names));
     }
 
     // Offline Players
     if (fmm.getOfflineFrozenCount() > 0) {
       Component names = new PersonalizedText(fmm.getOfflineFrozenNames());
       sender.sendMessage(
-          formatFrozenList("command.freeze.list.offline", fmm.getOfflineFrozenCount(), names));
+          formatFrozenList("moderation.freeze.frozenList.offline", fmm.getOfflineFrozenCount(), names));
     }
   }
 
@@ -193,13 +193,13 @@ public class ModerationCommands implements Listener {
 
     Component alreadyFrozen =
         new PersonalizedTranslatable(
-                "command.freeze.already.frozen",
+                "moderation.freeze.alreadyFrozen",
                 match.getPlayer(target).getStyledName(NameStyle.FANCY))
             .getPersonalizedText()
             .color(ChatColor.GRAY);
     Component alreadyThawed =
         new PersonalizedTranslatable(
-                "command.freeze.already.thaw",
+                "moderation.freeze.alreadyThawed",
                 match.getPlayer(target).getStyledName(NameStyle.FANCY))
             .getPersonalizedText()
             .color(ChatColor.GRAY);
@@ -437,14 +437,14 @@ public class ModerationCommands implements Listener {
       if (onlineBans > 0) {
         sender.sendMessage(
             new PersonalizedTranslatable(
-                    "moderation.commands.banIP.alts",
+                    "moderation.ipBan.bannedWithAlts",
                     formattedTarget,
                     new PersonalizedText(Integer.toString(onlineBans)).color(ChatColor.AQUA))
                 .getPersonalizedText()
                 .color(ChatColor.RED));
       } else {
         sender.sendMessage(
-            new PersonalizedTranslatable("moderation.commands.banIP", formattedTarget)
+            new PersonalizedTranslatable("moderation.ipBan.banned", formattedTarget)
                 .getPersonalizedText()
                 .color(ChatColor.RED));
       }
@@ -452,7 +452,7 @@ public class ModerationCommands implements Listener {
     } else {
       sender.sendMessage(
           new PersonalizedTranslatable(
-                  "moderation.commands.invalidIP",
+                  "moderation.ipBan.invalidIP",
                   new PersonalizedText(address).color(ChatColor.RED).italic(true))
               .color(ChatColor.GRAY));
     }
@@ -511,7 +511,7 @@ public class ModerationCommands implements Listener {
       if (alts.isEmpty()) {
         sender.sendMessage(
             new PersonalizedTranslatable(
-                    "moderation.commands.noAlts", target.getStyledName(NameStyle.FANCY))
+                    "moderation.alts.noAlts", target.getStyledName(NameStyle.FANCY))
                 .getPersonalizedText()
                 .color(ChatColor.RED));
       } else {
@@ -539,7 +539,7 @@ public class ModerationCommands implements Listener {
 
       Component pageNum =
           new PersonalizedTranslatable(
-                  "command.paginatedResult.page",
+                  "command.simplePageHeader",
                   new PersonalizedText(Integer.toString(page)).color(ChatColor.DARK_AQUA),
                   new PersonalizedText(Integer.toString(pages)).color(ChatColor.DARK_AQUA))
               .getPersonalizedText()
@@ -593,7 +593,7 @@ public class ModerationCommands implements Listener {
         throw new CommandException(
             ComponentRenderers.toLegacyText(
                 new PersonalizedTranslatable(
-                        "commands.invalid.target",
+                        "command.notJoinedServer",
                         new PersonalizedText(target).color(ChatColor.AQUA))
                     .getPersonalizedText()
                     .color(ChatColor.RED),
@@ -670,7 +670,7 @@ public class ModerationCommands implements Listener {
             sender);
 
     Component banTypeFormatted =
-        new PersonalizedTranslatable("moderation.records.type", banType)
+        new PersonalizedTranslatable("moderation.type", banType)
             .getPersonalizedText()
             .color(ChatColor.GRAY);
 
@@ -976,7 +976,7 @@ public class ModerationCommands implements Listener {
               .color(ChatColor.DARK_AQUA);
 
       return new PersonalizedTranslatable(
-              "moderation.events.similarIP.hover", getPunisher(), timeAgo)
+              "moderation.similarIP.hover", getPunisher(), timeAgo)
           .getPersonalizedText()
           .color(ChatColor.GRAY);
     }
@@ -1060,7 +1060,7 @@ public class ModerationCommands implements Listener {
   private Component formatAltAccountBroadcast(BannedAccountInfo info, MatchPlayer player) {
     Component message =
         new PersonalizedTranslatable(
-                "moderation.events.similarIP",
+                "moderation.similarIP.loginEvent",
                 player.getStyledName(NameStyle.FANCY),
                 new PersonalizedText(info.getUserName()).color(ChatColor.DARK_AQUA))
             .getPersonalizedText()

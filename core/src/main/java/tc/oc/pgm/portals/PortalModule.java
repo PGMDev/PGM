@@ -36,7 +36,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 
 public class PortalModule implements MapModule {
   private static final Component PROTECT_MESSAGE =
-      new PersonalizedTranslatable("match.portal.protectMessage");
+      new PersonalizedTranslatable("match.protectPortals");
 
   protected final Set<Portal> portals;
 

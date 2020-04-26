@@ -57,7 +57,7 @@ public class FreeForAllCommands {
         throw new CommandException(
             AllTranslations.get()
                 .translate(
-                    "commands.incorrectUsage",
+                        "command.incorrectUsage",
                     sender,
                     "<team> (default | [-p max-players] [-o max-overfill])"));
       }

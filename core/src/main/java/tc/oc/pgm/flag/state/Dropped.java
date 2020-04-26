@@ -43,7 +43,7 @@ public class Dropped extends Uncarried implements Missing {
       this.flag
           .getMatch()
           .sendMessage(
-              new PersonalizedTranslatable("match.flag.drop", this.flag.getComponentName()));
+              new PersonalizedTranslatable("flag.drop", this.flag.getComponentName()));
     }
 
     if (TimeUtils.isInfinite(getDuration())) {

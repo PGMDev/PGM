@@ -99,11 +99,11 @@ public class FreezeMatchModule implements MatchModule, Listener {
     meta.setDisplayName(
         ChatColor.WHITE
             + ChatColor.BOLD.toString()
-            + AllTranslations.get().translate("freeze.itemName", viewer));
+            + AllTranslations.get().translate("moderation.freeze.itemName", viewer));
     meta.addItemFlags(ItemFlag.values());
     meta.setLore(
         Collections.singletonList(
-            ChatColor.GRAY + AllTranslations.get().translate("freeze.itemDescription", viewer)));
+            ChatColor.GRAY + AllTranslations.get().translate("moderation.freeze.itemDescription", viewer)));
     stack.setItemMeta(meta);
     return stack;
   }
@@ -325,7 +325,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
 
       freezee.showTitle(
           Components.blank(),
-          new PersonalizedTranslatable("freeze.frozen", senderName)
+          new PersonalizedTranslatable("moderation.freeze.frozen", senderName)
               .getPersonalizedText()
               .color(ChatColor.RED),
           5,
@@ -334,7 +334,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
       freezee.playSound(FREEZE_SOUND);
       ChatDispatcher.broadcastAdminChatMessage(
           new PersonalizedTranslatable(
-                  "freeze.broadcast.frozen", senderName, freezee.getStyledName(NameStyle.FANCY))
+                  "moderation.freeze.broadcast.frozen", senderName, freezee.getStyledName(NameStyle.FANCY))
               .getPersonalizedText()
               .color(ChatColor.GRAY),
           match);
@@ -346,12 +346,12 @@ public class FreezeMatchModule implements MatchModule, Listener {
       freezee.getBukkit().hideTitle();
       freezee.playSound(THAW_SOUND);
       freezee.sendMessage(
-          new PersonalizedTranslatable("freeze.unfrozen", senderName)
+          new PersonalizedTranslatable("moderation.freeze.unfrozen", senderName)
               .getPersonalizedText()
               .color(ChatColor.GREEN));
       ChatDispatcher.broadcastAdminChatMessage(
           new PersonalizedTranslatable(
-                  "freeze.broadcast.thaw", senderName, freezee.getStyledName(NameStyle.FANCY))
+                  "moderation.freeze.broadcast.thaw", senderName, freezee.getStyledName(NameStyle.FANCY))
               .getPersonalizedText()
               .color(ChatColor.GRAY),
           match);

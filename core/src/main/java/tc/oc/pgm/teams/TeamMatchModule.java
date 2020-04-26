@@ -60,23 +60,23 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       if (team != null) {
         if (players == 1) {
           return new PersonalizedTranslatable(
-              "start.needMorePlayers.team.singular",
+                  "match.needMorePlayers.team.singular",
               new PersonalizedText(String.valueOf(players), ChatColor.AQUA),
               team.getComponentName());
         } else {
           return new PersonalizedTranslatable(
-              "start.needMorePlayers.team.plural",
+                  "match.needMorePlayers.team.plural",
               new PersonalizedText(String.valueOf(players), ChatColor.AQUA),
               team.getComponentName());
         }
       } else {
         if (players == 1) {
           return new PersonalizedTranslatable(
-              "start.needMorePlayers.ffa.singular",
+                  "match.needMorePlayers.ffa.singular",
               new PersonalizedText(String.valueOf(players), ChatColor.AQUA));
         } else {
           return new PersonalizedTranslatable(
-              "start.needMorePlayers.ffa.plural",
+                  "match.needMorePlayers.ffa.plural",
               new PersonalizedText(String.valueOf(players), ChatColor.AQUA));
         }
       }
@@ -470,29 +470,29 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
         case SWITCH_DISABLED:
           joining.sendWarning(
               new PersonalizedTranslatable(
-                  "command.gameplay.join.switchDisabled", lastTeam.getComponentName()),
+                      "match.join.success.switchDisabled", lastTeam.getComponentName()),
               false);
           return true;
 
         case CHOICE_DISABLED:
           joining.sendWarning(
-              new PersonalizedTranslatable("command.gameplay.join.choiceDisabled"), false);
+              new PersonalizedTranslatable("match.join.denied.choiceDisabled"), false);
           return true;
 
         case CHOICE_DENIED:
           joining.sendWarning(
-              new PersonalizedTranslatable("command.gameplay.join.choiceDenied"), false);
+              new PersonalizedTranslatable("match.join.denied.choiceDenied"), false);
           return true;
 
         case FULL:
           if (teamResult.getTeam() != null) {
             joining.sendWarning(
                 new PersonalizedTranslatable(
-                    "command.gameplay.join.completelyFull",
+                        "match.join.denied.completelyFull",
                     teamResult.getTeam().getComponentName()),
                 false);
           } else {
-            joining.sendWarning(new PersonalizedTranslatable("autoJoin.teamsFull"), false);
+            joining.sendWarning(new PersonalizedTranslatable("match.join.denied.teamsFull"), false);
           }
 
           return true;
@@ -500,7 +500,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
         case REDUNDANT:
           joining.sendWarning(
               new PersonalizedTranslatable(
-                  "command.gameplay.join.alreadyOnTeam", joining.getParty().getComponentName()),
+                      "match.join.denied.alreadyOnTeam", joining.getParty().getComponentName()),
               false);
           return true;
       }
@@ -549,7 +549,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       if (even && areTeamsEven() && shortList.size() - i < getTeams().size()) {
         // Prevent join if even teams are required, and there aren't enough remaining players to go
         // around
-        player.sendWarning(new PersonalizedTranslatable("command.gameplay.join.uneven"));
+        player.sendWarning(new PersonalizedTranslatable("match.join.denied.uneven"));
       } else {
         join(player, null, queryJoin(player, null, true));
       }
@@ -610,17 +610,17 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     // Give them the bad news
     if (jmm.canPriorityKick(kickMe)) {
       kickMe.sendMessage(
-          new PersonalizedTranslatable("gameplay.kickedForBalance", kickTo.getComponentName()));
-      kickMe.sendMessage(new PersonalizedTranslatable("gameplay.autoJoinSwitch"));
+          new PersonalizedTranslatable("match.movedForBalance", kickTo.getComponentName()));
+      kickMe.sendMessage(new PersonalizedTranslatable("match.join.success.switched"));
     } else {
       kickMe.playSound(new Sound("mob.villager.hit"));
       if (forBalance) {
         kickMe.sendWarning(
-            new PersonalizedTranslatable("gameplay.kickedForBalance", kickTo.getComponentName()),
+            new PersonalizedTranslatable("match.movedForBalance", kickTo.getComponentName()),
             false);
       } else {
         kickMe.sendWarning(
-            new PersonalizedTranslatable("gameplay.kickedForPremium", kickFrom.getComponentName()),
+            new PersonalizedTranslatable("match.leave.kickedPremium.teams", kickFrom.getComponentName()),
             false);
       }
     }
@@ -643,7 +643,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       event
           .getPlayer()
           .sendMessage(
-              new PersonalizedTranslatable("team.join", event.getNewParty().getComponentName()));
+              new PersonalizedTranslatable("match.join.success.team", event.getNewParty().getComponentName()));
     }
     updateReadiness();
   }

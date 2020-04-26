@@ -62,11 +62,11 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     public Component getReason() {
       if (players == 1) {
         return new PersonalizedTranslatable(
-            "start.needMorePlayers.ffa.singular",
+                "match.needMorePlayers.ffa.singular",
             new PersonalizedText(String.valueOf(players), net.md_5.bungee.api.ChatColor.AQUA));
       } else {
         return new PersonalizedTranslatable(
-            "start.needMorePlayers.ffa.plural",
+                "match.needMorePlayers.ffa.plural",
             new PersonalizedText(String.valueOf(players), net.md_5.bungee.api.ChatColor.AQUA));
       }
     }
@@ -199,7 +199,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
 
     MatchPlayer kickMe = kickable.get(match.getRandom().nextInt(kickable.size()));
 
-    kickMe.sendWarning(new PersonalizedTranslatable("gameplay.ffa.kickedForPremium"), false);
+    kickMe.sendWarning(new PersonalizedTranslatable("match.leave.kickedPremium.ffa"), false);
     kickMe.playSound(new Sound("mob.villager.hit"));
 
     match.setParty(kickMe, match.getDefaultParty());
@@ -237,12 +237,12 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
       GenericJoinResult genericResult = (GenericJoinResult) result;
       switch (genericResult.getStatus()) {
         case FULL:
-          joining.sendWarning(new PersonalizedTranslatable("autoJoin.matchFull"), false);
+          joining.sendWarning(new PersonalizedTranslatable("match.join.denied.matchFull"), false);
           return true;
 
         case REDUNDANT:
           joining.sendWarning(
-              new PersonalizedTranslatable("command.gameplay.join.alreadyJoined"), false);
+              new PersonalizedTranslatable("match.join.denied.alreadyJoined"), false);
           return true;
       }
     }
@@ -276,7 +276,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
   public boolean forceJoin(MatchPlayer joining) {
     if (joining.getParty() instanceof Tribute) {
       joining.sendWarning(
-          new PersonalizedTranslatable("command.gameplay.join.alreadyJoined"), false);
+          new PersonalizedTranslatable("match.join.denied.alreadyJoined"), false);
     }
 
     return match.setParty(joining, getTribute(joining));
@@ -285,7 +285,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPartyChange(PlayerPartyChangeEvent event) {
     if (event.getNewParty() instanceof Tribute) {
-      event.getPlayer().sendMessage(new PersonalizedTranslatable("ffa.join"));
+      event.getPlayer().sendMessage(new PersonalizedTranslatable("match.join.success.ffa"));
     }
     updateReadiness();
   }

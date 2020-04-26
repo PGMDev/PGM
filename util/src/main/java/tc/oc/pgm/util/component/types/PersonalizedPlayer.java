@@ -85,7 +85,7 @@ public class PersonalizedPlayer extends Component {
           new HoverEvent(
               HoverEvent.Action.SHOW_TEXT,
               new BaseComponent[] {
-                new PersonalizedTranslatable("tip.teleportTo", component.duplicate()).render(viewer)
+                new PersonalizedTranslatable("misc.teleportTo", component.duplicate()).render(viewer)
               }));
       component.setClickEvent(
           new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + player.getName()));

@@ -153,10 +153,10 @@ public abstract class MatchCountdown extends Countdown {
     long seconds = remaining.getSeconds();
     if (seconds == 1) {
       return new PersonalizedTranslatable(
-          "countdown.singularCompound", new PersonalizedText("1", color));
+          "misc.time.second", new PersonalizedText("1", color));
     } else {
       return new PersonalizedTranslatable(
-          "countdown.pluralCompound", new PersonalizedText(String.valueOf(seconds), color));
+          "misc.time.seconds", new PersonalizedText(String.valueOf(seconds), color));
     }
   }
 

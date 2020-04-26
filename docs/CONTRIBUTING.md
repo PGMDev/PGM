@@ -23,6 +23,10 @@ You can save a good amount of time during code review if you share your ideas an
 
 Players, contributors, and server owners should be able to enjoy the core mechanics of PGM "out-of-the-box" without any extra plugins or requirements. No website, database, or external API should be required to run a server on your local machine. Eventually, it should be able to run on any Minecraft server version and be compatible with the most popular Bukkit plugins.
 
+Localization
+------------
+PGM is translated into multiple languages! Therefore, when working on something that will give any feedback like errors, confirmations, prompts for info or a query response that is viewed by any users, please read through the README located in `util/src/main/i18n`
+
 Dependencies
 ------------
 You'll need to make sure your machine has the following dependencies before compiling PGM. The instructions will vary by operation system, so click on each link to read the detailed steps.

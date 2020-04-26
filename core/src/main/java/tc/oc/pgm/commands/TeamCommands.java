@@ -31,12 +31,12 @@ public class TeamCommands {
           ChatColor.GRAY
               + AllTranslations.get()
                   .translate(
-                      "command.gameplay.myteam.message",
+                          "match.myTeam.yourTeam",
                       player.getBukkit(),
                       player.getParty().getColoredName() + ChatColor.GRAY));
     } else {
       throw new CommandException(
-          AllTranslations.get().translate("command.gameplay.myteam.notOnTeam", sender));
+          AllTranslations.get().translate("match.myTeam.notOnTeam", sender));
     }
   }
 
@@ -65,7 +65,7 @@ public class TeamCommands {
     }
     sender.sendMessage(
         new PersonalizedTranslatable(
-                "command.team.force.success",
+                "match.team.force.success",
                 matchPlayer.getStyledName(NameStyle.FANCY),
                 matchPlayer.getParty().getComponentName(),
                 oldParty.getComponentName())
@@ -81,7 +81,7 @@ public class TeamCommands {
       throws CommandException {
     if (match.isRunning()) {
       throw new CommandException(
-          AllTranslations.get().translate("command.team.shuffle.matchRunning", sender));
+          AllTranslations.get().translate("match.team.shuffle.deniedMatchRunning", sender));
     } else {
       List<Team> teams = new ArrayList<>(tmm.getParticipatingTeams());
       List<MatchPlayer> participating = new ArrayList<>(match.getParticipants());
@@ -89,7 +89,7 @@ public class TeamCommands {
       for (int i = 0; i < participating.size(); i++) {
         tmm.forceJoin(participating.get(i), teams.get((i * teams.size()) / participating.size()));
       }
-      match.sendMessage(new PersonalizedTranslatable("command.team.shuffle.success"));
+      match.sendMessage(new PersonalizedTranslatable("match.team.shuffle.success"));
     }
   }
 
@@ -114,7 +114,7 @@ public class TeamCommands {
     for (Team t : tmm.getTeams()) {
       if (t.getName().equalsIgnoreCase(newName)) {
         throw new CommandException(
-            AllTranslations.get().translate("command.team.alias.nameAlreadyUsed", sender, newName));
+            AllTranslations.get().translate("match.team.alias.deniedNameAlreadyUsed", sender, newName));
       }
     }
 
@@ -147,7 +147,7 @@ public class TeamCommands {
         throw new CommandException(
             AllTranslations.get()
                 .translate(
-                    "commands.incorrectUsage",
+                        "command.incorrectUsage",
                     sender,
                     "<team> (default | [-p max-players] [-o max-overfill])"));
       }

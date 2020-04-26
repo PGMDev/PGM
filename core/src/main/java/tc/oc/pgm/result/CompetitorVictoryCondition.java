@@ -25,8 +25,8 @@ public class CompetitorVictoryCondition extends ImmediateVictoryCondition {
   public Component getDescription(Match match) {
     return new PersonalizedTranslatable(
         competitor.isNamePlural()
-            ? "broadcast.gameOver.teamWinText.plural"
-            : "broadcast.gameOver.teamWinText",
+            ? "match.broadcasts.gameOver.teamWinners"
+            : "match.broadcasts.gameOver.teamWinner",
         competitor.getComponentName());
   }
 }

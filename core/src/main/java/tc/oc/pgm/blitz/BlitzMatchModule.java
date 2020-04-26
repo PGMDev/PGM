@@ -85,7 +85,7 @@ public class BlitzMatchModule implements MatchModule, Listener {
     if (event.getMatch().isRunning()) {
       event.cancel(
           new PersonalizedTranslatable(
-              "blitz.join", new PersonalizedText("Blitz", net.md_5.bungee.api.ChatColor.AQUA)));
+                  "gamemode.blitz.joinDenied", new PersonalizedText("Blitz", net.md_5.bungee.api.ChatColor.AQUA)));
     }
   }
 
@@ -99,12 +99,12 @@ public class BlitzMatchModule implements MatchModule, Listener {
               new PersonalizedText(),
               new PersonalizedText(
                   new PersonalizedTranslatable(
-                      "match.blitz.livesRemaining.message",
+                          "gamemode.blitz.livesRemaining",
                       new PersonalizedText(
                           new PersonalizedTranslatable(
                               lives == 1
-                                  ? "match.blitz.livesRemaining.singularLives"
-                                  : "match.blitz.livesRemaining.pluralLives",
+                                  ? "gamemode.blitz.life"
+                                  : "gamemode.blitz.lives",
                               new PersonalizedText(Integer.toString(lives))),
                           net.md_5.bungee.api.ChatColor.AQUA)),
                   net.md_5.bungee.api.ChatColor.RED),

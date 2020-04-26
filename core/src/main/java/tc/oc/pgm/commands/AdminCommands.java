@@ -92,7 +92,7 @@ public class AdminCommands {
 
     if (!ended)
       throw new CommandException(
-          AllTranslations.get().translate("command.admin.end.unknownError", sender));
+          AllTranslations.get().translate("admin.end.unknownError", sender));
   }
 
   @Command(
@@ -111,7 +111,7 @@ public class AdminCommands {
       throws CommandException {
     if (RestartManager.isQueued() && !force) {
       throw new CommandException(
-          AllTranslations.get().translate("command.admin.setNext.restartQueued", sender));
+          AllTranslations.get().translate("admin.setNext.restartQueued", sender));
     }
 
     mapOrder.setNextMap(map);
@@ -121,13 +121,13 @@ public class AdminCommands {
       sender.sendMessage(
           ChatColor.GREEN
               + AllTranslations.get()
-                  .translate("command.admin.cancelRestart.restartUnqueued", sender));
+                  .translate("admin.cancelRestart.restartUnqueued", sender));
     }
 
     Component mapName = new PersonalizedText(map.getName()).color(ChatColor.DARK_PURPLE);
     Component successful =
         new PersonalizedTranslatable(
-                "command.admin.set.success",
+                        "admin.setNext.success",
                 UsernameFormatUtils.formatStaffName(sender, match),
                 mapName)
             .getPersonalizedText()
@@ -197,7 +197,7 @@ public class AdminCommands {
     match.getCountdown().cancelAll();
     match.needModule(StartMatchModule.class).setAutoStart(false);
     sender.sendMessage(
-        ChatColor.GREEN + AllTranslations.get().translate("command.admin.cancel.success", sender));
+        ChatColor.GREEN + AllTranslations.get().translate("admin.cancelCountdowns", sender));
   }
 
   @Command(

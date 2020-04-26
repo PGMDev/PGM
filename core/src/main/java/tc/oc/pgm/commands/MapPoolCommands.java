@@ -58,7 +58,7 @@ public class MapPoolCommands {
 
     if (mapPool == null) {
       sender.sendMessage(
-          ChatColor.RED + AllTranslations.get().translate("command.pools.noPoolMatch", sender));
+          ChatColor.RED + AllTranslations.get().translate("maps.pools.noPoolMatch", sender));
       return;
     }
     List<MapInfo> maps = mapPool.getMaps();
@@ -66,7 +66,7 @@ public class MapPoolCommands {
     int resultsPerPage = 8;
     int pages = (maps.size() + resultsPerPage - 1) / resultsPerPage;
 
-    String title = AllTranslations.get().translate("command.pools.mapPool.title", sender);
+    String title = AllTranslations.get().translate("maps.pools.mapPool", sender);
     title +=
         ChatColor.DARK_AQUA + " (" + ChatColor.AQUA + mapPool.getName() + ChatColor.DARK_AQUA + ")";
     title = ComponentUtils.paginate(title, page, pages);
@@ -123,7 +123,7 @@ public class MapPoolCommands {
     List<MapPool> mapPools = mapPoolManager.getMapPools();
     if (mapPools.isEmpty()) {
       sender.sendMessage(
-          ChatColor.RED + AllTranslations.get().translate("command.pools.noMapPools", sender));
+          ChatColor.RED + AllTranslations.get().translate("maps.pools.noMapPools", sender));
       return;
     }
 
@@ -134,7 +134,7 @@ public class MapPoolCommands {
     int resultsPerPage = 8;
     int pages = (mapPools.size() + resultsPerPage - 1) / resultsPerPage;
 
-    String title = AllTranslations.get().translate("command.pools.mapPoolList.title", sender);
+    String title = AllTranslations.get().translate("maps.pools.mapPoolListTitle", sender);
     title = ComponentUtils.paginate(title, page, pages);
     title = ComponentUtils.horizontalLineHeading(title, ChatColor.BLUE, 250);
 
@@ -183,14 +183,14 @@ public class MapPoolCommands {
 
     if (positions < 0) {
       sender.sendMessage(
-          ChatColor.RED + AllTranslations.get().translate("command.pools.skip.noNegative", sender));
+          ChatColor.RED + AllTranslations.get().translate("maps.pools.skip.noNegative", sender));
       return;
     }
 
     MapPool pool = getMapPoolManager(sender, mapOrder).getActiveMapPool();
     if (!(pool instanceof Rotation)) {
       sender.sendMessage(
-          ChatColor.RED + AllTranslations.get().translate("command.pools.noRotation", sender));
+          ChatColor.RED + AllTranslations.get().translate("maps.pools.noRotation", sender));
       return;
     }
 
@@ -210,7 +210,7 @@ public class MapPoolCommands {
             + ChatColor.GREEN
             + AllTranslations.get()
                 .translate(
-                    "command.pools.skip.message",
+                        "maps.pools.skip.message",
                     sender,
                     (ChatColor.AQUA.toString() + positions + ChatColor.GREEN)));
   }
@@ -223,14 +223,14 @@ public class MapPoolCommands {
     MapPoll poll = pool instanceof VotingPool ? ((VotingPool) pool).getCurrentPoll() : null;
     if (poll == null) {
       sender.sendMessage(
-          ChatColor.RED + AllTranslations.get().translate("command.pool.vote.noVote", sender));
+          ChatColor.RED + AllTranslations.get().translate("maps.pools.vote.noVote", sender));
       return;
     }
     boolean voteResult = poll.toggleVote(map, ((Player) sender).getUniqueId());
 
     PersonalizedTranslatable tr =
         new PersonalizedTranslatable(
-            voteResult ? "command.pool.vote.voted" : "command.pool.vote.removedVote",
+            voteResult ? "maps.pools.vote.voted" : "maps.pools.vote.removedVote",
             map.getName());
     sender.sendMessage(new PersonalizedText(tr, voteResult ? ChatColor.GREEN : ChatColor.RED));
     poll.sendBook(player);
@@ -241,6 +241,6 @@ public class MapPoolCommands {
     if (mapOrder instanceof MapPoolManager) return (MapPoolManager) mapOrder;
 
     throw new CommandException(
-        AllTranslations.get().translate("command.pools.mapPoolsDisabled", sender));
+        AllTranslations.get().translate("maps.pools.mapPoolsDisabled", sender));
   }
 }

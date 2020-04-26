@@ -70,7 +70,7 @@ public class AntiGriefListener implements Listener {
     if (block != null
         && (block.getType() == Material.WATER || block.getType() == Material.STATIONARY_WATER)) {
       clicker.sendMessage(
-          ChatColor.RED + AllTranslations.get().translate("defuse.water", clicker.getBukkit()));
+          ChatColor.RED + AllTranslations.get().translate("moderation.defuse.water", clicker.getBukkit()));
       return;
     }
 
@@ -87,14 +87,14 @@ public class AntiGriefListener implements Listener {
             ChatColor.RED
                 + AllTranslations.get()
                     .translate(
-                        "defuse.player",
+                            "moderation.defuse.player",
                         clicker.getBukkit(),
                         owner.getBukkit().getDisplayName(clicker.getBukkit()) + ChatColor.RED));
       } else {
         this.notifyDefuse(
             clicker,
             entity,
-            ChatColor.RED + AllTranslations.get().translate("defuse.world", clicker.getBukkit()));
+            ChatColor.RED + AllTranslations.get().translate("moderation.defuse.world", clicker.getBukkit()));
       }
     }
   }
@@ -129,7 +129,7 @@ public class AntiGriefListener implements Listener {
       ComponentRenderers.send(
           player,
           new PersonalizedTranslatable(
-              "defuse.player", TranslationUtils.nameList(NameStyle.COLOR, owners)));
+                  "moderation.defuse.player", TranslationUtils.nameList(NameStyle.COLOR, owners)));
     }
   }
 
@@ -173,12 +173,12 @@ public class AntiGriefListener implements Listener {
     meta.setDisplayName(
         ChatColor.RED
             + ChatColor.BOLD.toString()
-            + AllTranslations.get().translate("defuse.displayName", event.getPlayer().getBukkit()));
+            + AllTranslations.get().translate("moderation.defuse.displayName", event.getPlayer().getBukkit()));
     meta.setLore(
         Collections.singletonList(
             ChatColor.GRAY
                 + AllTranslations.get()
-                    .translate("defuse.tooltip", event.getPlayer().getBukkit())));
+                    .translate("moderation.defuse.tooltip", event.getPlayer().getBukkit())));
     shears.setItemMeta(meta);
 
     event.getPlayer().getBukkit().getInventory().setItem(DEFUSE_SLOT, shears);

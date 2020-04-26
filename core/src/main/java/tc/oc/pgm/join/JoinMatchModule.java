@@ -121,17 +121,17 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
       switch (genericResult.getStatus()) {
         case MATCH_STARTED:
           joining.sendWarning(
-              new PersonalizedTranslatable("command.gameplay.join.matchStarted"), false);
+              new PersonalizedTranslatable("match.join.denied.matchStarted"), false);
           return true;
 
         case MATCH_FINISHED:
           joining.sendWarning(
-              new PersonalizedTranslatable("command.gameplay.join.matchFinished"), false);
+              new PersonalizedTranslatable("match.join.denied.matchFinished"), false);
           return true;
 
         case NO_PERMISSION:
           joining.sendWarning(
-              new PersonalizedTranslatable("command.gameplay.join.joinDenied"), false);
+              new PersonalizedTranslatable("match.join.denied.genericDeny"), false);
           return true;
       }
     }
@@ -160,13 +160,13 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
 
     if (leaving.getParty() instanceof ObservingParty) {
       leaving.sendWarning(
-          new PersonalizedTranslatable("command.gameplay.leave.alreadyOnObservers"), false);
+          new PersonalizedTranslatable("match.leave.denied.alreadyOnObservers"), false);
       return false;
     }
 
     if (!leaving.getBukkit().hasPermission(Permissions.LEAVE)) {
       leaving.sendWarning(
-          new PersonalizedTranslatable("command.gameplay.leave.leaveDenied"), false);
+          new PersonalizedTranslatable("match.leave.denied.notAllowedToObserve"), false);
       return false;
     }
 
@@ -184,12 +184,12 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
   public boolean queueToJoin(MatchPlayer joining) {
     boolean joined = match.setParty(joining, queuedParticipants);
     if (joined) {
-      joining.sendMessage(new PersonalizedTranslatable("ffa.join"));
+      joining.sendMessage(new PersonalizedTranslatable("match.join.success.ffa"));
     }
 
     joining.sendMessage(
         new PersonalizedText(
-            new PersonalizedTranslatable("team.join.deferred.request"),
+            new PersonalizedTranslatable("match.join.deferred.atMatchStart"),
             ChatColor.YELLOW)); // Always show this message
 
     if (match.hasModule(TeamMatchModule.class)) {
@@ -197,19 +197,19 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
       joining.sendMessage(
           new PersonalizedText(
               new PersonalizedTranslatable(
-                  "team.join.forfeitWarning",
+                      "match.join.rankedForfeitWarning.mainComponent",
                   new PersonalizedText(
-                      new PersonalizedTranslatable("team.join.forfeitWarning.emphasis.warning"),
+                      new PersonalizedTranslatable("match.join.rankedForfeitWarning.warning"),
                       ChatColor.RED),
                   new PersonalizedText(
                       new PersonalizedTranslatable(
-                          "team.join.forfeitWarning.emphasis.playUntilTheEnd"),
+                              "match.join.rankedForfeitWarning.playUntilTheEnd"),
                       ChatColor.RED),
                   new PersonalizedText(
-                      new PersonalizedTranslatable("team.join.forfeitWarning.emphasis.doubleLoss"),
+                      new PersonalizedTranslatable("match.join.rankedForfeitWarning.doubleLoss"),
                       ChatColor.RED),
                   new PersonalizedText(
-                      new PersonalizedTranslatable("team.join.forfeitWarning.emphasis.suspension"),
+                      new PersonalizedTranslatable("match.join.rankedForfeitWarning.suspension"),
                       ChatColor.RED)),
               ChatColor.DARK_RED));
 
@@ -218,7 +218,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
         joining.sendMessage(
             new PersonalizedText(
                 new PersonalizedTranslatable(
-                    "team.join.forfeitWarning.timeLimit",
+                        "match.join.rankedForfeitWarning.timeLimit",
                     new PersonalizedText(
                         PeriodFormats.briefNaturalPrecise(tlmm.getTimeLimit().getDuration()),
                         ChatColor.AQUA),
@@ -229,7 +229,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
         joining.sendMessage(
             new PersonalizedText(
                 new PersonalizedTranslatable(
-                    "team.join.forfeitWarning.noTimeLimit",
+                        "match.join.rankedForfeitWarning.noTimeLimit",
                     new PersonalizedText("/leave", ChatColor.GOLD)),
                 ChatColor.DARK_RED,
                 ChatColor.BOLD));
@@ -244,7 +244,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
     if (match.setParty(joining, match.getDefaultParty())) {
       joining.sendMessage(
           new PersonalizedText(
-              new PersonalizedTranslatable("team.join.deferred.cancel"), ChatColor.YELLOW));
+              new PersonalizedTranslatable("match.join.deferred.cancel"), ChatColor.YELLOW));
       return true;
     } else {
       return false;

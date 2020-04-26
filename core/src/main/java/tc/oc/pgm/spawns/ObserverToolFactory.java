@@ -30,7 +30,7 @@ public class ObserverToolFactory {
         .name(
             ChatColor.BLUE.toString()
                 + ChatColor.BOLD
-                + AllTranslations.get().translate("teleportTool.displayName", player))
+                + AllTranslations.get().translate("observer.teleportTool", player))
         .build();
   }
 
@@ -40,7 +40,7 @@ public class ObserverToolFactory {
         .name(
             ChatColor.DARK_PURPLE.toString()
                 + ChatColor.BOLD
-                + AllTranslations.get().translate("editWand.displayName", player))
+                + AllTranslations.get().translate("observer.editWand", player))
         .build();
   }
 

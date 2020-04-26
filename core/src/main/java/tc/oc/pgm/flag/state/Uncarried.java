@@ -172,9 +172,9 @@ public abstract class Uncarried extends Spawned {
     Block flagBlock = this.location.getBlock();
 
     if (block.equals(flagBlock) || block.equals(flagBlock.getRelative(BlockFace.UP))) {
-      event.setCancelled(true, new PersonalizedTranslatable("match.flag.cannotBreak"));
+      event.setCancelled(true, new PersonalizedTranslatable("flag.cannotBreakFlag"));
     } else if (block.equals(flagBlock.getRelative(BlockFace.DOWN))) {
-      event.setCancelled(true, new PersonalizedTranslatable("match.flag.cannotBreakBlockUnder"));
+      event.setCancelled(true, new PersonalizedTranslatable("flag.cannotBreakBlockUnder"));
     }
   }
 

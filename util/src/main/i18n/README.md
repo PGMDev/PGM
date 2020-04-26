@@ -9,5 +9,7 @@ to [our CrowdIn project](https://crowdin.com/project/pgm) when a new commit is p
 `feat/*` branch on the main PGM repo. Translations may then be submitted by the community. Once they are approved, they
 will be automatically PR'd back into the source branch on an hourly basis.
 
+TODO: Write tutorial on how to add strings to .properties with correct standards.. (with pointer to keyori/adventure(text))
+
 **Note**: Please do not modify any *translation* files directly in this repo. Instead, translations should be submitted
 through [our CrowdIn project](https://crowdin.com/project/pgm), through the process described above.

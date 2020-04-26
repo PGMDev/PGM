@@ -23,7 +23,7 @@ public class HuddleCountdown extends PreMatchCountdown implements Listener {
   @Override
   protected Component formatText() {
     return new PersonalizedTranslatable(
-            "countdown.huddle.message", secondsRemaining(ChatColor.DARK_RED))
+            "match.huddle.ending", secondsRemaining(ChatColor.DARK_RED))
         .color(ChatColor.YELLOW);
   }
 
@@ -38,7 +38,7 @@ public class HuddleCountdown extends PreMatchCountdown implements Listener {
         competitor.sendMessage(
             new PersonalizedText(
                 new PersonalizedTranslatable(
-                    "huddle.instructions", PeriodFormats.briefNaturalPrecise(total)),
+                        "match.huddle.start", PeriodFormats.briefNaturalPrecise(total)),
                 ChatColor.YELLOW));
       }
     }
