@@ -39,9 +39,11 @@ public class Rotation extends MapPool {
   private int getMapPosition(MapInfo map) {
     int count = 0;
 
-    for (MapInfo pgmMap : maps) {
-      if (pgmMap.getName().equals(map.getName())) break;
-      count++;
+    for (int i = 0; i < maps.size(); i++) {
+      if (maps.get(i).getName().equals(map.getName())) {
+        count = i;
+        break;
+      }
     }
 
     return count;
