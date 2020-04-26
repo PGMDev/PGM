@@ -4,6 +4,7 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;
 
 import java.time.Duration;
+import java.util.List;
 
 public class SpawnerDefinition {
 
@@ -14,5 +15,6 @@ public class SpawnerDefinition {
     public int maxEntities;
     public Duration minDelay, maxDelay, delay;
     public Filter filter;
+    public List<SpawnerObject> objects;
 
 }

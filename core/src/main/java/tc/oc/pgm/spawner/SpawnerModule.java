@@ -16,6 +16,8 @@ import tc.oc.pgm.regions.EverywhereRegion;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.renewable.RenewableModule;
+import tc.oc.pgm.spawner.objects.SpawnerObjectEntity;
+import tc.oc.pgm.spawner.objects.SpawnerObjectTNT;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
@@ -58,17 +60,34 @@ public class SpawnerModule implements MapModule {
                Attribute maxDelay = element.getAttribute("max-delay");
 
                if ((minDelay != null || maxDelay != null) && delay != null) {
-                   throw new InvalidXMLException("Delay cannot be set with min-delay and max-delay", element);
+                   throw new InvalidXMLException("Attribute 'minDelay' and 'maxDelay' cannot be combined with 'delay'", element);
                }
 
-               spawnerDefinition.delay = XMLUtils.parseDuration(delay);
-               spawnerDefinition.minDelay = XMLUtils.parseDuration(minDelay);
-               spawnerDefinition.maxDelay = XMLUtils.parseDuration(maxDelay);
+               spawnerDefinition.delay = XMLUtils.parseDuration(delay, Duration.ofSeconds(10));
+               spawnerDefinition.minDelay = XMLUtils.parseDuration(minDelay, spawnerDefinition.delay);
+               spawnerDefinition.maxDelay = XMLUtils.parseDuration(maxDelay, spawnerDefinition.delay);
+
+               if (spawnerDefinition.maxDelay.compareTo(spawnerDefinition.minDelay) < 0){
+                    throw new InvalidXMLException("Max delay cannot be smaller than min delay", element);
+               }
 
                spawnerDefinition.maxEntities = XMLUtils.parseNumber(element.getAttribute("max-entities"), Integer.class, Integer.MAX_VALUE);
                spawnerDefinition.playerRange = XMLUtils.parseNumber(element.getAttribute("max-player-range"), Integer.class, Integer.MAX_VALUE);
-
                // TODO Parse filters
+
+                List<SpawnerObject> objects = new ArrayList<>();
+                for (Element object : XMLUtils.getChildren(element, "entity", "item", "tnt", "potion")) {
+                   switch (object.getName()) {
+                       case "entity":
+                           SpawnerObjectEntity entity = new SpawnerObjectEntity(XMLUtils.parseEntityType(object));
+                           objects.add(entity);
+                           break;
+                       case "tnt":
+
+                           break;
+                   }
+                }
+                spawnerDefinition.objects = objects;
             }
 
             return spawnerModule.spawnerDefinitions.isEmpty() ? null : spawnerModule;
