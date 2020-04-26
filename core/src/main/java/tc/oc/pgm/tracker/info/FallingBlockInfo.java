@@ -6,7 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.FallingBlock;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
-import tc.oc.pgm.util.translation.MinecraftTranslations;
+import tc.oc.pgm.util.text.MinecraftTranslations;
 
 public class FallingBlockInfo extends EntityInfo implements DamageInfo {
 

@@ -31,7 +31,7 @@ import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.RUNNING)
 public class LaneMatchModule implements MatchModule, Listener {
@@ -100,7 +100,7 @@ public class LaneMatchModule implements MatchModule, Listener {
               .getPlayer()
               .sendMessage(
                   ChatColor.RED
-                      + AllTranslations.get().translate("match.laneExit", player.getBukkit()));
+                      + TextTranslations.translate("match.laneExit", player.getBukkit()));
         }
       }
     }

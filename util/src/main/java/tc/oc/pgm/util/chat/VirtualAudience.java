@@ -8,7 +8,7 @@ import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.ComponentRenderers;
-import tc.oc.pgm.util.translation.ComponentRenderer;
+import tc.oc.pgm.util.text.TextTranslations;
 
 /** An {@link Audience} that represents a virtual {@link CommandSender}. */
 @FunctionalInterface
@@ -28,7 +28,7 @@ public interface VirtualAudience extends Audience {
    * @return A rendered message.
    */
   default net.kyori.text.Component renderMessage(net.kyori.text.Component message) {
-    return ComponentRenderer.INSTANCE.render(message, getAudience().getLocale());
+    return TextTranslations.translate(message, getAudience().getLocale());
   }
 
   /**

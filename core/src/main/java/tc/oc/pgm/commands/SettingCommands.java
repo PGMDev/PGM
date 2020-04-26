@@ -2,8 +2,12 @@ package tc.oc.pgm.commands;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.argument.ArgumentException;
-import com.google.common.collect.Lists;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -12,8 +16,9 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.translations.AllTranslations;
-import tc.oc.pgm.util.translations.TranslationUtils;
+import tc.oc.pgm.util.text.TextFormatter;
+import tc.oc.pgm.util.text.TextTranslations;
+
 
 public class SettingCommands {
 
@@ -24,7 +29,7 @@ public class SettingCommands {
   public static void setting(CommandSender sender, MatchPlayer player, SettingKey key)
       throws ArgumentException {
     if (player == null)
-      throw new ArgumentException(AllTranslations.get().translate("command.onlyPlayers", sender));
+      throw new ArgumentException(TextTranslations.translate("command.onlyPlayers", sender));
 
     final SettingValue value = player.getSettings().getValue(key);
 
@@ -34,13 +39,14 @@ public class SettingCommands {
             new PersonalizedText(key.getName()),
             new PersonalizedText(value.getName(), ChatColor.GREEN)));
     player.sendMessage(
-        new PersonalizedTranslatable(
+        TranslatableComponent.of(
             "setting.options",
-            TranslationUtils.legacyList(
-                sender,
-                (input) -> ChatColor.WHITE + input,
-                (input) -> ChatColor.GRAY + input,
-                Lists.newArrayList(key.getPossibleValues()))));
+            TextFormatter.list(
+                Stream.of(key.getPossibleValues())
+                    .map(SettingValue::getName)
+                    .map(TextComponent::of)
+                    .collect(Collectors.toList()),
+                TextColor.WHITE)));
   }
 
   @Command(
@@ -51,7 +57,7 @@ public class SettingCommands {
       CommandSender sender, MatchPlayer player, SettingKey key, @Nullable String query)
       throws ArgumentException {
     if (player == null)
-      throw new ArgumentException(AllTranslations.get().translate("command.onlyPlayers", sender));
+      throw new ArgumentException(TextTranslations.translate("command.onlyPlayers", sender));
 
     final Settings setting = player.getSettings();
     final SettingValue old = setting.getValue(key);

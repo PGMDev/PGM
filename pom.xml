@@ -100,6 +100,12 @@
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
+            <artifactId>text-serializer-plain</artifactId>
+            <version>3.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
             <artifactId>text-serializer-legacy</artifactId>
             <version>3.0.4</version>
             <scope>compile</scope>
@@ -131,6 +137,13 @@
             <artifactId>intake-bukkit</artifactId>
             <version>1.2-SNAPSHOT</version>
             <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.6.2</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

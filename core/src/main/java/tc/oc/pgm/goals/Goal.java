@@ -1,6 +1,7 @@
 package tc.oc.pgm.goals;
 
 import javax.annotation.Nullable;
+import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
@@ -57,6 +58,10 @@ public interface Goal<T extends GoalDefinition> extends Feature<T> {
   String getColoredName();
 
   Component getComponentName();
+
+  default net.kyori.text.Component getTextName() {
+    return LegacyComponentSerializer.legacy().deserialize(getColoredName());
+  }
 
   /** A color used for fireworks displays */
   Color getColor();

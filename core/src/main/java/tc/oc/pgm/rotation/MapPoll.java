@@ -34,7 +34,7 @@ import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 /** Represents a polling process, with a set of options. */
 public class MapPoll {
@@ -135,7 +135,7 @@ public class MapPoll {
 
   public void sendBook(MatchPlayer viewer) {
     String title = ChatColor.GOLD + "" + ChatColor.BOLD;
-    title += AllTranslations.get().translate("vote.title.map", viewer.getBukkit());
+    title += TextTranslations.translate("vote.title.map", viewer.getBukkit());
 
     ItemStack is = new ItemStack(Material.WRITTEN_BOOK);
     BookMeta meta = (BookMeta) is.getItemMeta();

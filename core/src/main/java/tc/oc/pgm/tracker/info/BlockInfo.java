@@ -6,7 +6,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.material.MaterialData;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
-import tc.oc.pgm.util.translation.MinecraftTranslations;
+import tc.oc.pgm.util.text.MinecraftTranslations;
 
 public class BlockInfo extends OwnerInfoBase implements PhysicalInfo {
 

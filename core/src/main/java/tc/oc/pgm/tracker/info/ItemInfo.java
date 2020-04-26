@@ -7,7 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
-import tc.oc.pgm.util.translation.MinecraftTranslations;
+import tc.oc.pgm.util.text.MinecraftTranslations;
 
 public class ItemInfo extends OwnerInfoBase implements PhysicalInfo {
 

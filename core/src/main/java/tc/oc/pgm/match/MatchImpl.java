@@ -800,6 +800,7 @@ public class MatchImpl implements Match {
       loaded.set(true);
       callEvent(new MatchLoadEvent(this));
     } catch (Throwable e) {
+      e.printStackTrace();
       unload();
       destroy();
       throw e;

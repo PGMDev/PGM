@@ -7,7 +7,7 @@ import org.bukkit.potion.PotionEffectType;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
 import tc.oc.pgm.util.inventory.InventoryUtils;
-import tc.oc.pgm.util.translation.MinecraftTranslations;
+import tc.oc.pgm.util.text.MinecraftTranslations;
 
 public class ThrownPotionInfo extends EntityInfo implements PotionInfo {
 

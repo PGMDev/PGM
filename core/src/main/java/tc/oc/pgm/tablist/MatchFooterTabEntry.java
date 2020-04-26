@@ -13,7 +13,7 @@ import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.tablist.DynamicTabEntry;
 import tc.oc.pgm.util.tablist.TabView;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class MatchFooterTabEntry extends DynamicTabEntry {
 
@@ -60,7 +60,7 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
 
     content.extra(
         new PersonalizedText(
-            AllTranslations.get().translate("match.info.time", view.getViewer()) + ": ",
+            TextTranslations.translate("match.info.time", view.getViewer()) + ": ",
             ChatColor.GRAY),
         new PersonalizedText(
             TimeUtils.formatDuration(match.getDuration()),

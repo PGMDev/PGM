@@ -36,6 +36,7 @@ import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.text.TextTranslations;
 import tc.oc.pgm.util.translations.AllTranslations;
 
 public class AdminCommands {
@@ -67,6 +68,9 @@ public class AdminCommands {
       Audience audience, Match match, @Default("30") int duration, @Switch('f') boolean force) {
     RestartManager.queueRestart(
         "Restart requested via /queuerestart command", Duration.ofSeconds(duration));
+
+    sender.sendMessage(
+        ChatColor.RED + "Server will restart automatically at the next safe opportunity.");
 
     if (force && match.isRunning()) {
       match.finish();
@@ -108,13 +112,12 @@ public class AdminCommands {
     Competitor winner = StringUtils.bestFuzzyMatch(target, getCompetitorMap(sender, match), 0.9);
 
     if (target != null && winner == null)
-      throw new CommandException(
-          AllTranslations.get().translate("command.competitorNotFound", sender));
+      throw new CommandException(TextTranslations.translate("command.competitorNotFound", sender));
 
     boolean ended = match.finish(winner);
 
     if (!ended)
-      throw new CommandException(AllTranslations.get().translate("admin.end.unknownError", sender));
+      throw new CommandException(TextTranslations.translate("command.admin.end.unknownError", sender));
   }
 
   @Command(
@@ -131,7 +134,7 @@ public class AdminCommands {
       Match match)
       throws CommandException {
     if (RestartManager.isQueued() && !force) {
-      throw new CommandException(AllTranslations.get().translate("map.setNext.confirm", sender));
+      throw new CommandException(TextTranslations.translate("map.setNext.confirm", sender));
     }
 
     mapOrder.setNextMap(map);
@@ -140,7 +143,7 @@ public class AdminCommands {
       RestartManager.cancelRestart();
       sender.sendMessage(
           ChatColor.GREEN
-              + AllTranslations.get().translate("admin.cancelRestart.restartUnqueued", sender));
+              + TextTranslations.translate("admin.cancelRestart.restartUnqueued", sender));
     }
 
     Component mapName = new PersonalizedText(map.getName()).color(ChatColor.DARK_PURPLE);
@@ -214,7 +217,7 @@ public class AdminCommands {
     match.getCountdown().cancelAll();
     match.needModule(StartMatchModule.class).setAutoStart(false);
     sender.sendMessage(
-        ChatColor.GREEN + AllTranslations.get().translate("admin.cancelCountdowns", sender));
+        ChatColor.GREEN + TextTranslations.translate("admin.cancelCountdowns", sender));
   }
 
   @Command(

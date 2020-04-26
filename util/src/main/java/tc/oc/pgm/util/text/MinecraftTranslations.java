@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.translation;
+package tc.oc.pgm.util.text;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
@@ -10,7 +10,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.potion.PotionEffectType;
 import tc.oc.pgm.util.StringUtils;
 
-/** Provides access to Minecraft translation keys that are maintained by Mojang. */
+/** A singleton for accessing {@link Component} translations for Minecraft clients. */
 public final class MinecraftTranslations {
   private MinecraftTranslations() {}
 
@@ -18,6 +18,7 @@ public final class MinecraftTranslations {
   private static final String MATERIAL_KEY = "item.%s.name";
   private static final String POTION_KEY = "potion.%s";
 
+  // TODO: Bukkit 1.13+ exposes NamespaceKey, which is significantly more accurate than this
   private static final Map<Pattern, String> MATERIAL_REPLACEMENTS =
       ImmutableMap.<Pattern, String>builder()
           .put(Pattern.compile("_AXE"), "_HATCHET")
@@ -26,7 +27,7 @@ public final class MinecraftTranslations {
 
   private static final Map<String, String> KEY_EXCEPTIONS =
       ImmutableMap.<String, String>builder()
-          .put("entity.PrimedTnt.name", "tile.tnt.name")
+          .put("entity.PrimedTnt.name", "tile.tnt.name") // "TNT" instead of "Block of TNT"
           .put("entity.MinecartTNT.name", "item.minecartTnt.name")
           .put("entity.EnderCrystal.name", "item.end_crystal.name")
           .put("item.anvil.name", "tile.anvil.name")
@@ -40,11 +41,24 @@ public final class MinecraftTranslations {
           .put("potion.damageResistance", "potion.resistance")
           .build();
 
+  /**
+   * Gets a translated entity name.
+   *
+   * @param entity An entity type.
+   * @return An translated entity name.
+   */
   public static Component getEntity(EntityType entity) {
     return getKey(ENTITY_KEY, entity.getName());
   }
 
-  // TODO: Bukkit 1.13+ exposes NamespaceKey, which is significantly more accurate than this
+  /**
+   * Gets a translated material name.
+   *
+   * <p>Note: is highly inaccurate and is only guaranteed to work with weapons.
+   *
+   * @param material A material.
+   * @return A material name.
+   */
   public static Component getMaterial(Material material) {
     String name = material.name();
     for (Map.Entry<Pattern, String> entry : MATERIAL_REPLACEMENTS.entrySet()) {
@@ -54,6 +68,12 @@ public final class MinecraftTranslations {
     return getKey(MATERIAL_KEY, StringUtils.camelCase(name, true));
   }
 
+  /**
+   * Gets a translated potion name.
+   *
+   * @param potion A potion type.
+   * @return A potion name.
+   */
   public static Component getPotion(PotionEffectType potion) {
     return getKey(POTION_KEY, StringUtils.camelCase(potion.getName()));
   }

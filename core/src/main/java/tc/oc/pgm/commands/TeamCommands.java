@@ -22,7 +22,7 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class TeamCommands {
 
@@ -33,13 +33,12 @@ public class TeamCommands {
     if (player.getParty() instanceof Team) {
       sender.sendMessage(
           ChatColor.GRAY
-              + AllTranslations.get()
-                  .translate(
-                      "match.myTeam",
-                      player.getBukkit(),
-                      player.getParty().getColoredName() + ChatColor.GRAY));
+              + TextTranslations.translate(
+                  "match.myTeam",
+                  player.getBukkit(),
+                  player.getParty().getColoredName() + ChatColor.GRAY));
     } else {
-      throw new CommandException(AllTranslations.get().translate("match.notOnTeam", sender));
+      throw new CommandException(TextTranslations.translate("match.notOnTeam", sender));
     }
   }
 
@@ -88,7 +87,7 @@ public class TeamCommands {
       @Switch('f') boolean force)
       throws CommandException {
     if (match.isRunning() && !force) {
-      throw new CommandException(AllTranslations.get().translate("match.shuffle.err", sender));
+      throw new CommandException(TextTranslations.translate("match.shuffle.err", sender));
     } else {
       List<MatchPlayer> players =
           new ArrayList<>(all ? match.getPlayers() : match.getParticipants());
@@ -111,7 +110,7 @@ public class TeamCommands {
     Team team = tmm.bestFuzzyMatch(target);
 
     if (team == null) {
-      throw new CommandException(AllTranslations.get().translate("command.teamNotFound", sender));
+      throw new CommandException(TextTranslations.translate("command.teamNotFound", sender));
     }
 
     if (newName.length() > 32) newName = newName.substring(0, 32);
@@ -119,7 +118,7 @@ public class TeamCommands {
     for (Team t : tmm.getTeams()) {
       if (t.getName().equalsIgnoreCase(newName)) {
         throw new CommandException(
-            AllTranslations.get().translate("match.alias.err", sender, newName));
+            TextTranslations.translate("match.alias.err", sender, newName));
       }
     }
 
@@ -154,11 +153,10 @@ public class TeamCommands {
     } else {
       if (maxPlayers == null && maxOverfill == null) {
         throw new CommandException(
-            AllTranslations.get()
-                .translate(
-                    "command.incorrectUsage",
-                    sender,
-                    "<team> (default | [-p max-players] [-o max-overfill])"));
+            TextTranslations.translate(
+                "command.incorrectUsage",
+                sender,
+                "<team> (default | [-p max-players] [-o max-overfill])"));
       }
 
       for (Team team : teams) {
@@ -224,7 +222,7 @@ public class TeamCommands {
     else teams = Collections.singletonList(tmm.bestFuzzyMatch(teamName));
 
     if (teams.size() == 0)
-      throw new CommandException(AllTranslations.get().translate("command.teamNotFound", sender));
+      throw new CommandException(TextTranslations.translate("command.teamNotFound", sender));
 
     return teams;
   }

@@ -27,7 +27,7 @@ import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.tracker.info.SpleefInfo;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.translation.ComponentRenderer;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class DeathMessageBuilder {
 
@@ -37,7 +37,7 @@ public class DeathMessageBuilder {
 
   static SortedSet<String> getAllKeys() {
     if (allKeys == null) {
-      allKeys = ComponentRenderer.INSTANCE.getKeys().tailSet("death.");
+      allKeys = TextTranslations.getKeys().tailSet("death.");
     }
     return allKeys;
   }

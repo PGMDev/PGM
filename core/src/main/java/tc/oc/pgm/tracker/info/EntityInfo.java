@@ -9,7 +9,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
-import tc.oc.pgm.util.translation.MinecraftTranslations;
+import tc.oc.pgm.util.text.MinecraftTranslations;
 
 public class EntityInfo extends OwnerInfoBase implements PhysicalInfo {
 

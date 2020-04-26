@@ -1,0 +1,219 @@
+package tc.oc.pgm.util.text;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static tc.oc.pgm.util.text.TextParser.*;
+
+import com.google.common.collect.Range;
+import java.time.Duration;
+import org.bukkit.ChatColor;
+import org.bukkit.util.Vector;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.Version;
+
+public final class TextParserTest {
+
+  @ParameterizedTest
+  @ValueSource(strings = {"true", "on", "yes"})
+  void testParseBooleanTrue(String text) throws TextException {
+    assertTrue(parseBoolean(text));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"false", "off", "no"})
+  void testParseBooleanFalse(String text) throws TextException {
+    assertFalse(parseBoolean(text));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"", "notaboolean", "1"})
+  void testParseBooleanInvalid(String text) {
+    assertEquals(
+        "error.invalidFormat",
+        assertThrows(TextException.class, () -> parseBoolean(text)).getMessage());
+  }
+
+  @ParameterizedTest
+  @CsvSource({"1, 1", "-10, -10", "1337, +1337"})
+  void testParseInteger(int expected, String text) throws TextException {
+    assertEquals(expected, parseInteger(text, Range.all()));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"", "notaninteger", "1.0", "-13.01"})
+  void testParseIntegerInvalid(String text) {
+    assertEquals(
+        "error.invalidFormat",
+        assertThrows(TextException.class, () -> parseInteger(text, Range.all())).getMessage());
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"-oo", "0", "-1337"})
+  void testParseIntegerOutOfRange(String text) {
+    assertEquals(
+        "error.outOfRange",
+        assertThrows(TextException.class, () -> parseInteger(text, Range.greaterThan(0)))
+            .getMessage());
+  }
+
+  @ParameterizedTest
+  @CsvSource({"1.0,1.0", "-10,-10", "1337.1234,+1337.1234"})
+  void testParseFloat(float expected, String text) throws TextException {
+    assertEquals(expected, parseFloat(text, Range.all()));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"", "notafloat", "1/2"})
+  void testParseFloatInvalid(String text) {
+    assertEquals(
+        "error.invalidFormat",
+        assertThrows(TextException.class, () -> parseFloat(text, Range.all())).getMessage());
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"-oo", "0.0", "-1337.1234"})
+  void testParseFloatOutOfRange(String text) {
+    assertEquals(
+        "error.outOfRange",
+        assertThrows(TextException.class, () -> parseFloat(text, Range.greaterThan(0f)))
+            .getMessage());
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "1000,1s",
+    "-120000,-2m",
+    "259200000,3d",
+    "61000,1m1s",
+    "86461000,1d1m1s",
+    "0,0",
+    "-1234,-1.234"
+  })
+  void testParseDuration(long millis, String text) throws TextException {
+    assertEquals(Duration.ofMillis(millis), parseDuration(text, Range.all()));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"", "notaduration", "1/2", "1m2d"})
+  void testParseDurationInvalid(String text) {
+    assertEquals(
+        "error.invalidFormat",
+        assertThrows(TextException.class, () -> parseDuration(text, Range.all())).getMessage());
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"-1m", "-oo", "0", "-60"})
+  void testParseDurationOutOfRange(String text) {
+    assertEquals(
+        "error.outOfRange",
+        assertThrows(
+                TextException.class, () -> parseDuration(text, Range.greaterThan(Duration.ZERO)))
+            .getMessage());
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"oo", "+oo"})
+  void testParsePositiveInfinity(String text) throws TextException {
+    assertEquals(Integer.MAX_VALUE, parseInteger(text, Range.all()));
+    assertEquals(Float.POSITIVE_INFINITY, parseFloat(text, Range.all()));
+    assertEquals(TimeUtils.INFINITE_DURATION, parseDuration(text, Range.all()));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"-oo"})
+  void testParseNegativeInfinity(String text) throws TextException {
+    assertEquals(Integer.MIN_VALUE, parseInteger(text, Range.all()));
+    assertEquals(Float.NEGATIVE_INFINITY, parseFloat(text, Range.all()));
+    assertEquals(TimeUtils.INFINITE_DURATION.negated(), parseDuration(text, Range.all()));
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      value = {"0;0;0;0,0,0", "-10.050;2000.123;10;-10.050,2000.123,10"},
+      delimiter = ';')
+  void testParseVector(float x, float y, float z, String text) throws TextException {
+    final Range<Float> all = Range.all();
+    assertEquals(new Vector(x, y, z), parseVector3d(text, all, all));
+
+    // Same test for a 2d vector, but exclude the last pair
+    text = text.substring(0, text.lastIndexOf(','));
+    assertEquals(new Vector(x, 0, y), parseVector2d(text, all));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"", "notavector", "1.2.3", "1;2;3", "1.01,2.31"})
+  void testParseVectorInvalid(String text) {
+    assertEquals(
+        "error.invalidFormat",
+        assertThrows(TextException.class, () -> parseVector3d(text, Range.all(), Range.all()))
+            .getMessage());
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"0.25,1337.13", "oo,oo", "0,+oo", "0.001,-0.001"})
+  void testParseVectorOutOfRange(String text) {
+    assertEquals(
+        "error.outOfRange",
+        assertThrows(TextException.class, () -> parseVector2d(text, Range.atMost(0f)))
+            .getMessage());
+  }
+
+  @ParameterizedTest
+  @CsvSource({"0,0,0,0", "0,1,0,0.1", "1,2,3,1.2.3"})
+  void testParseVersion(int major, int minor, int patch, String text) throws TextException {
+    assertEquals(new Version(major, minor, patch), parseVersion(text, Range.all()));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"", "1.2.3.4", "v1", "v1.2.3"})
+  void testParseVersionInvalid(String text) {
+    assertEquals(
+        "error.invalidFormat",
+        assertThrows(TextException.class, () -> parseVersion(text, Range.all())).getMessage());
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"1.4.1", "2.0", "-1.0.1"})
+  void testParseVersionOutOfRange(String text) {
+    assertEquals(
+        "error.outOfRange",
+        assertThrows(
+                TextException.class, () -> parseVersion(text, Range.atMost(new Version(1, 4, 0))))
+            .getMessage());
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"DARK_PURPLE", "DARK PURPLE", "dark_purple", "dark purple"})
+  void testParseEnum(String text) throws TextException {
+    assertEquals(ChatColor.DARK_PURPLE, parseEnum(text, ChatColor.class, Range.all(), false));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"purple", "dark purp", "dark_p"})
+  void testParseEnumFuzzy(String text) throws TextException {
+    assertEquals(ChatColor.DARK_PURPLE, parseEnum(text, ChatColor.class, Range.all(), true));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"", "magenta", "checkers", "purple_dark"})
+  void testParseEnumInvalid(String text) {
+    assertEquals(
+        "error.invalidFormat",
+        assertThrows(
+                TextException.class, () -> parseEnum(text, ChatColor.class, Range.all(), false))
+            .getMessage());
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"green", "dark purple", "MAGIC"})
+  void testParseEnumOutOfRange(String text) {
+    assertEquals(
+        "error.outOfRange",
+        assertThrows(
+                TextException.class,
+                () -> parseEnum(text, ChatColor.class, Range.atMost(ChatColor.BLACK), false))
+            .getMessage());
+  }
+}

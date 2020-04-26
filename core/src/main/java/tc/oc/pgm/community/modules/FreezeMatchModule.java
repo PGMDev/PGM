@@ -57,7 +57,7 @@ import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.Components;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.LOADED)
 public class FreezeMatchModule implements MatchModule, Listener {
@@ -99,12 +99,12 @@ public class FreezeMatchModule implements MatchModule, Listener {
     meta.setDisplayName(
         ChatColor.WHITE
             + ChatColor.BOLD.toString()
-            + AllTranslations.get().translate("moderation.freeze.itemName", viewer));
+            + TextTranslations.translate("moderation.freeze.itemName", viewer));
     meta.addItemFlags(ItemFlag.values());
     meta.setLore(
         Collections.singletonList(
             ChatColor.GRAY
-                + AllTranslations.get().translate("moderation.freeze.itemDescription", viewer)));
+                + TextTranslations.translate("moderation.freeze.itemDescription", viewer)));
     stack.setItemMeta(meta);
     return stack;
   }

@@ -55,7 +55,7 @@ import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.PeriodFormats;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class PGMListener implements Listener {
   private final Plugin parent;
@@ -86,7 +86,7 @@ public class PGMListener implements Listener {
       try {
         mm.createMatch(null).get();
       } catch (InterruptedException | ExecutionException e) {
-        // No-op
+        e.printStackTrace();
       } finally {
         lock.writeLock().unlock();
       }
@@ -96,7 +96,7 @@ public class PGMListener implements Listener {
     try {
       lock.readLock().tryLock(15, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
-      // No-op
+      e.printStackTrace();
     } finally {
       lock.readLock().unlock();
     }
@@ -104,7 +104,7 @@ public class PGMListener implements Listener {
     if (!mm.getMatches().hasNext()) {
       event.disallow(
           AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-          AllTranslations.get().translate("misc.incorrectWorld", null));
+          TextTranslations.translate("misc.incorrectWorld", null));
     }
   }
 
@@ -115,7 +115,7 @@ public class PGMListener implements Listener {
       if (event.getPlayer().hasPermission(Permissions.JOIN_FULL)) {
         event.allow();
       } else {
-        event.setKickMessage(AllTranslations.get().translate("misc.serverFull", event.getPlayer()));
+        event.setKickMessage(TextTranslations.translate("misc.serverFull", event.getPlayer()));
       }
     }
   }
@@ -127,7 +127,7 @@ public class PGMListener implements Listener {
           .getPlayer()
           .kickPlayer(
               ChatColor.RED
-                  + AllTranslations.get().translate("misc.incorrectWorld", event.getPlayer()));
+                  + TextTranslations.translate("misc.incorrectWorld", event.getPlayer()));
       this.parent
           .getLogger()
           .info(
@@ -350,7 +350,7 @@ public class PGMListener implements Listener {
                   + ChatColor.WHITE
                   + "] "
                   + ChatColor.GREEN
-                  + AllTranslations.get()
+                  + TextTranslations
                       .translate(
                           "pool.change",
                           Bukkit.getConsoleSender(),

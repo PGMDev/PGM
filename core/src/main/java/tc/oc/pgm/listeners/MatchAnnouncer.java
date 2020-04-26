@@ -2,6 +2,9 @@ package tc.oc.pgm.listeners;
 
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -21,11 +24,10 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.ComponentUtils;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.translations.TranslationUtils;
+import tc.oc.pgm.util.text.TextFormatter;
 
 public class MatchAnnouncer implements Listener {
 
@@ -122,11 +124,11 @@ public class MatchAnnouncer implements Listener {
     Collection<Contributor> authors = mapInfo.getAuthors();
     if (!authors.isEmpty()) {
       viewer.sendMessage(
-          new PersonalizedText(" ", ChatColor.DARK_GRAY)
-              .extra(
-                  viewer.getBukkit(),
-                  new PersonalizedTranslatable(
-                      "misc.createdBy", TranslationUtils.nameList(NameStyle.FANCY, authors))));
+          TextComponent.space()
+              .append(
+                  TranslatableComponent.of(
+                      "misc.createdBy", TextColor.GRAY,
+                      TextFormatter.nameList(authors, NameStyle.FANCY, TextColor.GRAY))));
     }
 
     viewer.sendMessage(ComponentUtils.horizontalLine(ChatColor.WHITE, 200));

@@ -38,7 +38,7 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.RUNNING)
 public class WoolMatchModule implements MatchModule, Listener {
@@ -221,11 +221,10 @@ public class WoolMatchModule implements MatchModule, Listener {
             if (!wool.getDefinition().isCraftable()) {
               playerHolder.sendMessage(
                   ChatColor.RED
-                      + AllTranslations.get()
-                          .translate(
-                              "wool.craftingDisabled",
-                              playerHolder.getBukkit(),
-                              wool.getComponentName()));
+                      + TextTranslations.translate(
+                          "wool.craftingDisabled",
+                          playerHolder.getBukkit(),
+                          wool.getComponentName()));
               event.getInventory().setResult(null);
             }
           }

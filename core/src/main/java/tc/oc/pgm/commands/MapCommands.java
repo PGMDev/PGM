@@ -40,7 +40,7 @@ import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class MapCommands {
 
@@ -89,7 +89,7 @@ public class MapCommands {
     int pages = (maps.size() + resultsPerPage - 1) / resultsPerPage;
 
     String title =
-        ComponentUtils.paginate(AllTranslations.get().translate("map.title", sender), page, pages);
+        ComponentUtils.paginate(TextTranslations.translate("map.title", sender), page, pages);
     String listHeader =
         ComponentUtils.horizontalLineHeading(title, ChatColor.BLUE, ComponentUtils.MAX_CHAT_WIDTH);
 
@@ -248,7 +248,7 @@ public class MapCommands {
     Component total = new PersonalizedText(Integer.toString(totalPlayers), ChatColor.GOLD);
 
     String verboseVs =
-        " " + AllTranslations.get().translate("map.info.playerLimit.vs", sender) + " ";
+        " " + TextTranslations.translate("map.info.playerLimit.vs", sender) + " ";
     Component verbose =
         new PersonalizedText(
             new PersonalizedText("(")
@@ -269,18 +269,17 @@ public class MapCommands {
     final MapInfo next = mapOrder.getNextMap();
 
     if (next == null) {
-      sender.sendMessage(ChatColor.RED + AllTranslations.get().translate("map.noNextMap", sender));
+      sender.sendMessage(ChatColor.RED + TextTranslations.translate("map.noNextMap", sender));
       return;
     }
 
     audience.sendMessage(
         ChatColor.DARK_PURPLE
-            + AllTranslations.get()
-                .translate(
-                    "map.nextMap",
-                    sender,
-                    next.getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS, sender).toLegacyText()
-                        + ChatColor.DARK_PURPLE));
+            + TextTranslations.translate(
+                "map.nextMap",
+                sender,
+                next.getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS, sender).toLegacyText()
+                    + ChatColor.DARK_PURPLE));
   }
 
   private @Nullable Component formatContribution(Contributor contributor) {

@@ -30,7 +30,7 @@ import tc.oc.pgm.util.component.ComponentUtils;
 import tc.oc.pgm.util.component.Components;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.RUNNING)
 public class StatsMatchModule implements MatchModule, Listener {
@@ -169,7 +169,7 @@ public class StatsMatchModule implements MatchModule, Listener {
                     Components.fromLegacyText(
                         ComponentUtils.horizontalLineHeading(
                             ChatColor.YELLOW
-                                + AllTranslations.get()
+                                + TextTranslations
                                     .translate("match.stats.overall", viewer.getBukkit()),
                             ChatColor.WHITE,
                             ComponentUtils.MAX_CHAT_WIDTH)));

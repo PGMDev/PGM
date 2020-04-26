@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.translation;
+package tc.oc.pgm.util.text;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +16,7 @@ import java.util.ResourceBundle;
  *
  * <p>See https://stackoverflow.com/a/4660195 for more details.
  */
-public final class UTF8Control extends ResourceBundle.Control {
+final class UTF8Control extends ResourceBundle.Control {
   public ResourceBundle newBundle(
       String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
       throws IOException {

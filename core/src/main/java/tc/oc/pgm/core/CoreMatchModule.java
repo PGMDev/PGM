@@ -30,7 +30,7 @@ import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.RUNNING)
 public class CoreMatchModule implements MatchModule, Listener {
@@ -128,7 +128,7 @@ public class CoreMatchModule implements MatchModule, Listener {
           && player.getParty() == core.getOwner()) {
         event.setCancelled(true);
         player.sendWarning(
-            AllTranslations.get().translate("core.damageOwn", player.getBukkit()), true);
+            TextTranslations.translate("core.damageOwn", player.getBukkit()), true);
       }
     }
   }

@@ -53,7 +53,7 @@ import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.LOADED)
 public class ViewInventoryMatchModule implements MatchModule, Listener {
@@ -341,9 +341,8 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
         String key = livesLeft == 1 ? "misc.life" : "misc.lives";
         lifeMeta.setDisplayName(
             ChatColor.GREEN
-                + AllTranslations.get()
-                    .translate(
-                        key, viewer, ChatColor.AQUA + String.valueOf(livesLeft) + ChatColor.GREEN));
+                + TextTranslations.translate(
+                    key, viewer, ChatColor.AQUA + String.valueOf(livesLeft) + ChatColor.GREEN));
         lives.setItemMeta(lifeMeta);
         preview.setItem(4, lives);
       }
@@ -352,15 +351,14 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
 
       if (holder.getAllowFlight()) {
         specialLore.add(
-            ChatColor.LIGHT_PURPLE
-                + AllTranslations.get().translate("observer.preview.flying", viewer));
+            ChatColor.LIGHT_PURPLE + TextTranslations.translate("observer.preview.flying", viewer));
       }
 
       DoubleJumpMatchModule djmm = matchHolder.getMatch().getModule(DoubleJumpMatchModule.class);
       if (djmm != null && djmm.hasKit(matchHolder)) {
         specialLore.add(
             ChatColor.LIGHT_PURPLE
-                + AllTranslations.get().translate("observer.preview.doubleJump", viewer));
+                + TextTranslations.translate("observer.preview.doubleJump", viewer));
       }
 
       double knockbackResistance =
@@ -368,33 +366,30 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
       if (knockbackResistance > 0) {
         specialLore.add(
             ChatColor.LIGHT_PURPLE
-                + AllTranslations.get()
-                    .translate(
-                        "observer.preview.knockbackResistance",
-                        viewer,
-                        (int) Math.ceil(knockbackResistance * 100)));
+                + TextTranslations.translate(
+                    "observer.preview.knockbackResistance",
+                    viewer,
+                    (int) Math.ceil(knockbackResistance * 100)));
       }
 
       double knockbackReduction = holder.getKnockbackReduction();
       if (knockbackReduction > 0) {
         specialLore.add(
             ChatColor.LIGHT_PURPLE
-                + AllTranslations.get()
-                    .translate(
-                        "observer.preview.knockbackReduction",
-                        viewer,
-                        (int) Math.ceil(knockbackReduction * 100)));
+                + TextTranslations.translate(
+                    "observer.preview.knockbackReduction",
+                    viewer,
+                    (int) Math.ceil(knockbackReduction * 100)));
       }
 
       double walkSpeed = holder.getWalkSpeed();
       if (walkSpeed != WalkSpeedKit.BUKKIT_DEFAULT) {
         specialLore.add(
             ChatColor.LIGHT_PURPLE
-                + AllTranslations.get()
-                    .translate(
-                        "observer.preview.walkSpeed",
-                        viewer,
-                        String.format("%.1f", walkSpeed / WalkSpeedKit.BUKKIT_DEFAULT)));
+                + TextTranslations.translate(
+                    "observer.preview.walkSpeed",
+                    viewer,
+                    String.format("%.1f", walkSpeed / WalkSpeedKit.BUKKIT_DEFAULT)));
       }
 
       if (!specialLore.isEmpty()) {
@@ -403,7 +398,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
         specialMeta.setDisplayName(
             ChatColor.AQUA.toString()
                 + ChatColor.ITALIC
-                + AllTranslations.get().translate("observer.preview.specialAbilities", viewer));
+                + TextTranslations.translate("observer.preview.specialAbilities", viewer));
         specialMeta.setLore(specialLore);
         special.setItemMeta(specialMeta);
         preview.setItem(5, special);
@@ -417,7 +412,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     potionMeta.setDisplayName(
         ChatColor.AQUA.toString()
             + ChatColor.ITALIC
-            + AllTranslations.get().translate("observer.preview.potionEffects", viewer));
+            + TextTranslations.translate("observer.preview.potionEffects", viewer));
     List<String> lore = Lists.newArrayList();
     if (hasPotions) {
       for (PotionEffect effect : holder.getActivePotionEffects()) {
@@ -430,7 +425,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     } else {
       lore.add(
           ChatColor.YELLOW
-              + AllTranslations.get().translate("observer.preview.noPotionEffects", viewer));
+              + TextTranslations.translate("observer.preview.noPotionEffects", viewer));
     }
     potionMeta.setLore(lore);
     potions.setItemMeta(potionMeta);
@@ -442,7 +437,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     hungerMeta.setDisplayName(
         ChatColor.AQUA.toString()
             + ChatColor.ITALIC
-            + AllTranslations.get().translate("observer.preview.hungerLevel", viewer));
+            + TextTranslations.translate("observer.preview.hungerLevel", viewer));
     hungerMeta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
     hunger.setItemMeta(hungerMeta);
     preview.setItem(7, hunger);
@@ -452,7 +447,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     healthMeta.setDisplayName(
         ChatColor.AQUA.toString()
             + ChatColor.ITALIC
-            + AllTranslations.get().translate("observer.preview.healthLevel", viewer));
+            + TextTranslations.translate("observer.preview.healthLevel", viewer));
     healthMeta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
     health.setItemMeta(healthMeta);
     preview.setItem(8, health);

@@ -207,9 +207,13 @@ public class MapPoolManager implements MapOrder {
 
   @Override
   public void matchEnded(Match match) {
-    if (activeMapPool.isDynamic() || shouldRevert(match)) {
-      getAppropriateDynamicPool(match).ifPresent(pool -> updateActiveMapPool(pool, match));
-    }
+    int activePlayers = match.getPlayers().size() - (match.getObservers().size() / 2);
+
+    mapPools.stream()
+        .filter(rot -> activePlayers >= rot.getPlayers())
+        .max(MapPool::compareTo)
+        .ifPresent(pool -> updateActiveMapPool(pool, match));
+
     activeMapPool.matchEnded(match);
   }
 
