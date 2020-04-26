@@ -21,4 +21,9 @@ public class SpawnerObjectTNT implements SpawnerObject {
         primed.setFuseTicks(fuse);
         primed.setYield(power);
     }
+
+    @Override
+    public boolean isTracked() {
+        return false;
+    }
 }

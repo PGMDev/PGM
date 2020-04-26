@@ -8,10 +8,10 @@ import java.util.List;
 
 public class SpawnerDefinition {
 
-    public Region region;
+    public Region spawnRegion;
     public String id;
     public int count;
-    public int playerRange;
+    public Region playerRegion;
     public int maxEntities;
     public Duration minDelay, maxDelay, delay;
     public Filter filter;
