@@ -25,13 +25,13 @@ import java.util.logging.Logger;
 
 public class SpawnerModule implements MapModule {
 
-    private final List<SpawnerDefinition> spawnerDefinitions = new ArrayList<>();
+    private static final List<SpawnerDefinition> spawnerDefinitions = new ArrayList<>();
     public static final String ATTRIBUTE_KEY = "PGM_SPAWNER_OBJECT";
 
 
     @Override
     public MatchModule createMatchModule(Match match) {
-        return new SpawnerMatchModule(match, this.spawnerDefinitions);
+        return new SpawnerMatchModule(match, spawnerDefinitions);
     }
 
     public static class Factory implements MapModuleFactory<SpawnerModule> {
@@ -86,9 +86,10 @@ public class SpawnerModule implements MapModule {
                    }
                 }
                 spawnerDefinition.objects = objects;
+                spawnerDefinitions.add(spawnerDefinition);
             }
 
-            return spawnerModule.spawnerDefinitions.isEmpty() ? null : spawnerModule;
+            return spawnerDefinitions.isEmpty() ? null : spawnerModule;
         }
 
 

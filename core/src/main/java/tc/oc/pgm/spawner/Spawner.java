@@ -57,6 +57,7 @@ public class Spawner implements Listener, Tickable {
                 }
             }
             generateDelay();
+            lastTick = match.getTick().tick;
         }
     }
 
@@ -73,7 +74,7 @@ public class Spawner implements Listener, Tickable {
 
 
     private boolean canSpawn() {
-        if (spawnedEntities > definition.maxEntities || trackedPlayers.size() == 0){
+        if (spawnedEntities >= definition.maxEntities || trackedPlayers.size() == 0){
             return false;
         }
         else {
