@@ -25,7 +25,7 @@ public class FormattingListener implements Listener {
           .getMatch()
           .sendMessage(
               new PersonalizedTranslatable(
-                      "wool.place.success",
+                  "wool.place.success",
                   event.getPlayer().getStyledName(NameStyle.COLOR),
                   event.getWool().getComponentName(),
                   event.getPlayer().getParty().getComponentName()));
@@ -40,7 +40,7 @@ public class FormattingListener implements Listener {
           .sendMessage(
               new PersonalizedText(
                   new PersonalizedTranslatable(
-                          "core.leaked",
+                      "core.leaked",
                       Components.blank(),
                       event.getCore().getComponentName(),
                       event.getCore().getOwner().getComponentName()),
@@ -66,7 +66,7 @@ public class FormattingListener implements Listener {
         if (entry.getPercentage() > 0.2) { // 20% necessary to be included
           contributors.add(
               new PersonalizedTranslatable(
-                      "match.objective.credit.percentage",
+                  "match.objective.credit.percentage",
                   entry.getPlayerState().getStyledName(NameStyle.COLOR),
                   new PersonalizedText(
                       String.valueOf(Math.round(entry.getPercentage() * 100)),
@@ -80,12 +80,14 @@ public class FormattingListener implements Listener {
       if (contributors.isEmpty()) {
         credit =
             someExcluded
-                ? new PersonalizedTranslatable("match.objective.credit.many") // All contributors < 20%
+                ? new PersonalizedTranslatable(
+                    "match.objective.credit.many") // All contributors < 20%
                 : new PersonalizedTranslatable("match.objective.credit.unknown"); // No contributors
       } else {
         if (someExcluded) {
           contributors.add(
-              new PersonalizedTranslatable("match.objective.credit.etc")); // Some contributors < 20%
+              new PersonalizedTranslatable(
+                  "match.objective.credit.etc")); // Some contributors < 20%
         }
         credit = TranslationUtils.combineComponents(contributors);
       }
@@ -94,7 +96,7 @@ public class FormattingListener implements Listener {
           .getMatch()
           .sendMessage(
               new PersonalizedTranslatable(
-                      "destroyable.complete",
+                  "destroyable.complete",
                   credit,
                   destroyable.getComponentName(),
                   destroyable.getOwner().getComponentName()));

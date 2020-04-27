@@ -201,7 +201,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
 
     match.sendMessage(
         new PersonalizedTranslatable(
-                "gamemode.scorebox.scored",
+            "gamemode.scorebox.scored",
             player.getStyledName(NameStyle.COLOR),
             new PersonalizedTranslatable(
                 wholePoints == 1 ? "gamemode.scorebox.point" : "gamemode.scorebox.points",

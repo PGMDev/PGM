@@ -27,7 +27,7 @@ public class MaxBuildHeightMatchModule implements MatchModule, Listener {
         event.setCancelled(
             true,
             new PersonalizedTranslatable(
-                    "match.playableArea.maxBuildHeightWarning",
+                "match.playableArea.maxBuildHeightWarning",
                 new PersonalizedText(
                     String.valueOf(buildHeight), net.md_5.bungee.api.ChatColor.AQUA)));
       }

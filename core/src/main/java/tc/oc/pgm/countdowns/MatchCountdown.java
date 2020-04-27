@@ -152,8 +152,7 @@ public abstract class MatchCountdown extends Countdown {
   protected Component secondsRemaining(ChatColor color) {
     long seconds = remaining.getSeconds();
     if (seconds == 1) {
-      return new PersonalizedTranslatable(
-          "misc.time.second", new PersonalizedText("1", color));
+      return new PersonalizedTranslatable("misc.time.second", new PersonalizedText("1", color));
     } else {
       return new PersonalizedTranslatable(
           "misc.time.seconds", new PersonalizedText(String.valueOf(seconds), color));

@@ -90,19 +90,19 @@ public class Core extends TouchableGoal<CoreFactory> implements ModeChangeGoal<C
   public Component getTouchMessage(@Nullable ParticipantState toucher, boolean self) {
     if (toucher == null) {
       return new PersonalizedTranslatable(
-              "core.touch.owned.generic",
+          "core.touch.owned.generic",
           Components.blank(),
           getComponentName(),
           getOwner().getComponentName());
     } else if (self) {
       return new PersonalizedTranslatable(
-              "core.touch.owned.you",
+          "core.touch.owned.you",
           Components.blank(),
           getComponentName(),
           getOwner().getComponentName());
     } else {
       return new PersonalizedTranslatable(
-              "core.touch.owned.player",
+          "core.touch.owned.player",
           toucher.getStyledName(NameStyle.COLOR),
           getComponentName(),
           getOwner().getComponentName());

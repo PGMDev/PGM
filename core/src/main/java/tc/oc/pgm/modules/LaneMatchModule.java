@@ -68,7 +68,8 @@ public class LaneMatchModule implements MatchModule, Listener {
     // prevent ender pearling to the other lane
     if (!containsTo && event.getCause() instanceof PlayerTeleportEvent) {
       if (((PlayerTeleportEvent) event.getCause()).getCause() == TeleportCause.ENDER_PEARL) {
-        event.setCancelled(true, new PersonalizedTranslatable("match.disabledFeature.lane.enderPearl"));
+        event.setCancelled(
+            true, new PersonalizedTranslatable("match.disabledFeature.lane.enderPearl"));
         return;
       }
     }
@@ -78,7 +79,8 @@ public class LaneMatchModule implements MatchModule, Listener {
       // they have been marked as "out of lane"
       if (containsTo && !containsFrom) {
         // prevent the player from re-entering the lane
-        event.setCancelled(true, new PersonalizedTranslatable("match.disabledFeature.lane.reEntry"));
+        event.setCancelled(
+            true, new PersonalizedTranslatable("match.disabledFeature.lane.reEntry"));
       } else {
         // if they are going to land on something, teleport them underneith it
         Block under = event.getTo().clone().add(new Vector(0, -1, 0)).getBlock();

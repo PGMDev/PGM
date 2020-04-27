@@ -263,7 +263,7 @@ public class ChatDispatcher implements Listener {
         if (receiver == null) {
           player.sendWarning(
               new PersonalizedTranslatable(
-                      "chat.message.unknownTarget", new PersonalizedText(target)),
+                  "chat.message.unknownTarget", new PersonalizedText(target)),
               true);
         } else {
           sendDirect(

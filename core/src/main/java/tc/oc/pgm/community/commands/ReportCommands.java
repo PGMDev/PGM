@@ -71,9 +71,7 @@ public class ReportCommands {
           Component secondsComponent = new PersonalizedText(Long.toString(secondsRemaining));
           Component secondsLeftComponent =
               new PersonalizedTranslatable(
-                      secondsRemaining != 1
-                          ? "misc.time.seconds"
-                          : "misc.time.second",
+                      secondsRemaining != 1 ? "misc.time.seconds" : "misc.time.second",
                       secondsComponent)
                   .getPersonalizedText()
                   .color(ChatColor.AQUA);
@@ -109,7 +107,7 @@ public class ReportCommands {
 
     final Component component =
         new PersonalizedTranslatable(
-                "moderation.report.notify",
+            "moderation.report.notify",
             matchPlayer == null
                 ? new PersonalizedText("Console", ChatColor.AQUA, ChatColor.ITALIC)
                 : matchPlayer.getStyledName(NameStyle.FANCY),

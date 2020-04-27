@@ -76,7 +76,7 @@ public class TimeLimit extends SelfIdentifyingFeatureDefinition implements Victo
       return new PersonalizedTranslatable("match.timeLimit.generic", time);
     } else {
       return new PersonalizedTranslatable(
-              "match.timeLimit.result", result.getDescription(match), time);
+          "match.timeLimit.result", result.getDescription(match), time);
     }
   }
 

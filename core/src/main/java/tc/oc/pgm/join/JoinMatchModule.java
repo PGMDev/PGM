@@ -130,8 +130,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
           return true;
 
         case NO_PERMISSION:
-          joining.sendWarning(
-              new PersonalizedTranslatable("match.join.denied.genericDeny"), false);
+          joining.sendWarning(new PersonalizedTranslatable("match.join.denied.genericDeny"), false);
           return true;
       }
     }
@@ -197,13 +196,13 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
       joining.sendMessage(
           new PersonalizedText(
               new PersonalizedTranslatable(
-                      "match.join.rankedForfeitWarning.mainComponent",
+                  "match.join.rankedForfeitWarning.mainComponent",
                   new PersonalizedText(
                       new PersonalizedTranslatable("match.join.rankedForfeitWarning.warning"),
                       ChatColor.RED),
                   new PersonalizedText(
                       new PersonalizedTranslatable(
-                              "match.join.rankedForfeitWarning.playUntilTheEnd"),
+                          "match.join.rankedForfeitWarning.playUntilTheEnd"),
                       ChatColor.RED),
                   new PersonalizedText(
                       new PersonalizedTranslatable("match.join.rankedForfeitWarning.doubleLoss"),
@@ -218,7 +217,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
         joining.sendMessage(
             new PersonalizedText(
                 new PersonalizedTranslatable(
-                        "match.join.rankedForfeitWarning.timeLimit",
+                    "match.join.rankedForfeitWarning.timeLimit",
                     new PersonalizedText(
                         PeriodFormats.briefNaturalPrecise(tlmm.getTimeLimit().getDuration()),
                         ChatColor.AQUA),
@@ -229,7 +228,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
         joining.sendMessage(
             new PersonalizedText(
                 new PersonalizedTranslatable(
-                        "match.join.rankedForfeitWarning.noTimeLimit",
+                    "match.join.rankedForfeitWarning.noTimeLimit",
                     new PersonalizedText("/leave", ChatColor.GOLD)),
                 ChatColor.DARK_RED,
                 ChatColor.BOLD));

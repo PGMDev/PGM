@@ -20,15 +20,15 @@ public class PeriodFormats {
   /** Return the key for the localized description of the given time interval */
   private static String periodKey(TemporalUnit unit, long quantity) {
     if (unit == ChronoUnit.DAYS) {
-      return quantity == 1 ? "time.interval.day" : "time.interval.days";
+      return quantity == 1 ? "misc.time.day" : "misc.time.days";
     } else if (unit == ChronoUnit.HOURS) {
-      return quantity == 1 ? "time.interval.hour" : "time.interval.hours";
+      return quantity == 1 ? "misc.time.hour" : "misc.time.hours";
     } else if (unit == ChronoUnit.MINUTES) {
-      return quantity == 1 ? "time.interval.minute" : "time.interval.minutes";
+      return quantity == 1 ? "misc.time.minute" : "misc.time.minutes";
     } else if (unit == ChronoUnit.SECONDS) {
-      return quantity == 1 ? "time.interval.second" : "time.interval.seconds";
+      return quantity == 1 ? "misc.time.second" : "misc.time.seconds";
     } else if (unit == ChronoUnit.MILLIS) {
-      return quantity == 1 ? "time.interval.millisecond" : "time.interval.milliseconds";
+      return quantity == 1 ? "misc.time.millisecond" : "misc.time.milliseconds";
     } else {
       throw new IllegalArgumentException("Unsupported time unit: " + unit);
     }

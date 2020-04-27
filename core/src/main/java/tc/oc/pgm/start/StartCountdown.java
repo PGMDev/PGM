@@ -37,8 +37,7 @@ public class StartCountdown extends PreMatchCountdown {
 
   @Override
   protected Component formatText() {
-    return new PersonalizedTranslatable(
-            "match.matchStarting", secondsRemaining(ChatColor.DARK_RED))
+    return new PersonalizedTranslatable("match.matchStarting", secondsRemaining(ChatColor.DARK_RED))
         .color(ChatColor.GREEN);
   }
 
@@ -75,7 +74,8 @@ public class StartCountdown extends PreMatchCountdown {
           this.balanceWarningSent = true;
           this.getMatch()
               .sendWarning(
-                  new PersonalizedTranslatable("match.broadcasts.balanceWarning", team.getComponentName()),
+                  new PersonalizedTranslatable(
+                      "match.broadcasts.balanceWarning", team.getComponentName()),
                   false);
         }
       }

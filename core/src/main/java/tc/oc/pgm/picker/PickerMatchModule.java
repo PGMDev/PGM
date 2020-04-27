@@ -243,8 +243,7 @@ public class PickerMatchModule implements MatchModule, Listener {
     meta.setLore(
         Lists.newArrayList(
             ChatColor.DARK_PURPLE
-                + AllTranslations.get()
-                    .translate("observer.picker.tooltip", player.getBukkit())));
+                + AllTranslations.get().translate("observer.picker.tooltip", player.getBukkit())));
 
     stack.setItemMeta(meta);
     return stack;
@@ -256,11 +255,13 @@ public class PickerMatchModule implements MatchModule, Listener {
     ItemMeta meta = stack.getItemMeta();
     meta.setDisplayName(
         OPEN_BUTTON_PREFIX
-            + AllTranslations.get().translate("observer.picker.displayName.leave", player.getBukkit()));
+            + AllTranslations.get()
+                .translate("observer.picker.displayName.leave", player.getBukkit()));
     meta.setLore(
         Lists.newArrayList(
             ChatColor.DARK_PURPLE
-                + AllTranslations.get().translate("observer.picker.tooltipObserver", player.getBukkit())));
+                + AllTranslations.get()
+                    .translate("observer.picker.tooltipObserver", player.getBukkit())));
 
     stack.setItemMeta(meta);
     return stack;
@@ -694,16 +695,12 @@ public class PickerMatchModule implements MatchModule, Listener {
             player.sendMessage(
                 ChatColor.GOLD
                     + AllTranslations.get()
-                        .translate(
-                                "class.success",
-                            player.getBukkit(),
-                            ChatColor.GREEN + name));
+                        .translate("class.success", player.getBukkit(), ChatColor.GREEN + name));
             scheduleRefresh(player);
           } else {
             player.sendMessage(
                 ChatColor.RED
-                    + AllTranslations.get()
-                        .translate("class.stickyClass", player.getBukkit()));
+                    + AllTranslations.get().translate("class.stickyClass", player.getBukkit()));
           }
         }
 

@@ -31,12 +31,11 @@ public class TeamCommands {
           ChatColor.GRAY
               + AllTranslations.get()
                   .translate(
-                          "match.myTeam.yourTeam",
+                      "match.myTeam.yourTeam",
                       player.getBukkit(),
                       player.getParty().getColoredName() + ChatColor.GRAY));
     } else {
-      throw new CommandException(
-          AllTranslations.get().translate("match.myTeam.notOnTeam", sender));
+      throw new CommandException(AllTranslations.get().translate("match.myTeam.notOnTeam", sender));
     }
   }
 
@@ -107,21 +106,26 @@ public class TeamCommands {
       throw new CommandException(AllTranslations.get().translate("command.teamNotFound", sender));
     }
 
-    if (newName.length() > 32) { //TODO: Localize this one
+    if (newName.length() > 32) { // TODO: Localize this one
       throw new CommandException("Team name cannot be longer than 32 characters");
     }
 
     for (Team t : tmm.getTeams()) {
       if (t.getName().equalsIgnoreCase(newName)) {
         throw new CommandException(
-            AllTranslations.get().translate("match.team.alias.deniedNameAlreadyUsed", sender, newName));
+            AllTranslations.get()
+                .translate("match.team.alias.deniedNameAlreadyUsed", sender, newName));
       }
     }
 
     String oldName = team.getColoredName();
     team.setName(newName);
 
-    match.sendMessage(oldName + ChatColor.GRAY + " renamed to " + team.getColoredName());//TODO: Localize this one
+    match.sendMessage(
+        oldName
+            + ChatColor.GRAY
+            + " renamed to "
+            + team.getColoredName()); // TODO: Localize this one
   }
 
   @Command(
@@ -147,7 +151,7 @@ public class TeamCommands {
         throw new CommandException(
             AllTranslations.get()
                 .translate(
-                        "command.incorrectUsage",
+                    "command.incorrectUsage",
                     sender,
                     "<team> (default | [-p max-players] [-o max-overfill])"));
       }
@@ -155,11 +159,11 @@ public class TeamCommands {
       for (Team team : teams) {
         maxPlayers = maxPlayers == null ? team.getMaxPlayers() : maxPlayers;
         maxOverfill = maxOverfill == null ? maxPlayers : maxOverfill;
-        //TODO: Localize this one
+        // TODO: Localize this one
         if (maxPlayers < 0) throw new CommandException("max-players cannot be less than 0");
 
-        if (maxOverfill < maxPlayers)//TODO: Localize this one
-          throw new CommandException("max-overfill cannot be less than max-players");
+        if (maxOverfill < maxPlayers) // TODO: Localize this one
+        throw new CommandException("max-overfill cannot be less than max-players");
 
         team.setMaxSize(maxPlayers, maxOverfill);
       }
@@ -170,11 +174,11 @@ public class TeamCommands {
             sender.sendMessage(
                 team.getColoredName()
                     + ChatColor.WHITE
-                    + " now has max size "//TODO: Localize this one
+                    + " now has max size " // TODO: Localize this one
                     + ChatColor.AQUA
                     + team.getMaxPlayers()
                     + ChatColor.WHITE
-                    + " and max overfill "//TODO: Localize this one
+                    + " and max overfill " // TODO: Localize this one
                     + ChatColor.AQUA
                     + team.getMaxOverfill()));
   }
@@ -201,7 +205,7 @@ public class TeamCommands {
             sender.sendMessage(
                 team.getColoredName()
                     + ChatColor.WHITE
-                    + " now has min size "//TODO: Localize this one
+                    + " now has min size " // TODO: Localize this one
                     + ChatColor.AQUA
                     + team.getMinPlayers()));
   }

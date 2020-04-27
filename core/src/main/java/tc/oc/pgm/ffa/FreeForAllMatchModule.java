@@ -62,11 +62,11 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     public Component getReason() {
       if (players == 1) {
         return new PersonalizedTranslatable(
-                "match.needMorePlayers.ffa.singular",
+            "match.needMorePlayers.ffa.singular",
             new PersonalizedText(String.valueOf(players), net.md_5.bungee.api.ChatColor.AQUA));
       } else {
         return new PersonalizedTranslatable(
-                "match.needMorePlayers.ffa.plural",
+            "match.needMorePlayers.ffa.plural",
             new PersonalizedText(String.valueOf(players), net.md_5.bungee.api.ChatColor.AQUA));
       }
     }
@@ -275,8 +275,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
 
   public boolean forceJoin(MatchPlayer joining) {
     if (joining.getParty() instanceof Tribute) {
-      joining.sendWarning(
-          new PersonalizedTranslatable("match.join.denied.alreadyJoined"), false);
+      joining.sendWarning(new PersonalizedTranslatable("match.join.denied.alreadyJoined"), false);
     }
 
     return match.setParty(joining, getTribute(joining));

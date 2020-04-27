@@ -115,7 +115,8 @@ public class PGMListener implements Listener {
       if (event.getPlayer().hasPermission(Permissions.JOIN_FULL)) {
         event.allow();
       } else {
-        event.setKickMessage(AllTranslations.get().translate("system.serverFull", event.getPlayer()));
+        event.setKickMessage(
+            AllTranslations.get().translate("system.serverFull", event.getPlayer()));
       }
     }
   }

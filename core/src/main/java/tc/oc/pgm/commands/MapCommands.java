@@ -184,8 +184,7 @@ public class MapCommands {
 
     audience.sendMessage(
         new PersonalizedText(
-            mapInfoLabel("maps.mapInfo.playerLimit"),
-            createPlayerLimitComponent(sender, map)));
+            mapInfoLabel("maps.mapInfo.playerLimit"), createPlayerLimitComponent(sender, map)));
 
     if (sender.hasPermission(Permissions.DEBUG)) {
       audience.sendMessage(
@@ -280,7 +279,7 @@ public class MapCommands {
         ChatColor.DARK_PURPLE
             + AllTranslations.get()
                 .translate(
-                        "maps.next.success",
+                    "maps.next.success",
                     sender,
                     next.getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS, sender).toLegacyText()
                         + ChatColor.DARK_PURPLE));

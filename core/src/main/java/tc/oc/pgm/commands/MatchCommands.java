@@ -40,8 +40,7 @@ public class MatchCommands {
     sender.sendMessage(
         ComponentUtils.horizontalLineHeading(
             ChatColor.YELLOW
-                + AllTranslations.get()
-                    .translate("match.matchInfo.title", sender, match.getId()),
+                + AllTranslations.get().translate("match.matchInfo.title", sender, match.getId()),
             ChatColor.WHITE,
             ComponentUtils.MAX_CHAT_WIDTH));
 

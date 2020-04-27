@@ -210,7 +210,7 @@ public class MapPoolCommands {
             + ChatColor.GREEN
             + AllTranslations.get()
                 .translate(
-                        "admin.skip.pools.success",
+                    "admin.skip.pools.success",
                     sender,
                     (ChatColor.AQUA.toString() + positions + ChatColor.GREEN)));
   }
@@ -230,8 +230,7 @@ public class MapPoolCommands {
 
     PersonalizedTranslatable tr =
         new PersonalizedTranslatable(
-            voteResult ? "maps.pools.vote.voted" : "maps.pools.vote.removedVote",
-            map.getName());
+            voteResult ? "maps.pools.vote.voted" : "maps.pools.vote.removedVote", map.getName());
     sender.sendMessage(new PersonalizedText(tr, voteResult ? ChatColor.GREEN : ChatColor.RED));
     poll.sendBook(player);
   }

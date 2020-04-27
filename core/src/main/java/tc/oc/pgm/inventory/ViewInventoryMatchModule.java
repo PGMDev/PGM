@@ -338,10 +338,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
         int livesLeft = module.getNumOfLives(holder.getUniqueId());
         ItemStack lives = new ItemStack(Material.EGG, livesLeft);
         ItemMeta lifeMeta = lives.getItemMeta();
-        String key =
-            livesLeft == 1
-                ? "gamemode.blitz.life"
-                : "gamemode.blitz.lives";
+        String key = livesLeft == 1 ? "gamemode.blitz.life" : "gamemode.blitz.lives";
         lifeMeta.setDisplayName(
             ChatColor.GREEN
                 + AllTranslations.get()
@@ -373,7 +370,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
             ChatColor.LIGHT_PURPLE
                 + AllTranslations.get()
                     .translate(
-                            "observer.inventoryPreview.knockbackResistance",
+                        "observer.inventoryPreview.knockbackResistance",
                         viewer,
                         (int) Math.ceil(knockbackResistance * 100)));
       }
@@ -384,7 +381,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
             ChatColor.LIGHT_PURPLE
                 + AllTranslations.get()
                     .translate(
-                            "observer.inventoryPreview.knockbackReduction",
+                        "observer.inventoryPreview.knockbackReduction",
                         viewer,
                         (int) Math.ceil(knockbackReduction * 100)));
       }
@@ -395,7 +392,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
             ChatColor.LIGHT_PURPLE
                 + AllTranslations.get()
                     .translate(
-                            "observer.inventoryPreview.walkSpeed",
+                        "observer.inventoryPreview.walkSpeed",
                         viewer,
                         String.format("%.1f", walkSpeed / WalkSpeedKit.BUKKIT_DEFAULT)));
       }
@@ -434,7 +431,8 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     } else {
       lore.add(
           ChatColor.YELLOW
-              + AllTranslations.get().translate("observer.inventoryPreview.noPotionEffects", viewer));
+              + AllTranslations.get()
+                  .translate("observer.inventoryPreview.noPotionEffects", viewer));
     }
     potionMeta.setLore(lore);
     potions.setItemMeta(potionMeta);

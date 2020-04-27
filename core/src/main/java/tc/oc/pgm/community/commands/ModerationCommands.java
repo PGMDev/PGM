@@ -150,14 +150,16 @@ public class ModerationCommands implements Listener {
                       .map(m -> m.getStyledName(NameStyle.FANCY))
                       .collect(Collectors.toList())));
       sender.sendMessage(
-          formatFrozenList("moderation.freeze.frozenList.online", fmm.getFrozenPlayers().size(), names));
+          formatFrozenList(
+              "moderation.freeze.frozenList.online", fmm.getFrozenPlayers().size(), names));
     }
 
     // Offline Players
     if (fmm.getOfflineFrozenCount() > 0) {
       Component names = new PersonalizedText(fmm.getOfflineFrozenNames());
       sender.sendMessage(
-          formatFrozenList("moderation.freeze.frozenList.offline", fmm.getOfflineFrozenCount(), names));
+          formatFrozenList(
+              "moderation.freeze.frozenList.offline", fmm.getOfflineFrozenCount(), names));
     }
   }
 
@@ -975,8 +977,7 @@ public class ModerationCommands implements Listener {
           PeriodFormats.relativePastApproximate(java.time.Instant.ofEpochMilli(time.toEpochMilli()))
               .color(ChatColor.DARK_AQUA);
 
-      return new PersonalizedTranslatable(
-              "moderation.similarIP.hover", getPunisher(), timeAgo)
+      return new PersonalizedTranslatable("moderation.similarIP.hover", getPunisher(), timeAgo)
           .getPersonalizedText()
           .color(ChatColor.GRAY);
     }

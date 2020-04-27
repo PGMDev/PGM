@@ -91,8 +91,7 @@ public class AdminCommands {
     boolean ended = match.finish(winner);
 
     if (!ended)
-      throw new CommandException(
-          AllTranslations.get().translate("admin.end.unknownError", sender));
+      throw new CommandException(AllTranslations.get().translate("admin.end.unknownError", sender));
   }
 
   @Command(
@@ -120,14 +119,13 @@ public class AdminCommands {
       RestartManager.cancelRestart();
       sender.sendMessage(
           ChatColor.GREEN
-              + AllTranslations.get()
-                  .translate("admin.cancelRestart.restartUnqueued", sender));
+              + AllTranslations.get().translate("admin.cancelRestart.restartUnqueued", sender));
     }
 
     Component mapName = new PersonalizedText(map.getName()).color(ChatColor.DARK_PURPLE);
     Component successful =
         new PersonalizedTranslatable(
-                        "admin.setNext.success",
+                "admin.setNext.success",
                 UsernameFormatUtils.formatStaffName(sender, match),
                 mapName)
             .getPersonalizedText()

@@ -85,13 +85,11 @@ public class StartCommands {
 
     if (autoStart) {
       sender.sendMessage(
-          ChatColor.GREEN
-              + AllTranslations.get().translate("admin.autoStart.enabled", sender));
+          ChatColor.GREEN + AllTranslations.get().translate("admin.autoStart.enabled", sender));
       smm.autoStartCountdown();
     } else {
       sender.sendMessage(
-          ChatColor.BLUE
-              + AllTranslations.get().translate("admin.autoStart.disabled", sender));
+          ChatColor.BLUE + AllTranslations.get().translate("admin.autoStart.disabled", sender));
     }
   }
 }

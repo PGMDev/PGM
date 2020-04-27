@@ -254,7 +254,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
       return new PersonalizedTranslatable("flag.pickup.you", getComponentName());
     } else {
       return new PersonalizedTranslatable(
-              "flag.pickup.player", getComponentName(), toucher.getStyledName(NameStyle.COLOR));
+          "flag.pickup.player", getComponentName(), toucher.getStyledName(NameStyle.COLOR));
     }
   }
 

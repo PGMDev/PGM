@@ -31,8 +31,7 @@ public class ClassCommands {
       // show current class
       sender.sendMessage(
           ChatColor.GREEN
-              + AllTranslations.get()
-                  .translate("class.currentClass", player.getBukkit())
+              + AllTranslations.get().translate("class.currentClass", player.getBukkit())
               + " "
               + ChatColor.GOLD
               + ChatColor.UNDERLINE
@@ -47,15 +46,14 @@ public class ClassCommands {
 
       if (result == null) {
         throw new CommandException(
-            AllTranslations.get()
-                .translate("class.classNotFound", player.getBukkit()));
+            AllTranslations.get().translate("class.classNotFound", player.getBukkit()));
       }
 
       if (!cls.canUse(player.getBukkit())) {
         throw new CommandException(
             AllTranslations.get()
                 .translate(
-                        "class.restricted",
+                    "class.restricted",
                     player.getBukkit(),
                     ChatColor.GOLD,
                     result.getName(),
@@ -73,7 +71,7 @@ public class ClassCommands {
           ChatColor.GREEN
               + AllTranslations.get()
                   .translate(
-                          "class.success",
+                      "class.success",
                       player.getBukkit(),
                       ChatColor.GOLD.toString()
                           + ChatColor.UNDERLINE
@@ -82,8 +80,7 @@ public class ClassCommands {
       if (player.isParticipating()) {
         sender.sendMessage(
             ChatColor.GREEN
-                + AllTranslations.get()
-                    .translate("class.successNextSpawn", player.getBukkit()));
+                + AllTranslations.get().translate("class.successNextSpawn", player.getBukkit()));
       }
     }
   }
@@ -150,8 +147,7 @@ public class ClassCommands {
     if (classModule != null) {
       return classModule;
     } else {
-      throw new CommandException(
-          AllTranslations.get().translate("class.notEnabled", sender));
+      throw new CommandException(AllTranslations.get().translate("class.notEnabled", sender));
     }
   }
 }

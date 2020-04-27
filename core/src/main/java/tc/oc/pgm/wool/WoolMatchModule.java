@@ -189,7 +189,7 @@ public class WoolMatchModule implements MatchModule, Listener {
       } else if (wool.getOwner() != player.getParty()) {
         player.sendWarning(
             new PersonalizedTranslatable(
-                    "wool.place.wrongTeam", wool.getOwner().getComponentName(), woolName),
+                "wool.place.wrongTeam", wool.getOwner().getComponentName(), woolName),
             true);
       } else {
         event.setCancelled(false);
@@ -223,7 +223,7 @@ public class WoolMatchModule implements MatchModule, Listener {
                   ChatColor.RED
                       + AllTranslations.get()
                           .translate(
-                                  "wool.craftDisabled",
+                              "wool.craftDisabled",
                               playerHolder.getBukkit(),
                               wool.getComponentName()));
               event.getInventory().setResult(null);

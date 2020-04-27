@@ -103,7 +103,8 @@ public class FreezeMatchModule implements MatchModule, Listener {
     meta.addItemFlags(ItemFlag.values());
     meta.setLore(
         Collections.singletonList(
-            ChatColor.GRAY + AllTranslations.get().translate("moderation.freeze.itemDescription", viewer)));
+            ChatColor.GRAY
+                + AllTranslations.get().translate("moderation.freeze.itemDescription", viewer)));
     stack.setItemMeta(meta);
     return stack;
   }
@@ -334,7 +335,9 @@ public class FreezeMatchModule implements MatchModule, Listener {
       freezee.playSound(FREEZE_SOUND);
       ChatDispatcher.broadcastAdminChatMessage(
           new PersonalizedTranslatable(
-                  "moderation.freeze.broadcast.frozen", senderName, freezee.getStyledName(NameStyle.FANCY))
+                  "moderation.freeze.broadcast.frozen",
+                  senderName,
+                  freezee.getStyledName(NameStyle.FANCY))
               .getPersonalizedText()
               .color(ChatColor.GRAY),
           match);
@@ -351,7 +354,9 @@ public class FreezeMatchModule implements MatchModule, Listener {
               .color(ChatColor.GREEN));
       ChatDispatcher.broadcastAdminChatMessage(
           new PersonalizedTranslatable(
-                  "moderation.freeze.broadcast.thaw", senderName, freezee.getStyledName(NameStyle.FANCY))
+                  "moderation.freeze.broadcast.thaw",
+                  senderName,
+                  freezee.getStyledName(NameStyle.FANCY))
               .getPersonalizedText()
               .color(ChatColor.GRAY),
           match);

@@ -60,23 +60,23 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       if (team != null) {
         if (players == 1) {
           return new PersonalizedTranslatable(
-                  "match.needMorePlayers.team.singular",
+              "match.needMorePlayers.team.singular",
               new PersonalizedText(String.valueOf(players), ChatColor.AQUA),
               team.getComponentName());
         } else {
           return new PersonalizedTranslatable(
-                  "match.needMorePlayers.team.plural",
+              "match.needMorePlayers.team.plural",
               new PersonalizedText(String.valueOf(players), ChatColor.AQUA),
               team.getComponentName());
         }
       } else {
         if (players == 1) {
           return new PersonalizedTranslatable(
-                  "match.needMorePlayers.ffa.singular",
+              "match.needMorePlayers.ffa.singular",
               new PersonalizedText(String.valueOf(players), ChatColor.AQUA));
         } else {
           return new PersonalizedTranslatable(
-                  "match.needMorePlayers.ffa.plural",
+              "match.needMorePlayers.ffa.plural",
               new PersonalizedText(String.valueOf(players), ChatColor.AQUA));
         }
       }
@@ -470,7 +470,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
         case SWITCH_DISABLED:
           joining.sendWarning(
               new PersonalizedTranslatable(
-                      "match.join.success.switchDisabled", lastTeam.getComponentName()),
+                  "match.join.success.switchDisabled", lastTeam.getComponentName()),
               false);
           return true;
 
@@ -488,8 +488,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
           if (teamResult.getTeam() != null) {
             joining.sendWarning(
                 new PersonalizedTranslatable(
-                        "match.join.denied.completelyFull",
-                    teamResult.getTeam().getComponentName()),
+                    "match.join.denied.completelyFull", teamResult.getTeam().getComponentName()),
                 false);
           } else {
             joining.sendWarning(new PersonalizedTranslatable("match.join.denied.teamsFull"), false);
@@ -500,7 +499,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
         case REDUNDANT:
           joining.sendWarning(
               new PersonalizedTranslatable(
-                      "match.join.denied.alreadyOnTeam", joining.getParty().getComponentName()),
+                  "match.join.denied.alreadyOnTeam", joining.getParty().getComponentName()),
               false);
           return true;
       }
@@ -620,7 +619,8 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
             false);
       } else {
         kickMe.sendWarning(
-            new PersonalizedTranslatable("match.leave.kickedPremium.teams", kickFrom.getComponentName()),
+            new PersonalizedTranslatable(
+                "match.leave.kickedPremium.teams", kickFrom.getComponentName()),
             false);
       }
     }
@@ -643,7 +643,8 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       event
           .getPlayer()
           .sendMessage(
-              new PersonalizedTranslatable("match.join.success.team", event.getNewParty().getComponentName()));
+              new PersonalizedTranslatable(
+                  "match.join.success.team", event.getNewParty().getComponentName()));
     }
     updateReadiness();
   }

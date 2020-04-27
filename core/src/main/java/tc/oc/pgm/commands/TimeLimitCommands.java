@@ -118,7 +118,7 @@ public class TimeLimitCommands {
         new PersonalizedText(net.md_5.bungee.api.ChatColor.YELLOW)
             .extra(
                 new PersonalizedTranslatable(
-                        "match.timeLimit.commandOutput",
+                    "match.timeLimit.commandOutput",
                     new PersonalizedText(
                         TimeUtils.formatDuration(duration), net.md_5.bungee.api.ChatColor.AQUA),
                     result.getDescription(match))));
