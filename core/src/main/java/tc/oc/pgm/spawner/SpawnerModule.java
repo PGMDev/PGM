@@ -82,7 +82,8 @@ public class SpawnerModule implements MapModule {
         spawnerDefinition.maxEntities =
             XMLUtils.parseNumber(
                 element.getAttribute("max-entities"), Integer.class, Integer.MAX_VALUE);
-        spawnerDefinition.filter = filterParser.parseFilterProperty(element, "filter", StaticFilter.ALLOW);
+        spawnerDefinition.filter =
+            filterParser.parseFilterProperty(element, "filter", StaticFilter.ALLOW);
 
         List<SpawnerObject> objects = new ArrayList<>();
         for (Element object : XMLUtils.getChildren(element, "entity", "item", "tnt", "effect")) {

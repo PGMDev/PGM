@@ -2,7 +2,6 @@ package tc.oc.pgm.spawner;
 
 import java.time.Duration;
 import java.util.List;
-
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;
 
