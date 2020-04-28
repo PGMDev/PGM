@@ -2,7 +2,6 @@ package tc.oc.pgm.db;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -30,8 +29,8 @@ public class DatastoreImpl implements Datastore {
   private final Logger logger;
   private final Connection connection;
 
-  public DatastoreImpl(File file) throws SQLException {
-    this.logger = ClassLogger.get(PGM.get().getLogger(), DatastoreImpl.class);
+  public DatastoreImpl(String uri) throws SQLException {
+    this.logger = ClassLogger.get(PGM.get().getLogger(), getClass());
 
     try {
       Class.forName("org.sqlite.JDBC"); // Hint maven to shade this class
@@ -40,8 +39,7 @@ public class DatastoreImpl implements Datastore {
           "Could not find SQLite3 driver class (likely due to a jar shading issue)", e);
     }
 
-    final Connection connection =
-        DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
+    final Connection connection = DriverManager.getConnection(uri);
     connection.setAutoCommit(true);
     this.connection = connection;
 
@@ -112,6 +110,8 @@ public class DatastoreImpl implements Datastore {
   }
 
   private Username selectUsername(UUID id) throws SQLException {
+    Username username = null;
+
     try (final PreparedStatement statement =
         getConnection()
             .prepareStatement(
@@ -123,12 +123,12 @@ public class DatastoreImpl implements Datastore {
           final String name = result.getString(1);
           final Date expires = new Date(result.getLong(2) * 1000);
 
-          return new UsernameImpl(id, name, expires);
+          username = new UsernameImpl(id, name, expires);
         }
       }
     }
 
-    return null;
+    return username;
   }
 
   private void updateUsername(UUID id, @Nullable String name) throws SQLException {
@@ -334,13 +334,14 @@ public class DatastoreImpl implements Datastore {
 
       try (final ResultSet result = statement.executeQuery()) {
         if (result.next()) {
-          final String next_map = result.getString(2);
+          final String nextMap = result.getString(2);
           final boolean active = result.getBoolean(3);
 
-          return new MapActivityImpl(name, next_map, active);
+          activity = new MapActivityImpl(name, nextMap, active);
         }
       }
     }
+
     return activity;
   }
 
@@ -355,7 +356,19 @@ public class DatastoreImpl implements Datastore {
     }
   }
 
-  private Connection getConnection() {
+  private Connection getConnection() throws SQLException {
+    if (connection.isClosed()) {
+      throw new SQLException("SQL connection is closed");
+    }
     return connection;
+  }
+
+  @Override
+  public void close() {
+    try {
+      getConnection().close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
   }
 }

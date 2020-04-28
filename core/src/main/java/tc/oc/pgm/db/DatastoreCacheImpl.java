@@ -6,19 +6,21 @@ import com.google.common.cache.LoadingCache;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import org.bukkit.Bukkit;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.map.MapActivity;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.api.setting.Settings;
 
+@SuppressWarnings({"UnstableApiUsage", "unchecked"})
 public class DatastoreCacheImpl implements Datastore {
 
+  private final Datastore datastore;
   private final LoadingCache<UUID, Username> usernames;
   private final LoadingCache<UUID, Settings> settings;
   private final LoadingCache<String, MapActivity> mapPools;
 
   public DatastoreCacheImpl(Datastore datastore) {
+    this.datastore = datastore;
     this.usernames =
         buildCache(
             builder ->
@@ -33,17 +35,17 @@ public class DatastoreCacheImpl implements Datastore {
             builder ->
                 builder
                     .weakValues()
-                    .maximumSize(Bukkit.getMaxPlayers())
+                    .maximumSize(250)
                     // .refreshAfterWrite(15, TimeUnit.MINUTES)
                     .expireAfterAccess(1, TimeUnit.HOURS),
             datastore::getSettings);
 
-    this.mapPools = buildCache(builder -> builder.weakValues(), datastore::getMapActivity);
+    this.mapPools = buildCache(CacheBuilder::weakValues, datastore::getMapActivity);
   }
 
   // FIXME: Potential deadlock as a result of async loading, removed temporarily
   private <K, V> LoadingCache<K, V> buildCache(
-      Function<CacheBuilder, CacheBuilder> builder, Function<K, V> function) {
+      Function<CacheBuilder, CacheBuilder<K, V>> builder, Function<K, V> function) {
     return builder
         .apply(CacheBuilder.newBuilder())
         .build(
@@ -73,5 +75,14 @@ public class DatastoreCacheImpl implements Datastore {
   @Override
   public MapActivity getMapActivity(String poolName) {
     return mapPools.getUnchecked(poolName);
+  }
+
+  @Override
+  public void close() {
+    datastore.close();
+
+    usernames.invalidateAll();
+    settings.invalidateAll();
+    mapPools.invalidateAll();
   }
 }

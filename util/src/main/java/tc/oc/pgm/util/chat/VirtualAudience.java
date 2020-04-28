@@ -4,7 +4,6 @@ import javax.annotation.Nullable;
 import net.kyori.text.TextComponent;
 import net.kyori.text.adapter.bukkit.TextAdapter;
 import net.kyori.text.format.TextColor;
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.ComponentRenderers;
@@ -29,16 +28,6 @@ public interface VirtualAudience extends Audience {
    */
   default net.kyori.text.Component renderMessage(net.kyori.text.Component message) {
     return TextTranslations.translate(message, getAudience().getLocale());
-  }
-
-  /**
-   * Render a {@link net.kyori.text.Component} to be relevant to this audience.
-   *
-   * @param message A message.
-   * @return A rendered message, as "legacy" Minecraft text.
-   */
-  default String renderMessageLegacy(net.kyori.text.Component message) {
-    return LegacyComponentSerializer.legacy().serialize(renderMessage(message));
   }
 
   @Override

@@ -30,7 +30,6 @@ import org.bukkit.event.vehicle.VehicleUpdateEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.event.BlockTransformEvent;
@@ -294,7 +293,7 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void nerfFishing(PlayerFishEvent event) {
-    if (Config.Fishing.disableTreasure() && event.getCaught() instanceof Item) {
+    if (event.getCaught() instanceof Item) {
       Item caught = (Item) event.getCaught();
       if (caught.getItemStack().getType() != Material.RAW_FISH) {
         caught.setItemStack(new ItemStack(Material.RAW_FISH));

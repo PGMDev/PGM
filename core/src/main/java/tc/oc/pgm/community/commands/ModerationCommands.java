@@ -32,7 +32,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
-import tc.oc.pgm.Config;
+import tc.oc.pgm.PGMConfig;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
@@ -820,7 +820,7 @@ public class ModerationCommands implements Listener {
     Component header =
         new PersonalizedText(
             ComponentUtils.horizontalLineHeading(
-                Config.Moderation.getServerName(), ChatColor.DARK_GRAY));
+                PGMConfig.Moderation.getServerName(), ChatColor.DARK_GRAY));
 
     Component footer =
         new PersonalizedText(
@@ -849,8 +849,8 @@ public class ModerationCommands implements Listener {
             .color(ChatColor.GRAY)); // The sign-off of who performed the punishment
 
     // Link to rules for review by player
-    if (Config.Moderation.isRuleLinkVisible()) {
-      Component rules = new PersonalizedText(Config.Moderation.getRulesLink());
+    if (PGMConfig.Moderation.isRuleLinkVisible()) {
+      Component rules = new PersonalizedText(PGMConfig.Moderation.getRulesLink());
 
       lines.add(Components.blank());
       lines.add(
@@ -860,9 +860,9 @@ public class ModerationCommands implements Listener {
     }
 
     // Configurable last line (for appeal message or etc)
-    if (Config.Moderation.isAppealVisible() && type.equals(PunishmentType.BAN)) {
+    if (PGMConfig.Moderation.isAppealVisible() && type.equals(PunishmentType.BAN)) {
       lines.add(Components.blank());
-      lines.add(new PersonalizedText(Config.Moderation.getAppealMessage()));
+      lines.add(new PersonalizedText(PGMConfig.Moderation.getAppealMessage()));
     }
 
     lines.add(Components.blank());

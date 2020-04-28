@@ -20,7 +20,6 @@ import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
@@ -52,10 +51,8 @@ public class MatchManagerImpl implements MatchManager, Listener {
 
     logger.info("Loaded match-" + match.getId() + " (" + match.getMap().getId() + ")");
 
-    if (Config.Experiments.get().shouldUnloadNonMatchWorlds()) {
-      for (World world : PGM.get().getServer().getWorlds()) {
-        onNonMatchUnload(world);
-      }
+    for (World world : PGM.get().getServer().getWorlds()) {
+      onNonMatchUnload(world);
     }
   }
 
@@ -68,9 +65,12 @@ public class MatchManagerImpl implements MatchManager, Listener {
     PGM.get()
         .getAsyncExecutor()
         .schedule(
-            match::destroy, Config.Experiments.get().getMatchDestroySeconds(), TimeUnit.SECONDS);
-
-    logger.info("Unloaded match-" + match.getId() + " (" + match.getMap().getId() + ")");
+            () -> {
+              match.destroy();
+              logger.info("Unloaded match-" + match.getId() + " (" + match.getMap().getId() + ")");
+            },
+            15,
+            TimeUnit.SECONDS);
   }
 
   private void onNonMatchUnload(World world) {

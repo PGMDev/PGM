@@ -4,11 +4,6 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.*;
 import com.google.gson.JsonParseException;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -49,7 +44,6 @@ import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.nms.NMSHacks;
 
-// TODO: remove dependency on bukkit packages
 public final class XMLUtils {
   private XMLUtils() {}
 
@@ -525,14 +519,6 @@ public final class XMLUtils {
     }
   }
 
-  public static Duration parseTickDuration(Node node) throws InvalidXMLException {
-    return parseTickDuration(node, node.getValueNormalize());
-  }
-
-  public static Duration parseTickDuration(Node node, Duration def) throws InvalidXMLException {
-    return node == null ? def : parseDuration(node);
-  }
-
   public static Duration parseSecondDuration(Node node, String text) throws InvalidXMLException {
     if ("oo".equals(text)) return TimeUtils.INFINITE_DURATION;
     try {
@@ -598,10 +584,6 @@ public final class XMLUtils {
     return node == null ? null : parseVector(node, node.getValue());
   }
 
-  public static Vector parseVector(Node node, Vector def) throws InvalidXMLException {
-    return node == null ? def : parseVector(node);
-  }
-
   public static Vector parseVector(Attribute attr, String value) throws InvalidXMLException {
     return attr == null ? null : parseVector(new Node(attr), value);
   }
@@ -631,10 +613,6 @@ public final class XMLUtils {
 
   public static Vector parse2DVector(Node node) throws InvalidXMLException {
     return parse2DVector(node, node.getValue());
-  }
-
-  public static Vector parse2DVector(Node node, Vector def) throws InvalidXMLException {
-    return node == null ? def : parse2DVector(node);
   }
 
   public static BlockVector parseBlockVector(Node node, BlockVector def)
@@ -682,18 +660,6 @@ public final class XMLUtils {
 
   public static Material parseMaterial(Node node) throws InvalidXMLException {
     return parseMaterial(node, node.getValueNormalize());
-  }
-
-  public static Material parseBlockMaterial(Node node, String text) throws InvalidXMLException {
-    Material material = parseMaterial(node, text);
-    if (!material.isBlock()) {
-      throw new InvalidXMLException("Material " + material.name() + " is not a block", node);
-    }
-    return material;
-  }
-
-  public static Material parseBlockMaterial(Node node) throws InvalidXMLException {
-    return node == null ? null : parseBlockMaterial(node, node.getValueNormalize());
   }
 
   public static MaterialData parseMaterialData(Node node, String text) throws InvalidXMLException {
@@ -1128,56 +1094,6 @@ public final class XMLUtils {
 
   public static GameMode parseGameMode(Node node, GameMode def) throws InvalidXMLException {
     return node == null ? def : parseGameMode(node);
-  }
-
-  public static Path parseRelativePath(Node node) throws InvalidXMLException {
-    return parseRelativePath(node, null);
-  }
-
-  public static Path parseRelativePath(Node node, Path def) throws InvalidXMLException {
-    if (node == null) return def;
-    final String text = node.getValueNormalize();
-    try {
-      Path path = Paths.get(text);
-      if (path.isAbsolute()) {
-        throw new InvalidPathException(text, "Path is not relative");
-      }
-      for (Path part : path) {
-        if (part.toString().trim().startsWith("src/test")) {
-          throw new InvalidPathException(text, "Path contains an invalid component");
-        }
-      }
-      return path;
-    } catch (InvalidPathException e) {
-      throw new InvalidXMLException("Invalid relative path '" + text + "'", node, e);
-    }
-  }
-
-  public static File parseRelativePath(File basePath, Node node, File def)
-      throws InvalidXMLException {
-    if (node == null) return def;
-
-    File path;
-    try {
-      path = new File(basePath, node.getValue()).getCanonicalFile();
-    } catch (IOException e) {
-      throw new InvalidXMLException("Error resolving relative file path", node);
-    }
-
-    if (!path.toString().startsWith(basePath.toString())) {
-      throw new InvalidXMLException("Invalid relative file path", node);
-    }
-
-    return path;
-  }
-
-  public static File parseRelativeFolder(File basePath, Node node, File def)
-      throws InvalidXMLException {
-    File path = parseRelativePath(basePath, node, def);
-    if (path != def && !path.isDirectory()) {
-      throw new InvalidXMLException("Folder does not exist", node);
-    }
-    return path;
   }
 
   public static Version parseSemanticVersion(Node node) throws InvalidXMLException {

@@ -7,6 +7,7 @@ import org.bukkit.event.Listener;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.PeriodFormats;
@@ -31,6 +32,9 @@ public class HuddleCountdown extends PreMatchCountdown implements Listener {
     super.onStart(remaining, total);
 
     getMatch().addListener(this, MatchScope.LOADED);
+
+    JoinMatchModule jmm = getMatch().needModule(JoinMatchModule.class);
+    jmm.queuedJoin(jmm.getQueuedParticipants());
 
     for (Competitor competitor : getMatch().getCompetitors()) {
       if (competitor instanceof Team) {

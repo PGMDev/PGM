@@ -32,7 +32,7 @@ public class CycleCommands {
       throws CommandException {
     CycleMatchModule cmm = match.needModule(CycleMatchModule.class);
 
-    if (match.isRunning() && !force && !cmm.getConfig().runningMatch()) {
+    if (match.isRunning() && !force) {
       throw new CommandException(TextTranslations.translate("admin.matchRunning.cycle", sender));
     }
 

@@ -5,11 +5,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import java.lang.ref.SoftReference;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -51,9 +49,9 @@ public class MapLibraryImpl implements MapLibrary {
     }
   }
 
-  public MapLibraryImpl(Logger logger, Collection<MapSourceFactory> factories) {
+  public MapLibraryImpl(Logger logger, Set<MapSourceFactory> factories) {
     this.logger = checkNotNull(logger); // Logger should be visible in-game
-    this.factories = new LinkedHashSet<>(checkNotNull(factories));
+    this.factories = Collections.synchronizedSet(checkNotNull(factories));
     this.maps = new ConcurrentSkipListMap<>();
     this.failed = Collections.synchronizedSet(new HashSet<>());
   }

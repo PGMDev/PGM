@@ -109,7 +109,7 @@ public final class TextTranslations {
     if (locale == SOURCE_LOCALE) return locale;
 
     Locale nearest = LOCALES.get(locale);
-    if (nearest != null || loadKeys(locale) > 0) return nearest;
+    if (nearest != null || loadKeys(locale) <= 0) return nearest;
 
     int maxScore = 0;
     for (Locale other : getLocales()) {
@@ -161,10 +161,10 @@ public final class TextTranslations {
    * Loads translation keys of a locale.
    *
    * @param locale A locale.
-   * @return The number of keys found, or 1 if already loaded.
+   * @return The number of keys found, or 0 if already loaded.
    */
   public static long loadKeys(Locale locale) {
-    if (getLocales().contains(locale)) return 1;
+    if (getLocales().contains(locale)) return 0;
 
     long keysFound = 0;
     for (String resourceName : SOURCE_NAMES) {
@@ -187,6 +187,11 @@ public final class TextTranslations {
         TRANSLATIONS_TABLE.put(key, locale, new MessageFormat(format, locale));
         keysFound++;
       }
+    }
+
+    // Clear locale cache when a new locale is loaded
+    if (keysFound > 0) {
+      LOCALES.clear();
     }
 
     return keysFound;

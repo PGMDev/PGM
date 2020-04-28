@@ -16,15 +16,12 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerLocaleChangeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -341,46 +338,40 @@ public class PickerMatchModule implements MatchModule, Listener {
   }
 
   @EventHandler(priority = EventPriority.HIGHEST)
-  public void rightClickIcon(final PlayerInteractEvent event) {
-    if (event.getAction() == Action.PHYSICAL) return;
+  public void rightClickIcon(final ObserverInteractEvent event) {
+    final boolean right = event.getClickType() == ClickType.RIGHT;
+    final boolean left = event.getClickType() == ClickType.LEFT;
+    if ((!right && !left) || InventoryUtils.isNothing(event.getClickedItem())) return;
 
-    MatchPlayer player = match.getPlayer(event.getPlayer());
-    if (player == null) return;
-
-    if (!canUse(player)) return;
-
-    ItemStack hand = event.getPlayer().getItemInHand();
-    if (InventoryUtils.isNothing(hand)) return;
-
+    final ItemStack hand = event.getClickedItem();
     String displayName = hand.getItemMeta().getDisplayName();
     if (displayName == null) return;
 
+    final MatchPlayer player = event.getPlayer();
+    if (!canUse(player)) return;
+
     boolean handled = false;
-    boolean immediate =
-        (event.getAction() == Action.LEFT_CLICK_AIR
-            || event.getAction() == Action.LEFT_CLICK_BLOCK);
     final JoinMatchModule jmm = match.needModule(JoinMatchModule.class);
 
     if (hand.getType() == Button.JOIN.material) {
       handled = true;
-      if (!immediate && canOpenWindow(player) && settingEnabled(player, true)) {
+      if (right && canOpenWindow(player) && settingEnabled(player, true)) {
         showWindow(player);
       } else {
         // If there is nothing to pick or setting is disabled, just join immediately
         jmm.join(player, null);
       }
-    } else if (hand.getType() == Button.LEAVE.material && !immediate) {
+    } else if (hand.getType() == Button.LEAVE.material && left) {
       jmm.leave(player);
     }
 
     if (handled) {
-      event.setUseInteractedBlock(Event.Result.DENY);
-      event.setUseItemInHand(Event.Result.DENY);
+      event.setCancelled(true);
 
       // Unfortunately, not opening the window seems to cause the player to put the helmet
       // on their head, no matter what we do server-side. So, we have to force an inventory
       // update to resync them.
-      event.getPlayer().updateInventory();
+      player.getBukkit().updateInventory();
     }
   }
 

@@ -20,7 +20,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
-import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
@@ -503,7 +502,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   public String renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
     if (this.getShowProgress() || viewer.isObserving()) {
       String text = this.renderCompletion();
-      if (Config.Scoreboard.preciseProgress()) {
+      if (PGM.get().getConfiguration().showProximity()) {
         String precise = this.renderPreciseCompletion();
         if (precise != null) {
           text += " " + ChatColor.GRAY + precise;

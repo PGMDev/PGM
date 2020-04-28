@@ -10,7 +10,8 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import tc.oc.pgm.Config;
+import tc.oc.pgm.api.Config;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -66,13 +67,17 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
     }
   }
 
+  private Config getConfig() {
+    return PGM.get().getConfiguration();
+  }
+
   public boolean canJoinFull(MatchPlayer joining) {
-    return !Config.Join.capacity()
-        || (Config.Join.overfill() && joining.getBukkit().hasPermission(Permissions.JOIN_FULL));
+    return !getConfig().shouldLimitJoin()
+        || joining.getBukkit().hasPermission(Permissions.JOIN_FULL);
   }
 
   public boolean canPriorityKick(MatchPlayer joining) {
-    return Config.Join.priorityKick()
+    return getConfig().canPriorityKick()
         && joining.getBukkit().hasPermission(Permissions.JOIN_FULL)
         && !match.isRunning();
   }
@@ -95,7 +100,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
 
     // If mid-match join is disabled, player cannot join for the first time after the match has
     // started
-    if (match.isRunning() && !Config.Join.midMatch()) {
+    if (match.isRunning() && !getConfig().canAnytimeJoin()) {
       return GenericJoinResult.Status.MATCH_STARTED.toResult();
     }
 

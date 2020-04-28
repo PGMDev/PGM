@@ -18,7 +18,6 @@ import org.bukkit.Difficulty;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
-import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.WorldInfo;
@@ -41,7 +40,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
   protected MatchFactoryImpl(String mapId) {
     this.start = new AtomicLong(System.currentTimeMillis());
-    this.timeout = new AtomicLong(Config.Experiments.get().getMatchPreLoadSeconds() * 1000L);
+    this.timeout = new AtomicLong(60 * 1000L); // 1 minute
     this.stages = new Stack<>();
     this.stages.push(new InitMapStage(checkNotNull(mapId)));
     this.future = Executors.newSingleThreadExecutor().submit(this);
@@ -342,8 +341,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
     private MoveMatchStage(Match match) {
       this.match = checkNotNull(match);
-      this.delay =
-          Duration.ofMillis(1000L / Config.Experiments.get().getPlayerTeleportsPerSecond());
+      this.delay = Duration.ZERO;
     }
 
     private Stage advanceSync() {

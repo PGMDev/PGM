@@ -38,7 +38,7 @@ public final class TextParserTest {
   @ParameterizedTest
   @CsvSource({"1, 1", "-10, -10", "1337, +1337"})
   void testParseInteger(int expected, String text) throws TextException {
-    assertEquals(expected, parseInteger(text, Range.all()));
+    assertEquals(expected, parseInteger(text));
   }
 
   @ParameterizedTest
@@ -46,7 +46,7 @@ public final class TextParserTest {
   void testParseIntegerInvalid(String text) {
     assertEquals(
         "error.invalidFormat",
-        assertThrows(TextException.class, () -> parseInteger(text, Range.all())).getMessage());
+        assertThrows(TextException.class, () -> parseInteger(text)).getMessage());
   }
 
   @ParameterizedTest
@@ -61,7 +61,7 @@ public final class TextParserTest {
   @ParameterizedTest
   @CsvSource({"1.0,1.0", "-10,-10", "1337.1234,+1337.1234"})
   void testParseFloat(float expected, String text) throws TextException {
-    assertEquals(expected, parseFloat(text, Range.all()));
+    assertEquals(expected, parseFloat(text));
   }
 
   @ParameterizedTest
@@ -69,7 +69,7 @@ public final class TextParserTest {
   void testParseFloatInvalid(String text) {
     assertEquals(
         "error.invalidFormat",
-        assertThrows(TextException.class, () -> parseFloat(text, Range.all())).getMessage());
+        assertThrows(TextException.class, () -> parseFloat(text)).getMessage());
   }
 
   @ParameterizedTest
@@ -92,7 +92,7 @@ public final class TextParserTest {
     "-1234,-1.234"
   })
   void testParseDuration(long millis, String text) throws TextException {
-    assertEquals(Duration.ofMillis(millis), parseDuration(text, Range.all()));
+    assertEquals(Duration.ofMillis(millis), parseDuration(text));
   }
 
   @ParameterizedTest
@@ -100,7 +100,7 @@ public final class TextParserTest {
   void testParseDurationInvalid(String text) {
     assertEquals(
         "error.invalidFormat",
-        assertThrows(TextException.class, () -> parseDuration(text, Range.all())).getMessage());
+        assertThrows(TextException.class, () -> parseDuration(text)).getMessage());
   }
 
   @ParameterizedTest
@@ -116,17 +116,17 @@ public final class TextParserTest {
   @ParameterizedTest
   @ValueSource(strings = {"oo", "+oo"})
   void testParsePositiveInfinity(String text) throws TextException {
-    assertEquals(Integer.MAX_VALUE, parseInteger(text, Range.all()));
-    assertEquals(Float.POSITIVE_INFINITY, parseFloat(text, Range.all()));
-    assertEquals(TimeUtils.INFINITE_DURATION, parseDuration(text, Range.all()));
+    assertEquals(Integer.MAX_VALUE, parseInteger(text));
+    assertEquals(Float.POSITIVE_INFINITY, parseFloat(text));
+    assertEquals(TimeUtils.INFINITE_DURATION, parseDuration(text));
   }
 
   @ParameterizedTest
   @ValueSource(strings = {"-oo"})
   void testParseNegativeInfinity(String text) throws TextException {
-    assertEquals(Integer.MIN_VALUE, parseInteger(text, Range.all()));
-    assertEquals(Float.NEGATIVE_INFINITY, parseFloat(text, Range.all()));
-    assertEquals(TimeUtils.INFINITE_DURATION.negated(), parseDuration(text, Range.all()));
+    assertEquals(Integer.MIN_VALUE, parseInteger(text));
+    assertEquals(Float.NEGATIVE_INFINITY, parseFloat(text));
+    assertEquals(TimeUtils.INFINITE_DURATION.negated(), parseDuration(text));
   }
 
   @ParameterizedTest
@@ -134,12 +134,11 @@ public final class TextParserTest {
       value = {"0;0;0;0,0,0", "-10.050;2000.123;10;-10.050,2000.123,10"},
       delimiter = ';')
   void testParseVector(float x, float y, float z, String text) throws TextException {
-    final Range<Float> all = Range.all();
-    assertEquals(new Vector(x, y, z), parseVector3d(text, all, all));
+    assertEquals(new Vector(x, y, z), parseVector3d(text));
 
     // Same test for a 2d vector, but exclude the last pair
     text = text.substring(0, text.lastIndexOf(','));
-    assertEquals(new Vector(x, 0, y), parseVector2d(text, all));
+    assertEquals(new Vector(x, 0, y), parseVector2d(text));
   }
 
   @ParameterizedTest
@@ -147,8 +146,7 @@ public final class TextParserTest {
   void testParseVectorInvalid(String text) {
     assertEquals(
         "error.invalidFormat",
-        assertThrows(TextException.class, () -> parseVector3d(text, Range.all(), Range.all()))
-            .getMessage());
+        assertThrows(TextException.class, () -> parseVector3d(text)).getMessage());
   }
 
   @ParameterizedTest
@@ -163,7 +161,7 @@ public final class TextParserTest {
   @ParameterizedTest
   @CsvSource({"0,0,0,0", "0,1,0,0.1", "1,2,3,1.2.3"})
   void testParseVersion(int major, int minor, int patch, String text) throws TextException {
-    assertEquals(new Version(major, minor, patch), parseVersion(text, Range.all()));
+    assertEquals(new Version(major, minor, patch), parseVersion(text));
   }
 
   @ParameterizedTest
@@ -171,7 +169,7 @@ public final class TextParserTest {
   void testParseVersionInvalid(String text) {
     assertEquals(
         "error.invalidFormat",
-        assertThrows(TextException.class, () -> parseVersion(text, Range.all())).getMessage());
+        assertThrows(TextException.class, () -> parseVersion(text)).getMessage());
   }
 
   @ParameterizedTest
@@ -187,7 +185,7 @@ public final class TextParserTest {
   @ParameterizedTest
   @ValueSource(strings = {"DARK_PURPLE", "DARK PURPLE", "dark_purple", "dark purple"})
   void testParseEnum(String text) throws TextException {
-    assertEquals(ChatColor.DARK_PURPLE, parseEnum(text, ChatColor.class, Range.all(), false));
+    assertEquals(ChatColor.DARK_PURPLE, parseEnum(text, ChatColor.class));
   }
 
   @ParameterizedTest
@@ -201,9 +199,7 @@ public final class TextParserTest {
   void testParseEnumInvalid(String text) {
     assertEquals(
         "error.invalidFormat",
-        assertThrows(
-                TextException.class, () -> parseEnum(text, ChatColor.class, Range.all(), false))
-            .getMessage());
+        assertThrows(TextException.class, () -> parseEnum(text, ChatColor.class)).getMessage());
   }
 
   @ParameterizedTest

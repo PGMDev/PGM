@@ -2,11 +2,26 @@ package tc.oc.pgm.util;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+/**
+ * A semantic version.
+ *
+ * @link https://semver.org
+ */
 public final class Version implements Comparable<Version> {
+  private static final String DOT = ".";
+
   private final int major;
   private final int minor;
   private final int patch;
 
+  /**
+   * Creates a semantic version.
+   *
+   * @param major The major number.
+   * @param minor The minor number.
+   * @param patch The patch number.
+   * @throws IllegalArgumentException If any of the numbers are negative.
+   */
   public Version(int major, int minor, int patch) {
     checkArgument(major >= 0, "version major cannot be negative");
     checkArgument(minor >= 0, "version minor cannot be negative");
@@ -15,6 +30,26 @@ public final class Version implements Comparable<Version> {
     this.major = major;
     this.minor = minor;
     this.patch = patch;
+  }
+
+  /**
+   * Gets whether this version is greater than or equal to another version.
+   *
+   * @param other Another version.
+   * @return If this version >= other version.
+   */
+  public boolean isNoOlderThan(Version other) {
+    return compareTo(other) >= 0;
+  }
+
+  /**
+   * Gets whether this version is less than another version.
+   *
+   * @param other Another version.
+   * @return If this version < other version.
+   */
+  public boolean isOlderThan(Version other) {
+    return compareTo(other) < 0;
   }
 
   @Override
@@ -32,6 +67,7 @@ public final class Version implements Comparable<Version> {
 
   @Override
   public boolean equals(Object obj) {
+    if (obj == this) return true;
     if (obj instanceof Version) {
       return compareTo((Version) obj) == 0;
     }
@@ -41,27 +77,9 @@ public final class Version implements Comparable<Version> {
   @Override
   public String toString() {
     if (patch == 0) {
-      return major + "." + minor;
+      return major + DOT + minor;
     } else {
-      return major + "." + minor + "." + patch;
+      return major + DOT + minor + DOT + patch;
     }
-  }
-
-  /**
-   * Return true if the major versions match and the minor version and patch levels are greater or
-   * equal to the given version
-   */
-  public boolean isNoOlderThan(Version spec) {
-    return this.major == spec.major
-        && (this.minor > spec.minor || (this.minor == spec.minor && this.patch >= spec.patch));
-  }
-
-  /**
-   * Return true if the major versions match and the minor version and patch levels are less than
-   * the given version
-   */
-  public boolean isOlderThan(Version spec) {
-    return this.major == spec.major
-        && (this.minor < spec.minor || (this.minor == spec.minor && this.patch < spec.patch));
   }
 }

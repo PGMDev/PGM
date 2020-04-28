@@ -10,8 +10,6 @@ import java.util.AbstractMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.PGM;
@@ -32,7 +30,6 @@ import tc.oc.pgm.timelimit.TimeLimitCountdown;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.UsernameFormatUtils;
-import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
@@ -224,10 +221,8 @@ public class AdminCommands {
       aliases = {"pgm"},
       desc = "Reload the PGM configuration",
       perms = Permissions.RELOAD)
-  public void pgm(Audience audience) {
+  public void pgm() {
     PGM.get().reloadConfig();
-
-    audience.sendMessage(TranslatableComponent.of("admin.reloadConfig", TextColor.GREEN));
   }
 
   private static Map<String, Competitor> getCompetitorMap(CommandSender sender, Match match) {

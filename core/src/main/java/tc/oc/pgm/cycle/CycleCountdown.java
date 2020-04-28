@@ -3,7 +3,6 @@ package tc.oc.pgm.cycle;
 import java.time.Duration;
 import java.util.Objects;
 import net.md_5.bungee.api.ChatColor;
-import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
@@ -22,7 +21,17 @@ public class CycleCountdown extends MatchCountdown {
 
   public CycleCountdown(Match match) {
     super(match);
-    this.preloadTime = Config.Experiments.get().getMatchPreLoadSeconds();
+    try {
+      this.preloadTime =
+          Integer.parseInt(
+              PGM.get()
+                  .getConfiguration()
+                  .getExperiments()
+                  .getOrDefault("match-pre-load", "0")
+                  .toString());
+    } catch (Throwable t) {
+      this.preloadTime = 0;
+    }
   }
 
   private void setNextMap(MapInfo map, boolean end) {

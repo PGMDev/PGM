@@ -6,10 +6,10 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import tc.oc.pgm.Config;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
@@ -37,16 +37,11 @@ public class MatchAnnouncer implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchLoad(final MatchLoadEvent event) {
-    if (Config.Broadcast.enabled()) {
-      final Match match = event.getMatch();
-      match
-          .getExecutor(MatchScope.LOADED)
-          .scheduleWithFixedDelay(
-              () -> match.getPlayers().forEach(this::sendCurrentlyPlaying),
-              0,
-              Config.Broadcast.frequency(),
-              TimeUnit.SECONDS);
-    }
+    final Match match = event.getMatch();
+    match
+        .getExecutor(MatchScope.LOADED)
+        .scheduleWithFixedDelay(
+            () -> match.getPlayers().forEach(this::sendCurrentlyPlaying), 0, 5, TimeUnit.MINUTES);
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -107,9 +102,17 @@ public class MatchAnnouncer implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void clearTitle(PlayerJoinMatchEvent event) {
-    event.getPlayer().getBukkit().hideTitle();
+    final Player player = event.getPlayer().getBukkit();
 
-    sendWelcomeMessage(event.getPlayer());
+    player.hideTitle();
+
+    // Bukkit assumes a player's locale is "en_US" before it receives a player's setting packet.
+    // Thus, we delay sending this prominent message, so it is more likely its in the right locale.
+    event
+        .getPlayer()
+        .getMatch()
+        .getExecutor(MatchScope.LOADED)
+        .schedule(() -> sendWelcomeMessage(event.getPlayer()), 500, TimeUnit.MILLISECONDS);
   }
 
   private void sendWelcomeMessage(MatchPlayer viewer) {

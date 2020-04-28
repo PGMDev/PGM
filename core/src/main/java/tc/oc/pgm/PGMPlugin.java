@@ -9,7 +9,9 @@ import com.google.common.collect.Lists;
 import java.io.File;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +29,7 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
@@ -35,6 +38,7 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.map.exception.MapException;
+import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.module.Module;
@@ -73,7 +77,6 @@ import tc.oc.pgm.community.commands.ModerationCommands;
 import tc.oc.pgm.community.commands.ReportCommands;
 import tc.oc.pgm.db.DatastoreCacheImpl;
 import tc.oc.pgm.db.DatastoreImpl;
-import tc.oc.pgm.events.ConfigLoadEvent;
 import tc.oc.pgm.listeners.AntiGriefListener;
 import tc.oc.pgm.listeners.BlockTransformListener;
 import tc.oc.pgm.listeners.ChatDispatcher;
@@ -86,7 +89,10 @@ import tc.oc.pgm.listeners.PGMListener;
 import tc.oc.pgm.listeners.ServerPingDataListener;
 import tc.oc.pgm.listeners.WorldProblemListener;
 import tc.oc.pgm.map.MapLibraryImpl;
+import tc.oc.pgm.map.source.DefaultMapSourceFactory;
+import tc.oc.pgm.map.source.SystemMapSourceFactory;
 import tc.oc.pgm.match.MatchManagerImpl;
+import tc.oc.pgm.prefix.ConfigPrefixProvider;
 import tc.oc.pgm.prefix.PrefixRegistryImpl;
 import tc.oc.pgm.restart.RestartListener;
 import tc.oc.pgm.restart.ShouldRestartTask;
@@ -97,13 +103,17 @@ import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.FileUtils;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.concurrent.BukkitExecutorService;
+import tc.oc.pgm.util.text.TextException;
+import tc.oc.pgm.util.text.TextTranslations;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 
 public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
+  private Config config;
   private Logger gameLogger;
   private Datastore datastore;
   private MapLibrary mapLibrary;
+  private Set<MapSourceFactory> mapSourceFactories;
   private MatchManager matchManager;
   private MatchTabManager matchTabManager;
   private MapOrder mapOrder;
@@ -134,74 +144,62 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     server.getConsoleSender().addAttachment(this, Permissions.ALL.getName(), true);
 
     final Logger logger = getLogger();
-    logger.setLevel(Config.Log.level());
-
-    registerEvents(Config.Maps.get());
-    registerEvents(Config.PlayerList.get());
-    registerEvents(Config.Prefixes.get());
-    registerEvents(Config.Experiments.get());
-
-    try {
-      getConfig().options().copyDefaults(true);
-      saveConfig();
-      reloadConfig();
-    } catch (Throwable t) {
-      logger.log(Level.WARNING, "Failed to create or save configuration", t);
-    }
-
-    executorService = new BukkitExecutorService(this, false);
-    asyncExecutorService = new BukkitExecutorService(this, true);
-
-    try {
-      datastore = new DatastoreImpl(new File(getDataFolder(), "pgm.db"));
-      datastore = new DatastoreCacheImpl(datastore);
-    } catch (SQLException e) {
-      shutdown("Failed to initialize SQL database", e);
-      return;
-    }
-
     gameLogger = Logger.getLogger(logger.getName() + ".game");
     gameLogger.setUseParentHandlers(false);
     gameLogger.addHandler(new InGameHandler());
     gameLogger.setParent(logger);
 
-    mapLibrary = new MapLibraryImpl(gameLogger, Config.Maps.get().getFactories());
-    try {
-      mapLibrary.loadNewMaps(false).get(30, TimeUnit.SECONDS);
-    } catch (InterruptedException | TimeoutException e) {
-      // No-op
-    } catch (ExecutionException e) {
-      if (!mapLibrary.getMaps().hasNext()) {
-        shutdown("Failed to load any maps", e.getCause());
-        return;
-      } else {
-        logger.log(Level.WARNING, "Failed to load some maps", e.getCause());
-      }
-    }
+    executorService = new BukkitExecutorService(this, false);
+    asyncExecutorService = new BukkitExecutorService(this, true);
 
-    if (!mapLibrary.getMaps().hasNext()) {
-      shutdown("Failed to load at least 1 map before timeout", null);
+    mapSourceFactories = new LinkedHashSet<>();
+    mapLibrary = new MapLibraryImpl(gameLogger, mapSourceFactories);
+
+    saveDefaultConfig(); // Writes a config file, if one does not exist.
+    reloadConfig(); // Populates "this.config", if there is an error, will be null
+
+    if (config == null) {
+      getServer().getPluginManager().disablePlugin(this);
       return;
     }
 
-    matchManager = new MatchManagerImpl(logger);
-
-    if (Config.MapPools.areEnabled()) {
-      mapOrder =
-          new MapPoolManager(
-              logger, new File(getDataFolder(), Config.MapPools.getPath()), datastore);
-    } else {
-      mapOrder = new RandomMapOrder(Lists.newArrayList(mapLibrary.getMaps()));
+    try {
+      datastore = new DatastoreImpl(config.getDatabaseUri());
+      datastore = new DatastoreCacheImpl(datastore);
+    } catch (SQLException e) {
+      e.printStackTrace();
+      getServer().getPluginManager().disablePlugin(this);
+      return;
     }
 
-    prefixRegistry = new PrefixRegistryImpl();
+    try {
+      mapLibrary.loadNewMaps(false).get(30, TimeUnit.SECONDS);
+    } catch (ExecutionException | InterruptedException | TimeoutException e) {
+      e.printStackTrace();
+    }
 
-    if (Config.PlayerList.enabled()) {
+    if (!mapLibrary.getMaps().hasNext()) {
+      getServer().getPluginManager().disablePlugin(this);
+      return;
+    }
+
+    if (config.getMapPoolFile() == null) {
+      mapOrder = new RandomMapOrder(Lists.newArrayList(mapLibrary.getMaps()));
+    } else {
+      mapOrder = new MapPoolManager(logger, new File(config.getMapPoolFile()), datastore);
+    }
+
+    prefixRegistry =
+        new PrefixRegistryImpl(config.getGroups().isEmpty() ? null : new ConfigPrefixProvider());
+
+    matchManager = new MatchManagerImpl(logger);
+
+    if (config.showTabList()) {
       matchTabManager = new MatchTabManager(this);
     }
 
-    if (Config.AutoRestart.enabled()) {
-      asyncExecutorService.scheduleAtFixedRate(new ShouldRestartTask(this), 0, 1, TimeUnit.MINUTES);
+    if (!config.getUptimeLimit().isNegative()) {
+      asyncExecutorService.scheduleAtFixedRate(new ShouldRestartTask(), 0, 1, TimeUnit.MINUTES);
     }
 
     registerListeners();
@@ -232,12 +230,39 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   @Override
   public void reloadConfig() {
     super.reloadConfig();
-    getServer().getPluginManager().callEvent(new ConfigLoadEvent(getConfig()));
+
+    try {
+      config = new PGMConfig(getConfig(), getDataFolder());
+    } catch (TextException e) {
+      getGameLogger().log(Level.SEVERE, e.getLocalizedMessage(), e);
+      return;
+    }
+
+    getGameLogger()
+        .log(Level.INFO, ChatColor.GREEN + TextTranslations.translate("command.admin.pgm", null));
+
+    final Logger logger = getLogger();
+    logger.setLevel(config.getLogLevel());
+
+    for (String source : config.getMapSources()) {
+      final MapSourceFactory factory;
+      try {
+        factory =
+            source.equalsIgnoreCase("default")
+                ? DefaultMapSourceFactory.INSTANCE
+                : new SystemMapSourceFactory(source);
+      } catch (Throwable t) {
+        t.printStackTrace();
+        continue;
+      }
+
+      mapSourceFactories.add(factory);
+    }
   }
 
-  private void shutdown(String message, @Nullable Throwable cause) {
-    getLogger().log(Level.WARNING, message, cause);
-    getServer().shutdown();
+  @Override
+  public Config getConfiguration() {
+    return config;
   }
 
   @Override
@@ -341,12 +366,13 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     node.registerCommands(new MapPoolCommands());
     node.registerCommands(new StatsCommands());
 
-    // TODO: Community commands
-    final ModerationCommands modCommands = new ModerationCommands(chat, getMatchManager());
-    node.registerCommands(modCommands);
-    registerEvents(modCommands);
+    if (config.isCommunityMode()) {
+      final ModerationCommands modCommands = new ModerationCommands(chat, getMatchManager());
+      node.registerCommands(modCommands);
+      registerEvents(modCommands);
 
-    node.registerCommands(new ReportCommands());
+      node.registerCommands(new ReportCommands());
+    }
 
     new BukkitIntake(this, graph).register();
   }
@@ -391,6 +417,11 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       final Throwable thrown = record.getThrown();
       if (thrown == null) {
         return record.getMessage();
+      }
+
+      final TextException textErr = tryException(TextException.class, thrown);
+      if (textErr != null) {
+        return format(null, textErr.getLocalizedMessage(), textErr.getCause());
       }
 
       final InvalidXMLException xmlErr = tryException(InvalidXMLException.class, thrown);

@@ -17,7 +17,7 @@ import org.apache.commons.lang.math.Fraction;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import tc.oc.pgm.Config;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -107,7 +107,6 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   // All teams in the match
   private final Set<Team> teams;
-  private final boolean requireEven;
 
   // Players who autojoined their current team
   private final Set<MatchPlayer> autoJoins = new HashSet<>();
@@ -120,10 +119,9 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   private final Map<UUID, Team> playerTeamMap = new HashMap<>();
 
-  public TeamMatchModule(Match match, Set<TeamFactory> teamFactories, boolean requireEven) {
+  public TeamMatchModule(Match match, Set<TeamFactory> teamFactories) {
     this.match = match;
     this.teams = new HashSet<>(teamFactories.size());
-    this.requireEven = requireEven;
 
     for (TeamFactory teamFactory : teamFactories) {
       this.teams.add(teamFactory.createTeam(match));
@@ -170,7 +168,8 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     }
     teamNeeded -= playersQueued;
 
-    int globalNeeded = Config.minimumPlayers() - playersJoined - playersQueued;
+    int globalNeeded =
+        (int) PGM.get().getConfiguration().getMinimumPlayers() - playersJoined - playersQueued;
 
     int playersNeeded;
     if (globalNeeded > teamNeeded) {
@@ -235,11 +234,11 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
   }
 
   public boolean canSwitchTeams(MatchPlayer joining) {
-    return Config.Teams.allowSwitch() || !match.isRunning();
+    return canChooseTeam(joining);
   }
 
   public boolean canChooseTeam(MatchPlayer joining) {
-    return Config.Teams.allowChoose() && joining.getBukkit().hasPermission(Permissions.JOIN_CHOOSE);
+    return joining.getBukkit().hasPermission(Permissions.JOIN_CHOOSE);
   }
 
   @Override
@@ -264,23 +263,6 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     } else {
       return false;
     }
-  }
-
-  private boolean requireEvenTeams() {
-    if (!requireEven) return false;
-
-    // If any teams are unequal in size, don't try to even the teams
-    // TODO: This could be done, it's just more complicated
-    int size = -1;
-    for (Team team : getTeams()) {
-      if (size == -1) {
-        size = team.getMaxOverfill();
-      } else if (size != team.getMaxOverfill()) {
-        return false;
-      }
-    }
-
-    return true;
   }
 
   public boolean areTeamsEven() {
@@ -406,7 +388,10 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       // If team choosing is disabled, and the match has not started yet, defer the join.
       // Note that this can only happen with autojoin. Choosing a team always fails if
       // the condition below is true.
-      if (!queued && !Config.Teams.allowChoose() && !match.isRunning()) {
+      if (!queued
+          && !canChooseTeam(joining)
+          && !match.isRunning()
+          && PGM.get().getConfiguration().shouldQueueJoin()) {
         return GenericJoinResult.Status.QUEUED.toResult();
       }
 
@@ -421,6 +406,11 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
         }
       }
 
+      // Queue the player if there is an attempt to achieve balance
+      if (!queued && !match.isRunning() && PGM.get().getConfiguration().shouldQueueJoin()) {
+        return GenericJoinResult.Status.QUEUED.toResult();
+      }
+
       // Try to find a team for the player to join
       return getEmptiestJoinableTeam(joining, true);
 
@@ -433,12 +423,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       // If team switching is disabled and the player is choosing to re-join their
       // last team, don't consider it a "choice" since that's the only team they can
       // join anyway. In any other case, check that they are allowed to choose their team.
-      if (Config.Teams.allowSwitch() || chosenTeam != lastTeam) {
-        // Team choosing is disabled
-        if (!Config.Teams.allowChoose()) {
-          return new TeamJoinResult(GenericJoinResult.Status.CHOICE_DISABLED);
-        }
-
+      if (canSwitchTeams(joining) || chosenTeam != lastTeam) {
         // Player is not allowed to choose their team
         if (!canChooseTeam(joining)) {
           return new TeamJoinResult(GenericJoinResult.Status.CHOICE_DENIED);
@@ -520,8 +505,6 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   @Override
   public void queuedJoin(QueuedParticipants queue) {
-    final boolean even = requireEvenTeams();
-
     // First, eliminate any players who cannot join at all, so they do not influence the even teams
     // logic
     List<MatchPlayer> shortList = new ArrayList<>();
@@ -537,19 +520,13 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
     for (int i = 0; i < shortList.size(); i++) {
       MatchPlayer player = shortList.get(i);
-      if (even && areTeamsEven() && shortList.size() - i < getTeams().size()) {
-        // Prevent join if even teams are required, and there aren't enough remaining players
-        // Although this is not technically a "priority kick" that's the best message to send
-        player.sendWarning(new PersonalizedTranslatable("leave.ok.priorityKick"));
-      } else {
-        join(player, null, queryJoin(player, null, true));
-      }
+      join(player, null, queryJoin(player, null, true));
     }
   }
 
   /** Try to balance teams by bumping players to other teams */
   public void balanceTeams() {
-    if (!Config.Teams.autoBalance()) return;
+    if (!PGM.get().getConfiguration().shouldBalanceJoin()) return;
 
     match.getLogger().info("Auto-balancing teams");
 

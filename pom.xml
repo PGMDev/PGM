@@ -5,6 +5,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <doclint>none</doclint>
     </properties>
 
     <name>PGM</name>
@@ -199,6 +200,17 @@
                     <nonFilteredFileExtensions>
                         <nonFilteredFileExtension>zip</nonFilteredFileExtension>
                     </nonFilteredFileExtensions>
+                </configuration>
+            </plugin>
+
+            <!-- Allows for building of java docs, although not used yet -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <failOnError>false</failOnError>
+                    <includeDependencySources>true</includeDependencySources>
                 </configuration>
             </plugin>
         </plugins>

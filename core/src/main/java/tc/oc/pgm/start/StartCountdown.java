@@ -32,7 +32,7 @@ public class StartCountdown extends PreMatchCountdown {
   }
 
   protected boolean willHuddle() {
-    return !huddle.isZero();
+    return !huddle.isZero() && !huddle.isNegative();
   }
 
   @Override

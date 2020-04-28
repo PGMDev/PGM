@@ -223,7 +223,6 @@ public class MapInfoImpl implements MapInfo {
                               viewer.getLocale()))));
       Component withAuthors =
           new PersonalizedTranslatable("misc.authorship", mapName, authors)
-              .getPersonalizedText()
               .color(ChatColor.DARK_PURPLE);
       styledName = withAuthors;
     } else {

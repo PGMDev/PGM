@@ -22,7 +22,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.Config;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -117,7 +117,7 @@ public class WoolMatchModule implements MatchModule, Listener {
   }
 
   private void refillOneWoolPerContainer() {
-    if (!Config.Wool.autoRefillWoolChests()) return;
+    if (!PGM.get().getConfiguration().shouldRefillWool()) return;
 
     for (Entry<Inventory, Map<Integer, ItemStack>> chest : this.woolChests.entrySet()) {
       Inventory inv = chest.getKey();

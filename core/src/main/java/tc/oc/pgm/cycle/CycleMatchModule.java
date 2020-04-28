@@ -20,16 +20,10 @@ public class CycleMatchModule implements MatchModule, Listener {
 
   private final MapOrder mapOrder;
   private final Match match;
-  private final CycleConfig config;
 
   public CycleMatchModule(Match match) {
     this.match = match;
     this.mapOrder = PGM.get().getMapOrder();
-    this.config = new CycleConfig(PGM.get().getConfig());
-  }
-
-  public CycleConfig getConfig() {
-    return config;
   }
 
   public void cycleNow() {
@@ -37,19 +31,19 @@ public class CycleMatchModule implements MatchModule, Listener {
   }
 
   public void startCountdown(@Nullable Duration duration) {
-    if (duration == null) duration = config.countdown();
+    if (duration == null) duration = PGM.get().getConfiguration().getCycleTime();
     match.finish();
     match.getCountdown().start(new CycleCountdown(match), duration);
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.MONITOR)
   public void onPartyChange(PlayerPartyChangeEvent event) {
-    if (match.isRunning() && match.getParticipants().isEmpty()) {
-      CycleConfig.Auto autoConfig = config.matchEmpty();
-      if (autoConfig.enabled()) {
-        match.getLogger().info("Cycling due to empty match");
-        startCountdown(autoConfig.countdown());
-      }
+    if (event.wasParticipating()
+        && match.isRunning()
+        && match.getParticipants().size() < PGM.get().getConfiguration().getMinimumPlayers()) {
+      match.getLogger().info("Cycling due to empty match");
+      match.finish();
+      startCountdown(null);
     }
   }
 
@@ -59,9 +53,9 @@ public class CycleMatchModule implements MatchModule, Listener {
     mapOrder.matchEnded(match);
 
     if (!RestartManager.isQueued()) {
-      CycleConfig.Auto autoConfig = config.matchEnd();
-      if (autoConfig.enabled()) {
-        startCountdown(autoConfig.countdown());
+      Duration duration = PGM.get().getConfiguration().getCycleTime();
+      if (!duration.isNegative()) {
+        startCountdown(duration);
       }
     }
   }

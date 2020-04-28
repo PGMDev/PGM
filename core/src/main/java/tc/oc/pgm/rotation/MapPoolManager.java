@@ -15,7 +15,6 @@ import org.apache.commons.io.FileUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import tc.oc.pgm.Config;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
@@ -218,11 +217,10 @@ public class MapPoolManager implements MapOrder {
   }
 
   private boolean shouldRevert(Match match) {
-    return (Config.MapPools.areStaffRequired()
-            && !match.getPlayers().stream()
-                .filter(mp -> mp.getBukkit().hasPermission(Permissions.STAFF))
-                .findAny()
-                .isPresent())
+    return !match.getPlayers().stream()
+            .filter(mp -> mp.getBukkit().hasPermission(Permissions.STAFF))
+            .findAny()
+            .isPresent()
         || !activeMapPool.isDynamic()
             && poolTimeLimit != null
             && TimeUtils.isLongerThan(
