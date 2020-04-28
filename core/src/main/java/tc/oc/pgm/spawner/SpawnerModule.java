@@ -17,6 +17,8 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.FilterModule;
+import tc.oc.pgm.filters.FilterParser;
+import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
@@ -50,6 +52,7 @@ public class SpawnerModule implements MapModule {
       SpawnerModule spawnerModule = new SpawnerModule();
       RegionParser regionParser = factory.getRegions();
       KitParser kitParser = factory.getKits();
+      FilterParser filterParser = factory.getFilters();
 
       for (Element element :
           XMLUtils.flattenElements(doc.getRootElement(), "spawners", "spawner")) {
@@ -79,7 +82,7 @@ public class SpawnerModule implements MapModule {
         spawnerDefinition.maxEntities =
             XMLUtils.parseNumber(
                 element.getAttribute("max-entities"), Integer.class, Integer.MAX_VALUE);
-        // TODO Filters?
+        spawnerDefinition.filter = filterParser.parseFilterProperty(element, "filter", StaticFilter.ALLOW);
 
         List<SpawnerObject> objects = new ArrayList<>();
         for (Element object : XMLUtils.getChildren(element, "entity", "item", "tnt", "effect")) {

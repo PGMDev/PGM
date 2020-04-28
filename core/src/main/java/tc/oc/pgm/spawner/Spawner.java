@@ -81,7 +81,15 @@ public class Spawner implements Listener, Tickable {
   }
 
   private boolean canSpawn() {
-    return spawnedEntities < definition.maxEntities && trackedPlayers.size() != 0;
+    if (spawnedEntities < definition.maxEntities && trackedPlayers.size() != 0){
+      for (Player p : trackedPlayers){
+          if (definition.filter.query(match.getPlayer(p).getQuery()).isAllowed()){
+            return true;
+          }
+      }
+      return false;
+    }
+    return false;
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
