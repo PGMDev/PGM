@@ -42,8 +42,7 @@ public class SettingCommands {
             "setting.options",
             TextFormatter.list(
                 Stream.of(key.getPossibleValues())
-                    .map(SettingValue::getName)
-                    .map(TextComponent::of)
+                    .map(option -> TextComponent.of(option.getName(), TextColor.GRAY))
                     .collect(Collectors.toList()),
                 TextColor.WHITE)));
   }

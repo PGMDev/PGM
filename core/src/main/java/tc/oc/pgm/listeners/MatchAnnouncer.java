@@ -145,7 +145,7 @@ public class MatchAnnouncer implements Listener {
                 viewer
                     .getMatch()
                     .getMap()
-                    .getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS, viewer.getBukkit()))
+                    .getStyledNameLegacy(MapNameStyle.COLOR_WITH_AUTHORS, viewer.getBukkit()))
             .color(ChatColor.DARK_PURPLE));
   }
 }

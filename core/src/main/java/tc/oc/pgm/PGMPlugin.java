@@ -75,8 +75,8 @@ import tc.oc.pgm.commands.provider.TeamMatchModuleProvider;
 import tc.oc.pgm.commands.provider.VectorProvider;
 import tc.oc.pgm.community.commands.ModerationCommands;
 import tc.oc.pgm.community.commands.ReportCommands;
-import tc.oc.pgm.db.DatastoreCacheImpl;
-import tc.oc.pgm.db.DatastoreImpl;
+import tc.oc.pgm.db.CacheDatastore;
+import tc.oc.pgm.db.SQLDatastore;
 import tc.oc.pgm.listeners.AntiGriefListener;
 import tc.oc.pgm.listeners.BlockTransformListener;
 import tc.oc.pgm.listeners.ChatDispatcher;
@@ -136,7 +136,12 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
   @Override
   public void onEnable() {
-    PGM.set(this);
+    try {
+      PGM.set(this);
+    } catch (IllegalArgumentException e) {
+      return; // Indicates the plugin failed to load, so exit early
+    }
+
     Modules.registerAll();
     Permissions.registerAll();
 
@@ -164,13 +169,19 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     }
 
     try {
-      datastore = new DatastoreImpl(config.getDatabaseUri());
-      datastore = new DatastoreCacheImpl(datastore);
-    } catch (SQLException e) {
-      e.printStackTrace();
-      getServer().getPluginManager().disablePlugin(this);
-      return;
+      datastore = new SQLDatastore(config.getDatabaseUri(), asyncExecutorService);
+    } catch (SQLException e1) {
+      logger.log(Level.SEVERE, "Unable to connect to database", e1);
+      try {
+        datastore = new SQLDatastore(null, asyncExecutorService);
+      } catch (SQLException e2) {
+        logger.log(Level.SEVERE, "Unable to connect to fallback database", e2);
+        getServer().getPluginManager().disablePlugin(this);
+        return;
+      }
     }
+
+    datastore = new CacheDatastore(datastore);
 
     try {
       mapLibrary.loadNewMaps(false).get(30, TimeUnit.SECONDS);
@@ -210,6 +221,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   public void onDisable() {
     if (matchTabManager != null) matchTabManager.disable();
     if (matchManager != null) matchManager.getMatches().forEachRemaining(Match::unload);
+    if (datastore != null) datastore.close();
     datastore = null;
     mapLibrary = null;
     matchManager = null;

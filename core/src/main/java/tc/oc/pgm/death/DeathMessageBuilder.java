@@ -212,6 +212,14 @@ public class DeathMessageBuilder {
   }
 
   boolean entity(EntityInfo entityInfo) {
+    // Skip for entities that are weird and have no translations
+    switch (entityInfo.getEntityType()) {
+      case UNKNOWN:
+      case COMPLEX_PART:
+      case ENDER_CRYSTAL:
+        return false;
+    }
+
     if (option("entity")) {
       weapon = entityInfo.getName();
       option(entityInfo.getIdentifier());

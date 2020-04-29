@@ -29,7 +29,6 @@ public final class MinecraftTranslations {
       ImmutableMap.<String, String>builder()
           .put("entity.PrimedTnt.name", "tile.tnt.name") // "TNT" instead of "Block of TNT"
           .put("entity.MinecartTNT.name", "item.minecartTnt.name")
-          .put("entity.EnderCrystal.name", "item.end_crystal.name")
           .put("item.anvil.name", "tile.anvil.name")
           .put("item.sand.name", "tile.sand.name")
           .put("item.gravel.name", "tile.gravel.name")

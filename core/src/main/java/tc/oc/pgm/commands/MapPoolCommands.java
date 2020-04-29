@@ -96,9 +96,7 @@ public class MapPoolCommands {
         if (votes != null && chance)
           str += ChatColor.YELLOW + SCORE_FORMAT.format(chances.get(map)) + " ";
         str +=
-            ChatColor.RESET
-                + ""
-                + map.getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS, sender).toLegacyText();
+            ChatColor.RESET + "" + map.getStyledNameLegacy(MapNameStyle.COLOR_WITH_AUTHORS, sender);
         return str;
       }
     }.display(audience, maps, page);

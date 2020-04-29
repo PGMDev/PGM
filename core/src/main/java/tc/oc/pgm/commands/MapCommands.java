@@ -17,6 +17,8 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -98,7 +100,7 @@ public class MapCommands {
       public String format(MapInfo map, int index) {
         return (index + 1)
             + ". "
-            + map.getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS, sender).toLegacyText();
+            + map.getStyledNameLegacy(MapNameStyle.COLOR_WITH_AUTHORS, sender);
       }
     }.display(audience, ImmutableSortedSet.copyOf(maps), page);
   }
@@ -273,12 +275,10 @@ public class MapCommands {
     }
 
     audience.sendMessage(
-        ChatColor.DARK_PURPLE
-            + TextTranslations.translate(
-                "map.nextMap",
-                sender,
-                next.getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS, sender).toLegacyText()
-                    + ChatColor.DARK_PURPLE));
+        TranslatableComponent.of(
+            "map.nextMap",
+            TextColor.DARK_PURPLE,
+            next.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS)));
   }
 
   private @Nullable Component formatContribution(Contributor contributor) {

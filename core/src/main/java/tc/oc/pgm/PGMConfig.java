@@ -93,9 +93,7 @@ public final class PGMConfig implements Config {
 
     this.logLevel = parseLogLevel(config.getString("log-level", "info"));
 
-    this.databaseUri =
-        config.getString(
-            "database-uri", "jdbc:sqlite:" + new File(dataFolder, "pgm.db").getAbsolutePath());
+    this.databaseUri = config.getString("database-uri");
 
     final String motd = config.getString("motd");
     this.motd = motd == null || motd.isEmpty() ? null : parseComponentLegacy(motd);

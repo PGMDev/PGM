@@ -3,10 +3,11 @@ package tc.oc.pgm.api.map;
 import java.text.Normalizer;
 import java.util.Collection;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.util.Version;
-import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.named.MapNameStyle;
+import tc.oc.pgm.util.text.TextTranslations;
 
 /** Essential information about a map. */
 public interface MapInfo extends Comparable<MapInfo>, Cloneable {
@@ -39,6 +40,19 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
    * @return A name, alphanumeric with spaces are allowed.
    */
   String getName();
+
+  /**
+   * Gets a styled map name.
+   *
+   * @param style A style.
+   * @return A styled map name.
+   */
+  Component getStyledName(MapNameStyle style);
+
+  @Deprecated
+  default String getStyledNameLegacy(MapNameStyle style, @Nullable CommandSender sender) {
+    return TextTranslations.translateLegacy(getStyledName(style), sender);
+  }
 
   /**
    * Get a short, human-readable description of the map's objective.
@@ -106,15 +120,6 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
    * @return A cloned {@link MapInfo}.
    */
   MapInfo clone();
-
-  /**
-   * Creates a component of the map name with styling
-   *
-   * @param style - the {@link MapNameStyle} to style name with
-   * @param viewer - the {@link CommandSender} viewer
-   * @return A new component of the Map name
-   */
-  Component getStyledMapName(MapNameStyle style, CommandSender viewer);
 
   @Override
   default int compareTo(MapInfo o) {

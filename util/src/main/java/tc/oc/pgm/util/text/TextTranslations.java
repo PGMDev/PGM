@@ -209,6 +209,19 @@ public final class TextTranslations {
   }
 
   /**
+   * Gets a translated text in legacy format.
+   *
+   * @param text The text.
+   * @param sender A command sender or null.
+   * @return The translated legacy text.
+   */
+  @Deprecated
+  public static String translateLegacy(Component text, @Nullable CommandSender sender) {
+    return LegacyComponentSerializer.legacy()
+        .serialize(translate(text, sender == null ? SOURCE_LOCALE : sender.getLocale()));
+  }
+
+  /**
    * Gets a translated legacy text.
    *
    * @param key A translation key.
