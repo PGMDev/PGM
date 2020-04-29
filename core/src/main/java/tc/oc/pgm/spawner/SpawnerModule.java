@@ -22,18 +22,17 @@ import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
-import tc.oc.pgm.spawner.objects.SpawnerObjectEntity;
-import tc.oc.pgm.spawner.objects.SpawnerObjectItem;
-import tc.oc.pgm.spawner.objects.SpawnerObjectPotion;
-import tc.oc.pgm.spawner.objects.SpawnerObjectTNT;
+import tc.oc.pgm.spawner.objects.SpawnableEntity;
+import tc.oc.pgm.spawner.objects.SpawnableItem;
+import tc.oc.pgm.spawner.objects.SpawnablePotion;
+import tc.oc.pgm.spawner.objects.SpawnableTNT;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class SpawnerModule implements MapModule {
 
-  private static final List<SpawnerDefinition> spawnerDefinitions = new ArrayList<>();
-  public static final String METADATA_KEY = "PGM_SPAWNER_OBJECT";
+  private final List<SpawnerDefinition> spawnerDefinitions = new ArrayList<>();
 
   @Override
   public MatchModule createMatchModule(Match match) {
@@ -75,52 +74,53 @@ public class SpawnerModule implements MapModule {
         spawnerDefinition.minDelay = XMLUtils.parseDuration(minDelay, spawnerDefinition.delay);
         spawnerDefinition.maxDelay = XMLUtils.parseDuration(maxDelay, spawnerDefinition.delay);
 
-        if (spawnerDefinition.maxDelay.compareTo(spawnerDefinition.minDelay) < 0) {
+        if (TimeUtils.isShorterThan(spawnerDefinition.maxDelay, spawnerDefinition.minDelay)) {
           throw new InvalidXMLException("Max delay cannot be smaller than min delay", element);
         }
 
         spawnerDefinition.maxEntities =
             XMLUtils.parseNumber(
                 element.getAttribute("max-entities"), Integer.class, Integer.MAX_VALUE);
-        spawnerDefinition.filter =
+        spawnerDefinition.playerFilter =
             filterParser.parseFilterProperty(element, "filter", StaticFilter.ALLOW);
 
-        List<SpawnerObject> objects = new ArrayList<>();
+        List<Spawnable> objects = new ArrayList<>();
         for (Element object : XMLUtils.getChildren(element, "entity", "item", "tnt", "effect")) {
           int count;
           switch (object.getName()) {
             case "entity":
               count = XMLUtils.parseNumber(object.getAttribute("count"), Integer.class, 1);
-              SpawnerObjectEntity entity =
-                  new SpawnerObjectEntity(XMLUtils.parseEntityType(object), count);
+              SpawnableEntity entity =
+                  new SpawnableEntity(XMLUtils.parseEntityType(object), count);
               objects.add(entity);
               break;
             case "tnt":
               Duration fuse = XMLUtils.parseDuration(object.getAttribute("fuse"));
               float power = XMLUtils.parseNumber(object.getAttribute("power"), Float.class);
               count = XMLUtils.parseNumber(object.getAttribute("count"), Integer.class, 1);
-              SpawnerObjectTNT tnt =
-                  new SpawnerObjectTNT(power, (int) TimeUtils.toTicks(fuse), count);
+              SpawnableTNT tnt =
+                  new SpawnableTNT(power, (int) TimeUtils.toTicks(fuse), count);
               objects.add(tnt);
               break;
             case "effect":
               PotionEffect effect = XMLUtils.parsePotionEffect(object);
               count = XMLUtils.parseNumber(object.getAttribute("count"), Integer.class, 1);
-              SpawnerObjectPotion potion = new SpawnerObjectPotion(count, effect);
+              SpawnablePotion potion = new SpawnablePotion(count, effect);
               objects.add(potion);
               break;
             case "item":
               ItemStack stack = kitParser.parseItem(object, false);
-              SpawnerObjectItem item = new SpawnerObjectItem(stack);
+              SpawnableItem item = new SpawnableItem(stack);
               objects.add(item);
               break;
           }
         }
         spawnerDefinition.objects = objects;
-        spawnerDefinitions.add(spawnerDefinition);
+        factory.getFeatures().addFeature(element, spawnerDefinition);
+        spawnerModule.spawnerDefinitions.add(spawnerDefinition);
       }
 
-      return spawnerDefinitions.isEmpty() ? null : spawnerModule;
+      return spawnerModule.spawnerDefinitions.isEmpty() ? null : spawnerModule;
     }
   }
 }

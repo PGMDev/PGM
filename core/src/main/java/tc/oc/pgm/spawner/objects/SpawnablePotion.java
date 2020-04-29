@@ -7,14 +7,14 @@ import org.bukkit.entity.ThrownPotion;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
-import tc.oc.pgm.spawner.SpawnerObject;
+import tc.oc.pgm.spawner.Spawnable;
 
-public class SpawnerObjectPotion implements SpawnerObject {
+public class SpawnablePotion implements Spawnable {
 
   private final int count;
   private final PotionEffect potion;
 
-  public SpawnerObjectPotion(int count, PotionEffect potion) {
+  public SpawnablePotion(int count, PotionEffect potion) {
     this.count = count;
     this.potion = potion;
   }
@@ -39,7 +39,7 @@ public class SpawnerObjectPotion implements SpawnerObject {
   }
 
   @Override
-  public int spawnCount() {
+  public int getSpawnCount() {
     return count;
   }
 }

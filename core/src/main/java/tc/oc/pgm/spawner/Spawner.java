@@ -1,10 +1,7 @@
 package tc.oc.pgm.spawner;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.logging.Logger;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -16,32 +13,46 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
+import tc.oc.pgm.api.feature.Feature;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.Tickable;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 
-public class Spawner implements Listener, Tickable {
+public class Spawner implements Feature<SpawnerDefinition>, Listener, Tickable {
 
   private final SpawnerDefinition definition;
   private final Match match;
-  private final Logger logger;
 
   private long lastTick;
 
   private int spawnedEntities;
-  private List<Player> trackedPlayers = new ArrayList<>();
+  private OnlinePlayerMapAdapter<MatchPlayer> trackedPlayers;
 
-  private static final Random RANDOM = new Random();
+  public static final String METADATA_KEY = "PGM_SPAWNER_OBJECT";
+
+
   private static long generatedDelay;
 
-  public Spawner(SpawnerDefinition definition, Match match, Logger logger) {
+  public Spawner(SpawnerDefinition definition, Match match) {
     this.definition = definition;
     this.match = match;
-    this.logger = logger;
 
     this.lastTick = match.getTick().tick;
+    this.trackedPlayers = new OnlinePlayerMapAdapter<>(PGM.get());
     generateDelay();
+  }
+
+  @Override
+  public String getId() {
+    return definition.id;
+  }
+
+  @Override
+  public SpawnerDefinition getDefinition() {
+    return definition;
   }
 
   @Override
@@ -50,8 +61,8 @@ public class Spawner implements Listener, Tickable {
       return;
     }
     if (match.getTick().tick - lastTick >= generatedDelay) {
-      for (SpawnerObject object : definition.objects) {
-        Vector randomSpawnLoc = definition.spawnRegion.getRandom(RANDOM);
+      for (Spawnable object : definition.objects) {
+        Vector randomSpawnLoc = definition.spawnRegion.getRandom(match.getRandom());
         object.spawn(
             new Location(
                 match.getWorld(),
@@ -59,7 +70,7 @@ public class Spawner implements Listener, Tickable {
                 randomSpawnLoc.getY(),
                 randomSpawnLoc.getZ()));
         if (object.isTracked()) {
-          spawnedEntities = spawnedEntities + object.spawnCount();
+          spawnedEntities = spawnedEntities + object.getSpawnCount();
         }
       }
       generateDelay();
@@ -75,40 +86,44 @@ public class Spawner implements Listener, Tickable {
       long minDelay = TimeUtils.toTicks(definition.minDelay);
       generatedDelay =
           (long)
-              (RANDOM.nextDouble() * (maxDelay - minDelay)
+              (match.getRandom().nextDouble() * (maxDelay - minDelay)
                   + minDelay); // Picks a random tick duration between minDelay and maxDelay
     }
   }
 
   private boolean canSpawn() {
-    if (spawnedEntities < definition.maxEntities && trackedPlayers.size() != 0) {
-      for (Player p : trackedPlayers) {
-        if (definition.filter.query(match.getPlayer(p).getQuery()).isAllowed()) {
-          return true;
-        }
-      }
+    if (spawnedEntities >= definition.maxEntities || trackedPlayers.isEmpty()) {
       return false;
+    }
+    for (MatchPlayer p : trackedPlayers.values()) {
+      if (definition.playerFilter.query(p.getQuery()).isAllowed()) {
+        return true;
+      }
     }
     return false;
   }
 
+  private boolean isTrackedEntity(Entity entity){
+    return entity.getMetadata(METADATA_KEY, PGM.get()) != null;
+  }
+
   @EventHandler(priority = EventPriority.MONITOR)
   public void onEntityDeath(EntityDeathEvent event) {
-    if (event.getEntity().getMetadata(SpawnerModule.METADATA_KEY, PGM.get()) != null) {
+    if (isTrackedEntity(event.getEntity())) {
       spawnedEntities--;
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onItemDespawn(ItemDespawnEvent event) {
-    if (event.getEntity().getMetadata(SpawnerModule.METADATA_KEY, PGM.get()) != null) {
+    if (isTrackedEntity(event.getEntity())) {
       spawnedEntities = spawnedEntities - event.getEntity().getItemStack().getAmount();
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerPickup(PlayerPickupItemEvent event) {
-    if (event.getItem().getMetadata(SpawnerModule.METADATA_KEY, PGM.get()) != null) {
+    if (isTrackedEntity(event.getItem())) {
       spawnedEntities = spawnedEntities - event.getItem().getItemStack().getAmount();
     }
   }
@@ -119,8 +134,8 @@ public class Spawner implements Listener, Tickable {
     if (match.getPlayer(player).isObserving()) {
       return;
     }
-    if (definition.playerRegion.contains(event.getPlayer()) && !trackedPlayers.contains(player)) {
-      trackedPlayers.add(player);
+    if (definition.playerRegion.contains(event.getPlayer()) && trackedPlayers.get(player) == null) {
+      trackedPlayers.put(player, match.getPlayer(player));
     } else if (!definition.playerRegion.contains(event.getPlayer())) {
       trackedPlayers.remove(player);
     }
@@ -130,4 +145,6 @@ public class Spawner implements Listener, Tickable {
   public void onPlayerQuit(PlayerQuitEvent event) {
     trackedPlayers.remove(event.getPlayer());
   }
+
+
 }

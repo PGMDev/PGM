@@ -2,7 +2,7 @@ package tc.oc.pgm.spawner;
 
 import org.bukkit.Location;
 
-public interface SpawnerObject {
+public interface Spawnable {
 
   void spawn(Location location);
 
@@ -14,5 +14,5 @@ public interface SpawnerObject {
    */
   boolean isTracked();
 
-  int spawnCount();
+  int getSpawnCount();
 }

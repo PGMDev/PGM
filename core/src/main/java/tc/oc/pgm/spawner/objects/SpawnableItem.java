@@ -5,15 +5,15 @@ import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.spawner.SpawnerModule;
-import tc.oc.pgm.spawner.SpawnerObject;
+import tc.oc.pgm.spawner.Spawner;
+import tc.oc.pgm.spawner.Spawnable;
 
-public class SpawnerObjectItem implements SpawnerObject {
+public class SpawnableItem implements Spawnable {
 
   private int count;
   private ItemStack stack;
 
-  public SpawnerObjectItem(ItemStack stack) {
+  public SpawnableItem(ItemStack stack) {
     this.count = stack.getAmount();
     this.stack = stack;
   }
@@ -21,7 +21,7 @@ public class SpawnerObjectItem implements SpawnerObject {
   @Override
   public void spawn(Location location) {
     Item item = location.getWorld().dropItem(location, stack);
-    item.setMetadata(SpawnerModule.METADATA_KEY, new FixedMetadataValue(PGM.get(), "Spawner Item"));
+    item.setMetadata(Spawner.METADATA_KEY, new FixedMetadataValue(PGM.get(), "Spawner Item"));
   }
 
   @Override
@@ -30,7 +30,7 @@ public class SpawnerObjectItem implements SpawnerObject {
   }
 
   @Override
-  public int spawnCount() {
+  public int getSpawnCount() {
     return count;
   }
 }

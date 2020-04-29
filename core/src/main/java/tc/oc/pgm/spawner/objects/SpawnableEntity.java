@@ -4,15 +4,16 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.metadata.FixedMetadataValue;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.spawner.Spawner;
 import tc.oc.pgm.spawner.SpawnerModule;
-import tc.oc.pgm.spawner.SpawnerObject;
+import tc.oc.pgm.spawner.Spawnable;
 
-public class SpawnerObjectEntity implements SpawnerObject {
+public class SpawnableEntity implements Spawnable {
 
   private Class<? extends Entity> entity;
   private int spawnCount;
 
-  public SpawnerObjectEntity(Class<? extends Entity> entity, int spawnCount) {
+  public SpawnableEntity(Class<? extends Entity> entity, int spawnCount) {
     this.entity = entity;
     this.spawnCount = spawnCount;
   }
@@ -22,7 +23,7 @@ public class SpawnerObjectEntity implements SpawnerObject {
     for (int i = 0; i < spawnCount; i++) {
       Entity spawned = location.getWorld().spawn(location, entity);
       spawned.setMetadata(
-          SpawnerModule.METADATA_KEY, new FixedMetadataValue(PGM.get(), "Spawner Entity"));
+          Spawner.METADATA_KEY, new FixedMetadataValue(PGM.get(), "Spawner Entity"));
     }
   }
 
@@ -32,7 +33,7 @@ public class SpawnerObjectEntity implements SpawnerObject {
   }
 
   @Override
-  public int spawnCount() {
+  public int getSpawnCount() {
     return spawnCount;
   }
 }

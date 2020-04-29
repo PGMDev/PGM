@@ -20,7 +20,7 @@ public class SpawnerMatchModule implements MatchModule {
   public void load() {
     for (SpawnerDefinition definition : definitions) {
       Spawner spawner =
-          new Spawner(definition, match, ClassLogger.get(match.getLogger(), Spawner.class));
+          new Spawner(definition, match);
       match.addListener(spawner, MatchScope.RUNNING);
       match.addTickable(spawner, MatchScope.RUNNING);
     }

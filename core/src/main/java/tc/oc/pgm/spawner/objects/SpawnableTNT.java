@@ -2,15 +2,15 @@ package tc.oc.pgm.spawner.objects;
 
 import org.bukkit.Location;
 import org.bukkit.entity.TNTPrimed;
-import tc.oc.pgm.spawner.SpawnerObject;
+import tc.oc.pgm.spawner.Spawnable;
 
-public class SpawnerObjectTNT implements SpawnerObject {
+public class SpawnableTNT implements Spawnable {
 
   private final float power;
   private final int fuse;
   private final int count;
 
-  public SpawnerObjectTNT(float power, int fuse, int count) {
+  public SpawnableTNT(float power, int fuse, int count) {
     this.power = power;
     this.fuse = fuse;
     this.count = count;
@@ -31,7 +31,7 @@ public class SpawnerObjectTNT implements SpawnerObject {
   }
 
   @Override
-  public int spawnCount() {
+  public int getSpawnCount() {
     return count;
   }
 }
