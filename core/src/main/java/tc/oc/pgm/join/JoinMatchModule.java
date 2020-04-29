@@ -95,6 +95,11 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
       return GenericJoinResult.Status.MATCH_FINISHED.toResult();
     }
 
+    // Don't allow vanished players to join
+    if (joining.isVanished()) {
+      return GenericJoinResult.Status.VANISHED.toResult();
+    }
+
     // If mid-match join is disabled, player cannot join for the first time after the match has
     // started
     if (match.isRunning() && !Config.Join.midMatch()) {
@@ -132,6 +137,10 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
         case NO_PERMISSION:
           joining.sendWarning(
               new PersonalizedTranslatable("command.gameplay.join.joinDenied"), false);
+          return true;
+
+        case VANISHED:
+          joining.sendWarning(new PersonalizedTranslatable("command.gameplay.join.vanish"), false);
           return true;
       }
     }

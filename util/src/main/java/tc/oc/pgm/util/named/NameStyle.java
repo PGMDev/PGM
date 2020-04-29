@@ -5,15 +5,16 @@ package tc.oc.pgm.util.named;
  * only by context, and is independent of the viewer.
  */
 public enum NameStyle {
-  PLAIN(false, false, false, false, false, false, false, false), // No formatting
-  COLOR(true, false, false, false, false, false, false, true), // Color only
+  PLAIN(false, false, false, false, false, false, false, false, false), // No formatting
+  COLOR(true, false, false, false, false, false, false, true, false), // Color only
   FANCY(
-      true, true, true, true, true, false, false, true), // Color, flair, friend status, nick status
+      true, true, true, true, true, false, false, true,
+      false), // Color, flair, friend status, nick status, vanish status
   TAB(
-      true, true, true, true, true, false, true,
-      true), // Color, flair, friend status, nick status, death status
-  VERBOSE(true, true, true, true, true, true, false, true), // Fancy plus nickname
-  CONCISE(true, true, true, true, true, true, false, false); // Verbose, but removes teleport
+      true, true, true, true, true, false, true, true,
+      true), // Color, flair, friend status, nick status, death status, and vanish status
+  VERBOSE(true, true, true, true, true, true, false, true, true), // Fancy plus nickname
+  CONCISE(true, true, true, true, true, true, false, false, true); // Verbose, but removes teleport
 
   public final boolean isColor;
   public final boolean showPrefix;
@@ -23,6 +24,7 @@ public enum NameStyle {
   public final boolean showNickname; // Show nickname after real name
   public final boolean showDeath; // Grey out name if dead
   public final boolean teleport; // Click name to teleport
+  public final boolean showVanish; // Italic if vanished
 
   NameStyle(
       boolean isColor,
@@ -32,7 +34,8 @@ public enum NameStyle {
       boolean showDisguise,
       boolean showNickname,
       boolean showDeath,
-      boolean teleport) {
+      boolean teleport,
+      boolean showVanish) {
     this.isColor = isColor;
     this.showPrefix = showPrefix;
     this.showSelf = showSelf;
@@ -41,5 +44,6 @@ public enum NameStyle {
     this.showNickname = showNickname;
     this.showDeath = showDeath;
     this.teleport = teleport;
+    this.showVanish = showVanish;
   }
 }

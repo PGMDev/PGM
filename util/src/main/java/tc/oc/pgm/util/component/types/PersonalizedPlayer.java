@@ -78,6 +78,11 @@ public class PersonalizedPlayer extends Component {
           displayName.replaceFirst(realName, ChatColor.DARK_GRAY + realName + ChatColor.RESET);
     }
 
+    if (style.showVanish && isVanished(player)) {
+      displayName =
+          displayName.replaceFirst(realName, ChatColor.STRIKETHROUGH + realName + ChatColor.RESET);
+    }
+
     component = TextComponent.fromLegacyToComponent(displayName, false);
 
     if (style.teleport) {
@@ -92,5 +97,9 @@ public class PersonalizedPlayer extends Component {
     }
 
     return component;
+  }
+
+  private boolean isVanished(Player player) {
+    return player.hasMetadata("isVanished");
   }
 }

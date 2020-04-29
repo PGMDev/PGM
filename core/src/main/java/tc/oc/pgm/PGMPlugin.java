@@ -61,6 +61,7 @@ import tc.oc.pgm.commands.StartCommands;
 import tc.oc.pgm.commands.StatsCommands;
 import tc.oc.pgm.commands.TeamCommands;
 import tc.oc.pgm.commands.TimeLimitCommands;
+import tc.oc.pgm.commands.UserCommands;
 import tc.oc.pgm.commands.provider.AudienceProvider;
 import tc.oc.pgm.commands.provider.DurationProvider;
 import tc.oc.pgm.commands.provider.MapInfoProvider;
@@ -71,6 +72,7 @@ import tc.oc.pgm.commands.provider.TeamMatchModuleProvider;
 import tc.oc.pgm.commands.provider.VectorProvider;
 import tc.oc.pgm.community.commands.ModerationCommands;
 import tc.oc.pgm.community.commands.ReportCommands;
+import tc.oc.pgm.community.features.VanishManager;
 import tc.oc.pgm.db.DatastoreCacheImpl;
 import tc.oc.pgm.db.DatastoreImpl;
 import tc.oc.pgm.events.ConfigLoadEvent;
@@ -111,6 +113,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   private PrefixRegistry prefixRegistry;
   private ScheduledExecutorService executorService;
   private ScheduledExecutorService asyncExecutorService;
+  private VanishManager vanishManager;
 
   public PGMPlugin() {
     super();
@@ -195,6 +198,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       mapOrder = new RandomMapOrder(Lists.newArrayList(mapLibrary.getMaps()));
     }
 
+    vanishManager = new VanishManager(matchManager);
     prefixRegistry = new PrefixRegistryImpl();
 
     if (Config.PlayerList.enabled()) {
@@ -218,6 +222,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     matchManager = null;
     matchTabManager = null;
     prefixRegistry = null;
+    vanishManager = null;
 
     // Sometimes match folders need to be cleaned up due to de-syncs
     for (File dir : getServer().getWorldContainer().listFiles()) {
@@ -286,6 +291,11 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     return asyncExecutorService;
   }
 
+  @Override
+  public VanishManager getVanishManager() {
+    return vanishManager;
+  }
+
   private class CommandModule extends AbstractModule {
     @Override
     protected void configure() {
@@ -319,7 +329,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     BasicBukkitCommandGraph graph = new BasicBukkitCommandGraph(new CommandModule());
     DispatcherNode node = graph.getRootDispatcherNode();
 
-    final ChatDispatcher chat = new ChatDispatcher(getMatchManager());
+    final ChatDispatcher chat = new ChatDispatcher(getMatchManager(), getVanishManager());
     node.registerCommands(chat);
     registerEvents(chat);
 
@@ -341,11 +351,16 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     node.registerCommands(new ObserverCommands());
     node.registerCommands(new MapPoolCommands());
     node.registerCommands(new StatsCommands());
+    node.registerCommands(new UserCommands(vanishManager));
 
     // TODO: Community commands
-    final ModerationCommands modCommands = new ModerationCommands(chat, getMatchManager());
+    final ModerationCommands modCommands =
+        new ModerationCommands(chat, getMatchManager(), getVanishManager());
     node.registerCommands(modCommands);
     registerEvents(modCommands);
+
+    node.registerCommands(vanishManager);
+    registerEvents(vanishManager);
 
     node.registerCommands(new ReportCommands());
 
@@ -362,7 +377,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     registerEvents(prefixRegistry);
     registerEvents(new GeneralizingListener(this));
     new BlockTransformListener(this).registerEvents();
-    registerEvents(new PGMListener(this, matchManager));
+    registerEvents(new PGMListener(this, matchManager, vanishManager));
     registerEvents(new FormattingListener());
     registerEvents(new AntiGriefListener(matchManager));
     registerEvents(new ItemTransferListener());

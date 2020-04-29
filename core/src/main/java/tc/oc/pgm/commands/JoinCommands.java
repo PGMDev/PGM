@@ -47,7 +47,7 @@ public class JoinCommands {
       }
     }
 
-    if (sender.hasPermission(Permissions.JOIN_FORCE) && force) {
+    if (sender.hasPermission(Permissions.JOIN_FORCE) && force && !player.isVanished()) {
       jmm.forceJoin(player, chosenParty);
     } else {
       jmm.join(player, chosenParty);

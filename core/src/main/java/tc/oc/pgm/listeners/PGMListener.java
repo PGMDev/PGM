@@ -44,6 +44,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.commands.MatchCommands;
+import tc.oc.pgm.community.features.VanishManager;
 import tc.oc.pgm.events.MapPoolAdjustEvent;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
@@ -60,13 +61,15 @@ import tc.oc.pgm.util.translations.AllTranslations;
 public class PGMListener implements Listener {
   private final Plugin parent;
   private final MatchManager mm;
+  private final VanishManager vm;
 
   // Single-write, multi-read lock used to create the first match
   private final ReentrantReadWriteLock lock;
 
-  public PGMListener(Plugin parent, MatchManager mm) {
+  public PGMListener(Plugin parent, MatchManager mm, VanishManager vm) {
     this.parent = parent;
     this.mm = mm;
+    this.vm = vm;
     this.lock = new ReentrantReadWriteLock();
   }
 
@@ -150,7 +153,7 @@ public class PGMListener implements Listener {
     if (event.getJoinMessage() != null) {
       event.setJoinMessage(null);
       MatchPlayer player = match.getPlayer(event.getPlayer());
-      if (player != null) {
+      if (player != null && !vm.isVanished(player.getId())) {
         announceJoinOrLeave(player, "broadcast.joinMessage");
       }
     }
@@ -163,7 +166,7 @@ public class PGMListener implements Listener {
 
     if (event.getQuitMessage() != null) {
       MatchPlayer player = match.getPlayer(event.getPlayer());
-      if (player != null) {
+      if (player != null && !vm.isVanished(player.getId())) {
         announceJoinOrLeave(player, "broadcast.leaveMessage");
       }
       event.setQuitMessage(null);
@@ -173,7 +176,7 @@ public class PGMListener implements Listener {
     PGM.get().getPrefixRegistry().removePlayer(event.getPlayer().getUniqueId());
   }
 
-  private void announceJoinOrLeave(MatchPlayer player, String messageKey) {
+  public static void announceJoinOrLeave(MatchPlayer player, String messageKey) {
     checkNotNull(player);
     checkNotNull(messageKey);
 

@@ -8,6 +8,7 @@ import com.google.common.collect.Multimap;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -71,7 +72,11 @@ public class MatchCommands {
             .append(ChatColor.GRAY)
             .append(": ")
             .append(ChatColor.WHITE)
-            .append(team.getPlayers().size());
+            .append(
+                team.getPlayers().stream()
+                    .filter(mp -> !mp.isVanished())
+                    .collect(Collectors.toList())
+                    .size());
 
         if (team.getMaxPlayers() != Integer.MAX_VALUE) {
           msg.append(ChatColor.GRAY).append("/").append(team.getMaxPlayers());
