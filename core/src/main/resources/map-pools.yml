@@ -3,27 +3,26 @@
 # Map pool configuration.
 
 pools:
-  #
-  # A map pool named 'default'.
+  # A map pool named "default".
   default:
-    #
+
     # A type of map pool.
     #
-    #  ordered = maps are played in the provided order.
-    #  shuffled = maps are played in random order.
-    #  voted = players vote on which maps are played next.
+    #  "ordered"  = maps are played in the provided order.
+    #  "shuffled" = maps are played in random order.
+    #  "voted"    = players vote on which maps are played next.
     type: ordered
-    #
+
     # Is this map pool enabled?
     enabled: true
-    #
+
     # Is this map pool dynamic?
     #
     # If true, the pool is only enabled when the number of players
     # on the server reaches the "players" threshold.
     dynamic: true
     players: 1
-    #
+
     # A list of map names in this pool. Names are case-sensitive.
     maps:
       - Airship Battle

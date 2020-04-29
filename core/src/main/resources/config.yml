@@ -5,10 +5,6 @@
 map:
   # List of folders to load maps.
   sources:
-    #
-    # A special "default" source that downloads 5 "classic" maps.
-    - "default"
-
     # A folder to load maps.
     #
     #  server/
@@ -20,6 +16,11 @@ map:
     #
     # See the example above, folders are relative to the server folder.
     - "maps"
+
+    # A special "default" source that downloads 5 "classic" maps.
+    #
+    # Remove this to disable those maps.
+    - "default"
 
   # A path to a map pools file, or empty to disable map pools.
   pools: "map-pools.yml"
@@ -59,10 +60,10 @@ gameplay:
 
 # Toggles various user interfaces.
 ui:
-  sidebar: true          # Enable the side bar?
-  tablist: true          # Enable the tab list?
-  proximity: false       # Should the proximity of objectives be visible?
-  fireworks: true        # Spawn fireworks after objectives are completed?
+  sidebar: true    # Enable the side bar?
+  tablist: true    # Enable the tab list?
+  proximity: false # Should the proximity of objectives be visible?
+  fireworks: true  # Spawn fireworks after objectives are completed?
   participants-see-observers: true # Can participants see observers in the tab list?
 
 # Overrides the header and footer of the side bar.
@@ -80,7 +81,7 @@ sidebar:
 #         Running = Green (&a)
 #         Finished = Red (&c)
 #
-# To disable, set to an empty string or comment out.
+# To disable, set to an empty string.
 motd: "{2}» &b{1} {2}«"
 
 # A list of player groups, defined in order of priority, with highest on top.
@@ -134,6 +135,15 @@ community:
   server-name: "" # Name of your server, displayed when players are kicked.
   rules-link: ""  # A URL to a rules website, displayed when players are kicked.
   appeal-msg: ""  # A message, displayed on the kick screen, if a player is banned.
+
+# Overrides the default database uri.
+#
+# Only SQLite and MySQL-compatible databases officially supported.
+#  "sqlite:/path/to/file.db"
+#  "mysql://localhost/mydatabase?user=myuser&password=mypassword"
+#
+# Please do *not* edit this option unless you know what you're doing.
+database-uri: ""
 
 # Experimental features that are not yet stable.
 experiments: {}
