@@ -33,7 +33,6 @@ public class Spawner implements Feature<SpawnerDefinition>, Listener, Tickable {
 
   public static final String METADATA_KEY = "PGM_SPAWNER_OBJECT";
 
-
   private static long generatedDelay;
 
   public Spawner(SpawnerDefinition definition, Match match) {
@@ -61,16 +60,17 @@ public class Spawner implements Feature<SpawnerDefinition>, Listener, Tickable {
       return;
     }
     if (match.getTick().tick - lastTick >= generatedDelay) {
-      for (Spawnable object : definition.objects) {
+      for (Spawnable spawnable : definition.objects) {
         Vector randomSpawnLoc = definition.spawnRegion.getRandom(match.getRandom());
-        object.spawn(
+        spawnable.spawn(
             new Location(
                 match.getWorld(),
                 randomSpawnLoc.getX(),
                 randomSpawnLoc.getY(),
-                randomSpawnLoc.getZ()));
-        if (object.isTracked()) {
-          spawnedEntities = spawnedEntities + object.getSpawnCount();
+                randomSpawnLoc.getZ()),
+            match);
+        if (spawnable.isTracked()) {
+          spawnedEntities = spawnedEntities + spawnable.getSpawnCount();
         }
       }
       generateDelay();
@@ -103,7 +103,7 @@ public class Spawner implements Feature<SpawnerDefinition>, Listener, Tickable {
     return false;
   }
 
-  private boolean isTrackedEntity(Entity entity){
+  private boolean isTrackedEntity(Entity entity) {
     return entity.getMetadata(METADATA_KEY, PGM.get()) != null;
   }
 
@@ -145,6 +145,4 @@ public class Spawner implements Feature<SpawnerDefinition>, Listener, Tickable {
   public void onPlayerQuit(PlayerQuitEvent event) {
     trackedPlayers.remove(event.getPlayer());
   }
-
-
 }

@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -22,10 +21,7 @@ import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
-import tc.oc.pgm.spawner.objects.SpawnableEntity;
 import tc.oc.pgm.spawner.objects.SpawnableItem;
-import tc.oc.pgm.spawner.objects.SpawnablePotion;
-import tc.oc.pgm.spawner.objects.SpawnableTNT;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -85,35 +81,12 @@ public class SpawnerModule implements MapModule {
             filterParser.parseFilterProperty(element, "filter", StaticFilter.ALLOW);
 
         List<Spawnable> objects = new ArrayList<>();
-        for (Element object : XMLUtils.getChildren(element, "entity", "item", "tnt", "effect")) {
-          int count;
-          switch (object.getName()) {
-            case "entity":
-              count = XMLUtils.parseNumber(object.getAttribute("count"), Integer.class, 1);
-              SpawnableEntity entity =
-                  new SpawnableEntity(XMLUtils.parseEntityType(object), count);
-              objects.add(entity);
-              break;
-            case "tnt":
-              Duration fuse = XMLUtils.parseDuration(object.getAttribute("fuse"));
-              float power = XMLUtils.parseNumber(object.getAttribute("power"), Float.class);
-              count = XMLUtils.parseNumber(object.getAttribute("count"), Integer.class, 1);
-              SpawnableTNT tnt =
-                  new SpawnableTNT(power, (int) TimeUtils.toTicks(fuse), count);
-              objects.add(tnt);
-              break;
-            case "effect":
-              PotionEffect effect = XMLUtils.parsePotionEffect(object);
-              count = XMLUtils.parseNumber(object.getAttribute("count"), Integer.class, 1);
-              SpawnablePotion potion = new SpawnablePotion(count, effect);
-              objects.add(potion);
-              break;
-            case "item":
-              ItemStack stack = kitParser.parseItem(object, false);
-              SpawnableItem item = new SpawnableItem(stack);
-              objects.add(item);
-              break;
-          }
+        for (Element spawnable :
+            XMLUtils.getChildren(
+                element, "item")) { // TODO Add more types of spawnables once entity parser is built
+          ItemStack stack = kitParser.parseItem(spawnable, false);
+          SpawnableItem item = new SpawnableItem(stack);
+          objects.add(item);
         }
         spawnerDefinition.objects = objects;
         factory.getFeatures().addFeature(element, spawnerDefinition);
