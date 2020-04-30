@@ -33,7 +33,7 @@ import tc.oc.pgm.util.UsernameResolver;
 public class MapLibraryImpl implements MapLibrary {
 
   private final Logger logger;
-  private final Set<MapSourceFactory> factories;
+  private final List<MapSourceFactory> factories;
   private final SortedMap<String, MapEntry> maps;
   private final Set<MapSource> failed;
 
@@ -49,9 +49,9 @@ public class MapLibraryImpl implements MapLibrary {
     }
   }
 
-  public MapLibraryImpl(Logger logger, Set<MapSourceFactory> factories) {
+  public MapLibraryImpl(Logger logger, List<MapSourceFactory> factories) {
     this.logger = checkNotNull(logger); // Logger should be visible in-game
-    this.factories = Collections.synchronizedSet(checkNotNull(factories));
+    this.factories = Collections.synchronizedList(checkNotNull(factories));
     this.maps = new ConcurrentSkipListMap<>();
     this.failed = Collections.synchronizedSet(new HashSet<>());
   }
@@ -121,7 +121,7 @@ public class MapLibraryImpl implements MapLibrary {
     final int ok = reset ? 0 : maps.size();
 
     // Discover new maps
-    final Iterator<MapSourceFactory> factories = this.factories.iterator();
+    final Iterator<MapSourceFactory> factories = this.factories.listIterator();
     while (factories.hasNext()) {
       final MapSourceFactory factory = factories.next();
       try {

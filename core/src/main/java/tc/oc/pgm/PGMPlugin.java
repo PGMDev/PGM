@@ -9,9 +9,9 @@ import com.google.common.collect.Lists;
 import java.io.File;
 import java.sql.SQLException;
 import java.time.Duration;
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -113,7 +113,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   private Logger gameLogger;
   private Datastore datastore;
   private MapLibrary mapLibrary;
-  private Set<MapSourceFactory> mapSourceFactories;
+  private List<MapSourceFactory> mapSourceFactories;
   private MatchManager matchManager;
   private MatchTabManager matchTabManager;
   private MapOrder mapOrder;
@@ -157,7 +157,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     executorService = new BukkitExecutorService(this, false);
     asyncExecutorService = new BukkitExecutorService(this, true);
 
-    mapSourceFactories = new LinkedHashSet<>();
+    mapSourceFactories = new ArrayList<>();
     mapLibrary = new MapLibraryImpl(gameLogger, mapSourceFactories);
 
     saveDefaultConfig(); // Writes a config file, if one does not exist.
@@ -221,12 +221,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   public void onDisable() {
     if (matchTabManager != null) matchTabManager.disable();
     if (matchManager != null) matchManager.getMatches().forEachRemaining(Match::unload);
-    if (datastore != null) datastore.close();
-    datastore = null;
-    mapLibrary = null;
-    matchManager = null;
-    matchTabManager = null;
-    prefixRegistry = null;
 
     // Sometimes match folders need to be cleaned up due to de-syncs
     for (File dir : getServer().getWorldContainer().listFiles()) {
@@ -235,8 +229,10 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       }
     }
 
-    executorService.shutdownNow();
-    asyncExecutorService.shutdownNow();
+    // FIXME: Datastore and ExecutorServices need to be properly shutdown
+    executorService.shutdown();
+    asyncExecutorService.shutdown();
+    // datastore.close();
   }
 
   @Override
