@@ -190,7 +190,7 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   public boolean canSee(MatchPlayer other) {
     if (!other.isVisible()) return false;
     if (other.isParticipating()) return true;
-    if (other.isVanished() && !getBukkit().hasPermission(Permissions.STAFF)) return false;
+    if (other.isVanished() && !getBukkit().hasPermission(Permissions.VANISH)) return false;
     return isObserving()
         && getSettings().getValue(SettingKey.OBSERVERS) == SettingValue.OBSERVERS_ON;
   }

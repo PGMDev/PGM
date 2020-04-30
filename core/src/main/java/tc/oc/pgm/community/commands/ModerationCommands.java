@@ -39,8 +39,8 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.Username;
+import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.community.events.PlayerPunishmentEvent;
-import tc.oc.pgm.community.features.VanishManager;
 import tc.oc.pgm.community.modules.FreezeMatchModule;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
@@ -131,7 +131,7 @@ public class ModerationCommands implements Listener {
   @Command(
       aliases = {"frozenlist", "fls", "flist"},
       desc = "View a list of frozen players",
-      perms = Permissions.STAFF)
+      perms = Permissions.FREEZE)
   public void sendFrozenList(CommandSender sender, Match match) {
     FreezeMatchModule fmm = match.getModule(FreezeMatchModule.class);
 
@@ -175,7 +175,7 @@ public class ModerationCommands implements Listener {
       aliases = {"freeze", "fz", "f"},
       usage = "<player>",
       desc = "Freeze a player",
-      perms = Permissions.STAFF)
+      perms = Permissions.FREEZE)
   public void freeze(CommandSender sender, Match match, Player target) throws CommandException {
     setFreeze(sender, match, target, true);
   }
@@ -184,7 +184,7 @@ public class ModerationCommands implements Listener {
       aliases = {"unfreeze", "uf"},
       usage = "<player>",
       desc = "Unfreeze a player",
-      perms = Permissions.STAFF)
+      perms = Permissions.FREEZE)
   public void unFreeze(CommandSender sender, Match match, Player target) throws CommandException {
     setFreeze(sender, match, target, false);
   }

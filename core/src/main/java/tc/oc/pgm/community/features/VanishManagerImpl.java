@@ -6,6 +6,9 @@ import app.ashcon.intake.parametric.annotation.Switch;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -22,6 +25,7 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.player.event.MatchPlayerAddEvent;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
@@ -30,36 +34,48 @@ import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.listeners.PGMListener;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.ComponentRenderers;
+import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.named.NameStyle;
 
-public class VanishManager implements Listener {
+public class VanishManagerImpl implements VanishManager, Listener {
 
   private static final String VANISH_KEY = "isVanished";
   private static final MetadataValue VANISH_VALUE = new FixedMetadataValue(PGM.get(), true);
 
-  private List<UUID> vanishedPlayers;
+  private final List<UUID> vanishedPlayers;
   private final MatchManager matchManager;
 
-  public VanishManager(MatchManager matchManager) {
+  private final Future<?>
+      hotbarTask; // Task is run every second to ensure vanished players retain hotbar message
+  private boolean hotbarFlash;
+
+  public VanishManagerImpl(MatchManager matchManager, ScheduledExecutorService tasks) {
     this.vanishedPlayers = Lists.newArrayList();
     this.matchManager = matchManager;
+    this.hotbarFlash = false;
+    this.hotbarTask =
+        tasks.scheduleAtFixedRate(
+            () -> {
+              getOnlineVanished().forEach(p -> sendHotbarVanish(p, hotbarFlash));
+              hotbarFlash = !hotbarFlash; // Toggle boolean so we get a nice flashing effect
+            },
+            0,
+            1,
+            TimeUnit.SECONDS);
   }
 
+  @Override
+  public void disable() {
+    hotbarTask.cancel(true);
+  }
+
+  @Override
   public boolean isVanished(UUID uuid) {
     return vanishedPlayers.contains(uuid);
   }
 
-  private void addVanished(UUID uuid) {
-    if (!isVanished(uuid)) {
-      this.vanishedPlayers.add(uuid);
-    }
-  }
-
-  private void removeVanished(UUID uuid) {
-    this.vanishedPlayers.remove(uuid);
-  }
-
+  @Override
   public List<MatchPlayer> getOnlineVanished() {
     return vanishedPlayers.stream()
         .filter(u -> matchManager.getPlayer(u) != null)
@@ -67,6 +83,7 @@ public class VanishManager implements Listener {
         .collect(Collectors.toList());
   }
 
+  @Override
   public void setVanished(MatchPlayer player, boolean vanish, boolean quiet)
       throws CommandException {
     if (isVanished(player.getId()) == vanish) {
@@ -110,12 +127,21 @@ public class VanishManager implements Listener {
     match.callEvent(new PlayerVanishEvent(player, vanish));
   }
 
-  /* Commands */
+  private void addVanished(UUID uuid) {
+    if (!isVanished(uuid)) {
+      this.vanishedPlayers.add(uuid);
+    }
+  }
 
+  private void removeVanished(UUID uuid) {
+    this.vanishedPlayers.remove(uuid);
+  }
+
+  /* Commands */
   @Command(
       aliases = {"vanish", "disappear", "v"},
       desc = "Vanish from the server",
-      perms = Permissions.STAFF)
+      perms = Permissions.VANISH)
   public void vanish(CommandSender sender, MatchPlayer player, @Switch('s') boolean silent)
       throws CommandException {
     setVanished(player, true, silent);
@@ -128,7 +154,7 @@ public class VanishManager implements Listener {
   @Command(
       aliases = {"unvanish", "appear", "uv"},
       desc = "Return to the server",
-      perms = Permissions.STAFF)
+      perms = Permissions.VANISH)
   public void unVanish(CommandSender sender, MatchPlayer player, @Switch('s') boolean silent)
       throws CommandException {
     setVanished(player, false, silent);
@@ -170,7 +196,14 @@ public class VanishManager implements Listener {
     }
   }
 
-  public static Component formatVanishedName(Component vanishedPlayer) {
-    return vanishedPlayer.color(ChatColor.DARK_GRAY).italic(true);
+  private void sendHotbarVanish(MatchPlayer player, boolean flashColor) {
+    Component warning =
+        new PersonalizedText(" \u26a0 ", flashColor ? ChatColor.YELLOW : ChatColor.GOLD);
+    Component vanish =
+        new PersonalizedTranslatable("vanish.hotbar")
+            .getPersonalizedText()
+            .color(ChatColor.LIGHT_PURPLE)
+            .bold(true);
+    player.sendHotbarMessage(new PersonalizedText(warning, vanish, warning));
   }
 }

@@ -1,21 +1,16 @@
 package tc.oc.pgm.community.events;
 
 import org.bukkit.event.HandlerList;
-import tc.oc.pgm.api.event.ExtendedCancellable;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.MatchPlayerEvent;
 
-public class PlayerVanishEvent extends ExtendedCancellable {
+public class PlayerVanishEvent extends MatchPlayerEvent {
 
-  private MatchPlayer vanisher;
-  private boolean vanished;
+  private final boolean vanished;
 
   public PlayerVanishEvent(MatchPlayer vanisher, boolean vanished) {
-    this.vanisher = vanisher;
+    super(vanisher);
     this.vanished = vanished;
-  }
-
-  public MatchPlayer getPlayer() {
-    return vanisher;
   }
 
   public boolean isVanished() {

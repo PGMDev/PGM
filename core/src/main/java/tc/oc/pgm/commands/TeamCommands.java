@@ -53,6 +53,17 @@ public class TeamCommands {
       @Text String teamName) {
     MatchPlayer matchPlayer = match.getPlayer(player);
     Party oldParty = matchPlayer.getParty();
+
+    // Exempt vanished players from being forced
+    if (matchPlayer.isVanished()) {
+      sender.sendMessage(
+          new PersonalizedTranslatable(
+                  "command.team.force.exempt", matchPlayer.getStyledName(NameStyle.FANCY))
+              .getPersonalizedText()
+              .color(ChatColor.RED));
+      return;
+    }
+
     if (teamName != null) {
       if (teamName.trim().toLowerCase().startsWith("obs")) {
         match.setParty(matchPlayer, match.getDefaultParty());

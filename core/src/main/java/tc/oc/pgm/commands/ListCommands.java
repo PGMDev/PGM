@@ -9,7 +9,7 @@ import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.community.features.VanishManager;
+import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.Components;
@@ -17,11 +17,11 @@ import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.named.NameStyle;
 
-public class UserCommands {
+public class ListCommands {
 
   private final VanishManager vanish;
 
-  public UserCommands(VanishManager vanish) {
+  public ListCommands(VanishManager vanish) {
     this.vanish = vanish;
   }
 

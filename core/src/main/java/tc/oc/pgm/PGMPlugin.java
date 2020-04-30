@@ -40,6 +40,7 @@ import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.module.Module;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.prefix.PrefixRegistry;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
@@ -51,6 +52,7 @@ import tc.oc.pgm.commands.FreeForAllCommands;
 import tc.oc.pgm.commands.GoalCommands;
 import tc.oc.pgm.commands.InventoryCommands;
 import tc.oc.pgm.commands.JoinCommands;
+import tc.oc.pgm.commands.ListCommands;
 import tc.oc.pgm.commands.MapCommands;
 import tc.oc.pgm.commands.MapPoolCommands;
 import tc.oc.pgm.commands.MatchCommands;
@@ -61,7 +63,6 @@ import tc.oc.pgm.commands.StartCommands;
 import tc.oc.pgm.commands.StatsCommands;
 import tc.oc.pgm.commands.TeamCommands;
 import tc.oc.pgm.commands.TimeLimitCommands;
-import tc.oc.pgm.commands.UserCommands;
 import tc.oc.pgm.commands.provider.AudienceProvider;
 import tc.oc.pgm.commands.provider.DurationProvider;
 import tc.oc.pgm.commands.provider.MapInfoProvider;
@@ -72,7 +73,7 @@ import tc.oc.pgm.commands.provider.TeamMatchModuleProvider;
 import tc.oc.pgm.commands.provider.VectorProvider;
 import tc.oc.pgm.community.commands.ModerationCommands;
 import tc.oc.pgm.community.commands.ReportCommands;
-import tc.oc.pgm.community.features.VanishManager;
+import tc.oc.pgm.community.features.VanishManagerImpl;
 import tc.oc.pgm.db.DatastoreCacheImpl;
 import tc.oc.pgm.db.DatastoreImpl;
 import tc.oc.pgm.events.ConfigLoadEvent;
@@ -198,7 +199,8 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       mapOrder = new RandomMapOrder(Lists.newArrayList(mapLibrary.getMaps()));
     }
 
-    vanishManager = new VanishManager(matchManager);
+    // TODO: When community features are configurable, use {@link NoopVanishManager} when disabled
+    vanishManager = new VanishManagerImpl(matchManager, executorService);
     prefixRegistry = new PrefixRegistryImpl();
 
     if (Config.PlayerList.enabled()) {
@@ -217,6 +219,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   public void onDisable() {
     if (matchTabManager != null) matchTabManager.disable();
     if (matchManager != null) matchManager.getMatches().forEachRemaining(Match::unload);
+    if (vanishManager != null) vanishManager.disable();
     datastore = null;
     mapLibrary = null;
     matchManager = null;
@@ -351,18 +354,20 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     node.registerCommands(new ObserverCommands());
     node.registerCommands(new MapPoolCommands());
     node.registerCommands(new StatsCommands());
-    node.registerCommands(new UserCommands(vanishManager));
+    node.registerCommands(new ListCommands(vanishManager));
 
-    // TODO: Community commands
+    // Community commands
     final ModerationCommands modCommands =
         new ModerationCommands(chat, getMatchManager(), getVanishManager());
     node.registerCommands(modCommands);
-    registerEvents(modCommands);
-
     node.registerCommands(vanishManager);
-    registerEvents(vanishManager);
-
     node.registerCommands(new ReportCommands());
+
+    // Community Events
+    registerEvents(modCommands);
+    if (vanishManager instanceof VanishManagerImpl) {
+      registerEvents((VanishManagerImpl) vanishManager);
+    }
 
     new BukkitIntake(this, graph).register();
   }
