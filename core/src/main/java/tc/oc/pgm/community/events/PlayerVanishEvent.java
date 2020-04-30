@@ -4,17 +4,15 @@ import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerEvent;
 
+/** PlayerVanishEvent - Called when a player's vanish status changes * */
 public class PlayerVanishEvent extends MatchPlayerEvent {
-
-  private final boolean vanished;
 
   public PlayerVanishEvent(MatchPlayer vanisher, boolean vanished) {
     super(vanisher);
-    this.vanished = vanished;
   }
 
   public boolean isVanished() {
-    return vanished;
+    return getPlayer().isVanished();
   }
 
   private static final HandlerList handlers = new HandlerList();

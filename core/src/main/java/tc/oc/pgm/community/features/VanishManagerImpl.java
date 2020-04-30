@@ -10,8 +10,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -33,7 +34,6 @@ import tc.oc.pgm.community.events.PlayerVanishEvent;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.listeners.PGMListener;
 import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.ComponentRenderers;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.named.NameStyle;
@@ -84,25 +84,17 @@ public class VanishManagerImpl implements VanishManager, Listener {
   }
 
   @Override
-  public void setVanished(MatchPlayer player, boolean vanish, boolean quiet)
-      throws CommandException {
+  public boolean setVanished(MatchPlayer player, boolean vanish, boolean quiet) {
     if (isVanished(player.getId()) == vanish) {
-      throw new CommandException(
-          ComponentRenderers.toLegacyText(
-              new PersonalizedTranslatable(
-                  vanish ? "vanish.activate.already" : "vanish.deactivate.already"),
-              player.getBukkit()));
+      return false;
     }
 
     // Keep track of the UUID and apply/remove META data, so we can detect vanish status from other
     // projects (i.e utils)
     if (vanish) {
-      addVanished(player.getId());
-      player.getBukkit().setMetadata(VANISH_KEY, VANISH_VALUE);
-      player.getSettings().setValue(SettingKey.CHAT, SettingValue.CHAT_ADMIN);
+      addVanished(player);
     } else {
-      removeVanished(player.getId());
-      player.getBukkit().removeMetadata(VANISH_KEY, VANISH_VALUE.getOwningPlugin());
+      removeVanished(player);
     }
 
     final Match match = player.getMatch();
@@ -125,16 +117,21 @@ public class VanishManagerImpl implements VanishManager, Listener {
     }
 
     match.callEvent(new PlayerVanishEvent(player, vanish));
+
+    return true;
   }
 
-  private void addVanished(UUID uuid) {
-    if (!isVanished(uuid)) {
-      this.vanishedPlayers.add(uuid);
+  private void addVanished(MatchPlayer player) {
+    if (!isVanished(player.getId())) {
+      this.vanishedPlayers.add(player.getId());
+      player.getBukkit().setMetadata(VANISH_KEY, VANISH_VALUE);
+      player.getSettings().setValue(SettingKey.CHAT, SettingValue.CHAT_ADMIN);
     }
   }
 
-  private void removeVanished(UUID uuid) {
-    this.vanishedPlayers.remove(uuid);
+  private void removeVanished(MatchPlayer player) {
+    this.vanishedPlayers.remove(player.getId());
+    player.getBukkit().removeMetadata(VANISH_KEY, VANISH_VALUE.getOwningPlugin());
   }
 
   /* Commands */
@@ -142,26 +139,24 @@ public class VanishManagerImpl implements VanishManager, Listener {
       aliases = {"vanish", "disappear", "v"},
       desc = "Vanish from the server",
       perms = Permissions.VANISH)
-  public void vanish(CommandSender sender, MatchPlayer player, @Switch('s') boolean silent)
-      throws CommandException {
-    setVanished(player, true, silent);
-    sender.sendMessage(
-        new PersonalizedTranslatable("vanish.activate")
-            .getPersonalizedText()
-            .color(ChatColor.GREEN));
+  public void vanish(MatchPlayer sender, @Switch('s') boolean silent) throws CommandException {
+    if (setVanished(sender, true, silent)) {
+      sender.sendMessage(TranslatableComponent.of("vanish.activate").color(TextColor.GREEN));
+    } else {
+      sender.sendWarning(TranslatableComponent.of("vanish.activate.already"));
+    }
   }
 
   @Command(
       aliases = {"unvanish", "appear", "uv"},
       desc = "Return to the server",
       perms = Permissions.VANISH)
-  public void unVanish(CommandSender sender, MatchPlayer player, @Switch('s') boolean silent)
-      throws CommandException {
-    setVanished(player, false, silent);
-    sender.sendMessage(
-        new PersonalizedTranslatable("vanish.deactivate")
-            .getPersonalizedText()
-            .color(ChatColor.RED));
+  public void unVanish(MatchPlayer sender, @Switch('s') boolean silent) throws CommandException {
+    if (setVanished(sender, false, silent)) {
+      sender.sendMessage(TranslatableComponent.of("vanish.deactivate").color(TextColor.RED));
+    } else {
+      sender.sendWarning(TranslatableComponent.of("vanish.deactivate.already"));
+    }
   }
 
   /* Events */
@@ -197,7 +192,7 @@ public class VanishManagerImpl implements VanishManager, Listener {
   }
 
   private void sendHotbarVanish(MatchPlayer player, boolean flashColor) {
-    Component warning =
+    PersonalizedText warning =
         new PersonalizedText(" \u26a0 ", flashColor ? ChatColor.YELLOW : ChatColor.GOLD);
     Component vanish =
         new PersonalizedTranslatable("vanish.hotbar")

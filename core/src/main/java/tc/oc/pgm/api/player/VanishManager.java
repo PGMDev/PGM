@@ -1,18 +1,17 @@
 package tc.oc.pgm.api.player;
 
-import app.ashcon.intake.CommandException;
-import java.util.List;
+import java.util.Collection;
 import java.util.UUID;
 
 /** A manager that holds information related to {@link MatchPlayer}s who are vanished. */
 public interface VanishManager {
 
   /**
-   * A list of {@link MatchPlayer} who are online and vanished.
+   * A collection of {@link MatchPlayer} who are online and vanished.
    *
-   * @return A list of {@link MatchPlayer}
+   * @return A collection of {@link MatchPlayer}
    */
-  List<MatchPlayer> getOnlineVanished();
+  Collection<MatchPlayer> getOnlineVanished();
 
   /**
    * Returns whether the matching UUID is vanished
@@ -28,9 +27,9 @@ public interface VanishManager {
    * @param player - The target {@link MatchPlayer}
    * @param vanish - Whether the player is vanished or not
    * @param quiet - Whether to broadcast related join/quit messages
-   * @throws CommandException When player is already vanished/unvanished
+   * @return whether the action was successful
    */
-  void setVanished(MatchPlayer player, boolean vanish, boolean quiet) throws CommandException;
+  boolean setVanished(MatchPlayer player, boolean vanish, boolean quiet);
 
   /** Called when the vanish manager is disabled */
   void disable();
