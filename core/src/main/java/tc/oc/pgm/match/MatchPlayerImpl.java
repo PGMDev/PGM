@@ -29,6 +29,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffect;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
@@ -72,6 +73,7 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   private final AtomicBoolean dead;
   private final AtomicBoolean visible;
   private final AtomicInteger protocolVersion;
+  private final AtomicBoolean vanished;
 
   public MatchPlayerImpl(Match match, Player player) {
     this.logger =
@@ -85,6 +87,7 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
     this.frozen = new AtomicBoolean(false);
     this.dead = new AtomicBoolean(false);
     this.visible = new AtomicBoolean(false);
+    this.vanished = new AtomicBoolean(false);
     this.protocolVersion = new AtomicInteger(ViaUtils.getProtocolVersion(player));
   }
 
@@ -178,6 +181,11 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   }
 
   @Override
+  public boolean isVanished() {
+    return vanished.get();
+  }
+
+  @Override
   public boolean canInteract() {
     return isAlive() && !isFrozen();
   }
@@ -186,6 +194,7 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   public boolean canSee(MatchPlayer other) {
     if (!other.isVisible()) return false;
     if (other.isParticipating()) return true;
+    if (other.isVanished() && !getBukkit().hasPermission(Permissions.VANISH)) return false;
     return isObserving()
         && getSettings().getValue(SettingKey.OBSERVERS) == SettingValue.OBSERVERS_ON;
   }
@@ -321,6 +330,11 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   @Override
   public void setGameMode(GameMode gameMode) {
     getBukkit().setGameMode(gameMode);
+  }
+
+  @Override
+  public void setVanished(boolean yes) {
+    vanished.set(yes);
   }
 
   /**

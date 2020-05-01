@@ -34,6 +34,8 @@ public interface Permissions {
   String WARN = ROOT + ".warn"; // Access to the /warn command
   String MUTE = ROOT + ".mute"; // Access to the /mute command
   String BAN = ROOT + ".ban"; // Access to the /ban command
+  String FREEZE = ROOT + ".freeze"; // Access to the /freeze command
+  String VANISH = ROOT + ".vanish"; // Access to /vanish command
 
   // Role-specific permission nodes
   Permission DEFAULT =
@@ -72,6 +74,8 @@ public interface Permissions {
               .put(WARN, true)
               .put(MUTE, true)
               .put(BAN, true)
+              .put(FREEZE, true)
+              .put(VANISH, true)
               .build());
 
   Permission DEVELOPER =
