@@ -40,8 +40,7 @@ public class MatchCommands {
     sender.sendMessage(
         ComponentUtils.horizontalLineHeading(
             ChatColor.YELLOW
-                + TextTranslations.translate(
-                    "match.title", sender)
+                + TextTranslations.translate("match.title", sender)
                 + " #"
                 + match.getId(),
             ChatColor.WHITE,
@@ -124,9 +123,7 @@ public class MatchCommands {
 
         if (!teamGoalTexts.isEmpty()) {
           sender.sendMessage(
-              ChatColor.DARK_PURPLE
-                  + TextTranslations.translate("match.info.goals", sender)
-                  + ":");
+              ChatColor.DARK_PURPLE + TextTranslations.translate("match.info.goals", sender) + ":");
 
           for (Map.Entry<Team, Collection<String>> entry : teamGoalTexts.asMap().entrySet()) {
             Team team = entry.getKey();

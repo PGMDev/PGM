@@ -72,12 +72,10 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       } else {
         if (players == 1) {
           return new PersonalizedTranslatable(
-              "match.needMorePlayers.ffa.singular",
-              new PersonalizedText(String.valueOf(players), ChatColor.AQUA));
+              "join.wait.singular", new PersonalizedText(String.valueOf(players), ChatColor.AQUA));
         } else {
           return new PersonalizedTranslatable(
-              "match.needMorePlayers.ffa.plural",
-              new PersonalizedText(String.valueOf(players), ChatColor.AQUA));
+              "join.wait.plural", new PersonalizedText(String.valueOf(players), ChatColor.AQUA));
         }
       }
     }

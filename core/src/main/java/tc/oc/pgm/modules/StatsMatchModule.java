@@ -169,8 +169,8 @@ public class StatsMatchModule implements MatchModule, Listener {
                     Components.fromLegacyText(
                         ComponentUtils.horizontalLineHeading(
                             ChatColor.YELLOW
-                                + TextTranslations
-                                    .translate("match.stats.overall", viewer.getBukkit()),
+                                + TextTranslations.translate(
+                                    "match.stats.overall", viewer.getBukkit()),
                             ChatColor.WHITE,
                             ComponentUtils.MAX_CHAT_WIDTH)));
 

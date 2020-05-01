@@ -40,7 +40,17 @@ public final class TextTranslations {
 
   // An list of all .properties files to load
   private static final List<String> SOURCE_NAMES =
-      ImmutableList.of("strings", "command", "death", "error", "misc", "moderation");
+      ImmutableList.of(
+          "command",
+          "death",
+          "error",
+          "gamemode",
+          "join",
+          "map",
+          "match",
+          "misc",
+          "moderation",
+          "observer");
 
   // A table of all keys mapped to their locale and message format (*not* thread safe)
   private static final SortedMap<String, Map<Locale, MessageFormat>> TRANSLATIONS_MAP =

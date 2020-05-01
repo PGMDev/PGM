@@ -27,7 +27,6 @@ public class StatsCommands {
               ComponentUtils.MAX_CHAT_WIDTH));
       sender.sendMessage(
           match.getModule(StatsMatchModule.class).getBasicStatsMessage(player.getId()));
-    } else
-      throw new CommandException(TextTranslations.translate("match.stats.disabled", sender));
+    } else throw new CommandException(TextTranslations.translate("match.stats.disabled", sender));
   }
 }

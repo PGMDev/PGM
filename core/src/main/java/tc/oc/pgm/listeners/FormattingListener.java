@@ -40,13 +40,13 @@ public class FormattingListener implements Listener {
     if (!core.isVisible()) return;
 
     event
-            .getMatch()
-            .sendMessage(
-                    TranslatableComponent.of(
-                            "core.complete.owned",
-                            formatContributions(core.getContributions()),
-                            core.getTextName(),
-                            core.getOwner().getName(NameStyle.COLOR)));
+        .getMatch()
+        .sendMessage(
+            TranslatableComponent.of(
+                "core.complete.owned",
+                formatContributions(core.getContributions()),
+                core.getTextName(),
+                core.getOwner().getName(NameStyle.COLOR)));
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -76,10 +76,10 @@ public class FormattingListener implements Listener {
     for (Contribution entry : sorted) {
       if (entry.getPercentage() > 0.2) { // 20% necessary to be included
         contributors.add(
-                TranslatableComponent.of(
-                        "objective.credit.percentage",
-                        entry.getPlayerState().getName(NameStyle.COLOR),
-                        TextComponent.of(Math.round(entry.getPercentage() * 100), TextColor.AQUA)));
+            TranslatableComponent.of(
+                "objective.credit.percentage",
+                entry.getPlayerState().getName(NameStyle.COLOR),
+                TextComponent.of(Math.round(entry.getPercentage() * 100), TextColor.AQUA)));
       } else {
         someExcluded = true;
       }
@@ -88,12 +88,12 @@ public class FormattingListener implements Listener {
     final Component credit;
     if (contributors.isEmpty()) {
       credit =
-              TranslatableComponent.of(
-                      someExcluded ? "objective.credit.many" : "objective.credit.unknown");
+          TranslatableComponent.of(
+              someExcluded ? "objective.credit.many" : "objective.credit.unknown");
     } else {
       if (someExcluded) {
         contributors.add(
-                TranslatableComponent.of("objective.credit.etc")); // Some contributors < 20%
+            TranslatableComponent.of("objective.credit.etc")); // Some contributors < 20%
       }
       credit = TextFormatter.list(contributors, TextColor.WHITE);
     }

@@ -57,8 +57,7 @@ public class MapPoolCommands {
             : mapPoolManager.getMapPoolByName(poolName);
 
     if (mapPool == null) {
-      sender.sendMessage(
-          ChatColor.RED + TextTranslations.translate("pool.noPoolMatch", sender));
+      sender.sendMessage(ChatColor.RED + TextTranslations.translate("pool.noPoolMatch", sender));
       return;
     }
     List<MapInfo> maps = mapPool.getMaps();
@@ -122,8 +121,7 @@ public class MapPoolCommands {
 
     List<MapPool> mapPools = mapPoolManager.getMapPools();
     if (mapPools.isEmpty()) {
-      sender.sendMessage(
-          ChatColor.RED + TextTranslations.translate("pool.noMapPools", sender));
+      sender.sendMessage(ChatColor.RED + TextTranslations.translate("pool.noMapPools", sender));
       return;
     }
 
@@ -182,15 +180,13 @@ public class MapPoolCommands {
       throws CommandException {
 
     if (positions < 0) {
-      sender.sendMessage(
-          ChatColor.RED + TextTranslations.translate("pool.skip.negative", sender));
+      sender.sendMessage(ChatColor.RED + TextTranslations.translate("pool.skip.negative", sender));
       return;
     }
 
     MapPool pool = getMapPoolManager(sender, mapOrder).getActiveMapPool();
     if (!(pool instanceof Rotation)) {
-      sender.sendMessage(
-          ChatColor.RED + TextTranslations.translate("pool.noRotation", sender));
+      sender.sendMessage(ChatColor.RED + TextTranslations.translate("pool.noRotation", sender));
       return;
     }
 
@@ -209,9 +205,7 @@ public class MapPoolCommands {
             + "] "
             + ChatColor.GREEN
             + TextTranslations.translate(
-                "pool.skip",
-                sender,
-                (ChatColor.AQUA.toString() + positions + ChatColor.GREEN)));
+                "pool.skip", sender, (ChatColor.AQUA.toString() + positions + ChatColor.GREEN)));
   }
 
   @Command(aliases = "votenext", desc = "Vote for the next map to play", usage = "map")

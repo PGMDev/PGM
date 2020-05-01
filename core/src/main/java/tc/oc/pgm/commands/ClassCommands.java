@@ -76,8 +76,7 @@ public class ClassCommands {
                       + ChatColor.GREEN));
       if (player.isParticipating()) {
         sender.sendMessage(
-            ChatColor.GREEN
-                + TextTranslations.translate("match.class.queue", player.getBukkit()));
+            ChatColor.GREEN + TextTranslations.translate("match.class.queue", player.getBukkit()));
       }
     }
   }

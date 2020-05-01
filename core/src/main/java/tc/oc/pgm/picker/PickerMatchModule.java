@@ -212,7 +212,7 @@ public class PickerMatchModule implements MatchModule, Listener {
     if (hasTeams && hasClasses) {
       key = "picker.windowTitle.teamClass";
     } else if (hasTeams) {
-      key = "picker.windowTitle.teamSelection";
+      key = "picker.windowTitle.team";
     } else {
       key = "picker.windowTitle.class";
     }
@@ -231,7 +231,7 @@ public class PickerMatchModule implements MatchModule, Listener {
     } else if (hasTeams && hasClasses) {
       key = "picker.title.teamClass";
     } else if (hasTeams) {
-      key = "picker.title.teamSelection";
+      key = "picker.title.team";
     } else if (hasClasses) {
       key = "picker.title.class";
     } else {
@@ -253,8 +253,7 @@ public class PickerMatchModule implements MatchModule, Listener {
 
     ItemMeta meta = stack.getItemMeta();
     meta.setDisplayName(
-        OPEN_BUTTON_PREFIX
-            + TextTranslations.translate("picker.title.leave", player.getBukkit()));
+        OPEN_BUTTON_PREFIX + TextTranslations.translate("picker.title.leave", player.getBukkit()));
     meta.setLore(
         Lists.newArrayList(
             ChatColor.DARK_PURPLE
@@ -603,15 +602,13 @@ public class PickerMatchModule implements MatchModule, Listener {
     autojoinMeta.setDisplayName(
         ChatColor.GRAY.toString()
             + ChatColor.BOLD
-            + TextTranslations.translate(
-                "picker.autoJoin.displayName", viewer.getBukkit()));
+            + TextTranslations.translate("picker.autoJoin.displayName", viewer.getBukkit()));
     autojoinMeta.setLore(
         Lists.newArrayList(
             this.getTeamSizeDescription(
                 viewer.getMatch().getParticipants().size(), viewer.getMatch().getMaxPlayers()),
             ChatColor.AQUA
-                + TextTranslations.translate(
-                    "picker.autoJoin.tooltip", viewer.getBukkit())));
+                + TextTranslations.translate("picker.autoJoin.tooltip", viewer.getBukkit())));
     autojoin.setItemMeta(autojoinMeta);
 
     return autojoin;
@@ -631,29 +628,25 @@ public class PickerMatchModule implements MatchModule, Listener {
         default:
           lore.add(
               ChatColor.GREEN
-                  + TextTranslations.translate(
-                      "picker.clickToJoin", player.getBukkit()));
+                  + TextTranslations.translate("picker.clickToJoin", player.getBukkit()));
           break;
 
         case REJOINED:
           lore.add(
               ChatColor.GREEN
-                  + TextTranslations.translate(
-                      "picker.clickToRejoin", player.getBukkit()));
+                  + TextTranslations.translate("picker.clickToRejoin", player.getBukkit()));
           break;
 
         case CHOICE_DENIED:
           lore.add(
               ChatColor.GOLD
-                  + TextTranslations.translate(
-                      "picker.noPermissions", player.getBukkit()));
+                  + TextTranslations.translate("picker.noPermissions", player.getBukkit()));
           break;
 
         case FULL:
           lore.add(
               ChatColor.DARK_RED
-                  + TextTranslations.translate(
-                      "picker.capacity", player.getBukkit()));
+                  + TextTranslations.translate("picker.capacity", player.getBukkit()));
           break;
       }
     }
@@ -693,9 +686,7 @@ public class PickerMatchModule implements MatchModule, Listener {
             player.sendMessage(
                 ChatColor.GOLD
                     + TextTranslations.translate(
-                        "class.success",
-                        player.getBukkit(),
-                        ChatColor.GREEN + name));
+                        "class.success", player.getBukkit(), ChatColor.GREEN + name));
             scheduleRefresh(player);
           } else {
             player.sendMessage(

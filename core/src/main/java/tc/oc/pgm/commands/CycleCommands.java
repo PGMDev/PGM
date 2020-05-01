@@ -33,8 +33,7 @@ public class CycleCommands {
     CycleMatchModule cmm = match.needModule(CycleMatchModule.class);
 
     if (match.isRunning() && !force && !cmm.getConfig().runningMatch()) {
-      throw new CommandException(
-          TextTranslations.translate("admin.matchRunning.cycle", sender));
+      throw new CommandException(TextTranslations.translate("admin.matchRunning.cycle", sender));
     }
 
     if (map != null && mapOrder.getNextMap() != map) {

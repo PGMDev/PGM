@@ -117,8 +117,7 @@ public class TeamCommands {
 
     for (Team t : tmm.getTeams()) {
       if (t.getName().equalsIgnoreCase(newName)) {
-        throw new CommandException(
-            TextTranslations.translate("match.alias.err", sender, newName));
+        throw new CommandException(TextTranslations.translate("match.alias.err", sender, newName));
       }
     }
 

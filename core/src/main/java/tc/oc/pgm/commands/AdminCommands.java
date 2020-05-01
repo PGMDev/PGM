@@ -37,7 +37,6 @@ import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.text.TextTranslations;
-import tc.oc.pgm.util.translations.AllTranslations;
 
 public class AdminCommands {
 
@@ -69,7 +68,7 @@ public class AdminCommands {
     RestartManager.queueRestart(
         "Restart requested via /queuerestart command", Duration.ofSeconds(duration));
 
-    sender.sendMessage(
+    audience.sendMessage(
         ChatColor.RED + "Server will restart automatically at the next safe opportunity.");
 
     if (force && match.isRunning()) {
@@ -117,7 +116,8 @@ public class AdminCommands {
     boolean ended = match.finish(winner);
 
     if (!ended)
-      throw new CommandException(TextTranslations.translate("command.admin.end.unknownError", sender));
+      throw new CommandException(
+          TextTranslations.translate("command.admin.end.unknownError", sender));
   }
 
   @Command(
@@ -149,7 +149,7 @@ public class AdminCommands {
     Component mapName = new PersonalizedText(map.getName()).color(ChatColor.DARK_PURPLE);
     Component successful =
         new PersonalizedTranslatable(
-                "map.setNext", UsernameFormatUtils.formatStaffName(sender, match), mapName)
+                "map.setNext", mapName, UsernameFormatUtils.formatStaffName(sender, match))
             .getPersonalizedText()
             .color(ChatColor.GRAY);
     ChatDispatcher.broadcastAdminChatMessage(successful, match);
@@ -226,6 +226,7 @@ public class AdminCommands {
       perms = Permissions.RELOAD)
   public void pgm(Audience audience) {
     PGM.get().reloadConfig();
+
     audience.sendMessage(TranslatableComponent.of("admin.reloadConfig", TextColor.GREEN));
   }
 

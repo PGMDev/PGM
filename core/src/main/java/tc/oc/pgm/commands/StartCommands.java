@@ -29,12 +29,10 @@ public class StartCommands {
     StartMatchModule smm = match.needModule(StartMatchModule.class);
 
     if (match.isRunning()) {
-      throw new CommandException(
-          TextTranslations.translate("admin.start.matchRunning", sender));
+      throw new CommandException(TextTranslations.translate("admin.start.matchRunning", sender));
     }
     if (match.isFinished()) {
-      throw new CommandException(
-          TextTranslations.translate("admin.start.matchFinished", sender));
+      throw new CommandException(TextTranslations.translate("admin.start.matchFinished", sender));
     }
 
     if (smm.canStart(true)) {
@@ -89,7 +87,7 @@ public class StartCommands {
       smm.autoStartCountdown();
     } else {
       sender.sendMessage(
-          ChatColor.BLUE + TextTranslations.translate("admin.autoStart.disabled", sender));
+          ChatColor.RED + TextTranslations.translate("admin.autoStart.disabled", sender));
     }
   }
 }

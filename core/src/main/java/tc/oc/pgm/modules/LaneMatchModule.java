@@ -99,8 +99,7 @@ public class LaneMatchModule implements MatchModule, Listener {
           event
               .getPlayer()
               .sendMessage(
-                  ChatColor.RED
-                      + TextTranslations.translate("match.laneExit", player.getBukkit()));
+                  ChatColor.RED + TextTranslations.translate("match.laneExit", player.getBukkit()));
         }
       }
     }

@@ -127,7 +127,8 @@ public class MatchAnnouncer implements Listener {
           TextComponent.space()
               .append(
                   TranslatableComponent.of(
-                      "misc.createdBy", TextColor.GRAY,
+                      "misc.createdBy",
+                      TextColor.GRAY,
                       TextFormatter.nameList(authors, NameStyle.FANCY, TextColor.GRAY))));
     }
 

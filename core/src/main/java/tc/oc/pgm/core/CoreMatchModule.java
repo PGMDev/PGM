@@ -127,8 +127,7 @@ public class CoreMatchModule implements MatchModule, Listener {
           && core.getCasingRegion().contains(center)
           && player.getParty() == core.getOwner()) {
         event.setCancelled(true);
-        player.sendWarning(
-            TextTranslations.translate("core.damageOwn", player.getBukkit()), true);
+        player.sendWarning(TextTranslations.translate("core.damageOwn", player.getBukkit()), true);
       }
     }
   }

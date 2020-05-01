@@ -126,8 +126,7 @@ public class PGMListener implements Listener {
       event
           .getPlayer()
           .kickPlayer(
-              ChatColor.RED
-                  + TextTranslations.translate("misc.incorrectWorld", event.getPlayer()));
+              ChatColor.RED + TextTranslations.translate("misc.incorrectWorld", event.getPlayer()));
       this.parent
           .getLogger()
           .info(
@@ -350,11 +349,10 @@ public class PGMListener implements Listener {
                   + ChatColor.WHITE
                   + "] "
                   + ChatColor.GREEN
-                  + TextTranslations
-                      .translate(
-                          "pool.change",
-                          Bukkit.getConsoleSender(),
-                          (ChatColor.AQUA + event.getNewPool().getName() + ChatColor.GREEN)));
+                  + TextTranslations.translate(
+                      "pool.change",
+                      Bukkit.getConsoleSender(),
+                      (ChatColor.AQUA + event.getNewPool().getName() + ChatColor.GREEN)));
     }
   }
 }

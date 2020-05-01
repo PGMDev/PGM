@@ -247,8 +247,7 @@ public class MapCommands {
     int totalPlayers = maxPlayers.stream().mapToInt(i -> i).sum();
     Component total = new PersonalizedText(Integer.toString(totalPlayers), ChatColor.GOLD);
 
-    String verboseVs =
-        " " + TextTranslations.translate("map.info.playerLimit.vs", sender) + " ";
+    String verboseVs = " " + TextTranslations.translate("map.info.playerLimit.vs", sender) + " ";
     Component verbose =
         new PersonalizedText(
             new PersonalizedText("(")

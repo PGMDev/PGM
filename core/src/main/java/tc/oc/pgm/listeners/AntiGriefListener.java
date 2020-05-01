@@ -70,7 +70,8 @@ public class AntiGriefListener implements Listener {
     if (block != null
         && (block.getType() == Material.WATER || block.getType() == Material.STATIONARY_WATER)) {
       clicker.sendMessage(
-          ChatColor.RED + TextTranslations.translate("moderation.defuse.water", clicker.getBukkit()));
+          ChatColor.RED
+              + TextTranslations.translate("moderation.defuse.water", clicker.getBukkit()));
       return;
     }
 
@@ -93,7 +94,8 @@ public class AntiGriefListener implements Listener {
         this.notifyDefuse(
             clicker,
             entity,
-            ChatColor.RED + TextTranslations.translate("moderation.defuse.world", clicker.getBukkit()));
+            ChatColor.RED
+                + TextTranslations.translate("moderation.defuse.world", clicker.getBukkit()));
       }
     }
   }
@@ -127,7 +129,8 @@ public class AntiGriefListener implements Listener {
     if (owners != null && !owners.isEmpty()) {
       player.sendMessage(
           TranslatableComponent.of(
-              "moderation.defuse.player", TextFormatter.nameList(owners, NameStyle.COLOR, TextColor.WHITE)));
+              "moderation.defuse.player",
+              TextFormatter.nameList(owners, NameStyle.COLOR, TextColor.WHITE)));
     }
   }
 
@@ -171,11 +174,13 @@ public class AntiGriefListener implements Listener {
     meta.setDisplayName(
         ChatColor.RED
             + ChatColor.BOLD.toString()
-            + TextTranslations.translate("moderation.defuse.displayName", event.getPlayer().getBukkit()));
+            + TextTranslations.translate(
+                "moderation.defuse.displayName", event.getPlayer().getBukkit()));
     meta.setLore(
         Collections.singletonList(
             ChatColor.GRAY
-                + TextTranslations.translate("moderation.defuse.tooltip", event.getPlayer().getBukkit())));
+                + TextTranslations.translate(
+                    "moderation.defuse.tooltip", event.getPlayer().getBukkit())));
     shears.setItemMeta(meta);
 
     event.getPlayer().getBukkit().getInventory().setItem(DEFUSE_SLOT, shears);

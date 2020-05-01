@@ -19,7 +19,6 @@ import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;
 
-
 public class SettingCommands {
 
   @Command(
