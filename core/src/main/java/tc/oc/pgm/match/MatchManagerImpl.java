@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Range;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
@@ -20,6 +21,7 @@ import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
@@ -29,6 +31,8 @@ import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.text.TextException;
+import tc.oc.pgm.util.text.TextParser;
 
 public class MatchManagerImpl implements MatchManager, Listener {
 
@@ -36,10 +40,34 @@ public class MatchManagerImpl implements MatchManager, Listener {
   private final Map<String, Match> matchById;
   private final Map<String, Match> matchByWorld;
 
+  // If true, all non-match worlds are forcibly unloaded.
+  // This assumption works well when PGM is the only thing running on a server,
+  // but when mixed with other plugins/worlds may prove to be problematic.
+  private final boolean unloadNonMatches;
+
+  // Number of seconds to wait before destroying a previously unloaded match.
+  // If not specified, defaults to 1/2 of the start time.
+  private final long destroyDelaySecs;
+
   public MatchManagerImpl(Logger logger) {
     this.logger = ClassLogger.get(checkNotNull(logger), getClass());
     this.matchById = Collections.synchronizedMap(new LinkedHashMap<>());
     this.matchByWorld = new HashMap<>();
+
+    final Config config = PGM.get().getConfiguration();
+    this.unloadNonMatches =
+        config.getExperiments().getOrDefault("unload-non-match-worlds", "false").equals("true");
+
+    long delaySecs = (config.getStartTime().getSeconds() + 1) / 2;
+    try {
+      delaySecs =
+          TextParser.parseInteger(
+              config.getExperiments().getOrDefault("match-destroy-seconds", "").toString(),
+              Range.atLeast(0));
+    } catch (TextException e) {
+      // No-op, since this is experimental
+    }
+    this.destroyDelaySecs = delaySecs;
   }
 
   @EventHandler
@@ -51,8 +79,10 @@ public class MatchManagerImpl implements MatchManager, Listener {
 
     logger.info("Loaded match-" + match.getId() + " (" + match.getMap().getId() + ")");
 
-    for (World world : PGM.get().getServer().getWorlds()) {
-      onNonMatchUnload(world);
+    if (unloadNonMatches) {
+      for (World world : PGM.get().getServer().getWorlds()) {
+        onNonMatchUnload(world);
+      }
     }
   }
 
@@ -62,6 +92,7 @@ public class MatchManagerImpl implements MatchManager, Listener {
 
     matchById.remove(checkNotNull(match).getId());
     matchByWorld.remove(checkNotNull(match.getWorld()).getName());
+
     PGM.get()
         .getAsyncExecutor()
         .schedule(
@@ -69,10 +100,11 @@ public class MatchManagerImpl implements MatchManager, Listener {
               match.destroy();
               logger.info("Unloaded match-" + match.getId() + " (" + match.getMap().getId() + ")");
             },
-            15,
+            destroyDelaySecs,
             TimeUnit.SECONDS);
   }
 
+  // TODO: Do not reference craft classes and move to NMSHacks
   private void onNonMatchUnload(World world) {
     final String name = world.getName();
     if (name.startsWith("match")) return;

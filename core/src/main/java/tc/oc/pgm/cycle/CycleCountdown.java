@@ -1,56 +1,44 @@
 package tc.oc.pgm.cycle;
 
+import com.google.common.collect.Range;
 import java.time.Duration;
-import java.util.Objects;
 import net.md_5.bungee.api.ChatColor;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.text.TextException;
+import tc.oc.pgm.util.text.TextParser;
 
 public class CycleCountdown extends MatchCountdown {
 
-  private int preloadTime;
-  private boolean ended;
+  // Number of seconds before a cycle occurs to start loading the next match.
+  // This eases stress on the main thread when handling lots of players.
+  private int preloadSecs;
+
   private MapInfo nextMap;
   private MatchFactory nextMatch;
 
   public CycleCountdown(Match match) {
     super(match);
+
     try {
-      this.preloadTime =
-          Integer.parseInt(
+      this.preloadSecs =
+          TextParser.parseInteger(
               PGM.get()
                   .getConfiguration()
                   .getExperiments()
-                  .getOrDefault("match-pre-load", "0")
-                  .toString());
-    } catch (Throwable t) {
-      this.preloadTime = 0;
+                  .getOrDefault("match-preload-seconds", "")
+                  .toString(),
+              Range.atLeast(0));
+    } catch (TextException t) {
+      // No-op, since this is experimental
     }
-  }
-
-  private void setNextMap(MapInfo map, boolean end) {
-    if (!ended) {
-      if (!Objects.equals(nextMap, map)) {
-        nextMap = map;
-        if (nextMatch != null) {
-          nextMatch.cancel(true);
-        }
-        nextMatch = null;
-      }
-      if (map != null && nextMatch == null && remaining.getSeconds() <= preloadTime) {
-        nextMatch = PGM.get().getMatchManager().createMatch(nextMap.getId());
-      }
-      if (end && nextMatch != null) {
-        nextMatch.await();
-      }
-    }
-    ended |= end;
   }
 
   @Override
@@ -77,19 +65,22 @@ public class CycleCountdown extends MatchCountdown {
 
   @Override
   public void onTick(Duration remaining, Duration total) {
-    setNextMap(PGM.get().getMapOrder().getNextMap(), false);
     super.onTick(remaining, total);
-  }
 
-  @Override
-  public void onCancel(Duration remaining, Duration total) {
-    super.onCancel(remaining, total);
-    setNextMap(null, true);
+    final MapOrder mapOrder = PGM.get().getMapOrder();
+    if (remaining.getSeconds() <= preloadSecs) {
+      if (nextMatch != null) return;
+
+      nextMap = mapOrder.popNextMap();
+      nextMatch = PGM.get().getMatchManager().createMatch(nextMap.getId());
+    } else {
+      nextMap = mapOrder.getNextMap();
+    }
   }
 
   @Override
   public void onEnd(Duration total) {
     super.onEnd(total);
-    setNextMap(PGM.get().getMapOrder().popNextMap(), true);
+    if (nextMatch != null) nextMatch.await();
   }
 }

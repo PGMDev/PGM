@@ -12,6 +12,7 @@ import java.sql.Statement;
 import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
@@ -32,7 +33,7 @@ public class SQLDatastore implements Datastore {
 
   public SQLDatastore(@Nullable String uri, ExecutorService executorService) throws SQLException {
     this.logger = ClassLogger.get(PGM.get().getLogger(), getClass());
-    this.executorService = executorService;
+    this.executorService = Executors.newSingleThreadExecutor();
     this.connection = getConnection(uri);
 
     initUsername();

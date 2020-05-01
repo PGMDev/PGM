@@ -207,7 +207,7 @@ public final class PGMConfig implements Config {
     if (config.getBoolean("motd.enabled", true)) {
       final String format =
           config
-              .getString("motd.format")
+              .getString("motd.format", "")
               .replace("{state.color}", "{2}")
               .replace("{map.name}", "{1}")
               .replace("{map.version}", "1.0.0")

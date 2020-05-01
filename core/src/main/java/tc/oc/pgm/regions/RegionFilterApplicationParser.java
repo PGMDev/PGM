@@ -1,12 +1,14 @@
 package tc.oc.pgm.regions;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
+import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -17,6 +19,7 @@ import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.filters.TeamFilter;
 import tc.oc.pgm.kits.Kit;
+import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.component.Component;
@@ -63,24 +66,29 @@ public class RegionFilterApplicationParser {
   }
 
   public void parseLane(Element el) throws InvalidXMLException {
+    final FeatureReference<TeamFactory> team =
+        Teams.getTeamRef(new Node(XMLUtils.getRequiredAttribute(el, "team")), factory);
+
     add(
         el,
         new RegionFilterApplication(
             RFAScope.PLAYER_ENTER,
             parseRegion(el),
-            new DenyFilter(new TeamFilter(Teams.getTeamRef(new Node(el), factory))),
+            new DenyFilter(new TeamFilter(team)),
             new PersonalizedTranslatable("match.laneExit"),
             false));
   }
 
   public void parseMaxBuildHeight(Element el) throws InvalidXMLException {
-    final int height = XMLUtils.parseNumber(el, Integer.class);
     add(
         el,
         new RegionFilterApplication(
             RFAScope.BLOCK_PLACE,
             new CuboidRegion(
-                new Vector(Double.NEGATIVE_INFINITY, height + 1, Double.NEGATIVE_INFINITY),
+                new Vector(
+                    Double.NEGATIVE_INFINITY,
+                    XMLUtils.parseNumber(el, Integer.class),
+                    Double.NEGATIVE_INFINITY),
                 new Vector(
                     Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)),
             StaticFilter.DENY,
@@ -89,14 +97,13 @@ public class RegionFilterApplicationParser {
   }
 
   public void parsePlayable(Element el) throws InvalidXMLException {
-    add(
-        el,
-        new RegionFilterApplication(
-            RFAScope.PLAYER_LEAVE,
-            parseRegion(el),
-            StaticFilter.DENY,
-            new PersonalizedTranslatable("match.outOfBounds"),
-            false));
+    final Region region = new NegativeRegion(parseRegion(el));
+    final Component message = new PersonalizedTranslatable("match.outOfBounds");
+
+    for (RFAScope scope :
+        Lists.newArrayList(RFAScope.BLOCK_PLACE, RFAScope.BLOCK_BREAK, RFAScope.PLAYER_ENTER)) {
+      add(el, new RegionFilterApplication(scope, region, StaticFilter.DENY, message, false));
+    }
   }
 
   public void parse(Element el) throws InvalidXMLException {

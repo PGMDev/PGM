@@ -2,6 +2,7 @@ package tc.oc.pgm.match;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.Range;
 import java.io.File;
 import java.time.Duration;
 import java.util.Iterator;
@@ -12,6 +13,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import org.bukkit.Difficulty;
@@ -27,22 +29,22 @@ import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.FileUtils;
 import tc.oc.pgm.util.chunk.NullChunkGenerator;
+import tc.oc.pgm.util.text.TextException;
+import tc.oc.pgm.util.text.TextParser;
 
 public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
   private static final AtomicLong counter = new AtomicLong();
   private static final Difficulty[] difficulties = Difficulty.values();
   private static final World.Environment[] environments = World.Environment.values();
 
-  private final AtomicLong start;
-  private final AtomicLong timeout;
   private final Stack<Stage> stages;
   private final Future<Match> future;
+  private final AtomicBoolean timedOut;
 
   protected MatchFactoryImpl(String mapId) {
-    this.start = new AtomicLong(System.currentTimeMillis());
-    this.timeout = new AtomicLong(60 * 1000L); // 1 minute
     this.stages = new Stack<>();
     this.stages.push(new InitMapStage(checkNotNull(mapId)));
+    this.timedOut = new AtomicBoolean(false);
     this.future = Executors.newSingleThreadExecutor().submit(this);
   }
 
@@ -70,9 +72,9 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
       // Only wait if the next stage is not done, or
       // the entire factory is not timed out.
       final long delay = stage.delay().toMillis();
-      while (!next.isDone() && start.get() + timeout.get() + delay >= System.currentTimeMillis()) {
+      while (!next.isDone() && !timedOut.get()) {
         try {
-          Thread.sleep(delay);
+          Thread.sleep(Math.max(100, delay));
         } catch (InterruptedException e) {
           return revert(e);
         }
@@ -137,14 +139,12 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
   @Override
   public Match get(long duration, TimeUnit unit) throws InterruptedException, ExecutionException {
-    final long timeoutNew = Math.max(0, unit.toMillis(duration));
-    timeout.getAndUpdate((timeout) -> Math.min(timeout, timeoutNew));
     return future.get();
   }
 
   @Override
   public void await() {
-    timeout.set(0); // Will disable all delays from any stage
+    timedOut.set(true); // Will disable all delays from any stage
   }
 
   /** An execution stage for creating a {@link Match}. */
@@ -341,7 +341,24 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
     private MoveMatchStage(Match match) {
       this.match = checkNotNull(match);
-      this.delay = Duration.ZERO;
+
+      Duration delay = Duration.ZERO;
+      try {
+        delay =
+            Duration.ofMillis(
+                (long)
+                    (1000f
+                        / TextParser.parseFloat(
+                            PGM.get()
+                                .getConfiguration()
+                                .getExperiments()
+                                .getOrDefault("match-teleports-per-second", "")
+                                .toString(),
+                            Range.atLeast(1f))));
+      } catch (TextException e) {
+        // No-op, since an experimental feature
+      }
+      this.delay = delay;
     }
 
     private Stage advanceSync() {

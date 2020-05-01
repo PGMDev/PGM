@@ -75,7 +75,7 @@ public class StartCountdown extends PreMatchCountdown {
           this.balanceWarningSent = true;
           this.getMatch()
               .sendWarning(
-                  new PersonalizedTranslatable("broadcast.balanceTeams", team.getComponentName()),
+                  new PersonalizedTranslatable("match.balanceTeams", team.getComponentName()),
                   false);
         }
       }

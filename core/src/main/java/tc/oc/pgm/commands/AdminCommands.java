@@ -68,9 +68,6 @@ public class AdminCommands {
     RestartManager.queueRestart(
         "Restart requested via /queuerestart command", Duration.ofSeconds(duration));
 
-    audience.sendMessage(
-        ChatColor.RED + "Server will restart automatically at the next safe opportunity.");
-
     if (force && match.isRunning()) {
       match.finish();
     }
@@ -116,8 +113,7 @@ public class AdminCommands {
     boolean ended = match.finish(winner);
 
     if (!ended)
-      throw new CommandException(
-          TextTranslations.translate("command.admin.end.unknownError", sender));
+      throw new CommandException(TextTranslations.translate("admin.end.unknownError", sender));
   }
 
   @Command(

@@ -351,14 +351,13 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
 
       if (holder.getAllowFlight()) {
         specialLore.add(
-            ChatColor.LIGHT_PURPLE + TextTranslations.translate("observer.preview.flying", viewer));
+            ChatColor.LIGHT_PURPLE + TextTranslations.translate("preview.flying", viewer));
       }
 
       DoubleJumpMatchModule djmm = matchHolder.getMatch().getModule(DoubleJumpMatchModule.class);
       if (djmm != null && djmm.hasKit(matchHolder)) {
         specialLore.add(
-            ChatColor.LIGHT_PURPLE
-                + TextTranslations.translate("observer.preview.doubleJump", viewer));
+            ChatColor.LIGHT_PURPLE + TextTranslations.translate("preview.doubleJump", viewer));
       }
 
       double knockbackResistance =
@@ -367,7 +366,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
         specialLore.add(
             ChatColor.LIGHT_PURPLE
                 + TextTranslations.translate(
-                    "observer.preview.knockbackResistance",
+                    "preview.knockbackResistance",
                     viewer,
                     (int) Math.ceil(knockbackResistance * 100)));
       }
@@ -377,7 +376,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
         specialLore.add(
             ChatColor.LIGHT_PURPLE
                 + TextTranslations.translate(
-                    "observer.preview.knockbackReduction",
+                    "preview.knockbackReduction",
                     viewer,
                     (int) Math.ceil(knockbackReduction * 100)));
       }
@@ -387,7 +386,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
         specialLore.add(
             ChatColor.LIGHT_PURPLE
                 + TextTranslations.translate(
-                    "observer.preview.walkSpeed",
+                    "preview.walkSpeed",
                     viewer,
                     String.format("%.1f", walkSpeed / WalkSpeedKit.BUKKIT_DEFAULT)));
       }
@@ -398,7 +397,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
         specialMeta.setDisplayName(
             ChatColor.AQUA.toString()
                 + ChatColor.ITALIC
-                + TextTranslations.translate("observer.preview.specialAbilities", viewer));
+                + TextTranslations.translate("preview.specialAbilities", viewer));
         specialMeta.setLore(specialLore);
         special.setItemMeta(specialMeta);
         preview.setItem(5, special);
@@ -412,7 +411,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     potionMeta.setDisplayName(
         ChatColor.AQUA.toString()
             + ChatColor.ITALIC
-            + TextTranslations.translate("observer.preview.potionEffects", viewer));
+            + TextTranslations.translate("preview.potionEffects", viewer));
     List<String> lore = Lists.newArrayList();
     if (hasPotions) {
       for (PotionEffect effect : holder.getActivePotionEffects()) {
@@ -423,9 +422,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
                 + (effect.getAmplifier() + 1));
       }
     } else {
-      lore.add(
-          ChatColor.YELLOW
-              + TextTranslations.translate("observer.preview.noPotionEffects", viewer));
+      lore.add(ChatColor.YELLOW + TextTranslations.translate("preview.noPotionEffects", viewer));
     }
     potionMeta.setLore(lore);
     potions.setItemMeta(potionMeta);
@@ -437,7 +434,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     hungerMeta.setDisplayName(
         ChatColor.AQUA.toString()
             + ChatColor.ITALIC
-            + TextTranslations.translate("observer.preview.hungerLevel", viewer));
+            + TextTranslations.translate("preview.hungerLevel", viewer));
     hungerMeta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
     hunger.setItemMeta(hungerMeta);
     preview.setItem(7, hunger);
@@ -447,7 +444,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     healthMeta.setDisplayName(
         ChatColor.AQUA.toString()
             + ChatColor.ITALIC
-            + TextTranslations.translate("observer.preview.healthLevel", viewer));
+            + TextTranslations.translate("preview.healthLevel", viewer));
     healthMeta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
     health.setItemMeta(healthMeta);
     preview.setItem(8, health);

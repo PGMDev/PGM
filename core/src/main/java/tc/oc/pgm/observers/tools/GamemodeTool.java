@@ -21,7 +21,7 @@ public class GamemodeTool implements InventoryMenuItem {
 
   @Override
   public Component getName() {
-    return new PersonalizedTranslatable("observer.tools.gamemode");
+    return new PersonalizedTranslatable("setting.gamemode");
   }
 
   @Override
@@ -35,7 +35,7 @@ public class GamemodeTool implements InventoryMenuItem {
         new PersonalizedTranslatable("gameMode." + player.getGameMode().name().toLowerCase())
             .color(ChatColor.AQUA);
     Component lore =
-        new PersonalizedTranslatable("observer.tools.gamemode.lore", gamemode)
+        new PersonalizedTranslatable("setting.gamemode.lore", gamemode)
             .getPersonalizedText()
             .color(ChatColor.GRAY);
     return Lists.newArrayList(ComponentRenderers.toLegacyText(lore, player.getBukkit()));
@@ -74,12 +74,12 @@ public class GamemodeTool implements InventoryMenuItem {
             .color(ChatColor.AQUA)
             .hoverEvent(
                 HoverEvent.Action.SHOW_TEXT,
-                new PersonalizedTranslatable("observer.tools.gamemode.hover")
+                new PersonalizedTranslatable("setting.gamemode.hover")
                     .getPersonalizedText()
                     .color(ChatColor.GRAY)
                     .render())
             .clickEvent(ClickEvent.Action.RUN_COMMAND, "/tools");
-    return new PersonalizedTranslatable("observer.tools.gamemode.warning", command)
+    return new PersonalizedTranslatable("setting.gamemode.warning", command)
         .getPersonalizedText()
         .color(ChatColor.GRAY);
   }

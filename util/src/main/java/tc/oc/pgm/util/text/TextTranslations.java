@@ -50,7 +50,7 @@ public final class TextTranslations {
           "match",
           "misc",
           "moderation",
-          "observer");
+          "ui");
 
   // A table of all keys mapped to their locale and message format (*not* thread safe)
   private static final SortedMap<String, Map<Locale, MessageFormat>> TRANSLATIONS_MAP =
