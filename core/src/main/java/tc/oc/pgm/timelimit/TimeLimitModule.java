@@ -17,7 +17,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.result.VictoryConditions;
-import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.text.TextParser;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
@@ -82,7 +82,7 @@ public class TimeLimitModule implements MapModule {
 
       return new TimeLimit(
           el.getAttributeValue("id"),
-          TimeUtils.parseDuration(el.getTextNormalize()),
+          TextParser.parseDuration(el.getTextNormalize()),
           parseVictoryCondition(factory, el.getAttribute("result")),
           XMLUtils.parseBoolean(el.getAttribute("show"), true));
     }

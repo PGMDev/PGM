@@ -18,7 +18,7 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.goals.GoalMatchModule;
-import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.text.TextParser;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -63,7 +63,7 @@ public class ObjectiveModesModule implements MapModule {
 
         MaterialData material =
             XMLUtils.parseBlockMaterialData(Node.fromRequiredAttr(modeEl, "material"));
-        Duration after = TimeUtils.parseDuration(modeEl.getAttributeValue("after"));
+        Duration after = TextParser.parseDuration(modeEl.getAttributeValue("after"));
         String name = modeEl.getAttributeValue("name");
         if (name != null) {
           name = ChatColor.translateAlternateColorCodes('`', name);
@@ -71,7 +71,7 @@ public class ObjectiveModesModule implements MapModule {
 
         String showBeforeRaw = modeEl.getAttributeValue("show-before");
         Duration showBefore =
-            showBeforeRaw != null ? TimeUtils.parseDuration(showBeforeRaw) : DEFAULT_SHOW_BEFORE;
+            showBeforeRaw != null ? TextParser.parseDuration(showBeforeRaw) : DEFAULT_SHOW_BEFORE;
 
         // Legacy
         boolean legacyShowBossBar = XMLUtils.parseBoolean(modeEl.getAttribute("boss-bar"), true);

@@ -34,7 +34,7 @@ public abstract class PreMatchCountdown extends MatchCountdown {
   public void onCancel(Duration remaining, Duration total) {
     super.onCancel(remaining, total);
     getMatch().setPhase(MatchPhase.IDLE);
-    getMatch().sendWarning(new PersonalizedTranslatable("broadcast.startCancelled"), false);
+    getMatch().sendWarning(new PersonalizedTranslatable("broadcast.startCancel"), false);
   }
 
   @Override

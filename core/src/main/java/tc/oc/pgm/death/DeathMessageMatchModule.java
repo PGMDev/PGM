@@ -1,7 +1,9 @@
 package tc.oc.pgm.death;
 
 import java.util.logging.Logger;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.format.TextColor;
+import net.kyori.text.format.TextDecoration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -14,9 +16,6 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DeathMessageMatchModule implements MatchModule, Listener {
@@ -36,14 +35,8 @@ public class DeathMessageMatchModule implements MatchModule, Listener {
   public void handleDeathBroadcast(MatchPlayerDeathEvent event) {
     if (!event.getMatch().isRunning()) return;
 
-    DeathMessageBuilder builder =
-        new DeathMessageBuilder(event.getVictim(), event.getDamageInfo(), logger);
-    Component message = builder.getMessage().color(ChatColor.GRAY);
-
-    if (event.isPredicted()) {
-      message.extra(
-          new PersonalizedText(" "), new PersonalizedTranslatable("death.predictedSuffix"));
-    }
+    DeathMessageBuilder builder = new DeathMessageBuilder(event, logger);
+    Component message = builder.getMessage().color(TextColor.GRAY);
 
     for (MatchPlayer viewer : event.getMatch().getPlayers()) {
       switch (viewer.getSettings().getValue(SettingKey.DEATH)) {
@@ -51,13 +44,12 @@ public class DeathMessageMatchModule implements MatchModule, Listener {
           if (event.isInvolved(viewer)) {
             viewer.sendMessage(message);
           } else if (event.isTeamKill() && viewer.getBukkit().hasPermission(Permissions.STAFF)) {
-            viewer.sendMessage(
-                new PersonalizedText(message.render(viewer.getBukkit())).italic(true));
+            viewer.sendMessage(message.decoration(TextDecoration.ITALIC, true));
           }
           break;
         case DEATH_ALL:
           if (event.isInvolved(viewer)) {
-            viewer.sendMessage(new PersonalizedText(message.render(viewer.getBukkit())).bold(true));
+            viewer.sendMessage(message.decoration(TextDecoration.BOLD, true));
           } else {
             viewer.sendMessage(message);
           }

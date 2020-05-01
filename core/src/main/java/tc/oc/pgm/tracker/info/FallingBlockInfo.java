@@ -1,13 +1,12 @@
 package tc.oc.pgm.tracker.info;
 
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.FallingBlock;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.text.MinecraftTranslations;
 
 public class FallingBlockInfo extends EntityInfo implements DamageInfo {
 
@@ -32,8 +31,8 @@ public class FallingBlockInfo extends EntityInfo implements DamageInfo {
   }
 
   @Override
-  public Component getLocalizedName() {
-    return new PersonalizedTranslatable(NMSHacks.getTranslationKey(getMaterial()));
+  public Component getName() {
+    return MinecraftTranslations.getMaterial(getMaterial());
   }
 
   @Override

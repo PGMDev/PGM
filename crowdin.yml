@@ -2,7 +2,7 @@ project_identifier: pgm
 api_key_env: CROWDIN_API_KEY
 preserve_hierarchy: false
 files:
-  - source: /util/src/main/i18n/templates/strings.properties
+  - source: /util/src/main/i18n/templates/*.properties
     translation: /util/src/main/i18n/translations/%file_name%_%locale_with_underscore%.%file_extension%
 commit_message: Update %language% translations
 append_commit_message: false

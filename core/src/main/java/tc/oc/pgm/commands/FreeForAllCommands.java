@@ -11,7 +11,7 @@ import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class FreeForAllCommands {
 
@@ -55,11 +55,10 @@ public class FreeForAllCommands {
     } else {
       if (maxPlayers == null && maxOverfill == null) {
         throw new CommandException(
-            AllTranslations.get()
-                .translate(
-                    "commands.incorrectUsage",
-                    sender,
-                    "<team> (default | [-p max-players] [-o max-overfill])"));
+            TextTranslations.translate(
+                "command.incorrectUsage",
+                sender,
+                "<team> (default | [-p max-players] [-o max-overfill])"));
       }
 
       maxPlayers = maxPlayers == null ? ffa.getMaxPlayers() : maxPlayers;
@@ -89,9 +88,8 @@ public class FreeForAllCommands {
     FreeForAllMatchModule ffaModule = match.getModule(FreeForAllMatchModule.class);
     if (ffaModule == null) {
       throw new CommandException(
-          AllTranslations.get()
-              .translate(
-                  "command.moduleNotFound", sender, FreeForAllMatchModule.class.getSimpleName()));
+          TextTranslations.translate(
+              "command.moduleNotFound", sender, FreeForAllMatchModule.class.getSimpleName()));
     }
     return ffaModule;
   }

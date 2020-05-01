@@ -161,7 +161,7 @@ public class EventFilterMatchModule implements MatchModule, Listener {
         true,
         event.getPlayer().getWorld(),
         match.getPlayer(event.getPlayer()),
-        new PersonalizedTranslatable("match.bed.disabled"));
+        new PersonalizedTranslatable("match.disabled.bed"));
   }
 
   // ---------------------------
@@ -263,7 +263,7 @@ public class EventFilterMatchModule implements MatchModule, Listener {
           true,
           event.getWorld(),
           event.getPlayer(),
-          new PersonalizedTranslatable("match.enderChestsDisabled"));
+          new PersonalizedTranslatable("match.disabled.enderChest"));
     }
   }
 

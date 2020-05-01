@@ -14,11 +14,11 @@ import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 public class FlySpeedTool implements InventoryMenuItem {
 
-  private static String TRANSLATION_KEY = "observer.tools.flyspeed.";
+  private static String TRANSLATION_KEY = "setting.flyspeed.";
 
   @Override
   public Component getName() {
-    return new PersonalizedTranslatable("observer.tools.flyspeed");
+    return new PersonalizedTranslatable("setting.flyspeed");
   }
 
   @Override
@@ -30,7 +30,7 @@ public class FlySpeedTool implements InventoryMenuItem {
   public List<String> getLore(MatchPlayer player) {
     Component flySpeed = FlySpeed.of(player.getBukkit().getFlySpeed()).getName();
     Component lore =
-        new PersonalizedTranslatable("observer.tools.flyspeed.lore", flySpeed)
+        new PersonalizedTranslatable("setting.flyspeed.lore", flySpeed)
             .getPersonalizedText()
             .color(ChatColor.GRAY);
     return Lists.newArrayList(ComponentRenderers.toLegacyText(lore, player.getBukkit()));

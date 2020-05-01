@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
+import tc.oc.pgm.util.material.Materials;
 
 /**
  * A pattern that matches a specific Material and optionally, its metadata/damage value. If
@@ -84,7 +85,7 @@ public class SingleMaterialMatcher implements MaterialMatcher {
 
   public static SingleMaterialMatcher parse(String text) {
     String[] pieces = text.split(":");
-    Material material = Material.matchMaterial(pieces[0]);
+    Material material = Materials.parseMaterial(pieces[0]);
     if (material == null) {
       throw new IllegalArgumentException("Could not find material '" + pieces[0] + "'.");
     }

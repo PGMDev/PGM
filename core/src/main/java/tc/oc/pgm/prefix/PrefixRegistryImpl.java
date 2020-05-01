@@ -7,7 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import tc.oc.pgm.Config.Prefixes;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.PrefixChangeEvent;
 import tc.oc.pgm.api.party.Party;
@@ -23,8 +22,8 @@ public class PrefixRegistryImpl implements PrefixRegistry, Listener {
 
   private PrefixProvider prefixProvider;
 
-  public PrefixRegistryImpl() {
-    this.prefixProvider = Prefixes.enabled() ? new ConfigPrefixProvider() : null;
+  public PrefixRegistryImpl(@Nullable PrefixProvider provider) {
+    this.prefixProvider = provider;
   }
 
   @EventHandler

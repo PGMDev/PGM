@@ -36,9 +36,26 @@ import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class AdminCommands {
+
+  @Command(
+      aliases = {"restart"},
+      desc = "Restart the server",
+      usage = "[seconds] - defaults to 30 seconds",
+      flags = "f",
+      perms = Permissions.STOP)
+  public void restart(
+      Audience audience, Match match, @Default("30") int duration, @Switch('f') boolean force) {
+
+    if (!force && match.isRunning()) {
+      audience.sendWarning(TranslatableComponent.of("admin.matchRunning.restart"));
+      return;
+    }
+
+    queueRestart(audience, match, duration, true);
+  }
 
   @Command(
       aliases = {"queuerestart", "qr"},
@@ -47,31 +64,37 @@ public class AdminCommands {
       flags = "f",
       perms = Permissions.STOP)
   public void queueRestart(
-      CommandSender sender, Match match, @Default("30") int duration, @Switch('f') boolean force)
-      throws CommandException {
+      Audience audience, Match match, @Default("30") int duration, @Switch('f') boolean force) {
     RestartManager.queueRestart(
         "Restart requested via /queuerestart command", Duration.ofSeconds(duration));
 
-    sender.sendMessage(
-        ChatColor.RED + "Server will restart automatically at the next safe opportunity.");
-
     if (force && match.isRunning()) {
       match.finish();
-    } else {
-      PGM.get().getServer().getPluginManager().callEvent(new RequestRestartEvent());
     }
+
+    if (match.isRunning()) {
+      audience.sendMessage(
+          TranslatableComponent.of("admin.queueRestart.restartQueued", TextColor.RED));
+    } else {
+      audience.sendMessage(
+          TranslatableComponent.of("admin.queueRestart.restartingNow", TextColor.GREEN));
+    }
+
+    PGM.get().getServer().getPluginManager().callEvent(new RequestRestartEvent());
   }
 
   @Command(
       aliases = {"cancelrestart", "cr"},
       desc = "Cancels a previously requested restart",
       perms = Permissions.STOP)
-  public void cancelRestart(CommandSender sender) {
+  public void cancelRestart(Audience audience) {
     if (RestartManager.isQueued()) {
       PGM.get().getServer().getPluginManager().callEvent(new CancelRestartEvent());
-      sender.sendMessage(ChatColor.RED + "Server restart is now cancelled");
+      audience.sendMessage(
+          TranslatableComponent.of("admin.cancelRestart.restartUnqueued", TextColor.RED));
     } else {
-      sender.sendMessage(ChatColor.RED + "No restart is currently queued.");
+      audience.sendMessage(
+          TranslatableComponent.of("admin.cancelRestart.noActionTaken", TextColor.RED));
     }
   }
 
@@ -85,20 +108,17 @@ public class AdminCommands {
     Competitor winner = StringUtils.bestFuzzyMatch(target, getCompetitorMap(sender, match), 0.9);
 
     if (target != null && winner == null)
-      throw new CommandException(
-          AllTranslations.get().translate("command.competitorNotFound", sender));
+      throw new CommandException(TextTranslations.translate("command.competitorNotFound", sender));
 
     boolean ended = match.finish(winner);
 
     if (!ended)
-      throw new CommandException(
-          AllTranslations.get().translate("command.admin.end.unknownError", sender));
+      throw new CommandException(TextTranslations.translate("admin.end.unknownError", sender));
   }
 
   @Command(
       aliases = {"setnext", "sn"},
-      desc =
-          "Sets the next map.  Note that the rotation will go to this map then resume as normal.",
+      desc = "Sets the next map. Note that the rotation will go to this map then resume as normal.",
       usage = "[map name]",
       flags = "f",
       perms = Permissions.SETNEXT)
@@ -110,8 +130,7 @@ public class AdminCommands {
       Match match)
       throws CommandException {
     if (RestartManager.isQueued() && !force) {
-      throw new CommandException(
-          AllTranslations.get().translate("command.admin.setNext.restartQueued", sender));
+      throw new CommandException(TextTranslations.translate("map.setNext.confirm", sender));
     }
 
     mapOrder.setNextMap(map);
@@ -120,16 +139,13 @@ public class AdminCommands {
       RestartManager.cancelRestart();
       sender.sendMessage(
           ChatColor.GREEN
-              + AllTranslations.get()
-                  .translate("command.admin.cancelRestart.restartUnqueued", sender));
+              + TextTranslations.translate("admin.cancelRestart.restartUnqueued", sender));
     }
 
     Component mapName = new PersonalizedText(map.getName()).color(ChatColor.DARK_PURPLE);
     Component successful =
         new PersonalizedTranslatable(
-                "command.admin.set.success",
-                UsernameFormatUtils.formatStaffName(sender, match),
-                mapName)
+                "map.setNext", mapName, UsernameFormatUtils.formatStaffName(sender, match))
             .getPersonalizedText()
             .color(ChatColor.GRAY);
     ChatDispatcher.broadcastAdminChatMessage(successful, match);
@@ -197,16 +213,15 @@ public class AdminCommands {
     match.getCountdown().cancelAll();
     match.needModule(StartMatchModule.class).setAutoStart(false);
     sender.sendMessage(
-        ChatColor.GREEN + AllTranslations.get().translate("command.admin.cancel.success", sender));
+        ChatColor.GREEN + TextTranslations.translate("admin.cancelCountdowns", sender));
   }
 
   @Command(
       aliases = {"pgm"},
       desc = "Reload the PGM configuration",
       perms = Permissions.RELOAD)
-  public void pgm(Audience audience) {
+  public void pgm() {
     PGM.get().reloadConfig();
-    audience.sendMessage(TranslatableComponent.of("admin.reload", TextColor.GREEN));
   }
 
   private static Map<String, Competitor> getCompetitorMap(CommandSender sender, Match match) {

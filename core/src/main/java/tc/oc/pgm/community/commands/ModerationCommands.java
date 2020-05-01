@@ -32,7 +32,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
-import tc.oc.pgm.Config;
+import tc.oc.pgm.PGMConfig;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
@@ -134,7 +134,7 @@ public class ModerationCommands implements Listener {
 
     if (fmm.getFrozenPlayers().isEmpty() && fmm.getOfflineFrozenCount() < 1) {
       sender.sendMessage(
-          new PersonalizedTranslatable("command.freeze.list.none")
+          new PersonalizedTranslatable("moderation.freeze.frozenList.none")
               .getPersonalizedText()
               .color(ChatColor.RED));
       return;
@@ -150,14 +150,16 @@ public class ModerationCommands implements Listener {
                       .map(m -> m.getStyledName(NameStyle.FANCY))
                       .collect(Collectors.toList())));
       sender.sendMessage(
-          formatFrozenList("command.freeze.list", fmm.getFrozenPlayers().size(), names));
+          formatFrozenList(
+              "moderation.freeze.frozenList.online", fmm.getFrozenPlayers().size(), names));
     }
 
     // Offline Players
     if (fmm.getOfflineFrozenCount() > 0) {
       Component names = new PersonalizedText(fmm.getOfflineFrozenNames());
       sender.sendMessage(
-          formatFrozenList("command.freeze.list.offline", fmm.getOfflineFrozenCount(), names));
+          formatFrozenList(
+              "moderation.freeze.frozenList.offline", fmm.getOfflineFrozenCount(), names));
     }
   }
 
@@ -193,13 +195,13 @@ public class ModerationCommands implements Listener {
 
     Component alreadyFrozen =
         new PersonalizedTranslatable(
-                "command.freeze.already.frozen",
+                "moderation.freeze.alreadyFrozen",
                 match.getPlayer(target).getStyledName(NameStyle.FANCY))
             .getPersonalizedText()
             .color(ChatColor.GRAY);
     Component alreadyThawed =
         new PersonalizedTranslatable(
-                "command.freeze.already.thaw",
+                "moderation.freeze.alreadyThawed",
                 match.getPlayer(target).getStyledName(NameStyle.FANCY))
             .getPersonalizedText()
             .color(ChatColor.GRAY);
@@ -437,14 +439,14 @@ public class ModerationCommands implements Listener {
       if (onlineBans > 0) {
         sender.sendMessage(
             new PersonalizedTranslatable(
-                    "moderation.commands.banIP.alts",
+                    "moderation.ipBan.bannedWithAlts",
                     formattedTarget,
                     new PersonalizedText(Integer.toString(onlineBans)).color(ChatColor.AQUA))
                 .getPersonalizedText()
                 .color(ChatColor.RED));
       } else {
         sender.sendMessage(
-            new PersonalizedTranslatable("moderation.commands.banIP", formattedTarget)
+            new PersonalizedTranslatable("moderation.ipBan.banned", formattedTarget)
                 .getPersonalizedText()
                 .color(ChatColor.RED));
       }
@@ -452,7 +454,7 @@ public class ModerationCommands implements Listener {
     } else {
       sender.sendMessage(
           new PersonalizedTranslatable(
-                  "moderation.commands.invalidIP",
+                  "moderation.ipBan.invalidIP",
                   new PersonalizedText(address).color(ChatColor.RED).italic(true))
               .color(ChatColor.GRAY));
     }
@@ -511,7 +513,7 @@ public class ModerationCommands implements Listener {
       if (alts.isEmpty()) {
         sender.sendMessage(
             new PersonalizedTranslatable(
-                    "moderation.commands.noAlts", target.getStyledName(NameStyle.FANCY))
+                    "moderation.alts.noAlts", target.getStyledName(NameStyle.FANCY))
                 .getPersonalizedText()
                 .color(ChatColor.RED));
       } else {
@@ -539,7 +541,7 @@ public class ModerationCommands implements Listener {
 
       Component pageNum =
           new PersonalizedTranslatable(
-                  "command.paginatedResult.page",
+                  "command.simplePageHeader",
                   new PersonalizedText(Integer.toString(page)).color(ChatColor.DARK_AQUA),
                   new PersonalizedText(Integer.toString(pages)).color(ChatColor.DARK_AQUA))
               .getPersonalizedText()
@@ -593,7 +595,7 @@ public class ModerationCommands implements Listener {
         throw new CommandException(
             ComponentRenderers.toLegacyText(
                 new PersonalizedTranslatable(
-                        "commands.invalid.target",
+                        "command.notJoinedServer",
                         new PersonalizedText(target).color(ChatColor.AQUA))
                     .getPersonalizedText()
                     .color(ChatColor.RED),
@@ -670,7 +672,7 @@ public class ModerationCommands implements Listener {
             sender);
 
     Component banTypeFormatted =
-        new PersonalizedTranslatable("moderation.records.type", banType)
+        new PersonalizedTranslatable("moderation.type", banType)
             .getPersonalizedText()
             .color(ChatColor.GRAY);
 
@@ -818,7 +820,7 @@ public class ModerationCommands implements Listener {
     Component header =
         new PersonalizedText(
             ComponentUtils.horizontalLineHeading(
-                Config.Moderation.getServerName(), ChatColor.DARK_GRAY));
+                PGMConfig.Moderation.getServerName(), ChatColor.DARK_GRAY));
 
     Component footer =
         new PersonalizedText(
@@ -847,8 +849,8 @@ public class ModerationCommands implements Listener {
             .color(ChatColor.GRAY)); // The sign-off of who performed the punishment
 
     // Link to rules for review by player
-    if (Config.Moderation.isRuleLinkVisible()) {
-      Component rules = new PersonalizedText(Config.Moderation.getRulesLink());
+    if (PGMConfig.Moderation.isRuleLinkVisible()) {
+      Component rules = new PersonalizedText(PGMConfig.Moderation.getRulesLink());
 
       lines.add(Components.blank());
       lines.add(
@@ -858,9 +860,9 @@ public class ModerationCommands implements Listener {
     }
 
     // Configurable last line (for appeal message or etc)
-    if (Config.Moderation.isAppealVisible() && type.equals(PunishmentType.BAN)) {
+    if (PGMConfig.Moderation.isAppealVisible() && type.equals(PunishmentType.BAN)) {
       lines.add(Components.blank());
-      lines.add(new PersonalizedText(Config.Moderation.getAppealMessage()));
+      lines.add(new PersonalizedText(PGMConfig.Moderation.getAppealMessage()));
     }
 
     lines.add(Components.blank());
@@ -874,7 +876,7 @@ public class ModerationCommands implements Listener {
    */
   private void sendWarning(MatchPlayer target, String reason) {
     Component titleWord =
-        new PersonalizedTranslatable("moderation.warning")
+        new PersonalizedTranslatable("misc.warning")
             .getPersonalizedText()
             .color(ChatColor.DARK_RED);
     Component title = new PersonalizedText(WARN_SYMBOL, titleWord, WARN_SYMBOL);
@@ -975,8 +977,7 @@ public class ModerationCommands implements Listener {
           PeriodFormats.relativePastApproximate(java.time.Instant.ofEpochMilli(time.toEpochMilli()))
               .color(ChatColor.DARK_AQUA);
 
-      return new PersonalizedTranslatable(
-              "moderation.events.similarIP.hover", getPunisher(), timeAgo)
+      return new PersonalizedTranslatable("moderation.similarIP.hover", getPunisher(), timeAgo)
           .getPersonalizedText()
           .color(ChatColor.GRAY);
     }
@@ -1060,7 +1061,7 @@ public class ModerationCommands implements Listener {
   private Component formatAltAccountBroadcast(BannedAccountInfo info, MatchPlayer player) {
     Component message =
         new PersonalizedTranslatable(
-                "moderation.events.similarIP",
+                "moderation.similarIP.loginEvent",
                 player.getStyledName(NameStyle.FANCY),
                 new PersonalizedText(info.getUserName()).color(ChatColor.DARK_AQUA))
             .getPersonalizedText()

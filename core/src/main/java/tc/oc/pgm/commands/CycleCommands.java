@@ -12,7 +12,7 @@ import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.commands.annotations.Text;
 import tc.oc.pgm.cycle.CycleMatchModule;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class CycleCommands {
 
@@ -32,9 +32,8 @@ public class CycleCommands {
       throws CommandException {
     CycleMatchModule cmm = match.needModule(CycleMatchModule.class);
 
-    if (match.isRunning() && !force && !cmm.getConfig().runningMatch()) {
-      throw new CommandException(
-          AllTranslations.get().translate("command.admin.cycle.matchRunning", sender));
+    if (match.isRunning() && !force) {
+      throw new CommandException(TextTranslations.translate("admin.matchRunning.cycle", sender));
     }
 
     if (map != null && mapOrder.getNextMap() != map) {

@@ -32,7 +32,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Bukkit;
@@ -86,6 +85,7 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.features.MatchFeatureContext;
 import tc.oc.pgm.filters.query.MatchQuery;
 import tc.oc.pgm.filters.query.Query;
+import tc.oc.pgm.join.QueuedParticipants;
 import tc.oc.pgm.result.CompetitorVictoryCondition;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.FileUtils;
@@ -122,6 +122,7 @@ public class MatchImpl implements Match {
   private final Set<Party> parties;
   private final RankedSet<VictoryCondition> victory;
   private final RankedSet<Competitor> competitors;
+  private final AtomicReference<Party> queuedParticipants;
   private final Observers observers;
   private final MatchFeatureContext features;
 
@@ -163,6 +164,7 @@ public class MatchImpl implements Match {
               }
               return 0;
             });
+    this.queuedParticipants = new AtomicReference<>();
     this.observers = new Observers(this);
     this.features = new MatchFeatureContext();
   }
@@ -401,14 +403,24 @@ public class MatchImpl implements Match {
 
   @Override
   public Collection<MatchPlayer> getObservers() {
-    return observers.getPlayers();
+    final Party queued = queuedParticipants.get();
+    if (queued == null) return observers.getPlayers();
+
+    return ImmutableList.<MatchPlayer>builder()
+        .addAll(queued.getPlayers())
+        .addAll(observers.getPlayers())
+        .build();
   }
 
   @Override
   public Collection<MatchPlayer> getParticipants() {
-    return getCompetitors().stream()
-        .flatMap(c -> c.getPlayers().stream())
-        .collect(Collectors.toList());
+    final ImmutableList.Builder<MatchPlayer> builder = ImmutableList.builder();
+
+    for (Competitor competitor : getCompetitors()) {
+      builder.addAll(competitor.getPlayers());
+    }
+
+    return builder.build();
   }
 
   @Override
@@ -417,7 +429,12 @@ public class MatchImpl implements Match {
     if (player == null) {
       logger.fine("Adding player " + bukkit);
 
-      NMSHacks.forceRespawn(bukkit);
+      // If the bukkit player is dead, force them back into the world
+      if (bukkit.isDead()) {
+        bukkit.leaveVehicle();
+        bukkit.spigot().respawn();
+      }
+
       player = new MatchPlayerImpl(this, bukkit);
       MatchPlayerAddEvent event = new MatchPlayerAddEvent(player, getDefaultParty());
       callEvent(event);
@@ -571,7 +588,7 @@ public class MatchImpl implements Match {
 
   @Override
   public void addVictoryCondition(VictoryCondition condition) {
-    if (victory.add(condition)) {
+    if (!isFinished() && victory.add(condition)) {
       logger.fine("Added victory condition " + condition);
       calculateVictory();
     }
@@ -633,6 +650,8 @@ public class MatchImpl implements Match {
 
     if (party instanceof Competitor) {
       competitors.add((Competitor) party);
+    } else if (party instanceof QueuedParticipants) {
+      queuedParticipants.set(party);
     }
 
     callEvent(
@@ -655,6 +674,7 @@ public class MatchImpl implements Match {
             : new PartyRemoveEvent(party));
 
     if (party instanceof Competitor) competitors.remove(party);
+    if (party instanceof QueuedParticipants) queuedParticipants.set(null);
     parties.remove(party);
   }
 
@@ -795,6 +815,7 @@ public class MatchImpl implements Match {
       loaded.set(true);
       callEvent(new MatchLoadEvent(this));
     } catch (Throwable e) {
+      e.printStackTrace();
       unload();
       destroy();
       throw e;

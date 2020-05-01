@@ -187,7 +187,8 @@ public class ScoreboardMatchModule implements MatchModule, Listener {
                     + toString(team)
                     + " on scoreboard "
                     + toString(scoreboard));
-        team.removePlayer(player.getBukkit());
+        // FIXME: Removing this fixes white tab list entries when cycling
+        // team.removePlayer(player.getBukkit());
       }
     }
 

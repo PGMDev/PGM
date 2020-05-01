@@ -7,6 +7,10 @@ import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
 import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
 import java.util.*;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
+import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -18,7 +22,7 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class TeamCommands {
 
@@ -29,14 +33,12 @@ public class TeamCommands {
     if (player.getParty() instanceof Team) {
       sender.sendMessage(
           ChatColor.GRAY
-              + AllTranslations.get()
-                  .translate(
-                      "command.gameplay.myteam.message",
-                      player.getBukkit(),
-                      player.getParty().getColoredName() + ChatColor.GRAY));
+              + TextTranslations.translate(
+                  "match.myTeam",
+                  player.getBukkit(),
+                  player.getParty().getColoredName() + ChatColor.GRAY));
     } else {
-      throw new CommandException(
-          AllTranslations.get().translate("command.gameplay.myteam.notOnTeam", sender));
+      throw new CommandException(TextTranslations.translate("match.notOnTeam", sender));
     }
   }
 
@@ -65,7 +67,7 @@ public class TeamCommands {
     }
     sender.sendMessage(
         new PersonalizedTranslatable(
-                "command.team.force.success",
+                "join.ok.force",
                 matchPlayer.getStyledName(NameStyle.FANCY),
                 matchPlayer.getParty().getComponentName(),
                 oldParty.getComponentName())
@@ -77,19 +79,23 @@ public class TeamCommands {
       aliases = {"shuffle"},
       desc = "Shuffle the teams",
       perms = Permissions.JOIN_FORCE)
-  public static void shuffle(CommandSender sender, TeamMatchModule tmm, Match match)
+  public static void shuffle(
+      CommandSender sender,
+      TeamMatchModule tmm,
+      Match match,
+      @Switch('a') boolean all,
+      @Switch('f') boolean force)
       throws CommandException {
-    if (match.isRunning()) {
-      throw new CommandException(
-          AllTranslations.get().translate("command.team.shuffle.matchRunning", sender));
+    if (match.isRunning() && !force) {
+      throw new CommandException(TextTranslations.translate("match.shuffle.err", sender));
     } else {
-      List<Team> teams = new ArrayList<>(tmm.getParticipatingTeams());
-      List<MatchPlayer> participating = new ArrayList<>(match.getParticipants());
-      Collections.shuffle(participating);
-      for (int i = 0; i < participating.size(); i++) {
-        tmm.forceJoin(participating.get(i), teams.get((i * teams.size()) / participating.size()));
+      List<MatchPlayer> players =
+          new ArrayList<>(all ? match.getPlayers() : match.getParticipants());
+      Collections.shuffle(players);
+      for (MatchPlayer player : players) {
+        tmm.forceJoin(player, null);
       }
-      match.sendMessage(new PersonalizedTranslatable("command.team.shuffle.success"));
+      match.sendMessage(new PersonalizedTranslatable("match.shuffle.ok"));
     }
   }
 
@@ -104,24 +110,25 @@ public class TeamCommands {
     Team team = tmm.bestFuzzyMatch(target);
 
     if (team == null) {
-      throw new CommandException(AllTranslations.get().translate("command.teamNotFound", sender));
+      throw new CommandException(TextTranslations.translate("command.teamNotFound", sender));
     }
 
-    if (newName.length() > 32) {
-      throw new CommandException("Team name cannot be longer than 32 characters");
-    }
+    if (newName.length() > 32) newName = newName.substring(0, 32);
 
     for (Team t : tmm.getTeams()) {
       if (t.getName().equalsIgnoreCase(newName)) {
-        throw new CommandException(
-            AllTranslations.get().translate("command.team.alias.nameAlreadyUsed", sender, newName));
+        throw new CommandException(TextTranslations.translate("match.alias.err", sender, newName));
       }
     }
 
     String oldName = team.getColoredName();
     team.setName(newName);
 
-    match.sendMessage(oldName + ChatColor.GRAY + " renamed to " + team.getColoredName());
+    match.sendMessage(
+        TranslatableComponent.of(
+            "match.alias.ok",
+            TextComponent.of(oldName, TextColor.GRAY),
+            LegacyComponentSerializer.INSTANCE.deserialize(team.getColoredName())));
   }
 
   @Command(
@@ -145,21 +152,20 @@ public class TeamCommands {
     } else {
       if (maxPlayers == null && maxOverfill == null) {
         throw new CommandException(
-            AllTranslations.get()
-                .translate(
-                    "commands.incorrectUsage",
-                    sender,
-                    "<team> (default | [-p max-players] [-o max-overfill])"));
+            TextTranslations.translate(
+                "command.incorrectUsage",
+                sender,
+                "<team> (default | [-p max-players] [-o max-overfill])"));
       }
 
       for (Team team : teams) {
         maxPlayers = maxPlayers == null ? team.getMaxPlayers() : maxPlayers;
         maxOverfill = maxOverfill == null ? maxPlayers : maxOverfill;
-
+        // TODO: Localize this one
         if (maxPlayers < 0) throw new CommandException("max-players cannot be less than 0");
 
-        if (maxOverfill < maxPlayers)
-          throw new CommandException("max-overfill cannot be less than max-players");
+        if (maxOverfill < maxPlayers) // TODO: Localize this one
+        throw new CommandException("max-overfill cannot be less than max-players");
 
         team.setMaxSize(maxPlayers, maxOverfill);
       }
@@ -170,11 +176,11 @@ public class TeamCommands {
             sender.sendMessage(
                 team.getColoredName()
                     + ChatColor.WHITE
-                    + " now has max size "
+                    + " now has max size " // TODO: Localize this one
                     + ChatColor.AQUA
                     + team.getMaxPlayers()
                     + ChatColor.WHITE
-                    + " and max overfill "
+                    + " and max overfill " // TODO: Localize this one
                     + ChatColor.AQUA
                     + team.getMaxOverfill()));
   }
@@ -201,7 +207,7 @@ public class TeamCommands {
             sender.sendMessage(
                 team.getColoredName()
                     + ChatColor.WHITE
-                    + " now has min size "
+                    + " now has min size " // TODO: Localize this one
                     + ChatColor.AQUA
                     + team.getMinPlayers()));
   }
@@ -215,7 +221,7 @@ public class TeamCommands {
     else teams = Collections.singletonList(tmm.bestFuzzyMatch(teamName));
 
     if (teams.size() == 0)
-      throw new CommandException(AllTranslations.get().translate("command.teamNotFound", sender));
+      throw new CommandException(TextTranslations.translate("command.teamNotFound", sender));
 
     return teams;
   }

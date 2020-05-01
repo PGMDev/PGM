@@ -1,129 +1,149 @@
 #
-# PvP Game Manager Sample Configuration
-#
-# This file describes some high-level configuration about the server as a
-# whole.  Map-specific configuration should be specified in the map folder.
+# PGM
+# The original PvP Game Manager for Minecraft.
 
 map:
+  # List of folders to load maps.
   sources:
-    - default
-    - maps/
+    # A folder to load maps.
+    #
+    #  server/
+    #    bukkit.jar
+    #    plugins/
+    #      PGM/
+    #        config.yml
+    #    maps/
+    #
+    # See the example above, folders are relative to the server folder.
+    - "maps"
 
-map-pools:
-  enabled: true
-  path: map-pools.yml
-  require-staff: true          # Requires at least one online staff (pgm.staff) to stay on non-dynamic pool, will revert to dynamic pool if none are found.
-  
+    # A special "default" source that downloads 5 "classic" maps.
+    #
+    # Remove this to disable those maps.
+    - "default"
+
+  # A path to a map pools file, or empty to disable map pools.
+  pools: "map-pools.yml"
+
+# Sets the duration of various countdowns.
+#
+#  "30s"  = 30 seconds
+#  "1m5s" = 1 minute and 5 seconds
+#  "0s"   = immediately
+#  -1     = disabled
+#
+# See the examples above for how to format durations.
+countdown:
+  start: "30s"    # After a match cycles or /start
+  cycle: "30s"    # After a match ends or /cycle
+  huddle: -1      # Before a match starts (only recommended for "ranked" matches)
+
+# Sets thresholds for when to restart the server.
+#
+# Set to -1 to disable either of these options.
 restart:
-  enabled: true
-  uptime: 3h
-  match-limit: 15
+  uptime: "1d"    # Queues a restart after this amount of time has elapsed.
+  match-limit: 60 # Queues a restart after this amount of matches.
 
-start:
-  auto: true                  # Start the match automatically when ready
-  countdown: 30s              # Default match start countdown
-  huddle: 0s                  # Team huddle duration
-
-cycle:
-  countdown: 30s              # Default countdown for cycle commands
-  running-match: false        # Allow cycle commands during a running match without the -f flag
-  match-empty:                # Cycle if a running match empties out
-    enabled: false
-    countdown: 5s
-  match-end:                  # Cycle when a match ends
-    enabled: true
-    countdown: 30s
-
+# Changes behaviour when players try to /join a match.
 join:
-  priority-kick: true         # Kick non-privileged players to make room for privileged ones
-  mid-match: true             # Allow players to join after the match has started (does not override Blitz rule)
-  commit-players: false       # Do various things to keep players in the match once committed
-  capacity:
-    enabled: true
-    overfill: true            # Enable overfill (false disables overfill, regardless of XML)
-    overfill-ratio: 1.25      # Default value, XML overrides this
+  min-players: 1      # Minimum number of players before a match can start.
+  anytime: true       # Can players join after a match has started?
+  balance: true       # Can players be moved to make teams more balanced?
+  queue: false        # Should players be put in a queue before joining the match?
+  limit: true         # Should there be a limit on the number of players on each team?
+  priority-kick: true # Can free players be kicked to observers to make room for a premium player?
 
-minimum-players: 1
+# Changes various gameplay mechanics.
+gameplay:
+  refill-wool: true # Should wool in wool rooms be automatically refilled?
 
-teams:
-  minimum-players: 0
-  allow-choose: true       # Allow privileged players to choose their team
-  allow-switch: true       # Allow players to be on multiple teams in the same match
-  try-balance: false       # Try to balance teams if they are stacked
-  require-even: false      # Force evenly sized teams when using queued joins
+# Toggles various user interfaces.
+ui:
+  sidebar: true    # Enable the side bar?
+  tablist: true    # Enable the tab list?
+  proximity: false # Should the proximity of objectives be visible?
+  fireworks: true  # Spawn fireworks after objectives are completed?
+  participants-see-observers: true # Can participants see observers in the tab list?
 
-broadcast:
-  enabled: true
-  frequency: 600
-
-arrow-removal:
-  enabled: true
-  delay: 10
-
-fishing:
-  disable-treasure: true
-
-scoreboard:
-  show-proximity: false
-  precise-progress: false
-
-wool:
-  auto-refill: true
-
-player-list:
-  enabled: true
-
-motd:
-  enabled: true                                          # If the custom PGM motd should be shown to players
-  ## Available Placeholders ##
-  # {map.name} - Name of the currently playing map
-  # {map.version} - Version of the currently playing map
-  # {state.color} - Chat color (with the §) describing the current match's state (configured below)
-  # {state.name} - Name of the current match state, with an uppercase first letter
-  # {state.name-lower} - Fully lowercase name of the current match state
-  format: "{state.color}» &b{map.name} {state.color}«"   # Format of the MOTD
-  colors:
-    idle: gray                                           # Color designating a match which is waiting to start
-    starting: yellow                                     # Color designating a match which is starting
-    running: green                                       # Color designating a match which is currently running
-    finished: red                                        # Color designating a match which has ended
-
-groups:
-  admin:
-    op: true
-    priority: 10
-    prefix:
-      symbol: ❖
-      color: gold
-
-experiments:
-  match-preload-seconds: 3 # Number of seconds to pre-load a match and its world before cycle
-  match-destroy-seconds: 10 # Number of seconds to wait before unloading a world after the match has unloaded
-  match-teleports-per-second: 10 # Number of players to teleport per second to a new match on cycle
-  tab-render-seconds: 1 # Number of seconds before invalidating the tab list
-  unload-non-match-worlds: true # Unload any worlds that are not associated with a match
-
+# Overrides the header and footer of the side bar.
 sidebar:
-  # Messages may be formatted with '&'
-  # Leave blank to disable
-  top: ""
-  bottom: ""
-  # If the sidebar message should overwrite lines in the sidebar when it is full
-  overwrite: false
+  header: "" # A header, disabled if empty.
+  footer: "" # A footer, disabled if empty.
 
-# Note: All moderation fields may be formatted with '&' color codes
-moderation:
-  # Name of server to display on kick screen header
-  server-name: ''
+# Overrides the server MoTD.
+#
+#  {0} = The existing server MoTD.
+#  {1} = Name of the map currently playing.
+#  {2} = A color code representing the current match state:
+#         Idle = Grey (&7)
+#         Starting = Yellow (&e)
+#         Running = Green (&a)
+#         Finished = Red (&c)
+#
+# To disable, set to an empty string.
+motd: "{2}» &b{1} {2}«"
 
-  # Link to a rules website to display on kick screens
-  rules-link: ''
+# A list of player groups, defined in order of priority, with highest on top.
+#
+# Each group is assigned the permission "pgm.group.<name>".
+groups:
+  # A special group for server operators.
+  op:
+    prefix: "&6❖"
 
-  # Last message line shown on ban/temp-ban kick screen
-  appeal-msg: ''
+  # customgroup:
+  #   prefix: ""
+  #   permissions:
+  #    - "+pgm.premium"
+  #   observer-permissions: []
+  #   participant-permissions: []
+  #
+  # Create your own group using the template provided above.
 
-fireworks:
-  # Post-match fireworks fire above the winners of the current match
-  post-match: true
-  # Goals spawn fireworks when objectives are completed
-  goals: true
+  # A special group for all players.
+  #
+  # Do *not* remove this group unless you know what you're doing.
+  # This ensures that players cannot teleport or do other bad things during a match.
+  default:
+    # A list of permissions.
+    #  "-" denotes a negative permission.
+    #  "+" denotes a positive permission.
+    permissions:
+      - "-bukkit.command.kill"
+      - "-bukkit.command.me"
+      - "-bukkit.command.tell"
+      - "-worldedit.navigation.ceiling"
+      - "-worldedit.navigation.up"
+      - "-worldedit.calc"
+      - "-commandbook.pong"
+      - "-commandbook.speed.flight"
+      - "-commandbook.speed.walk"
+    # A list of permissions, only when a player is observing.
+    observer-permissions:
+      - "+worldedit.navigation.*"
+      - "+commandbook.teleport"
+    # A list of permissions, only when a player is participating.
+    participant-permissions:
+      - "-worldedit.navigation.thru.tool"
+      - "-worldedit.navigation.jumpto.tool"
+      - "-commandbook.teleport"
+
+# Enables "community mode" with features such as /report, /freeze, /warn, and /ban.
+community:
+  enabled: true   # Is community mode enabled?
+  server-name: "" # Name of your server, displayed when players are kicked.
+  rules-link: ""  # A URL to a rules website, displayed when players are kicked.
+  appeal-msg: ""  # A message, displayed on the kick screen, if a player is banned.
+
+# Overrides the default database uri.
+#
+# Only SQLite and MySQL-compatible databases officially supported.
+#  "sqlite:/path/to/file.db"
+#  "mysql://localhost/mydatabase?user=myuser&password=mypassword"
+#
+# Please do *not* edit this option unless you know what you're doing.
+database-uri: ""
+
+# Experimental features that are not yet stable.
+experiments: {}

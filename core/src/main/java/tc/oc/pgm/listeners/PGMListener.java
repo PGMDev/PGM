@@ -30,7 +30,6 @@ import org.bukkit.event.vehicle.VehicleUpdateEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.event.BlockTransformEvent;
@@ -55,7 +54,7 @@ import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.PeriodFormats;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class PGMListener implements Listener {
   private final Plugin parent;
@@ -86,7 +85,7 @@ public class PGMListener implements Listener {
       try {
         mm.createMatch(null).get();
       } catch (InterruptedException | ExecutionException e) {
-        // No-op
+        e.printStackTrace();
       } finally {
         lock.writeLock().unlock();
       }
@@ -96,7 +95,7 @@ public class PGMListener implements Listener {
     try {
       lock.readLock().tryLock(15, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
-      // No-op
+      e.printStackTrace();
     } finally {
       lock.readLock().unlock();
     }
@@ -104,7 +103,7 @@ public class PGMListener implements Listener {
     if (!mm.getMatches().hasNext()) {
       event.disallow(
           AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-          AllTranslations.get().translate("incorrectWorld.kickMessage", null));
+          TextTranslations.translate("misc.incorrectWorld", null));
     }
   }
 
@@ -115,7 +114,7 @@ public class PGMListener implements Listener {
       if (event.getPlayer().hasPermission(Permissions.JOIN_FULL)) {
         event.allow();
       } else {
-        event.setKickMessage(AllTranslations.get().translate("serverFull", event.getPlayer()));
+        event.setKickMessage(TextTranslations.translate("misc.serverFull", event.getPlayer()));
       }
     }
   }
@@ -126,9 +125,7 @@ public class PGMListener implements Listener {
       event
           .getPlayer()
           .kickPlayer(
-              ChatColor.RED
-                  + AllTranslations.get()
-                      .translate("incorrectWorld.kickMessage", event.getPlayer()));
+              ChatColor.RED + TextTranslations.translate("misc.incorrectWorld", event.getPlayer()));
       this.parent
           .getLogger()
           .info(
@@ -151,7 +148,7 @@ public class PGMListener implements Listener {
       event.setJoinMessage(null);
       MatchPlayer player = match.getPlayer(event.getPlayer());
       if (player != null) {
-        announceJoinOrLeave(player, "broadcast.joinMessage");
+        announceJoinOrLeave(player, "misc.join");
       }
     }
   }
@@ -164,7 +161,7 @@ public class PGMListener implements Listener {
     if (event.getQuitMessage() != null) {
       MatchPlayer player = match.getPlayer(event.getPlayer());
       if (player != null) {
-        announceJoinOrLeave(player, "broadcast.leaveMessage");
+        announceJoinOrLeave(player, "misc.leave");
       }
       event.setQuitMessage(null);
     }
@@ -296,7 +293,7 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void nerfFishing(PlayerFishEvent event) {
-    if (Config.Fishing.disableTreasure() && event.getCaught() instanceof Item) {
+    if (event.getCaught() instanceof Item) {
       Item caught = (Item) event.getCaught();
       if (caught.getItemStack().getType() != Material.RAW_FISH) {
         caught.setItemStack(new ItemStack(Material.RAW_FISH));
@@ -329,12 +326,11 @@ public class PGMListener implements Listener {
       Component staffName =
           UsernameFormatUtils.formatStaffName(event.getSender(), event.getMatch());
       PersonalizedTranslatable forced =
-          new PersonalizedTranslatable("pools.poolChange.force", poolName, staffName);
+          new PersonalizedTranslatable("pool.change.force", poolName, staffName);
       if (event.getTimeLimit() != null) {
         Component time =
             PeriodFormats.briefNaturalApproximate(event.getTimeLimit()).color(ChatColor.GREEN);
-        forced =
-            new PersonalizedTranslatable("pools.poolChange.force.timed", poolName, time, staffName);
+        forced = new PersonalizedTranslatable("pool.change.forceTimed", poolName, time, staffName);
       }
       ChatDispatcher.broadcastAdminChatMessage(
           forced.getPersonalizedText().color(ChatColor.GRAY), event.getMatch());
@@ -352,11 +348,10 @@ public class PGMListener implements Listener {
                   + ChatColor.WHITE
                   + "] "
                   + ChatColor.GREEN
-                  + AllTranslations.get()
-                      .translate(
-                          "pools.poolChange",
-                          Bukkit.getConsoleSender(),
-                          (ChatColor.AQUA + event.getNewPool().getName() + ChatColor.GREEN)));
+                  + TextTranslations.translate(
+                      "pool.change",
+                      Bukkit.getConsoleSender(),
+                      (ChatColor.AQUA + event.getNewPool().getName() + ChatColor.GREEN)));
     }
   }
 }

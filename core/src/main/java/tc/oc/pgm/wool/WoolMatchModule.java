@@ -22,7 +22,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.Config;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -38,7 +38,7 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.RUNNING)
 public class WoolMatchModule implements MatchModule, Listener {
@@ -117,7 +117,7 @@ public class WoolMatchModule implements MatchModule, Listener {
   }
 
   private void refillOneWoolPerContainer() {
-    if (!Config.Wool.autoRefillWoolChests()) return;
+    if (!PGM.get().getConfiguration().shouldRefillWool()) return;
 
     for (Entry<Inventory, Map<Integer, ItemStack>> chest : this.woolChests.entrySet()) {
       Inventory inv = chest.getKey();
@@ -185,11 +185,11 @@ public class WoolMatchModule implements MatchModule, Listener {
     if (player != null) { // wool can only be placed by a player
       Component woolName = wool.getComponentName();
       if (!isValidWool(wool.getDyeColor(), event.getNewState())) {
-        player.sendWarning(new PersonalizedTranslatable("match.wool.placeWrong", woolName), true);
+        player.sendWarning(new PersonalizedTranslatable("wool.wrongWool", woolName), true);
       } else if (wool.getOwner() != player.getParty()) {
         player.sendWarning(
             new PersonalizedTranslatable(
-                "match.wool.placeOther", wool.getOwner().getComponentName(), woolName),
+                "wool.wrongTeam", wool.getOwner().getComponentName(), woolName),
             true);
       } else {
         event.setCancelled(false);
@@ -221,11 +221,10 @@ public class WoolMatchModule implements MatchModule, Listener {
             if (!wool.getDefinition().isCraftable()) {
               playerHolder.sendMessage(
                   ChatColor.RED
-                      + AllTranslations.get()
-                          .translate(
-                              "match.wool.craftDisabled",
-                              playerHolder.getBukkit(),
-                              wool.getComponentName()));
+                      + TextTranslations.translate(
+                          "wool.craftingDisabled",
+                          playerHolder.getBukkit(),
+                          wool.getComponentName()));
               event.getInventory().setResult(null);
             }
           }

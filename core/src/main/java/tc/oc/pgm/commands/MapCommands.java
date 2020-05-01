@@ -17,6 +17,8 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -40,7 +42,7 @@ import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class MapCommands {
 
@@ -89,8 +91,7 @@ public class MapCommands {
     int pages = (maps.size() + resultsPerPage - 1) / resultsPerPage;
 
     String title =
-        ComponentUtils.paginate(
-            AllTranslations.get().translate("command.map.mapList.title", sender), page, pages);
+        ComponentUtils.paginate(TextTranslations.translate("map.title", sender), page, pages);
     String listHeader =
         ComponentUtils.horizontalLineHeading(title, ChatColor.BLUE, ComponentUtils.MAX_CHAT_WIDTH);
 
@@ -99,7 +100,7 @@ public class MapCommands {
       public String format(MapInfo map, int index) {
         return (index + 1)
             + ". "
-            + map.getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS, sender).toLegacyText();
+            + map.getStyledNameLegacy(MapNameStyle.COLOR_WITH_AUTHORS, sender);
       }
     }.display(audience, ImmutableSortedSet.copyOf(maps), page);
   }
@@ -146,17 +147,17 @@ public class MapCommands {
 
     audience.sendMessage(
         new PersonalizedText(
-            mapInfoLabel("command.map.mapInfo.objective"),
+            mapInfoLabel("map.info.objective"),
             new PersonalizedText(map.getDescription(), ChatColor.GOLD)));
 
     Collection<Contributor> authors = map.getAuthors();
     if (authors.size() == 1) {
       audience.sendMessage(
           new PersonalizedText(
-              mapInfoLabel("command.map.mapInfo.authorSingular"),
+              mapInfoLabel("map.info.author.singular"),
               formatContribution(authors.iterator().next())));
     } else {
-      audience.sendMessage(mapInfoLabel("command.map.mapInfo.authorPlural"));
+      audience.sendMessage(mapInfoLabel("map.info.author.plural"));
       for (Contributor author : authors) {
         audience.sendMessage(new PersonalizedText("  ").extra(formatContribution(author)));
       }
@@ -164,14 +165,14 @@ public class MapCommands {
 
     Collection<Contributor> contributors = map.getContributors();
     if (!contributors.isEmpty()) {
-      audience.sendMessage(mapInfoLabel("command.map.mapInfo.contributors"));
+      audience.sendMessage(mapInfoLabel("map.info.contributors"));
       for (Contributor contributor : contributors) {
         audience.sendMessage(new PersonalizedText("  ").extra(formatContribution(contributor)));
       }
     }
 
     if (!map.getRules().isEmpty()) {
-      audience.sendMessage(mapInfoLabel("command.map.mapInfo.rules"));
+      audience.sendMessage(mapInfoLabel("map.info.rules"));
 
       int i = 0;
       for (String rule : map.getRules()) {
@@ -184,13 +185,12 @@ public class MapCommands {
 
     audience.sendMessage(
         new PersonalizedText(
-            mapInfoLabel("command.map.mapInfo.playerLimit"),
-            createPlayerLimitComponent(sender, map)));
+            mapInfoLabel("map.info.playerLimit"), createPlayerLimitComponent(sender, map)));
 
     if (sender.hasPermission(Permissions.DEBUG)) {
       audience.sendMessage(
           new PersonalizedText(
-              mapInfoLabel("command.map.mapInfo.proto"),
+              mapInfoLabel("map.info.proto"),
               new PersonalizedText(map.getProto().toString(), ChatColor.GOLD)));
     }
 
@@ -206,7 +206,7 @@ public class MapCommands {
       if (!mapPools.isEmpty()) {
         audience.sendMessage(
             new PersonalizedText(
-                mapInfoLabel("command.map.mapInfo.pools"),
+                mapInfoLabel("map.info.pools"),
                 new PersonalizedText(mapPools).color(ChatColor.GOLD).bold(false)));
       }
     }
@@ -215,7 +215,7 @@ public class MapCommands {
   private Component createTagsComponent(Collection<MapTag> tags) {
     checkNotNull(tags);
 
-    Component result = mapInfoLabel("command.map.mapInfo.tags");
+    Component result = mapInfoLabel("map.info.tags");
     MapTag[] mapTags = tags.toArray(new MapTag[0]);
     for (int i = 0; i < mapTags.length; i++) {
       if (i != 0) {
@@ -229,7 +229,7 @@ public class MapCommands {
               .clickEvent(ClickEvent.Action.RUN_COMMAND, "/maps -t " + mapTag)
               .hoverEvent(
                   HoverEvent.Action.SHOW_TEXT,
-                  new PersonalizedTranslatable("command.map.mapTag.hover", mapTag).render());
+                  new PersonalizedTranslatable("map.info.mapTag.hover", mapTag).render());
       result.extra(component);
     }
     return result;
@@ -249,8 +249,7 @@ public class MapCommands {
     int totalPlayers = maxPlayers.stream().mapToInt(i -> i).sum();
     Component total = new PersonalizedText(Integer.toString(totalPlayers), ChatColor.GOLD);
 
-    String verboseVs =
-        " " + AllTranslations.get().translate("command.map.mapInfo.playerLimit.vs", sender) + " ";
+    String verboseVs = " " + TextTranslations.translate("map.info.playerLimit.vs", sender) + " ";
     Component verbose =
         new PersonalizedText(
             new PersonalizedText("(")
@@ -271,19 +270,15 @@ public class MapCommands {
     final MapInfo next = mapOrder.getNextMap();
 
     if (next == null) {
-      sender.sendMessage(
-          ChatColor.RED + AllTranslations.get().translate("command.map.next.noNextMap", sender));
+      sender.sendMessage(ChatColor.RED + TextTranslations.translate("map.noNextMap", sender));
       return;
     }
 
     audience.sendMessage(
-        ChatColor.DARK_PURPLE
-            + AllTranslations.get()
-                .translate(
-                    "command.map.next.success",
-                    sender,
-                    next.getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS, sender).toLegacyText()
-                        + ChatColor.DARK_PURPLE));
+        TranslatableComponent.of(
+            "map.nextMap",
+            TextColor.DARK_PURPLE,
+            next.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS)));
   }
 
   private @Nullable Component formatContribution(Contributor contributor) {

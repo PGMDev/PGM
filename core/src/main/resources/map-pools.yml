@@ -1,17 +1,29 @@
 #
-# Map pool sample configuration
-#
-# Each new rotation or voted pool should follow the same configuration structure, within this file
-#
-# NOTE: Map names are case-sensitive
+# PGM
+# Map pool configuration.
 
 pools:
+  # A map pool named "default".
   default:
-    # Allowed types: ordered (rotation), voted (voted map pool), shuffled (randomly selected order)
+
+    # A type of map pool.
+    #
+    #  "ordered"  = maps are played in the provided order.
+    #  "shuffled" = maps are played in random order.
+    #  "voted"    = players vote on which maps are played next.
     type: ordered
+
+    # Is this map pool enabled?
     enabled: true
-    dynamic: true # If set to true, map pool will be considered when adjusting to best fit player size.
+
+    # Is this map pool dynamic?
+    #
+    # If true, the pool is only enabled when the number of players
+    # on the server reaches the "players" threshold.
+    dynamic: true
     players: 1
+
+    # A list of map names in this pool. Names are case-sensitive.
     maps:
       - Airship Battle
       - Harb

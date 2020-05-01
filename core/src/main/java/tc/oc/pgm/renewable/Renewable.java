@@ -29,7 +29,7 @@ import tc.oc.pgm.util.block.BlockFaces;
 import tc.oc.pgm.util.block.BlockVectorSet;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.material.MaterialCounter;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.material.Materials;
 
 public class Renewable implements Listener, Tickable {
 
@@ -274,12 +274,8 @@ public class Renewable implements Listener, Tickable {
 
     newState.update(true, true);
 
-    if (definition.particles) {
-      NMSHacks.playBlockBreakEffect(match.getWorld(), pos, material.getItemType());
-    }
-
-    if (definition.sound) {
-      // TODO: find bukkit api to do this
+    if (definition.particles || definition.sound) {
+      Materials.playBreakEffect(location, material);
     }
 
     return true;

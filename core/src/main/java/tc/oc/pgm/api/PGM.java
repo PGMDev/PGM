@@ -16,6 +16,8 @@ import tc.oc.pgm.tablist.MatchTabManager;
 /** PvP Game Manager (aka. PGM), the global {@link Plugin} to manage PvP games. */
 public interface PGM extends Plugin {
 
+  Config getConfiguration();
+
   Logger getGameLogger();
 
   Datastore getDatastore();
