@@ -88,8 +88,6 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
    *
    * @return The {@link Player}, or {@code null} if offline.
    */
-  @Deprecated
-  @Nullable
   Player getBukkit();
 
   /**
@@ -168,8 +166,8 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
   /**
    * Mark the {@link MatchPlayer} as dead.
    *
-   * @see #isDead()
    * @param dead Whether the {@link MatchPlayer} should be dead.
+   * @see #isDead()
    */
   void setDead(boolean dead);
 

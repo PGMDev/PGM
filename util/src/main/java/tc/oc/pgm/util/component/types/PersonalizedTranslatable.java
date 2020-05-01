@@ -1,18 +1,20 @@
 package tc.oc.pgm.util.component.types;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TranslatableComponent;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.Components;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 /**
  * A {@link Component} that wraps around a {@link TranslatableComponent}
  *
- * <p>This component checks if the pattern provided exists in {@link AllTranslations}, if it does,
+ * <p>This component checks if the pattern provided exists in {@link TextTranslations}, if it does,
  * it returns a translated {@link PersonalizedText} component using the arguments. If it doesn't
  * exist, it uses a default {@link TranslatableComponent} as a fallback
  */
@@ -49,7 +51,9 @@ public class PersonalizedTranslatable extends Component {
   @Override
   public BaseComponent render(CommandSender viewer) {
     TranslatableComponent component = getComponent();
-    String pattern = AllTranslations.get().getPattern(component.getTranslate(), viewer);
+    MessageFormat pattern =
+        TextTranslations.getNearestKey(
+            viewer == null ? Locale.US : viewer.getLocale(), component.getTranslate());
 
     if (pattern != null) {
       // Found a TranslatableComponent with one of our keys
@@ -57,7 +61,7 @@ public class PersonalizedTranslatable extends Component {
       for (BaseComponent extra : component.getWith()) with.add(new Component(extra));
 
       BaseComponent finalComponent =
-          new PersonalizedText(Components.format(pattern, with)).render(viewer);
+          new PersonalizedText(Components.format(pattern.toPattern(), with)).render(viewer);
       Components.copyFormat(component, finalComponent);
       return finalComponent;
     } else {

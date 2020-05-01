@@ -62,7 +62,7 @@ public class PlayerClass {
   }
 
   public boolean canUse(Player player) {
-    return !this.isRestricted() || player.isOp();
+    return true; // Restricted classes are removed: !this.isRestricted() || player.isOp();
   }
 
   @Override

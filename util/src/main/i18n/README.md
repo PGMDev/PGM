@@ -1,13 +1,33 @@
 Translations [![Crowdin](https://badges.crowdin.net/pgm/localized.svg)](https://crowdin.com/project/pgm)
 ===
 
-All languages that are [supported by the Minecraft client](https://crowdin.net/project/minecraft) are supported by PGM.
+PGM uses [Crowdin](https://crowdin.com/project/pgm) to maintain its extensive amount of translations. Any message, alert, or user interface should be properly translated using this guide. See the `i18n/templates` folder for a comprehensive list of all translation keys.
 
-The original English string templates live in [strings.properties](templates/strings.properties), and may be edited
-when making modifications to the project. Modifications to the English string templates will be automatically uploaded
-to [our CrowdIn project](https://crowdin.com/project/pgm) when a new commit is pushed to the `master` branch or any
-`feat/*` branch on the main PGM repo. Translations may then be submitted by the community. Once they are approved, they
-will be automatically PR'd back into the source branch on an hourly basis.
+If you want to add a new translation key or editing an existing key **in English** make a PR on Github. For all other languages, go to our project on [Crowdin](https://crowdin.com/project/pgm).
 
-**Note**: Please do not modify any *translation* files directly in this repo. Instead, translations should be submitted
-through [our CrowdIn project](https://crowdin.com/project/pgm), through the process described above.
+Example
+===
+
+Let's say you want to send a message to player's telling them who won the match.
+
+First, go to `i18n/templates/match.properties` and add a new key. Always make sure to add `{0} = ...` comments above the key so others know how to translate it.
+
+```properties
+# {0} = player name
+# {1} = number of points
+match.end.notifyWinner = Congrats, {0} won the match with {1} points!
+```
+
+Then, go to your code and use `TranslatableComponent` and `TextComponent` to create your message. 
+
+```java
+public void sendMatchEnd(MatchPlayer player, String winnerName, int points) {
+  player.sendMessage(
+    TranslatableComponent.of("match.end.notifyWinner",
+      TextComponent.of(winnerName, TextColor.GOLD),
+      TextComponent.of(points, TextColor.GREEN)
+      TextColor.AQUA));
+}
+```
+
+See `TextFormatter` for extra utilities such as translating lists, multiple names, or time durations.

@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
-import tc.oc.pgm.Config;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -124,7 +124,7 @@ public class MatchTabView extends TabView implements ListeningTabView {
       // Number of players/staff on observers
       int observingPlayers = 0;
       int observingStaff = 0;
-      if (Config.PlayerList.playersSeeObservers() || matchPlayer.isObserving()) {
+      if (PGM.get().getConfiguration().canParticipantsSeeObservers() || matchPlayer.isObserving()) {
         observingPlayers = observers.size();
         for (MatchPlayer player : observers) {
           if (player.getBukkit().hasPermission(Permissions.STAFF)) observingStaff++;

@@ -45,6 +45,7 @@ import tc.oc.pgm.projectile.ProjectileDefinition;
 import tc.oc.pgm.shield.ShieldKit;
 import tc.oc.pgm.shield.ShieldParameters;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -377,10 +378,10 @@ public abstract class KitParser {
     if (el == null) return null;
 
     org.jdom2.Attribute attrMaterial = el.getAttribute("material");
-    Material type =
-        Material.matchMaterial(attrMaterial != null ? attrMaterial.getValue() : el.getValue());
+    String name = attrMaterial != null ? attrMaterial.getValue() : el.getValue();
+    Material type = Materials.parseMaterial(name);
     if (type == null || (type == Material.AIR && !allowAir)) {
-      throw new InvalidXMLException("Invalid material type '" + el.getValue() + "'.", el);
+      throw new InvalidXMLException("Invalid material type '" + name + "'", el);
     }
 
     return parseItem(el, type);

@@ -1,16 +1,9 @@
 package tc.oc.pgm.util.bukkit;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import org.bukkit.*;
-import org.bukkit.inventory.ItemFactory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
-import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
 
@@ -29,34 +22,10 @@ public interface BukkitUtils {
     return PLUGIN.get();
   }
 
-  ItemFactory FACTORY = Bukkit.getServer().getItemFactory();
-
   /** Makes strings have pretty colors */
   static String colorize(String s) {
     return ChatColor.translateAlternateColorCodes(
         '&', ChatColor.translateAlternateColorCodes('`', s));
-  }
-
-  static List<String> colorizeList(List<String> list) {
-    List<String> result = new ArrayList<String>();
-
-    for (String line : list) {
-      result.add(colorize(line));
-    }
-
-    return result;
-  }
-
-  static ItemStack generateBook(String title, String author, List<String> pages) {
-    ItemStack stack = new ItemStack(Material.WRITTEN_BOOK);
-    BookMeta meta = (BookMeta) FACTORY.getItemMeta(Material.WRITTEN_BOOK);
-
-    meta.setTitle(title);
-    meta.setAuthor(author);
-    meta.setPages(pages);
-
-    stack.setItemMeta(meta);
-    return stack;
   }
 
   static ChatColor dyeColorToChatColor(DyeColor dyeColor) {
@@ -74,12 +43,6 @@ public interface BukkitUtils {
       return dyeColor;
     } else {
       return DyeColor.WHITE;
-    }
-  }
-
-  static void broadcastMessage(final String... messages) {
-    for (String message : Preconditions.checkNotNull(messages, "Messages")) {
-      Bukkit.broadcastMessage(Preconditions.checkNotNull(message, "Message"));
     }
   }
 
@@ -187,16 +150,6 @@ public interface BukkitUtils {
           .put(PotionEffectType.ABSORPTION, "Absorption")
           .put(PotionEffectType.SATURATION, "Saturation")
           .build();
-
-  static MetadataValue getPluginMetadata(Plugin plugin, List<MetadataValue> metadataValues) {
-    for (MetadataValue metadataValue : metadataValues) {
-      if (metadataValue.getOwningPlugin() == plugin) {
-        return metadataValue;
-      }
-    }
-
-    return null;
-  }
 
   static ChatColor convertColor(net.md_5.bungee.api.ChatColor color) {
     return ChatColor.getByChar(color.toString().charAt(1));

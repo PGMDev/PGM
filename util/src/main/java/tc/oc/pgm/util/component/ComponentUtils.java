@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 
-public class ComponentUtils {
+public final class ComponentUtils {
 
   public static final int GUARANTEED_NO_WRAP_CHAT_PAGE_WIDTH = 55;
   public static final int MAX_CHAT_WIDTH = 300;

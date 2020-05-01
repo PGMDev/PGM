@@ -1,6 +1,6 @@
 package tc.oc.pgm.kits.tag;
 
-import tc.oc.pgm.util.item.tag.ItemTag;
+import tc.oc.pgm.util.inventory.tag.ItemTag;
 
 public class ItemTags {
 

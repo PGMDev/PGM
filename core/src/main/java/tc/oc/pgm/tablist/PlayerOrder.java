@@ -3,7 +3,8 @@ package tc.oc.pgm.tablist;
 import java.util.Comparator;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
-import tc.oc.pgm.Config;
+import tc.oc.pgm.api.Config;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.player.MatchPlayer;
 
@@ -47,7 +48,8 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
 
     // If players have different permissions, the player with the highest ranked perm
     // that the other one does't have is first. Disguised players effectively have no perms.
-    for (Permission permission : Config.PlayerList.getPermsByPriority()) {
+    for (Config.Group group : PGM.get().getConfiguration().getGroups()) {
+      Permission permission = group.getPermission();
       boolean aPerm = a.hasPermission(permission);
       boolean bPerm = b.hasPermission(permission);
 

@@ -7,10 +7,6 @@ import java.util.logging.Logger;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Skull;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -22,7 +18,6 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.block.BlockVectorSet;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class WorldProblemListener implements Listener {
 
@@ -52,26 +47,6 @@ public class WorldProblemListener implements Listener {
             "Gamerule 'randomTickSpeed' is set to "
                 + value
                 + " for this world (normal value is 3). This may overload the server.");
-      }
-    }
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void warnUncachedSkulls(ChunkLoadEvent event) {
-    for (BlockState state : event.getChunk().getTileEntities()) {
-      if (state instanceof Skull) {
-        if (!NMSHacks.isSkullCached((Skull) state)) {
-          Location loc = state.getLocation();
-          broadcastDeveloperWarning(
-              "Uncached skull \""
-                  + ((Skull) state).getOwner()
-                  + "\" at "
-                  + loc.getBlockX()
-                  + ", "
-                  + loc.getBlockY()
-                  + ", "
-                  + loc.getBlockZ());
-        }
       }
     }
   }
@@ -108,14 +83,5 @@ public class WorldProblemListener implements Listener {
 
   public static boolean wasBlock36(World world, int x, int y, int z) {
     return block36Locations.get(world).contains(x, y, z);
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void fixVillagerTrades(ChunkLoadEvent event) {
-    for (Entity entity : event.getChunk().getEntities()) {
-      if (entity instanceof Villager) {
-        NMSHacks.fixVillagerTrades((Villager) entity);
-      }
-    }
   }
 }

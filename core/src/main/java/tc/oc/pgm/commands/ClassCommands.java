@@ -13,7 +13,7 @@ import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.PlayerClass;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.component.ComponentUtils;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class ClassCommands {
 
@@ -31,59 +31,52 @@ public class ClassCommands {
       // show current class
       sender.sendMessage(
           ChatColor.GREEN
-              + AllTranslations.get()
-                  .translate("command.class.view.currentClass", player.getBukkit())
+              + TextTranslations.translate("match.class.current", player.getBukkit())
               + " "
               + ChatColor.GOLD
               + ChatColor.UNDERLINE
               + cls.getName());
       sender.sendMessage(
           ChatColor.DARK_PURPLE
-              + AllTranslations.get()
-                  .translate("command.class.view.list", player.getBukkit())
+              + TextTranslations.translate("match.class.view", player.getBukkit())
                   .replace("'/classes'", ChatColor.GOLD + "'/classes'" + ChatColor.DARK_PURPLE));
     } else {
       PlayerClass result = StringUtils.bestFuzzyMatch(search, classModule.getClasses(), 0.9);
 
       if (result == null) {
         throw new CommandException(
-            AllTranslations.get()
-                .translate("command.class.select.classNotFound", player.getBukkit()));
+            TextTranslations.translate("match.class.notFound", player.getBukkit()));
       }
 
       if (!cls.canUse(player.getBukkit())) {
         throw new CommandException(
-            AllTranslations.get()
-                .translate(
-                    "command.class.restricted",
-                    player.getBukkit(),
-                    ChatColor.GOLD,
-                    result.getName(),
-                    ChatColor.RED));
+            TextTranslations.translate(
+                "command.class.restricted",
+                player.getBukkit(),
+                ChatColor.GOLD,
+                result.getName(),
+                ChatColor.RED));
       }
 
       try {
         classModule.setPlayerClass(player.getId(), result);
       } catch (IllegalStateException e) {
         throw new CommandException(
-            AllTranslations.get().translate("command.class.stickyClass", player.getBukkit()));
+            TextTranslations.translate("match.class.sticky", player.getBukkit()));
       }
 
       sender.sendMessage(
           ChatColor.GREEN
-              + AllTranslations.get()
-                  .translate(
-                      "command.class.select.confirm",
-                      player.getBukkit(),
-                      ChatColor.GOLD.toString()
-                          + ChatColor.UNDERLINE
-                          + result.getName()
-                          + ChatColor.GREEN));
+              + TextTranslations.translate(
+                  "match.class.ok",
+                  player.getBukkit(),
+                  ChatColor.GOLD.toString()
+                      + ChatColor.UNDERLINE
+                      + result.getName()
+                      + ChatColor.GREEN));
       if (player.isParticipating()) {
         sender.sendMessage(
-            ChatColor.GREEN
-                + AllTranslations.get()
-                    .translate("command.class.select.nextSpawn", player.getBukkit()));
+            ChatColor.GREEN + TextTranslations.translate("match.class.queue", player.getBukkit()));
       }
     }
   }
@@ -99,11 +92,10 @@ public class ClassCommands {
 
     sender.sendMessage(
         ComponentUtils.dashedChatMessage(
-            ChatColor.GOLD + AllTranslations.get().translate("command.class.list.title", sender),
+            ChatColor.GOLD + TextTranslations.translate("match.class.title", sender),
             "-",
             ChatColor.RED.toString()));
     int i = 1;
-    boolean doesntHave = false;
     for (PlayerClass cls : classModule.getClasses()) {
       StringBuilder result = new StringBuilder();
 
@@ -115,7 +107,6 @@ public class ClassCommands {
         result.append(ChatColor.GREEN);
       } else {
         result.append(ChatColor.RED);
-        doesntHave = true;
       }
 
       if (cls == senderClass) result.append(ChatColor.UNDERLINE);
@@ -131,17 +122,6 @@ public class ClassCommands {
 
       sender.sendMessage(result.toString());
     }
-
-    if (doesntHave) {
-      sender.sendMessage(
-          ComponentUtils.dashedChatMessage(
-              ChatColor.GOLD
-                  + AllTranslations.get()
-                      .translate("command.class.list.shop", sender)
-                      .replace("oc.tc/shop", ChatColor.GREEN + "oc.tc/shop" + ChatColor.GOLD),
-              "-",
-              ChatColor.RED.toString()));
-    }
   }
 
   private static ClassMatchModule getClassModule(Match match, CommandSender sender)
@@ -150,8 +130,7 @@ public class ClassCommands {
     if (classModule != null) {
       return classModule;
     } else {
-      throw new CommandException(
-          AllTranslations.get().translate("command.class.notEnabled", sender));
+      throw new CommandException(TextTranslations.translate("match.class.notEnabled", sender));
     }
   }
 }

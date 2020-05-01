@@ -2,9 +2,10 @@ package tc.oc.pgm.api.player;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
+import tc.oc.pgm.util.named.Named;
 
 /** Represents the mapping of a {@link UUID} to a username. */
-public interface Username {
+public interface Username extends Named {
 
   /**
    * Get the unique {@link UUID} of the player.
@@ -25,7 +26,6 @@ public interface Username {
    * Change the username of the player.
    *
    * @param name The new username or null.
-   * @return Whether the operation was successful.
    */
-  boolean setName(@Nullable String name);
+  void setName(@Nullable String name);
 }

@@ -20,7 +20,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
-import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
@@ -136,19 +135,19 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   public Component getTouchMessage(@Nullable ParticipantState toucher, boolean self) {
     if (toucher == null) {
       return new PersonalizedTranslatable(
-          "match.touch.destroyable.owner",
+          "destroyable.touch.owned",
           Components.blank(),
           getComponentName(),
           getOwner().getComponentName());
     } else if (self) {
       return new PersonalizedTranslatable(
-          "match.touch.destroyable.owner.you",
+          "destroyable.touch.owned.you",
           Components.blank(),
           getComponentName(),
           getOwner().getComponentName());
     } else {
       return new PersonalizedTranslatable(
-          "match.touch.destroyable.owner.toucher",
+          "destroyable.touch.owned.player",
           toucher.getStyledName(NameStyle.COLOR),
           getComponentName(),
           getOwner().getComponentName());
@@ -401,14 +400,14 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     if (deltaHealth < 0) {
       // Damage
       if (player != null && player.getParty() == this.getOwner()) {
-        return "match.destroyable.damageOwn";
+        return "destroyable.damageOwn";
       }
     } else if (deltaHealth > 0) {
       // Repair
       if (player != null && player.getParty() != this.getOwner()) {
-        return "match.destroyable.repairOther";
+        return "destroyable.repairOther";
       } else if (!this.definition.isRepairable()) {
-        return "match.destroyable.repairDisabled";
+        return "destroyable.repairDisabled";
       }
     }
 
@@ -503,7 +502,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   public String renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
     if (this.getShowProgress() || viewer.isObserving()) {
       String text = this.renderCompletion();
-      if (Config.Scoreboard.preciseProgress()) {
+      if (PGM.get().getConfiguration().showProximity()) {
         String precise = this.renderPreciseCompletion();
         if (precise != null) {
           text += " " + ChatColor.GRAY + precise;

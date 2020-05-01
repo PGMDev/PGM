@@ -5,21 +5,19 @@ import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
 import net.minecraft.server.v1_8_R3.*;
-import net.minecraft.server.v1_8_R3.Item;
 import net.minecraft.server.v1_8_R3.WorldBorder;
 import org.bukkit.*;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Skull;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.*;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftMetaBook;
-import org.bukkit.craftbukkit.v1_8_R3.potion.CraftPotionEffectType;
 import org.bukkit.craftbukkit.v1_8_R3.scoreboard.CraftTeam;
 import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers;
 import org.bukkit.craftbukkit.v1_8_R3.util.Skins;
@@ -28,14 +26,14 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.potion.PotionEffectTypeWrapper;
 import org.bukkit.scoreboard.NameTagVisibility;
-import org.bukkit.util.Vector;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
 
 public interface NMSHacks {
+
+  AtomicInteger ENTITY_IDS = new AtomicInteger(Integer.MAX_VALUE);
 
   static EntityTrackerEntry getTrackerEntry(net.minecraft.server.v1_8_R3.Entity nms) {
     return ((WorldServer) nms.getWorld()).getTracker().trackedEntities.get(nms.getId());
@@ -43,69 +41,6 @@ public interface NMSHacks {
 
   static EntityTrackerEntry getTrackerEntry(Entity entity) {
     return getTrackerEntry(((CraftEntity) entity).getHandle());
-  }
-
-  static void forceRespawn(Player player) {
-    if (player.isDead()) {
-      if (player.getVehicle() != null) {
-        player.getVehicle().eject();
-      }
-      PacketPlayInClientCommand packet =
-          new PacketPlayInClientCommand(
-              PacketPlayInClientCommand.EnumClientCommand.PERFORM_RESPAWN);
-      CraftPlayer cplayer = (CraftPlayer) player;
-      packet.a(cplayer.getHandle().playerConnection);
-    }
-  }
-
-  /** Check all of the given villagers trades and replace any with invalid data */
-  static void fixVillagerTrades(Villager villager) {
-    EntityVillager nms = ((CraftVillager) villager).getHandle();
-    MerchantRecipeList offers = nms.getOffers(null);
-
-    for (int i = 0; i < offers.size(); i++) {
-      MerchantRecipe oldRecipe = offers.get(i);
-      if (oldRecipe.getBuyItem1() == null || oldRecipe.getBuyItem3() == null) {
-        // If the buy1 or sell slots are null, then trying to serialize the
-        // villager will generate an NPE. Assume it's a terminal recipe with
-        // invalid items, and replace it with a working recipe.
-        MerchantRecipe newRecipe =
-            new MerchantRecipe(
-                new ItemStack(Blocks.BARRIER), // Buy slot 1
-                oldRecipe.getBuyItem2(), // Buy slot 2
-                new ItemStack(Blocks.BARRIER), // Sell slot
-                oldRecipe.e(), // Uses
-                oldRecipe.f()); // Max uses
-        // Only way to set this field is through NBT
-        if (!oldRecipe.j()) {
-          NBTTagCompound tag = newRecipe.k();
-          tag.setBoolean("rewardExp", false);
-          newRecipe.a(tag);
-        }
-
-        offers.set(i, newRecipe);
-      }
-    }
-  }
-
-  static void openVillagerTrade(Player bukkitPlayer, Villager bukkitVillager) {
-    EntityVillager villager = ((CraftVillager) bukkitVillager).getHandle();
-    EntityPlayer player = ((CraftPlayer) bukkitPlayer).getHandle();
-    NBTTagCompound data = new NBTTagCompound();
-    EntityVillager newVillager = new EntityVillager(player.world);
-
-    villager.b(data);
-    newVillager.dead = false;
-    newVillager.setAge(1);
-    newVillager.a(data);
-    newVillager.a_(player);
-
-    player.openTrade(newVillager);
-  }
-
-  static boolean hasInfinityEnchanment(Arrow bukkitArrow) {
-    EntityArrow arrow = ((CraftArrow) bukkitArrow).getHandle();
-    return arrow.fromPlayer == 2; // ELECTROID: EntityArrow.PickupStatus.DISALLOWED;
   }
 
   static void sendPacket(Player bukkitPlayer, Object packet) {
@@ -158,29 +93,6 @@ public interface NMSHacks {
     return playerListPacketData(packet, uuid, null, null, null, 0, null);
   }
 
-  static Packet playerListAddPacket(
-      UUID uuid,
-      String name,
-      @Nullable BaseComponent displayName,
-      GameMode gamemode,
-      int ping,
-      @Nullable Skin skin) {
-    PacketPlayOutPlayerInfo packet = new PacketPlayOutPlayerInfo();
-    packet.a = PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER;
-    packet.b.add(playerListPacketData(packet, uuid, name, displayName, gamemode, ping, skin));
-    return packet;
-  }
-
-  static Packet playerListRemovePacket(UUID uuid, String name) {
-    PacketPlayOutPlayerInfo packet = new PacketPlayOutPlayerInfo();
-    packet.a = PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER;
-
-    packet.b.add(
-        new PacketPlayOutPlayerInfo(packet.a)
-            .constructData(new GameProfile(uuid, name), 0, null, null));
-    return packet;
-  }
-
   static Packet teamPacket(
       int operation,
       String name,
@@ -217,27 +129,6 @@ public interface NMSHacks {
       String suffix,
       boolean friendlyFire,
       boolean seeFriendlyInvisibles,
-      NameTagVisibility nameTagVisibility,
-      Collection<String> players) {
-    return teamPacket(
-        0,
-        name,
-        displayName,
-        prefix,
-        suffix,
-        friendlyFire,
-        seeFriendlyInvisibles,
-        nameTagVisibility,
-        players);
-  }
-
-  static Packet teamCreatePacket(
-      String name,
-      String displayName,
-      String prefix,
-      String suffix,
-      boolean friendlyFire,
-      boolean seeFriendlyInvisibles,
       Collection<String> players) {
     return teamPacket(
         0,
@@ -255,25 +146,6 @@ public interface NMSHacks {
     return teamPacket(1, name, null, null, null, false, false, null, Lists.<String>newArrayList());
   }
 
-  static Packet teamUpdatePacket(
-      String name,
-      String displayName,
-      String prefix,
-      String suffix,
-      boolean friendlyFire,
-      boolean seeFriendlyInvisibles) {
-    return teamPacket(
-        2,
-        name,
-        displayName,
-        prefix,
-        suffix,
-        friendlyFire,
-        seeFriendlyInvisibles,
-        null,
-        Lists.<String>newArrayList());
-  }
-
   static Packet teamJoinPacket(String name, Collection<String> players) {
     return teamPacket(3, name, null, null, null, false, false, null, players);
   }
@@ -282,25 +154,9 @@ public interface NMSHacks {
     return teamPacket(4, name, null, null, null, false, false, null, players);
   }
 
-  /** Entity Spawning and Metadata */
   static int allocateEntityId() {
-    return allocateEntityId(null);
+    return ENTITY_IDS.decrementAndGet();
   }
-
-  static int allocateEntityId(@Nullable Object context) {
-    Integer i = null;
-    if (context != null) {
-      i = ENTITY_IDS.get(context);
-    }
-    if (i == null) {
-      i = Bukkit.allocateEntityId();
-      if (context != null) ENTITY_IDS.put(context, i);
-    }
-    return i;
-  }
-
-  // FIXME: Ensure map size does not grow forever
-  Map<Object, Integer> ENTITY_IDS = new WeakHashMap<>();
 
   static class EntityMetadata {
     public final DataWatcher dataWatcher;
@@ -425,20 +281,11 @@ public interface NMSHacks {
     sendPacket(player, teleportEntityPacket(entityId, location));
   }
 
-  static Packet entityMetadataPacket(Entity entity, boolean complete) {
-    return entityMetadataPacket(((CraftEntity) entity).getHandle().getId(), entity, complete);
-  }
-
   static Packet entityMetadataPacket(int entityId, Entity entity, boolean complete) {
     return new PacketPlayOutEntityMetadata(
         entityId,
         ((CraftEntity) entity).getHandle().getDataWatcher(),
         complete); // true = all values, false = only dirty values
-  }
-
-  static Packet entityMetadataPacket(int entityId, EntityMetadata metadata, boolean complete) {
-    return new PacketPlayOutEntityMetadata(
-        entityId, metadata.dataWatcher, complete); // true = all values, false = only dirty values
   }
 
   static EntityMetadata createEntityMetadata() {
@@ -497,21 +344,6 @@ public interface NMSHacks {
     metadata.dataWatcher.a(10, (byte) flags);
   }
 
-  static Packet entityEquipmentPacket(int entityId, int slot, org.bukkit.inventory.ItemStack item) {
-    return new PacketPlayOutEntityEquipment(entityId, slot, CraftItemStack.asNMSCopy(item));
-  }
-
-  static void playEffect(World bukkitWorld, Vector pos, int effectId, int data) {
-    WorldServer world = ((CraftWorld) bukkitWorld).getHandle();
-    world.triggerEffect(
-        effectId, new BlockPosition(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ()), data);
-  }
-
-  @SuppressWarnings("deprecation")
-  static void playBlockBreakEffect(World bukkitWorld, Vector pos, org.bukkit.Material material) {
-    playEffect(bukkitWorld, pos, 2001, material.getId());
-  }
-
   /**
    * Test if the given tool is capable of "efficiently" mining the given block.
    *
@@ -536,20 +368,6 @@ public interface NMSHacks {
     return ((CraftWorld) world).getHandle().getTime();
   }
 
-  /**
-   * Test if a {@link Skull} has a cached skin. If this returns false, the skull will likely try to
-   * fetch its skin the next time it is loaded.
-   */
-  static boolean isSkullCached(Skull skull) {
-    TileEntitySkull nmsSkull =
-        (TileEntitySkull)
-            ((CraftWorld) skull.getWorld())
-                .getTileEntityAt(skull.getX(), skull.getY(), skull.getZ());
-    return nmsSkull.getGameProfile() == null
-        || (nmsSkull.getGameProfile().isComplete()
-            && nmsSkull.getGameProfile().getProperties().containsKey("textures"));
-  }
-
   static void sendMessage(Player player, BaseComponent[] message, int position) {
     PacketPlayOutChat packet = new PacketPlayOutChat(null, (byte) position);
     packet.components = message;
@@ -564,48 +382,6 @@ public interface NMSHacks {
 
   static void sendHotbarMessage(Player player, Component message) {
     sendHotbarMessage(player, message.toLegacyText());
-  }
-
-  static void enableArmorSlots(ArmorStand armorStand, boolean enabled) {
-    CraftArmorStand craftArmorStand = (CraftArmorStand) armorStand;
-    NBTTagCompound nbt = new NBTTagCompound();
-    craftArmorStand.getHandle().b(nbt);
-    nbt.setInt("DisabledSlots", enabled ? 0 : 0x1f1f00);
-    craftArmorStand.getHandle().a(nbt);
-  }
-
-  static Object particlesPacket(
-      String name,
-      boolean longRange,
-      Vector pos,
-      Vector offset,
-      float data,
-      int count,
-      int... extra) {
-    return new PacketPlayOutWorldParticles(
-        EnumParticle.valueOf(EnumParticle.class, name),
-        longRange,
-        (float) pos.getX(),
-        (float) pos.getY(),
-        (float) pos.getZ(),
-        (float) offset.getX(),
-        (float) offset.getY(),
-        (float) offset.getZ(),
-        data,
-        count,
-        extra);
-  }
-
-  static Object blockCrackParticlesPacket(
-      MaterialData material, boolean longRange, Vector pos, Vector offset, float data, int count) {
-    return particlesPacket(
-        "BLOCK_CRACK",
-        longRange,
-        pos,
-        offset,
-        data,
-        count,
-        material.getItemTypeId() + (material.getData() << 12));
   }
 
   static void showBorderWarning(Player player, boolean show) {
@@ -646,66 +422,6 @@ public interface NMSHacks {
     }
 
     sendPacketToViewers(player, packet);
-  }
-
-  static ItemStack asNMS(org.bukkit.inventory.ItemStack bukkit) {
-    if (bukkit instanceof CraftItemStack) {
-      return ((CraftItemStack) bukkit).getHandle();
-    } else {
-      return CraftItemStack.asNMSCopy(bukkit);
-    }
-  }
-
-  static String getKey(org.bukkit.Material material) {
-    MinecraftKey key = Item.REGISTRY.c(Item.getById(material.getId()));
-    return key == null ? null : key.toString();
-  }
-
-  static String getTranslationKey(org.bukkit.inventory.ItemStack stack) {
-    ItemStack nms = asNMS(stack);
-    return nms == null ? null : nms.getItem().k(nms) + ".name";
-  }
-
-  static String getTranslationKey(Block nmsBlock) {
-    return nmsBlock.a() + ".name";
-  }
-
-  // Some world cannot be made into NMS ItemStacks (e.g. Lava),
-  // so try to make them directly into blocks instead.
-  static String getBlockTranslationKey(org.bukkit.Material material) {
-    Block nmsBlock = CraftMagicNumbers.getBlock(material);
-    return nmsBlock == null ? null : getTranslationKey(nmsBlock);
-  }
-
-  static String getTranslationKey(org.bukkit.Material material) {
-    String key = getTranslationKey(new org.bukkit.inventory.ItemStack(material));
-    return key != null ? key : getBlockTranslationKey(material);
-  }
-
-  static String getTranslationKey(MaterialData material) {
-    String key = getTranslationKey(material.toItemStack(1));
-    return key != null ? key : getBlockTranslationKey(material.getItemType());
-  }
-
-  static String getTranslationKey(org.bukkit.entity.Entity entity) {
-    net.minecraft.server.v1_8_R3.Entity nms = ((CraftEntity) entity).getHandle();
-    String key = EntityTypes.b(nms);
-    if (key == null) key = "generic";
-    return "entity." + key + ".name";
-  }
-
-  static String getTranslationKey(org.bukkit.entity.EntityType entity) {
-    return "entity." + entity.getName() + ".name";
-  }
-
-  static String getTranslationKey(PotionEffectType effect) {
-    if (effect instanceof CraftPotionEffectType) {
-      return ((CraftPotionEffectType) effect).getHandle().a();
-    } else if (effect instanceof PotionEffectTypeWrapper) {
-      return getTranslationKey(((PotionEffectTypeWrapper) effect).getType());
-    } else {
-      return "potion.empty";
-    }
   }
 
   static org.bukkit.enchantments.Enchantment getEnchantment(String key) {

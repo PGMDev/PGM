@@ -3,15 +3,14 @@ package tc.oc.pgm.tracker.info;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.annotation.Nullable;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Location;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
 import tc.oc.pgm.api.tracker.info.RangedInfo;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.Components;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 public class ProjectileInfo implements PhysicalInfo, DamageInfo, RangedInfo {
 
@@ -60,15 +59,15 @@ public class ProjectileInfo implements PhysicalInfo, DamageInfo, RangedInfo {
   }
 
   @Override
-  public Component getLocalizedName() {
+  public net.kyori.text.Component getName() {
     if (customName != null) {
-      return Components.fromLegacyText(customName);
+      return LegacyComponentSerializer.legacy().deserialize(customName);
     } else if (getProjectile() instanceof PotionInfo) {
-      // PotionInfo.getLocalizedName returns a potion name,
+      // PotionInfo.getName returns a potion name,
       // which doesn't work outside a potion death message.
-      return new PersonalizedTranslatable("item.potion.name");
+      return TranslatableComponent.of("item.potion.name");
     } else {
-      return getProjectile().getLocalizedName();
+      return getProjectile().getName();
     }
   }
 

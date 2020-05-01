@@ -54,7 +54,7 @@ public class ModeChangeCountdown extends MatchCountdown implements Comparable<Mo
   @Override
   protected Component formatText() {
     return new PersonalizedTranslatable(
-            "match.objectiveMode.countdown",
+            "objective.modeCountdown",
             getMode().getComponentName(),
             secondsRemaining(ChatColor.AQUA))
         .color(ChatColor.DARK_AQUA);

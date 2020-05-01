@@ -12,12 +12,12 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import tc.oc.pgm.util.item.Items;
+import tc.oc.pgm.util.inventory.InventoryUtils;
 
 /**
- * Derived from the names found in {@link net.minecraft.server.CommandReplaceItem}. If we ever
- * implement applying kits to other types of inventories, this should be expanded to include those
- * slot names as well.
+ * Derived from the names found in net.minecraft.server.CommandReplaceItem. If we ever implement
+ * applying kits to other types of inventories, this should be expanded to include those slot names
+ * as well.
  */
 public abstract class Slot {
 
@@ -64,7 +64,7 @@ public abstract class Slot {
   public abstract Inventory getInventory(HumanEntity holder);
 
   protected ItemStack addItem(HumanEntity holder, ItemStack stack) {
-    return Items.placeStack(
+    return InventoryUtils.placeStack(
         getInventory(holder),
         ContiguousSet.create(getAutoIndexRange(), DiscreteDomain.integers()),
         stack);

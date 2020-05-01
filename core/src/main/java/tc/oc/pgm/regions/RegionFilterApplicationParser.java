@@ -1,21 +1,29 @@
 package tc.oc.pgm.regions;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
+import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.filters.DenyFilter;
 import tc.oc.pgm.filters.FilterNode;
 import tc.oc.pgm.filters.FilterParser;
+import tc.oc.pgm.filters.StaticFilter;
+import tc.oc.pgm.filters.TeamFilter;
 import tc.oc.pgm.kits.Kit;
+import tc.oc.pgm.teams.TeamFactory;
+import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -41,12 +49,7 @@ public class RegionFilterApplicationParser {
     return proto.isNoOlderThan(MapProtos.FILTER_FEATURES);
   }
 
-  private void add(Element el, RegionFilterApplication rfa) throws InvalidXMLException {
-    factory.getFeatures().addFeature(el, rfa);
-    rfaContext.add(rfa);
-  }
-
-  public void parse(Element el) throws InvalidXMLException {
+  private Region parseRegion(Element el) throws InvalidXMLException {
     Region region;
     if (useId()) {
       region = regionParser.parseRegionProperty(el, "region");
@@ -54,7 +57,57 @@ public class RegionFilterApplicationParser {
     } else {
       region = regionParser.parseChildren(el);
     }
+    return region;
+  }
 
+  private void add(Element el, RegionFilterApplication rfa) throws InvalidXMLException {
+    factory.getFeatures().addFeature(el, rfa);
+    rfaContext.add(rfa);
+  }
+
+  public void parseLane(Element el) throws InvalidXMLException {
+    final FeatureReference<TeamFactory> team =
+        Teams.getTeamRef(new Node(XMLUtils.getRequiredAttribute(el, "team")), factory);
+
+    add(
+        el,
+        new RegionFilterApplication(
+            RFAScope.PLAYER_ENTER,
+            parseRegion(el),
+            new DenyFilter(new TeamFilter(team)),
+            new PersonalizedTranslatable("match.laneExit"),
+            false));
+  }
+
+  public void parseMaxBuildHeight(Element el) throws InvalidXMLException {
+    add(
+        el,
+        new RegionFilterApplication(
+            RFAScope.BLOCK_PLACE,
+            new CuboidRegion(
+                new Vector(
+                    Double.NEGATIVE_INFINITY,
+                    XMLUtils.parseNumber(el, Integer.class),
+                    Double.NEGATIVE_INFINITY),
+                new Vector(
+                    Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)),
+            StaticFilter.DENY,
+            new PersonalizedTranslatable("match.maxBuildHeight"),
+            false));
+  }
+
+  public void parsePlayable(Element el) throws InvalidXMLException {
+    final Region region = new NegativeRegion(parseRegion(el));
+    final Component message = new PersonalizedTranslatable("match.outOfBounds");
+
+    for (RFAScope scope :
+        Lists.newArrayList(RFAScope.BLOCK_PLACE, RFAScope.BLOCK_BREAK, RFAScope.PLAYER_ENTER)) {
+      add(el, new RegionFilterApplication(scope, region, StaticFilter.DENY, message, false));
+    }
+  }
+
+  public void parse(Element el) throws InvalidXMLException {
+    Region region = parseRegion(el);
     Component message = XMLUtils.parseFormattedText(el, "message");
 
     boolean earlyWarning = XMLUtils.parseBoolean(el.getAttribute("early-warning"), false);

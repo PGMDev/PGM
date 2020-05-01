@@ -7,7 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.Config;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -66,7 +66,7 @@ public class FreeForAllModule implements MapModule {
           throw new InvalidXMLException("Cannot combine <players> and <teams>", elPlayers);
         return null;
       } else {
-        int minPlayers = Config.minimumPlayers();
+        int minPlayers = (int) PGM.get().getConfiguration().getMinimumPlayers();
         int maxPlayers = Bukkit.getMaxPlayers();
         int maxOverfill = maxPlayers;
         NameTagVisibility nameTagVisibility = NameTagVisibility.ALWAYS;

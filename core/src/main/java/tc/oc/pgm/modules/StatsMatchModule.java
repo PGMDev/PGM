@@ -30,7 +30,7 @@ import tc.oc.pgm.util.component.ComponentUtils;
 import tc.oc.pgm.util.component.Components;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.RUNNING)
 public class StatsMatchModule implements MatchModule, Listener {
@@ -80,7 +80,7 @@ public class StatsMatchModule implements MatchModule, Listener {
       }
       return new Component(
           new PersonalizedTranslatable(
-                  "stats.basic",
+                  "match.stats",
                   new PersonalizedText(Integer.toString(kills), ChatColor.GREEN),
                   new PersonalizedText(Integer.toString(killstreak), ChatColor.GREEN),
                   new PersonalizedText(Integer.toString(deaths), ChatColor.RED),
@@ -153,14 +153,12 @@ public class StatsMatchModule implements MatchModule, Listener {
       allBowshots.put(playerUUID, playerStats.longestBowKill);
     }
 
-    Component killMessage = getMessage("stats.kills", sortStats(allKills), ChatColor.GREEN);
+    Component killMessage = getMessage("match.stats.kills", sortStats(allKills), ChatColor.GREEN);
     Component killstreakMessage =
-        getMessage("stats.killstreak", sortStats(allKillstreaks), ChatColor.GREEN);
-    Component deathMessage = getMessage("stats.deaths", sortStats(allDeaths), ChatColor.RED);
+        getMessage("match.stats.killstreak", sortStats(allKillstreaks), ChatColor.GREEN);
+    Component deathMessage = getMessage("match.stats.deaths", sortStats(allDeaths), ChatColor.RED);
     Map.Entry<UUID, Integer> bestBowshot = sortStats(allBowshots);
-    String bowMessageKey =
-        (bestBowshot.getValue() == 1) ? "stats.bowshot.block" : "stats.bowshot.blocks";
-    Component bowshotMessage = getMessage(bowMessageKey, bestBowshot, ChatColor.YELLOW);
+    Component bowshotMessage = getMessage("match.stats.bowshot", bestBowshot, ChatColor.YELLOW);
 
     match
         .getExecutor(MatchScope.LOADED)
@@ -171,7 +169,8 @@ public class StatsMatchModule implements MatchModule, Listener {
                     Components.fromLegacyText(
                         ComponentUtils.horizontalLineHeading(
                             ChatColor.YELLOW
-                                + AllTranslations.get().translate("stats.best", viewer.getBukkit()),
+                                + TextTranslations.translate(
+                                    "match.stats.overall", viewer.getBukkit()),
                             ChatColor.WHITE,
                             ComponentUtils.MAX_CHAT_WIDTH)));
 
@@ -213,6 +212,8 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   Component getMessage(String messageKey, Map.Entry<UUID, Integer> mapEntry, ChatColor color) {
+    if (mapEntry.getValue() == 1)
+      mapEntry.setValue(2); // Avoids translating "1 block" vs "n blocks"
     return new Component(
         new PersonalizedTranslatable(
                 messageKey,

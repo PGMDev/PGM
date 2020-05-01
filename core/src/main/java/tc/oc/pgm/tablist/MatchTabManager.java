@@ -13,7 +13,6 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
-import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.match.Match;
@@ -75,10 +74,7 @@ public class MatchTabManager extends TabManager implements Listener {
               MatchTabManager.this.render();
             }
           };
-      this.renderTask =
-          PGM.get()
-              .getExecutor()
-              .schedule(render, Config.Experiments.get().getTabRenderSeconds(), TimeUnit.SECONDS);
+      this.renderTask = PGM.get().getExecutor().schedule(render, 1, TimeUnit.SECONDS);
     }
   }
 

@@ -5,6 +5,7 @@ import app.ashcon.intake.CommandException;
 import app.ashcon.intake.bukkit.parametric.Type;
 import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
 import app.ashcon.intake.parametric.annotation.Switch;
+import com.google.common.collect.Range;
 import java.time.Duration;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -19,6 +20,7 @@ import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.component.ComponentRenderers;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.text.TextParser;
 
 public class TimeLimitCommands {
 
@@ -78,11 +80,7 @@ public class TimeLimitCommands {
 
         Duration duration;
         if (durationString != null) {
-          try {
-            duration = TimeUtils.parseDuration(durationString);
-          } catch (IllegalArgumentException ex) {
-            throw new CommandException("Invalid time format: " + durationString);
-          }
+          duration = TextParser.parseDuration(durationString, Range.atLeast(Duration.ZERO));
         } else if (existing != null) {
           duration = existing.getDuration();
         } else {
@@ -118,7 +116,7 @@ public class TimeLimitCommands {
         new PersonalizedText(net.md_5.bungee.api.ChatColor.YELLOW)
             .extra(
                 new PersonalizedTranslatable(
-                    "timeLimit.commandOutput",
+                    "match.timeLimit.commandOutput",
                     new PersonalizedText(
                         TimeUtils.formatDuration(duration), net.md_5.bungee.api.ChatColor.AQUA),
                     result.getDescription(match))));

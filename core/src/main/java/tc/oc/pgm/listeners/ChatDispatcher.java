@@ -58,7 +58,7 @@ public class ChatDispatcher implements Listener {
   private static final String ADMIN_CHAT_SYMBOL = "$";
 
   private static final Component CONSOLE =
-      new PersonalizedTranslatable("console")
+      new PersonalizedTranslatable("misc.console")
           .getPersonalizedText()
           .color(ChatColor.DARK_AQUA)
           .italic(true);
@@ -140,7 +140,7 @@ public class ChatDispatcher implements Listener {
     if (sender != null && !sender.getBukkit().hasPermission(Permissions.ADMINCHAT)) {
       sender.getSettings().resetValue(SettingKey.CHAT);
       SettingKey.CHAT.update(sender);
-      sender.sendWarning(new PersonalizedTranslatable("commands.adminchat.noperms"), true);
+      sender.sendWarning(new PersonalizedTranslatable("chat.channelSwitch.admin.noPerms"), true);
       return;
     }
 
@@ -179,7 +179,7 @@ public class ChatDispatcher implements Listener {
           && !sender.getBukkit().hasPermission(Permissions.STAFF)) {
         String name = receiver.getDisplayName(sender.getBukkit()) + ChatColor.RED;
         Component component =
-            new PersonalizedTranslatable("command.message.blockedNoPermissions", name);
+            new PersonalizedTranslatable("chat.message.blockedNoPermissions", name);
         sender.sendMessage(new PersonalizedText(component, ChatColor.RED));
         return;
       }
@@ -205,7 +205,7 @@ public class ChatDispatcher implements Listener {
         match,
         sender,
         message,
-        formatPrivateMessage("commands.message.from", matchReceiver.getBukkit()),
+        formatPrivateMessage("chat.message.from", matchReceiver.getBukkit()),
         viewer -> viewer.getBukkit().equals(receiver),
         null);
 
@@ -214,7 +214,7 @@ public class ChatDispatcher implements Listener {
         match,
         manager.getPlayer(receiver), // Allow for cross-match messages
         message,
-        formatPrivateMessage("commands.message.to", sender.getBukkit()),
+        formatPrivateMessage("chat.message.to", sender.getBukkit()),
         viewer -> viewer.getBukkit().equals(sender.getBukkit()),
         null);
   }
@@ -234,7 +234,7 @@ public class ChatDispatcher implements Listener {
     if (sender == null) return;
     final MatchPlayer receiver = manager.getPlayer(lastMessagedBy.get(sender.getBukkit()));
     if (receiver == null) {
-      audience.sendWarning(new PersonalizedTranslatable("commands.message.noReply"));
+      audience.sendWarning(new PersonalizedTranslatable("chat.message.noReply"));
       return;
     }
 
@@ -263,7 +263,7 @@ public class ChatDispatcher implements Listener {
         if (receiver == null) {
           player.sendWarning(
               new PersonalizedTranslatable(
-                  "commands.message.noTarget", new PersonalizedText(target)),
+                  "chat.message.unknownTarget", new PersonalizedText(target)),
               true);
         } else {
           sendDirect(

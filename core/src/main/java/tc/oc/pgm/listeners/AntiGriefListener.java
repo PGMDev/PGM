@@ -3,6 +3,8 @@ package tc.oc.pgm.listeners;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -25,11 +27,9 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.tnt.TNTMatchModule;
 import tc.oc.pgm.tracker.Trackers;
-import tc.oc.pgm.util.component.ComponentRenderers;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.translations.AllTranslations;
-import tc.oc.pgm.util.translations.TranslationUtils;
+import tc.oc.pgm.util.text.TextFormatter;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class AntiGriefListener implements Listener {
 
@@ -70,7 +70,8 @@ public class AntiGriefListener implements Listener {
     if (block != null
         && (block.getType() == Material.WATER || block.getType() == Material.STATIONARY_WATER)) {
       clicker.sendMessage(
-          ChatColor.RED + AllTranslations.get().translate("defuse.water", clicker.getBukkit()));
+          ChatColor.RED
+              + TextTranslations.translate("moderation.defuse.water", clicker.getBukkit()));
       return;
     }
 
@@ -85,16 +86,16 @@ public class AntiGriefListener implements Listener {
             clicker,
             entity,
             ChatColor.RED
-                + AllTranslations.get()
-                    .translate(
-                        "defuse.player",
-                        clicker.getBukkit(),
-                        owner.getBukkit().getDisplayName(clicker.getBukkit()) + ChatColor.RED));
+                + TextTranslations.translate(
+                    "moderation.defuse.player",
+                    clicker.getBukkit(),
+                    owner.getBukkit().getDisplayName(clicker.getBukkit()) + ChatColor.RED));
       } else {
         this.notifyDefuse(
             clicker,
             entity,
-            ChatColor.RED + AllTranslations.get().translate("defuse.world", clicker.getBukkit()));
+            ChatColor.RED
+                + TextTranslations.translate("moderation.defuse.world", clicker.getBukkit()));
       }
     }
   }
@@ -116,20 +117,20 @@ public class AntiGriefListener implements Listener {
         && clicker.isObserving()
         && clicker.getBukkit().hasPermission(Permissions.DEFUSE)) {
       if (event.getAction() == Action.RIGHT_CLICK_AIR) {
-        this.obsTntDefuse(clicker.getBukkit(), event.getPlayer().getLocation());
+        this.obsTntDefuse(clicker, event.getPlayer().getLocation());
       } else if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-        this.obsTntDefuse(clicker.getBukkit(), event.getClickedBlock().getLocation());
+        this.obsTntDefuse(clicker, event.getClickedBlock().getLocation());
       }
     }
   }
 
-  private void obsTntDefuse(Player player, Location loc) {
+  private void obsTntDefuse(MatchPlayer player, Location loc) {
     List<ParticipantState> owners = this.removeTnt(loc, 5.0);
     if (owners != null && !owners.isEmpty()) {
-      ComponentRenderers.send(
-          player,
-          new PersonalizedTranslatable(
-              "defuse.player", TranslationUtils.nameList(NameStyle.COLOR, owners)));
+      player.sendMessage(
+          TranslatableComponent.of(
+              "moderation.defuse.player",
+              TextFormatter.nameList(owners, NameStyle.COLOR, TextColor.WHITE)));
     }
   }
 
@@ -173,12 +174,13 @@ public class AntiGriefListener implements Listener {
     meta.setDisplayName(
         ChatColor.RED
             + ChatColor.BOLD.toString()
-            + AllTranslations.get().translate("defuse.displayName", event.getPlayer().getBukkit()));
+            + TextTranslations.translate(
+                "moderation.defuse.displayName", event.getPlayer().getBukkit()));
     meta.setLore(
         Collections.singletonList(
             ChatColor.GRAY
-                + AllTranslations.get()
-                    .translate("defuse.tooltip", event.getPlayer().getBukkit())));
+                + TextTranslations.translate(
+                    "moderation.defuse.tooltip", event.getPlayer().getBukkit())));
     shears.setItemMeta(meta);
 
     event.getPlayer().getBukkit().getInventory().setItem(DEFUSE_SLOT, shears);

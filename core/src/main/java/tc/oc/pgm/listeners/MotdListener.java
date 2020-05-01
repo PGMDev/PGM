@@ -1,91 +1,59 @@
 package tc.oc.pgm.listeners;
 
-import com.google.common.collect.Maps;
-import java.util.Map;
-import java.util.Map.Entry;
-import org.apache.commons.lang.StringUtils;
+import java.text.MessageFormat;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerListPingEvent;
-import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.match.event.MatchPhaseChangeEvent;
-import tc.oc.pgm.events.ConfigLoadEvent;
 
 public class MotdListener implements Listener {
 
-  private static final String MAP_NAME_KEY = "map.name";
-  private static final String MAP_VERSION_KEY = "map.version";
-  private static final String STATE_COLOR_KEY = "state.color";
-  private static final String STATE_NAME_KEY = "state.name";
-  private static final String STATE_NAME_LOWER_KEY = "state.name-lower";
-
-  private static final Map<String, String> MOTD_DATA = Maps.newHashMap();
-  private String format;
+  private ChatColor phaseColor;
+  private String mapName;
 
   public MotdListener() {
-    this.format = Config.Motd.format();
+    this.phaseColor = ChatColor.GRAY;
 
-    // Ensure there are always default keys
     MapInfo map = PGM.get().getMapOrder().getNextMap();
-    if (map == null) map = PGM.get().getMapLibrary().getMaps().next();
-
-    MOTD_DATA.put(MAP_NAME_KEY, map.getName());
-    MOTD_DATA.put(MAP_VERSION_KEY, map.getVersion().toString());
-    MOTD_DATA.put(STATE_NAME_KEY, "Idle");
-    MOTD_DATA.put(STATE_NAME_LOWER_KEY, "idle");
-    MOTD_DATA.put(STATE_COLOR_KEY, Config.Motd.Colors.idle().toString());
-  }
-
-  @EventHandler
-  public void onServerListPing(ServerListPingEvent event) {
-    if (!Config.Motd.enabled()) return;
-
-    String motd = format;
-    // There's no nice named string placeholder system built directly into Java :(.
-    for (Entry<String, String> entry : MOTD_DATA.entrySet()) {
-      String find = entry.getKey();
-      String replace = entry.getValue();
-      motd = motd.replace("{" + find + "}", replace);
+    if (map == null) {
+      map = PGM.get().getMapLibrary().getMaps().next();
     }
-    event.setMotd(motd);
+
+    this.mapName = map.getName();
   }
 
-  @EventHandler
-  public void onConfigReload(ConfigLoadEvent event) {
-    this.format = Config.Motd.format();
+  @EventHandler(priority = EventPriority.HIGHEST)
+  public void onServerListPing(ServerListPingEvent event) {
+    final String format = PGM.get().getConfiguration().getMotd();
+    if (format == null || format.isEmpty()) return;
+
+    event.setMotd(MessageFormat.format(format, event.getMotd(), mapName, phaseColor.toString()));
   }
 
   @EventHandler
   public void onLoad(MatchLoadEvent event) {
-    MOTD_DATA.put(MAP_NAME_KEY, event.getMatch().getMap().getName());
-    MOTD_DATA.put(MAP_VERSION_KEY, event.getMatch().getMap().getVersion().toString());
+    mapName = event.getMatch().getMap().getName();
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onStateChange(MatchPhaseChangeEvent event) {
-    String name = event.getNewPhase().name().toLowerCase();
-    ChatColor color = ChatColor.WHITE;
     switch (event.getNewPhase()) {
-      case IDLE:
-        color = Config.Motd.Colors.idle();
-        break;
       case STARTING:
-        color = Config.Motd.Colors.starting();
+        phaseColor = ChatColor.YELLOW;
         break;
       case RUNNING:
-        color = Config.Motd.Colors.running();
+        phaseColor = ChatColor.GREEN;
         break;
       case FINISHED:
-        color = Config.Motd.Colors.finished();
+        phaseColor = ChatColor.RED;
         break;
+      default:
+        phaseColor = ChatColor.GRAY;
     }
-    MOTD_DATA.put(STATE_NAME_KEY, StringUtils.capitalize(name));
-    MOTD_DATA.put(STATE_NAME_LOWER_KEY, name);
-    MOTD_DATA.put(STATE_COLOR_KEY, color.toString());
   }
 }

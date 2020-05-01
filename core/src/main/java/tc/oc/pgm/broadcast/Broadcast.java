@@ -15,11 +15,11 @@ import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 public class Broadcast implements Comparable<Broadcast> {
   public enum Type {
     TIP(
-        new PersonalizedText(new PersonalizedTranslatable("prefixed.tip"), ChatColor.BLUE),
+        new PersonalizedText(new PersonalizedTranslatable("misc.tip"), ChatColor.BLUE),
         new Sound("mob.endermen.idle", 1, 1.2f)),
 
     ALERT(
-        new PersonalizedText(new PersonalizedTranslatable("prefixed.alert"), ChatColor.YELLOW),
+        new PersonalizedText(new PersonalizedTranslatable("misc.alert"), ChatColor.YELLOW),
         new Sound("note.pling", 1, 2f));
 
     final Component prefix;

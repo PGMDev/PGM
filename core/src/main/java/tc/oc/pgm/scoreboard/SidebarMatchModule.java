@@ -18,6 +18,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
@@ -27,7 +29,7 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
-import tc.oc.pgm.Config;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -60,8 +62,6 @@ import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.events.TeamRespawnsChangeEvent;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.component.ComponentRenderers;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.wool.MonumentWool;
 import tc.oc.pgm.wool.WoolMatchModule;
@@ -77,7 +77,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
     @Override
     public SidebarMatchModule createMatchModule(Match match) throws ModuleLoadException {
-      return new SidebarMatchModule(match);
+      return PGM.get().getConfiguration().showSideBar() ? new SidebarMatchModule(match) : null;
     }
   }
 
@@ -91,6 +91,9 @@ public class SidebarMatchModule implements MatchModule, Listener {
   protected @Nullable Future<?> renderTask;
 
   private static String renderSidebarTitle(Collection<MapTag> tags) {
+    final Component configTitle = PGM.get().getConfiguration().getMatchHeader();
+    if (configTitle != null) return LegacyComponentSerializer.legacy().serialize(configTitle);
+
     final List<String> gamemode =
         tags.stream()
             .filter(MapTag::isGamemode)
@@ -118,7 +121,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
       title = auxiliary.get(0) + " & " + auxiliary.get(1);
     }
 
-    return title.isEmpty() ? "Match" : title;
+    return ChatColor.AQUA + (title.isEmpty() ? "Match" : title);
   }
 
   private class Sidebar {
@@ -138,13 +141,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
       this.scoreboard = match.needModule(ScoreboardMatchModule.class).getScoreboard(party);
       this.objective = this.scoreboard.registerNewObjective(IDENTIFIER, "dummy");
       this.objective.setDisplayName(
-          StringUtils.left(
-              ComponentRenderers.toLegacyText(
-                  new PersonalizedText(
-                      renderSidebarTitle(match.getMap().getTags()),
-                      net.md_5.bungee.api.ChatColor.AQUA),
-                  null),
-              32));
+          StringUtils.left(renderSidebarTitle(match.getMap().getTags()), 32));
       this.objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
       for (int i = 0; i < MAX_ROWS; ++i) {
@@ -308,7 +305,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void goalProximityChange(final GoalProximityChangeEvent event) {
-    if (Config.Scoreboard.showProximity()) {
+    if (PGM.get().getConfiguration().showProximity()) {
       renderSidebarDebounce();
     }
   }
@@ -516,18 +513,13 @@ public class SidebarMatchModule implements MatchModule, Listener {
         }
       }
 
-      if (Config.SidebarMessage.topEnabled()) {
-        if (rows.size() < MAX_ROWS || Config.SidebarMessage.overwriteExisting()) {
-          rows.add(0, Config.SidebarMessage.formatTop());
-        }
-      }
-
-      if (Config.SidebarMessage.bottomEnabled()) {
+      final Component footer = PGM.get().getConfiguration().getMatchFooter();
+      if (footer != null) {
         if (rows.size() < MAX_ROWS - 2) {
           rows.add("");
-          rows.add(Config.SidebarMessage.formatBottom());
-        } else if (Config.SidebarMessage.overwriteExisting()) {
-          rows.set(MAX_ROWS - 2, Config.SidebarMessage.formatBottom());
+          rows.add(LegacyComponentSerializer.legacy().serialize(footer));
+        } else {
+          rows.set(MAX_ROWS - 2, LegacyComponentSerializer.legacy().serialize(footer));
         }
       }
 

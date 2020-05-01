@@ -3,8 +3,8 @@ package tc.oc.pgm.spawns.states;
 import java.util.List;
 import org.bukkit.event.Event;
 import org.bukkit.permissions.PermissionAttachment;
+import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.spawns.SpawnMatchModule;
@@ -21,7 +21,11 @@ public class Participating extends State {
   public void enterState() {
     super.enterState();
     permissionAttachment = bukkit.addAttachment(PGM.get());
-    permissionAttachment.setPermission(Permissions.PARTICIPANT, true);
+    for (Config.Group group : PGM.get().getConfiguration().getGroups()) {
+      if (bukkit.hasPermission(group.getPermission())) {
+        permissionAttachment.setPermission(group.getParticipantPermission(), true);
+      }
+    }
   }
 
   @Override

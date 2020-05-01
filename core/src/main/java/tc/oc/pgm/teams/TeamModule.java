@@ -13,7 +13,6 @@ import org.bukkit.scoreboard.NameTagVisibility;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.Config;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -28,6 +27,7 @@ import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class TeamModule implements MapModule<TeamMatchModule> {
+  private static final double OVERFILL_RATIO = 1.25;
   private static final Map<Integer, Collection<MapTag>> TAGS = new ConcurrentHashMap<>();
 
   private final Set<TeamFactory> teams;
@@ -81,8 +81,7 @@ public class TeamModule implements MapModule<TeamMatchModule> {
 
   @Override
   public TeamMatchModule createMatchModule(Match match) {
-    return new TeamMatchModule(
-        match, teams, requireEven != null ? requireEven : Config.Teams.requireEven());
+    return new TeamMatchModule(match, teams);
   }
 
   /**
@@ -132,15 +131,12 @@ public class TeamModule implements MapModule<TeamMatchModule> {
         XMLUtils.parseNameTagVisibility(
             Node.fromAttr(el, "show-name-tags"), NameTagVisibility.ALWAYS);
 
-    int minPlayers =
-        XMLUtils.parseNumber(
-            Node.fromAttr(el, "min"), Integer.class, Config.Teams.minimumPlayers());
+    int minPlayers = XMLUtils.parseNumber(Node.fromAttr(el, "min"), Integer.class, 0);
     int maxPlayers = XMLUtils.parseNumber(Node.fromRequiredAttr(el, "max"), Integer.class);
 
     Attribute attrMaxOverfill = el.getAttribute("max-overfill");
     int maxOverfill =
-        XMLUtils.parseNumber(
-            attrMaxOverfill, Integer.class, (int) (maxPlayers * Config.Join.overfillRatio()));
+        XMLUtils.parseNumber(attrMaxOverfill, Integer.class, (int) (maxPlayers * OVERFILL_RATIO));
     if (maxOverfill < maxPlayers) {
       throw new InvalidXMLException("Max overfill can not be less then max players.", el);
     }

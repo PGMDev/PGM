@@ -1,7 +1,6 @@
 package tc.oc.pgm.util;
 
 import java.time.Duration;
-import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
@@ -32,31 +31,6 @@ public final class TimeUtils {
       return secs + "s";
     } else {
       return "<1s";
-    }
-  }
-
-  public static Duration parseDuration(String text) {
-    if (text.equalsIgnoreCase("oo")) {
-      return INFINITE_DURATION;
-    }
-
-    int index = text.indexOf("d"); // days
-    String format;
-    if (index > 0) {
-      format = "p" + text.substring(0, ++index) + "t" + text.substring(++index);
-    } else {
-      format = "pt" + text;
-    }
-
-    try {
-      return Duration.parse(format);
-    } catch (DateTimeParseException e1) {
-      // Fallback to parsing as a fractional number of seconds
-      try {
-        return Duration.ofMillis((long) Double.parseDouble(text) * 1000);
-      } catch (NumberFormatException e2) {
-        throw new IllegalArgumentException("Unable to parse '" + text + "' into a duration", e1);
-      }
     }
   }
 
