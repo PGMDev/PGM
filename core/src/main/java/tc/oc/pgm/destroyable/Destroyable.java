@@ -136,7 +136,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   public Component getTouchMessage(@Nullable ParticipantState toucher, boolean self) {
     if (toucher == null) {
       return new PersonalizedTranslatable(
-          "destroyable.touch.owned.generic",
+          "destroyable.touch.owned",
           Components.blank(),
           getComponentName(),
           getOwner().getComponentName());
@@ -401,14 +401,14 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     if (deltaHealth < 0) {
       // Damage
       if (player != null && player.getParty() == this.getOwner()) {
-        return "match.destroyable.damageOwn";
+        return "destroyable.damageOwn";
       }
     } else if (deltaHealth > 0) {
       // Repair
       if (player != null && player.getParty() != this.getOwner()) {
-        return "match.destroyable.repairOther";
+        return "destroyable.repairOther";
       } else if (!this.definition.isRepairable()) {
-        return "match.destroyable.repairDisabled";
+        return "destroyable.repairDisabled";
       }
     }
 

@@ -28,6 +28,7 @@ import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.named.NameStyle;
 
+// TODO: Consider making Core extend Destroyable
 public class Core extends TouchableGoal<CoreFactory> implements ModeChangeGoal<CoreFactory> {
 
   protected final FiniteBlockRegion casingRegion;
@@ -88,21 +89,22 @@ public class Core extends TouchableGoal<CoreFactory> implements ModeChangeGoal<C
 
   @Override
   public Component getTouchMessage(@Nullable ParticipantState toucher, boolean self) {
+    // Core has same touch messages as Destroyable
     if (toucher == null) {
       return new PersonalizedTranslatable(
-          "core.touch.owned.generic",
+          "destroyable.touch.owned",
           Components.blank(),
           getComponentName(),
           getOwner().getComponentName());
     } else if (self) {
       return new PersonalizedTranslatable(
-          "core.touch.owned.you",
+          "destroyable.touch.owned.you",
           Components.blank(),
           getComponentName(),
           getOwner().getComponentName());
     } else {
       return new PersonalizedTranslatable(
-          "core.touch.owned.player",
+          "destroyable.touch.owned.player",
           toucher.getStyledName(NameStyle.COLOR),
           getComponentName(),
           getOwner().getComponentName());

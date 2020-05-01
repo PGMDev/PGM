@@ -11,11 +11,16 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.filters.DenyFilter;
 import tc.oc.pgm.filters.FilterNode;
 import tc.oc.pgm.filters.FilterParser;
+import tc.oc.pgm.filters.StaticFilter;
+import tc.oc.pgm.filters.TeamFilter;
 import tc.oc.pgm.kits.Kit;
+import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -41,12 +46,7 @@ public class RegionFilterApplicationParser {
     return proto.isNoOlderThan(MapProtos.FILTER_FEATURES);
   }
 
-  private void add(Element el, RegionFilterApplication rfa) throws InvalidXMLException {
-    factory.getFeatures().addFeature(el, rfa);
-    rfaContext.add(rfa);
-  }
-
-  public void parse(Element el) throws InvalidXMLException {
+  private Region parseRegion(Element el) throws InvalidXMLException {
     Region region;
     if (useId()) {
       region = regionParser.parseRegionProperty(el, "region");
@@ -54,7 +54,53 @@ public class RegionFilterApplicationParser {
     } else {
       region = regionParser.parseChildren(el);
     }
+    return region;
+  }
 
+  private void add(Element el, RegionFilterApplication rfa) throws InvalidXMLException {
+    factory.getFeatures().addFeature(el, rfa);
+    rfaContext.add(rfa);
+  }
+
+  public void parseLane(Element el) throws InvalidXMLException {
+    add(
+        el,
+        new RegionFilterApplication(
+            RFAScope.PLAYER_ENTER,
+            parseRegion(el),
+            new DenyFilter(new TeamFilter(Teams.getTeamRef(new Node(el), factory))),
+            new PersonalizedTranslatable("match.laneExit"),
+            false));
+  }
+
+  public void parseMaxBuildHeight(Element el) throws InvalidXMLException {
+    final int height = XMLUtils.parseNumber(el, Integer.class);
+    add(
+        el,
+        new RegionFilterApplication(
+            RFAScope.BLOCK_PLACE,
+            new CuboidRegion(
+                new Vector(Double.NEGATIVE_INFINITY, height + 1, Double.NEGATIVE_INFINITY),
+                new Vector(
+                    Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)),
+            StaticFilter.DENY,
+            new PersonalizedTranslatable("match.maxBuildHeight"),
+            false));
+  }
+
+  public void parsePlayable(Element el) throws InvalidXMLException {
+    add(
+        el,
+        new RegionFilterApplication(
+            RFAScope.PLAYER_LEAVE,
+            parseRegion(el),
+            StaticFilter.DENY,
+            new PersonalizedTranslatable("match.outOfBounds"),
+            false));
+  }
+
+  public void parse(Element el) throws InvalidXMLException {
+    Region region = parseRegion(el);
     Component message = XMLUtils.parseFormattedText(el, "message");
 
     boolean earlyWarning = XMLUtils.parseBoolean(el.getAttribute("early-warning"), false);

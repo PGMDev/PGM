@@ -672,7 +672,7 @@ public class ModerationCommands implements Listener {
             sender);
 
     Component banTypeFormatted =
-        new PersonalizedTranslatable("moderation.type.mainComponent", banType)
+        new PersonalizedTranslatable("moderation.type", banType)
             .getPersonalizedText()
             .color(ChatColor.GRAY);
 
@@ -876,7 +876,7 @@ public class ModerationCommands implements Listener {
    */
   private void sendWarning(MatchPlayer target, String reason) {
     Component titleWord =
-        new PersonalizedTranslatable("moderation.warning")
+        new PersonalizedTranslatable("misc.warning")
             .getPersonalizedText()
             .color(ChatColor.DARK_RED);
     Component title = new PersonalizedText(WARN_SYMBOL, titleWord, WARN_SYMBOL);

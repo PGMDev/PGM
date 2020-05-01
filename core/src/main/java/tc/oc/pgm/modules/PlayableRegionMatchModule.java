@@ -31,8 +31,7 @@ public class PlayableRegionMatchModule implements MatchModule, Listener {
   public void onBlockTransformEvent(final BlockTransformEvent event) {
     Location center = BlockVectors.center(event.getNewState());
     if (!this.playableRegion.contains(center.toVector())) {
-      event.setCancelled(
-          true, new PersonalizedTranslatable("match.playableArea.blockInteractWarning"));
+      event.setCancelled(true, new PersonalizedTranslatable("match.outOfBounds.interact"));
     }
   }
 
@@ -44,8 +43,7 @@ public class PlayableRegionMatchModule implements MatchModule, Listener {
       Vector from = BlockVectors.center(event.getFrom()).toVector();
       Vector to = BlockVectors.center(event.getTo()).toVector();
       if (this.playableRegion.contains(from) && !this.playableRegion.contains(to)) {
-        event.setCancelled(
-            true, new PersonalizedTranslatable("match.playableArea.leaveAreaWarning"));
+        event.setCancelled(true, new PersonalizedTranslatable("match.outOfBounds.leave"));
       }
     }
   }

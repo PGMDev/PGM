@@ -50,7 +50,7 @@ public class MapInfoProvider implements BukkitProvider<MapInfo> {
     }
 
     if (map == null && !isGoToNext(annotations)) {
-      throw new ArgumentException(AllTranslations.get().translate("maps.notFound", sender));
+      throw new ArgumentException(AllTranslations.get().translate("map.notFound", sender));
     }
 
     return map;

@@ -20,15 +20,15 @@ public class PeriodFormats {
   /** Return the key for the localized description of the given time interval */
   private static String periodKey(TemporalUnit unit, long quantity) {
     if (unit == ChronoUnit.DAYS) {
-      return quantity == 1 ? "misc.time.day" : "misc.time.days";
+      return quantity == 1 ? "misc.day" : "misc.days";
     } else if (unit == ChronoUnit.HOURS) {
-      return quantity == 1 ? "misc.time.hour" : "misc.time.hours";
+      return quantity == 1 ? "misc.hour" : "misc.hours";
     } else if (unit == ChronoUnit.MINUTES) {
-      return quantity == 1 ? "misc.time.minute" : "misc.time.minutes";
+      return quantity == 1 ? "misc.minute" : "misc.minutes";
     } else if (unit == ChronoUnit.SECONDS) {
-      return quantity == 1 ? "misc.time.second" : "misc.time.seconds";
+      return quantity == 1 ? "misc.second" : "misc.seconds";
     } else if (unit == ChronoUnit.MILLIS) {
-      return quantity == 1 ? "misc.time.millisecond" : "misc.time.milliseconds";
+      return quantity == 1 ? "misc.millisecond" : "misc.milliseconds";
     } else {
       throw new IllegalArgumentException("Unsupported time unit: " + unit);
     }
@@ -133,6 +133,6 @@ public class PeriodFormats {
 
   public static Component relativePastApproximate(Instant then) {
     return new PersonalizedTranslatable(
-        "time.ago", briefNaturalApproximate(Duration.between(then, Instant.now())));
+        "misc.timeAgo", briefNaturalApproximate(Duration.between(then, Instant.now())));
   }
 }

@@ -50,10 +50,9 @@ public class MatchAnnouncer implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchBegin(final MatchStartEvent event) {
     Match match = event.getMatch();
-    match.sendMessage(
-        new PersonalizedTranslatable("match.broadcasts.matchStarted").color(ChatColor.GREEN));
+    match.sendMessage(new PersonalizedTranslatable("broadcast.matchStart").color(ChatColor.GREEN));
 
-    Component go = new PersonalizedTranslatable("match.broadcasts.go").color(ChatColor.GREEN);
+    Component go = new PersonalizedTranslatable("broadcast.go").color(ChatColor.GREEN);
     for (MatchPlayer player : match.getParticipants()) {
       player.showTitle(go, null, 0, 5, 15);
     }
@@ -69,13 +68,13 @@ public class MatchAnnouncer implements Listener {
     for (MatchPlayer viewer : match.getPlayers()) {
       Component title, subtitle = null;
       if (event.getWinner() == null) {
-        title = new PersonalizedTranslatable("match.broadcasts.gameOver.header");
+        title = new PersonalizedTranslatable("broadcast.gameOver");
       } else {
         title =
             new PersonalizedTranslatable(
                 event.getWinner().isNamePlural()
-                    ? "match.broadcasts.gameOver.teamWinners"
-                    : "match.broadcasts.gameOver.teamWinner",
+                    ? "broadcast.gameOver.teamWinners"
+                    : "broadcast.gameOver.teamWinner",
                 event.getWinner().getComponentName());
 
         if (event.getWinner() == viewer.getParty()) {
@@ -83,16 +82,14 @@ public class MatchAnnouncer implements Listener {
           viewer.playSound(SOUND_MATCH_WIN);
           if (viewer.getParty() instanceof Team) {
             subtitle =
-                new PersonalizedTranslatable("match.broadcasts.gameOver.teamWon")
-                    .color(ChatColor.GREEN);
+                new PersonalizedTranslatable("broadcast.gameOver.teamWon").color(ChatColor.GREEN);
           }
         } else if (viewer.getParty() instanceof Competitor) {
           // Loser
           viewer.playSound(SOUND_MATCH_LOSE);
           if (viewer.getParty() instanceof Team) {
             subtitle =
-                new PersonalizedTranslatable("match.broadcasts.gameOver.teamLost")
-                    .color(ChatColor.RED);
+                new PersonalizedTranslatable("broadcast.gameOver.teamLost").color(ChatColor.RED);
           }
         } else {
           // Observer
@@ -129,8 +126,7 @@ public class MatchAnnouncer implements Listener {
               .extra(
                   viewer.getBukkit(),
                   new PersonalizedTranslatable(
-                      "system.welcomeMessage.createdBy",
-                      TranslationUtils.nameList(NameStyle.FANCY, authors))));
+                      "misc.createdBy", TranslationUtils.nameList(NameStyle.FANCY, authors))));
     }
 
     viewer.sendMessage(ComponentUtils.horizontalLine(ChatColor.WHITE, 200));
@@ -139,7 +135,7 @@ public class MatchAnnouncer implements Listener {
   private void sendCurrentlyPlaying(MatchPlayer viewer) {
     viewer.sendMessage(
         new PersonalizedTranslatable(
-                "system.currentlyPlaying",
+                "misc.playing",
                 viewer
                     .getMatch()
                     .getMap()

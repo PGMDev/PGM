@@ -33,7 +33,7 @@ public class TimeLimitCountdown extends MatchCountdown {
   @Override
   protected Component formatText() {
     return new PersonalizedTranslatable(
-            "match.timeLimit.remaining", new PersonalizedText(colonTime(), urgencyColor()))
+            "misc.timeRemaining", new PersonalizedText(colonTime(), urgencyColor()))
         .color(ChatColor.AQUA);
   }
 

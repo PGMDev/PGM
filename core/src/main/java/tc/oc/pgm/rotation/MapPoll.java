@@ -135,7 +135,7 @@ public class MapPoll {
 
   public void sendBook(MatchPlayer viewer) {
     String title = ChatColor.GOLD + "" + ChatColor.BOLD;
-    title += AllTranslations.get().translate("maps.pools.vote.book.title", viewer.getBukkit());
+    title += AllTranslations.get().translate("vote.title.map", viewer.getBukkit());
 
     ItemStack is = new ItemStack(Material.WRITTEN_BOOK);
     BookMeta meta = (BookMeta) is.getItemMeta();
@@ -145,7 +145,7 @@ public class MapPoll {
     List<Component> content = new ArrayList<>(votes.size() + 2);
     content.add(
         new PersonalizedText(
-            new PersonalizedTranslatable("maps.pools.vote.book.header"), ChatColor.DARK_PURPLE));
+            new PersonalizedTranslatable("vote.header.map"), ChatColor.DARK_PURPLE));
     content.add(new PersonalizedText("\n\n"));
 
     for (MapInfo pgmMap : votes.keySet()) content.add(getMapBookComponent(viewer, pgmMap));

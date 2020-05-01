@@ -185,11 +185,11 @@ public class WoolMatchModule implements MatchModule, Listener {
     if (player != null) { // wool can only be placed by a player
       Component woolName = wool.getComponentName();
       if (!isValidWool(wool.getDyeColor(), event.getNewState())) {
-        player.sendWarning(new PersonalizedTranslatable("wool.place.wrongWool", woolName), true);
+        player.sendWarning(new PersonalizedTranslatable("wool.wrongWool", woolName), true);
       } else if (wool.getOwner() != player.getParty()) {
         player.sendWarning(
             new PersonalizedTranslatable(
-                "wool.place.wrongTeam", wool.getOwner().getComponentName(), woolName),
+                "wool.wrongTeam", wool.getOwner().getComponentName(), woolName),
             true);
       } else {
         event.setCancelled(false);
@@ -223,7 +223,7 @@ public class WoolMatchModule implements MatchModule, Listener {
                   ChatColor.RED
                       + AllTranslations.get()
                           .translate(
-                              "wool.craftDisabled",
+                              "wool.craftingDisabled",
                               playerHolder.getBukkit(),
                               wool.getComponentName()));
               event.getInventory().setResult(null);

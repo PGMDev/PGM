@@ -40,17 +40,17 @@ public final class TimeUtils {
       return INFINITE_DURATION;
     }
 
-    int index = text.indexOf("d"); // days
-    String format;
-    if (index > 0) {
-      format = "p" + text.substring(0, ++index) + "t" + text.substring(++index);
-    } else {
-      format = "pt" + text;
-    }
-
     try {
+      int index = text.indexOf("d"); // days
+      String format;
+      if (index > 0) {
+        format = "p" + text.substring(0, ++index) + "t" + text.substring(++index);
+      } else {
+        format = "pt" + text;
+      }
+
       return Duration.parse(format);
-    } catch (DateTimeParseException e1) {
+    } catch (DateTimeParseException | StringIndexOutOfBoundsException e1) {
       // Fallback to parsing as a fractional number of seconds
       try {
         return Duration.ofMillis((long) Double.parseDouble(text) * 1000);

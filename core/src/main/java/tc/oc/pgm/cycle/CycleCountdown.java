@@ -53,14 +53,14 @@ public class CycleCountdown extends MatchCountdown {
     if (remaining.isZero()) {
       cycleComponent =
           mapName != null
-              ? new PersonalizedTranslatable("maps.cycle.complete.verbose", mapName)
-              : new PersonalizedTranslatable("maps.cycle.complete.no_map");
+              ? new PersonalizedTranslatable("map.cycledMap", mapName)
+              : new PersonalizedTranslatable("map.cycled");
     } else {
       Component secs = secondsRemaining(ChatColor.DARK_RED);
       cycleComponent =
           mapName != null
-              ? new PersonalizedTranslatable("maps.cycle.message.verbose", mapName, secs)
-              : new PersonalizedTranslatable("maps.cycle.message.no_map", secs);
+              ? new PersonalizedTranslatable("map.cycleMap", mapName, secs)
+              : new PersonalizedTranslatable("map.cycle", secs);
     }
 
     return cycleComponent.color(ChatColor.DARK_AQUA);

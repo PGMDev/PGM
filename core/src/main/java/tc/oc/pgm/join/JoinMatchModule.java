@@ -22,9 +22,7 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.match.ObservingParty;
-import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
-import tc.oc.pgm.util.component.PeriodFormats;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
@@ -120,17 +118,15 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
 
       switch (genericResult.getStatus()) {
         case MATCH_STARTED:
-          joining.sendWarning(
-              new PersonalizedTranslatable("match.join.denied.matchStarted"), false);
+          joining.sendWarning(new PersonalizedTranslatable("join.err.afterStart"), false);
           return true;
 
         case MATCH_FINISHED:
-          joining.sendWarning(
-              new PersonalizedTranslatable("match.join.denied.matchFinished"), false);
+          joining.sendWarning(new PersonalizedTranslatable("join.err.afterFinish"), false);
           return true;
 
         case NO_PERMISSION:
-          joining.sendWarning(new PersonalizedTranslatable("match.join.denied.genericDeny"), false);
+          joining.sendWarning(new PersonalizedTranslatable("join.err.noPermission"), false);
           return true;
       }
     }
@@ -159,13 +155,14 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
 
     if (leaving.getParty() instanceof ObservingParty) {
       leaving.sendWarning(
-          new PersonalizedTranslatable("match.leave.denied.alreadyOnObservers"), false);
+          new PersonalizedTranslatable(
+              "join.err.alreadyJoined.team", leaving.getParty().getComponentName()),
+          false);
       return false;
     }
 
     if (!leaving.getBukkit().hasPermission(Permissions.LEAVE)) {
-      leaving.sendWarning(
-          new PersonalizedTranslatable("match.leave.denied.notAllowedToObserve"), false);
+      leaving.sendWarning(new PersonalizedTranslatable("leave.err.noPermission"), false);
       return false;
     }
 
@@ -183,56 +180,10 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
   public boolean queueToJoin(MatchPlayer joining) {
     boolean joined = match.setParty(joining, queuedParticipants);
     if (joined) {
-      joining.sendMessage(new PersonalizedTranslatable("match.join.success.ffa"));
-    }
-
-    joining.sendMessage(
-        new PersonalizedText(
-            new PersonalizedTranslatable("match.join.deferred.atMatchStart"),
-            ChatColor.YELLOW)); // Always show this message
-
-    if (match.hasModule(TeamMatchModule.class)) {
-      // If they are joining a team, show them a scary warning about leaving the match
+      joining.sendMessage(new PersonalizedTranslatable("join.ok"));
+    } else {
       joining.sendMessage(
-          new PersonalizedText(
-              new PersonalizedTranslatable(
-                  "match.join.rankedForfeitWarning.mainComponent",
-                  new PersonalizedText(
-                      new PersonalizedTranslatable("match.join.rankedForfeitWarning.warning"),
-                      ChatColor.RED),
-                  new PersonalizedText(
-                      new PersonalizedTranslatable(
-                          "match.join.rankedForfeitWarning.playUntilTheEnd"),
-                      ChatColor.RED),
-                  new PersonalizedText(
-                      new PersonalizedTranslatable("match.join.rankedForfeitWarning.doubleLoss"),
-                      ChatColor.RED),
-                  new PersonalizedText(
-                      new PersonalizedTranslatable("match.join.rankedForfeitWarning.suspension"),
-                      ChatColor.RED)),
-              ChatColor.DARK_RED));
-
-      TimeLimitMatchModule tlmm = match.getModule(TimeLimitMatchModule.class);
-      if (tlmm != null && tlmm.getTimeLimit() != null) {
-        joining.sendMessage(
-            new PersonalizedText(
-                new PersonalizedTranslatable(
-                    "match.join.rankedForfeitWarning.timeLimit",
-                    new PersonalizedText(
-                        PeriodFormats.briefNaturalPrecise(tlmm.getTimeLimit().getDuration()),
-                        ChatColor.AQUA),
-                    new PersonalizedText("/leave", ChatColor.GOLD)),
-                ChatColor.DARK_RED,
-                ChatColor.BOLD));
-      } else {
-        joining.sendMessage(
-            new PersonalizedText(
-                new PersonalizedTranslatable(
-                    "match.join.rankedForfeitWarning.noTimeLimit",
-                    new PersonalizedText("/leave", ChatColor.GOLD)),
-                ChatColor.DARK_RED,
-                ChatColor.BOLD));
-      }
+          new PersonalizedText(new PersonalizedTranslatable("join.ok.queue"), ChatColor.YELLOW));
     }
 
     return joined;
@@ -242,8 +193,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
     if (!isQueuedToJoin(joining)) return false;
     if (match.setParty(joining, match.getDefaultParty())) {
       joining.sendMessage(
-          new PersonalizedText(
-              new PersonalizedTranslatable("match.join.deferred.cancel"), ChatColor.YELLOW));
+          new PersonalizedText(new PersonalizedTranslatable("join.ok.dequeue"), ChatColor.YELLOW));
       return true;
     } else {
       return false;

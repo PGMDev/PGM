@@ -71,8 +71,7 @@ public class ReportCommands {
           Component secondsComponent = new PersonalizedText(Long.toString(secondsRemaining));
           Component secondsLeftComponent =
               new PersonalizedTranslatable(
-                      secondsRemaining != 1 ? "misc.time.seconds" : "misc.time.second",
-                      secondsComponent)
+                      secondsRemaining != 1 ? "misc.seconds" : "misc.second", secondsComponent)
                   .getPersonalizedText()
                   .color(ChatColor.AQUA);
           commandSender.sendMessage(

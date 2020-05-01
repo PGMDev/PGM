@@ -40,7 +40,9 @@ public class MatchCommands {
     sender.sendMessage(
         ComponentUtils.horizontalLineHeading(
             ChatColor.YELLOW
-                + AllTranslations.get().translate("match.matchInfo.title", sender, match.getId()),
+                + AllTranslations.get().translate("match.title", sender)
+                + " #"
+                + match.getId(),
             ChatColor.WHITE,
             ComponentUtils.MAX_CHAT_WIDTH));
 
@@ -48,7 +50,7 @@ public class MatchCommands {
       // show match time
       sender.sendMessage(
           ChatColor.DARK_PURPLE
-              + AllTranslations.get().translate("match.matchInfo.time", sender)
+              + AllTranslations.get().translate("match.info.time", sender)
               + ": "
               + ChatColor.GOLD
               + TimeUtils.formatDuration(match.getDuration()));
@@ -81,7 +83,7 @@ public class MatchCommands {
     } else if (ffamm != null) {
       teamCountParts.add(
           ChatColor.YELLOW
-              + AllTranslations.get().translate("match.matchInfo.players", sender)
+              + AllTranslations.get().translate("match.info.players", sender)
               + ChatColor.GRAY
               + ": "
               + ChatColor.WHITE
@@ -93,7 +95,7 @@ public class MatchCommands {
 
     teamCountParts.add(
         ChatColor.AQUA
-            + AllTranslations.get().translate("match.matchInfo.observers", sender)
+            + AllTranslations.get().translate("match.info.observers", sender)
             + ChatColor.GRAY
             + ": "
             + ChatColor.WHITE
@@ -122,7 +124,7 @@ public class MatchCommands {
         if (!teamGoalTexts.isEmpty()) {
           sender.sendMessage(
               ChatColor.DARK_PURPLE
-                  + AllTranslations.get().translate("match.matchInfo.goals", sender)
+                  + AllTranslations.get().translate("match.info.goals", sender)
                   + ":");
 
           for (Map.Entry<Team, Collection<String>> entry : teamGoalTexts.asMap().entrySet()) {

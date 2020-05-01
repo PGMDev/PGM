@@ -7,6 +7,10 @@ import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
 import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
 import java.util.*;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
+import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -31,11 +35,11 @@ public class TeamCommands {
           ChatColor.GRAY
               + AllTranslations.get()
                   .translate(
-                      "match.myTeam.yourTeam",
+                      "match.myTeam",
                       player.getBukkit(),
                       player.getParty().getColoredName() + ChatColor.GRAY));
     } else {
-      throw new CommandException(AllTranslations.get().translate("match.myTeam.notOnTeam", sender));
+      throw new CommandException(AllTranslations.get().translate("match.notOnTeam", sender));
     }
   }
 
@@ -64,7 +68,7 @@ public class TeamCommands {
     }
     sender.sendMessage(
         new PersonalizedTranslatable(
-                "match.team.force.success",
+                "join.ok.force",
                 matchPlayer.getStyledName(NameStyle.FANCY),
                 matchPlayer.getParty().getComponentName(),
                 oldParty.getComponentName())
@@ -76,19 +80,23 @@ public class TeamCommands {
       aliases = {"shuffle"},
       desc = "Shuffle the teams",
       perms = Permissions.JOIN_FORCE)
-  public static void shuffle(CommandSender sender, TeamMatchModule tmm, Match match)
+  public static void shuffle(
+      CommandSender sender,
+      TeamMatchModule tmm,
+      Match match,
+      @Switch('a') boolean all,
+      @Switch('f') boolean force)
       throws CommandException {
-    if (match.isRunning()) {
-      throw new CommandException(
-          AllTranslations.get().translate("match.team.shuffle.deniedMatchRunning", sender));
+    if (match.isRunning() && !force) {
+      throw new CommandException(AllTranslations.get().translate("match.shuffle.err", sender));
     } else {
-      List<Team> teams = new ArrayList<>(tmm.getParticipatingTeams());
-      List<MatchPlayer> participating = new ArrayList<>(match.getParticipants());
-      Collections.shuffle(participating);
-      for (int i = 0; i < participating.size(); i++) {
-        tmm.forceJoin(participating.get(i), teams.get((i * teams.size()) / participating.size()));
+      List<MatchPlayer> players =
+          new ArrayList<>(all ? match.getPlayers() : match.getParticipants());
+      Collections.shuffle(players);
+      for (MatchPlayer player : players) {
+        tmm.forceJoin(player, null);
       }
-      match.sendMessage(new PersonalizedTranslatable("match.team.shuffle.success"));
+      match.sendMessage(new PersonalizedTranslatable("match.shuffle.ok"));
     }
   }
 
@@ -106,15 +114,12 @@ public class TeamCommands {
       throw new CommandException(AllTranslations.get().translate("command.teamNotFound", sender));
     }
 
-    if (newName.length() > 32) { // TODO: Localize this one
-      throw new CommandException("Team name cannot be longer than 32 characters");
-    }
+    if (newName.length() > 32) newName = newName.substring(0, 32);
 
     for (Team t : tmm.getTeams()) {
       if (t.getName().equalsIgnoreCase(newName)) {
         throw new CommandException(
-            AllTranslations.get()
-                .translate("match.team.alias.deniedNameAlreadyUsed", sender, newName));
+            AllTranslations.get().translate("match.alias.err", sender, newName));
       }
     }
 
@@ -122,10 +127,10 @@ public class TeamCommands {
     team.setName(newName);
 
     match.sendMessage(
-        oldName
-            + ChatColor.GRAY
-            + " renamed to "
-            + team.getColoredName()); // TODO: Localize this one
+        TranslatableComponent.of(
+            "match.alias.ok",
+            TextComponent.of(oldName, TextColor.GRAY),
+            LegacyComponentSerializer.INSTANCE.deserialize(team.getColoredName())));
   }
 
   @Command(

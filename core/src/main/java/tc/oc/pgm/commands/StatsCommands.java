@@ -22,11 +22,12 @@ public class StatsCommands {
     if (player.getSettings().getValue(SettingKey.STATS).equals(SettingValue.STATS_ON)) {
       sender.sendMessage(
           ComponentUtils.horizontalLineHeading(
-              ChatColor.DARK_GREEN + AllTranslations.get().translate("stats.current", sender),
+              ChatColor.DARK_GREEN + AllTranslations.get().translate("match.stats.you", sender),
               ChatColor.WHITE,
               ComponentUtils.MAX_CHAT_WIDTH));
       sender.sendMessage(
           match.getModule(StatsMatchModule.class).getBasicStatsMessage(player.getId()));
-    } else throw new CommandException(AllTranslations.get().translate("stats.disabled", sender));
+    } else
+      throw new CommandException(AllTranslations.get().translate("match.stats.disabled", sender));
   }
 }

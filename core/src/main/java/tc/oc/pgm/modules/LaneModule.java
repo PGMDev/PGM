@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 import org.jdom2.Document;
-import org.jdom2.Element;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
@@ -20,7 +19,6 @@ import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.XMLUtils;
 
 public class LaneModule implements MapModule {
   private final Map<TeamFactory, Region> lanes;
@@ -47,6 +45,7 @@ public class LaneModule implements MapModule {
     @Override
     public LaneModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
+      /*
       Map<TeamFactory, Region> lanes = Maps.newHashMap();
       TeamModule teamModule = factory.getModule(TeamModule.class);
 
@@ -61,7 +60,8 @@ public class LaneModule implements MapModule {
         return new LaneModule(lanes);
       } else {
         return null;
-      }
+      }*/
+      return null;
     }
   }
 }
