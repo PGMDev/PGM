@@ -43,6 +43,7 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.PlayerClass;
+import tc.oc.pgm.community.events.PlayerVanishEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
@@ -377,6 +378,11 @@ public class PickerMatchModule implements MatchModule, Listener {
 
   @EventHandler
   public void giveKitToObservers(final ObserverKitApplyEvent event) {
+    refreshKit(event.getPlayer());
+  }
+
+  @EventHandler
+  public void playerVanishRefresh(final PlayerVanishEvent event) {
     refreshKit(event.getPlayer());
   }
 

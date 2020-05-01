@@ -39,6 +39,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.Username;
+import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.community.events.PlayerPunishmentEvent;
 import tc.oc.pgm.community.modules.FreezeMatchModule;
 import tc.oc.pgm.listeners.ChatDispatcher;
@@ -67,12 +68,14 @@ public class ModerationCommands implements Listener {
 
   private final ChatDispatcher chat;
   private final MatchManager manager;
+  private final VanishManager vanish;
 
   private final List<BannedAccountInfo> recentBans;
 
-  public ModerationCommands(ChatDispatcher chat, MatchManager manager) {
+  public ModerationCommands(ChatDispatcher chat, MatchManager manager, VanishManager vanish) {
     this.chat = chat;
     this.manager = manager;
+    this.vanish = vanish;
     this.recentBans = Lists.newArrayList();
   }
 
@@ -128,7 +131,7 @@ public class ModerationCommands implements Listener {
   @Command(
       aliases = {"frozenlist", "fls", "flist"},
       desc = "View a list of frozen players",
-      perms = Permissions.STAFF)
+      perms = Permissions.FREEZE)
   public void sendFrozenList(CommandSender sender, Match match) {
     FreezeMatchModule fmm = match.getModule(FreezeMatchModule.class);
 
@@ -174,7 +177,7 @@ public class ModerationCommands implements Listener {
       aliases = {"freeze", "fz", "f"},
       usage = "<player>",
       desc = "Freeze a player",
-      perms = Permissions.STAFF)
+      perms = Permissions.FREEZE)
   public void freeze(CommandSender sender, Match match, Player target) throws CommandException {
     setFreeze(sender, match, target, true);
   }
@@ -183,7 +186,7 @@ public class ModerationCommands implements Listener {
       aliases = {"unfreeze", "uf"},
       usage = "<player>",
       desc = "Unfreeze a player",
-      perms = Permissions.STAFF)
+      perms = Permissions.FREEZE)
   public void unFreeze(CommandSender sender, Match match, Player target) throws CommandException {
     setFreeze(sender, match, target, false);
   }
@@ -326,6 +329,7 @@ public class ModerationCommands implements Listener {
       Match match,
       @Text String reason,
       @Switch('s') boolean silent) {
+    silent = checkSilent(silent, sender);
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
     if (punish(PunishmentType.KICK, targetMatchPlayer, sender, reason, silent)) {
       target.kickPlayer(
@@ -351,6 +355,7 @@ public class ModerationCommands implements Listener {
       @Switch('s') boolean silent,
       @Switch('t') Duration banLength)
       throws CommandException {
+    silent = checkSilent(silent, sender);
     boolean tempBan = banLength != null && !banLength.isZero();
 
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
@@ -387,8 +392,9 @@ public class ModerationCommands implements Listener {
       @Text String reason,
       @Switch('s') boolean silent)
       throws CommandException {
-    Player targetPlayer = Bukkit.getPlayerExact(target);
+    silent = checkSilent(silent, sender);
 
+    Player targetPlayer = Bukkit.getPlayerExact(target);
     String address = target; // Default address to what was input
 
     if (targetPlayer != null) {
@@ -1067,5 +1073,13 @@ public class ModerationCommands implements Listener {
             .getPersonalizedText()
             .color(ChatColor.GRAY);
     return message.hoverEvent(HoverEvent.Action.SHOW_TEXT, info.getHoverMessage().render());
+  }
+
+  // Force vanished players to silent broadcast
+  private boolean checkSilent(boolean silent, CommandSender sender) {
+    if (!silent && sender instanceof Player && vanish.isVanished(((Player) sender).getUniqueId())) {
+      silent = true;
+    }
+    return silent;
   }
 }

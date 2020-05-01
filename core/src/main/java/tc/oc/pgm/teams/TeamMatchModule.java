@@ -257,7 +257,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     Party oldTeam = player.getParty();
     if (oldTeam == newTeam) return true;
 
-    if (match.setParty(player, newTeam)) {
+    if (!player.isVanished() && match.setParty(player, newTeam)) {
       setAutoJoin(player, autoJoin);
       return true;
     } else {

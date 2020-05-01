@@ -28,6 +28,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.commands.SettingCommands;
@@ -46,6 +47,7 @@ import tc.oc.pgm.util.named.NameStyle;
 public class ChatDispatcher implements Listener {
 
   private final MatchManager manager;
+  private final VanishManager vanish;
   private final OnlinePlayerMapAdapter<UUID> lastMessagedBy;
 
   private final Set<UUID> muted;
@@ -75,8 +77,9 @@ public class ChatDispatcher implements Listener {
           new PersonalizedText("A").color(ChatColor.GOLD),
           new PersonalizedText("] "));
 
-  public ChatDispatcher(MatchManager manager) {
+  public ChatDispatcher(MatchManager manager, VanishManager vanish) {
     this.manager = manager;
+    this.vanish = vanish;
     this.lastMessagedBy = new OnlinePlayerMapAdapter<>(PGM.get());
     this.muted = Sets.newHashSet();
   }
@@ -167,12 +170,27 @@ public class ChatDispatcher implements Listener {
       usage = "[player] [message]")
   public void sendDirect(Match match, MatchPlayer sender, Player receiver, @Text String message) {
     if (sender == null) return;
+
+    if (vanish.isVanished(sender.getId())) {
+      sender.sendWarning(new PersonalizedTranslatable("vanish.chat.deny"));
+      return;
+    }
     if (isMuted(sender)) {
       sendMutedMessage(sender);
       return;
     }
     MatchPlayer matchReceiver = manager.getPlayer(receiver);
     if (matchReceiver != null) {
+
+      // Vanish Check - Don't allow messages to vanished
+      if (vanish.isVanished(matchReceiver.getId())) {
+        sender.sendMessage(
+            new PersonalizedTranslatable("command.playerNotFound")
+                .getPersonalizedText()
+                .color(ChatColor.RED));
+        return;
+      }
+
       SettingValue option = matchReceiver.getSettings().getValue(SettingKey.MESSAGE);
 
       if (option.equals(SettingValue.MESSAGE_OFF)
@@ -333,6 +351,15 @@ public class ChatDispatcher implements Listener {
     final String message = text.trim();
 
     if (sender != null) {
+
+      // Vanish check - Ensure player is only sending messages in admin chat
+      if (sender.isVanished() && !filter.equals(AC_FILTER)) {
+        sender.sendWarning(new PersonalizedTranslatable("vanish.chat.deny"));
+        // Force channel back to admin chat, in case of accidental switch
+        sender.getSettings().setValue(SettingKey.CHAT, SettingValue.CHAT_ADMIN);
+        return;
+      }
+
       PGM.get()
           .getAsyncExecutor()
           .execute(
