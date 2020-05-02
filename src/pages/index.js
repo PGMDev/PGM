@@ -89,7 +89,7 @@ function Home() {
                     "button button--outline button--primary button--lg",
                     styles.getStarted
                   )}
-                  to={useBaseUrl("docs/doc1")}
+                  to={useBaseUrl("docs/guides/migrate")}
                 >
                   Get Started
                 </Link>
