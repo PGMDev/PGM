@@ -37,6 +37,7 @@
   overflow-wrap: break-word;
   border-collapse: collapse;
   border-style: hidden;
+  margin-bottom: 0px;
 }
 
 .table span {
@@ -48,9 +49,23 @@
   padding-bottom: 3px;
 }
 
+.table th {
+  border-color: rgb(72, 77, 91, 0.2);
+  background-color: rgb(72, 77, 91, 0.1);
+}
+
 .table td {
   padding-top: 5px;
   padding-bottom: 5px;
+  background-color: rgb(72, 77, 91, 0);
+}
+
+.table tr:nth-child(even) td {
+  border-color: rgb(72, 77, 91, 0.25);
+}
+
+.table tr:nth-child(odd) td {
+  border-color: rgb(72, 77, 91, 0.25);
 }
 
 .table label {
