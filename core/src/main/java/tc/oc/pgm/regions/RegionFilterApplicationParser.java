@@ -65,11 +65,16 @@ public class RegionFilterApplicationParser {
     rfaContext.add(rfa);
   }
 
+  private void prepend(Element el, RegionFilterApplication rfa) throws InvalidXMLException {
+    factory.getFeatures().addFeature(el, rfa);
+    rfaContext.prepend(rfa);
+  }
+
   public void parseLane(Element el) throws InvalidXMLException {
     final FeatureReference<TeamFactory> team =
         Teams.getTeamRef(new Node(XMLUtils.getRequiredAttribute(el, "team")), factory);
 
-    add(
+    prepend(
         el,
         new RegionFilterApplication(
             RFAScope.PLAYER_ENTER,
@@ -80,7 +85,7 @@ public class RegionFilterApplicationParser {
   }
 
   public void parseMaxBuildHeight(Element el) throws InvalidXMLException {
-    add(
+    prepend(
         el,
         new RegionFilterApplication(
             RFAScope.BLOCK_PLACE,
@@ -102,7 +107,7 @@ public class RegionFilterApplicationParser {
 
     for (RFAScope scope :
         Lists.newArrayList(RFAScope.BLOCK_PLACE, RFAScope.BLOCK_BREAK, RFAScope.PLAYER_ENTER)) {
-      add(el, new RegionFilterApplication(scope, region, StaticFilter.DENY, message, false));
+      prepend(el, new RegionFilterApplication(scope, region, StaticFilter.DENY, message, false));
     }
   }
 

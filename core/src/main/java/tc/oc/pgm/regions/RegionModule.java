@@ -71,6 +71,11 @@ public class RegionModule implements MapModule {
         }
       }
 
+      // Support deprecated <lanes> syntax
+      for (Element laneEl : XMLUtils.flattenElements(doc.getRootElement(), "lanes", "lane")) {
+        rfaParser.parseLane(laneEl);
+      }
+
       // Support deprecated <playable> syntax
       Element playableEl = XMLUtils.getUniqueChild(doc.getRootElement(), "playable");
       if (playableEl != null) rfaParser.parsePlayable(playableEl);
@@ -78,11 +83,6 @@ public class RegionModule implements MapModule {
       // Support deprecated <maxbuildheight> syntax
       Element heightEl = XMLUtils.getUniqueChild(doc.getRootElement(), "maxbuildheight");
       if (heightEl != null) rfaParser.parseMaxBuildHeight(heightEl);
-
-      // Support deprecated <lanes> syntax
-      for (Element laneEl : XMLUtils.flattenElements(doc.getRootElement(), "lanes", "lane")) {
-        rfaParser.parseLane(laneEl);
-      }
 
       return new RegionModule(rfaContext);
     }
