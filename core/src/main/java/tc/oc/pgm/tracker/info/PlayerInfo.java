@@ -3,12 +3,12 @@ package tc.oc.pgm.tracker.info;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.MeleeInfo;
 import tc.oc.pgm.api.tracker.info.OwnerInfo;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
-import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.named.NameStyle;
 
 public class PlayerInfo implements OwnerInfo, MeleeInfo, PhysicalInfo {
@@ -50,8 +50,8 @@ public class PlayerInfo implements OwnerInfo, MeleeInfo, PhysicalInfo {
   }
 
   @Override
-  public Component getLocalizedName() {
-    return player.getStyledName(NameStyle.COLOR);
+  public Component getName() {
+    return player.getName(NameStyle.COLOR);
   }
 
   @Override

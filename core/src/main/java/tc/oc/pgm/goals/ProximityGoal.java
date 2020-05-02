@@ -8,7 +8,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import tc.oc.pgm.Config;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
@@ -155,7 +155,7 @@ public abstract class ProximityGoal<T extends ProximityGoalDefinition> extends O
 
   public boolean shouldShowProximity(@Nullable Competitor team, Party viewer) {
     return team != null
-        && Config.Scoreboard.showProximity()
+        && PGM.get().getConfiguration().showProximity()
         && isProximityRelevant(team)
         && (viewer == team || viewer.isObserving());
   }

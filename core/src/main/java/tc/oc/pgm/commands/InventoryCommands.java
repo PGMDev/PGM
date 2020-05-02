@@ -25,7 +25,7 @@ public class InventoryCommands {
     } else {
       throw new CommandException(
           ComponentRenderers.toLegacyText(
-              new PersonalizedTranslatable("player.inventoryPreview.notViewable"), sender));
+              new PersonalizedTranslatable("preview.notViewable"), sender));
     }
   }
 }

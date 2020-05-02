@@ -14,9 +14,11 @@ import tc.oc.pgm.api.map.exception.MapMissingException;
 // TODO: Instead of bundling a zip with the jar, implement a GithubMapSourceFactory and use that
 public class DefaultMapSourceFactory extends SystemMapSourceFactory {
 
+  public static final DefaultMapSourceFactory INSTANCE = new DefaultMapSourceFactory();
+
   private final AtomicBoolean downloaded;
 
-  public DefaultMapSourceFactory() {
+  private DefaultMapSourceFactory() {
     super("maps/");
     dir.mkdir();
     this.downloaded = new AtomicBoolean();

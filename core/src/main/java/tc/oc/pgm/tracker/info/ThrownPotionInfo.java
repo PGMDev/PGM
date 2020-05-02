@@ -1,14 +1,13 @@
 package tc.oc.pgm.tracker.info;
 
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.potion.PotionEffectType;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.item.Potions;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.inventory.InventoryUtils;
+import tc.oc.pgm.util.text.MinecraftTranslations;
 
 public class ThrownPotionInfo extends EntityInfo implements PotionInfo {
 
@@ -16,7 +15,7 @@ public class ThrownPotionInfo extends EntityInfo implements PotionInfo {
 
   public ThrownPotionInfo(ThrownPotion entity, @Nullable ParticipantState owner) {
     super(entity, owner);
-    this.effectType = Potions.getPrimaryEffectType(entity.getItem());
+    this.effectType = InventoryUtils.getPrimaryEffectType(entity.getItem());
   }
 
   public ThrownPotionInfo(ThrownPotion entity) {
@@ -34,8 +33,8 @@ public class ThrownPotionInfo extends EntityInfo implements PotionInfo {
   }
 
   @Override
-  public Component getLocalizedName() {
-    return new PersonalizedTranslatable(NMSHacks.getTranslationKey(getPotionEffect()));
+  public Component getName() {
+    return MinecraftTranslations.getPotion(getPotionEffect());
   }
 
   @Override

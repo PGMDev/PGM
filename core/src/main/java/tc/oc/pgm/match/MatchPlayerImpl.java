@@ -25,8 +25,11 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffect;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
@@ -49,7 +52,6 @@ import tc.oc.pgm.util.chat.PlayerAudience;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedPlayer;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.DeathOverride;
 import tc.oc.pgm.util.nms.NMSHacks;
 
 public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<MatchPlayer> {
@@ -57,6 +59,9 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   // TODO: Probably should be moved to a better location
   private static final int FROZEN_VEHICLE_ENTITY_ID = NMSHacks.allocateEntityId();
   private static final Attribute[] ATTRIBUTES = Attribute.values();
+
+  private static final String DEATH_KEY = "isDead";
+  private static final MetadataValue DEATH_VALUE = new FixedMetadataValue(PGM.get(), true);
 
   private final Logger logger;
   private final Match match;
@@ -68,6 +73,7 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   private final AtomicBoolean dead;
   private final AtomicBoolean visible;
   private final AtomicInteger protocolVersion;
+  private final AtomicBoolean vanished;
 
   public MatchPlayerImpl(Match match, Player player) {
     this.logger =
@@ -81,6 +87,7 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
     this.frozen = new AtomicBoolean(false);
     this.dead = new AtomicBoolean(false);
     this.visible = new AtomicBoolean(false);
+    this.vanished = new AtomicBoolean(false);
     this.protocolVersion = new AtomicInteger(ViaUtils.getProtocolVersion(player));
   }
 
@@ -174,6 +181,11 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   }
 
   @Override
+  public boolean isVanished() {
+    return vanished.get();
+  }
+
+  @Override
   public boolean canInteract() {
     return isAlive() && !isFrozen();
   }
@@ -182,6 +194,7 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   public boolean canSee(MatchPlayer other) {
     if (!other.isVisible()) return false;
     if (other.isParticipating()) return true;
+    if (other.isVanished() && !getBukkit().hasPermission(Permissions.VANISH)) return false;
     return isObserving()
         && getSettings().getValue(SettingKey.OBSERVERS) == SettingValue.OBSERVERS_ON;
   }
@@ -275,8 +288,13 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
 
   @Override
   public void setDead(boolean yes) {
-    dead.set(yes);
-    DeathOverride.setDead(getBukkit(), yes);
+    if (dead.compareAndSet(!yes, yes)) {
+      if (yes) {
+        getBukkit().setMetadata(DEATH_KEY, DEATH_VALUE);
+      } else {
+        getBukkit().removeMetadata(DEATH_KEY, DEATH_VALUE.getOwningPlugin());
+      }
+    }
   }
 
   @Override
@@ -312,6 +330,11 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   @Override
   public void setGameMode(GameMode gameMode) {
     getBukkit().setGameMode(gameMode);
+  }
+
+  @Override
+  public void setVanished(boolean yes) {
+    vanished.set(yes);
   }
 
   /**

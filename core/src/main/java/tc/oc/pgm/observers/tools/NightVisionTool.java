@@ -18,7 +18,7 @@ public class NightVisionTool implements InventoryMenuItem {
 
   @Override
   public Component getName() {
-    return new PersonalizedTranslatable("observer.tools.nightvision");
+    return new PersonalizedTranslatable("setting.nightvision");
   }
 
   @Override
@@ -33,7 +33,7 @@ public class NightVisionTool implements InventoryMenuItem {
             .getPersonalizedText()
             .color(hasNightVision(player) ? ChatColor.GREEN : ChatColor.RED);
     Component lore =
-        new PersonalizedTranslatable("observer.tools.nightvision.lore", status)
+        new PersonalizedTranslatable("setting.nightvision.lore", status)
             .getPersonalizedText()
             .color(ChatColor.GRAY);
     return Lists.newArrayList(ComponentRenderers.toLegacyText(lore, player.getBukkit()));

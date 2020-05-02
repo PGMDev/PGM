@@ -30,7 +30,7 @@ public class BossBarMatchModule implements MatchModule, Listener {
   private final BossBarStack stack = new BossBarStack();
 
   public BossBarMatchModule(Match match) {
-    this.entityId = NMSHacks.allocateEntityId(match);
+    this.entityId = NMSHacks.allocateEntityId();
   }
 
   protected void removeView(Player viewer) {

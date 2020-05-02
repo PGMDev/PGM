@@ -5,7 +5,6 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
-import tc.oc.pgm.Config;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.util.TimeUtils;
@@ -13,7 +12,7 @@ import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.tablist.DynamicTabEntry;
 import tc.oc.pgm.util.tablist.TabView;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class MatchFooterTabEntry extends DynamicTabEntry {
 
@@ -49,29 +48,12 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
   public BaseComponent getContent(TabView view) {
     Component content = new PersonalizedText(ChatColor.DARK_GRAY);
 
-    String datacenter = Config.PlayerList.datacenter();
-    String server = Config.PlayerList.server();
-
-    if (datacenter != null) {
-      content.extra(
-          new PersonalizedText(datacenter, ChatColor.WHITE, ChatColor.BOLD),
-          new PersonalizedText(" - "));
-    }
-
     content.extra(
         new PersonalizedText(
-            AllTranslations.get().translate("command.match.matchInfo.time", view.getViewer())
-                + ": ",
-            ChatColor.GRAY),
+            TextTranslations.translate("match.info.time", view.getViewer()) + ": ", ChatColor.GRAY),
         new PersonalizedText(
             TimeUtils.formatDuration(match.getDuration()),
             this.match.isRunning() ? ChatColor.GREEN : ChatColor.GOLD));
-
-    if (server != null) {
-      content.extra(
-          new PersonalizedText(" - "),
-          new PersonalizedText(server, ChatColor.WHITE, ChatColor.BOLD));
-    }
 
     return content.render(view.getViewer());
   }

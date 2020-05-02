@@ -2,9 +2,8 @@ package tc.oc.pgm.restart;
 
 import java.time.Duration;
 import java.time.Instant;
-import org.bukkit.plugin.Plugin;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.bukkit.ConfigUtils;
 
 /**
  * Periodically check if the server has exceeded the maximum uptime or memory usage limits and if so
@@ -14,36 +13,29 @@ public class ShouldRestartTask implements Runnable {
 
   private final Instant startTime;
 
-  private final Duration uptimeLimit;
-  private final long memoryLimit;
-
-  public ShouldRestartTask(Plugin plugin) {
+  public ShouldRestartTask() {
     this.startTime = Instant.now();
-
-    this.uptimeLimit = ConfigUtils.getDuration(plugin.getConfig(), "restart.uptime");
-    this.memoryLimit = plugin.getConfig().getLong("restart.memory", 0) * 1024 * 1024; // Megabytes
   }
 
   @Override
   public void run() {
-    if (!RestartManager.isQueued()) {
-      if (uptimeLimit()) {
-        RestartManager.queueRestart("Exceeded uptime limit of " + uptimeLimit);
-      }
-
-      if (memoryLimit()) {
-        RestartManager.queueRestart("Exceeded memory limit of " + memoryLimit);
-      }
+    if (!RestartManager.isQueued() && hasReachedLimit()) {
+      RestartManager.queueRestart("Exceeded uptime limit of " + getLimit());
     }
   }
 
-  private boolean uptimeLimit() {
-    Duration uptime = Duration.between(this.startTime, Instant.now());
-    return this.uptimeLimit != null && TimeUtils.isLongerThan(uptime, this.uptimeLimit);
+  private Duration getLimit() {
+    return PGM.get().getConfiguration().getUptimeLimit();
   }
 
-  private boolean memoryLimit() {
-    long memory = Runtime.getRuntime().totalMemory();
-    return this.memoryLimit > 0 && memory > this.memoryLimit;
+  private boolean hasReachedLimit() {
+    final Duration limit = getLimit();
+
+    if (TimeUtils.isLongerThan(limit, Duration.ZERO)) {
+      final Duration uptime = Duration.between(startTime, Instant.now());
+      return TimeUtils.isLongerThan(uptime, limit);
+    }
+
+    return false;
   }
 }

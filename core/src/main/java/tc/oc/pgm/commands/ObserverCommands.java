@@ -24,7 +24,7 @@ public class ObserverCommands {
     } else {
       throw new CommandException(
           ComponentRenderers.toLegacyText(
-              new PersonalizedTranslatable("observer.command.wrongmode"), sender));
+              new PersonalizedTranslatable("setting.observersOnly"), sender));
     }
   }
 }

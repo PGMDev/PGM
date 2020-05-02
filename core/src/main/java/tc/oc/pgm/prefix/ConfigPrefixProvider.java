@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import tc.oc.pgm.Config.Prefixes;
-import tc.oc.pgm.Config.Prefixes.Prefix;
+import tc.oc.pgm.api.Config;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.PrefixChangeEvent;
 import tc.oc.pgm.api.prefix.PrefixProvider;
 
@@ -38,9 +38,10 @@ public class ConfigPrefixProvider implements PrefixProvider {
     if (player == null) return "";
 
     StringBuilder builder = new StringBuilder();
-    for (Prefix prefix : Prefixes.getPrefixes().values()) {
-      if (player.hasPermission(prefix.permission)) {
-        builder.append(prefix.toString());
+    for (Config.Group group : PGM.get().getConfiguration().getGroups()) {
+      if (player.hasPermission(group.getPermission())) {
+        final String prefix = group.getPrefix();
+        if (prefix != null) builder.append(prefix);
       }
     }
     return builder.toString();

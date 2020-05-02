@@ -71,10 +71,7 @@ public class ReportCommands {
           Component secondsComponent = new PersonalizedText(Long.toString(secondsRemaining));
           Component secondsLeftComponent =
               new PersonalizedTranslatable(
-                      secondsRemaining != 1
-                          ? "countdown.pluralCompound"
-                          : "countdown.singularCompound",
-                      secondsComponent)
+                      secondsRemaining != 1 ? "misc.seconds" : "misc.second", secondsComponent)
                   .getPersonalizedText()
                   .color(ChatColor.AQUA);
           commandSender.sendMessage(
@@ -105,11 +102,11 @@ public class ReportCommands {
             new PersonalizedText(new PersonalizedTranslatable("misc.thankYou"), ChatColor.GREEN),
             new PersonalizedText(" "),
             new PersonalizedText(
-                new PersonalizedTranslatable("command.report.acknowledge"), ChatColor.GOLD)));
+                new PersonalizedTranslatable("moderation.report.acknowledge"), ChatColor.GOLD)));
 
     final Component component =
         new PersonalizedTranslatable(
-            "command.report.notify",
+            "moderation.report.notify",
             matchPlayer == null
                 ? new PersonalizedText("Console", ChatColor.AQUA, ChatColor.ITALIC)
                 : matchPlayer.getStyledName(NameStyle.FANCY),
@@ -167,7 +164,7 @@ public class ReportCommands {
 
     Component pageNum =
         new PersonalizedTranslatable(
-                "command.paginatedResult.page",
+                "command.simplePageHeader",
                 new PersonalizedText(Integer.toString(page)).color(ChatColor.RED),
                 new PersonalizedText(Integer.toString(pages)).color(ChatColor.RED))
             .add(ChatColor.AQUA);

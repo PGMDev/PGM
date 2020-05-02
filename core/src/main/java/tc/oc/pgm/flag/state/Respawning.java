@@ -9,6 +9,7 @@ import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.PeriodFormats;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
@@ -55,10 +56,10 @@ public class Respawning extends Spawned implements Returning {
           .getMatch()
           .sendMessage(
               new PersonalizedTranslatable(
-                  "match.flag.willRespawn",
+                  "flag.willRespawn",
                   this.flag.getComponentName(),
                   new PersonalizedText(
-                      String.valueOf(respawnTime.getSeconds()),
+                      PeriodFormats.briefNaturalApproximate(respawnTime),
                       net.md_5.bungee.api.ChatColor.AQUA)));
     }
   }
@@ -83,16 +84,14 @@ public class Respawning extends Spawned implements Returning {
     super.finishCountdown();
 
     if (!Duration.ZERO.equals(respawnTime)) {
-      this.respawn(
-          new PersonalizedTranslatable("match.flag.respawn", this.flag.getComponentName()));
+      this.respawn(new PersonalizedTranslatable("flag.respawn", this.flag.getComponentName()));
     } else if (!this.wasCaptured) {
       // Flag was dropped
-      this.respawn(new PersonalizedTranslatable("match.flag.return", this.flag.getComponentName()));
+      this.respawn(new PersonalizedTranslatable("flag.return", this.flag.getComponentName()));
     } else if (this.wasDelayed) {
       // Flag was captured and respawn was delayed by a filter, so we announce that the flag has
       // respawned
-      this.respawn(
-          new PersonalizedTranslatable("match.flag.respawn", this.flag.getComponentName()));
+      this.respawn(new PersonalizedTranslatable("flag.respawn", this.flag.getComponentName()));
     }
   }
 

@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class TeamMatchModuleProvider implements BukkitProvider<TeamMatchModule> {
 
@@ -32,7 +32,7 @@ public class TeamMatchModuleProvider implements BukkitProvider<TeamMatchModule> 
     TeamMatchModule teamMatchModule =
         matchManager.getMatch(sender).getModule(TeamMatchModule.class);
     if (teamMatchModule == null) {
-      throw new ProvisionException(AllTranslations.get().translate("command.noTeams", sender));
+      throw new ProvisionException(TextTranslations.translate("command.noTeams", sender));
     }
     return teamMatchModule;
   }

@@ -1,14 +1,17 @@
 package tc.oc.pgm.death;
 
-import java.util.NavigableSet;
+import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.EntityType;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.api.tracker.info.*;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
 import tc.oc.pgm.tracker.Trackers;
@@ -22,22 +25,19 @@ import tc.oc.pgm.tracker.info.ItemInfo;
 import tc.oc.pgm.tracker.info.MobInfo;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.tracker.info.SpleefInfo;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.Components;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.translations.TranslationUtils;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class DeathMessageBuilder {
 
   static class NoMessage extends Exception {}
 
-  static NavigableSet<String> allKeys;
+  static SortedSet<String> allKeys;
 
-  static NavigableSet<String> getAllKeys() {
+  static SortedSet<String> getAllKeys() {
     if (allKeys == null) {
-      allKeys = TranslationUtils.getKeys("death.");
+      allKeys = TextTranslations.getKeys().tailSet("death.");
     }
     return allKeys;
   }
@@ -50,39 +50,51 @@ public class DeathMessageBuilder {
   private final Logger logger;
   private final MatchPlayer victim;
   private final @Nullable ParticipantState killer;
+  private final boolean predicted;
 
   private String key;
-  private Component weapon = Components.blank();
-  private Component mob = Components.blank();
+  private Component weapon = TextComponent.empty();
+  private Component mob = TextComponent.empty();
   private Long distance;
 
-  public DeathMessageBuilder(MatchPlayer victim, DamageInfo damageInfo, Logger logger) {
-    this.victim = victim;
-    this.killer = damageInfo.getAttacker();
+  public DeathMessageBuilder(MatchPlayerDeathEvent event, Logger logger) {
+    this.victim = event.getVictim();
+    this.killer = event.getDamageInfo().getAttacker();
+    this.predicted = event.isPredicted();
     this.logger = logger;
 
-    build(damageInfo);
+    build(event.getDamageInfo());
   }
 
   public Component getMessage() {
-    return new PersonalizedTranslatable(key, getArgs());
+    Component message = TranslatableComponent.of(key, getArgs());
+
+    if (predicted)
+      message =
+          message
+              .append(TextComponent.space())
+              .append(TranslatableComponent.of("death.predictedSuffix"));
+
+    return message;
   }
 
   Component[] getArgs() {
     Component[] args = new Component[5];
-    args[0] = victim.getStyledName(NameStyle.COLOR);
-    args[1] = killer == null ? Components.blank() : killer.getStyledName(NameStyle.COLOR);
+    args[0] = victim.getName(NameStyle.COLOR);
+    args[1] = killer == null ? TextComponent.empty() : killer.getName(NameStyle.COLOR);
     args[2] = weapon;
     args[3] = mob;
     args[4] =
-        distance == null ? Components.blank() : new PersonalizedText(String.valueOf(distance));
+        distance == null
+            ? TextComponent.empty()
+            : TranslatableComponent.of(String.valueOf(distance));
     return args;
   }
 
   void setDistance(double n) {
     if (!Double.isNaN(n)) {
       distance = Math.round(Math.max(0, n));
-      if (distance == 1l) distance = 2l; // Cleverly ensure the text is always plural
+      if (distance == 1L) distance = 2L; // Cleverly ensure the text is always plural
     }
   }
 
@@ -92,7 +104,7 @@ public class DeathMessageBuilder {
 
   /** Test if the given string is a prefix of any existing key */
   boolean exists(String prefix) {
-    String key = getAllKeys().ceiling(prefix);
+    String key = getAllKeys().tailSet(prefix).first();
     return key != null && key.startsWith(prefix);
   }
 
@@ -176,15 +188,16 @@ public class DeathMessageBuilder {
 
   boolean potion(PotionInfo potionInfo) {
     if (option("potion")) {
-      weapon = potionInfo.getLocalizedName();
+      weapon = potionInfo.getName();
       return true;
     }
     return false;
   }
 
   boolean item(ItemInfo itemInfo) {
-    if (itemInfo.getItem().getType() != Material.AIR && option("item")) {
-      weapon = itemInfo.getLocalizedName();
+    // TODO: Bukkit 1.13+ should be able to handle more than just weapons
+    if (Materials.isWeapon(itemInfo.getItem().getType()) && option("item")) {
+      weapon = itemInfo.getName();
       return true;
     }
     return false;
@@ -192,15 +205,23 @@ public class DeathMessageBuilder {
 
   boolean block(BlockInfo blockInfo) {
     if (option("block")) {
-      weapon = blockInfo.getLocalizedName();
+      weapon = blockInfo.getName();
       return true;
     }
     return false;
   }
 
   boolean entity(EntityInfo entityInfo) {
+    // Skip for entities that are weird and have no translations
+    switch (entityInfo.getEntityType()) {
+      case UNKNOWN:
+      case COMPLEX_PART:
+      case ENDER_CRYSTAL:
+        return false;
+    }
+
     if (option("entity")) {
-      weapon = entityInfo.getLocalizedName();
+      weapon = entityInfo.getName();
       option(entityInfo.getIdentifier());
       return true;
     }
@@ -212,9 +233,9 @@ public class DeathMessageBuilder {
       if (potion((PotionInfo) info)) {
         return true;
       } else if (option("entity")) {
-        // PotionInfo.getLocalizedName returns a potion name,
+        // PotionInfo.getName returns a potion name,
         // which doesn't work outside a potion death message.
-        weapon = new PersonalizedTranslatable("item.potion.name");
+        weapon = TranslatableComponent.of("item.potion.name");
         return true;
       }
     } else if (info instanceof EntityInfo) {
@@ -230,7 +251,7 @@ public class DeathMessageBuilder {
 
   boolean mob(MobInfo mobInfo) {
     if (option("mob")) {
-      mob = mobInfo.getLocalizedName();
+      mob = mobInfo.getName();
       option(mobInfo.getIdentifier());
       return true;
     }
@@ -317,18 +338,20 @@ public class DeathMessageBuilder {
 
     require("projectile");
 
-    if (projectile.getProjectile() instanceof EntityInfo
-        && ((EntityInfo) projectile.getProjectile()).getEntityType() == EntityType.ARROW) {
-      // "shot by arrow" is redundant
-      attack(projectile.getShooter(), null);
+    PhysicalInfo info = projectile.getProjectile();
+    if (info instanceof EntityInfo) {
+      switch (((EntityInfo) info).getEntityType()) {
+        case ARROW:
+        case WITHER_SKULL:
+          info = null; // "shot by arrow" is redundant
+          break;
+      }
     } else {
-      attack(projectile.getShooter(), projectile.getProjectile());
-      weapon =
-          projectile
-              .getLocalizedName(); // Projectile name may be different than entity name e.g. custom
-      // projectile
+      // Projectile name may be different than entity name e.g. custom projectile
+      weapon = projectile.getName();
     }
 
+    attack(projectile.getShooter(), info);
     ranged(projectile, distanceReference);
   }
 

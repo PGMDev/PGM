@@ -6,7 +6,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.kits.tag.ItemTags;
-import tc.oc.pgm.util.item.Items;
+import tc.oc.pgm.util.inventory.InventoryUtils;
 
 public class CooldownRunnable extends BukkitRunnable {
   private final ProjectileCooldown projectileCooldown;
@@ -27,7 +27,7 @@ public class CooldownRunnable extends BukkitRunnable {
     Duration timeLeft = projectileCooldown.getTimeLeft();
 
     for (ItemStack item : matchPlayer.getInventory()) {
-      if (Items.isNothing(item)) continue;
+      if (InventoryUtils.isNothing(item)) continue;
       String projectileId = ItemTags.PROJECTILE.get(item);
       if (projectileId != null
           && projectileId.equals(projectileCooldown.getProjectileDefinition().getId())) {

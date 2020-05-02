@@ -8,6 +8,7 @@ import com.google.common.collect.Multimap;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -25,7 +26,7 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.component.ComponentUtils;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class MatchCommands {
 
@@ -40,8 +41,9 @@ public class MatchCommands {
     sender.sendMessage(
         ComponentUtils.horizontalLineHeading(
             ChatColor.YELLOW
-                + AllTranslations.get()
-                    .translate("command.match.matchInfo.title", sender, match.getId()),
+                + TextTranslations.translate("match.title", sender)
+                + " #"
+                + match.getId(),
             ChatColor.WHITE,
             ComponentUtils.MAX_CHAT_WIDTH));
 
@@ -49,7 +51,7 @@ public class MatchCommands {
       // show match time
       sender.sendMessage(
           ChatColor.DARK_PURPLE
-              + AllTranslations.get().translate("command.match.matchInfo.time", sender)
+              + TextTranslations.translate("match.info.time", sender)
               + ": "
               + ChatColor.GOLD
               + TimeUtils.formatDuration(match.getDuration()));
@@ -71,7 +73,11 @@ public class MatchCommands {
             .append(ChatColor.GRAY)
             .append(": ")
             .append(ChatColor.WHITE)
-            .append(team.getPlayers().size());
+            .append(
+                team.getPlayers().stream()
+                    .filter(mp -> !mp.isVanished())
+                    .collect(Collectors.toList())
+                    .size());
 
         if (team.getMaxPlayers() != Integer.MAX_VALUE) {
           msg.append(ChatColor.GRAY).append("/").append(team.getMaxPlayers());
@@ -82,7 +88,7 @@ public class MatchCommands {
     } else if (ffamm != null) {
       teamCountParts.add(
           ChatColor.YELLOW
-              + AllTranslations.get().translate("command.match.matchInfo.players", sender)
+              + TextTranslations.translate("match.info.players", sender)
               + ChatColor.GRAY
               + ": "
               + ChatColor.WHITE
@@ -94,7 +100,7 @@ public class MatchCommands {
 
     teamCountParts.add(
         ChatColor.AQUA
-            + AllTranslations.get().translate("command.match.matchInfo.observers", sender)
+            + TextTranslations.translate("match.info.observers", sender)
             + ChatColor.GRAY
             + ": "
             + ChatColor.WHITE
@@ -122,9 +128,7 @@ public class MatchCommands {
 
         if (!teamGoalTexts.isEmpty()) {
           sender.sendMessage(
-              ChatColor.DARK_PURPLE
-                  + AllTranslations.get().translate("command.match.matchInfo.goals", sender)
-                  + ":");
+              ChatColor.DARK_PURPLE + TextTranslations.translate("match.info.goals", sender) + ":");
 
           for (Map.Entry<Team, Collection<String>> entry : teamGoalTexts.asMap().entrySet()) {
             Team team = entry.getKey();

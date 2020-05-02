@@ -19,7 +19,7 @@ public class VisibilityTool implements InventoryMenuItem {
 
   @Override
   public Component getName() {
-    return new PersonalizedTranslatable("observer.tools.visibility");
+    return new PersonalizedTranslatable("setting.visibility");
   }
 
   @Override
@@ -31,13 +31,11 @@ public class VisibilityTool implements InventoryMenuItem {
   public List<String> getLore(MatchPlayer player) {
     Component status =
         new PersonalizedTranslatable(
-                isVisible(player)
-                    ? "observer.tools.visibility.shown"
-                    : "observer.tools.visibility.hidden")
+                isVisible(player) ? "setting.visibility.shown" : "setting.visibility.hidden")
             .getPersonalizedText()
             .color(isVisible(player) ? ChatColor.GREEN : ChatColor.RED);
     Component lore =
-        new PersonalizedTranslatable("observer.tools.visibility.lore", status)
+        new PersonalizedTranslatable("setting.visibility.lore", status)
             .getPersonalizedText()
             .color(ChatColor.GRAY);
     return Lists.newArrayList(ComponentRenderers.toLegacyText(lore, player.getBukkit()));

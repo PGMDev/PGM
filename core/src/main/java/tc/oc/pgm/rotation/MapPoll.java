@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -34,7 +35,7 @@ import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 /** Represents a polling process, with a set of options. */
 public class MapPoll {
@@ -113,7 +114,11 @@ public class MapPoll {
 
     // Check if the winning map name's length suitable for the top title, otherwise subtitle
     boolean top = winner.getName().length() < TITLE_LENGTH_CUTOFF;
-    Component mapName = winner.getStyledMapName(MapNameStyle.COLOR, viewer.getBukkit()).bold(true);
+    Component mapName =
+        new PersonalizedText(
+                TextComponent.fromLegacyToComponent(
+                    winner.getStyledNameLegacy(MapNameStyle.COLOR, viewer.getBukkit()), false))
+            .bold(true);
 
     viewer.showTitle(
         top ? mapName : Components.blank(), top ? Components.blank() : mapName, 5, 60, 5);
@@ -128,14 +133,17 @@ public class MapPoll {
         new PersonalizedText(" ").bold(!voted), // Fix 1px symbol diff
         new PersonalizedText("" + countVotes(votes.get(map)), ChatColor.YELLOW),
         new PersonalizedText("] "),
-        map.getStyledMapName(
-            winner ? MapNameStyle.HIGHLIGHT_WITH_AUTHORS : MapNameStyle.COLOR_WITH_AUTHORS,
-            viewer.getBukkit()));
+        new PersonalizedText(
+            TextComponent.fromLegacyToComponent(
+                map.getStyledNameLegacy(
+                    winner ? MapNameStyle.HIGHLIGHT_WITH_AUTHORS : MapNameStyle.COLOR_WITH_AUTHORS,
+                    viewer.getBukkit()),
+                false)));
   }
 
   public void sendBook(MatchPlayer viewer) {
     String title = ChatColor.GOLD + "" + ChatColor.BOLD;
-    title += AllTranslations.get().translate("command.pool.vote.book.title", viewer.getBukkit());
+    title += TextTranslations.translate("vote.title.map", viewer.getBukkit());
 
     ItemStack is = new ItemStack(Material.WRITTEN_BOOK);
     BookMeta meta = (BookMeta) is.getItemMeta();
@@ -145,7 +153,7 @@ public class MapPoll {
     List<Component> content = new ArrayList<>(votes.size() + 2);
     content.add(
         new PersonalizedText(
-            new PersonalizedTranslatable("command.pool.vote.book.header"), ChatColor.DARK_PURPLE));
+            new PersonalizedTranslatable("vote.header.map"), ChatColor.DARK_PURPLE));
     content.add(new PersonalizedText("\n\n"));
 
     for (MapInfo pgmMap : votes.keySet()) content.add(getMapBookComponent(viewer, pgmMap));

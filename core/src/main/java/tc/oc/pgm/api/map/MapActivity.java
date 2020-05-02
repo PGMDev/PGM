@@ -10,14 +10,15 @@ public interface MapActivity {
    *
    * @return The name of the map pool
    */
-  public String getPoolName();
+  String getPoolName();
 
   /**
    * For rotation based pools, will be the map that is resumed upon server restart.
    *
-   * @return The name of a map
+   * @return The name of a map, or null
    */
-  public String getMapName();
+  @Nullable
+  String getMapName();
 
   /**
    * Whether this map pool was the last active. If the map pool was the last active, it will be
@@ -25,13 +26,13 @@ public interface MapActivity {
    *
    * @return Whether the map pool is active
    */
-  public boolean isActive();
+  boolean isActive();
 
   /**
-   * Updates the map activity in the {@link Datastore}
+   * Updates the map activity.
    *
    * @param nextMap Name of next map (if rotation based).
    * @param active If this pool is currently active.
    */
-  public void update(@Nullable String nextMap, boolean active);
+  void update(@Nullable String nextMap, boolean active);
 }

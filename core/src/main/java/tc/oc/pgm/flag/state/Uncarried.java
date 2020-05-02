@@ -21,7 +21,6 @@ import tc.oc.pgm.flag.event.FlagPickupEvent;
 import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.material.Materials;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 /** Base class for flag states in which the banner is placed on the ground somewhere as a block */
 public abstract class Uncarried extends Spawned {
@@ -69,8 +68,9 @@ public abstract class Uncarried extends Spawned {
     Materials.placeStanding(this.location, this.flag.getBannerMeta());
 
     this.labelEntity =
-        this.location.getWorld().spawn(this.location.clone().add(0, 0.7, 0), ArmorStand.class);
+        this.location.getWorld().spawn(this.location.clone().add(0, 1.7, 0), ArmorStand.class);
     this.labelEntity.setVisible(false);
+    this.labelEntity.setMarker(true);
     this.labelEntity.setGravity(false);
     this.labelEntity.setRemoveWhenFarAway(false);
     this.labelEntity.setSmall(true);
@@ -78,7 +78,6 @@ public abstract class Uncarried extends Spawned {
     this.labelEntity.setBasePlate(false);
     this.labelEntity.setCustomName(this.flag.getColoredName());
     this.labelEntity.setCustomNameVisible(true);
-    NMSHacks.enableArmorSlots(this.labelEntity, false);
   }
 
   protected void breakBanner() {
@@ -172,9 +171,9 @@ public abstract class Uncarried extends Spawned {
     Block flagBlock = this.location.getBlock();
 
     if (block.equals(flagBlock) || block.equals(flagBlock.getRelative(BlockFace.UP))) {
-      event.setCancelled(true, new PersonalizedTranslatable("match.flag.cannotBreak"));
+      event.setCancelled(true, new PersonalizedTranslatable("flag.cannotBreakFlag"));
     } else if (block.equals(flagBlock.getRelative(BlockFace.DOWN))) {
-      event.setCancelled(true, new PersonalizedTranslatable("match.flag.cannotBreakBlockUnder"));
+      event.setCancelled(true, new PersonalizedTranslatable("flag.cannotBreakBlockUnder"));
     }
   }
 
@@ -189,20 +188,6 @@ public abstract class Uncarried extends Spawned {
           && ((EntityDamageByEntityEvent) event).getDamager() instanceof Projectile) {
         ((EntityDamageByEntityEvent) event).getDamager().remove();
       }
-    }
-  }
-
-  @Override
-  public void tickLoaded() {
-    super.tickLoaded();
-
-    if (this.particleClock % 10 == 0) {
-      // ASHCON
-      /*this.flag.getMatch().getWorld().playEffect(this.getLocation().clone().add(0, 1, 0),
-      Effect.PORTAL,
-      0, 0,
-      0, 0, 0,
-      1, 8, 64);*/
     }
   }
 }

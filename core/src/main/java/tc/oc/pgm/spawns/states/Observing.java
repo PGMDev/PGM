@@ -14,8 +14,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.material.Door;
 import org.bukkit.permissions.PermissionAttachment;
+import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -49,7 +49,11 @@ public class Observing extends State {
     super.enterState();
 
     permissionAttachment = bukkit.addAttachment(PGM.get());
-    permissionAttachment.setPermission(Permissions.OBSERVER, true);
+    for (Config.Group group : PGM.get().getConfiguration().getGroups()) {
+      if (bukkit.hasPermission(group.getPermission())) {
+        permissionAttachment.setPermission(group.getObserverPermission(), true);
+      }
+    }
 
     if (reset) player.reset();
     player.setDead(false);

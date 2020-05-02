@@ -5,6 +5,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <doclint>none</doclint>
     </properties>
 
     <name>PGM</name>
@@ -95,7 +96,25 @@
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>text-api</artifactId>
+            <version>3.0.4</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>text-serializer-plain</artifactId>
             <version>3.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>text-serializer-legacy</artifactId>
+            <version>3.0.4</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>text-serializer-gson</artifactId>
+            <version>3.0.4</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -119,6 +138,13 @@
             <artifactId>intake-bukkit</artifactId>
             <version>1.2-SNAPSHOT</version>
             <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.6.2</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -174,6 +200,17 @@
                     <nonFilteredFileExtensions>
                         <nonFilteredFileExtension>zip</nonFilteredFileExtension>
                     </nonFilteredFileExtensions>
+                </configuration>
+            </plugin>
+
+            <!-- Allows for building of java docs, although not used yet -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <failOnError>false</failOnError>
+                    <includeDependencySources>true</includeDependencySources>
                 </configuration>
             </plugin>
         </plugins>

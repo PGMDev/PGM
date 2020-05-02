@@ -1,12 +1,11 @@
 package tc.oc.pgm.tracker.info;
 
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
 import org.bukkit.potion.PotionEffectType;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.text.MinecraftTranslations;
 
 public class GenericPotionInfo implements PotionInfo {
 
@@ -28,8 +27,8 @@ public class GenericPotionInfo implements PotionInfo {
   }
 
   @Override
-  public Component getLocalizedName() {
-    return new PersonalizedTranslatable(NMSHacks.getTranslationKey(getPotionEffect()));
+  public Component getName() {
+    return MinecraftTranslations.getPotion(getPotionEffect());
   }
 
   @Override

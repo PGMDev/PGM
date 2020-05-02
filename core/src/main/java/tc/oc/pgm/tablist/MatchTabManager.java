@@ -13,7 +13,6 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
-import tc.oc.pgm.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.match.Match;
@@ -22,6 +21,7 @@ import tc.oc.pgm.api.match.event.MatchUnloadEvent;
 import tc.oc.pgm.api.party.event.PartyRenameEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
+import tc.oc.pgm.community.events.PlayerVanishEvent;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.ffa.Tribute;
@@ -75,10 +75,7 @@ public class MatchTabManager extends TabManager implements Listener {
               MatchTabManager.this.render();
             }
           };
-      this.renderTask =
-          PGM.get()
-              .getExecutor()
-              .schedule(render, Config.Experiments.get().getTabRenderSeconds(), TimeUnit.SECONDS);
+      this.renderTask = PGM.get().getExecutor().schedule(render, 1, TimeUnit.SECONDS);
     }
   }
 
@@ -208,5 +205,12 @@ public class MatchTabManager extends TabManager implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onSpawn(ParticipantSpawnEvent event) {
     invalidate(event.getPlayer());
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onVanish(PlayerVanishEvent event) {
+    PlayerTabEntry entry = getPlayerEntry(event.getPlayer());
+    entry.invalidate();
+    entry.refresh();
   }
 }

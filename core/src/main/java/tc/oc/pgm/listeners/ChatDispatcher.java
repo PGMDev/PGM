@@ -28,6 +28,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.commands.SettingCommands;
@@ -46,6 +47,7 @@ import tc.oc.pgm.util.named.NameStyle;
 public class ChatDispatcher implements Listener {
 
   private final MatchManager manager;
+  private final VanishManager vanish;
   private final OnlinePlayerMapAdapter<UUID> lastMessagedBy;
 
   private final Set<UUID> muted;
@@ -58,7 +60,7 @@ public class ChatDispatcher implements Listener {
   private static final String ADMIN_CHAT_SYMBOL = "$";
 
   private static final Component CONSOLE =
-      new PersonalizedTranslatable("console")
+      new PersonalizedTranslatable("misc.console")
           .getPersonalizedText()
           .color(ChatColor.DARK_AQUA)
           .italic(true);
@@ -75,8 +77,9 @@ public class ChatDispatcher implements Listener {
           new PersonalizedText("A").color(ChatColor.GOLD),
           new PersonalizedText("] "));
 
-  public ChatDispatcher(MatchManager manager) {
+  public ChatDispatcher(MatchManager manager, VanishManager vanish) {
     this.manager = manager;
+    this.vanish = vanish;
     this.lastMessagedBy = new OnlinePlayerMapAdapter<>(PGM.get());
     this.muted = Sets.newHashSet();
   }
@@ -140,7 +143,7 @@ public class ChatDispatcher implements Listener {
     if (sender != null && !sender.getBukkit().hasPermission(Permissions.ADMINCHAT)) {
       sender.getSettings().resetValue(SettingKey.CHAT);
       SettingKey.CHAT.update(sender);
-      sender.sendWarning(new PersonalizedTranslatable("commands.adminchat.noperms"), true);
+      sender.sendWarning(new PersonalizedTranslatable("chat.channelSwitch.admin.noPerms"), true);
       return;
     }
 
@@ -167,19 +170,34 @@ public class ChatDispatcher implements Listener {
       usage = "[player] [message]")
   public void sendDirect(Match match, MatchPlayer sender, Player receiver, @Text String message) {
     if (sender == null) return;
+
+    if (vanish.isVanished(sender.getId())) {
+      sender.sendWarning(new PersonalizedTranslatable("vanish.chat.deny"));
+      return;
+    }
     if (isMuted(sender)) {
       sendMutedMessage(sender);
       return;
     }
     MatchPlayer matchReceiver = manager.getPlayer(receiver);
     if (matchReceiver != null) {
+
+      // Vanish Check - Don't allow messages to vanished
+      if (vanish.isVanished(matchReceiver.getId())) {
+        sender.sendMessage(
+            new PersonalizedTranslatable("command.playerNotFound")
+                .getPersonalizedText()
+                .color(ChatColor.RED));
+        return;
+      }
+
       SettingValue option = matchReceiver.getSettings().getValue(SettingKey.MESSAGE);
 
       if (option.equals(SettingValue.MESSAGE_OFF)
           && !sender.getBukkit().hasPermission(Permissions.STAFF)) {
         String name = receiver.getDisplayName(sender.getBukkit()) + ChatColor.RED;
         Component component =
-            new PersonalizedTranslatable("command.message.blockedNoPermissions", name);
+            new PersonalizedTranslatable("chat.message.blockedNoPermissions", name);
         sender.sendMessage(new PersonalizedText(component, ChatColor.RED));
         return;
       }
@@ -205,7 +223,7 @@ public class ChatDispatcher implements Listener {
         match,
         sender,
         message,
-        formatPrivateMessage("commands.message.from", matchReceiver.getBukkit()),
+        formatPrivateMessage("chat.message.from", matchReceiver.getBukkit()),
         viewer -> viewer.getBukkit().equals(receiver),
         null);
 
@@ -214,7 +232,7 @@ public class ChatDispatcher implements Listener {
         match,
         manager.getPlayer(receiver), // Allow for cross-match messages
         message,
-        formatPrivateMessage("commands.message.to", sender.getBukkit()),
+        formatPrivateMessage("chat.message.to", sender.getBukkit()),
         viewer -> viewer.getBukkit().equals(sender.getBukkit()),
         null);
   }
@@ -234,7 +252,7 @@ public class ChatDispatcher implements Listener {
     if (sender == null) return;
     final MatchPlayer receiver = manager.getPlayer(lastMessagedBy.get(sender.getBukkit()));
     if (receiver == null) {
-      audience.sendWarning(new PersonalizedTranslatable("commands.message.noReply"));
+      audience.sendWarning(new PersonalizedTranslatable("chat.message.noReply"));
       return;
     }
 
@@ -263,7 +281,7 @@ public class ChatDispatcher implements Listener {
         if (receiver == null) {
           player.sendWarning(
               new PersonalizedTranslatable(
-                  "commands.message.noTarget", new PersonalizedText(target)),
+                  "chat.message.unknownTarget", new PersonalizedText(target)),
               true);
         } else {
           sendDirect(
@@ -333,6 +351,15 @@ public class ChatDispatcher implements Listener {
     final String message = text.trim();
 
     if (sender != null) {
+
+      // Vanish check - Ensure player is only sending messages in admin chat
+      if (sender.isVanished() && !filter.equals(AC_FILTER)) {
+        sender.sendWarning(new PersonalizedTranslatable("vanish.chat.deny"));
+        // Force channel back to admin chat, in case of accidental switch
+        sender.getSettings().setValue(SettingKey.CHAT, SettingValue.CHAT_ADMIN);
+        return;
+      }
+
       PGM.get()
           .getAsyncExecutor()
           .execute(

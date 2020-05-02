@@ -8,8 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
-import tc.oc.pgm.Config;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
@@ -20,19 +19,17 @@ import tc.oc.pgm.util.ClassLogger;
 
 public class RestartListener implements Listener {
 
-  private final Plugin plugin;
+  private final PGM plugin;
   private final MatchManager matchManager;
   private final Logger logger;
 
-  private int matchCount;
-  private @Nullable Integer matchLimit;
+  private long matchCount;
   private @Nullable RequestRestartEvent.Deferral deferral;
 
-  public RestartListener(Plugin plugin, MatchManager matchManager) {
+  public RestartListener(PGM plugin, MatchManager matchManager) {
     this.plugin = plugin;
     this.matchManager = matchManager;
-    this.logger = ClassLogger.get(this.plugin.getLogger(), this.getClass());
-    this.matchLimit = Config.AutoRestart.matchLimit() > 0 ? Config.AutoRestart.matchLimit() : null;
+    this.logger = ClassLogger.get(plugin.getLogger(), getClass());
   }
 
   private void attemptMatchEnd(Match match) {
@@ -101,8 +98,9 @@ public class RestartListener implements Listener {
 
   @EventHandler
   public void onMatchLoad(MatchLoadEvent event) {
-    if (this.matchLimit != null && ++this.matchCount >= this.matchLimit) {
-      RestartManager.queueRestart("Reached match limit of " + this.matchLimit);
+    long matchLimit = plugin.getConfiguration().getMatchLimit();
+    if (++matchCount >= matchLimit && matchLimit > 0) {
+      RestartManager.queueRestart("Reached match limit of " + matchLimit);
     }
   }
 }

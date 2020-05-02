@@ -210,7 +210,7 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
       }
 
       if (getDeferTouches()) {
-        toucher.sendMessage(new PersonalizedTranslatable("match.touch.destroyable.deferredNotice"));
+        toucher.sendMessage(new PersonalizedTranslatable("objective.credit.future"));
       }
     }
   }
