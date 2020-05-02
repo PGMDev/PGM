@@ -33,7 +33,7 @@ module.exports = {
           position: "left",
         },
         {
-          to: "docs/doc1",
+          to: "docs/modules/main",
           activeBasePath: "docs",
           label: "Examples",
           position: "left",
@@ -52,12 +52,20 @@ module.exports = {
           title: "Docs",
           items: [
             {
-              label: "Style Guide",
-              to: "docs/doc1",
+              to: "docs/modules/main",
+              label: "Modules",
             },
             {
-              label: "Second Doc",
-              to: "docs/doc2",
+              to: "docs/reference/inventory",
+              label: "Reference",
+            },
+            {
+              to: "docs/guides/regions",
+              label: "Guides",
+            },
+            {
+              to: "docs/modules/main",
+              label: "Examples",
             },
           ],
         },
