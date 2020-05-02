@@ -22,10 +22,10 @@ const features = [
     imageUrl: "img/open-hands.png",
     description: (
       <>
-        Not only it is easy to use, but contributing is also more accessible
-        thanks to having no dependency injection. PGM is supposed to be
-        reliable, stable and performant, and we could not do any of that without
-        our wonderful contributors!
+        Not only is PGM easy to use, but contributing requires no dependency 
+        installation. The plugin is designed with reliability, stability and 
+        performance in mind, all made possible thanks to our wonderful 
+        community contributors.
       </>
     ),
   },
