@@ -26,7 +26,6 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.tablist.TabEntry;
-import tc.oc.pgm.util.tablist.TabManager;
 import tc.oc.pgm.util.tablist.TabView;
 
 public class MatchTabView extends TabView implements ListeningTabView {
@@ -51,7 +50,7 @@ public class MatchTabView extends TabView implements ListeningTabView {
   private TeamOrder teamOrder;
 
   public MatchTabView(Player viewer) {
-    super(viewer);
+    super(viewer); // All fields must be reset in PlayerJoinMatchEvent to prevent leaks
   }
 
   private void addObserver(MatchPlayer observer) {
@@ -60,18 +59,6 @@ public class MatchTabView extends TabView implements ListeningTabView {
 
   private void removeObserver(MatchPlayer player) {
     this.observerPlayers.remove(player);
-  }
-
-  @Override
-  public void enable(TabManager manager) {
-    if (manager instanceof MatchTabManager) {
-      this.playerOrder =
-          ((MatchTabManager) manager).getPlayerOrderFactory().getOrder(this.matchPlayer);
-    } else if (playerOrder == null) {
-      this.playerOrder = new PlayerOrder(this.matchPlayer);
-    }
-
-    super.enable(manager);
   }
 
   @Override
@@ -158,7 +145,6 @@ public class MatchTabView extends TabView implements ListeningTabView {
 
         int columnsPerTeam =
             Math.max(1, this.getWidth() / Math.max(1, tmm.getParticipatingTeams().size()));
-        ;
 
         // Minimum rows required by teams (when they are distributed evenly across columns),
         // including the header row
@@ -229,11 +215,15 @@ public class MatchTabView extends TabView implements ListeningTabView {
           this.setSlot(x, this.getHeight() - observerRows, null);
         }
 
-        // Render observers
-        this.renderTeam(
+        final List<MatchPlayer> obs =
             observerPlayers.stream()
                 .filter(mp -> isVisible(mp, matchPlayer))
-                .collect(Collectors.toList()),
+                .collect(Collectors.toList());
+        Collections.sort(obs, playerOrder);
+
+        // Render observers
+        this.renderTeam(
+            obs,
             null,
             false,
             0,
@@ -252,10 +242,11 @@ public class MatchTabView extends TabView implements ListeningTabView {
       this.match = event.getMatch();
       this.matchPlayer = event.getPlayer();
 
+      this.playerOrder = new PlayerOrder(this.matchPlayer);
       this.teamOrder = new TeamOrder(this.matchPlayer);
 
       this.observerPlayers.clear();
-      this.match.getObservers().forEach(mp -> addObserver(mp));
+      this.match.getObservers().forEach(this::addObserver);
       this.participantPlayers.clear();
       this.participantPlayers.addAll(this.match.getParticipants());
 

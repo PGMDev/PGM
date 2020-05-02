@@ -1,7 +1,5 @@
 package tc.oc.pgm.tablist;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -46,11 +44,9 @@ public class MatchTabManager extends TabManager implements Listener {
       new DefaultMapAdapter<>(FreeForAllTabEntry::new, true);
 
   private Future<?> renderTask;
-  private PlayerOrderFactory playerOrderFactory;
 
   public MatchTabManager(Plugin plugin) {
     super(plugin, new MatchTabView.Factory(), null);
-    playerOrderFactory = PlayerOrder::new;
   }
 
   public void disable() {
@@ -77,11 +73,6 @@ public class MatchTabManager extends TabManager implements Listener {
           };
       this.renderTask = PGM.get().getExecutor().schedule(render, 1, TimeUnit.SECONDS);
     }
-  }
-
-  @Override
-  public @Nullable TabView getViewOrNull(Player viewer) {
-    return (TabView) super.getViewOrNull(viewer);
   }
 
   @Override
@@ -122,14 +113,6 @@ public class MatchTabManager extends TabManager implements Listener {
         break;
       }
     }
-  }
-
-  protected PlayerOrderFactory getPlayerOrderFactory() {
-    return playerOrderFactory;
-  }
-
-  public void setPlayerOrderFactory(PlayerOrderFactory factory) {
-    this.playerOrderFactory = checkNotNull(factory);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
