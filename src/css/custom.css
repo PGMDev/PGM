@@ -32,7 +32,7 @@
   border-radius: 8px;
 }
 
-.table {
+table {
   display: table;
   width: 100%;
   overflow-wrap: break-word;
@@ -41,35 +41,35 @@
   margin-bottom: 0px;
 }
 
-.table span {
+table span {
   margin-right: 5px;
 }
 
-.table tr {
+table tr {
   padding-top: 3px;
   padding-bottom: 3px;
 }
 
-.table th {
+table th {
   border-color: rgb(72, 77, 91, 0.2);
   background-color: rgb(72, 77, 91, 0.1);
 }
 
-.table td {
+table td {
   padding-top: 5px;
   padding-bottom: 5px;
   background-color: rgb(72, 77, 91, 0);
 }
 
-.table tr:nth-child(even) td {
+table tr:nth-child(even) td {
   border-color: rgb(72, 77, 91, 0.25);
 }
 
-.table tr:nth-child(odd) td {
+table tr:nth-child(odd) td {
   border-color: rgb(72, 77, 91, 0.25);
 }
 
-.table label {
+table label {
   display: block;
   unicode-bidi: embed;
   font-family: monospace;

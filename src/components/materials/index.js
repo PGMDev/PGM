@@ -172,7 +172,7 @@ const Materials = ({ children }) => {
         </div>
       </form>
       <div className="table-container">
-        <table className="table">
+        <table>
           <thead>
             <tr>
               <th>UID</th>

@@ -7,7 +7,9 @@ title: Includes & Conditionals
 
 A XML file can be split into multiple files and then included into the main one by using the include element. This allows you to keep the main file more organized by including sections such as kits or classes.
 
-    <include src="classes.xml"/>
+```xml
+<include src="classes.xml"/>
+```
 
 The PGM plugin will look through it's plugin-wide include path for includes, and it will also look for them relative to from where they are imported. You can set up a chain of includes that respects those same semantics.
 
@@ -26,8 +28,8 @@ _Example_
 
 The master map repository contains the following pre-made XML files for you to use
 
-<div class="table-container">
-  <table class="table">
+<div className="table-container">
+  <table>
     <thead>
       <tr>
         <th>File</th>
@@ -123,8 +125,8 @@ When PGM parses the XML, it will skip over any conditional blocks which are fals
 There are two limitations to conditionals right now:
 attributes can only equate to true/false and conditions are defined in the PGM server configuration.
 
-<div class="table-container">
-  <table class="table">
+<div className="table-container">
+  <table className="table">
     <thead>
       <tr>
         <th>Element</th>
@@ -162,8 +164,8 @@ attributes can only equate to true/false and conditions are defined in the PGM s
 
 ##### Conditionals
 
-<div class="table-container">
-  <table class="table">
+<div className="table-container">
+  <table>
     <thead>
       <tr>
         <th>Name</th>
