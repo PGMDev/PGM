@@ -1,6 +1,7 @@
 package tc.oc.pgm.spawner;
 
 import org.bukkit.Effect;
+import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -8,7 +9,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
-import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.feature.Feature;
@@ -38,7 +38,7 @@ public class Spawner implements Feature<SpawnerDefinition>, Listener, Tickable {
 
     this.lastTick = match.getTick().tick;
     this.players = new OnlinePlayerMapAdapter<>(PGM.get());
-    generateDelay();
+    calculateDelay();
   }
 
   @Override
@@ -56,24 +56,20 @@ public class Spawner implements Feature<SpawnerDefinition>, Listener, Tickable {
     if (!canSpawn()) return;
     if (match.getTick().tick - lastTick >= currentDelay) {
       for (Spawnable spawnable : definition.objects) {
-        final Vector location = definition.spawnRegion.getRandom(match.getRandom());
-        spawnable.spawn(location.toLocation(match.getWorld()), match);
-        match
-            .getWorld()
-            .spigot()
-            .playEffect(
-                location.toLocation(match.getWorld()), Effect.FLAME, 0, 0, 0, 0.15f, 0, 0, 40, 64);
+        final Location location =
+            definition.spawnRegion.getRandom(match.getRandom()).toLocation(match.getWorld());
+        spawnable.spawn(location, match);
+        match.getWorld().spigot().playEffect(location, Effect.FLAME, 0, 0, 0, 0.15f, 0, 0, 40, 64);
 
         if (spawnable.isTracked()) {
           spawnedEntities = spawnedEntities + spawnable.getSpawnCount();
         }
       }
-      generateDelay();
-      lastTick = match.getTick().tick;
+      calculateDelay();
     }
   }
 
-  private void generateDelay() {
+  private void calculateDelay() {
     if (definition.minDelay == definition.maxDelay) {
       currentDelay = TimeUtils.toTicks(definition.delay);
     } else {
@@ -84,6 +80,7 @@ public class Spawner implements Feature<SpawnerDefinition>, Listener, Tickable {
               (match.getRandom().nextDouble() * (maxDelay - minDelay)
                   + minDelay); // Picks a random tick duration between minDelay and maxDelay
     }
+    lastTick = match.getTick().tick;
   }
 
   private boolean canSpawn() {
@@ -111,8 +108,7 @@ public class Spawner implements Feature<SpawnerDefinition>, Listener, Tickable {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerPickup(PlayerPickupItemEvent event) {
-    if (isTracked(event.getItem()))
-      spawnedEntities = spawnedEntities - event.getItem().getItemStack().getAmount();
+    if (isTracked(event.getItem())) spawnedEntities -= event.getItem().getItemStack().getAmount();
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
