@@ -10,11 +10,13 @@ import org.bukkit.inventory.ItemStack;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.filters.StaticFilter;
@@ -51,33 +53,30 @@ public class SpawnerModule implements MapModule {
 
       for (Element element :
           XMLUtils.flattenElements(doc.getRootElement(), "spawners", "spawner")) {
-        SpawnerDefinition spawnerDefinition = new SpawnerDefinition();
-        spawnerDefinition.spawnRegion =
-            regionParser.parseRequiredRegionProperty(element, "spawn-region");
-        spawnerDefinition.playerRegion =
-            regionParser.parseRequiredRegionProperty(element, "player-region");
-        spawnerDefinition.id = element.getAttributeValue("id");
-        Attribute delay = element.getAttribute("delay");
-        Attribute minDelay = element.getAttribute("min-delay");
-        Attribute maxDelay = element.getAttribute("max-delay");
+        Region spawnRegion = regionParser.parseRequiredRegionProperty(element, "spawn-region");
+        Region playerRegion = regionParser.parseRequiredRegionProperty(element, "player-region");
+        String id = element.getAttributeValue("id");
+        Attribute delayAttr = element.getAttribute("delay");
+        Attribute minDelayAttr = element.getAttribute("min-delay");
+        Attribute maxDelayAttr = element.getAttribute("max-delay");
 
-        if ((minDelay != null || maxDelay != null) && delay != null) {
+        if ((minDelayAttr != null || maxDelayAttr != null) && delayAttr != null) {
           throw new InvalidXMLException(
               "Attribute 'minDelay' and 'maxDelay' cannot be combined with 'delay'", element);
         }
 
-        spawnerDefinition.delay = XMLUtils.parseDuration(delay, Duration.ofSeconds(10));
-        spawnerDefinition.minDelay = XMLUtils.parseDuration(minDelay, spawnerDefinition.delay);
-        spawnerDefinition.maxDelay = XMLUtils.parseDuration(maxDelay, spawnerDefinition.delay);
+        Duration delay = XMLUtils.parseDuration(delayAttr, Duration.ofSeconds(10));
+        Duration minDelay = XMLUtils.parseDuration(minDelayAttr, delay);
+        Duration maxDelay = XMLUtils.parseDuration(maxDelayAttr, delay);
 
-        if (TimeUtils.isShorterThan(spawnerDefinition.maxDelay, spawnerDefinition.minDelay)) {
+        if (TimeUtils.isShorterThan(maxDelay, minDelay)) {
           throw new InvalidXMLException("Max delay cannot be smaller than min delay", element);
         }
 
-        spawnerDefinition.maxEntities =
+        int maxEntities =
             XMLUtils.parseNumber(
                 element.getAttribute("max-entities"), Integer.class, Integer.MAX_VALUE);
-        spawnerDefinition.playerFilter =
+        Filter playerFilter =
             filterParser.parseFilterProperty(element, "filter", StaticFilter.ALLOW);
 
         List<Spawnable> objects = new ArrayList<>();
@@ -88,7 +87,18 @@ public class SpawnerModule implements MapModule {
           SpawnableItem item = new SpawnableItem(stack);
           objects.add(item);
         }
-        spawnerDefinition.objects = objects;
+
+        SpawnerDefinition spawnerDefinition =
+            new SpawnerDefinition(
+                id,
+                objects,
+                spawnRegion,
+                playerRegion,
+                playerFilter,
+                delay,
+                minDelay,
+                maxDelay,
+                maxEntities);
         factory.getFeatures().addFeature(element, spawnerDefinition);
         spawnerModule.spawnerDefinitions.add(spawnerDefinition);
       }

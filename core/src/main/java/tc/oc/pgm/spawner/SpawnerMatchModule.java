@@ -8,7 +8,7 @@ import tc.oc.pgm.api.match.MatchScope;
 public class SpawnerMatchModule implements MatchModule {
 
   private Match match;
-  private List<SpawnerDefinition> definitions;
+  private final List<SpawnerDefinition> definitions;
 
   public SpawnerMatchModule(Match match, List<SpawnerDefinition> definitions) {
     this.match = match;
