@@ -8,7 +8,7 @@ import java.lang.annotation.Annotation;
 import java.time.Duration;
 import java.util.List;
 import org.bukkit.command.CommandSender;
-import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.text.TextParser;
 
 public class DurationProvider implements BukkitProvider<Duration> {
 
@@ -22,7 +22,7 @@ public class DurationProvider implements BukkitProvider<Duration> {
       CommandSender commandSender, CommandArgs commandArgs, List<? extends Annotation> list)
       throws ArgumentException, ProvisionException {
     if (commandArgs.hasNext()) {
-      return TimeUtils.parseDuration(commandArgs.next());
+      return TextParser.parseDuration(commandArgs.next());
     }
     return null;
   }

@@ -14,7 +14,7 @@ import tc.oc.pgm.start.UnreadyReason;
 import tc.oc.pgm.util.component.ComponentRenderers;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class StartCommands {
 
@@ -29,12 +29,10 @@ public class StartCommands {
     StartMatchModule smm = match.needModule(StartMatchModule.class);
 
     if (match.isRunning()) {
-      throw new CommandException(
-          AllTranslations.get().translate("command.admin.start.matchRunning", sender));
+      throw new CommandException(TextTranslations.translate("admin.start.matchRunning", sender));
     }
     if (match.isFinished()) {
-      throw new CommandException(
-          AllTranslations.get().translate("command.admin.start.matchFinished", sender));
+      throw new CommandException(TextTranslations.translate("admin.start.matchFinished", sender));
     }
 
     if (smm.canStart(true)) {
@@ -44,7 +42,7 @@ public class StartCommands {
       ComponentRenderers.send(
           sender,
           new PersonalizedText(
-              new PersonalizedTranslatable("command.admin.start.unknownState"),
+              new PersonalizedTranslatable("admin.start.unknownState"),
               net.md_5.bungee.api.ChatColor.RED));
       for (UnreadyReason reason : smm.getUnreadyReasons(true)) {
         ComponentRenderers.send(
@@ -85,13 +83,11 @@ public class StartCommands {
 
     if (autoStart) {
       sender.sendMessage(
-          ChatColor.GREEN
-              + AllTranslations.get().translate("command.admin.autoStartEnabled", sender));
+          ChatColor.GREEN + TextTranslations.translate("admin.autoStart.enabled", sender));
       smm.autoStartCountdown();
     } else {
       sender.sendMessage(
-          ChatColor.BLUE
-              + AllTranslations.get().translate("command.admin.autoStartDisabled", sender));
+          ChatColor.RED + TextTranslations.translate("admin.autoStart.disabled", sender));
     }
   }
 }

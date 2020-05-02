@@ -8,8 +8,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.Permissible;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.util.ClassLogger;
-import tc.oc.pgm.util.item.ItemBuilder;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.inventory.ItemBuilder;
+import tc.oc.pgm.util.text.TextTranslations;
 
 /** Creates some of the items for the observer hotbar */
 public class ObserverToolFactory {
@@ -30,7 +30,7 @@ public class ObserverToolFactory {
         .name(
             ChatColor.BLUE.toString()
                 + ChatColor.BOLD
-                + AllTranslations.get().translate("teleportTool.displayName", player))
+                + TextTranslations.translate("misc.teleportTool", player))
         .build();
   }
 
@@ -40,7 +40,7 @@ public class ObserverToolFactory {
         .name(
             ChatColor.DARK_PURPLE.toString()
                 + ChatColor.BOLD
-                + AllTranslations.get().translate("editWand.displayName", player))
+                + TextTranslations.translate("misc.editWand", player))
         .build();
   }
 

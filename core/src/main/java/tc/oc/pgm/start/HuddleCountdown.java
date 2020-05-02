@@ -6,11 +6,8 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
-import tc.oc.pgm.api.party.Competitor;
-import tc.oc.pgm.teams.Team;
+import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.PeriodFormats;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 /** Optional countdown between teams being finalized and match starting */
@@ -22,8 +19,7 @@ public class HuddleCountdown extends PreMatchCountdown implements Listener {
 
   @Override
   protected Component formatText() {
-    return new PersonalizedTranslatable(
-            "countdown.huddle.message", secondsRemaining(ChatColor.DARK_RED))
+    return new PersonalizedTranslatable("countdown.huddleEnd", secondsRemaining(ChatColor.DARK_RED))
         .color(ChatColor.YELLOW);
   }
 
@@ -33,15 +29,8 @@ public class HuddleCountdown extends PreMatchCountdown implements Listener {
 
     getMatch().addListener(this, MatchScope.LOADED);
 
-    for (Competitor competitor : getMatch().getCompetitors()) {
-      if (competitor instanceof Team) {
-        competitor.sendMessage(
-            new PersonalizedText(
-                new PersonalizedTranslatable(
-                    "huddle.instructions", PeriodFormats.briefNaturalPrecise(total)),
-                ChatColor.YELLOW));
-      }
-    }
+    JoinMatchModule jmm = getMatch().needModule(JoinMatchModule.class);
+    jmm.queuedJoin(jmm.getQueuedParticipants());
   }
 
   protected void cleanup() {

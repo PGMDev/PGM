@@ -12,7 +12,7 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class JoinCommands {
 
@@ -42,12 +42,11 @@ public class JoinCommands {
         // player wants to join a specific team
         chosenParty = tmm.bestFuzzyMatch(team.trim());
         if (chosenParty == null)
-          throw new CommandException(
-              AllTranslations.get().translate("command.teamNotFound", sender));
+          throw new CommandException(TextTranslations.translate("command.teamNotFound", sender));
       }
     }
 
-    if (sender.hasPermission(Permissions.JOIN_FORCE) && force) {
+    if (sender.hasPermission(Permissions.JOIN_FORCE) && force && !player.isVanished()) {
       jmm.forceJoin(player, chosenParty);
     } else {
       jmm.join(player, chosenParty);

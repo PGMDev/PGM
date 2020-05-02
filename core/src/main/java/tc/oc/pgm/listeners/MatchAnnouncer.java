@@ -2,11 +2,14 @@ package tc.oc.pgm.listeners;
 
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import tc.oc.pgm.Config;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
@@ -21,11 +24,10 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.ComponentUtils;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.translations.TranslationUtils;
+import tc.oc.pgm.util.text.TextFormatter;
 
 public class MatchAnnouncer implements Listener {
 
@@ -35,16 +37,11 @@ public class MatchAnnouncer implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchLoad(final MatchLoadEvent event) {
-    if (Config.Broadcast.enabled()) {
-      final Match match = event.getMatch();
-      match
-          .getExecutor(MatchScope.LOADED)
-          .scheduleWithFixedDelay(
-              () -> match.getPlayers().forEach(this::sendCurrentlyPlaying),
-              0,
-              Config.Broadcast.frequency(),
-              TimeUnit.SECONDS);
-    }
+    final Match match = event.getMatch();
+    match
+        .getExecutor(MatchScope.LOADED)
+        .scheduleWithFixedDelay(
+            () -> match.getPlayers().forEach(this::sendCurrentlyPlaying), 0, 5, TimeUnit.MINUTES);
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -68,13 +65,13 @@ public class MatchAnnouncer implements Listener {
     for (MatchPlayer viewer : match.getPlayers()) {
       Component title, subtitle = null;
       if (event.getWinner() == null) {
-        title = new PersonalizedTranslatable("broadcast.gameOver.gameOverText");
+        title = new PersonalizedTranslatable("broadcast.gameOver");
       } else {
         title =
             new PersonalizedTranslatable(
                 event.getWinner().isNamePlural()
-                    ? "broadcast.gameOver.teamWinText.plural"
-                    : "broadcast.gameOver.teamWinText",
+                    ? "broadcast.gameOver.teamWinners"
+                    : "broadcast.gameOver.teamWinner",
                 event.getWinner().getComponentName());
 
         if (event.getWinner() == viewer.getParty()) {
@@ -105,9 +102,17 @@ public class MatchAnnouncer implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void clearTitle(PlayerJoinMatchEvent event) {
-    event.getPlayer().getBukkit().hideTitle();
+    final Player player = event.getPlayer().getBukkit();
 
-    sendWelcomeMessage(event.getPlayer());
+    player.hideTitle();
+
+    // Bukkit assumes a player's locale is "en_US" before it receives a player's setting packet.
+    // Thus, we delay sending this prominent message, so it is more likely its in the right locale.
+    event
+        .getPlayer()
+        .getMatch()
+        .getExecutor(MatchScope.LOADED)
+        .schedule(() -> sendWelcomeMessage(event.getPlayer()), 500, TimeUnit.MILLISECONDS);
   }
 
   private void sendWelcomeMessage(MatchPlayer viewer) {
@@ -122,12 +127,12 @@ public class MatchAnnouncer implements Listener {
     Collection<Contributor> authors = mapInfo.getAuthors();
     if (!authors.isEmpty()) {
       viewer.sendMessage(
-          new PersonalizedText(" ", ChatColor.DARK_GRAY)
-              .extra(
-                  viewer.getBukkit(),
-                  new PersonalizedTranslatable(
-                      "broadcast.welcomeMessage.createdBy",
-                      TranslationUtils.nameList(NameStyle.FANCY, authors))));
+          TextComponent.space()
+              .append(
+                  TranslatableComponent.of(
+                      "misc.createdBy",
+                      TextColor.GRAY,
+                      TextFormatter.nameList(authors, NameStyle.FANCY, TextColor.GRAY))));
     }
 
     viewer.sendMessage(ComponentUtils.horizontalLine(ChatColor.WHITE, 200));
@@ -136,11 +141,11 @@ public class MatchAnnouncer implements Listener {
   private void sendCurrentlyPlaying(MatchPlayer viewer) {
     viewer.sendMessage(
         new PersonalizedTranslatable(
-                "broadcast.currentlyPlaying",
+                "misc.playing",
                 viewer
                     .getMatch()
                     .getMap()
-                    .getStyledMapName(MapNameStyle.COLOR_WITH_AUTHORS, viewer.getBukkit()))
+                    .getStyledNameLegacy(MapNameStyle.COLOR_WITH_AUTHORS, viewer.getBukkit()))
             .color(ChatColor.DARK_PURPLE));
   }
 }

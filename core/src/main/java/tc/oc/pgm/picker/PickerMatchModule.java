@@ -16,15 +16,12 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerLocaleChangeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -46,6 +43,7 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.PlayerClass;
+import tc.oc.pgm.community.events.PlayerVanishEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
@@ -59,8 +57,8 @@ import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.component.ComponentUtils;
-import tc.oc.pgm.util.item.Items;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.inventory.InventoryUtils;
+import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.LOADED)
 public class PickerMatchModule implements MatchModule, Listener {
@@ -210,14 +208,14 @@ public class PickerMatchModule implements MatchModule, Listener {
 
     String key;
     if (hasTeams && hasClasses) {
-      key = "teamClass.picker.title";
+      key = "picker.windowTitle.teamClass";
     } else if (hasTeams) {
-      key = "teamSelection.picker.title";
+      key = "picker.windowTitle.team";
     } else {
-      key = "class.picker.title";
+      key = "picker.windowTitle.class";
     }
 
-    return ChatColor.DARK_RED + AllTranslations.get().translate(key, player.getBukkit());
+    return ChatColor.DARK_RED + TextTranslations.translate(key, player.getBukkit());
   }
 
   private ItemStack createJoinButton(final MatchPlayer player) {
@@ -227,24 +225,22 @@ public class PickerMatchModule implements MatchModule, Listener {
 
     String key;
     if (!canOpenWindow(player)) {
-      key = "ffa.picker.displayName";
+      key = "picker.title.ffa";
     } else if (hasTeams && hasClasses) {
-      key = "teamClass.picker.displayName";
+      key = "picker.title.teamClass";
     } else if (hasTeams) {
-      key = "teamSelection.picker.displayName";
+      key = "picker.title.team";
     } else if (hasClasses) {
-      key = "class.picker.displayName";
+      key = "picker.title.class";
     } else {
-      key = "ffa.picker.displayName";
+      key = "picker.title.ffa";
     }
 
-    meta.setDisplayName(
-        OPEN_BUTTON_PREFIX + AllTranslations.get().translate(key, player.getBukkit()));
+    meta.setDisplayName(OPEN_BUTTON_PREFIX + TextTranslations.translate(key, player.getBukkit()));
     meta.setLore(
         Lists.newArrayList(
             ChatColor.DARK_PURPLE
-                + AllTranslations.get()
-                    .translate("teamSelection.picker.tooltip", player.getBukkit())));
+                + TextTranslations.translate("picker.tooltip", player.getBukkit())));
 
     stack.setItemMeta(meta);
     return stack;
@@ -255,12 +251,11 @@ public class PickerMatchModule implements MatchModule, Listener {
 
     ItemMeta meta = stack.getItemMeta();
     meta.setDisplayName(
-        OPEN_BUTTON_PREFIX
-            + AllTranslations.get().translate("leave.picker.displayName", player.getBukkit()));
+        OPEN_BUTTON_PREFIX + TextTranslations.translate("picker.title.leave", player.getBukkit()));
     meta.setLore(
         Lists.newArrayList(
             ChatColor.DARK_PURPLE
-                + AllTranslations.get().translate("leave.picker.tooltip", player.getBukkit())));
+                + TextTranslations.translate("picker.tooltipObserver", player.getBukkit())));
 
     stack.setItemMeta(meta);
     return stack;
@@ -309,6 +304,7 @@ public class PickerMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
   public void cancelArmorEquip(ObserverInteractEvent event) {
     if (event.getClickType() == ClickType.RIGHT
+        && event.getClickedItem() != null
         && event.getClickedItem().getType() == Button.TEAM_JOIN.material) {
       event.setCancelled(true);
       event.getPlayer().getBukkit().updateInventory();
@@ -343,51 +339,50 @@ public class PickerMatchModule implements MatchModule, Listener {
   }
 
   @EventHandler(priority = EventPriority.HIGHEST)
-  public void rightClickIcon(final PlayerInteractEvent event) {
-    if (event.getAction() == Action.PHYSICAL) return;
+  public void rightClickIcon(final ObserverInteractEvent event) {
+    final boolean right = event.getClickType() == ClickType.RIGHT;
+    final boolean left = event.getClickType() == ClickType.LEFT;
+    if ((!right && !left) || InventoryUtils.isNothing(event.getClickedItem())) return;
 
-    MatchPlayer player = match.getPlayer(event.getPlayer());
-    if (player == null) return;
-
-    if (!canUse(player)) return;
-
-    ItemStack hand = event.getPlayer().getItemInHand();
-    if (Items.isNothing(hand)) return;
-
+    final ItemStack hand = event.getClickedItem();
     String displayName = hand.getItemMeta().getDisplayName();
     if (displayName == null) return;
 
+    final MatchPlayer player = event.getPlayer();
+    if (!canUse(player)) return;
+
     boolean handled = false;
-    boolean immediate =
-        (event.getAction() == Action.LEFT_CLICK_AIR
-            || event.getAction() == Action.LEFT_CLICK_BLOCK);
     final JoinMatchModule jmm = match.needModule(JoinMatchModule.class);
 
     if (hand.getType() == Button.JOIN.material) {
       handled = true;
-      if (!immediate && canOpenWindow(player) && settingEnabled(player, true)) {
+      if (right && canOpenWindow(player) && settingEnabled(player, true)) {
         showWindow(player);
       } else {
         // If there is nothing to pick or setting is disabled, just join immediately
         jmm.join(player, null);
       }
-    } else if (hand.getType() == Button.LEAVE.material && !immediate) {
+    } else if (hand.getType() == Button.LEAVE.material && left) {
       jmm.leave(player);
     }
 
     if (handled) {
-      event.setUseInteractedBlock(Event.Result.DENY);
-      event.setUseItemInHand(Event.Result.DENY);
+      event.setCancelled(true);
 
       // Unfortunately, not opening the window seems to cause the player to put the helmet
       // on their head, no matter what we do server-side. So, we have to force an inventory
       // update to resync them.
-      event.getPlayer().updateInventory();
+      player.getBukkit().updateInventory();
     }
   }
 
   @EventHandler
   public void giveKitToObservers(final ObserverKitApplyEvent event) {
+    refreshKit(event.getPlayer());
+  }
+
+  @EventHandler
+  public void playerVanishRefresh(final PlayerVanishEvent event) {
     refreshKit(event.getPlayer());
   }
 
@@ -588,7 +583,7 @@ public class PickerMatchModule implements MatchModule, Listener {
     if (!cls.canUse(viewer.getBukkit())) {
       lore.add(
           ChatColor.RED
-              + AllTranslations.get().translate("class.picker.restricted", viewer.getBukkit()));
+              + TextTranslations.translate("class.picker.restricted", viewer.getBukkit()));
     }
 
     meta.setLore(lore);
@@ -604,15 +599,13 @@ public class PickerMatchModule implements MatchModule, Listener {
     autojoinMeta.setDisplayName(
         ChatColor.GRAY.toString()
             + ChatColor.BOLD
-            + AllTranslations.get()
-                .translate("teamSelection.picker.autoJoin.displayName", viewer.getBukkit()));
+            + TextTranslations.translate("picker.autoJoin.displayName", viewer.getBukkit()));
     autojoinMeta.setLore(
         Lists.newArrayList(
             this.getTeamSizeDescription(
                 viewer.getMatch().getParticipants().size(), viewer.getMatch().getMaxPlayers()),
             ChatColor.AQUA
-                + AllTranslations.get()
-                    .translate("teamSelection.picker.autoJoin.tooltip", viewer.getBukkit())));
+                + TextTranslations.translate("picker.autoJoin.tooltip", viewer.getBukkit())));
     autojoin.setItemMeta(autojoinMeta);
 
     return autojoin;
@@ -632,29 +625,25 @@ public class PickerMatchModule implements MatchModule, Listener {
         default:
           lore.add(
               ChatColor.GREEN
-                  + AllTranslations.get()
-                      .translate("teamSelection.picker.clickToJoin", player.getBukkit()));
+                  + TextTranslations.translate("picker.clickToJoin", player.getBukkit()));
           break;
 
         case REJOINED:
           lore.add(
               ChatColor.GREEN
-                  + AllTranslations.get()
-                      .translate("teamSelection.picker.clickToRejoin", player.getBukkit()));
+                  + TextTranslations.translate("picker.clickToRejoin", player.getBukkit()));
           break;
 
         case CHOICE_DENIED:
           lore.add(
               ChatColor.GOLD
-                  + AllTranslations.get()
-                      .translate("teamSelection.picker.noPermissions", player.getBukkit()));
+                  + TextTranslations.translate("picker.noPermissions", player.getBukkit()));
           break;
 
         case FULL:
           lore.add(
               ChatColor.DARK_RED
-                  + AllTranslations.get()
-                      .translate("teamSelection.picker.capacity", player.getBukkit()));
+                  + TextTranslations.translate("picker.capacity", player.getBukkit()));
           break;
       }
     }
@@ -693,17 +682,13 @@ public class PickerMatchModule implements MatchModule, Listener {
             cmm.setPlayerClass(player.getId(), cls);
             player.sendMessage(
                 ChatColor.GOLD
-                    + AllTranslations.get()
-                        .translate(
-                            "command.class.select.confirm",
-                            player.getBukkit(),
-                            ChatColor.GREEN + name));
+                    + TextTranslations.translate(
+                        "class.success", player.getBukkit(), ChatColor.GREEN + name));
             scheduleRefresh(player);
           } else {
             player.sendMessage(
                 ChatColor.RED
-                    + AllTranslations.get()
-                        .translate("command.class.stickyClass", player.getBukkit()));
+                    + TextTranslations.translate("match.class.sticky", player.getBukkit()));
           }
         }
 

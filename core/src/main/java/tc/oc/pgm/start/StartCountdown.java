@@ -32,13 +32,13 @@ public class StartCountdown extends PreMatchCountdown {
   }
 
   protected boolean willHuddle() {
-    return !huddle.isZero();
+    return !huddle.isZero() && !huddle.isNegative();
   }
 
   @Override
   protected Component formatText() {
     return new PersonalizedTranslatable(
-            "countdown.matchStart.message", secondsRemaining(ChatColor.DARK_RED))
+            "countdown.matchStart", secondsRemaining(ChatColor.DARK_RED))
         .color(ChatColor.GREEN);
   }
 
@@ -75,7 +75,7 @@ public class StartCountdown extends PreMatchCountdown {
           this.balanceWarningSent = true;
           this.getMatch()
               .sendWarning(
-                  new PersonalizedTranslatable("team.balanceWarning", team.getComponentName()),
+                  new PersonalizedTranslatable("match.balanceTeams", team.getComponentName()),
                   false);
         }
       }

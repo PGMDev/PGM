@@ -14,7 +14,7 @@ import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
-import tc.oc.pgm.util.translations.AllTranslations;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class MapInfoProvider implements BukkitProvider<MapInfo> {
 
@@ -50,7 +50,7 @@ public class MapInfoProvider implements BukkitProvider<MapInfo> {
     }
 
     if (map == null && !isGoToNext(annotations)) {
-      throw new ArgumentException(AllTranslations.get().translate("command.mapNotFound", sender));
+      throw new ArgumentException(TextTranslations.translate("map.notFound", sender));
     }
 
     return map;

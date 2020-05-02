@@ -22,7 +22,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.meta.FireworkMeta;
-import tc.oc.pgm.Config;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -45,9 +45,6 @@ public class FireworkMatchModule implements MatchModule, Listener {
 
   private final Match match;
 
-  private static final boolean POST_ENABLED = Config.Fireworks.postMatchEnabled();
-  private static final boolean GOALS_ENABLED = Config.Fireworks.goalsEnabled();
-
   private static final int ROCKET_COUNT = 5; // Maximum rockets to launch at once, one per player
   private static final int INITIAL_DELAY = 2; // Seconds before starting to launch rockets
   private static final int FREQUENCY = 2; // Seconds between rocket launches
@@ -69,7 +66,7 @@ public class FireworkMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchEnd(final MatchFinishEvent event) {
-    if (!POST_ENABLED) return;
+    if (!PGM.get().getConfiguration().showFireworks()) return;
     match
         .getExecutor(MatchScope.LOADED)
         .scheduleAtFixedRate(
@@ -127,7 +124,7 @@ public class FireworkMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onWoolPlace(final PlayerWoolPlaceEvent event) {
-    if (GOALS_ENABLED && event.getWool().isVisible()) {
+    if (PGM.get().getConfiguration().showFireworks() && event.getWool().isVisible()) {
       this.spawnFireworkDisplay(
           BlockVectors.center(event.getBlock()),
           event.getWool().getDyeColor().getColor(),
@@ -142,7 +139,7 @@ public class FireworkMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onCoreLeak(final CoreLeakEvent event) {
-    if (GOALS_ENABLED && event.getCore().isVisible()) {
+    if (PGM.get().getConfiguration().showFireworks() && event.getCore().isVisible()) {
       this.spawnFireworkDisplay(
           event.getMatch().getWorld(),
           event.getCore().getCasingRegion(),
@@ -158,7 +155,7 @@ public class FireworkMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onDestroyableBreak(final DestroyableDestroyedEvent event) {
-    if (GOALS_ENABLED && event.getDestroyable().isVisible()) {
+    if (PGM.get().getConfiguration().showFireworks() && event.getDestroyable().isVisible()) {
       this.spawnFireworkDisplay(
           event.getMatch().getWorld(),
           event.getDestroyable().getBlockRegion(),
@@ -174,7 +171,9 @@ public class FireworkMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onHillCapture(final ControllerChangeEvent event) {
-    if (GOALS_ENABLED && event.getControlPoint().isVisible() && event.getNewController() != null) {
+    if (PGM.get().getConfiguration().showFireworks()
+        && event.getControlPoint().isVisible()
+        && event.getNewController() != null) {
       this.spawnFireworkDisplay(
           event.getMatch().getWorld(),
           event.getControlPoint().getCaptureRegion(),
@@ -190,7 +189,7 @@ public class FireworkMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onFlagCapture(final FlagCaptureEvent event) {
-    if (GOALS_ENABLED && event.getGoal().isVisible()) {
+    if (PGM.get().getConfiguration().showFireworks() && event.getGoal().isVisible()) {
       this.spawnFireworkDisplay(
           event.getMatch().getWorld(),
           event.getNet().getRegion(),

@@ -10,7 +10,8 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import tc.oc.pgm.Config;
+import tc.oc.pgm.api.Config;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -22,9 +23,7 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.match.ObservingParty;
-import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
-import tc.oc.pgm.util.component.PeriodFormats;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
@@ -68,13 +67,17 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
     }
   }
 
+  private Config getConfig() {
+    return PGM.get().getConfiguration();
+  }
+
   public boolean canJoinFull(MatchPlayer joining) {
-    return !Config.Join.capacity()
-        || (Config.Join.overfill() && joining.getBukkit().hasPermission(Permissions.JOIN_FULL));
+    return !getConfig().shouldLimitJoin()
+        || joining.getBukkit().hasPermission(Permissions.JOIN_FULL);
   }
 
   public boolean canPriorityKick(MatchPlayer joining) {
-    return Config.Join.priorityKick()
+    return getConfig().canPriorityKick()
         && joining.getBukkit().hasPermission(Permissions.JOIN_FULL)
         && !match.isRunning();
   }
@@ -95,9 +98,14 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
       return GenericJoinResult.Status.MATCH_FINISHED.toResult();
     }
 
+    // Don't allow vanished players to join
+    if (joining.isVanished()) {
+      return GenericJoinResult.Status.VANISHED.toResult();
+    }
+
     // If mid-match join is disabled, player cannot join for the first time after the match has
     // started
-    if (match.isRunning() && !Config.Join.midMatch()) {
+    if (match.isRunning() && !getConfig().canAnytimeJoin()) {
       return GenericJoinResult.Status.MATCH_STARTED.toResult();
     }
 
@@ -120,18 +128,19 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
 
       switch (genericResult.getStatus()) {
         case MATCH_STARTED:
-          joining.sendWarning(
-              new PersonalizedTranslatable("command.gameplay.join.matchStarted"), false);
+          joining.sendWarning(new PersonalizedTranslatable("join.err.afterStart"), false);
           return true;
 
         case MATCH_FINISHED:
-          joining.sendWarning(
-              new PersonalizedTranslatable("command.gameplay.join.matchFinished"), false);
+          joining.sendWarning(new PersonalizedTranslatable("join.err.afterFinish"), false);
           return true;
 
         case NO_PERMISSION:
-          joining.sendWarning(
-              new PersonalizedTranslatable("command.gameplay.join.joinDenied"), false);
+          joining.sendWarning(new PersonalizedTranslatable("join.err.noPermission"), false);
+          return true;
+
+        case VANISHED:
+          joining.sendWarning(new PersonalizedTranslatable("command.gameplay.join.vanish"), false);
           return true;
       }
     }
@@ -160,13 +169,14 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
 
     if (leaving.getParty() instanceof ObservingParty) {
       leaving.sendWarning(
-          new PersonalizedTranslatable("command.gameplay.leave.alreadyOnObservers"), false);
+          new PersonalizedTranslatable(
+              "join.err.alreadyJoined.team", leaving.getParty().getComponentName()),
+          false);
       return false;
     }
 
     if (!leaving.getBukkit().hasPermission(Permissions.LEAVE)) {
-      leaving.sendWarning(
-          new PersonalizedTranslatable("command.gameplay.leave.leaveDenied"), false);
+      leaving.sendWarning(new PersonalizedTranslatable("leave.err.noPermission"), false);
       return false;
     }
 
@@ -184,56 +194,10 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
   public boolean queueToJoin(MatchPlayer joining) {
     boolean joined = match.setParty(joining, queuedParticipants);
     if (joined) {
-      joining.sendMessage(new PersonalizedTranslatable("ffa.join"));
-    }
-
-    joining.sendMessage(
-        new PersonalizedText(
-            new PersonalizedTranslatable("team.join.deferred.request"),
-            ChatColor.YELLOW)); // Always show this message
-
-    if (match.hasModule(TeamMatchModule.class)) {
-      // If they are joining a team, show them a scary warning about leaving the match
+      joining.sendMessage(new PersonalizedTranslatable("join.ok"));
+    } else {
       joining.sendMessage(
-          new PersonalizedText(
-              new PersonalizedTranslatable(
-                  "team.join.forfeitWarning",
-                  new PersonalizedText(
-                      new PersonalizedTranslatable("team.join.forfeitWarning.emphasis.warning"),
-                      ChatColor.RED),
-                  new PersonalizedText(
-                      new PersonalizedTranslatable(
-                          "team.join.forfeitWarning.emphasis.playUntilTheEnd"),
-                      ChatColor.RED),
-                  new PersonalizedText(
-                      new PersonalizedTranslatable("team.join.forfeitWarning.emphasis.doubleLoss"),
-                      ChatColor.RED),
-                  new PersonalizedText(
-                      new PersonalizedTranslatable("team.join.forfeitWarning.emphasis.suspension"),
-                      ChatColor.RED)),
-              ChatColor.DARK_RED));
-
-      TimeLimitMatchModule tlmm = match.getModule(TimeLimitMatchModule.class);
-      if (tlmm != null && tlmm.getTimeLimit() != null) {
-        joining.sendMessage(
-            new PersonalizedText(
-                new PersonalizedTranslatable(
-                    "team.join.forfeitWarning.timeLimit",
-                    new PersonalizedText(
-                        PeriodFormats.briefNaturalPrecise(tlmm.getTimeLimit().getDuration()),
-                        ChatColor.AQUA),
-                    new PersonalizedText("/leave", ChatColor.GOLD)),
-                ChatColor.DARK_RED,
-                ChatColor.BOLD));
-      } else {
-        joining.sendMessage(
-            new PersonalizedText(
-                new PersonalizedTranslatable(
-                    "team.join.forfeitWarning.noTimeLimit",
-                    new PersonalizedText("/leave", ChatColor.GOLD)),
-                ChatColor.DARK_RED,
-                ChatColor.BOLD));
-      }
+          new PersonalizedText(new PersonalizedTranslatable("join.ok.queue"), ChatColor.YELLOW));
     }
 
     return joined;
@@ -243,8 +207,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
     if (!isQueuedToJoin(joining)) return false;
     if (match.setParty(joining, match.getDefaultParty())) {
       joining.sendMessage(
-          new PersonalizedText(
-              new PersonalizedTranslatable("team.join.deferred.cancel"), ChatColor.YELLOW));
+          new PersonalizedText(new PersonalizedTranslatable("join.ok.dequeue"), ChatColor.YELLOW));
       return true;
     } else {
       return false;

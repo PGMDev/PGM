@@ -31,9 +31,7 @@ public class TeamVictoryCondition extends ImmediateVictoryCondition {
   public Component getDescription(Match match) {
     Team team = getTeam(match);
     return new PersonalizedTranslatable(
-        team.isNamePlural()
-            ? "broadcast.gameOver.teamWinText.plural"
-            : "broadcast.gameOver.teamWinText",
+        team.isNamePlural() ? "broadcast.gameOver.teamWinners" : "broadcast.gameOver.teamWinner",
         team.getComponentName());
   }
 }

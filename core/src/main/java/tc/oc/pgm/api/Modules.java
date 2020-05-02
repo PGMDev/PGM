@@ -70,17 +70,11 @@ import tc.oc.pgm.modules.ItemDestroyMatchModule;
 import tc.oc.pgm.modules.ItemDestroyModule;
 import tc.oc.pgm.modules.ItemKeepMatchModule;
 import tc.oc.pgm.modules.ItemKeepModule;
-import tc.oc.pgm.modules.LaneMatchModule;
-import tc.oc.pgm.modules.LaneModule;
-import tc.oc.pgm.modules.MaxBuildHeightMatchModule;
-import tc.oc.pgm.modules.MaxBuildHeightModule;
 import tc.oc.pgm.modules.MobsMatchModule;
 import tc.oc.pgm.modules.MobsModule;
 import tc.oc.pgm.modules.ModifyBowProjectileMatchModule;
 import tc.oc.pgm.modules.ModifyBowProjectileModule;
 import tc.oc.pgm.modules.MultiTradeMatchModule;
-import tc.oc.pgm.modules.PlayableRegionMatchModule;
-import tc.oc.pgm.modules.PlayableRegionModule;
 import tc.oc.pgm.modules.SoundsMatchModule;
 import tc.oc.pgm.modules.StatsMatchModule;
 import tc.oc.pgm.modules.TimeLockModule;
@@ -181,10 +175,6 @@ public interface Modules {
     register(RegionModule.class, RegionMatchModule.class, new RegionModule.Factory());
     register(FilterModule.class, FilterMatchModule.class, new FilterModule.Factory());
     register(SpawnModule.class, SpawnMatchModule.class, new SpawnModule.Factory());
-    register(
-        PlayableRegionModule.class,
-        PlayableRegionMatchModule.class,
-        new PlayableRegionModule.Factory());
     register(CoreModule.class, CoreMatchModule.class, new CoreModule.Factory());
     register(WoolModule.class, WoolMatchModule.class, new WoolModule.Factory());
     register(ScoreModule.class, ScoreMatchModule.class, new ScoreModule.Factory());
@@ -194,10 +184,6 @@ public interface Modules {
     register(ToolRepairModule.class, ToolRepairMatchModule.class, new ToolRepairModule.Factory());
     register(TNTModule.class, TNTMatchModule.class, new TNTModule.Factory());
     register(PortalModule.class, PortalMatchModule.class, new PortalModule.Factory());
-    register(
-        MaxBuildHeightModule.class,
-        MaxBuildHeightMatchModule.class,
-        new MaxBuildHeightModule.Factory());
     register(CraftingModule.class, CraftingMatchModule.class, new CraftingModule.Factory());
     register(ItemModifyModule.class, ItemModifyMatchModule.class, new ItemModifyModule.Factory());
     register(
@@ -207,7 +193,6 @@ public interface Modules {
         ModifyBowProjectileMatchModule.class,
         new ModifyBowProjectileModule.Factory());
     register(MobsModule.class, MobsMatchModule.class, new MobsModule.Factory());
-    register(LaneModule.class, LaneMatchModule.class, new LaneModule.Factory());
     register(TimeLimitModule.class, TimeLimitMatchModule.class, new TimeLimitModule.Factory());
     register(HungerModule.class, HungerMatchModule.class, new HungerModule.Factory());
     register(BlitzModule.class, BlitzMatchModule.class, new BlitzModule.Factory());

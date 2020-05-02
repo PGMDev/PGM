@@ -23,7 +23,7 @@ public class FreeForAllTabEntry extends DynamicTabEntry {
             new PersonalizedText("/", ChatColor.DARK_GRAY),
             new PersonalizedText(String.valueOf(match.getMaxPlayers()), ChatColor.GRAY),
             new PersonalizedText(" ", ChatColor.YELLOW, ChatColor.BOLD)
-                .extra(new PersonalizedTranslatable("command.match.matchInfo.players")))
+                .extra(new PersonalizedTranslatable("match.info.players")))
         .render(view.getViewer());
   }
 }

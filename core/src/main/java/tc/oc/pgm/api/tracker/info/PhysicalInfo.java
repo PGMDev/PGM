@@ -1,9 +1,9 @@
 package tc.oc.pgm.api.tracker.info;
 
-import tc.oc.pgm.util.component.Component;
+import net.kyori.text.Component;
 
 public interface PhysicalInfo extends OwnerInfo {
   String getIdentifier();
 
-  Component getLocalizedName();
+  Component getName();
 }

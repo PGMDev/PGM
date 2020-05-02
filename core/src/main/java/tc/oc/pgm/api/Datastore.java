@@ -31,4 +31,7 @@ public interface Datastore {
    * @return A {@link MapActivity}.
    */
   MapActivity getMapActivity(String poolName);
+
+  /** Cleans up any resources or connections. */
+  void close();
 }

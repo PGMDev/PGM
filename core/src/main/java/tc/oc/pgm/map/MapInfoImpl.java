@@ -9,10 +9,13 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
+import net.kyori.text.format.TextDecoration;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Difficulty;
-import org.bukkit.command.CommandSender;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.MapInfo;
@@ -21,11 +24,8 @@ import tc.oc.pgm.api.map.WorldInfo;
 import tc.oc.pgm.map.contrib.PlayerContributor;
 import tc.oc.pgm.map.contrib.PseudonymContributor;
 import tc.oc.pgm.util.Version;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.named.MapNameStyle;
-import tc.oc.pgm.util.translations.TranslationUtils;
+import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -191,36 +191,24 @@ public class MapInfoImpl implements MapInfo {
   }
 
   @Override
-  public Component getStyledMapName(MapNameStyle style, @Nullable CommandSender viewer) {
-    Component styledName;
-    Component mapName = new PersonalizedText(getName());
-    Component authors =
-        new PersonalizedText(
-            TranslationUtils.legacyList(
-                viewer,
-                (input) -> ChatColor.DARK_PURPLE + input,
-                (input) -> ChatColor.RED + input,
-                getAuthors().stream().map(Contributor::getName).collect(Collectors.toList())));
+  public Component getStyledName(MapNameStyle style) {
+    TextComponent.Builder name = TextComponent.builder(getName());
 
-    if (style.isColor) {
-      mapName = mapName.color(ChatColor.GOLD);
-    }
-
-    if (style.isHighlight) {
-      mapName = mapName.underlined(true);
-    }
-
+    if (style.isColor) name.color(TextColor.GOLD);
+    if (style.isHighlight) name.decoration(TextDecoration.UNDERLINED, true);
     if (style.showAuthors) {
-      Component withAuthors =
-          new PersonalizedTranslatable("misc.authorship", mapName, authors)
-              .getPersonalizedText()
-              .color(ChatColor.DARK_PURPLE);
-      styledName = withAuthors;
-    } else {
-      styledName = mapName;
+      return TranslatableComponent.of(
+          "misc.authorship",
+          TextColor.DARK_PURPLE,
+          name.build(),
+          TextFormatter.list(
+              getAuthors().stream()
+                  .map(c -> TextComponent.of(c.getName(), TextColor.RED))
+                  .collect(Collectors.toList()),
+              TextColor.DARK_PURPLE));
     }
 
-    return styledName;
+    return name.build();
   }
 
   private static List<String> parseRules(Element root) {

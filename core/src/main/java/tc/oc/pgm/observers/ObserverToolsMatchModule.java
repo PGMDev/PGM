@@ -125,14 +125,12 @@ public class ObserverToolsMatchModule implements MatchModule, Listener {
     ItemStack tool = new ItemStack(TOOL_MATERIAL);
     ItemMeta meta = tool.getItemMeta();
     Component displayName =
-        new PersonalizedTranslatable("observer.tools.displayName")
+        new PersonalizedTranslatable("setting.displayName")
             .getPersonalizedText()
             .color(ChatColor.AQUA)
             .bold(true);
     Component lore =
-        new PersonalizedTranslatable("observer.tools.lore")
-            .getPersonalizedText()
-            .color(ChatColor.GRAY);
+        new PersonalizedTranslatable("setting.lore").getPersonalizedText().color(ChatColor.GRAY);
     meta.setDisplayName(ComponentRenderers.toLegacyText(displayName, player.getBukkit()));
     meta.setLore(Lists.newArrayList(ComponentRenderers.toLegacyText(lore, player.getBukkit())));
     meta.addItemFlags(ItemFlag.values());
@@ -142,7 +140,7 @@ public class ObserverToolsMatchModule implements MatchModule, Listener {
 
   public class ObserverToolMenu extends InventoryMenu {
 
-    public static final String INVENTORY_TITLE = "observer.tools.title";
+    public static final String INVENTORY_TITLE = "setting.title";
     public static final int INVENTORY_ROWS = 1;
 
     private List<InventoryMenuItem> tools;

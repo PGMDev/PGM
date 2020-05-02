@@ -50,7 +50,6 @@ public abstract class TaskExecutorService implements ScheduledExecutorService {
    * Cancel a task, based on its id.
    *
    * @param id A task id.
-   * @return Whether the task was cancelled.
    */
   protected abstract void cancelTask(int id);
 

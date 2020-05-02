@@ -73,10 +73,10 @@ public class TimeLimit extends SelfIdentifyingFeatureDefinition implements Victo
   public Component getDescription(Match match) {
     Component time = new PersonalizedText(TimeUtils.formatDuration(duration));
     if (result == null) {
-      return new PersonalizedTranslatable("timeLimit.description.generic", time);
+      return new PersonalizedTranslatable("match.timeLimit.generic", time);
     } else {
       return new PersonalizedTranslatable(
-          "timeLimit.description.result", result.getDescription(match), time);
+          "match.timeLimit.result", result.getDescription(match), time);
     }
   }
 

@@ -65,4 +65,23 @@ public final class StringUtils {
       return percent + "%";
     }
   }
+
+  public static String camelCase(String text) {
+    return camelCase(text, false);
+  }
+
+  public static String camelCase(String text, boolean reverse) {
+    final String[] sections = text.toLowerCase().split("[-_ ]");
+    final StringBuilder builder = new StringBuilder(text.length());
+    final int start = reverse ? sections.length - 1 : 0;
+
+    for (int i = 0; i < sections.length; i++) {
+      final String section = sections[Math.abs(start - i)];
+
+      builder.append(
+          i == 0 ? section : section.substring(0, 1).toUpperCase() + section.substring(1));
+    }
+
+    return builder.toString();
+  }
 }

@@ -13,6 +13,7 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -89,14 +90,12 @@ public class StartMatchModule implements MatchModule, Listener {
   protected final UnreadyBar unreadyBar;
   protected final Set<UnreadyReason> unreadyReasons = new HashSet<>();
   protected BossBarMatchModule bbmm;
-  protected final StartConfig config;
   protected boolean autoStart; // Initialized from config, but is mutable
 
   private StartMatchModule(Match match) {
     this.match = match;
     this.unreadyBar = new UnreadyBar();
-    this.config = new StartConfig(PGM.get().getConfig());
-    this.autoStart = config.autoStart();
+    this.autoStart = !PGM.get().getConfiguration().getStartTime().isNegative();
   }
 
   @Override
@@ -235,8 +234,9 @@ public class StartMatchModule implements MatchModule, Listener {
 
   private boolean startCountdown(
       @Nullable Duration duration, @Nullable Duration huddle, boolean force) {
-    if (duration == null) duration = config.countdown();
-    if (huddle == null) huddle = config.huddle();
+    final Config config = PGM.get().getConfiguration();
+    if (duration == null) duration = config.getStartTime();
+    if (huddle == null) huddle = config.getHuddleTime();
 
     match.getLogger().fine("STARTING countdown");
     cc().start(new StartCountdown(match, force, huddle), duration);
@@ -253,7 +253,7 @@ public class StartMatchModule implements MatchModule, Listener {
   }
 
   private void startUnreadyTimeout() {
-    Duration duration = config.timeout();
+    Duration duration = null; // Removed after config update
     if (duration != null) {
       match.getLogger().fine("STARTING unready timeout with duration " + duration);
       cc().start(new UnreadyTimeout(match), duration);

@@ -42,8 +42,7 @@ public class Dropped extends Uncarried implements Missing {
       this.flag.playStatusSound(Flag.DROP_SOUND_OWN, Flag.DROP_SOUND);
       this.flag
           .getMatch()
-          .sendMessage(
-              new PersonalizedTranslatable("match.flag.drop", this.flag.getComponentName()));
+          .sendMessage(new PersonalizedTranslatable("flag.drop", this.flag.getComponentName()));
     }
 
     if (TimeUtils.isInfinite(getDuration())) {

@@ -34,6 +34,8 @@ public interface Permissions {
   String WARN = ROOT + ".warn"; // Access to the /warn command
   String MUTE = ROOT + ".mute"; // Access to the /mute command
   String BAN = ROOT + ".ban"; // Access to the /ban command
+  String FREEZE = ROOT + ".freeze"; // Access to the /freeze command
+  String VANISH = ROOT + ".vanish"; // Access to /vanish command
 
   // Role-specific permission nodes
   Permission DEFAULT =
@@ -48,6 +50,7 @@ public interface Permissions {
           PermissionDefault.FALSE,
           new ImmutableMap.Builder<String, Boolean>()
               .putAll(DEFAULT.getChildren())
+              .put(DEFAULT.getName(), true)
               .put(JOIN_CHOOSE, true)
               .put(JOIN_FULL, true)
               .build());
@@ -58,6 +61,7 @@ public interface Permissions {
           PermissionDefault.FALSE,
           new ImmutableMap.Builder<String, Boolean>()
               .putAll(PREMIUM.getChildren())
+              .put(PREMIUM.getName(), true)
               .put(START, true)
               .put(STOP, true)
               .put(SETNEXT, true)
@@ -70,6 +74,8 @@ public interface Permissions {
               .put(WARN, true)
               .put(MUTE, true)
               .put(BAN, true)
+              .put(FREEZE, true)
+              .put(VANISH, true)
               .build());
 
   Permission DEVELOPER =
@@ -78,65 +84,30 @@ public interface Permissions {
           PermissionDefault.FALSE,
           new ImmutableMap.Builder<String, Boolean>()
               .putAll(MODERATOR.getChildren())
+              .put(MODERATOR.getName(), true)
               .put(GAMEPLAY, true)
               .put(DEBUG, true)
               .put(RELOAD, true)
               .build());
 
-  Permission ALL = new Permission("pgm.*", PermissionDefault.OP, DEVELOPER.getChildren());
-
-  // Global-disable permission nodes
-  Permission DISABLE =
+  Permission ALL =
       new Permission(
-          "pgm.disable",
-          PermissionDefault.NOT_OP,
+          "pgm.*",
+          PermissionDefault.OP,
           new ImmutableMap.Builder<String, Boolean>()
-              .put("worldedit.navigation.ceiling", false)
-              .put("worldedit.navigation.up", false)
-              .put("worldedit.calc", false)
-              .put("bukkit.command.kill", false)
-              .put("bukkit.command.me", false)
-              .put("bukkit.command.tell", false)
-              .put("commandbook.pong", false)
-              .put("commandbook.speed.flight", false)
-              .put("commandbook.speed.walk", false)
-              .build());
-
-  // Party-specific permission nodes
-  Permission PARTICIPANT =
-      new Permission(
-          "pgm.participant",
-          PermissionDefault.FALSE,
-          new ImmutableMap.Builder<String, Boolean>()
-              .putAll(DISABLE.getChildren())
-              .put("worldedit.navigation.jumpto.tool", false)
-              .put("worldedit.navigation.thru.tool", false)
-              .put("commandbook.teleport", false)
-              .build());
-  Permission OBSERVER =
-      new Permission(
-          "pgm.observer",
-          PermissionDefault.FALSE,
-          new ImmutableMap.Builder<String, Boolean>()
-              .putAll(DISABLE.getChildren())
-              .put("worldedit.navigation.*", true)
-              .put("commandbook.teleport", true)
+              .putAll(DEVELOPER.getChildren())
+              .put(DEVELOPER.getName(), true)
               .build());
 
   static void registerAll() {
-    Stream.of(DEFAULT, PREMIUM, MODERATOR, DEVELOPER, ALL, PARTICIPANT, OBSERVER)
-        .forEachOrdered(Permissions::register);
+    Stream.of(DEFAULT, PREMIUM, MODERATOR, DEVELOPER, ALL).forEachOrdered(Permissions::register);
   }
 
   static Permission register(Permission permission) {
-    PGM.get().getServer().getPluginManager().addPermission(permission);
-    return permission;
-  }
-
-  static Permission register(String node, PermissionDefault def) {
-    Permission permission = PGM.get().getServer().getPluginManager().getPermission(node);
-    if (permission == null) {
-      permission = register(new Permission(node, def));
+    try {
+      PGM.get().getServer().getPluginManager().addPermission(permission);
+    } catch (Throwable t) {
+      // No-op, the permission was already registered
     }
     return permission;
   }

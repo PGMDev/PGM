@@ -17,7 +17,7 @@ import org.apache.commons.lang.math.Fraction;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import tc.oc.pgm.Config;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -60,24 +60,22 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       if (team != null) {
         if (players == 1) {
           return new PersonalizedTranslatable(
-              "start.needMorePlayers.team.singular",
+              "join.wait.singular.team",
               new PersonalizedText(String.valueOf(players), ChatColor.AQUA),
               team.getComponentName());
         } else {
           return new PersonalizedTranslatable(
-              "start.needMorePlayers.team.plural",
+              "join.wait.plural.team",
               new PersonalizedText(String.valueOf(players), ChatColor.AQUA),
               team.getComponentName());
         }
       } else {
         if (players == 1) {
           return new PersonalizedTranslatable(
-              "start.needMorePlayers.ffa.singular",
-              new PersonalizedText(String.valueOf(players), ChatColor.AQUA));
+              "join.wait.singular", new PersonalizedText(String.valueOf(players), ChatColor.AQUA));
         } else {
           return new PersonalizedTranslatable(
-              "start.needMorePlayers.ffa.plural",
-              new PersonalizedText(String.valueOf(players), ChatColor.AQUA));
+              "join.wait.plural", new PersonalizedText(String.valueOf(players), ChatColor.AQUA));
         }
       }
     }
@@ -109,7 +107,6 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   // All teams in the match
   private final Set<Team> teams;
-  private final boolean requireEven;
 
   // Players who autojoined their current team
   private final Set<MatchPlayer> autoJoins = new HashSet<>();
@@ -122,10 +119,9 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   private final Map<UUID, Team> playerTeamMap = new HashMap<>();
 
-  public TeamMatchModule(Match match, Set<TeamFactory> teamFactories, boolean requireEven) {
+  public TeamMatchModule(Match match, Set<TeamFactory> teamFactories) {
     this.match = match;
     this.teams = new HashSet<>(teamFactories.size());
-    this.requireEven = requireEven;
 
     for (TeamFactory teamFactory : teamFactories) {
       this.teams.add(teamFactory.createTeam(match));
@@ -172,7 +168,8 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     }
     teamNeeded -= playersQueued;
 
-    int globalNeeded = Config.minimumPlayers() - playersJoined - playersQueued;
+    int globalNeeded =
+        (int) PGM.get().getConfiguration().getMinimumPlayers() - playersJoined - playersQueued;
 
     int playersNeeded;
     if (globalNeeded > teamNeeded) {
@@ -237,11 +234,11 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
   }
 
   public boolean canSwitchTeams(MatchPlayer joining) {
-    return Config.Teams.allowSwitch() || !match.isRunning();
+    return canChooseTeam(joining);
   }
 
   public boolean canChooseTeam(MatchPlayer joining) {
-    return Config.Teams.allowChoose() && joining.getBukkit().hasPermission(Permissions.JOIN_CHOOSE);
+    return joining.getBukkit().hasPermission(Permissions.JOIN_CHOOSE);
   }
 
   @Override
@@ -260,29 +257,12 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     Party oldTeam = player.getParty();
     if (oldTeam == newTeam) return true;
 
-    if (match.setParty(player, newTeam)) {
+    if (!player.isVanished() && match.setParty(player, newTeam)) {
       setAutoJoin(player, autoJoin);
       return true;
     } else {
       return false;
     }
-  }
-
-  private boolean requireEvenTeams() {
-    if (!requireEven) return false;
-
-    // If any teams are unequal in size, don't try to even the teams
-    // TODO: This could be done, it's just more complicated
-    int size = -1;
-    for (Team team : getTeams()) {
-      if (size == -1) {
-        size = team.getMaxOverfill();
-      } else if (size != team.getMaxOverfill()) {
-        return false;
-      }
-    }
-
-    return true;
   }
 
   public boolean areTeamsEven() {
@@ -408,7 +388,10 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       // If team choosing is disabled, and the match has not started yet, defer the join.
       // Note that this can only happen with autojoin. Choosing a team always fails if
       // the condition below is true.
-      if (!queued && !Config.Teams.allowChoose() && !match.isRunning()) {
+      if (!queued
+          && !canChooseTeam(joining)
+          && !match.isRunning()
+          && PGM.get().getConfiguration().shouldQueueJoin()) {
         return GenericJoinResult.Status.QUEUED.toResult();
       }
 
@@ -423,6 +406,11 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
         }
       }
 
+      // Queue the player if there is an attempt to achieve balance
+      if (!queued && !match.isRunning() && PGM.get().getConfiguration().shouldQueueJoin()) {
+        return GenericJoinResult.Status.QUEUED.toResult();
+      }
+
       // Try to find a team for the player to join
       return getEmptiestJoinableTeam(joining, true);
 
@@ -435,12 +423,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       // If team switching is disabled and the player is choosing to re-join their
       // last team, don't consider it a "choice" since that's the only team they can
       // join anyway. In any other case, check that they are allowed to choose their team.
-      if (Config.Teams.allowSwitch() || chosenTeam != lastTeam) {
-        // Team choosing is disabled
-        if (!Config.Teams.allowChoose()) {
-          return new TeamJoinResult(GenericJoinResult.Status.CHOICE_DISABLED);
-        }
-
+      if (canSwitchTeams(joining) || chosenTeam != lastTeam) {
         // Player is not allowed to choose their team
         if (!canChooseTeam(joining)) {
           return new TeamJoinResult(GenericJoinResult.Status.CHOICE_DENIED);
@@ -469,30 +452,23 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       switch (teamResult.getStatus()) {
         case SWITCH_DISABLED:
           joining.sendWarning(
-              new PersonalizedTranslatable(
-                  "command.gameplay.join.switchDisabled", lastTeam.getComponentName()),
+              new PersonalizedTranslatable("join.err.noSwitch", lastTeam.getComponentName()),
               false);
           return true;
 
         case CHOICE_DISABLED:
-          joining.sendWarning(
-              new PersonalizedTranslatable("command.gameplay.join.choiceDisabled"), false);
-          return true;
-
         case CHOICE_DENIED:
-          joining.sendWarning(
-              new PersonalizedTranslatable("command.gameplay.join.choiceDenied"), false);
+          joining.sendWarning(new PersonalizedTranslatable("join.err.noChoice"), false);
           return true;
 
         case FULL:
           if (teamResult.getTeam() != null) {
             joining.sendWarning(
                 new PersonalizedTranslatable(
-                    "command.gameplay.join.completelyFull",
-                    teamResult.getTeam().getComponentName()),
+                    "join.err.full.team", teamResult.getTeam().getComponentName()),
                 false);
           } else {
-            joining.sendWarning(new PersonalizedTranslatable("autoJoin.teamsFull"), false);
+            joining.sendWarning(new PersonalizedTranslatable("join.err.full"), false);
           }
 
           return true;
@@ -500,7 +476,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
         case REDUNDANT:
           joining.sendWarning(
               new PersonalizedTranslatable(
-                  "command.gameplay.join.alreadyOnTeam", joining.getParty().getComponentName()),
+                  "join.err.alreadyJoined.team", joining.getParty().getComponentName()),
               false);
           return true;
       }
@@ -529,8 +505,6 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   @Override
   public void queuedJoin(QueuedParticipants queue) {
-    final boolean even = requireEvenTeams();
-
     // First, eliminate any players who cannot join at all, so they do not influence the even teams
     // logic
     List<MatchPlayer> shortList = new ArrayList<>();
@@ -546,19 +520,13 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
     for (int i = 0; i < shortList.size(); i++) {
       MatchPlayer player = shortList.get(i);
-      if (even && areTeamsEven() && shortList.size() - i < getTeams().size()) {
-        // Prevent join if even teams are required, and there aren't enough remaining players to go
-        // around
-        player.sendWarning(new PersonalizedTranslatable("command.gameplay.join.uneven"));
-      } else {
-        join(player, null, queryJoin(player, null, true));
-      }
+      join(player, null, queryJoin(player, null, true));
     }
   }
 
   /** Try to balance teams by bumping players to other teams */
   public void balanceTeams() {
-    if (!Config.Teams.autoBalance()) return;
+    if (!PGM.get().getConfiguration().shouldBalanceJoin()) return;
 
     match.getLogger().info("Auto-balancing teams");
 
@@ -609,18 +577,16 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
     // Give them the bad news
     if (jmm.canPriorityKick(kickMe)) {
-      kickMe.sendMessage(
-          new PersonalizedTranslatable("gameplay.kickedForBalance", kickTo.getComponentName()));
-      kickMe.sendMessage(new PersonalizedTranslatable("gameplay.autoJoinSwitch"));
+      kickMe.sendMessage(new PersonalizedTranslatable("join.ok.moved", kickTo.getComponentName()));
+      kickMe.sendMessage(new PersonalizedTranslatable("join.ok.moved.explanation"));
     } else {
       kickMe.playSound(new Sound("mob.villager.hit"));
       if (forBalance) {
         kickMe.sendWarning(
-            new PersonalizedTranslatable("gameplay.kickedForBalance", kickTo.getComponentName()),
-            false);
+            new PersonalizedTranslatable("join.ok.moved", kickTo.getComponentName()), false);
       } else {
         kickMe.sendWarning(
-            new PersonalizedTranslatable("gameplay.kickedForPremium", kickFrom.getComponentName()),
+            new PersonalizedTranslatable("leave.ok.priorityKick.team", kickFrom.getComponentName()),
             false);
       }
     }
@@ -643,7 +609,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       event
           .getPlayer()
           .sendMessage(
-              new PersonalizedTranslatable("team.join", event.getNewParty().getComponentName()));
+              new PersonalizedTranslatable("join.ok.team", event.getNewParty().getComponentName()));
     }
     updateReadiness();
   }

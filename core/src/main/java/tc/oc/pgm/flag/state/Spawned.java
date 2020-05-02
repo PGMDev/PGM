@@ -1,14 +1,13 @@
 package tc.oc.pgm.flag.state;
 
+import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 /**
  * Base class for flag states in which the banner is physically present somewhere in the map (i.e.
@@ -55,20 +54,22 @@ public abstract class Spawned extends BaseState {
     this.particleClock++;
 
     if (this.flag.getDefinition().showBeam()) {
-      Object packet =
-          NMSHacks.particlesPacket(
-              "ITEM_CRACK",
-              true,
-              this.getLocation().clone().add(0, 56, 0).toVector(),
-              new Vector(0.15, 24, 0.15), // radius on each axis of the particle ball
-              0f, // initial horizontal velocity
-              40, // number of particles
-              Material.WOOL.getId(),
-              this.flag.getDyeColor().getWoolData());
-
       for (MatchPlayer player : flag.getMatch().getPlayers()) {
         if (this.canSeeParticles(player.getBukkit())) {
-          NMSHacks.sendPacket(player.getBukkit(), packet);
+          player
+              .getBukkit()
+              .spigot()
+              .playEffect(
+                  this.getLocation().clone().add(0, 56, 0),
+                  Effect.TILE_DUST,
+                  Material.WOOL.getId(),
+                  flag.getDyeColor().getWoolData(),
+                  0.15f, // radius on each axis of the particle ball
+                  24f,
+                  0.15f,
+                  0f, // initial horizontal velocity
+                  40, // number of particles
+                  200); // radius in blocks to show particles
         }
       }
     }

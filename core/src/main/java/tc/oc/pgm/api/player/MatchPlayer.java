@@ -88,8 +88,6 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
    *
    * @return The {@link Player}, or {@code null} if offline.
    */
-  @Deprecated
-  @Nullable
   Player getBukkit();
 
   /**
@@ -139,6 +137,14 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
   boolean isFrozen();
 
   /**
+   * Get whether the {@link MatchPlayer} is currently vanished. Determines whether to display to
+   * non-staff or not.
+   *
+   * @return Whether the {@link MatchPlayer} is vanished.
+   */
+  boolean isVanished();
+
+  /**
    * Get whether the {@link MatchPlayer} can interact with things in the {@link Match}.
    *
    * @return Whether the {@link MatchPlayer} can interact.
@@ -168,8 +174,8 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
   /**
    * Mark the {@link MatchPlayer} as dead.
    *
-   * @see #isDead()
    * @param dead Whether the {@link MatchPlayer} should be dead.
+   * @see #isDead()
    */
   void setDead(boolean dead);
 
@@ -201,6 +207,13 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
    * @param gameMode - The gamemode to set
    */
   void setGameMode(GameMode gameMode);
+
+  /**
+   * Mark the {@link MatchPlayer} as vanished or not.
+   *
+   * @param vanished - Whether the player is vanished
+   */
+  void setVanished(boolean vanished);
 
   /**
    * Get the protocol version of the {@link MatchPlayer}'s client
