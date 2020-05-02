@@ -151,7 +151,7 @@ public class PGMListener implements Listener {
       event.setJoinMessage(null);
       MatchPlayer player = match.getPlayer(event.getPlayer());
       if (player != null && !vm.isVanished(player.getId())) {
-        announceJoinOrLeave(player, "misc.join");
+        announceJoinOrLeave(player, true);
       }
     }
   }
@@ -164,7 +164,7 @@ public class PGMListener implements Listener {
     if (event.getQuitMessage() != null) {
       MatchPlayer player = match.getPlayer(event.getPlayer());
       if (player != null && !vm.isVanished(player.getId())) {
-        announceJoinOrLeave(player, "misc.leave");
+        announceJoinOrLeave(player, false);
       }
       event.setQuitMessage(null);
     }
@@ -173,17 +173,20 @@ public class PGMListener implements Listener {
     PGM.get().getPrefixRegistry().removePlayer(event.getPlayer().getUniqueId());
   }
 
-  public static void announceJoinOrLeave(MatchPlayer player, String messageKey) {
+  public static void announceJoinOrLeave(MatchPlayer player, boolean join) {
     checkNotNull(player);
-    checkNotNull(messageKey);
 
     for (MatchPlayer viewer : player.getMatch().getPlayers()) {
       if (player.equals(viewer)) continue;
 
+      final boolean vanish =
+          player.isVanished() && viewer.getBukkit().hasPermission(Permissions.VANISH);
+      final String key = (join ? "misc.join" : "misc.leave") + (vanish ? ".quiet" : "");
+
       SettingValue option = viewer.getSettings().getValue(SettingKey.JOIN);
       if (option.equals(SettingValue.JOIN_ON)) {
         String name = player.getBukkit().getDisplayName(viewer.getBukkit()) + ChatColor.YELLOW;
-        Component component = new PersonalizedTranslatable(messageKey, name);
+        Component component = new PersonalizedTranslatable(key, name);
         viewer.sendMessage(new PersonalizedText(component, ChatColor.YELLOW));
       }
     }

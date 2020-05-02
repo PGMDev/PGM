@@ -13,12 +13,10 @@ import java.util.stream.Collectors;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import tc.oc.pgm.api.PGM;
@@ -31,12 +29,10 @@ import tc.oc.pgm.api.player.event.MatchPlayerAddEvent;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.community.events.PlayerVanishEvent;
-import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.listeners.PGMListener;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.named.NameStyle;
 
 public class VanishManagerImpl implements VanishManager, Listener {
 
@@ -112,7 +108,7 @@ public class VanishManagerImpl implements VanishManager, Listener {
 
     // Broadcast join/quit message
     if (!quiet) {
-      PGMListener.announceJoinOrLeave(player, vanish ? "misc.leave" : "misc.join");
+      PGMListener.announceJoinOrLeave(player, !vanish);
     }
 
     match.callEvent(new PlayerVanishEvent(player, vanish));
@@ -161,33 +157,14 @@ public class VanishManagerImpl implements VanishManager, Listener {
   /* Events */
   @EventHandler(priority = EventPriority.MONITOR)
   public void onJoin(PlayerJoinEvent event) {
-    announceJoinOrLeaveForStaff("misc.join.quiet", event.getPlayer());
-
     if (isVanished(event.getPlayer().getUniqueId())) {
       matchManager.getPlayer(event.getPlayer()).setVanished(true);
     }
   }
 
   @EventHandler
-  public void onQuit(PlayerQuitEvent event) {
-    announceJoinOrLeaveForStaff("misc.leave.quiet", event.getPlayer());
-  }
-
-  @EventHandler
   public void checkMatchPlayer(MatchPlayerAddEvent event) {
     event.getPlayer().setVanished(isVanished(event.getPlayer().getId()));
-  }
-
-  private void announceJoinOrLeaveForStaff(String key, Player player) {
-    Match match = matchManager.getMatch(player);
-    MatchPlayer matchPlayer = match.getPlayer(player);
-    if (isVanished(matchPlayer.getId())) {
-      ChatDispatcher.broadcastAdminChatMessage(
-          new PersonalizedTranslatable(key, matchPlayer.getStyledName(NameStyle.FANCY))
-              .getPersonalizedText()
-              .color(ChatColor.YELLOW),
-          match);
-    }
   }
 
   private void sendHotbarVanish(MatchPlayer player, boolean flashColor) {
