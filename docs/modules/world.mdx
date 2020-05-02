@@ -1,0 +1,117 @@
+---
+id: world
+title: World & Terrain
+---
+
+### Terrain
+
+A world's terrain generator can be modified to use a specific seed, world and/or whether the vanilla chunk generator is used. By default a new random seed is generated for each match, unless one is specified in the seed attribute.
+
+When using the vanilla generator the default minecraft terrain generator will be used instead of generating null chunks.
+The specific world generation rules such as flat worlds, etc., can be changed by editing the world's `level.dat` file with a NBT editor. The `RandomSeed` value in the level data file is not used.
+
+Any chunks not in the world's `region/` folder will be generated according to the minecraft chunk generation rules. This means that only the terrain that you have modified needs to be saved with the world.
+
+The `world=""` attribute is used to specify the sub-folder that contains the map's `region/` and `level.dat` files.
+This is used with [conditionals](/modules/includes_conditionals#conditionals) to automatically load the holiday versions of the map, etc.
+
+<div className="table-container">
+  <table className="table">
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<terrain />`}</label>
+        </td>
+        <td>A node defining properties for this world's generator.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Terrain Attributes
+
+<div className="table-container">
+  <table className="table">
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>world</label>
+        </td>
+        <td>The level data sub-folder to be used with this map.</td>
+        <td>
+          <span className="badge badge--primary">Sub-folder Name</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>vanilla</label>
+        </td>
+        <td>
+          Specify if this world is uses the vanilla or null chunk generator.
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+      <tr>
+        <td>
+          <label>seed</label>
+        </td>
+        <td>This worlds generation seed.</td>
+        <td>
+          <span className="badge badge--primary">String</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>pre-match-physics</label>
+        </td>
+        <td>
+          Allow physics events, such as water flowing, before the match starts.
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+```xml
+<terrain vanilla="true" seed="qwerty"/>
+
+<!-- Christmas world conditional -->
+<if christmas="true">
+    <terrain world="christmas"/>
+</if>
+<if christmas="false">
+    <terrain world="normal"/>
+</if>
+```
+
+### Internal Maps
+
+Maps that are entirely indoors or underground can use the `internal` attribute on the [main map element](/modules/main)
+to prevent observers from accidentally teleporting on top of the map with the compass tool.
+In order for this to work, the exterior of the map must be completely filled in with solid blocks,
+all the way up to the maximum build height.
+
+See [Main Map Element](/modules/main)

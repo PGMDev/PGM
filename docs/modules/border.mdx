@@ -1,0 +1,241 @@
+---
+id: border
+title: World Border
+---
+
+The world border module uses the default minecraft world border and allows customization of its size, position and behavior. Only one world border definition can be active at a time.
+
+Attributes for multiple world borders can be applied for all borders by specifying them in the root `<world-borders>` element.
+
+<div className="table-container">
+  <table className="table">
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<world-borders> </world-borders>`}</label>
+        </td>
+        <td>Node containing all the defined world borders.</td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>Sub-elements</th>
+        <th />
+        <th>Value/Children</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<world-border>`}</label>
+        </td>
+        <td>A single world border.</td>
+        <td>
+          <span className="badge badge--secondary">
+            World Border Sub-elements
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### World Borders Attributes
+
+<div className="table-container">
+  <table className="table">
+    <thead>
+      <tr>
+        <th style={{ minWidth: "150px" }}>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>center</label>
+        </td>
+        <td>
+          <span className="badge badge--danger">Required</span>
+          The center of this world border.
+        </td>
+        <td>
+          <span className="badge badge--primary">X,Z</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>size</label>
+        </td>
+        <td>
+          <span className="badge badge--danger">Required</span>
+          The diameter of the world border, borders are always square.
+        </td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>when</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          Filter when this world border is in effect.
+        </td>
+        <td>
+          <a href="/modules/filters">Filter</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>after</label>
+        </td>
+        <td>
+          Time after which this border takes effect.
+          <br />
+          <i>
+            Not compatible with the <label>when</label> property.
+          </i>
+        </td>
+        <td>
+          <a href="/reference/time_periods">Time Period</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>duration</label>
+        </td>
+        <td>
+          The time it takes to transition from the previous state to this state.
+        </td>
+        <td>
+          <a href="/reference/time_periods">Time Period</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>damage</label>
+        </td>
+        <td>
+          Amount of damage per second inflicted to players for each meter they
+          are outside the border.
+        </td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td>0.2</td>
+      </tr>
+      <tr>
+        <td>
+          <label>buffer</label>
+        </td>
+        <td>
+          Distance to the edge of the border where damage to the player begins.
+        </td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td>
+          <label>warning-distance</label>
+        </td>
+        <td>Show red vignette to players closer than this to border.</td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td>
+          <label>warning-time</label>
+        </td>
+        <td>
+          Show red vignette to players when the border is moving and will reach
+          them within this time.
+        </td>
+        <td>
+          <a href="/reference/time_periods">Time Period</a>
+        </td>
+        <td>15s</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### World Border Sub-elements
+
+<div className="table-container">
+  <table className="table table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th>Value/Children</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<when>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          Filter when this world border is in effect.
+        </td>
+        <td>
+          <a href="/modules/filters">Filter</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Examples_
+
+```xml
+<world-borders center="6.5, -36.5">
+    <!-- Typical time-based shrinking border. Starts at 200 meters when the match loads. -->
+    <!-- After 5 minutes, it starts shrinking, until it is 20 meters wide at 15 minutes. -->
+    <world-border size="200"/>
+    <world-border size="20" after="5m" duration="10m"/>
+</world-borders>
+
+<!-- Borders can be controlled with filters (and will update dynamically). This is -->
+<!-- roughly how you would move a deadly border depending on which team controls a hill -->
+<world-borders size="50" damage="20">
+    <world-border center="30, 0">
+        <when>
+            <objective team="red-team">control-point</objective>
+        </when>
+    </world-border>
+    <world-border center="-30, 0">
+        <when>
+            <objective team="blue-team">control-point</objective>
+        </when>
+    </world-border>
+</world-borders>
+```

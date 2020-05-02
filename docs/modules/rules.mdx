@@ -1,0 +1,49 @@
+---
+id: rules
+title: Rules
+---
+
+You can use the rules module to add custom rules to your map that are not already included within your own established server-wide rules. Regions and filters should be used to enforce access and block rules.
+
+<div class="table-container">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Rule Element</th>
+        <th>Description</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<rules> </rules>`}</label>
+        </td>
+        <td>Node containing all the defined custom rules.</td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>Sub-elements</th>
+        <th />
+        <th>Value/Children</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<rule> </rule>`}</label>
+        </td>
+        <td>A custom map rule.</td>
+        <td>
+          <span class="badge badge--primary">Text</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Example_
+
+```xml
+<rules>
+    <rule>Do not intentional prolong the match by hiding or exiting the playing area.</rule>
+</rules>
+```
