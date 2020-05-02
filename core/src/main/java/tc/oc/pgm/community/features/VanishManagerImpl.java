@@ -112,8 +112,7 @@ public class VanishManagerImpl implements VanishManager, Listener {
 
     // Broadcast join/quit message
     if (!quiet) {
-      PGMListener.announceJoinOrLeave(
-          player, vanish ? "broadcast.leaveMessage" : "broadcast.joinMessage");
+      PGMListener.announceJoinOrLeave(player, vanish ? "misc.leave" : "misc.join");
     }
 
     match.callEvent(new PlayerVanishEvent(player, vanish));
@@ -197,7 +196,7 @@ public class VanishManagerImpl implements VanishManager, Listener {
     Component vanish =
         new PersonalizedTranslatable("vanish.hotbar")
             .getPersonalizedText()
-            .color(ChatColor.LIGHT_PURPLE)
+            .color(ChatColor.RED)
             .bold(true);
     player.sendHotbarMessage(new PersonalizedText(warning, vanish, warning));
   }

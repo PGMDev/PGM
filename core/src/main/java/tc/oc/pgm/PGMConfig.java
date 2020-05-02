@@ -489,8 +489,7 @@ public final class PGMConfig implements Config {
           Permissions.GROUP
               + "."
               + id
-              + "-"
-              + (realm.contains("-") ? realm.substring(0, realm.indexOf('-')) : "");
+              + (realm.contains("-") ? "-" + realm.substring(0, realm.indexOf('-')) : "");
 
       return Permissions.register(new Permission(node, def, permissions));
     }

@@ -143,7 +143,7 @@ public class ChatDispatcher implements Listener {
     if (sender != null && !sender.getBukkit().hasPermission(Permissions.ADMINCHAT)) {
       sender.getSettings().resetValue(SettingKey.CHAT);
       SettingKey.CHAT.update(sender);
-      sender.sendWarning(new PersonalizedTranslatable("chat.channelSwitch.admin.noPerms"), true);
+      sender.sendWarning(new PersonalizedTranslatable("misc.noPermission"), true);
       return;
     }
 
@@ -223,7 +223,7 @@ public class ChatDispatcher implements Listener {
         match,
         sender,
         message,
-        formatPrivateMessage("chat.message.from", matchReceiver.getBukkit()),
+        formatPrivateMessage("misc.from", matchReceiver.getBukkit()),
         viewer -> viewer.getBukkit().equals(receiver),
         null);
 
@@ -232,7 +232,7 @@ public class ChatDispatcher implements Listener {
         match,
         manager.getPlayer(receiver), // Allow for cross-match messages
         message,
-        formatPrivateMessage("chat.message.to", sender.getBukkit()),
+        formatPrivateMessage("misc.to", sender.getBukkit()),
         viewer -> viewer.getBukkit().equals(sender.getBukkit()),
         null);
   }
