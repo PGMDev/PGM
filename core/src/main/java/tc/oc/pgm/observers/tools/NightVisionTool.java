@@ -9,12 +9,12 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.menu.InventoryMenu;
-import tc.oc.pgm.menu.InventoryMenuItem;
+import tc.oc.pgm.observers.ObserverTool;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.ComponentRenderers;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
-public class NightVisionTool implements InventoryMenuItem {
+public class NightVisionTool implements ObserverTool {
 
   @Override
   public Component getName() {
@@ -45,9 +45,9 @@ public class NightVisionTool implements InventoryMenuItem {
   }
 
   @Override
-  public void onInventoryClick(InventoryMenu menu, MatchPlayer player, ClickType clickType) {
+  public void onClick(InventoryMenu menu, MatchPlayer player, ClickType clickType) {
     toggleNightVision(player);
-    menu.refreshWindow(player);
+    menu.refresh(player);
   }
 
   private boolean hasNightVision(MatchPlayer player) {

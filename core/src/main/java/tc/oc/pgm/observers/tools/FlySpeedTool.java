@@ -7,12 +7,12 @@ import org.bukkit.Material;
 import org.bukkit.event.inventory.ClickType;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.menu.InventoryMenu;
-import tc.oc.pgm.menu.InventoryMenuItem;
+import tc.oc.pgm.observers.ObserverTool;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.ComponentRenderers;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
-public class FlySpeedTool implements InventoryMenuItem {
+public class FlySpeedTool implements ObserverTool {
 
   private static String TRANSLATION_KEY = "setting.flyspeed.";
 
@@ -42,14 +42,15 @@ public class FlySpeedTool implements InventoryMenuItem {
   }
 
   @Override
-  public void onInventoryClick(InventoryMenu menu, MatchPlayer player, ClickType clickType) {
+  public void onClick(InventoryMenu menu, MatchPlayer player, ClickType clickType) {
     FlySpeed speed = FlySpeed.of(player.getBukkit().getFlySpeed());
     if (clickType.isRightClick()) {
       player.getBukkit().setFlySpeed(speed.getPrev().getValue());
     } else {
       player.getBukkit().setFlySpeed(speed.getNext().getValue());
     }
-    menu.refreshWindow(player);
+
+    menu.refresh(player);
   }
 
   public static enum FlySpeed {

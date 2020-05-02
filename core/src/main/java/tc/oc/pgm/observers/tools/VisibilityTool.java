@@ -10,12 +10,12 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.menu.InventoryMenu;
-import tc.oc.pgm.menu.InventoryMenuItem;
+import tc.oc.pgm.observers.ObserverTool;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.ComponentRenderers;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
-public class VisibilityTool implements InventoryMenuItem {
+public class VisibilityTool implements ObserverTool {
 
   @Override
   public Component getName() {
@@ -47,9 +47,9 @@ public class VisibilityTool implements InventoryMenuItem {
   }
 
   @Override
-  public void onInventoryClick(InventoryMenu menu, MatchPlayer player, ClickType clickType) {
+  public void onClick(InventoryMenu menu, MatchPlayer player, ClickType clickType) {
     toggleObserverVisibility(player);
-    menu.refreshWindow(player);
+    menu.refresh(player);
   }
 
   public boolean isVisible(MatchPlayer player) {

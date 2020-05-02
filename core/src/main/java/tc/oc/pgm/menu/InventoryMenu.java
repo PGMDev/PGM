@@ -1,151 +1,79 @@
 package tc.oc.pgm.menu;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.util.WeakHashMap;
-import javax.annotation.Nullable;
-import org.bukkit.Bukkit;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.event.inventory.ClickType;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.observers.ObserverToolsMatchModule;
-import tc.oc.pgm.util.StringUtils;
-import tc.oc.pgm.util.component.ComponentRenderers;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.menu.items.InventoryItem;
 
-public abstract class InventoryMenu {
-
-  protected static final int ROW_WIDTH = 9; // Number of columns per row
-  protected static final int MAX_ROWS = 6; // Max allowed row size
-
-  private final WeakHashMap<MatchPlayer, InventoryMenu> viewing =
-      new WeakHashMap<>(); // Map of players who are viewing the gui, along with the menu
-  private final String title; // Title of the inventory
-  private final int rows; // The # of rows in the inventory
+/** Interface that describes a programmable inventory menu. */
+public interface InventoryMenu {
 
   /**
-   * InventoryMenu: An easy way to make an GUI menu that users can interact with.
+   * Opens the {@link InventoryMenu} with no history, override a past history if one is already
+   * present for a specific {@link MatchPlayer}
    *
-   * <p>See {@link ObserverToolsMatchModule} for an example on implementation
-   *
-   * <p>Note: Code here was extracted from PickerMatchModule to allow for reuse
-   *
-   * @param title - A string that will be translated and made the inventory title
-   * @param rows - The amount of rows the inventory will be created with
+   * @param player the player who's opening the inventory
    */
-  public InventoryMenu(String title, int rows) {
-    checkArgument(rows > 0 && rows <= MAX_ROWS, "Row size must be between 1 and " + MAX_ROWS);
-    this.title = checkNotNull(title);
-    this.rows = rows;
-  }
-
-  /** Defines how the GUI will display the layout */
-  public abstract ItemStack[] createWindowContents(final MatchPlayer player);
-
-  public String getTranslatedTitle(MatchPlayer player) {
-    return ComponentRenderers.toLegacyText(new PersonalizedTranslatable(title), player.getBukkit());
-  }
-
-  public boolean isViewing(MatchPlayer player) {
-    return viewing.containsKey(player);
-  }
-
-  public void display(MatchPlayer player) {
-    this.showWindow(player);
-    this.viewing.put(player, this);
-  }
-
-  public void remove(MatchPlayer player) {
-    this.viewing.remove(player);
-  }
-
-  public void refreshAll() {
-    viewing.keySet().forEach(this::refreshWindow);
-  }
-
-  private int getInventorySize() {
-    return ROW_WIDTH * rows;
-  }
+  void openAsRoot(MatchPlayer player);
 
   /**
-   * Open the window for the given player, or refresh its contents if they already have it open, and
-   * return the current contents.
+   * Opens the {@link InventoryMenu} without override the previous history of this inventory. This
+   * is important for when a {@link MatchPlayer} presses the back button in a {@link InventoryMenu},
+   * this prevents a back button chain
    *
-   * <p>If the window is currently open but too small to hold the current contents, it will be
-   * closed and reopened.
-   *
-   * <p>If the player is not currently allowed to have the window open, close any window they have
-   * open and return null.
+   * @param player the player
    */
-  private @Nullable Inventory showWindow(MatchPlayer player) {
-    ItemStack[] contents = createWindowContents(player);
-    Inventory inv = getOpenWindow(player);
-    if (inv != null && inv.getSize() < contents.length) {
-      inv = null;
-      closeWindow(player);
-    }
-    if (inv == null) {
-      inv = openWindow(player, contents);
-    } else {
-      inv.setContents(contents);
-    }
-    return inv;
-  }
+  void openRaw(MatchPlayer player);
 
   /**
-   * If the given player currently has the window open, refresh its contents and return the updated
-   * inventory. The window will be closed and reopened if it is too small to hold the current
-   * contents.
+   * Opens the {@link InventoryMenu} and sets another {@link InventoryMenu} to be the history for
+   * this {@link MatchPlayer}
    *
-   * <p>If the window is open but should be closed, close it and return null.
-   *
-   * <p>If the player does not have the window open, return null.
+   * @param player the player opening the inventory
+   * @param previous the previous inventory, the one to put in this {@link InventoryMenu}'s history
    */
-  public @Nullable Inventory refreshWindow(MatchPlayer player) {
-    Inventory inv = getOpenWindow(player);
-    if (inv != null) {
-      ItemStack[] contents = createWindowContents(player);
-      if (inv.getSize() < contents.length) {
-        closeWindow(player);
-        inv = openWindow(player, contents);
-      } else {
-        inv.setContents(contents);
-      }
-    }
-    return inv;
-  }
+  void openWithPrevious(MatchPlayer player, InventoryMenu previous);
 
   /**
-   * Return the inventory of the given player's currently open window, or null if the player does
-   * not have the window open.
+   * Acts as a {@link MatchPlayer} clicking a {@link InventoryItem} in a specific {@link
+   * InventoryMenu}
+   *
+   * @param x the x coordinate
+   * @param y the y coordinate
+   * @param player the player clicking the item
+   * @param clickType the type of click which is occurring
    */
-  private @Nullable Inventory getOpenWindow(MatchPlayer player) {
-    if (isViewing(player)) {
-      return player.getBukkit().getOpenInventory().getTopInventory();
-    }
-    return null;
-  }
+  void clickItem(int x, int y, MatchPlayer player, ClickType clickType);
 
-  /** Close any window that is currently open for the given player */
-  private void closeWindow(MatchPlayer player) {
-    if (isViewing(player)) {
-      player.getBukkit().closeInventory();
-    }
-  }
+  /**
+   * Whether or not the {@link MatchPlayer} has a previous inventory, a history in this inventory
+   *
+   * @param player the player
+   * @return true if the player has a history, false otherwise
+   */
+  boolean hasPrevious(MatchPlayer player);
 
-  /** Open a new window for the given player displaying the given contents */
-  private Inventory openWindow(MatchPlayer player, ItemStack[] contents) {
-    closeWindow(player);
-    Inventory inv =
-        Bukkit.createInventory(
-            player.getBukkit(),
-            getInventorySize(),
-            StringUtils.truncate(getTranslatedTitle(player), 32));
+  /**
+   * Pops a {@link MatchPlayer}'s history, opening the inventory in their history
+   *
+   * @param player the player's who's history is being popped
+   */
+  void popPrevious(MatchPlayer player);
 
-    inv.setContents(contents);
-    player.getBukkit().openInventory(inv);
-    viewing.put(player, this);
-    return inv;
-  }
+  /** Purges all {@link InventoryItem} caches, forcing them to be re-rendered. */
+  void purgeAll();
+
+  /**
+   * Purges all {@link InventoryItem} caches for a specific {@link MatchPlayer}, forcing them to be
+   * re-rendered.
+   *
+   * @param player the player whose item cache to purge
+   */
+  void purge(MatchPlayer player);
+
+  /**
+   * Re-renders the inventory for a player who is currently viewing it.
+   *
+   * @param player the player whose inventory should be re-rendered.
+   */
+  void refresh(MatchPlayer player);
 }

@@ -1,18 +1,17 @@
-package tc.oc.pgm.menu;
+package tc.oc.pgm.observers;
 
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.menu.items.InventoryClickAction;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.ComponentRenderers;
 
-public interface InventoryMenuItem {
-
+public interface ObserverTool extends InventoryClickAction {
   public Component getName();
 
   public ChatColor getColor();
@@ -20,8 +19,6 @@ public interface InventoryMenuItem {
   public List<String> getLore(MatchPlayer player);
 
   public Material getMaterial(MatchPlayer player);
-
-  public void onInventoryClick(InventoryMenu menu, MatchPlayer player, ClickType clickType);
 
   default ItemStack createItem(MatchPlayer player) {
     ItemStack stack = new ItemStack(getMaterial(player));
@@ -35,7 +32,6 @@ public interface InventoryMenuItem {
     meta.addItemFlags(ItemFlag.values());
 
     stack.setItemMeta(meta);
-
     return stack;
   }
 }

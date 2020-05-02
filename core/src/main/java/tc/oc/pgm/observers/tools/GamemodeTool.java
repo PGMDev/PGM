@@ -11,13 +11,13 @@ import org.bukkit.Material;
 import org.bukkit.event.inventory.ClickType;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.menu.InventoryMenu;
-import tc.oc.pgm.menu.InventoryMenuItem;
+import tc.oc.pgm.observers.ObserverTool;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.ComponentRenderers;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
-public class GamemodeTool implements InventoryMenuItem {
+public class GamemodeTool implements ObserverTool {
 
   @Override
   public Component getName() {
@@ -47,9 +47,9 @@ public class GamemodeTool implements InventoryMenuItem {
   }
 
   @Override
-  public void onInventoryClick(InventoryMenu menu, MatchPlayer player, ClickType clickType) {
+  public void onClick(InventoryMenu menu, MatchPlayer player, ClickType clickType) {
     toggleObserverGameMode(player);
-    menu.refreshWindow(player);
+    menu.refresh(player);
   }
 
   public void toggleObserverGameMode(MatchPlayer player) {
