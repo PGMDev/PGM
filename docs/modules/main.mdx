@@ -9,8 +9,8 @@ The `proto=""` attribute specifies what PGM version the XML file was created for
 
 The maps version should follow the versioning schema `major.minor.patch`.
 
-<div>
-  <table class="table">
+<div className="table-container">
+  <table className="table">
     <thead>
       <tr>
         <th>Map Element</th>
@@ -27,7 +27,7 @@ The maps version should follow the versioning schema `major.minor.patch`.
           The main map node containing all the modules used in this match.
         </td>
         <td>
-          <span class="badge badge--secondary">XML Modules</span>
+          <span className="badge badge--secondary">XML Modules</span>
         </td>
       </tr>
     </tbody>
@@ -36,8 +36,8 @@ The maps version should follow the versioning schema `major.minor.patch`.
 
 ##### Map Attributes
 
-<div>
-  <table class="table">
+<div className="table-container">
+  <table className="table">
     <thead>
       <tr>
         <th>Attribute</th>
@@ -52,7 +52,7 @@ The maps version should follow the versioning schema `major.minor.patch`.
           <label>proto</label>
         </td>
         <td>
-          <span class="badge badge--danger">Required</span>
+          <span className="badge badge--danger">Required</span>
           The maps XML protocol version.
         </td>
         <td>
@@ -66,7 +66,7 @@ The maps version should follow the versioning schema `major.minor.patch`.
         </td>
         <td>A custom title for this match's gamemode.</td>
         <td>
-          <span class="badge badge--primary">String</span>
+          <span className="badge badge--primary">String</span>
         </td>
         <td></td>
       </tr>
@@ -76,7 +76,7 @@ The maps version should follow the versioning schema `major.minor.patch`.
         </td>
         <td>Prevent compass teleports above Y 255</td>
         <td>
-          <span class="badge badge--primary">true/false</span>
+          <span className="badge badge--primary">true/false</span>
         </td>
         <td>false</td>
       </tr>
@@ -86,8 +86,8 @@ The maps version should follow the versioning schema `major.minor.patch`.
 
 ##### Map Sub-elements
 
-<div>
-  <table class="table">
+<div className="table-container">
+  <table className="table">
     <thead>
       <tr>
         <th>Element</th>
@@ -102,11 +102,11 @@ The maps version should follow the versioning schema `major.minor.patch`.
           <label>{`<name>`}</label>
         </td>
         <td>
-          <span class="badge badge--danger">Required</span>
+          <span className="badge badge--danger">Required</span>
           The name of the map.
         </td>
         <td>
-          <span class="badge badge--primary">String</span>
+          <span className="badge badge--primary">String</span>
         </td>
         <td></td>
       </tr>
@@ -122,10 +122,10 @@ The maps version should follow the versioning schema `major.minor.patch`.
           <label>a-z 0-9 _</label>
         </td>
         <td>
-          <span class="badge badge--primary">String</span>
+          <span className="badge badge--primary">String</span>
         </td>
         <td>
-          <span class="badge badge--secondary">Auto Generated</span>
+          <span className="badge badge--secondary">Auto Generated</span>
         </td>
       </tr>
       <tr>
@@ -133,7 +133,7 @@ The maps version should follow the versioning schema `major.minor.patch`.
           <label>{`<version>`}</label>
         </td>
         <td>
-          <span class="badge badge--danger">Required</span>
+          <span className="badge badge--danger">Required</span>
           The map's <a href="http://semver.org">semantic version</a> string.
         </td>
         <td>
@@ -146,11 +146,11 @@ The maps version should follow the versioning schema `major.minor.patch`.
           <label>{`<objective>`}</label>
         </td>
         <td>
-          <span class="badge badge--danger">Required</span>
+          <span className="badge badge--danger">Required</span>
           The map's objective, shown at the start of the match.
         </td>
         <td>
-          <span class="badge badge--primary">String</span>
+          <span className="badge badge--primary">String</span>
         </td>
         <td></td>
       </tr>
@@ -159,7 +159,7 @@ The maps version should follow the versioning schema `major.minor.patch`.
           <label>{`<authors>`}</label>
         </td>
         <td>
-          <span class="badge badge--danger">Required</span>
+          <span className="badge badge--danger">Required</span>
           The authors of the map, at least one author is required.
         </td>
         <td>
@@ -212,14 +212,14 @@ The maps version should follow the versioning schema `major.minor.patch`.
           <label>{`<gamemode>`}</label>
         </td>
         <td>
-          <a class="left-ref-link" href="#gamemode">
-            <i class="fa fa-chevron-down"></i>
+          <a className="left-ref-link" href="#gamemode">
+            <i className="fa fa-chevron-down"></i>
           </a>
           The gamemode(s) of this map, if this is not specified the map will set
           the gamemode(s) to whatever modules are used.
         </td>
         <td>
-          <span class="badge badge--primary">Gamemode ID</span>
+          <span className="badge badge--primary">Gamemode ID</span>
         </td>
         <td></td>
       </tr>
@@ -249,8 +249,8 @@ A players name should **not** be used to credit them, instead their UUID should 
 
 ##### Author or Contributor Sub-elements
 
-<div>
-  <table class="table">
+<div className="table-container">
+  <table className="table">
     <thead>
       <tr>
         <th>Element</th>
@@ -269,7 +269,7 @@ A players name should **not** be used to credit them, instead their UUID should 
           <br />
         </td>
         <td>
-          <span class="badge badge--primary">String</span>
+          <span className="badge badge--primary">String</span>
         </td>
       </tr>
       <tr>
@@ -281,7 +281,7 @@ A players name should **not** be used to credit them, instead their UUID should 
           <label>{`<contributors>`}</label>
         </td>
         <td>
-          <span class="badge badge--primary">String</span>
+          <span className="badge badge--primary">String</span>
         </td>
       </tr>
     </tbody>
@@ -291,7 +291,7 @@ A players name should **not** be used to credit them, instead their UUID should 
 ##### Author & Contributor Attributes
 
 <div>
-  <table class="table">
+  <table className="table">
     <thead>
       <tr>
         <th>Attribute</th>
@@ -306,7 +306,7 @@ A players name should **not** be used to credit them, instead their UUID should 
         </td>
         <td>The contribution this author or contributor made to the map.</td>
         <td>
-          <span class="badge badge--primary">String</span>
+          <span className="badge badge--primary">String</span>
         </td>
       </tr>
       <tr>
@@ -315,7 +315,7 @@ A players name should **not** be used to credit them, instead their UUID should 
         </td>
         <td>UUID used to identify a player.</td>
         <td>
-          <span class="badge badge--primary">String</span>
+          <span className="badge badge--primary">String</span>
         </td>
       </tr>
     </tbody>
@@ -345,8 +345,8 @@ This mainly affects how the map is categorized and displayed.
 If no `<gamemode>` tags are specified the map will set the gamemode(s) to whatever modules are used.
 This means that a map that uses destroyables and flags would be listed as a "DTM & CTF" unless specified otherwise.
 
-<div>
-  <table class="table">
+<div className="table-container">
+  <table className="table">
     <thead>
       <tr>
         <th>Element</th>
@@ -361,7 +361,7 @@ This means that a map that uses destroyables and flags would be listed as a "DTM
         </td>
         <td>The gamemode(s) of this map.</td>
         <td>
-          <span class="badge badge--primary">Gamemode ID</span>
+          <span className="badge badge--primary">Gamemode ID</span>
         </td>
       </tr>
     </tbody>
@@ -370,8 +370,8 @@ This means that a map that uses destroyables and flags would be listed as a "DTM
 
 ##### Gamemode ID's
 
-<div>
-  <table class="table">
+<div className="table-container">
+  <table className="table">
     <thead>
       <tr>
         <th>ID</th>

@@ -23,12 +23,18 @@
   padding: 0 var(--ifm-pre-padding);
 }
 
+.table-container {
+  display: block;
+  overflow-x: auto;
+  margin-bottom: 10px;
+  box-shadow: var(--ifm-global-shadow-lw) !important;
+  border-radius: 8px;
+}
+
 .table {
   display: table;
   width: 100%;
   overflow-wrap: break-word;
-  box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1) !important;
-  box-shadow: var(--ifm-global-shadow-tl) !important;
   border-collapse: collapse;
   border-style: hidden;
 }

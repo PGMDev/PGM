@@ -171,7 +171,7 @@ const Materials = ({ children }) => {
           <span ref={resultCount}></span>
         </div>
       </form>
-      <div>
+      <div className="table-container">
         <table className="table">
           <thead>
             <tr>
