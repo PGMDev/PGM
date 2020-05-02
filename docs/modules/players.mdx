@@ -1,0 +1,133 @@
+---
+id: players
+title: Players (free-for-all)
+---
+
+The players module is the basis for all team-less gamemodes, such as FFA, UHC, or hunger games style matches.
+This module is not limited to matches focused on combat,
+it can also be used in combat-less game modes where players have to collect specific items, etc.
+Win conditions are set by using the score and time limit modules.
+
+<span className="badge badge--danger">NOTE</span> This gamemode is not compatible
+with the teams module!
+
+<div className="table-container">
+  <table className="table">
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<players />`}</label>
+        </td>
+        <td>The players node, containing player settings.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Players Attributes
+
+<div className="table-container">
+  <table className="table">
+    <thead>
+      <tr>
+        <th style={{ minWidth: "130px" }}>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>min</label>
+        </td>
+        <td>Minimum amount of players required.</td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>max</label>
+        </td>
+        <td>
+          Player limit -- normal players cannot join the match once it reaches
+          this size.
+          <br />
+          <i>
+            Premium players may join over this limit until{" "}
+            <label>max-overfill</label> is reached.
+          </i>
+        </td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>max-overfill</label>
+        </td>
+        <td>
+          Player overfill -- premium players cannot join the match once it
+          reaches this size.
+          <br />
+          <i>
+            Must be greater than the defined <label>max</label>.
+          </i>
+        </td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>show-name-tags</label>
+        </td>
+        <td>
+          Specify who can see the name tags of players.
+          <br />
+          Accepts:
+          <label>true</label>, <label>false</label>, <label>allies</label> or <label>enemies</label>
+        </td>
+        <td>
+          <span className="badge badge--primary">Enum</span>
+        </td>
+        <td>true</td>
+      </tr>
+      <tr>
+        <td>
+          <label>colors</label>
+        </td>
+        <td>
+          Auto assign a unique color to each player, works for up to 10 players
+          and then colors repeat.
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Example_
+
+```xml
+<players max="16" max-overfill="20"/>
+<time>8m</time>
+
+<score>
+    <kills>1</kills>
+    <deaths>1</deaths>
+</score>
+```

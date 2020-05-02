@@ -8,6 +8,7 @@ module.exports = {
       "modules/border",
       "modules/mobs",
     ],
+    Format: ["modules/players", "modules/teams"],
   },
   Reference: {
     Items: ["reference/inventory"],
