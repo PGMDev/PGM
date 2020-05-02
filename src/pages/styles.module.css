@@ -1,0 +1,128 @@
+/* stylelint-disable docusaurus/copyright-header */
+/**
+ * CSS files with the .module.css suffix will be treated as CSS modules
+ * and scoped locally.
+ */
+
+.features {
+  display: flex;
+  align-items: center;
+  padding: 2rem 0;
+  width: 100%;
+}
+
+.featureImage {
+  height: 200px;
+  width: 200px;
+}
+
+.banner {
+  text-align: left;
+  padding: 4rem 0;
+  overflow: hidden;
+  position: relative;
+  z-index: 10;
+}
+
+.banner video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  z-index: 0;
+  -ms-transform: translateX(-50%) translateY(-50%);
+  -moz-transform: translateX(-50%) translateY(-50%);
+  -webkit-transform: translateX(-50%) translateY(-50%);
+  transform: translateX(-50%) translateY(-50%);
+}
+
+.bannerTitle {
+  font-size: 4.5rem !important;
+  line-height: 1.01em !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+}
+
+@media only screen and (min-width: 992px) {
+  .banner h1 {
+    margin-top: 90px;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  .banner {
+    padding: 2rem;
+  }
+}
+
+.bannerContainer {
+  position: relative;
+  z-index: 2;
+}
+
+.bannerOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: black;
+  opacity: 0.5;
+  z-index: 1;
+}
+
+.Ctas {
+  display: flex;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.GitHubButtonWrapper {
+  display: flex;
+}
+
+.GitHubButton {
+  border: none;
+  margin-left: 24px;
+  overflow: hidden;
+}
+
+.floating {
+  animation-name: floating;
+  animation-duration: 3s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50vh;
+  margin-top: 7%;
+  margin-bottom: 15%;
+}
+
+@media only screen and (min-width: 992px) {
+  .floating {
+    float: right;
+  }
+}
+
+@media only screen and (max-width: 992px) {
+  .floating {
+    float: center;
+  }
+}
+
+@keyframes floating {
+  from {
+    transform: translate(0, 0px);
+  }
+  65% {
+    transform: translate(0, 15px);
+  }
+  to {
+    transform: translate(0, -0px);
+  }
+}

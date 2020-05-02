@@ -1,0 +1,42 @@
+---
+id: migrate
+title: Help Us Migrate Past Files!
+---
+
+We need help migrating the old documentation files to this website. These were written in HAML, and need to be converted to Markdown and HTML/JSX (the technologies that the new documentation website uses). In order to do so, please continue reading this guide.
+
+First, select a documentation file from `reference`, `guides` or `modules`, all located within the `src` folder in the old [XML Documentation repository](https://github.com/OvercastNetwork/docs.oc.tc), and convert it to HTML/ERB using [this tool](https://haml2erb.org).
+
+Once you've got an HTML file, remove all unnecessary HTML. You will notice what's necessary or what's not if you take a look at existing migrated documents [here](https://github.com/Electroid/PGM/blob/gh-pages/docs), but generally you should maintain only maintain HTML tables, with a few exceptions:
+
+- Replace `<%= html_escape([XML Tags] %>` with ```{`[XML TAGS]`}```. Since Docusaurus 2 supports MDX, this is the only way to escape XML from rendering inside an HTML table.
+- Replace `<span class="highlight">` and possible child `<code>` elements with `<label>`, from this:
+
+```html
+<td>
+  <span class="highlight">
+    <code> {`<world-borders> </world-borders>`} </code>
+  </span>
+</td>
+```
+
+to this:
+
+```html
+<td>
+  <label> {`<world-borders> </world-borders>`} </label>
+</td>
+```
+
+That's because `<code>` tags end up rendering multiline code blocks, not a one line code block.
+
+Last but not least, add a header that specifies an ID for that document and a title, like so:
+
+```
+---
+id: regions
+title: Defining Regions
+---
+```
+
+And you're done! Please check the [contributing guidelines](https://github.com/Electroid/PGM/blob/docs/README.md#how-to-contribute) on how to submit your changes.

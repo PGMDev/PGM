@@ -1,0 +1,18 @@
+.footerLogoLink {
+  opacity: 0.5;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.footerLogoLink:hover {
+  opacity: 1;
+}
+
+.footerCol {
+  text-align: center;
+}
+
+.footerTitle {
+  border-bottom: 3px solid;
+  padding-bottom: 5px;
+  display: inline-block;
+}
