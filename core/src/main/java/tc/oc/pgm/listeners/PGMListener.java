@@ -251,7 +251,7 @@ public class PGMListener implements Listener {
     event
         .getMatch()
         .getWorld()
-        .setGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE.getValue(), Boolean.toString(false));
+        .setGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE.getName(), Boolean.toString(false));
   }
 
   @EventHandler
@@ -264,13 +264,13 @@ public class PGMListener implements Listener {
     GameRulesMatchModule gameRulesModule = event.getMatch().getModule(GameRulesMatchModule.class);
     if (gameRulesModule != null
         && gameRulesModule.getGameRules().containsKey(GameRule.DO_DAYLIGHT_CYCLE)) {
-      unlockTime = gameRulesModule.getGameRules().get(GameRule.DO_DAYLIGHT_CYCLE);
+      unlockTime = (boolean) gameRulesModule.getGameRules().get(GameRule.DO_DAYLIGHT_CYCLE);
     }
 
     event
         .getMatch()
         .getWorld()
-        .setGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE.getValue(), Boolean.toString(unlockTime));
+        .setGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE.getName(), Boolean.toString(unlockTime));
   }
 
   @EventHandler
@@ -278,7 +278,7 @@ public class PGMListener implements Listener {
     event
         .getMatch()
         .getWorld()
-        .setGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE.getValue(), Boolean.toString(false));
+        .setGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE.getName(), Boolean.toString(false));
   }
 
   @EventHandler
