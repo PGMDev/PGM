@@ -100,6 +100,8 @@ import tc.oc.pgm.scoreboard.ScoreboardMatchModule;
 import tc.oc.pgm.scoreboard.SidebarMatchModule;
 import tc.oc.pgm.shield.ShieldMatchModule;
 import tc.oc.pgm.snapshot.SnapshotMatchModule;
+import tc.oc.pgm.spawner.SpawnerMatchModule;
+import tc.oc.pgm.spawner.SpawnerModule;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.SpawnModule;
 import tc.oc.pgm.start.StartMatchModule;
@@ -234,6 +236,7 @@ public interface Modules {
     register(DamageModule.class, DamageMatchModule.class, new DamageModule.Factory());
     register(
         WorldBorderModule.class, WorldBorderMatchModule.class, new WorldBorderModule.Factory());
+    register(SpawnerModule.class, SpawnerMatchModule.class, new SpawnerModule.Factory());
 
     // MapModules that are also MatchModules
     register(TimeLockModule.class, TimeLockModule.class, new TimeLockModule.Factory());
