@@ -81,7 +81,6 @@ import tc.oc.pgm.modules.StatsMatchModule;
 import tc.oc.pgm.modules.TimeLockModule;
 import tc.oc.pgm.modules.ToolRepairMatchModule;
 import tc.oc.pgm.modules.ToolRepairModule;
-import tc.oc.pgm.observers.ObserverSettingsMatchModule;
 import tc.oc.pgm.picker.PickerMatchModule;
 import tc.oc.pgm.portals.PortalMatchModule;
 import tc.oc.pgm.portals.PortalModule;
@@ -99,6 +98,7 @@ import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.score.ScoreModule;
 import tc.oc.pgm.scoreboard.ScoreboardMatchModule;
 import tc.oc.pgm.scoreboard.SidebarMatchModule;
+import tc.oc.pgm.settings.SettingsMatchModule;
 import tc.oc.pgm.shield.ShieldMatchModule;
 import tc.oc.pgm.snapshot.SnapshotMatchModule;
 import tc.oc.pgm.spawner.SpawnerMatchModule;
@@ -155,7 +155,7 @@ public interface Modules {
     register(DoubleJumpMatchModule.class, DoubleJumpMatchModule::new);
     register(ArrowRemovalMatchModule.class, ArrowRemovalMatchModule::new);
     register(SoundsMatchModule.class, new SoundsMatchModule.Factory());
-    register(ObserverSettingsMatchModule.class, new ObserverSettingsMatchModule.Factory());
+    register(SettingsMatchModule.class, new SettingsMatchModule.Factory());
     register(FireworkMatchModule.class, FireworkMatchModule::new);
     register(StatsMatchModule.class, StatsMatchModule::new);
 

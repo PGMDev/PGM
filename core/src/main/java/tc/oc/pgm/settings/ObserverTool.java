@@ -1,4 +1,4 @@
-package tc.oc.pgm.observers;
+package tc.oc.pgm.settings;
 
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;

@@ -1,4 +1,4 @@
-package tc.oc.pgm.observers.tools;
+package tc.oc.pgm.settings.tools;
 
 import com.google.common.collect.Lists;
 import java.util.List;
@@ -9,7 +9,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.menu.InventoryMenu;
-import tc.oc.pgm.observers.ObserverTool;
+import tc.oc.pgm.settings.ObserverTool;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.ComponentRenderers;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
