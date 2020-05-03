@@ -99,6 +99,9 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
   @Override
   public void setNextMap(MapInfo map) {}
 
+  @Override
+  public void resetNextMap() {}
+
   /**
    * Called when this map pool is going to be switched out
    *

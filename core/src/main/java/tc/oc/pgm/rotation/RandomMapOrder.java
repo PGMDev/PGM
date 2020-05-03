@@ -72,4 +72,11 @@ public class RandomMapOrder implements MapOrder {
     // Set next maps are sent to the front of the deque
     deque.addFirst(new WeakReference<>(map));
   }
+
+  @Override
+  public void resetNextMap() {
+    if (deque.pollFirst() != null) {
+      deque.removeFirst();
+    }
+  }
 }

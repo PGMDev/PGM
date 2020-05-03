@@ -96,9 +96,7 @@ public class VanishManagerImpl implements VanishManager, Listener {
     final Match match = player.getMatch();
 
     // Ensure player is an observer
-    if (!player.getParty().isObserving()) {
-      match.setParty(player, match.getDefaultParty());
-    }
+    match.setParty(player, match.getDefaultParty());
 
     // Set vanish status in match player
     player.setVanished(vanish);

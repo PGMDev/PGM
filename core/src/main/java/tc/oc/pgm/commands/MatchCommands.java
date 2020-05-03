@@ -104,7 +104,10 @@ public class MatchCommands {
             + ChatColor.GRAY
             + ": "
             + ChatColor.WHITE
-            + match.getObservers().size());
+            + match.getObservers().stream()
+                .filter(mp -> !mp.isVanished())
+                .collect(Collectors.toList())
+                .size());
 
     sender.sendMessage(Joiner.on(ChatColor.DARK_GRAY + " | ").join(teamCountParts));
 

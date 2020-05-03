@@ -2,6 +2,8 @@ package tc.oc.pgm.commands;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
+import app.ashcon.intake.bukkit.parametric.Type;
+import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
 import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
@@ -10,6 +12,8 @@ import java.util.AbstractMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
@@ -33,9 +37,7 @@ import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.chat.Audience;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class AdminCommands {
@@ -119,13 +121,15 @@ public class AdminCommands {
   @Command(
       aliases = {"setnext", "sn"},
       desc = "Sets the next map. Note that the rotation will go to this map then resume as normal.",
-      usage = "[map name]",
-      flags = "f",
+      usage = "[map name] -f (force) -r (revert)",
+      flags = "fr",
       perms = Permissions.SETNEXT)
   public static void setNext(
+      Audience viewer,
       CommandSender sender,
       @Switch('f') boolean force,
-      @Text MapInfo map,
+      @Switch('r') boolean reset,
+      @Fallback(Type.NULL) @Text MapInfo map,
       MapOrder mapOrder,
       Match match)
       throws CommandException {
@@ -133,21 +137,32 @@ public class AdminCommands {
       throw new CommandException(TextTranslations.translate("map.setNext.confirm", sender));
     }
 
+    if (reset) {
+      if (mapOrder.getNextMap() != null) {
+        Component mapName = mapOrder.getNextMap().getStyledName(MapNameStyle.COLOR);
+        mapOrder.resetNextMap();
+        ChatDispatcher.broadcastAdminChatMessage(
+            TranslatableComponent.of("map.setNext.revert", TextColor.GRAY)
+                .args(UsernameFormatUtils.formatStaffName(sender, match), mapName),
+            match);
+      } else {
+        viewer.sendWarning(TranslatableComponent.of("map.setNext.none"));
+      }
+      return;
+    }
+
     mapOrder.setNextMap(map);
 
     if (RestartManager.isQueued()) {
       RestartManager.cancelRestart();
-      sender.sendMessage(
-          ChatColor.GREEN
-              + TextTranslations.translate("admin.cancelRestart.restartUnqueued", sender));
+      viewer.sendWarning(
+          TranslatableComponent.of("admin.cancelRestart.restartUnqueued", TextColor.GREEN));
     }
 
-    Component mapName = new PersonalizedText(map.getName()).color(ChatColor.DARK_PURPLE);
+    Component mapName = TextComponent.of(map.getName(), TextColor.GOLD);
     Component successful =
-        new PersonalizedTranslatable(
-                "map.setNext", mapName, UsernameFormatUtils.formatStaffName(sender, match))
-            .getPersonalizedText()
-            .color(ChatColor.GRAY);
+        TranslatableComponent.of("map.setNext", TextColor.GRAY)
+            .args(mapName, UsernameFormatUtils.formatStaffName(sender, match));
     ChatDispatcher.broadcastAdminChatMessage(successful, match);
   }
 
@@ -158,7 +173,8 @@ public class AdminCommands {
       flags = "r",
       perms = Permissions.SETNEXT)
   public static void setPool(
-      CommandSender sender,
+      Audience sender,
+      CommandSender source,
       Match match,
       MapOrder mapOrder,
       @Nullable String poolName,
@@ -166,36 +182,25 @@ public class AdminCommands {
       @Switch('t') Duration timeLimit)
       throws CommandException {
     if (!match.getCountdown().getAll(CycleCountdown.class).isEmpty()) {
-      sender.sendMessage(
-          new PersonalizedTranslatable("command.admin.setPool.activeCycle")
-              .getPersonalizedText()
-              .color(ChatColor.RED));
+      sender.sendMessage(TranslatableComponent.of("admin.setPool.activeCycle", TextColor.RED));
       return;
     }
-    MapPoolManager mapPoolManager = MapPoolCommands.getMapPoolManager(sender, mapOrder);
+    MapPoolManager mapPoolManager = MapPoolCommands.getMapPoolManager(source, mapOrder);
     MapPool newPool =
         reset
             ? mapPoolManager.getAppropriateDynamicPool(match).orElse(null)
             : mapPoolManager.getMapPoolByName(poolName);
 
     if (newPool == null) {
-      Component error =
-          new PersonalizedTranslatable(
-                  reset ? "command.pools.noDynamic " : "command.pools.noPoolMatch")
-              .getPersonalizedText()
-              .color(ChatColor.RED);
-      sender.sendMessage(error);
+      sender.sendWarning(TranslatableComponent.of(reset ? "pool.noDynamic" : "pool.noPoolMatch"));
     } else {
       if (newPool.equals(mapPoolManager.getActiveMapPool())) {
         sender.sendMessage(
-            new PersonalizedTranslatable(
-                    "command.pools.set.matching",
-                    new PersonalizedText(newPool.getName()).color(ChatColor.LIGHT_PURPLE))
-                .getPersonalizedText()
-                .color(ChatColor.GRAY));
+            TranslatableComponent.of("pool.matching", TextColor.GRAY)
+                .args(TextComponent.of(newPool.getName(), TextColor.LIGHT_PURPLE)));
         return;
       }
-      mapPoolManager.updateActiveMapPool(newPool, match, true, sender, timeLimit);
+      mapPoolManager.updateActiveMapPool(newPool, match, true, source, timeLimit);
     }
   }
 

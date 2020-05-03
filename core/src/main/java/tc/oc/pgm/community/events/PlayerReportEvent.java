@@ -1,8 +1,7 @@
-package tc.oc.pgm.events;
+package tc.oc.pgm.community.events;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.event.ExtendedCancellable;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -10,17 +9,17 @@ import tc.oc.pgm.api.player.MatchPlayer;
 /** Called immediately AFTER a player runs the report command. */
 public class PlayerReportEvent extends ExtendedCancellable {
 
-  private final CommandSender sender;
+  private final MatchPlayer sender;
   private final MatchPlayer player;
   private final String reason;
 
-  public PlayerReportEvent(CommandSender sender, MatchPlayer player, String reason) {
+  public PlayerReportEvent(MatchPlayer sender, MatchPlayer player, String reason) {
     this.sender = checkNotNull(sender);
     this.player = checkNotNull(player);
     this.reason = checkNotNull(reason);
   }
 
-  public CommandSender getSender() {
+  public MatchPlayer getSender() {
     return sender;
   }
 

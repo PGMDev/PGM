@@ -65,7 +65,13 @@ public class MapPoolManager implements MapOrder {
   }
 
   public @Nullable String getNextMapForPool(String poolName) {
-    return database.getMapActivity(poolName).getMapName();
+    String mapName = database.getMapActivity(poolName).getMapName();
+    if (mapName != null) {
+      PGM.get()
+          .getLogger()
+          .log(Level.INFO, String.format("%s was found in map activity as the next map.", mapName));
+    }
+    return mapName;
   }
 
   private void loadMapPools() {
@@ -88,7 +94,6 @@ public class MapPoolManager implements MapOrder {
     if (activeMapPool == null) {
       logger.log(Level.WARNING, "No active map pool was found, defaulting to first dynamic pool.");
       activeMapPool = mapPools.stream().filter(mp -> mp.isDynamic()).findFirst().orElse(null);
-
       if (activeMapPool == null) {
         logger.log(Level.SEVERE, "Failed to find any dynamic map pool!");
       }
@@ -191,6 +196,13 @@ public class MapPoolManager implements MapOrder {
   public void setNextMap(MapInfo map) {
     overriderMap = map;
     activeMapPool.setNextMap(map); // Notify pool a next map has been set
+  }
+
+  @Override
+  public void resetNextMap() {
+    if (overriderMap != null) {
+      overriderMap = null;
+    }
   }
 
   public Optional<MapPool> getAppropriateDynamicPool(Match match) {

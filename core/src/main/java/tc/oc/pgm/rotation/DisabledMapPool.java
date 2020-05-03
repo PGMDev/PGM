@@ -22,4 +22,7 @@ public class DisabledMapPool extends MapPool {
   public MapInfo getNextMap() {
     return null;
   }
+
+  @Override
+  public void resetNextMap() {}
 }

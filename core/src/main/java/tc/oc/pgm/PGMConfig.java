@@ -528,15 +528,15 @@ public final class PGMConfig implements Config {
     }
 
     public static String getRulesLink() {
-      return BukkitUtils.colorize(PGM.get().getConfig().getString("moderation.rules-link", ""));
+      return BukkitUtils.colorize(PGM.get().getConfig().getString("community.rules-link", ""));
     }
 
     public static String getServerName() {
-      return BukkitUtils.colorize(PGM.get().getConfig().getString("moderation.server-name", ""));
+      return BukkitUtils.colorize(PGM.get().getConfig().getString("community.server-name", ""));
     }
 
     public static String getAppealMessage() {
-      return BukkitUtils.colorize(PGM.get().getConfig().getString("moderation.appeal-msg", ""));
+      return BukkitUtils.colorize(PGM.get().getConfig().getString("community.appeal-msg", ""));
     }
 
     public static boolean isAppealVisible() {

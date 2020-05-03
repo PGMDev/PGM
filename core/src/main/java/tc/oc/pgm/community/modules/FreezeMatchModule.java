@@ -9,6 +9,10 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -53,9 +57,8 @@ import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.pgm.util.chat.Sound;
-import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.Components;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -73,8 +76,9 @@ public class FreezeMatchModule implements MatchModule, Listener {
     this.freeze = new Freeze();
   }
 
-  public void setFrozen(@Nullable CommandSender freezer, MatchPlayer freezee, boolean frozen) {
-    freeze.setFrozen(freezer, freezee, frozen);
+  public void setFrozen(
+      @Nullable CommandSender freezer, MatchPlayer freezee, boolean frozen, boolean silent) {
+    freeze.setFrozen(freezer, freezee, frozen, silent);
   }
 
   public List<MatchPlayer> getFrozenPlayers() {
@@ -118,7 +122,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-  public void onPlayerInteractEntity(final ObserverInteractEvent event) {
+  public void onObserverToolFreeze(final ObserverInteractEvent event) {
     if (event.getPlayer().isDead()) return;
 
     if (freeze.isFrozen(event.getPlayer().getBukkit())) {
@@ -134,7 +138,8 @@ public class FreezeMatchModule implements MatchModule, Listener {
         freeze.setFrozen(
             event.getPlayer().getBukkit(),
             event.getClickedPlayer(),
-            !freeze.isFrozen(event.getClickedEntity()));
+            !freeze.isFrozen(event.getClickedEntity()),
+            event.getPlayer().isVanished());
       }
     }
   }
@@ -257,7 +262,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
   public void onPlayerJoin(PlayerJoinEvent event) {
     if (freeze.isCached(event.getPlayer().getUniqueId())) {
       freeze.removeCachedPlayer(event.getPlayer().getUniqueId());
-      freeze.setFrozen(Bukkit.getConsoleSender(), match.getPlayer(event.getPlayer()), true);
+      freeze.setFrozen(Bukkit.getConsoleSender(), match.getPlayer(event.getPlayer()), true, true);
     }
   }
 
@@ -307,58 +312,66 @@ public class FreezeMatchModule implements MatchModule, Listener {
       return player instanceof Player && frozenPlayers.containsKey(player);
     }
 
-    public void setFrozen(@Nullable CommandSender freezer, MatchPlayer freezee, boolean frozen) {
+    public void setFrozen(
+        @Nullable CommandSender freezer, MatchPlayer freezee, boolean frozen, boolean silent) {
       freezee.setFrozen(frozen);
 
       Component senderName = UsernameFormatUtils.formatStaffName(freezer, freezee.getMatch());
 
       if (frozen) {
-        freeze(freezee, senderName);
+        freeze(freezee, senderName, silent);
       } else {
-        thaw(freezee, senderName);
+        thaw(freezee, senderName, silent);
       }
     }
 
-    private void freeze(MatchPlayer freezee, Component senderName) {
+    private void freeze(MatchPlayer freezee, Component senderName, boolean silent) {
       frozenPlayers.put(freezee.getBukkit(), freezee);
 
       removeEntities(freezee.getBukkit().getLocation(), 10);
 
-      freezee.showTitle(
-          Components.blank(),
-          new PersonalizedTranslatable("moderation.freeze.frozen", senderName)
-              .getPersonalizedText()
-              .color(ChatColor.RED),
-          5,
-          9999,
-          5);
+      Component freeze = TranslatableComponent.of("moderation.freeze.frozen");
+      Component by = TranslatableComponent.of("misc.by").args(senderName);
+
+      TextComponent.Builder freezeTitle = TextComponent.builder();
+      freezeTitle.append(freeze);
+      if (!silent) {
+        freezeTitle.append(" ").append(by);
+      }
+
+      // TODO: Migrate this once showTitle is upgraded
+      tc.oc.pgm.util.component.Component oldTitle =
+          new PersonalizedText(
+              TextTranslations.translateLegacy(
+                  freezeTitle.color(TextColor.RED).build(), freezee.getBukkit()));
+
+      freezee.showTitle(Components.blank(), oldTitle, 5, 9999, 5);
       freezee.playSound(FREEZE_SOUND);
+
       ChatDispatcher.broadcastAdminChatMessage(
-          new PersonalizedTranslatable(
-                  "moderation.freeze.broadcast.frozen",
-                  senderName,
-                  freezee.getStyledName(NameStyle.FANCY))
-              .getPersonalizedText()
-              .color(ChatColor.GRAY),
+          TranslatableComponent.of("moderation.freeze.broadcast.frozen", TextColor.GRAY)
+              .args(senderName, freezee.getName(NameStyle.FANCY)),
           match);
     }
 
-    private void thaw(MatchPlayer freezee, Component senderName) {
+    private void thaw(MatchPlayer freezee, Component senderName, boolean silent) {
       frozenPlayers.remove(freezee.getBukkit());
+
+      Component thawed = TranslatableComponent.of("moderation.freeze.unfrozen");
+      Component by = TranslatableComponent.of("misc.by").args(senderName);
+
+      TextComponent.Builder thawedTitle = TextComponent.builder().append(thawed);
+      if (!silent) {
+        thawedTitle.append(" ").append(by);
+      }
 
       freezee.getBukkit().hideTitle();
       freezee.playSound(THAW_SOUND);
-      freezee.sendMessage(
-          new PersonalizedTranslatable("moderation.freeze.unfrozen", senderName)
-              .getPersonalizedText()
-              .color(ChatColor.GREEN));
+      freezee.sendMessage(thawedTitle.color(TextColor.GREEN).build());
+
       ChatDispatcher.broadcastAdminChatMessage(
-          new PersonalizedTranslatable(
-                  "moderation.freeze.broadcast.thaw",
-                  senderName,
-                  freezee.getStyledName(NameStyle.FANCY))
-              .getPersonalizedText()
-              .color(ChatColor.GRAY),
+          TranslatableComponent.of("moderation.freeze.broadcast.thaw", TextColor.GRAY)
+              .args(senderName, freezee.getName(NameStyle.FANCY)),
           match);
     }
 

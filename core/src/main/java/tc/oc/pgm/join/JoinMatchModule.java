@@ -140,7 +140,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
           return true;
 
         case VANISHED:
-          joining.sendWarning(new PersonalizedTranslatable("command.gameplay.join.vanish"), false);
+          joining.sendWarning(new PersonalizedTranslatable("join.err.vanish"), false);
           return true;
       }
     }
