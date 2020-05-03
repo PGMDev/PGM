@@ -102,7 +102,7 @@
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>text-serializer-plain</artifactId>
-            <version>3.0.2</version>
+            <version>3.0.4</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
