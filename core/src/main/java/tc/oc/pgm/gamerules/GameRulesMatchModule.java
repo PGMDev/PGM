@@ -9,23 +9,21 @@ import tc.oc.pgm.api.match.MatchModule;
 public class GameRulesMatchModule implements MatchModule {
 
   private final Match match;
-  private final Map<GameRule<?>, Object> gameRules;
+  private final Map<String, String> gameRules;
 
-  public GameRulesMatchModule(Match match, Map<GameRule<?>, Object> gameRules) {
+  public GameRulesMatchModule(Match match, Map<String, String> gameRules) {
     this.match = match;
     this.gameRules = Preconditions.checkNotNull(gameRules, "gamerules");
   }
 
   @Override
   public void load() {
-    for (Map.Entry<GameRule<?>, Object> gameRule : this.gameRules.entrySet()) {
-      this.match
-          .getWorld()
-          .setGameRuleValue(gameRule.getKey().getName(), gameRule.getValue().toString());
+    for (Map.Entry<String, String> gameRule : this.gameRules.entrySet()) {
+      this.match.getWorld().setGameRuleValue(gameRule.getKey(), gameRule.getValue());
     }
   }
 
-  public ImmutableMap<GameRule<?>, Object> getGameRules() {
+  public ImmutableMap<String, String> getGameRules() {
     return ImmutableMap.copyOf(gameRules);
   }
 }

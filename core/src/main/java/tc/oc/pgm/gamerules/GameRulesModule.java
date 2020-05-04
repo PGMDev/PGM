@@ -15,9 +15,9 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 
 public class GameRulesModule implements MapModule {
 
-  private Map<GameRule<?>, Object> gameRules;
+  private Map<String, String> gameRules;
 
-  private GameRulesModule(Map<GameRule<?>, Object> gamerules) {
+  private GameRulesModule(Map<String, String> gamerules) {
     this.gameRules = gamerules;
   }
 
@@ -29,37 +29,27 @@ public class GameRulesModule implements MapModule {
     @Override
     public GameRulesModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      Map<GameRule<?>, Object> gameRules = new HashMap<>();
+      Map<String, String> gameRules = new HashMap<>();
 
       for (Element gameRulesElement : doc.getRootElement().getChildren("gamerules")) {
         for (Element gameRuleElement : gameRulesElement.getChildren()) {
-          GameRule<?> gameRule = GameRule.forName(gameRuleElement.getName());
+          String rule = gameRuleElement.getName();
           String value = gameRuleElement.getValue();
 
-          if (gameRule == null) {
-            throw new InvalidXMLException(
-                gameRuleElement.getName() + " is not a valid gamerule", gameRuleElement);
-          }
           if (value == null) {
-            throw new InvalidXMLException(
-                "Missing value for gamerule " + gameRule.getName(), gameRuleElement);
-          } else if (!gameRule.getParseTest().test(value)) {
-            throw new InvalidXMLException(
-                gameRuleElement.getValue() + " is not a valid gamerule value", gameRuleElement);
-          }
-          if (gameRules.containsKey(gameRule)) {
-            throw new InvalidXMLException(
-                gameRule.getName() + " has already been specified", gameRuleElement);
+            throw new InvalidXMLException("Missing value for gamerule " + rule, gameRuleElement);
+          } else if (gameRules.containsKey(rule)) {
+            throw new InvalidXMLException(rule + " has already been specified", gameRuleElement);
           }
 
-          gameRules.put(gameRule, value);
+          gameRules.put(rule, value);
         }
       }
       return new GameRulesModule(gameRules);
     }
   }
 
-  public ImmutableMap<GameRule<?>, Object> getGameRules() {
+  public ImmutableMap<String, String> getGameRules() {
     return ImmutableMap.copyOf(this.gameRules);
   }
 }
