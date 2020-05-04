@@ -181,8 +181,11 @@ public final class TextTranslations {
       }
 
       for (String key : resource.keySet()) {
+        String format = resource.getString(key);
+
         // Single quotes are a special keyword that need to be escaped in MessageFormat
-        final String format = resource.getString(key).replaceAll("'", "''");
+        // Templates are not escaped, where as translations are escaped
+        if (locale == SOURCE_LOCALE) format = format.replaceAll("'", "''");
 
         TRANSLATIONS_TABLE.put(key, locale, new MessageFormat(format, locale));
         keysFound++;
