@@ -117,7 +117,7 @@ public final class TextTranslations {
           (locale.getLanguage().equals(other.getLanguage()) ? 3 : 0)
               + (locale.getCountry().equals(other.getCountry()) ? 2 : 0)
               + (locale.getVariant().equals(other.getVariant()) ? 1 : 0);
-      if (score >= maxScore) {
+      if (score > maxScore) {
         maxScore = score;
         nearest = other;
       }
