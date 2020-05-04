@@ -54,8 +54,8 @@ import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.component.ComponentRenderers;
 import tc.oc.pgm.util.component.ComponentUtils;
 import tc.oc.pgm.util.component.PeriodFormats;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;
 import tc.oc.pgm.util.xml.XMLUtils;
 
@@ -117,7 +117,7 @@ public class ModerationCommands implements Listener {
     Component content =
         onlineStaff.isEmpty()
             ? TranslatableComponent.of("moderation.staff.empty")
-            : TextComponent.join(TextComponent.of(", ", TextColor.GRAY), onlineStaff);
+            : TextFormatter.list(onlineStaff, TextColor.GRAY);
 
     Component staff =
         TranslatableComponent.of("moderation.staff.name", TextColor.GRAY).args(staffCount, content);
@@ -531,8 +531,8 @@ public class ModerationCommands implements Listener {
       int perPage = 8;
       int pages = (altAccounts.size() + perPage - 1) / perPage;
 
-      Component pageNum =
-          TranslatableComponent.of("command.simplePageHeader", TextColor.GRAY)
+      Component pageHeader =
+          TranslatableComponent.of("command.pageHeader", TextColor.GRAY)
               .args(
                   TextComponent.of(Integer.toString(page), TextColor.DARK_AQUA),
                   TextComponent.of(Integer.toString(pages), TextColor.DARK_AQUA));
@@ -545,8 +545,8 @@ public class ModerationCommands implements Listener {
               .append(headerText)
               .append(" (", TextColor.GRAY)
               .append(Integer.toString(altAccounts.size()), TextColor.DARK_AQUA)
-              .append(") » Page ", TextColor.GRAY)
-              .append(pageNum)
+              .append(") »", TextColor.GRAY)
+              .append(pageHeader)
               .build();
 
       Component formattedHeader =
@@ -596,7 +596,7 @@ public class ModerationCommands implements Listener {
         || ban.getExpiration() != null && ban.getExpiration().toInstant().isBefore(Instant.now())) {
       throw new CommandException(
           TextTranslations.translateLegacy(
-              TranslatableComponent.of("moderation.records.lookupNone")
+              TranslatableComponent.of("moderation.records.lookupNone", TextColor.GRAY)
                   .args(TextComponent.of(target, TextColor.DARK_AQUA)),
               sender));
     }
@@ -614,16 +614,11 @@ public class ModerationCommands implements Listener {
       String length =
           ComponentRenderers.toLegacyText(
               PeriodFormats.briefNaturalApproximate(
-                  java.time.Instant.ofEpochSecond(ban.getCreated().toInstant().getEpochSecond()),
-                  java.time.Instant.ofEpochSecond(
-                      ban.getExpiration().toInstant().getEpochSecond())),
+                  ban.getCreated().toInstant(), ban.getExpiration().toInstant()),
               sender);
       String remaining =
           ComponentRenderers.toLegacyText(
-              PeriodFormats.briefNaturalApproximate(
-                  java.time.Instant.now(),
-                  java.time.Instant.ofEpochSecond(
-                      ban.getExpiration().toInstant().getEpochSecond())),
+              PeriodFormats.briefNaturalApproximate(Instant.now(), ban.getExpiration().toInstant()),
               sender);
 
       banType =
@@ -640,9 +635,7 @@ public class ModerationCommands implements Listener {
 
     String createdAgo =
         ComponentRenderers.toLegacyText(
-            PeriodFormats.relativePastApproximate(
-                java.time.Instant.ofEpochSecond(ban.getCreated().toInstant().getEpochSecond())),
-            sender);
+            PeriodFormats.relativePastApproximate(ban.getCreated().toInstant()), sender);
 
     Component banTypeFormatted =
         TranslatableComponent.of("moderation.type", TextColor.GRAY).args(banType);
@@ -797,8 +790,7 @@ public class ModerationCommands implements Listener {
       Component timeLeft =
           TextComponent.of(
               ComponentRenderers.toLegacyText(
-                  PeriodFormats.briefNaturalApproximate(
-                      java.time.Duration.ofSeconds(expires.getSeconds())),
+                  PeriodFormats.briefNaturalApproximate(Duration.ofSeconds(expires.getSeconds())),
                   Bukkit.getConsoleSender()));
       lines.add(
           TranslatableComponent.of("moderation.screen.expires", TextColor.GRAY).args(timeLeft));
@@ -841,13 +833,7 @@ public class ModerationCommands implements Listener {
         TextComponent.builder().append(WARN_SYMBOL).append(titleWord).append(WARN_SYMBOL).build();
     Component subtitle = formatPunishmentReason(reason).color(TextColor.GOLD);
 
-    // TODO: Upgrade show title to new text
-    tc.oc.pgm.util.component.Component oldTitle =
-        new PersonalizedText(TextTranslations.translateLegacy(title, target.getBukkit()));
-    tc.oc.pgm.util.component.Component oldSubTitle =
-        new PersonalizedText(TextTranslations.translateLegacy(subtitle, target.getBukkit()));
-
-    target.showTitle(oldTitle, oldSubTitle, 5, 200, 10);
+    target.showTitle(title, subtitle, 5, 200, 10);
     target.playSound(WARN_SOUND);
   }
 
@@ -935,12 +921,11 @@ public class ModerationCommands implements Listener {
     }
 
     public Component getHoverMessage() {
+      // TODO: Upgrade once PeriodFormats has been migrated
       Component timeAgo =
           TextComponent.of(
               ComponentRenderers.toLegacyText(
-                  PeriodFormats.relativePastApproximate(
-                          java.time.Instant.ofEpochMilli(time.toEpochMilli()))
-                      .color(ChatColor.DARK_AQUA),
+                  PeriodFormats.relativePastApproximate(time).color(ChatColor.DARK_AQUA),
                   Bukkit.getConsoleSender()));
       return TranslatableComponent.of("moderation.similarIP.hover", TextColor.GRAY)
           .args(getPunisher(), timeAgo);

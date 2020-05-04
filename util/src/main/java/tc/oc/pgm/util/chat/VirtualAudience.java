@@ -48,6 +48,14 @@ public interface VirtualAudience extends Audience {
   @Override
   default void showBossbar(net.kyori.text.Component message, float progress) {}
 
+  @Override
+  default void showTitle(
+      @Nullable net.kyori.text.Component title,
+      @Nullable net.kyori.text.Component subTitle,
+      int inTicks,
+      int stayTicks,
+      int outTicks) {}
+
   ///////////////////////////////////////////////////////////////
   // METHODS BELOW ARE ALL DEPRECATED AND WILL BE REMOVED SOON //
   ///////////////////////////////////////////////////////////////

@@ -146,7 +146,7 @@ public class AdminCommands {
                 .args(UsernameFormatUtils.formatStaffName(sender, match), mapName),
             match);
       } else {
-        viewer.sendWarning(TranslatableComponent.of("map.setNext.none"));
+        viewer.sendWarning(TranslatableComponent.of("map.noNextMap"));
       }
       return;
     }

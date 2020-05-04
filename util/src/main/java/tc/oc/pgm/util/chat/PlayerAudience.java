@@ -1,12 +1,14 @@
 package tc.oc.pgm.util.chat;
 
 import javax.annotation.Nullable;
-import net.kyori.text.adapter.bukkit.TextAdapter;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.github.paperspigot.Title;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.text.TextTranslations;
 
 /** An {@link Audience} that represents an online {@link Player}. */
 @FunctionalInterface
@@ -27,12 +29,34 @@ public interface PlayerAudience extends VirtualAudience {
 
   @Override
   default void showHotbar(net.kyori.text.Component message) {
-    TextAdapter.sendActionBar(getAudience(), renderMessage(message));
+    getAudience().sendActionBar(TextTranslations.translateLegacy(message, getAudience()));
   }
 
   @Override
   default void showBossbar(@Nullable net.kyori.text.Component message, float progress) {
     // TODO
+  }
+
+  @Override
+  default void showTitle(
+      @Nullable net.kyori.text.Component title,
+      @Nullable net.kyori.text.Component subTitle,
+      int inTicks,
+      int stayTicks,
+      int outTicks) {
+    Title bukkitTitle =
+        Title.builder()
+            .title(
+                TextComponent.fromLegacyText(
+                    TextTranslations.translateLegacy(title, getAudience())))
+            .subtitle(
+                TextComponent.fromLegacyText(
+                    TextTranslations.translateLegacy(subTitle, getAudience())))
+            .fadeIn(inTicks)
+            .stay(stayTicks)
+            .fadeOut(outTicks)
+            .build();
+    getAudience().sendTitle(bukkitTitle);
   }
 
   @Override

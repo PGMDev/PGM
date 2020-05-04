@@ -54,6 +54,13 @@ public class ChatDispatcher implements Listener {
 
   private final Set<UUID> muted;
 
+  public static final TextComponent ADMIN_CHAT_PREFIX =
+      TextComponent.builder()
+          .append("[", TextColor.WHITE)
+          .append("A", TextColor.GOLD)
+          .append("] ", TextColor.WHITE)
+          .build();
+
   private static final Sound DM_SOUND = new Sound("random.orb", 1f, 1.2f);
   private static final Sound AC_SOUND = new Sound("random.orb", 1f, 0.7f);
 
@@ -63,16 +70,11 @@ public class ChatDispatcher implements Listener {
 
   private static final String GLOBAL_FORMAT = "<%s>: %s";
   private static final String PREFIX_FORMAT = "%s: %s";
+  private static final String AC_FORMAT =
+      TextTranslations.translateLegacy(ADMIN_CHAT_PREFIX, null) + PREFIX_FORMAT;
 
   private static final Predicate<MatchPlayer> AC_FILTER =
       viewer -> viewer.getBukkit().hasPermission(Permissions.ADMINCHAT);
-
-  public static final TextComponent ADMIN_CHAT_PREFIX =
-      TextComponent.builder()
-          .append("[", TextColor.WHITE)
-          .append("A", TextColor.GOLD)
-          .append("] ", TextColor.WHITE)
-          .build();
 
   public ChatDispatcher(MatchManager manager, VanishManager vanish) {
     this.manager = manager;
@@ -152,7 +154,7 @@ public class ChatDispatcher implements Listener {
         match,
         sender,
         message != null ? BukkitUtils.colorize(message) : message,
-        TextTranslations.translateLegacy(ADMIN_CHAT_PREFIX, null) + PREFIX_FORMAT,
+        AC_FORMAT,
         AC_FILTER,
         SettingValue.CHAT_ADMIN);
 
@@ -252,7 +254,8 @@ public class ChatDispatcher implements Listener {
     if (sender == null) return;
     final MatchPlayer receiver = manager.getPlayer(lastMessagedBy.get(sender.getBukkit()));
     if (receiver == null) {
-      audience.sendWarning(TranslatableComponent.of("command.message.noReply"));
+      audience.sendWarning(
+          TranslatableComponent.of("command.message.noReply").args(TextComponent.of("/msg")));
       return;
     }
 
@@ -345,29 +348,22 @@ public class ChatDispatcher implements Listener {
     final String message = text.trim();
 
     if (sender != null) {
-
-      // Vanish check - Ensure player is only sending messages in admin chat
-      if (sender.isVanished() && !filter.equals(AC_FILTER)) {
-        sender.sendWarning(TranslatableComponent.of("vanish.chat.deny"));
-        // Force channel back to admin chat, in case of accidental switch
-        sender.getSettings().setValue(SettingKey.CHAT, SettingValue.CHAT_ADMIN);
-        return;
-      }
-
       PGM.get()
           .getAsyncExecutor()
           .execute(
               () -> {
+                final Predicate<MatchPlayer> finalFilter = sender.isVanished() ? AC_FILTER : filter;
+                final String finalFormat = sender.isVanished() ? AC_FORMAT : format;
                 final AsyncPlayerChatEvent event =
                     new AsyncPlayerChatEvent(
                         false,
                         sender.getBukkit(),
                         message,
                         match.getPlayers().stream()
-                            .filter(filter)
+                            .filter(finalFilter)
                             .map(MatchPlayer::getBukkit)
                             .collect(Collectors.toSet()));
-                event.setFormat(format);
+                event.setFormat(finalFormat);
                 CHAT_EVENT_CACHE.put(event, true);
                 match.callEvent(event);
 

@@ -2,9 +2,11 @@ package tc.oc.pgm.listeners;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
@@ -152,8 +154,13 @@ public class PGMListener implements Listener {
     if (event.getJoinMessage() != null) {
       event.setJoinMessage(null);
       MatchPlayer player = match.getPlayer(event.getPlayer());
-      if (player != null && !vm.isVanished(player.getId())) {
-        announceJoinOrLeave(player, true);
+      if (player != null) {
+        if (!vm.isVanished(player.getId())) {
+          announceJoinOrLeave(player, true, false);
+        } else {
+          // Announce actual staff join
+          announceJoinOrLeave(player, true, true);
+        }
       }
     }
   }
@@ -165,8 +172,13 @@ public class PGMListener implements Listener {
 
     if (event.getQuitMessage() != null) {
       MatchPlayer player = match.getPlayer(event.getPlayer());
-      if (player != null && !vm.isVanished(player.getId())) {
-        announceJoinOrLeave(player, false);
+      if (player != null) {
+        if (!vm.isVanished(player.getId())) {
+          announceJoinOrLeave(player, false, false);
+        } else {
+          // Announce actual staff quit
+          announceJoinOrLeave(player, false, true);
+        }
       }
       event.setQuitMessage(null);
     }
@@ -175,15 +187,20 @@ public class PGMListener implements Listener {
     PGM.get().getPrefixRegistry().removePlayer(event.getPlayer().getUniqueId());
   }
 
-  public static void announceJoinOrLeave(MatchPlayer player, boolean join) {
+  public static void announceJoinOrLeave(MatchPlayer player, boolean join, boolean staffOnly) {
     checkNotNull(player);
+    Collection<MatchPlayer> viewers =
+        player.getMatch().getPlayers().stream()
+            .filter(p -> (staffOnly ? p.getBukkit().hasPermission(Permissions.STAFF) : true))
+            .collect(Collectors.toList());
 
-    for (MatchPlayer viewer : player.getMatch().getPlayers()) {
+    for (MatchPlayer viewer : viewers) {
       if (player.equals(viewer)) continue;
+      if (!staffOnly && player.isVanished() && viewer.getBukkit().hasPermission(Permissions.STAFF))
+        continue; // Skip staff during fake broadcast
 
-      final boolean vanish =
-          player.isVanished() && viewer.getBukkit().hasPermission(Permissions.VANISH);
-      final String key = (join ? "misc.join" : "misc.leave") + (vanish ? ".quiet" : "");
+      final String key =
+          (join ? "misc.join" : "misc.leave") + (staffOnly && player.isVanished() ? ".quiet" : "");
 
       SettingValue option = viewer.getSettings().getValue(SettingKey.JOIN);
       if (option.equals(SettingValue.JOIN_ON)) {
@@ -191,7 +208,10 @@ public class PGMListener implements Listener {
             TextComponent.of(
                 player.getBukkit().getDisplayName(viewer.getBukkit()) + ChatColor.YELLOW);
         Component component = TranslatableComponent.of(key).args(name);
-        viewer.sendMessage(component.color(TextColor.YELLOW));
+        viewer.sendMessage(
+            staffOnly
+                ? ChatDispatcher.ADMIN_CHAT_PREFIX.append(component.color(TextColor.YELLOW))
+                : component.color(TextColor.YELLOW));
       }
     }
   }

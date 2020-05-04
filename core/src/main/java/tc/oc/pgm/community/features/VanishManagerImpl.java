@@ -10,9 +10,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.format.TextDecoration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -26,13 +28,8 @@ import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.player.event.MatchPlayerAddEvent;
-import tc.oc.pgm.api.setting.SettingKey;
-import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.community.events.PlayerVanishEvent;
 import tc.oc.pgm.listeners.PGMListener;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 public class VanishManagerImpl implements VanishManager, Listener {
 
@@ -106,7 +103,7 @@ public class VanishManagerImpl implements VanishManager, Listener {
 
     // Broadcast join/quit message
     if (!quiet) {
-      PGMListener.announceJoinOrLeave(player, !vanish);
+      PGMListener.announceJoinOrLeave(player, !vanish, false);
     }
 
     match.callEvent(new PlayerVanishEvent(player, vanish));
@@ -118,7 +115,6 @@ public class VanishManagerImpl implements VanishManager, Listener {
     if (!isVanished(player.getId())) {
       this.vanishedPlayers.add(player.getId());
       player.getBukkit().setMetadata(VANISH_KEY, VANISH_VALUE);
-      player.getSettings().setValue(SettingKey.CHAT, SettingValue.CHAT_ADMIN);
     }
   }
 
@@ -166,13 +162,12 @@ public class VanishManagerImpl implements VanishManager, Listener {
   }
 
   private void sendHotbarVanish(MatchPlayer player, boolean flashColor) {
-    PersonalizedText warning =
-        new PersonalizedText(" \u26a0 ", flashColor ? ChatColor.YELLOW : ChatColor.GOLD);
+    Component warning =
+        TextComponent.of(" \u26a0 ", flashColor ? TextColor.YELLOW : TextColor.GOLD);
     Component vanish =
-        new PersonalizedTranslatable("vanish.hotbar")
-            .getPersonalizedText()
-            .color(ChatColor.RED)
-            .bold(true);
-    player.sendHotbarMessage(new PersonalizedText(warning, vanish, warning));
+        TranslatableComponent.of("vanish.hotbar", TextColor.RED, TextDecoration.BOLD);
+    Component message =
+        TextComponent.builder().append(warning).append(vanish).append(warning).build();
+    player.showHotbar(message);
   }
 }

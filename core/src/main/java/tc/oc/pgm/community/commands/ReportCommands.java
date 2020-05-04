@@ -246,7 +246,8 @@ public class ReportCommands {
 
     private Component getUsername(UUID uuid, Match match) {
       MatchPlayer player = match.getPlayer(targetUUID);
-      Component name = TextComponent.of("Unknown", TextColor.AQUA, TextDecoration.ITALIC);
+      Component name =
+          TranslatableComponent.of("misc.unknown", TextColor.AQUA, TextDecoration.ITALIC);
       if (match.getPlayer(targetUUID) != null) {
         name = player.getName(NameStyle.FANCY);
       } else {
