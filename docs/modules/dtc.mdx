@@ -1,0 +1,259 @@
+---
+id: dtc
+title: Destroy the Core
+---
+
+Players have to locate and break the enemy team's core, usually an obsidian sphere filled with lava. The lava has to leak down a certain distance for the core to be destroyed. Lava should not be available anywhere else on the map, otherwise a core leak could be faked. This can also be avoided by keeping the lava far away enough from the core and not giving players buckets or the ability to craft them.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Cores Element</th>
+        <th>Description</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<cores> </cores>`}</label>
+        </td>
+        <td>Node containing all the defined cores.</td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>Sub-elements</th>
+        <th />
+        <th>Value/Children</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<core> </core>`}</label>
+        </td>
+        <td>A single core.</td>
+        <td>
+          <span className="badge badge--secondary">Core Sub-elements</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Core Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>id</label>
+        </td>
+        <td>
+          Unique identifier used to reference cores from other places in the
+          XML.
+        </td>
+        <td>
+          <span className="badge badge--primary">String</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>name</label>
+        </td>
+        <td>The core's name, used in notification messages.</td>
+        <td>
+          <span className="badge badge--primary">String</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>required</label>
+        </td>
+        <td>
+          Specify if this objective is required to win the match.
+          <br />
+          Teams completing all of their required objectives will win regardless
+          of score or blitz configuration.
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+      <tr>
+        <td>
+          <label>region</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          <span className="badge badge--danger">Required</span>A region
+          containing the core.
+        </td>
+        <td>
+          <a href="/modules/regions">Bounded Region</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>leak</label>
+        </td>
+        <td>
+          Distance below the bottom of the core <strong>region</strong> that the
+          lava must leak.
+        </td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td>
+          <label>material</label>
+        </td>
+        <td>
+          The core casing material, used to detect breaks, and for mode changes.
+        </td>
+        <td>
+          <a href="/reference/inventory#material_matchers">
+            Single Material Pattern
+          </a>
+        </td>
+        <td>obsidian</td>
+      </tr>
+      <tr>
+        <td>
+          <label>team</label>
+        </td>
+        <td>
+          <span className="badge badge--danger">Required</span>
+          Team the core belongs to, i.e. its owner.
+        </td>
+        <td>
+          <a href="/modules/teams">Team ID</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>mode-changes</label>
+        </td>
+        <td>
+          Specify if this core uses{" "}
+          <a href="/modules/monument_modes">monument modes</a>
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>show</label>
+        </td>
+        <td>
+          Specify if the core should be hidden from all visible locations to the
+          player. These locations include chat, the boss bar, and the
+          scoreboard.
+          <br />
+          <label>NOTE:</label>
+          The objective will also not be logged to the Database and the player will
+          not recieve any raindrops upon completion.
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+      <tr>
+        <td>
+          <label>proximity-metric</label>
+        </td>
+        <td>
+          Metric used to determine proximity to the core.
+          <br />
+          Accepts <label>closest player</label>, <label>closest block</label> or{" "}
+          <label>closest kill</label>
+        </td>
+        <td>
+          <span className="badge badge--primary">Proximity Metric</span>
+        </td>
+        <td>
+          <label>closest player</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>proximity-horizontal</label>
+        </td>
+        <td>Only calculate horizontal distance for core proximity.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Core Sub-elements
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<region>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          <span className="badge badge--danger">Required</span>A region
+          containing the core.
+        </td>
+        <td>
+          <a href="/modules/regions">Bounded Regions</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+```xml
+<cores material="obsidian" leak="8">
+    <core team="blue">
+        <region><cuboid min="10,15,12" max="12,13,16"/></region>
+    </core>
+</cores>
+
+<cores material="obsidian" leak="4">
+    <core team="red" region="red-core"/>
+</cores>
+```

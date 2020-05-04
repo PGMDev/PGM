@@ -9,6 +9,17 @@ module.exports = {
       "modules/mobs",
     ],
     Format: ["modules/players", "modules/teams"],
+    Objectives: [
+      "modules/ctw",
+      "modules/ctf",
+      "modules/control-points",
+      "modules/dtm",
+      "modules/dtc",
+      "modules/monument-modes",
+      "modules/blitz",
+      "modules/scoring",
+      "modules/other",
+    ],
   },
   Reference: {
     Items: ["reference/inventory"],

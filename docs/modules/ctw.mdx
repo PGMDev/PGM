@@ -1,0 +1,299 @@
+---
+id: ctw
+title: Capture the Wool
+---
+
+Players have to retrieve wool blocks from the enemy teams side of the map and then put them on their victory monument(s). The area a wool has to be placed in is protected by default to prevent it from being blocked with another block.
+
+```xml
+<wools>
+    <wool team="blue" color="lime">
+        <monument><block>0.5,11,-92.5</block></monument>
+        <!-- Blue team has to place a lime wool block at 0.5,11,-92.5 to win -->
+    </wool>
+    <wool team="green" color="light blue" craftable="false">
+        <monument><block>0.5,11,93.5</block></monument>
+        <!-- Light blue wool can not be crafted, it must be picked up -->
+    </wool>
+</wools>
+```
+
+<div className="table-container">
+  <table className="table">
+    <thead>
+      <tr>
+        <th>Wools Element</th>
+        <th>Description</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<wools> </wools>`}</label>
+        </td>
+        <td>Node containing all the wools for this map.</td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>Sub-elements</th>
+        <th />
+        <th>Value/Children</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<wool> </wool>`}</label>
+        </td>
+        <td>A wool victory monument.</td>
+        <td>
+          <span className="badge badge--secondary">Wool Sub-elements</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Wool Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>id</label>
+        </td>
+        <td>
+          Unique identifier used to reference wool monuments from other places
+          in the XML.
+        </td>
+        <td>
+          <span className="badge badge--primary">String</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>required</label>
+        </td>
+        <td>
+          Specify if this objective is required to win the match.
+          <br />
+          Teams completing all of their required objectives will win regardless
+          of score or blitz configuration.
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+      <tr>
+        <td>
+          <label>team</label>
+        </td>
+        <td>
+          <span className="badge badge--danger">Required</span>
+          The team which has to place the wool.
+        </td>
+        <td>
+          <a href="/modules/teams">Team ID</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>color</label>
+        </td>
+        <td>
+          <span className="badge badge--danger">Required</span>
+          The wools color.
+        </td>
+        <td>
+          <a href="/reference/colors">Dye Color Name</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>monument</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          <span className="badge badge--danger">Required</span>
+          The monument where the wool has to be placed.
+        </td>
+        <td>
+          <a href="/modules/regions">Region</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>craftable</label>
+        </td>
+        <td>
+          Specify if the wool can be crafted, e.g. with white wool and dye.
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>show</label>
+        </td>
+        <td>
+          Specify if the objective should be hidden from all visible locations
+          to the player. These locations include chat, the boss bar, and the
+          scoreboard.
+          <br />
+          <i>
+            If set to false, the objective will not be logged to the database
+            and the player will not receive any raindrops upon completion.
+          </i>
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+      <tr>
+        <td>
+          <label>location</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--danger"
+            title="Required after proto 1.3.4"
+          >
+            Required
+          </span>
+          Location where the wool can be found at, used to determine proximity.
+        </td>
+        <td>
+          <span className="badge badge--primary">X,Y,Z</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>wool-proximity-metric</label>
+        </td>
+        <td>
+          Metric used to determine proximity to the wool.
+          <br />
+          Accepts <label>closest player</label>, <label>closest block</label> or{" "}
+          <label>closest kill</label>
+        </td>
+        <td>
+          <span className="badge badge--primary">Proximity Metric</span>
+        </td>
+        <td>
+          <label>closest kill</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>wool-proximity-horizontal</label>
+        </td>
+        <td>Only calculate horizontal distance for wool proximity.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+      <tr>
+        <td>
+          <label>monument-proximity-metric</label>
+        </td>
+        <td>
+          Metric used to determine proximity to the monument.
+          <br />
+          Accepts <label>closest player</label>, <label>closest block</label> or{" "}
+          <label>closest kill</label>
+        </td>
+        <td>
+          <span className="badge badge--primary">Proximity Metric</span>
+        </td>
+        <td>
+          <label>closest block</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>monument-proximity-horizontal</label>
+        </td>
+        <td>Only calculate horizontal distance for monument proximity.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Wool Sub-elements
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<monument>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          <span className="badge badge--danger">Required</span>
+          The monument where the wool has to be placed.
+        </td>
+        <td>
+          <a href="/modules/regions">Region</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+You can group multiple victory monuments from the same team inside a single `<wools team="team-id">` element; and then define that teams individual wool colors inside of a `<wool>` element.
+
+```xml
+<wools team="red">
+    <wool color="cyan" location="32.5,14,0.5">
+        <monument><block>-60,26,-118</block></monument>
+    </wool>
+    <wool color="lime" location="0.5,10,21.5">
+        <monument><block>-60,26,-121</block></monument>
+    </wool>
+</wools>
+
+<wools team="blue">
+    <wool color="magenta" location="-32.5,14,0.5" monument="magenta-monument"/>
+    <wool color="lime" location="0.5,10,21.5" monument="lime-monument"/>
+</wools>
+```

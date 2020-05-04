@@ -1,0 +1,296 @@
+---
+id: dtm
+title: Destroy the Monument
+---
+
+Players have to locate and destroy certain objects from the enemy team, such as an obsidian pillar, etc. Teams win after a specified percentage of the enemy teams destroyables are destroyed. Teams can have multiple destroyables and they can be made out of multiple materials.
+
+Completion specifies how much of the material(s) inside of the monument region must be removed for it to count as destroyed. For example, if the monument is obsidian and completion is set to 100% then all the obsidian must be removed in order for the monument to count as destroyed.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Destroyables Element</th>
+        <th>Description</th>
+        <th />
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<destroyables> </destroyables>`}</label>
+        </td>
+        <td>Node containing all the defined destroyables.</td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>Sub-elements</th>
+        <th />
+        <th>Value/Children</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<destroyable> </destroyable>`}</label>
+        </td>
+        <td>A single destroyable.</td>
+        <td>
+          <span className="badge badge--secondary">
+            Destroyable Sub-elements
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Destroyable Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>id</label>
+        </td>
+        <td>
+          Unique identifier used to reference monuments from other places in the
+          XML.
+        </td>
+        <td>
+          <span className="badge badge--primary">String</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>name</label>
+        </td>
+        <td>
+          <span className="badge badge--danger">Required</span>
+          The destroyables name.
+        </td>
+        <td>
+          <span className="badge badge--primary">String</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>required</label>
+        </td>
+        <td>
+          Specify if this objective is required to win the match. Teams
+          completing all of their required objectives will win regardless of
+          score or blitz configuration.
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+      <tr>
+        <td>
+          <label>region</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          <span className="badge badge--danger">Required</span>
+          Region containing the destroyable.
+        </td>
+        <td>
+          <a href="/modules/regions">Bounded Region</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>materials</label>
+        </td>
+        <td>
+          The destroyables materials, multiple materials are separated with a
+          semicolon
+          <label>;</label>
+        </td>
+        <td>
+          <a href="/reference/inventory#material_matchers">Material Pattern</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>owner</label>
+        </td>
+        <td>
+          <span className="badge badge--danger">Required</span>
+          The destroyables owner.
+        </td>
+        <td>
+          <a href="/modules/teams">Team ID</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>completion</label>
+        </td>
+        <td>
+          Percentage of the destroyable that needs to be destroyed for a win.
+        </td>
+        <td>
+          <span className="badge badge--primary">0 - 100</span>
+        </td>
+        <td>100%</td>
+      </tr>
+      <tr>
+        <td>
+          <label>mode-changes</label>
+        </td>
+        <td>
+          Specify if this destroyable uses custom{" "}
+          <a href="/modules/monument_modes">monument modes</a>
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+      <tr>
+        <td>
+          <label>show-progress</label>
+        </td>
+        <td>Show this destroyables progress in the scoreboard.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+      <tr>
+        <td>
+          <label>repairable</label>
+        </td>
+        <td>Specify if the destroyable can be repaired.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+      <tr>
+        <td>
+          <label>sparks</label>
+        </td>
+        <td>
+          Spawn fireworks particles for destroyed blocks & play the fireworks
+          sound to all players.
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+      <tr>
+        <td>
+          <label>show</label>
+        </td>
+        <td>
+          Specify if the objective should be hidden from all visible locations
+          to the player. These locations include chat, the boss bar, and the
+          scoreboard.
+          <br />
+          <label>NOTE:</label>
+          The objective will also not be logged to the Database and the player will
+          not recieve any raindrops upon completion.
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+      <tr>
+        <td>
+          <label>proximity-metric</label>
+        </td>
+        <td>
+          Metric used to determine proximity to the destroyable.
+          <br />
+          Accepts <label>closest player</label>, <label>closest block</label> or{" "}
+          <label>closest kill</label>
+        </td>
+        <td>
+          <span className="badge badge--primary">Proximity Metric</span>
+        </td>
+        <td>
+          <label>closest player</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>proximity-horizontal</label>
+        </td>
+        <td>Only calculate horizontal distance for destroyable proximity.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Destroyable Sub-elements
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<region>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          <span className="badge badge--danger">Required</span>
+          Region containing the destroyable.
+        </td>
+        <td>
+          <a href="/modules/regions">Bounded Regions</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+```xml
+<destroyables name="Monument" materials="obsidian" completion="100%">
+    <destroyable owner="blue">
+        <region><cuboid min="46,16,26" max="45,14,25"/></region>
+    </destroyable>
+    <destroyable owner="red">
+        <region><cuboid min="-44,16,-24" max="-45,14,-25"/></region>
+    </destroyable>
+</destroyables>
+```

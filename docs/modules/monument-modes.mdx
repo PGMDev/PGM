@@ -1,0 +1,138 @@
+---
+id: monument-modes
+title: Monument Modes
+---
+
+This module can be used to customize the modes that cores and destroyables cycle through, and at what duration they do so. When a monuments mode changes its material is usually changed from a hard to a soft block.
+
+The `<modes>` tag can contain any number of `<mode>` tags with different durations. Each `<mode>` has configurable characteristics that define it.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th />
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<modes> </modes>`}</label>
+        </td>
+        <td>Node containing the monument modes for this match.</td>
+        <td />
+      </tr>
+      <tr>
+        <th>Sub-elements</th>
+        <th />
+        <th>Value/Children</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<mode/>`}</label>
+        </td>
+        <td>An individual monument mode.</td>
+        <td>
+          <span className="badge badge--secondary">None</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Mode Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>after</label>
+        </td>
+        <td>
+          <span className="badge badge--danger">Required</span>
+          Time from the start of the game till this mode takes effect.
+        </td>
+        <td>
+          <a href="/reference/time_periods">Time Period</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>material</label>
+        </td>
+        <td>
+          <span className="badge badge--danger">Required</span>
+          Material the core/destroyable changes to.
+        </td>
+        <td>
+          <a href="/reference/inventory#material_matchers">
+            Single Material Pattern
+          </a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>name</label>
+        </td>
+        <td>Custom mode name, used for the mode change notice.</td>
+        <td>
+          <span className="badge badge--primary">String</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>show-before</label>
+        </td>
+        <td>
+          The time before a mode is over to show it in the BossBar.
+          <br />
+          If show-before is set to 0 the mode is not shown in the BossBar at
+          all.
+        </td>
+        <td>
+          <a href="/reference/time_periods">Time Period</a>
+        </td>
+        <td>60 sec</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+Example
+
+```xml
+<modes>
+    <mode after="10m" material="gold block"/>
+</modes>
+```
+
+This specifies a mode that will change the material of affected objectives to gold block after 10 minutes of gameplay.
+
+```xml
+<modes>
+    <mode after="5m" material="coal block" name="`eEASY MODE"/>
+</modes>
+```
+
+This specifies a mode that will change the material of affected objectives to coal block after 10 minutes of gameplay, with the following chat message: `> > > EASY MODE < < <`
+
+`NOTE:` In order for an objective to change modes, it must have `mode-changes="true"` in its element tag.
+
+```xml
+<destroyables name="Monument" materials="obsidian" mode-changes="true">
+    <!-- destroyables... -->
+</destroyable>
+```
