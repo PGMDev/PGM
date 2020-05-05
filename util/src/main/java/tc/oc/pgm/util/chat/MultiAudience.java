@@ -39,6 +39,16 @@ public interface MultiAudience extends Audience {
     for (Audience a : getAudiences()) a.playSound(sound);
   }
 
+  @Override
+  default void showTitle(
+      @Nullable net.kyori.text.Component title,
+      @Nullable net.kyori.text.Component subTitle,
+      int inTicks,
+      int stayTicks,
+      int outTicks) {
+    for (Audience a : getAudiences()) a.showTitle(title, subTitle, inTicks, stayTicks, outTicks);
+  }
+
   ///////////////////////////////////////////////////////////////
   // METHODS BELOW ARE ALL DEPRECATED AND WILL BE REMOVED SOON //
   ///////////////////////////////////////////////////////////////

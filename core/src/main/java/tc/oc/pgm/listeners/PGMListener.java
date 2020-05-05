@@ -2,9 +2,15 @@ package tc.oc.pgm.listeners;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -51,10 +57,8 @@ import tc.oc.pgm.gamerules.GameRule;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.TimeLockModule;
 import tc.oc.pgm.util.UsernameFormatUtils;
-import tc.oc.pgm.util.component.Component;
+import tc.oc.pgm.util.component.ComponentRenderers;
 import tc.oc.pgm.util.component.PeriodFormats;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class PGMListener implements Listener {
@@ -150,8 +154,13 @@ public class PGMListener implements Listener {
     if (event.getJoinMessage() != null) {
       event.setJoinMessage(null);
       MatchPlayer player = match.getPlayer(event.getPlayer());
-      if (player != null && !vm.isVanished(player.getId())) {
-        announceJoinOrLeave(player, true);
+      if (player != null) {
+        if (!vm.isVanished(player.getId())) {
+          announceJoinOrLeave(player, true, false);
+        } else {
+          // Announce actual staff join
+          announceJoinOrLeave(player, true, true);
+        }
       }
     }
   }
@@ -163,8 +172,13 @@ public class PGMListener implements Listener {
 
     if (event.getQuitMessage() != null) {
       MatchPlayer player = match.getPlayer(event.getPlayer());
-      if (player != null && !vm.isVanished(player.getId())) {
-        announceJoinOrLeave(player, false);
+      if (player != null) {
+        if (!vm.isVanished(player.getId())) {
+          announceJoinOrLeave(player, false, false);
+        } else {
+          // Announce actual staff quit
+          announceJoinOrLeave(player, false, true);
+        }
       }
       event.setQuitMessage(null);
     }
@@ -173,21 +187,31 @@ public class PGMListener implements Listener {
     PGM.get().getPrefixRegistry().removePlayer(event.getPlayer().getUniqueId());
   }
 
-  public static void announceJoinOrLeave(MatchPlayer player, boolean join) {
+  public static void announceJoinOrLeave(MatchPlayer player, boolean join, boolean staffOnly) {
     checkNotNull(player);
+    Collection<MatchPlayer> viewers =
+        player.getMatch().getPlayers().stream()
+            .filter(p -> (staffOnly ? p.getBukkit().hasPermission(Permissions.STAFF) : true))
+            .collect(Collectors.toList());
 
-    for (MatchPlayer viewer : player.getMatch().getPlayers()) {
+    for (MatchPlayer viewer : viewers) {
       if (player.equals(viewer)) continue;
+      if (!staffOnly && player.isVanished() && viewer.getBukkit().hasPermission(Permissions.STAFF))
+        continue; // Skip staff during fake broadcast
 
-      final boolean vanish =
-          player.isVanished() && viewer.getBukkit().hasPermission(Permissions.VANISH);
-      final String key = (join ? "misc.join" : "misc.leave") + (vanish ? ".quiet" : "");
+      final String key =
+          (join ? "misc.join" : "misc.leave") + (staffOnly && player.isVanished() ? ".quiet" : "");
 
       SettingValue option = viewer.getSettings().getValue(SettingKey.JOIN);
       if (option.equals(SettingValue.JOIN_ON)) {
-        String name = player.getBukkit().getDisplayName(viewer.getBukkit()) + ChatColor.YELLOW;
-        Component component = new PersonalizedTranslatable(key, name);
-        viewer.sendMessage(new PersonalizedText(component, ChatColor.YELLOW));
+        Component name =
+            TextComponent.of(
+                player.getBukkit().getDisplayName(viewer.getBukkit()) + ChatColor.YELLOW);
+        Component component = TranslatableComponent.of(key).args(name);
+        viewer.sendMessage(
+            staffOnly
+                ? ChatDispatcher.ADMIN_CHAT_PREFIX.append(component.color(TextColor.YELLOW))
+                : component.color(TextColor.YELLOW));
       }
     }
   }
@@ -327,19 +351,20 @@ public class PGMListener implements Listener {
   public void announceDynamicMapPoolChange(MapPoolAdjustEvent event) {
     // Send feedback to staff, alerting them that the map pool has changed by force
     if (event.isForced()) {
-      Component poolName =
-          new PersonalizedText(event.getNewPool().getName()).color(ChatColor.LIGHT_PURPLE);
+      Component poolName = TextComponent.of(event.getNewPool().getName(), TextColor.LIGHT_PURPLE);
       Component staffName =
           UsernameFormatUtils.formatStaffName(event.getSender(), event.getMatch());
-      PersonalizedTranslatable forced =
-          new PersonalizedTranslatable("pool.change.force", poolName, staffName);
+      Component forced = TranslatableComponent.of("pool.change.force").args(poolName, staffName);
       if (event.getTimeLimit() != null) {
         Component time =
-            PeriodFormats.briefNaturalApproximate(event.getTimeLimit()).color(ChatColor.GREEN);
-        forced = new PersonalizedTranslatable("pool.change.forceTimed", poolName, time, staffName);
+            TextComponent.of(
+                ComponentRenderers.toLegacyText(
+                    PeriodFormats.briefNaturalApproximate(event.getTimeLimit())
+                        .color(ChatColor.GREEN),
+                    Bukkit.getConsoleSender()));
+        forced = TranslatableComponent.of("pool.change.forceTimed").args(poolName, time, staffName);
       }
-      ChatDispatcher.broadcastAdminChatMessage(
-          forced.getPersonalizedText().color(ChatColor.GRAY), event.getMatch());
+      ChatDispatcher.broadcastAdminChatMessage(forced.color(TextColor.GRAY), event.getMatch());
     }
 
     // Broadcast map pool changes due to size

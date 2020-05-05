@@ -1,12 +1,14 @@
 package tc.oc.pgm.util;
 
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
+import net.kyori.text.format.TextDecoration;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.community.commands.ModerationCommands;
 import tc.oc.pgm.util.named.NameStyle;
 
 /**
@@ -15,16 +17,14 @@ import tc.oc.pgm.util.named.NameStyle;
  */
 public class UsernameFormatUtils {
 
-  private static final Component CONSOLE_NAME =
-      new PersonalizedTranslatable("console")
-          .getPersonalizedText()
-          .color(ChatColor.DARK_AQUA)
-          .italic(true);
+  public static final Component CONSOLE_NAME =
+      TranslatableComponent.of("misc.console", TextColor.DARK_AQUA)
+          .decoration(TextDecoration.ITALIC, true);
 
   public static Component formatStaffName(CommandSender sender, Match match) {
     if (sender != null && sender instanceof Player) {
       MatchPlayer matchPlayer = match.getPlayer((Player) sender);
-      if (matchPlayer != null) return matchPlayer.getStyledName(NameStyle.FANCY);
+      if (matchPlayer != null) return matchPlayer.getName(NameStyle.FANCY);
     }
     return CONSOLE_NAME;
   }

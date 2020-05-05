@@ -40,6 +40,23 @@ public interface Audience {
   void showBossbar(net.kyori.text.Component message, float progress);
 
   /**
+   * Send a title with desired lengths.
+   *
+   * @param title The upper line
+   * @param subTitle The lower line
+   * @param inTicks Fade in time in ticks
+   * @param stayTicks Length title is displayed
+   * @param outTicks Fade out time in ticks
+   * @return
+   */
+  void showTitle(
+      @Nullable net.kyori.text.Component title,
+      @Nullable net.kyori.text.Component subTitle,
+      int inTicks,
+      int stayTicks,
+      int outTicks);
+
+  /**
    * Play a {@link Sound}, by the raw asset name.
    *
    * @param sound The sound.
@@ -71,6 +88,7 @@ public interface Audience {
   @Deprecated
   void sendHotbarMessage(Component message);
 
+  @Deprecated
   void showTitle(
       @Nullable Component title,
       @Nullable Component subtitle,

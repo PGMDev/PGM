@@ -27,4 +27,9 @@ public class RandomMapPool extends MapPool {
   public void setNextMap(MapInfo map) {
     order.setNextMap(map);
   }
+
+  @Override
+  public void resetNextMap() {
+    order.resetNextMap();
+  }
 }

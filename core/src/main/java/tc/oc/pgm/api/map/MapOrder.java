@@ -31,6 +31,9 @@ public interface MapOrder {
    */
   void setNextMap(MapInfo map);
 
+  /** Removes any map that was set manually, returning the server to what was previously chosen. */
+  void resetNextMap();
+
   /**
    * Notify the {@link MapOrder} that a match just ended, to allow it to run actions before cycle
    * starts.

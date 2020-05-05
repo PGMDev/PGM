@@ -10,9 +10,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.format.TextDecoration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -26,13 +28,8 @@ import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.player.event.MatchPlayerAddEvent;
-import tc.oc.pgm.api.setting.SettingKey;
-import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.community.events.PlayerVanishEvent;
 import tc.oc.pgm.listeners.PGMListener;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 public class VanishManagerImpl implements VanishManager, Listener {
 
@@ -81,10 +78,6 @@ public class VanishManagerImpl implements VanishManager, Listener {
 
   @Override
   public boolean setVanished(MatchPlayer player, boolean vanish, boolean quiet) {
-    if (isVanished(player.getId()) == vanish) {
-      return false;
-    }
-
     // Keep track of the UUID and apply/remove META data, so we can detect vanish status from other
     // projects (i.e utils)
     if (vanish) {
@@ -96,9 +89,7 @@ public class VanishManagerImpl implements VanishManager, Listener {
     final Match match = player.getMatch();
 
     // Ensure player is an observer
-    if (!player.getParty().isObserving()) {
-      match.setParty(player, match.getDefaultParty());
-    }
+    match.setParty(player, match.getDefaultParty());
 
     // Set vanish status in match player
     player.setVanished(vanish);
@@ -108,19 +99,18 @@ public class VanishManagerImpl implements VanishManager, Listener {
 
     // Broadcast join/quit message
     if (!quiet) {
-      PGMListener.announceJoinOrLeave(player, !vanish);
+      PGMListener.announceJoinOrLeave(player, !vanish, false);
     }
 
     match.callEvent(new PlayerVanishEvent(player, vanish));
 
-    return true;
+    return isVanished(player.getId());
   }
 
   private void addVanished(MatchPlayer player) {
     if (!isVanished(player.getId())) {
       this.vanishedPlayers.add(player.getId());
       player.getBukkit().setMetadata(VANISH_KEY, VANISH_VALUE);
-      player.getSettings().setValue(SettingKey.CHAT, SettingValue.CHAT_ADMIN);
     }
   }
 
@@ -131,26 +121,14 @@ public class VanishManagerImpl implements VanishManager, Listener {
 
   /* Commands */
   @Command(
-      aliases = {"vanish", "disappear", "v"},
-      desc = "Vanish from the server",
+      aliases = {"vanish", "v"},
+      desc = "Toggle vanish status",
       perms = Permissions.VANISH)
   public void vanish(MatchPlayer sender, @Switch('s') boolean silent) throws CommandException {
-    if (setVanished(sender, true, silent)) {
-      sender.sendMessage(TranslatableComponent.of("vanish.activate").color(TextColor.GREEN));
+    if (setVanished(sender, !isVanished(sender.getId()), silent)) {
+      sender.sendWarning(TranslatableComponent.of("vanish.activate").color(TextColor.GREEN));
     } else {
-      sender.sendWarning(TranslatableComponent.of("vanish.activate.already"));
-    }
-  }
-
-  @Command(
-      aliases = {"unvanish", "appear", "uv"},
-      desc = "Return to the server",
-      perms = Permissions.VANISH)
-  public void unVanish(MatchPlayer sender, @Switch('s') boolean silent) throws CommandException {
-    if (setVanished(sender, false, silent)) {
-      sender.sendMessage(TranslatableComponent.of("vanish.deactivate").color(TextColor.RED));
-    } else {
-      sender.sendWarning(TranslatableComponent.of("vanish.deactivate.already"));
+      sender.sendWarning(TranslatableComponent.of("vanish.deactivate").color(TextColor.RED));
     }
   }
 
@@ -168,13 +146,12 @@ public class VanishManagerImpl implements VanishManager, Listener {
   }
 
   private void sendHotbarVanish(MatchPlayer player, boolean flashColor) {
-    PersonalizedText warning =
-        new PersonalizedText(" \u26a0 ", flashColor ? ChatColor.YELLOW : ChatColor.GOLD);
+    Component warning =
+        TextComponent.of(" \u26a0 ", flashColor ? TextColor.YELLOW : TextColor.GOLD);
     Component vanish =
-        new PersonalizedTranslatable("vanish.hotbar")
-            .getPersonalizedText()
-            .color(ChatColor.RED)
-            .bold(true);
-    player.sendHotbarMessage(new PersonalizedText(warning, vanish, warning));
+        TranslatableComponent.of("vanish.hotbar", TextColor.RED, TextDecoration.BOLD);
+    Component message =
+        TextComponent.builder().append(warning).append(vanish).append(warning).build();
+    player.showHotbar(message);
   }
 }
