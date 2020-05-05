@@ -92,7 +92,7 @@
             <!-- Generates a /server folder for debugging purposes -->
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
+                <version>3.0.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>

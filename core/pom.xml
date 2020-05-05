@@ -86,7 +86,7 @@
             <!-- Generate a .zip resource of default maps provided in the maps/ folder -->
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
+                <version>3.0.0</version>
                 <executions>
                     <execution>
                         <id>maps</id>
