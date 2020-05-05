@@ -240,10 +240,8 @@ public class ChatDispatcher implements Listener {
 
   private String formatPrivateMessage(String key, CommandSender viewer) {
     Component action =
-        TranslatableComponent.of(key, TextColor.GRAY)
-            .decoration(TextDecoration.ITALIC, true)
-            .append(TextComponent.of(" " + PREFIX_FORMAT));
-    return TextTranslations.translateLegacy(action, viewer);
+        TranslatableComponent.of(key, TextColor.GRAY).decoration(TextDecoration.ITALIC, true);
+    return TextTranslations.translateLegacy(action, viewer) + " " + PREFIX_FORMAT;
   }
 
   @Command(

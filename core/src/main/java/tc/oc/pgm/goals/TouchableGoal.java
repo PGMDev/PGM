@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import javax.annotation.Nullable;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
@@ -23,7 +25,6 @@ import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.ComponentRenderers;
 import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 /**
  * A {@link Goal} that may be 'touched' by players, meaning the player has made some tangible
@@ -210,7 +211,9 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
       }
 
       if (getDeferTouches()) {
-        toucher.sendMessage(new PersonalizedTranslatable("objective.credit.future"));
+        toucher.sendMessage(
+            TranslatableComponent.of("objective.credit.future")
+                .args(TextComponent.of(this.getName())));
       }
     }
   }
