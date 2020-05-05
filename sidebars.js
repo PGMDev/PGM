@@ -20,6 +20,7 @@ module.exports = {
       "modules/scoring",
       "modules/other",
     ],
+    Mechanics: ["modules/filters", "modules/regions", "modules/spawns"],
   },
   Reference: {
     Items: ["reference/inventory"],

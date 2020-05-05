@@ -1,0 +1,1349 @@
+---
+id: filters
+title: Filters
+---
+
+Filters are true/false conditions about players, blocks, or the match in general.
+Other modules use filters to decide _if_ and _when_ things should happen to those players, blocks, or the entire match.
+
+Filters are built from **matchers** and **modifiers**.
+Matchers are specific questions, like
+
+- is it made of wood?
+- is he/she on the Red Team?
+- is it inside region X?
+- has the match run past 5 minutes?
+
+Modifiers can combine questions using logic, such as
+
+- A and B
+- A or B
+- not A
+- (A or B) and not (A and B)
+
+Modifiers can also transform the meaning of questions, or answers, in various ways.
+
+The documentation for other modules will explain where filters can be used, and how the filter affects the module's behavior.
+Generally, other modules use filters in one of two ways:
+
+<ul>
+  <li>
+    <em>Passively,</em> which means whenever the module wants to do its thing,
+    it will check the filter to decide if it should be done or not.
+  </li>
+  <li>
+    <em>Dynamically,</em> in which case the filter will notify the module when
+    it's time to do something, and who or what it should be done to.
+  </li>
+</ul>
+<p>
+  Only filters labeled <span className="badge badge--primary">Dynamic</span> are
+  capable of the latter. Modules that require dynamic filters will say so in
+  their documentation.
+</p>
+
+### Abstaining
+
+Some filters don't make sense in certain contexts.
+For example, you can't ask if a block is on the Red Team, or if a player is made of wood, or if the match is inside a region.
+
+Some modules will generate an error if you try to use the wrong type of filter, but other modules may allow it.
+When a filter doesn't apply to a particular decision, it will **abstain** from that decision, and things will behave as they would if the filter didn't exist.
+Generally, you should avoid using filters in such a way that they can abstain, since it tends to be confusing.
+
+However, the [event rules module](/modules/regions#applying) uses filter abstention to make very complex conditions easier to express:
+It accepts a _chain_ of filters, and uses the first filter in the chain that doesn't abstain.
+
+Filters can be _forced_ to abstain using the `<allow>` and `<deny>` modifiers.
+
+### Defining Filters
+
+Filters can be defined inside the top-level `<filters>` element,
+and assigned an `id` used to reference them elsewhere.
+
+```xml
+<filters>
+    <any id="filter-name">
+        <!-- Filter elements -->
+    </any>
+
+    <team id="viridescent-team-filter">viridescent-team</team>
+
+    <!-- More filters-->
+</filters>
+```
+
+### Matcher Elements
+
+Filter matchers test for specific conditions or properties of things.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th style="min-width: 300px;" style={{ minWidth: "300px" }}>
+          Element
+        </th>
+        <th>Description</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th colspan="3">Generic filters (apply to anything)</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<filter id="filter1"/>`}</label>
+        </td>
+        <td>Reference a filter by its ID.</td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<always/>`}</label>
+        </td>
+        <td>
+          Matches/allows everything.
+          <br />
+          Can be referenced with the ID <label>always</label>
+        </td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<never/>`}</label>
+        </td>
+        <td>
+          Matches nothing/denies everything.
+          <br />
+          Can be referenced with the ID <label>never</label>
+        </td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<match-started/>`}</label>
+        </td>
+        <td>Filter if the match has started.</td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<match-running/>`}</label>
+        </td>
+        <td>Filter if the match is running.</td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<match-finished/>`}</label>
+        </td>
+        <td>Filter if the match is over.</td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<time>duration</time>`}</label>
+        </td>
+        <td>
+          Filter if the specified
+          <a href="/reference/time_periods">time period</a>
+          has elapsed since the match started.
+        </td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<completed>objective_id</completed>`}</label>
+        </td>
+        <td>
+          <a className="left-ref-link" href="#objectiveFilter">
+            <i className="fa fa-chevron-down"></i>
+          </a>
+          Match if the objective is completed.
+        </td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<captured>objective_id</captured>`}</label>
+        </td>
+        <td>
+          <a className="left-ref-link" href="#objectiveFilter">
+            <i className="fa fa-chevron-down"></i>
+          </a>
+          Match players or teams who currently control the objective.
+        </td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<flag-carried>flag_id</flag-carried>`}</label>
+        </td>
+        <td>
+          <a className="left-ref-link" href="#flagFilter">
+            <i className="fa fa-chevron-down"></i>
+          </a>
+          Match if the flag is being carried by anyone.
+        </td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<flag-dropped>flag_id</flag-dropped>`}</label>
+        </td>
+        <td>
+          <a className="left-ref-link" href="#flagFilter">
+            <i className="fa fa-chevron-down"></i>
+          </a>
+          Match if the flag is dropped on the ground.
+        </td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<flag-returned>flag_id</flag-returned>`}</label>
+        </td>
+        <td>
+          <a className="left-ref-link" href="#flagFilter">
+            <i className="fa fa-chevron-down"></i>
+          </a>
+          Match if the flag is at the return-point.
+        </td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<flag-captured>flag_id</flag-captured>`}</label>
+        </td>
+        <td>
+          <a className="left-ref-link" href="#flagFilter">
+            <i className="fa fa-chevron-down"></i>
+          </a>
+          Match if the flag has been captured.
+        </td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <th colspan="3">
+          Spatial filters (apply to anything with a physical location)
+        </th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<void/>`}</label>
+        </td>
+        <td>
+          <a className="left-ref-link" href="#voidFilter">
+            <i className="fa fa-chevron-down"></i>
+          </a>
+          Match if there is an air block at Y=0 in the vertical column of this location
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <em>
+            Any <a href="/modules/regions">region</a> element
+          </em>
+        </td>
+      </tr>
+      <tr>
+        <th colspan="3">Block filters</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<material>block</material>`}</label>
+        </td>
+        <td>
+          Matches blocks by their
+          <a href="/reference/inventory#material_finder">Material</a>
+          name.
+          <br />
+          Accepts a
+          <a href="/reference/inventory#material_matchers">
+            Single Material Pattern
+          </a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<structural-load>2</structural-load>`}</label>
+        </td>
+        <td>
+          <a className="left-ref-link" href="#structuralLoadFilters">
+            <i className="fa fa-chevron-down"></i>
+          </a>
+          Test the number of other gravity blocks that the queried block is supporting.
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <th colspan="3">Entity filters</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<spawn>spawn reason</spawn>`}</label>
+        </td>
+        <td>
+          Matches spawn event reasons, see
+          <a href="/modules/mobs">mob spawning</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<mob>mob name</mob>`}</label>
+        </td>
+        <td>
+          Matches mobs by their name, see
+          <a href="/modules/mobs">mob spawning</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<entity>entity name</entity>`}</label>
+        </td>
+        <td>Match entities, e.g. projectiles, boats, dropped items, etc.</td>
+        <td></td>
+      </tr>
+      <tr>
+        <th colspan="3">Competitor filters (apply to teams, or FFA players)</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<rank> </rank>`}</label>
+        </td>
+        <td>
+          <a className="left-ref-link" href="#rank_score">
+            <i className="fa fa-chevron-down"></i>
+          </a>
+          Match if the player or team's rank is within the specified range.
+        </td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<score> </score>`}</label>
+        </td>
+        <td>
+          <a className="left-ref-link" href="#rank_score">
+            <i className="fa fa-chevron-down"></i>
+          </a>
+          Match if the player or team's score is within the specified range.
+        </td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<carrying-flag>flag_id</carrying-flag>`}</label>
+        </td>
+        <td>
+          <a className="left-ref-link" href="#flagFilter">
+            <i className="fa fa-chevron-down"></i>
+          </a>
+          Match the team/player carrying the specified flag.
+        </td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <th colspan="3">Player filters</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<participating/>`}</label>
+        </td>
+        <td>Match if the player is participating in the match.</td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<observing/>`}</label>
+        </td>
+        <td>Match if the player is observing the match.</td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<team>team</team>`}</label>
+        </td>
+        <td>Matches a team by its ID.</td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<class>class name</class>`}</label>
+        </td>
+        <td>Match players with the specified class.</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<kill-streak/>`}</label>
+        </td>
+        <td>
+          <a className="left-ref-link" href="#killStreakFilter">
+            <i className="fa fa-chevron-down"></i>
+          </a>
+          Match players with a certain range or amount of kills.
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<crouching/>`}</label>
+        </td>
+        <td>Match if the player is crouching.</td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<walking/>`}</label>
+        </td>
+        <td>Match if the player is walking.</td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<sprinting/>`}</label>
+        </td>
+        <td>Match if the player is sprinting.</td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<flying/>`}</label>
+        </td>
+        <td>Match if the player is flying.</td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<can-fly/>`}</label>
+        </td>
+        <td>Match if the player can fly.</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<gliding/>`}</label>
+        </td>
+        <td>Match if the player is gliding with an elytra.</td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<grounded/>`}</label>
+        </td>
+        <td>Match if the player is on the ground.</td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<carrying><item material=""/></carrying>`}</label>
+        </td>
+        <td>
+          <a className="left-ref-link" href="#itemFilters">
+            <i className="fa fa-chevron-down"></i>
+          </a>
+          Match if the player is carrying an item.
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<holding><item material=""/></holding>`}</label>
+        </td>
+        <td>
+          <a className="left-ref-link" href="#itemFilters">
+            <i className="fa fa-chevron-down"></i>
+          </a>
+          Match if the player is holding an item.
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<wearing><item material=""/></wearing>`}</label>
+        </td>
+        <td>
+          <a className="left-ref-link" href="#itemFilters">
+            <i className="fa fa-chevron-down"></i>
+          </a>
+          Match if the player is wearing an item.
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <th colspan="3">Event filters (apply to transient events)</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<cause>cause</cause>`}</label>
+        </td>
+        <td>
+          <a className="left-ref-link" href="#causeFilters">
+            <i className="fa fa-chevron-down"></i>
+          </a>
+          Filter an event's cause.
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<random>decimal or range</random>`}</label>
+        </td>
+        <td>
+          <a className="left-ref-link" href="#randomFilter">
+            <i className="fa fa-chevron-down"></i>
+          </a>
+          Random chance matcher.
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <th colspan="3">Damage filters (apply to damage/combat events)</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<relation>relation</relation>`}</label>
+        </td>
+        <td>
+          <a className="left-ref-link" href="#relationFilters">
+            <i className="fa fa-chevron-down"></i>
+          </a>
+          Filter an event's relation to the player.
+        </td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+### Modifier Elements
+
+Filter modifiers are used to alter the meaning of other filters, and combine them into more complex conditions.
+These elements must contain either a single filter, or a list of filters, as their child elements.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th style={{ minWidth: "85px" }}>Name</th>
+        <th>Description</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th colspan="3">Logic - combine other filters</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<not>`}</label>
+        </td>
+        <td>
+          Invert the filters result; allow if the child filter denies, deny if
+          it allows, abstain otherwise.
+        </td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<one>`}</label>
+        </td>
+        <td>
+          Allow if <i>only one</i> of the child filters allows, deny if{" "}
+          <i>one or more allow</i> or <i>none allow and at least one denies</i>,
+          otherwise abstain.
+        </td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<all>`}</label>
+        </td>
+        <td>
+          Allow if <i>all</i> of the child filters allow, deny if{" "}
+          <i>one or more deny</i>, otherwise abstain.
+        </td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<any>`}</label>
+        </td>
+        <td>
+          Allow if <i>one</i> of the child filters allows, deny if{" "}
+          <i>none allow and at least one denies</i>, otherwise abstain.
+        </td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <th colspan="3">Abstention - force filters to abstain</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<allow>`}</label>
+        </td>
+        <td>
+          Allow if the child filter allows, otherwise abstain (transform deny to
+          abstain).
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<deny>`}</label>
+        </td>
+        <td>Deny if the child filter allows, otherwise abstain.</td>
+        <td></td>
+      </tr>
+      <tr>
+        <th colspan="3">Query modifiers - change the question</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<same-team>`}</label>
+        </td>
+        <td>
+          Change a player question to a team question.
+          <br />
+          For example, "do they have the flag?" becomes "does their team have
+          the flag?".
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<victim>`}</label>
+        </td>
+        <td>
+          Make a damage question specifically about the victim.
+          <br />
+          For example, "do they have the flag?" becomes "does the victim have
+          the flag?" Commonly used with the <a href="/modules/damage">
+            damage
+          </a>{" "}
+          module.
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<attacker>`}</label>
+        </td>
+        <td>
+          Make a damage question specifically about the attacker.
+          <br />
+          For example, "do they have the flag?" becomes "does the attacker have
+          the flag?" Commonly used in the <a href="/modules/damage">
+            damage
+          </a>{" "}
+          module.
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <th colspan="3">
+          Mechanisms - apply complex mechanics to other filters
+        </th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<players>`}</label>
+        </td>
+        <td>
+          <a className="left-ref-link" href="#players">
+            <i className="fa fa-chevron-down"></i>
+          </a>
+          Count the number of players that match the inner filter.
+        </td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<countdown>`}</label>
+        </td>
+        <td>
+          <a className="left-ref-link" href="#countdown">
+            <i className="fa fa-chevron-down"></i>
+          </a>
+          Countdown from the moment that the inner filter matched.
+        </td>
+        <td>
+          <span className="badge badge--primary">Dynamic</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Examples_
+
+```xml
+<filters>
+    <not id="deny-yellow-explosions">
+        <all>
+            <team>yellow</team>
+            <cause>explosion</cause>
+        </all>
+    </not>
+</filters>
+```
+
+```xml
+<filters>
+    <deny id="no-tnt"><material>TNT</material></deny>
+</filters>
+```
+
+#### Kill-Streak Filter
+
+The kill-streak filter is a matcher that matches players who have a specified number of kills.
+The kill counter can be set to count from the start of the match or from the last time the player died.
+This filter is commonly used in [kill rewards](/modules/killreward) but can also be used to restrict access to certain locations, etc.
+
+##### Kill-Streak Filter Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>min</label>
+        </td>
+        <td>Match players with at-least this many kills.</td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>max</label>
+        </td>
+        <td>Match players with a maximum of this many kills.</td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>count</label>
+        </td>
+        <td>
+          Match players with exactly this many kills.
+          <br />
+          <i>
+            Can not be mixed with the <label>min</label> & <label>max</label>{" "}
+            attributes.
+          </i>
+        </td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>repeat</label>
+        </td>
+        <td>Repeat the filter range</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+      <tr>
+        <td>
+          <label>persistent</label>
+        </td>
+        <td>Do not reset a players kill count when they die.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Examples_
+
+```xml
+<kill-streak min="3"/>      <!-- matches players with at least 3 kills -->
+<kill-streak max="5"/>      <!-- matches players with at most 5 kills -->
+<kill-streak count="4"/>    <!-- matches players with exactly 4 kills -->
+<kill-streak id="10th-kill-filter" repeat="true" count="10"/>    <!-- match for every 10th kill -->
+```
+
+#### Random Filter
+
+This filter will randomly `ALLOW` or `DENY` when evaluated in the context of an event.
+Its value is a decimal fraction between 0 and 1, representing the probability of `ALLOW`.
+The value can also be an interval, in the form `[0, 1)`.
+When the filter is evaluated, a random number is chosen, and the filter passes if the number falls within the filter's interval.
+Multiple filters applied to the same object at the same instant will use the same random number.
+So, if their intervals do not overlap, the filters will never both pass at the same time.
+Using intervals in this way, any number of filters can be made mutually exclusive, or their relationships can be controlled in more complex ways.
+A random filter can only be applied to instantaneous events, and not to conditions that persist over some span of time.
+Specifically, they can be used in the following contexts:
+
+- Regional block change rules
+- Block drop rules
+- Damage rules
+- Mob spawning rules
+
+In other contexts, random filters will `ABSTAIN`.
+
+_Examples_
+
+```xml
+<!-- 50% chance that it will return either ALLOW or DENY -->
+<random>0.5</random>
+<!-- Also a 50% chance -->
+<!-- Any number from 0.25 to 0.75 including 0.25 but excluding 0.75 -->
+<random>[0.25, 0.75)</random>
+```
+
+#### Rank & Score Filters
+
+The rank and score filters match if the team's or player's rank or score is a equal to a single value or within a range of values.<br/>
+The value can be an exact amount or a interval specifying a range. Only whole numbers are valid.
+
+_Examples_
+
+```xml
+<!-- Match if the team (or player in ffa) rank is 3 -->
+<rank>3</rank>
+<!-- Match if team (or player in ffa) has a score from 5 to 10. -->
+<score>[5-10]</score>
+```
+
+#### Player Count Filter
+
+This filter counts the number of players matching a single child filter,
+and matches if that count is within a specified range.
+The child filter can be omitted, in which case all players in the match will be counted.
+
+##### Player Count Filter Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>min</label>
+        </td>
+        <td>Minimum player count</td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td>1</td>
+      </tr>
+      <tr>
+        <td>
+          <label>max</label>
+        </td>
+        <td>Maximum player count</td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td>oo (unlimited)</td>
+      </tr>
+      <tr>
+        <td>
+          <label>participants</label>
+        </td>
+        <td>Include participants (players actually playing) in the count.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+      <tr>
+        <td>
+          <label>observers</label>
+        </td>
+        <td>Include observers in the count.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Examples_
+
+```xml
+<!-- Match if there are at least 4 players participating -->
+<players min="4"/>
+<!-- Match if there are 1 to 3 players sneaking in region X -->
+<players min="1" max="3">
+    <all>
+        <sneaking/>
+        <region id="X"/>
+    </all>
+</players>
+```
+
+#### Countdown Filter
+
+This filter matches for up to the specified amount of time after the child filter starts matching.
+It never matches when the child filter doesn't match.
+
+##### Countdown Filter Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>duration</label>
+        </td>
+        <td>Length of time to match for</td>
+        <td>
+          <span className="badge badge--primary">Time Period</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>message</label>
+        </td>
+        <td>
+          Optional timer message to display while counting down. Only players
+          who match the filter can see the timer. If the message contains a
+          placeholder, it will be replaced with the remaining time.
+        </td>
+        <td>
+          <span className="badge badge--primary">Message Template</span>
+        </td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Examples_
+
+```xml
+<!-- Countdown 30s from the moment any player picks up the flag -->
+<!-- (you could then use the countdown filter to kill them, teleport them, etc) -->
+<countdown duration="30s" message="You have {0} to capture the flag">
+  <carrying-flag>blue-flag</carrying-flag>
+</countdown>
+```
+
+#### Objective Filters
+
+There are two filter types that test the state of an objective: `<completed>` and `<captured>`.
+Both types require the ID of an objective as the content of the tag.
+The `<completed>` filter matches when the specified objective is completed or captured by anybody e.g.
+when a [destroyable](/modules/gamemode_dtm) is destroyed, a [core](/modules/gamemode_dtc) is leaked, or a [hill](/modules/control_points) is captured by anyone.
+This filter is not affected by the context in which it is applied, and never abstains.
+The `<captured>` filter matches players or teams who currently control the specified objective.
+This filter is useful for objectives that can change ownership, such as [hills](/modules/control_points) and [flags](/modules/gamemode_ctf).
+For other objective types, it will match players/teams who are _allowed_ to complete the objective, if the objective is completed, which is generally not useful.
+This filter will abstain if used in a context that does not involve a specific player or team.
+Alternately, `<captured>` can have a team specified with the `team` attribute.
+Then it will always test that team's control of the objective, regardless of the filtering context, and will never abstain.
+
+##### Capture Filter Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>team</label>
+        </td>
+        <td>Match only if the objective is captured/completed by this team.</td>
+        <td>
+          <a href="/modules/teams">Team ID</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Examples_
+
+```xml
+<!-- Match if red-core has been leaked -->
+<completed>red-core</completed>
+<!-- Match if south-hill is owned by anyone -->
+<completed>south-hill</completed>
+<!-- Match players/teams who own north-hill -->
+<captured>north-hill</captured>
+<!-- Match if blue-team owns central-hill -->
+<captured team="blue-team">central-hill</captured>
+```
+
+#### Flag Filters
+
+The flag filters allow filtering of a specific flags current state or for the player that is carrying the flag. One important use of these filters is to implement the standard rule that a team can only capture an enemy flag when their own flag is returned. This can be implemented easily using a `<flag-returned>` as the capture-filter of a flag. This can also be done with the nets return attribute. However, using the return attribute will return dropped flags, while using a filter will not.
+The flag carried, dropped, captured and returned filters have an optional `post` attribute to only match if the flag was last returned to that post.
+
+```xml
+<!-- The blue flag is currently being carried by a player -->
+<flag-carried>blue-flag</flag-carried>
+<!-- The blue flag has been carried away & dropped from the red-post -->
+<flag-dropped post="red-post">blue-flag</flag-dropped>
+<!-- The yellow flag is standing at one of its posts -->
+<flag-returned>yellow-flag</flag-returned>
+<!-- The yellow flag is standing at the green-post -->
+<flag-returned post="green-post">yellow-flag</flag-returned>
+<!-- The cyan flag has been captured but not yet returned -->
+<flag-captured>cyan-flag</flag-captured>
+<!-- The player currently carrying the purple flag -->
+<carrying-flag>purple-flag</carrying-flag>
+```
+
+#### Item Filters
+
+These filters can be used to filter for players with specific items in their inventory. They accept a single [item](/modules/items) element. Only the item's type, durability/damage and meta data are compared. A item's meta data includes the item's name, enchantments, etc.
+
+```xml
+<!-- Player has a stick named 'Blue Door Key' in their inventory -->
+<carrying><item name="Blue Door Key" material="stick"/></carrying>
+<!-- Player is holding a clock -->
+<holding><item material="clock"/></holding>
+<!-- Player is wearing a chainmail chestplate -->
+<wearing><item material="chainmail chestplate"/></wearing>
+```
+
+#### Event Cause Filters
+
+Cause filters are used to filter an event or action according to its cause.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<cause> </cause>`}</label>
+        </td>
+        <td>Filter an event's cause.</td>
+      </tr>
+      <tr>
+        <th colspan="2">Cause: Actor Type</th>
+      </tr>
+      <tr>
+        <td>
+          <label>WORLD</label>
+        </td>
+        <td>World events such as ice melting, etc.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>LIVING</label>
+        </td>
+        <td>Events caused by a living entity.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>MOB</label>
+        </td>
+        <td>Events caused by a mob.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>PLAYER</label>
+        </td>
+        <td>Events caused by a player.</td>
+      </tr>
+      <tr>
+        <th colspan="2">Cause: Block Action</th>
+      </tr>
+      <tr>
+        <td>
+          <label>PUNCH</label>
+        </td>
+        <td>Events where a block is punched.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>TRAMPLE</label>
+        </td>
+        <td>Events where a block is trampled.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>MINE</label>
+        </td>
+        <td>Events where a block is mined.</td>
+      </tr>
+      <tr>
+        <th colspan="2">Cause: Damage Type</th>
+      </tr>
+      <tr>
+        <td>
+          <label>MELEE</label>
+        </td>
+        <td>
+          <label>PROJECTILE</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>POTION</label>
+        </td>
+        <td>
+          <label>EXPLOSION</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>COMBUSTION</label>
+        </td>
+        <td>
+          <label>FALL</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>GRAVITY</label>
+          Fall and void damage.
+        </td>
+        <td>
+          <label>VOID</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>SQUASH</label>
+        </td>
+        <td>
+          <label>SUFFOCATION</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>DROWNING</label>
+        </td>
+        <td>
+          <label>STARVATION</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>LIGHTNING</label>
+        </td>
+        <td>
+          <label>CACTUS</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>THORNS</label>
+        </td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+#### Player Relation Filters
+
+The relation filter is used when a player is damaged to check the relation between them and the damage cause.
+This filter is only used in damage related contexts i.e., [damage filters](/modules/damage), and [kill rewards](/modules/killreward)
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<relation> </relation>`}</label>
+        </td>
+        <td>The relation between the player and their damage cause.</td>
+      </tr>
+      <tr>
+        <th colspan="2">Values</th>
+      </tr>
+      <tr>
+        <td>
+          <label>NEUTRAL</label>
+        </td>
+        <td>Event has no attacker, e.g. world damage.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>SELF</label>
+        </td>
+        <td>Events caused by the player. (Same player same team)</td>
+      </tr>
+      <tr>
+        <td>
+          <label>ALLY</label>
+        </td>
+        <td>
+          Events caused by a player on the same team. (Different player same
+          team)
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>ENEMY</label>
+        </td>
+        <td>Events caused by an enemy player. (Different team)</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+#### Structural Load Filters
+
+The structural load filter checks the number of gravity blocks that are attached to the queried block.
+It returns `ALLOW` as long as the structural load is greater than or equal to the specified value and `DENY` otherwise.
+
+<span className="badge badge--warning">Warning</span> This filter is very computationally
+expensive to apply, XML authors should ensure that it is only run when absolutely
+necessary, e.g. by placing other filters above it. They should also not apply it
+to events that modify large amounts of blocks, such as explosions. This filter requires
+the falling blocks module to be loaded otherwise it will default to abstain.
+
+_Example_
+
+```xml
+<!--  Deny breaking structures longer than 3 blocks  -->
+<not>
+    <all>
+        <cause>player</cause>
+        <filter name="structure-blocks"/>
+        <structural-load>3</structural-load>
+    </all>
+</not>
+```
+
+#### Void Filter
+
+If your map is especially complex shaped you may have to use the `<void/>` tag to shape your filtered region.
+The `<void/>` tag checks the specified regions for blocks on the bottom layer of the world. It then creates an outline of those blocks and the specified filter is only active inside or outside that outline. Bridges are usually not detected because they are not at `y=0`. This can be fixed by creating a invisible silhouette of the bridge with block 36 at `y=0`.
+
+_Example_
+
+```xml
+<filters>
+    <not id="no-void">
+        <void/>
+    </not>
+</filters>
+<regions>
+    <apply block="no-void" message="You may not modify the void area!">
+        <region>
+            <rectangle id="main-area" min="65,860" max="290,980"/>
+        </region>
+    </apply>
+</regions>
+```
