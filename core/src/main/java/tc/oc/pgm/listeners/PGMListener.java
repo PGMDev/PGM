@@ -53,7 +53,6 @@ import tc.oc.pgm.commands.MatchCommands;
 import tc.oc.pgm.events.MapPoolAdjustEvent;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.gamerules.GameRule;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.TimeLockModule;
 import tc.oc.pgm.util.UsernameFormatUtils;
@@ -62,6 +61,8 @@ import tc.oc.pgm.util.component.PeriodFormats;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class PGMListener implements Listener {
+  private static final String DO_DAYLIGHT_CYCLE = "doDaylightCycle";
+
   private final Plugin parent;
   private final MatchManager mm;
   private final VanishManager vm;
@@ -272,10 +273,7 @@ public class PGMListener implements Listener {
   //
   @EventHandler
   public void lockTime(final MatchLoadEvent event) {
-    event
-        .getMatch()
-        .getWorld()
-        .setGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE.getValue(), Boolean.toString(false));
+    event.getMatch().getWorld().setGameRuleValue(DO_DAYLIGHT_CYCLE, Boolean.toString(false));
   }
 
   @EventHandler
@@ -286,23 +284,16 @@ public class PGMListener implements Listener {
     }
 
     GameRulesMatchModule gameRulesModule = event.getMatch().getModule(GameRulesMatchModule.class);
-    if (gameRulesModule != null
-        && gameRulesModule.getGameRules().containsKey(GameRule.DO_DAYLIGHT_CYCLE)) {
-      unlockTime = gameRulesModule.getGameRules().get(GameRule.DO_DAYLIGHT_CYCLE);
+    if (gameRulesModule != null && gameRulesModule.getGameRules().containsKey(DO_DAYLIGHT_CYCLE)) {
+      unlockTime = Boolean.parseBoolean(gameRulesModule.getGameRules().get(DO_DAYLIGHT_CYCLE));
     }
 
-    event
-        .getMatch()
-        .getWorld()
-        .setGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE.getValue(), Boolean.toString(unlockTime));
+    event.getMatch().getWorld().setGameRuleValue(DO_DAYLIGHT_CYCLE, Boolean.toString(unlockTime));
   }
 
   @EventHandler
   public void lockTime(final MatchFinishEvent event) {
-    event
-        .getMatch()
-        .getWorld()
-        .setGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE.getValue(), Boolean.toString(false));
+    event.getMatch().getWorld().setGameRuleValue(DO_DAYLIGHT_CYCLE, Boolean.toString(false));
   }
 
   @EventHandler
