@@ -27,7 +27,6 @@ import net.kyori.text.format.TextDecoration;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -56,12 +55,6 @@ public class ReportCommands {
 
   private final Cache<UUID, Report> RECENT_REPORTS =
       CacheBuilder.newBuilder().expireAfterWrite(REPORT_EXPIRE_HOURS, TimeUnit.HOURS).build();
-
-  private final Datastore database;
-
-  public ReportCommands(Datastore database) {
-    this.database = database;
-  }
 
   @Command(
       aliases = {"report"},
@@ -114,7 +107,14 @@ public class ReportCommands {
                 accused.getName(NameStyle.FANCY),
                 TextComponent.of(reason.trim(), TextColor.WHITE));
 
-    RECENT_REPORTS.put(UUID.randomUUID(), new Report(accused.getId(), sender.getId(), reason));
+    RECENT_REPORTS.put(
+        UUID.randomUUID(),
+        new Report(
+            accused.getId(),
+            sender.getId(),
+            accused.getBukkit().getName(),
+            sender.getBukkit().getName(),
+            reason));
 
     ChatDispatcher.broadcastAdminChatMessage(component, match, Optional.of(REPORT_NOTIFY_SOUND));
   }
@@ -144,7 +144,7 @@ public class ReportCommands {
     if (target != null) {
       reportList =
           reportList.stream()
-              .filter(r -> r.getTargetName(match).equalsIgnoreCase(target))
+              .filter(r -> r.getOfflineTargetName().equalsIgnoreCase(target))
               .collect(Collectors.toList());
     }
 
@@ -189,7 +189,7 @@ public class ReportCommands {
                 ComponentRenderers.toLegacyText(
                     PeriodFormats.relativePastApproximate(
                             Instant.ofEpochMilli(data.getTimeSent().toEpochMilli()))
-                        .color(ChatColor.DARK_AQUA),
+                        .color(ChatColor.DARK_GREEN),
                     sender));
 
         return TextComponent.builder()
@@ -206,12 +206,18 @@ public class ReportCommands {
   private class Report implements Comparable<Report> {
     private final UUID targetUUID;
     private final UUID senderUUID;
+
+    private final String offlineTargetName;
+    private final String offlineSenderName;
+
     private final String reason;
     private final Instant timeSent;
 
-    public Report(UUID target, UUID sender, String reason) {
+    public Report(UUID target, UUID sender, String targetName, String senderName, String reason) {
       this.targetUUID = target;
       this.senderUUID = sender;
+      this.offlineTargetName = targetName;
+      this.offlineSenderName = senderName;
       this.reason = reason;
       this.timeSent = Instant.now();
     }
@@ -232,8 +238,12 @@ public class ReportCommands {
       return timeSent;
     }
 
-    public String getTargetName(Match match) {
-      return database.getUsername(targetUUID).getName();
+    public String getOfflineTargetName() {
+      return offlineTargetName;
+    }
+
+    public String getOfflineSenderName() {
+      return offlineSenderName;
     }
 
     public Component getTargetComponent(Match match) {
@@ -251,7 +261,11 @@ public class ReportCommands {
       if (match.getPlayer(targetUUID) != null) {
         name = player.getName(NameStyle.FANCY);
       } else {
-        name = TextComponent.of(database.getUsername(targetUUID).getName(), TextColor.DARK_AQUA);
+        name =
+            TextComponent.of(
+                uuid.equals(targetUUID) ? getOfflineTargetName() : getOfflineSenderName(),
+                TextColor.DARK_AQUA,
+                TextDecoration.ITALIC);
       }
       return name;
     }

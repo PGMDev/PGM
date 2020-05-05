@@ -454,7 +454,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       node.registerCommands(vanishManager);
       registerEvents((Listener) vanishManager);
 
-      node.registerCommands(new ReportCommands(datastore));
+      node.registerCommands(new ReportCommands());
       node.registerCommands(new ListCommands(vanishManager));
     }
 
