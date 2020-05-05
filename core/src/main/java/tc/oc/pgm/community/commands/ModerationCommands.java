@@ -169,46 +169,18 @@ public class ModerationCommands implements Listener {
       aliases = {"freeze", "fz", "f"},
       usage = "<player>",
       flags = "s",
-      desc = "Freeze a player",
+      desc = "Toggle a player's frozen state",
       perms = Permissions.FREEZE)
   public void freeze(CommandSender sender, Match match, Player target, @Switch('s') boolean silent)
       throws CommandException {
-    setFreeze(sender, match, target, true, silent);
+    setFreeze(sender, match, target, silent);
   }
 
-  @Command(
-      aliases = {"unfreeze", "uf"},
-      usage = "<player>",
-      flags = "s",
-      desc = "Unfreeze a player",
-      perms = Permissions.FREEZE)
-  public void unFreeze(
-      CommandSender sender, Match match, Player target, @Switch('s') boolean silent)
-      throws CommandException {
-    setFreeze(sender, match, target, false, silent);
-  }
-
-  private void setFreeze(
-      CommandSender sender, Match match, Player target, boolean freeze, boolean silent)
-      throws CommandException {
+  private void setFreeze(CommandSender sender, Match match, Player target, boolean silent) {
     FreezeMatchModule fmm = match.getModule(FreezeMatchModule.class);
     MatchPlayer player = match.getPlayer(target);
-
-    Component alreadyFrozen =
-        TranslatableComponent.of("moderation.freeze.alreadyFrozen", TextColor.GRAY)
-            .args(match.getPlayer(target).getName(NameStyle.FANCY));
-    Component alreadyThawed =
-        TranslatableComponent.of("moderation.freeze.alreadyThawed", TextColor.GRAY)
-            .args(match.getPlayer(target).getName(NameStyle.FANCY));
-
     if (player != null) {
-      if (fmm.isFrozen(player) && freeze) {
-        throw new CommandException(TextTranslations.translateLegacy(alreadyFrozen, sender));
-      } else if (!fmm.isFrozen(player) && !freeze) {
-        throw new CommandException(TextTranslations.translateLegacy(alreadyThawed, sender));
-      } else {
-        fmm.setFrozen(sender, player, freeze, silent);
-      }
+      fmm.setFrozen(sender, player, !fmm.isFrozen(player), silent);
     }
   }
 

@@ -38,7 +38,8 @@ public interface VirtualAudience extends Audience {
   @Override
   default void sendWarning(net.kyori.text.Component message) {
     sendMessage(
-        TextComponent.of(" \u26a0 ", TextColor.YELLOW).append(message.color(TextColor.RED)));
+        TextComponent.of(" \u26a0 ", TextColor.YELLOW)
+            .append(message.colorIfAbsent(TextColor.RED)));
     playSound(new Sound("note.bass", 1f, 0.75f));
   }
 

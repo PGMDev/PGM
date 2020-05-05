@@ -1,5 +1,6 @@
 package tc.oc.pgm.util.text;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,6 +10,9 @@ import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
+import net.kyori.text.format.TextDecoration;
+import org.bukkit.command.CommandSender;
+import tc.oc.pgm.util.component.ComponentUtils;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.named.Named;
 
@@ -59,5 +63,63 @@ public final class TextFormatter {
   public static Component nameList(
       Collection<? extends Named> names, NameStyle style, TextColor color) {
     return list(Collections2.transform(names, name -> name.getName(style)), color);
+  }
+
+  /**
+   * Appends formatted page number to end of provided text
+   *
+   * @param text Component to apply page to
+   * @param page The current page number
+   * @param pages The total number of pages
+   * @param mainColor The color of the text
+   * @param pageColor The color of the page numbers
+   * @param simple Whether to include 'Page' in wording
+   * @return A message with page information appended.
+   */
+  public static Component paginate(
+      Component text,
+      int page,
+      int pages,
+      TextColor mainColor,
+      TextColor pageColor,
+      boolean simple) {
+    return TextComponent.builder()
+        .append(text)
+        .append(" ")
+        .append("(", mainColor)
+        .append(
+            TranslatableComponent.of(
+                    simple ? "command.simplePageHeader" : "command.pageHeader", TextColor.DARK_AQUA)
+                .args(TextComponent.of(page, pageColor), TextComponent.of(pages, pageColor)))
+        .append(")", mainColor)
+        .build();
+  }
+
+  /**
+   * Formats the provided text with a header that spans the chat window.
+   *
+   * @param sender Who is viewing the list
+   * @param text The text to format
+   * @param lineColor Color of the line
+   * @param width length of the line
+   * @return A formatted header
+   */
+  public static Component horizontalLineHeading(
+      CommandSender sender, Component text, TextColor lineColor, int width) {
+    text = TextComponent.builder().append(" ").append(text).append(" ").build();
+    int textWidth = ComponentUtils.pixelWidth(TextTranslations.translateLegacy(text, sender));
+    int spaceCount =
+        Math.max(0, ((width - textWidth) / 2 + 1) / (ComponentUtils.SPACE_PIXEL_WIDTH + 1));
+    String line = Strings.repeat(" ", spaceCount);
+    return TextComponent.builder()
+        .append(line, lineColor, TextDecoration.STRIKETHROUGH)
+        .append(text)
+        .append(line, lineColor, TextDecoration.STRIKETHROUGH)
+        .build();
+  }
+
+  public static Component horizontalLineHeading(
+      CommandSender sender, Component text, TextColor lineColor) {
+    return horizontalLineHeading(sender, text, lineColor, ComponentUtils.MAX_CHAT_WIDTH);
   }
 }

@@ -78,10 +78,6 @@ public class VanishManagerImpl implements VanishManager, Listener {
 
   @Override
   public boolean setVanished(MatchPlayer player, boolean vanish, boolean quiet) {
-    if (isVanished(player.getId()) == vanish) {
-      return false;
-    }
-
     // Keep track of the UUID and apply/remove META data, so we can detect vanish status from other
     // projects (i.e utils)
     if (vanish) {
@@ -108,7 +104,7 @@ public class VanishManagerImpl implements VanishManager, Listener {
 
     match.callEvent(new PlayerVanishEvent(player, vanish));
 
-    return true;
+    return isVanished(player.getId());
   }
 
   private void addVanished(MatchPlayer player) {
@@ -125,26 +121,14 @@ public class VanishManagerImpl implements VanishManager, Listener {
 
   /* Commands */
   @Command(
-      aliases = {"vanish", "disappear", "v"},
-      desc = "Vanish from the server",
+      aliases = {"vanish", "v"},
+      desc = "Toggle vanish status",
       perms = Permissions.VANISH)
   public void vanish(MatchPlayer sender, @Switch('s') boolean silent) throws CommandException {
-    if (setVanished(sender, true, silent)) {
-      sender.sendMessage(TranslatableComponent.of("vanish.activate").color(TextColor.GREEN));
+    if (setVanished(sender, !isVanished(sender.getId()), silent)) {
+      sender.sendWarning(TranslatableComponent.of("vanish.activate").color(TextColor.GREEN));
     } else {
-      sender.sendWarning(TranslatableComponent.of("vanish.activate.already"));
-    }
-  }
-
-  @Command(
-      aliases = {"unvanish", "appear", "uv"},
-      desc = "Return to the server",
-      perms = Permissions.VANISH)
-  public void unVanish(MatchPlayer sender, @Switch('s') boolean silent) throws CommandException {
-    if (setVanished(sender, false, silent)) {
-      sender.sendMessage(TranslatableComponent.of("vanish.deactivate").color(TextColor.RED));
-    } else {
-      sender.sendWarning(TranslatableComponent.of("vanish.deactivate.already"));
+      sender.sendWarning(TranslatableComponent.of("vanish.deactivate").color(TextColor.RED));
     }
   }
 

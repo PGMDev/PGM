@@ -10,7 +10,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.Permissions;
@@ -22,12 +25,10 @@ import tc.oc.pgm.rotation.MapPool;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.Rotation;
 import tc.oc.pgm.rotation.VotingPool;
-import tc.oc.pgm.util.PrettyPaginatedResult;
+import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.chat.Audience;
-import tc.oc.pgm.util.component.ComponentUtils;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.named.MapNameStyle;
+import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class MapPoolCommands {
@@ -57,7 +58,7 @@ public class MapPoolCommands {
             : mapPoolManager.getMapPoolByName(poolName);
 
     if (mapPool == null) {
-      sender.sendMessage(ChatColor.RED + TextTranslations.translate("pool.noPoolMatch", sender));
+      audience.sendWarning(TranslatableComponent.of("pool.noPoolMatch"));
       return;
     }
     List<MapInfo> maps = mapPool.getMaps();
@@ -65,11 +66,22 @@ public class MapPoolCommands {
     int resultsPerPage = 8;
     int pages = (maps.size() + resultsPerPage - 1) / resultsPerPage;
 
-    String title = TextTranslations.translate("pool.name", sender);
-    title +=
-        ChatColor.DARK_AQUA + " (" + ChatColor.AQUA + mapPool.getName() + ChatColor.DARK_AQUA + ")";
-    title = ComponentUtils.paginate(title, page, pages);
-    title = ComponentUtils.horizontalLineHeading(title, ChatColor.BLUE, 250);
+    Component mapPoolComponent =
+        TextFormatter.paginate(
+            TextComponent.builder()
+                .append(TranslatableComponent.of("pool.name"))
+                .append(" (", TextColor.DARK_AQUA)
+                .append(mapPool.getName(), TextColor.AQUA)
+                .append(")", TextColor.DARK_AQUA)
+                .build(),
+            page,
+            pages,
+            TextColor.DARK_AQUA,
+            TextColor.AQUA,
+            false);
+
+    Component title =
+        TextFormatter.horizontalLineHeading(sender, mapPoolComponent, TextColor.BLUE, 250);
 
     VotingPool votes =
         (scores || chance) && mapPool instanceof VotingPool ? (VotingPool) mapPool : null;
@@ -86,18 +98,19 @@ public class MapPoolCommands {
 
     int nextPos = mapPool instanceof Rotation ? ((Rotation) mapPool).getNextPosition() : -1;
 
-    new PrettyPaginatedResult<MapInfo>(title, resultsPerPage) {
+    new PrettyPaginatedComponentResults<MapInfo>(title, resultsPerPage) {
       @Override
-      public String format(MapInfo map, int index) {
+      public Component format(MapInfo map, int index) {
         index++;
-        String str = (nextPos == index ? ChatColor.DARK_AQUA + "" : "") + index + ". ";
+        TextComponent.Builder entry =
+            TextComponent.builder()
+                .append(index + ". ", nextPos == index ? TextColor.DARK_AQUA : TextColor.WHITE);
         if (votes != null && scores)
-          str += ChatColor.YELLOW + SCORE_FORMAT.format(votes.getMapScore(map)) + " ";
+          entry.append(SCORE_FORMAT.format(votes.getMapScore(map)) + " ", TextColor.YELLOW);
         if (votes != null && chance)
-          str += ChatColor.YELLOW + SCORE_FORMAT.format(chances.get(map)) + " ";
-        str +=
-            ChatColor.RESET + "" + map.getStyledNameLegacy(MapNameStyle.COLOR_WITH_AUTHORS, sender);
-        return str;
+          entry.append(SCORE_FORMAT.format(chances.get(map)) + " ", TextColor.YELLOW);
+        entry.append(map.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS));
+        return entry.build();
       }
     }.display(audience, maps, page);
   }
@@ -119,7 +132,7 @@ public class MapPoolCommands {
 
     List<MapPool> mapPools = mapPoolManager.getMapPools();
     if (mapPools.isEmpty()) {
-      sender.sendMessage(ChatColor.RED + TextTranslations.translate("pool.noMapPools", sender));
+      audience.sendWarning(TranslatableComponent.of("pool.noMapPools"));
       return;
     }
 
@@ -130,41 +143,52 @@ public class MapPoolCommands {
     int resultsPerPage = 8;
     int pages = (mapPools.size() + resultsPerPage - 1) / resultsPerPage;
 
-    String title = TextTranslations.translate("pool.title", sender);
-    title = ComponentUtils.paginate(title, page, pages);
-    title = ComponentUtils.horizontalLineHeading(title, ChatColor.BLUE, 250);
+    Component paginated =
+        TextFormatter.paginate(
+            TranslatableComponent.of("pool.title"),
+            page,
+            pages,
+            TextColor.DARK_AQUA,
+            TextColor.AQUA,
+            true);
 
-    new PrettyPaginatedResult<MapPool>(title, resultsPerPage) {
+    Component formattedTitle =
+        TextFormatter.horizontalLineHeading(sender, paginated, TextColor.BLUE, 250);
+
+    new PrettyPaginatedComponentResults<MapPool>(formattedTitle, resultsPerPage) {
       @Override
-      public String format(MapPool mapPool, int index) {
-        String arrow =
-            mapPoolManager.getActiveMapPool().getName().equals(mapPool.getName())
-                ? ChatColor.GREEN + "» "
-                : "» ";
+      public Component format(MapPool mapPool, int index) {
+        Component arrow =
+            TextComponent.of(
+                "» ",
+                mapPoolManager.getActiveMapPool().getName().equals(mapPool.getName())
+                    ? TextColor.GREEN
+                    : TextColor.WHITE);
 
-        String maps =
-            " ("
-                + ChatColor.DARK_GREEN
-                + "Maps: "
-                + ChatColor.WHITE
-                + Integer.toString(mapPool.getMaps().size())
-                + ChatColor.DARK_AQUA
-                + ")";
-        String players =
-            " ("
-                + ChatColor.AQUA
-                + "Players: "
-                + ChatColor.WHITE
-                + mapPool.getPlayers()
-                + ChatColor.DARK_AQUA
-                + ")";
+        Component maps =
+            TextComponent.builder()
+                .append(" (", TextColor.DARK_AQUA)
+                .append(TranslatableComponent.of("map.title", TextColor.DARK_GREEN))
+                .append(": ", TextColor.DARK_GREEN)
+                .append(Integer.toString(mapPool.getMaps().size()), TextColor.WHITE)
+                .append(")", TextColor.DARK_AQUA)
+                .build();
 
-        return arrow
-            + ChatColor.GOLD
-            + mapPool.getName()
-            + ChatColor.DARK_AQUA
-            + maps
-            + (mapPool.isDynamic() ? players : "");
+        Component players =
+            TextComponent.builder()
+                .append(" (", TextColor.DARK_AQUA)
+                .append(TranslatableComponent.of("match.info.players", TextColor.AQUA))
+                .append(": ", TextColor.AQUA)
+                .append(Integer.toString(mapPool.getPlayers()), TextColor.WHITE)
+                .append(")", TextColor.DARK_AQUA)
+                .build();
+
+        return TextComponent.builder()
+            .append(arrow)
+            .append(mapPool.getName(), TextColor.GOLD)
+            .append(maps)
+            .append(mapPool.isDynamic() ? players : TextComponent.empty())
+            .build();
       }
     }.display(audience, mapPools, page);
   }
@@ -174,36 +198,36 @@ public class MapPoolCommands {
       desc = "Skips one or more maps from the current rotation.",
       usage = "[positions]",
       perms = Permissions.SETNEXT)
-  public static void skip(CommandSender sender, MapOrder mapOrder, @Default("1") int positions)
+  public static void skip(
+      Audience viewer, CommandSender sender, MapOrder mapOrder, @Default("1") int positions)
       throws CommandException {
 
     if (positions < 0) {
-      sender.sendMessage(ChatColor.RED + TextTranslations.translate("pool.skip.negative", sender));
+      viewer.sendWarning(TranslatableComponent.of("pool.skip.negative"));
       return;
     }
 
     MapPool pool = getMapPoolManager(sender, mapOrder).getActiveMapPool();
     if (!(pool instanceof Rotation)) {
-      sender.sendMessage(ChatColor.RED + TextTranslations.translate("pool.noRotation", sender));
+      viewer.sendWarning(TranslatableComponent.of("pool.noRotation"));
       return;
     }
 
     ((Rotation) pool).advance(positions);
-    sender.sendMessage(
-        ChatColor.WHITE
-            + "["
-            + ChatColor.GOLD
-            + "Rotations"
-            + ChatColor.WHITE
-            + "] "
-            + "["
-            + ChatColor.AQUA
-            + pool.getName()
-            + ChatColor.WHITE
-            + "] "
-            + ChatColor.GREEN
-            + TextTranslations.translate(
-                "pool.skip", sender, (ChatColor.AQUA.toString() + positions + ChatColor.GREEN)));
+
+    Component message =
+        TextComponent.builder()
+            .append("[", TextColor.WHITE)
+            .append(TranslatableComponent.of("pool.name", TextColor.GOLD))
+            .append("] [", TextColor.WHITE)
+            .append(pool.getName(), TextColor.AQUA)
+            .append("]", TextColor.WHITE)
+            .append(
+                TranslatableComponent.of("pool.skip", TextColor.GREEN)
+                    .args(TextComponent.of(positions, TextColor.AQUA)))
+            .build();
+
+    viewer.sendMessage(message);
   }
 
   @Command(aliases = "votenext", desc = "Vote for the next map to play", usage = "map")
@@ -213,14 +237,17 @@ public class MapPoolCommands {
     MapPool pool = getMapPoolManager(sender, mapOrder).getActiveMapPool();
     MapPoll poll = pool instanceof VotingPool ? ((VotingPool) pool).getCurrentPoll() : null;
     if (poll == null) {
-      sender.sendMessage(ChatColor.RED + TextTranslations.translate("vote.noVote", sender));
+      player.sendWarning(TranslatableComponent.of("vote.noVote"));
       return;
     }
     boolean voteResult = poll.toggleVote(map, ((Player) sender).getUniqueId());
 
-    PersonalizedTranslatable tr =
-        new PersonalizedTranslatable(voteResult ? "vote.for" : "vote.abstain", map.getName());
-    sender.sendMessage(new PersonalizedText(tr, voteResult ? ChatColor.GREEN : ChatColor.RED));
+    Component voteAction =
+        TranslatableComponent.of(
+                voteResult ? "vote.for" : "vote.abstain",
+                voteResult ? TextColor.GREEN : TextColor.RED)
+            .args(map.getStyledName(MapNameStyle.COLOR));
+    player.sendMessage(voteAction);
     poll.sendBook(player);
   }
 
