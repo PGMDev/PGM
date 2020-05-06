@@ -35,13 +35,6 @@ import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 @ListenerScope(MatchScope.LOADED)
 public class SettingsMatchModule implements MatchModule, Listener {
 
-  public static class Factory implements MatchModuleFactory<SettingsMatchModule> {
-    @Override
-    public SettingsMatchModule createMatchModule(Match match) throws ModuleLoadException {
-      return new SettingsMatchModule(match);
-    }
-  }
-
   // Slot where tool item is placed
   public static final int TOOL_BUTTON_SLOT = 8;
 

@@ -14,19 +14,10 @@ import org.bukkit.inventory.Inventory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
-import tc.oc.pgm.api.match.factory.MatchModuleFactory;
-import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.events.ListenerScope;
 
 @ListenerScope(MatchScope.LOADED)
 public class InventoryMenuMatchModule implements MatchModule, Listener {
-
-  public static class Factory implements MatchModuleFactory<InventoryMenuMatchModule> {
-    @Override
-    public InventoryMenuMatchModule createMatchModule(Match match) throws ModuleLoadException {
-      return new InventoryMenuMatchModule(match);
-    }
-  }
 
   private final Match match;
   private final Map<Inventory, InventoryMenu> inventoryMap;
@@ -59,7 +50,7 @@ public class InventoryMenuMatchModule implements MatchModule, Listener {
    * Links a {@link Inventory} and a {@link InventoryMenu} together for the listener to track
    *
    * @param bukkitInventory the bukkit inventory to form part of the link
-   * @param inventory the walrus inventory to form the other part of the link
+   * @param inventory the inventory menu to form the other part of the link
    */
   void addInventory(Inventory bukkitInventory, InventoryMenu inventory) {
     inventoryMap.put(bukkitInventory, inventory);
@@ -141,7 +132,7 @@ public class InventoryMenuMatchModule implements MatchModule, Listener {
   }
 
   /**
-   * Removes a {@link Inventory} from the manager
+   * Removes a {@link Inventory} from the manager when a player stops viewing it.
    *
    * @param event the close inventory event
    */

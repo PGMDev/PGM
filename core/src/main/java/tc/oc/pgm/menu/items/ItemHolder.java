@@ -6,7 +6,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.menu.InventoryMenu;
 
 /**
- * A holder for {@link InventoryItem} inside of a {@link InventoryMenu}. Keeps track of what slot
+ * A holder for an {@link InventoryItem} inside of a {@link InventoryMenu}. Keeps track of what slot
  * the item is in and the translation between bukkit raw slots and a x,y coordinate system
  */
 public class ItemHolder {
@@ -45,7 +45,7 @@ public class ItemHolder {
    *
    * @param player the player
    * @param bukkitInventory the bukkit inventory to put the item in
-   * @param inventory the walrus inventory the item is from
+   * @param inventory the inventory menu the item is from
    */
   public void putInInventory(
       MatchPlayer player, Inventory bukkitInventory, InventoryMenu inventory) {

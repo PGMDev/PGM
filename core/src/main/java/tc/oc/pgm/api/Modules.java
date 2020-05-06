@@ -155,7 +155,7 @@ public interface Modules {
     register(DoubleJumpMatchModule.class, DoubleJumpMatchModule::new);
     register(ArrowRemovalMatchModule.class, ArrowRemovalMatchModule::new);
     register(SoundsMatchModule.class, new SoundsMatchModule.Factory());
-    register(SettingsMatchModule.class, new SettingsMatchModule.Factory());
+    register(SettingsMatchModule.class, SettingsMatchModule::new);
     register(FireworkMatchModule.class, FireworkMatchModule::new);
     register(StatsMatchModule.class, StatsMatchModule::new);
 

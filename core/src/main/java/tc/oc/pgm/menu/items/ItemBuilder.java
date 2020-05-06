@@ -99,7 +99,7 @@ public class ItemBuilder {
   /**
    * Set's the owner of skull, if the item is a skull
    *
-   * @param owner the owner of the skull
+   * @param owner the username of the skull's owner
    * @return the builder
    */
   public ItemBuilder setSkullString(String owner) {
