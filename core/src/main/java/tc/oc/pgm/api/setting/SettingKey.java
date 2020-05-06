@@ -76,7 +76,8 @@ public enum SettingKey {
       VOTE_ON,
       VOTE_OFF), // Changes if the vote book is shown on cycle
   STATS(
-      "stats",
+      Collections.singletonList("stats"),
+      "match.stats.overall",
       ChatColor.YELLOW,
       Material.WATCH,
       STATS_ON,
@@ -86,17 +87,33 @@ public enum SettingKey {
   private static final String SETTING_TRANSLATION_KEY = "setting.";
 
   private final List<String> aliases;
+  private final String displayNameKey;
   private final SettingValue[] values;
   private final ChatColor color;
   private final Material material;
 
   SettingKey(String name, ChatColor color, Material material, SettingValue... values) {
-    this(Collections.singletonList(name), color, material, values);
+    this(
+        Collections.singletonList(name),
+        SETTING_TRANSLATION_KEY + name.toLowerCase(),
+        color,
+        material,
+        values);
   }
 
   SettingKey(List<String> aliases, ChatColor color, Material material, SettingValue... values) {
+    this(aliases, SETTING_TRANSLATION_KEY + aliases.get(0).toLowerCase(), color, material, values);
+  }
+
+  SettingKey(
+      List<String> aliases,
+      String displayNameKey,
+      ChatColor color,
+      Material material,
+      SettingValue... values) {
     checkArgument(!aliases.isEmpty(), "aliases is empty");
     this.aliases = ImmutableList.copyOf(aliases);
+    this.displayNameKey = displayNameKey;
     this.values = values;
     this.color = color;
     this.material = material;
@@ -117,7 +134,7 @@ public enum SettingKey {
    * @return The formatted display name.
    */
   public Component getDisplayName() {
-    return new PersonalizedTranslatable(SETTING_TRANSLATION_KEY + this.getName().toLowerCase())
+    return new PersonalizedTranslatable(displayNameKey)
         .getPersonalizedText()
         .bold(true)
         .color(this.color);

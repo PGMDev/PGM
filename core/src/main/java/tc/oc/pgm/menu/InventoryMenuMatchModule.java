@@ -94,8 +94,10 @@ public class InventoryMenuMatchModule implements MatchModule, Listener {
    */
   @EventHandler
   public void onClick(InventoryClickEvent event) {
+    Inventory inventory = event.getInventory();
+
     // player hasn't clicked an inventory
-    if (event.getInventory() == null) {
+    if (inventory == null) {
       return;
     }
 
@@ -108,8 +110,6 @@ public class InventoryMenuMatchModule implements MatchModule, Listener {
     if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR) {
       return;
     }
-
-    Inventory inventory = event.getInventory();
 
     if (hasInventory(inventory)) {
       int x = event.getSlot() % 9;
