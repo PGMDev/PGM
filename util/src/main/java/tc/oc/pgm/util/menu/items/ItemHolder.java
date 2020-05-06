@@ -1,9 +1,9 @@
-package tc.oc.pgm.menu.items;
+package tc.oc.pgm.util.menu.items;
 
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.menu.InventoryMenu;
+import tc.oc.pgm.util.menu.InventoryMenu;
 
 /**
  * A holder for an {@link InventoryItem} inside of a {@link InventoryMenu}. Keeps track of what slot
@@ -47,8 +47,7 @@ public class ItemHolder {
    * @param bukkitInventory the bukkit inventory to put the item in
    * @param inventory the inventory menu the item is from
    */
-  public void putInInventory(
-      MatchPlayer player, Inventory bukkitInventory, InventoryMenu inventory) {
+  public void putInInventory(Player player, Inventory bukkitInventory, InventoryMenu inventory) {
     ItemStack itemStack = item.item(inventory, player);
     if (itemStack == null) {
       return;

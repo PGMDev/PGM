@@ -1,15 +1,16 @@
-package tc.oc.pgm.menu;
+package tc.oc.pgm.util.menu;
 
 import com.google.common.collect.Lists;
 import java.util.List;
-import tc.oc.pgm.menu.items.InventoryItem;
-import tc.oc.pgm.menu.items.InventoryItemBuilder;
-import tc.oc.pgm.menu.items.ItemHolder;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.menu.items.InventoryItem;
+import tc.oc.pgm.util.menu.items.InventoryItemBuilder;
+import tc.oc.pgm.util.menu.items.ItemHolder;
 
 public class InventoryMenuBuilder {
 
+  private final InventoryMenuManager manager;
   private final int rows;
   private final List<ItemHolder> items;
   private Component name;
@@ -17,9 +18,11 @@ public class InventoryMenuBuilder {
   /**
    * Creates a new inventory builder
    *
+   * @param manager
    * @param rows the number of rows the inventory should have
    */
-  public InventoryMenuBuilder(int rows) {
+  public InventoryMenuBuilder(InventoryMenuManager manager, int rows) {
+    this.manager = manager;
     this.rows = rows;
     this.name = new PersonalizedText("");
     this.items = Lists.newArrayList();
@@ -103,6 +106,6 @@ public class InventoryMenuBuilder {
    * @return the constructed inventory
    */
   public InventoryMenu build() {
-    return new InventoryMenuImpl(items, rows, name);
+    return new InventoryMenuImpl(manager, items, rows, name);
   }
 }

@@ -1,31 +1,34 @@
-package tc.oc.pgm.menu;
+package tc.oc.pgm.util.menu;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.function.Consumer;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
-import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
-import tc.oc.pgm.api.match.MatchScope;
-import tc.oc.pgm.events.ListenerScope;
+import org.bukkit.plugin.Plugin;
 
-@ListenerScope(MatchScope.LOADED)
-public class InventoryMenuMatchModule implements MatchModule, Listener {
+public class InventoryMenuManager implements Listener {
 
-  private final Match match;
   private final Map<Inventory, InventoryMenu> inventoryMap;
+  private final Plugin plugin;
 
   /** Creates a new inventory manager. */
-  public InventoryMenuMatchModule(Match match) {
-    this.match = match;
+  public InventoryMenuManager(Plugin plugin) {
+    this.plugin = plugin;
     inventoryMap = Maps.newHashMap();
+    plugin.getServer().getPluginManager().registerEvents(this, plugin);
+  }
+
+  /** Disables the inventory manager and unregisters all events. */
+  public void disable() {
+    HandlerList.unregisterAll(this);
   }
 
   /**
@@ -41,9 +44,18 @@ public class InventoryMenuMatchModule implements MatchModule, Listener {
       throw new IllegalStateException("There can be at most 6 rows in an inventory");
     }
 
-    InventoryMenuBuilder builder = new InventoryMenuBuilder(rows);
+    InventoryMenuBuilder builder = new InventoryMenuBuilder(this, rows);
     func.accept(builder);
     return builder.build();
+  }
+
+  /**
+   * Returns the {@link Plugin} associated with this inventory menu manager.
+   *
+   * @return the {@link Plugin} associated with this inventory menu manager.
+   */
+  public Plugin getPlugin() {
+    return plugin;
   }
 
   /**
@@ -115,7 +127,7 @@ public class InventoryMenuMatchModule implements MatchModule, Listener {
       int x = event.getSlot() % 9;
       int y = event.getSlot() / 9;
       event.setCancelled(true);
-      getInventory(inventory).clickItem(x, y, match.getPlayer(event.getActor()), event.getClick());
+      getInventory(inventory).clickItem(x, y, event.getActor(), event.getClick());
     }
   }
 

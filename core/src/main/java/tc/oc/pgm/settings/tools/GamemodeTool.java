@@ -8,16 +8,28 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.menu.InventoryMenu;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.settings.ObserverTool;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.ComponentRenderers;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.menu.InventoryMenu;
 
 public class GamemodeTool implements ObserverTool {
+
+  private final Match match;
+
+  /**
+   * Constructor.
+   *
+   * @param match the match this tool is being used in
+   */
+  public GamemodeTool(Match match) {
+    this.match = match;
+  }
 
   @Override
   public Component getName() {
@@ -30,7 +42,7 @@ public class GamemodeTool implements ObserverTool {
   }
 
   @Override
-  public List<String> getLore(MatchPlayer player) {
+  public List<String> getLore(Player player) {
     Component gamemode =
         new PersonalizedTranslatable("gameMode." + player.getGameMode().name().toLowerCase())
             .color(ChatColor.AQUA);
@@ -38,33 +50,33 @@ public class GamemodeTool implements ObserverTool {
         new PersonalizedTranslatable("setting.gamemode.lore", gamemode)
             .getPersonalizedText()
             .color(ChatColor.GRAY);
-    return Lists.newArrayList(ComponentRenderers.toLegacyText(lore, player.getBukkit()));
+    return Lists.newArrayList(ComponentRenderers.toLegacyText(lore, player));
   }
 
   @Override
-  public Material getMaterial(MatchPlayer player) {
+  public Material getMaterial(Player player) {
     return isCreative(player) ? Material.SEA_LANTERN : Material.PRISMARINE;
   }
 
   @Override
-  public void onClick(InventoryMenu menu, MatchPlayer player, ClickType clickType) {
+  public void onClick(InventoryMenu menu, Player player, ClickType clickType) {
     toggleObserverGameMode(player);
     menu.refresh(player);
   }
 
-  public void toggleObserverGameMode(MatchPlayer player) {
+  public void toggleObserverGameMode(Player player) {
     player.setGameMode(getOppositeMode(player.getGameMode()));
     if (player.getGameMode() == GameMode.SPECTATOR) {
-      player.sendWarning(getToggleMessage(), true);
+      match.getPlayer(player).sendWarning(getToggleMessage(), true);
     } else if (isCreative(player)) {
       // Note: When WorldEdit is present, this executes a command to ensure the player is not stuck
       if (Bukkit.getPluginManager().isPluginEnabled("WorldEdit")) {
-        player.getBukkit().performCommand("worldedit:!");
+        player.performCommand("worldedit:!");
       }
     }
   }
 
-  private boolean isCreative(MatchPlayer player) {
+  private boolean isCreative(Player player) {
     return player.getGameMode().equals(GameMode.CREATIVE);
   }
 

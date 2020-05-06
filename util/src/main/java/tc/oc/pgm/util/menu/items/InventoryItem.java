@@ -1,9 +1,9 @@
-package tc.oc.pgm.menu.items;
+package tc.oc.pgm.util.menu.items;
 
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
-import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.menu.InventoryMenu;
+import tc.oc.pgm.util.menu.InventoryMenu;
 
 /** Interface that describes a selection in an inventory menu. */
 public interface InventoryItem {
@@ -21,7 +21,7 @@ public interface InventoryItem {
    * @return the generated itemstack, usually used to put in normal bukkit inventories or null if
    *     the item stack should not be rendered
    */
-  ItemStack item(InventoryMenu inventory, MatchPlayer player);
+  ItemStack item(InventoryMenu inventory, Player player);
 
   /**
    * A callback for when this item is clicked inside of an inventory. If the item has not been
@@ -31,11 +31,11 @@ public interface InventoryItem {
    * @param inventory the inventory this item is inside of
    * @param player the player who clicked the item
    */
-  void onClick(InventoryMenu inventory, MatchPlayer player, ClickType clickType);
+  void onClick(InventoryMenu inventory, Player player, ClickType clickType);
 
   /**
    * This completely clears the item cache, meaning that the next time this item is generated it
-   * will not use the cached version but will call {@link #item(InventoryMenu inventory, MatchPlayer
+   * will not use the cached version but will call {@link #item(InventoryMenu inventory, Player
    * player)}
    */
   void purgeAll();
@@ -43,9 +43,9 @@ public interface InventoryItem {
   /**
    * This clears the item cache for a specific player, meaning the next time this item is generated
    * for that player it will not used the cached version but will call {@link #item(InventoryMenu
-   * inventory, MatchPlayer player)}
+   * inventory, Player player)}
    *
    * @param player the player the cache is being cleared for
    */
-  void purge(MatchPlayer player);
+  void purge(Player player);
 }

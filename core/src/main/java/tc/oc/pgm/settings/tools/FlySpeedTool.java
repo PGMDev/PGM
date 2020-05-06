@@ -4,13 +4,13 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.menu.InventoryMenu;
 import tc.oc.pgm.settings.ObserverTool;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.ComponentRenderers;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.menu.InventoryMenu;
 
 public class FlySpeedTool implements ObserverTool {
 
@@ -27,27 +27,27 @@ public class FlySpeedTool implements ObserverTool {
   }
 
   @Override
-  public List<String> getLore(MatchPlayer player) {
-    Component flySpeed = FlySpeed.of(player.getBukkit().getFlySpeed()).getName();
+  public List<String> getLore(Player player) {
+    Component flySpeed = FlySpeed.of(player.getFlySpeed()).getName();
     Component lore =
         new PersonalizedTranslatable("setting.flyspeed.lore", flySpeed)
             .getPersonalizedText()
             .color(ChatColor.GRAY);
-    return Lists.newArrayList(ComponentRenderers.toLegacyText(lore, player.getBukkit()));
+    return Lists.newArrayList(ComponentRenderers.toLegacyText(lore, player));
   }
 
   @Override
-  public Material getMaterial(MatchPlayer player) {
+  public Material getMaterial(Player player) {
     return Material.FEATHER;
   }
 
   @Override
-  public void onClick(InventoryMenu menu, MatchPlayer player, ClickType clickType) {
-    FlySpeed speed = FlySpeed.of(player.getBukkit().getFlySpeed());
+  public void onClick(InventoryMenu menu, Player player, ClickType clickType) {
+    FlySpeed speed = FlySpeed.of(player.getFlySpeed());
     if (clickType.isRightClick()) {
-      player.getBukkit().setFlySpeed(speed.getPrev().getValue());
+      player.setFlySpeed(speed.getPrev().getValue());
     } else {
-      player.getBukkit().setFlySpeed(speed.getNext().getValue());
+      player.setFlySpeed(speed.getNext().getValue());
     }
 
     menu.refresh(player);

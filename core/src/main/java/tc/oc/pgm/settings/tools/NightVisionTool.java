@@ -4,15 +4,15 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.menu.InventoryMenu;
 import tc.oc.pgm.settings.ObserverTool;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.ComponentRenderers;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.menu.InventoryMenu;
 
 public class NightVisionTool implements ObserverTool {
 
@@ -27,7 +27,7 @@ public class NightVisionTool implements ObserverTool {
   }
 
   @Override
-  public List<String> getLore(MatchPlayer player) {
+  public List<String> getLore(Player player) {
     Component status =
         new PersonalizedTranslatable(hasNightVision(player) ? "misc.on" : "misc.off")
             .getPersonalizedText()
@@ -36,32 +36,30 @@ public class NightVisionTool implements ObserverTool {
         new PersonalizedTranslatable("setting.nightvision.lore", status)
             .getPersonalizedText()
             .color(ChatColor.GRAY);
-    return Lists.newArrayList(ComponentRenderers.toLegacyText(lore, player.getBukkit()));
+    return Lists.newArrayList(ComponentRenderers.toLegacyText(lore, player));
   }
 
   @Override
-  public Material getMaterial(MatchPlayer player) {
+  public Material getMaterial(Player player) {
     return hasNightVision(player) ? Material.POTION : Material.GLASS_BOTTLE;
   }
 
   @Override
-  public void onClick(InventoryMenu menu, MatchPlayer player, ClickType clickType) {
+  public void onClick(InventoryMenu menu, Player player, ClickType clickType) {
     toggleNightVision(player);
     menu.refresh(player);
   }
 
-  private boolean hasNightVision(MatchPlayer player) {
-    return player.getBukkit().hasPotionEffect(PotionEffectType.NIGHT_VISION);
+  private boolean hasNightVision(Player player) {
+    return player.hasPotionEffect(PotionEffectType.NIGHT_VISION);
   }
 
-  public void toggleNightVision(MatchPlayer player) {
+  public void toggleNightVision(Player player) {
     if (hasNightVision(player)) {
-      player.getBukkit().removePotionEffect(PotionEffectType.NIGHT_VISION);
+      player.removePotionEffect(PotionEffectType.NIGHT_VISION);
     } else {
-      player
-          .getBukkit()
-          .addPotionEffect(
-              new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, true, false));
+      player.addPotionEffect(
+          new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, true, false));
     }
   }
 }

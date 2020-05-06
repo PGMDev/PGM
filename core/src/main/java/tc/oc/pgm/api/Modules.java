@@ -56,7 +56,6 @@ import tc.oc.pgm.killreward.KillRewardMatchModule;
 import tc.oc.pgm.killreward.KillRewardModule;
 import tc.oc.pgm.kits.KitMatchModule;
 import tc.oc.pgm.kits.KitModule;
-import tc.oc.pgm.menu.InventoryMenuMatchModule;
 import tc.oc.pgm.modes.ObjectiveModesMatchModule;
 import tc.oc.pgm.modes.ObjectiveModesModule;
 import tc.oc.pgm.modules.ArrowRemovalMatchModule;
@@ -150,7 +149,6 @@ public interface Modules {
     register(TrackerMatchModule.class, TrackerMatchModule::new);
     register(ShieldMatchModule.class, ShieldMatchModule::new);
     register(ViewInventoryMatchModule.class, ViewInventoryMatchModule::new);
-    register(InventoryMenuMatchModule.class, InventoryMenuMatchModule::new);
     register(CycleMatchModule.class, CycleMatchModule::new);
     register(DoubleJumpMatchModule.class, DoubleJumpMatchModule::new);
     register(ArrowRemovalMatchModule.class, ArrowRemovalMatchModule::new);
