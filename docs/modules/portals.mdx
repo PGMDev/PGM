@@ -1,0 +1,466 @@
+---
+id: portals
+title: Portals
+---
+
+Portals teleport a player that enters the specified region to an exact location, by a certain offset amount or to a random location inside a region.
+
+The position and direction attributes of a portal are relative to the players location and where they are looking. Prefix these values with an at symbol `@` to specify absolute values. Portals can be restricted to certain teams by defining their filter attribute.
+
+Portals respond to any player move event, this allows almost instant teleportation as soon as the player matches the portals filter.
+
+`TIP:` Copy the yaw and pitch from the F3 screen in minecraft (the `Facing: Direction (Axis) (Yaw/Pitch)` line).
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th />
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<portals> </portals>`}</label>
+        </td>
+        <td colspan="2">Node containing the portals on this map.</td>
+      </tr>
+      <tr>
+        <th>Sub-elements</th>
+        <th />
+        <th>Value/Children</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<portal>`}</label>
+        </td>
+        <td>An individual portal node.</td>
+        <td>
+          <span className="badge badge--secondary">Portal Sub-elements</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Portal Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>x</label>,<label>y</label>,<label>z</label>
+        </td>
+        <td>
+          Offset the players <label>X,Y,Z</label> position by the amount
+          specified.
+        </td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>region</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          <span className="badge badge--danger">Required</span>
+          Region where this portals entrance is located.
+          <br />
+          <i>
+            Cannot combine an entrance region with <label>forward</label> or{" "}
+            <label>transit</label> properties.
+          </i>
+        </td>
+        <td>
+          <a href="/modules/regions">Region</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>destination</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          Destination of the portal, teleports players to a random point inside the
+          region.
+          <br />
+          <i>
+            Cannot combine an exit region with <label>reverse</label> or{" "}
+            <label>transit</label> properties.
+          </i>
+        </td>
+        <td>
+          <a href="/modules/regions">Randomize-able Region</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>filter</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          Filter portal player access.
+        </td>
+        <td>
+          <a href="/modules/filters">Filter</a>
+        </td>
+        <td>
+          <label>{`<always/>`}</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>forward</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          Apply forward transform on rising edge
+        </td>
+        <td>
+          <a href="/modules/filters">Dynamic Filter</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>reverse</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          Apply reverse transform on rising edge
+        </td>
+        <td>
+          <a href="/modules/filters">Dynamic Filter</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>transit</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          Apply forward transform on rising edge and reverse transform on falling
+          edge
+          <br />
+          <i>
+            Cannot combine <label>transit</label> property with{" "}
+            <label>forward</label> or <label>reverse</label> properties.
+          </i>
+        </td>
+        <td>
+          <a href="/modules/filters">Dynamic Filter</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>observers</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          Filter portal observer access.
+        </td>
+        <td>
+          <a href="/modules/filters">Filter</a>
+        </td>
+        <td>
+          <label>{`<always/>`}</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>sound</label>
+        </td>
+        <td>Play the portal sound</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+      <tr>
+        <td>
+          <label>protect</label>
+        </td>
+        <td>Protect the portal entrance and exit regions.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+      <tr>
+        <td>
+          <label>bidirectional</label>
+        </td>
+        <td>
+          Creates a dual-linked portal that goes both ways. This can only be
+          used when all coordinates and directions are relative.
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+      <tr>
+        <td>
+          <label>yaw</label>
+        </td>
+        <td>
+          Specify the direction the player is looking horizontally from
+          -180&deg; to 180&deg;.
+          <br />
+          <i>South 0, East -90, North 180 and West 90.</i>
+        </td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>smooth</label>
+        </td>
+        <td>Smoothly teleport players.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+      <tr>
+        <td>
+          <label>pitch</label>
+        </td>
+        <td>
+          Specify the direction the player is looking vertically from -90&deg;
+          to 90&deg;.
+          <br />
+          <i>-90 is straight up 90 is straight down.</i>
+        </td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Portal Sub-elements
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th>Value/Children</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<region>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          <span className="badge badge--danger">Required</span>
+          Region where this portals entrance is located.
+        </td>
+        <td>
+          <a href="/modules/regions">Regions</a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<destination>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          Destination of the portal, teleports players to a random point inside the
+          region.
+          <br />
+          <i>Region is automatically filtered against block place.</i>
+        </td>
+        <td>
+          <a href="/modules/regions">Randomize-able Regions</a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<filter>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          Filter portal player access.
+        </td>
+        <td>
+          <a href="/modules/filters">Filters</a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<forward>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          Apply forward transform on rising edge
+        </td>
+        <td>
+          <a href="/modules/filters">Dynamic Filters</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<reverse>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          Apply reverse transform on rising edge
+        </td>
+        <td>
+          <a href="/modules/filters">Dynamic Filters</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<transit>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          Apply forward transform on rising edge and reverse transform on falling
+          edge
+          <br />
+          <i>
+            Cannot combine <label>transit</label> property with{" "}
+            <label>forward</label> or <label>reverse</label> properties.
+          </i>
+        </td>
+        <td>
+          <a href="/modules/filters">Dynamic Filters</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<observers>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          Filter portal observer access.
+        </td>
+        <td>
+          <a href="/modules/filters">Filters</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Examples_
+
+```xml
+<portals>
+    <!-- Moves the player to exactly X:10 Y:8 Z:45, pitch & yaw remain unchanged -->
+    <portal x="@10" y="@8" z="@45">
+        <region><cuboid min="-56,33,-1" max="-55,35,2"/></region>
+    </portal>
+
+    <!-- Adds 12 to the players Z position, turning them to face east and 10° up -->
+    <portal z="12" pitch="@10" yaw="@-90">
+        <region><cuboid min="-56,33,-1" max="-55,35,2"/></region>
+    </portal>
+
+    <!-- Teleport the player from portal-entrance to a random point inside portal-exit -->
+    <portal region="portal-entrance">
+        <destination><region id="portal-exit"/></destination>
+    </portal>
+</portals>
+```

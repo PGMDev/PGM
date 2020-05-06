@@ -1,0 +1,173 @@
+---
+id: gamerules
+title: Gamerules
+---
+
+Minecraft's built in game rules can be set via the `<gamerules>` module. Not all gamerules are supported, the table below lists which are supported.
+
+When stopping the daylight cycle, you should either use the `<doDaylightCycle>` gamerule, or the [timelock](/modules/other_settings#timelock) element. One will overwrite the other, so be consistent.
+
+<div class="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<gamerules> </gamerules>`}</label>
+        </td>
+        <td>Node containing the defined game rules.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Supported Gamerule Sub-elements
+
+<div class="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th style={{ minWidth: "110px" }}>Values</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<doFireTick>`}</label>
+        </td>
+        <td>Toggles whether firespread occurs.</td>
+        <td>
+          <span class="badge badge--primary">true / false</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<doTileDrops>`}</label>
+        </td>
+        <td>Toggles whether tile entities drop.</td>
+        <td>
+          <span class="badge badge--primary">true / false</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<doMobLoot>`}</label>
+        </td>
+        <td>Toggles whether mobs drop loot on death.</td>
+        <td>
+          <span class="badge badge--primary">true / false</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<mobGriefing>`}</label>
+        </td>
+        <td>
+          Toggles whether mobs such as Creepers and Endermen cause enviromental
+          damage.
+        </td>
+        <td>
+          <span class="badge badge--primary">true / false</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<naturalRegeneration>`}</label>
+        </td>
+        <td>Toggles whether or not players naturally regain heath.</td>
+        <td>
+          <span class="badge badge--primary">true / false</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<doDaylightCycle>`}</label>
+        </td>
+        <td>Toggles whether or not the time tick occurs.</td>
+        <td>
+          <span class="badge badge--primary">true / false</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+Example
+
+```xml
+<gamerules>
+    <doDaylightCycle>false</doDaylightCycle>
+    <naturalRegeneration>false</naturalRegeneration>
+</gamerules>
+```
+
+##### Unsupported Gamerules
+
+<div class="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Rule</th>
+        <th>Reason</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>doMobSpawning</label>
+        </td>
+        <td>
+          Not supported in favor of the <a href="/modules/mobs">mobs</a> module.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>keepInventory</label>
+        </td>
+        <td>Not supported since PGM already solves this with kits.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>commandBlockOutput</label>
+        </td>
+        <td>Command blocks are disabled in PGM.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>logAdminCommands</label>
+        </td>
+        <td>Not useful in custom maps.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>randomTickSpeed</label>
+        </td>
+        <td>Not useful in custom maps.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>reducedDebugInfo</label>
+        </td>
+        <td>Not useful in custom maps.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>sendCommandFeedback</label>
+        </td>
+        <td>Not useful in custom maps.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>showDeathMessages</label>
+        </td>
+        <td>Not useful in custom maps.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

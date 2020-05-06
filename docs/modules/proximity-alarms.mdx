@@ -1,0 +1,170 @@
+---
+id: proximity-alarms
+title: Proximity Alarms
+---
+
+Proximity alarms can be used to alert players when an enemy enters a specified area. Flares will go off around the protected area, with the color of the detected player's team, and all allied players will receive an alert message with sound.
+
+If the `<notify>` subelement is not defined, the proximity-alarm message is sent only to players who _cannot_ be detected, i.e. those who do not match the detection filter. If the `<detect>` attribute is missing no message will be sent, which means that only players who can see or hear the flares will know when the alarm is tripped.
+
+Flares will only be set off if a `flare-radius=""` is defined. If this attribute is missing a message must be specified to alert players. This is how the alarm can be made "silent", so that enemies may not realize that they have been detected.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th />
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <span className="highlight">
+            <label>{`<proximity-alarms> </proximity-alarms>`}</label>
+          </span>
+        </td>
+        <td colspan="2">Node containing this maps proximity-alarms.</td>
+      </tr>
+      <tr>
+        <th>Sub-elements</th>
+        <th />
+        <th>Value/Children</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<proximity-alarm>`}</label>
+        </td>
+        <td>An individual proximity-alarm node.</td>
+        <td>
+          <span className="badge badge--secondary">
+            Proximity-alarm Sub-elements
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Proximity-alarm Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>region</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          <span className="badge badge--danger">Required</span>
+          The region this alarm applies to.
+        </td>
+        <td>
+          <a href="/modules/regions">Region</a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>message</label>
+        </td>
+        <td>Message to show in chat when a player is detected.</td>
+        <td>
+          <span className="badge badge--primary">String</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>flare-radius</label>
+        </td>
+        <td>
+          Radius of the circular area to show flares in, centered on the
+          proximity-alarm region.
+        </td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Proximity-alarm Sub-elements
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th>Value/Children</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<region>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          <span className="badge badge--danger">Required</span>
+          The region this alarm applies to, treated as a region union.
+        </td>
+        <td>
+          <a href="/modules/regions">Regions</a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<detect>`}</label>
+        </td>
+        <td>Filter who gets detected by the proximity alarm.</td>
+        <td>
+          <a href="/modules/filters">Filter</a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<notify>`}</label>
+        </td>
+        <td>Filter who gets notified by the proximity alarm.</td>
+        <td>
+          <a href="/modules/filters">Filter</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>{" "}
+
+_Example_
+
+```xml
+<proximity-alarms>
+    <proximity-alarm message="Enemy detected at Blue monument!" flare-radius="4">
+        <region>
+            <cylinder base="27.5,119,-26.5" radius="7.5" height="15"/>
+        </region>
+        <detect>
+            <team>red</team>
+        </detect>
+    </proximity-alarm>
+</proximity-alarms>
+```

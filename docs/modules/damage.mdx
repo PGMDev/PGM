@@ -1,0 +1,351 @@
+---
+id: damage
+title: Damage
+---
+
+### Friendly Fire
+
+Allows teammates to kill each other. Arrows will be absorbed if they hit a teammate.
+
+```xml
+<friendlyfire>on</friendlyfire> <!-- Defaults to off -->
+```
+
+Refunds arrows blocked by teammates from non-infinity bows.
+
+```xml
+<friendlyfirerefund>off</friendlyfirerefund> <!-- Defaults to on -->
+```
+
+### Difficulty
+
+The difficulty level can be set to `peaceful`, `easy`, `normal`, or `hard`. The default is `hard`.
+
+```xml
+<difficulty>easy</difficulty> <!-- Defaults to hard -->
+```
+
+### Hunger
+
+Specify if a player can starve to death, usually used with the difficulty setting.<br/>
+This can also be accomplished with the `naturalRegeneration` [gamerule](/modules/gamerules).
+
+```xml
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+```
+
+### Damage Filtering
+
+This module is used to filter when or if damage is applied to entities.
+Its contents can be a filter or combination of filters.
+It doesn't have to be `<allow>` and `<deny>` at the top level but that's usually what you want.
+Regions can also be used since they are filters that filter for a location.
+
+_Examples_
+
+```xml
+<damage>
+    <deny>
+        <cause>explosion</cause>
+    </deny>
+</damage>
+```
+
+```xml
+<!-- Deny damage events where the attacker is on the red team -->
+<damage>
+    <deny>
+        <attacker>
+            <team>red</team>
+        </attacker>
+    </deny>
+</damage>
+```
+
+### Disable Damage
+
+Use this module to disable damage from specific causes.
+
+While almost every form of damage can be disabled safely it is recommended that you do **not** disable `VOID` damage.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Disable Damage Element</th>
+        <th>Description</th>
+        <th />
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<disabledamage> </disabledamage>`}</label>
+        </td>
+        <td>Node containing the disabled damage types.</td>
+        <td />
+      </tr>
+      <tr>
+        <th>Sub-elements</th>
+        <th />
+        <th>Value/Children</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<damage> </damage>`}</label>
+        </td>
+        <td>The damage type that is disabled.</td>
+        <td>
+          <a href="#causes">Damage Cause</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Example_
+
+```xml
+<disabledamage>
+    <!-- Disable fall damage -->
+    <damage>fall</damage>
+</disabledamage>
+```
+
+#### Block Explosion Attributes
+
+The `BLOCK_EXPLOSION` damage cause has several extended attributes to customize who/what gets damaged. Only attributes with `false` as the value need to be explicitly defined since all attributes default to `true`.
+
+<div className="table-responsive">
+  <table className="table table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>ally</label>
+        </td>
+        <td>
+          Damage to players on the same team as the person that caused the
+          explosion.
+        </td>
+        <td>
+          <span className="label label-primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+      <tr>
+        <td>
+          <label>self</label>
+        </td>
+        <td>Damage to the person that caused the explosion.</td>
+        <td>
+          <span className="label label-primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+      <tr>
+        <td>
+          <label>enemy</label>
+        </td>
+        <td>
+          Damage to players not on the same team as the person that caused the
+          explosion.
+        </td>
+        <td>
+          <span className="label label-primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+      <tr>
+        <td>
+          <label>other</label>
+        </td>
+        <td>Any other damage caused by the explosion.</td>
+        <td>
+          <span className="label label-primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Example_
+
+```xml
+<disabledamage>
+    <!-- TNT damages enemies and self, but not teammates -->
+    <damage ally="true" self="false" enemy="false" other="false">block explosion</damage>
+</disabledamage>
+```
+
+#### Damage Causes
+
+The following damage causes can be used in the disable damage module.
+These causes do not need to be capitalized or contain underscores, i.e., `FIRE_TICK` and `fire tick` will both work.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>CONTACT</label>
+        </td>
+        <td>Damage caused when an entity contacts a block such as a Cactus.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>ENTITY_ATTACK</label>
+        </td>
+        <td>Damage caused when an entity attacks another entity.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>PROJECTILE</label>
+        </td>
+        <td>Damage caused when attacked by a projectile.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>SUFFOCATION</label>
+        </td>
+        <td>Damage caused by being put in a block.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>FALL</label>
+        </td>
+        <td>
+          Damage caused when an entity falls a distance greater than 3 blocks.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>FIRE</label>
+        </td>
+        <td>Damage caused by direct exposure to fire.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>FIRE_TICK</label>
+        </td>
+        <td>Damage caused due to burns caused by fire.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>MELTING</label>
+        </td>
+        <td>Damage caused due to a snowman melting.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>LAVA</label>
+        </td>
+        <td>Damage caused by direct exposure to lava.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>DROWNING</label>
+        </td>
+        <td>Damage caused by running out of air while in water.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>BLOCK_EXPLOSION</label>
+        </td>
+        <td>Damage caused by being in the area when a block explodes.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>ENTITY_EXPLOSION</label>
+        </td>
+        <td>
+          Damage caused by being in the area when an entity, such as a Creeper,
+          explodes.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>VOID</label>
+        </td>
+        <td>Damage caused by falling into the void.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>LIGHTNING</label>
+        </td>
+        <td>Damage caused by being struck by lightning.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>SUICIDE</label>
+        </td>
+        <td>Damage caused by committing suicide using the command "/kill".</td>
+      </tr>
+      <tr>
+        <td>
+          <label>STARVATION</label>
+        </td>
+        <td>Damage caused by starving due to having an empty hunger bar.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>POISON</label>
+        </td>
+        <td>Damage caused due to an ongoing poison effect.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>MAGIC</label>
+        </td>
+        <td>Damage caused by being hit by a damage potion or spell.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>WITHER</label>
+        </td>
+        <td>Damage caused by Wither potion effect.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>FALLING_BLOCK</label>
+        </td>
+        <td>
+          Damage caused by being hit by a falling block which deals damage.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>THORNS</label>
+        </td>
+        <td>
+          Damage caused in retaliation to another attack by the Thorns
+          enchantment.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>CUSTOM</label>
+        </td>
+        <td>Custom damage.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+Copied from: [bukkit docs - Damage Cause](https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/EntityDamageEvent.DamageCause.html)

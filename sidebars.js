@@ -20,7 +20,16 @@ module.exports = {
       "modules/scoring",
       "modules/other",
     ],
-    Mechanics: ["modules/filters", "modules/regions", "modules/spawns"],
+    Mechanics: [
+      "modules/filters",
+      "modules/regions",
+      "modules/spawns",
+      "modules/portals",
+      "modules/proximity-alarms",
+      "modules/lanes",
+      "modules/damage",
+      "modules/gamerules",
+    ],
   },
   Reference: {
     Items: ["reference/inventory"],

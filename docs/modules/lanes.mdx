@@ -1,0 +1,84 @@
+---
+id: lanes
+title: Lanes
+---
+
+Lanes are used in RFW style maps with two parallel lanes for the teams. They prevent players from leaving their teams lane and entering the enemies.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th />
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<lanes> </lanes>`}</label>
+        </td>
+        <td>Node containing this world's lanes.</td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>Sub-elements</th>
+        <th />
+        <th>Value/Children</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<lane> </lane>`}</label>
+        </td>
+        <td>A single lane definition.</td>
+        <td>
+          <a href="/modules/regions">Regions</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Lane Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>team</label>
+        </td>
+        <td>
+          <span className="badge badge--danger">Required</span>
+          The team the lane belongs to and in which they have to stay inside.
+        </td>
+        <td>
+          <a href="/modules/teams">Team ID</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Example_
+
+```xml
+<lanes>
+    <lane team="blue">
+        <region id="blue-lane-total"/>
+        <region id="blue-spawn-rooms"/>
+    </lane>
+    <lane team="red">
+        <region id="red-lane-total"/>
+        <region id="red-spawn-rooms"/>
+    </lane>
+</lanes>
+```
