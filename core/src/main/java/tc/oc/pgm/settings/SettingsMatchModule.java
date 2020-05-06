@@ -140,7 +140,7 @@ public class SettingsMatchModule implements MatchModule, Listener {
 
   private ItemStack createToolItem(Player player) {
     Component displayName =
-        new PersonalizedTranslatable("setting.displayName")
+        new PersonalizedTranslatable(INVENTORY_TITLE)
             .getPersonalizedText()
             .color(ChatColor.AQUA)
             .bold(true);

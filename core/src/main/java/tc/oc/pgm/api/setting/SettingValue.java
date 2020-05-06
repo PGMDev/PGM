@@ -18,9 +18,11 @@ import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
  * @see SettingKey
  */
 public enum SettingValue {
-  CHAT_TEAM("chat", "team", ChatColor.BLUE), // Only send to members on the player's team
-  CHAT_GLOBAL("chat", "global", ChatColor.GOLD), // Send to all players in the same match
-  CHAT_ADMIN("chat", "admin", ChatColor.DARK_RED), // Send to all server operators
+  CHAT_TEAM(
+      "chat", "team", "misc.team", ChatColor.BLUE), // Only send to members on the player's team
+  CHAT_GLOBAL(
+      "chat", "global", "misc.global", ChatColor.GOLD), // Send to all players in the same match
+  CHAT_ADMIN("chat", "admin", "misc.admin", ChatColor.DARK_RED), // Send to all server operators
 
   DEATH_OWN("death", "own", ChatColor.RED), // Only send death messages involving self
   DEATH_ALL(

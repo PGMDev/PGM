@@ -55,13 +55,13 @@ public class SettingCommands {
     }
   }
 
-  @Command(aliases = "settings", desc = "Open the settings GUI")
+  @Command(aliases = "settings", desc = "Open the settings menu")
   public static void openSettings(CommandSender sender, MatchPlayer player)
       throws ArgumentException {
     if (player == null) {
       throw new ArgumentException(TextTranslations.translate("command.onlyPlayers", sender));
     }
 
-    player.getMatch().getModule(SettingsMatchModule.class).openMenu(player);
+    player.getMatch().needModule(SettingsMatchModule.class).openMenu(player);
   }
 }

@@ -13,7 +13,7 @@ import tc.oc.pgm.util.menu.items.ItemHolder;
 public class InventoryMenuImpl implements InventoryMenu {
 
   private final InventoryMenuManager manager;
-  private final WeakHashMap<Player, InventoryMenu> history;
+  private final Map<Player, InventoryMenu> history;
   private final List<ItemHolder> items;
   private final int rows;
   private final Component title;

@@ -3,7 +3,6 @@ package tc.oc.pgm.util.menu;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.function.Consumer;
-import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -13,6 +12,7 @@ import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
+import tc.oc.pgm.util.inventory.InventoryUtils;
 
 public class InventoryMenuManager implements Listener {
 
@@ -108,18 +108,10 @@ public class InventoryMenuManager implements Listener {
   public void onClick(InventoryClickEvent event) {
     Inventory inventory = event.getInventory();
 
-    // player hasn't clicked an inventory
-    if (inventory == null) {
-      return;
-    }
-
-    // player clicks outside
-    if (event.getSlotType() == InventoryType.SlotType.OUTSIDE) {
-      return;
-    }
-
-    // there's no item there
-    if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR) {
+    // player hasn't clicked an inventory, clicked outside, or didn't click any item
+    if (inventory == null
+        || event.getSlotType() == InventoryType.SlotType.OUTSIDE
+        || InventoryUtils.isNothing(event.getCurrentItem())) {
       return;
     }
 
