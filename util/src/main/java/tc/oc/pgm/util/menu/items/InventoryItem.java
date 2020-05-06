@@ -38,7 +38,7 @@ public interface InventoryItem {
    * will not use the cached version but will call {@link #item(InventoryMenu inventory, Player
    * player)}
    */
-  void purgeAll();
+  void invalidateAll();
 
   /**
    * This clears the item cache for a specific player, meaning the next time this item is generated
@@ -47,5 +47,5 @@ public interface InventoryItem {
    *
    * @param player the player the cache is being cleared for
    */
-  void purge(Player player);
+  void invalidate(Player player);
 }

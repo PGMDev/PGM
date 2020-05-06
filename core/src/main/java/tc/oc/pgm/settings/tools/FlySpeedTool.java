@@ -48,7 +48,7 @@ public class FlySpeedTool implements ObserverTool {
       player.setFlySpeed(speed.getNext().getValue());
     }
 
-    menu.refresh(player);
+    menu.invalidate(player);
   }
 
   public static enum FlySpeed {

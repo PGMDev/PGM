@@ -58,7 +58,7 @@ public class GamemodeTool implements ObserverTool {
   @Override
   public void onClick(InventoryMenu menu, Player player, ClickType clickType) {
     toggleObserverGameMode(player);
-    menu.refresh(player);
+    menu.invalidate(player);
   }
 
   public void toggleObserverGameMode(Player player) {

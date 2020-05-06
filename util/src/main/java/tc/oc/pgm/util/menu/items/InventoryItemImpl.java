@@ -71,12 +71,12 @@ public class InventoryItemImpl implements InventoryItem {
   }
 
   @Override
-  public void purgeAll() {
+  public void invalidateAll() {
     cache.clear();
   }
 
   @Override
-  public void purge(Player player) {
+  public void invalidate(Player player) {
     cache.remove(player);
   }
 }

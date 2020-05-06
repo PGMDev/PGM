@@ -44,7 +44,7 @@ public class NightVisionTool implements ObserverTool {
   @Override
   public void onClick(InventoryMenu menu, Player player, ClickType clickType) {
     toggleNightVision(player);
-    menu.refresh(player);
+    menu.invalidate(player);
   }
 
   private boolean hasNightVision(Player player) {

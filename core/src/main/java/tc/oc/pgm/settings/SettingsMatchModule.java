@@ -78,7 +78,7 @@ public class SettingsMatchModule implements MatchModule, Listener {
               .onClick(
                   (menu, player) -> {
                     match.getPlayer(player).getSettings().toggleValue(key);
-                    menu.refresh(player);
+                    menu.invalidate(player);
                   })
               .build();
 
@@ -123,9 +123,9 @@ public class SettingsMatchModule implements MatchModule, Listener {
 
   public void openMenu(MatchPlayer player) {
     if (player.isObserving()) {
-      observerMenu.openAsRoot(player.getBukkit());
+      observerMenu.open(player.getBukkit());
     } else {
-      otherMenu.openAsRoot(player.getBukkit());
+      otherMenu.open(player.getBukkit());
     }
   }
 
