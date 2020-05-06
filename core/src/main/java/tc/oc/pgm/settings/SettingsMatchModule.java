@@ -1,7 +1,10 @@
 package tc.oc.pgm.settings;
 
 import com.google.common.collect.Lists;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
+import net.kyori.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,15 +26,13 @@ import tc.oc.pgm.settings.tools.FlySpeedTool;
 import tc.oc.pgm.settings.tools.GamemodeTool;
 import tc.oc.pgm.settings.tools.NightVisionTool;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.ComponentRenderers;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.inventory.ItemBuilder;
 import tc.oc.pgm.util.menu.InventoryMenu;
 import tc.oc.pgm.util.menu.InventoryMenuBuilder;
 import tc.oc.pgm.util.menu.InventoryMenuManager;
 import tc.oc.pgm.util.menu.items.InventoryItem;
 import tc.oc.pgm.util.menu.items.InventoryItemBuilder;
+import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.LOADED)
 public class SettingsMatchModule implements MatchModule, Listener {
@@ -66,8 +67,8 @@ public class SettingsMatchModule implements MatchModule, Listener {
         new InventoryMenuBuilder(manager, SETTINGS_ROWS + obsToolsRows);
     InventoryMenuBuilder otherBuilder = new InventoryMenuBuilder(manager, SETTINGS_ROWS);
 
-    obsBuilder.setName(new PersonalizedTranslatable(INVENTORY_TITLE).add(ChatColor.AQUA));
-    otherBuilder.setName(new PersonalizedTranslatable(INVENTORY_TITLE).add(ChatColor.AQUA));
+    obsBuilder.setName(TranslatableComponent.of(INVENTORY_TITLE, TextColor.AQUA));
+    otherBuilder.setName(TranslatableComponent.of(INVENTORY_TITLE, TextColor.AQUA));
 
     for (int i = 0; i < SettingKey.values().length; i++) {
       SettingKey key = SettingKey.values()[i];
@@ -140,17 +141,13 @@ public class SettingsMatchModule implements MatchModule, Listener {
 
   private ItemStack createToolItem(Player player) {
     Component displayName =
-        new PersonalizedTranslatable(INVENTORY_TITLE)
-            .getPersonalizedText()
-            .color(ChatColor.AQUA)
-            .bold(true);
-    Component lore =
-        new PersonalizedTranslatable("setting.lore").getPersonalizedText().color(ChatColor.GRAY);
+        TranslatableComponent.of(INVENTORY_TITLE, TextColor.AQUA, TextDecoration.BOLD);
+    Component lore = TranslatableComponent.of("setting.lore", TextColor.GRAY);
 
     return new ItemBuilder()
         .material(TOOL_MATERIAL)
-        .name(ComponentRenderers.toLegacyText(displayName, player))
-        .lore(ComponentRenderers.toLegacyText(lore, player))
+        .name(TextTranslations.translateLegacy(displayName, player))
+        .lore(TextTranslations.translateLegacy(lore, player))
         .flags(ItemFlag.values())
         .build();
   }
@@ -164,9 +161,10 @@ public class SettingsMatchModule implements MatchModule, Listener {
     ItemStack stack = new ItemStack(material);
 
     ItemMeta meta = stack.getItemMeta();
-    meta.setDisplayName(setting.getDisplayName().render(player.getBukkit()).toLegacyText());
+    meta.setDisplayName(
+        TextTranslations.translateLegacy(setting.getDisplayName(), player.getBukkit()));
     Component lore = setting.getLore(value.getDisplayName());
-    meta.setLore(Lists.newArrayList(ComponentRenderers.toLegacyText(lore, player.getBukkit())));
+    meta.setLore(Lists.newArrayList(TextTranslations.translateLegacy(lore, player.getBukkit())));
     meta.addItemFlags(ItemFlag.values());
     stack.setItemMeta(meta);
 

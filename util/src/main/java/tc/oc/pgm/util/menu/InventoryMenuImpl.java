@@ -1,14 +1,15 @@
 package tc.oc.pgm.util.menu;
 
 import java.util.List;
+import java.util.Map;
 import java.util.WeakHashMap;
+import net.kyori.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.ComponentRenderers;
 import tc.oc.pgm.util.menu.items.ItemHolder;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class InventoryMenuImpl implements InventoryMenu {
 
@@ -44,7 +45,7 @@ public class InventoryMenuImpl implements InventoryMenu {
   @Override
   public void openRaw(Player player) {
     Inventory inventory =
-        Bukkit.createInventory(player, rows * 9, ComponentRenderers.toLegacyText(title, player));
+        Bukkit.createInventory(player, rows * 9, TextTranslations.translateLegacy(title, player));
 
     populateInventory(player, inventory);
 

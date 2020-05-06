@@ -2,8 +2,8 @@ package tc.oc.pgm.util.menu;
 
 import com.google.common.collect.Lists;
 import java.util.List;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import tc.oc.pgm.util.menu.items.InventoryItem;
 import tc.oc.pgm.util.menu.items.InventoryItemBuilder;
 import tc.oc.pgm.util.menu.items.ItemHolder;
@@ -24,7 +24,7 @@ public class InventoryMenuBuilder {
   public InventoryMenuBuilder(InventoryMenuManager manager, int rows) {
     this.manager = manager;
     this.rows = rows;
-    this.name = new PersonalizedText("");
+    this.name = TextComponent.of("");
     this.items = Lists.newArrayList();
   }
 

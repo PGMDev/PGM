@@ -2,41 +2,38 @@ package tc.oc.pgm.settings.tools;
 
 import com.google.common.collect.Lists;
 import java.util.List;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import tc.oc.pgm.settings.ObserverTool;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.ComponentRenderers;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.menu.InventoryMenu;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class NightVisionTool implements ObserverTool {
 
   @Override
   public Component getName() {
-    return new PersonalizedTranslatable("setting.nightvision");
+    return TranslatableComponent.of("setting.nightvision");
   }
 
   @Override
-  public ChatColor getColor() {
-    return ChatColor.DARK_PURPLE;
+  public TextColor getColor() {
+    return TextColor.DARK_PURPLE;
   }
 
   @Override
   public List<String> getLore(Player player) {
     Component status =
-        new PersonalizedTranslatable(hasNightVision(player) ? "misc.on" : "misc.off")
-            .getPersonalizedText()
-            .color(hasNightVision(player) ? ChatColor.GREEN : ChatColor.RED);
+        TranslatableComponent.of(hasNightVision(player) ? "misc.on" : "misc.off")
+            .color(hasNightVision(player) ? TextColor.GREEN : TextColor.RED);
     Component lore =
-        new PersonalizedTranslatable("setting.nightvision.lore", status)
-            .getPersonalizedText()
-            .color(ChatColor.GRAY);
-    return Lists.newArrayList(ComponentRenderers.toLegacyText(lore, player));
+        TranslatableComponent.of("setting.nightvision.lore").args(status).color(TextColor.GRAY);
+    return Lists.newArrayList(TextTranslations.translateLegacy(lore, player));
   }
 
   @Override
