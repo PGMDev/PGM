@@ -9,7 +9,7 @@ First, select a documentation file from `reference`, `guides` or `modules`, all 
 
 Once you've got an HTML file, remove all unnecessary HTML. You will notice what's necessary or what's not if you take a look at existing migrated documents [here](https://github.com/Electroid/PGM/blob/docs/docs), but generally you should maintain only maintain HTML tables, with a few exceptions:
 
-- Replace `<%= html_escape([XML Tags] %>` with ```{`[XML TAGS]`}```. Since Docusaurus 2 supports MDX, this is the only way to escape XML from rendering inside an HTML table.
+- Replace `<%= html_escape([XML Tags] %>` with `` {`[XML TAGS]`} ``. Since Docusaurus 2 supports MDX, this is the only way to escape XML from rendering inside an HTML table.
 - Replace `<span class="highlight">` and possible child `<code>` elements with `<label>`, from this:
 
 ```html

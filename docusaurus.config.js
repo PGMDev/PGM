@@ -15,25 +15,25 @@ module.exports = {
       },
       links: [
         {
-          to: "docs/modules/main",
+          to: "docs/modules/general/main",
           activeBasePath: "docs",
           label: "Modules",
           position: "left",
         },
         {
-          to: "docs/reference/inventory",
+          to: "docs/reference/items/inventory",
           activeBasePath: "docs",
           label: "Reference",
           position: "left",
         },
         {
-          to: "docs/guides/regions",
+          to: "docs/guides/xml-pointers/regions",
           activeBasePath: "docs",
           label: "Guides",
           position: "left",
         },
         {
-          to: "docs/modules/main",
+          to: "docs/modules/general/main",
           activeBasePath: "docs",
           label: "Examples",
           position: "left",
@@ -52,19 +52,19 @@ module.exports = {
           title: "Docs",
           items: [
             {
-              to: "docs/modules/main",
+              to: "docs/modules/general/main",
               label: "Modules",
             },
             {
-              to: "docs/reference/inventory",
+              to: "docs/reference/items/inventory",
               label: "Reference",
             },
             {
-              to: "docs/guides/regions",
+              to: "docs/guides/xml-pointers/regions",
               label: "Guides",
             },
             {
-              to: "docs/modules/main",
+              to: "docs/modules/general/main",
               label: "Examples",
             },
           ],

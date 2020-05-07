@@ -31,8 +31,9 @@ The area a region applies to is specified with one or more of the following elem
       <tr>
         <td>
           <label>{`<cuboid id="abc" min="X1,Y1,Z1" max="X2,Y2,Z2"/>`}</label>
-          <br />A rectangular solid from <label>X1,Y1,Z1</label> to{" "}
-          <label>X2,Y2,Z2</label>.
+          <br />A rectangular solid from <label>X1,Y1,Z1</label> to <label>
+            X2,Y2,Z2
+          </label>.
           <br />
           <i>Only block bounded when using finite coordinates.</i>
         </td>
@@ -45,8 +46,9 @@ The area a region applies to is specified with one or more of the following elem
           <label>
             {`<cylinder id="abc" base="X,Y,Z" radius="R" height="H"/>`}
           </label>
-          <br />A cylinder located at <label>X,Y,Z</label> with a radius of{" "}
-          <label>R</label> and a height of <label>H</label>.
+          <br />A cylinder located at <label>X,Y,Z</label> with a radius of <label>
+            R
+          </label> and a height of <label>H</label>.
           <br />
           <i>Only block bounded when using a finite radius.</i>
         </td>
@@ -66,8 +68,9 @@ The area a region applies to is specified with one or more of the following elem
       <tr>
         <td>
           <label>{`<sphere id="abc" origin="X,Y,Z" radius="R"/>`}</label>
-          <br />A sphere located at <label>X,Y,Z</label> with a radius of{" "}
-          <label>R</label>.
+          <br />A sphere located at <label>X,Y,Z</label> with a radius of <label>
+            R
+          </label>.
           <br />
           <i>Only block bounded when using a finite radius.</i>
         </td>
@@ -101,8 +104,9 @@ The area a region applies to is specified with one or more of the following elem
       <tr>
         <td>
           <label>{`<circle id="abc" center="X,Z" radius="R"/>`}</label>
-          <br />A circle located at <label>X,Z</label> with a radius of{" "}
-          <label>R</label>. <br />
+          <br />A circle located at <label>X,Z</label> with a radius of <label>
+            R
+          </label>. <br />
           <i>
             The region goes from 0 to map height, i.e. PGM doesn't check the
             players Y position.
@@ -120,14 +124,13 @@ The area a region applies to is specified with one or more of the following elem
       </tr>
       <tr>
         <td>
-          <label>{`<below x="" y="" z="" id="abc"/>`}</label>|<label>
-            {`<above x="" y="" z="" id="abc"/>`}
-          </label>
+          <label>{`<below x="" y="" z="" id="abc"/>`}</label>|
+          <label>{`<above x="" y="" z="" id="abc"/>`}</label>
           <br />
           Half of the world split at the specified axis.
           <br />
-          If multiple axises are defined the specified parts of each axis are intersected
-          and returned.
+          If multiple axises are defined the specified parts of each axis are
+          intersected and returned.
         </td>
         <td></td>
       </tr>
@@ -146,16 +149,16 @@ The area a region applies to is specified with one or more of the following elem
       <tr>
         <td>
           <label>{`<nowhere/>`}</label>
-          <br />A reference-able zero size/position region, contains nothing.
-          Can be referenced with the ID: <label>nowhere</label>
+          <br />A reference-able zero size/position region, contains nothing. Can
+          be referenced with the ID: <label>nowhere</label>
         </td>
         <td></td>
       </tr>
       <tr>
         <td>
           <label>{`<everywhere/>`}</label>
-          <br />A reference-able infinite size region, contains everything. Can
-          be referenced with the ID: <label>everywhere</label>
+          <br />A reference-able infinite size region, contains everything. Can be
+          referenced with the ID: <label>everywhere</label>
         </td>
         <td></td>
       </tr>
