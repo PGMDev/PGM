@@ -1,0 +1,667 @@
+---
+id: blockdrops
+title: Block Drops
+---
+
+This module can be used to customize what drops when blocks are broken, and what the broken block is replaced with. It can also be used to customize drops when a block is punched by a player in adventure mode, or to change a block's type when a player walks on it. All sub-elements are optional, if there are no elements all blocks will simply drop nothing.
+
+Custom drops also apply to blocks broken by explosions. The custom drops are reduced by 70% just like default explosion drops, though this can be customized through the [TNT module](/modules/tnt). Blocks broken by means other than mining or explosions currently do not cause custom drops.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th>Value/Children</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<block-drops> </block-drops>`}</label>
+        </td>
+        <td>Node containing all the defined block drop rules.</td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>Sub-elements</th>
+        <th />
+        <th />
+      </tr>
+      <tr>
+        <td>
+          <label>{`<rule>`}</label>
+        </td>
+        <td>An individual block drop rule.</td>
+        <td>
+          <span className="badge badge--secondary">Rule Sub-elements</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Rule Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <td>Default</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>filter</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          The blocks that get modified by this rule.
+        </td>
+        <td>
+          <a href="/modules/filters">Filter</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>region</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          The region this rule applies to.
+        </td>
+        <td>
+          <a href="/modules/regions">Region</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>kit</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          The kit to give players when this rule applies.
+        </td>
+        <td>
+          <a href="/modules/kits">Kit ID</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>experience</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          The amount of XP that gets dropped.
+        </td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>replacement</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          What to replace the mined block with.
+        </td>
+        <td>
+          <a href="/reference/inventory#material_matchers">
+            Single Material Pattern
+          </a>
+        </td>
+        <td>
+          <span className="badge badge--secondary">Air</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>wrongtool</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          Drop items regardless of what tool was used to mine the block.
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+      <tr>
+        <td>
+          <label>punch</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          Check this rule when a block is punched.
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+      <tr>
+        <td>
+          <label>trample</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          Check this rule when a block is walked on.
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Rule Sub-elements
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th style={{ minWidth: "125px" }}>Element</th>
+        <th>Description</th>
+        <th>Value/Children</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<filter>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          Filter what blocks get modified by this rule.
+        </td>
+        <td>
+          <a href="/modules/filters">Filters</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<region>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          The region this rule applies to.
+        </td>
+        <td>
+          <a href="/modules/regions">Regions</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<kit>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          The kit to give players when this rule applies.
+        </td>
+        <td>
+          <a href="/modules/kits">Kits</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<drops>`}</label>
+        </td>
+        <td>The items which get dropped when a matching block is mined.</td>
+        <td>
+          <a href="/modules/items">Items</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<experience>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be this sub-element or an attribute."
+          >
+            Property
+          </span>
+          The amount of XP that gets dropped.
+        </td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<replacement>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be this sub-element or an attribute."
+          >
+            Property
+          </span>
+          What to replace the mined block with.
+        </td>
+        <td>
+          <a href="/reference/inventory#material_matchers">
+            Single Material Pattern
+          </a>
+        </td>
+        <td>
+          <span className="badge badge--secondary">Air</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<wrongtool>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          Drop items regardless of what tool was used to mine the block.
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<punch>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          Check this rule when a player in adventure mode punches a block.
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<trample>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          Check this rule when a block is walked on.
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<fall-chance>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          The percentage of blocks that will change to falling blocks when exploded.
+        </td>
+        <td>
+          <span className="badge badge--primary">0 - 1.0</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<land-chance>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          The percentage of falling blocks that will change back to real blocks when
+          they land.
+        </td>
+        <td>
+          <span className="badge badge--primary">0 - 1.0</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<fall-speed>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          A multiplier for the velocity of the blocks flying out from a explosion.
+        </td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Block Drops Item Attributes</th>
+        <th>Description</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>chance</label>
+        </td>
+        <td>Chance that this item will actually be dropped.</td>
+        <td>
+          <span className="badge badge--primary">0 - 1.0</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+The `<filter>` element is used to limit the rule to particular blocks. If multiple filters are listed, the rule will apply when _any_ of them match. This filter is usually used to only filter what blocks the rule applies to. If filters such as `<team>` are used then no items or XP will drop if the block is mined by a non-matching player, the rules `<replacement>` material will still take effect however.
+
+Items specified in the `<drops>` element can have any of the item attributes such as custom names, enchantments, attributes, etc. They can also have a special `chance` attribute specifying the chance that they will actually be dropped. This value can range from 0 to 1, a chance of 0.5 would mean that the item will at average drop 50% of the time.
+
+By default, custom drops won't appear if a block is mined with the "wrong" tool, e.g., stone mined with a shovel.
+If `wrongtool` is set to true, the custom drops will happen regardless of what tool was used.
+
+_Examples_
+
+```xml
+<block-drops>
+    <rule wrong-tool="false">
+        <region>
+            <cuboid min="1,2,3" max="4,5,6"/>
+        </region>
+        <!-- Make iron blocks and ore drop iron ingots, and 1 XP -->
+        <filter>
+            <any>
+                <material>iron ore</material>
+                <material>iron block</material>
+            </any>
+        </filter>
+        <drops>
+            <item material="iron ingot"/>
+        </drops>
+        <experience>1</experience>
+        <!-- Replace mined iron blocks and ore with stone -->
+        <replacement>stone</replacement>
+    </rule>
+</block-drops>
+```
+
+```xml
+<block-drops>
+    <!-- Emerald ore blocks drop ore instead of emerald items, -->
+    <!-- with a 50% chance of also dropping a stone block. -->
+    <rule>
+        <filter>
+            <material>emerald ore</material>
+        </filter>
+        <drops>
+            <item material="emerald ore"/>
+            <item chance="0.5" material="stone"/>
+        </drops>
+    </rule>
+</block-drops>
+```
+
+```xml
+<block-drops>
+    <!-- When a chest is broken give the player the 'chest-kit'. -->
+    <rule kit="chest-kit">
+        <filter>
+            <material>chest</material>
+        </filter>
+    </rule>
+</block-drops>
+```
+
+#### Block Punching
+
+The `punch` attribute or sub-element specifies if that rule is checked when players in adventure mode punch a block. A rule with the punch attribute set to true will still apply when a block is broken, to change this behavior the `<cause>punch<cause>` or `<cause>mine<cause>` filters can be used.
+
+```xml
+<block-drops>
+    <!-- 10% chance that a leaf block will drop a stick when it's punched or broken -->
+    <rule punch="true">
+        <filter>
+            <material>leaves</material>
+        </filter>
+        <drops>
+            <item chance="0.1" material="stick"/>
+        </drops>
+    </rule>
+</block-drops>
+```
+
+#### Block Trampling
+
+Setting the `trample` attribute or sub-element to true allows customization of what happens to a block when a player walks over it.
+This can be used to turn grass into dirt where players walk, or to drop a specific item when a player walks over a block.
+
+A rule with trample set to true will still apply when a player breaks a specified block, a `<cause>trample</cause>` filter can be used to disable this behavior.
+
+Additionally the `<sprinting/>`, `<walking/>` & `<crouching/>` filters used in combination with a random filter can be used to modify the chance that a trample rule will apply.
+
+```xml
+<block-drops>
+    <rule trample="true">
+        <filter>
+            <all>
+                <material>grass</material>
+                <cause>trample</cause>
+                <any>
+                    <all>
+                        <sprinting/>
+                        <random>0.3</random>
+                    </all>
+                    <all>
+                        <walking/>
+                        <random>0.1</random>
+                    </all>
+                    <all>
+                        <crouching/>
+                        <random>0.05</random>
+                    </all>
+                </any>
+            </all>
+        </filter>
+        <replacement>dirt</replacement>
+    </rule>
+</block-drops>
+```
+
+#### Explosion behavior
+
+The behavior for blocks that become airborne due to explosions can be modified in addition to all the other drop rules.
+
+##### Rule Sub-elements
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th>Value/Children</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<fall-chance>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          The percentage of blocks that will change to falling blocks when exploded.
+        </td>
+        <td>
+          <span className="badge badge--primary">0 - 1.0</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<land-chance>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          The percentage of falling blocks that will change back to real blocks when
+          they land.
+        </td>
+        <td>
+          <span className="badge badge--primary">0 - 1.0</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<fall-speed>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          A multiplier for the velocity of the blocks flying out from a explosion.
+        </td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Examples_
+
+```xml
+<block-drops>
+    <rule>
+        <!-- 50% of blocks broken by an explosion get turned into falling/flying blocks -->
+        <fall-chance>0.5</fall-chance>
+        <!-- 80% of the falling blocks will be placed when they land -->
+        <land-chance>0.8</land-chance>
+    </rule>
+
+    <!-- Increase the speed of flying blocks by 50% in the central region -->
+    <rule fall-speed="1.5">
+        <region>
+            <region id="central-region"/>
+        </region>
+    </rule>
+</block-drops>
+```

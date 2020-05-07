@@ -48,6 +48,12 @@ module.exports = {
       "modules/gear/kill-rewards",
       "modules/gear/lootables",
     ],
+    Blocks: [
+      "modules/blocks/blockdrops",
+      "modules/blocks/falling-blocks",
+      "modules/blocks/renewables",
+      "modules/blocks/structures",
+    ],
   },
   Reference: {
     Items: ["reference/items/inventory"],
