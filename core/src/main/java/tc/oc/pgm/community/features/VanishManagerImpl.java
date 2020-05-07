@@ -17,7 +17,6 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
 import net.kyori.text.format.TextDecoration;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -160,21 +159,15 @@ public class VanishManagerImpl implements VanishManager, Listener {
         .getBukkit()
         .hasPermission(Permissions.VANISH)) { // Player is not vanished, but has permission to
 
-      // If majority of staff are vanished, auto vanish to keep hidden. Or if player logs in via a
-      // "vanish" subdomain.
+      // Automatic vanish if player logs in via a "vanish" subdomain.
       String domain = loginSubdomains.getIfPresent(player.getId());
-      boolean staff = checkStaffCount();
-      if (staff || domain != null) {
+      if (domain != null) {
         player.setVanished(true);
         addVanished(player);
 
-        if (staff) {
-          player.sendWarning(TranslatableComponent.of("vanish.login.auto", TextColor.GRAY));
-        } else if (domain != null) {
-          player.sendWarning(
-              TranslatableComponent.of("vanish.login.domain", TextColor.GRAY)
-                  .args(TextComponent.of(domain, TextColor.AQUA)));
-        }
+        player.sendWarning(
+            TranslatableComponent.of("vanish.login.domain", TextColor.GRAY)
+                .args(TextComponent.of(domain, TextColor.AQUA)));
       }
     }
   }
@@ -182,17 +175,6 @@ public class VanishManagerImpl implements VanishManager, Listener {
   @EventHandler
   public void checkMatchPlayer(MatchPlayerAddEvent event) {
     event.getPlayer().setVanished(isVanished(event.getPlayer().getId()));
-  }
-
-  private boolean checkStaffCount() {
-    int totalStaff =
-        Bukkit.getOnlinePlayers().stream()
-                .filter(p -> p.hasPermission(Permissions.VANISH))
-                .collect(Collectors.toList())
-                .size()
-            - 1; // Subtract the joining player
-    int vanished = getOnlineVanished().size();
-    return vanished > (totalStaff / 2);
   }
 
   private boolean isVanishSubdomain(String address) {
