@@ -53,6 +53,11 @@ table tr {
 table th {
   border-color: rgb(72, 77, 91, 0.2);
   background-color: rgb(72, 77, 91, 0.1);
+  padding: 8px;
+}
+
+table tbody tr th {
+  padding: 3px;
 }
 
 table td {
