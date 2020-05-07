@@ -3,6 +3,8 @@ package tc.oc.pgm.community.features;
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Switch;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.UUID;
@@ -15,10 +17,13 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
 import net.kyori.text.format.TextDecoration;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import tc.oc.pgm.api.PGM;
@@ -133,16 +138,65 @@ public class VanishManagerImpl implements VanishManager, Listener {
   }
 
   /* Events */
+  private final Cache<UUID, String> loginSubdomains =
+      CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.SECONDS).build();
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onPreJoin(PlayerLoginEvent event) {
+    Player player = event.getPlayer();
+    if (player.hasPermission(Permissions.VANISH)
+        && !isVanished(player.getUniqueId())
+        && isVanishSubdomain(event.getHostname())) {
+      loginSubdomains.put(player.getUniqueId(), event.getHostname());
+    }
+  }
+
   @EventHandler(priority = EventPriority.MONITOR)
   public void onJoin(PlayerJoinEvent event) {
-    if (isVanished(event.getPlayer().getUniqueId())) {
-      matchManager.getPlayer(event.getPlayer()).setVanished(true);
+    MatchPlayer player = matchManager.getPlayer(event.getPlayer());
+    if (isVanished(player.getId())) { // Player is already vanished
+      player.setVanished(true);
+    } else if (player
+        .getBukkit()
+        .hasPermission(Permissions.VANISH)) { // Player is not vanished, but has permission to
+
+      // If majority of staff are vanished, auto vanish to keep hidden. Or if player logs in via a
+      // "vanish" subdomain.
+      String domain = loginSubdomains.getIfPresent(player.getId());
+      boolean staff = checkStaffCount();
+      if (staff || domain != null) {
+        player.setVanished(true);
+        addVanished(player);
+
+        if (staff) {
+          player.sendWarning(TranslatableComponent.of("vanish.login.auto", TextColor.GRAY));
+        } else if (domain != null) {
+          player.sendWarning(
+              TranslatableComponent.of("vanish.login.domain", TextColor.GRAY)
+                  .args(TextComponent.of(domain, TextColor.AQUA)));
+        }
+      }
     }
   }
 
   @EventHandler
   public void checkMatchPlayer(MatchPlayerAddEvent event) {
     event.getPlayer().setVanished(isVanished(event.getPlayer().getId()));
+  }
+
+  private boolean checkStaffCount() {
+    int totalStaff =
+        Bukkit.getOnlinePlayers().stream()
+                .filter(p -> p.hasPermission(Permissions.VANISH))
+                .collect(Collectors.toList())
+                .size()
+            - 1; // Subtract the joining player
+    int vanished = getOnlineVanished().size();
+    return vanished > (totalStaff / 2);
+  }
+
+  private boolean isVanishSubdomain(String address) {
+    return address.startsWith("vanish"); // TODO Maybe allow config value?
   }
 
   private void sendHotbarVanish(MatchPlayer player, boolean flashColor) {
