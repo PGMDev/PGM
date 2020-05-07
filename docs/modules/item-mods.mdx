@@ -1,0 +1,371 @@
+---
+id: item-mods
+title: Item Mods
+---
+
+The item mods module allows modification of all items present on a map or created during the match. This can be used, for example, to make all gold swords unbreakable or give all items of a specific type a custom name.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th />
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<item-mods> </item-mods>`}</label>
+        </td>
+        <td>
+          The item mods node, containing all the individual modification rules.
+        </td>
+        <td />
+      </tr>
+      <tr>
+        <th>Sub-elements</th>
+        <th />
+        <th>Value/Children</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<rule> </rule>`}</label>
+        </td>
+        <td>A single item modification rule.</td>
+        <td>
+          <span className="badge badge--secondary">Rule Sub-Elements</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Rule Sub-Elements
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th>Value/Children</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<match> </match>`}</label>
+        </td>
+        <td>
+          <span className="badge badge--danger">Required</span>
+          <span
+            className="badge badge--warning"
+            title="Only one of this child permitted per parent"
+          >
+            Unique
+          </span>
+          The material or materials to modify.
+        </td>
+        <td>
+          <span className="badge badge--secondary">Match Sub-Elements</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<modify> </modify>`}</label>
+        </td>
+        <td>
+          <span className="badge badge--danger">Required</span>
+          <span
+            className="badge badge--warning"
+            title="Only one of this child permitted per parent"
+          >
+            Unique
+          </span>
+          The attributes to modify on the specified material(s).
+        </td>
+        <td>
+          <a href="#itemmeta">Item Meta</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Match Sub-Elements
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th>Value/Children</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<material> </material>`}</label>
+        </td>
+        <td>An individual material to match.</td>
+        <td>
+          <a href="/reference/inventory#material_matchers">
+            Single Material Pattern
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<all-materials/>`}</label>
+        </td>
+        <td>Match all materials.</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<all-blocks/>`}</label>
+        </td>
+        <td>Match all block type materials.</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Examples_
+
+```xml
+<item-mods>
+    <rule>
+        <match>
+            <material>Iron Sword</material>
+        </match>
+        <modify unbreakable="true">
+            <enchantment level="1">Knockback</enchantment>
+        </modify>
+    </rule>
+</item-mods>
+```
+
+```xml
+<item-mods>
+    <rule>
+        <match>
+            <material>Bow</material>
+        </match>
+        <modify show-enchantments="false" unbreakable="true">
+            <enchantment level="2">Infinity</enchantment>
+        </modify>
+    </rule>
+</item-mods>
+```
+
+### Item Meta
+
+The following attributes and sub-elements can be used with the `<modify>` element to modify an item or block.
+While these are the same attributes as used in item kits
+the modify element does not currently support the projectile or grenade attributes.
+
+##### Modify Sub-Elements
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<enchantment> </enchantment>`}</label>
+        </td>
+        <td>This item's enchantments.</td>
+        <td>
+          <a href="/modules/items#enchantments">Enchantments</a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<effect> </effect>`}</label>
+        </td>
+        <td>A custom potion effect, only applies for potion items.</td>
+        <td>
+          <a href="/modules/potions">Potion Effect</a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<attribute> </attribute>`}</label>
+        </td>
+        <td>Custom attributes for this item.</td>
+        <td>
+          <a href="/modules/items#attributes">Attribute Modifiers</a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<can-destroy> </can-destroy>`}</label>
+        </td>
+        <td>The materials that can be mined with the item.</td>
+        <td>
+          <a href="/modules/items#can-destroy">Can Destroy</a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<can-place-on> </can-place-on>`}</label>
+        </td>
+        <td>Materials that the item can be placed on.</td>
+        <td>
+          <a href="/modules/items#can-destroy">Can Place On</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Modify Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>name</label>
+        </td>
+        <td>The item's display name.</td>
+        <td>
+          <span className="badge badge--primary">String</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>lore</label>
+        </td>
+        <td>Custom lore string.</td>
+        <td>
+          <span className="badge badge--primary">String</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>unbreakable</label>
+        </td>
+        <td>
+          Specify if this item is unbreakable, hides the durability bar in
+          minecraft.
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+      <tr>
+        <td>
+          <label>color</label>
+        </td>
+        <td>
+          Leather armor color as a hexadecimal color. <label>RRGGBB</label>
+          <br />
+          <i>Only applies to leather armor items.</i>
+        </td>
+        <td>
+          <span className="badge badge--primary">Hex Color</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>potion</label>
+        </td>
+        <td>
+          Potion type
+          <br />
+          <i>Only applies to potion items.</i>
+        </td>
+        <td>
+          <a href="http://minecraft.gamepedia.com/Potion#Data_values">
+            Potion ID
+          </a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>show-enchantments</label>
+        </td>
+        <td>Show enchantments in the item tooltip.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+      <tr>
+        <td>
+          <label>show-attributes</label>
+        </td>
+        <td>Show attribute modifiers in the item tooltip.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+      <tr>
+        <td>
+          <label>show-unbreakable</label>
+        </td>
+        <td>Show the unbreakable property in the item tooltip.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+      <tr>
+        <td>
+          <label>show-can-destroy</label>
+        </td>
+        <td>Show the breakable block list in the item tooltip.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+      <tr>
+        <td>
+          <label>show-can-place-on</label>
+        </td>
+        <td>Show the blocks the item can be placed on in the item tooltip.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+      <tr>
+        <td>
+          <label>show-other</label>
+        </td>
+        <td>Show various other things in the item tooltip.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

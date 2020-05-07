@@ -1,0 +1,218 @@
+---
+id: repair-remove-keep
+title: Repair, Remove & Keep
+---
+
+### Tool Repair
+
+Defines tools that will be automatically repaired when dropped and picked up again. This will also merge items that are picked up, i.e., picking up an iron sword would result in it merging with your sword and repairing it. Repaired items will keep their enchantment, unlike vanilla minecraft where they will not.
+
+This also works with non-tool items such as arrows. When people pick up item in the `<toolrepair>` module and they already have one of the same kind it gets merged into the existing item, if they don't have it they get it like normal. Repairing arrows instead of removing them has the advantage of the player being able to accidental drop one and not lose it.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th />
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<toolrepair> </toolrepair>`}</label>
+        </td>
+        <td>
+          A node containing all the tools that will be repaired when picked up.
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>Sub-elements</th>
+        <th />
+        <th>Value/Children</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<tool> </tool>`}</label>
+        </td>
+        <td>
+          A single tool that will be repaired, can be anything with durability.
+        </td>
+        <td>
+          <a href="/reference/inventory#material_matchers">Material Name</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Example_
+
+```xml
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+</toolrepair>
+```
+
+### Item Remove
+
+Defines items that will be deleted when dropped on the map. Also works when items are destroyed, such as seeds from tall grass, etc.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th />
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<itemremove> </itemremove>`}</label>
+        </td>
+        <td>
+          A node containing all the items that will be removed when dropped.
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>Sub-elements</th>
+        <th />
+        <th>Value/Children</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<item> </item>`}</label>
+        </td>
+        <td>The item that will be removed when dropped.</td>
+        <td>
+          <a href="/reference/inventory#material_matchers">Material Name</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Example_
+
+```xml
+<itemremove>
+    <item>arrow</item>
+    <item>cooked fish</item>
+    <item>diamond helmet</item>
+    <item>iron chestplate</item>
+</itemremove>
+```
+
+### Item Keep
+
+Defines items that will be kept on death. If there is a spawn kit, kept items will be given back _after_ the kit is applied, except for equipped armor, which will replace any armor in the kit.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th />
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<itemkeep> </itemkeep>`}</label>
+        </td>
+        <td>A node containing all the items kept when respawning.</td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>Sub-elements</th>
+        <th />
+        <th>Value/Children</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<item> </item>`}</label>
+        </td>
+        <td>
+          The item that will remain in a player's inventory when they die and
+          respawn.
+        </td>
+        <td>
+          <a href="/reference/inventory#material_matchers">Material Name</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Example_
+
+```xml
+<itemkeep>
+    <item>diamond sword</item>
+    <item>tnt</item>
+</itemkeep>
+```
+
+### Armor Keep
+
+Similar to `<itemkeep>` except that the specified items are only kept if they are equipped in an armor slot.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th style={{ minWidth: "210px" }}>Element</th>
+        <th>Description</th>
+        <th />
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<armorkeep> </armorkeep>`}</label>
+        </td>
+        <td>
+          A node containing all the
+          <b>equipped</b>
+          armor kept when respawning.
+        </td>
+        <td />
+      </tr>
+      <tr>
+        <th>Sub-elements</th>
+        <th />
+        <th>Value/Children</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<item> </item>`}</label>
+        </td>
+        <td>
+          A equipped armor item that will remain in a player's inventory when
+          they die and respawn.
+        </td>
+        <td>
+          <a href="/reference/inventory#material_matchers">Material Name</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Example_
+
+```xml
+<armorkeep>
+    <item>iron helmet</item>
+    <item>iron chestplate</item>
+    <item>iron leggings</item>
+    <item>iron boots</item>
+</armorkeep>
+```

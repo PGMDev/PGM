@@ -1,0 +1,461 @@
+---
+id: crafting
+title: Crafting Recipes
+---
+
+The crafting module allows custom shaped and shapeless crafting recipes and smelting products. Vanilla recipes for a specific material can also be disabled to prevent crafting of that material except with the new recipe.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th />
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<crafting> </crafting>`}</label>
+        </td>
+        <td>Node containing the custom crafting recipes.</td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>Sub-elements</th>
+        <th />
+        <th>Value/Children</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<shaped>`}</label>
+        </td>
+        <td>A shaped crafting recipe node.</td>
+        <td>
+          <span className="badge badge--secondary">
+            Shaped Recipe Sub-elements
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<shapeless>`}</label>
+        </td>
+        <td>A custom shapeless recipe node.</td>
+        <td>
+          <span className="badge badge--secondary">
+            Shapeless Recipe Sub-elements
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<smelt>`}</label>
+        </td>
+        <td>A custom smelting recipe.</td>
+        <td>
+          <span className="badge badge--secondary">
+            Smelt Recipe Sub-elements
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<disable>`}</label>
+        </td>
+        <td>Disable all vanilla recipes for this item.</td>
+        <td>
+          <a href="/reference/inventory#material_matchers">
+            Single Material Pattern
+          </a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Recipe Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>override</label>
+        </td>
+        <td>
+          Disable all vanilla recipes for the same item. This is just a
+          convenient alternative to the <label>{`<disable>`}</label> element.
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+      <tr>
+        <td>
+          <label>override-all</label>
+        </td>
+        <td>Override all vanilla recipes resulting in this material.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Recipe Sub-elements
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th>Type</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<result>`}</label>
+        </td>
+        <td>
+          <span className="badge badge--danger">Required</span>{" "}
+          <span
+            className="badge badge--warning"
+            title="Only one of this child permitted per parent"
+          >
+            Unique
+          </span>{" "}
+          The result of this recipe, only one result is allowed per recipe.
+          <br />
+          Accepts all attributes and sub-elements of a normal kit item.
+        </td>
+        <td>
+          <a href="/modules/items">Item</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+#### Shaped Recipes
+
+Shaped recipes require that their items are arranged in a specific location on the crafting grid.
+
+The crafting grid is represented inside `<shape>` using `<row>` elements.
+A `<row>` element contains a string with up to 3 symbols specifying the ingredient at that spot in the grid.
+An ingredients symbol is defined in the `<ingredient symbol="">` attribute.
+
+A shaped recipe does not need to specify all 3 rows of a crafting grid, only one row is required.
+All columns in a shaped recipe need to be the same width.
+Blank ingredient spots are specifed with a dot `.`
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th />
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<shaped> </shaped>`}</label>
+        </td>
+        <td>A shaped crafting recipe node.</td>
+        <td />
+      </tr>
+      <tr>
+        <th>Sub-elements</th>
+        <th />
+        <th>Value/Children</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<shape>`}</label>
+        </td>
+        <td>
+          <span className="badge badge--danger">Required</span>{" "}
+          <span
+            className="badge badge--warning"
+            title="Only one of this child permitted per parent"
+          >
+            Unique
+          </span>{" "}
+          An ingredient used in this recipe.
+          <br />
+          <i>Only one shape per recipe is allowed.</i>
+        </td>
+        <td>
+          <label>{`<row>`}</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<ingredient>`}</label>|<label>{`<i>`}</label>
+        </td>
+        <td>
+          <span className="badge badge--danger">Required</span> An ingredient
+          used in this recipe.
+          <br />A shaped recipe requires at least one ingredient.
+        </td>
+        <td>
+          <a href="/reference/inventory#material_matchers">
+            Single Material Pattern
+          </a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Shape Sub-elements
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<row>`}</label>
+        </td>
+        <td>A row in the recipe crafting shape.</td>
+        <td>
+          <span className="badge badge--secondary">Row String</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Shaped Ingredient Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>symbol</label>
+        </td>
+        <td>
+          <span className="badge badge--danger">Required</span>
+          The symbol used to specify this ingredients grid location in the recipe.
+        </td>
+        <td>
+          <span className="badge badge--primary">Single Character</span>
+        </td>
+        <td>A-Z 0-9</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Example_
+
+```xml
+<crafting>
+    <!-- Add custom shaped recipe and disable vanilla recipes for the same item. -->
+    <shaped override="true">
+        <result material="stone pickaxe">
+            <enchantment level="2">durability</enchantment>
+        </result>
+        <shape>
+            <row>FFF</row>
+            <row>.S.</row>
+            <row>.S.</row>
+        </shape>
+        <ingredient symbol="F">flint</ingredient >
+        <ingredient symbol="S">stick</i>
+    </shaped>
+
+    <!-- 3x1 recipe, cheaper gold ingots -->
+    <shaped override="true">
+        <result material="gold ingot"/>
+        <shape>
+            <row>GGG</row>
+        </shape>
+        <ingredient symbol="G">gold nugget</ingredient >
+    </shaped>
+</crafting>
+```
+
+#### Shapeless Recipes
+
+Unlike a shaped recipe, shapeless recipes do not require that their items are arranged in any specific way in the crafting grid.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th />
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<shapeless> </shapeless>`}</label>
+        </td>
+        <td>A custom shapeless recipe node.</td>
+        <td />
+      </tr>
+      <tr>
+        <th>Sub-elements</th>
+        <th />
+        <th>Value/Children</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<ingredient>`}</label>|<label>{`<i>`}</label>
+        </td>
+        <td>
+          <span className="badge badge--danger">Required</span>
+          An ingredient used in this recipe.
+          <br />A shapeless recipe requires at least one ingredient.
+        </td>
+        <td>
+          <a href="/reference/inventory#material_matchers">
+            Single Material Pattern
+          </a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+#### Shapeless Ingredient attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>amount</label>
+        </td>
+        <td>
+          Amount of items of this type required for this recipe.
+          <br />
+          <i>
+            Items must be in separate slots, not stacked, for this recipe to
+            work.
+          </i>
+        </td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td>1-9</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Example_
+
+```xml
+<crafting>
+    <shapeless>
+        <result material="redstone"/>
+        <ingredient>sugar</ingredient>
+        <ingredient amount="3">ink sack:1</ingredient>
+    </shapeless>
+</crafting>
+```
+
+#### Smelt Recipes
+
+Smelt recipes specify what a material gets smelted into in a furnace.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th />
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<smelt> </smelt>`}</label>
+        </td>
+        <td>A custom smelting recipe.</td>
+        <td />
+      </tr>
+      <tr>
+        <th>Sub-elements</th>
+        <th />
+        <th>Value/Children</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<ingredient>`}</label>|<label>{`<i>`}</label>
+        </td>
+        <td>
+          <span className="badge badge--danger">Required</span>
+          <span
+            className="badge badge--warning"
+            title="Only one of this child permitted per parent"
+          >
+            Unique
+          </span> An ingredient used in this recipe.
+          <br />A smelt recipe only accepts one ingredient.
+        </td>
+        <td>
+          <a href="/reference/inventory#material_matchers">
+            Single Material Pattern
+          </a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Example_
+
+```xml
+<crafting>
+    <smelt>
+        <result amount="16" material="torch"/>
+        <ingredient>stick</ingredient>
+    </smelt>
+</crafting>
+```

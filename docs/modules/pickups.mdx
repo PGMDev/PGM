@@ -1,0 +1,344 @@
+---
+id: pickups
+title: Pickups
+---
+
+Pickups are used to create a pickup-able kit at a specific location.
+While somewhat similar to a kit applied using a region, pickups are represented by a physical object and have a refresh time.
+
+By default an ender crystal entity is used to show the pickup location.
+When a player walks into the crystal it gives them a kit and then de-spawns.
+The crystal will respawn again at a _random_ location inside the specified region after the set respawn time.
+This means that the pickup's region must be randomize-able, e.g. a `<cuboid>`, `<cylinder>`, `<block>` or `<point>`.
+A `<point>` region does not return a randomized position but can still be used to specify an exact location for a pickup.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Pickups Element</th>
+        <th>Description</th>
+        <th />
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<pickups> </pickups>`}</label>
+        </td>
+        <td>Node containing all the pickups.</td>
+        <td />
+      </tr>
+      <tr>
+        <th>Sub-elements</th>
+        <th />
+        <th>Value/Children</th>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<pickup/>`}</label>
+        </td>
+        <td>A single pickup.</td>
+        <td>
+          <span className="badge badge--secondary">Pickup Sub-elements</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Pickup Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Type</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>id</label>
+        </td>
+        <td>
+          Unique identifier used to reference this pickup from other places in
+          the XML.
+        </td>
+        <td>
+          <span className="badge badge--primary">String</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>name</label>
+        </td>
+        <td>
+          The display name of this pickup, shown above the pickup entity if
+          present.
+        </td>
+        <td>
+          <span className="badge badge--primary">Formatted Text</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>appearance</label>
+        </td>
+        <td>
+          Entity used to show this pickup's location.
+          <br />
+          Currently only accepts <label>ENDER CRYSTAL</label>
+        </td>
+        <td>
+          <a href="/reference/entity_types">Entity Type</a>
+        </td>
+        <td>
+          <span className="badge badge--secondary">Ender Crystal</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>spawn-filter</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          Filter if this pickup is and can be spawned.
+        </td>
+        <td>
+          <a href="/modules/filters">Filter</a>
+        </td>
+        <td>
+          <label>{`<always/>`}</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>pickup-filter</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          Filter who can pick up the pickup's kit.
+        </td>
+        <td>
+          <a href="/modules/filters">Filter</a>
+        </td>
+        <td>
+          <label>{`<always/>`}</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>region</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          <span className="badge badge--danger">Required</span>
+          Region where the pickup entity is placed into.
+        </td>
+        <td>
+          <a href="/modules/regions">Randomize-able Region</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>kit</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          The kit to give to players who pick up this pickup.
+        </td>
+        <td>
+          <a href="/modules/kits">Kit ID</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>respawn-time</label>
+        </td>
+        <td>
+          Time until the pickup entity is re-spawned after being picked up.
+          <br />
+          If set to zero the entity will not despawn and will simply be
+          refreshed.
+        </td>
+        <td>
+          <a href="/reference/time_periods">Time Period</a>
+        </td>
+        <td>3 sec</td>
+      </tr>
+      <tr>
+        <td>
+          <label>pickup-time</label>
+        </td>
+        <td>Time until the pickup is refreshed and can be picked up again.</td>
+        <td>
+          <a href="/reference/time_periods">Time Period</a>
+        </td>
+        <td>3 sec</td>
+      </tr>
+      <tr>
+        <td>
+          <label>effects</label>
+        </td>
+        <td>Show the pickup's particle effects.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+      <tr>
+        <td>
+          <label>sounds</label>
+        </td>
+        <td>Play the pickup's sound effects.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Pickup Sub-elements
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<spawn-filter>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          Filter if this pickup is and can be spawned.
+        </td>
+        <td>
+          <a href="/modules/filters">Filters</a>
+        </td>
+        <td>
+          <label>{`<always/>`}</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<pickup-filter>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          Filter who can pick up the pickup's kit.
+        </td>
+        <td>
+          <a href="/modules/filters">Filters</a>
+        </td>
+        <td>
+          <label>{`<always/>`}</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<region>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          <span className="badge badge--danger">Required</span>
+          Region where this pickup is placed into.
+        </td>
+        <td>
+          <a href="/modules/regions">Randomize-able Regions</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<kit>`}</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this sub-element or an attribute."
+          >
+            Property
+          </span>
+          The kit to give to players who pick up this pickup.
+        </td>
+        <td>
+          <a href="/modules/kits">Kits</a>
+        </td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Examples_
+
+```xml
+<pickups>
+    <pickup id="archer-pickup" name="`3Archery" region="archery-tower" kit="archery-kit" refresh="5m"/>
+    <pickup id="healing-pickup" name="`4Healing Station" region="heal-station" refresh="1m">
+        <kit>
+            <effect duration="10" amplifier="4">instant_health</effect>
+        </kit>
+    </pickup>
+</pickups>
+```
+
+```xml
+<pickups>
+    <pickup id="speed-powerup" region="powerups" kit="speed-kit" refresh="10s"/>
+    <!-- ... -->
+    <pickup id="poison-powerdown" region="powerups" kit="poison-kit" refresh="10s"/>
+</pickups>
+```

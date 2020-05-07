@@ -1,0 +1,85 @@
+---
+id: potions
+title: Potion Effects
+---
+
+The potion `<effect>` element can be used in a kit to apply potion effects directly to a player,
+or used to give a custom effect to a [potion bottle item](/modules/items#potions).
+
+Duration specifies how long the potion will last, and amplifier determines what level / how strong the potion is.
+The effect type is specified by its [Minecraft ID](http://minecraft.gamepedia.com/Data_values#Status_effects).
+Effect ID's should be specified without their `minecraft:` prefix.
+
+##### Effect Element
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<effect> </effect>`}</label>
+        </td>
+        <td>A potion effect</td>
+        <td>
+          <a href="http://minecraft.gamepedia.com/Data_values#Status_effects">
+            Status Effect ID
+          </a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Effect Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>duration</label>
+        </td>
+        <td>Duration of the effect.</td>
+        <td>
+          <a href="/reference/time_periods">Time Period</a>
+        </td>
+        <td>oo (forever)</td>
+      </tr>
+      <tr>
+        <td>
+          <label>amplifier</label>
+        </td>
+        <td>
+          Strength of the effect. The value matches what is displayed to the
+          player in-game, so the first tier of potions have amplifier 1.
+        </td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td>1</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+_Example_
+
+```xml
+<effect duration="10" amplifier="4">resistance</effect>
+<effect duration="900" amplifier="1">jump_boost</effect>
+```

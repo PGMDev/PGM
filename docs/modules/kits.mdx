@@ -1,0 +1,766 @@
+---
+id: kits
+title: Kits
+---
+
+Kits are groups of items and effects that can be given to players in various ways. There are many types of kits, and they can be
+packaged together in any combination.
+
+Kits can be given an `id` attribute, which is used to refer to them in other places.
+Kits can contain other kits directly, and can also inherit items from other kits through the `parents=""` attribute.
+
+Some types of kits are _removable_, meaning that the kit can be automatically taken from the player as well as given. When used in certain contexts,
+these kits will be automatically removed from the player at an appropriate time. This will be noted in the documentation where applicable.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<kit> </kit>`}</label>
+        </td>
+        <td>
+          A kit node, containing specific kit types and/or other kit nodes.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Kit Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>id</label>
+        </td>
+        <td>
+          Unique identifier used to reference this kit from other places in the
+          XML.
+        </td>
+        <td>
+          <span className="badge badge--primary">String</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>filter</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          Filter when this kit is used.
+        </td>
+        <td>
+          <a href="/modules/filters">Filter</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>give</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          Dynamic filter used to apply the kit.
+        </td>
+        <td>
+          <a href="/modules/filters">Dynamic Filter</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>take</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          Dynamic filter used to remove the kit.
+        </td>
+        <td>
+          <a href="/modules/filters">Dynamic Filter</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>lend</label>
+        </td>
+        <td>
+          <span
+            className="badge badge--secondary"
+            title="Can be either this attribute or a sub-element."
+          >
+            Property
+          </span>
+          Kit is applied when the dynamic filter returns allow and removed when it
+          is deny.
+          <br />
+          <i>
+            Cannot combine <label>lend</label> property with <label>give</label>{" "}
+            or <label>take</label>
+          </i>
+        </td>
+        <td>
+          <a href="/modules/filters">Dynamic Filter</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>parents</label>
+        </td>
+        <td>The kit's parent or a comma separated list of parent kits.</td>
+        <td>
+          <span className="badge badge--primary">String</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>force</label>
+        </td>
+        <td>Force apply the kit.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>potion-particles</label>
+        </td>
+        <td>
+          Enable or disable potion particles.
+          <br />
+          <i>Potion particles are disabled for all players by default.</i>
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+      <tr>
+        <td>
+          <label>reset-ender-pearls</label>
+        </td>
+        <td>
+          Reset any ender pearls the player might have thrown before the kit was
+          applied.
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+The effect of the `force` attribute depends on the type of kit it is used with:
+conflicting items or armor will be replaced instead of smartly merged & repaired,
+health & hunger will be set instead of only increased,
+and potion effects can be replaced with the same effect at a lower level or shorter duration.
+
+```xml
+<kits>
+    <kit id="spawn" force="true">
+        <item slot="0" material ="iron sword"/>
+        <item slot="8" amount="32" material="bread"/>
+        <effect duration="5" amplifier="1">instant_health</effect>
+    </kit>
+    <kit id="red" parents="spawn">
+        <helmet color="cd0000" material="leather helmet"/>
+    </kit>
+    <kit id="blue" parents="spawn">
+        <helmet color="0066cc" material="leather helmet"/>
+    </kit>
+</kits>
+```
+
+In the example above players from blue team will get a blue helmet,
+players from red team will get a red helmet; both teams will get the items from the spawn kit.
+The spawn kit contains a 5 second healing potion to help prevent spawn killing.
+
+### Item & Armor Kits
+
+Kits can place items in specific slots of a player's inventory, and equip them with armor. See [Items & Armor](/modules/items) for details.
+
+Item kits will replace any items in the player's inventory in slots present in the kit, but they will not alter any other slots.
+If you want to guarantee that a slot is empty, put an item called "air" in that slot. You can also clear the player's entire inventory
+before applying the kit by using one of the elements below.
+
+##### Inventory Clear Elements
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<clear/>`}</label>
+        </td>
+        <td>Clear the all of the player's inventory including armor slots.</td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<clear-items/>`}</label>
+        </td>
+        <td>Clear only the player's item slots.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+```xml
+<kit id="ender" reset-ender-pearls="true">
+    <item slot="0" amount="1" material="ender pearl"/>
+    <clear/>
+</kit>
+```
+
+### Game-mode Kit
+
+A player's gamemode can be changed when they spawn or enter a region, etc. by using this kit.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<game-mode> </game-mode>`}</label>
+        </td>
+        <td>
+          The gamemode to change the player to.
+          <br />
+        </td>
+        <td>
+          <span className="badge badge--secondary">Game Mode String</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+```xml
+<game-mode>adventure</game-mode>
+```
+
+### Health & Hunger Kits
+
+A player's health and hunger can be modified with kits, this can be useful on maps with the `naturalRegeneration` [gamerule](/modules/gamerules) set to false.
+
+By default health or hunger values are only increased, not decreased. For example, a player with 5 hearts (10 points) will not get a 5 health point kit applied, however a 20 point kit will be applied. This can be overwritten with a kits `force="true"` attribute.
+
+##### Health & Hunger Elements
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<health> </health>`}</label>
+        </td>
+        <td>Health value in 1/2 heart increments.</td>
+        <td>
+          <span className="badge badge--primary">1 - 20</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<saturation> </saturation>`}</label>
+        </td>
+        <td>
+          Food saturation, always equal to or less than the player's food level.
+        </td>
+        <td>
+          <span className="badge badge--primary">Decimal</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>{`<foodlevel> </foodlevel>`}</label>
+        </td>
+        <td>Food level in 1/2 drumstick increments.</td>
+        <td>
+          <span className="badge badge--primary">0 - 20</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+```xml
+<kit id="health" force="true">
+    <health>10</health>
+</kit>
+
+<kit id="hunger">
+    <saturation>20</saturation>
+    <foodlevel>20</foodlevel>
+</kit>
+```
+
+### Potion Effect Kits (removable)
+
+Potion effects can be applied and removed with a kit. See [Potion Effects](/modules/potions) for details about the `<effect>` element.
+
+```xml
+<kit>
+    <effect duration="10" amplifier="4">resistance</effect>
+</kit>
+```
+
+### Attribute Modifier Kits (removable)
+
+Attribute modifiers can be applied directly to players through a kit. Modifying attributes in this way,
+instead of through an item, is a simple way to ensure that the player cannot avoid the effect of
+the modifier.
+
+The only way to remove an attribute modifier is by removing the kit that applied it. A kit cannot
+affect a modifier applied by a different kit.
+
+**Attribute Operations**
+
+- `add` Add amount
+- `base` Multiply amount by base value and add it
+- `multiply` Multiply by amount
+
+##### Attribute Kit Elements
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<attribute> </attribute>`}</label>
+        </td>
+        <td>
+          <a href="/reference/attributes">Attribute name</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Attribute Kit Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>amount</label>
+        </td>
+        <td>Numeric parameter</td>
+        <td>
+          <span className="badge badge--primary">Decimal</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>operation</label>
+        </td>
+        <td>Modifier operation</td>
+        <td>
+          <span className="badge badge--primary">add / base / multiply</span>
+        </td>
+        <td>
+          <label>add</label>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+```xml
+<kit>
+    <attribute operation="add" amount="0.5">generic.movementSpeed</attribute>
+</kit>
+```
+
+### Walk Speed Kit (removable)
+
+Increase or decrease a player's walking speed. The value is a multiplier of the normal walking speed.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<walk-speed> </walk-speed>`}</label>
+        </td>
+        <td>Increase or decrease a player's walking speed.</td>
+        <td>
+          <span className="badge badge--primary">0 - 5.0</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+```xml
+<kit id="rabbit">
+    <!-- 1.8 times faster than a normal player -->
+    <walk-speed>1.8</walk-speed>
+</kit>
+
+<kit id="tortoise">
+    <!-- half as fast as a normal player -->
+    <walk-speed>0.5</walk-speed>
+</kit>
+```
+
+### Knockback Reduction Kit (removable)
+
+Reduce (or increase) the knockback players receive when they have this kit applied.
+The normal input range is `0 - 1.0`. If the value is greater than one the knockback will be increased,
+and anything lower than zero pushes the player to the attacker instead of away from them.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<knockback-reduction> </knockback-reduction>`}</label>
+        </td>
+        <td>Knockback reduction amount</td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+```xml
+<kit>
+    <knockback-reduction>0.5</knockback-reduction>
+</kit>
+```
+
+### Shield Kit (removable)
+
+The shield kit gives the player a shield consisting of absorption hearts that recharge after a set period of time.
+Recharging of the shield is based on when damage was taken last, every time a player is damaged it resets the recharge timer.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<shield health="4" delay="4s"/>`}</label>
+        </td>
+        <td>Give the player a recharging shield of absorption hearts.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Shield Kit Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>health</label>
+        </td>
+        <td>Amount of extra absorption hearts to give to the player.</td>
+        <td>
+          <span className="badge badge--primary">Decimal</span>
+        </td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td>
+          <label>delay</label>
+        </td>
+        <td>
+          Time to wait after a player is last damaged to recharge the shield.
+        </td>
+        <td>
+          <a href="/reference/time_periods">Time Period</a>
+        </td>
+        <td>4s</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+```xml
+<kit>
+    <shield health="4" delay="8s"/>
+</kit>
+```
+
+### Double Jump Kit (removable)
+
+Give players with this kit the ability to double-jump.
+This element's enabled attribute can be used to disable double-jump inside regions, etc.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<double-jump/>`}</label>
+        </td>
+        <td>Give player the double-jump ability.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Double-Jump Attributes
+
+<div className="table-responsive">
+  <table className="table table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>enabled</label>
+        </td>
+        <td>Enable or disable double-jump.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+      <tr>
+        <td>
+          <label>power</label>
+        </td>
+        <td>Power of the double jump (a normal player jump is about 1)</td>
+        <td>
+          <span className="badge badge--primary">Number</span>
+        </td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td>
+          <label>recharge-time</label>
+        </td>
+        <td>Recharge time till the player can double jump again.</td>
+        <td>
+          <a href="/reference/time_periods">Time Period</a>
+        </td>
+        <td>2.5s</td>
+      </tr>
+      <tr>
+        <td>
+          <label>recharge-before-landing</label>
+        </td>
+        <td>
+          Player starts recharging before they land from their previous jump.
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>false</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+```xml
+<kit>
+    <double-jump recharge-before-landing="true"/>
+</kit>
+```
+
+### Fly Kit (removable)
+
+The fly kit gives players which it is applied to the ability to fly.
+It also allows modification of the speed at which they fly.
+If no attributes are specified can-fly defaults to true.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<fly/>`}</label>
+        </td>
+        <td>Control the player's flying ability</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Fly Kit Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>can-fly</label>
+        </td>
+        <td>Set if the player can fly.</td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td>true</td>
+      </tr>
+      <tr>
+        <td>
+          <label>flying</label>
+        </td>
+        <td>
+          Set if the player is currently flying.
+          <br />
+          <i>
+            To enable flying
+            <label>can-fly</label>
+            can not be set to false.
+          </i>
+        </td>
+        <td>
+          <span className="badge badge--primary">true/false</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>fly-speed</label>
+        </td>
+        <td>Set the fly speed multiplier.</td>
+        <td>
+          <span className="badge badge--primary">0 - 10</span>
+        </td>
+        <td>1</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+```xml
+<kit id="fly">
+    <fly/>                    <!-- Allow player to fly -->
+    <fly can-fly="false"/>    <!-- Don't allow player to fly -->
+    <fly flying="true"/>      <!-- Make the player fly right away -->
+    <fly flying="false"/>     <!-- Make the player stop flying right away -->
+</kit>
+```
