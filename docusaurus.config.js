@@ -1,8 +1,8 @@
 module.exports = {
   title: "PGM Documentation",
   tagline: "Documentation for PGM, the original Minecraft PvP Game Manager",
-  url: "https://electroid.github.io/",
-  baseUrl: "/PGM/",
+  url: "https://pgm.dev/",
+  baseUrl: "/",
   favicon: "img/favicon.png",
   organizationName: "Electroid", // Usually your GitHub org/user name.
   projectName: "PGM", // Usually your repo name.
