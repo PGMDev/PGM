@@ -1,0 +1,204 @@
+---
+id: spawners
+title: Spawners
+---
+
+The <label>`<spawners>`</label> module provides an easy way of spawning entities and items into the world, without using actual spawner blocks and NBT editors.
+
+The module uses the same syntax as <a href="/modules/gear/kits">kits</a> to define items and makes use of a specific <a href="/modules/mechanics/regions">region</a> to spawn them in.
+
+<div className="alert alert--warning" style={{ marginBottom: "30px" }}>
+  Currently, only dropped items are supported by this module. Other types of
+  entities may be supported in the future.
+</div>
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th>Value/Children</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<spawners> </spawners>`}</label>
+        </td>
+        <td>
+          The main spawner node containing all defined spawners used in the
+          match.
+        </td>
+        <td>
+          <span className="badge badge--secondary">Spawners</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Spawner Attributes
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>id</label>
+        </td>
+        <td>
+          <span className="badge badge--danger">Required</span>
+          Unique identifier used to reference the spawner from other places in the
+          XML.
+        </td>
+        <td>String</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>spawn-region</label>
+        </td>
+        <td>
+          <span className="badge badge--danger">Required</span>The region in
+          which to spawn the target entities.
+        </td>
+        <td>
+          <a href="/modules/mechanics/regions">Region</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>player-region</label>
+        </td>
+        <td>
+          <span className="badge badge--danger">Required</span>The region used
+          to determine whether the spawner is actively spawning entities. At
+          least 1 player must be in this region for the spawner to be
+          active.{" "}
+        </td>
+        <td>
+          <a href="/modules/mechanics/regions">Region</a>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <label>max-entities</label>
+        </td>
+        <td>Cap of how many entities the spawner can spawn.</td>
+        <td>Number</td>
+        <td>Infinity</td>
+      </tr>
+      <tr>
+        <td>
+          <label>delay</label>
+        </td>
+        <td>Interval in between spawning attempts.</td>
+        <td>
+          <a href="/reference/time_periods">Time Period</a>
+        </td>
+        <td>10s</td>
+      </tr>
+      <tr>
+        <td>
+          <label>min-delay</label>
+        </td>
+        <td>
+          Used to randomize the spawn interval. Combine this with{" "}
+          <label>max-delay</label> to create random intervals in between two
+          values.{" "}
+          <em>
+            Cannot be combined with <label>delay</label>.
+          </em>
+        </td>
+        <td>
+          <a href="/reference/time_periods">Time Period</a>
+        </td>
+        <td>
+          <label>delay</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>max-delay</label>
+        </td>
+        <td>
+          Used to randomize the spawn interval. Combine this with{" "}
+          <label>min-delay</label> to create random intervals in between two
+          values.{" "}
+          <em>
+            Cannot be combined with <label>delay</label>.
+          </em>
+        </td>
+        <td>
+          <a href="/reference/time_periods">Time Period</a>
+        </td>
+        <td>
+          <label>delay</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>filter</label>
+        </td>
+        <td>
+          Filter to further control spawn conditions, will return true if at
+          least one player in <label>player-region</label> meets criteria.{" "}
+        </td>
+        <td>
+          <a href="/modules/mechanics/filters">Filter</a>
+        </td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Spawner Sub-elements
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Description</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>{`<item> </item>`}</label>
+        </td>
+        <td>
+          An item that will be dropped in the <label>spawn-region</label>
+        </td>
+        <td>
+          <a href="/modules/gear/items">Item</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Example
+
+This will spawn golden swords (in stacks of 1) in the red base, provided there is at least 1 person in that base. The swords will spawn in ramdom intervals of 2s - 10s. The <label>filter</label> insures that only players on the red team can trigger the spawner.
+
+```xml
+<spawners>
+    <spawner id="sword-spawner" spawn-region="red-base"  player-region="red-base" max-entities="50" min-delay="2s" max-delay="10s" filter="only-red">
+        <item amount="1" name="`6Golden Sword" material="gold sword"/>
+    </spawner>
+</spawners>
+```
