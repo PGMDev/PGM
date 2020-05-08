@@ -48,6 +48,7 @@
                             <include>org.jdom:jdom2:*</include>
                             <include>net.kyori:text-*:*</include>
                             <include>app.ashcon.intake:intake-*:*</include>
+                            <include>org.eclipse.jgit:jgit:*</include>
                         </includes>
                     </artifactSet>
                     <filters>
@@ -70,6 +71,10 @@
                         <relocation>
                             <pattern>org.jdom2</pattern>
                             <shadedPattern>tc.oc.pgm.lib.org.jdom2</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>org.eclipse</pattern>
+                            <shadedPattern>tc.oc.pgm.lib.org.eclipse</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>
