@@ -24,7 +24,7 @@ public class GitMapSourceFactory extends SystemMapSourceFactory {
   private final File dir;
   // The factory needs to parse the source differently depending on if credentials are provided
   private static boolean credentialsProvided;
-  private final boolean updateOnRestart;
+  private boolean updateOnRestart;
 
   private CredentialsProvider provider = null;
 
@@ -64,7 +64,10 @@ public class GitMapSourceFactory extends SystemMapSourceFactory {
     if (!masterDir.exists()) masterDir.mkdir();
 
     // Ensure the git map directory exists before trying to update it
-    if (!dir.exists()) dir.mkdir();
+    if (!dir.exists()) {
+      this.updateOnRestart = true;
+      dir.mkdir();
+    }
     if (!dir.isDirectory())
       throw new MapMissingException(
           dir.getPath(), "Unable to read git directory " + dir.getName() + "(Is it a file?)");
