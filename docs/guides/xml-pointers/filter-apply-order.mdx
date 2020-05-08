@@ -1,0 +1,47 @@
+---
+id: filter-apply-order
+title: Filter Apply Order
+---
+
+After proto `1.3.3` and above, the order that you [apply](/modules/regions#applying) filters to regions affects their behavior.
+Here's an example.
+
+Let's start out with a basic filter that **denies** everything **except** TNT.
+
+```xml
+<filter name="only-tnt">
+    <block>tnt</block>
+</filter>
+```
+
+Now let's apply this filter to `Region A`, and also apply a filter to `Region B` that denies all blocks.
+
+```xml
+<apply block="only-tnt" region="region-a"/>
+
+<apply block="never" region="region-b"/>
+```
+
+However, there is one slight complication. `Region B` is inside of `Region A`.
+So which filter will override the other? This is where the apply order comes in handy.
+
+![Apply Order Image](https://i.imgur.com/tFkLV5O.png)
+
+The order that you put the `<apply>`'s can change the outcome when something gets filtered.
+In the previous example, the `only-tnt` filter would always override the `never` filter since it is above it.
+The apply for `region B` won't get checked since it overlaps completely with `region A` and `region A` never returns abstain.
+
+If we changed the order of the filters:
+
+```xml
+<apply block="never" region="region-b"/>
+<apply block="only-tnt" region="region-a"/>
+```
+
+Now you cannot place blocks in `Region B`, but outside of it in `Region A` you can only place TNT blocks.
+
+Although this may not be an issue for many maps such as a Blitz map or a TDM,
+this is a crucial concept for many DTC/DTM/CTW maps that use the `<void/>` filter.
+Usually it's best to have the `<void/>` filter at the lowest priority (at the bottom of the list).
+
+A map developer will be able to help you through this process to ensure that your map's regions and filters are properly working.

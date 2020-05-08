@@ -72,7 +72,16 @@ module.exports = {
     ],
   },
   Guides: {
-    "XML Pointers": ["guides/xml-pointers/regions"],
+    "XML Pointers": [
+      "guides/xml-pointers/regions",
+      "guides/xml-pointers/filter-apply-order",
+      "guides/xml-pointers/conventions",
+    ],
+    "Packaging Maps": [
+      "guides/packaging/cleaning-files",
+      "guides/packaging/pruning-chunks",
+      "guides/packaging/compiling-and-releasing",
+    ],
     Contribute: ["guides/contribute/migrate"],
   },
 };
