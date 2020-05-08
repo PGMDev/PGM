@@ -27,7 +27,7 @@ public abstract class PathMapSourceFactory implements MapSourceFactory {
 
   protected abstract MapSource loadSource(String dir);
 
-  private Stream<MapSource> loadNewSource(@Nullable String path) {
+  Stream<MapSource> loadNewSource(@Nullable String path) {
     if (path == null || !path.startsWith(this.path) || sources.containsKey(path)) {
       return Stream.empty();
     }

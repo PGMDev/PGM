@@ -103,6 +103,7 @@ import tc.oc.pgm.listeners.ServerPingDataListener;
 import tc.oc.pgm.listeners.WorldProblemListener;
 import tc.oc.pgm.map.MapLibraryImpl;
 import tc.oc.pgm.map.source.DefaultMapSourceFactory;
+import tc.oc.pgm.map.source.GitMapSourceFactory;
 import tc.oc.pgm.map.source.SystemMapSourceFactory;
 import tc.oc.pgm.match.MatchManagerImpl;
 import tc.oc.pgm.match.NoopVanishManager;
@@ -274,12 +275,12 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     logger.setLevel(config.getLogLevel());
 
     for (String source : config.getMapSources()) {
-      final MapSourceFactory factory;
+      MapSourceFactory factory;
       try {
-        factory =
-            source.equalsIgnoreCase("default")
-                ? DefaultMapSourceFactory.INSTANCE
-                : new SystemMapSourceFactory(source);
+        if (source.equalsIgnoreCase("default")) factory = DefaultMapSourceFactory.INSTANCE;
+        if (source.startsWith("https://") || source.startsWith("http://"))
+          factory = new GitMapSourceFactory(source, logger);
+        else factory = new SystemMapSourceFactory(source);
       } catch (Throwable t) {
         t.printStackTrace();
         continue;
