@@ -69,8 +69,8 @@ public class SpawnerModule implements MapModule {
         Duration minDelay = XMLUtils.parseDuration(minDelayAttr, delay);
         Duration maxDelay = XMLUtils.parseDuration(maxDelayAttr, delay);
 
-        if (TimeUtils.isShorterThan(maxDelay, minDelay)) {
-          throw new InvalidXMLException("Max delay cannot be smaller than min delay", element);
+        if (maxDelay.compareTo(minDelay) <= 0) {
+          throw new InvalidXMLException("Max-delay must be longer than min-delay", element);
         }
 
         int maxEntities =
