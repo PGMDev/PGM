@@ -33,7 +33,7 @@ module.exports = {
           position: "left",
         },
         {
-          to: "docs/modules/general/main",
+          to: "docs/examples/airship-battle",
           activeBasePath: "docs",
           label: "Examples",
           position: "left",

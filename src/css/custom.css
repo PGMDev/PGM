@@ -85,3 +85,9 @@ table label {
   padding: 1px 4px;
   display: inline-block;
 }
+
+.icon-right {
+  float: right;
+  margin-left: 8px;
+  font-style: normal;
+}

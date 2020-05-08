@@ -84,4 +84,5 @@ module.exports = {
     ],
     Contribute: ["guides/contribute/migrate"],
   },
+  Examples: ["examples/airship-battle"],
 };
