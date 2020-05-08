@@ -22,7 +22,7 @@ public class GitMapSourceFactory extends SystemMapSourceFactory {
   private final String gitURI;
   private final Logger logger;
   private final File dir;
-  //The factory needs to parse the source differently depending on if credentials are provided
+  // The factory needs to parse the source differently depending on if credentials are provided
   private static boolean credentialsProvided;
   private final boolean updateOnRestart;
 
@@ -31,7 +31,8 @@ public class GitMapSourceFactory extends SystemMapSourceFactory {
   private static File getFile(String source) {
     credentialsProvided = source.contains(";");
 
-    int uniqueIdentifier = Math.abs(source.hashCode()); //Prevents errors on similar repository names
+    int uniqueIdentifier =
+        Math.abs(source.hashCode()); // Prevents errors on similar repository names
 
     String dirName;
     if (credentialsProvided)
@@ -53,11 +54,10 @@ public class GitMapSourceFactory extends SystemMapSourceFactory {
     this.dir = getFile(source);
     this.updateOnRestart = updateOnRestart;
 
-    //Disable if JGit is not present
+    // Disable if JGit is not present
     if (Class.forName("org.eclipse.jgit.api.Git") == null) {
       throw new MapMissingException(
-          dir.getPath(),
-          "Unable to load JGit(was it excluded when compiling the jar?)");
+          dir.getPath(), "Unable to load JGit(was it excluded when compiling the jar?)");
     }
 
     File masterDir = new File("./gitMaps");
@@ -94,7 +94,7 @@ public class GitMapSourceFactory extends SystemMapSourceFactory {
       }
     }
 
-    //Load maps separately so it still loads downloaded maps if git connection fails
+    // Load maps separately so it still loads downloaded maps if git connection fails
     try {
       paths = loadAllPaths();
     } catch (IOException e) {

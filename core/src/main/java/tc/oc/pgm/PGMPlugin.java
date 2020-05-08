@@ -276,27 +276,33 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     for (String source : config.getMapSources()) {
       MapSourceFactory factory = null;
       try {
-        if (source.equalsIgnoreCase("default")) factory = new GitMapSourceFactory("https://github.com/KingOfSquares/DefaultMaps", logger, false);
-        if (source.startsWith("git;")){
+        if (source.equalsIgnoreCase("default"))
+          factory =
+              new GitMapSourceFactory(
+                  "https://github.com/KingOfSquares/DefaultMaps", logger, false);
+        if (source.startsWith("git;")) {
           String gitSource = source.substring(4);
           factory = new GitMapSourceFactory(gitSource, logger, true);
         }
         if (new File(source).exists()) factory = new SystemMapSourceFactory(source);
-      } catch(StringIndexOutOfBoundsException e){ //Git source parsing exception
-        factory = null; //Trigger the map source error message
-      }
-
-      catch (Throwable t) {
+      } catch (StringIndexOutOfBoundsException e) { // Git source parsing exception
+        factory = null; // Trigger the map source error message
+      } catch (Throwable t) {
         t.printStackTrace();
         continue;
       }
 
-      if(factory == null) {
+      if (factory == null) {
         logger.log(Level.WARNING, "-----MAP SOURCE ERROR-----");
         logger.log(Level.WARNING, "Map source " + source + " is not a valid source");
-        logger.log(Level.INFO, "To add a map source folder outside of the server folder you have to specify the full path");
-        logger.log(Level.INFO, "To add a git source you have to format your source like this: git;URL;USERNAME;PASSWORD");
-        logger.log(Level.INFO, "Username and password only required if the git repository is private");
+        logger.log(
+            Level.INFO,
+            "To add a map source folder outside of the server folder you have to specify the full path");
+        logger.log(
+            Level.INFO,
+            "To add a git source you have to format your source like this: git;URL;USERNAME;PASSWORD");
+        logger.log(
+            Level.INFO, "Username and password only required if the git repository is private");
         logger.log(Level.WARNING, source + " will be ignored until restart");
         logger.log(Level.WARNING, "");
         continue;
