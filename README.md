@@ -14,15 +14,7 @@ Follow the steps below to get a working local installation of this documentation
 2. Once it's done, run `npm start`. This command starts a local development server and opens up a browser window. Most changes are reflected live without needing to restart the server.
 3. Depending where you host it, you can build the website using `npm build` if you intend to upload it yourself, or build it _and_ deploy it to Github pages using `GIT_USER=<Your GitHub username> USE_SSH=true npm deploy`. The later is a convenient way to build the website and push to the `gh-pages` branch.
 
-## Immediate Plans
-
-We are currently migrating all data from the old XML documentation site to this website (and we need help for this! Read on to see how to help).
-
-Once this migration step is finished and this website has safely acquired all old data, we can begin to expand and the website will be ready for users to document additional features. In the meantime, if you find an undocumented feature, please create an Issue for it so it does not go unnoticed.
-
 ## How to Contribute
-
-**`NOTE`**: Help us migrate old data! Check the `Help Migrate Past Files` guide on our website for details.
 
 Before opening a Pull Request, please:
 

@@ -82,7 +82,6 @@ module.exports = {
       "guides/packaging/pruning-chunks",
       "guides/packaging/compiling-and-releasing",
     ],
-    Contribute: ["guides/contribute/migrate"],
   },
   Examples: ["examples/airship-battle"],
 };
