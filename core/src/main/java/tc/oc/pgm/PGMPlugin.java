@@ -278,7 +278,8 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       MapSourceFactory factory;
       try {
         factory = DefaultMapSourceFactory.INSTANCE;
-        if (source.startsWith("https://") || source.startsWith("http://")) factory = new GitMapSourceFactory(source, logger);
+        if (source.startsWith("https://") || source.startsWith("http://"))
+          factory = new GitMapSourceFactory(source, logger);
         if (new File(source).exists()) factory = new SystemMapSourceFactory(source);
       } catch (Throwable t) {
         t.printStackTrace();

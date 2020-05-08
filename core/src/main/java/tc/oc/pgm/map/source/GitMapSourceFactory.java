@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.FetchCommand;
 import org.eclipse.jgit.api.Git;
@@ -33,25 +32,27 @@ public class GitMapSourceFactory extends SystemMapSourceFactory {
     int uniqueIdentifier = Math.abs(source.hashCode());
 
     String dirName;
-    if(credentialsProvided) dirName = (source.substring(source.lastIndexOf("/"), source.indexOf(";")) + "_" + uniqueIdentifier);
+    if (credentialsProvided)
+      dirName =
+          (source.substring(source.lastIndexOf("/"), source.indexOf(";")) + "_" + uniqueIdentifier);
     else dirName = (source.substring(source.lastIndexOf("/") + 1) + "_" + uniqueIdentifier);
-
-
 
     return new File("./gitMaps/" + dirName);
   }
 
-  public GitMapSourceFactory(String source, Logger logger) throws MapMissingException, ClassNotFoundException {
+  public GitMapSourceFactory(String source, Logger logger)
+      throws MapMissingException, ClassNotFoundException {
     super(getFile(source).getPath());
 
-
-    if(credentialsProvided) this.gitURI = source.substring(0, source.indexOf(";"));
+    if (credentialsProvided) this.gitURI = source.substring(0, source.indexOf(";"));
     else this.gitURI = source;
     this.logger = logger;
     this.dir = getFile(source);
 
     if (Class.forName("org.eclipse.jgit.api.Git") == null) {
-      throw new MapMissingException(dir.getPath(), "Unable to load JGit classes(did you exclude them when compiling the jar?)");
+      throw new MapMissingException(
+          dir.getPath(),
+          "Unable to load JGit classes(did you exclude them when compiling the jar?)");
     }
 
     File masterDir = new File("./gitMaps");
@@ -63,8 +64,9 @@ public class GitMapSourceFactory extends SystemMapSourceFactory {
       throw new MapMissingException(
           dir.getPath(), "Unable to read git directory " + dir.getName() + "(Is it a file?)");
 
-    if(credentialsProvided){
-      provider = new UsernamePasswordCredentialsProvider(
+    if (credentialsProvided) {
+      provider =
+          new UsernamePasswordCredentialsProvider(
               source.substring(source.indexOf(";") + 1, source.lastIndexOf(";")),
               source.substring(source.lastIndexOf(";") + 1));
     }
@@ -74,24 +76,25 @@ public class GitMapSourceFactory extends SystemMapSourceFactory {
   public Iterator<? extends MapSource> loadNewSources() throws MapMissingException {
     final Stream<String> paths;
 
-    //Since this is also loaded on startup it includes the check for JGits existence
+    // Since this is also loaded on startup it includes the check for JGits existence
     try {
 
       refreshRepo();
-    }
-    catch (GitAPIException e) {
-      logger.log(Level.WARNING, "Unable to fetch repo " + dir.getName() + ", caused by: " + e.getMessage());
-      if (e instanceof TransportException){
+    } catch (GitAPIException e) {
+      logger.log(
+          Level.WARNING,
+          "Unable to fetch repo " + dir.getName() + ", caused by: " + e.getMessage());
+      if (e instanceof TransportException) {
         logger.log(Level.INFO, "Provide your username and password in the config like this:");
         logger.log(Level.INFO, "URL;USERNAME;PASSWORD");
         logger.log(Level.INFO, "e.g: Github.com/KingOfSquares/maps;KingOfSquares;password1234");
       }
     }
 
-    //Do this seperate so it still loads downloaded maps if git connection fails
-    try{
+    // Do this seperate so it still loads downloaded maps if git connection fails
+    try {
       paths = loadAllPaths();
-    }catch (IOException e) {
+    } catch (IOException e) {
       throw new MapMissingException(dir.getPath(), "Unable to list files in" + dir.getName(), e);
     }
 
@@ -115,7 +118,7 @@ public class GitMapSourceFactory extends SystemMapSourceFactory {
       try {
         CloneCommand clone = Git.cloneRepository().setDirectory(dir).setURI(gitURI);
 
-        if(provider != null) clone.setCredentialsProvider(provider);
+        if (provider != null) clone.setCredentialsProvider(provider);
 
         git = clone.call();
         logger.log(Level.INFO, "Successfully cloned git repository " + dir.getName() + "!");
@@ -123,9 +126,7 @@ public class GitMapSourceFactory extends SystemMapSourceFactory {
         f.printStackTrace();
         throw new MapMissingException(
             dir.getPath(),
-            "Unable to connect to remote git repo "
-                + dir.getName()
-                + ", is the URI correct?",
+            "Unable to connect to remote git repo " + dir.getName() + ", is the URI correct?",
             e);
       }
     }
