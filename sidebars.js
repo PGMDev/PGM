@@ -1,8 +1,7 @@
 module.exports = {
   Modules: {
-    General: ["modules/general/main", "modules/general/includes-conditionals"],
+    General: ["modules/general/main"],
     Information: [
-      "modules/information/tutorial",
       "modules/information/broadcasts",
       "modules/information/rules",
     ],
@@ -46,13 +45,11 @@ module.exports = {
       "modules/gear/projectiles",
       "modules/gear/tnt",
       "modules/gear/kill-rewards",
-      "modules/gear/lootables",
     ],
     Blocks: [
       "modules/blocks/blockdrops",
       "modules/blocks/falling-blocks",
       "modules/blocks/renewables",
-      "modules/blocks/structures",
     ],
   },
   Reference: {

@@ -169,34 +169,6 @@ Filter matchers test for specific conditions or properties of things.
       </tr>
       <tr>
         <td>
-          <label>{`<completed>objective_id</completed>`}</label>
-        </td>
-        <td>
-          <a className="left-ref-link" href="#objectiveFilter">
-            <i className="fa fa-chevron-down"></i>
-          </a>
-          Match if the objective is completed.
-        </td>
-        <td>
-          <span className="badge badge--primary">Dynamic</span>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <label>{`<captured>objective_id</captured>`}</label>
-        </td>
-        <td>
-          <a className="left-ref-link" href="#objectiveFilter">
-            <i className="fa fa-chevron-down"></i>
-          </a>
-          Match players or teams who currently control the objective.
-        </td>
-        <td>
-          <span className="badge badge--primary">Dynamic</span>
-        </td>
-      </tr>
-      <tr>
-        <td>
           <label>{`<flag-carried>flag_id</flag-carried>`}</label>
         </td>
         <td>
@@ -338,34 +310,6 @@ Filter matchers test for specific conditions or properties of things.
       </tr>
       <tr>
         <th colspan="3">Competitor filters (apply to teams, or FFA players)</th>
-      </tr>
-      <tr>
-        <td>
-          <label>{`<rank> </rank>`}</label>
-        </td>
-        <td>
-          <a className="left-ref-link" href="#rank_score">
-            <i className="fa fa-chevron-down"></i>
-          </a>
-          Match if the player or team's rank is within the specified range.
-        </td>
-        <td>
-          <span className="badge badge--primary">Dynamic</span>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <label>{`<score> </score>`}</label>
-        </td>
-        <td>
-          <a className="left-ref-link" href="#rank_score">
-            <i className="fa fa-chevron-down"></i>
-          </a>
-          Match if the player or team's score is within the specified range.
-        </td>
-        <td>
-          <span className="badge badge--primary">Dynamic</span>
-        </td>
       </tr>
       <tr>
         <td>
@@ -710,34 +654,6 @@ These elements must contain either a single filter, or a list of filters, as the
           Mechanisms - apply complex mechanics to other filters
         </th>
       </tr>
-      <tr>
-        <td>
-          <label>{`<players>`}</label>
-        </td>
-        <td>
-          <a className="left-ref-link" href="#players">
-            <i className="fa fa-chevron-down"></i>
-          </a>
-          Count the number of players that match the inner filter.
-        </td>
-        <td>
-          <span className="badge badge--primary">Dynamic</span>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <label>{`<countdown>`}</label>
-        </td>
-        <td>
-          <a className="left-ref-link" href="#countdown">
-            <i className="fa fa-chevron-down"></i>
-          </a>
-          Countdown from the moment that the inner filter matched.
-        </td>
-        <td>
-          <span className="badge badge--primary">Dynamic</span>
-        </td>
-      </tr>
     </tbody>
   </table>
 </div>
@@ -879,20 +795,6 @@ _Examples_
 <random>[0.25, 0.75)</random>
 ```
 
-#### Rank & Score Filters
-
-The rank and score filters match if the team's or player's rank or score is a equal to a single value or within a range of values.<br/>
-The value can be an exact amount or a interval specifying a range. Only whole numbers are valid.
-
-_Examples_
-
-```xml
-<!-- Match if the team (or player in ffa) rank is 3 -->
-<rank>3</rank>
-<!-- Match if team (or player in ffa) has a score from 5 to 10. -->
-<score>[5-10]</score>
-```
-
 #### Player Count Filter
 
 This filter counts the number of players matching a single child filter,
@@ -955,128 +857,6 @@ The child filter can be omitted, in which case all players in the match will be 
     </tbody>
   </table>
 </div>
-
-_Examples_
-
-```xml
-<!-- Match if there are at least 4 players participating -->
-<players min="4"/>
-<!-- Match if there are 1 to 3 players sneaking in region X -->
-<players min="1" max="3">
-    <all>
-        <sneaking/>
-        <region id="X"/>
-    </all>
-</players>
-```
-
-#### Countdown Filter
-
-This filter matches for up to the specified amount of time after the child filter starts matching.
-It never matches when the child filter doesn't match.
-
-##### Countdown Filter Attributes
-
-<div className="table-container">
-  <table>
-    <thead>
-      <tr>
-        <th>Attribute</th>
-        <th>Description</th>
-        <th>Value</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          <label>duration</label>
-        </td>
-        <td>Length of time to match for</td>
-        <td>
-          <span className="badge badge--primary">Time Period</span>
-        </td>
-        <td></td>
-      </tr>
-      <tr>
-        <td>
-          <label>message</label>
-        </td>
-        <td>
-          Optional timer message to display while counting down. Only players
-          who match the filter can see the timer. If the message contains a
-          placeholder, it will be replaced with the remaining time.
-        </td>
-        <td>
-          <span className="badge badge--primary">Message Template</span>
-        </td>
-        <td></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-_Examples_
-
-```xml
-<!-- Countdown 30s from the moment any player picks up the flag -->
-<!-- (you could then use the countdown filter to kill them, teleport them, etc) -->
-<countdown duration="30s" message="You have {0} to capture the flag">
-  <carrying-flag>blue-flag</carrying-flag>
-</countdown>
-```
-
-#### Objective Filters
-
-There are two filter types that test the state of an objective: `<completed>` and `<captured>`.
-Both types require the ID of an objective as the content of the tag.
-The `<completed>` filter matches when the specified objective is completed or captured by anybody e.g.
-when a [destroyable](/modules/gamemode_dtm) is destroyed, a [core](/modules/gamemode_dtc) is leaked, or a [hill](/modules/control_points) is captured by anyone.
-This filter is not affected by the context in which it is applied, and never abstains.
-The `<captured>` filter matches players or teams who currently control the specified objective.
-This filter is useful for objectives that can change ownership, such as [hills](/modules/control_points) and [flags](/modules/gamemode_ctf).
-For other objective types, it will match players/teams who are _allowed_ to complete the objective, if the objective is completed, which is generally not useful.
-This filter will abstain if used in a context that does not involve a specific player or team.
-Alternately, `<captured>` can have a team specified with the `team` attribute.
-Then it will always test that team's control of the objective, regardless of the filtering context, and will never abstain.
-
-##### Capture Filter Attributes
-
-<div className="table-container">
-  <table>
-    <thead>
-      <tr>
-        <th>Attribute</th>
-        <th>Description</th>
-        <th>Value</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          <label>team</label>
-        </td>
-        <td>Match only if the objective is captured/completed by this team.</td>
-        <td>
-          <a href="/modules/teams">Team ID</a>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-_Examples_
-
-```xml
-<!-- Match if red-core has been leaked -->
-<completed>red-core</completed>
-<!-- Match if south-hill is owned by anyone -->
-<completed>south-hill</completed>
-<!-- Match players/teams who own north-hill -->
-<captured>north-hill</captured>
-<!-- Match if blue-team owns central-hill -->
-<captured team="blue-team">central-hill</captured>
-```
 
 #### Flag Filters
 
