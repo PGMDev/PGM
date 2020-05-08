@@ -29,7 +29,7 @@ public class GitMapSourceFactory extends SystemMapSourceFactory {
   private CredentialsProvider provider = null;
 
   private static File getFile(String source) {
-    credentialsProvided = source.contains(";");
+    credentialsProvided = isCredentialsProvided(source);
 
     int uniqueIdentifier =
         Math.abs(source.hashCode()); // Prevents errors on similar repository names
@@ -139,5 +139,11 @@ public class GitMapSourceFactory extends SystemMapSourceFactory {
     fetch.call();
 
     git.reset().setRef("@{upstream}").setMode(ResetCommand.ResetType.HARD).call();
+  }
+
+  private static boolean isCredentialsProvided(String source) {
+    int count = 0;
+    for (int i = 0; i < source.length(); i++) if (source.charAt(i) == ';') count++;
+    return count == 3;
   }
 }
