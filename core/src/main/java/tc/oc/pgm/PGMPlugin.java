@@ -102,7 +102,6 @@ import tc.oc.pgm.listeners.PGMListener;
 import tc.oc.pgm.listeners.ServerPingDataListener;
 import tc.oc.pgm.listeners.WorldProblemListener;
 import tc.oc.pgm.map.MapLibraryImpl;
-import tc.oc.pgm.map.source.DefaultMapSourceFactory;
 import tc.oc.pgm.map.source.GitMapSourceFactory;
 import tc.oc.pgm.map.source.SystemMapSourceFactory;
 import tc.oc.pgm.match.MatchManagerImpl;
@@ -275,14 +274,31 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     logger.setLevel(config.getLogLevel());
 
     for (String source : config.getMapSources()) {
-      MapSourceFactory factory;
+      MapSourceFactory factory = null;
       try {
-        factory = DefaultMapSourceFactory.INSTANCE;
-        if (source.startsWith("https://") || source.startsWith("http://"))
-          factory = new GitMapSourceFactory(source, logger);
+        if (source.equalsIgnoreCase("default")) factory = new GitMapSourceFactory("https://github.com/KingOfSquares/DefaultMaps", logger, false);
+        if (source.startsWith("git;")){
+          String gitSource = source.substring(4);
+          factory = new GitMapSourceFactory(gitSource, logger, true);
+        }
         if (new File(source).exists()) factory = new SystemMapSourceFactory(source);
-      } catch (Throwable t) {
+      } catch(StringIndexOutOfBoundsException e){ //Git source parsing exception
+        factory = null; //Trigger the map source error message
+      }
+
+      catch (Throwable t) {
         t.printStackTrace();
+        continue;
+      }
+
+      if(factory == null) {
+        logger.log(Level.WARNING, "-----MAP SOURCE ERROR-----");
+        logger.log(Level.WARNING, "Map source " + source + " is not a valid source");
+        logger.log(Level.INFO, "To add a map source folder outside of the server folder you have to specify the full path");
+        logger.log(Level.INFO, "To add a git source you have to format your source like this: git;URL;USERNAME;PASSWORD");
+        logger.log(Level.INFO, "Username and password only required if the git repository is private");
+        logger.log(Level.WARNING, source + " will be ignored until restart");
+        logger.log(Level.WARNING, "");
         continue;
       }
 

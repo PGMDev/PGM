@@ -22,14 +22,16 @@ public class GitMapSourceFactory extends SystemMapSourceFactory {
   private final String gitURI;
   private final Logger logger;
   private final File dir;
+  //The factory needs to parse the source differently depending on if credentials are provided
   private static boolean credentialsProvided;
+  private final boolean updateOnRestart;
 
   private CredentialsProvider provider = null;
 
   private static File getFile(String source) {
     credentialsProvided = source.contains(";");
 
-    int uniqueIdentifier = Math.abs(source.hashCode());
+    int uniqueIdentifier = Math.abs(source.hashCode()); //Prevents errors on similar repository names
 
     String dirName;
     if (credentialsProvided)
@@ -40,19 +42,22 @@ public class GitMapSourceFactory extends SystemMapSourceFactory {
     return new File("./gitMaps/" + dirName);
   }
 
-  public GitMapSourceFactory(String source, Logger logger)
+  public GitMapSourceFactory(String source, Logger logger, boolean updateOnRestart)
       throws MapMissingException, ClassNotFoundException {
     super(getFile(source).getPath());
 
     if (credentialsProvided) this.gitURI = source.substring(0, source.indexOf(";"));
     else this.gitURI = source;
+
     this.logger = logger;
     this.dir = getFile(source);
+    this.updateOnRestart = updateOnRestart;
 
+    //Disable if JGit is not present
     if (Class.forName("org.eclipse.jgit.api.Git") == null) {
       throw new MapMissingException(
           dir.getPath(),
-          "Unable to load JGit classes(did you exclude them when compiling the jar?)");
+          "Unable to load JGit(was it excluded when compiling the jar?)");
     }
 
     File masterDir = new File("./gitMaps");
@@ -76,10 +81,8 @@ public class GitMapSourceFactory extends SystemMapSourceFactory {
   public Iterator<? extends MapSource> loadNewSources() throws MapMissingException {
     final Stream<String> paths;
 
-    // Since this is also loaded on startup it includes the check for JGits existence
     try {
-
-      refreshRepo();
+      if (updateOnRestart) refreshRepo();
     } catch (GitAPIException e) {
       logger.log(
           Level.WARNING,
@@ -91,7 +94,7 @@ public class GitMapSourceFactory extends SystemMapSourceFactory {
       }
     }
 
-    // Do this seperate so it still loads downloaded maps if git connection fails
+    //Load maps separately so it still loads downloaded maps if git connection fails
     try {
       paths = loadAllPaths();
     } catch (IOException e) {
@@ -116,10 +119,9 @@ public class GitMapSourceFactory extends SystemMapSourceFactory {
       logger.log(
           Level.INFO, "This will happen the first time PGM tries to read a new git repository");
       try {
+
         CloneCommand clone = Git.cloneRepository().setDirectory(dir).setURI(gitURI);
-
         if (provider != null) clone.setCredentialsProvider(provider);
-
         git = clone.call();
         logger.log(Level.INFO, "Successfully cloned git repository " + dir.getName() + "!");
       } catch (GitAPIException f) {
