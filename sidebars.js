@@ -32,6 +32,7 @@ module.exports = {
       "modules/mechanics/lanes",
       "modules/mechanics/damage",
       "modules/mechanics/gamerules",
+      "modules/mechanics/spawners",
     ],
     Gear: [
       "modules/gear/items",
