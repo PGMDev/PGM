@@ -138,11 +138,12 @@ public class VanishManagerImpl implements VanishManager, Listener {
 
   /* Events */
   private final Cache<UUID, String> loginSubdomains =
-      CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.SECONDS).build();
+      CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.SECONDS).build();
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPreJoin(PlayerLoginEvent event) {
     Player player = event.getPlayer();
+    loginSubdomains.invalidate(player.getUniqueId());
     if (player.hasPermission(Permissions.VANISH)
         && !isVanished(player.getUniqueId())
         && isVanishSubdomain(event.getHostname())) {
@@ -162,6 +163,7 @@ public class VanishManagerImpl implements VanishManager, Listener {
       // Automatic vanish if player logs in via a "vanish" subdomain.
       String domain = loginSubdomains.getIfPresent(player.getId());
       if (domain != null) {
+        loginSubdomains.invalidate(player.getId());
         player.setVanished(true);
         addVanished(player);
 
@@ -178,7 +180,7 @@ public class VanishManagerImpl implements VanishManager, Listener {
   }
 
   private boolean isVanishSubdomain(String address) {
-    return address.startsWith("vanish"); // TODO Maybe allow config value?
+    return address.startsWith("vanish.");
   }
 
   private void sendHotbarVanish(MatchPlayer player, boolean flashColor) {
