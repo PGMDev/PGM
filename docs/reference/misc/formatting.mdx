@@ -1,0 +1,184 @@
+---
+id: formatting
+title: Text Formatting
+---
+
+Text formatting codes are used to create fancy colorized text, they are prefixed with a grave symbol `` ` ``. After using a formatting code such as `` `o `` (italic) it has to be reset, otherwise it will continue until the end of the text.
+
+<div className="alert alert--info" style={{ marginBottom: "20px" }}>
+  <p style={{ color: "#000000", marginBottom: "0px" }}>
+    Some older maps may use the depreciated § section symbol to specify
+    formatting codes. This symbol should not be used in new map files.
+  </p>
+</div>
+
+_Examples_
+
+```xml
+<item name="`iFrozen `rWater" material="snowball"/>
+<line>This is one of three of `9Blue Team`r's victory monuments.</line>
+<item name="`1Blue `4Red `rNone" material="book"/>
+```
+
+##### Chat Colors
+
+![Chat Colors](https://i.imgur.com/UuiIpLu.png)
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th style={{ width: "40px" }}>ID</th>
+        <th>Color Name</th>
+        <th style={{ width: "40px" }}>ID</th>
+        <th>Color Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>0</label>
+        </td>
+        <td>BLACK</td>
+        <td>
+          <label>8</label>
+        </td>
+        <td>DARK_GRAY</td>
+      </tr>
+      <tr>
+        <td>
+          <label>1</label>
+        </td>
+        <td>DARK_BLUE</td>
+        <td>
+          <label>9</label>
+        </td>
+        <td>BLUE</td>
+      </tr>
+      <tr>
+        <td>
+          <label>2</label>
+        </td>
+        <td>DARK_GREEN</td>
+        <td>
+          <label>a</label>
+        </td>
+        <td>GREEN</td>
+      </tr>
+      <tr>
+        <td>
+          <label>3</label>
+        </td>
+        <td>DARK_AQUA</td>
+        <td>
+          <label>b</label>
+        </td>
+        <td>AQUA</td>
+      </tr>
+      <tr>
+        <td>
+          <label>4</label>
+        </td>
+        <td>DARK_RED</td>
+        <td>
+          <label>c</label>
+        </td>
+        <td>RED</td>
+      </tr>
+      <tr>
+        <td>
+          <label>5</label>
+        </td>
+        <td>DARK_PURPLE</td>
+        <td>
+          <label>d</label>
+        </td>
+        <td>LIGHT_PURPLE</td>
+      </tr>
+      <tr>
+        <td>
+          <label>6</label>
+        </td>
+        <td>GOLD</td>
+        <td>
+          <label>e</label>
+        </td>
+        <td>YELLOW</td>
+      </tr>
+      <tr>
+        <td>
+          <label>7</label>
+        </td>
+        <td>GRAY</td>
+        <td>
+          <label>f</label>
+        </td>
+        <td>WHITE</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+##### Text
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th style={{ width: "40px" }}>ID</th>
+        <th>Function</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <label>k</label>
+        </td>
+        <td>MAGIC</td>
+      </tr>
+      <tr>
+        <td>
+          <label>l</label>
+        </td>
+        <td>BOLD</td>
+      </tr>
+      <tr>
+        <td>
+          <label>m</label>
+        </td>
+        <td>STRIKETHROUGH</td>
+      </tr>
+      <tr>
+        <td>
+          <label>n</label>
+        </td>
+        <td>UNDERLINE</td>
+      </tr>
+      <tr>
+        <td>
+          <label>o</label>
+        </td>
+        <td>ITALIC</td>
+      </tr>
+      <tr>
+        <td>
+          <label>r</label>
+        </td>
+        <td>RESET</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+The magic formatter will convert all the text after it into a scrambled, constantly changing mess of letters.
+
+`NOTE:` Reset resets all color and text styles.
+
+To have a line all italic and one word red you will have to to do the following.
+
+```xml
+<!-- Everything is italic and the word "italic" is also red -->
+<line>`oThis is a  `citalic `r`otext with a single red word.</line>
+```
+
+Copied from: [bukkit docs - Chat Color](https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/ChatColor.html)

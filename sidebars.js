@@ -56,7 +56,20 @@ module.exports = {
     ],
   },
   Reference: {
-    Items: ["reference/items/inventory"],
+    Items: [
+      "reference/items/inventory",
+      "reference/items/enchantments",
+      "reference/items/attributes",
+    ],
+    Entities: [
+      "reference/entities/entity-types",
+      "reference/entities/spawn-reasons",
+    ],
+    Misc: [
+      "reference/misc/formatting",
+      "reference/misc/colors",
+      "reference/misc/time-periods",
+    ],
   },
   Guides: {
     "XML Pointers": ["guides/xml-pointers/regions"],

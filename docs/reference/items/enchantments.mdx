@@ -1,0 +1,317 @@
+---
+id: enchantments
+title: Enchantments
+---
+
+Enchantments can be referenced by their Bukkit or [Minecraft](http://minecraft.gamepedia.com/Data_values#Enchantment_IDs) name.
+Bukkit enchantment names are not case sensitive and a space can be used instead of an underscore.
+
+`NOTE:` PGM allows enchantments to be applied to any item regardless if the enchant was intended for it or not.
+
+<div className="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Bukkit Name</th>
+        <th>Minecraft Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th colspan="4">Armor Enchantments</th>
+      </tr>
+      <tr>
+        <td>0</td>
+        <td>
+          <label>PROTECTION_ENVIRONMENTAL</label>
+        </td>
+        <td>
+          <label>protection</label>
+        </td>
+        <td>Provides protection against environmental damage.</td>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>
+          <label>PROTECTION_FIRE</label>
+        </td>
+        <td>
+          <label>fire_protection</label>
+        </td>
+        <td>Provides protection against fire damage.</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>
+          <label>PROTECTION_FALL</label>
+        </td>
+        <td>
+          <label>feather_falling</label>
+        </td>
+        <td>Provides protection against fall damage.</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>
+          <label>PROTECTION_EXPLOSIONS</label>
+        </td>
+        <td>
+          <label>blast_protection</label>
+        </td>
+        <td>Provides protection against explosive damage.</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>
+          <label>PROTECTION_PROJECTILE</label>
+        </td>
+        <td>
+          <label>projectile_protection</label>
+        </td>
+        <td>Provides protection against projectile damage.</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>
+          <label>OXYGEN</label>
+        </td>
+        <td>
+          <label>respiration</label>
+        </td>
+        <td>Decreases the rate of air loss whilst underwater.</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>
+          <label>WATER_WORKER</label>
+        </td>
+        <td>
+          <label>aqua_affinity</label>
+        </td>
+        <td>Increases the speed at which a player may mine underwater.</td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td>
+          <label>THORNS</label>
+        </td>
+        <td>
+          <label>thorns</label>
+        </td>
+        <td>Damages the attacker.</td>
+      </tr>
+      <tr>
+        <td>8</td>
+        <td>
+          <label>DEPTH_STRIDER</label>
+        </td>
+        <td>
+          <label>depth_strider</label>
+        </td>
+        <td>Increases the speed at which a player may move underwater.</td>
+      </tr>
+      <tr>
+        <td>9</td>
+        <td>
+          <label>FROST_WALKER</label>
+        </td>
+        <td>
+          <label>frost_walker</label>
+        </td>
+        <td>Create frost blocks when walking over water.</td>
+      </tr>
+      <tr>
+        <th colspan="4">Tool Enchantments</th>
+      </tr>
+      <tr>
+        <td>16</td>
+        <td>
+          <label>DAMAGE_ALL</label>
+        </td>
+        <td>
+          <label>sharpness</label>
+        </td>
+        <td>Increases damage against all targets.</td>
+      </tr>
+      <tr>
+        <td>17</td>
+        <td>
+          <label>DAMAGE_UNDEAD</label>
+        </td>
+        <td>
+          <label>smite</label>
+        </td>
+        <td>Increases damage against undead targets.</td>
+      </tr>
+      <tr>
+        <td>18</td>
+        <td>
+          <label>DAMAGE_ARTHROPODS</label>
+        </td>
+        <td>
+          <label>bane_of_arthropods</label>
+        </td>
+        <td>Increases damage against arthropod targets.</td>
+      </tr>
+      <tr>
+        <td>19</td>
+        <td>
+          <label>KNOCKBACK</label>
+        </td>
+        <td>
+          <label>knockback</label>
+        </td>
+        <td>All damage to other targets will knock them back when hit.</td>
+      </tr>
+      <tr>
+        <td>20</td>
+        <td>
+          <label>FIRE_ASPECT</label>
+        </td>
+        <td>
+          <label>fire_aspect</label>
+        </td>
+        <td>When attacking a target, has a chance to set them on fire.</td>
+      </tr>
+      <tr>
+        <td>21</td>
+        <td>
+          <label>LOOT_BONUS_MOBS</label>
+        </td>
+        <td>
+          <label>looting</label>
+        </td>
+        <td>Provides a chance of gaining extra loot when killing monsters.</td>
+      </tr>
+      <tr>
+        <td>32</td>
+        <td>
+          <label>DIG_SPEED</label>
+        </td>
+        <td>
+          <label>efficiency</label>
+        </td>
+        <td>Increases the rate at which you mine/dig.</td>
+      </tr>
+      <tr>
+        <td>33</td>
+        <td>
+          <label>SILK_TOUCH</label>
+        </td>
+        <td>
+          <label>silk_touch</label>
+        </td>
+        <td>
+          Allows blocks to drop themselves instead of fragments.
+          <br />
+          (For example, stone instead of cobblestone)
+        </td>
+      </tr>
+      <tr>
+        <td>34</td>
+        <td>
+          <label>DURABILITY</label>
+        </td>
+        <td>
+          <label>unbreaking</label>
+        </td>
+        <td>Decreases the rate at which a tool looses durability.</td>
+      </tr>
+      <tr>
+        <td>35</td>
+        <td>
+          <label>LOOT_BONUS_BLOCKS</label>
+        </td>
+        <td>
+          <label>fortune</label>
+        </td>
+        <td>Provides a chance of gaining extra loot when destroying blocks.</td>
+      </tr>
+      <tr>
+        <th colspan="4">Bow Enchantments</th>
+      </tr>
+      <tr>
+        <td>48</td>
+        <td>
+          <label>ARROW_DAMAGE</label>
+        </td>
+        <td>
+          <label>power</label>
+        </td>
+        <td>Provides extra damage when shooting arrows from bows.</td>
+      </tr>
+      <tr>
+        <td>49</td>
+        <td>
+          <label>ARROW_KNOCKBACK</label>
+        </td>
+        <td>
+          <label>punch</label>
+        </td>
+        <td>
+          Provides a knockback when an entity is hit by an arrow from a bow.
+        </td>
+      </tr>
+      <tr>
+        <td>50</td>
+        <td>
+          <label>ARROW_FIRE</label>
+        </td>
+        <td>
+          <label>flame</label>
+        </td>
+        <td>Sets entities on fire when hit by arrows shot from a bow.</td>
+      </tr>
+      <tr>
+        <td>51</td>
+        <td>
+          <label>ARROW_INFINITE</label>
+        </td>
+        <td>
+          <label>infinity</label>
+        </td>
+        <td>Provides infinite arrows when shooting a bow.</td>
+      </tr>
+      <tr>
+        <th colspan="4">Fishing Enchantments</th>
+      </tr>
+      <tr>
+        <td>61</td>
+        <td>
+          <label>LUCK</label>
+        </td>
+        <td>
+          <label>luck_of_the_sea</label>
+        </td>
+        <td>Decreases odds of catching worthless junk.</td>
+      </tr>
+      <tr>
+        <td>62</td>
+        <td>
+          <label>LURE</label>
+        </td>
+        <td>
+          <label>lure</label>
+        </td>
+        <td>Increases rate of fish biting your hook.</td>
+      </tr>
+      <tr>
+        <th colspan="4">Item Enchantments</th>
+      </tr>
+      <tr>
+        <td>70</td>
+        <td>
+          <label>MENDING</label>
+        </td>
+        <td>
+          <label>mending</label>
+        </td>
+        <td>Repair the item using experience orbs.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+Copied from: [bukkit docs - Enchantments](https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/enchantments/Enchantment.html)
