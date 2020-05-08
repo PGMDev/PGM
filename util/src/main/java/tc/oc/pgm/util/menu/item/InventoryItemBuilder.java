@@ -1,15 +1,15 @@
-package tc.oc.pgm.util.menu.items;
+package tc.oc.pgm.util.menu.item;
 
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.util.menu.InventoryMenu;
-import tc.oc.pgm.util.menu.InventoryMenuManager;
+import tc.oc.pgm.util.menu.InventoryMenuListener;
 
 public class InventoryItemBuilder {
   // TODO: Add back button
-  private final InventoryMenuManager manager;
+  private final InventoryMenuListener listener;
   private final BiFunction<InventoryMenu, Player, ItemStack> createItem;
   private boolean cache;
   private InventoryClickAction onClick;
@@ -19,12 +19,12 @@ public class InventoryItemBuilder {
    * Creates a new inventory item builder, from a function that creates the item stack from a
    * specific player
    *
-   * @param manager the manager for this inventory
+   * @param listener the listener for this inventory
    * @param createItem the create item function
    */
   private InventoryItemBuilder(
-      InventoryMenuManager manager, BiFunction<InventoryMenu, Player, ItemStack> createItem) {
-    this.manager = manager;
+      InventoryMenuListener listener, BiFunction<InventoryMenu, Player, ItemStack> createItem) {
+    this.listener = listener;
     this.createItem = createItem;
     this.cache = false;
     this.tickDelay = 0;
@@ -34,25 +34,25 @@ public class InventoryItemBuilder {
   /**
    * Creates a new {@link InventoryItemBuilder} that is used to create an {@link InventoryItem}
    *
-   * @param manager the manager for this inventory
+   * @param listener the listener for this inventory
    * @param createItem the create item function that constructs an {@link ItemStack} from the
    *     inventory and the player
    * @return the created {@link InventoryItemBuilder}
    */
   public static InventoryItemBuilder createItem(
-      InventoryMenuManager manager, BiFunction<InventoryMenu, Player, ItemStack> createItem) {
-    return new InventoryItemBuilder(manager, createItem);
+      InventoryMenuListener listener, BiFunction<InventoryMenu, Player, ItemStack> createItem) {
+    return new InventoryItemBuilder(listener, createItem);
   }
 
   /**
    * Creates a new {@link InventoryItemBuilder}, used to create inventory items
    *
-   * @param manager the manager for this inventory
+   * @param listener the listener for this inventory
    * @param item an {@link ItemStack} that should be in the inventory
    * @return the created {@link InventoryItemBuilder}
    */
-  public static InventoryItemBuilder createItem(InventoryMenuManager manager, ItemStack item) {
-    return new InventoryItemBuilder(manager, (x, y) -> item);
+  public static InventoryItemBuilder createItem(InventoryMenuListener listener, ItemStack item) {
+    return new InventoryItemBuilder(listener, (x, y) -> item);
   }
 
   /**
@@ -110,6 +110,6 @@ public class InventoryItemBuilder {
    * @return the {@link InventoryItem} that has been created by this builder
    */
   public InventoryItem build() {
-    return new InventoryItemImpl(manager, createItem, onClick, tickDelay, cache);
+    return new InventoryItemImpl(listener, createItem, onClick, tickDelay, cache);
   }
 }

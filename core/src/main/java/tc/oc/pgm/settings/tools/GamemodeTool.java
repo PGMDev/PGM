@@ -19,6 +19,7 @@ import tc.oc.pgm.util.text.TextTranslations;
 
 public class GamemodeTool implements ObserverTool {
 
+  private static boolean worldEditEnabled;
   private final Match match;
 
   /**
@@ -28,6 +29,7 @@ public class GamemodeTool implements ObserverTool {
    */
   public GamemodeTool(Match match) {
     this.match = match;
+    worldEditEnabled = Bukkit.getPluginManager().isPluginEnabled("WorldEdit");
   }
 
   @Override
@@ -67,7 +69,7 @@ public class GamemodeTool implements ObserverTool {
       match.getPlayer(player).sendWarning(getToggleMessage());
     } else if (isCreative(player)) {
       // Note: When WorldEdit is present, this executes a command to ensure the player is not stuck
-      if (Bukkit.getPluginManager().isPluginEnabled("WorldEdit")) {
+      if (worldEditEnabled) {
         player.performCommand("worldedit:!");
       }
     }

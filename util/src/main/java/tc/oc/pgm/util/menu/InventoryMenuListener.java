@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.function.Consumer;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -14,21 +13,15 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 
-public class InventoryMenuManager implements Listener {
+public class InventoryMenuListener implements Listener {
 
   private final Map<Inventory, InventoryMenu> inventoryMap;
   private final Plugin plugin;
 
-  /** Creates a new inventory manager. */
-  public InventoryMenuManager(Plugin plugin) {
+  /** Creates a new inventory listener. */
+  public InventoryMenuListener(Plugin plugin) {
     this.plugin = plugin;
     inventoryMap = Maps.newHashMap();
-    plugin.getServer().getPluginManager().registerEvents(this, plugin);
-  }
-
-  /** Disables the inventory manager and unregisters all events. */
-  public void disable() {
-    HandlerList.unregisterAll(this);
   }
 
   /**
@@ -50,9 +43,9 @@ public class InventoryMenuManager implements Listener {
   }
 
   /**
-   * Returns the {@link Plugin} associated with this inventory menu manager.
+   * Returns the {@link Plugin} associated with this inventory menu listener.
    *
-   * @return the {@link Plugin} associated with this inventory menu manager.
+   * @return the {@link Plugin} associated with this inventory menu listener.
    */
   public Plugin getPlugin() {
     return plugin;
@@ -136,7 +129,7 @@ public class InventoryMenuManager implements Listener {
   }
 
   /**
-   * Removes a {@link Inventory} from the manager when a player stops viewing it.
+   * Removes a {@link Inventory} from the listener when a player stops viewing it.
    *
    * @param event the close inventory event
    */

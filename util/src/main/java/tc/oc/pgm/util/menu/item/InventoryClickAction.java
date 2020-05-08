@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.menu.items;
+package tc.oc.pgm.util.menu.item;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;

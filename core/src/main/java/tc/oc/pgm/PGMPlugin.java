@@ -118,6 +118,7 @@ import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.FileUtils;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.concurrent.BukkitExecutorService;
+import tc.oc.pgm.util.menu.InventoryMenuListener;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextTranslations;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -136,6 +137,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   private ScheduledExecutorService executorService;
   private ScheduledExecutorService asyncExecutorService;
   private VanishManager vanishManager;
+  private InventoryMenuListener inventoryMenuListener;
 
   public PGMPlugin() {
     super();
@@ -245,6 +247,8 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       matchTabManager = new MatchTabManager(this);
     }
 
+    inventoryMenuListener = new InventoryMenuListener(this);
+
     if (!config.getUptimeLimit().isNegative()) {
       asyncExecutorService.scheduleAtFixedRate(new ShouldRestartTask(), 0, 1, TimeUnit.MINUTES);
     }
@@ -349,6 +353,11 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   @Override
   public VanishManager getVanishManager() {
     return vanishManager;
+  }
+
+  @Override
+  public InventoryMenuListener getInventoryMenuListener() {
+    return inventoryMenuListener;
   }
 
   private class CommandRegistrar extends BukkitIntake {
@@ -487,6 +496,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     registerEvents(new MatchAnnouncer());
     registerEvents(new MotdListener());
     registerEvents(new ServerPingDataListener(matchManager, mapOrder, getLogger(), vanishManager));
+    registerEvents(inventoryMenuListener);
   }
 
   private class InGameHandler extends Handler {

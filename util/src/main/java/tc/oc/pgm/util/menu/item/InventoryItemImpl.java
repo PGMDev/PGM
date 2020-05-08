@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.menu.items;
+package tc.oc.pgm.util.menu.item;
 
 import java.util.WeakHashMap;
 import java.util.function.BiFunction;
@@ -7,11 +7,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.util.menu.InventoryMenu;
-import tc.oc.pgm.util.menu.InventoryMenuManager;
+import tc.oc.pgm.util.menu.InventoryMenuListener;
 
 public class InventoryItemImpl implements InventoryItem {
 
-  private final InventoryMenuManager manager;
+  private final InventoryMenuListener listener;
   private final BiFunction<InventoryMenu, Player, ItemStack> itemGenerator;
   private final InventoryClickAction onClick;
 
@@ -22,7 +22,7 @@ public class InventoryItemImpl implements InventoryItem {
   /**
    * Creates a new {@link InventoryItemImpl}, the default implementation of {@link InventoryItem}
    *
-   * @param manager the inventory menu manager
+   * @param listener the inventory menu listener
    * @param itemGenerator the function used to create the item
    * @param onClick the onclick function
    * @param millisDelay the delay between a player clicking an item in the inventory and the
@@ -30,12 +30,12 @@ public class InventoryItemImpl implements InventoryItem {
    * @param shouldCache whether or not the item should be cached, true if it should be
    */
   public InventoryItemImpl(
-      InventoryMenuManager manager,
+      InventoryMenuListener listener,
       BiFunction<InventoryMenu, Player, ItemStack> itemGenerator,
       InventoryClickAction onClick,
       int millisDelay,
       boolean shouldCache) {
-    this.manager = manager;
+    this.listener = listener;
     this.itemGenerator = itemGenerator;
     this.onClick = onClick;
     this.cache = new WeakHashMap<>();
@@ -62,7 +62,7 @@ public class InventoryItemImpl implements InventoryItem {
     if (millisDelay > 0) {
       Bukkit.getScheduler()
           .runTaskLater(
-              manager.getPlugin(),
+              listener.getPlugin(),
               () -> onClick.onClick(inventory, player, clickType),
               millisDelay / 50);
     } else {

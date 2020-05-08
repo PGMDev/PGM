@@ -88,10 +88,10 @@ public enum SettingKey {
   private static final String SETTING_TRANSLATION_KEY = "setting.";
 
   private final List<String> aliases;
-  private final String displayNameKey;
+  private final Component displayName;
   private final SettingValue[] values;
-  private final TextColor color;
   private final Material material;
+  private final TranslatableComponent lore;
 
   SettingKey(String name, TextColor color, Material material, SettingValue... values) {
     this(
@@ -114,10 +114,13 @@ public enum SettingKey {
       SettingValue... values) {
     checkArgument(!aliases.isEmpty(), "aliases is empty");
     this.aliases = ImmutableList.copyOf(aliases);
-    this.displayNameKey = displayNameKey;
+    this.displayName = TranslatableComponent.of(displayNameKey, color, TextDecoration.BOLD);
     this.values = values;
-    this.color = color;
     this.material = material;
+    this.lore =
+        TranslatableComponent.of(
+                SETTING_TRANSLATION_KEY + this.getName().toLowerCase() + ".description")
+            .color(TextColor.GRAY);
   }
 
   /**
@@ -135,28 +138,25 @@ public enum SettingKey {
    * @return The formatted display name.
    */
   public Component getDisplayName() {
-    return TranslatableComponent.of(displayNameKey, color, TextDecoration.BOLD);
+    return displayName;
   }
 
   /**
-   * Gets the lore of the setting.
+   * Gets the description of the setting.
    *
    * @param value the formatted value the setting is currently set to
-   * @return the complete lore text for the setting
+   * @return the description text for the setting
    */
-  public Component getLore(Component value) {
-    return TranslatableComponent.of(
-            SETTING_TRANSLATION_KEY + this.getName().toLowerCase() + ".description")
-        .args(value)
-        .color(TextColor.GRAY);
+  public Component getDescription(Component value) {
+    return lore.args(value);
   }
 
   /**
-   * Gets the material used to represent the setting.
+   * Gets the icon used to represent the setting.
    *
-   * @return the material used to represent the setting.
+   * @return the icon used to represent the setting.
    */
-  public Material getMaterial() {
+  public Material getIcon() {
     return material;
   }
 

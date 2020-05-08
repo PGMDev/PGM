@@ -4,13 +4,13 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
-import tc.oc.pgm.util.menu.items.InventoryItem;
-import tc.oc.pgm.util.menu.items.InventoryItemBuilder;
-import tc.oc.pgm.util.menu.items.ItemHolder;
+import tc.oc.pgm.util.menu.item.InventoryItem;
+import tc.oc.pgm.util.menu.item.InventoryItemBuilder;
+import tc.oc.pgm.util.menu.item.ItemHolder;
 
 public class InventoryMenuBuilder {
 
-  private final InventoryMenuManager manager;
+  private final InventoryMenuListener listener;
   private final int rows;
   private final List<ItemHolder> items;
   private Component name;
@@ -18,13 +18,13 @@ public class InventoryMenuBuilder {
   /**
    * Creates a new inventory builder
    *
-   * @param manager
+   * @param listener
    * @param rows the number of rows the inventory should have
    */
-  public InventoryMenuBuilder(InventoryMenuManager manager, int rows) {
-    this.manager = manager;
+  public InventoryMenuBuilder(InventoryMenuListener listener, int rows) {
+    this.listener = listener;
     this.rows = rows;
-    this.name = TextComponent.of("");
+    this.name = TextComponent.empty();
     this.items = Lists.newArrayList();
   }
 
@@ -106,6 +106,6 @@ public class InventoryMenuBuilder {
    * @return the constructed inventory
    */
   public InventoryMenu build() {
-    return new InventoryMenuImpl(manager, items, rows, name);
+    return new InventoryMenuImpl(listener, items, rows, name);
   }
 }

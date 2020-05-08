@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import tc.oc.pgm.util.menu.items.InventoryClickAction;
+import tc.oc.pgm.util.menu.item.InventoryClickAction;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public interface ObserverTool extends InventoryClickAction {
@@ -25,7 +25,6 @@ public interface ObserverTool extends InventoryClickAction {
     ItemStack stack = new ItemStack(getMaterial(player));
     ItemMeta meta = stack.getItemMeta();
 
-    // TODO: Check translations
     meta.setDisplayName(
         TextTranslations.translateLegacy(
             getName().color(getColor()).decoration(TextDecoration.BOLD, true), player));

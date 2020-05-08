@@ -13,6 +13,7 @@ import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.prefix.PrefixRegistry;
 import tc.oc.pgm.tablist.MatchTabManager;
+import tc.oc.pgm.util.menu.InventoryMenuListener;
 
 /** PvP Game Manager (aka. PGM), the global {@link Plugin} to manage PvP games. */
 public interface PGM extends Plugin {
@@ -39,6 +40,8 @@ public interface PGM extends Plugin {
   ScheduledExecutorService getAsyncExecutor();
 
   VanishManager getVanishManager();
+
+  InventoryMenuListener getInventoryMenuListener();
 
   AtomicReference<PGM> GLOBAL = new AtomicReference<>(null);
 

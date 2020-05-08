@@ -6,12 +6,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
-import tc.oc.pgm.util.menu.items.ItemHolder;
+import tc.oc.pgm.util.menu.item.ItemHolder;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class InventoryMenuImpl implements InventoryMenu {
 
-  private final InventoryMenuManager manager;
+  private final InventoryMenuListener listener;
   private final List<ItemHolder> items;
   private final int rows;
   private final Component title;
@@ -19,14 +19,14 @@ public class InventoryMenuImpl implements InventoryMenu {
   /**
    * Creates a new {@link InventoryMenuImpl}
    *
-   * @param manager the inventory manager
+   * @param listener the inventory listener
    * @param items the items to put in this inventory
    * @param rows the number of rows this inventory will have
    * @param title the title of this inventory
    */
   public InventoryMenuImpl(
-      InventoryMenuManager manager, List<ItemHolder> items, int rows, Component title) {
-    this.manager = manager;
+      InventoryMenuListener listener, List<ItemHolder> items, int rows, Component title) {
+    this.listener = listener;
     this.items = items;
     this.rows = rows;
     this.title = title;
@@ -39,7 +39,7 @@ public class InventoryMenuImpl implements InventoryMenu {
 
     populateInventory(player, inventory);
 
-    manager.addInventory(inventory, this);
+    listener.addInventory(inventory, this);
     player.openInventory(inventory);
   }
 

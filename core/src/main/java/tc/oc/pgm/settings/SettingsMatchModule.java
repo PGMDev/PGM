@@ -1,6 +1,5 @@
 package tc.oc.pgm.settings;
 
-import com.google.common.collect.Lists;
 import net.kyori.text.Component;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
@@ -9,16 +8,15 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.ObserverInteractEvent;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.ListenerScope;
@@ -29,10 +27,9 @@ import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.util.inventory.ItemBuilder;
 import tc.oc.pgm.util.menu.InventoryMenu;
 import tc.oc.pgm.util.menu.InventoryMenuBuilder;
-import tc.oc.pgm.util.menu.InventoryMenuManager;
-import tc.oc.pgm.util.menu.items.InventoryItem;
-import tc.oc.pgm.util.menu.items.InventoryItemBuilder;
-import tc.oc.pgm.util.text.TextTranslations;
+import tc.oc.pgm.util.menu.InventoryMenuListener;
+import tc.oc.pgm.util.menu.item.InventoryItem;
+import tc.oc.pgm.util.menu.item.InventoryItemBuilder;
 
 @ListenerScope(MatchScope.LOADED)
 public class SettingsMatchModule implements MatchModule, Listener {
@@ -47,7 +44,6 @@ public class SettingsMatchModule implements MatchModule, Listener {
   public static final int SETTINGS_ROWS = (SettingKey.values().length + 9 - 1) / 9;
 
   private final Match match;
-  private InventoryMenuManager manager;
   private InventoryMenu observerMenu;
   private InventoryMenu otherMenu;
 
@@ -57,11 +53,11 @@ public class SettingsMatchModule implements MatchModule, Listener {
 
   @Override
   public void load() {
-    this.manager = new InventoryMenuManager(PGM.get());
-
     ObserverTool[] tools =
         new ObserverTool[] {new FlySpeedTool(), new GamemodeTool(match), new NightVisionTool()};
     int obsToolsRows = (tools.length + 9 - 1) / 9;
+
+    InventoryMenuListener manager = PGM.get().getInventoryMenuListener();
 
     InventoryMenuBuilder obsBuilder =
         new InventoryMenuBuilder(manager, SETTINGS_ROWS + obsToolsRows);
@@ -99,24 +95,18 @@ public class SettingsMatchModule implements MatchModule, Listener {
     this.otherMenu = otherBuilder.build();
   }
 
-  @Override
-  public void unload() {
-    manager.disable();
-  }
-
   @EventHandler
   public void onObserverKitApply(ObserverKitApplyEvent event) {
     refreshKit(event.getPlayer());
   }
 
   @EventHandler
-  public void onToolClick(PlayerInteractEvent event) {
-    if (isRightClick(event.getAction())) {
-      ItemStack item = event.getPlayer().getItemInHand();
+  public void onToolClick(ObserverInteractEvent event) {
+    if (event.getClickType() == ClickType.RIGHT) {
+      ItemStack item = event.getPlayer().getBukkit().getItemInHand();
 
       if (item.getType().equals(TOOL_MATERIAL)) {
-        MatchPlayer player = match.getPlayer(event.getPlayer());
-        openMenu(player);
+        openMenu(event.getPlayer());
       }
     }
   }
@@ -135,10 +125,6 @@ public class SettingsMatchModule implements MatchModule, Listener {
     }
   }
 
-  private boolean isRightClick(Action action) {
-    return action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK;
-  }
-
   private ItemStack createToolItem(Player player) {
     Component displayName =
         TranslatableComponent.of(INVENTORY_TITLE, TextColor.AQUA, TextDecoration.BOLD);
@@ -146,28 +132,24 @@ public class SettingsMatchModule implements MatchModule, Listener {
 
     return new ItemBuilder()
         .material(TOOL_MATERIAL)
-        .name(TextTranslations.translateLegacy(displayName, player))
-        .lore(TextTranslations.translateLegacy(lore, player))
+        .name(player, displayName)
+        .lore(player, lore)
         .flags(ItemFlag.values())
         .build();
   }
 
   private ItemStack createSettingMenuItem(MatchPlayer player, SettingKey setting) {
     SettingValue value = player.getSettings().getValue(setting);
-    Material material = value.getMaterial();
+    Material material = value.getIcon();
     if (material == null) {
-      material = setting.getMaterial();
+      material = setting.getIcon();
     }
-    ItemStack stack = new ItemStack(material);
 
-    ItemMeta meta = stack.getItemMeta();
-    meta.setDisplayName(
-        TextTranslations.translateLegacy(setting.getDisplayName(), player.getBukkit()));
-    Component lore = setting.getLore(value.getDisplayName());
-    meta.setLore(Lists.newArrayList(TextTranslations.translateLegacy(lore, player.getBukkit())));
-    meta.addItemFlags(ItemFlag.values());
-    stack.setItemMeta(meta);
-
-    return stack;
+    return new ItemBuilder()
+        .material(material)
+        .name(player.getBukkit(), setting.getDisplayName())
+        .lore(player.getBukkit(), setting.getDescription(value.getDisplayName()))
+        .flags(ItemFlag.values())
+        .build();
   }
 }

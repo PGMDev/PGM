@@ -2,7 +2,7 @@ package tc.oc.pgm.util.menu;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import tc.oc.pgm.util.menu.items.InventoryItem;
+import tc.oc.pgm.util.menu.item.InventoryItem;
 
 /** Interface that describes a programmable inventory menu. */
 public interface InventoryMenu {

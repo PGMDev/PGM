@@ -57,8 +57,7 @@ public enum SettingValue {
 
   private final String key;
   private final String name;
-  private final String displayNameKey;
-  private final TextColor color;
+  private final Component displayName;
   @Nullable private final Material material;
 
   SettingValue(String key, String name, TextColor color) {
@@ -82,8 +81,7 @@ public enum SettingValue {
       @Nullable Material material) {
     this.key = key;
     this.name = checkNotNull(name);
-    this.displayNameKey = displayNameKey;
-    this.color = color;
+    this.displayName = TranslatableComponent.of(displayNameKey).color(color);
     this.material = material;
   }
 
@@ -111,16 +109,16 @@ public enum SettingValue {
    * @return formatted name of the {@link SettingValue}.
    */
   public Component getDisplayName() {
-    return TranslatableComponent.of(displayNameKey).color(color);
+    return displayName;
   }
 
   /**
-   * Gets the material that should be used to represent the {@link SettingValue}.
+   * Gets the icon that should be used to represent the {@link SettingValue}.
    *
-   * @return the material that should be used to represent the {@link SettingValue}.
+   * @return the icon that should be used to represent the {@link SettingValue}.
    */
   @Nullable
-  public Material getMaterial() {
+  public Material getIcon() {
     return material;
   }
 
