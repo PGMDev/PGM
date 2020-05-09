@@ -73,7 +73,7 @@ these kits will be automatically removed from the player at an appropriate time.
           Filter when this kit is used.
         </td>
         <td>
-          <a href="/modules/filters">Filter</a>
+          <a href="/docs/modules/mechanics/filters">Filter</a>
         </td>
         <td></td>
       </tr>
@@ -91,7 +91,7 @@ these kits will be automatically removed from the player at an appropriate time.
           Dynamic filter used to apply the kit.
         </td>
         <td>
-          <a href="/modules/filters">Dynamic Filter</a>
+          <a href="/docs/modules/mechanics/filters">Dynamic Filter</a>
         </td>
         <td></td>
       </tr>
@@ -109,7 +109,7 @@ these kits will be automatically removed from the player at an appropriate time.
           Dynamic filter used to remove the kit.
         </td>
         <td>
-          <a href="/modules/filters">Dynamic Filter</a>
+          <a href="/docs/modules/mechanics/filters">Dynamic Filter</a>
         </td>
         <td></td>
       </tr>
@@ -133,7 +133,7 @@ these kits will be automatically removed from the player at an appropriate time.
           </i>
         </td>
         <td>
-          <a href="/modules/filters">Dynamic Filter</a>
+          <a href="/docs/modules/mechanics/filters">Dynamic Filter</a>
         </td>
         <td></td>
       </tr>
@@ -215,7 +215,7 @@ The spawn kit contains a 5 second healing potion to help prevent spawn killing.
 
 ### Item & Armor Kits
 
-Kits can place items in specific slots of a player's inventory, and equip them with armor. See [Items & Armor](/modules/items) for details.
+Kits can place items in specific slots of a player's inventory, and equip them with armor. See [Items & Armor](/docs/modules/gear/items) for details.
 
 Item kits will replace any items in the player's inventory in slots present in the kit, but they will not alter any other slots.
 If you want to guarantee that a slot is empty, put an item called "air" in that slot. You can also clear the player's entire inventory
@@ -291,7 +291,7 @@ A player's gamemode can be changed when they spawn or enter a region, etc. by us
 
 ### Health & Hunger Kits
 
-A player's health and hunger can be modified with kits, this can be useful on maps with the `naturalRegeneration` [gamerule](/modules/gamerules) set to false.
+A player's health and hunger can be modified with kits, this can be useful on maps with the `naturalRegeneration` [gamerule](/docs/modules/mechanics/gamerules) set to false.
 
 By default health or hunger values are only increased, not decreased. For example, a player with 5 hearts (10 points) will not get a 5 health point kit applied, however a 20 point kit will be applied. This can be overwritten with a kits `force="true"` attribute.
 
@@ -353,7 +353,7 @@ By default health or hunger values are only increased, not decreased. For exampl
 
 ### Potion Effect Kits (removable)
 
-Potion effects can be applied and removed with a kit. See [Potion Effects](/modules/potions) for details about the `<effect>` element.
+Potion effects can be applied and removed with a kit. See [Potion Effects](/docs/modules/gear/potions) for details about the `<effect>` element.
 
 ```xml
 <kit>

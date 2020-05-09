@@ -13,7 +13,6 @@ The specific world generation rules such as flat worlds, etc., can be changed by
 Any chunks not in the world's `region/` folder will be generated according to the minecraft chunk generation rules. This means that only the terrain that you have modified needs to be saved with the world.
 
 The `world=""` attribute is used to specify the sub-folder that contains the map's `region/` and `level.dat` files.
-This is used with [conditionals](/modules/includes_conditionals#conditionals) to automatically load the holiday versions of the map, etc.
 
 <div className="table-container">
   <table>
@@ -109,9 +108,9 @@ This is used with [conditionals](/modules/includes_conditionals#conditionals) to
 
 ### Internal Maps
 
-Maps that are entirely indoors or underground can use the `internal` attribute on the [main map element](/modules/main)
+Maps that are entirely indoors or underground can use the `internal` attribute on the [main map element](/docs/modules/general/main)
 to prevent observers from accidentally teleporting on top of the map with the compass tool.
 In order for this to work, the exterior of the map must be completely filled in with solid blocks,
 all the way up to the maximum build height.
 
-See [Main Map Element](/modules/main)
+See [Main Map Element](/docs/modules/general/main)

@@ -7,7 +7,7 @@ Flags are [banners](http://minecraft.gamepedia.com/Banner) that can be picked up
 They are highly configurable and can be used to implement a wide variety of gamemodes.
 
 To define a flag's appearance, a standing-banner must be manually placed by the map creator, at the flag's initial location in the map.
-This allows complete control of the banner's colors and patterns. Unlike [wools](/modules/gamemode_ctw), each flag defined in XML creates a single, physical flag in the game.
+This allows complete control of the banner's colors and patterns. Unlike [wools](/docs/modules/objectives/ctw), each flag defined in XML creates a single, physical flag in the game.
 There are never multiple objects or items representing the same flag.
 
 In addition to flags, a CTF map also requires **nets** for flags to be captured in, and **posts** for them to respawn at.
@@ -69,7 +69,9 @@ In addition to flags, a CTF map also requires **nets** for flags to be captured 
           A point or region(s) for flags to spawn at.
         </td>
         <td>
-          <a href="/modules/regions#pointProviders">Point Provider</a>
+          <a href="/docs/modules/mechanics/regions#pointProviders">
+            Point Provider
+          </a>
         </td>
       </tr>
       <tr>
@@ -95,9 +97,9 @@ In addition to flags, a CTF map also requires **nets** for flags to be captured 
 A `<flag>` is a single physical banner that can be picked up, dropped, and captured.
 Its appearance is defined by an actual banner built into the map, and it has a name and color which you can override in XML.
 It can be owned by a specific team, or shared.
-It can serve as a one-time objective, similar to wools, or it can award or deduct [points](/modules/scoring).
+It can serve as a one-time objective, similar to wools, or it can award or deduct [points](/docs/modules/objectives/scoring).
 A flag can award points for being captured, or at a specified rate while it is carried.
-It can also come with a [kit](/modules/kits) that is given to the carrier.
+It can also come with a [kit](/docs/modules/gear/kits) that is given to the carrier.
 Filters can be used to control who can pickup/capture the flag and when.
 
 <div className="table-container">
@@ -211,7 +213,7 @@ Filters can be used to control who can pickup/capture the flag and when.
           The flag's initial & default post.
         </td>
         <td>
-          <a href="/modules/gamemode_ctf#posts">Flag Post</a>
+          <a href="/docs/modules/objectives/ctf#posts">Flag Post</a>
         </td>
         <td></td>
       </tr>
@@ -227,7 +229,7 @@ Filters can be used to control who can pickup/capture the flag and when.
           when the flag is picked up or dropped.
         </td>
         <td>
-          <a href="/modules/teams">Team ID</a>
+          <a href="/docs/modules/format/teams">Team ID</a>
         </td>
         <td></td>
       </tr>
@@ -316,7 +318,7 @@ Filters can be used to control who can pickup/capture the flag and when.
           Filter who can pickup the flag.
         </td>
         <td>
-          <a href="/modules/filters">Filter</a>
+          <a href="/docs/modules/mechanics/filters">Filter</a>
         </td>
         <td></td>
       </tr>
@@ -334,7 +336,7 @@ Filters can be used to control who can pickup/capture the flag and when.
           Filter if the flag can be dropped at the current location.
         </td>
         <td>
-          <a href="/modules/filters">Filter</a>
+          <a href="/docs/modules/mechanics/filters">Filter</a>
         </td>
         <td></td>
       </tr>
@@ -352,7 +354,7 @@ Filters can be used to control who can pickup/capture the flag and when.
           Filter who can capture the flag.
         </td>
         <td>
-          <a href="/modules/filters">Filter</a>
+          <a href="/docs/modules/mechanics/filters">Filter</a>
         </td>
         <td></td>
       </tr>
@@ -370,7 +372,7 @@ Filters can be used to control who can pickup/capture the flag and when.
           Given to players when they pick up the flag.
         </td>
         <td>
-          <a href="/modules/kits">Kit</a>
+          <a href="/docs/modules/gear/kits">Kit</a>
         </td>
         <td></td>
       </tr>
@@ -388,7 +390,7 @@ Filters can be used to control who can pickup/capture the flag and when.
           Given to flag carriers when they lose the flag, for whatever reason.
         </td>
         <td>
-          <a href="/modules/kits">Kit</a>
+          <a href="/docs/modules/gear/kits">Kit</a>
         </td>
         <td></td>
       </tr>
@@ -408,7 +410,7 @@ Filters can be used to control who can pickup/capture the flag and when.
           kit types are removable.
         </td>
         <td>
-          <a href="/modules/kits">Removable Kit</a>
+          <a href="/docs/modules/gear/kits">Removable Kit</a>
         </td>
         <td></td>
       </tr>
@@ -527,7 +529,9 @@ Filters can be used to control who can pickup/capture the flag and when.
           The flag's initial & default post.
         </td>
         <td>
-          <a href="/modules/regions#pointProviders">Point Provider</a>
+          <a href="/docs/modules/mechanics/regions#pointProviders">
+            Point Provider
+          </a>
         </td>
       </tr>
       <tr>
@@ -544,7 +548,7 @@ Filters can be used to control who can pickup/capture the flag and when.
           Filter who can pickup the flag.
         </td>
         <td>
-          <a href="/modules/filters">Filters</a>
+          <a href="/docs/modules/mechanics/filters">Filters</a>
         </td>
       </tr>
       <tr>
@@ -561,7 +565,7 @@ Filters can be used to control who can pickup/capture the flag and when.
           Filter if the flag can be dropped at the current location.
         </td>
         <td>
-          <a href="/modules/filters">Filters</a>
+          <a href="/docs/modules/mechanics/filters">Filters</a>
         </td>
       </tr>
       <tr>
@@ -578,7 +582,7 @@ Filters can be used to control who can pickup/capture the flag and when.
           Filter who can capture the flag.
         </td>
         <td>
-          <a href="/modules/filters">Filters</a>
+          <a href="/docs/modules/mechanics/filters">Filters</a>
         </td>
       </tr>
       <tr>
@@ -595,7 +599,7 @@ Filters can be used to control who can pickup/capture the flag and when.
           Given to players when they pick up the flag.
         </td>
         <td>
-          <a href="/modules/kits">Kit</a>
+          <a href="/docs/modules/gear/kits">Kit</a>
         </td>
       </tr>
       <tr>
@@ -612,7 +616,7 @@ Filters can be used to control who can pickup/capture the flag and when.
           Given to flag carriers when they lose the flag, for whatever reason.
         </td>
         <td>
-          <a href="/modules/kits">Kit</a>
+          <a href="/docs/modules/gear/kits">Kit</a>
         </td>
       </tr>
     </tbody>
@@ -622,8 +626,8 @@ Filters can be used to control who can pickup/capture the flag and when.
 #### Posts
 
 A **post** is a point or region where flags can respawn after being captured or dropped.
-It is essentially a [spawn](/modules/spawns) for flags instead of players,
-and like spawns, they are defined with [point providers](/modules/regions#pointProviders), and can be randomized.
+It is essentially a [spawn](/docs/modules/mechanics/spawns) for flags instead of players,
+and like spawns, they are defined with [point providers](/docs/modules/mechanics/regions#pointProviders), and can be randomized.
 
 A flag remembers the last post it was at and will respawn there after being dropped or captured.
 Each flag must have a default post, where it will be placed at the start of the match.
@@ -635,7 +639,7 @@ Multiple flags can be at a post simultaneously only if there is space available 
 The time required for a flag to respawn is configurable, as well as the time it spends on the ground after being dropped.
 
 Posts can be owned by a team, and award them points at a specified rate while a flag is there.
-The `permanent` option can be used to make a post into something like a [monument](/modules/gamemode_ctw), where the flag is mounted after being captured once.
+The `permanent` option can be used to make a post into something like a [monument](/docs/modules/objectives/ctw), where the flag is mounted after being captured once.
 
 <div className="table-container">
   <table>
@@ -653,7 +657,9 @@ The `permanent` option can be used to make a post into something like a [monumen
         </td>
         <td>A point or region(s) for flags to spawn at.</td>
         <td>
-          <a href="/modules/regions#pointProviders">Point Provider</a>
+          <a href="/docs/modules/mechanics/regions#pointProviders">
+            Point Provider
+          </a>
         </td>
       </tr>
     </tbody>
@@ -690,7 +696,7 @@ The `permanent` option can be used to make a post into something like a [monumen
         </td>
         <td>The team that owns this post.</td>
         <td>
-          <a href="/modules/teams">Team ID</a>
+          <a href="/docs/modules/format/teams">Team ID</a>
         </td>
         <td></td>
       </tr>
@@ -756,7 +762,7 @@ The `permanent` option can be used to make a post into something like a [monumen
           Filter who can pickup a flag from this post.
         </td>
         <td>
-          <a href="/modules/filters">Filter</a>
+          <a href="/docs/modules/mechanics/filters">Filter</a>
         </td>
         <td></td>
       </tr>
@@ -847,7 +853,7 @@ The `permanent` option can be used to make a post into something like a [monumen
           Filter who can pickup the flag for this net.
         </td>
         <td>
-          <a href="/modules/filters">Filters</a>
+          <a href="/docs/modules/mechanics/filters">Filters</a>
         </td>
       </tr>
     </tbody>
@@ -929,7 +935,7 @@ If the net has no owner, then the player carrying the flag will receive the poin
           The region flag carriers must enter to capture in this net.
         </td>
         <td>
-          <a href="/modules/regions">Region</a>
+          <a href="/docs/modules/mechanics/regions">Region</a>
         </td>
         <td></td>
       </tr>
@@ -939,7 +945,7 @@ If the net has no owner, then the player carrying the flag will receive the poin
         </td>
         <td>The team that owns this net.</td>
         <td>
-          <a href="/modules/teams">Team ID</a>
+          <a href="/docs/modules/format/teams">Team ID</a>
         </td>
         <td></td>
       </tr>
@@ -971,7 +977,7 @@ If the net has no owner, then the player carrying the flag will receive the poin
           The ID of the post a flag returns to after being captured in this net.
         </td>
         <td>
-          <a href="/modules/flags">Flag Post</a>
+          <a href="/docs/modules/objectives/ctf">Flag Post</a>
         </td>
         <td></td>
       </tr>
@@ -1048,7 +1054,7 @@ If the net has no owner, then the player carrying the flag will receive the poin
           Filter players who can capture in this net.
         </td>
         <td>
-          <a href="/modules/filters">Filter</a>
+          <a href="/docs/modules/mechanics/filters">Filter</a>
         </td>
         <td></td>
       </tr>
@@ -1097,7 +1103,7 @@ If the net has no owner, then the player carrying the flag will receive the poin
           Filter when the flags captured in this net are allowed to respawn.
         </td>
         <td>
-          <a href="/modules/filters">Filter</a>
+          <a href="/docs/modules/mechanics/filters">Filter</a>
         </td>
         <td></td>
       </tr>
@@ -1162,7 +1168,7 @@ If the net has no owner, then the player carrying the flag will receive the poin
           The region flag carriers must enter to capture in this net.
         </td>
         <td>
-          <a href="/modules/regions">Regions</a>
+          <a href="/docs/modules/mechanics/regions">Regions</a>
         </td>
       </tr>
       <tr>
@@ -1179,7 +1185,7 @@ If the net has no owner, then the player carrying the flag will receive the poin
           Filter players who can capture in this net.
         </td>
         <td>
-          <a href="/modules/filters">Filters</a>
+          <a href="/docs/modules/mechanics/filters">Filters</a>
         </td>
       </tr>
       <tr>
@@ -1196,7 +1202,7 @@ If the net has no owner, then the player carrying the flag will receive the poin
           Filter when the flags captured in this net are allowed to respawn.
         </td>
         <td>
-          <a href="/modules/filters">Filters</a>
+          <a href="/docs/modules/mechanics/filters">Filters</a>
         </td>
       </tr>
     </tbody>

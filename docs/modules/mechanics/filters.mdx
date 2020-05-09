@@ -51,7 +51,7 @@ Some modules will generate an error if you try to use the wrong type of filter, 
 When a filter doesn't apply to a particular decision, it will **abstain** from that decision, and things will behave as they would if the filter didn't exist.
 Generally, you should avoid using filters in such a way that they can abstain, since it tends to be confusing.
 
-However, the [event rules module](/modules/regions#applying) uses filter abstention to make very complex conditions easier to express:
+However, the [event rules module](/docs/modules/mechanics/regions#applying) uses filter abstention to make very complex conditions easier to express:
 It accepts a _chain_ of filters, and uses the first filter in the chain that doesn't abstain.
 
 Filters can be _forced_ to abstain using the `<allow>` and `<deny>` modifiers.
@@ -243,7 +243,7 @@ Filter matchers test for specific conditions or properties of things.
       <tr>
         <td colspan="3">
           <em>
-            Any <a href="/modules/regions">region</a> element
+            Any <a href="/docs/modules/mechanics/regions">region</a> element
           </em>
         </td>
       </tr>
@@ -287,7 +287,7 @@ Filter matchers test for specific conditions or properties of things.
         </td>
         <td>
           Matches spawn event reasons, see
-          <a href="/modules/mobs">mob spawning</a>
+          <a href="/docs/modules/environment/mobs">mob spawning</a>
         </td>
         <td></td>
       </tr>
@@ -297,7 +297,7 @@ Filter matchers test for specific conditions or properties of things.
         </td>
         <td>
           Matches mobs by their name, see
-          <a href="/modules/mobs">mob spawning</a>
+          <a href="/docs/modules/environment/mobs">mob spawning</a>
         </td>
         <td></td>
       </tr>
@@ -627,10 +627,8 @@ These elements must contain either a single filter, or a list of filters, as the
           Make a damage question specifically about the victim.
           <br />
           For example, "do they have the flag?" becomes "does the victim have
-          the flag?" Commonly used with the <a href="/modules/damage">
-            damage
-          </a>{" "}
-          module.
+          the flag?" Commonly used with the{" "}
+          <a href="/docs/modules/mechanics/damage">damage</a> module.
         </td>
         <td></td>
       </tr>
@@ -642,10 +640,8 @@ These elements must contain either a single filter, or a list of filters, as the
           Make a damage question specifically about the attacker.
           <br />
           For example, "do they have the flag?" becomes "does the attacker have
-          the flag?" Commonly used in the <a href="/modules/damage">
-            damage
-          </a>{" "}
-          module.
+          the flag?" Commonly used in the{" "}
+          <a href="/docs/modules/mechanics/damage">damage</a> module.
         </td>
         <td></td>
       </tr>
@@ -681,7 +677,7 @@ _Examples_
 
 The kill-streak filter is a matcher that matches players who have a specified number of kills.
 The kill counter can be set to count from the start of the match or from the last time the player died.
-This filter is commonly used in [kill rewards](/modules/killreward) but can also be used to restrict access to certain locations, etc.
+This filter is commonly used in [kill rewards](/docs/modules/gear/kill-rewards) but can also be used to restrict access to certain locations, etc.
 
 ##### Kill-Streak Filter Attributes
 
@@ -880,7 +876,7 @@ The flag carried, dropped, captured and returned filters have an optional `post`
 
 #### Item Filters
 
-These filters can be used to filter for players with specific items in their inventory. They accept a single [item](/modules/items) element. Only the item's type, durability/damage and meta data are compared. A item's meta data includes the item's name, enchantments, etc.
+These filters can be used to filter for players with specific items in their inventory. They accept a single [item](/docs/modules/gear/items) element. Only the item's type, durability/damage and meta data are compared. A item's meta data includes the item's name, enchantments, etc.
 
 ```xml
 <!-- Player has a stick named 'Blue Door Key' in their inventory -->
@@ -1031,7 +1027,7 @@ Cause filters are used to filter an event or action according to its cause.
 #### Player Relation Filters
 
 The relation filter is used when a player is damaged to check the relation between them and the damage cause.
-This filter is only used in damage related contexts i.e., [damage filters](/modules/damage), and [kill rewards](/modules/killreward)
+This filter is only used in damage related contexts i.e., [damage filters](/docs/modules/mechanics/damage), and [kill rewards](/docs/modules/gear/kill-rewards)
 
 <div className="table-container">
   <table>
