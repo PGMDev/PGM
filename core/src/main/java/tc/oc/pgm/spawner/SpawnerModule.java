@@ -24,7 +24,6 @@ import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.spawner.objects.SpawnableItem;
-import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
@@ -69,8 +68,8 @@ public class SpawnerModule implements MapModule {
         Duration minDelay = XMLUtils.parseDuration(minDelayAttr, delay);
         Duration maxDelay = XMLUtils.parseDuration(maxDelayAttr, delay);
 
-        if (TimeUtils.isShorterThan(maxDelay, minDelay)) {
-          throw new InvalidXMLException("Max delay cannot be smaller than min delay", element);
+        if (maxDelay.compareTo(minDelay) <= 0) {
+          throw new InvalidXMLException("Max-delay must be longer than min-delay", element);
         }
 
         int maxEntities =
