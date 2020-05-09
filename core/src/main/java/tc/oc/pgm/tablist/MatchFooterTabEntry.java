@@ -7,6 +7,10 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.setting.SettingKey;
+import tc.oc.pgm.api.setting.SettingValue;
+import tc.oc.pgm.modules.StatsMatchModule;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedText;
@@ -54,6 +58,13 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
         new PersonalizedText(
             TimeUtils.formatDuration(match.getDuration()),
             this.match.isRunning() ? ChatColor.GREEN : ChatColor.GOLD));
+
+    MatchPlayer viewer = match.getPlayer(view.getViewer());
+
+    if (viewer.getSettings().getValue(SettingKey.STATS).equals(SettingValue.STATS_ON)) {
+      content.extra("\n");
+      content.extra(match.getModule(StatsMatchModule.class).getBasicStatsMessage(viewer.getId()));
+    }
 
     return content.render(view.getViewer());
   }
