@@ -306,7 +306,7 @@ Example
 
 A score box can also award points in exchange for particular items carried by the player when they
 enter the box. These items are defined inside a `<redeemables>` score box sub-element as `<item>` tags.
-Each item contains a [material name](/reference/inventory#material_finder)
+Each item contains a [material name](/docs/reference/items/inventory#material_finder)
 and an optional `points="..."` attribute specifying the number of points awarded for each item.
 
 Example
@@ -326,7 +326,7 @@ Example
 ### Time Limit
 
 Give the match a time limit, the result attribute determines how the winning team or player is calculated when the time runs out.
-Result can be the name of a team, or one of the special values; "tie" for no winner, or "objectives" for the team that has the most objectives completed. The time limit can be specified in minutes, etc., by formatting it as a [time period](/reference/time_periods).
+Result can be the name of a team, or one of the special values; "tie" for no winner, or "objectives" for the team that has the most objectives completed. The time limit can be specified in minutes, etc., by formatting it as a [time period](/docs/reference/misc/time-periods).
 
 `NOTE!` This tag is **not** placed inside the score module, instead it is located in the root `<map>` element.
 

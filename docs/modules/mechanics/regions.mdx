@@ -14,7 +14,7 @@ Regions are a type of filter that filters the coordinates of a query. They are u
 <region id="xyzzy-region"/>
 ```
 
-The area a region applies to is specified with one or more of the following elements. Use `oo` and `-oo` to specify positive/negative infinity in coordinates. See the [Properly Defining Regions](/guides/regions) guide for information on how to properly get the coordinates of a region.
+The area a region applies to is specified with one or more of the following elements. Use `oo` and `-oo` to specify positive/negative infinity in coordinates. See the [Properly Defining Regions](/docs/guides/xml-pointers/regions) guide for information on how to properly get the coordinates of a region.
 
 ##### Region Types
 
@@ -184,7 +184,7 @@ The above and below regions can be used to conveniently define axis-aligned half
 
 Filters, kits, and velocity changes can be applied to regions by using an `<apply>` element. The apply element can contain more than one region. If the apply element contains more than one region the same settings are applied to all of them. Applies with no region default to `<everywhere/>`. Applies can also be defined in the filters element.
 
-The order in which apply elements are specified determines which takes precedence when regions overlap. Applies specified first override those specified further down in the XML. See [filter apply order](/guides/filter_apply_order) for a more detailed example. The region an apply affects can be specified as an attribute or in a `<region>` sub-element.
+The order in which apply elements are specified determines which takes precedence when regions overlap. Applies specified first override those specified further down in the XML. See [filter apply order](/docs/guides/xml-pointers/filter-apply-order) for a more detailed example. The region an apply affects can be specified as an attribute or in a `<region>` sub-element.
 
 ##### Apply Element Attributes
 

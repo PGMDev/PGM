@@ -7,7 +7,7 @@ The item elements are used to place items into a player's inventory or armor slo
 Items have many different attributes, and some may only apply to certain item types;
 such as the leather armor `color` attribute.
 
-Item names can be found with the [material finder](/reference/inventory#material_finder)
+Item names can be found with the [material finder](/docs/reference/items/inventory#material_finder)
 or on the [bukkit docs - Material](https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html)
 
 ##### Item Element
@@ -122,7 +122,9 @@ or on the [bukkit docs - Material](https://hub.spigotmc.org/javadocs/bukkit/org/
           The item's material name.
         </td>
         <td>
-          <a href="/reference/inventory#material_matchers">Material Name</a>
+          <a href="/docs/reference/items/inventory#material_matchers">
+            Material Name
+          </a>
         </td>
         <td></td>
       </tr>
@@ -139,7 +141,7 @@ or on the [bukkit docs - Material](https://hub.spigotmc.org/javadocs/bukkit/org/
           </i>
         </td>
         <td>
-          <a href="/reference/inventory">Inventory Slot</a>
+          <a href="/docs/reference/items/inventory">Inventory Slot</a>
         </td>
         <td></td>
       </tr>
@@ -341,7 +343,7 @@ or on the [bukkit docs - Material](https://hub.spigotmc.org/javadocs/bukkit/org/
   </table>
 </div>
 
-Items can be give custom names and lore with the `name` and `lore` attributes. Colors and fancy text in item names or lore can be specified with the grave symbol `` ` `` and then the [formatting code](/reference/formatting). You can specify multiple lines of lore using a pipe symbol `|` for line breaks.
+Items can be give custom names and lore with the `name` and `lore` attributes. Colors and fancy text in item names or lore can be specified with the grave symbol `` ` `` and then the [formatting code](/docs/reference/misc/formatting). You can specify multiple lines of lore using a pipe symbol `|` for line breaks.
 
 ```xml
 <item name="`6Golden Sword" material="gold sword"/> <!-- Gold sword with a gold/yellow name. -->
@@ -529,7 +531,7 @@ Enchanting, naming or giving armor lore works the same way as with items.
 ```
 
 Items like leather armor are colored with the `color` attribute.
-The color is represented in hexadecimal, see [dye colors](/reference/colors) for a list of hex colors for the different dyes.
+The color is represented in hexadecimal, see [dye colors](/docs/reference/misc/colors) for a list of hex colors for the different dyes.
 
 `NOTE:` The hex color value is specified without the hash `#` symbol.
 
@@ -626,7 +628,7 @@ This feature is enabled by default, but can be disabled with this tag.
 
 ### Books
 
-Written books can be created using the book element, the tile, author and individual pages can be formatted with [formatting codes](/reference/formatting). All normal item attributes can also be applied to books.
+Written books can be created using the book element, the tile, author and individual pages can be formatted with [formatting codes](/docs/reference/misc/formatting). All normal item attributes can also be applied to books.
 
 Each page in a book can contain a maximum of 13 lines, with approximately 19 characters per line. Preferably books should be written in-game to ensure proper formatting, and then translated into the books element.
 
@@ -744,7 +746,7 @@ Each page in a book can contain a maximum of 13 lines, with approximately 19 cha
 Any enchantment can be applied to any item and an item can have one or multiple enchantments.
 The enchantment type can be specified by its
 [Minecraft name](http://minecraft.gamepedia.com/Data_values#Enchantment_IDs) or
-[Bukkit name](/reference/enchantments).
+[Bukkit name](/docs/reference/items/enchantments).
 
 To store an enchantment in an enchanted book (instead of enchanting the book itself),
 simply replace the tag `enchantment` with `stored-enchantment`.
@@ -767,7 +769,7 @@ simply replace the tag `enchantment` with `stored-enchantment`.
         </td>
         <td>An item enchantment.</td>
         <td>
-          <a href="/reference/enchantments">Enchantment Name</a>
+          <a href="/docs/reference/items/enchantments">Enchantment Name</a>
         </td>
       </tr>
       <tr>
@@ -776,7 +778,7 @@ simply replace the tag `enchantment` with `stored-enchantment`.
         </td>
         <td>An enchantment stored in an enchanted book.</td>
         <td>
-          <a href="/reference/enchantments">Enchantment Name</a>
+          <a href="/docs/reference/items/enchantments">Enchantment Name</a>
         </td>
       </tr>
     </tbody>
@@ -846,7 +848,7 @@ Attribute modifiers can be applied to items in the same way they are applied to 
 See [Attribute Kits](/docs/modules/gear/kits#attributes) for details.
 
 Additionally, a `slot` can be specified, in which case the modifier will only be applied
-when the item is in that slot. This must be an [armor or hand slot](/reference/inventory).
+when the item is in that slot. This must be an [armor or hand slot](/docs/reference/items/inventory).
 
 _Examples_
 
@@ -929,7 +931,9 @@ massive tooltip being displayed to the player.
           <i>Does not accept a damage/data value.</i>
         </td>
         <td>
-          <a href="/reference/inventory#material_matchers">Material Name</a>
+          <a href="/docs/reference/items/inventory#material_matchers">
+            Material Name
+          </a>
         </td>
       </tr>
       <tr>
