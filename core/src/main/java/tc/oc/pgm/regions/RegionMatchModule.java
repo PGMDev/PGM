@@ -72,7 +72,7 @@ public class RegionMatchModule implements MatchModule, Listener {
     tc.oc.pgm.filters.query.PlayerQuery query =
         new tc.oc.pgm.filters.query.PlayerQuery(event, player);
 
-    if (this.useRegionPriority) {
+    if (useRegionPriority) {
       // We need to handle both scopes in the same loop, because the priority order can interleave
       // them
       for (RegionFilterApplication rfa : this.rfaContext.getAll()) {
@@ -92,13 +92,17 @@ public class RegionMatchModule implements MatchModule, Listener {
       // To preserve legacy behavior exactly, these need to be in seperate loops
       for (RegionFilterApplication rfa : this.rfaContext.get(RFAScope.PLAYER_ENTER)) {
         if ((from == null || !rfa.region.contains(from)) && rfa.region.contains(to)) {
-          processQuery(rfa, query);
+          if (processQuery(rfa, query) && rfa.useRegionPriority) {
+            break;
+          }
         }
       }
 
       for (RegionFilterApplication rfa : this.rfaContext.get(RFAScope.PLAYER_LEAVE)) {
         if ((from == null || rfa.region.contains(from)) && !rfa.region.contains(to)) {
-          processQuery(rfa, query);
+          if (processQuery(rfa, query) && rfa.useRegionPriority) {
+            break;
+          }
         }
       }
     }
@@ -208,14 +212,14 @@ public class RegionMatchModule implements MatchModule, Listener {
       // Legacy behavior
       if (event.isPlace()) {
         for (RegionFilterApplication rfa : this.rfaContext.get(RFAScope.BLOCK_PLACE)) {
-          if (rfa.region.contains(pos)) {
-            processQuery(rfa, placeQuery);
+          if (rfa.region.contains(pos) && processQuery(rfa, placeQuery) && rfa.useRegionPriority) {
+            break;
           }
         }
       } else {
         for (RegionFilterApplication rfa : this.rfaContext.get(RFAScope.BLOCK_BREAK)) {
-          if (rfa.region.contains(pos)) {
-            processQuery(rfa, breakQuery);
+          if (rfa.region.contains(pos) && processQuery(rfa, breakQuery) && rfa.useRegionPriority) {
+            break;
           }
         }
       }
@@ -244,7 +248,7 @@ public class RegionMatchModule implements MatchModule, Listener {
           if (event.isCancelled() && rfa.message != null) {
             player.sendWarning(rfa.message, true);
           }
-          if (this.useRegionPriority) {
+          if (this.useRegionPriority || rfa.useRegionPriority) {
             break;
           }
         }
@@ -324,7 +328,7 @@ public class RegionMatchModule implements MatchModule, Listener {
               player.sendWarning(rfa.message, false);
             }
           }
-          if (this.useRegionPriority) {
+          if (this.useRegionPriority || rfa.useRegionPriority) {
             break;
           }
         }
@@ -339,7 +343,7 @@ public class RegionMatchModule implements MatchModule, Listener {
       if (rfa.region.contains(blockState)) {
         if (processQuery(rfa, query)) {
           sendCancelMessage(rfa, query);
-          if (this.useRegionPriority) break;
+          if (this.useRegionPriority || rfa.useRegionPriority) break;
         }
       }
     }
@@ -355,7 +359,7 @@ public class RegionMatchModule implements MatchModule, Listener {
       if (rfa.region.contains(blockState)) {
         if (processQuery(rfa, query)) {
           sendCancelMessage(rfa, query);
-          if (this.useRegionPriority) break;
+          if (this.useRegionPriority || rfa.useRegionPriority) break;
         }
       }
     }

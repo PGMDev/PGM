@@ -17,6 +17,7 @@ public class RegionFilterApplication implements FeatureDefinition {
   public final Vector velocity;
   public final @Nullable Component message;
   public final boolean earlyWarning;
+  public boolean useRegionPriority;
 
   private RegionFilterApplication(
       RFAScope scope,
