@@ -3,7 +3,6 @@ package tc.oc.pgm.regions;
 import com.google.common.collect.ArrayListMultimap;
 import java.util.ArrayList;
 import java.util.List;
-import org.bukkit.util.Vector;
 
 public class RFAContext {
   protected final ArrayListMultimap<RFAScope, RegionFilterApplication> rfas =
@@ -20,6 +19,7 @@ public class RFAContext {
 
   /** Prepend the given RFA, giving it the highest priority */
   public void prepend(RegionFilterApplication rfa) {
+    rfa.useRegionPriority = true; // Allows region priority to work on older maps
     this.rfas.get(rfa.scope).add(0, rfa);
     this.byPriority.add(0, rfa);
   }
@@ -32,20 +32,5 @@ public class RFAContext {
   /** Return all RFAs in priority order */
   public Iterable<RegionFilterApplication> getAll() {
     return this.byPriority;
-  }
-
-  public RegionFilterApplication getNearest(Vector pos) {
-    RegionFilterApplication nearest = null;
-    double distance = Double.POSITIVE_INFINITY;
-
-    for (RegionFilterApplication rfa : byPriority) {
-      double d = pos.distanceSquared(rfa.region.getBounds().getCenterPoint());
-      if (d < distance) {
-        nearest = rfa;
-        distance = d;
-      }
-    }
-
-    return nearest;
   }
 }

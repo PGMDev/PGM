@@ -8,7 +8,6 @@ import java.util.List;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
-import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -19,7 +18,6 @@ import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.filters.TeamFilter;
 import tc.oc.pgm.kits.Kit;
-import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.component.Component;
@@ -71,34 +69,34 @@ public class RegionFilterApplicationParser {
   }
 
   public void parseLane(Element el) throws InvalidXMLException {
-    final FeatureReference<TeamFactory> team =
-        Teams.getTeamRef(new Node(XMLUtils.getRequiredAttribute(el, "team")), factory);
+    final Filter filter =
+        new DenyFilter(
+            new TeamFilter(
+                Teams.getTeamRef(new Node(XMLUtils.getRequiredAttribute(el, "team")), factory)));
+    final Region region = parseRegion(el);
+    final Component message = new PersonalizedTranslatable("match.laneExit");
 
+    prepend(el, new RegionFilterApplication(RFAScope.PLAYER_ENTER, region, filter, message, false));
     prepend(
         el,
         new RegionFilterApplication(
-            RFAScope.PLAYER_ENTER,
-            parseRegion(el),
-            new DenyFilter(new TeamFilter(team)),
-            new PersonalizedTranslatable("match.laneExit"),
-            false));
+            RFAScope.BLOCK_PLACE, new NegativeRegion(region), filter, message, false));
   }
 
   public void parseMaxBuildHeight(Element el) throws InvalidXMLException {
-    prepend(
-        el,
-        new RegionFilterApplication(
-            RFAScope.BLOCK_PLACE,
-            new CuboidRegion(
-                new Vector(
-                    Double.NEGATIVE_INFINITY,
-                    XMLUtils.parseNumber(el, Integer.class),
-                    Double.NEGATIVE_INFINITY),
-                new Vector(
-                    Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)),
-            StaticFilter.DENY,
-            new PersonalizedTranslatable("match.maxBuildHeight"),
-            false));
+    final Region region =
+        new CuboidRegion(
+            new Vector(
+                Double.NEGATIVE_INFINITY,
+                XMLUtils.parseNumber(el, Integer.class),
+                Double.NEGATIVE_INFINITY),
+            new Vector(
+                Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY));
+    final Component message = new PersonalizedTranslatable("match.maxBuildHeight");
+
+    for (RFAScope scope : Lists.newArrayList(RFAScope.BLOCK_PLACE)) {
+      prepend(el, new RegionFilterApplication(scope, region, StaticFilter.DENY, message, false));
+    }
   }
 
   public void parsePlayable(Element el) throws InvalidXMLException {
