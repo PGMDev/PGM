@@ -165,6 +165,8 @@ public class StatsMatchModule implements MatchModule, Listener {
         .schedule(
             () -> {
               for (MatchPlayer viewer : match.getPlayers()) {
+                if (viewer.getSettings().getValue(SettingKey.STATS) == SettingValue.STATS_OFF)
+                  continue;
                 viewer.sendMessage(
                     Components.fromLegacyText(
                         ComponentUtils.horizontalLineHeading(
