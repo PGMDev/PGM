@@ -166,10 +166,6 @@ public class VanishManagerImpl implements VanishManager, Listener {
         loginSubdomains.invalidate(player.getId());
         player.setVanished(true);
         addVanished(player);
-
-        player.sendWarning(
-            TranslatableComponent.of("vanish.login.domain", TextColor.GRAY)
-                .args(TextComponent.of(domain, TextColor.AQUA)));
       }
     }
   }
