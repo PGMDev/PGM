@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static tc.oc.pgm.util.text.TextParser.*;
 
 import com.google.common.collect.Range;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.Duration;
 import org.bukkit.ChatColor;
 import org.bukkit.util.Vector;
@@ -211,5 +213,24 @@ public final class TextParserTest {
                 TextException.class,
                 () -> parseEnum(text, ChatColor.class, Range.atMost(ChatColor.BLACK), false))
             .getMessage());
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"sqlite::memory:"})
+  void testParseSqlConnection(String text) throws SQLException {
+    final Connection connection = parseSqlConnection(text);
+
+    assertNotNull(connection);
+    assertFalse(connection.isClosed());
+
+    connection.close();
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"", "notauri"})
+  void testParseSqlConnectionInvalid(String text) {
+    assertEquals(
+        "error.invalidFormat",
+        assertThrows(TextException.class, () -> parseSqlConnection(text)).getMessage());
   }
 }
