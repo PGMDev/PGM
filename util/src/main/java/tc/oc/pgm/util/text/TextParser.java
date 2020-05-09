@@ -3,9 +3,15 @@ package tc.oc.pgm.util.text;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static tc.oc.pgm.util.text.TextException.invalidFormat;
 import static tc.oc.pgm.util.text.TextException.outOfRange;
+import static tc.oc.pgm.util.text.TextException.unknown;
 
 import com.google.common.collect.Range;
 import com.google.gson.JsonSyntaxException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
@@ -398,7 +404,7 @@ public final class TextParser {
    *
    * @param text The text.
    * @return A log level.
-   * @throws TextException If the text is invalod.
+   * @throws TextException If the text is invalid.
    */
   public static Level parseLogLevel(String text) throws TextException {
     checkNotNull(text, "cannot parse log level from null");
@@ -407,6 +413,46 @@ public final class TextParser {
       return Level.parse(text.toUpperCase());
     } catch (IllegalArgumentException e) {
       throw invalidFormat(text, Level.class, e);
+    }
+  }
+
+  /**
+   * Parses text into a sql connection.
+   *
+   * @param text The text.
+   * @return A sql connection.
+   * @throws TextException If the text is invalid or the connection cannot be made.
+   */
+  public static Connection parseSqlConnection(String text) throws TextException {
+    checkNotNull(text, "cannot parse sql connection from null");
+
+    final URI uri;
+    try {
+      uri = new URI(text);
+    } catch (URISyntaxException e) {
+      throw invalidFormat(text, URI.class, e);
+    }
+
+    // The driver class must be loaded before calling DriverManager#getDriver.
+    // If a custom driver is used, we are not responsible for loading it.
+    final String scheme = uri.getScheme();
+    try {
+      if (scheme == null || scheme.isEmpty()) {
+        throw invalidFormat(text, URI.class, null);
+      } else if (scheme.startsWith("sqlite")) {
+        Class.forName("org.sqlite.JDBC");
+      } else if (scheme.startsWith("mysql")) {
+        Class.forName("com.mysql.jdbc.Driver");
+      }
+    } catch (ClassNotFoundException e) {
+      throw unknown(e);
+    }
+
+    // Driver uris will always start with "jdbc:"
+    try {
+      return DriverManager.getConnection("jdbc:" + uri.toString());
+    } catch (SQLException e) {
+      throw unknown(e); // TODO: wrap common database errors with more friendly messages
     }
   }
 }

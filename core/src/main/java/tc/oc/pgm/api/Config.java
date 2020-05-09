@@ -29,6 +29,13 @@ public interface Config {
   String getDatabaseUri();
 
   /**
+   * Gets the maximum number of concurrent database connections.
+   *
+   * @return Number of connections.
+   */
+  int getDatabaseMaxConnections();
+
+  /**
    * Gets a list of map sources, typically directory paths.
    *
    * @return A list of map sources.

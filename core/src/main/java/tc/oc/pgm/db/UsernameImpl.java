@@ -31,7 +31,7 @@ class UsernameImpl implements Username {
 
   @Nullable
   @Override
-  public final String getName() {
+  public String getName() {
     return name;
   }
 
