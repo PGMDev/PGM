@@ -160,8 +160,10 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     Modules.registerAll();
     Permissions.registerAll();
 
-    final Server server = getServer();
-    server.getConsoleSender().addAttachment(this, Permissions.ALL.getName(), true);
+    final CommandSender console = getServer().getConsoleSender();
+    console.addAttachment(this, Permissions.ALL.getName(), true);
+    console.addAttachment(this, Permissions.DEBUG, false);
+    console.recalculatePermissions();
 
     final Logger logger = getLogger();
     gameLogger = Logger.getLogger(logger.getName() + ".game");
@@ -489,11 +491,13 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       final String message = format(record);
 
       if (message != null) {
+        getLogger().log(Level.INFO, ChatColor.stripColor(message));
         Bukkit.broadcast(message, Permissions.DEBUG);
       }
 
       if (message == null || message.contains("Unhandled")) {
-        getLogger().log(record.getLevel(), record.getMessage(), record.getThrown());
+        getLogger()
+            .log(record.getLevel(), record.getThrown().getMessage(), record.getThrown().getCause());
       }
     }
 
