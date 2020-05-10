@@ -94,11 +94,13 @@ public final class PGMConfig implements Config {
 
     this.logLevel = parseLogLevel(config.getString("log-level", "info"));
 
+    final String databaseUri = config.getString("database-uri");
     this.databaseUri =
-        config.getString(
-            "database-uri", "sqlite:" + new File(dataFolder, "pgm.db").getAbsolutePath());
+        databaseUri == null || databaseUri.isEmpty()
+            ? "sqlite:" + new File(dataFolder, "pgm.db").getAbsolutePath()
+            : databaseUri;
     this.databaseMaxConnections =
-        databaseUri.startsWith("sqlite:")
+        this.databaseUri.startsWith("sqlite:")
             ? 1 // SQLite is single threaded by nature
             : Math.min(5, Runtime.getRuntime().availableProcessors());
 
