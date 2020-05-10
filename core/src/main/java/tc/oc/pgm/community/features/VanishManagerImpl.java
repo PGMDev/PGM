@@ -23,6 +23,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import tc.oc.pgm.api.PGM;
@@ -139,6 +140,8 @@ public class VanishManagerImpl implements VanishManager, Listener {
   /* Events */
   private final Cache<UUID, String> loginSubdomains =
       CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.SECONDS).build();
+  private final List<UUID> tempVanish =
+      Lists.newArrayList(); // List of online UUIDs who joined via "vanish" subdomain
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPreJoin(PlayerLoginEvent event) {
@@ -151,7 +154,7 @@ public class VanishManagerImpl implements VanishManager, Listener {
     }
   }
 
-  @EventHandler(priority = EventPriority.MONITOR)
+  @EventHandler(priority = EventPriority.HIGH)
   public void onJoin(PlayerJoinEvent event) {
     MatchPlayer player = matchManager.getPlayer(event.getPlayer());
     if (isVanished(player.getId())) { // Player is already vanished
@@ -160,13 +163,33 @@ public class VanishManagerImpl implements VanishManager, Listener {
         .getBukkit()
         .hasPermission(Permissions.VANISH)) { // Player is not vanished, but has permission to
 
-      // Automatic vanish if player logs in via a "vanish" subdomain.
+      // Automatic vanish if player logs in via a "vanish" subdomain
       String domain = loginSubdomains.getIfPresent(player.getId());
       if (domain != null) {
         loginSubdomains.invalidate(player.getId());
+        tempVanish.add(player.getId());
         player.setVanished(true);
         addVanished(player);
       }
+    }
+  }
+
+  @EventHandler(priority = EventPriority.HIGH)
+  public void onQuit(PlayerQuitEvent event) {
+    MatchPlayer player = matchManager.getPlayer(event.getPlayer());
+    // If player is vanished & joined via "vanish" subdomain. Remove vanish status on quit
+    if (isVanished(player.getId()) && tempVanish.contains(player.getId())) {
+      player.setVanished(false);
+      removeVanished(player);
+    }
+  }
+
+  @EventHandler
+  public void onUnvanish(PlayerVanishEvent event) {
+    // If player joined via "vanish" subdomain, but unvanishes while online
+    // stop tracking them for auto-vanish removal
+    if (!event.isVanished() && tempVanish.contains(event.getPlayer().getId())) {
+      tempVanish.remove(event.getPlayer().getId());
     }
   }
 

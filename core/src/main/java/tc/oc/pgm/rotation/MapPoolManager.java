@@ -1,11 +1,12 @@
 package tc.oc.pgm.rotation;
 
+import com.google.common.collect.Maps;
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,11 +35,13 @@ public class MapPoolManager implements MapOrder {
 
   private Logger logger;
 
+  private File mapPoolsFile;
   private FileConfiguration mapPoolFileConfig;
-  private List<MapPool> mapPools = new ArrayList<>();
+
+  private Map<MapPool, MapActivity> mapPools = Maps.newHashMap();
   private MapPool activeMapPool;
 
-  /* If a time limit is added via /setpool <name> -t [time], then after this duration the map pool will revert automaticly */
+  /* If a time limit is added via /setpool <name> -t [time], then after this duration the map pool will revert automatically */
   private Duration poolTimeLimit = null;
   private Instant poolStartTime = null;
 
@@ -49,6 +52,7 @@ public class MapPoolManager implements MapOrder {
 
   public MapPoolManager(Logger logger, File mapPoolsFile, Datastore database) {
     this.logger = logger;
+    this.mapPoolsFile = mapPoolsFile;
     this.database = database;
 
     if (!mapPoolsFile.exists()) {
@@ -60,58 +64,82 @@ public class MapPoolManager implements MapOrder {
       }
     }
 
-    this.mapPoolFileConfig = YamlConfiguration.loadConfiguration(mapPoolsFile);
-    loadMapPools();
+    reload();
   }
 
   public @Nullable String getNextMapForPool(String poolName) {
     String mapName = database.getMapActivity(poolName).getMapName();
     if (mapName != null) {
-      PGM.get()
-          .getLogger()
-          .log(Level.INFO, String.format("%s was found in map activity as the next map.", mapName));
+      logger.log(
+          Level.INFO,
+          String.format("%s was found in map activity as the next map (%s).", mapName, poolName));
     }
     return mapName;
   }
 
-  private void loadMapPools() {
-    mapPools =
+  public int reload() {
+    this.mapPoolFileConfig = YamlConfiguration.loadConfiguration(mapPoolsFile);
+    return loadMapPools();
+  }
+
+  private int loadMapPools() {
+    List<MapPool> pools =
         mapPoolFileConfig.getConfigurationSection("pools").getKeys(false).stream()
             .map(key -> MapPool.of(this, mapPoolFileConfig, key))
             .filter(MapPool::isEnabled)
             .collect(Collectors.toList());
 
-    mapPools.stream()
-        .forEach(
-            pool -> {
-              MapActivity ma = database.getMapActivity(pool.getName());
-              if (ma.isActive() && !pool.isDynamic()) {
-                activeMapPool = pool;
-                logger.log(Level.INFO, "Resuming last active map pool (" + pool.getName() + ")");
-              }
-            });
+    List<MapActivity> activity =
+        pools.stream()
+            .map(MapPool::getName)
+            .map(database::getMapActivity)
+            .collect(Collectors.toList());
+
+    this.mapPools.clear(); // For reloads
+
+    pools.forEach(
+        pool ->
+            mapPools.put(
+                pool,
+                activity.stream()
+                    .filter(a -> a.getPoolName().equalsIgnoreCase(pool.getName()))
+                    .findAny()
+                    .orElse(null)));
+
+    Optional<MapActivity> lastActive =
+        mapPools.values().stream().filter(ma -> ma.isActive()).findFirst();
+    if (lastActive.isPresent()) {
+      activeMapPool = getMapPoolByName(lastActive.get().getPoolName());
+    }
 
     if (activeMapPool == null) {
       logger.log(Level.WARNING, "No active map pool was found, defaulting to first dynamic pool.");
-      activeMapPool = mapPools.stream().filter(mp -> mp.isDynamic()).findFirst().orElse(null);
+      activeMapPool =
+          mapPools.keySet().stream().sorted().filter(mp -> mp.isDynamic()).findFirst().orElse(null);
       if (activeMapPool == null) {
         logger.log(Level.SEVERE, "Failed to find any dynamic map pool!");
       }
+    } else {
+      logger.log(Level.INFO, "Resuming last active map pool (" + activeMapPool.getName() + ")");
     }
+
+    return pools.size();
   }
 
   public void saveMapPools() {
-    mapPools.stream()
+    mapPools.entrySet().stream()
         .forEach(
-            pool -> {
+            e -> {
               String nextMap = null;
-              if (pool instanceof Rotation) {
-                nextMap = pool.getNextMap().getName();
+              if (e.getKey() instanceof Rotation) {
+                nextMap = e.getKey().getNextMap().getName();
               }
+
               boolean active =
-                  activeMapPool.getName().equalsIgnoreCase(pool.getName())
-                      && activeMapPool.isDynamic();
-              database.getMapActivity(pool.getName()).update(nextMap, active);
+                  getActiveMapPool() != null
+                      && getActiveMapPool().getName().equalsIgnoreCase(e.getKey().getName())
+                      && e.getKey().isDynamic();
+              e.getValue().update(nextMap, active);
             });
   }
 
@@ -120,7 +148,7 @@ public class MapPoolManager implements MapOrder {
   }
 
   public List<MapPool> getMapPools() {
-    return mapPools;
+    return mapPools.keySet().stream().sorted().collect(Collectors.toList());
   }
 
   private void updateActiveMapPool(MapPool mapPool, Match match) {
@@ -165,7 +193,7 @@ public class MapPoolManager implements MapOrder {
    * @return The {@link MapPool} which matches the input name
    */
   public MapPool getMapPoolByName(String name) {
-    return mapPools.stream()
+    return mapPools.keySet().stream()
         .filter(rot -> rot.getName().equalsIgnoreCase(name))
         .findFirst()
         .orElse(null);
@@ -182,6 +210,11 @@ public class MapPoolManager implements MapOrder {
       overriderMap = null;
       return overrider;
     }
+
+    if (activeMapPool == null) {
+      getActiveMapPool();
+    }
+
     return activeMapPool.popNextMap();
   }
 
@@ -211,20 +244,17 @@ public class MapPoolManager implements MapOrder {
             ? (int) (match.getObservers().size() * 0.85)
             : (int) (match.getObservers().size() * 0.5);
     int activePlayers = match.getPlayers().size() - obs;
-    return mapPools.stream()
-        .filter(rot -> activePlayers >= rot.getPlayers())
+    return mapPools.keySet().stream()
+        .filter(pool -> pool.isDynamic())
+        .filter(pool -> activePlayers >= pool.getPlayers())
         .max(MapPool::compareTo);
   }
 
   @Override
   public void matchEnded(Match match) {
-    int activePlayers = match.getPlayers().size() - (match.getObservers().size() / 2);
-
-    mapPools.stream()
-        .filter(rot -> activePlayers >= rot.getPlayers())
-        .max(MapPool::compareTo)
-        .ifPresent(pool -> updateActiveMapPool(pool, match));
-
+    if (activeMapPool.isDynamic() || shouldRevert(match)) {
+      getAppropriateDynamicPool(match).ifPresent(pool -> updateActiveMapPool(pool, match));
+    }
     activeMapPool.matchEnded(match);
   }
 
