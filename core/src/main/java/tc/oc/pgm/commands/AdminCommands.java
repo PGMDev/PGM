@@ -229,6 +229,25 @@ public class AdminCommands {
     PGM.get().reloadConfig();
   }
 
+  @Command(
+      aliases = {"reloadpools"},
+      desc = "Reload map pools",
+      perms = Permissions.RELOAD)
+  public void reloadMapPools(Audience viewer) {
+    if (PGM.get().getMapOrder() instanceof MapPoolManager) {
+      int poolCount = ((MapPoolManager) PGM.get().getMapOrder()).reload();
+      viewer.sendWarning(
+          TranslatableComponent.of("command.admin.reloadPools", TextColor.GREEN)
+              .args(TextComponent.of(poolCount, TextColor.GOLD))
+              .append(TextComponent.space())
+              .append(
+                  TranslatableComponent.of(
+                      poolCount != 1 ? "pool.title" : "pool.name", TextColor.GREEN)));
+    } else {
+      viewer.sendWarning(TranslatableComponent.of("command.notEnabled"));
+    }
+  }
+
   private static Map<String, Competitor> getCompetitorMap(CommandSender sender, Match match) {
     return match.getCompetitors().stream()
         .map(competitor -> new AbstractMap.SimpleEntry<>(competitor.getName(sender), competitor))
