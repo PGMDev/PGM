@@ -77,9 +77,10 @@ public class MapPoolManager implements MapOrder {
     return mapName;
   }
 
-  public int reload() {
+  @Override
+  public void reload() {
     this.mapPoolFileConfig = YamlConfiguration.loadConfiguration(mapPoolsFile);
-    return loadMapPools();
+    loadMapPools();
   }
 
   private int loadMapPools() {
