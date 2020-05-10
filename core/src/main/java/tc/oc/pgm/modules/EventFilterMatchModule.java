@@ -1,9 +1,18 @@
 package tc.oc.pgm.modules;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Random;
 import javax.annotation.Nullable;
+import org.bukkit.Effect;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -13,6 +22,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockDamageEvent;
+import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.entity.EntityCombustByEntityEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -35,6 +45,10 @@ import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.world.PortalCreateEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.Dispenser;
+import org.bukkit.util.Vector;
 import tc.oc.pgm.api.event.AdventureModeInteractEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -44,6 +58,7 @@ import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.event.ObserverInteractEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerBlockTransformEvent;
+import tc.oc.pgm.kits.ArmorType;
 import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
@@ -194,6 +209,97 @@ public class EventFilterMatchModule implements MatchModule, Listener {
   public void onShoot(final EntityShootBowEvent event) {
     // PlayerInteractEvent is fired on draw, this is fired on release. Need to cancel both.
     cancelUnlessInteracting(event, event.getEntity());
+  }
+
+  @EventHandler(priority = EventPriority.LOWEST)
+  public void onDispense(BlockDispenseEvent event) {
+    ItemStack item = event.getItem();
+    ArmorType armorType = ArmorType.getArmorType(item);
+
+    // If the dispenser is equipping a player with armor the velocity is 0
+    if (event.getVelocity().length() != 0 || armorType == null) {
+      return;
+    }
+
+    World world = event.getWorld();
+    Block block = event.getBlock();
+    Inventory inventory = ((org.bukkit.block.Dispenser) block.getState()).getInventory();
+
+    BlockFace facing = ((Dispenser) block.getState().getMaterialData()).getFacing();
+
+    Location dispenseLocation =
+        new Location(
+            event.getWorld(),
+            block.getX() + 0.5D + 0.7D * facing.getModX(),
+            block.getY() + 1.2D * facing.getModY(),
+            block.getZ() + 0.5D + 0.7D * facing.getModZ());
+
+    Collection<Player> nearbyPlayers = world.getNearbyPlayers(dispenseLocation, 1);
+
+    List<Player> nearbyParticipatingPlayers = new ArrayList<>();
+
+    boolean interferingPlayerPresent = false;
+
+    for (Player player : nearbyPlayers) {
+      MatchPlayer matchPlayer = match.getPlayer(player);
+      if (matchPlayer.isAlive()) {
+        nearbyParticipatingPlayers.add(player);
+      } else {
+        interferingPlayerPresent = true;
+      }
+    }
+
+    if (!interferingPlayerPresent) return;
+
+    event.setCancelled(true);
+    world.playEffect(dispenseLocation, Effect.CLICK1, 1, 16);
+
+    boolean dropItem = false;
+    for (Player player : nearbyParticipatingPlayers) {
+      ItemStack currentItem = armorType.getItem(player.getInventory());
+      if (currentItem == null || currentItem.getType() == Material.AIR) {
+        armorType.setItem(player.getInventory(), item);
+        dropItem = true;
+        break;
+      }
+    }
+
+    // copied from nms
+    if (dropItem) {
+      Item droppedItem = world.dropItem(dispenseLocation, item);
+      Vector droppedItemVelocity = new Vector();
+      Random random = match.getRandom();
+      double baseSpeed = random.nextDouble() * 0.1D + 0.2D;
+      double randomModifier = 0.007499999832361937D * 6D;
+      droppedItemVelocity.setX((double) facing.getModX() * baseSpeed);
+      droppedItemVelocity.setX(
+          (double) facing.getModX() * baseSpeed + random.nextGaussian() * randomModifier);
+      droppedItemVelocity.setY(0.20000000298023224D + random.nextGaussian() * randomModifier);
+      droppedItemVelocity.setZ((double) facing.getModZ() * baseSpeed);
+      droppedItemVelocity.setZ(
+          (double) facing.getModZ() * baseSpeed + random.nextGaussian() * randomModifier);
+      droppedItem.setVelocity(droppedItemVelocity);
+    }
+
+    // When this is called the amount for the armor being dispensed will be 0, we have to manually
+    // set its size to less than 0 due to how the nms code works
+    for (int i = 0; i < inventory.getSize(); i++) {
+      ItemStack itemStack = inventory.getItem(i);
+      if (itemStack != null && itemStack.getAmount() == 0) {
+        itemStack.setAmount(-1);
+        return;
+      }
+    }
+
+    // If we reach here the armor selected was in a stack of more than 1 so we just remove from
+    // the first similar stack
+    for (int i = 0; i < inventory.getSize(); i++) {
+      ItemStack itemStack = inventory.getItem(i);
+      if (itemStack != null && itemStack.isSimilar(item)) {
+        itemStack.subtract();
+        return;
+      }
+    }
   }
 
   // --------------------------------------
