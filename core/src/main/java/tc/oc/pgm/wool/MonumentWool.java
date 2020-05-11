@@ -5,7 +5,6 @@ import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -96,9 +95,7 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
   @Override
   protected boolean canBlockUpdateProximity(BlockState oldState, BlockState newState) {
     // If monument proximity metric is closest block, make it only the wool
-    return !hasTouched(getOwner())
-        || (oldState.getType() == Material.AIR
-            && this.getDefinition().isObjectiveWool(newState.getData()));
+    return !hasTouched(getOwner()) || this.getDefinition().isObjectiveWool(newState.getData());
   }
 
   public void handleWoolAcquisition(Player player, ItemStack item) {
