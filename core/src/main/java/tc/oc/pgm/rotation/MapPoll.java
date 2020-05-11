@@ -136,7 +136,7 @@ public class MapPoll {
         .build();
   }
 
-  public void sendBook(MatchPlayer viewer) {
+  public void sendBook(MatchPlayer viewer, boolean forceOpen) {
     String title = ChatColor.GOLD + "" + ChatColor.BOLD;
     title += TextTranslations.translate("vote.title.map", viewer.getBukkit());
 
@@ -162,7 +162,7 @@ public class MapPoll {
     }
     viewer.getInventory().setItemInHand(is);
 
-    if (viewer.getSettings().getValue(SettingKey.VOTE) == SettingValue.VOTE_ON)
+    if (forceOpen || viewer.getSettings().getValue(SettingKey.VOTE) == SettingValue.VOTE_ON)
       NMSHacks.openBook(is, viewer.getBukkit());
   }
 
@@ -180,7 +180,7 @@ public class MapPoll {
                 TextComponent.of(
                     map.getTags().stream().map(MapTag::toString).collect(Collectors.joining(" ")),
                     TextColor.YELLOW)))
-        .clickEvent(ClickEvent.runCommand("/votenext " + map.getName()))
+        .clickEvent(ClickEvent.runCommand("/votenext -o " + map.getName()))
         .build();
   }
 

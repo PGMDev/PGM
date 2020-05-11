@@ -278,7 +278,11 @@ public final class MapPoolCommand {
 
   @Command(aliases = "votenext", desc = "Vote for the next map", usage = "map")
   public static void voteNext(
-      MatchPlayer player, CommandSender sender, MapOrder mapOrder, @Text MapInfo map)
+      MatchPlayer player,
+      CommandSender sender,
+      MapOrder mapOrder,
+      @Switch('o') boolean forceOpen,
+      @Text MapInfo map)
       throws CommandException {
     MapPool pool = getMapPoolManager(sender, mapOrder).getActiveMapPool();
     MapPoll poll = pool instanceof VotingPool ? ((VotingPool) pool).getCurrentPoll() : null;
@@ -294,7 +298,7 @@ public final class MapPoolCommand {
             voteResult ? TextColor.GREEN : TextColor.RED,
             map.getStyledName(MapNameStyle.COLOR));
     player.sendMessage(voteAction);
-    poll.sendBook(player);
+    poll.sendBook(player, forceOpen);
   }
 
   public static MapPoolManager getMapPoolManager(CommandSender sender, MapOrder mapOrder)
