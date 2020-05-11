@@ -227,6 +227,7 @@ public class AdminCommands {
       perms = Permissions.RELOAD)
   public void pgm() {
     PGM.get().reloadConfig();
+    PGM.get().getMapOrder().reload();
   }
 
   private static Map<String, Competitor> getCompetitorMap(CommandSender sender, Match match) {
