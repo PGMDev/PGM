@@ -8,6 +8,7 @@ import {
   faArrowDown,
   faAngleRight,
   faFolderOpen,
+  faCompass,
 } from "@fortawesome/free-solid-svg-icons";
 
 import classnames from "classnames";
@@ -96,7 +97,7 @@ export default function Downloads() {
                 <p>
                   SportPaper is a Minecraft server jar based on Paper 1.8 tuned
                   for maximum performance for high intensity PvP. It is
-                  mandatory and should run along PGM.
+                  mandatory and should run alongside PGM.
                 </p>
                 <a
                   className={classnames(
@@ -158,21 +159,38 @@ export default function Downloads() {
               <div className={classnames("hero", styles.others_hero)}>
                 <div className="col">
                   <div className="row">
-                    <img
-                      src="https://avatars3.githubusercontent.com/u/54190830?s=200&v=4"
-                      className={styles.octc_logo}
-                    />
-                    <div className={styles.others_header}>
-                      <h2>Overcast Community</h2>
-                      <a href="https://oc.tc/">Website</a>
+                    <div className="col col--6">
+                      <div className="row">
+                        <h1 className={styles.others_icon}>
+                          <FontAwesomeIcon icon={faCompass} />
+                        </h1>
+                        <div className={styles.others_header}>
+                          <h2>PGM Tracker</h2>
+                          <a href="https://pgm.fyi">
+                            <label>Website</label>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col col--6">
+                      <a
+                        className={classnames(
+                          "button button--primary",
+                          styles.others_button
+                        )}
+                        href="https://pgm.fyi"
+                      >
+                        Visit <FontAwesomeIcon icon={faCompass} />
+                      </a>
                     </div>
                   </div>
                   <div className={styles.others_description}>
                     <p>
-                      An old favorite is back! Get to play a variety of classic
-                      Minecraft PvP maps and get involved with PGM development
-                      by trying beta features! Join today @{" "}
-                      <code>play.oc.tc</code>
+                      PGM Tracker is a community tool made by{" "}
+                      <a href="https://github.com/applenick">applenick</a> that
+                      tracks public PGM servers. Take a look at it, play a
+                      variety of Minecraft PvP maps and get involved with
+                      development!
                     </p>
                   </div>
                 </div>
