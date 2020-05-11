@@ -15,27 +15,30 @@ module.exports = {
       },
       links: [
         {
-          to: "docs/modules/general/main",
-          activeBasePath: "docs",
-          label: "Modules",
+          label: "XML",
           position: "left",
+          items: [
+            {
+              to: "docs/modules/general/main",
+              label: "Modules",
+            },
+            {
+              to: "docs/reference/items/inventory",
+              label: "Reference",
+            },
+            {
+              to: "docs/guides/xml-pointers/regions",
+              label: "Guides",
+            },
+            {
+              to: "docs/examples/airship-battle",
+              label: "Examples",
+            },
+          ],
         },
         {
-          to: "docs/reference/items/inventory",
-          activeBasePath: "docs",
-          label: "Reference",
-          position: "left",
-        },
-        {
-          to: "docs/guides/xml-pointers/regions",
-          activeBasePath: "docs",
-          label: "Guides",
-          position: "left",
-        },
-        {
-          to: "docs/examples/airship-battle",
-          activeBasePath: "docs",
-          label: "Examples",
+          to: "downloads",
+          label: "Downloads",
           position: "left",
         },
         {
@@ -63,10 +66,6 @@ module.exports = {
               to: "docs/guides/xml-pointers/regions",
               label: "Guides",
             },
-            {
-              to: "docs/modules/general/main",
-              label: "Examples",
-            },
           ],
         },
         {
@@ -85,6 +84,10 @@ module.exports = {
         {
           title: "More",
           items: [
+            {
+              label: "Downloads",
+              to: "downloads",
+            },
             {
               label: "GitHub",
               href: "https://github.com/Electroid/PGM",

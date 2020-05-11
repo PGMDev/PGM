@@ -1,0 +1,266 @@
+.spinner_hero {
+  padding: 3rem 1rem;
+  background: transparent;
+  border-radius: 10px;
+}
+
+.lds_ripple {
+  width: 80px;
+  height: 80px;
+  margin: auto;
+  position: relative;
+}
+
+.lds_ripple div {
+  position: absolute;
+  border: 4px solid;
+  opacity: 1;
+  border-radius: 50%;
+  animation: lds_ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+.lds_ripple div:nth-child(2) {
+  animation-delay: -0.5s;
+}
+@keyframes lds_ripple {
+  0% {
+    top: 36px;
+    left: 36px;
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    top: 0px;
+    left: 0px;
+    width: 72px;
+    height: 72px;
+    opacity: 0;
+  }
+}
+
+.appearing {
+  display: block;
+
+  -webkit-animation: fadeInFromNone 0.3s ease-out;
+  -moz-animation: fadeInFromNone 0.3s ease-out;
+  -o-animation: fadeInFromNone 0.3s ease-out;
+  animation: fadeInFromNone 0.3s ease-out;
+}
+
+@-webkit-keyframes fadeInFromNone {
+  0% {
+    display: none;
+    opacity: 0;
+  }
+
+  1% {
+    display: block;
+    opacity: 0;
+  }
+
+  100% {
+    display: block;
+    opacity: 1;
+  }
+}
+
+@-moz-keyframes fadeInFromNone {
+  0% {
+    display: none;
+    opacity: 0;
+  }
+
+  1% {
+    display: block;
+    opacity: 0;
+  }
+
+  100% {
+    display: block;
+    opacity: 1;
+  }
+}
+
+@-o-keyframes fadeInFromNone {
+  0% {
+    display: none;
+    opacity: 0;
+  }
+
+  1% {
+    display: block;
+    opacity: 0;
+  }
+
+  100% {
+    display: block;
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInFromNone {
+  0% {
+    display: none;
+    opacity: 0;
+  }
+
+  1% {
+    display: block;
+    opacity: 0;
+  }
+
+  100% {
+    display: block;
+    opacity: 1;
+  }
+}
+
+.downloads_container {
+  padding-bottom: 2rem !important;
+  padding-top: 2rem !important;
+}
+
+.downloads_title {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+}
+
+.downloads_hero {
+  box-shadow: 0px 0.3px 0.9px rgba(0, 0, 0, 0.108),
+    0px 1.6px 3.6px rgba(0, 0, 0, 0.132);
+  padding: 3rem 1rem;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+    url("/img/fallback.jpg");
+  background-position: center;
+  color: white;
+  border-radius: 10px;
+}
+
+@media screen and (max-width: 1000px) {
+  .hero_shadow div {
+    padding: 0;
+  }
+}
+
+.pgm_logo {
+  width: 70px;
+  height: 70px;
+  margin-left: 1rem;
+  margin-right: 1.5rem;
+}
+
+.pgm h1 {
+  margin-bottom: 0px;
+}
+
+.pgm label {
+  font-size: 12px;
+}
+
+.pgm p {
+  margin-bottom: 10px;
+}
+
+.pgm h2 {
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.description {
+  margin-top: 30px;
+}
+
+.description p {
+  font-weight: 300;
+  font-size: 1.125rem;
+}
+
+.download_button_container {
+  display: flex !important;
+}
+
+.download_button {
+  width: 200px;
+  max-width: 200px;
+}
+
+@media screen and (max-width: 1000px) {
+  .download_button {
+    margin-bottom: 30px;
+  }
+}
+
+@media screen and (min-width: 1000px) {
+  .col_border {
+    border-right: 1px solid #c8c6c4;
+  }
+
+  .col_margin_left {
+    margin-left: 15px !important;
+  }
+}
+
+.others {
+  margin-top: 30px;
+}
+
+@media screen and (max-width: 1000px) {
+  .others_column {
+    margin-top: 30px;
+  }
+}
+
+.others_hero {
+  box-shadow: 0px 0.3px 0.9px rgba(0, 0, 0, 0.108),
+    0px 1.6px 3.6px rgba(0, 0, 0, 0.132);
+  padding: 2.5rem 1rem;
+  border-radius: 10px;
+}
+
+.others_hero h2 {
+  font-size: 20;
+}
+
+.others_hero svg {
+  margin-left: 5px;
+}
+
+.others_header h2 {
+  margin-block-start: 0;
+  margin-block-end: 0;
+  font-size: 1.1rem;
+}
+
+.others_header a {
+  margin-block-start: 0;
+  margin-block-end: 0;
+}
+
+.others_icon {
+  margin-left: 1rem;
+  margin-right: 1.5rem;
+  font-size: 2.5rem;
+}
+
+.others_description {
+  margin-top: 15px;
+}
+
+.others_description p {
+  font-weight: 350;
+  font-size: 1.125rem;
+}
+
+.others_button {
+  width: 200px;
+  max-width: 200px;
+  margin-top: 5px;
+}
+
+.octc_logo {
+  width: 66px;
+  height: 66px;
+  margin-left: 1rem;
+  margin-right: 1.5rem;
+}
