@@ -89,7 +89,7 @@ public class VotingPool extends MapPool {
               // If there is a restart queued, don't start a vote
               if (RestartManager.isQueued()) return;
               currentPoll = new MapPoll(match, mapScores, VOTE_SIZE);
-              match.getPlayers().forEach(currentPoll::sendBook);
+              match.getPlayers().forEach(viewer -> currentPoll.sendBook(viewer, false));
             },
             5,
             TimeUnit.SECONDS);
