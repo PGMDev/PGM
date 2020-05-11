@@ -97,7 +97,11 @@ public final class PGMConfig implements Config {
     final String databaseUri = config.getString("database-uri");
     this.databaseUri =
         databaseUri == null || databaseUri.isEmpty()
-            ? "sqlite:" + new File(dataFolder, "pgm.db").getAbsolutePath()
+            ? new File(dataFolder, "pgm.db")
+                .getAbsoluteFile()
+                .toURI()
+                .toString()
+                .replaceFirst("^file", "sqlite")
             : databaseUri;
     this.databaseMaxConnections =
         this.databaseUri.startsWith("sqlite:")
