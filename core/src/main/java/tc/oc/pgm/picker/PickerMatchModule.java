@@ -126,7 +126,7 @@ public class PickerMatchModule implements MatchModule, Listener {
       case PICKER_ON: // When on always show the GUI
         return true;
       default: // Display after map cycle, but check perms when clicking button.
-        return (playerTriggered ? hasPermission : true);
+        return (playerTriggered ? (hasPermission || hasClasses) : true);
     }
   }
 
@@ -191,10 +191,6 @@ public class PickerMatchModule implements MatchModule, Listener {
    */
   private boolean canOpenWindow(MatchPlayer player) {
     return canUse(player) && (hasClasses || canChooseMultipleTeams(player));
-  }
-
-  private boolean isPicking(MatchPlayer player) {
-    return picking.contains(player);
   }
 
   private void refreshCountsAll() {
@@ -683,7 +679,7 @@ public class PickerMatchModule implements MatchModule, Listener {
             player.sendMessage(
                 ChatColor.GOLD
                     + TextTranslations.translate(
-                        "class.success", player.getBukkit(), ChatColor.GREEN + name));
+                        "match.class.ok", player.getBukkit(), ChatColor.GREEN + name));
             scheduleRefresh(player);
           } else {
             player.sendMessage(
