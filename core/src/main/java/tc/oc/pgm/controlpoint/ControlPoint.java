@@ -154,8 +154,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
    */
   @Override
   public double getCompletion() {
-    return this.capturingTime.getSeconds()
-        / (double) this.definition.getTimeToCapture().getSeconds();
+    return this.capturingTime.toMillis() / (double) this.definition.getTimeToCapture().toMillis();
   }
 
   @Override
