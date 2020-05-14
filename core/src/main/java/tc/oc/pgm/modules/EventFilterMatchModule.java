@@ -254,12 +254,12 @@ public class EventFilterMatchModule implements MatchModule, Listener {
     event.setCancelled(true);
     world.playEffect(dispenseLocation, Effect.CLICK1, 1, 16);
 
-    boolean dropItem = false;
+    boolean dropItem = true;
     for (Player player : nearbyParticipatingPlayers) {
       ItemStack currentItem = armorType.getItem(player.getInventory());
       if (currentItem == null || currentItem.getType() == Material.AIR) {
         armorType.setItem(player.getInventory(), item);
-        dropItem = true;
+        dropItem = false;
         break;
       }
     }
