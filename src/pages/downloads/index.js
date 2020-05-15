@@ -96,7 +96,7 @@ export default function Downloads() {
                 <h2>Download SportPaper</h2>
                 <p>
                   SportPaper is a Minecraft server jar based on Paper 1.8 tuned
-                  for maximum performance for high intensity PvP. It is
+                  for maximum performance and high intensity PvP. It is
                   mandatory and should run alongside PGM.
                 </p>
                 <a
