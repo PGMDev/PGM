@@ -4,6 +4,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Skin;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.component.types.PersonalizedPlayer;
@@ -77,5 +78,10 @@ public class PlayerTabEntry extends DynamicTabEntry {
   @Override
   public String toString() {
     return this.getClass().getSimpleName() + "{" + this.player.getName() + "}";
+  }
+
+  @Override
+  public int getPing() {
+    return ((CraftPlayer) this.player).getHandle().ping;
   }
 }
