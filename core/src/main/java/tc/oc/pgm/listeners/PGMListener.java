@@ -51,8 +51,15 @@ import tc.oc.pgm.events.MapPoolAdjustEvent;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.TimeLockModule;
+import tc.oc.pgm.spawns.ObserverToolFactory;
+import tc.oc.pgm.spawns.SpawnMatchModule;
+import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.util.UsernameFormatUtils;
-import tc.oc.pgm.util.text.PeriodFormats;
+import tc.oc.pgm.util.component.ComponentRenderers;
+import tc.oc.pgm.util.component.PeriodFormats;
+import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.localization.PlayerLocaleChangeEvent;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class PGMListener implements Listener {
@@ -387,5 +394,28 @@ public class PGMListener implements Listener {
 
       event.getMatch().sendMessage(broadcast);
     }
+  }
+
+  /**
+   * See https://github.com/Electroid/PGM/issues/443 This refreshes the observer items whenever the
+   * information about locale arrives
+   */
+  @EventHandler
+  public void updateObserverToolsOnLocaleChange(PlayerLocaleChangeEvent event) {
+    Player bukkitPlayer = event.getPlayer();
+    MatchPlayer player = mm.getPlayer(bukkitPlayer);
+    Match match = mm.getMatch(bukkitPlayer);
+    ObserverToolFactory factory = match.needModule(SpawnMatchModule.class).getObserverToolFactory();
+
+    player.getInventory().setItem(0, factory.getTeleportTool(bukkitPlayer));
+
+    if (factory.canUseEditWand(bukkitPlayer)) {
+      player.getInventory().setItem(1, factory.getEditWand(bukkitPlayer));
+    }
+
+    // Let other modules give observer items
+    player.getMatch().callEvent(new ObserverKitApplyEvent(player));
+
+    player.getBukkit().updateInventory();
   }
 }

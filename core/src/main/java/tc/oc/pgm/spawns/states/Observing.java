@@ -3,7 +3,6 @@ package tc.oc.pgm.spawns.states;
 import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -17,7 +16,6 @@ import org.bukkit.material.Door;
 import org.bukkit.permissions.PermissionAttachment;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -76,34 +74,25 @@ public class Observing extends State {
     if (reset) {
 
       // Give basic observer items.
-      // This task is delayed to ensure Bukkit
-      // has recieved the locale of the player before giving items with localized names
-      player
-          .getMatch()
-          .getExecutor(MatchScope.LOADED)
-          .schedule(
-              () -> {
-                ObserverToolFactory toolFactory = smm.getObserverToolFactory();
-                player.getInventory().setItem(0, toolFactory.getTeleportTool(bukkit));
 
-                if (toolFactory.canUseEditWand(bukkit)) {
-                  player.getInventory().setItem(1, toolFactory.getEditWand(bukkit));
-                }
+      ObserverToolFactory toolFactory = smm.getObserverToolFactory();
+      player.getInventory().setItem(0, toolFactory.getTeleportTool(bukkit));
 
-                // Let other modules give observer items
-                player.getMatch().callEvent(new ObserverKitApplyEvent(player));
+      if (toolFactory.canUseEditWand(bukkit)) {
+        player.getInventory().setItem(1, toolFactory.getEditWand(bukkit));
+      }
 
-                // Apply observer spawn kit, if there is one
-                spawn.applyKit(player);
+      // Let other modules give observer items
+      player.getMatch().callEvent(new ObserverKitApplyEvent(player));
 
-                player.getBukkit().updateInventory();
-              },
-              500,
-              TimeUnit.MILLISECONDS);
+      // Apply observer spawn kit, if there is one
+      spawn.applyKit(player);
+
+      player.getBukkit().updateInventory();
+
+      player.setVisible(true);
+      player.resetGamemode();
     }
-
-    player.setVisible(true);
-    player.resetGamemode();
 
     // The player is not standing on anything, turn their flying on
     if (bukkit.getAllowFlight()) {

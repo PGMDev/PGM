@@ -247,4 +247,18 @@ public class GeneralizingListener implements Listener {
       Audience.get(event.getPlayer()).sendWarning(event.getCancelMessage());
     }
   }
+
+  // -------------------------
+  // ---- Localization -------
+  // -------------------------
+
+  // TODO: Move away from Sportbukkit event to detect this change
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onPlayerLocaleChange(final org.bukkit.event.player.PlayerLocaleChangeEvent event) {
+    final tc.oc.pgm.util.localization.PlayerLocaleChangeEvent newEvent =
+        new tc.oc.pgm.util.localization.PlayerLocaleChangeEvent(
+            event.getPlayer(), event.getNewLocale(), event.getOldLocale());
+
+    this.pm.callEvent(newEvent);
+  }
 }
