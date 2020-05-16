@@ -10,7 +10,7 @@ public class ProximityMetric {
     CLOSEST_PLAYER("closest player"),
     CLOSEST_BLOCK("closest block"),
     CLOSEST_KILL("closest kill"),
-    NONE("no proximity")
+    NONE("no proximity");
 
     public final String description;
 
