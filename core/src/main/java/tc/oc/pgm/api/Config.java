@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import javax.annotation.Nullable;
 import net.kyori.text.Component;
 import org.bukkit.permissions.Permission;
+import tc.oc.pgm.map.source.gitSource.GitRepository;
 
 /** A configuration for server owners to modify {@link PGM}. */
 public interface Config {
@@ -29,11 +30,19 @@ public interface Config {
   String getDatabaseUri();
 
   /**
-   * Gets a list of map sources, typically directory paths.
+   * Gets a list of directory paths to locally stored map sources.
    *
-   * @return A list of map sources.
+   * @return A list of folder map sources.
    */
-  List<String> getMapSources();
+  List<String> getFolderMapSources();
+
+  /**
+   * Gets a list of @link{GitRepository} which are used as remote map sources
+   *
+   * @see GitRepository
+   * @return A list of git map sources
+   */
+  List<GitRepository> getGitMapSources();
 
   /**
    * Gets a path to "map-pool.yml" file.

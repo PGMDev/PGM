@@ -13,6 +13,7 @@ import app.ashcon.intake.util.auth.AuthorizationException;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import java.io.File;
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -102,8 +103,9 @@ import tc.oc.pgm.listeners.PGMListener;
 import tc.oc.pgm.listeners.ServerPingDataListener;
 import tc.oc.pgm.listeners.WorldProblemListener;
 import tc.oc.pgm.map.MapLibraryImpl;
-import tc.oc.pgm.map.source.GitMapSourceFactory;
 import tc.oc.pgm.map.source.SystemMapSourceFactory;
+import tc.oc.pgm.map.source.gitSource.GitMapSourceFactory;
+import tc.oc.pgm.map.source.gitSource.GitRepository;
 import tc.oc.pgm.match.MatchManagerImpl;
 import tc.oc.pgm.match.NoopVanishManager;
 import tc.oc.pgm.prefix.ConfigPrefixProvider;
@@ -265,6 +267,8 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     } catch (TextException e) {
       getGameLogger().log(Level.SEVERE, e.getLocalizedMessage(), e);
       return;
+    } catch (URISyntaxException e) {
+      getLogger().log(Level.WARNING, e.getReason());
     }
 
     getGameLogger()
@@ -273,42 +277,33 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     final Logger logger = getLogger();
     logger.setLevel(config.getLogLevel());
 
-    for (String source : config.getMapSources()) {
-      MapSourceFactory factory = null;
+    for (String source : config.getFolderMapSources()) {
       try {
-        if (source.equalsIgnoreCase("default"))
-          factory =
-              new GitMapSourceFactory(
-                  "https://github.com/KingOfSquares/DefaultMaps", logger, false);
-        if (source.startsWith("git;")) {
-          String gitSource = source.substring(4);
-          factory = new GitMapSourceFactory(gitSource, logger, true);
+        if (new File(source).exists()) {
+          mapSourceFactories.add(new SystemMapSourceFactory(source));
         }
-        if (new File(source).exists()) factory = new SystemMapSourceFactory(source);
-      } catch (StringIndexOutOfBoundsException e) { // Git source parsing exception
-        factory = null; // Trigger the map source error message
       } catch (Throwable t) {
         t.printStackTrace();
-        continue;
+        logger.log(Level.WARNING, "Map source " + source + " is invalid and will be ignored");
       }
+    }
 
-      if (factory == null) {
-        logger.log(Level.WARNING, "-----MAP SOURCE ERROR-----");
-        logger.log(Level.WARNING, "Map source " + source + " is not a valid source");
-        logger.log(
-            Level.INFO,
-            "To add a map source folder outside of the server folder you have to specify the full path");
-        logger.log(
-            Level.INFO,
-            "To add a git source you have to format your source like this: git;URL;USERNAME;PASSWORD");
-        logger.log(
-            Level.INFO, "Username and password only required if the git repository is private");
-        logger.log(Level.WARNING, source + " will be ignored until restart");
-        logger.log(Level.WARNING, "");
-        continue;
+    try { // Disable if JGit is not present
+      if (Class.forName("org.eclipse.jgit.api.Git") != null) {
+
+        for (GitRepository source : config.getGitMapSources()) {
+          try {
+            mapSourceFactories.add(new GitMapSourceFactory(source, logger));
+          } catch (Throwable e) {
+            e.printStackTrace();
+            logger.log(
+                Level.WARNING,
+                "Map source " + source.getDir().getName() + " is invalid and will be ignored");
+          }
+        }
       }
-
-      mapSourceFactories.add(factory);
+    } catch (ClassNotFoundException e) {
+      logger.log(Level.SEVERE, "Unable to load JGit(was it excluded when compiling the jar?)");
     }
   }
 

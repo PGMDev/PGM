@@ -12,6 +12,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,19 +22,24 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.kyori.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
+import org.eclipse.jgit.transport.URIish;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.map.source.gitSource.GitRepository;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.text.TextException;
 
 public final class PGMConfig implements Config {
+
+  private static final Logger logger = Logger.getLogger("PGMConfig");
 
   // log-level
   private final Level logLevel;
@@ -45,7 +51,8 @@ public final class PGMConfig implements Config {
   private final String motd;
 
   // map.*
-  private final List<String> mapSources;
+  private final List<GitRepository> gitMapSources;
+  private final List<String> folderMapSources;
   private final String mapPoolFile;
 
   // countdown.*
@@ -88,7 +95,7 @@ public final class PGMConfig implements Config {
   // experiments.*
   private final Map<String, Object> experiments;
 
-  PGMConfig(FileConfiguration config, File dataFolder) throws TextException {
+  PGMConfig(FileConfiguration config, File dataFolder) throws TextException, URISyntaxException {
     handleLegacyConfig(config, dataFolder);
 
     this.logLevel = parseLogLevel(config.getString("log-level", "info"));
@@ -98,7 +105,11 @@ public final class PGMConfig implements Config {
     final String motd = config.getString("motd");
     this.motd = motd == null || motd.isEmpty() ? null : parseComponentLegacy(motd);
 
-    this.mapSources = config.getStringList("map.sources");
+    this.folderMapSources = config.getStringList("map.folders");
+    this.gitMapSources =
+        parseGitSources(
+            config.getStringList("map.sources.repositories"),
+            config.getMapList("map.sources.repositories"));
     final String mapPoolFile = config.getString("map.pools");
     this.mapPoolFile =
         mapPoolFile == null || mapPoolFile.isEmpty()
@@ -131,9 +142,7 @@ public final class PGMConfig implements Config {
     this.header = header == null || header.isEmpty() ? null : parseComponent(header);
     final String footer = config.getString("sidebar.footer");
     this.footer = footer == null || footer.isEmpty() ? null : parseComponent(footer);
-
     this.communityMode = parseBoolean(config.getString("community.enabled", "true"));
-
     final ConfigurationSection section = config.getConfigurationSection("groups");
     this.groups = new ArrayList<>();
     if (section != null) {
@@ -144,6 +153,41 @@ public final class PGMConfig implements Config {
 
     final ConfigurationSection experiments = config.getConfigurationSection("experiments");
     this.experiments = experiments == null ? ImmutableMap.of() : experiments.getValues(false);
+  }
+
+  private static List<GitRepository> parseGitSources(
+      List<String> simpleRepos, List<Map<?, ?>> thoroughRepos) throws URISyntaxException {
+    List<GitRepository> gits = new ArrayList<>();
+
+    for (String repository : simpleRepos) {
+      gits.add(new GitRepository(repository));
+    }
+
+    for (Map<?, ?> repository : thoroughRepos) {
+      try {
+
+        URIish uri = new URIish((String) repository.get("uri"));
+
+        String branch = (String) repository.get("branch");
+
+        List<String> folders = (ArrayList<String>) repository.get("folders");
+
+        gits.add(new GitRepository(uri, branch, folders));
+      } catch (ClassCastException e) {
+        // Config parsing error, not catching this will break loading of the plugin if thrown
+        logger.log(
+            Level.WARNING,
+            "Config ERROR: A git repository was formatted incorrectly for and will be ignored until restart");
+      } catch (URISyntaxException e) {
+        logger.log(
+            Level.WARNING,
+            "Config ERROR: A URI("
+                + e.getInput()
+                + ") was formatted incorrectly and will be ignored until restart",
+            e);
+      }
+    }
+    return gits;
   }
 
   // TODO: Can be removed after 1.0 release
@@ -325,8 +369,13 @@ public final class PGMConfig implements Config {
   }
 
   @Override
-  public List<String> getMapSources() {
-    return mapSources;
+  public List<String> getFolderMapSources() {
+    return folderMapSources;
+  }
+
+  @Override
+  public List<GitRepository> getGitMapSources() {
+    return gitMapSources;
   }
 
   @Override
