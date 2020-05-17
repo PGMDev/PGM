@@ -9,7 +9,8 @@ public class ProximityMetric {
   public static enum Type {
     CLOSEST_PLAYER("closest player"),
     CLOSEST_BLOCK("closest block"),
-    CLOSEST_KILL("closest kill");
+    CLOSEST_KILL("closest kill"),
+    NONE("no proximity");
 
     public final String description;
 
