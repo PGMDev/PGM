@@ -66,9 +66,6 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
             TimeUtils.formatDuration(match.getDuration()),
             this.match.isRunning() ? ChatColor.GREEN : ChatColor.GOLD));
 
-
-
-
     return content.render(view.getViewer());
   }
 }
