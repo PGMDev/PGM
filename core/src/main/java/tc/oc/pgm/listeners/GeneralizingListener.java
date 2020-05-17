@@ -12,8 +12,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
-import org.bukkit.event.vehicle.VehicleEnterEvent;
-import org.bukkit.event.vehicle.VehicleMoveEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.util.RayBlockIntersection;
@@ -76,7 +74,6 @@ public class GeneralizingListener implements Listener {
     Location originalFrom = event.getFrom();
     Location originalTo = event.getTo();
 
-    if (player.getVehicle() != null) return;
     Location oldTo = this.lastToLocation.get(player);
     if (oldTo != null && !oldTo.equals(originalFrom)) {
       // If this movement does not start where the last known movement ended,
@@ -182,42 +179,6 @@ public class GeneralizingListener implements Listener {
     newLoc.setYaw(event.getTo().getYaw());
     event.setCancelled(false);
     event.setTo(newLoc);
-  }
-
-  @EventHandler(priority = EventPriority.LOW)
-  public void onPlayerEnterVehicle(final VehicleEnterEvent event) {
-    if (event.getEntered() instanceof Player) {
-      Player player = (Player) event.getEntered();
-
-      this.updateLastToLocation(player, event.getVehicle().getLocation());
-      CoarsePlayerMoveEvent generalEvent =
-          new CoarsePlayerMoveEvent(
-              event, player, player.getLocation(), event.getVehicle().getLocation());
-      this.pm.callEvent(generalEvent);
-
-      if (generalEvent.isCancelled()) {
-        event.setCancelled(true);
-        this.updateLastToLocation(player, player.getLocation());
-      }
-    }
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR)
-  private void onVehicleMove(final VehicleMoveEvent event) {
-    if (event.getVehicle().getPassenger() instanceof Player) {
-      Player player = (Player) event.getVehicle().getPassenger();
-
-      this.updateLastToLocation(player, event.getVehicle().getLocation());
-      CoarsePlayerMoveEvent generalEvent =
-          new CoarsePlayerMoveEvent(event, player, event.getFrom(), event.getTo());
-      this.pm.callEvent(generalEvent);
-
-      if (generalEvent.isCancelled()) {
-        event.getVehicle().eject();
-        event.getVehicle().setVelocity(new Vector());
-        this.updateLastToLocation(player, event.getFrom());
-      }
-    }
   }
 
   // reset the last location on death
