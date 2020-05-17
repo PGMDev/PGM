@@ -8,7 +8,7 @@ Every map XML file starts with the XML header and then the base `<map>` module.
 
 ```xml
 <?xml version="1.0"?>
-<map proto="1.4.2">
+<map proto="1.4.0">
 <!-- Specifies what the map is called -->
 <name>Airship Battle</name>
 <!-- States what version the map is -->
@@ -25,6 +25,50 @@ Every map XML file starts with the XML header and then the base `<map>` module.
 </rules>
 ```
 
+[<i className="icon-right">➡️</i>](/docs/modules/format/teams)
+Defines the teams [colors](/docs/reference/misc/formatting#chatColors), names and how many people can be on the teams.
+
+```xml
+<teams>
+    <team id="blue-team" color="blue" max="24">Blue Team</team>
+    <team id="red-team" color="dark red" max="24">Red Team</team>
+</teams>
+```
+
+[<i className="icon-right">➡️</i>](/docs/modules/gear/kits)
+Define a kit with special TNT defuser shears.
+
+```xml
+<kits>
+    <kit id="shears">
+        <item slot="8" name="`6TNT Defuser" lore="`7Right click to defuse teammate's TNT|`7Does not work in `9water`7!" material="shears"/>
+    </kit>
+</kits>
+```
+
+[<i className="icon-right">➡️</i>](/docs/modules/mechanics/spawns)
+Specify where the previously defined teams will spawn, the kit they will spawn with and what direction they face.
+
+```xml
+<spawns>
+    <spawn team="blue-team" kit="shears" yaw="270">
+        <region>
+            <cuboid min="4.5,91,-34" max="7.5,91,-31"/>
+        </region>
+    </spawn>
+    <spawn team="red-team" kit="shears" yaw="90">
+        <region>
+            <cuboid min="-30.5,91,-34" max="-27.5,91,-31"/>
+        </region>
+    </spawn>
+    <default yaw="180">
+        <region>
+            <cylinder base="-11.5,90,-33" radius="3" height="0"/>
+        </region>
+    </default>
+</spawns>
+```
+
 [<i className="icon-right">➡️</i>](/docs/modules/mechanics/filters)
 These filters is used to prevent people from placing dispensers or obsidian in the regions they are applied to.
 
@@ -39,34 +83,20 @@ These filters is used to prevent people from placing dispensers or obsidian in t
 </filters>
 ```
 
-[<i className="icon-right">➡️</i>](/docs/modules/format/teams)
-Defines the teams [colors](/docs/reference/misc/formatting#chatColors), names and how many people can be on the teams.
-
-```xml
-<teams>
-    <team id="blue-team" color="blue" max="24">Blue Team</team>
-    <team id="red-team" color="dark red" max="24">Red Team</team>
-</teams>
-```
-
 [<i className="icon-right">➡️</i>](/docs/modules/mechanics/regions)
 These regions reference the dispenser and obsidian filters defined above and states where they will work.
 
 ```xml
 <regions>
-    <!-- Apply the deny-dispenser filter to a infinite region -->
-    <apply block-place="deny-dispenser" message="Dispensers are disabled on this map!">
+    <apply leave="never" message="Don't exit the playing field!">
         <region>
-            <rectangle min="-oo,-oo" max="oo,oo"/>
+            <union>
+                <rectangle min="-102,-4" max="102,125"/> <!-- Main area -->
+                <rectangle min="-36,-16" max="13,-2"/> <!-- Area between spawn tunnels -->
+            </union>
         </region>
     </apply>
-    <apply leave="always" message="Don't exit the playing field!">
-        <region>
-            <rectangle min="-102,-4" max="102,125"/> <!-- Main area -->
-            <rectangle min="-36,-16" max="13,-2"/> <!-- Area between spawn tunnels -->
-        </region>
-    </apply>
-    <apply block="always" message="Don't edit blocks outside the playing field!">
+    <apply block="never" message="Don't edit blocks outside the playing field!">
         <region>
             <negative>
                 <union id="map">
@@ -85,18 +115,30 @@ These regions reference the dispenser and obsidian filters defined above and sta
             </complement>
         </region>
     </apply>
+    <apply block-place="deny-dispenser" message="Dispensers are disabled on this map!">
+        <region>
+            <everywhere/>
+        </region>
+    </apply>
 </regions>
 ```
 
-[<i className="icon-right">➡️</i>](/docs/modules/gear/kits)
-Define a kit with special TNT defuser shears.
+[<i className="icon-right">➡️</i>](/docs/modules/objectives/dtc)
+This specifies what material the core is made of, who each core belongs to and how far the lava needs to leak.
 
 ```xml
-<kits>
-    <kit id="shears">
-        <item slot="8" name="`6TNT Defuser" lore="`7Right click to defuse teammate's TNT|`7Does not work in `9water`7!" material="shears"/>
-    </kit>
-</kits>
+<cores material="obsidian" leak="10">
+    <core team="blue">
+        <region>
+            <cuboid min="13,85,23" max="18,92,30"/>
+        </region>
+    </core>
+    <core team="red">
+        <region>
+            <cuboid min="-41,85,23" max="-36,92,30"/>
+        </region>
+    </core>
+</cores>
 ```
 
 [<i className="icon-right">➡️</i>](/docs/modules/gear/repair-remove-keep)
@@ -108,37 +150,6 @@ Remove shears, obsidian and gold block items from the playing field when they ar
     <item>obsidian</item>
     <item>gold block</item>
 </itemremove>
-```
-
-[<i className="icon-right">➡️</i>](/docs/modules/mechanics/spawns)
-Specify where the previously defined teams will spawn, the kit they will spawn with and what direction they face.
-
-```xml
-<spawns>
-    <spawn team="blue-team" yaw="270" kit="shears">
-        <cuboid min="4.5,91,-34" max="7.5,91,-31"/>
-    </spawn>
-    <spawn team="red-team" yaw="90" kit="shears">
-        <cuboid min="-30.5,91,-34" max="-27.5,91,-31"/>
-    </spawn>
-    <default yaw="180">
-        <cylinder base="-11.5,90,-33" radius="3" height="0"/>
-    </default>
-</spawns>
-```
-
-[<i className="icon-right">➡️</i>](/docs/modules/objectives/dtc)
-This specifies what material the core is made of, who each core belongs to and how far the lava needs to leak.
-
-```xml
-<cores material="obsidian" leak="10">
-    <core team="blue-team">
-        <cuboid min="13,85,23" max="18,92,30"/>
-    </core>
-    <core team="red-team">
-        <cuboid min="-41,85,23" max="-36,92,30"/>
-    </core>
-</cores>
 ```
 
 [<i className="icon-right">➡️</i>](/docs/modules/objectives/other)
