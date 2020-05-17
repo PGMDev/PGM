@@ -41,4 +41,7 @@ public interface MapOrder {
    * @param match The match that just ended
    */
   default void matchEnded(Match match) {}
+
+  /** Reloads the {@link MapOrder} */
+  default void reload() {}
 }
