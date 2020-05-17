@@ -52,6 +52,13 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
   public BaseComponent getContent(TabView view) {
     Component content = new PersonalizedText(ChatColor.DARK_GRAY);
 
+    MatchPlayer viewer = match.getPlayer(view.getViewer());
+
+    if (viewer.getSettings().getValue(SettingKey.STATS).equals(SettingValue.STATS_ON)) {
+      content.extra(match.getModule(StatsMatchModule.class).getBasicStatsMessage(viewer.getId()));
+      content.extra("\n");
+    }
+
     content.extra(
         new PersonalizedText(
             TextTranslations.translate("match.info.time", view.getViewer()) + ": ", ChatColor.GRAY),
@@ -59,12 +66,8 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
             TimeUtils.formatDuration(match.getDuration()),
             this.match.isRunning() ? ChatColor.GREEN : ChatColor.GOLD));
 
-    MatchPlayer viewer = match.getPlayer(view.getViewer());
 
-    if (viewer.getSettings().getValue(SettingKey.STATS).equals(SettingValue.STATS_ON)) {
-      content.extra("\n");
-      content.extra(match.getModule(StatsMatchModule.class).getBasicStatsMessage(viewer.getId()));
-    }
+
 
     return content.render(view.getViewer());
   }
