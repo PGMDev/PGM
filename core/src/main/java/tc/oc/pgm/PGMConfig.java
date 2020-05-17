@@ -177,7 +177,7 @@ public final class PGMConfig implements Config {
         // Config parsing error, not catching this will break loading of the plugin if thrown
         logger.log(
             Level.WARNING,
-            "Config ERROR: A git repository was formatted incorrectly for and will be ignored until restart");
+            "Config ERROR: A git repository was formatted incorrectly and will be ignored until restart");
       } catch (URISyntaxException e) {
         logger.log(
             Level.WARNING,
