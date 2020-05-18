@@ -84,6 +84,15 @@ public class ReportCommands {
     }
 
     MatchPlayer accused = match.getPlayer(player);
+
+    // Don't allow reports of vanished players
+    if (accused.isVanished()) {
+      sender.sendWarning(
+          TextComponent.of(
+              "Could not find player named '" + player.getName() + "'", TextColor.RED));
+      return;
+    }
+
     PlayerReportEvent event = new PlayerReportEvent(sender, accused, reason);
     match.callEvent(event);
 

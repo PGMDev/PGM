@@ -162,7 +162,7 @@ public class AdminCommands {
     Component mapName = TextComponent.of(map.getName(), TextColor.GOLD);
     Component successful =
         TranslatableComponent.of("map.setNext", TextColor.GRAY)
-            .args(mapName, UsernameFormatUtils.formatStaffName(sender, match));
+            .args(UsernameFormatUtils.formatStaffName(sender, match), mapName);
     ChatDispatcher.broadcastAdminChatMessage(successful, match);
   }
 
