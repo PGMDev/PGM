@@ -54,7 +54,8 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
 
     MatchPlayer viewer = match.getPlayer(view.getViewer());
 
-    if (viewer.getSettings().getValue(SettingKey.STATS).equals(SettingValue.STATS_ON)) {
+    if (viewer.getCompetitor() != null
+        && viewer.getSettings().getValue(SettingKey.STATS).equals(SettingValue.STATS_ON)) {
       content.extra(match.getModule(StatsMatchModule.class).getBasicStatsMessage(viewer.getId()));
       content.extra("\n");
     }
