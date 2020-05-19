@@ -32,7 +32,6 @@ public class CacheDatastore implements Datastore {
                 });
     this.settings =
         CacheBuilder.newBuilder()
-            .softValues()
             .maximumSize(Math.min(100, Bukkit.getMaxPlayers()))
             .build(
                 new CacheLoader<UUID, Settings>() {
