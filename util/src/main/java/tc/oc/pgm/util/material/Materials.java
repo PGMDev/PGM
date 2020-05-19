@@ -57,6 +57,11 @@ public interface Materials {
       case GOLD_HOE:
       case IRON_HOE:
       case DIAMOND_HOE:
+        // Others
+      case BOW:
+      case FLINT_AND_STEEL:
+      case SHEARS:
+      case STICK:
         return true;
       default:
         return false;
