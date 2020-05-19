@@ -164,6 +164,7 @@ public class AntiGriefListener implements Listener {
 
   @EventHandler
   public void giveKit(final ObserverKitApplyEvent event) {
+    if (event.getPlayer().getParty() == null) return;
     if (!event.getPlayer().getParty().isObserving()
         || !event.getPlayer().getBukkit().hasPermission(Permissions.DEFUSE)) return;
 

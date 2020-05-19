@@ -168,8 +168,7 @@ public class VanishManagerImpl implements VanishManager, Listener {
       if (domain != null) {
         loginSubdomains.invalidate(player.getId());
         tempVanish.add(player.getId());
-        player.setVanished(true);
-        addVanished(player);
+        setVanished(player, true, true);
       }
     }
   }
@@ -179,8 +178,7 @@ public class VanishManagerImpl implements VanishManager, Listener {
     MatchPlayer player = matchManager.getPlayer(event.getPlayer());
     // If player is vanished & joined via "vanish" subdomain. Remove vanish status on quit
     if (isVanished(player.getId()) && tempVanish.contains(player.getId())) {
-      player.setVanished(false);
-      removeVanished(player);
+      setVanished(player, false, true);
     }
   }
 

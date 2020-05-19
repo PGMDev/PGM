@@ -84,6 +84,18 @@ public class ReportCommands {
     }
 
     MatchPlayer accused = match.getPlayer(player);
+
+    // Don't allow reports of vanished players
+    if (accused.isVanished()) {
+      // Due to Intake not accounting for player locale, this message matches what is sent when no
+      // player is found.
+      // TODO: Please upgrade if command framework uses locale
+      sender.sendWarning(
+          TextComponent.of(
+              "Could not find player named '" + player.getName() + "'", TextColor.RED));
+      return;
+    }
+
     PlayerReportEvent event = new PlayerReportEvent(sender, accused, reason);
     match.callEvent(event);
 

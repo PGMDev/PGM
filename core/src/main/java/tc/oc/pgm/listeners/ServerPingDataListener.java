@@ -8,11 +8,13 @@ import com.google.common.cache.LoadingCache;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerListPingEvent;
@@ -24,6 +26,7 @@ import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
+import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.map.contrib.PlayerContributor;
 import tc.oc.pgm.util.ClassLogger;
 
@@ -35,11 +38,17 @@ public class ServerPingDataListener implements Listener {
   private final AtomicBoolean ready;
   private final AtomicBoolean legacySportPaper;
   private final LoadingCache<Match, JsonObject> matchCache;
+  private final VanishManager vanishManager;
 
-  public ServerPingDataListener(MatchManager matchManager, MapOrder mapOrder, Logger parentLogger) {
+  public ServerPingDataListener(
+      MatchManager matchManager,
+      MapOrder mapOrder,
+      Logger parentLogger,
+      VanishManager vanishManager) {
     this.matchManager = checkNotNull(matchManager);
     this.mapOrder = checkNotNull(mapOrder);
     this.logger = ClassLogger.get(checkNotNull(parentLogger), ServerPingDataListener.class);
+    this.vanishManager = checkNotNull(vanishManager);
     this.ready = new AtomicBoolean();
     this.legacySportPaper = new AtomicBoolean();
     this.matchCache =
@@ -65,6 +74,15 @@ public class ServerPingDataListener implements Listener {
   @EventHandler
   public void onServerListPing(ServerListPingEvent event) {
     if (!ready.get() || legacySportPaper.get()) return;
+
+    // Remove vanished players from player sample/ping count
+    Iterator<Player> playerSample = event.iterator();
+    while (playerSample.hasNext()) {
+      Player player = playerSample.next();
+      if (vanishManager.isVanished(player.getUniqueId())) {
+        playerSample.remove();
+      }
+    }
 
     try {
       JsonObject root = event.getOrCreateExtra(PGM.get());
