@@ -4,5 +4,5 @@ preserve_hierarchy: false
 files:
   - source: /util/src/main/i18n/templates/*.properties
     translation: /util/src/main/i18n/translations/%file_name%_%locale_with_underscore%.%file_extension%
-commit_message: Update %language% %file_name% translations
+commit_message: Update %language% translations
 append_commit_message: false
