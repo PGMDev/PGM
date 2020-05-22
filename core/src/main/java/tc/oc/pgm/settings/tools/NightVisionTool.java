@@ -16,9 +16,11 @@ import tc.oc.pgm.util.text.TextTranslations;
 
 public class NightVisionTool implements ObserverTool {
 
+  private static final String TRANSLATION_KEY = "setting.nightvision";
+
   @Override
   public Component getName() {
-    return TranslatableComponent.of("setting.nightvision");
+    return TranslatableComponent.of(TRANSLATION_KEY);
   }
 
   @Override
@@ -32,7 +34,7 @@ public class NightVisionTool implements ObserverTool {
         TranslatableComponent.of(hasNightVision(player) ? "misc.on" : "misc.off")
             .color(hasNightVision(player) ? TextColor.GREEN : TextColor.RED);
     Component lore =
-        TranslatableComponent.of("setting.nightvision.lore").args(status).color(TextColor.GRAY);
+        TranslatableComponent.of(TRANSLATION_KEY + ".lore").args(status).color(TextColor.GRAY);
     return Lists.newArrayList(TextTranslations.translateLegacy(lore, player));
   }
 

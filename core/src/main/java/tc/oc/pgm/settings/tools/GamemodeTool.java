@@ -19,6 +19,7 @@ import tc.oc.pgm.util.text.TextTranslations;
 
 public class GamemodeTool implements ObserverTool {
 
+  private static final String TRANSLATION_KEY = "setting.gamemode";
   private static boolean worldEditEnabled;
   private final Match match;
 
@@ -34,7 +35,7 @@ public class GamemodeTool implements ObserverTool {
 
   @Override
   public Component getName() {
-    return TranslatableComponent.of("setting.gamemode");
+    return TranslatableComponent.of(TRANSLATION_KEY);
   }
 
   @Override
@@ -45,10 +46,10 @@ public class GamemodeTool implements ObserverTool {
   @Override
   public List<String> getLore(Player player) {
     Component gamemode =
-        TranslatableComponent.of("setting.gamemode." + player.getGameMode().name().toLowerCase())
+        TranslatableComponent.of(TRANSLATION_KEY + "." + player.getGameMode().name().toLowerCase())
             .color(TextColor.AQUA);
     Component lore =
-        TranslatableComponent.of("setting.gamemode.lore").args(gamemode).color(TextColor.GRAY);
+        TranslatableComponent.of(TRANSLATION_KEY + ".lore").args(gamemode).color(TextColor.GRAY);
     return Lists.newArrayList(TextTranslations.translateLegacy(lore, player));
   }
 
@@ -86,9 +87,9 @@ public class GamemodeTool implements ObserverTool {
             .hoverEvent(
                 HoverEvent.of(
                     HoverEvent.Action.SHOW_TEXT,
-                    TranslatableComponent.of("setting.gamemode.hover").color(TextColor.GRAY)))
+                    TranslatableComponent.of(TRANSLATION_KEY + ".hover").color(TextColor.GRAY)))
             .clickEvent(ClickEvent.of(ClickEvent.Action.RUN_COMMAND, "/settings"));
-    return TranslatableComponent.of("setting.gamemode.warning").args(command).color(TextColor.GRAY);
+    return TranslatableComponent.of(TRANSLATION_KEY + ".warning").args(command).color(TextColor.GRAY);
   }
 
   private GameMode getOppositeMode(GameMode mode) {

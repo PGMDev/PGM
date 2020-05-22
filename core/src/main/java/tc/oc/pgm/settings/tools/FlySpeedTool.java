@@ -14,11 +14,11 @@ import tc.oc.pgm.util.text.TextTranslations;
 
 public class FlySpeedTool implements ObserverTool {
 
-  private static final String TRANSLATION_KEY = "setting.flyspeed.";
+  private static final String TRANSLATION_KEY = "setting.flyspeed";
 
   @Override
   public Component getName() {
-    return TranslatableComponent.of("setting.flyspeed");
+    return TranslatableComponent.of(TRANSLATION_KEY);
   }
 
   @Override
@@ -30,7 +30,7 @@ public class FlySpeedTool implements ObserverTool {
   public List<String> getLore(Player player) {
     Component flySpeed = FlySpeed.of(player.getFlySpeed()).getName();
     Component lore =
-        TranslatableComponent.of("setting.flyspeed.lore").args(flySpeed).color(TextColor.GRAY);
+        TranslatableComponent.of(TRANSLATION_KEY + ".lore").args(flySpeed).color(TextColor.GRAY);
     return Lists.newArrayList(TextTranslations.translateLegacy(lore, player));
   }
 
@@ -72,7 +72,7 @@ public class FlySpeedTool implements ObserverTool {
     }
 
     public Component getName() {
-      return TranslatableComponent.of(TRANSLATION_KEY + this.name().toLowerCase()).color(color);
+      return TranslatableComponent.of(TRANSLATION_KEY + "." + this.name().toLowerCase()).color(color);
     }
 
     public FlySpeed getNext() {
