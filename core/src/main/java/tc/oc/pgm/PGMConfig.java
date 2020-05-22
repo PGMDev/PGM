@@ -1,5 +1,6 @@
 package tc.oc.pgm;
 
+import static tc.oc.pgm.util.text.TextException.configError;
 import static tc.oc.pgm.util.text.TextParser.parseBoolean;
 import static tc.oc.pgm.util.text.TextParser.parseComponent;
 import static tc.oc.pgm.util.text.TextParser.parseComponentLegacy;
@@ -22,8 +23,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -33,13 +34,15 @@ import org.eclipse.jgit.transport.URIish;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.map.exception.MapMissingException;
+import tc.oc.pgm.api.map.factory.MapSourceFactory;
+import tc.oc.pgm.map.source.SystemMapSourceFactory;
+import tc.oc.pgm.map.source.gitSource.GitMapSourceFactory;
 import tc.oc.pgm.map.source.gitSource.GitRepository;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.text.TextException;
 
 public final class PGMConfig implements Config {
-
-  private static final Logger logger = Logger.getLogger("PGMConfig");
 
   // log-level
   private final Level logLevel;
@@ -51,8 +54,7 @@ public final class PGMConfig implements Config {
   private final String motd;
 
   // map.*
-  private final List<GitRepository> gitMapSources;
-  private final List<String> folderMapSources;
+  private final List<? extends MapSourceFactory> mapSourceFactories;
   private final String mapPoolFile;
 
   // countdown.*
@@ -95,7 +97,7 @@ public final class PGMConfig implements Config {
   // experiments.*
   private final Map<String, Object> experiments;
 
-  PGMConfig(FileConfiguration config, File dataFolder) throws TextException, URISyntaxException {
+  PGMConfig(FileConfiguration config, File dataFolder) throws TextException {
     handleLegacyConfig(config, dataFolder);
 
     this.logLevel = parseLogLevel(config.getString("log-level", "info"));
@@ -105,11 +107,12 @@ public final class PGMConfig implements Config {
     final String motd = config.getString("motd");
     this.motd = motd == null || motd.isEmpty() ? null : parseComponentLegacy(motd);
 
-    this.folderMapSources = config.getStringList("map.folders");
-    this.gitMapSources =
-        parseGitSources(
+    this.mapSourceFactories =
+        parseMapSources(
+            config.getStringList("map.folders"),
             config.getStringList("map.sources.repositories"),
             config.getMapList("map.sources.repositories"));
+
     final String mapPoolFile = config.getString("map.pools");
     this.mapPoolFile =
         mapPoolFile == null || mapPoolFile.isEmpty()
@@ -155,12 +158,19 @@ public final class PGMConfig implements Config {
     this.experiments = experiments == null ? ImmutableMap.of() : experiments.getValues(false);
   }
 
-  private static List<GitRepository> parseGitSources(
-      List<String> simpleRepos, List<Map<?, ?>> thoroughRepos) throws URISyntaxException {
+  private static List<? extends MapSourceFactory> parseMapSources(
+      List<String> folderMapSources, List<String> simpleRepos, List<Map<?, ?>> thoroughRepos) {
+
+    List<MapSourceFactory> mapSourceFactories = new ArrayList<>();
+
     List<GitRepository> gits = new ArrayList<>();
 
     for (String repository : simpleRepos) {
-      gits.add(new GitRepository(repository));
+      try {
+        gits.add(new GitRepository(repository));
+      } catch (URISyntaxException e) {
+        throw configError("error.invalidUri", e, TextComponent.of(e.getInput()));
+      }
     }
 
     for (Map<?, ?> repository : thoroughRepos) {
@@ -174,20 +184,38 @@ public final class PGMConfig implements Config {
 
         gits.add(new GitRepository(uri, branch, folders));
       } catch (ClassCastException e) {
-        // Config parsing error, not catching this will break loading of the plugin if thrown
-        logger.log(
-            Level.WARNING,
-            "Config ERROR: A git repository was formatted incorrectly and will be ignored until restart");
+        throw configError("error.invalidGitRepository", e);
+
       } catch (URISyntaxException e) {
-        logger.log(
-            Level.WARNING,
-            "Config ERROR: A URI("
-                + e.getInput()
-                + ") was formatted incorrectly and will be ignored until restart",
-            e);
+        throw configError("error.invalidUri", e, TextComponent.of(e.getInput()));
       }
     }
-    return gits;
+
+    for (String source : folderMapSources) {
+      try {
+        if (new File(source).exists()) {
+          mapSourceFactories.add(new SystemMapSourceFactory(source));
+        }
+      } catch (Throwable t) {
+        t.printStackTrace();
+      }
+    }
+
+    try { // Disable if JGit is not present
+      if (Class.forName("org.eclipse.jgit.api.Git") != null) {
+
+        for (GitRepository source : gits) {
+          try {
+            mapSourceFactories.add(new GitMapSourceFactory(source));
+          } catch (MapMissingException ex) {
+            ex.printStackTrace();
+          }
+        }
+      }
+    } catch (ClassNotFoundException e) {
+      throw configError("error.gitNotPresent", e);
+    }
+    return mapSourceFactories;
   }
 
   // TODO: Can be removed after 1.0 release
@@ -369,13 +397,8 @@ public final class PGMConfig implements Config {
   }
 
   @Override
-  public List<String> getFolderMapSources() {
-    return folderMapSources;
-  }
-
-  @Override
-  public List<GitRepository> getGitMapSources() {
-    return gitMapSources;
+  public List<? extends MapSourceFactory> getMapSourceFactories() {
+    return mapSourceFactories;
   }
 
   @Override

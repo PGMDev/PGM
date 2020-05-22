@@ -13,7 +13,6 @@ import app.ashcon.intake.util.auth.AuthorizationException;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import java.io.File;
-import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -103,9 +102,6 @@ import tc.oc.pgm.listeners.PGMListener;
 import tc.oc.pgm.listeners.ServerPingDataListener;
 import tc.oc.pgm.listeners.WorldProblemListener;
 import tc.oc.pgm.map.MapLibraryImpl;
-import tc.oc.pgm.map.source.SystemMapSourceFactory;
-import tc.oc.pgm.map.source.gitSource.GitMapSourceFactory;
-import tc.oc.pgm.map.source.gitSource.GitRepository;
 import tc.oc.pgm.match.MatchManagerImpl;
 import tc.oc.pgm.match.NoopVanishManager;
 import tc.oc.pgm.prefix.ConfigPrefixProvider;
@@ -267,44 +263,12 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     } catch (TextException e) {
       getGameLogger().log(Level.SEVERE, e.getLocalizedMessage(), e);
       return;
-    } catch (URISyntaxException e) {
-      getLogger().log(Level.WARNING, e.getReason());
     }
+
+    mapSourceFactories.addAll(config.getMapSourceFactories());
 
     getGameLogger()
         .log(Level.INFO, ChatColor.GREEN + TextTranslations.translate("admin.reloadConfig", null));
-
-    final Logger logger = getLogger();
-    logger.setLevel(config.getLogLevel());
-
-    for (String source : config.getFolderMapSources()) {
-      try {
-        if (new File(source).exists()) {
-          mapSourceFactories.add(new SystemMapSourceFactory(source));
-        }
-      } catch (Throwable t) {
-        t.printStackTrace();
-        logger.log(Level.WARNING, "Map source " + source + " is invalid and will be ignored");
-      }
-    }
-
-    try { // Disable if JGit is not present
-      if (Class.forName("org.eclipse.jgit.api.Git") != null) {
-
-        for (GitRepository source : config.getGitMapSources()) {
-          try {
-            mapSourceFactories.add(new GitMapSourceFactory(source, logger));
-          } catch (Throwable e) {
-            e.printStackTrace();
-            logger.log(
-                Level.WARNING,
-                "Map source " + source.getDir().getName() + " is invalid and will be ignored");
-          }
-        }
-      }
-    } catch (ClassNotFoundException e) {
-      logger.log(Level.SEVERE, "Unable to load JGit(was it excluded when compiling the jar?)");
-    }
   }
 
   @Override

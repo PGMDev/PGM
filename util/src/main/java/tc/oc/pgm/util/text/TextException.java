@@ -59,6 +59,12 @@ public class TextException extends RuntimeException {
     return new TextException(null, null, "error.outOfRange", TextComponent.of(text), format(range));
   }
 
+  public static TextException configError(
+      String errorKey, @Nullable Throwable cause, Component... errorArgs) {
+    return new TextException(
+        cause, null, "error.config", (TranslatableComponent.of(errorKey).args(errorArgs)));
+  }
+
   private static Component format(Range<?> range) {
     return TextComponent.of(range.toString().replace("∞", "oo").replace("‥", ", "));
   }
