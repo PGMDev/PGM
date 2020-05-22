@@ -89,7 +89,9 @@ public class GamemodeTool implements ObserverTool {
                     HoverEvent.Action.SHOW_TEXT,
                     TranslatableComponent.of(TRANSLATION_KEY + ".hover").color(TextColor.GRAY)))
             .clickEvent(ClickEvent.of(ClickEvent.Action.RUN_COMMAND, "/settings"));
-    return TranslatableComponent.of(TRANSLATION_KEY + ".warning").args(command).color(TextColor.GRAY);
+    return TranslatableComponent.of(TRANSLATION_KEY + ".warning")
+        .args(command)
+        .color(TextColor.GRAY);
   }
 
   private GameMode getOppositeMode(GameMode mode) {

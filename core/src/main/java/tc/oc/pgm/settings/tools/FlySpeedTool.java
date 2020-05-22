@@ -72,7 +72,8 @@ public class FlySpeedTool implements ObserverTool {
     }
 
     public Component getName() {
-      return TranslatableComponent.of(TRANSLATION_KEY + "." + this.name().toLowerCase()).color(color);
+      return TranslatableComponent.of(TRANSLATION_KEY + "." + this.name().toLowerCase())
+          .color(color);
     }
 
     public FlySpeed getNext() {
