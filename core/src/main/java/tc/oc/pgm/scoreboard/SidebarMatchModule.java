@@ -497,7 +497,11 @@ public class SidebarMatchModule implements MatchModule, Listener {
             if (goal instanceof MonumentWool && goal.isVisible()) {
               MonumentWool wool = (MonumentWool) goal;
               if (!firstWool) {
-                woolText += "   ";
+                if (sortedWools.size() > 5) {
+                  woolText += " ";
+                } else {
+                  woolText += "   ";
+                }
               }
               firstWool = false;
               woolText += wool.renderSidebarStatusColor(competitor, viewingParty);
