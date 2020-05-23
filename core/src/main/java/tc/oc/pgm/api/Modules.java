@@ -97,7 +97,6 @@ import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.score.ScoreModule;
 import tc.oc.pgm.scoreboard.ScoreboardMatchModule;
 import tc.oc.pgm.scoreboard.SidebarMatchModule;
-import tc.oc.pgm.settings.SettingsMatchModule;
 import tc.oc.pgm.shield.ShieldMatchModule;
 import tc.oc.pgm.snapshot.SnapshotMatchModule;
 import tc.oc.pgm.spawner.SpawnerMatchModule;
@@ -153,7 +152,6 @@ public interface Modules {
     register(DoubleJumpMatchModule.class, DoubleJumpMatchModule::new);
     register(ArrowRemovalMatchModule.class, ArrowRemovalMatchModule::new);
     register(SoundsMatchModule.class, new SoundsMatchModule.Factory());
-    register(SettingsMatchModule.class, SettingsMatchModule::new);
     register(FireworkMatchModule.class, FireworkMatchModule::new);
     register(StatsMatchModule.class, StatsMatchModule::new);
 

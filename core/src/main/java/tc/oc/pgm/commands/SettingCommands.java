@@ -9,12 +9,18 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
-import tc.oc.pgm.settings.SettingsMatchModule;
+import tc.oc.pgm.settings.SettingsListener;
 import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class SettingCommands {
+
+  private static SettingsListener settings;
+
+  public SettingCommands(SettingsListener settings) {
+    SettingCommands.settings = settings;
+  }
 
   @Command(
       aliases = "toggle",
@@ -55,13 +61,15 @@ public class SettingCommands {
     }
   }
 
-  @Command(aliases = "settings", desc = "Open the settings menu")
+  @Command(
+      aliases = {"settings", "tools", "observertools", "ot"},
+      desc = "Open the settings menu")
   public static void openSettings(CommandSender sender, MatchPlayer player)
       throws ArgumentException {
     if (player == null) {
       throw new ArgumentException(TextTranslations.translate("command.onlyPlayers", sender));
     }
 
-    player.getMatch().needModule(SettingsMatchModule.class).openMenu(player);
+    settings.openMenu(player);
   }
 }

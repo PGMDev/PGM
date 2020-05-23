@@ -72,7 +72,6 @@ import tc.oc.pgm.commands.MapCommands;
 import tc.oc.pgm.commands.MapPoolCommands;
 import tc.oc.pgm.commands.MatchCommands;
 import tc.oc.pgm.commands.ModeCommands;
-import tc.oc.pgm.commands.ObserverCommands;
 import tc.oc.pgm.commands.SettingCommands;
 import tc.oc.pgm.commands.StartCommands;
 import tc.oc.pgm.commands.StatsCommands;
@@ -113,6 +112,7 @@ import tc.oc.pgm.restart.RestartListener;
 import tc.oc.pgm.restart.ShouldRestartTask;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.RandomMapOrder;
+import tc.oc.pgm.settings.SettingsListener;
 import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.FileUtils;
@@ -138,6 +138,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   private ScheduledExecutorService asyncExecutorService;
   private VanishManager vanishManager;
   private InventoryMenuListener inventoryMenuListener;
+  private SettingsListener settingsListener;
 
   public PGMPlugin() {
     super();
@@ -252,6 +253,8 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     if (!config.getUptimeLimit().isNegative()) {
       asyncExecutorService.scheduleAtFixedRate(new ShouldRestartTask(), 0, 1, TimeUnit.MINUTES);
     }
+
+    settingsListener = new SettingsListener();
 
     registerListeners();
     registerCommands();
@@ -456,8 +459,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     node.registerCommands(new MatchCommands());
     node.registerNode("mode", "modes").registerCommands(new ModeCommands());
     node.registerCommands(new TimeLimitCommands());
-    node.registerCommands(new SettingCommands());
-    node.registerCommands(new ObserverCommands());
+    node.registerCommands(new SettingCommands(settingsListener));
     node.registerCommands(new MapPoolCommands());
     node.registerCommands(new StatsCommands());
 
@@ -497,6 +499,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     registerEvents(new MotdListener());
     registerEvents(new ServerPingDataListener(matchManager, mapOrder, getLogger(), vanishManager));
     registerEvents(inventoryMenuListener);
+    registerEvents(settingsListener);
   }
 
   private class InGameHandler extends Handler {

@@ -12,7 +12,8 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.settings.ObserverTool;
 import tc.oc.pgm.util.menu.InventoryMenu;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -21,15 +22,9 @@ public class GamemodeTool implements ObserverTool {
 
   private static final String TRANSLATION_KEY = "setting.gamemode";
   private static boolean worldEditEnabled;
-  private final Match match;
 
-  /**
-   * Constructor.
-   *
-   * @param match the match this tool is being used in
-   */
-  public GamemodeTool(Match match) {
-    this.match = match;
+  /** Constructor. */
+  public GamemodeTool() {
     worldEditEnabled = Bukkit.getPluginManager().isPluginEnabled("WorldEdit");
   }
 
@@ -67,7 +62,10 @@ public class GamemodeTool implements ObserverTool {
   public void toggleObserverGameMode(Player player) {
     player.setGameMode(getOppositeMode(player.getGameMode()));
     if (player.getGameMode() == GameMode.SPECTATOR) {
-      match.getPlayer(player).sendWarning(getToggleMessage());
+      MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(player);
+      if (matchPlayer != null) {
+        matchPlayer.sendWarning(getToggleMessage());
+      }
     } else if (isCreative(player)) {
       // Note: When WorldEdit is present, this executes a command to ensure the player is not stuck
       if (worldEditEnabled) {

@@ -12,14 +12,10 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
-import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.ObserverInteractEvent;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
-import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.settings.tools.FlySpeedTool;
 import tc.oc.pgm.settings.tools.GamemodeTool;
 import tc.oc.pgm.settings.tools.NightVisionTool;
@@ -31,8 +27,7 @@ import tc.oc.pgm.util.menu.InventoryMenuListener;
 import tc.oc.pgm.util.menu.item.InventoryItem;
 import tc.oc.pgm.util.menu.item.InventoryItemBuilder;
 
-@ListenerScope(MatchScope.LOADED)
-public class SettingsMatchModule implements MatchModule, Listener {
+public class SettingsListener implements Listener {
 
   // Slot where tool item is placed
   public static final int TOOL_BUTTON_SLOT = 8;
@@ -43,18 +38,12 @@ public class SettingsMatchModule implements MatchModule, Listener {
   public static final String INVENTORY_TITLE = "setting.title";
   public static final int SETTINGS_ROWS = (SettingKey.values().length + 9 - 1) / 9;
 
-  private final Match match;
-  private InventoryMenu observerMenu;
-  private InventoryMenu otherMenu;
+  private final InventoryMenu observerMenu;
+  private final InventoryMenu otherMenu;
 
-  public SettingsMatchModule(Match match) {
-    this.match = match;
-  }
-
-  @Override
-  public void load() {
+  public SettingsListener() {
     ObserverTool[] tools =
-        new ObserverTool[] {new FlySpeedTool(), new GamemodeTool(match), new NightVisionTool()};
+        new ObserverTool[] {new FlySpeedTool(), new GamemodeTool(), new NightVisionTool()};
     int obsToolsRows = (tools.length + 9 - 1) / 9;
 
     InventoryMenuListener manager = PGM.get().getInventoryMenuListener();
@@ -70,10 +59,10 @@ public class SettingsMatchModule implements MatchModule, Listener {
       SettingKey key = SettingKey.values()[i];
       InventoryItem invItem =
           InventoryItemBuilder.createItem(
-                  manager, (menu, player) -> createSettingMenuItem(match.getPlayer(player), key))
+                  manager, (menu, player) -> createSettingMenuItem(player, key))
               .onClick(
                   (menu, player) -> {
-                    match.getPlayer(player).getSettings().toggleValue(key);
+                    PGM.get().getMatchManager().getPlayer(player).getSettings().toggleValue(key);
                     menu.invalidate(player);
                   })
               .build();
@@ -138,8 +127,9 @@ public class SettingsMatchModule implements MatchModule, Listener {
         .build();
   }
 
-  private ItemStack createSettingMenuItem(MatchPlayer player, SettingKey setting) {
-    SettingValue value = player.getSettings().getValue(setting);
+  private ItemStack createSettingMenuItem(Player player, SettingKey setting) {
+    MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(player);
+    SettingValue value = matchPlayer.getSettings().getValue(setting);
     Material material = value.getIcon();
     if (material == null) {
       material = setting.getIcon();
@@ -147,8 +137,8 @@ public class SettingsMatchModule implements MatchModule, Listener {
 
     return new ItemBuilder()
         .material(material)
-        .name(player.getBukkit(), setting.getDisplayName())
-        .lore(player.getBukkit(), setting.getDescription(value.getDisplayName()))
+        .name(player, setting.getDisplayName())
+        .lore(player, setting.getDescription(value.getDisplayName()))
         .flags(ItemFlag.values())
         .build();
   }
