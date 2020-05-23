@@ -221,6 +221,10 @@ public class SidebarMatchModule implements MatchModule, Listener {
     return match.getModule(BlitzMatchModule.class) != null;
   }
 
+  private boolean isWool() {
+    return match.getModule(WoolMatchModule.class) != null;
+  }
+
   private boolean isCompactWool() {
     WoolMatchModule wmm = match.getModule(WoolMatchModule.class);
     return wmm != null
@@ -466,7 +470,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
       }
 
       for (Competitor competitor : sortedCompetitors) {
-        if (!firstTeam) {
+        if (!(firstTeam || (isWool() && competitorsWithGoals.size() > 5))) {
           // Add a blank row between teams
           rows.add("");
         }
