@@ -4,6 +4,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -16,7 +17,11 @@ import tc.oc.pgm.events.ListenerScope;
 @ListenerScope(MatchScope.RUNNING)
 public class RageMatchModule implements MatchModule, Listener {
 
-  public RageMatchModule(Match match) {}
+  private final boolean allProjectiles;
+
+  public RageMatchModule(Match match, boolean allProjectiles) {
+    this.allProjectiles = allProjectiles;
+  }
 
   @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
   public void handlePlayerDamage(EntityDamageByEntityEvent event) {
@@ -32,7 +37,6 @@ public class RageMatchModule implements MatchModule, Listener {
     } else if (damager instanceof Arrow) {
       Arrow arrow = (Arrow) damager; // Arrows with damage > 2 are from power bows.
       return arrow.getShooter() instanceof Player && arrow.spigot().getDamage() > 2.0D;
-    }
-    return false;
+    } else return damager instanceof Projectile && allProjectiles;
   }
 }
