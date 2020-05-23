@@ -25,6 +25,7 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
   protected final Vector location;
   protected final Region placement;
   protected final boolean craftable;
+  protected final boolean inline;
   protected final boolean visible;
   protected final Component componentName;
 
@@ -55,7 +56,8 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
       DyeColor color,
       Vector location,
       Region placement,
-      boolean craftable) {
+      boolean craftable,
+      boolean inline) {
 
     super(
         id,
@@ -69,6 +71,7 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
     this.location = location;
     this.placement = placement;
     this.craftable = craftable;
+    this.inline = inline;
     this.visible = visible;
     this.componentName = makeComponentName(color);
   }
@@ -85,6 +88,8 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
         + this.placement
         + ", craftable="
         + this.craftable
+        + ", inline="
+        + this.inline
         + ", visible="
         + this.visible
         + "}";
@@ -118,6 +123,10 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
 
   public boolean isCraftable() {
     return this.craftable;
+  }
+
+  public boolean isInline() {
+    return this.inline;
   }
 
   public boolean isObjectiveWool(ItemStack stack) {

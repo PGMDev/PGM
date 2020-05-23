@@ -83,6 +83,7 @@ public class WoolModule implements MapModule {
       for (Element woolEl : XMLUtils.flattenElements(doc.getRootElement(), "wools", "wool")) {
         String id = woolEl.getAttributeValue("id");
         boolean craftable = Boolean.parseBoolean(woolEl.getAttributeValue("craftable", "true"));
+        boolean inline = Boolean.parseBoolean(woolEl.getAttributeValue("inline", "false"));
         TeamFactory team =
             teamModule.parseTeam(XMLUtils.getRequiredAttribute(woolEl, "team"), factory);
         DyeColor color = XMLUtils.parseDyeColor(XMLUtils.getRequiredAttribute(woolEl, "color"));
@@ -124,7 +125,8 @@ public class WoolModule implements MapModule {
                 color,
                 location,
                 placement,
-                craftable);
+                craftable,
+                inline);
         factory.getFeatures().addFeature(woolEl, wool);
         woolFactories.put(team, wool);
       }

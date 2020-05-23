@@ -476,9 +476,6 @@ public class SidebarMatchModule implements MatchModule, Listener {
         }
         firstTeam = false;
 
-        // Add a row for the team name
-        rows.add(competitor.getStyledName(NameStyle.FANCY).render().toLegacyText());
-
         if (isCompactWool()) {
           String woolText = " ";
           boolean firstWool = true;
@@ -493,12 +490,22 @@ public class SidebarMatchModule implements MatchModule, Listener {
                 }
               });
 
+          boolean inline = false;
+          String altText = " ";
+          int index = 1;
           for (Goal goal : sortedWools) {
             if (goal instanceof MonumentWool && goal.isVisible()) {
               MonumentWool wool = (MonumentWool) goal;
+              if (wool.getDefinition().isInline() == true) {
+                inline = true;
+              }
               if (!firstWool) {
                 if (sortedWools.size() > 5) {
                   woolText += " ";
+                  if (index % 2 == 0) {
+                    altText += " ";
+                  }
+                  index += 1;
                 } else {
                   woolText += "   ";
                 }
@@ -506,12 +513,37 @@ public class SidebarMatchModule implements MatchModule, Listener {
               firstWool = false;
               woolText += wool.renderSidebarStatusColor(competitor, viewingParty);
               woolText += wool.renderSidebarStatusText(competitor, viewingParty);
+              altText += wool.renderSidebarStatusColor(competitor, viewingParty);
+              altText += wool.renderSidebarStatusText(competitor, viewingParty);
             }
           }
 
-          rows.add(woolText);
+          if (!inline) {
+            // This team's wools are not inline; add a row for the team name
+            rows.add(competitor.getStyledName(NameStyle.FANCY).render().toLegacyText());
+
+            // Add a row for the compact wools
+            rows.add(woolText);
+          } else {
+            // Add team name & compact wools on a single line.
+            String teamName = competitor.getStyledName(NameStyle.FANCY).render().toLegacyText();
+            String inlineString = teamName + woolText;
+            if (inlineString.length() <= 32) {
+              rows.add(teamName + woolText);
+            } else {
+              inlineString = teamName + altText;
+              if (inlineString.length() <= 32) {
+                rows.add(teamName + altText);
+              } else {
+                rows.add(teamName + " " + altText.replaceAll("\\s", ""));
+              }
+            }
+          }
 
         } else {
+          // Wools are not compact; add a row for the team name
+          rows.add(competitor.getStyledName(NameStyle.FANCY).render().toLegacyText());
+
           // Add a row for each of this team's goals
           for (Goal goal : gmm.getGoals()) {
             if (!goal.isShared() && goal.canComplete(competitor) && goal.isVisible()) {
