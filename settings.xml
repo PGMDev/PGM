@@ -4,7 +4,7 @@
                       https://maven.apache.org/xsd/settings-1.0.0.xsd">
     <servers>
         <server>
-            <id>ashcon-repo</id>
+            <id>ashcon.app</id>
             <username>${env.NEXUS_USERNAME}</username>
             <password>${env.NEXUS_PASSWORD}</password>
         </server>

@@ -12,12 +12,12 @@
     <description>The original PvP Game Manager for Minecraft.</description>
     <inceptionYear>2011</inceptionYear>
 
-    <url>https://github.com/Electroid/PGM</url>
+    <url>https://pgm.dev</url>
     <issueManagement>
-        <url>https://github.com/Electroid/PGM/issues</url>
+        <url>https://github.com/PGMDev/PGM/issues</url>
     </issueManagement>
     <scm>
-        <connection>scm:git:git://github.com/Electroid/PGM</connection>
+        <connection>scm:git:git://github.com/PGMDev/PGM</connection>
     </scm>
 
     <developers>
@@ -40,18 +40,23 @@
 
     <repositories>
         <repository>
-            <id>ashcon-repo</id>
-            <url>https://repo.ashcon.app/content/repositories/snapshots</url>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
         <repository>
-            <id>viaversion-repo</id>
+            <id>viaversion.com</id>
             <url>https://repo.viaversion.com</url>
+        </repository>
+        <!-- TODO: move SportPaper to jitpack.io -->
+        <repository>
+            <id>ashcon.app</id>
+            <url>https://repo.ashcon.app/content/repositories/snapshots</url>
         </repository>
     </repositories>
 
     <distributionManagement>
         <repository>
-            <id>ashcon-repo</id>
+            <id>ashcon.repo</id>
             <url>https://repo.ashcon.app/content/repositories/snapshots</url>
         </repository>
     </distributionManagement>
@@ -136,7 +141,7 @@
         <dependency>
             <groupId>app.ashcon.intake</groupId>
             <artifactId>intake-bukkit</artifactId>
-            <version>1.2-SNAPSHOT</version>
+            <version>v1.2</version>
             <scope>compile</scope>
         </dependency>
 
