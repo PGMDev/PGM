@@ -1,6 +1,5 @@
 name: PGM
 softdepend: [ViaVersion]
-author: Ashcon Partovi
 description: ${project.parent.description}
 main: ${project.mainClass}
 version: ${project.version} (git-${git.commit.id.abbrev})
