@@ -46,11 +46,15 @@ import tc.oc.pgm.api.party.event.PartyRemoveEvent;
 import tc.oc.pgm.api.party.event.PartyRenameEvent;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.blitz.BlitzMatchModule;
+import tc.oc.pgm.controlpoint.ControlPointMatchModule;
+import tc.oc.pgm.core.CoreMatchModule;
 import tc.oc.pgm.destroyable.Destroyable;
+import tc.oc.pgm.destroyable.DestroyableMatchModule;
 import tc.oc.pgm.events.FeatureChangeEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.ffa.Tribute;
+import tc.oc.pgm.flag.FlagMatchModule;
 import tc.oc.pgm.goals.Goal;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.ProximityGoal;
@@ -221,15 +225,39 @@ public class SidebarMatchModule implements MatchModule, Listener {
     return match.getModule(BlitzMatchModule.class) != null;
   }
 
+  // Determines if wool objectives should be given their own rows, or all shown on 1 row.
   private boolean isCompactWool() {
     WoolMatchModule wmm = match.getModule(WoolMatchModule.class);
     return wmm != null
-        && MAX_ROWS < wmm.getWools().keySet().size() * 2 - 1 + wmm.getWools().values().size();
+        && !(wmm.getWools().keySet().size() * 2 - 1 + wmm.getWools().values().size() < MAX_ROWS);
   }
 
-  private boolean isSuperCompact() {
+  // Determines if all the map objectives can fit onto the scoreboard with empty rows in between.
+  private boolean isSuperCompact(Set<Competitor> competitorsWithGoals) {
+    int rowsUsed = competitorsWithGoals.size() * 2 - 1;
+
     WoolMatchModule wmm = match.getModule(WoolMatchModule.class);
-    return wmm != null && MAX_ROWS < wmm.getWools().keySet().size() * 3 - 1;
+    if (wmm != null) {
+      if (isCompactWool()) {
+        rowsUsed += wmm.getWools().keySet().size() * 2 - 1;
+      } else {
+        rowsUsed += wmm.getWools().values().size();
+      }
+    }
+
+    ControlPointMatchModule cpmm = match.getModule(ControlPointMatchModule.class);
+    if (cpmm != null) rowsUsed += cpmm.getControlPoints().size();
+
+    FlagMatchModule fmm = match.getModule(FlagMatchModule.class);
+    if (fmm != null) rowsUsed += fmm.getFlags().size();
+
+    CoreMatchModule cmm = match.getModule(CoreMatchModule.class);
+    if (cmm != null) rowsUsed += cmm.getCores().size();
+
+    DestroyableMatchModule dmm = match.getModule(DestroyableMatchModule.class);
+    if (dmm != null) rowsUsed += dmm.getDestroyables().size();
+
+    return !(rowsUsed < MAX_ROWS);
   }
 
   private void addSidebar(Party party) {
@@ -405,7 +433,6 @@ public class SidebarMatchModule implements MatchModule, Listener {
     final boolean hasScores = hasScores();
     final boolean isBlitz = isBlitz();
     final boolean isCompactWool = isCompactWool();
-    final boolean isSuperCompact = isSuperCompact();
     final GoalMatchModule gmm = match.needModule(GoalMatchModule.class);
 
     Set<Competitor> competitorsWithGoals = new HashSet<>();
@@ -423,6 +450,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
         }
       }
     }
+    final boolean isSuperCompact = isSuperCompact(competitorsWithGoals);
 
     for (Map.Entry<Party, Sidebar> entry : this.sidebars.entrySet()) {
       Party viewingParty = entry.getKey();

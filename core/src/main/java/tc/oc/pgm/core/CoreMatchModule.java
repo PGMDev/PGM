@@ -152,4 +152,8 @@ public class CoreMatchModule implements MatchModule, Listener {
       }
     }
   }
+
+  public List<Core> getCores() {
+    return cores;
+  }
 }

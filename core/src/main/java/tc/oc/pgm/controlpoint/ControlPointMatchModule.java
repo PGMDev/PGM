@@ -36,4 +36,8 @@ public class ControlPointMatchModule implements MatchModule {
     }
     HandlerList.unregisterAll(this.announcer);
   }
+
+  public List<ControlPoint> getControlPoints() {
+    return controlPoints;
+  }
 }
