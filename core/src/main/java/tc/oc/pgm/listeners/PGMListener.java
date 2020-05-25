@@ -189,6 +189,11 @@ public class PGMListener implements Listener {
   }
 
   public static void announceJoinOrLeave(MatchPlayer player, boolean join, boolean staffOnly) {
+    announceJoinOrLeave(player, join, staffOnly, false);
+  }
+
+  public static void announceJoinOrLeave(
+      MatchPlayer player, boolean join, boolean staffOnly, boolean force) {
     checkNotNull(player);
     Collection<MatchPlayer> viewers =
         player.getMatch().getPlayers().stream()
@@ -201,7 +206,8 @@ public class PGMListener implements Listener {
         continue; // Skip staff during fake broadcast
 
       final String key =
-          (join ? "misc.join" : "misc.leave") + (staffOnly && player.isVanished() ? ".quiet" : "");
+          (join ? "misc.join" : "misc.leave")
+              + (staffOnly && (player.isVanished() || force) ? ".quiet" : "");
 
       SettingValue option = viewer.getSettings().getValue(SettingKey.JOIN);
       if (option.equals(SettingValue.JOIN_ON)) {

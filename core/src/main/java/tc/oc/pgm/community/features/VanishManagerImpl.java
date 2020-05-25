@@ -179,6 +179,10 @@ public class VanishManagerImpl implements VanishManager, Listener {
     // If player is vanished & joined via "vanish" subdomain. Remove vanish status on quit
     if (isVanished(player.getId()) && tempVanish.contains(player.getId())) {
       setVanished(player, false, true);
+      // Temporary vanish status is removed before quit,
+      // so prevent regular quit msg and forces a staff only broadcast
+      event.setQuitMessage(null);
+      PGMListener.announceJoinOrLeave(player, false, true, true);
     }
   }
 
