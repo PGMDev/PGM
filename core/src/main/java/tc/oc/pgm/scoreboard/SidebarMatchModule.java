@@ -221,10 +221,26 @@ public class SidebarMatchModule implements MatchModule, Listener {
     return match.getModule(BlitzMatchModule.class) != null;
   }
 
+  // Determines if wool objectives should be given their own rows, or all shown on 1 row.
   private boolean isCompactWool() {
     WoolMatchModule wmm = match.getModule(WoolMatchModule.class);
     return wmm != null
-        && MAX_ROWS < wmm.getWools().keySet().size() * 2 - 1 + wmm.getWools().values().size();
+        && !(wmm.getWools().keySet().size() * 2 - 1 + wmm.getWools().values().size() < MAX_ROWS);
+  }
+
+  // Determines if all the map objectives can fit onto the scoreboard with empty rows in between.
+  private boolean isSuperCompact(Set<Competitor> competitorsWithGoals) {
+    int rowsUsed = competitorsWithGoals.size() * 2 - 1;
+
+    if (isCompactWool()) {
+      WoolMatchModule wmm = match.getModule(WoolMatchModule.class);
+      rowsUsed += wmm.getWools().keySet().size();
+    } else {
+      GoalMatchModule gmm = match.needModule(GoalMatchModule.class);
+      rowsUsed += gmm.getGoals().size();
+    }
+
+    return !(rowsUsed < MAX_ROWS);
   }
 
   private void addSidebar(Party party) {
@@ -399,6 +415,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
   private void renderSidebar() {
     final boolean hasScores = hasScores();
     final boolean isBlitz = isBlitz();
+    final boolean isCompactWool = isCompactWool();
     final GoalMatchModule gmm = match.needModule(GoalMatchModule.class);
 
     Set<Competitor> competitorsWithGoals = new HashSet<>();
@@ -416,6 +433,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
         }
       }
     }
+    final boolean isSuperCompact = isSuperCompact(competitorsWithGoals);
 
     for (Map.Entry<Party, Sidebar> entry : this.sidebars.entrySet()) {
       Party viewingParty = entry.getKey();
@@ -466,7 +484,10 @@ public class SidebarMatchModule implements MatchModule, Listener {
       }
 
       for (Competitor competitor : sortedCompetitors) {
-        if (!firstTeam) {
+        // Prevent team name from showing if there isn't space for at least 1 row of its objectives
+        if (!(rows.size() + 2 < MAX_ROWS)) break;
+
+        if (!(firstTeam || isSuperCompact)) {
           // Add a blank row between teams
           rows.add("");
         }
@@ -475,8 +496,8 @@ public class SidebarMatchModule implements MatchModule, Listener {
         // Add a row for the team name
         rows.add(competitor.getStyledName(NameStyle.FANCY).render().toLegacyText());
 
-        if (isCompactWool()) {
-          String woolText = " ";
+        if (isCompactWool) {
+          String woolText = "";
           boolean firstWool = true;
 
           List<Goal> sortedWools = new ArrayList<>(gmm.getGoals(competitor));
@@ -489,22 +510,25 @@ public class SidebarMatchModule implements MatchModule, Listener {
                 }
               });
 
+          // Calculate whether having three spaces between each wool would fit on the scoreboard.
+          boolean horizontalCompact =
+              !((MAX_PREFIX + MAX_SUFFIX) < sortedWools.size() + 3 * (sortedWools.size() - 1));
+
           for (Goal goal : sortedWools) {
             if (goal instanceof MonumentWool && goal.isVisible()) {
               MonumentWool wool = (MonumentWool) goal;
-              if (!firstWool) {
-                woolText += "   ";
-              }
+              woolText += " ";
+              if (!firstWool && !horizontalCompact) woolText += "  ";
               firstWool = false;
               woolText += wool.renderSidebarStatusColor(competitor, viewingParty);
               woolText += wool.renderSidebarStatusText(competitor, viewingParty);
             }
           }
-
+          // Add a row for the compact wools
           rows.add(woolText);
 
         } else {
-          // Add a row for each of this team's goals
+          // Not compact; add a row for each of this team's goals
           for (Goal goal : gmm.getGoals()) {
             if (!goal.isShared() && goal.canComplete(competitor) && goal.isVisible()) {
               rows.add(this.renderGoal(goal, competitor, viewingParty));
