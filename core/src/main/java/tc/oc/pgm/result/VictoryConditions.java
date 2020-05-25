@@ -5,9 +5,11 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.goals.GoalsVictoryCondition;
+import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamVictoryCondition;
 import tc.oc.pgm.teams.Teams;
+import tc.oc.pgm.util.text.TextException;
 
 public class VictoryConditions {
   private VictoryConditions() {}
@@ -35,13 +37,13 @@ public class VictoryConditions {
         if (match != null) {
           TeamFactory winner = Teams.getTeam(raw, match);
           if (winner == null) {
-            throw new IllegalArgumentException("Invalid result");
+            throw TextException.invalidFormat(raw, Team.class, null);
           }
           return new TeamVictoryCondition(winner);
         } else {
           TeamFactory winner = Teams.getTeam(raw, factory);
           if (winner == null) {
-            throw new IllegalArgumentException("Invalid result");
+            throw TextException.invalidFormat(raw, Team.class, null);
           }
           return new TeamVictoryCondition(winner);
         }

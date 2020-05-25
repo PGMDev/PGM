@@ -41,6 +41,14 @@ public class TextException extends RuntimeException {
     return PlainComponentSerializer.INSTANCE.serialize(localized);
   }
 
+  public static TextException of(String key, Component... args) {
+    return new TextException(null, null, key, args);
+  }
+
+  public static TextException noPermission() {
+    return TextException.of("misc.noPermission");
+  }
+
   public static TextException unknown(@Nullable Throwable cause) {
     return new TextException(cause, null, "error.unknown");
   }
