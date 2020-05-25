@@ -340,9 +340,6 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
    * team to make room.
    */
   public int getOpenSlots(MatchPlayer joining, boolean priorityKick) {
-    // Can always join obs
-    if (this.isObserving()) return 1;
-
     // Count existing team members with and without join privileges
     int normal = 0, privileged = 0;
 

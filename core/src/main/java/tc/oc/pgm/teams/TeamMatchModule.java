@@ -290,7 +290,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
     for (Team team : this.getParticipatingTeams()) {
       float fullness = team.getFullness(false);
-      if (fullness > maxFullness) {
+      if (fullestTeam == null || fullness > maxFullness) {
         fullestTeam = team;
         maxFullness = fullness;
       }
@@ -306,7 +306,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
     for (Team team : this.getParticipatingTeams()) {
       float fullness = team.getFullness(false);
-      if (fullness < minFullness) {
+      if (emptiestTeam == null || fullness < minFullness) {
         emptiestTeam = team;
         minFullness = fullness;
       }
