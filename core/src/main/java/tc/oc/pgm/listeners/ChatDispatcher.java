@@ -1,7 +1,6 @@
 package tc.oc.pgm.listeners;
 
 import app.ashcon.intake.Command;
-import app.ashcon.intake.argument.ArgumentException;
 import app.ashcon.intake.parametric.annotation.Text;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -35,7 +34,6 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
-import tc.oc.pgm.commands.SettingCommands;
 import tc.oc.pgm.ffa.Tribute;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.UsernameFormatUtils;
@@ -47,6 +45,13 @@ import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class ChatDispatcher implements Listener {
+
+  private static ChatDispatcher INSTANCE = new ChatDispatcher();
+
+  public static ChatDispatcher get() {
+    return INSTANCE; // FIXME: no one should need to statically access ChatDispatcher, but community
+    // does this a lot
+  }
 
   private final MatchManager manager;
   private final VanishManager vanish;
@@ -76,11 +81,12 @@ public class ChatDispatcher implements Listener {
   private static final Predicate<MatchPlayer> AC_FILTER =
       viewer -> viewer.getBukkit().hasPermission(Permissions.ADMINCHAT);
 
-  public ChatDispatcher(MatchManager manager, VanishManager vanish) {
-    this.manager = manager;
-    this.vanish = vanish;
+  public ChatDispatcher() {
+    this.manager = PGM.get().getMatchManager();
+    this.vanish = PGM.get().getVanishManager();
     this.lastMessagedBy = new OnlinePlayerMapAdapter<>(PGM.get());
     this.muted = Sets.newHashSet();
+    PGM.get().getServer().getPluginManager().registerEvents(this, PGM.get());
   }
 
   public void addMuted(MatchPlayer player) {
@@ -333,13 +339,9 @@ public class ChatDispatcher implements Listener {
       Predicate<MatchPlayer> filter,
       @Nullable SettingValue type) {
     // When a message is empty, this indicates the player wants to change their default chat channel
-    if (text == null) {
-      try {
-        SettingCommands.toggle(
-            sender == null ? null : sender.getBukkit(), sender, SettingKey.CHAT, type.getName());
-      } catch (ArgumentException e) {
-        // No-op, this is when console tries to change chat settings
-      }
+    if (text == null && sender != null) {
+      // FIXME: there should be a better way to do this
+      sender.getBukkit().performCommand("set " + SettingKey.CHAT + " " + type.getName());
       return;
     }
 

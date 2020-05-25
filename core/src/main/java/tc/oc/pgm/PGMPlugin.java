@@ -1,20 +1,8 @@
 package tc.oc.pgm;
 
-import app.ashcon.intake.CommandException;
-import app.ashcon.intake.InvalidUsageException;
-import app.ashcon.intake.InvocationCommandException;
-import app.ashcon.intake.bukkit.BukkitIntake;
-import app.ashcon.intake.bukkit.graph.BasicBukkitCommandGraph;
-import app.ashcon.intake.fluent.CommandGraph;
-import app.ashcon.intake.fluent.DispatcherNode;
-import app.ashcon.intake.parametric.AbstractModule;
-import app.ashcon.intake.parametric.provider.EnumProvider;
-import app.ashcon.intake.util.auth.AuthorizationException;
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import java.io.File;
 import java.sql.SQLException;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -27,18 +15,14 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.util.Vector;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.Modules;
@@ -54,40 +38,11 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.module.Module;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
-import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.prefix.PrefixRegistry;
-import tc.oc.pgm.api.setting.SettingKey;
-import tc.oc.pgm.api.setting.SettingValue;
-import tc.oc.pgm.commands.AdminCommands;
-import tc.oc.pgm.commands.ClassCommands;
-import tc.oc.pgm.commands.CycleCommands;
-import tc.oc.pgm.commands.DestroyableCommands;
-import tc.oc.pgm.commands.FreeForAllCommands;
-import tc.oc.pgm.commands.GoalCommands;
-import tc.oc.pgm.commands.InventoryCommands;
-import tc.oc.pgm.commands.JoinCommands;
-import tc.oc.pgm.commands.ListCommands;
-import tc.oc.pgm.commands.MapCommands;
-import tc.oc.pgm.commands.MapPoolCommands;
-import tc.oc.pgm.commands.MatchCommands;
-import tc.oc.pgm.commands.ModeCommands;
-import tc.oc.pgm.commands.ObserverCommands;
-import tc.oc.pgm.commands.SettingCommands;
-import tc.oc.pgm.commands.StartCommands;
-import tc.oc.pgm.commands.StatsCommands;
-import tc.oc.pgm.commands.TeamCommands;
-import tc.oc.pgm.commands.TimeLimitCommands;
-import tc.oc.pgm.commands.provider.AudienceProvider;
-import tc.oc.pgm.commands.provider.DurationProvider;
-import tc.oc.pgm.commands.provider.MapInfoProvider;
-import tc.oc.pgm.commands.provider.MatchPlayerProvider;
-import tc.oc.pgm.commands.provider.MatchProvider;
-import tc.oc.pgm.commands.provider.SettingKeyProvider;
-import tc.oc.pgm.commands.provider.TeamMatchModuleProvider;
-import tc.oc.pgm.commands.provider.VectorProvider;
-import tc.oc.pgm.community.commands.ModerationCommands;
-import tc.oc.pgm.community.commands.ReportCommands;
+import tc.oc.pgm.command.graph.CommandExecutor;
+import tc.oc.pgm.command.graph.CommandGraph;
+import tc.oc.pgm.community.command.CommunityCommandGraph;
 import tc.oc.pgm.community.features.VanishManagerImpl;
 import tc.oc.pgm.db.CacheDatastore;
 import tc.oc.pgm.db.SQLDatastore;
@@ -114,9 +69,7 @@ import tc.oc.pgm.restart.ShouldRestartTask;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.RandomMapOrder;
 import tc.oc.pgm.tablist.MatchTabManager;
-import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.FileUtils;
-import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.concurrent.BukkitExecutorService;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -267,6 +220,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   public void reloadConfig() {
     super.reloadConfig();
 
+    final boolean startup = config == null;
     try {
       config = new PGMConfig(getConfig(), getDataFolder());
     } catch (TextException e) {
@@ -274,8 +228,11 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       return;
     }
 
-    getGameLogger()
-        .log(Level.INFO, ChatColor.GREEN + TextTranslations.translate("admin.reloadConfig", null));
+    if (!startup) {
+      getGameLogger()
+          .log(
+              Level.INFO, ChatColor.GREEN + TextTranslations.translate("admin.reloadConfig", null));
+    }
 
     final Logger logger = getLogger();
     logger.setLevel(config.getLogLevel());
@@ -293,6 +250,10 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       }
 
       mapSourceFactories.add(factory);
+    }
+
+    if (mapOrder != null) {
+      mapOrder.reload();
     }
   }
 
@@ -351,133 +312,29 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     return vanishManager;
   }
 
-  private class CommandRegistrar extends BukkitIntake {
-
-    public CommandRegistrar(CommandGraph commandGraph) {
-      super(PGMPlugin.this, commandGraph);
-    }
-
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-      final Audience audience = Audience.get(sender);
-
-      try {
-        return this.getCommandGraph()
-            .getRootDispatcherNode()
-            .getDispatcher()
-            .call(this.getCommand(command, args), this.getNamespace(sender));
-      } catch (AuthorizationException e) {
-        audience.sendWarning(TranslatableComponent.of("misc.noPermission"));
-      } catch (InvocationCommandException e) {
-        if (e.getCause() instanceof TextException) {
-          audience.sendWarning(((TextException) e.getCause()).getText());
-        } else {
-          audience.sendWarning(TextException.unknown(e).getText());
-          e.printStackTrace();
-        }
-      } catch (InvalidUsageException e) {
-        if (e.getMessage() != null) {
-          audience.sendWarning(TextComponent.of(e.getMessage()));
-        }
-
-        if (e.isFullHelpSuggested()) {
-          audience.sendMessage(
-              TextComponent.of(
-                  "/"
-                      + Joiner.on(' ').join(e.getAliasStack())
-                      + " "
-                      + e.getCommand().getDescription().getUsage()));
-        }
-      } catch (CommandException e) {
-        audience.sendMessage(TextComponent.of(e.getMessage()));
-      }
-
-      return false;
-    }
-  }
-
-  private class CommandModule extends AbstractModule {
-    @Override
-    protected void configure() {
-      configureInstances();
-      configureProviders();
-    }
-
-    private void configureInstances() {
-      bind(PGM.class).toInstance(PGMPlugin.this);
-      bind(MatchManager.class).toInstance(getMatchManager());
-      bind(MapLibrary.class).toInstance(getMapLibrary());
-      bind(MapOrder.class).toInstance(getMapOrder());
-    }
-
-    private void configureProviders() {
-      final MatchPlayerProvider playerProvider = new MatchPlayerProvider(getMatchManager());
-      bind(MatchPlayer.class).toProvider(playerProvider);
-      bind(Audience.class).toProvider(new AudienceProvider(playerProvider));
-      bind(Match.class).toProvider(new MatchProvider(getMatchManager()));
-      bind(MapInfo.class)
-          .toProvider(new MapInfoProvider(getMatchManager(), getMapLibrary(), getMapOrder()));
-      bind(Duration.class).toProvider(new DurationProvider());
-      bind(TeamMatchModule.class).toProvider(new TeamMatchModuleProvider(getMatchManager()));
-      bind(Vector.class).toProvider(new VectorProvider());
-      bind(SettingKey.class).toProvider(new SettingKeyProvider());
-      bind(SettingValue.class).toProvider(new EnumProvider<>(SettingValue.class));
-    }
-  }
-
   private void registerCommands() {
-    BasicBukkitCommandGraph graph = new BasicBukkitCommandGraph(new CommandModule());
-    DispatcherNode node = graph.getRootDispatcherNode();
+    final CommandGraph graph =
+        config.isCommunityMode() ? new CommunityCommandGraph() : new CommandGraph();
 
-    final ChatDispatcher chat = new ChatDispatcher(getMatchManager(), getVanishManager());
-    node.registerCommands(chat);
-    registerEvents(chat);
+    graph.register(vanishManager);
+    graph.register(ChatDispatcher.get());
 
-    node.registerCommands(new MapCommands());
-    node.registerCommands(new CycleCommands());
-    node.registerCommands(new InventoryCommands());
-    node.registerCommands(new GoalCommands());
-    node.registerCommands(new JoinCommands());
-    node.registerCommands(new StartCommands());
-    node.registerCommands(new DestroyableCommands());
-    node.registerNode("team").registerCommands(new TeamCommands());
-    node.registerCommands(new AdminCommands());
-    node.registerCommands(new ClassCommands());
-    node.registerNode("players", "ffa").registerCommands(new FreeForAllCommands());
-    node.registerCommands(new MatchCommands());
-    node.registerNode("mode", "modes").registerCommands(new ModeCommands());
-    node.registerCommands(new TimeLimitCommands());
-    node.registerCommands(new SettingCommands());
-    node.registerCommands(new ObserverCommands());
-    node.registerCommands(new MapPoolCommands());
-    node.registerCommands(new StatsCommands());
-
-    if (config.isCommunityMode()) {
-      final ModerationCommands modCommands =
-          new ModerationCommands(chat, matchManager, vanishManager);
-      node.registerCommands(modCommands);
-      registerEvents(modCommands);
-
-      node.registerCommands(vanishManager);
-      registerEvents((Listener) vanishManager);
-
-      node.registerCommands(new ReportCommands());
-      node.registerCommands(new ListCommands(vanishManager));
-    }
-
-    new CommandRegistrar(graph).register();
+    new CommandExecutor(this, graph).register();
   }
 
-  private void registerEvents(Listener listener) {
-    getServer().getPluginManager().registerEvents(listener, this);
+  private void registerEvents(Object listener) {
+    if (listener instanceof Listener) {
+      getServer().getPluginManager().registerEvents((Listener) listener, this);
+    }
   }
 
   private void registerListeners() {
-    registerEvents((Listener) matchManager);
-    if (matchTabManager != null) registerEvents(matchTabManager);
+    new BlockTransformListener(this).registerEvents();
+    registerEvents(matchManager);
+    registerEvents(matchTabManager);
+    registerEvents(vanishManager);
     registerEvents(prefixRegistry);
     registerEvents(new GeneralizingListener(this));
-    new BlockTransformListener(this).registerEvents();
     registerEvents(new PGMListener(this, matchManager, vanishManager));
     registerEvents(new FormattingListener());
     registerEvents(new AntiGriefListener(matchManager));

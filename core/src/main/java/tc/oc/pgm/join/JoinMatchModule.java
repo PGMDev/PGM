@@ -158,6 +158,8 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
 
   @Override
   public boolean forceJoin(MatchPlayer joining, @Nullable Competitor forcedParty) {
+    if (joining.isVanished()) return join(joining, forcedParty);
+
     for (JoinHandler handler : handlers) {
       if (handler.forceJoin(joining, forcedParty)) return true;
     }
