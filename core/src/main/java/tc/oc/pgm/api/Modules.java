@@ -70,6 +70,7 @@ import tc.oc.pgm.modules.ItemDestroyMatchModule;
 import tc.oc.pgm.modules.ItemDestroyModule;
 import tc.oc.pgm.modules.ItemKeepMatchModule;
 import tc.oc.pgm.modules.ItemKeepModule;
+import tc.oc.pgm.modules.MapmakerMatchModule;
 import tc.oc.pgm.modules.MobsMatchModule;
 import tc.oc.pgm.modules.MobsModule;
 import tc.oc.pgm.modules.ModifyBowProjectileMatchModule;
@@ -156,6 +157,7 @@ public interface Modules {
     register(ObserverToolsMatchModule.class, new ObserverToolsMatchModule.Factory());
     register(FireworkMatchModule.class, FireworkMatchModule::new);
     register(StatsMatchModule.class, StatsMatchModule::new);
+    register(MapmakerMatchModule.class, MapmakerMatchModule::new);
 
     // Community MatchModules
     register(FreezeMatchModule.class, FreezeMatchModule::new);
