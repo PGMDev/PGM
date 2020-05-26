@@ -3,9 +3,8 @@
 # The original PvP Game Manager for Minecraft.
 
 map:
-  # List of folders to load maps.
-  sources:
-    # A folder to load maps.
+  folders:
+    # List of folders to load maps.
     #
     #  server/
     #    bukkit.jar
@@ -17,10 +16,18 @@ map:
     # See the example above, folders are relative to the server folder.
     - "maps"
 
-    # A special "default" source that downloads 5 "classic" maps.
+  repositories:
+    # List of git repositories to load maps.
     #
-    # Remove this to disable those maps.
-    - "default"
+    #  - uri: "https://<user>:<oauth-token>@github.com/myUser/myPrivateRepo"
+    #    path: "maps"
+    #    branch: "master"
+    #    folders:
+    #    - "tournament"
+    #
+    # To disable the default maps, remove the repository below.
+    - uri: "https://github.com/PGMDev/Maps"
+      path: "maps-default"
 
   # A path to a map pools file, or empty to disable map pools.
   pools: "map-pools.yml"

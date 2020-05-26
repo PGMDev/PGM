@@ -21,13 +21,9 @@ public class SystemMapSourceFactory extends PathMapSourceFactory {
 
   protected final File dir;
 
-  private static File getFile(String path) {
-    return new File(checkNotNull(path)).getAbsoluteFile();
-  }
-
-  public SystemMapSourceFactory(String path) {
-    super(getFile(path).getPath());
-    this.dir = getFile(path);
+  public SystemMapSourceFactory(File file) {
+    super(file.getPath());
+    this.dir = file;
   }
 
   @Override

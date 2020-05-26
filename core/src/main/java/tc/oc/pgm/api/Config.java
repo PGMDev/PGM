@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import javax.annotation.Nullable;
 import net.kyori.text.Component;
 import org.bukkit.permissions.Permission;
+import tc.oc.pgm.api.map.factory.MapSourceFactory;
 
 /** A configuration for server owners to modify {@link PGM}. */
 public interface Config {
@@ -36,11 +37,11 @@ public interface Config {
   int getDatabaseMaxConnections();
 
   /**
-   * Gets a list of map sources, typically directory paths.
+   * Gets a list of map source factories
    *
-   * @return A list of map sources.
+   * @return A list of map source factories.
    */
-  List<String> getMapSources();
+  List<? extends MapSourceFactory> getMapSourceFactories();
 
   /**
    * Gets a path to "map-pool.yml" file.

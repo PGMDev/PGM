@@ -7,19 +7,23 @@ import static tc.oc.pgm.util.text.TextParser.parseDuration;
 import static tc.oc.pgm.util.text.TextParser.parseEnum;
 import static tc.oc.pgm.util.text.TextParser.parseInteger;
 import static tc.oc.pgm.util.text.TextParser.parseLogLevel;
+import static tc.oc.pgm.util.text.TextParser.parseUri;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import net.kyori.text.Component;
 import org.bukkit.ChatColor;
@@ -30,6 +34,9 @@ import org.bukkit.permissions.PermissionDefault;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.map.factory.MapSourceFactory;
+import tc.oc.pgm.map.source.GitMapSourceFactory;
+import tc.oc.pgm.map.source.SystemMapSourceFactory;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.text.TextException;
 
@@ -46,7 +53,7 @@ public final class PGMConfig implements Config {
   private final String motd;
 
   // map.*
-  private final List<String> mapSources;
+  private final List<MapSourceFactory> mapSourceFactories;
   private final String mapPoolFile;
 
   // countdown.*
@@ -111,7 +118,49 @@ public final class PGMConfig implements Config {
     final String motd = config.getString("motd");
     this.motd = motd == null || motd.isEmpty() ? null : parseComponentLegacy(motd);
 
-    this.mapSources = config.getStringList("map.sources");
+    this.mapSourceFactories = new LinkedList<>();
+
+    final TreeSet<String> folders = new TreeSet<>(config.getStringList("map.folders"));
+    final List<Map<?, ?>> repositories = new LinkedList<>(config.getMapList("map.repositories"));
+
+    for (String uri : config.getStringList("map.repositories")) {
+      repositories.add(ImmutableMap.of("uri", uri));
+    }
+
+    for (Map<?, ?> repository : repositories) {
+      final URI uri = parseUri(String.valueOf(repository.get("uri")));
+
+      String branch = String.valueOf(repository.get("branch"));
+      if (branch.isEmpty() || branch.equals("null")) {
+        branch = null;
+      }
+
+      String path = String.valueOf(repository.get("path"));
+      final File folder;
+      if (path.isEmpty() || path.equals("null")) {
+        folder =
+            new File(
+                "maps", (uri.getHost() + uri.getPath()).replaceAll("[/._]", "-").toLowerCase());
+      } else {
+        folder = new File(path);
+      }
+
+      this.mapSourceFactories.add(new GitMapSourceFactory(folder, uri, branch));
+
+      final Object subFolders = repository.get("folders");
+      if (subFolders instanceof List) {
+        for (Object subFolder : (List) subFolders) {
+          folders.add(new File(folder, subFolder.toString()).getAbsolutePath());
+        }
+      } else {
+        folders.add(folder.getAbsolutePath());
+      }
+    }
+
+    for (String folder : folders) {
+      this.mapSourceFactories.add(new SystemMapSourceFactory(new File(folder)));
+    }
+
     final String mapPoolFile = config.getString("map.pools");
     this.mapPoolFile =
         mapPoolFile == null || mapPoolFile.isEmpty()
@@ -161,6 +210,24 @@ public final class PGMConfig implements Config {
 
   // TODO: Can be removed after 1.0 release
   private static void handleLegacyConfig(FileConfiguration config, File dataFolder) {
+    // v0.9 uses map.folders instead of map.sources
+    if (config.get("map.sources") != null) {
+      renameKey(config, "map.sources", "map.folders");
+
+      if (config.getStringList("map.folders").contains("default")) {
+        config.set(
+            "map.repositories",
+            ImmutableList.of(
+                ImmutableMap.of("uri", "https://github.com/PGMDev/Maps", "path", "default-maps")));
+      }
+
+      try {
+        config.save(new File(dataFolder, "config.yml"));
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+
     // A somewhat hacky way of determining if this config need to be converted
     if (config.get("arrow-removal") == null) return;
 
@@ -343,8 +410,8 @@ public final class PGMConfig implements Config {
   }
 
   @Override
-  public List<String> getMapSources() {
-    return mapSources;
+  public List<? extends MapSourceFactory> getMapSourceFactories() {
+    return mapSourceFactories;
   }
 
   @Override

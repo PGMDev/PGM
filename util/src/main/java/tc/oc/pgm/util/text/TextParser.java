@@ -417,6 +417,27 @@ public final class TextParser {
   }
 
   /**
+   * Parses text into a uri.
+   *
+   * @param text The text.
+   * @return A uri.
+   * @throws TextException If the text is invalid.
+   */
+  public static URI parseUri(String text) throws TextException {
+    checkNotNull(text, "cannot parse uri from null");
+
+    if (text.trim().isEmpty()) {
+      throw invalidFormat(text, URI.class, null);
+    }
+
+    try {
+      return new URI(text);
+    } catch (URISyntaxException e) {
+      throw invalidFormat(text, URI.class, e);
+    }
+  }
+
+  /**
    * Parses text into a sql connection.
    *
    * @param text The text.
