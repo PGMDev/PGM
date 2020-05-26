@@ -151,6 +151,13 @@
             <version>5.6.2</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- Git library for cloning and pulling repositories -->
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>5.7.0.202003110725-r</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -194,18 +201,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-
-            <!-- Prevent .zip resources from getting filtered and corrupted -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.1.0</version>
-                <configuration>
-                    <nonFilteredFileExtensions>
-                        <nonFilteredFileExtension>zip</nonFilteredFileExtension>
-                    </nonFilteredFileExtensions>
-                </configuration>
             </plugin>
 
             <!-- Allows for building of java docs, although not used yet -->

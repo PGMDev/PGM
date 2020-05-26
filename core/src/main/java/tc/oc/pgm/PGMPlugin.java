@@ -58,8 +58,6 @@ import tc.oc.pgm.listeners.PGMListener;
 import tc.oc.pgm.listeners.ServerPingDataListener;
 import tc.oc.pgm.listeners.WorldProblemListener;
 import tc.oc.pgm.map.MapLibraryImpl;
-import tc.oc.pgm.map.source.DefaultMapSourceFactory;
-import tc.oc.pgm.map.source.SystemMapSourceFactory;
 import tc.oc.pgm.match.MatchManagerImpl;
 import tc.oc.pgm.match.NoopVanishManager;
 import tc.oc.pgm.prefix.ConfigPrefixProvider;
@@ -237,20 +235,8 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     final Logger logger = getLogger();
     logger.setLevel(config.getLogLevel());
 
-    for (String source : config.getMapSources()) {
-      final MapSourceFactory factory;
-      try {
-        factory =
-            source.equalsIgnoreCase("default")
-                ? DefaultMapSourceFactory.INSTANCE
-                : new SystemMapSourceFactory(source);
-      } catch (Throwable t) {
-        t.printStackTrace();
-        continue;
-      }
-
-      mapSourceFactories.add(factory);
-    }
+    mapSourceFactories.clear();
+    mapSourceFactories.addAll(config.getMapSourceFactories());
 
     if (mapOrder != null) {
       mapOrder.reload();

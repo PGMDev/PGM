@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static tc.oc.pgm.util.text.TextParser.*;
 
 import com.google.common.collect.Range;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Duration;
@@ -213,6 +215,20 @@ public final class TextParserTest {
                 TextException.class,
                 () -> parseEnum(text, ChatColor.class, Range.atMost(ChatColor.BLACK), false))
             .getMessage());
+  }
+
+  @ParameterizedTest
+  @CsvSource({"https://pgm.dev", "file://chinook.db", "mysql://username:password@localhost:3306"})
+  void testParseUri(String text) throws TextException, URISyntaxException {
+    assertEquals(new URI(text), parseUri(text));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"", " ", "https://"})
+  void testParseUriInvalid(String text) {
+    assertEquals(
+        "error.invalidFormat",
+        assertThrows(TextException.class, () -> parseUri(text)).getMessage());
   }
 
   @ParameterizedTest
