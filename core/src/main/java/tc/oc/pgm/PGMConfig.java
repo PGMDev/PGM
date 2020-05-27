@@ -158,7 +158,10 @@ public final class PGMConfig implements Config {
     }
 
     for (String folder : folders) {
-      this.mapSourceFactories.add(new SystemMapSourceFactory(new File(folder)));
+      File folderFile = new File(folder);
+      this.mapSourceFactories.add(
+          new SystemMapSourceFactory(
+              folderFile.isAbsolute() ? folderFile : folderFile.getAbsoluteFile()));
     }
 
     final String mapPoolFile = config.getString("map.pools");
