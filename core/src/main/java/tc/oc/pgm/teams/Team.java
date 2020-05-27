@@ -39,6 +39,7 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
   private JoinMatchModule jmm;
   protected @Nullable String name = null;
   protected @Nullable Component componentName;
+  protected @Nullable net.kyori.text.Component textName;
   protected Component chatPrefix;
   protected Integer minPlayers, maxPlayers, maxOverfill;
 

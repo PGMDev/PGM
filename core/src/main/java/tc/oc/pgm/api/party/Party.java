@@ -3,6 +3,7 @@ package tc.oc.pgm.api.party;
 import java.util.Collection;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.command.CommandSender;
@@ -119,12 +120,18 @@ public interface Party extends Audience, Named {
     return getColor() + getName(viewer);
   }
 
-  /**
-   * Get the current name of the {@link Party} as a {@link Component} with colors.
-   *
-   * @return The current {@link Party} name.
-   */
+  /** @deprecated */
+  @Deprecated
   Component getComponentName();
+
+  /**
+   * Get the current name of the {@link Party} as a {@link net.kyori.text.Component} with colors.
+   *
+   * @return The current {@link Party} name
+   */
+  default net.kyori.text.Component getTextName() {
+    return LegacyComponentSerializer.legacy().deserialize(getColoredName());
+  }
 
   /**
    * Get the prefix in chat for all {@link MatchPlayer}s in the {@link Party}.

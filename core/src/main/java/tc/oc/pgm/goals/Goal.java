@@ -57,6 +57,8 @@ public interface Goal<T extends GoalDefinition> extends Feature<T> {
 
   String getColoredName();
 
+  /** @deprecated */
+  @Deprecated
   Component getComponentName();
 
   default net.kyori.text.Component getTextName() {
