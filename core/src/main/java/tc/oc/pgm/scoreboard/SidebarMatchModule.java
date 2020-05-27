@@ -497,7 +497,6 @@ public class SidebarMatchModule implements MatchModule, Listener {
         rows.add(competitor.getStyledName(NameStyle.FANCY).render().toLegacyText());
 
         if (isCompactWool) {
-          String woolText = "";
           boolean firstWool = true;
 
           List<Goal> sortedWools = new ArrayList<>(gmm.getGoals(competitor));
@@ -512,7 +511,14 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
           // Calculate whether having three spaces between each wool would fit on the scoreboard.
           boolean horizontalCompact =
-              !((MAX_PREFIX + MAX_SUFFIX) < sortedWools.size() + 3 * (sortedWools.size() - 1));
+              (MAX_PREFIX + MAX_SUFFIX)
+                  < (3 * sortedWools.size()) + (3 * (sortedWools.size() - 1)) + 1;
+          String woolText = "";
+          if (!horizontalCompact) {
+            // If there is extra room, add another space to the left of the wools to make them
+            // appear more centered.
+            woolText += " ";
+          }
 
           for (Goal goal : sortedWools) {
             if (goal instanceof MonumentWool && goal.isVisible()) {
