@@ -36,7 +36,7 @@ Steps
 1. Clone the repository on your machine.
 
 ```bash
-git clone git@github.com:Electroid/PGM.git
+git clone git@github.com:PGMDev/PGM.git
 ```
 
 2. Make your changes (league system, anyone?)
