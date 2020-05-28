@@ -225,7 +225,7 @@ public class MapPoll {
     return uuids.stream()
         .map(Bukkit::getPlayer)
         // Count disconnected players as 1, can't test for their perms
-        .mapToInt(p -> p == null || !p.hasPermission(Permissions.PREMIUM) ? 1 : 2)
+        .mapToInt(p -> p == null || !p.hasPermission(Permissions.EXTRA_VOTE) ? 1 : 2)
         .sum();
   }
 
