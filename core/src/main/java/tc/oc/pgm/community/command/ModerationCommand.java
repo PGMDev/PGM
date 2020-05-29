@@ -203,7 +203,7 @@ public class ModerationCommand implements Listener {
     warn(sender, target, match, reason);
 
     if (punish(PunishmentType.MUTE, targetMatchPlayer, sender, reason, true)) {
-      chat.addMuted(targetMatchPlayer);
+      chat.addMuted(targetMatchPlayer, reason);
     }
   }
 

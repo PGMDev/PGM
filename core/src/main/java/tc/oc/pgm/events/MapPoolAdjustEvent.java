@@ -18,6 +18,7 @@ public class MapPoolAdjustEvent extends Event {
   private final boolean forced;
   private final @Nullable CommandSender sender;
   private final @Nullable Duration timeLimit;
+  private final int matchLimit;
 
   public MapPoolAdjustEvent(
       MapPool oldMapPool,
@@ -25,13 +26,15 @@ public class MapPoolAdjustEvent extends Event {
       Match match,
       boolean forced,
       @Nullable CommandSender sender,
-      @Nullable Duration timeLimit) {
+      @Nullable Duration timeLimit,
+      int matchLimit) {
     this.oldPool = oldMapPool;
     this.newPool = newMapPool;
     this.match = match;
     this.forced = forced;
     this.sender = sender;
     this.timeLimit = timeLimit;
+    this.matchLimit = matchLimit;
   }
 
   public MapPool getOldPool() {
@@ -56,6 +59,10 @@ public class MapPoolAdjustEvent extends Event {
 
   public Duration getTimeLimit() {
     return timeLimit;
+  }
+
+  public int getMatchLimit() {
+    return matchLimit;
   }
 
   private static final HandlerList handlers = new HandlerList();

@@ -100,7 +100,7 @@ public class RestartListener implements Listener {
   public void onMatchLoad(MatchLoadEvent event) {
     long matchLimit = plugin.getConfiguration().getMatchLimit();
     if (++matchCount >= matchLimit && matchLimit > 0) {
-      RestartManager.queueRestart("Reached match limit of " + matchLimit);
+      RestartManager.queueRestart("Reached match limit of " + matchLimit, "console");
     }
   }
 }

@@ -45,6 +45,9 @@ public class MapPoolManager implements MapOrder {
   private Duration poolTimeLimit = null;
   private Instant poolStartTime = null;
 
+  private int matchCountLimit = 0; // The limit for when to revert to dynamic pools
+  private int matchCount = 0; // # of completed matches since start of pool
+
   /** When a {@link MapInfo} is manually set next, it overrides the rotation order * */
   private MapInfo overriderMap;
 
@@ -153,7 +156,7 @@ public class MapPoolManager implements MapOrder {
   }
 
   private void updateActiveMapPool(MapPool mapPool, Match match) {
-    updateActiveMapPool(mapPool, match, false, null, null);
+    updateActiveMapPool(mapPool, match, false, null, null, 0);
   }
 
   public void updateActiveMapPool(
@@ -161,7 +164,8 @@ public class MapPoolManager implements MapOrder {
       Match match,
       boolean force,
       @Nullable CommandSender sender,
-      @Nullable Duration timeLimit) {
+      @Nullable Duration timeLimit,
+      int matchLimit) {
     saveMapPools();
 
     if (mapPool == activeMapPool) return;
@@ -170,20 +174,24 @@ public class MapPoolManager implements MapOrder {
 
     // Set new active pool
     activeMapPool = mapPool;
+    matchCount = 0;
 
     if (!activeMapPool.isDynamic()) {
       poolStartTime = Instant.now();
       if (timeLimit != null) {
         poolTimeLimit = timeLimit;
       }
+      matchCountLimit = Math.max(0, matchLimit);
     } else {
       poolStartTime = null;
       poolTimeLimit = null;
+      matchCountLimit = 0;
     }
 
     // Call a MapPoolAdjustEvent so plugins can listen when map pool has changed
     match.callEvent(
-        new MapPoolAdjustEvent(activeMapPool, mapPool, match, force, sender, poolTimeLimit));
+        new MapPoolAdjustEvent(
+            activeMapPool, mapPool, match, force, sender, poolTimeLimit, matchCountLimit));
   }
 
   /**
@@ -253,9 +261,14 @@ public class MapPoolManager implements MapOrder {
 
   @Override
   public void matchEnded(Match match) {
+    if (hasMatchCountLimit()) {
+      matchCount++;
+    }
+
     if (activeMapPool.isDynamic() || shouldRevert(match)) {
       getAppropriateDynamicPool(match).ifPresent(pool -> updateActiveMapPool(pool, match));
     }
+
     activeMapPool.matchEnded(match);
   }
 
@@ -266,7 +279,11 @@ public class MapPoolManager implements MapOrder {
             .isPresent()
         || !activeMapPool.isDynamic()
             && poolTimeLimit != null
-            && TimeUtils.isLongerThan(
-                Duration.between(poolStartTime, Instant.now()), poolTimeLimit);
+            && TimeUtils.isLongerThan(Duration.between(poolStartTime, Instant.now()), poolTimeLimit)
+        || hasMatchCountLimit() && (matchCount > matchCountLimit);
+  }
+
+  private boolean hasMatchCountLimit() {
+    return !activeMapPool.isDynamic() && (matchCountLimit > 0);
   }
 }

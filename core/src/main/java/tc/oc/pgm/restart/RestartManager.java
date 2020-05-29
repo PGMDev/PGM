@@ -13,22 +13,29 @@ public class RestartManager {
   private static Instant queuedAt;
   private static String reason;
   private static Duration countdown;
+  private static String source;
 
   /** Queues a restart to be initiated at next available opportunity. */
   public static boolean queueRestart(String reason) {
+    return queueRestart(reason, null);
+  }
+
+  public static boolean queueRestart(String reason, String source) {
     if (!isQueued()) {
       RestartManager.queuedAt = Instant.now();
       RestartManager.reason = reason;
+      RestartManager.source = source;
       return true;
     }
     return false;
   }
 
-  public static boolean queueRestart(String reason, Duration countdown) {
+  public static boolean queueRestart(String reason, Duration countdown, String source) {
     if (!isQueued()) {
       RestartManager.queuedAt = Instant.now();
       RestartManager.reason = reason;
       RestartManager.countdown = countdown;
+      RestartManager.source = source;
       return true;
     }
     return false;
@@ -53,6 +60,10 @@ public class RestartManager {
 
   public static @Nullable Duration getCountdown() {
     return countdown;
+  }
+
+  public static @Nullable String getSource() {
+    return source;
   }
 
   public static boolean isQueued() {

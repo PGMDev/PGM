@@ -337,12 +337,40 @@ public class PGMListener implements Listener {
       Component poolName = TextComponent.of(event.getNewPool().getName(), TextColor.LIGHT_PURPLE);
       Component staffName =
           UsernameFormatUtils.formatStaffName(event.getSender(), event.getMatch());
-      Component forced = TranslatableComponent.of("pool.change.force", poolName, staffName);
+      Component matchLimit =
+          TextComponent.builder()
+              .append(Integer.toString(event.getMatchLimit()), TextColor.GREEN)
+              .append(" ")
+              .append(
+                  TranslatableComponent.of(
+                      "match.name" + (event.getMatchLimit() != 1 ? ".plural" : ""), TextColor.GRAY))
+              .build();
+
+      // No limit
+      Component forced = TranslatableComponent.of("pool.change.force", staffName, poolName);
       if (event.getTimeLimit() != null) {
-        Component time =
-            PeriodFormats.briefNaturalApproximate(event.getTimeLimit()).color(TextColor.GREEN);
-        forced = TranslatableComponent.of("pool.change.forceTimed", poolName, time, staffName);
+      Component time =
+              PeriodFormats.briefNaturalApproximate(event.getTimeLimit()).color(TextColor.GREEN);
+
+        // If time & match limit are present, display both
+        if (event.getMatchLimit() != 0) {
+          Component timeAndLimit =
+              TranslatableComponent.of("misc.or", TextColor.GRAY).args(time, matchLimit);
+          forced =
+              TranslatableComponent.of("pool.change.forceLimit")
+                  .args(staffName, poolName, timeAndLimit);
+        } else {
+          // Just time limit
+          forced =
+              TranslatableComponent.of("pool.change.forceLimit").args(staffName, poolName, time);
+        }
+      } else if (event.getMatchLimit() != 0) {
+        // Just match limit
+        forced =
+            TranslatableComponent.of("pool.change.forceLimit")
+                .args(staffName, poolName, matchLimit);
       }
+
       ChatDispatcher.broadcastAdminChatMessage(forced.color(TextColor.GRAY), event.getMatch());
     }
 
