@@ -46,6 +46,7 @@ public class MapInfoImpl implements MapInfo {
   protected final Collection<Integer> players;
 
   public MapInfoImpl(
+          @Nullable String license,
       @Nullable String id,
       Version proto,
       Version version,
