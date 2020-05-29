@@ -41,6 +41,7 @@ public class MapInfoImpl implements MapInfo {
   private final Collection<String> rules;
   private final int difficulty;
   private final WorldInfo world;
+  private static String license;
 
   protected final Collection<MapTag> tags;
   protected final Collection<Integer> players;
@@ -71,6 +72,7 @@ public class MapInfoImpl implements MapInfo {
     this.tags = tags == null ? new TreeSet<>() : tags;
     this.players = players == null ? new LinkedList<>() : players;
     this.world = world == null ? new WorldInfoImpl() : world;
+    this.license=license;
   }
 
   public MapInfoImpl(MapInfo info) {
@@ -86,6 +88,7 @@ public class MapInfoImpl implements MapInfo {
         info.getDifficulty(),
         info.getTags(),
         info.getMaxPlayers(),
+        info.getLicense(),
         info.getWorld());
   }
 
@@ -99,6 +102,7 @@ public class MapInfoImpl implements MapInfo {
         parseContributors(root, "author"),
         parseContributors(root, "contributor"),
         parseRules(root),
+        parseLicense(root),
         XMLUtils.parseEnum(
                 Node.fromLastChildOrAttr(root, "difficulty"),
                 Difficulty.class,
@@ -110,10 +114,15 @@ public class MapInfoImpl implements MapInfo {
         parseWorld(root));
   }
 
-  public String parseLicense(Element root)
+  public static String parseLicense(Element root)
   {
-    String licenseval=root.getChild("license").getValue();
-    return licenseval;
+    license=root.getChild("license").getValue();
+    return license;
+  }
+  @Override
+  public String getLicense()
+  {
+      return license;
   }
   @Override
   public String getId() {

@@ -34,10 +34,10 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
    * @return The version.
    */
 
-  String parseLicense(Element e);
+  String getLicense();
 
   /**
-   * Parse the license and return its value
+   * Get a license for the map. Can be null.
    *
    * @return The License
    */
