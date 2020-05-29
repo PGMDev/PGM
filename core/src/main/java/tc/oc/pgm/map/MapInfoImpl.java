@@ -109,6 +109,11 @@ public class MapInfoImpl implements MapInfo {
         parseWorld(root));
   }
 
+  public String parseLicense(Element root)
+  {
+    String licenseval=root.getChild("license").getValue();
+    return licenseval;
+  }
   @Override
   public String getId() {
     return id;

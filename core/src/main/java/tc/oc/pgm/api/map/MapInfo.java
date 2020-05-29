@@ -5,6 +5,7 @@ import java.util.Collection;
 import javax.annotation.Nullable;
 import net.kyori.text.Component;
 import org.bukkit.command.CommandSender;
+import org.jdom2.Element;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -32,6 +33,15 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
    *
    * @return The version.
    */
+
+  String parseLicense(Element e);
+
+  /**
+   * Parse the license and return its value
+   *
+   * @return The License
+   */
+
   Version getVersion();
 
   /**
