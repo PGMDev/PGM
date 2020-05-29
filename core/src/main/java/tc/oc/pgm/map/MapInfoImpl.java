@@ -41,7 +41,7 @@ public class MapInfoImpl implements MapInfo {
   private final Collection<String> rules;
   private final int difficulty;
   private final WorldInfo world;
-  private static String license;
+  private final String license;
 
   protected final Collection<MapTag> tags;
   protected final Collection<Integer> players;
@@ -116,8 +116,9 @@ public class MapInfoImpl implements MapInfo {
 
   public static String parseLicense(Element root)
   {
-    license=root.getChild("license").getValue();
-    return license;
+    StringBuilder sb = new StringBuilder();
+    sb.append(root.getChild("license").getValue());
+    return sb.toString();
   }
   @Override
   public String getLicense()
