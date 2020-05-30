@@ -72,7 +72,7 @@ public class MapInfoImpl implements MapInfo {
     this.tags = tags == null ? new TreeSet<>() : tags;
     this.players = players == null ? new LinkedList<>() : players;
     this.world = world == null ? new WorldInfoImpl() : world;
-    this.license=license;
+    this.license=license==null? "":license;
   }
 
   public MapInfoImpl(MapInfo info) {
@@ -114,12 +114,19 @@ public class MapInfoImpl implements MapInfo {
         parseWorld(root));
   }
 
-  public static String parseLicense(Element root)
+  private static String parseLicense(Element root)
   {
+    String licence="";
     StringBuilder sb = new StringBuilder();
     sb.append(root.getChild("license").getValue());
-    return sb.toString();
+    if((sb.toString().equals("Attribution 4.0 International")||sb.toString().equals("CC-BY")))
+    {
+      licence=sb.toString();
+    }
+
+    return licence;
   }
+
   @Override
   public String getLicense()
   {
