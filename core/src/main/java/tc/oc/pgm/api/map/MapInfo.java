@@ -34,14 +34,6 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
    * @return The version.
    */
 
-  String getLicense();
-
-  /**
-   * Get a license for the map. Can be null.
-   *
-   * @return The License
-   */
-
   Version getVersion();
 
   /**
@@ -78,6 +70,14 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
    *
    * @return The authors.
    */
+  String getLicense();
+
+  /**
+   * Get a license for the map. Can be null.
+   *
+   * @return The License
+   */
+
   Collection<Contributor> getAuthors();
 
   /**
@@ -122,6 +122,7 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
    *
    * @return The {@link WorldInfo}.
    */
+
   WorldInfo getWorld();
 
   /**

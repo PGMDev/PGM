@@ -2,11 +2,7 @@ package tc.oc.pgm.map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.kyori.text.Component;
@@ -60,6 +56,7 @@ public class MapInfoImpl implements MapInfo {
       @Nullable Collection<MapTag> tags,
       @Nullable Collection<Integer> players,
       @Nullable WorldInfo world) {
+      this.license=license;
     this.name = checkNotNull(name);
     this.id = checkNotNull(MapInfo.normalizeName(id == null ? name : id));
     this.proto = checkNotNull(proto);
@@ -72,11 +69,12 @@ public class MapInfoImpl implements MapInfo {
     this.tags = tags == null ? new TreeSet<>() : tags;
     this.players = players == null ? new LinkedList<>() : players;
     this.world = world == null ? new WorldInfoImpl() : world;
-    this.license=license==null? "":license;
+
   }
 
   public MapInfoImpl(MapInfo info) {
     this(
+            info.getLicense(),
         checkNotNull(info).getId(),
         info.getProto(),
         info.getVersion(),
@@ -88,12 +86,12 @@ public class MapInfoImpl implements MapInfo {
         info.getDifficulty(),
         info.getTags(),
         info.getMaxPlayers(),
-        info.getLicense(),
         info.getWorld());
   }
 
   public MapInfoImpl(Element root) throws InvalidXMLException {
     this(
+            parseLicense(root),
         checkNotNull(root).getChildTextNormalize("slug"),
         XMLUtils.parseSemanticVersion(Node.fromRequiredAttr(root, "proto")),
         XMLUtils.parseSemanticVersion(Node.fromRequiredChildOrAttr(root, "version")),
@@ -102,7 +100,6 @@ public class MapInfoImpl implements MapInfo {
         parseContributors(root, "author"),
         parseContributors(root, "contributor"),
         parseRules(root),
-        parseLicense(root),
         XMLUtils.parseEnum(
                 Node.fromLastChildOrAttr(root, "difficulty"),
                 Difficulty.class,
@@ -113,27 +110,6 @@ public class MapInfoImpl implements MapInfo {
         null,
         parseWorld(root));
   }
-
-  private static String parseLicense(Element root)
-  {
-    String licence="";
-    String checkLicense;
-    StringBuilder sb = new StringBuilder();
-    checkLicense=sb.append(root.getChild("license").getValue()).toString();
-    if(
-            (checkLicense.equals("Attribution 4.0 International")||checkLicense.equals("CC-BY"))
-            || (checkLicense.equals("Attribution-NoDerivatives 4.0 International")||checkLicense.equals("CC-BY-ND"))
-            || (checkLicense.equals("Attribution-ShareAlike 4.0 International")||checkLicense.equals("CC-BY-SA"))
-            || (checkLicense.equals("Attribution-NonCommercial 4.0 International")||checkLicense.equals("CC-BY-NC"))
-            || (checkLicense.equals("Attribution-NonCommercial-NoDerivatives 4.0 International")||checkLicense.equals("CC-BY-NC-ND"))
-            || (checkLicense.equals("Attribution-NonCommercial-ShareAlike 4.0 International")||checkLicense.equals("CC-BY-NC-SA")))
-    {
-      licence=checkLicense;
-    }
-
-    return licence;
-  }
-
   @Override
   public String getLicense()
   {
@@ -240,7 +216,28 @@ public class MapInfoImpl implements MapInfo {
 
     return name.build();
   }
+    private static String parseLicense(Element root)throws InvalidXMLException
+    {
+        String licence=null;
+        String checkLicense=root.getChild("license").getValue();
+        ArrayList<String> validLicense=new ArrayList<String>();
+        validLicense.add("CC-BY");
+        validLicense.add("CC-BY-ND");
+        validLicense.add("CC-BY-SA");
+        validLicense.add("CC-BY-NC");
+        validLicense.add("CC-BY-NC-ND");
+        validLicense.add("CC-BY-NC-SA");
 
+
+        if(validLicense.contains(checkLicense) || checkLicense==null)
+        {
+            licence=checkLicense;
+        }
+        else
+            throw new InvalidXMLException("This license is invalid!",root.getChild("license"));
+
+        return licence;
+    }
   private static List<String> parseRules(Element root) {
     List<String> rules = null;
     for (Element parent : root.getChildren("rules")) {
