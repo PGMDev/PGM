@@ -117,11 +117,18 @@ public class MapInfoImpl implements MapInfo {
   private static String parseLicense(Element root)
   {
     String licence="";
+    String checkLicense;
     StringBuilder sb = new StringBuilder();
-    sb.append(root.getChild("license").getValue());
-    if((sb.toString().equals("Attribution 4.0 International")||sb.toString().equals("CC-BY")))
+    checkLicense=sb.append(root.getChild("license").getValue()).toString();
+    if(
+            (checkLicense.equals("Attribution 4.0 International")||checkLicense.equals("CC-BY"))
+            || (checkLicense.equals("Attribution-NoDerivatives 4.0 International")||checkLicense.equals("CC-BY-ND"))
+            || (checkLicense.equals("Attribution-ShareAlike 4.0 International")||checkLicense.equals("CC-BY-SA"))
+            || (checkLicense.equals("Attribution-NonCommercial 4.0 International")||checkLicense.equals("CC-BY-NC"))
+            || (checkLicense.equals("Attribution-NonCommercial-NoDerivatives 4.0 International")||checkLicense.equals("CC-BY-NC-ND"))
+            || (checkLicense.equals("Attribution-NonCommercial-ShareAlike 4.0 International")||checkLicense.equals("CC-BY-NC-SA")))
     {
-      licence=sb.toString();
+      licence=checkLicense;
     }
 
     return licence;
