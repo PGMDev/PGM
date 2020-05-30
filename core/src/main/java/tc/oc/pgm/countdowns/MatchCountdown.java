@@ -32,7 +32,7 @@ public abstract class MatchCountdown extends Countdown {
 
     @Override
     public float getMeter(Player viewer) {
-      return total.isZero() ? 0f : (float) remaining.toMillis() / total.toMillis();
+      return bossBarProgress(remaining, total);
     }
   };
 
