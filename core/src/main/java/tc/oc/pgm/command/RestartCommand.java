@@ -28,8 +28,7 @@ public final class RestartCommand {
       Match match,
       @Default("30s") Duration duration,
       @Switch('f') boolean force) {
-    RestartManager.queueRestart(
-        "Restart requested via /queuerestart command", duration, sender.getName());
+    RestartManager.queueRestart("Restart requested via /queuerestart command", duration);
 
     if (force && match.isRunning()) {
       match.finish();
