@@ -182,11 +182,10 @@ public class WoolMatchModule implements MatchModule, Listener {
     if (player != null) { // wool can only be placed by a player
       net.kyori.text.Component woolName = wool.getTextName();
       if (!isValidWool(wool.getDyeColor(), event.getNewState())) {
-        player.sendWarning(TranslatableComponent.of("wool.wrongWool").args(woolName));
+        player.sendWarning(TranslatableComponent.of("wool.wrongWool", woolName));
       } else if (wool.getOwner() != player.getParty()) {
         player.sendWarning(
-            TranslatableComponent.of("wool.wrongTeam")
-                .args(wool.getOwner().getTextName(), woolName));
+            TranslatableComponent.of("wool.wrongTeam", wool.getOwner().getTextName(), woolName));
       } else {
         event.setCancelled(false);
         wool.markPlaced();
@@ -216,7 +215,7 @@ public class WoolMatchModule implements MatchModule, Listener {
           if (wool.getDefinition().isObjectiveWool(result)) {
             if (!wool.getDefinition().isCraftable()) {
               playerHolder.sendWarning(
-                  TranslatableComponent.of("wool.craftingDisabled").args(wool.getTextName()));
+                  TranslatableComponent.of("wool.craftingDisabled", wool.getTextName()));
               event.getInventory().setResult(null);
             }
           }
