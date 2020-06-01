@@ -39,6 +39,7 @@ public class MapInfoImpl implements MapInfo {
   private final Collection<Contributor> authors;
   private final Collection<Contributor> contributors;
   private final Collection<String> rules;
+  private final Component gamemodeName;
   private final int difficulty;
   private final WorldInfo world;
 
@@ -57,7 +58,8 @@ public class MapInfoImpl implements MapInfo {
       @Nullable Integer difficulty,
       @Nullable Collection<MapTag> tags,
       @Nullable Collection<Integer> players,
-      @Nullable WorldInfo world) {
+      @Nullable WorldInfo world,
+      Component gamemodeName) {
     this.name = checkNotNull(name);
     this.id = checkNotNull(MapInfo.normalizeName(id == null ? name : id));
     this.proto = checkNotNull(proto);
@@ -70,6 +72,7 @@ public class MapInfoImpl implements MapInfo {
     this.tags = tags == null ? new TreeSet<>() : tags;
     this.players = players == null ? new LinkedList<>() : players;
     this.world = world == null ? new WorldInfoImpl() : world;
+    this.gamemodeName = gamemodeName == null ? TextComponent.empty() : gamemodeName;
   }
 
   public MapInfoImpl(MapInfo info) {
@@ -85,7 +88,8 @@ public class MapInfoImpl implements MapInfo {
         info.getDifficulty(),
         info.getTags(),
         info.getMaxPlayers(),
-        info.getWorld());
+        info.getWorld(),
+        info.getGamemodeName());
   }
 
   public MapInfoImpl(Element root) throws InvalidXMLException {
@@ -106,7 +110,8 @@ public class MapInfoImpl implements MapInfo {
             .ordinal(),
         null,
         null,
-        parseWorld(root));
+        parseWorld(root),
+        XMLUtils.parseFormattedText(root, "game"));
   }
 
   @Override
@@ -162,6 +167,11 @@ public class MapInfoImpl implements MapInfo {
   @Override
   public Collection<Integer> getMaxPlayers() {
     return players;
+  }
+
+  @Override
+  public Component getGamemodeName() {
+    return gamemodeName;
   }
 
   @Override

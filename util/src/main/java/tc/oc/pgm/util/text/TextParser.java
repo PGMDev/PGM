@@ -18,6 +18,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import net.kyori.text.Component;
+import net.kyori.text.format.TextColor;
 import net.kyori.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Chunk;
@@ -475,5 +476,9 @@ public final class TextParser {
     } catch (SQLException e) {
       throw unknown(e); // TODO: wrap common database errors with more friendly messages
     }
+  }
+
+  public static TextColor parseTextColor(Enum<?> color) {
+    return TextColor.valueOf(color.name());
   }
 }

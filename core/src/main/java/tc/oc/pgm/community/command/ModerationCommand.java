@@ -690,7 +690,7 @@ public class ModerationCommand implements Listener {
     target.getMatch().callEvent(event);
     if (event.isCancelled()) {
       if (event.getCancelMessage() != null) {
-        issuer.sendMessage(event.getCancelMessage());
+        Audience.get(issuer).sendMessage(event.getCancelMessage());
       }
     }
 

@@ -12,6 +12,9 @@ import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -42,9 +45,6 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.Components;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
@@ -134,23 +134,15 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   @Override
   public Component getTouchMessage(@Nullable ParticipantState toucher, boolean self) {
     if (toucher == null) {
-      return new PersonalizedTranslatable(
-          "destroyable.touch.owned",
-          Components.blank(),
-          getComponentName(),
-          getOwner().getComponentName());
+      return TranslatableComponent.of("destroyable.touch.owned")
+          .args(TextComponent.empty(), getComponentName(), getOwner().getComponentName());
     } else if (self) {
-      return new PersonalizedTranslatable(
-          "destroyable.touch.owned.you",
-          Components.blank(),
-          getComponentName(),
-          getOwner().getComponentName());
+      return TranslatableComponent.of("destroyable.touch.owned.you")
+          .args(TextComponent.empty(), getComponentName(), getOwner().getComponentName());
     } else {
-      return new PersonalizedTranslatable(
-          "destroyable.touch.owned.player",
-          toucher.getStyledName(NameStyle.COLOR),
-          getComponentName(),
-          getOwner().getComponentName());
+      return TranslatableComponent.of("destroyable.touch.owned.player")
+          .args(
+              toucher.getName(NameStyle.COLOR), getComponentName(), getOwner().getComponentName());
     }
   }
 

@@ -1,7 +1,9 @@
 package tc.oc.pgm.spawns.states;
 
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import org.bukkit.Location;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -11,8 +13,6 @@ import tc.oc.pgm.api.event.PlayerItemTransferEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 /** Player is waiting to spawn as a participant */
 public abstract class Spawning extends Participating {
@@ -96,18 +96,18 @@ public abstract class Spawning extends Participating {
   }
 
   public void updateTitle() {
-    player.showTitle(getTitle(), getSubtitle().color(ChatColor.GREEN), 0, 3, 3);
+    player.showTitle(getTitle(), getSubtitle().color(TextColor.GREEN), 0, 3, 3);
   }
 
   protected abstract Component getTitle();
 
   protected Component getSubtitle() {
     if (!spawnRequested) {
-      return new PersonalizedTranslatable("death.respawn.unconfirmed");
+      return TranslatableComponent.of("death.respawn.unconfirmed");
     } else if (options.message != null) {
       return options.message;
     } else {
-      return new PersonalizedTranslatable("death.respawn.confirmed.waiting");
+      return TranslatableComponent.of("death.respawn.confirmed.waiting");
     }
   }
 }

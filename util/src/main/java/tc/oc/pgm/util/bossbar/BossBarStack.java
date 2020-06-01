@@ -3,8 +3,8 @@ package tc.oc.pgm.util.bossbar;
 import com.google.common.collect.Iterables;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import net.kyori.text.Component;
 import org.bukkit.entity.Player;
-import tc.oc.pgm.util.component.Component;
 
 /**
  * A {@link BossBar} that combines a mutable stack of child bars, and displays the topmost visible

@@ -1,12 +1,12 @@
 package tc.oc.pgm.regions;
 
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.kits.Kit;
-import tc.oc.pgm.util.component.Component;
 
 public class RegionFilterApplication implements FeatureDefinition {
   public final RFAScope scope;

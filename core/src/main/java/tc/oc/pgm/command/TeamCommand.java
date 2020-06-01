@@ -48,8 +48,8 @@ public final class TeamCommand {
             "join.ok.force",
             TextColor.GRAY,
             joiner.getName(NameStyle.FANCY),
-            joiner.getParty().getName(NameStyle.FANCY),
-            oldParty.getName(NameStyle.FANCY)));
+            joiner.getParty().getComponentName(),
+            oldParty.getComponentName()));
   }
 
   @Command(
@@ -90,11 +90,10 @@ public final class TeamCommand {
       }
     }
 
-    final Component oldName = team.getName(NameStyle.FANCY).color(TextColor.GRAY);
+    final Component oldName = team.getComponentName().color(TextColor.GRAY);
     ((Team) team).setName(newName);
 
-    match.sendMessage(
-        TranslatableComponent.of("match.alias.ok", oldName, team.getName(NameStyle.FANCY)));
+    match.sendMessage(TranslatableComponent.of("match.alias.ok", oldName, team.getComponentName()));
   }
 
   @Command(
@@ -124,7 +123,7 @@ public final class TeamCommand {
       audience.sendMessage(
           TranslatableComponent.of(
               "match.resize.max",
-              team.getName(NameStyle.FANCY),
+              team.getComponentName(),
               TextComponent.of(team.getMaxPlayers(), TextColor.AQUA)));
     }
   }
@@ -145,7 +144,7 @@ public final class TeamCommand {
       audience.sendMessage(
           TranslatableComponent.of(
               "match.resize.min",
-              team.getName(NameStyle.FANCY),
+              team.getComponentName(),
               TextComponent.of(team.getMinPlayers(), TextColor.AQUA)));
     }
   }

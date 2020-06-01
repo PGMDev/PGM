@@ -1,14 +1,13 @@
 package tc.oc.pgm.match;
 
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import org.bukkit.Color;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.ComponentUtils;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.TextParser;
 
 public abstract class ObservingParty extends SimpleParty {
 
@@ -35,10 +34,6 @@ public abstract class ObservingParty extends SimpleParty {
     return true;
   }
 
-  public net.md_5.bungee.api.ChatColor getBungeeColor() {
-    return ComponentUtils.convert(getColor());
-  }
-
   @Override
   public Color getFullColor() {
     return BukkitUtils.colorOf(this.getColor());
@@ -60,20 +55,15 @@ public abstract class ObservingParty extends SimpleParty {
   @Override
   public Component getComponentName() {
     if (componentName == null) {
-      componentName = new PersonalizedText(getName(), getBungeeColor());
+      componentName = TextComponent.of(getName(), TextParser.parseTextColor(getColor()));
     }
     return componentName;
   }
 
   @Override
-  public Component getStyledName(NameStyle style) {
-    return getComponentName();
-  }
-
-  @Override
   public Component getChatPrefix() {
     if (chatPrefix == null) {
-      chatPrefix = new PersonalizedText("(Obs) ", getBungeeColor());
+      chatPrefix = TextComponent.of("(Obs) ", TextParser.parseTextColor(getColor()));
     }
     return chatPrefix;
   }

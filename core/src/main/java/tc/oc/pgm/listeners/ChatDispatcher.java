@@ -133,7 +133,7 @@ public class ChatDispatcher implements Listener {
           match,
           sender,
           message,
-          party.getChatPrefix().toLegacyText() + PREFIX_FORMAT,
+          TextTranslations.translateLegacy(party.getChatPrefix(), null) + PREFIX_FORMAT,
           viewer ->
               party.equals(viewer.getParty())
                   || (viewer.isObserving()

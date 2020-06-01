@@ -8,8 +8,8 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.util.StringUtils;
-import tc.oc.pgm.util.component.ComponentRenderers;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class BossBarView implements BossBarObserver {
 
@@ -69,7 +69,7 @@ public class BossBarView implements BossBarObserver {
 
   private String renderText() {
     return StringUtils.truncate(
-        ComponentRenderers.toLegacyText(bar.getText(viewer), viewer), MAX_TEXT_LENGTH);
+        TextTranslations.translateLegacy(bar.getText(viewer), viewer), MAX_TEXT_LENGTH);
   }
 
   private void spawnBoss() {

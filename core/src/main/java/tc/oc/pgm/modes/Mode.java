@@ -2,10 +2,10 @@ package tc.oc.pgm.modes;
 
 import java.time.Duration;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.format.TextColor;
 import org.bukkit.material.MaterialData;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 
 public class Mode {
 
@@ -28,7 +28,7 @@ public class Mode {
     this.after = after;
     this.name = name;
     this.componentName =
-        new PersonalizedText(name != null ? name : getPreformattedMaterialName(), ChatColor.RED);
+        TextComponent.of(name != null ? name : getPreformattedMaterialName(), TextColor.RED);
     this.showBefore = showBefore;
   }
 

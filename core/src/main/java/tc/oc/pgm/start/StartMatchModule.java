@@ -9,7 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.format.TextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -30,7 +31,6 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerLeaveMatchEvent;
 import tc.oc.pgm.util.bossbar.DynamicBossBar;
-import tc.oc.pgm.util.component.Component;
 
 @ListenerScope(MatchScope.LOADED)
 public class StartMatchModule implements MatchModule, Listener {
@@ -137,7 +137,7 @@ public class StartMatchModule implements MatchModule, Listener {
     if (unreadyReasons.isEmpty()) {
       return null;
     } else {
-      return unreadyReasons.iterator().next().getReason().color(ChatColor.RED);
+      return unreadyReasons.iterator().next().getReason().color(TextColor.RED);
     }
   }
 

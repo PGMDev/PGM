@@ -246,7 +246,7 @@ public class RegionMatchModule implements MatchModule, Listener {
       if (rfa.earlyWarning && rfa.region.contains(event.getBlock())) {
         if (processQuery(rfa, query)) {
           if (event.isCancelled() && rfa.message != null) {
-            player.sendWarning(rfa.message, true);
+            player.sendWarning(rfa.message);
           }
           if (this.useRegionPriority || rfa.useRegionPriority) {
             break;
@@ -325,7 +325,7 @@ public class RegionMatchModule implements MatchModule, Listener {
             pie.setUseInteractedBlock(Event.Result.DENY);
 
             if (rfa.message != null) {
-              player.sendWarning(rfa.message, false);
+              player.sendWarning(rfa.message);
             }
           }
           if (this.useRegionPriority || rfa.useRegionPriority) {
@@ -372,7 +372,7 @@ public class RegionMatchModule implements MatchModule, Listener {
         && query instanceof PlayerQuery) {
 
       MatchPlayer player = match.getPlayer(((PlayerQuery) query).getPlayerId());
-      if (player != null) player.sendWarning(rfa.message, false);
+      if (player != null) player.sendWarning(rfa.message);
     }
   }
 

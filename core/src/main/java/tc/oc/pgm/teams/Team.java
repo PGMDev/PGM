@@ -3,6 +3,8 @@ package tc.oc.pgm.teams;
 import java.util.Collection;
 import java.util.Objects;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import org.apache.commons.lang.math.Fraction;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
@@ -18,10 +20,7 @@ import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.match.SimpleParty;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.ComponentUtils;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.TextParser;
 
 /**
  * Mutable class to represent a team created from a TeamInfo instance that is tied to a specific
@@ -196,21 +195,16 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
   @Override
   public Component getComponentName() {
     if (componentName == null) {
-      this.componentName = new PersonalizedText(getName(), ComponentUtils.convert(getColor()));
+      this.componentName = TextComponent.of(getName(), TextParser.parseTextColor(getColor()));
     }
     return componentName;
-  }
-
-  @Override
-  public Component getStyledName(NameStyle style) {
-    return getComponentName();
   }
 
   @Override
   public Component getChatPrefix() {
     if (chatPrefix == null) {
       this.chatPrefix =
-          new PersonalizedText("(" + getShortName() + ") ", ComponentUtils.convert(getColor()));
+          TextComponent.of("(" + getShortName() + ") ", TextParser.parseTextColor(getColor()));
     }
     return chatPrefix;
   }

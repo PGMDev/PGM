@@ -4,13 +4,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.time.Duration;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 /** Countdown to team huddle, or match start if huddle is disabled */
 public class StartCountdown extends PreMatchCountdown {
@@ -37,9 +37,8 @@ public class StartCountdown extends PreMatchCountdown {
 
   @Override
   protected Component formatText() {
-    return new PersonalizedTranslatable(
-            "countdown.matchStart", secondsRemaining(ChatColor.DARK_RED))
-        .color(ChatColor.GREEN);
+    return TranslatableComponent.of("countdown.matchStart", TextColor.GREEN)
+        .args(secondsRemaining(TextColor.DARK_RED));
   }
 
   @Override
@@ -75,8 +74,7 @@ public class StartCountdown extends PreMatchCountdown {
           this.balanceWarningSent = true;
           this.getMatch()
               .sendWarning(
-                  new PersonalizedTranslatable("match.balanceTeams", team.getComponentName()),
-                  false);
+                  TranslatableComponent.of("match.balanceTeams").args(team.getComponentName()));
         }
       }
 

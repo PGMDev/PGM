@@ -2,16 +2,16 @@ package tc.oc.pgm.countdowns;
 
 import java.time.Duration;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.bossbar.BossBarMatchModule;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bossbar.BossBar;
 import tc.oc.pgm.util.bossbar.DynamicBossBar;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 public abstract class MatchCountdown extends Countdown {
   protected final Match match;
@@ -101,8 +101,8 @@ public abstract class MatchCountdown extends Countdown {
     if (showTitle()) {
       getMatch()
           .showTitle(
-              new PersonalizedText(String.valueOf(remaining.getSeconds()), ChatColor.YELLOW),
-              new PersonalizedText(""),
+              TextComponent.of(String.valueOf(remaining.getSeconds()), TextColor.YELLOW),
+              TextComponent.empty(),
               0,
               5,
               15);
@@ -136,26 +136,26 @@ public abstract class MatchCountdown extends Countdown {
     }
   }
 
-  protected ChatColor urgencyColor() {
+  protected TextColor urgencyColor() {
     long seconds = remaining.getSeconds();
     if (seconds > 60) {
-      return ChatColor.GREEN;
+      return TextColor.GREEN;
     } else if (seconds > 30) {
-      return ChatColor.YELLOW;
+      return TextColor.YELLOW;
     } else if (seconds > 5) {
-      return ChatColor.GOLD;
+      return TextColor.GOLD;
     } else {
-      return ChatColor.DARK_RED;
+      return TextColor.DARK_RED;
     }
   }
 
-  protected Component secondsRemaining(ChatColor color) {
+  protected Component secondsRemaining(TextColor color) {
     long seconds = remaining.getSeconds();
     if (seconds == 1) {
-      return new PersonalizedTranslatable("misc.second", new PersonalizedText("1", color));
+      return TranslatableComponent.of("misc.second").args(TextComponent.of("1", color));
     } else {
-      return new PersonalizedTranslatable(
-          "misc.seconds", new PersonalizedText(String.valueOf(seconds), color));
+      return TranslatableComponent.of("misc.seconds")
+          .args(TextComponent.of(String.valueOf(seconds), color));
     }
   }
 

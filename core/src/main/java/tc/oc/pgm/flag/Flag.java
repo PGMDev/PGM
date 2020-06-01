@@ -4,6 +4,11 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Iterator;
 import java.util.Set;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
+import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
@@ -52,12 +57,9 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.chat.Sound;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.ComponentUtils;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.TextParser;
 
 public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
@@ -173,16 +175,16 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     return color;
   }
 
-  public net.md_5.bungee.api.ChatColor getChatColor() {
-    return ComponentUtils.convert(BukkitUtils.dyeColorToChatColor(this.getDyeColor()));
+  public TextColor getChatColor() {
+    return TextParser.parseTextColor(BukkitUtils.dyeColorToChatColor(this.getDyeColor()));
   }
 
   public String getColoredName() {
-    return this.getChatColor() + this.getName();
+    return LegacyComponentSerializer.INSTANCE.serialize(getComponentName());
   }
 
   public Component getComponentName() {
-    return new PersonalizedText(getName()).color(getChatColor());
+    return TextComponent.of(getName(), getChatColor());
   }
 
   public ImmutableSet<Net> getNets() {
@@ -251,10 +253,10 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   @Override
   public Component getTouchMessage(ParticipantState toucher, boolean self) {
     if (self) {
-      return new PersonalizedTranslatable("flag.touch.you", getComponentName());
+      return TranslatableComponent.of("flag.touch.you").args(getComponentName());
     } else {
-      return new PersonalizedTranslatable(
-          "flag.touch.player", getComponentName(), toucher.getStyledName(NameStyle.COLOR));
+      return TranslatableComponent.of("flag.touch.player")
+          .args(getComponentName(), toucher.getName(NameStyle.COLOR));
     }
   }
 

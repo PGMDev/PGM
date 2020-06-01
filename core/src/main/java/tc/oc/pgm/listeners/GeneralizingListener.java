@@ -244,7 +244,7 @@ public class GeneralizingListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void processCancelMessage(final CoarsePlayerMoveEvent event) {
     if (event.isCancelled() && event.getCancelMessage() != null) {
-      Audience.get(event.getPlayer()).sendWarning(event.getCancelMessage(), false);
+      Audience.get(event.getPlayer()).sendWarning(event.getCancelMessage());
     }
   }
 }

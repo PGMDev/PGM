@@ -2,6 +2,8 @@ package tc.oc.pgm.wool;
 
 import java.util.Collections;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
@@ -24,8 +26,6 @@ import tc.oc.pgm.kits.ApplyKitEvent;
 import tc.oc.pgm.kits.ArmorKit;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.named.NameStyle;
 
 public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
@@ -64,11 +64,11 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
 
   @Override
   public Component getTouchMessage(ParticipantState toucher, boolean self) {
-    return new PersonalizedTranslatable(
-        self ? "wool.touch.owned.you" : "wool.touch.owned.player",
-        toucher.getStyledName(NameStyle.COLOR),
-        getComponentName(),
-        toucher.getParty().getComponentName());
+    return TranslatableComponent.of(self ? "wool.touch.owned.you" : "wool.touch.owned.player")
+        .args(
+            toucher.getName(NameStyle.COLOR),
+            getComponentName(),
+            toucher.getParty().getComponentName());
   }
 
   @Override

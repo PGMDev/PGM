@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.command.CommandSender;
@@ -16,9 +18,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.chat.MultiAudience;
-import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.component.types.PersonalizedPlayer;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.named.NameStyle;
 
 /**
@@ -121,17 +121,14 @@ public class Tribute implements Competitor, MultiAudience {
 
   @Override
   public Component getComponentName() {
-    return new PersonalizedText(getColoredName());
-  }
-
-  @Override
-  public Component getStyledName(NameStyle style) {
-    return new PersonalizedPlayer(player == null ? null : player.getBukkit(), username, style);
+    return new PersonalizedPlayer(
+            player == null ? null : player.getBukkit(), username, NameStyle.FANCY)
+        .render();
   }
 
   @Override
   public Component getChatPrefix() {
-    return new PersonalizedText();
+    return TextComponent.empty();
   }
 
   @Override

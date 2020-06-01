@@ -1,7 +1,7 @@
 package tc.oc.pgm.goals;
 
 import javax.annotation.Nullable;
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
@@ -10,7 +10,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.util.bossbar.BossBar;
-import tc.oc.pgm.util.component.Component;
 
 /** TODO: Extract CompletableGoal which flags and CPs don't implement */
 public interface Goal<T extends GoalDefinition> extends Feature<T> {
@@ -58,10 +57,6 @@ public interface Goal<T extends GoalDefinition> extends Feature<T> {
   String getColoredName();
 
   Component getComponentName();
-
-  default net.kyori.text.Component getTextName() {
-    return LegacyComponentSerializer.legacy().deserialize(getColoredName());
-  }
 
   /** A color used for fireworks displays */
   Color getColor();

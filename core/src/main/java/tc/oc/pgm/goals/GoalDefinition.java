@@ -1,10 +1,10 @@
 package tc.oc.pgm.goals;
 
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 
 /**
  * Definition of a goal/objective feature. Provides a name field, used to identify the goal to
@@ -39,7 +39,7 @@ public abstract class GoalDefinition extends SelfIdentifyingFeatureDefinition {
   }
 
   public Component getComponentName() {
-    return new PersonalizedText(getName());
+    return TextComponent.of(getName());
   }
 
   public @Nullable Boolean isRequired() {
