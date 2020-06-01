@@ -66,7 +66,7 @@ public final class MatchCommand {
       for (Team team : tmm.getTeams()) {
         StringBuilder msg = new StringBuilder();
 
-        String teamName = team.getName();
+        String teamName = team.getDisplayName();
         if (teamName.endsWith(" Team")) teamName = teamName.substring(0, teamName.length() - 5);
 
         msg.append(team.getColor())

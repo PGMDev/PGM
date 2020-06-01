@@ -69,6 +69,11 @@ public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
   }
 
   @Override
+  public Component getName() {
+    return getName(NameStyle.FANCY);
+  }
+
+  @Override
   public Iterable<? extends Audience> getAudiences() {
     return getPlayer().map(Collections::singleton).orElseGet(Collections::emptySet);
   }

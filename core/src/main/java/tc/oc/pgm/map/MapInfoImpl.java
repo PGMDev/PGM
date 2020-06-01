@@ -39,7 +39,7 @@ public class MapInfoImpl implements MapInfo {
   private final Collection<Contributor> authors;
   private final Collection<Contributor> contributors;
   private final Collection<String> rules;
-  private final Component gamemodeName;
+  private final Component gamemode;
   private final int difficulty;
   private final WorldInfo world;
 
@@ -59,7 +59,7 @@ public class MapInfoImpl implements MapInfo {
       @Nullable Collection<MapTag> tags,
       @Nullable Collection<Integer> players,
       @Nullable WorldInfo world,
-      Component gamemodeName) {
+      Component gamemode) {
     this.name = checkNotNull(name);
     this.id = checkNotNull(MapInfo.normalizeName(id == null ? name : id));
     this.proto = checkNotNull(proto);
@@ -72,7 +72,7 @@ public class MapInfoImpl implements MapInfo {
     this.tags = tags == null ? new TreeSet<>() : tags;
     this.players = players == null ? new LinkedList<>() : players;
     this.world = world == null ? new WorldInfoImpl() : world;
-    this.gamemodeName = gamemodeName == null ? TextComponent.empty() : gamemodeName;
+    this.gamemode = gamemode == null ? TextComponent.empty() : gamemode;
   }
 
   public MapInfoImpl(MapInfo info) {
@@ -89,7 +89,7 @@ public class MapInfoImpl implements MapInfo {
         info.getTags(),
         info.getMaxPlayers(),
         info.getWorld(),
-        info.getGamemodeName());
+        info.getGamemode());
   }
 
   public MapInfoImpl(Element root) throws InvalidXMLException {
@@ -170,8 +170,8 @@ public class MapInfoImpl implements MapInfo {
   }
 
   @Override
-  public Component getGamemodeName() {
-    return gamemodeName;
+  public Component getGamemode() {
+    return gamemode;
   }
 
   @Override
@@ -213,7 +213,7 @@ public class MapInfoImpl implements MapInfo {
           name.build(),
           TextFormatter.list(
               getAuthors().stream()
-                  .map(c -> TextComponent.of(c.getName(), TextColor.RED))
+                  .map(c -> TextComponent.of(c.getUsername(), TextColor.RED))
                   .collect(Collectors.toList()),
               TextColor.DARK_PURPLE));
     }

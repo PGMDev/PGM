@@ -31,7 +31,7 @@ public class FormattingListener implements Listener {
                 "wool.complete.owned",
                 event.getPlayer().getName(NameStyle.COLOR),
                 event.getWool().getComponentName(),
-                event.getPlayer().getParty().getComponentName()));
+                event.getPlayer().getParty().getName()));
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -46,7 +46,7 @@ public class FormattingListener implements Listener {
                 "core.complete.owned",
                 formatContributions(core.getContributions()),
                 core.getComponentName(),
-                core.getOwner().getComponentName()));
+                core.getOwner().getName()));
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -61,7 +61,7 @@ public class FormattingListener implements Listener {
                 "destroyable.complete.owned",
                 formatContributions(event.getDestroyable().getContributions()),
                 destroyable.getComponentName(),
-                destroyable.getOwner().getComponentName()));
+                destroyable.getOwner().getName()));
   }
 
   private Component formatContributions(Collection<? extends Contribution> contributions) {

@@ -5,4 +5,6 @@ import net.kyori.text.Component;
 public interface Named {
 
   Component getName(NameStyle style);
+
+  Component getName();
 }

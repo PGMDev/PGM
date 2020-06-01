@@ -31,7 +31,7 @@ class UsernameImpl implements Username {
 
   @Nullable
   @Override
-  public String getName() {
+  public String getUsername() {
     return name;
   }
 
@@ -40,6 +40,11 @@ class UsernameImpl implements Username {
     return name == null
         ? TranslatableComponent.of("misc.unknown", TextColor.DARK_AQUA, TextDecoration.ITALIC)
         : new PersonalizedPlayer(Bukkit.getPlayer(id), name, style).render();
+  }
+
+  @Override
+  public Component getName() {
+    return getName(NameStyle.FANCY);
   }
 
   @Override

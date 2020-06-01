@@ -33,11 +33,7 @@ public final class ListCommand {
           .forEach(
               team ->
                   sendTeamInfo(
-                      viewer,
-                      sender,
-                      team.getComponentName(),
-                      team.getPlayers(),
-                      team.getMaxPlayers()));
+                      viewer, sender, team.getName(), team.getPlayers(), team.getMaxPlayers()));
     } else {
       sendTeamInfo(
           viewer,
@@ -50,7 +46,7 @@ public final class ListCommand {
     sendTeamInfo(
         viewer,
         sender,
-        match.getDefaultParty().getComponentName(),
+        match.getDefaultParty().getName(),
         match.getDefaultParty().getPlayers(),
         -1);
 

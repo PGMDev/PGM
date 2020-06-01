@@ -20,7 +20,7 @@ public interface Username extends Named {
    * @return The username.
    */
   @Nullable
-  String getName();
+  String getUsername();
 
   /**
    * Change the username of the player.

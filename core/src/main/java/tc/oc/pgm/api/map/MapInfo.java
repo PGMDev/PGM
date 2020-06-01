@@ -105,7 +105,7 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
    *
    * @return A component of the gamemode name if defined or null.
    */
-  Component getGamemodeName();
+  Component getGamemode();
 
   /**
    * Get the maximum number of players that can participate on each team.

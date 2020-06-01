@@ -186,8 +186,7 @@ public class WoolMatchModule implements MatchModule, Listener {
         player.sendWarning(TranslatableComponent.of("wool.wrongWool", woolName));
       } else if (wool.getOwner() != player.getParty()) {
         player.sendWarning(
-            TranslatableComponent.of("wool.wrongTeam")
-                .args(wool.getOwner().getComponentName(), woolName));
+            TranslatableComponent.of("wool.wrongTeam").args(wool.getOwner().getName(), woolName));
       } else {
         event.setCancelled(false);
         wool.markPlaced();

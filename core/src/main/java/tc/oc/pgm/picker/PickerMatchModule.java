@@ -646,7 +646,7 @@ public class PickerMatchModule implements MatchModule, Listener {
 
     LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();
     meta.setColor(team.getFullColor());
-    meta.setDisplayName(team.getColor().toString() + ChatColor.BOLD + team.getName());
+    meta.setDisplayName(team.getColor().toString() + ChatColor.BOLD + team.getDisplayName());
     meta.setLore(lore);
     item.setItemMeta(meta);
 

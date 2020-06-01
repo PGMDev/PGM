@@ -60,14 +60,10 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       if (team != null) {
         if (players == 1) {
           return TranslatableComponent.of("join.wait.singular.team")
-              .args(
-                  TextComponent.of(String.valueOf(players), TextColor.AQUA),
-                  team.getComponentName());
+              .args(TextComponent.of(String.valueOf(players), TextColor.AQUA), team.getName());
         } else {
           return TranslatableComponent.of("join.wait.plural.team")
-              .args(
-                  TextComponent.of(String.valueOf(players), TextColor.AQUA),
-                  team.getComponentName());
+              .args(TextComponent.of(String.valueOf(players), TextColor.AQUA), team.getName());
         }
       } else {
         if (players == 1) {
@@ -217,7 +213,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   public @Nullable Team bestFuzzyMatch(String name, double threshold) {
     Map<String, Team> byName = new HashMap<>();
-    for (Team team : getTeams()) byName.put(team.getName(), team);
+    for (Team team : getTeams()) byName.put(team.getDisplayName(), team);
     return StringUtils.bestFuzzyMatch(name, byName, threshold);
   }
 
@@ -452,7 +448,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       switch (teamResult.getStatus()) {
         case SWITCH_DISABLED:
           joining.sendWarning(
-              TranslatableComponent.of("join.err.noSwitch").args(lastTeam.getComponentName()));
+              TranslatableComponent.of("join.err.noSwitch").args(lastTeam.getName()));
           return true;
 
         case CHOICE_DISABLED:
@@ -464,7 +460,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
           if (teamResult.getTeam() != null) {
             joining.sendWarning(
                 TranslatableComponent.of("join.err.full.team")
-                    .args(teamResult.getTeam().getComponentName()));
+                    .args(teamResult.getTeam().getName()));
           } else {
             joining.sendWarning(TranslatableComponent.of("join.err.full"));
           }
@@ -474,7 +470,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
         case REDUNDANT:
           joining.sendWarning(
               TranslatableComponent.of("join.err.alreadyJoined.team")
-                  .args(joining.getParty().getComponentName()));
+                  .args(joining.getParty().getName()));
           return true;
       }
 
@@ -574,17 +570,15 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
     // Give them the bad news
     if (jmm.canPriorityKick(kickMe)) {
-      kickMe.sendMessage(TranslatableComponent.of("join.ok.moved").args(kickTo.getComponentName()));
+      kickMe.sendMessage(TranslatableComponent.of("join.ok.moved").args(kickTo.getName()));
       kickMe.sendMessage(TranslatableComponent.of("join.ok.moved.explanation"));
     } else {
       kickMe.playSound(new Sound("mob.villager.hit"));
       if (forBalance) {
-        kickMe.sendWarning(
-            TranslatableComponent.of("join.ok.moved").args(kickTo.getComponentName()));
+        kickMe.sendWarning(TranslatableComponent.of("join.ok.moved").args(kickTo.getName()));
       } else {
         kickMe.sendWarning(
-            TranslatableComponent.of("leave.ok.priorityKick.team")
-                .args(kickFrom.getComponentName()));
+            TranslatableComponent.of("leave.ok.priorityKick.team").args(kickFrom.getName()));
       }
     }
 
@@ -606,8 +600,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       event
           .getPlayer()
           .sendMessage(
-              TranslatableComponent.of("join.ok.team")
-                  .args(event.getNewParty().getComponentName()));
+              TranslatableComponent.of("join.ok.team").args(event.getNewParty().getName()));
     }
     updateReadiness();
   }

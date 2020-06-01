@@ -39,8 +39,8 @@ public class SQLDatastore extends ThreadSafeConnection implements Datastore {
     }
 
     @Override
-    public String getName() {
-      String name = super.getName();
+    public String getUsername() {
+      String name = super.getUsername();
 
       // Since there can be hundreds of names, only query when requested.
       if (!queried && name == null) {
@@ -91,7 +91,7 @@ public class SQLDatastore extends ThreadSafeConnection implements Datastore {
       @Override
       public void query(PreparedStatement statement) throws SQLException {
         statement.setString(1, getId().toString());
-        statement.setString(2, getName());
+        statement.setString(2, getUsername());
 
         // Pick a random expiration time between 1 and 2 weeks
         statement.setLong(

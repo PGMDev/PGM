@@ -71,7 +71,7 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
 
   @Override
   public String toString() {
-    return getClass().getSimpleName() + "{match=" + getMatch() + ", name=" + getName() + "}";
+    return getClass().getSimpleName() + "{match=" + getMatch() + ", name=" + getDisplayName() + "}";
   }
 
   @Override
@@ -127,24 +127,24 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
    * @return Name of the team without colors.
    */
   @Override
-  public String getName() {
+  public String getDisplayName() {
     return name != null ? name : getDefaultName();
   }
 
   public String getShortName() {
-    String lower = getName().toLowerCase();
+    String lower = getDisplayName().toLowerCase();
     if (lower.endsWith(" team")) {
-      return getName().substring(0, lower.length() - " team".length());
+      return getDisplayName().substring(0, lower.length() - " team".length());
     } else if (lower.startsWith("team ")) {
-      return getName().substring("team ".length());
+      return getDisplayName().substring("team ".length());
     } else {
-      return getName();
+      return getDisplayName();
     }
   }
 
   @Override
-  public String getName(@Nullable CommandSender viewer) {
-    return getName();
+  public String getDisplayName(@Nullable CommandSender viewer) {
+    return getDisplayName();
   }
 
   @Override
@@ -160,12 +160,12 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
    */
   @Override
   public String getColoredName() {
-    return getColor() + getName();
+    return getColor() + getDisplayName();
   }
 
   @Override
   public String getColoredName(@Nullable CommandSender viewer) {
-    return getColor() + getName(viewer);
+    return getColor() + getDisplayName(viewer);
   }
 
   /**
@@ -175,11 +175,11 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
    * @param newName New name for this team. Should not include colors.
    */
   public void setName(@Nullable String newName) {
-    if (Objects.equals(this.name, newName) || this.getName().equals(newName)) return;
-    String oldName = this.getName();
+    if (Objects.equals(this.name, newName) || this.getDisplayName().equals(newName)) return;
+    String oldName = this.getDisplayName();
     this.name = newName;
     this.componentName = null;
-    this.match.callEvent(new PartyRenameEvent(this, oldName, this.getName()));
+    this.match.callEvent(new PartyRenameEvent(this, oldName, this.getDisplayName()));
   }
 
   @Override
@@ -193,9 +193,10 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
   }
 
   @Override
-  public Component getComponentName() {
+  public Component getName() {
     if (componentName == null) {
-      this.componentName = TextComponent.of(getName(), TextParser.parseTextColor(getColor()));
+      this.componentName =
+          TextComponent.of(getDisplayName(), TextParser.parseTextColor(getColor()));
     }
     return componentName;
   }

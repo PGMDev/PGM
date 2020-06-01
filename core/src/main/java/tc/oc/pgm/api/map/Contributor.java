@@ -12,7 +12,7 @@ public interface Contributor extends Named {
    *
    * @return A name.
    */
-  String getName();
+  String getUsername();
 
   /**
    * Get a short, human-readable description of their contribution.

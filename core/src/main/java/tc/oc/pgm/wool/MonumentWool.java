@@ -50,7 +50,7 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
   public String toString() {
     StringBuilder sb = new StringBuilder("MonumentWool{");
     sb.append("id=").append(this.getId());
-    sb.append(",owner=").append(this.owner.getName());
+    sb.append(",owner=").append(this.owner.getDisplayName());
     sb.append(",definition=").append(this.definition);
     sb.append('}');
     return sb.toString();
@@ -65,10 +65,7 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
   @Override
   public Component getTouchMessage(ParticipantState toucher, boolean self) {
     return TranslatableComponent.of(self ? "wool.touch.owned.you" : "wool.touch.owned.player")
-        .args(
-            toucher.getName(NameStyle.COLOR),
-            getComponentName(),
-            toucher.getParty().getComponentName());
+        .args(toucher.getName(NameStyle.COLOR), getComponentName(), toucher.getParty().getName());
   }
 
   @Override

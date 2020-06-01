@@ -171,8 +171,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
 
     if (leaving.getParty() instanceof ObservingParty) {
       leaving.sendWarning(
-          new PersonalizedTranslatable(
-              "join.err.alreadyJoined.team", leaving.getParty().getComponentName()),
+          new PersonalizedTranslatable("join.err.alreadyJoined.team", leaving.getParty().getName()),
           false);
       return false;
     }

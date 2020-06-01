@@ -62,7 +62,7 @@ public class Tribute implements Competitor, MultiAudience {
 
   @Override
   public String toString() {
-    return getClass().getSimpleName() + "{match=" + getMatch() + ", name=" + getName() + "}";
+    return getClass().getSimpleName() + "{match=" + getMatch() + ", name=" + getDisplayName() + "}";
   }
 
   public UUID getPlayerId() {
@@ -81,16 +81,16 @@ public class Tribute implements Competitor, MultiAudience {
 
   @Override
   public String getDefaultName() {
-    return getName();
+    return getDisplayName();
   }
 
   @Override
-  public String getName() {
+  public String getDisplayName() {
     return username;
   }
 
   @Override
-  public String getName(@Nullable CommandSender viewer) {
+  public String getDisplayName(@Nullable CommandSender viewer) {
     return username;
   }
 
@@ -111,16 +111,16 @@ public class Tribute implements Competitor, MultiAudience {
 
   @Override
   public String getColoredName() {
-    return getColor() + getName();
+    return getColor() + getDisplayName();
   }
 
   @Override
   public String getColoredName(@Nullable CommandSender viewer) {
-    return getColor() + getName(viewer);
+    return getColor() + getDisplayName(viewer);
   }
 
   @Override
-  public Component getComponentName() {
+  public Component getName() {
     return new PersonalizedPlayer(
             player == null ? null : player.getBukkit(), username, NameStyle.FANCY)
         .render();

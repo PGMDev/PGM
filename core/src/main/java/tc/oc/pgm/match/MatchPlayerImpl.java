@@ -402,6 +402,11 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   }
 
   @Override
+  public Component getName() {
+    return getName(NameStyle.FANCY);
+  }
+
+  @Override
   public String getPrefixedName() {
     return PGM.get().getPrefixRegistry().getPrefixedName(getBukkit(), getParty());
   }

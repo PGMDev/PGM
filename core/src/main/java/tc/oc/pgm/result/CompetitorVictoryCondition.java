@@ -27,6 +27,6 @@ public class CompetitorVictoryCondition extends ImmediateVictoryCondition {
         competitor.isNamePlural()
             ? "broadcast.gameOver.teamWinners"
             : "broadcast.gameOver.teamWinner",
-        competitor.getComponentName());
+        competitor.getName());
   }
 }

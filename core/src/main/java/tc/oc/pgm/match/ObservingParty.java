@@ -20,13 +20,13 @@ public abstract class ObservingParty extends SimpleParty {
   }
 
   @Override
-  public String getName() {
+  public String getDisplayName() {
     return getDefaultName();
   }
 
   @Override
-  public String getName(@Nullable CommandSender viewer) {
-    return getName();
+  public String getDisplayName(@Nullable CommandSender viewer) {
+    return getDisplayName();
   }
 
   @Override
@@ -42,7 +42,7 @@ public abstract class ObservingParty extends SimpleParty {
   @Override
   public String getColoredName() {
     if (coloredName == null) {
-      coloredName = getColor() + getName();
+      coloredName = getColor() + getDisplayName();
     }
     return coloredName;
   }
@@ -53,9 +53,9 @@ public abstract class ObservingParty extends SimpleParty {
   }
 
   @Override
-  public Component getComponentName() {
+  public Component getName() {
     if (componentName == null) {
-      componentName = TextComponent.of(getName(), TextParser.parseTextColor(getColor()));
+      componentName = TextComponent.of(getDisplayName(), TextParser.parseTextColor(getColor()));
     }
     return componentName;
   }

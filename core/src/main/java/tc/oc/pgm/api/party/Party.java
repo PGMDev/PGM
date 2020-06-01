@@ -15,6 +15,8 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.match.ObservingParty;
 import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.named.Named;
 
 /**
  * A group of related {@link MatchPlayer}s in a {@link Match}.
@@ -22,7 +24,7 @@ import tc.oc.pgm.util.chat.Audience;
  * @see Competitor for participating {@link MatchPlayer}s.
  * @see ObservingParty for observing {@link MatchPlayer}s.
  */
-public interface Party extends Audience {
+public interface Party extends Audience, Named {
 
   /**
    * Get the {@link Match} that the {@link Party} is in.
@@ -67,7 +69,7 @@ public interface Party extends Audience {
    * @see PartyRenameEvent
    * @return The current name of the {@link Party}.
    */
-  String getName();
+  String getDisplayName();
 
   /**
    * Get the current name of the {@link Party} from the perspective of a {@link CommandSender}.
@@ -75,12 +77,12 @@ public interface Party extends Audience {
    * @param viewer The viewer.
    * @return The name of the {@link Party}, relative to the viewer.
    */
-  String getName(@Nullable CommandSender viewer);
+  String getDisplayName(@Nullable CommandSender viewer);
 
   /**
-   * Get whether {@link #getName()} is grammatically a plural word.
+   * Get whether {@link #getDisplayName()} is grammatically a plural word.
    *
-   * @return Whether {@link #getName()} is plural.
+   * @return Whether {@link #getDisplayName()} is plural.
    */
   boolean isNamePlural();
 
@@ -104,7 +106,7 @@ public interface Party extends Audience {
    * @return The colored {@link Party} name.
    */
   default String getColoredName() {
-    return getColor() + getName();
+    return getColor() + getDisplayName();
   }
 
   /**
@@ -115,7 +117,7 @@ public interface Party extends Audience {
    * @return The colored {@link Party} name.
    */
   default String getColoredName(@Nullable CommandSender viewer) {
-    return getColor() + getName(viewer);
+    return getColor() + getDisplayName(viewer);
   }
 
   /**
@@ -123,7 +125,13 @@ public interface Party extends Audience {
    *
    * @return The current {@link Party} name.
    */
-  Component getComponentName();
+  @Override
+  Component getName();
+
+  @Override
+  default Component getName(NameStyle style) {
+    return getName();
+  }
 
   /**
    * Get the prefix in chat for all {@link MatchPlayer}s in the {@link Party}.

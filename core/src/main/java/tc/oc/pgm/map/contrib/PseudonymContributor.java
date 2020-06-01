@@ -24,7 +24,7 @@ public class PseudonymContributor implements Contributor {
   }
 
   @Override
-  public String getName() {
+  public String getUsername() {
     return name;
   }
 
@@ -40,7 +40,12 @@ public class PseudonymContributor implements Contributor {
 
   @Override
   public Component getName(NameStyle style) {
-    return TextComponent.of(getName(), TextColor.DARK_AQUA);
+    return getName();
+  }
+
+  @Override
+  public Component getName() {
+    return TextComponent.of(getUsername(), TextColor.DARK_AQUA);
   }
 
   @Override

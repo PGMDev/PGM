@@ -207,7 +207,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
                 player.getName(NameStyle.COLOR),
                 TranslatableComponent.of(wholePoints == 1 ? "misc.point" : "misc.points")
                     .args(TextComponent.of(Integer.toString(wholePoints), TextColor.DARK_AQUA)),
-                player.getParty().getComponentName()));
+                player.getParty().getName()));
     player.playSound(new Sound("random.levelup"));
   }
 

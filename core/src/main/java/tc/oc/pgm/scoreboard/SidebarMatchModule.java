@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.kyori.text.Component;
-import net.kyori.text.format.TextColor;
 import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
@@ -93,11 +92,10 @@ public class SidebarMatchModule implements MatchModule, Listener {
   private static String renderSidebarTitle(
       Collection<MapTag> tags, @Nullable Component gamemodeName) {
     final Component configTitle = PGM.get().getConfiguration().getMatchHeader();
-    if (configTitle != null)
-      return LegacyComponentSerializer.legacy().serialize(configTitle.color(TextColor.AQUA));
+    if (configTitle != null) return LegacyComponentSerializer.legacy().serialize(configTitle);
     if (gamemodeName != null) {
       String customGamemode = LegacyComponentSerializer.legacy().serialize(gamemodeName);
-      if (!customGamemode.isEmpty()) return customGamemode;
+      if (!customGamemode.isEmpty()) return ChatColor.AQUA + customGamemode;
     }
 
     final List<String> gamemode =
@@ -148,7 +146,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
       this.objective = this.scoreboard.registerNewObjective(IDENTIFIER, "dummy");
       this.objective.setDisplayName(
           StringUtils.left(
-              renderSidebarTitle(match.getMap().getTags(), match.getMap().getGamemodeName()), 32));
+              renderSidebarTitle(match.getMap().getTags(), match.getMap().getGamemode()), 32));
       this.objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
       for (int i = 0; i < MAX_ROWS; ++i) {

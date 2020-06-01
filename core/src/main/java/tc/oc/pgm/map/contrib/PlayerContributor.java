@@ -30,8 +30,8 @@ public class PlayerContributor implements Contributor {
   }
 
   @Override
-  public String getName() {
-    final String name = username.getName();
+  public String getUsername() {
+    final String name = username.getUsername();
     return name == null ? "Unknown" : name;
   }
 
@@ -48,6 +48,11 @@ public class PlayerContributor implements Contributor {
   @Override
   public Component getName(NameStyle style) {
     return username.getName(style);
+  }
+
+  @Override
+  public Component getName() {
+    return username.getName();
   }
 
   @Override
@@ -69,7 +74,7 @@ public class PlayerContributor implements Contributor {
   public String toString() {
     return new ToStringBuilder(this)
         .append("id", getId())
-        .append("name", username.getName())
+        .append("name", username.getUsername())
         .append("desc", getContribution())
         .build();
   }

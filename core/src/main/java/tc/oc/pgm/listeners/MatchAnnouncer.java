@@ -72,7 +72,7 @@ public class MatchAnnouncer implements Listener {
                 event.getWinner().isNamePlural()
                     ? "broadcast.gameOver.teamWinners"
                     : "broadcast.gameOver.teamWinner",
-                event.getWinner().getComponentName());
+                event.getWinner().getName());
 
         if (event.getWinner() == viewer.getParty()) {
           // Winner

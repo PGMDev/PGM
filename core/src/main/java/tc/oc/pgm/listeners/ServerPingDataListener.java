@@ -174,7 +174,7 @@ public class ServerPingDataListener implements Listener {
     checkNotNull(contributor, "contributor");
     checkNotNull(jsonObject, "jsonObject");
 
-    jsonObject.addProperty("name", contributor.getName());
+    jsonObject.addProperty("name", contributor.getUsername());
     if (contributor instanceof PlayerContributor) {
       jsonObject.addProperty("uuid", ((PlayerContributor) contributor).getId().toString());
     }
