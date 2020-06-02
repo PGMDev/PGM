@@ -43,7 +43,7 @@ public class MapInfoImpl implements MapInfo {
   protected final Collection<Integer> players;
 
   public MapInfoImpl(
-          @Nullable String license,
+      @Nullable String license,
       @Nullable String id,
       Version proto,
       Version version,
@@ -56,7 +56,7 @@ public class MapInfoImpl implements MapInfo {
       @Nullable Collection<MapTag> tags,
       @Nullable Collection<Integer> players,
       @Nullable WorldInfo world) {
-      this.license=license;
+    this.license = license;
     this.name = checkNotNull(name);
     this.id = checkNotNull(MapInfo.normalizeName(id == null ? name : id));
     this.proto = checkNotNull(proto);
@@ -69,12 +69,11 @@ public class MapInfoImpl implements MapInfo {
     this.tags = tags == null ? new TreeSet<>() : tags;
     this.players = players == null ? new LinkedList<>() : players;
     this.world = world == null ? new WorldInfoImpl() : world;
-
   }
 
   public MapInfoImpl(MapInfo info) {
     this(
-            info.getLicense(),
+        info.getLicense(),
         checkNotNull(info).getId(),
         info.getProto(),
         info.getVersion(),
@@ -91,7 +90,7 @@ public class MapInfoImpl implements MapInfo {
 
   public MapInfoImpl(Element root) throws InvalidXMLException {
     this(
-            parseLicense(root),
+        parseLicense(root),
         checkNotNull(root).getChildTextNormalize("slug"),
         XMLUtils.parseSemanticVersion(Node.fromRequiredAttr(root, "proto")),
         XMLUtils.parseSemanticVersion(Node.fromRequiredChildOrAttr(root, "version")),
@@ -110,11 +109,12 @@ public class MapInfoImpl implements MapInfo {
         null,
         parseWorld(root));
   }
+
   @Override
-  public String getLicense()
-  {
-      return license;
+  public String getLicense() {
+    return license;
   }
+
   @Override
   public String getId() {
     return id;
@@ -216,28 +216,25 @@ public class MapInfoImpl implements MapInfo {
 
     return name.build();
   }
-    private static String parseLicense(Element root)throws InvalidXMLException
-    {
-        String licence=null;
-        String checkLicense=root.getChild("license").getValue();
-        ArrayList<String> validLicense=new ArrayList<String>();
-        validLicense.add("CC-BY");
-        validLicense.add("CC-BY-ND");
-        validLicense.add("CC-BY-SA");
-        validLicense.add("CC-BY-NC");
-        validLicense.add("CC-BY-NC-ND");
-        validLicense.add("CC-BY-NC-SA");
 
+  private static String parseLicense(Element root) throws InvalidXMLException {
+    String licence = null;
+    String checkLicense = root.getChild("license").getValue();
+    ArrayList<String> validLicense = new ArrayList<String>();
+    validLicense.add("CC-BY");
+    validLicense.add("CC-BY-ND");
+    validLicense.add("CC-BY-SA");
+    validLicense.add("CC-BY-NC");
+    validLicense.add("CC-BY-NC-ND");
+    validLicense.add("CC-BY-NC-SA");
 
-        if(validLicense.contains(checkLicense) || checkLicense==null)
-        {
-            licence=checkLicense;
-        }
-        else
-            throw new InvalidXMLException("This license is invalid!",root.getChild("license"));
+    if (validLicense.contains(checkLicense) || checkLicense == null) {
+      licence = checkLicense;
+    } else throw new InvalidXMLException("This license is invalid!", root.getChild("license"));
 
-        return licence;
-    }
+    return licence;
+  }
+
   private static List<String> parseRules(Element root) {
     List<String> rules = null;
     for (Element parent : root.getChildren("rules")) {
