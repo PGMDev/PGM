@@ -1,10 +1,7 @@
-package tc.oc.pgm.util.component.types;
+package tc.oc.pgm.util.text.types;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.lang.ref.WeakReference;
+import java.util.UUID;
 import javax.annotation.Nullable;
-import lombok.Getter;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
@@ -12,7 +9,9 @@ import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
 import net.kyori.text.event.HoverEvent.Action;
 import net.kyori.text.format.TextColor;
+import net.kyori.text.format.TextDecoration;
 import net.md_5.bungee.api.chat.BaseComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -20,50 +19,22 @@ import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextParser;
 import tc.oc.pgm.util.text.TextTranslations;
 
-/**
- * A component that renders as a player's name.
- *
- * <p>The "fancy" flag determines whether the name will include flair and other decorations.
- *
- * <p>The "big" flag shows the player's nickname after their real name when they are nicked and the
- * viewer can see through it.
- *
- * <p>A non-fancy, non-big name has color and nothing else.
- */
-@Getter
-public class PersonalizedPlayer {
+/** PlayerComponent is used to format player names in a consistent manner with optional styling */
+public interface PlayerComponent {
 
-  private final String username;
-  private final WeakReference<Player> player;
-  private final NameStyle style;
+  static Component UNKNOWN =
+      TranslatableComponent.of("misc.unknown", TextColor.DARK_AQUA, TextDecoration.ITALIC);
 
-  /**
-   * Constructor
-   *
-   * @param style {@link NameStyle} to apply to the component
-   */
-  public PersonalizedPlayer(@Nullable Player player, String username, NameStyle style) {
-    this.player = new WeakReference<>(player);
-    this.username = username;
-    this.style = checkNotNull(style);
+  static Component of(Player player, NameStyle style) {
+    return of(player, "", style);
   }
 
-  /**
-   * Constructor
-   *
-   * @param player to get identity from
-   * @param style {@link NameStyle} to apply to the component
-   */
-  public PersonalizedPlayer(Player player, NameStyle style) {
-    this(player, player.getName(), style);
-  }
-
-  public Component render() {
-    Player player = this.player.get();
-
+  static Component of(@Nullable Player player, String defName, NameStyle style) {
     TextComponent.Builder component = TextComponent.builder();
+
+    // Offline player
     if (player == null || !player.isOnline()) {
-      component.append(username, TextColor.DARK_AQUA);
+      component.append(defName, TextColor.DARK_AQUA);
       return component.build();
     }
 
@@ -99,16 +70,31 @@ public class PersonalizedPlayer {
     return component.build();
   }
 
-  public BaseComponent render(CommandSender viewer) {
-    return new net.md_5.bungee.api.chat.TextComponent(
-        TextTranslations.translateLegacy(render(), viewer));
+  static Component of(UUID playerId, NameStyle style) {
+    Player player = Bukkit.getPlayer(playerId);
+    return player != null ? of(player, style) : UNKNOWN;
   }
 
-  private boolean isVanished(Player player) {
+  static Component of(CommandSender sender, NameStyle style) {
+    return sender instanceof Player
+        ? of((Player) sender, style)
+        : TranslatableComponent.of("misc.console", TextColor.DARK_AQUA);
+  }
+
+  static boolean isVanished(Player player) {
     return player.hasMetadata("isVanished");
   }
 
-  private boolean isDead(Player player) {
+  static boolean isDead(Player player) {
     return player.hasMetadata("isDead") || player.isDead();
+  }
+
+  /**
+   * Support kept for custom tab-list usage (TODO: if tab-list system ever changes, upgrade/remove
+   * this)
+   */
+  static BaseComponent renderBaseComponent(CommandSender viewer, NameStyle style) {
+    return new net.md_5.bungee.api.chat.TextComponent(
+        TextTranslations.translateLegacy(of(viewer, style), viewer));
   }
 }

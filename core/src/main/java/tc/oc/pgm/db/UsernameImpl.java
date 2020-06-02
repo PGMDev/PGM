@@ -5,14 +5,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.util.UsernameResolver;
-import tc.oc.pgm.util.component.types.PersonalizedPlayer;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.types.PlayerComponent;
 
 class UsernameImpl implements Username {
 
@@ -38,8 +35,8 @@ class UsernameImpl implements Username {
   @Override
   public Component getName(NameStyle style) {
     return name == null
-        ? TranslatableComponent.of("misc.unknown", TextColor.DARK_AQUA, TextDecoration.ITALIC)
-        : new PersonalizedPlayer(Bukkit.getPlayer(id), name, style).render();
+        ? PlayerComponent.UNKNOWN
+        : PlayerComponent.of(Bukkit.getPlayer(id), name, style);
   }
 
   @Override

@@ -50,9 +50,9 @@ import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.chat.PlayerAudience;
-import tc.oc.pgm.util.component.types.PersonalizedPlayer;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.text.types.PlayerComponent;
 
 public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<MatchPlayer> {
 
@@ -398,7 +398,7 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
 
   @Override
   public Component getName(NameStyle style) {
-    return new PersonalizedPlayer(getBukkit(), style).render();
+    return PlayerComponent.of(getBukkit(), style);
   }
 
   @Override

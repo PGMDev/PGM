@@ -17,8 +17,8 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.chat.MultiAudience;
-import tc.oc.pgm.util.component.types.PersonalizedPlayer;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.types.PlayerComponent;
 
 public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
 
@@ -64,8 +64,7 @@ public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
   @Override
   public Component getName(NameStyle style) {
     MatchPlayer player = match.getPlayer(uuid);
-    return new PersonalizedPlayer(player == null ? null : player.getBukkit(), username, style)
-        .render();
+    return PlayerComponent.of(player.getBukkit(), username, style);
   }
 
   @Override

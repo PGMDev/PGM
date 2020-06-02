@@ -18,8 +18,8 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.chat.MultiAudience;
-import tc.oc.pgm.util.component.types.PersonalizedPlayer;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.types.PlayerComponent;
 
 /**
  * Wraps a single {@link MatchPlayer} in a free-for-all match.
@@ -121,9 +121,7 @@ public class Tribute implements Competitor, MultiAudience {
 
   @Override
   public Component getName() {
-    return new PersonalizedPlayer(
-            player == null ? null : player.getBukkit(), username, NameStyle.FANCY)
-        .render();
+    return PlayerComponent.of(player.getBukkit(), NameStyle.FANCY);
   }
 
   @Override
