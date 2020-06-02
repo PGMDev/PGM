@@ -221,11 +221,17 @@ public class MapInfoImpl implements MapInfo {
     String licence = null;
     String checkLicense = root.getChild("license").getValue();
     ArrayList<String> validLicense = new ArrayList<String>();
+    validLicense.add("Attribution 4.0 International");
     validLicense.add("CC-BY");
+    validLicense.add("Attribution-NoDerivatives 4.0 International");
     validLicense.add("CC-BY-ND");
+    validLicense.add("Attribution-ShareAlike 4.0 International");
     validLicense.add("CC-BY-SA");
+    validLicense.add("Attribution-NonCommercial 4.0 International");
     validLicense.add("CC-BY-NC");
+    validLicense.add("Attribution-NonCommercial-NoDerivatives 4.0 International");
     validLicense.add("CC-BY-NC-ND");
+    validLicense.add("Attribution-NonCommercial-ShareAlike 4.0 International");
     validLicense.add("CC-BY-NC-SA");
 
     if (validLicense.contains(checkLicense) || checkLicense == null) {
