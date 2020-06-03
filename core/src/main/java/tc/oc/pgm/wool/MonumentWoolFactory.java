@@ -17,7 +17,7 @@ import tc.oc.pgm.goals.ProximityGoalDefinition;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.text.TextParser;
+import tc.oc.pgm.util.text.TextFormatter;
 
 @FeatureInfo(name = "wool")
 public class MonumentWoolFactory extends ProximityGoalDefinition {
@@ -42,7 +42,7 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
 
   public static Component makeComponentName(DyeColor color) {
     return TextComponent.of(
-        makeName(color), TextParser.parseTextColor((BukkitUtils.dyeColorToChatColor(color))));
+        makeName(color), TextFormatter.convert((BukkitUtils.dyeColorToChatColor(color))));
   }
 
   public MonumentWoolFactory(

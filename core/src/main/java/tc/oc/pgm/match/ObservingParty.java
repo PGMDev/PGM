@@ -6,7 +6,7 @@ import org.bukkit.Color;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.text.TextParser;
+import tc.oc.pgm.util.text.TextFormatter;
 
 public abstract class ObservingParty extends SimpleParty {
 
@@ -30,7 +30,7 @@ public abstract class ObservingParty extends SimpleParty {
   @Override
   public Component getName(NameStyle style) {
     if (componentName == null) {
-      componentName = TextComponent.of(getDefaultName(), TextParser.parseTextColor(getColor()));
+      componentName = TextComponent.of(getDefaultName(), TextFormatter.convert(getColor()));
     }
     return componentName;
   }
@@ -38,7 +38,7 @@ public abstract class ObservingParty extends SimpleParty {
   @Override
   public Component getChatPrefix() {
     if (chatPrefix == null) {
-      chatPrefix = TextComponent.of("(Obs) ", TextParser.parseTextColor(getColor()));
+      chatPrefix = TextComponent.of("(Obs) ", TextFormatter.convert(getColor()));
     }
     return chatPrefix;
   }

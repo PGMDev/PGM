@@ -7,7 +7,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.controlpoint.events.ControllerChangeEvent;
-import tc.oc.pgm.util.text.TextParser;
+import tc.oc.pgm.util.text.TextFormatter;
 
 public class ControlPointAnnouncer implements Listener {
   private final Match match;
@@ -35,7 +35,7 @@ public class ControlPointAnnouncer implements Listener {
                 .append(" captured ", TextColor.GRAY)
                 .append(
                     event.getControlPoint().getName(),
-                    TextParser.parseTextColor(event.getNewController().getColor()))
+                    TextFormatter.convert(event.getNewController().getColor()))
                 .build());
       }
     }

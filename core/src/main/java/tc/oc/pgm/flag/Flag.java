@@ -59,7 +59,7 @@ import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.text.TextParser;
+import tc.oc.pgm.util.text.TextFormatter;
 
 public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
@@ -176,7 +176,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   }
 
   public TextColor getChatColor() {
-    return TextParser.parseTextColor(BukkitUtils.dyeColorToChatColor(this.getDyeColor()));
+    return TextFormatter.convert(BukkitUtils.dyeColorToChatColor(this.getDyeColor()));
   }
 
   public String getColoredName() {

@@ -122,4 +122,11 @@ public final class TextFormatter {
       CommandSender sender, Component text, TextColor lineColor) {
     return horizontalLineHeading(sender, text, lineColor, ComponentUtils.MAX_CHAT_WIDTH);
   }
+
+  /*
+   * Convert ChatColor -> TextColor
+   */
+  public static TextColor convert(Enum<?> color) {
+    return TextColor.valueOf(color.name());
+  }
 }

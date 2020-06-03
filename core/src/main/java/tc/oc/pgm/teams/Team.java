@@ -20,7 +20,7 @@ import tc.oc.pgm.match.SimpleParty;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.text.TextParser;
+import tc.oc.pgm.util.text.TextFormatter;
 
 /**
  * Mutable class to represent a team created from a TeamInfo instance that is tied to a specific
@@ -129,8 +129,7 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
   @Override
   public Component getName(NameStyle style) {
     if (componentName == null) {
-      this.componentName =
-          TextComponent.of(getDisplayName(), TextParser.parseTextColor(getColor()));
+      this.componentName = TextComponent.of(getDisplayName(), TextFormatter.convert(getColor()));
     }
     return componentName;
   }
@@ -183,8 +182,7 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
   @Override
   public Component getName() {
     if (componentName == null) {
-      this.componentName =
-          TextComponent.of(getDisplayName(), TextParser.parseTextColor(getColor()));
+      this.componentName = TextComponent.of(getDisplayName(), TextFormatter.convert(getColor()));
     }
     return componentName;
   }
@@ -193,7 +191,7 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
   public Component getChatPrefix() {
     if (chatPrefix == null) {
       this.chatPrefix =
-          TextComponent.of("(" + getShortName() + ") ", TextParser.parseTextColor(getColor()));
+          TextComponent.of("(" + getShortName() + ") ", TextFormatter.convert(getColor()));
     }
     return chatPrefix;
   }
