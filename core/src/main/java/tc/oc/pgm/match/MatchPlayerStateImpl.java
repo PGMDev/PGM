@@ -68,8 +68,8 @@ public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
   }
 
   @Override
-  public Component getName() {
-    return getName(NameStyle.FANCY);
+  public String getNameLegacy() {
+    return username;
   }
 
   @Override

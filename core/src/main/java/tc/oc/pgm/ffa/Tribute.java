@@ -104,6 +104,11 @@ public class Tribute implements Competitor, MultiAudience {
   }
 
   @Override
+  public String getNameLegacy() {
+    return username;
+  }
+
+  @Override
   public Component getChatPrefix() {
     return TextComponent.empty();
   }

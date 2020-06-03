@@ -19,8 +19,9 @@ public interface Username extends Named {
    *
    * @return The username.
    */
+  @Override
   @Nullable
-  String getUsername();
+  String getNameLegacy();
 
   /**
    * Change the username of the player.

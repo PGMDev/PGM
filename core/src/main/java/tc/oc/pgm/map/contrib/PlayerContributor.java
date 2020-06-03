@@ -45,6 +45,11 @@ public class PlayerContributor implements Contributor {
   }
 
   @Override
+  public String getNameLegacy() {
+    return username.getNameLegacy();
+  }
+
+  @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof PlayerContributor)) return false;
     final PlayerContributor o = (PlayerContributor) obj;
@@ -63,7 +68,7 @@ public class PlayerContributor implements Contributor {
   public String toString() {
     return new ToStringBuilder(this)
         .append("id", getId())
-        .append("name", username.getUsername())
+        .append("name", username.getNameLegacy())
         .append("desc", getContribution())
         .build();
   }

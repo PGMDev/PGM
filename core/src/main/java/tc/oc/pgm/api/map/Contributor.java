@@ -2,7 +2,6 @@ package tc.oc.pgm.api.map;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import tc.oc.pgm.util.named.Named;
 
 /** A named individual that helped contribute to a {@link MapInfo}. */
@@ -23,13 +22,4 @@ public interface Contributor extends Named {
    * @return Whether the contributor is the player.
    */
   boolean isPlayer(UUID id);
-
-  /**
-   * Converts the username component to legacy text.
-   *
-   * @return a legacy username
-   */
-  default String toLegacy() {
-    return LegacyComponentSerializer.INSTANCE.serialize(getName());
-  }
 }

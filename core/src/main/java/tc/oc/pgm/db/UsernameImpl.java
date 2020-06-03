@@ -28,7 +28,7 @@ class UsernameImpl implements Username {
 
   @Nullable
   @Override
-  public String getUsername() {
+  public String getNameLegacy() {
     return name;
   }
 

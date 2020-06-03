@@ -402,8 +402,8 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   }
 
   @Override
-  public Component getName() {
-    return getName(NameStyle.FANCY);
+  public String getNameLegacy() {
+    return getBukkit().getName();
   }
 
   @Override

@@ -85,7 +85,7 @@ public final class TeamCommand {
     }
 
     for (Team other : teams.getTeams()) {
-      if (other.getDisplayName().equalsIgnoreCase(newName)) {
+      if (other.getNameLegacy().equalsIgnoreCase(newName)) {
         throw TextException.of("match.alias.err", TextComponent.of(newName));
       }
     }

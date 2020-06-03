@@ -35,7 +35,12 @@ public class PseudonymContributor implements Contributor {
 
   @Override
   public Component getName(NameStyle style) {
-    return TextComponent.of(name, TextColor.DARK_AQUA);
+    return TextComponent.of(getNameLegacy(), TextColor.DARK_AQUA);
+  }
+
+  @Override
+  public String getNameLegacy() {
+    return name;
   }
 
   @Override

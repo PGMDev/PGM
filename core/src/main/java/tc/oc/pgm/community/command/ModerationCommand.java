@@ -556,8 +556,8 @@ public class ModerationCommand implements Listener {
     if (!XMLUtils.USERNAME_REGEX.matcher(target).matches()) {
       UUID uuid = UUID.fromString(target);
       Username username = PGM.get().getDatastore().getUsername(uuid);
-      if (username.getUsername() != null) {
-        target = username.getUsername();
+      if (username.getNameLegacy() != null) {
+        target = username.getNameLegacy();
       } else {
         throw new CommandException(
             TextTranslations.translateLegacy(

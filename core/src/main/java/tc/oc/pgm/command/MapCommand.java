@@ -114,7 +114,7 @@ public final class MapCommand {
     query = checkNotNull(query).toLowerCase();
 
     for (Contributor contributor : map.getAuthors()) {
-      if (contributor.toLegacy().toLowerCase().contains(query)) {
+      if (contributor.getNameLegacy().toLowerCase().contains(query)) {
         return true;
       }
     }

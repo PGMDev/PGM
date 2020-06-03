@@ -50,7 +50,7 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
   public String toString() {
     StringBuilder sb = new StringBuilder("MonumentWool{");
     sb.append("id=").append(this.getId());
-    sb.append(",owner=").append(this.owner.getDisplayName());
+    sb.append(",owner=").append(this.owner.getNameLegacy());
     sb.append(",definition=").append(this.definition);
     sb.append('}');
     return sb.toString();

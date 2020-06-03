@@ -71,7 +71,7 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
 
   @Override
   public String toString() {
-    return getClass().getSimpleName() + "{match=" + getMatch() + ", name=" + getDisplayName() + "}";
+    return getClass().getSimpleName() + "{match=" + getMatch() + ", name=" + getNameLegacy() + "}";
   }
 
   @Override
@@ -129,7 +129,7 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
   @Override
   public Component getName(NameStyle style) {
     if (componentName == null) {
-      this.componentName = TextComponent.of(getDisplayName(), TextFormatter.convert(getColor()));
+      this.componentName = TextComponent.of(getNameLegacy(), TextFormatter.convert(getColor()));
     }
     return componentName;
   }
@@ -140,18 +140,19 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
    *
    * @return Name of the team without colors.
    */
-  public String getDisplayName() {
+  @Override
+  public String getNameLegacy() {
     return name != null ? name : getDefaultName();
   }
 
   public String getShortName() {
-    String lower = getDisplayName().toLowerCase();
+    String lower = getNameLegacy().toLowerCase();
     if (lower.endsWith(" team")) {
-      return getDisplayName().substring(0, lower.length() - " team".length());
+      return getNameLegacy().substring(0, lower.length() - " team".length());
     } else if (lower.startsWith("team ")) {
-      return getDisplayName().substring("team ".length());
+      return getNameLegacy().substring("team ".length());
     } else {
-      return getDisplayName();
+      return getNameLegacy();
     }
   }
 
@@ -162,11 +163,11 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
    * @param newName New name for this team. Should not include colors.
    */
   public void setName(@Nullable String newName) {
-    if (Objects.equals(this.name, newName) || this.getDisplayName().equals(newName)) return;
-    String oldName = this.getDisplayName();
+    if (Objects.equals(this.name, newName) || this.getNameLegacy().equals(newName)) return;
+    String oldName = this.getNameLegacy();
     this.name = newName;
     this.componentName = null;
-    this.match.callEvent(new PartyRenameEvent(this, oldName, this.getDisplayName()));
+    this.match.callEvent(new PartyRenameEvent(this, oldName, this.getNameLegacy()));
   }
 
   @Override
@@ -177,14 +178,6 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
   @Override
   public Color getFullColor() {
     return BukkitUtils.colorOf(this.getColor());
-  }
-
-  @Override
-  public Component getName() {
-    if (componentName == null) {
-      this.componentName = TextComponent.of(getDisplayName(), TextFormatter.convert(getColor()));
-    }
-    return componentName;
   }
 
   @Override

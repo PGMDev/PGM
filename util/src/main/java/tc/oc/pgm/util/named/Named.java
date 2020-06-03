@@ -9,4 +9,7 @@ public interface Named {
   default Component getName() {
     return getName(NameStyle.FANCY);
   }
+
+  // TODO: Maybe add a note here explaining to prefer Named#getName()
+  String getNameLegacy();
 }

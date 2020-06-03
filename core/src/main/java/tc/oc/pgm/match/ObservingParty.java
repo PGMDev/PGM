@@ -36,6 +36,11 @@ public abstract class ObservingParty extends SimpleParty {
   }
 
   @Override
+  public String getNameLegacy() {
+    return getDefaultName();
+  }
+
+  @Override
   public Component getChatPrefix() {
     if (chatPrefix == null) {
       chatPrefix = TextComponent.of("(Obs) ", TextFormatter.convert(getColor()));

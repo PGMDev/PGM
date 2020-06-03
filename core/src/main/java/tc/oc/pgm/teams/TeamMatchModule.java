@@ -217,7 +217,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   public @Nullable Team bestFuzzyMatch(String name, double threshold) {
     Map<String, Team> byName = new HashMap<>();
-    for (Team team : getTeams()) byName.put(team.getDisplayName(), team);
+    for (Team team : getTeams()) byName.put(team.getNameLegacy(), team);
     return StringUtils.bestFuzzyMatch(name, byName, threshold);
   }
 
@@ -482,13 +482,6 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       }
 
       if (teamResult.priorityKickRequired()) {
-        match
-            .getLogger()
-            .info(
-                "Bumping a player from "
-                    + teamResult.getTeam().getDisplayName()
-                    + " to make room for "
-                    + joining.getBukkit().getName());
         kickPlayerOffTeam(teamResult.getTeam(), false);
       }
 
@@ -529,15 +522,6 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       Team team = this.getFullestTeam();
       if (team == null) break;
       if (!team.isStacked()) break;
-      match
-          .getLogger()
-          .info(
-              "Bumping a player from stacked team "
-                  + team.getDisplayName()
-                  + " size="
-                  + team.getSize(false)
-                  + " fullness="
-                  + team.getFullness(false));
       if (!this.kickPlayerOffTeam(team, true)) break;
     }
   }
