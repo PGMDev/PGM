@@ -52,10 +52,11 @@ public final class ListCommand {
 
     // Total count
     viewer.sendMessage(
-        TranslatableComponent.of("command.list.online", TextColor.GRAY)
-            .args(
-                TextComponent.of(
-                    Integer.toString(getSize(match.getPlayers(), false)), TextColor.GREEN)));
+        TranslatableComponent.of(
+            "command.list.online",
+            TextColor.GRAY,
+            TextComponent.of(
+                Integer.toString(getSize(match.getPlayers(), false)), TextColor.GREEN)));
   }
 
   private void sendTeamInfo(

@@ -211,7 +211,7 @@ public class PGMListener implements Listener {
         Component name =
             TextComponent.of(
                 player.getBukkit().getDisplayName(viewer.getBukkit()) + ChatColor.YELLOW);
-        Component component = TranslatableComponent.of(key).args(name);
+        Component component = TranslatableComponent.of(key, name);
         viewer.sendMessage(
             staffOnly
                 ? ChatDispatcher.ADMIN_CHAT_PREFIX.append(component.color(TextColor.YELLOW))
@@ -339,7 +339,7 @@ public class PGMListener implements Listener {
       Component poolName = TextComponent.of(event.getNewPool().getName(), TextColor.LIGHT_PURPLE);
       Component staffName =
           UsernameFormatUtils.formatStaffName(event.getSender(), event.getMatch());
-      Component forced = TranslatableComponent.of("pool.change.force").args(poolName, staffName);
+      Component forced = TranslatableComponent.of("pool.change.force", poolName, staffName);
       if (event.getTimeLimit() != null) {
         Component time =
             TextComponent.of(
@@ -347,7 +347,7 @@ public class PGMListener implements Listener {
                     PeriodFormats.briefNaturalApproximate(event.getTimeLimit())
                         .color(ChatColor.GREEN),
                     Bukkit.getConsoleSender()));
-        forced = TranslatableComponent.of("pool.change.forceTimed").args(poolName, time, staffName);
+        forced = TranslatableComponent.of("pool.change.forceTimed", poolName, time, staffName);
       }
       ChatDispatcher.broadcastAdminChatMessage(forced.color(TextColor.GRAY), event.getMatch());
     }

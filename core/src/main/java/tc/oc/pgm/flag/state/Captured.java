@@ -51,8 +51,7 @@ public class Captured extends BaseState implements Returning {
         this.flag
             .getMatch()
             .sendMessage(
-                TranslatableComponent.of("flag.respawnTogether")
-                    .args(this.flag.getComponentName()));
+                TranslatableComponent.of("flag.respawnTogether", this.flag.getComponentName()));
       }
     }
 

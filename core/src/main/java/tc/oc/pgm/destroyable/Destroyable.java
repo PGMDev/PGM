@@ -134,14 +134,23 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   @Override
   public Component getTouchMessage(@Nullable ParticipantState toucher, boolean self) {
     if (toucher == null) {
-      return TranslatableComponent.of("destroyable.touch.owned")
-          .args(TextComponent.empty(), getComponentName(), getOwner().getName());
+      return TranslatableComponent.of(
+          "destroyable.touch.owned",
+          TextComponent.empty(),
+          getComponentName(),
+          getOwner().getName());
     } else if (self) {
-      return TranslatableComponent.of("destroyable.touch.owned.you")
-          .args(TextComponent.empty(), getComponentName(), getOwner().getName());
+      return TranslatableComponent.of(
+          "destroyable.touch.owned.you",
+          TextComponent.empty(),
+          getComponentName(),
+          getOwner().getName());
     } else {
-      return TranslatableComponent.of("destroyable.touch.owned.player")
-          .args(toucher.getName(NameStyle.COLOR), getComponentName(), getOwner().getName());
+      return TranslatableComponent.of(
+          "destroyable.touch.owned.player",
+          toucher.getName(NameStyle.COLOR),
+          getComponentName(),
+          getOwner().getName());
     }
   }
 

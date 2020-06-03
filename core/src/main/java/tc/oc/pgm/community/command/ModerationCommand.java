@@ -121,7 +121,7 @@ public class ModerationCommand implements Listener {
             : TextFormatter.list(onlineStaff, TextColor.GRAY);
 
     Component staff =
-        TranslatableComponent.of("moderation.staff.name", TextColor.GRAY).args(staffCount, content);
+        TranslatableComponent.of("moderation.staff.name", TextColor.GRAY, staffCount, content);
 
     // Send message
     viewer.sendMessage(staff);
@@ -162,8 +162,8 @@ public class ModerationCommand implements Listener {
   }
 
   private Component formatFrozenList(String key, int count, Component names) {
-    return TranslatableComponent.of(key, TextColor.GRAY)
-        .args(TextComponent.of(Integer.toString(count), TextColor.AQUA), names);
+    return TranslatableComponent.of(
+        key, TextColor.GRAY, TextComponent.of(Integer.toString(count), TextColor.AQUA), names);
   }
 
   @Command(
@@ -195,8 +195,8 @@ public class ModerationCommand implements Listener {
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
     if (chat.isMuted(targetMatchPlayer)) {
       viewer.sendWarning(
-          TranslatableComponent.of("moderation.mute.existing")
-              .args(targetMatchPlayer.getName(NameStyle.FANCY)));
+          TranslatableComponent.of(
+              "moderation.mute.existing", targetMatchPlayer.getName(NameStyle.FANCY)));
       return;
     }
 
@@ -251,12 +251,14 @@ public class ModerationCommand implements Listener {
       targetMatchPlayer.sendMessage(
           TranslatableComponent.of("moderation.unmute.target", TextColor.GREEN));
       viewer.sendMessage(
-          TranslatableComponent.of("moderation.unmute.sender", TextColor.GRAY)
-              .args(targetMatchPlayer.getName(NameStyle.FANCY)));
+          TranslatableComponent.of(
+              "moderation.unmute.sender",
+              TextColor.GRAY,
+              targetMatchPlayer.getName(NameStyle.FANCY)));
     } else {
       viewer.sendMessage(
-          TranslatableComponent.of("moderation.unmute.none", TextColor.RED)
-              .args(targetMatchPlayer.getName(NameStyle.FANCY)));
+          TranslatableComponent.of(
+              "moderation.unmute.none", TextColor.RED, targetMatchPlayer.getName(NameStyle.FANCY)));
     }
   }
 
@@ -407,23 +409,24 @@ public class ModerationCommand implements Listener {
       Component formattedTarget = TextComponent.of(target, TextColor.DARK_AQUA);
       if (onlineBans > 0) {
         viewer.sendWarning(
-            TranslatableComponent.of("moderation.ipBan.bannedWithAlts")
-                .args(
-                    formattedTarget,
-                    TextComponent.of(
-                        Integer.toString(
-                            targetPlayer == null ? onlineBans : Math.max(0, onlineBans - 1)),
-                        TextColor.AQUA)));
+            TranslatableComponent.of(
+                "moderation.ipBan.bannedWithAlts",
+                formattedTarget,
+                TextComponent.of(
+                    Integer.toString(
+                        targetPlayer == null ? onlineBans : Math.max(0, onlineBans - 1)),
+                    TextColor.AQUA)));
       } else {
         viewer.sendMessage(
-            TranslatableComponent.of("moderation.ipBan.banned", TextColor.RED)
-                .args(formattedTarget));
+            TranslatableComponent.of("moderation.ipBan.banned", TextColor.RED, formattedTarget));
       }
 
     } else {
       viewer.sendMessage(
-          TranslatableComponent.of("moderation.ipBan.invalidIP", TextColor.GRAY)
-              .args(TextComponent.of(address, TextColor.RED, TextDecoration.ITALIC)));
+          TranslatableComponent.of(
+              "moderation.ipBan.invalidIP",
+              TextColor.GRAY,
+              TextComponent.of(address, TextColor.RED, TextDecoration.ITALIC)));
     }
   }
 
@@ -479,8 +482,8 @@ public class ModerationCommand implements Listener {
       List<MatchPlayer> alts = getAltAccounts(targetPl, manager);
       if (alts.isEmpty()) {
         viewer.sendMessage(
-            TranslatableComponent.of("moderation.alts.noAlts", TextColor.RED)
-                .args(target.getName(NameStyle.FANCY)));
+            TranslatableComponent.of(
+                "moderation.alts.noAlts", TextColor.RED, target.getName(NameStyle.FANCY)));
       } else {
         viewer.sendMessage(formatAltAccountList(target, alts));
       }
@@ -505,10 +508,11 @@ public class ModerationCommand implements Listener {
       int pages = (altAccounts.size() + perPage - 1) / perPage;
 
       Component pageHeader =
-          TranslatableComponent.of("command.pageHeader", TextColor.GRAY)
-              .args(
-                  TextComponent.of(Integer.toString(page), TextColor.DARK_AQUA),
-                  TextComponent.of(Integer.toString(pages), TextColor.DARK_AQUA));
+          TranslatableComponent.of(
+              "command.pageHeader",
+              TextColor.GRAY,
+              TextComponent.of(Integer.toString(page), TextColor.DARK_AQUA),
+              TextComponent.of(Integer.toString(pages), TextColor.DARK_AQUA));
 
       Component headerText =
           TranslatableComponent.of("moderation.alts.header", TextColor.DARK_AQUA);
@@ -557,8 +561,10 @@ public class ModerationCommand implements Listener {
       } else {
         throw new CommandException(
             TextTranslations.translateLegacy(
-                TranslatableComponent.of("command.notJoinedServer", TextColor.RED)
-                    .args(TextComponent.of(target, TextColor.AQUA)),
+                TranslatableComponent.of(
+                    "command.notJoinedServer",
+                    TextColor.RED,
+                    TextComponent.of(target, TextColor.AQUA)),
                 sender));
       }
     }
@@ -569,8 +575,10 @@ public class ModerationCommand implements Listener {
         || ban.getExpiration() != null && ban.getExpiration().toInstant().isBefore(Instant.now())) {
       throw new CommandException(
           TextTranslations.translateLegacy(
-              TranslatableComponent.of("moderation.records.lookupNone", TextColor.GRAY)
-                  .args(TextComponent.of(target, TextColor.DARK_AQUA)),
+              TranslatableComponent.of(
+                  "moderation.records.lookupNone",
+                  TextColor.GRAY,
+                  TextComponent.of(target, TextColor.DARK_AQUA)),
               sender));
     }
 
@@ -595,15 +603,18 @@ public class ModerationCommand implements Listener {
               sender);
 
       banType =
-          TranslatableComponent.of("moderation.type.temp_ban", TextColor.GOLD)
-              .args(
-                  TextComponent.of(
-                      length.lastIndexOf('s') != -1
-                          ? length.substring(0, length.lastIndexOf('s'))
-                          : length));
+          TranslatableComponent.of(
+              "moderation.type.temp_ban",
+              TextColor.GOLD,
+              TextComponent.of(
+                  length.lastIndexOf('s') != -1
+                      ? length.substring(0, length.lastIndexOf('s'))
+                      : length));
       expireDate =
-          TranslatableComponent.of("moderation.screen.expires", TextColor.GRAY)
-              .args(TextComponent.of(remaining, TextColor.YELLOW));
+          TranslatableComponent.of(
+              "moderation.screen.expires",
+              TextColor.GRAY,
+              TextComponent.of(remaining, TextColor.YELLOW));
     }
 
     String createdAgo =
@@ -611,16 +622,20 @@ public class ModerationCommand implements Listener {
             PeriodFormats.relativePastApproximate(ban.getCreated().toInstant()), sender);
 
     Component banTypeFormatted =
-        TranslatableComponent.of("moderation.type", TextColor.GRAY).args(banType);
+        TranslatableComponent.of("moderation.type", TextColor.GRAY, banType);
 
     Component reason =
-        TranslatableComponent.of("moderation.records.reason", TextColor.GRAY)
-            .args(TextComponent.of(ban.getReason(), TextColor.RED));
+        TranslatableComponent.of(
+            "moderation.records.reason",
+            TextColor.GRAY,
+            TextComponent.of(ban.getReason(), TextColor.RED));
     Component source =
         TextComponent.builder()
             .append(
-                TranslatableComponent.of("moderation.screen.signoff", TextColor.GRAY)
-                    .args(TextComponent.of(ban.getSource(), TextColor.AQUA)))
+                TranslatableComponent.of(
+                    "moderation.screen.signoff",
+                    TextColor.GRAY,
+                    TextComponent.of(ban.getSource(), TextColor.AQUA)))
             .append(TextComponent.space())
             .append(TextComponent.of(createdAgo, TextColor.GRAY))
             .build();
@@ -720,14 +735,14 @@ public class ModerationCommand implements Listener {
     }
 
     public Component getPunishmentPrefix(Component time) {
-      return TranslatableComponent.of(PREFIX_TRANSLATE_KEY + name().toLowerCase(), TextColor.GOLD)
-          .args(time);
+      return TranslatableComponent.of(
+          PREFIX_TRANSLATE_KEY + name().toLowerCase(), TextColor.GOLD, time);
     }
 
     public Component getScreenComponent(Component reason) {
       if (!screen) return TextComponent.empty();
-      return TranslatableComponent.of(SCREEN_TRANSLATE_KEY + name().toLowerCase(), TextColor.GOLD)
-          .args(reason);
+      return TranslatableComponent.of(
+          SCREEN_TRANSLATE_KEY + name().toLowerCase(), TextColor.GOLD, reason);
     }
   }
 
@@ -765,13 +780,12 @@ public class ModerationCommand implements Listener {
               ComponentRenderers.toLegacyText(
                   PeriodFormats.briefNaturalApproximate(Duration.ofSeconds(expires.getSeconds())),
                   Bukkit.getConsoleSender()));
-      lines.add(
-          TranslatableComponent.of("moderation.screen.expires", TextColor.GRAY).args(timeLeft));
+      lines.add(TranslatableComponent.of("moderation.screen.expires", TextColor.GRAY, timeLeft));
       lines.add(TextComponent.empty());
     }
 
     // Staff sign-off - who performed the punishment
-    lines.add(TranslatableComponent.of("moderation.screen.signoff", TextColor.GRAY).args(punisher));
+    lines.add(TranslatableComponent.of("moderation.screen.signoff", TextColor.GRAY, punisher));
 
     // Link to rules for review by player
     if (PGMConfig.Moderation.isRuleLinkVisible()) {
@@ -779,8 +793,8 @@ public class ModerationCommand implements Listener {
 
       lines.add(TextComponent.empty());
       lines.add(
-          TranslatableComponent.of("moderation.screen.rulesLink", TextColor.GRAY)
-              .args(rules)); // Link to rules
+          TranslatableComponent.of(
+              "moderation.screen.rulesLink", TextColor.GRAY, rules)); // Link to rules
     }
 
     // Configurable last line (for appeal message or etc)
@@ -900,8 +914,8 @@ public class ModerationCommand implements Listener {
               ComponentRenderers.toLegacyText(
                   PeriodFormats.relativePastApproximate(time).color(ChatColor.DARK_AQUA),
                   Bukkit.getConsoleSender()));
-      return TranslatableComponent.of("moderation.similarIP.hover", TextColor.GRAY)
-          .args(getPunisher(), timeAgo);
+      return TranslatableComponent.of(
+          "moderation.similarIP.hover", TextColor.GRAY, getPunisher(), timeAgo);
     }
   }
 
@@ -979,10 +993,10 @@ public class ModerationCommand implements Listener {
 
   private Component formatAltAccountBroadcast(BannedAccountInfo info, MatchPlayer player) {
     Component message =
-        TranslatableComponent.of("moderation.similarIP.loginEvent")
-            .args(
-                player.getName(NameStyle.FANCY),
-                TextComponent.of(info.getUserName(), TextColor.DARK_AQUA));
+        TranslatableComponent.of(
+            "moderation.similarIP.loginEvent",
+            player.getName(NameStyle.FANCY),
+            TextComponent.of(info.getUserName(), TextColor.DARK_AQUA));
     return message.hoverEvent(HoverEvent.of(Action.SHOW_TEXT, info.getHoverMessage()));
   }
 

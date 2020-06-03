@@ -151,7 +151,7 @@ public class Carried extends Spawned implements Missing {
       if (this.flag.getDefinition().getCarryMessage() != null) {
         message = this.flag.getDefinition().getCarryMessage();
       } else {
-        message = TranslatableComponent.of("flag.carrying").args(this.flag.getComponentName());
+        message = TranslatableComponent.of("flag.carrying", this.flag.getComponentName());
       }
 
       return message.color(TextColor.AQUA).decoration(TextDecoration.BOLD, true);
@@ -160,10 +160,12 @@ public class Carried extends Spawned implements Missing {
         message = this.deniedByNet.getDenyMessage();
       } else if (this.deniedByFlag != null) {
         message =
-            TranslatableComponent.of("flag.captureDenied.byFlag")
-                .args(this.flag.getComponentName(), this.deniedByFlag.getComponentName());
+            TranslatableComponent.of(
+                "flag.captureDenied.byFlag",
+                this.flag.getComponentName(),
+                this.deniedByFlag.getComponentName());
       } else {
-        message = TranslatableComponent.of("flag.captureDenied").args(this.flag.getComponentName());
+        message = TranslatableComponent.of("flag.captureDenied", this.flag.getComponentName());
       }
 
       return message.color(TextColor.RED).decoration(TextDecoration.BOLD, true);
@@ -219,13 +221,15 @@ public class Carried extends Spawned implements Missing {
 
   protected void captureFlag(Net net) {
     this.carrier.sendMessage(
-        TranslatableComponent.of("flag.capture.you").args(this.flag.getComponentName()));
+        TranslatableComponent.of("flag.capture.you", this.flag.getComponentName()));
 
     this.flag
         .getMatch()
         .sendMessage(
-            TranslatableComponent.of("flag.capture.player")
-                .args(this.flag.getComponentName(), this.carrier.getName(NameStyle.COLOR)));
+            TranslatableComponent.of(
+                "flag.capture.player",
+                this.flag.getComponentName(),
+                this.carrier.getName(NameStyle.COLOR)));
 
     this.flag.resetTouches(this.carrier.getCompetitor());
     this.flag.resetProximity(this.carrier.getCompetitor());

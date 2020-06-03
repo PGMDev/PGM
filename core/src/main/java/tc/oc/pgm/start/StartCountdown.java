@@ -37,8 +37,8 @@ public class StartCountdown extends PreMatchCountdown {
 
   @Override
   protected Component formatText() {
-    return TranslatableComponent.of("countdown.matchStart", TextColor.GREEN)
-        .args(secondsRemaining(TextColor.DARK_RED));
+    return TranslatableComponent.of(
+        "countdown.matchStart", TextColor.GREEN, secondsRemaining(TextColor.DARK_RED));
   }
 
   @Override
@@ -73,7 +73,7 @@ public class StartCountdown extends PreMatchCountdown {
         if (team.isStacked()) {
           this.balanceWarningSent = true;
           this.getMatch()
-              .sendWarning(TranslatableComponent.of("match.balanceTeams").args(team.getName()));
+              .sendWarning(TranslatableComponent.of("match.balanceTeams", team.getName()));
         }
       }
 

@@ -202,12 +202,13 @@ public class ScoreMatchModule implements MatchModule, Listener {
     if (wholePoints < 1) return;
 
     match.sendMessage(
-        TranslatableComponent.of("scorebox.scored")
-            .args(
-                player.getName(NameStyle.COLOR),
-                TranslatableComponent.of(wholePoints == 1 ? "misc.point" : "misc.points")
-                    .args(TextComponent.of(Integer.toString(wholePoints), TextColor.DARK_AQUA)),
-                player.getParty().getName()));
+        TranslatableComponent.of(
+            "scorebox.scored",
+            player.getName(NameStyle.COLOR),
+            TranslatableComponent.of(
+                wholePoints == 1 ? "misc.point" : "misc.points",
+                TextComponent.of(Integer.toString(wholePoints), TextColor.DARK_AQUA)),
+            player.getParty().getName()));
     player.playSound(new Sound("random.levelup"));
   }
 

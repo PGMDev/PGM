@@ -18,8 +18,8 @@ public class RestartCountdown extends MatchCountdown {
   @Override
   protected Component formatText() {
     if (TimeUtils.isLongerThan(remaining, Duration.ZERO)) {
-      return TranslatableComponent.of("countdown.restart", TextColor.AQUA)
-          .args(secondsRemaining(TextColor.DARK_RED));
+      return TranslatableComponent.of(
+          "countdown.restart", TextColor.AQUA, secondsRemaining(TextColor.DARK_RED));
     } else {
       return TranslatableComponent.of("misc.serverRestart", TextColor.RED);
     }

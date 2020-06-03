@@ -186,7 +186,7 @@ public class WoolMatchModule implements MatchModule, Listener {
         player.sendWarning(TranslatableComponent.of("wool.wrongWool", woolName));
       } else if (wool.getOwner() != player.getParty()) {
         player.sendWarning(
-            TranslatableComponent.of("wool.wrongTeam").args(wool.getOwner().getName(), woolName));
+            TranslatableComponent.of("wool.wrongTeam", wool.getOwner().getName(), woolName));
       } else {
         event.setCancelled(false);
         wool.markPlaced();
@@ -216,7 +216,7 @@ public class WoolMatchModule implements MatchModule, Listener {
           if (wool.getDefinition().isObjectiveWool(result)) {
             if (!wool.getDefinition().isCraftable()) {
               playerHolder.sendWarning(
-                  TranslatableComponent.of("wool.craftingDisabled").args(wool.getComponentName()));
+                  TranslatableComponent.of("wool.craftingDisabled", wool.getComponentName()));
               event.getInventory().setResult(null);
             }
           }

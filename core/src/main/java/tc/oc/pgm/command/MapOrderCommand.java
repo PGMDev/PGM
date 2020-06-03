@@ -67,8 +67,11 @@ public final class MapOrderCommand {
         Component mapName = mapOrder.getNextMap().getStyledName(MapNameStyle.COLOR);
         mapOrder.resetNextMap();
         ChatDispatcher.broadcastAdminChatMessage(
-            TranslatableComponent.of("map.setNext.revert", TextColor.GRAY)
-                .args(UsernameFormatUtils.formatStaffName(sender, match), mapName),
+            TranslatableComponent.of(
+                "map.setNext.revert",
+                TextColor.GRAY,
+                UsernameFormatUtils.formatStaffName(sender, match),
+                mapName),
             match);
       } else {
         viewer.sendWarning(TranslatableComponent.of("map.noNextMap"));
@@ -86,8 +89,11 @@ public final class MapOrderCommand {
 
     Component mapName = TextComponent.of(map.getName(), TextColor.GOLD);
     Component successful =
-        TranslatableComponent.of("map.setNext", TextColor.GRAY)
-            .args(UsernameFormatUtils.formatStaffName(sender, match), mapName);
+        TranslatableComponent.of(
+            "map.setNext",
+            TextColor.GRAY,
+            UsernameFormatUtils.formatStaffName(sender, match),
+            mapName);
     ChatDispatcher.broadcastAdminChatMessage(successful, match);
   }
 }

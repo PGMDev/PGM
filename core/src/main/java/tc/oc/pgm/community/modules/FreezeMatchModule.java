@@ -331,7 +331,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
       removeEntities(freezee.getBukkit().getLocation(), 10);
 
       Component freeze = TranslatableComponent.of("moderation.freeze.frozen");
-      Component by = TranslatableComponent.of("misc.by").args(senderName);
+      Component by = TranslatableComponent.of("misc.by", senderName);
 
       TextComponent.Builder freezeTitle = TextComponent.builder();
       freezeTitle.append(freeze);
@@ -349,8 +349,11 @@ public class FreezeMatchModule implements MatchModule, Listener {
       freezee.playSound(FREEZE_SOUND);
 
       ChatDispatcher.broadcastAdminChatMessage(
-          TranslatableComponent.of("moderation.freeze.broadcast.frozen", TextColor.GRAY)
-              .args(senderName, freezee.getName(NameStyle.FANCY)),
+          TranslatableComponent.of(
+              "moderation.freeze.broadcast.frozen",
+              TextColor.GRAY,
+              senderName,
+              freezee.getName(NameStyle.FANCY)),
           match);
     }
 
@@ -358,7 +361,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
       frozenPlayers.remove(freezee.getBukkit());
 
       Component thawed = TranslatableComponent.of("moderation.freeze.unfrozen");
-      Component by = TranslatableComponent.of("misc.by").args(senderName);
+      Component by = TranslatableComponent.of("misc.by", senderName);
 
       TextComponent.Builder thawedTitle = TextComponent.builder().append(thawed);
       if (!silent) {
@@ -370,8 +373,11 @@ public class FreezeMatchModule implements MatchModule, Listener {
       freezee.sendMessage(thawedTitle.color(TextColor.GREEN).build());
 
       ChatDispatcher.broadcastAdminChatMessage(
-          TranslatableComponent.of("moderation.freeze.broadcast.thaw", TextColor.GRAY)
-              .args(senderName, freezee.getName(NameStyle.FANCY)),
+          TranslatableComponent.of(
+              "moderation.freeze.broadcast.thaw",
+              TextColor.GRAY,
+              senderName,
+              freezee.getName(NameStyle.FANCY)),
           match);
     }
 

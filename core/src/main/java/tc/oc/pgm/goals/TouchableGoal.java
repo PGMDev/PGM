@@ -215,8 +215,7 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
 
       if (getDeferTouches()) {
         toucher.sendMessage(
-            TranslatableComponent.of("objective.credit.future")
-                .args(TextComponent.of(this.getName())));
+            TranslatableComponent.of("objective.credit.future", TextComponent.of(this.getName())));
       }
     }
   }

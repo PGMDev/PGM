@@ -32,8 +32,8 @@ public class TimeLimitCountdown extends MatchCountdown {
 
   @Override
   protected Component formatText() {
-    return TranslatableComponent.of("misc.timeRemaining", TextColor.AQUA)
-        .args(TextComponent.of(colonTime(), urgencyColor()));
+    return TranslatableComponent.of(
+        "misc.timeRemaining", TextColor.AQUA, TextComponent.of(colonTime(), urgencyColor()));
   }
 
   @Override

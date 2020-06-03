@@ -121,8 +121,8 @@ public class Dead extends Spawning {
     long ticks = ticksUntilRespawn();
     if (ticks > 0) {
       return TranslatableComponent.of(
-              spawnRequested ? "death.respawn.confirmed.time" : "death.respawn.unconfirmed.time")
-          .args(TextComponent.of(String.format("%.1f", (ticks / (float) 20)), TextColor.AQUA));
+          spawnRequested ? "death.respawn.confirmed.time" : "death.respawn.unconfirmed.time",
+          TextComponent.of(String.format("%.1f", (ticks / (float) 20)), TextColor.AQUA));
     } else {
       return super.getSubtitle();
     }

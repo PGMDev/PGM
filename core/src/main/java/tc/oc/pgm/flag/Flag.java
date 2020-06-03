@@ -253,10 +253,10 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   @Override
   public Component getTouchMessage(ParticipantState toucher, boolean self) {
     if (self) {
-      return TranslatableComponent.of("flag.touch.you").args(getComponentName());
+      return TranslatableComponent.of("flag.touch.you", getComponentName());
     } else {
-      return TranslatableComponent.of("flag.touch.player")
-          .args(getComponentName(), toucher.getName(NameStyle.COLOR));
+      return TranslatableComponent.of(
+          "flag.touch.player", getComponentName(), toucher.getName(NameStyle.COLOR));
     }
   }
 

@@ -226,8 +226,10 @@ public final class MapPoolCommand {
     } else {
       if (newPool.equals(mapPoolManager.getActiveMapPool())) {
         sender.sendMessage(
-            TranslatableComponent.of("pool.matching", TextColor.GRAY)
-                .args(TextComponent.of(newPool.getName(), TextColor.LIGHT_PURPLE)));
+            TranslatableComponent.of(
+                "pool.matching",
+                TextColor.GRAY,
+                TextComponent.of(newPool.getName(), TextColor.LIGHT_PURPLE)));
         return;
       }
       mapPoolManager.updateActiveMapPool(newPool, match, true, source, timeLimit);
@@ -264,8 +266,8 @@ public final class MapPoolCommand {
             .append(pool.getName(), TextColor.AQUA)
             .append("]", TextColor.WHITE)
             .append(
-                TranslatableComponent.of("pool.skip", TextColor.GREEN)
-                    .args(TextComponent.of(positions, TextColor.AQUA)))
+                TranslatableComponent.of(
+                    "pool.skip", TextColor.GREEN, TextComponent.of(positions, TextColor.AQUA)))
             .build();
 
     viewer.sendMessage(message);
@@ -285,9 +287,9 @@ public final class MapPoolCommand {
 
     Component voteAction =
         TranslatableComponent.of(
-                voteResult ? "vote.for" : "vote.abstain",
-                voteResult ? TextColor.GREEN : TextColor.RED)
-            .args(map.getStyledName(MapNameStyle.COLOR));
+            voteResult ? "vote.for" : "vote.abstain",
+            voteResult ? TextColor.GREEN : TextColor.RED,
+            map.getStyledName(MapNameStyle.COLOR));
     player.sendMessage(voteAction);
     poll.sendBook(player);
   }

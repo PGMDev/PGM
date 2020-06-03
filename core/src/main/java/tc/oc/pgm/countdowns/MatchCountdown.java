@@ -152,10 +152,10 @@ public abstract class MatchCountdown extends Countdown {
   protected Component secondsRemaining(TextColor color) {
     long seconds = remaining.getSeconds();
     if (seconds == 1) {
-      return TranslatableComponent.of("misc.second").args(TextComponent.of("1", color));
+      return TranslatableComponent.of("misc.second", TextComponent.of("1", color));
     } else {
-      return TranslatableComponent.of("misc.seconds")
-          .args(TextComponent.of(String.valueOf(seconds), color));
+      return TranslatableComponent.of(
+          "misc.seconds", TextComponent.of(String.valueOf(seconds), color));
     }
   }
 

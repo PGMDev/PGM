@@ -64,8 +64,11 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
 
   @Override
   public Component getTouchMessage(ParticipantState toucher, boolean self) {
-    return TranslatableComponent.of(self ? "wool.touch.owned.you" : "wool.touch.owned.player")
-        .args(toucher.getName(NameStyle.COLOR), getComponentName(), toucher.getParty().getName());
+    return TranslatableComponent.of(
+        self ? "wool.touch.owned.you" : "wool.touch.owned.player",
+        toucher.getName(NameStyle.COLOR),
+        getComponentName(),
+        toucher.getParty().getName());
   }
 
   @Override

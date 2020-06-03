@@ -53,8 +53,11 @@ public class ModeChangeCountdown extends MatchCountdown implements Comparable<Mo
 
   @Override
   protected Component formatText() {
-    return TranslatableComponent.of("objective.modeCountdown", TextColor.DARK_AQUA)
-        .args(getMode().getComponentName(), secondsRemaining(TextColor.AQUA));
+    return TranslatableComponent.of(
+        "objective.modeCountdown",
+        TextColor.DARK_AQUA,
+        getMode().getComponentName(),
+        secondsRemaining(TextColor.AQUA));
   }
 
   @Override

@@ -232,8 +232,10 @@ public final class MapCommand {
               .clickEvent(ClickEvent.runCommand("/maps -t " + mapTag))
               .hoverEvent(
                   HoverEvent.showText(
-                      TranslatableComponent.of("map.info.mapTag.hover", TextColor.GRAY)
-                          .args(TextComponent.of(mapTag, TextColor.GOLD))))
+                      TranslatableComponent.of(
+                          "map.info.mapTag.hover",
+                          TextColor.GRAY,
+                          TextComponent.of(mapTag, TextColor.GOLD))))
               .build();
 
       result.append(tag);

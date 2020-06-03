@@ -113,11 +113,12 @@ public class ReportCommand {
     sender.sendMessage(thanks);
 
     final Component component =
-        TranslatableComponent.of("moderation.report.notify", TextColor.YELLOW)
-            .args(
-                sender == null ? UsernameFormatUtils.CONSOLE_NAME : sender.getName(NameStyle.FANCY),
-                accused.getName(NameStyle.FANCY),
-                TextComponent.of(reason.trim(), TextColor.WHITE));
+        TranslatableComponent.of(
+            "moderation.report.notify",
+            TextColor.YELLOW,
+            sender == null ? UsernameFormatUtils.CONSOLE_NAME : sender.getName(NameStyle.FANCY),
+            accused.getName(NameStyle.FANCY),
+            TextComponent.of(reason.trim(), TextColor.WHITE));
 
     RECENT_REPORTS.put(
         UUID.randomUUID(),
@@ -169,14 +170,15 @@ public class ReportCommand {
     int pages = (reportList.size() + perPage - 1) / perPage;
 
     Component pageNum =
-        TranslatableComponent.of("command.simplePageHeader", TextColor.AQUA)
-            .args(
-                TextComponent.of(Integer.toString(page), TextColor.RED),
-                TextComponent.of(Integer.toString(pages), TextColor.RED));
+        TranslatableComponent.of(
+            "command.simplePageHeader",
+            TextColor.AQUA,
+            TextComponent.of(Integer.toString(page), TextColor.RED),
+            TextComponent.of(Integer.toString(pages), TextColor.RED));
 
     Component header =
-        TranslatableComponent.of("moderation.reports.header", TextColor.GRAY)
-            .args(headerResultCount, pageNum)
+        TranslatableComponent.of(
+                "moderation.reports.header", TextColor.GRAY, headerResultCount, pageNum)
             .append(
                 TextComponent.of(" (")
                     .append(headerResultCount)
@@ -193,8 +195,8 @@ public class ReportCommand {
       public Component format(Report data, int index) {
 
         Component reporter =
-            TranslatableComponent.of("moderation.reports.hover", TextColor.GRAY)
-                .args(data.getSenderComponent(match));
+            TranslatableComponent.of(
+                "moderation.reports.hover", TextColor.GRAY, data.getSenderComponent(match));
 
         Component timeAgo =
             TextComponent.of(

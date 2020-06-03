@@ -59,19 +59,23 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     public Component getReason() {
       if (team != null) {
         if (players == 1) {
-          return TranslatableComponent.of("join.wait.singular.team")
-              .args(TextComponent.of(String.valueOf(players), TextColor.AQUA), team.getName());
+          return TranslatableComponent.of(
+              "join.wait.singular.team",
+              TextComponent.of(String.valueOf(players), TextColor.AQUA),
+              team.getName());
         } else {
-          return TranslatableComponent.of("join.wait.plural.team")
-              .args(TextComponent.of(String.valueOf(players), TextColor.AQUA), team.getName());
+          return TranslatableComponent.of(
+              "join.wait.plural.team",
+              TextComponent.of(String.valueOf(players), TextColor.AQUA),
+              team.getName());
         }
       } else {
         if (players == 1) {
-          return TranslatableComponent.of("join.wait.singular")
-              .args(TextComponent.of(String.valueOf(players), TextColor.AQUA));
+          return TranslatableComponent.of(
+              "join.wait.singular", TextComponent.of(String.valueOf(players), TextColor.AQUA));
         } else {
-          return TranslatableComponent.of("join.wait.plural")
-              .args(TextComponent.of(String.valueOf(players), TextColor.AQUA));
+          return TranslatableComponent.of(
+              "join.wait.plural", TextComponent.of(String.valueOf(players), TextColor.AQUA));
         }
       }
     }
@@ -447,8 +451,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
       switch (teamResult.getStatus()) {
         case SWITCH_DISABLED:
-          joining.sendWarning(
-              TranslatableComponent.of("join.err.noSwitch").args(lastTeam.getName()));
+          joining.sendWarning(TranslatableComponent.of("join.err.noSwitch", lastTeam.getName()));
           return true;
 
         case CHOICE_DISABLED:
@@ -459,8 +462,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
         case FULL:
           if (teamResult.getTeam() != null) {
             joining.sendWarning(
-                TranslatableComponent.of("join.err.full.team")
-                    .args(teamResult.getTeam().getName()));
+                TranslatableComponent.of("join.err.full.team", teamResult.getTeam().getName()));
           } else {
             joining.sendWarning(TranslatableComponent.of("join.err.full"));
           }
@@ -469,8 +471,8 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
         case REDUNDANT:
           joining.sendWarning(
-              TranslatableComponent.of("join.err.alreadyJoined.team")
-                  .args(joining.getParty().getName()));
+              TranslatableComponent.of(
+                  "join.err.alreadyJoined.team", joining.getParty().getName()));
           return true;
       }
 
@@ -570,15 +572,15 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
     // Give them the bad news
     if (jmm.canPriorityKick(kickMe)) {
-      kickMe.sendMessage(TranslatableComponent.of("join.ok.moved").args(kickTo.getName()));
+      kickMe.sendMessage(TranslatableComponent.of("join.ok.moved", kickTo.getName()));
       kickMe.sendMessage(TranslatableComponent.of("join.ok.moved.explanation"));
     } else {
       kickMe.playSound(new Sound("mob.villager.hit"));
       if (forBalance) {
-        kickMe.sendWarning(TranslatableComponent.of("join.ok.moved").args(kickTo.getName()));
+        kickMe.sendWarning(TranslatableComponent.of("join.ok.moved", kickTo.getName()));
       } else {
         kickMe.sendWarning(
-            TranslatableComponent.of("leave.ok.priorityKick.team").args(kickFrom.getName()));
+            TranslatableComponent.of("leave.ok.priorityKick.team", kickFrom.getName()));
       }
     }
 
@@ -599,8 +601,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
         || (event.getNewParty() instanceof Observers && event.getOldParty() != null)) {
       event
           .getPlayer()
-          .sendMessage(
-              TranslatableComponent.of("join.ok.team").args(event.getNewParty().getName()));
+          .sendMessage(TranslatableComponent.of("join.ok.team", event.getNewParty().getName()));
     }
     updateReadiness();
   }

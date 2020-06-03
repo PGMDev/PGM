@@ -62,11 +62,11 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     @Override
     public Component getReason() {
       if (players == 1) {
-        return TranslatableComponent.of("join.wait.singular")
-            .args(TextComponent.of(String.valueOf(players), TextColor.AQUA));
+        return TranslatableComponent.of(
+            "join.wait.singular", TextComponent.of(String.valueOf(players), TextColor.AQUA));
       } else {
-        return TranslatableComponent.of("join.wait.plural")
-            .args(TextComponent.of(String.valueOf(players), TextColor.AQUA));
+        return TranslatableComponent.of(
+            "join.wait.plural", TextComponent.of(String.valueOf(players), TextColor.AQUA));
       }
     }
 

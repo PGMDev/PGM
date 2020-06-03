@@ -50,14 +50,14 @@ public class CycleCountdown extends MatchCountdown {
     if (remaining.isZero()) {
       cycleComponent =
           mapName != null
-              ? TranslatableComponent.of("map.cycledMap").args(mapName)
+              ? TranslatableComponent.of("map.cycledMap", mapName)
               : TranslatableComponent.of("map.cycled");
     } else {
       Component secs = secondsRemaining(TextColor.DARK_RED);
       cycleComponent =
           mapName != null
-              ? TranslatableComponent.of("map.cycleMap").args(mapName, secs)
-              : TranslatableComponent.of("map.cycle").args(secs);
+              ? TranslatableComponent.of("map.cycleMap", mapName, secs)
+              : TranslatableComponent.of("map.cycle", secs);
     }
 
     return cycleComponent.color(TextColor.DARK_AQUA);

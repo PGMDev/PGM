@@ -19,8 +19,8 @@ public class HuddleCountdown extends PreMatchCountdown implements Listener {
 
   @Override
   protected Component formatText() {
-    return TranslatableComponent.of("countdown.huddleEnd", TextColor.YELLOW)
-        .args(secondsRemaining(TextColor.DARK_RED));
+    return TranslatableComponent.of(
+        "countdown.huddleEnd", TextColor.YELLOW, secondsRemaining(TextColor.DARK_RED));
   }
 
   @Override
