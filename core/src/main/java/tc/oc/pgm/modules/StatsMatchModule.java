@@ -159,6 +159,8 @@ public class StatsMatchModule implements MatchModule, Listener {
         getMessage("match.stats.killstreak", sortStats(allKillstreaks), ChatColor.GREEN);
     Component deathMessage = getMessage("match.stats.deaths", sortStats(allDeaths), ChatColor.RED);
     Map.Entry<UUID, Integer> bestBowshot = sortStats(allBowshots);
+    if (bestBowshot.getValue() == 1)
+      bestBowshot.setValue(2); // Avoids translating "1 block" vs "n blocks"
     Component bowshotMessage = getMessage("match.stats.bowshot", bestBowshot, ChatColor.YELLOW);
 
     match
@@ -215,8 +217,6 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   Component getMessage(String messageKey, Map.Entry<UUID, Integer> mapEntry, ChatColor color) {
-    if (mapEntry.getValue() == 1)
-      mapEntry.setValue(2); // Avoids translating "1 block" vs "n blocks"
     return new Component(
         new PersonalizedTranslatable(
                 messageKey,
