@@ -295,15 +295,13 @@ public class PGMListener implements Listener {
   @EventHandler
   public void freezeWorld(final BlockTransformEvent event) {
     Match match = this.mm.getMatch(event.getWorld());
-    if (match != null && match.isFinished()) {
-      event.setCancelled(true);
-    }
+    if (match == null || match.isFinished()) event.setCancelled(true);
   }
 
   @EventHandler
   public void freezeVehicle(final VehicleUpdateEvent event) {
     Match match = this.mm.getMatch(event.getWorld());
-    if (match != null && match.isFinished()) {
+    if (match == null || match.isFinished()) {
       event.getVehicle().setVelocity(new Vector());
     }
   }

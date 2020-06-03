@@ -14,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -104,6 +105,11 @@ public class SnapshotMatchModule implements MatchModule, Listener {
   // event
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onBlockChange(BlockTransformEvent event) {
+    Match match = PGM.get().getMatchManager().getMatch(event.getWorld());
+
+    // Dont carry over old chunks into a new match
+    if (match == null || match.isFinished()) return;
+
     Chunk chunk = event.getOldState().getChunk();
     ChunkVector chunkVector = ChunkVector.of(chunk);
     if (!chunkSnapshots.containsKey(chunkVector)) {
