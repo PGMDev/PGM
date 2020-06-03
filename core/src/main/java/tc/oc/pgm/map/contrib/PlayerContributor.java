@@ -30,12 +30,6 @@ public class PlayerContributor implements Contributor {
   }
 
   @Override
-  public String getUsername() {
-    final String name = username.getUsername();
-    return name == null ? "Unknown" : name;
-  }
-
-  @Override
   public String getContribution() {
     return contribution;
   }
@@ -48,11 +42,6 @@ public class PlayerContributor implements Contributor {
   @Override
   public Component getName(NameStyle style) {
     return username.getName(style);
-  }
-
-  @Override
-  public Component getName() {
-    return username.getName();
   }
 
   @Override

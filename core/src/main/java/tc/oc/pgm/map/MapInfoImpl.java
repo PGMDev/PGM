@@ -213,7 +213,7 @@ public class MapInfoImpl implements MapInfo {
           name.build(),
           TextFormatter.list(
               getAuthors().stream()
-                  .map(c -> TextComponent.of(c.getUsername(), TextColor.RED))
+                  .map(c -> c.getName().color(TextColor.RED))
                   .collect(Collectors.toList()),
               TextColor.DARK_PURPLE));
     }

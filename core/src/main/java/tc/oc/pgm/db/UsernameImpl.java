@@ -40,11 +40,6 @@ class UsernameImpl implements Username {
   }
 
   @Override
-  public Component getName() {
-    return getName(NameStyle.FANCY);
-  }
-
-  @Override
   public void setName(@Nullable String name) {
     if (name == null) {
       UsernameResolver.resolve(id, this::setName);
