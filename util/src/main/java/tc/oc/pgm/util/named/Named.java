@@ -6,5 +6,7 @@ public interface Named {
 
   Component getName(NameStyle style);
 
-  Component getName();
+  default Component getName() {
+    return getName(NameStyle.FANCY);
+  }
 }

@@ -1,32 +1,20 @@
 package tc.oc.pgm.match;
 
-import javax.annotation.Nullable;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import org.bukkit.Color;
-import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextParser;
 
 public abstract class ObservingParty extends SimpleParty {
 
-  private String coloredName;
   private Component componentName;
   private Component chatPrefix;
 
   public ObservingParty(Match match) {
     super(match);
-  }
-
-  @Override
-  public String getDisplayName() {
-    return getDefaultName();
-  }
-
-  @Override
-  public String getDisplayName(@Nullable CommandSender viewer) {
-    return getDisplayName();
   }
 
   @Override
@@ -40,22 +28,9 @@ public abstract class ObservingParty extends SimpleParty {
   }
 
   @Override
-  public String getColoredName() {
-    if (coloredName == null) {
-      coloredName = getColor() + getDisplayName();
-    }
-    return coloredName;
-  }
-
-  @Override
-  public String getColoredName(@Nullable CommandSender viewer) {
-    return getColoredName();
-  }
-
-  @Override
-  public Component getName() {
+  public Component getName(NameStyle style) {
     if (componentName == null) {
-      componentName = TextComponent.of(getDisplayName(), TextParser.parseTextColor(getColor()));
+      componentName = TextComponent.of(getDefaultName(), TextParser.parseTextColor(getColor()));
     }
     return componentName;
   }

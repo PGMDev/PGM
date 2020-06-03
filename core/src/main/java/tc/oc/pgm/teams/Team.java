@@ -8,7 +8,6 @@ import net.kyori.text.TextComponent;
 import org.apache.commons.lang.math.Fraction;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
-import org.bukkit.command.CommandSender;
 import org.bukkit.scoreboard.NameTagVisibility;
 import tc.oc.pgm.api.feature.Feature;
 import tc.oc.pgm.api.match.Match;
@@ -20,6 +19,7 @@ import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.match.SimpleParty;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextParser;
 
 /**
@@ -120,13 +120,27 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
     return info.getDefaultName();
   }
 
+  @Override
+  public boolean isNamePlural() {
+    // Assume custom names are singular
+    return this.name == null && this.info.isDefaultNamePlural();
+  }
+
+  @Override
+  public Component getName(NameStyle style) {
+    if (componentName == null) {
+      this.componentName =
+          TextComponent.of(getDisplayName(), TextParser.parseTextColor(getColor()));
+    }
+    return componentName;
+  }
+
   /**
    * Gets the name of this team that can be modified using setTeam. If no custom name is set then
    * this will return the default team name as specified in the team info.
    *
    * @return Name of the team without colors.
    */
-  @Override
   public String getDisplayName() {
     return name != null ? name : getDefaultName();
   }
@@ -140,32 +154,6 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
     } else {
       return getDisplayName();
     }
-  }
-
-  @Override
-  public String getDisplayName(@Nullable CommandSender viewer) {
-    return getDisplayName();
-  }
-
-  @Override
-  public boolean isNamePlural() {
-    // Assume custom names are singular
-    return this.name == null && this.info.isDefaultNamePlural();
-  }
-
-  /**
-   * Gets the combination of the team color with the team name.
-   *
-   * @return Colored version of the team name.
-   */
-  @Override
-  public String getColoredName() {
-    return getColor() + getDisplayName();
-  }
-
-  @Override
-  public String getColoredName(@Nullable CommandSender viewer) {
-    return getColor() + getDisplayName(viewer);
   }
 
   /**

@@ -486,7 +486,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
             .getLogger()
             .info(
                 "Bumping a player from "
-                    + teamResult.getTeam().getColoredName()
+                    + teamResult.getTeam().getDisplayName()
                     + " to make room for "
                     + joining.getBukkit().getName());
         kickPlayerOffTeam(teamResult.getTeam(), false);
@@ -533,7 +533,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
           .getLogger()
           .info(
               "Bumping a player from stacked team "
-                  + team.getColoredName()
+                  + team.getDisplayName()
                   + " size="
                   + team.getSize(false)
                   + " fullness="
@@ -586,7 +586,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
     match
         .getLogger()
-        .info("Bumping " + kickMe.getBukkit().getDisplayName() + " to " + kickTo.getColoredName());
+        .info("Bumping " + kickMe.getBukkit().getDisplayName() + " to " + kickTo.getDefaultName());
 
     if (kickTo instanceof Team) {
       return forceJoin(kickMe, (Team) kickTo);

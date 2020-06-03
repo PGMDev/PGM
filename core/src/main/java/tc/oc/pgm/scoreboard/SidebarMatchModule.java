@@ -62,6 +62,7 @@ import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.events.TeamRespawnsChangeEvent;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.text.TextTranslations;
 import tc.oc.pgm.wool.MonumentWool;
 import tc.oc.pgm.wool.WoolMatchModule;
 
@@ -456,7 +457,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
             text = renderBlitz(competitor, viewingParty);
           }
           if (text.length() != 0) text += " ";
-          rows.add(text + competitor.getColoredName());
+          rows.add(text + TextTranslations.translateLegacy(competitor.getName(), null));
         }
 
         if (!competitorsWithGoals.isEmpty() || !sharedGoals.isEmpty()) {
@@ -499,7 +500,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
         firstTeam = false;
 
         // Add a row for the team name
-        rows.add(competitor.getColoredName());
+        rows.add(TextTranslations.translateLegacy(competitor.getName(), null));
 
         if (isCompactWool) {
           boolean firstWool = true;

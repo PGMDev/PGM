@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import net.kyori.text.TextComponent;
+import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.match.Match;
@@ -25,6 +27,7 @@ import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.component.ComponentUtils;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -34,7 +37,7 @@ public final class MatchCommand {
   @Command(
       aliases = {"match", "matchinfo"},
       desc = "Show the match info")
-  public void match(CommandSender sender, MatchPlayer player, Match match) {
+  public void match(Audience viewer, CommandSender sender, MatchPlayer player, Match match) {
     // indicates whether we have game information from the match yet
     boolean haveGameInfo =
         match.getPhase() == MatchPhase.RUNNING || match.getPhase() == MatchPhase.FINISHED;
@@ -138,12 +141,13 @@ public final class MatchCommand {
             Team team = entry.getKey();
             Collection<String> goalTexts = entry.getValue();
 
-            sender.sendMessage(
-                "  "
-                    + team.getColoredName()
-                    + ChatColor.GRAY
-                    + ": "
-                    + Joiner.on("  ").join(goalTexts));
+            viewer.sendMessage(
+                TextComponent.builder()
+                    .append("  ")
+                    .append(team.getName())
+                    .append(": ", TextColor.GRAY)
+                    .append(Joiner.on("  ").join(goalTexts))
+                    .build());
           }
         }
       } else {

@@ -8,7 +8,6 @@ import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
-import org.bukkit.command.CommandSender;
 import org.bukkit.scoreboard.NameTagVisibility;
 import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
@@ -62,7 +61,7 @@ public class Tribute implements Competitor, MultiAudience {
 
   @Override
   public String toString() {
-    return getClass().getSimpleName() + "{match=" + getMatch() + ", name=" + getDisplayName() + "}";
+    return getClass().getSimpleName() + "{match=" + getMatch() + ", name=" + getDefaultName() + "}";
   }
 
   public UUID getPlayerId() {
@@ -81,16 +80,6 @@ public class Tribute implements Competitor, MultiAudience {
 
   @Override
   public String getDefaultName() {
-    return getDisplayName();
-  }
-
-  @Override
-  public String getDisplayName() {
-    return username;
-  }
-
-  @Override
-  public String getDisplayName(@Nullable CommandSender viewer) {
     return username;
   }
 
@@ -110,18 +99,8 @@ public class Tribute implements Competitor, MultiAudience {
   }
 
   @Override
-  public String getColoredName() {
-    return getColor() + getDisplayName();
-  }
-
-  @Override
-  public String getColoredName(@Nullable CommandSender viewer) {
-    return getColor() + getDisplayName(viewer);
-  }
-
-  @Override
-  public Component getName() {
-    return PlayerComponent.of(player.getBukkit(), NameStyle.FANCY);
+  public Component getName(NameStyle style) {
+    return PlayerComponent.of(player.getBukkit(), style);
   }
 
   @Override
