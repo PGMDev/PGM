@@ -140,7 +140,7 @@ groups:
   mapmaker:
     prefix: "&9*"
     permissions:
-      - "pgm.premium"
+      - "+pgm.premium"
 
 # Enables "community mode" with features such as /report, /freeze, /warn, and /ban.
 community:

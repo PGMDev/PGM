@@ -4,6 +4,7 @@ import java.util.Collection;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -27,7 +28,7 @@ public class MapmakerMatchModule implements MatchModule, Listener {
         .getBukkit()
         .addAttachment(
             PGM.get(),
-            "pgm.group.mapmaker",
+            Permissions.MAPMAKER,
             authors.stream().anyMatch(c -> c.isPlayer(player.getId())));
     PGM.get().getPrefixRegistry().removePlayer(player.getId()); // Refresh prefixes for the player
   }
