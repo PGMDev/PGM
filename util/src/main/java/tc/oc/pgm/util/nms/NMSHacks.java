@@ -27,6 +27,7 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
+import org.bukkit.util.Vector;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
 
 public interface NMSHacks {
@@ -486,5 +487,114 @@ public interface NMSHacks {
 
   static int getPing(Player player) {
     return ((CraftPlayer) player).getHandle().ping;
+  }
+
+  static Packet setPassengerPacket(int riderId, int vehicleId) {
+    return new PacketPlayOutAttachEntity(riderId, vehicleId, false);
+  }
+
+  static Packet entityEquipmentPacket(
+      int entityId, int slot, org.bukkit.inventory.ItemStack armor) {
+    return new PacketPlayOutEntityEquipment(entityId, slot, CraftItemStack.asNMSCopy(armor));
+  }
+
+  interface FakeEntity {
+    int entityId();
+
+    Entity entity();
+
+    void spawn(Player viewer, Location location, org.bukkit.util.Vector velocity);
+
+    default void spawn(Player viewer, Location location) {
+      spawn(viewer, location, new org.bukkit.util.Vector(0, 0, 0));
+    }
+
+    default void destroy(Player viewer) {
+      sendPacket(viewer, destroyEntitiesPacket(entityId()));
+    }
+
+    default void teleport(Player viewer, Location location) {
+      sendPacket(viewer, teleportEntityPacket(entityId(), location));
+    }
+
+    default void ride(Player viewer, Entity rider) {
+      sendPacket(viewer, setPassengerPacket(rider.getEntityId(), entityId()));
+    }
+
+    default void mount(Player viewer, Entity vehicle) {
+      sendPacket(viewer, setPassengerPacket(entityId(), vehicle.getEntityId()));
+    }
+
+    default void wear(Player viewer, int slot, org.bukkit.inventory.ItemStack item) {
+      sendPacket(viewer, entityEquipmentPacket(entityId(), slot, item));
+    }
+  }
+
+  abstract class FakeEntityImpl<T extends net.minecraft.server.v1_8_R3.Entity>
+      implements FakeEntity {
+    protected final T entity;
+
+    protected FakeEntityImpl(T entity) {
+      this.entity = entity;
+    }
+
+    @Override
+    public Entity entity() {
+      return entity.getBukkitEntity();
+    }
+
+    @Override
+    public int entityId() {
+      return entity.getId();
+    }
+  }
+
+  class FakeLivingEntity<T extends EntityLiving> extends FakeEntityImpl<T> {
+
+    protected FakeLivingEntity(T entity) {
+      super(entity);
+    }
+
+    @Override
+    public void spawn(Player viewer, Location location, Vector velocity) {
+      entity.setPositionRotation(
+          location.getX(),
+          location.getY(),
+          location.getZ(),
+          location.getYaw(),
+          location.getPitch());
+      entity.motX = velocity.getX();
+      entity.motY = velocity.getY();
+      entity.motZ = velocity.getZ();
+      sendPacket(viewer, spawnPacket());
+    }
+
+    protected Packet<?> spawnPacket() {
+      return new PacketPlayOutSpawnEntityLiving(entity);
+    }
+  }
+
+  class FakeZombie extends FakeLivingEntity<EntityZombie> {
+
+    public FakeZombie(World world, boolean invisible) {
+      this(world, invisible, false);
+    }
+
+    public FakeZombie(World world, boolean invisible, boolean baby) {
+      super(new EntityZombie(((CraftWorld) world).getHandle()));
+
+      entity.setInvisible(invisible);
+      entity.setBaby(baby);
+      NBTTagCompound tag = entity.getNBTTag();
+      if (tag == null) {
+        tag = new NBTTagCompound();
+      }
+      entity.c(tag);
+      tag.setBoolean("Silent", true);
+      tag.setBoolean("Invulnerable", true);
+      tag.setBoolean("NoGravity", true);
+      tag.setBoolean("NoAI", true);
+      entity.f(tag);
+    }
   }
 }
