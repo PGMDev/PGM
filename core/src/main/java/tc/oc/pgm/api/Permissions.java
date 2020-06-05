@@ -38,6 +38,8 @@ public interface Permissions {
   String FREEZE = ROOT + ".freeze"; // Access to the /freeze command
   String VANISH = ROOT + ".vanish"; // Access to /vanish command
 
+  String MAPMAKER = GROUP + ".mapmaker"; // Permission group for mapmakers, defined in config.yml
+
   // Role-specific permission nodes
   Permission DEFAULT =
       new Permission(

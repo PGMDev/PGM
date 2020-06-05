@@ -136,6 +136,12 @@ groups:
       - "-worldedit.navigation.jumpto.tool"
       - "-commandbook.teleport"
 
+  # A special group for authors of the playing map
+  mapmaker:
+    prefix: "&9*"
+    permissions:
+      - "+pgm.premium"
+
 # Enables "community mode" with features such as /report, /freeze, /warn, and /ban.
 community:
   enabled: true   # Is community mode enabled?
