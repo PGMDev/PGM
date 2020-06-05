@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.component;
+package tc.oc.pgm.util.text;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -6,8 +6,9 @@ import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.List;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
 
 public class PeriodFormats {
 
@@ -65,17 +66,16 @@ public class PeriodFormats {
 
   /** Return a localized description of the given time interval. */
   public static Component formatPeriod(TemporalUnit unit, long quantity) {
-    return new PersonalizedTranslatable(
-        periodKey(unit, quantity), new PersonalizedText(String.valueOf(quantity)));
+    return TranslatableComponent.of(
+        periodKey(unit, quantity), TextComponent.of(String.valueOf(quantity)));
   }
 
   /**
    * Return a localized description of the given time period, which must contain exactly one field.
    */
   public static Component formatPeriod(Period period) {
-    return new PersonalizedTranslatable(
-        periodKey(period),
-        new PersonalizedText(String.valueOf(period.get(period.getUnits().get(0)))));
+    return TranslatableComponent.of(
+        periodKey(period), TextComponent.of(String.valueOf(period.get(period.getUnits().get(0)))));
   }
 
   /**
@@ -132,7 +132,7 @@ public class PeriodFormats {
   }
 
   public static Component relativePastApproximate(Instant then) {
-    return new PersonalizedTranslatable(
+    return TranslatableComponent.of(
         "misc.timeAgo", briefNaturalApproximate(Duration.between(then, Instant.now())));
   }
 }

@@ -12,8 +12,8 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.PlayerClass;
+import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.StringUtils;
-import tc.oc.pgm.util.component.ComponentUtils;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -65,7 +65,7 @@ public final class ClassCommand {
     final PlayerClass currentClass = classes.getSelectedClass(player.getId());
 
     player.sendMessage(
-        ComponentUtils.dashedChatMessage(
+        LegacyFormatUtils.dashedChatMessage(
             ChatColor.GOLD + TextTranslations.translate("match.class.title", player.getBukkit()),
             "-",
             ChatColor.RED.toString()));

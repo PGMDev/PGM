@@ -2,6 +2,7 @@ package tc.oc.pgm.flag.state;
 
 import java.time.Duration;
 import java.time.Instant;
+import net.kyori.text.TranslatableComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import tc.oc.pgm.api.party.Party;
@@ -11,7 +12,6 @@ import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.scoreboard.SidebarMatchModule;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 /**
  * State of a flag after a player drops it on the ground, either by dying or by clicking on the
@@ -42,7 +42,7 @@ public class Dropped extends Uncarried implements Missing {
       this.flag.playStatusSound(Flag.DROP_SOUND_OWN, Flag.DROP_SOUND);
       this.flag
           .getMatch()
-          .sendMessage(new PersonalizedTranslatable("flag.drop", this.flag.getComponentName()));
+          .sendMessage(TranslatableComponent.of("flag.drop", this.flag.getComponentName()));
     }
 
     if (TimeUtils.isInfinite(getDuration())) {

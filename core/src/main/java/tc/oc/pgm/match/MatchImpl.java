@@ -511,7 +511,7 @@ public class MatchImpl implements Match {
         callEvent(request);
         if (request.isCancelled()
             && newParty != null) { // Can't cancel this if the player is leaving the match
-          player.sendWarning(request.getCancelReason(), true);
+          player.sendWarning(request.getCancelReason());
           return false;
         }
       }
@@ -522,7 +522,7 @@ public class MatchImpl implements Match {
         callEvent(request);
         if (request.isCancelled()
             && oldParty != null) { // Can't cancel this if the player is joining the match
-          player.sendWarning(request.getCancelReason(), true);
+          player.sendWarning(request.getCancelReason());
           return false;
         }
       }

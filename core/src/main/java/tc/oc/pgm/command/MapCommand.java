@@ -36,11 +36,12 @@ import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.rotation.MapPool;
 import tc.oc.pgm.rotation.MapPoolManager;
-import tc.oc.pgm.util.PrettyPaginatedResult;
+import tc.oc.pgm.util.LegacyFormatUtils;
+import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.chat.Audience;
-import tc.oc.pgm.util.component.ComponentUtils;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public final class MapCommand {
@@ -80,17 +81,32 @@ public final class MapCommand {
     int resultsPerPage = 8;
     int pages = (maps.size() + resultsPerPage - 1) / resultsPerPage;
 
-    String title =
-        ComponentUtils.paginate(TextTranslations.translate("map.title", sender), page, pages);
-    String listHeader =
-        ComponentUtils.horizontalLineHeading(title, ChatColor.BLUE, ComponentUtils.MAX_CHAT_WIDTH);
+    Component title =
+        TextFormatter.paginate(
+            TranslatableComponent.of("map.title"),
+            page,
+            pages,
+            TextColor.DARK_AQUA,
+            TextColor.AQUA,
+            true);
+    Component listHeader = TextFormatter.horizontalLineHeading(sender, title, TextColor.BLUE);
 
-    new PrettyPaginatedResult<MapInfo>(listHeader, resultsPerPage) {
+    new PrettyPaginatedComponentResults<MapInfo>(listHeader, resultsPerPage) {
       @Override
-      public String format(MapInfo map, int index) {
-        return (index + 1)
-            + ". "
-            + map.getStyledNameLegacy(MapNameStyle.COLOR_WITH_AUTHORS, sender);
+      public Component format(MapInfo map, int index) {
+        return TextComponent.builder()
+            .append(Integer.toString(index + 1))
+            .append(". ")
+            .append(
+                map.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS)
+                    .hoverEvent(
+                        HoverEvent.showText(
+                            TranslatableComponent.of(
+                                "command.maps.hover",
+                                TextColor.GRAY,
+                                map.getStyledName(MapNameStyle.COLOR))))
+                    .clickEvent(ClickEvent.runCommand("/map " + map.getName())))
+            .build();
       }
     }.display(audience, ImmutableSortedSet.copyOf(maps), page);
   }
@@ -127,7 +143,7 @@ public final class MapCommand {
       usage = "[map name] - defaults to the current map")
   public void map(Audience audience, CommandSender sender, @Text MapInfo map) {
     audience.sendMessage(
-        ComponentUtils.horizontalLineHeading(
+        LegacyFormatUtils.horizontalLineHeading(
             ChatColor.DARK_AQUA
                 + map.getName()
                 + " "
@@ -172,7 +188,7 @@ public final class MapCommand {
       for (String rule : map.getRules()) {
         audience.sendMessage(
             TextComponent.builder()
-                .append(++i + ")", TextColor.WHITE)
+                .append(++i + ") ", TextColor.WHITE)
                 .append(rule, TextColor.GOLD)
                 .build());
       }

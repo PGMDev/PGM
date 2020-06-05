@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.types.PlayerComponent;
 
 /**
@@ -45,7 +46,8 @@ public class PlayerTabEntry extends DynamicTabEntry {
 
   @Override
   public BaseComponent getContent(TabView view) {
-    return PlayerComponent.renderBaseComponent(view.getViewer(), NameStyle.TAB);
+    return TextFormatter.renderBaseComponent(
+        view.getViewer(), PlayerComponent.of(view.getViewer(), NameStyle.TAB));
   }
 
   @Override

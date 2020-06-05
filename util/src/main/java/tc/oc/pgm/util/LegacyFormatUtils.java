@@ -1,11 +1,16 @@
-package tc.oc.pgm.util.component;
+package tc.oc.pgm.util;
 
 import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 
-public final class ComponentUtils {
+/**
+ * These utilities should no longer be used, instead use {@linkTextFormatter}
+ *
+ * <p>TODO: Determine if any of these would be useful and move to {@link TextFormatter}
+ */
+public final class LegacyFormatUtils {
 
   public static final int GUARANTEED_NO_WRAP_CHAT_PAGE_WIDTH = 55;
   public static final int MAX_CHAT_WIDTH = 300;
@@ -575,11 +580,6 @@ public final class ComponentUtils {
       }
     }
     return String.valueOf(chars);
-  }
-
-  public static String paginate(String title, int page, int pages) {
-    title += ChatColor.DARK_AQUA + " (" + ChatColor.AQUA + page + ChatColor.DARK_AQUA;
-    return title + " of " + ChatColor.AQUA + pages + ChatColor.DARK_AQUA + ")";
   }
 
   public static net.md_5.bungee.api.ChatColor convert(Enum<?> color) {

@@ -31,6 +31,7 @@ import org.jdom2.Attribute;
 import org.jdom2.Element;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.Version;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.material.matcher.AllMaterialMatcher;
@@ -921,7 +922,9 @@ public final class XMLUtils {
    */
   public static Component parseFormattedText(@Nullable Node node, Component def)
       throws InvalidXMLException {
-    return node == null ? def : TextParser.parseComponent(node.getValueNormalize());
+    return node == null
+        ? def
+        : TextParser.parseComponent(BukkitUtils.colorize(node.getValueNormalize()));
   }
 
   /**

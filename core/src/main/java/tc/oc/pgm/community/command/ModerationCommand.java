@@ -47,14 +47,13 @@ import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.community.events.PlayerPunishmentEvent;
 import tc.oc.pgm.community.modules.FreezeMatchModule;
 import tc.oc.pgm.listeners.ChatDispatcher;
+import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.chat.Sound;
-import tc.oc.pgm.util.component.ComponentRenderers;
-import tc.oc.pgm.util.component.ComponentUtils;
-import tc.oc.pgm.util.component.PeriodFormats;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.PeriodFormats;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -528,7 +527,7 @@ public class ModerationCommand implements Listener {
 
       Component formattedHeader =
           TextComponent.of(
-              ComponentUtils.horizontalLineHeading(
+              LegacyFormatUtils.horizontalLineHeading(
                   TextTranslations.translateLegacy(header, sender), ChatColor.BLUE));
 
       new PrettyPaginatedComponentResults<Component>(formattedHeader, perPage) {
@@ -593,14 +592,13 @@ public class ModerationCommand implements Listener {
     Component expireDate = TextComponent.empty();
     if (expires) {
       String length =
-          ComponentRenderers.toLegacyText(
+          TextTranslations.translateLegacy(
               PeriodFormats.briefNaturalApproximate(
                   ban.getCreated().toInstant(), ban.getExpiration().toInstant()),
               sender);
-      String remaining =
-          ComponentRenderers.toLegacyText(
-              PeriodFormats.briefNaturalApproximate(Instant.now(), ban.getExpiration().toInstant()),
-              sender);
+      Component remaining =
+          PeriodFormats.briefNaturalApproximate(Instant.now(), ban.getExpiration().toInstant())
+              .color(TextColor.YELLOW);
 
       banType =
           TranslatableComponent.of(
@@ -610,16 +608,11 @@ public class ModerationCommand implements Listener {
                   length.lastIndexOf('s') != -1
                       ? length.substring(0, length.lastIndexOf('s'))
                       : length));
-      expireDate =
-          TranslatableComponent.of(
-              "moderation.screen.expires",
-              TextColor.GRAY,
-              TextComponent.of(remaining, TextColor.YELLOW));
+      expireDate = TranslatableComponent.of("moderation.screen.expires", TextColor.GRAY, remaining);
     }
 
-    String createdAgo =
-        ComponentRenderers.toLegacyText(
-            PeriodFormats.relativePastApproximate(ban.getCreated().toInstant()), sender);
+    Component createdAgo =
+        PeriodFormats.relativePastApproximate(ban.getCreated().toInstant()).color(TextColor.GRAY);
 
     Component banTypeFormatted =
         TranslatableComponent.of("moderation.type", TextColor.GRAY, banType);
@@ -637,12 +630,10 @@ public class ModerationCommand implements Listener {
                     TextColor.GRAY,
                     TextComponent.of(ban.getSource(), TextColor.AQUA)))
             .append(TextComponent.space())
-            .append(TextComponent.of(createdAgo, TextColor.GRAY))
+            .append(createdAgo)
             .build();
 
-    viewer.sendMessage(
-        ComponentUtils.horizontalLineHeading(
-            TextTranslations.translateLegacy(header, sender), ChatColor.DARK_PURPLE));
+    viewer.sendMessage(TextFormatter.horizontalLineHeading(sender, header, TextColor.DARK_PURPLE));
     viewer.sendMessage(banTypeFormatted);
     viewer.sendMessage(reason);
     viewer.sendMessage(source);
@@ -762,11 +753,12 @@ public class ModerationCommand implements Listener {
 
     Component header =
         TextComponent.of(
-            ComponentUtils.horizontalLineHeading(
+            LegacyFormatUtils.horizontalLineHeading(
                 PGMConfig.Moderation.getServerName(), ChatColor.DARK_GRAY));
     Component footer =
         TextComponent.of(
-            ComponentUtils.horizontalLine(ChatColor.DARK_GRAY, ComponentUtils.MAX_CHAT_WIDTH));
+            LegacyFormatUtils.horizontalLine(
+                ChatColor.DARK_GRAY, LegacyFormatUtils.MAX_CHAT_WIDTH));
 
     lines.add(header); // Header Line (server name) - START
     lines.add(TextComponent.empty());
@@ -776,10 +768,7 @@ public class ModerationCommand implements Listener {
     // If punishment expires, inform user when
     if (expires != null) {
       Component timeLeft =
-          TextComponent.of(
-              ComponentRenderers.toLegacyText(
-                  PeriodFormats.briefNaturalApproximate(Duration.ofSeconds(expires.getSeconds())),
-                  Bukkit.getConsoleSender()));
+          PeriodFormats.briefNaturalApproximate(Duration.ofSeconds(expires.getSeconds()));
       lines.add(TranslatableComponent.of("moderation.screen.expires", TextColor.GRAY, timeLeft));
       lines.add(TextComponent.empty());
     }
@@ -850,7 +839,7 @@ public class ModerationCommand implements Listener {
     Component prefix = type.getPunishmentPrefix();
     if (length != null && !length.isZero()) {
       String time =
-          ComponentRenderers.toLegacyText(
+          TextTranslations.translateLegacy(
               PeriodFormats.briefNaturalApproximate(Duration.ofSeconds(length.getSeconds())),
               sender);
       prefix =
@@ -908,12 +897,7 @@ public class ModerationCommand implements Listener {
     }
 
     public Component getHoverMessage() {
-      // TODO: Upgrade once PeriodFormats has been migrated
-      Component timeAgo =
-          TextComponent.of(
-              ComponentRenderers.toLegacyText(
-                  PeriodFormats.relativePastApproximate(time).color(ChatColor.DARK_AQUA),
-                  Bukkit.getConsoleSender()));
+      Component timeAgo = PeriodFormats.relativePastApproximate(time).color(TextColor.DARK_AQUA);
       return TranslatableComponent.of(
           "moderation.similarIP.hover", TextColor.GRAY, getPunisher(), timeAgo);
     }

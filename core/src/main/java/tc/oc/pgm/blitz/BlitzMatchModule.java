@@ -3,6 +3,9 @@ package tc.oc.pgm.blitz;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -19,8 +22,6 @@ import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.PlayerParticipationStartEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 public class BlitzMatchModule implements MatchModule, Listener {
 
@@ -84,9 +85,8 @@ public class BlitzMatchModule implements MatchModule, Listener {
   public void handleJoin(final PlayerParticipationStartEvent event) {
     if (event.getMatch().isRunning()) {
       event.cancel(
-          new PersonalizedTranslatable(
-              "blitz.joinDenied",
-              new PersonalizedText("Blitz", net.md_5.bungee.api.ChatColor.AQUA)));
+          TranslatableComponent.of(
+              "blitz.joinDenied", TranslatableComponent.of("gamemode.blitz.name", TextColor.AQUA)));
     }
   }
 
@@ -97,16 +97,14 @@ public class BlitzMatchModule implements MatchModule, Listener {
       event
           .getPlayer()
           .showTitle(
-              new PersonalizedText(),
-              new PersonalizedText(
-                  new PersonalizedTranslatable(
-                      "blitz.livesRemaining",
-                      new PersonalizedText(
-                          new PersonalizedTranslatable(
-                              lives == 1 ? "misc.life" : "misc.lives",
-                              new PersonalizedText(Integer.toString(lives))),
-                          net.md_5.bungee.api.ChatColor.AQUA)),
-                  net.md_5.bungee.api.ChatColor.RED),
+              TextComponent.empty(),
+              TranslatableComponent.of(
+                  "blitz.livesRemaining",
+                  TextColor.RED,
+                  TranslatableComponent.of(
+                      lives == 1 ? "misc.life" : "misc.lives",
+                      TextColor.AQUA,
+                      TextComponent.of(Integer.toString(lives)))),
               0,
               60,
               20);

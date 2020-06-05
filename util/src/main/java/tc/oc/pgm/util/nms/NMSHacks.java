@@ -27,8 +27,6 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
 
 public interface NMSHacks {
@@ -372,16 +370,6 @@ public interface NMSHacks {
     PacketPlayOutChat packet = new PacketPlayOutChat(null, (byte) position);
     packet.components = message;
     sendPacket(player, packet);
-  }
-
-  // Only legacy formatting actually works, even though the packet uses components.
-  // If this is ever fixed, the methods below can be changed to pass the components through.
-  static void sendHotbarMessage(Player player, String message) {
-    sendMessage(player, new BaseComponent[] {new PersonalizedText(message).render(player)}, 2);
-  }
-
-  static void sendHotbarMessage(Player player, Component message) {
-    sendHotbarMessage(player, message.toLegacyText());
   }
 
   static void showBorderWarning(Player player, boolean show) {

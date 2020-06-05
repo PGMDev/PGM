@@ -26,9 +26,9 @@ import tc.oc.pgm.goals.ProximityGoal;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
+import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.chat.Audience;
-import tc.oc.pgm.util.component.ComponentUtils;
 import tc.oc.pgm.util.text.TextTranslations;
 
 // TODO: improve format and translate
@@ -43,13 +43,13 @@ public final class MatchCommand {
         match.getPhase() == MatchPhase.RUNNING || match.getPhase() == MatchPhase.FINISHED;
 
     sender.sendMessage(
-        ComponentUtils.horizontalLineHeading(
+        LegacyFormatUtils.horizontalLineHeading(
             ChatColor.YELLOW
                 + TextTranslations.translate("match.title", sender)
                 + " #"
                 + match.getId(),
             ChatColor.WHITE,
-            ComponentUtils.MAX_CHAT_WIDTH));
+            LegacyFormatUtils.MAX_CHAT_WIDTH));
 
     if (haveGameInfo) {
       // show match time

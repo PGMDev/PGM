@@ -6,7 +6,8 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -24,8 +25,6 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.match.ObservingParty;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 @ListenerScope(MatchScope.LOADED)
 public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
@@ -128,19 +127,19 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
 
       switch (genericResult.getStatus()) {
         case MATCH_STARTED:
-          joining.sendWarning(new PersonalizedTranslatable("join.err.afterStart"), false);
+          joining.sendWarning(TranslatableComponent.of("join.err.afterStart"));
           return true;
 
         case MATCH_FINISHED:
-          joining.sendWarning(new PersonalizedTranslatable("join.err.afterFinish"), false);
+          joining.sendWarning(TranslatableComponent.of("join.err.afterFinish"));
           return true;
 
         case NO_PERMISSION:
-          joining.sendWarning(new PersonalizedTranslatable("join.err.noPermission"), false);
+          joining.sendWarning(TranslatableComponent.of("join.err.noPermission"));
           return true;
 
         case VANISHED:
-          joining.sendWarning(new PersonalizedTranslatable("join.err.vanish"), false);
+          joining.sendWarning(TranslatableComponent.of("join.err.vanish"));
           return true;
       }
     }
@@ -171,13 +170,12 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
 
     if (leaving.getParty() instanceof ObservingParty) {
       leaving.sendWarning(
-          new PersonalizedTranslatable("join.err.alreadyJoined.team", leaving.getParty().getName()),
-          false);
+          TranslatableComponent.of("join.err.alreadyJoined.team", leaving.getParty().getName()));
       return false;
     }
 
     if (!leaving.getBukkit().hasPermission(Permissions.LEAVE)) {
-      leaving.sendWarning(new PersonalizedTranslatable("leave.err.noPermission"), false);
+      leaving.sendWarning(TranslatableComponent.of("leave.err.noPermission"));
       return false;
     }
 
@@ -195,10 +193,9 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
   public boolean queueToJoin(MatchPlayer joining) {
     boolean joined = match.setParty(joining, queuedParticipants);
     if (joined) {
-      joining.sendMessage(new PersonalizedTranslatable("join.ok"));
+      joining.sendMessage(TranslatableComponent.of("join.ok"));
     } else {
-      joining.sendMessage(
-          new PersonalizedText(new PersonalizedTranslatable("join.ok.queue"), ChatColor.YELLOW));
+      joining.sendMessage(TranslatableComponent.of("join.ok.queue", TextColor.YELLOW));
     }
 
     return joined;
@@ -207,8 +204,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
   public boolean cancelQueuedJoin(MatchPlayer joining) {
     if (!isQueuedToJoin(joining)) return false;
     if (match.setParty(joining, match.getDefaultParty())) {
-      joining.sendMessage(
-          new PersonalizedText(new PersonalizedTranslatable("join.ok.dequeue"), ChatColor.YELLOW));
+      joining.sendMessage(TranslatableComponent.of("join.ok.dequeue", TextColor.YELLOW));
       return true;
     } else {
       return false;

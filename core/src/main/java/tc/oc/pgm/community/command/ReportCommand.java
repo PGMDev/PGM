@@ -24,7 +24,6 @@ import net.kyori.text.event.HoverEvent;
 import net.kyori.text.event.HoverEvent.Action;
 import net.kyori.text.format.TextColor;
 import net.kyori.text.format.TextDecoration;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.Permissions;
@@ -36,12 +35,9 @@ import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.chat.Sound;
-import tc.oc.pgm.util.component.ComponentRenderers;
-import tc.oc.pgm.util.component.ComponentUtils;
-import tc.oc.pgm.util.component.PeriodFormats;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.text.TextTranslations;
+import tc.oc.pgm.util.text.PeriodFormats;
+import tc.oc.pgm.util.text.TextFormatter;
 
 public class ReportCommand {
 
@@ -146,10 +142,7 @@ public class ReportCommand {
       @Fallback(Type.NULL) @Switch('t') String target)
       throws CommandException {
     if (RECENT_REPORTS.asMap().isEmpty()) {
-      sender.sendMessage(
-          new PersonalizedTranslatable("moderation.reports.none")
-              .getPersonalizedText()
-              .color(ChatColor.RED));
+      audience.sendMessage(TranslatableComponent.of("moderation.reports.none", TextColor.RED));
       return;
     }
 
@@ -186,9 +179,7 @@ public class ReportCommand {
                     .append(pageNum));
 
     Component formattedHeader =
-        TextComponent.of(
-            ComponentUtils.horizontalLineHeading(
-                TextTranslations.translateLegacy(header, sender), ChatColor.DARK_GRAY));
+        TextFormatter.horizontalLineHeading(sender, header, TextColor.DARK_GRAY);
 
     new PrettyPaginatedComponentResults<Report>(formattedHeader, perPage) {
       @Override
@@ -199,12 +190,9 @@ public class ReportCommand {
                 "moderation.reports.hover", TextColor.GRAY, data.getSenderComponent(match));
 
         Component timeAgo =
-            TextComponent.of(
-                ComponentRenderers.toLegacyText(
-                    PeriodFormats.relativePastApproximate(
-                            Instant.ofEpochMilli(data.getTimeSent().toEpochMilli()))
-                        .color(ChatColor.DARK_GREEN),
-                    sender));
+            PeriodFormats.relativePastApproximate(
+                    Instant.ofEpochMilli(data.getTimeSent().toEpochMilli()))
+                .color(TextColor.DARK_GREEN);
 
         return TextComponent.builder()
             .append(timeAgo.hoverEvent(HoverEvent.of(Action.SHOW_TEXT, reporter)))

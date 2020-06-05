@@ -2,15 +2,16 @@ package tc.oc.pgm.observers.tools;
 
 import com.google.common.collect.Lists;
 import java.util.List;
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.ClickType;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.menu.InventoryMenu;
 import tc.oc.pgm.menu.InventoryMenuItem;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.ComponentRenderers;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class FlySpeedTool implements InventoryMenuItem {
 
@@ -18,7 +19,7 @@ public class FlySpeedTool implements InventoryMenuItem {
 
   @Override
   public Component getName() {
-    return new PersonalizedTranslatable("setting.flyspeed");
+    return TranslatableComponent.of("setting.flyspeed");
   }
 
   @Override
@@ -29,11 +30,8 @@ public class FlySpeedTool implements InventoryMenuItem {
   @Override
   public List<String> getLore(MatchPlayer player) {
     Component flySpeed = FlySpeed.of(player.getBukkit().getFlySpeed()).getName();
-    Component lore =
-        new PersonalizedTranslatable("setting.flyspeed.lore", flySpeed)
-            .getPersonalizedText()
-            .color(ChatColor.GRAY);
-    return Lists.newArrayList(ComponentRenderers.toLegacyText(lore, player.getBukkit()));
+    Component lore = TranslatableComponent.of("setting.flyspeed.lore", TextColor.GRAY, flySpeed);
+    return Lists.newArrayList(TextTranslations.translateLegacy(lore, player.getBukkit()));
   }
 
   @Override
@@ -53,17 +51,17 @@ public class FlySpeedTool implements InventoryMenuItem {
   }
 
   public static enum FlySpeed {
-    NORMAL(ChatColor.YELLOW, 0.1f),
-    FAST(ChatColor.GOLD, 0.25f),
-    FASTER(ChatColor.RED, 0.5f),
-    HYPERSPEED(ChatColor.LIGHT_PURPLE, 0.9f);
+    NORMAL(TextColor.YELLOW, 0.1f),
+    FAST(TextColor.GOLD, 0.25f),
+    FASTER(TextColor.RED, 0.5f),
+    HYPERSPEED(TextColor.LIGHT_PURPLE, 0.9f);
 
-    private ChatColor color;
+    private TextColor color;
     private float value;
 
     private static FlySpeed[] speeds = values();
 
-    FlySpeed(ChatColor color, float value) {
+    FlySpeed(TextColor color, float value) {
       this.color = color;
       this.value = value;
     }
@@ -73,9 +71,7 @@ public class FlySpeedTool implements InventoryMenuItem {
     }
 
     public Component getName() {
-      return new PersonalizedTranslatable(TRANSLATION_KEY + this.name().toLowerCase())
-          .getPersonalizedText()
-          .color(color);
+      return TranslatableComponent.of(TRANSLATION_KEY + this.name().toLowerCase(), color);
     }
 
     public FlySpeed getNext() {

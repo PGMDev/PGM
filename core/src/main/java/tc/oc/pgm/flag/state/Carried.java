@@ -40,7 +40,6 @@ import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 /** State of a flag when a player has picked it up and is wearing the banner on their head. */
 public class Carried extends Spawned implements Missing {
@@ -119,7 +118,7 @@ public class Carried extends Spawned implements Missing {
     SidebarMatchModule smm = this.flag.getMatch().getModule(SidebarMatchModule.class);
     if (smm != null) smm.stopBlinkingGoal(this.flag);
 
-    NMSHacks.sendHotbarMessage(this.carrier.getBukkit(), "");
+    this.carrier.showHotbar(TextComponent.empty());
 
     this.carrier.getInventory().remove(this.flag.getBannerItem());
     this.carrier.getInventory().setHelmet(this.helmetItem);

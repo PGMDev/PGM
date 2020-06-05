@@ -10,14 +10,12 @@ import net.kyori.text.event.HoverEvent;
 import net.kyori.text.event.HoverEvent.Action;
 import net.kyori.text.format.TextColor;
 import net.kyori.text.format.TextDecoration;
-import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextParser;
-import tc.oc.pgm.util.text.TextTranslations;
 
 /** PlayerComponent is used to format player names in a consistent manner with optional styling */
 public interface PlayerComponent {
@@ -34,7 +32,9 @@ public interface PlayerComponent {
 
     // Offline player
     if (player == null || !player.isOnline()) {
-      component.append(defName, TextColor.DARK_AQUA);
+      TextComponent name = TextComponent.of(defName);
+      if (style != NameStyle.PLAIN) name = name.color(TextColor.DARK_AQUA);
+      component.append(name);
       return component.build();
     }
 
@@ -87,14 +87,5 @@ public interface PlayerComponent {
 
   static boolean isDead(Player player) {
     return player.hasMetadata("isDead") || player.isDead();
-  }
-
-  /**
-   * Support kept for custom tab-list usage (TODO: if tab-list system ever changes, upgrade/remove
-   * this)
-   */
-  static BaseComponent renderBaseComponent(CommandSender viewer, NameStyle style) {
-    return new net.md_5.bungee.api.chat.TextComponent(
-        TextTranslations.translateLegacy(of(viewer, style), viewer));
   }
 }

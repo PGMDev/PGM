@@ -22,8 +22,8 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.teams.Team;
+import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.chat.Sound;
-import tc.oc.pgm.util.component.ComponentUtils;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -121,7 +121,7 @@ public class MatchAnnouncer implements Listener {
             viewer.getBukkit(), TextComponent.of(title), TextColor.WHITE, 200));
 
     String objective = " " + ChatColor.BLUE + ChatColor.ITALIC + mapInfo.getDescription();
-    ComponentUtils.wordWrap(objective, 200).forEach(viewer::sendMessage);
+    LegacyFormatUtils.wordWrap(objective, 200).forEach(viewer::sendMessage);
 
     Collection<Contributor> authors = mapInfo.getAuthors();
     if (!authors.isEmpty()) {
@@ -134,7 +134,7 @@ public class MatchAnnouncer implements Listener {
                       TextFormatter.nameList(authors, NameStyle.FANCY, TextColor.GRAY))));
     }
 
-    viewer.sendMessage(ComponentUtils.horizontalLine(ChatColor.WHITE, 200));
+    viewer.sendMessage(LegacyFormatUtils.horizontalLine(ChatColor.WHITE, 200));
   }
 
   private void sendCurrentlyPlaying(MatchPlayer viewer) {

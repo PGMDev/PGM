@@ -1,13 +1,13 @@
 package tc.oc.pgm.events;
 
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerEvent;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 
 public abstract class PlayerParticipationEvent extends MatchPlayerEvent implements Cancellable {
 
@@ -43,7 +43,7 @@ public abstract class PlayerParticipationEvent extends MatchPlayerEvent implemen
   public Component getCancelReason() {
     return cancelReason != null
         ? cancelReason
-        : new PersonalizedText("Internal error changing player participation state");
+        : TranslatableComponent.of("error.player.participationState");
   }
 
   private static final HandlerList handlers = new HandlerList();

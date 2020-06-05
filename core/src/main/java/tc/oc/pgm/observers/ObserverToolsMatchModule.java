@@ -2,6 +2,10 @@ package tc.oc.pgm.observers;
 
 import com.google.common.collect.Lists;
 import java.util.List;
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
+import net.kyori.text.format.TextDecoration;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -29,9 +33,7 @@ import tc.oc.pgm.observers.tools.GamemodeTool;
 import tc.oc.pgm.observers.tools.NightVisionTool;
 import tc.oc.pgm.observers.tools.VisibilityTool;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.ComponentRenderers;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.LOADED)
 public class ObserverToolsMatchModule implements MatchModule, Listener {
@@ -125,14 +127,10 @@ public class ObserverToolsMatchModule implements MatchModule, Listener {
     ItemStack tool = new ItemStack(TOOL_MATERIAL);
     ItemMeta meta = tool.getItemMeta();
     Component displayName =
-        new PersonalizedTranslatable("setting.displayName")
-            .getPersonalizedText()
-            .color(ChatColor.AQUA)
-            .bold(true);
-    Component lore =
-        new PersonalizedTranslatable("setting.lore").getPersonalizedText().color(ChatColor.GRAY);
-    meta.setDisplayName(ComponentRenderers.toLegacyText(displayName, player.getBukkit()));
-    meta.setLore(Lists.newArrayList(ComponentRenderers.toLegacyText(lore, player.getBukkit())));
+        TranslatableComponent.of("setting.displayName", TextColor.AQUA, TextDecoration.BOLD);
+    Component lore = TranslatableComponent.of("setting.lore", TextColor.GRAY);
+    meta.setDisplayName(TextTranslations.translateLegacy(displayName, player.getBukkit()));
+    meta.setLore(Lists.newArrayList(TextTranslations.translateLegacy(lore, player.getBukkit())));
     meta.addItemFlags(ItemFlag.values());
     tool.setItemMeta(meta);
     return tool;

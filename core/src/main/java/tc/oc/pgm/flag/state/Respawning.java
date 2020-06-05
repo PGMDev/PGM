@@ -2,16 +2,16 @@ package tc.oc.pgm.flag.state;
 
 import java.time.Duration;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.PeriodFormats;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.text.PeriodFormats;
 
 /**
  * State of a flag while it is waiting to respawn at a {@link Post} after being {@link Captured}.
@@ -55,12 +55,10 @@ public class Respawning extends Spawned implements Returning {
       this.flag
           .getMatch()
           .sendMessage(
-              new PersonalizedTranslatable(
+              TranslatableComponent.of(
                   "flag.willRespawn",
                   this.flag.getComponentName(),
-                  new PersonalizedText(
-                      PeriodFormats.briefNaturalApproximate(respawnTime),
-                      net.md_5.bungee.api.ChatColor.AQUA)));
+                  PeriodFormats.briefNaturalApproximate(respawnTime).color(TextColor.AQUA)));
     }
   }
 
@@ -84,14 +82,14 @@ public class Respawning extends Spawned implements Returning {
     super.finishCountdown();
 
     if (!Duration.ZERO.equals(respawnTime)) {
-      this.respawn(new PersonalizedTranslatable("flag.respawn", this.flag.getComponentName()));
+      this.respawn(TranslatableComponent.of("flag.respawn", this.flag.getComponentName()));
     } else if (!this.wasCaptured) {
       // Flag was dropped
-      this.respawn(new PersonalizedTranslatable("flag.return", this.flag.getComponentName()));
+      this.respawn(TranslatableComponent.of("flag.return", this.flag.getComponentName()));
     } else if (this.wasDelayed) {
       // Flag was captured and respawn was delayed by a filter, so we announce that the flag has
       // respawned
-      this.respawn(new PersonalizedTranslatable("flag.respawn", this.flag.getComponentName()));
+      this.respawn(TranslatableComponent.of("flag.respawn", this.flag.getComponentName()));
     }
   }
 

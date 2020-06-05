@@ -54,9 +54,9 @@ import tc.oc.pgm.spawns.events.DeathKitApplyEvent;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
+import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.chat.Sound;
-import tc.oc.pgm.util.component.ComponentUtils;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -571,7 +571,8 @@ public class PickerMatchModule implements MatchModule, Listener {
 
     List<String> lore = Lists.newArrayList();
     if (cls.getLongDescription() != null) {
-      ComponentUtils.wordWrap(ChatColor.GOLD + cls.getLongDescription(), LORE_WIDTH_PIXELS, lore);
+      LegacyFormatUtils.wordWrap(
+          ChatColor.GOLD + cls.getLongDescription(), LORE_WIDTH_PIXELS, lore);
     } else if (cls.getDescription() != null) {
       lore.add(ChatColor.GOLD + cls.getDescription());
     }

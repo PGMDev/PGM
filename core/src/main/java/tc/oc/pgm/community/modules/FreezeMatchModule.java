@@ -57,8 +57,6 @@ import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.pgm.util.chat.Sound;
-import tc.oc.pgm.util.component.Components;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -339,13 +337,8 @@ public class FreezeMatchModule implements MatchModule, Listener {
         freezeTitle.append(" ").append(by);
       }
 
-      // TODO: Migrate this once showTitle is upgraded
-      tc.oc.pgm.util.component.Component oldTitle =
-          new PersonalizedText(
-              TextTranslations.translateLegacy(
-                  freezeTitle.color(TextColor.RED).build(), freezee.getBukkit()));
-
-      freezee.showTitle(Components.blank(), oldTitle, 5, 9999, 5);
+      freezee.showTitle(
+          TextComponent.empty(), freezeTitle.color(TextColor.RED).build(), 5, 9999, 5);
       freezee.playSound(FREEZE_SOUND);
 
       ChatDispatcher.broadcastAdminChatMessage(

@@ -7,15 +7,12 @@ import javax.annotation.Nullable;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.observers.ObserverToolsMatchModule;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextFormatter;
 
@@ -45,11 +42,7 @@ public final class SettingCommand {
   public void setting(MatchPlayer player, SettingKey key) {
     final SettingValue value = player.getSettings().getValue(key);
 
-    player.sendMessage(
-        new PersonalizedTranslatable(
-            "setting.get",
-            new PersonalizedText(key.getName()),
-            new PersonalizedText(value.getName(), ChatColor.GREEN)));
+    sendCurrentSetting(player, key, value);
     player.sendMessage(
         TranslatableComponent.of(
             "setting.options",
@@ -79,19 +72,23 @@ public final class SettingCommand {
     }
 
     if (old == value) {
-      player.sendMessage(
-          new PersonalizedTranslatable(
-              "setting.get",
-              new PersonalizedText(key.getName()),
-              new PersonalizedText(old.getName(), ChatColor.GREEN)));
+      sendCurrentSetting(player, key, old);
     } else {
       player.sendMessage(
-          new PersonalizedTranslatable(
+          TranslatableComponent.of(
               "setting.set",
-              new PersonalizedText(key.getName()),
-              new PersonalizedText(old.getName(), ChatColor.GRAY),
-              new PersonalizedText(value.getName(), ChatColor.GREEN)));
+              TextComponent.of(key.getName()),
+              TextComponent.of(old.getName(), TextColor.GRAY),
+              TextComponent.of(value.getName(), TextColor.GREEN)));
       key.update(player);
     }
+  }
+
+  private void sendCurrentSetting(MatchPlayer player, SettingKey key, SettingValue value) {
+    player.sendMessage(
+        TranslatableComponent.of(
+            "setting.get",
+            TextComponent.of(key.getName()),
+            TextComponent.of(value.getName(), TextColor.GREEN)));
   }
 }
