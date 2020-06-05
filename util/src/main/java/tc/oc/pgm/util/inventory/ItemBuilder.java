@@ -1,12 +1,15 @@
 package tc.oc.pgm.util.inventory;
 
 import java.util.Arrays;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.Dye;
 import org.bukkit.material.MaterialData;
+import org.bukkit.material.Wool;
 
 /** A nice way to build {@link ItemStack}s. */
 public class ItemBuilder {
@@ -79,6 +82,26 @@ public class ItemBuilder {
 
   public ItemBuilder enchant(Enchantment enchantment, int level) {
     meta().addEnchant(enchantment, level, true);
+    return this;
+  }
+
+  public ItemBuilder color(DyeColor color) {
+    final Material type = item.getType();
+    switch (type) {
+      case INK_SACK:
+        item.setData(new Dye(color));
+        break;
+
+      case WOOL:
+        item.setData(new Wool(color));
+        break;
+
+      default:
+        // banners/other colored blocks
+        item.setData(new MaterialData(type, color.getWoolData()));
+        break;
+    }
+    item.setDurability(item.getData().getData());
     return this;
   }
 }
