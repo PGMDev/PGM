@@ -15,6 +15,6 @@ public class TieVictoryCondition extends ImmediateVictoryCondition {
 
   @Override
   public Component getDescription(Match match) {
-    return TranslatableComponent.of("tie.victoryCondition");
+    return TranslatableComponent.of("victoryCondition.tie");
   }
 }

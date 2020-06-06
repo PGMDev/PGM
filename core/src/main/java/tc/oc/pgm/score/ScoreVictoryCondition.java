@@ -38,6 +38,6 @@ public class ScoreVictoryCondition implements VictoryCondition {
 
   @Override
   public Component getDescription(Match match) {
-    return TranslatableComponent.of("score.victoryCondition");
+    return TranslatableComponent.of("victoryCondition.score");
   }
 }

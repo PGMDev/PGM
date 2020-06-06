@@ -44,10 +44,6 @@ public interface MultiAudience extends Audience {
     for (Audience a : getAudiences()) a.showTitle(title, subTitle, inTicks, stayTicks, outTicks);
   }
 
-  ///////////////////////////////////////////////////////////////
-  // METHODS BELOW ARE ALL DEPRECATED AND WILL BE REMOVED SOON //
-  ///////////////////////////////////////////////////////////////
-
   @Deprecated
   @Override
   default void sendMessage(String message) {

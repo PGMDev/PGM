@@ -2,7 +2,6 @@ package tc.oc.pgm.util.chat;
 
 import javax.annotation.Nullable;
 import net.kyori.text.Component;
-import net.kyori.text.adapter.bukkit.TextAdapter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.github.paperspigot.Title;
@@ -22,7 +21,7 @@ public interface PlayerAudience extends VirtualAudience {
 
   @Override
   default void showHotbar(Component message) {
-    TextAdapter.sendActionBar(getAudience(), message);
+    getAudience().sendActionBar(TextTranslations.translateLegacy(message, getAudience()));
   }
 
   @Override
@@ -35,8 +34,8 @@ public interface PlayerAudience extends VirtualAudience {
       Component title, Component subTitle, int inTicks, int stayTicks, int outTicks) {
     Title bukkitTitle =
         Title.builder()
-            .title(TextTranslations.translateLegacy(title, getAudience()))
-            .subtitle(TextTranslations.translateLegacy(subTitle, getAudience()))
+            .title(TextTranslations.toBaseComponentArray(title, getAudience()))
+            .subtitle(TextTranslations.toBaseComponentArray(subTitle, getAudience()))
             .fadeIn(inTicks)
             .stay(stayTicks)
             .fadeOut(outTicks)

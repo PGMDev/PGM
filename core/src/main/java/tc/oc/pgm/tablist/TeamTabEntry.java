@@ -9,6 +9,7 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.tablist.DynamicTabEntry;
 import tc.oc.pgm.util.tablist.TabView;
 import tc.oc.pgm.util.text.TextFormatter;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class TeamTabEntry extends DynamicTabEntry {
 
@@ -30,6 +31,6 @@ public class TeamTabEntry extends DynamicTabEntry {
                 team.getShortName(), TextFormatter.convert(team.getColor()), TextDecoration.BOLD)
             .build();
 
-    return TextFormatter.renderBaseComponent(view.getViewer(), content);
+    return TextTranslations.toBaseComponent(content, view.getViewer());
   }
 }

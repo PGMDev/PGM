@@ -11,7 +11,6 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
 import net.kyori.text.format.TextDecoration;
-import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.named.NameStyle;
@@ -129,14 +128,5 @@ public final class TextFormatter {
    */
   public static TextColor convert(Enum<?> color) {
     return TextColor.valueOf(color.name());
-  }
-
-  /**
-   * Support kept for custom tab-list/nms usage (TODO: if tab-list system ever changes,
-   * upgrade/remove this)
-   */
-  public static BaseComponent renderBaseComponent(CommandSender viewer, Component component) {
-    return new net.md_5.bungee.api.chat.TextComponent(
-        TextTranslations.translateLegacy(component, viewer));
   }
 }

@@ -51,6 +51,6 @@ public class GoalsVictoryCondition implements VictoryCondition {
 
   @Override
   public Component getDescription(Match match) {
-    return TranslatableComponent.of("goals.victoryCondition");
+    return TranslatableComponent.of("victoryCondition.goals");
   }
 }

@@ -36,6 +36,6 @@ public class BlitzVictoryCondition implements VictoryCondition {
 
   @Override
   public Component getDescription(Match match) {
-    return TranslatableComponent.of("blitz.victoryCondition");
+    return TranslatableComponent.of("victoryCondition.blitz");
   }
 }

@@ -36,7 +36,7 @@ public class GamemodeTool implements InventoryMenuItem {
         TranslatableComponent.of(
             "gameMode." + player.getGameMode().name().toLowerCase(), TextColor.AQUA);
     Component lore = TranslatableComponent.of("setting.gamemode.lore", TextColor.GRAY, gamemode);
-    return Lists.newArrayList(TextTranslations.translateLegacy(lore, player.getBukkit()));
+    return Lists.newArrayList(TextTranslations.translateBaseComponent(lore, player.getBukkit()));
   }
 
   @Override

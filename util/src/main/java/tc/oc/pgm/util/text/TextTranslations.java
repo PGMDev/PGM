@@ -23,8 +23,10 @@ import javax.annotation.Nullable;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
+import net.kyori.text.adapter.bukkit.SpigotTextAdapter;
 import net.kyori.text.renderer.TranslatableComponentRenderer;
 import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
+import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.command.CommandSender;
 
 /** A singleton for accessing {@link MessageFormat} and {@link Component} translations. */
@@ -245,5 +247,21 @@ public final class TextTranslations {
                 .collect(Collectors.toList()));
 
     return LegacyComponentSerializer.legacy().serialize(translate(text, locale));
+  }
+
+  /** BaseComponent support kept for tabs & handling non-legacy translations */
+  public static String translateBaseComponent(Component component, @Nullable CommandSender viewer) {
+    return toBaseComponent(component, viewer).toLegacyText();
+  }
+
+  public static BaseComponent toBaseComponent(Component component, @Nullable CommandSender viewer) {
+    return new net.md_5.bungee.api.chat.TextComponent(
+        TextTranslations.toBaseComponentArray(component, viewer));
+  }
+
+  public static BaseComponent[] toBaseComponentArray(
+      Component component, @Nullable CommandSender viewer) {
+    Component translated = translate(component, viewer.getLocale());
+    return SpigotTextAdapter.toBungeeCord(translated);
   }
 }

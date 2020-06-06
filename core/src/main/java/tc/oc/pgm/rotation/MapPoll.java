@@ -34,7 +34,6 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
-import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;
 
 /** Represents a polling process, with a set of options. */
@@ -153,7 +152,7 @@ public class MapPoll {
     for (MapInfo pgmMap : votes.keySet()) content.append(getMapBookComponent(viewer, pgmMap));
 
     NMSHacks.setBookPages(
-        meta, TextFormatter.renderBaseComponent(viewer.getBukkit(), content.build()));
+        meta, TextTranslations.toBaseComponent(content.build(), viewer.getBukkit()));
     is.setItemMeta(meta);
 
     ItemStack held = viewer.getInventory().getItemInHand();

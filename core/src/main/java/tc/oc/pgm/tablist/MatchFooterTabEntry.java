@@ -16,7 +16,7 @@ import tc.oc.pgm.modules.StatsMatchModule;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.tablist.DynamicTabEntry;
 import tc.oc.pgm.util.tablist.TabView;
-import tc.oc.pgm.util.text.TextFormatter;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class MatchFooterTabEntry extends DynamicTabEntry {
 
@@ -67,7 +67,7 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
             TimeUtils.formatDuration(match.getDuration()),
             this.match.isRunning() ? TextColor.GREEN : TextColor.GOLD);
 
-    return TextFormatter.renderBaseComponent(
-        view.getViewer(), content.colorIfAbsent(TextColor.DARK_GRAY).build());
+    return TextTranslations.toBaseComponent(
+        content.colorIfAbsent(TextColor.DARK_GRAY).build(), view.getViewer());
   }
 }

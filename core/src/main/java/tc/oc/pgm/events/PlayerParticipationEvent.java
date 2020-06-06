@@ -41,9 +41,7 @@ public abstract class PlayerParticipationEvent extends MatchPlayerEvent implemen
   }
 
   public Component getCancelReason() {
-    return cancelReason != null
-        ? cancelReason
-        : TranslatableComponent.of("error.player.participationState");
+    return cancelReason != null ? cancelReason : TranslatableComponent.of("error.unknown");
   }
 
   private static final HandlerList handlers = new HandlerList();

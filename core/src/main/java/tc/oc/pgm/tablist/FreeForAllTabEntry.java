@@ -9,7 +9,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.util.tablist.DynamicTabEntry;
 import tc.oc.pgm.util.tablist.TabView;
-import tc.oc.pgm.util.text.TextFormatter;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class FreeForAllTabEntry extends DynamicTabEntry {
 
@@ -31,6 +31,6 @@ public class FreeForAllTabEntry extends DynamicTabEntry {
                 TranslatableComponent.of(
                     "match.info.players", TextColor.YELLOW, TextDecoration.BOLD))
             .build();
-    return TextFormatter.renderBaseComponent(view.getViewer(), content);
+    return TextTranslations.toBaseComponent(content, view.getViewer());
   }
 }
