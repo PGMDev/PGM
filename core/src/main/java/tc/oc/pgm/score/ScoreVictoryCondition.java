@@ -1,10 +1,10 @@
 package tc.oc.pgm.score;
 
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.VictoryCondition;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 
 public class ScoreVictoryCondition implements VictoryCondition {
 
@@ -38,6 +38,6 @@ public class ScoreVictoryCondition implements VictoryCondition {
 
   @Override
   public Component getDescription(Match match) {
-    return new PersonalizedText("highest score");
+    return TranslatableComponent.of("victoryCondition.score");
   }
 }

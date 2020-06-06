@@ -6,9 +6,10 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Skin;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerSkinPartsChangeEvent;
-import tc.oc.pgm.util.component.types.PersonalizedPlayer;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.text.TextTranslations;
+import tc.oc.pgm.util.text.types.PlayerComponent;
 
 /**
  * {@link TabEntry} showing a {@link Player}'s name and skin.
@@ -35,7 +36,6 @@ public class PlayerTabEntry extends DynamicTabEntry {
   }
 
   protected final Player player;
-  protected @Nullable PersonalizedPlayer content;
   private final int spareEntityId;
 
   public PlayerTabEntry(Player player) {
@@ -46,10 +46,8 @@ public class PlayerTabEntry extends DynamicTabEntry {
 
   @Override
   public BaseComponent getContent(TabView view) {
-    if (content == null) {
-      this.content = new PersonalizedPlayer(player, NameStyle.TAB);
-    }
-    return content.render(view.getViewer());
+    return TextTranslations.toBaseComponent(
+        PlayerComponent.of(player, NameStyle.TAB), view.getViewer());
   }
 
   @Override

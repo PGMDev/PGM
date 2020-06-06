@@ -4,15 +4,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
 import org.bukkit.Bukkit;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.util.UsernameResolver;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedPlayer;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.types.PlayerComponent;
 
 class UsernameImpl implements Username {
 
@@ -31,16 +28,15 @@ class UsernameImpl implements Username {
 
   @Nullable
   @Override
-  public String getName() {
+  public String getNameLegacy() {
     return name;
   }
 
   @Override
-  public Component getStyledName(NameStyle style) {
+  public Component getName(NameStyle style) {
     return name == null
-        ? new PersonalizedText(
-            new PersonalizedTranslatable("misc.unknown"), ChatColor.DARK_AQUA, ChatColor.ITALIC)
-        : new PersonalizedPlayer(Bukkit.getPlayer(id), name, style);
+        ? PlayerComponent.UNKNOWN
+        : PlayerComponent.of(Bukkit.getPlayer(id), name, style);
   }
 
   @Override

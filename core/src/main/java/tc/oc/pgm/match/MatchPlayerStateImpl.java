@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
+import net.kyori.text.Component;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -16,9 +17,8 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.chat.MultiAudience;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedPlayer;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.types.PlayerComponent;
 
 public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
 
@@ -62,9 +62,14 @@ public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
   }
 
   @Override
-  public Component getStyledName(NameStyle style) {
+  public Component getName(NameStyle style) {
     MatchPlayer player = match.getPlayer(uuid);
-    return new PersonalizedPlayer(player == null ? null : player.getBukkit(), username, style);
+    return PlayerComponent.of(player.getBukkit(), username, style);
+  }
+
+  @Override
+  public String getNameLegacy() {
+    return username;
   }
 
   @Override

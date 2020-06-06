@@ -5,22 +5,21 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.time.Duration;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
+import net.kyori.text.format.TextDecoration;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.util.chat.Sound;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 public class Broadcast implements Comparable<Broadcast> {
   public enum Type {
     TIP(
-        new PersonalizedText(new PersonalizedTranslatable("misc.tip"), ChatColor.BLUE),
+        TranslatableComponent.of("misc.tip", TextColor.BLUE),
         new Sound("mob.endermen.idle", 1, 1.2f)),
 
-    ALERT(
-        new PersonalizedText(new PersonalizedTranslatable("misc.alert"), ChatColor.YELLOW),
-        new Sound("note.pling", 1, 2f));
+    ALERT(TranslatableComponent.of("misc.alert", TextColor.YELLOW), new Sound("note.pling", 1, 2f));
 
     final Component prefix;
     final Sound sound;
@@ -31,11 +30,18 @@ public class Broadcast implements Comparable<Broadcast> {
     }
 
     public Component format(Component message) {
-      return new PersonalizedText(ChatColor.GRAY, ChatColor.BOLD)
-          .extra("[")
-          .extra(prefix)
-          .extra("] ")
-          .extra(new PersonalizedText(message, ChatColor.AQUA, ChatColor.ITALIC).bold(false));
+      return TextComponent.builder()
+          .append("[")
+          .append(prefix)
+          .append("] ")
+          .append(
+              message
+                  .color(TextColor.AQUA)
+                  .decoration(TextDecoration.BOLD, false)
+                  .decoration(TextDecoration.ITALIC, true))
+          .colorIfAbsent(TextColor.GRAY)
+          .decoration(TextDecoration.BOLD, true)
+          .build();
     }
   }
 

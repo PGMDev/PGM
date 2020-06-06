@@ -1,7 +1,7 @@
 package tc.oc.pgm.util.bossbar;
 
+import net.kyori.text.Component;
 import org.bukkit.entity.Player;
-import tc.oc.pgm.util.component.Component;
 
 /** A retained UI component that renders text and a health amount to the boss bar */
 public interface BossBar {

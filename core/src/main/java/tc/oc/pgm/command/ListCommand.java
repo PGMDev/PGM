@@ -5,18 +5,19 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.Components;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.TextFormatter;
 
 // TODO: clean up format and use new components
 public final class ListCommand {
@@ -24,58 +25,63 @@ public final class ListCommand {
   @Command(
       aliases = {"list", "who", "online", "ls"},
       desc = "View a list of online players")
-  public void list(CommandSender sender, Match match) {
+  public void list(CommandSender sender, Audience viewer, Match match) {
     TeamMatchModule tmm = match.getModule(TeamMatchModule.class);
     if (tmm != null) {
-      sender.sendMessage(
-          new PersonalizedTranslatable("command.list.teams")
-              .getPersonalizedText()
-              .color(ChatColor.GRAY));
+      viewer.sendMessage(TranslatableComponent.of("command.list.teams", TextColor.GRAY));
       tmm.getTeams()
           .forEach(
               team ->
                   sendTeamInfo(
-                      sender, team.getComponentName(), team.getPlayers(), team.getMaxPlayers()));
+                      viewer, sender, team.getName(), team.getPlayers(), team.getMaxPlayers()));
     } else {
       sendTeamInfo(
+          viewer,
           sender,
-          new PersonalizedTranslatable("command.list.participants"),
+          TranslatableComponent.of("command.list.participants"),
           match.getParticipants(),
           match.getMaxPlayers());
     }
     // Observers
     sendTeamInfo(
+        viewer,
         sender,
-        match.getDefaultParty().getComponentName(),
+        match.getDefaultParty().getName(),
         match.getDefaultParty().getPlayers(),
         -1);
 
     // Total count
-    sender.sendMessage(
-        new PersonalizedTranslatable(
-                "command.list.online",
-                new PersonalizedText(
-                    Integer.toString(getSize(match.getPlayers(), false)), ChatColor.GREEN))
-            .getPersonalizedText()
-            .color(ChatColor.GRAY));
+    viewer.sendMessage(
+        TranslatableComponent.of(
+            "command.list.online",
+            TextColor.GRAY,
+            TextComponent.of(
+                Integer.toString(getSize(match.getPlayers(), false)), TextColor.GREEN)));
   }
 
   private void sendTeamInfo(
-      CommandSender sender, Component teamName, Collection<MatchPlayer> players, int max) {
+      Audience viewer,
+      CommandSender sender,
+      Component teamName,
+      Collection<MatchPlayer> players,
+      int max) {
     Component teamLine =
-        new PersonalizedText(
-            teamName,
-            new PersonalizedText(": ", ChatColor.GRAY),
-            new PersonalizedText(Integer.toString(getSize(players, false))),
-            max != -1
-                ? new PersonalizedText("/" + Integer.toString(max)).color(ChatColor.GRAY)
-                : Components.blank(),
-            getSize(players, true) > 0 && sender.hasPermission(Permissions.STAFF)
-                ? formatVanishCount(players)
-                : Components.blank());
-    sender.sendMessage(teamLine);
+        TextComponent.builder()
+            .append(teamName)
+            .append(": ", TextColor.GRAY)
+            .append(Integer.toString(getSize(players, false)))
+            .append(
+                max != -1
+                    ? TextComponent.of("/" + Integer.toString(max), TextColor.GRAY)
+                    : TextComponent.empty())
+            .append(
+                getSize(players, true) > 0 && sender.hasPermission(Permissions.STAFF)
+                    ? formatVanishCount(players)
+                    : TextComponent.empty())
+            .build();
+    viewer.sendMessage(teamLine);
     if (!players.isEmpty()) {
-      sender.sendMessage(formatNames(players, sender));
+      viewer.sendMessage(formatNames(players, sender));
     }
   }
 
@@ -83,18 +89,19 @@ public final class ListCommand {
     List<Component> names =
         players.stream()
             .filter(mp -> sender.hasPermission(Permissions.STAFF) || !isVanished(mp.getId()))
-            .map(mp -> new Component(mp.getStyledName(NameStyle.VERBOSE).render(sender)))
+            .map(mp -> mp.getName(NameStyle.VERBOSE))
             .collect(Collectors.toList());
 
-    return new Component(Components.join(new PersonalizedText(", ", ChatColor.GRAY), names));
+    return TextFormatter.list(names, TextColor.GRAY);
   }
 
   private Component formatVanishCount(Collection<MatchPlayer> players) {
-    return new PersonalizedText(
-            new PersonalizedText(" ("),
-            new PersonalizedText(Integer.toString(getSize(players, true))).color(ChatColor.WHITE),
-            new PersonalizedText(")"))
-        .color(ChatColor.GRAY);
+    return TextComponent.builder()
+        .append(" (")
+        .append(Integer.toString(getSize(players, true)), TextColor.WHITE)
+        .append(")")
+        .color(TextColor.GRAY)
+        .build();
   }
 
   private int getSize(Collection<MatchPlayer> players, boolean vanished) {

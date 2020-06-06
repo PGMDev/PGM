@@ -2,15 +2,15 @@ package tc.oc.pgm.modes;
 
 import java.time.Duration;
 import java.util.Set;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import org.bukkit.Bukkit;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.timelimit.TimeLimitCountdown;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 public class ModeChangeCountdown extends MatchCountdown implements Comparable<ModeChangeCountdown> {
 
@@ -53,11 +53,11 @@ public class ModeChangeCountdown extends MatchCountdown implements Comparable<Mo
 
   @Override
   protected Component formatText() {
-    return new PersonalizedTranslatable(
-            "objective.modeCountdown",
-            getMode().getComponentName(),
-            secondsRemaining(ChatColor.AQUA))
-        .color(ChatColor.DARK_AQUA);
+    return TranslatableComponent.of(
+        "objective.modeCountdown",
+        TextColor.DARK_AQUA,
+        getMode().getComponentName(),
+        secondsRemaining(TextColor.AQUA));
   }
 
   @Override

@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import org.bukkit.Bukkit;
@@ -22,9 +23,7 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.ComponentRenderers;
-import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.chat.Audience;
 
 /**
  * A {@link Goal} that may be 'touched' by players, meaning the player has made some tangible
@@ -192,10 +191,14 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
     if (!isVisible()) return;
 
     Component message = getTouchMessage(toucher, false);
-    ComponentRenderers.send(Bukkit.getConsoleSender(), message);
+    Audience.get(Bukkit.getConsoleSender()).sendMessage(message);
 
     if (!showEnemyTouches()) {
-      message = new PersonalizedText(toucher.getParty().getChatPrefix(), message);
+      message =
+          TextComponent.builder()
+              .append(toucher.getParty().getChatPrefix())
+              .append(message)
+              .build();
     }
 
     for (MatchPlayer viewer : getMatch().getPlayers()) {
@@ -212,8 +215,7 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
 
       if (getDeferTouches()) {
         toucher.sendMessage(
-            TranslatableComponent.of("objective.credit.future")
-                .args(TextComponent.of(this.getName())));
+            TranslatableComponent.of("objective.credit.future", TextComponent.of(this.getName())));
       }
     }
   }

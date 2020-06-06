@@ -4,6 +4,9 @@ import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Text;
 import java.time.Duration;
 import javax.annotation.Nullable;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.VictoryCondition;
@@ -13,8 +16,6 @@ import tc.oc.pgm.timelimit.TimeLimit;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.chat.Audience;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 public final class TimeLimitCommand {
 
@@ -46,12 +47,10 @@ public final class TimeLimitCommand {
     time.start();
 
     audience.sendMessage(
-        new PersonalizedText(net.md_5.bungee.api.ChatColor.YELLOW)
-            .extra(
-                new PersonalizedTranslatable(
-                    "match.timeLimit.commandOutput",
-                    new PersonalizedText(
-                        TimeUtils.formatDuration(duration), net.md_5.bungee.api.ChatColor.AQUA),
-                    result.getDescription(match))));
+        TranslatableComponent.of(
+            "match.timeLimit.commandOutput",
+            TextColor.YELLOW,
+            TextComponent.of(TimeUtils.formatDuration(duration), TextColor.AQUA),
+            result.getDescription(match)));
   }
 }

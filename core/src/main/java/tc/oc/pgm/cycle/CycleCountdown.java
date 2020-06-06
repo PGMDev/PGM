@@ -2,16 +2,16 @@ package tc.oc.pgm.cycle;
 
 import com.google.common.collect.Range;
 import java.time.Duration;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.countdowns.MatchCountdown;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
 
@@ -44,23 +44,23 @@ public class CycleCountdown extends MatchCountdown {
   @Override
   protected Component formatText() {
     Component mapName =
-        nextMap == null ? null : new PersonalizedText(nextMap.getName(), ChatColor.AQUA);
+        nextMap == null ? null : TextComponent.of(nextMap.getName(), TextColor.AQUA);
 
-    PersonalizedTranslatable cycleComponent;
+    TranslatableComponent cycleComponent;
     if (remaining.isZero()) {
       cycleComponent =
           mapName != null
-              ? new PersonalizedTranslatable("map.cycledMap", mapName)
-              : new PersonalizedTranslatable("map.cycled");
+              ? TranslatableComponent.of("map.cycledMap", mapName)
+              : TranslatableComponent.of("map.cycled");
     } else {
-      Component secs = secondsRemaining(ChatColor.DARK_RED);
+      Component secs = secondsRemaining(TextColor.DARK_RED);
       cycleComponent =
           mapName != null
-              ? new PersonalizedTranslatable("map.cycleMap", mapName, secs)
-              : new PersonalizedTranslatable("map.cycle", secs);
+              ? TranslatableComponent.of("map.cycleMap", mapName, secs)
+              : TranslatableComponent.of("map.cycle", secs);
     }
 
-    return cycleComponent.color(ChatColor.DARK_AQUA);
+    return cycleComponent.color(TextColor.DARK_AQUA);
   }
 
   @Override

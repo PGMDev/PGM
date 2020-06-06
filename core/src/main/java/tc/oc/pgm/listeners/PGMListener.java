@@ -12,7 +12,6 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.entity.EnderPearl;
@@ -53,8 +52,7 @@ import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.TimeLockModule;
 import tc.oc.pgm.util.UsernameFormatUtils;
-import tc.oc.pgm.util.component.ComponentRenderers;
-import tc.oc.pgm.util.component.PeriodFormats;
+import tc.oc.pgm.util.text.PeriodFormats;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class PGMListener implements Listener {
@@ -211,7 +209,7 @@ public class PGMListener implements Listener {
         Component name =
             TextComponent.of(
                 player.getBukkit().getDisplayName(viewer.getBukkit()) + ChatColor.YELLOW);
-        Component component = TranslatableComponent.of(key).args(name);
+        Component component = TranslatableComponent.of(key, name);
         viewer.sendMessage(
             staffOnly
                 ? ChatDispatcher.ADMIN_CHAT_PREFIX.append(component.color(TextColor.YELLOW))
@@ -339,35 +337,30 @@ public class PGMListener implements Listener {
       Component poolName = TextComponent.of(event.getNewPool().getName(), TextColor.LIGHT_PURPLE);
       Component staffName =
           UsernameFormatUtils.formatStaffName(event.getSender(), event.getMatch());
-      Component forced = TranslatableComponent.of("pool.change.force").args(poolName, staffName);
+      Component forced = TranslatableComponent.of("pool.change.force", poolName, staffName);
       if (event.getTimeLimit() != null) {
         Component time =
-            TextComponent.of(
-                ComponentRenderers.toLegacyText(
-                    PeriodFormats.briefNaturalApproximate(event.getTimeLimit())
-                        .color(ChatColor.GREEN),
-                    Bukkit.getConsoleSender()));
-        forced = TranslatableComponent.of("pool.change.forceTimed").args(poolName, time, staffName);
+            PeriodFormats.briefNaturalApproximate(event.getTimeLimit()).color(TextColor.GREEN);
+        forced = TranslatableComponent.of("pool.change.forceTimed", poolName, time, staffName);
       }
       ChatDispatcher.broadcastAdminChatMessage(forced.color(TextColor.GRAY), event.getMatch());
     }
 
     // Broadcast map pool changes due to size
     if (event.getNewPool().isDynamic()) {
-      event
-          .getMatch()
-          .sendMessage(
-              ChatColor.WHITE
-                  + "["
-                  + ChatColor.GOLD
-                  + "Rotations"
-                  + ChatColor.WHITE
-                  + "] "
-                  + ChatColor.GREEN
-                  + TextTranslations.translate(
+      Component broadcast =
+          TextComponent.builder()
+              .append("[", TextColor.WHITE)
+              .append(TranslatableComponent.of("pool.name", TextColor.GOLD))
+              .append("] ", TextColor.WHITE)
+              .append(
+                  TranslatableComponent.of(
                       "pool.change",
-                      Bukkit.getConsoleSender(),
-                      (ChatColor.AQUA + event.getNewPool().getName() + ChatColor.GREEN)));
+                      TextColor.GREEN,
+                      TextComponent.of(event.getNewPool().getName(), TextColor.AQUA)))
+              .build();
+
+      event.getMatch().sendMessage(broadcast);
     }
   }
 }

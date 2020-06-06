@@ -1,8 +1,8 @@
 package tc.oc.pgm.util.bossbar;
 
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import org.bukkit.entity.Player;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.BlankComponent;
 
 public class BlankBossBar implements BossBar {
 
@@ -17,7 +17,7 @@ public class BlankBossBar implements BossBar {
 
   @Override
   public Component getText(Player viewer) {
-    return BlankComponent.INSTANCE;
+    return TextComponent.empty();
   }
 
   @Override

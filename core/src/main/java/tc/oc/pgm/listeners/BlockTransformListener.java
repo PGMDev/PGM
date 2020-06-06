@@ -540,9 +540,7 @@ public class BlockTransformListener implements Listener {
         && event.getCancelMessage() != null
         && event.isManual()) {
 
-      ((PlayerBlockTransformEvent) event)
-          .getPlayerState()
-          .sendWarning(event.getCancelMessage(), false);
+      ((PlayerBlockTransformEvent) event).getPlayerState().sendWarning(event.getCancelMessage());
     }
   }
 

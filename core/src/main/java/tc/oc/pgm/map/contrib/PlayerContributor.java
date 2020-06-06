@@ -4,13 +4,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.player.Username;
-import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.named.NameStyle;
 
 public class PlayerContributor implements Contributor {
@@ -30,12 +30,6 @@ public class PlayerContributor implements Contributor {
   }
 
   @Override
-  public String getName() {
-    final String name = username.getName();
-    return name == null ? "Unknown" : name;
-  }
-
-  @Override
   public String getContribution() {
     return contribution;
   }
@@ -46,8 +40,13 @@ public class PlayerContributor implements Contributor {
   }
 
   @Override
-  public Component getStyledName(NameStyle style) {
-    return username.getStyledName(style);
+  public Component getName(NameStyle style) {
+    return username.getName(style);
+  }
+
+  @Override
+  public String getNameLegacy() {
+    return username.getNameLegacy();
   }
 
   @Override
@@ -69,7 +68,7 @@ public class PlayerContributor implements Contributor {
   public String toString() {
     return new ToStringBuilder(this)
         .append("id", getId())
-        .append("name", username.getName())
+        .append("name", username.getNameLegacy())
         .append("desc", getContribution())
         .build();
   }

@@ -12,7 +12,7 @@ import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
 import net.kyori.text.format.TextDecoration;
 import org.bukkit.command.CommandSender;
-import tc.oc.pgm.util.component.ComponentUtils;
+import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.named.Named;
 
@@ -107,9 +107,9 @@ public final class TextFormatter {
   public static Component horizontalLineHeading(
       CommandSender sender, Component text, TextColor lineColor, int width) {
     text = TextComponent.builder().append(" ").append(text).append(" ").build();
-    int textWidth = ComponentUtils.pixelWidth(TextTranslations.translateLegacy(text, sender));
+    int textWidth = LegacyFormatUtils.pixelWidth(TextTranslations.translateLegacy(text, sender));
     int spaceCount =
-        Math.max(0, ((width - textWidth) / 2 + 1) / (ComponentUtils.SPACE_PIXEL_WIDTH + 1));
+        Math.max(0, ((width - textWidth) / 2 + 1) / (LegacyFormatUtils.SPACE_PIXEL_WIDTH + 1));
     String line = Strings.repeat(" ", spaceCount);
     return TextComponent.builder()
         .append(line, lineColor, TextDecoration.STRIKETHROUGH)
@@ -120,6 +120,13 @@ public final class TextFormatter {
 
   public static Component horizontalLineHeading(
       CommandSender sender, Component text, TextColor lineColor) {
-    return horizontalLineHeading(sender, text, lineColor, ComponentUtils.MAX_CHAT_WIDTH);
+    return horizontalLineHeading(sender, text, lineColor, LegacyFormatUtils.MAX_CHAT_WIDTH);
+  }
+
+  /*
+   * Convert ChatColor -> TextColor
+   */
+  public static TextColor convert(Enum<?> color) {
+    return TextColor.valueOf(color.name());
   }
 }

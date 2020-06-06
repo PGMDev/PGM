@@ -8,13 +8,6 @@ import tc.oc.pgm.util.named.Named;
 public interface Contributor extends Named {
 
   /**
-   * Get the name of the individual.
-   *
-   * @return A name.
-   */
-  String getName();
-
-  /**
    * Get a short, human-readable description of their contribution.
    *
    * @return The contribution or {@code null} for unspecified.

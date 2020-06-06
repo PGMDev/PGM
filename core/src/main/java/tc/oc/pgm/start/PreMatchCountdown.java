@@ -1,11 +1,11 @@
 package tc.oc.pgm.start;
 
 import java.time.Duration;
+import net.kyori.text.TranslatableComponent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchPhase;
 import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.util.chat.Sound;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 /** Common base for countdowns leading up to match start */
 public abstract class PreMatchCountdown extends MatchCountdown {
@@ -34,7 +34,7 @@ public abstract class PreMatchCountdown extends MatchCountdown {
   public void onCancel(Duration remaining, Duration total) {
     super.onCancel(remaining, total);
     getMatch().setPhase(MatchPhase.IDLE);
-    getMatch().sendWarning(new PersonalizedTranslatable("broadcast.startCancel"), false);
+    getMatch().sendWarning(TranslatableComponent.of("broadcast.startCancel"));
   }
 
   @Override

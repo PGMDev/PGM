@@ -5,14 +5,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.WeakHashMap;
 import javax.annotation.Nullable;
+import net.kyori.text.TranslatableComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.observers.ObserverToolsMatchModule;
 import tc.oc.pgm.util.StringUtils;
-import tc.oc.pgm.util.component.ComponentRenderers;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public abstract class InventoryMenu {
 
@@ -44,7 +44,7 @@ public abstract class InventoryMenu {
   public abstract ItemStack[] createWindowContents(final MatchPlayer player);
 
   public String getTranslatedTitle(MatchPlayer player) {
-    return ComponentRenderers.toLegacyText(new PersonalizedTranslatable(title), player.getBukkit());
+    return TextTranslations.translateLegacy(TranslatableComponent.of(title), player.getBukkit());
   }
 
   public boolean isViewing(MatchPlayer player) {

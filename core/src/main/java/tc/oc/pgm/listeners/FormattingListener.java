@@ -30,8 +30,8 @@ public class FormattingListener implements Listener {
             TranslatableComponent.of(
                 "wool.complete.owned",
                 event.getPlayer().getName(NameStyle.COLOR),
-                event.getWool().getTextName(),
-                event.getPlayer().getParty().getName(NameStyle.COLOR)));
+                event.getWool().getComponentName(),
+                event.getPlayer().getParty().getName()));
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -45,8 +45,8 @@ public class FormattingListener implements Listener {
             TranslatableComponent.of(
                 "core.complete.owned",
                 formatContributions(core.getContributions()),
-                core.getTextName(),
-                core.getOwner().getName(NameStyle.COLOR)));
+                core.getComponentName(),
+                core.getOwner().getName()));
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -60,8 +60,8 @@ public class FormattingListener implements Listener {
             TranslatableComponent.of(
                 "destroyable.complete.owned",
                 formatContributions(event.getDestroyable().getContributions()),
-                destroyable.getTextName(),
-                destroyable.getOwner().getName(NameStyle.COLOR)));
+                destroyable.getComponentName(),
+                destroyable.getOwner().getName()));
   }
 
   private Component formatContributions(Collection<? extends Contribution> contributions) {

@@ -1,12 +1,15 @@
 package tc.oc.pgm.tablist;
 
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.format.TextColor;
+import net.kyori.text.format.TextDecoration;
 import net.md_5.bungee.api.chat.BaseComponent;
 import tc.oc.pgm.teams.Team;
-import tc.oc.pgm.util.component.ComponentUtils;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.tablist.DynamicTabEntry;
 import tc.oc.pgm.util.tablist.TabView;
+import tc.oc.pgm.util.text.TextFormatter;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class TeamTabEntry extends DynamicTabEntry {
 
@@ -18,12 +21,16 @@ public class TeamTabEntry extends DynamicTabEntry {
 
   @Override
   public BaseComponent getContent(TabView view) {
-    return new PersonalizedText(
-            new PersonalizedText(String.valueOf(team.getPlayers().size()), ChatColor.WHITE),
-            new PersonalizedText("/", ChatColor.DARK_GRAY),
-            new PersonalizedText(String.valueOf(team.getMaxPlayers()), ChatColor.GRAY),
-            new PersonalizedText(
-                " " + team.getShortName(), ComponentUtils.convert(team.getColor()), ChatColor.BOLD))
-        .render(view.getViewer());
+    Component content =
+        TextComponent.builder()
+            .append(String.valueOf(team.getPlayers().size()), TextColor.WHITE)
+            .append("/", TextColor.DARK_GRAY)
+            .append(String.valueOf(team.getMaxPlayers()), TextColor.GRAY)
+            .append(" ")
+            .append(
+                team.getShortName(), TextFormatter.convert(team.getColor()), TextDecoration.BOLD)
+            .build();
+
+    return TextTranslations.toBaseComponent(content, view.getViewer());
   }
 }

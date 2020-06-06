@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Logger;
+import net.kyori.text.Component;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.MapModule;
@@ -20,7 +21,6 @@ import tc.oc.pgm.regions.RFAScope;
 import tc.oc.pgm.regions.RegionFilterApplication;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 

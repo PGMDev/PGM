@@ -3,7 +3,6 @@ package tc.oc.pgm.util.xml;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.*;
-import com.google.gson.JsonParseException;
 import java.time.Duration;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -17,8 +16,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.chat.ComponentSerializer;
+import net.kyori.text.Component;
 import org.bukkit.*;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
@@ -34,8 +32,6 @@ import org.jdom2.Element;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.Components;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.material.matcher.AllMaterialMatcher;
@@ -926,22 +922,9 @@ public final class XMLUtils {
    */
   public static Component parseFormattedText(@Nullable Node node, Component def)
       throws InvalidXMLException {
-    if (node == null) return def;
-
-    String text = node.getValueNormalize();
-    if (looksLikeJson(text)) {
-      try {
-        return Components.concat(
-            Components.fromBungee(ComponentSerializer.parse(node.getValue()))
-                .toArray(new Component[0]));
-      } catch (JsonParseException e) {
-        throw new InvalidXMLException(e.getMessage(), node, e);
-      }
-    } else {
-      return Components.concat(
-          Components.fromBungee(TextComponent.fromLegacyText(BukkitUtils.colorize(text)))
-              .toArray(new Component[0]));
-    }
+    return node == null
+        ? def
+        : TextParser.parseComponent(BukkitUtils.colorize(node.getValueNormalize()));
   }
 
   /**

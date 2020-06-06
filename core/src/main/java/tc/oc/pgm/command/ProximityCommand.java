@@ -14,6 +14,7 @@ import tc.oc.pgm.goals.TouchableGoal;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.text.TextException;
+import tc.oc.pgm.util.text.TextTranslations;
 
 // TODO: make the output nicer and translate
 public final class ProximityCommand {
@@ -26,6 +27,7 @@ public final class ProximityCommand {
       throw TextException.noPermission();
     }
 
+    // TODO: use components
     List<String> lines = new ArrayList<>();
 
     for (Team team : match.needModule(TeamMatchModule.class).getParticipatingTeams()) {
@@ -38,7 +40,7 @@ public final class ProximityCommand {
           ProximityGoal proximity = (ProximityGoal) goal;
 
           if (!teamHeader) {
-            lines.add(team.getColoredName());
+            lines.add(TextTranslations.translateLegacy(team.getName(), player.getBukkit()));
             teamHeader = true;
           }
 

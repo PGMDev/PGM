@@ -3,18 +3,16 @@ package tc.oc.pgm.api.party;
 import java.util.Collection;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
-import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
-import tc.oc.pgm.api.party.event.PartyRenameEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.match.ObservingParty;
 import tc.oc.pgm.util.chat.Audience;
-import tc.oc.pgm.util.component.Component;
 import tc.oc.pgm.util.named.Named;
 
 /**
@@ -63,25 +61,9 @@ public interface Party extends Audience, Named {
   String getDefaultName();
 
   /**
-   * Get the current name of the {@link Party}, which might change at anytime.
+   * Get whether {@link #getDisplayName()} is grammatically a plural word.
    *
-   * @see PartyRenameEvent
-   * @return The current name of the {@link Party}.
-   */
-  String getName();
-
-  /**
-   * Get the current name of the {@link Party} from the perspective of a {@link CommandSender}.
-   *
-   * @param viewer The viewer.
-   * @return The name of the {@link Party}, relative to the viewer.
-   */
-  String getName(@Nullable CommandSender viewer);
-
-  /**
-   * Get whether {@link #getName()} is grammatically a plural word.
-   *
-   * @return Whether {@link #getName()} is plural.
+   * @return Whether {@link #getDisplayName()} is plural.
    */
   boolean isNamePlural();
 
@@ -98,33 +80,6 @@ public interface Party extends Audience, Named {
    * @return The {@link Color}.
    */
   Color getFullColor();
-
-  /**
-   * Get the current name of the {@link Party}, with its {@link #getColor()} formatting.
-   *
-   * @return The colored {@link Party} name.
-   */
-  default String getColoredName() {
-    return getColor() + getName();
-  }
-
-  /**
-   * Get the current name of the {@link Party}, with colors and from the perspective of a {@link
-   * CommandSender}.
-   *
-   * @param viewer The viewer.
-   * @return The colored {@link Party} name.
-   */
-  default String getColoredName(@Nullable CommandSender viewer) {
-    return getColor() + getName(viewer);
-  }
-
-  /**
-   * Get the current name of the {@link Party} as a {@link Component} with colors.
-   *
-   * @return The current {@link Party} name.
-   */
-  Component getComponentName();
 
   /**
    * Get the prefix in chat for all {@link MatchPlayer}s in the {@link Party}.

@@ -1,6 +1,8 @@
 package tc.oc.pgm.wool;
 
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.DyeColor;
 import org.bukkit.inventory.Inventory;
@@ -15,9 +17,7 @@ import tc.oc.pgm.goals.ProximityGoalDefinition;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.ComponentUtils;
-import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.text.TextFormatter;
 
 @FeatureInfo(name = "wool")
 public class MonumentWoolFactory extends ProximityGoalDefinition {
@@ -41,8 +41,8 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
   }
 
   public static Component makeComponentName(DyeColor color) {
-    return new PersonalizedText(
-        makeName(color), ComponentUtils.convert(BukkitUtils.dyeColorToChatColor(color)));
+    return TextComponent.of(
+        makeName(color), TextFormatter.convert((BukkitUtils.dyeColorToChatColor(color))));
   }
 
   public MonumentWoolFactory(

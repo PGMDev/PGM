@@ -5,6 +5,11 @@ import java.util.Deque;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
+import net.kyori.text.format.TextDecoration;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -34,12 +39,7 @@ import tc.oc.pgm.scoreboard.SidebarMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.Components;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 /** State of a flag when a player has picked it up and is wearing the banner on their head. */
 public class Carried extends Spawned implements Missing {
@@ -118,7 +118,7 @@ public class Carried extends Spawned implements Missing {
     SidebarMatchModule smm = this.flag.getMatch().getModule(SidebarMatchModule.class);
     if (smm != null) smm.stopBlinkingGoal(this.flag);
 
-    NMSHacks.sendHotbarMessage(this.carrier.getBukkit(), "");
+    this.carrier.showHotbar(TextComponent.empty());
 
     this.carrier.getInventory().remove(this.flag.getBannerItem());
     this.carrier.getInventory().setHelmet(this.helmetItem);
@@ -150,28 +150,24 @@ public class Carried extends Spawned implements Missing {
       if (this.flag.getDefinition().getCarryMessage() != null) {
         message = this.flag.getDefinition().getCarryMessage();
       } else {
-        message = new PersonalizedTranslatable("flag.carrying", this.flag.getComponentName());
+        message = TranslatableComponent.of("flag.carrying", this.flag.getComponentName());
       }
 
-      message.setColor(net.md_5.bungee.api.ChatColor.AQUA);
-      message.setBold(true);
-      return message;
+      return message.color(TextColor.AQUA).decoration(TextDecoration.BOLD, true);
     } else {
       if (this.deniedByNet.getDenyMessage() != null) {
         message = this.deniedByNet.getDenyMessage();
       } else if (this.deniedByFlag != null) {
         message =
-            new PersonalizedTranslatable(
+            TranslatableComponent.of(
                 "flag.captureDenied.byFlag",
                 this.flag.getComponentName(),
                 this.deniedByFlag.getComponentName());
       } else {
-        message = new PersonalizedTranslatable("flag.captureDenied", this.flag.getComponentName());
+        message = TranslatableComponent.of("flag.captureDenied", this.flag.getComponentName());
       }
 
-      message.setColor(net.md_5.bungee.api.ChatColor.RED);
-      message.setBold(true);
-      return message;
+      return message.color(TextColor.RED).decoration(TextDecoration.BOLD, true);
     }
   }
 
@@ -180,14 +176,11 @@ public class Carried extends Spawned implements Missing {
     super.tickRunning();
 
     Component message = this.getMessage();
-    this.carrier.sendHotbarMessage(
-        message instanceof PersonalizedTranslatable
-            ? ((PersonalizedTranslatable) message).getPersonalizedText()
-            : message);
+    this.carrier.showHotbar(message);
 
-    if (!Components.equals(message, this.lastMessage)) {
+    if (!message.equals(this.lastMessage)) {
       this.lastMessage = message;
-      this.carrier.showTitle(new PersonalizedText(), message, 0, 5, 35);
+      this.carrier.showTitle(TextComponent.empty(), message, 0, 5, 35);
     }
 
     ScoreMatchModule smm = this.flag.getMatch().getModule(ScoreMatchModule.class);
@@ -227,15 +220,15 @@ public class Carried extends Spawned implements Missing {
 
   protected void captureFlag(Net net) {
     this.carrier.sendMessage(
-        new PersonalizedTranslatable("flag.capture.you", this.flag.getComponentName()));
+        TranslatableComponent.of("flag.capture.you", this.flag.getComponentName()));
 
     this.flag
         .getMatch()
         .sendMessage(
-            new PersonalizedTranslatable(
+            TranslatableComponent.of(
                 "flag.capture.player",
                 this.flag.getComponentName(),
-                this.carrier.getStyledName(NameStyle.COLOR)));
+                this.carrier.getName(NameStyle.COLOR)));
 
     this.flag.resetTouches(this.carrier.getCompetitor());
     this.flag.resetProximity(this.carrier.getCompetitor());

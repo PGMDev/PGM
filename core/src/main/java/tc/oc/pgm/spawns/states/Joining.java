@@ -1,11 +1,11 @@
 package tc.oc.pgm.spawns.states;
 
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinPartyEvent;
 import tc.oc.pgm.spawns.SpawnMatchModule;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 
 /** Player is waiting to spawn after joining a team */
 public class Joining extends Spawning {
@@ -24,7 +24,7 @@ public class Joining extends Spawning {
 
   @Override
   protected Component getTitle() {
-    return new PersonalizedText();
+    return TextComponent.empty();
   }
 
   @Override

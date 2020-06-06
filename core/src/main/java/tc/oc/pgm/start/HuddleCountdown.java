@@ -1,14 +1,14 @@
 package tc.oc.pgm.start;
 
 import java.time.Duration;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.join.JoinMatchModule;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 /** Optional countdown between teams being finalized and match starting */
 public class HuddleCountdown extends PreMatchCountdown implements Listener {
@@ -19,8 +19,8 @@ public class HuddleCountdown extends PreMatchCountdown implements Listener {
 
   @Override
   protected Component formatText() {
-    return new PersonalizedTranslatable("countdown.huddleEnd", secondsRemaining(ChatColor.DARK_RED))
-        .color(ChatColor.YELLOW);
+    return TranslatableComponent.of(
+        "countdown.huddleEnd", TextColor.YELLOW, secondsRemaining(TextColor.DARK_RED));
   }
 
   @Override

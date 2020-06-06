@@ -2,6 +2,7 @@ package tc.oc.pgm.flag;
 
 import com.google.common.collect.ImmutableSet;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.feature.FeatureReference;
@@ -9,7 +10,6 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.teams.TeamFactory;
-import tc.oc.pgm.util.component.Component;
 
 @FeatureInfo(name = "net")
 public class Net extends SelfIdentifyingFeatureDefinition {

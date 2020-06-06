@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -30,7 +33,6 @@ import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.named.NameStyle;
 
@@ -200,13 +202,13 @@ public class ScoreMatchModule implements MatchModule, Listener {
     if (wholePoints < 1) return;
 
     match.sendMessage(
-        new PersonalizedTranslatable(
+        TranslatableComponent.of(
             "scorebox.scored",
-            player.getStyledName(NameStyle.COLOR),
-            new PersonalizedTranslatable(
+            player.getName(NameStyle.COLOR),
+            TranslatableComponent.of(
                 wholePoints == 1 ? "misc.point" : "misc.points",
-                ChatColor.DARK_AQUA + String.valueOf(wholePoints) + ChatColor.GRAY),
-            player.getParty().getStyledName(NameStyle.COLOR)));
+                TextComponent.of(Integer.toString(wholePoints), TextColor.DARK_AQUA)),
+            player.getParty().getName()));
     player.playSound(new Sound("random.levelup"));
   }
 

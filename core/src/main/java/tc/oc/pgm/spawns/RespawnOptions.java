@@ -2,8 +2,8 @@ package tc.oc.pgm.spawns;
 
 import java.time.Duration;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.component.Component;
 
 public class RespawnOptions {
   public final Duration delay; // Minimum wait time between death and respawn

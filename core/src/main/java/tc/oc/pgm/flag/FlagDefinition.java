@@ -2,6 +2,7 @@ package tc.oc.pgm.flag;
 
 import java.util.Collection;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
 import org.bukkit.DyeColor;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.feature.FeatureReference;
@@ -13,7 +14,6 @@ import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.component.Component;
 
 @FeatureInfo(name = "flag")
 public class FlagDefinition extends ProximityGoalDefinition {

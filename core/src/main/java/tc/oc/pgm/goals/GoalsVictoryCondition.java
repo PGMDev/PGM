@@ -2,11 +2,11 @@ package tc.oc.pgm.goals;
 
 import java.util.Collection;
 import java.util.Map;
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.VictoryCondition;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 
 // TODO: Break this down into multiple chainable conditions i.e. completions, touches, proximity,
 // etc.
@@ -51,6 +51,6 @@ public class GoalsVictoryCondition implements VictoryCondition {
 
   @Override
   public Component getDescription(Match match) {
-    return new PersonalizedText("most objectives");
+    return TranslatableComponent.of("victoryCondition.goals");
   }
 }

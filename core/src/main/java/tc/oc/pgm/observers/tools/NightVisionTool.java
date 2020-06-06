@@ -2,6 +2,9 @@ package tc.oc.pgm.observers.tools;
 
 import com.google.common.collect.Lists;
 import java.util.List;
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.ClickType;
@@ -10,15 +13,13 @@ import org.bukkit.potion.PotionEffectType;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.menu.InventoryMenu;
 import tc.oc.pgm.menu.InventoryMenuItem;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.ComponentRenderers;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class NightVisionTool implements InventoryMenuItem {
 
   @Override
   public Component getName() {
-    return new PersonalizedTranslatable("setting.nightvision");
+    return TranslatableComponent.of("setting.nightvision");
   }
 
   @Override
@@ -29,14 +30,11 @@ public class NightVisionTool implements InventoryMenuItem {
   @Override
   public List<String> getLore(MatchPlayer player) {
     Component status =
-        new PersonalizedTranslatable(hasNightVision(player) ? "misc.on" : "misc.off")
-            .getPersonalizedText()
-            .color(hasNightVision(player) ? ChatColor.GREEN : ChatColor.RED);
-    Component lore =
-        new PersonalizedTranslatable("setting.nightvision.lore", status)
-            .getPersonalizedText()
-            .color(ChatColor.GRAY);
-    return Lists.newArrayList(ComponentRenderers.toLegacyText(lore, player.getBukkit()));
+        TranslatableComponent.of(
+            hasNightVision(player) ? "misc.on" : "misc.off",
+            hasNightVision(player) ? TextColor.GREEN : TextColor.RED);
+    Component lore = TranslatableComponent.of("setting.nightvision.lore", TextColor.GRAY, status);
+    return Lists.newArrayList(TextTranslations.translateLegacy(lore, player.getBukkit()));
   }
 
   @Override

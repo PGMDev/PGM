@@ -62,7 +62,7 @@ import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.events.TeamRespawnsChangeEvent;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.TextTranslations;
 import tc.oc.pgm.wool.MonumentWool;
 import tc.oc.pgm.wool.WoolMatchModule;
 
@@ -90,9 +90,14 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
   protected @Nullable Future<?> renderTask;
 
-  private static String renderSidebarTitle(Collection<MapTag> tags) {
+  private static String renderSidebarTitle(
+      Collection<MapTag> tags, @Nullable Component gamemodeName) {
     final Component configTitle = PGM.get().getConfiguration().getMatchHeader();
     if (configTitle != null) return LegacyComponentSerializer.legacy().serialize(configTitle);
+    if (gamemodeName != null) {
+      String customGamemode = LegacyComponentSerializer.legacy().serialize(gamemodeName);
+      if (!customGamemode.isEmpty()) return ChatColor.AQUA + customGamemode;
+    }
 
     final List<String> gamemode =
         tags.stream()
@@ -141,7 +146,8 @@ public class SidebarMatchModule implements MatchModule, Listener {
       this.scoreboard = match.needModule(ScoreboardMatchModule.class).getScoreboard(party);
       this.objective = this.scoreboard.registerNewObjective(IDENTIFIER, "dummy");
       this.objective.setDisplayName(
-          StringUtils.left(renderSidebarTitle(match.getMap().getTags()), 32));
+          StringUtils.left(
+              renderSidebarTitle(match.getMap().getTags(), match.getMap().getGamemode()), 32));
       this.objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
       for (int i = 0; i < MAX_ROWS; ++i) {
@@ -451,7 +457,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
             text = renderBlitz(competitor, viewingParty);
           }
           if (text.length() != 0) text += " ";
-          rows.add(text + competitor.getStyledName(NameStyle.FANCY).render().toLegacyText());
+          rows.add(text + TextTranslations.translateLegacy(competitor.getName(), null));
         }
 
         if (!competitorsWithGoals.isEmpty() || !sharedGoals.isEmpty()) {
@@ -494,7 +500,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
         firstTeam = false;
 
         // Add a row for the team name
-        rows.add(competitor.getStyledName(NameStyle.FANCY).render().toLegacyText());
+        rows.add(TextTranslations.translateLegacy(competitor.getName(), null));
 
         if (isCompactWool) {
           boolean firstWool = true;

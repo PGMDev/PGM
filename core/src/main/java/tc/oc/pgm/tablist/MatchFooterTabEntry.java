@@ -3,7 +3,9 @@ package tc.oc.pgm.tablist;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
@@ -12,8 +14,6 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.modules.StatsMatchModule;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.tablist.DynamicTabEntry;
 import tc.oc.pgm.util.tablist.TabView;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -50,23 +50,24 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
 
   @Override
   public BaseComponent getContent(TabView view) {
-    Component content = new PersonalizedText(ChatColor.DARK_GRAY);
+    TextComponent.Builder content = TextComponent.builder();
 
     MatchPlayer viewer = match.getPlayer(view.getViewer());
 
     if (viewer.getCompetitor() != null
         && viewer.getSettings().getValue(SettingKey.STATS).equals(SettingValue.STATS_ON)) {
-      content.extra(match.getModule(StatsMatchModule.class).getBasicStatsMessage(viewer.getId()));
-      content.extra("\n");
+      content.append(match.getModule(StatsMatchModule.class).getBasicStatsMessage(viewer.getId()));
+      content.append("\n");
     }
 
-    content.extra(
-        new PersonalizedText(
-            TextTranslations.translate("match.info.time", view.getViewer()) + ": ", ChatColor.GRAY),
-        new PersonalizedText(
+    content
+        .append(TranslatableComponent.of("match.info.time", TextColor.GRAY))
+        .append(": ", TextColor.GRAY)
+        .append(
             TimeUtils.formatDuration(match.getDuration()),
-            this.match.isRunning() ? ChatColor.GREEN : ChatColor.GOLD));
+            this.match.isRunning() ? TextColor.GREEN : TextColor.GOLD);
 
-    return content.render(view.getViewer());
+    return TextTranslations.toBaseComponent(
+        content.colorIfAbsent(TextColor.DARK_GRAY).build(), view.getViewer());
   }
 }

@@ -1,18 +1,15 @@
 package tc.oc.pgm.match;
 
-import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import org.bukkit.Color;
-import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.ComponentUtils;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.TextFormatter;
 
 public abstract class ObservingParty extends SimpleParty {
 
-  private String coloredName;
   private Component componentName;
   private Component chatPrefix;
 
@@ -21,22 +18,8 @@ public abstract class ObservingParty extends SimpleParty {
   }
 
   @Override
-  public String getName() {
-    return getDefaultName();
-  }
-
-  @Override
-  public String getName(@Nullable CommandSender viewer) {
-    return getName();
-  }
-
-  @Override
   public boolean isNamePlural() {
     return true;
-  }
-
-  public net.md_5.bungee.api.ChatColor getBungeeColor() {
-    return ComponentUtils.convert(getColor());
   }
 
   @Override
@@ -45,35 +28,22 @@ public abstract class ObservingParty extends SimpleParty {
   }
 
   @Override
-  public String getColoredName() {
-    if (coloredName == null) {
-      coloredName = getColor() + getName();
-    }
-    return coloredName;
-  }
-
-  @Override
-  public String getColoredName(@Nullable CommandSender viewer) {
-    return getColoredName();
-  }
-
-  @Override
-  public Component getComponentName() {
+  public Component getName(NameStyle style) {
     if (componentName == null) {
-      componentName = new PersonalizedText(getName(), getBungeeColor());
+      componentName = TextComponent.of(getDefaultName(), TextFormatter.convert(getColor()));
     }
     return componentName;
   }
 
   @Override
-  public Component getStyledName(NameStyle style) {
-    return getComponentName();
+  public String getNameLegacy() {
+    return getDefaultName();
   }
 
   @Override
   public Component getChatPrefix() {
     if (chatPrefix == null) {
-      chatPrefix = new PersonalizedText("(Obs) ", getBungeeColor());
+      chatPrefix = TextComponent.of("(Obs) ", TextFormatter.convert(getColor()));
     }
     return chatPrefix;
   }

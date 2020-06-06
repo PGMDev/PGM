@@ -1,11 +1,11 @@
 package tc.oc.pgm.broadcast;
 
 import java.time.Duration;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.countdowns.MatchCountdown;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.BlankComponent;
 
 public class BroadcastCountdown extends MatchCountdown {
   private final Broadcast broadcast;
@@ -27,7 +27,7 @@ public class BroadcastCountdown extends MatchCountdown {
 
   @Override
   protected Component formatText() {
-    return BlankComponent.INSTANCE;
+    return TextComponent.empty();
   }
 
   @Override
@@ -36,7 +36,7 @@ public class BroadcastCountdown extends MatchCountdown {
     for (MatchPlayer player : this.getMatch().getPlayers()) {
       if (this.broadcast.filter == null
           || this.broadcast.filter.query(player.getQuery()).isAllowed()) {
-        player.sendMessage(this.broadcast.getFormattedMessage().toLegacyText());
+        player.sendMessage(this.broadcast.getFormattedMessage());
         player.playSound(this.broadcast.getSound());
       }
     }

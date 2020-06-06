@@ -2,7 +2,10 @@ package tc.oc.pgm.spawns.states;
 
 import java.util.List;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -14,9 +17,6 @@ import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.SpawnModule;
 import tc.oc.pgm.spawns.events.DeathKitApplyEvent;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.nms.NMSHacks;
 
 /** Player is waiting to respawn after dying in-game */
@@ -113,18 +113,16 @@ public class Dead extends Spawning {
 
   @Override
   protected Component getTitle() {
-    Component title = new PersonalizedTranslatable("deathScreen.title");
-    title.setColor(ChatColor.RED);
-    return title;
+    return TranslatableComponent.of("deathScreen.title", TextColor.RED);
   }
 
   @Override
   protected Component getSubtitle() {
     long ticks = ticksUntilRespawn();
     if (ticks > 0) {
-      return new PersonalizedTranslatable(
+      return TranslatableComponent.of(
           spawnRequested ? "death.respawn.confirmed.time" : "death.respawn.unconfirmed.time",
-          new PersonalizedText(String.format("%.1f", (ticks / (float) 20))).color(ChatColor.AQUA));
+          TextComponent.of(String.format("%.1f", (ticks / (float) 20)), TextColor.AQUA));
     } else {
       return super.getSubtitle();
     }

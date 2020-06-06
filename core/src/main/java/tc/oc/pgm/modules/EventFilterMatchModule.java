@@ -1,6 +1,8 @@
 package tc.oc.pgm.modules;
 
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -44,8 +46,6 @@ import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.event.ObserverInteractEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerBlockTransformEvent;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 /**
  * Listens to many events at low priority and cancels them if the actor is not allowed to interact
@@ -67,7 +67,7 @@ public class EventFilterMatchModule implements MatchModule, Listener {
     match.getLogger().fine("Cancel " + event + " actor=" + actor);
     event.setCancelled(true);
     if (actor != null && message != null) {
-      actor.sendWarning(message, true);
+      actor.sendWarning(message);
     }
     return true;
   }
@@ -161,7 +161,7 @@ public class EventFilterMatchModule implements MatchModule, Listener {
         true,
         event.getPlayer().getWorld(),
         match.getPlayer(event.getPlayer()),
-        new PersonalizedTranslatable("match.disabled.bed"));
+        TranslatableComponent.of("match.disabled.bed"));
   }
 
   // ---------------------------
@@ -263,7 +263,7 @@ public class EventFilterMatchModule implements MatchModule, Listener {
           true,
           event.getWorld(),
           event.getPlayer(),
-          new PersonalizedTranslatable("match.disabled.enderChest"));
+          TranslatableComponent.of("match.disabled.enderChest"));
     }
   }
 

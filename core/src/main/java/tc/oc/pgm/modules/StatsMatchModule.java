@@ -7,7 +7,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
+import net.kyori.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,12 +29,9 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.ComponentUtils;
-import tc.oc.pgm.util.component.Components;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.text.TextTranslations;
+import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.TextFormatter;
+import tc.oc.pgm.util.text.types.PlayerComponent;
 
 @ListenerScope(MatchScope.RUNNING)
 public class StatsMatchModule implements MatchModule, Listener {
@@ -71,22 +72,20 @@ public class StatsMatchModule implements MatchModule, Listener {
 
     private final DecimalFormat decimalFormatKd = new DecimalFormat("#.##");
 
-    Component getBasicStatsMessage() {
+    public Component getBasicStatsMessage() {
       String kd;
       if (deaths == 0) {
         kd = Double.toString(kills);
       } else {
         kd = decimalFormatKd.format(kills / (double) deaths);
       }
-      return new Component(
-          new PersonalizedTranslatable(
-                  "match.stats",
-                  new PersonalizedText(Integer.toString(kills), ChatColor.GREEN),
-                  new PersonalizedText(Integer.toString(killstreak), ChatColor.GREEN),
-                  new PersonalizedText(Integer.toString(deaths), ChatColor.RED),
-                  new PersonalizedText(kd, ChatColor.GREEN))
-              .color(ChatColor.GRAY)
-              .render());
+      return TranslatableComponent.of(
+          "match.stats",
+          TextColor.GRAY,
+          TextComponent.of(Integer.toString(kills), TextColor.GREEN),
+          TextComponent.of(Integer.toString(killstreak), TextColor.GREEN),
+          TextComponent.of(Integer.toString(deaths), TextColor.RED),
+          TextComponent.of(kd, TextColor.GREEN));
     }
   }
 
@@ -154,14 +153,14 @@ public class StatsMatchModule implements MatchModule, Listener {
       allBowshots.put(playerUUID, playerStats.longestBowKill);
     }
 
-    Component killMessage = getMessage("match.stats.kills", sortStats(allKills), ChatColor.GREEN);
+    Component killMessage = getMessage("match.stats.kills", sortStats(allKills), TextColor.GREEN);
     Component killstreakMessage =
-        getMessage("match.stats.killstreak", sortStats(allKillstreaks), ChatColor.GREEN);
-    Component deathMessage = getMessage("match.stats.deaths", sortStats(allDeaths), ChatColor.RED);
+        getMessage("match.stats.killstreak", sortStats(allKillstreaks), TextColor.GREEN);
+    Component deathMessage = getMessage("match.stats.deaths", sortStats(allDeaths), TextColor.RED);
     Map.Entry<UUID, Integer> bestBowshot = sortStats(allBowshots);
     if (bestBowshot.getValue() == 1)
       bestBowshot.setValue(2); // Avoids translating "1 block" vs "n blocks"
-    Component bowshotMessage = getMessage("match.stats.bowshot", bestBowshot, ChatColor.YELLOW);
+    Component bowshotMessage = getMessage("match.stats.bowshot", bestBowshot, TextColor.YELLOW);
 
     match
         .getExecutor(MatchScope.LOADED)
@@ -170,15 +169,12 @@ public class StatsMatchModule implements MatchModule, Listener {
               for (MatchPlayer viewer : match.getPlayers()) {
                 if (viewer.getSettings().getValue(SettingKey.STATS) == SettingValue.STATS_OFF)
                   continue;
-                viewer.sendMessage(
-                    Components.fromLegacyText(
-                        ComponentUtils.horizontalLineHeading(
-                            ChatColor.YELLOW
-                                + TextTranslations.translate(
-                                    "match.stats.overall", viewer.getBukkit()),
-                            ChatColor.WHITE,
-                            ComponentUtils.MAX_CHAT_WIDTH)));
 
+                viewer.sendMessage(
+                    TextFormatter.horizontalLineHeading(
+                        viewer.getBukkit(),
+                        TranslatableComponent.of("match.stats.overall", TextColor.YELLOW),
+                        TextColor.WHITE));
                 viewer.sendMessage(killMessage);
                 viewer.sendMessage(killstreakMessage);
                 viewer.sendMessage(deathMessage);
@@ -210,31 +206,23 @@ public class StatsMatchModule implements MatchModule, Listener {
     Future<?> task =
         match
             .getExecutor(MatchScope.LOADED)
-            .scheduleWithFixedDelay(
-                () -> player.sendHotbarMessage(message), 0, 1, TimeUnit.SECONDS);
+            .scheduleWithFixedDelay(() -> player.showHotbar(message), 0, 1, TimeUnit.SECONDS);
 
     match.getExecutor(MatchScope.LOADED).schedule(() -> task.cancel(true), 4, TimeUnit.SECONDS);
   }
 
-  Component getMessage(String messageKey, Map.Entry<UUID, Integer> mapEntry, ChatColor color) {
-    return new Component(
-        new PersonalizedTranslatable(
-                messageKey,
-                playerName(mapEntry.getKey()),
-                new PersonalizedText(Integer.toString(mapEntry.getValue()), color)
-                    .bold(true)
-                    .render())
-            .render());
+  Component getMessage(String messageKey, Map.Entry<UUID, Integer> mapEntry, TextColor color) {
+    return TranslatableComponent.of(
+        messageKey,
+        playerName(mapEntry.getKey()),
+        TextComponent.of(Integer.toString(mapEntry.getValue()), color, TextDecoration.BOLD));
   }
 
-  private PersonalizedText playerName(UUID playerUUID) {
-    if (Bukkit.getPlayer(playerUUID) == null) {
-      if (cachedUsernames.get(playerUUID) == null) {
-        return new PersonalizedText("Unknown", ChatColor.MAGIC, ChatColor.BLACK);
-      }
-      return new PersonalizedText(cachedUsernames.get(playerUUID), ChatColor.DARK_AQUA);
-    }
-    return new PersonalizedText(match.getPlayer(playerUUID).getBukkit().getDisplayName());
+  private Component playerName(UUID playerUUID) {
+    return PlayerComponent.of(
+        Bukkit.getPlayer(playerUUID),
+        cachedUsernames.getOrDefault(playerUUID, "Unknown"),
+        NameStyle.FANCY);
   }
 
   public boolean hasNoStats(UUID player) {

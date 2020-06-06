@@ -2,9 +2,13 @@ package tc.oc.pgm.observers.tools;
 
 import com.google.common.collect.Lists;
 import java.util.List;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.event.ClickEvent;
+import net.kyori.text.event.HoverEvent;
+import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -12,16 +16,13 @@ import org.bukkit.event.inventory.ClickType;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.menu.InventoryMenu;
 import tc.oc.pgm.menu.InventoryMenuItem;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.ComponentRenderers;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class GamemodeTool implements InventoryMenuItem {
 
   @Override
   public Component getName() {
-    return new PersonalizedTranslatable("setting.gamemode");
+    return TranslatableComponent.of("setting.gamemode");
   }
 
   @Override
@@ -32,13 +33,10 @@ public class GamemodeTool implements InventoryMenuItem {
   @Override
   public List<String> getLore(MatchPlayer player) {
     Component gamemode =
-        new PersonalizedTranslatable("gameMode." + player.getGameMode().name().toLowerCase())
-            .color(ChatColor.AQUA);
-    Component lore =
-        new PersonalizedTranslatable("setting.gamemode.lore", gamemode)
-            .getPersonalizedText()
-            .color(ChatColor.GRAY);
-    return Lists.newArrayList(ComponentRenderers.toLegacyText(lore, player.getBukkit()));
+        TranslatableComponent.of(
+            "gameMode." + player.getGameMode().name().toLowerCase(), TextColor.AQUA);
+    Component lore = TranslatableComponent.of("setting.gamemode.lore", TextColor.GRAY, gamemode);
+    return Lists.newArrayList(TextTranslations.translateBaseComponent(lore, player.getBukkit()));
   }
 
   @Override
@@ -55,7 +53,7 @@ public class GamemodeTool implements InventoryMenuItem {
   public void toggleObserverGameMode(MatchPlayer player) {
     player.setGameMode(getOppositeMode(player.getGameMode()));
     if (player.getGameMode() == GameMode.SPECTATOR) {
-      player.sendWarning(getToggleMessage(), true);
+      player.sendWarning(getToggleMessage());
     } else if (isCreative(player)) {
       // Note: When WorldEdit is present, this executes a command to ensure the player is not stuck
       if (Bukkit.getPluginManager().isPluginEnabled("WorldEdit")) {
@@ -70,18 +68,12 @@ public class GamemodeTool implements InventoryMenuItem {
 
   private Component getToggleMessage() {
     Component command =
-        new PersonalizedText("/tools")
-            .color(ChatColor.AQUA)
+        TextComponent.of("/tools", TextColor.AQUA)
             .hoverEvent(
-                HoverEvent.Action.SHOW_TEXT,
-                new PersonalizedTranslatable("setting.gamemode.hover")
-                    .getPersonalizedText()
-                    .color(ChatColor.GRAY)
-                    .render())
-            .clickEvent(ClickEvent.Action.RUN_COMMAND, "/tools");
-    return new PersonalizedTranslatable("setting.gamemode.warning", command)
-        .getPersonalizedText()
-        .color(ChatColor.GRAY);
+                HoverEvent.showText(
+                    TranslatableComponent.of("setting.gamemode.hover", TextColor.GRAY)))
+            .clickEvent(ClickEvent.runCommand("/tools"));
+    return TranslatableComponent.of("setting.gamemode.warning", TextColor.GRAY, command);
   }
 
   private GameMode getOppositeMode(GameMode mode) {

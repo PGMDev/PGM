@@ -1,5 +1,6 @@
 package tc.oc.pgm.flag.state;
 
+import net.kyori.text.TranslatableComponent;
 import org.bukkit.Location;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.filters.query.GoalQuery;
@@ -8,7 +9,6 @@ import tc.oc.pgm.flag.Net;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 /**
  * Flag is looking for a place to respawn after being captured. This phase can be delayed by a
@@ -51,7 +51,7 @@ public class Captured extends BaseState implements Returning {
         this.flag
             .getMatch()
             .sendMessage(
-                new PersonalizedTranslatable("flag.respawnTogether", this.flag.getComponentName()));
+                TranslatableComponent.of("flag.respawnTogether", this.flag.getComponentName()));
       }
     }
 

@@ -1,13 +1,13 @@
 package tc.oc.pgm.restart;
 
 import java.time.Duration;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import org.bukkit.Bukkit;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 public class RestartCountdown extends MatchCountdown {
 
@@ -18,10 +18,10 @@ public class RestartCountdown extends MatchCountdown {
   @Override
   protected Component formatText() {
     if (TimeUtils.isLongerThan(remaining, Duration.ZERO)) {
-      return new PersonalizedTranslatable("countdown.restart", secondsRemaining(ChatColor.DARK_RED))
-          .color(ChatColor.AQUA);
+      return TranslatableComponent.of(
+          "countdown.restart", TextColor.AQUA, secondsRemaining(TextColor.DARK_RED));
     } else {
-      return new PersonalizedTranslatable("misc.serverRestart").color(ChatColor.RED);
+      return TranslatableComponent.of("misc.serverRestart", TextColor.RED);
     }
   }
 

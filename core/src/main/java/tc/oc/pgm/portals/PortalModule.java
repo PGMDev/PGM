@@ -6,6 +6,8 @@ import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Set;
 import java.util.logging.Logger;
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -29,14 +31,11 @@ import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.regions.TranslatedRegion;
 import tc.oc.pgm.regions.Union;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class PortalModule implements MapModule {
-  private static final Component PROTECT_MESSAGE =
-      new PersonalizedTranslatable("map.protectPortal");
+  private static final Component PROTECT_MESSAGE = TranslatableComponent.of("map.protectPortal");
 
   protected final Set<Portal> portals;
 

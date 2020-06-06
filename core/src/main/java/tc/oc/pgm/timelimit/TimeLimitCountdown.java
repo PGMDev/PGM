@@ -2,13 +2,13 @@ package tc.oc.pgm.timelimit;
 
 import java.time.Duration;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.util.chat.Sound;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 public class TimeLimitCountdown extends MatchCountdown {
 
@@ -32,9 +32,8 @@ public class TimeLimitCountdown extends MatchCountdown {
 
   @Override
   protected Component formatText() {
-    return new PersonalizedTranslatable(
-            "misc.timeRemaining", new PersonalizedText(colonTime(), urgencyColor()))
-        .color(ChatColor.AQUA);
+    return TranslatableComponent.of(
+        "misc.timeRemaining", TextColor.AQUA, TextComponent.of(colonTime(), urgencyColor()));
   }
 
   @Override

@@ -1,16 +1,15 @@
 package tc.oc.pgm.util.named;
 
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
-import tc.oc.pgm.util.component.Component;
+import net.kyori.text.Component;
 
 public interface Named {
 
-  /** @see #getName(NameStyle) */
-  @Deprecated
-  Component getStyledName(NameStyle style);
+  Component getName(NameStyle style);
 
-  default net.kyori.text.Component getName(NameStyle style) {
-    return LegacyComponentSerializer.legacy()
-        .deserialize(getStyledName(style).render().toLegacyText());
+  default Component getName() {
+    return getName(NameStyle.FANCY);
   }
+
+  // TODO: Maybe add a note here explaining to prefer Named#getName()
+  String getNameLegacy();
 }

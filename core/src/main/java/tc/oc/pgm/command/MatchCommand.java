@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import net.kyori.text.TextComponent;
+import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.match.Match;
@@ -24,8 +26,9 @@ import tc.oc.pgm.goals.ProximityGoal;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
+import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.component.ComponentUtils;
+import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.text.TextTranslations;
 
 // TODO: improve format and translate
@@ -34,19 +37,19 @@ public final class MatchCommand {
   @Command(
       aliases = {"match", "matchinfo"},
       desc = "Show the match info")
-  public void match(CommandSender sender, MatchPlayer player, Match match) {
+  public void match(Audience viewer, CommandSender sender, MatchPlayer player, Match match) {
     // indicates whether we have game information from the match yet
     boolean haveGameInfo =
         match.getPhase() == MatchPhase.RUNNING || match.getPhase() == MatchPhase.FINISHED;
 
     sender.sendMessage(
-        ComponentUtils.horizontalLineHeading(
+        LegacyFormatUtils.horizontalLineHeading(
             ChatColor.YELLOW
                 + TextTranslations.translate("match.title", sender)
                 + " #"
                 + match.getId(),
             ChatColor.WHITE,
-            ComponentUtils.MAX_CHAT_WIDTH));
+            LegacyFormatUtils.MAX_CHAT_WIDTH));
 
     if (haveGameInfo) {
       // show match time
@@ -66,7 +69,7 @@ public final class MatchCommand {
       for (Team team : tmm.getTeams()) {
         StringBuilder msg = new StringBuilder();
 
-        String teamName = team.getName();
+        String teamName = team.getNameLegacy();
         if (teamName.endsWith(" Team")) teamName = teamName.substring(0, teamName.length() - 5);
 
         msg.append(team.getColor())
@@ -138,12 +141,13 @@ public final class MatchCommand {
             Team team = entry.getKey();
             Collection<String> goalTexts = entry.getValue();
 
-            sender.sendMessage(
-                "  "
-                    + team.getColoredName()
-                    + ChatColor.GRAY
-                    + ": "
-                    + Joiner.on("  ").join(goalTexts));
+            viewer.sendMessage(
+                TextComponent.builder()
+                    .append("  ")
+                    .append(team.getName())
+                    .append(": ", TextColor.GRAY)
+                    .append(Joiner.on("  ").join(goalTexts))
+                    .build());
           }
         }
       } else {

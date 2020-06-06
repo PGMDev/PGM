@@ -2,11 +2,11 @@ package tc.oc.pgm.teams;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.result.ImmediateVictoryCondition;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 /** Immediate, unconditional victory for an explicit {@link Team}. */
 public class TeamVictoryCondition extends ImmediateVictoryCondition {
@@ -30,8 +30,8 @@ public class TeamVictoryCondition extends ImmediateVictoryCondition {
   @Override
   public Component getDescription(Match match) {
     Team team = getTeam(match);
-    return new PersonalizedTranslatable(
+    return TranslatableComponent.of(
         team.isNamePlural() ? "broadcast.gameOver.teamWinners" : "broadcast.gameOver.teamWinner",
-        team.getComponentName());
+        team.getName());
   }
 }

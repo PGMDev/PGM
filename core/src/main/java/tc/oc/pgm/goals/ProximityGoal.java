@@ -21,9 +21,9 @@ import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalProximityChangeEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
+import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
-import tc.oc.pgm.util.component.ComponentUtils;
 
 public abstract class ProximityGoal<T extends ProximityGoalDefinition> extends OwnedGoal<T>
     implements Listener {
@@ -172,7 +172,7 @@ public abstract class ProximityGoal<T extends ProximityGoalDefinition> extends O
     if (distance == Double.POSITIVE_INFINITY) {
       text = "\u221e"; // ∞
     } else {
-      text = ComponentUtils.tiny(String.format("%.1f", distance));
+      text = LegacyFormatUtils.tiny(String.format("%.1f", distance));
     }
 
     return renderProximityColor(team, viewer) + text;

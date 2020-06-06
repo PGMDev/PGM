@@ -4,6 +4,7 @@ import static tc.oc.pgm.api.map.MapProtos.MODES_IMPLEMENTATION_VERSION;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import net.kyori.text.TranslatableComponent;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.minecart.ExplosiveMinecart;
@@ -29,8 +30,6 @@ import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
 import tc.oc.pgm.util.block.BlockVectors;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
-import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.RUNNING)
 public class CoreMatchModule implements MatchModule, Listener {
@@ -86,7 +85,7 @@ public class CoreMatchModule implements MatchModule, Listener {
             Competitor team = player.getParty();
 
             if (team == core.getOwner()) {
-              event.setCancelled(true, new PersonalizedTranslatable("core.damageOwn"));
+              event.setCancelled(true, TranslatableComponent.of("core.damageOwn"));
             } else if (event.getOldState().getData().equals(core.getMaterial())) {
               this.match.callEvent(new CoreBlockBreakEvent(core, player, event.getOldState()));
               core.touch(player);
@@ -127,7 +126,7 @@ public class CoreMatchModule implements MatchModule, Listener {
           && core.getCasingRegion().contains(center)
           && player.getParty() == core.getOwner()) {
         event.setCancelled(true);
-        player.sendWarning(TextTranslations.translate("core.damageOwn", player.getBukkit()), true);
+        player.sendWarning(TranslatableComponent.of("core.damageOwn"));
       }
     }
   }

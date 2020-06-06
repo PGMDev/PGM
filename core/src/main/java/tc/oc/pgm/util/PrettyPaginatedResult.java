@@ -4,11 +4,13 @@ import app.ashcon.intake.CommandException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import net.kyori.text.TextComponent;
 import tc.oc.pgm.util.chat.Audience;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 
 /**
  * Class used to display a paginated list of items that are formatted
+ *
+ * <p>See {@link PrettyPaginatedComponentResults} for more interactive menus
  *
  * @param <T> Type of item to format
  */
@@ -91,7 +93,7 @@ public abstract class PrettyPaginatedResult<T> {
    */
   public void display(Audience audience, List<? extends T> data, int page) throws CommandException {
     if (data.size() == 0) {
-      audience.sendMessage(new PersonalizedText(formatEmpty()));
+      audience.sendMessage(TextComponent.of(formatEmpty()));
       return;
     }
 
@@ -111,6 +113,6 @@ public abstract class PrettyPaginatedResult<T> {
       message.append(format(data.get(i), i));
       if (i != (data.size() - 1)) message.append("\n");
     }
-    audience.sendMessage(new PersonalizedText(message.toString()));
+    audience.sendMessage(TextComponent.of(message.toString()));
   }
 }

@@ -25,6 +25,7 @@ import tc.oc.pgm.map.contrib.PlayerContributor;
 import tc.oc.pgm.map.contrib.PseudonymContributor;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.named.MapNameStyle;
+import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -39,6 +40,7 @@ public class MapInfoImpl implements MapInfo {
   private final Collection<Contributor> authors;
   private final Collection<Contributor> contributors;
   private final Collection<String> rules;
+  private final Component gamemode;
   private final int difficulty;
   private final WorldInfo world;
 
@@ -57,7 +59,8 @@ public class MapInfoImpl implements MapInfo {
       @Nullable Integer difficulty,
       @Nullable Collection<MapTag> tags,
       @Nullable Collection<Integer> players,
-      @Nullable WorldInfo world) {
+      @Nullable WorldInfo world,
+      Component gamemode) {
     this.name = checkNotNull(name);
     this.id = checkNotNull(MapInfo.normalizeName(id == null ? name : id));
     this.proto = checkNotNull(proto);
@@ -70,6 +73,7 @@ public class MapInfoImpl implements MapInfo {
     this.tags = tags == null ? new TreeSet<>() : tags;
     this.players = players == null ? new LinkedList<>() : players;
     this.world = world == null ? new WorldInfoImpl() : world;
+    this.gamemode = gamemode == null ? TextComponent.empty() : gamemode;
   }
 
   public MapInfoImpl(MapInfo info) {
@@ -85,7 +89,8 @@ public class MapInfoImpl implements MapInfo {
         info.getDifficulty(),
         info.getTags(),
         info.getMaxPlayers(),
-        info.getWorld());
+        info.getWorld(),
+        info.getGamemode());
   }
 
   public MapInfoImpl(Element root) throws InvalidXMLException {
@@ -106,7 +111,8 @@ public class MapInfoImpl implements MapInfo {
             .ordinal(),
         null,
         null,
-        parseWorld(root));
+        parseWorld(root),
+        XMLUtils.parseFormattedText(root, "game"));
   }
 
   @Override
@@ -165,6 +171,11 @@ public class MapInfoImpl implements MapInfo {
   }
 
   @Override
+  public Component getGamemode() {
+    return gamemode;
+  }
+
+  @Override
   public WorldInfo getWorld() {
     return world;
   }
@@ -203,7 +214,7 @@ public class MapInfoImpl implements MapInfo {
           name.build(),
           TextFormatter.list(
               getAuthors().stream()
-                  .map(c -> TextComponent.of(c.getName(), TextColor.RED))
+                  .map(c -> c.getName(NameStyle.PLAIN).color(TextColor.RED))
                   .collect(Collectors.toList()),
               TextColor.DARK_PURPLE));
     }

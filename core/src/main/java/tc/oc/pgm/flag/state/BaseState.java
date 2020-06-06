@@ -26,7 +26,6 @@ import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 /** Base class for all {@link Flag} states */
 public abstract class BaseState implements Runnable, State {
@@ -171,7 +170,7 @@ public abstract class BaseState implements Runnable, State {
   }
 
   public ChatColor getStatusColor(Party viewer) {
-    return BukkitUtils.convertColor(this.flag.getChatColor());
+    return ChatColor.valueOf(this.flag.getChatColor().name());
   }
 
   public ChatColor getLabelColor(Party viewer) {

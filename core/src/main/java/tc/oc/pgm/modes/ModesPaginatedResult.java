@@ -2,11 +2,12 @@ package tc.oc.pgm.modes;
 
 import com.google.common.base.Preconditions;
 import java.time.Duration;
+import net.kyori.text.TextComponent;
+import net.kyori.text.format.TextDecoration;
 import org.bukkit.ChatColor;
 import tc.oc.pgm.util.PrettyPaginatedResult;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.component.Components;
-import tc.oc.pgm.util.component.types.PersonalizedText;
+import tc.oc.pgm.util.text.TextTranslations;
 
 /** Class used to display a paginated list of monument modes */
 public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountdown> {
@@ -38,8 +39,9 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
     }
 
     if (this.isExpired(countdown)) {
-      return Components.strikethrough(new PersonalizedText(builder.toString()), true)
-          .toLegacyText();
+      return TextTranslations.translateLegacy(
+          TextComponent.of(builder.toString()).decoration(TextDecoration.STRIKETHROUGH, true),
+          null);
     } else {
       return builder.toString();
     }

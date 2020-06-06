@@ -5,6 +5,9 @@ import java.util.Collections;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -22,9 +25,6 @@ import tc.oc.pgm.modes.ModeUtils;
 import tc.oc.pgm.regions.CuboidRegion;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.teams.Team;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.Components;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.named.NameStyle;
 
@@ -91,23 +91,23 @@ public class Core extends TouchableGoal<CoreFactory> implements ModeChangeGoal<C
   public Component getTouchMessage(@Nullable ParticipantState toucher, boolean self) {
     // Core has same touch messages as Destroyable
     if (toucher == null) {
-      return new PersonalizedTranslatable(
+      return TranslatableComponent.of(
           "destroyable.touch.owned",
-          Components.blank(),
+          TextComponent.empty(),
           getComponentName(),
-          getOwner().getComponentName());
+          getOwner().getName());
     } else if (self) {
-      return new PersonalizedTranslatable(
+      return TranslatableComponent.of(
           "destroyable.touch.owned.you",
-          Components.blank(),
+          TextComponent.empty(),
           getComponentName(),
-          getOwner().getComponentName());
+          getOwner().getName());
     } else {
-      return new PersonalizedTranslatable(
+      return TranslatableComponent.of(
           "destroyable.touch.owned.player",
-          toucher.getStyledName(NameStyle.COLOR),
+          toucher.getName(NameStyle.COLOR),
           getComponentName(),
-          getOwner().getComponentName());
+          getOwner().getName());
     }
   }
 

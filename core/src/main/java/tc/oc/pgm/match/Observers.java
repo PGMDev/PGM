@@ -1,5 +1,6 @@
 package tc.oc.pgm.match;
 
+import org.bukkit.ChatColor;
 import tc.oc.pgm.api.match.Match;
 
 public class Observers extends ObservingParty {
@@ -14,8 +15,8 @@ public class Observers extends ObservingParty {
   }
 
   @Override
-  public org.bukkit.ChatColor getColor() {
-    return org.bukkit.ChatColor.AQUA;
+  public ChatColor getColor() {
+    return ChatColor.AQUA;
   }
 
   @Override

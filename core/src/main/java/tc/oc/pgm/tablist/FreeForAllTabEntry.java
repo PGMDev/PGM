@@ -1,12 +1,15 @@
 package tc.oc.pgm.tablist;
 
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
+import net.kyori.text.format.TextDecoration;
 import net.md_5.bungee.api.chat.BaseComponent;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.tablist.DynamicTabEntry;
 import tc.oc.pgm.util.tablist.TabView;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class FreeForAllTabEntry extends DynamicTabEntry {
 
@@ -18,12 +21,16 @@ public class FreeForAllTabEntry extends DynamicTabEntry {
 
   @Override
   public BaseComponent getContent(TabView view) {
-    return new PersonalizedText(
-            new PersonalizedText(String.valueOf(match.getParticipants().size()), ChatColor.WHITE),
-            new PersonalizedText("/", ChatColor.DARK_GRAY),
-            new PersonalizedText(String.valueOf(match.getMaxPlayers()), ChatColor.GRAY),
-            new PersonalizedText(" ", ChatColor.YELLOW, ChatColor.BOLD)
-                .extra(new PersonalizedTranslatable("match.info.players")))
-        .render(view.getViewer());
+    Component content =
+        TextComponent.builder()
+            .append(String.valueOf(match.getParticipants().size()), TextColor.WHITE)
+            .append("/", TextColor.DARK_GRAY)
+            .append(String.valueOf(match.getMaxPlayers()), TextColor.GRAY)
+            .append(" ")
+            .append(
+                TranslatableComponent.of(
+                    "match.info.players", TextColor.YELLOW, TextDecoration.BOLD))
+            .build();
+    return TextTranslations.toBaseComponent(content, view.getViewer());
   }
 }

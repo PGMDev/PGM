@@ -7,14 +7,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.format.TextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.util.chat.Sound;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 
 public class ObjectiveModesMatchModule implements MatchModule {
 
@@ -93,13 +94,13 @@ public class ObjectiveModesMatchModule implements MatchModule {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onObjectiveModeChange(ObjectiveModeChangeEvent event) {
-    event
-        .getMatch()
-        .sendMessage(
-            new PersonalizedText(ChatColor.DARK_AQUA)
-                .extra("> > > > ")
-                .extra(new PersonalizedText(event.getName(), ChatColor.RED))
-                .extra(" < < < <"));
+    Component broadcast =
+        TextComponent.builder()
+            .append("> > > > ", TextColor.DARK_AQUA)
+            .append(event.getName(), TextColor.DARK_RED)
+            .append(" < < < <", TextColor.DARK_AQUA)
+            .build();
+    event.getMatch().sendMessage(broadcast);
     event.getMatch().playSound(SOUND);
   }
 }

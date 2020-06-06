@@ -33,6 +33,6 @@ public class TeamOrder implements Comparator<Team> {
     if (team == b) return 1;
 
     // Rest of the teams are ordered by name
-    return a.getName().compareTo(b.getName());
+    return a.getNameLegacy().compareTo(b.getNameLegacy());
   }
 }

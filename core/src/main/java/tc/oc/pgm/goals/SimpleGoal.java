@@ -2,6 +2,7 @@ package tc.oc.pgm.goals;
 
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
@@ -11,7 +12,6 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.util.ClassLogger;
-import tc.oc.pgm.util.component.Component;
 
 /** Basic {@link Goal} implementation with fields for the definition and match */
 public abstract class SimpleGoal<T extends GoalDefinition> implements Goal<T> {

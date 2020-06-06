@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -49,10 +50,9 @@ import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.chat.PlayerAudience;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedPlayer;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.text.types.PlayerComponent;
 
 public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<MatchPlayer> {
 
@@ -397,8 +397,13 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   }
 
   @Override
-  public Component getStyledName(NameStyle style) {
-    return new PersonalizedPlayer(getBukkit(), style);
+  public Component getName(NameStyle style) {
+    return PlayerComponent.of(getBukkit(), style);
+  }
+
+  @Override
+  public String getNameLegacy() {
+    return getBukkit().getName();
   }
 
   @Override

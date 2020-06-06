@@ -4,9 +4,10 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
-import org.bukkit.command.CommandSender;
 import org.bukkit.scoreboard.NameTagVisibility;
 import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
@@ -16,10 +17,8 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.chat.MultiAudience;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedPlayer;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.types.PlayerComponent;
 
 /**
  * Wraps a single {@link MatchPlayer} in a free-for-all match.
@@ -62,7 +61,7 @@ public class Tribute implements Competitor, MultiAudience {
 
   @Override
   public String toString() {
-    return getClass().getSimpleName() + "{match=" + getMatch() + ", name=" + getName() + "}";
+    return getClass().getSimpleName() + "{match=" + getMatch() + ", name=" + getDefaultName() + "}";
   }
 
   public UUID getPlayerId() {
@@ -81,16 +80,6 @@ public class Tribute implements Competitor, MultiAudience {
 
   @Override
   public String getDefaultName() {
-    return getName();
-  }
-
-  @Override
-  public String getName() {
-    return username;
-  }
-
-  @Override
-  public String getName(@Nullable CommandSender viewer) {
     return username;
   }
 
@@ -110,28 +99,18 @@ public class Tribute implements Competitor, MultiAudience {
   }
 
   @Override
-  public String getColoredName() {
-    return getColor() + getName();
+  public Component getName(NameStyle style) {
+    return PlayerComponent.of(player.getBukkit(), style);
   }
 
   @Override
-  public String getColoredName(@Nullable CommandSender viewer) {
-    return getColor() + getName(viewer);
-  }
-
-  @Override
-  public Component getComponentName() {
-    return new PersonalizedText(getColoredName());
-  }
-
-  @Override
-  public Component getStyledName(NameStyle style) {
-    return new PersonalizedPlayer(player == null ? null : player.getBukkit(), username, style);
+  public String getNameLegacy() {
+    return username;
   }
 
   @Override
   public Component getChatPrefix() {
-    return new PersonalizedText();
+    return TextComponent.empty();
   }
 
   @Override

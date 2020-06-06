@@ -4,13 +4,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.format.TextColor;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import tc.oc.pgm.api.map.Contributor;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.named.NameStyle;
 
 public class PseudonymContributor implements Contributor {
@@ -24,11 +24,6 @@ public class PseudonymContributor implements Contributor {
   }
 
   @Override
-  public String getName() {
-    return name;
-  }
-
-  @Override
   public String getContribution() {
     return contribution;
   }
@@ -39,8 +34,13 @@ public class PseudonymContributor implements Contributor {
   }
 
   @Override
-  public Component getStyledName(NameStyle style) {
-    return new PersonalizedText(getName(), ChatColor.DARK_AQUA);
+  public Component getName(NameStyle style) {
+    return TextComponent.of(getNameLegacy(), TextColor.DARK_AQUA);
+  }
+
+  @Override
+  public String getNameLegacy() {
+    return name;
   }
 
   @Override

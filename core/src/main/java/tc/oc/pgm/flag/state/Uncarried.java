@@ -1,6 +1,7 @@
 package tc.oc.pgm.flag.state;
 
 import javax.annotation.Nullable;
+import net.kyori.text.TranslatableComponent;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -19,7 +20,6 @@ import tc.oc.pgm.flag.FlagMatchModule;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.event.FlagPickupEvent;
 import tc.oc.pgm.util.block.BlockStates;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.material.Materials;
 
 /** Base class for flag states in which the banner is placed on the ground somewhere as a block */
@@ -171,9 +171,9 @@ public abstract class Uncarried extends Spawned {
     Block flagBlock = this.location.getBlock();
 
     if (block.equals(flagBlock) || block.equals(flagBlock.getRelative(BlockFace.UP))) {
-      event.setCancelled(true, new PersonalizedTranslatable("flag.cannotBreakFlag"));
+      event.setCancelled(true, TranslatableComponent.of("flag.cannotBreakFlag"));
     } else if (block.equals(flagBlock.getRelative(BlockFace.DOWN))) {
-      event.setCancelled(true, new PersonalizedTranslatable("flag.cannotBreakBlockUnder"));
+      event.setCancelled(true, TranslatableComponent.of("flag.cannotBreakBlockUnder"));
     }
   }
 

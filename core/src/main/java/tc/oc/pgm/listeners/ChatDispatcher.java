@@ -133,7 +133,7 @@ public class ChatDispatcher implements Listener {
           match,
           sender,
           message,
-          party.getChatPrefix().toLegacyText() + PREFIX_FORMAT,
+          TextTranslations.translateLegacy(party.getChatPrefix(), null) + PREFIX_FORMAT,
           viewer ->
               party.equals(viewer.getParty())
                   || (viewer.isObserving()
@@ -204,16 +204,16 @@ public class ChatDispatcher implements Listener {
       if (option.equals(SettingValue.MESSAGE_OFF)
           && !sender.getBukkit().hasPermission(Permissions.STAFF)) {
         Component blocked =
-            TranslatableComponent.of("command.message.blocked")
-                .args(matchReceiver.getName(NameStyle.FANCY));
+            TranslatableComponent.of(
+                "command.message.blocked", matchReceiver.getName(NameStyle.FANCY));
         sender.sendWarning(blocked);
         return;
       }
 
       if (isMuted(matchReceiver) && !sender.getBukkit().hasPermission(Permissions.STAFF)) {
         Component muted =
-            TranslatableComponent.of("moderation.mute.target")
-                .args(matchReceiver.getName(NameStyle.CONCISE));
+            TranslatableComponent.of(
+                "moderation.mute.target", matchReceiver.getName(NameStyle.CONCISE));
         sender.sendWarning(muted);
         return; // Only staff can message muted players
       } else {
@@ -259,7 +259,7 @@ public class ChatDispatcher implements Listener {
     final MatchPlayer receiver = manager.getPlayer(lastMessagedBy.get(sender.getBukkit()));
     if (receiver == null) {
       audience.sendWarning(
-          TranslatableComponent.of("command.message.noReply").args(TextComponent.of("/msg")));
+          TranslatableComponent.of("command.message.noReply", TextComponent.of("/msg")));
       return;
     }
 
@@ -287,8 +287,7 @@ public class ChatDispatcher implements Listener {
             getApproximatePlayer(player.getMatch(), target, player.getBukkit());
         if (receiver == null) {
           player.sendWarning(
-              TranslatableComponent.of("chat.message.unknownTarget")
-                  .args(TextComponent.of(target)));
+              TranslatableComponent.of("chat.message.unknownTarget", TextComponent.of(target)));
         } else {
           sendDirect(
               player.getMatch(),

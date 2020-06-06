@@ -1,9 +1,9 @@
 package tc.oc.pgm.result;
 
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 
 /** Everybody loses */
 public class TieVictoryCondition extends ImmediateVictoryCondition {
@@ -15,6 +15,6 @@ public class TieVictoryCondition extends ImmediateVictoryCondition {
 
   @Override
   public Component getDescription(Match match) {
-    return new PersonalizedText("nobody wins");
+    return TranslatableComponent.of("victoryCondition.tie");
   }
 }

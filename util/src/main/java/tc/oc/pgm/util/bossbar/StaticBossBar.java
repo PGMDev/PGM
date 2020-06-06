@@ -1,8 +1,8 @@
 package tc.oc.pgm.util.bossbar;
 
+import net.kyori.text.Component;
 import org.bukkit.entity.Player;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.Components;
+import tc.oc.pgm.util.text.TextParser;
 
 public class StaticBossBar implements BossBar {
 
@@ -16,7 +16,7 @@ public class StaticBossBar implements BossBar {
 
   @Deprecated
   public StaticBossBar(String text, float meter) {
-    this(Components.fromLegacyText(text), meter);
+    this(TextParser.parseComponent(text), meter);
   }
 
   @Override

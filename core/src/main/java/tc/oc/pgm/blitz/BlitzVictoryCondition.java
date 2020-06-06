@@ -1,10 +1,10 @@
 package tc.oc.pgm.blitz;
 
+import net.kyori.text.Component;
+import net.kyori.text.TranslatableComponent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.VictoryCondition;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 
 public class BlitzVictoryCondition implements VictoryCondition {
 
@@ -36,6 +36,6 @@ public class BlitzVictoryCondition implements VictoryCondition {
 
   @Override
   public Component getDescription(Match match) {
-    return new PersonalizedText("most survivors");
+    return TranslatableComponent.of("victoryCondition.blitz");
   }
 }

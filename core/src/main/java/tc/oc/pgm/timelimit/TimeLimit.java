@@ -4,15 +4,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.time.Duration;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 @FeatureInfo(name = "time-limit")
 public class TimeLimit extends SelfIdentifyingFeatureDefinition implements VictoryCondition {
@@ -71,12 +71,11 @@ public class TimeLimit extends SelfIdentifyingFeatureDefinition implements Victo
 
   @Override
   public Component getDescription(Match match) {
-    Component time = new PersonalizedText(TimeUtils.formatDuration(duration));
+    Component time = TextComponent.of(TimeUtils.formatDuration(duration));
     if (result == null) {
-      return new PersonalizedTranslatable("match.timeLimit.generic", time);
+      return TranslatableComponent.of("match.timeLimit.generic", time);
     } else {
-      return new PersonalizedTranslatable(
-          "match.timeLimit.result", result.getDescription(match), time);
+      return TranslatableComponent.of("match.timeLimit.result", result.getDescription(match), time);
     }
   }
 

@@ -57,8 +57,6 @@ import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.pgm.util.chat.Sound;
-import tc.oc.pgm.util.component.Components;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -331,7 +329,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
       removeEntities(freezee.getBukkit().getLocation(), 10);
 
       Component freeze = TranslatableComponent.of("moderation.freeze.frozen");
-      Component by = TranslatableComponent.of("misc.by").args(senderName);
+      Component by = TranslatableComponent.of("misc.by", senderName);
 
       TextComponent.Builder freezeTitle = TextComponent.builder();
       freezeTitle.append(freeze);
@@ -339,18 +337,16 @@ public class FreezeMatchModule implements MatchModule, Listener {
         freezeTitle.append(" ").append(by);
       }
 
-      // TODO: Migrate this once showTitle is upgraded
-      tc.oc.pgm.util.component.Component oldTitle =
-          new PersonalizedText(
-              TextTranslations.translateLegacy(
-                  freezeTitle.color(TextColor.RED).build(), freezee.getBukkit()));
-
-      freezee.showTitle(Components.blank(), oldTitle, 5, 9999, 5);
+      freezee.showTitle(
+          TextComponent.empty(), freezeTitle.color(TextColor.RED).build(), 5, 9999, 5);
       freezee.playSound(FREEZE_SOUND);
 
       ChatDispatcher.broadcastAdminChatMessage(
-          TranslatableComponent.of("moderation.freeze.broadcast.frozen", TextColor.GRAY)
-              .args(senderName, freezee.getName(NameStyle.FANCY)),
+          TranslatableComponent.of(
+              "moderation.freeze.broadcast.frozen",
+              TextColor.GRAY,
+              senderName,
+              freezee.getName(NameStyle.FANCY)),
           match);
     }
 
@@ -358,7 +354,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
       frozenPlayers.remove(freezee.getBukkit());
 
       Component thawed = TranslatableComponent.of("moderation.freeze.unfrozen");
-      Component by = TranslatableComponent.of("misc.by").args(senderName);
+      Component by = TranslatableComponent.of("misc.by", senderName);
 
       TextComponent.Builder thawedTitle = TextComponent.builder().append(thawed);
       if (!silent) {
@@ -370,8 +366,11 @@ public class FreezeMatchModule implements MatchModule, Listener {
       freezee.sendMessage(thawedTitle.color(TextColor.GREEN).build());
 
       ChatDispatcher.broadcastAdminChatMessage(
-          TranslatableComponent.of("moderation.freeze.broadcast.thaw", TextColor.GRAY)
-              .args(senderName, freezee.getName(NameStyle.FANCY)),
+          TranslatableComponent.of(
+              "moderation.freeze.broadcast.thaw",
+              TextColor.GRAY,
+              senderName,
+              freezee.getName(NameStyle.FANCY)),
           match);
     }
 

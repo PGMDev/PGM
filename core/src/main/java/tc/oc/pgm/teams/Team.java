@@ -3,10 +3,11 @@ package tc.oc.pgm.teams;
 import java.util.Collection;
 import java.util.Objects;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import org.apache.commons.lang.math.Fraction;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
-import org.bukkit.command.CommandSender;
 import org.bukkit.scoreboard.NameTagVisibility;
 import tc.oc.pgm.api.feature.Feature;
 import tc.oc.pgm.api.match.Match;
@@ -18,10 +19,8 @@ import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.match.SimpleParty;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.ComponentUtils;
-import tc.oc.pgm.util.component.types.PersonalizedText;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.TextFormatter;
 
 /**
  * Mutable class to represent a team created from a TeamInfo instance that is tied to a specific
@@ -72,7 +71,7 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
 
   @Override
   public String toString() {
-    return getClass().getSimpleName() + "{match=" + getMatch() + ", name=" + getName() + "}";
+    return getClass().getSimpleName() + "{match=" + getMatch() + ", name=" + getNameLegacy() + "}";
   }
 
   @Override
@@ -121,6 +120,20 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
     return info.getDefaultName();
   }
 
+  @Override
+  public boolean isNamePlural() {
+    // Assume custom names are singular
+    return this.name == null && this.info.isDefaultNamePlural();
+  }
+
+  @Override
+  public Component getName(NameStyle style) {
+    if (componentName == null) {
+      this.componentName = TextComponent.of(getNameLegacy(), TextFormatter.convert(getColor()));
+    }
+    return componentName;
+  }
+
   /**
    * Gets the name of this team that can be modified using setTeam. If no custom name is set then
    * this will return the default team name as specified in the team info.
@@ -128,45 +141,19 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
    * @return Name of the team without colors.
    */
   @Override
-  public String getName() {
+  public String getNameLegacy() {
     return name != null ? name : getDefaultName();
   }
 
   public String getShortName() {
-    String lower = getName().toLowerCase();
+    String lower = getNameLegacy().toLowerCase();
     if (lower.endsWith(" team")) {
-      return getName().substring(0, lower.length() - " team".length());
+      return getNameLegacy().substring(0, lower.length() - " team".length());
     } else if (lower.startsWith("team ")) {
-      return getName().substring("team ".length());
+      return getNameLegacy().substring("team ".length());
     } else {
-      return getName();
+      return getNameLegacy();
     }
-  }
-
-  @Override
-  public String getName(@Nullable CommandSender viewer) {
-    return getName();
-  }
-
-  @Override
-  public boolean isNamePlural() {
-    // Assume custom names are singular
-    return this.name == null && this.info.isDefaultNamePlural();
-  }
-
-  /**
-   * Gets the combination of the team color with the team name.
-   *
-   * @return Colored version of the team name.
-   */
-  @Override
-  public String getColoredName() {
-    return getColor() + getName();
-  }
-
-  @Override
-  public String getColoredName(@Nullable CommandSender viewer) {
-    return getColor() + getName(viewer);
   }
 
   /**
@@ -176,11 +163,11 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
    * @param newName New name for this team. Should not include colors.
    */
   public void setName(@Nullable String newName) {
-    if (Objects.equals(this.name, newName) || this.getName().equals(newName)) return;
-    String oldName = this.getName();
+    if (Objects.equals(this.name, newName) || this.getNameLegacy().equals(newName)) return;
+    String oldName = this.getNameLegacy();
     this.name = newName;
     this.componentName = null;
-    this.match.callEvent(new PartyRenameEvent(this, oldName, this.getName()));
+    this.match.callEvent(new PartyRenameEvent(this, oldName, this.getNameLegacy()));
   }
 
   @Override
@@ -194,23 +181,10 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
   }
 
   @Override
-  public Component getComponentName() {
-    if (componentName == null) {
-      this.componentName = new PersonalizedText(getName(), ComponentUtils.convert(getColor()));
-    }
-    return componentName;
-  }
-
-  @Override
-  public Component getStyledName(NameStyle style) {
-    return getComponentName();
-  }
-
-  @Override
   public Component getChatPrefix() {
     if (chatPrefix == null) {
       this.chatPrefix =
-          new PersonalizedText("(" + getShortName() + ") ", ComponentUtils.convert(getColor()));
+          TextComponent.of("(" + getShortName() + ") ", TextFormatter.convert(getColor()));
     }
     return chatPrefix;
   }

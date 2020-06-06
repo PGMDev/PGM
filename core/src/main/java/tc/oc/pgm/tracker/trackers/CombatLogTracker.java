@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
+import net.kyori.text.TranslatableComponent;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -27,7 +28,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 import tc.oc.pgm.util.material.Materials;
 
 /**
@@ -210,7 +210,7 @@ public class CombatLogTracker implements Listener {
   public void onParticipationStop(PlayerParticipationStopEvent event) {
     if (event.getMatch().isRunning()
         && this.getImminentDeath(event.getPlayer().getBukkit()) != null) {
-      event.cancel(new PersonalizedTranslatable("leave.err.combatLog"));
+      event.cancel(TranslatableComponent.of("leave.err.combatLog"));
       event.setCancelled(true);
     }
   }

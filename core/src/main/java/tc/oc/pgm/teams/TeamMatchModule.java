@@ -12,7 +12,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import org.apache.commons.lang.math.Fraction;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -39,9 +42,6 @@ import tc.oc.pgm.start.UnreadyReason;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.chat.Sound;
-import tc.oc.pgm.util.component.Component;
-import tc.oc.pgm.util.component.types.PersonalizedText;
-import tc.oc.pgm.util.component.types.PersonalizedTranslatable;
 
 @ListenerScope(MatchScope.LOADED)
 public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
@@ -59,23 +59,23 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     public Component getReason() {
       if (team != null) {
         if (players == 1) {
-          return new PersonalizedTranslatable(
+          return TranslatableComponent.of(
               "join.wait.singular.team",
-              new PersonalizedText(String.valueOf(players), ChatColor.AQUA),
-              team.getComponentName());
+              TextComponent.of(String.valueOf(players), TextColor.AQUA),
+              team.getName());
         } else {
-          return new PersonalizedTranslatable(
+          return TranslatableComponent.of(
               "join.wait.plural.team",
-              new PersonalizedText(String.valueOf(players), ChatColor.AQUA),
-              team.getComponentName());
+              TextComponent.of(String.valueOf(players), TextColor.AQUA),
+              team.getName());
         }
       } else {
         if (players == 1) {
-          return new PersonalizedTranslatable(
-              "join.wait.singular", new PersonalizedText(String.valueOf(players), ChatColor.AQUA));
+          return TranslatableComponent.of(
+              "join.wait.singular", TextComponent.of(String.valueOf(players), TextColor.AQUA));
         } else {
-          return new PersonalizedTranslatable(
-              "join.wait.plural", new PersonalizedText(String.valueOf(players), ChatColor.AQUA));
+          return TranslatableComponent.of(
+              "join.wait.plural", TextComponent.of(String.valueOf(players), TextColor.AQUA));
         }
       }
     }
@@ -217,7 +217,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   public @Nullable Team bestFuzzyMatch(String name, double threshold) {
     Map<String, Team> byName = new HashMap<>();
-    for (Team team : getTeams()) byName.put(team.getName(), team);
+    for (Team team : getTeams()) byName.put(team.getNameLegacy(), team);
     return StringUtils.bestFuzzyMatch(name, byName, threshold);
   }
 
@@ -451,33 +451,28 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
       switch (teamResult.getStatus()) {
         case SWITCH_DISABLED:
-          joining.sendWarning(
-              new PersonalizedTranslatable("join.err.noSwitch", lastTeam.getComponentName()),
-              false);
+          joining.sendWarning(TranslatableComponent.of("join.err.noSwitch", lastTeam.getName()));
           return true;
 
         case CHOICE_DISABLED:
         case CHOICE_DENIED:
-          joining.sendWarning(new PersonalizedTranslatable("join.err.noChoice"), false);
+          joining.sendWarning(TranslatableComponent.of("join.err.noChoice"));
           return true;
 
         case FULL:
           if (teamResult.getTeam() != null) {
             joining.sendWarning(
-                new PersonalizedTranslatable(
-                    "join.err.full.team", teamResult.getTeam().getComponentName()),
-                false);
+                TranslatableComponent.of("join.err.full.team", teamResult.getTeam().getName()));
           } else {
-            joining.sendWarning(new PersonalizedTranslatable("join.err.full"), false);
+            joining.sendWarning(TranslatableComponent.of("join.err.full"));
           }
 
           return true;
 
         case REDUNDANT:
           joining.sendWarning(
-              new PersonalizedTranslatable(
-                  "join.err.alreadyJoined.team", joining.getParty().getComponentName()),
-              false);
+              TranslatableComponent.of(
+                  "join.err.alreadyJoined.team", joining.getParty().getName()));
           return true;
       }
 
@@ -487,13 +482,6 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       }
 
       if (teamResult.priorityKickRequired()) {
-        match
-            .getLogger()
-            .info(
-                "Bumping a player from "
-                    + teamResult.getTeam().getColoredName()
-                    + " to make room for "
-                    + joining.getBukkit().getName());
         kickPlayerOffTeam(teamResult.getTeam(), false);
       }
 
@@ -534,15 +522,6 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       Team team = this.getFullestTeam();
       if (team == null) break;
       if (!team.isStacked()) break;
-      match
-          .getLogger()
-          .info(
-              "Bumping a player from stacked team "
-                  + team.getColoredName()
-                  + " size="
-                  + team.getSize(false)
-                  + " fullness="
-                  + team.getFullness(false));
       if (!this.kickPlayerOffTeam(team, true)) break;
     }
   }
@@ -577,23 +556,21 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
     // Give them the bad news
     if (jmm.canPriorityKick(kickMe)) {
-      kickMe.sendMessage(new PersonalizedTranslatable("join.ok.moved", kickTo.getComponentName()));
-      kickMe.sendMessage(new PersonalizedTranslatable("join.ok.moved.explanation"));
+      kickMe.sendMessage(TranslatableComponent.of("join.ok.moved", kickTo.getName()));
+      kickMe.sendMessage(TranslatableComponent.of("join.ok.moved.explanation"));
     } else {
       kickMe.playSound(new Sound("mob.villager.hit"));
       if (forBalance) {
-        kickMe.sendWarning(
-            new PersonalizedTranslatable("join.ok.moved", kickTo.getComponentName()), false);
+        kickMe.sendWarning(TranslatableComponent.of("join.ok.moved", kickTo.getName()));
       } else {
         kickMe.sendWarning(
-            new PersonalizedTranslatable("leave.ok.priorityKick.team", kickFrom.getComponentName()),
-            false);
+            TranslatableComponent.of("leave.ok.priorityKick.team", kickFrom.getName()));
       }
     }
 
     match
         .getLogger()
-        .info("Bumping " + kickMe.getBukkit().getDisplayName() + " to " + kickTo.getColoredName());
+        .info("Bumping " + kickMe.getBukkit().getDisplayName() + " to " + kickTo.getDefaultName());
 
     if (kickTo instanceof Team) {
       return forceJoin(kickMe, (Team) kickTo);
@@ -608,8 +585,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
         || (event.getNewParty() instanceof Observers && event.getOldParty() != null)) {
       event
           .getPlayer()
-          .sendMessage(
-              new PersonalizedTranslatable("join.ok.team", event.getNewParty().getComponentName()));
+          .sendMessage(TranslatableComponent.of("join.ok.team", event.getNewParty().getName()));
     }
     updateReadiness();
   }
