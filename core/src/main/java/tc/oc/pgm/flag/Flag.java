@@ -2,6 +2,7 @@ package tc.oc.pgm.flag;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.kyori.text.Component;
@@ -233,8 +234,31 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     }
   }
 
+  private int sequentialPostCounter = 0;
+  private Post returnPost;
+
+  public Post getReturnPost(Post post) {
+    if (post.isSpecifiedPost()) {
+      return post;
+    }
+    if (definition.isSequential()) {
+      Post returnPost = definition.getPosts().get(sequentialPostCounter++);
+      if (sequentialPostCounter == definition.getPosts().size()) {
+        sequentialPostCounter = 0;
+      }
+      return returnPost;
+    }
+    Random random = match.getRandom();
+    return definition.getPosts().get(random.nextInt(definition.getPosts().size()));
+  }
+
   public Location getReturnPoint(Post post) {
-    return post.getReturnPoint(this, this.bannerYawProvider).clone();
+    returnPost = getReturnPost(post);
+    return returnPost.getReturnPoint(this, this.bannerYawProvider).clone();
+  }
+
+  public AngleProvider getBannerYawProvider() {
+    return bannerYawProvider;
   }
 
   // Touchable

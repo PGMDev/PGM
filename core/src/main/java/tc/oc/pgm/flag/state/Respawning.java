@@ -3,6 +3,7 @@ package tc.oc.pgm.flag.state;
 import java.time.Duration;
 import javax.annotation.Nullable;
 import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
 import org.bukkit.ChatColor;
@@ -21,6 +22,7 @@ public class Respawning extends Spawned implements Returning {
 
   protected final @Nullable Location respawnFrom;
   protected final Location respawnTo;
+  protected final Post respawnToPost;
   protected final Duration respawnTime;
   protected final boolean wasCaptured;
   protected final boolean wasDelayed;
@@ -33,7 +35,8 @@ public class Respawning extends Spawned implements Returning {
       boolean wasDelayed) {
     super(flag, post);
     this.respawnFrom = respawnFrom;
-    this.respawnTo = this.flag.getReturnPoint(this.post);
+    respawnToPost = this.flag.getReturnPost(this.post);
+    this.respawnTo = this.respawnToPost.getReturnPoint(this.flag, this.flag.getBannerYawProvider());
     this.respawnTime =
         this.post.getRespawnTime(
             this.respawnFrom == null ? 0 : this.respawnFrom.distance(this.respawnTo));
@@ -52,13 +55,26 @@ public class Respawning extends Spawned implements Returning {
 
     if (!Duration.ZERO.equals(respawnTime)) {
       // Respawn is delayed
-      this.flag
-          .getMatch()
-          .sendMessage(
-              TranslatableComponent.of(
-                  "flag.willRespawn",
-                  this.flag.getComponentName(),
-                  PeriodFormats.briefNaturalApproximate(respawnTime).color(TextColor.AQUA)));
+      String postName = this.respawnToPost.getPostName();
+      Component timeComponent =
+          PeriodFormats.briefNaturalApproximate(respawnTime).color(TextColor.AQUA);
+
+      if (postName != null) {
+        this.flag
+            .getMatch()
+            .sendMessage(
+                TranslatableComponent.of(
+                    "flag.willRespawn.named",
+                    this.flag.getComponentName(),
+                    TextComponent.of(postName, TextColor.AQUA),
+                    timeComponent));
+      } else {
+        this.flag
+            .getMatch()
+            .sendMessage(
+                TranslatableComponent.of(
+                    "flag.willRespawn", this.flag.getComponentName(), timeComponent));
+      }
     }
   }
 
@@ -68,7 +84,7 @@ public class Respawning extends Spawned implements Returning {
       this.flag.getMatch().sendMessage(message);
     }
 
-    this.flag.transition(new Returned(this.flag, this.post, this.respawnTo));
+    this.flag.transition(new Returned(this.flag, this.respawnToPost, this.respawnTo));
   }
 
   @Override

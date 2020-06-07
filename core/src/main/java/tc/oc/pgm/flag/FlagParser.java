@@ -53,6 +53,7 @@ public class FlagParser {
   public Post parsePost(Element el) throws InvalidXMLException {
     checkDeprecatedFilter(el);
 
+    @Nullable String name = el.getAttributeValue("name");
     String id = el.getAttributeValue("id");
     FeatureReference<TeamFactory> owner =
         factory.getFeatures().createReference(Node.fromAttr(el, "owner"), TeamFactory.class, null);
@@ -85,6 +86,7 @@ public class FlagParser {
     Post post =
         new Post(
             id,
+            name, // Can be null
             owner,
             recoverTime,
             respawnTime,
@@ -137,6 +139,8 @@ public class FlagParser {
       returnPost = factory.getFeatures().get(postAttr.getValue(), Post.class);
       if (returnPost == null) {
         throw new InvalidXMLException("No post with ID '" + postAttr.getValue() + "'", postAttr);
+      } else {
+        returnPost.setSpecifiedPost(true);
       }
     }
 
@@ -205,6 +209,7 @@ public class FlagParser {
     Kit dropKit = factory.getKits().parseKitProperty(el, "drop-kit", null);
     Kit carryKit = factory.getKits().parseKitProperty(el, "carry-kit", null);
     boolean multiCarrier = XMLUtils.parseBoolean(el.getAttribute("shared"), false);
+    boolean sequential = XMLUtils.parseBoolean(el.getAttribute("sequential"), false);
     Component carryMessage = XMLUtils.parseFormattedText(el, "carry-message");
     boolean dropOnWater = XMLUtils.parseBoolean(el.getAttribute("drop-on-water"), true);
     boolean showBeam = XMLUtils.parseBoolean(el.getAttribute("beam"), true);
@@ -214,15 +219,19 @@ public class FlagParser {
     ProximityMetric netProximityMetric =
         ProximityMetric.parse(
             el, "net", new ProximityMetric(ProximityMetric.Type.CLOSEST_PLAYER, false));
-
     Post defaultPost;
-    Element elPost = XMLUtils.getUniqueChild(el, "post");
-    if (elPost != null) {
+    List<Post> flagPosts = new ArrayList<>();
+    for (Element elPost : el.getChildren("post")) {
+      flagPosts.add(this.parsePost(elPost));
+    }
+
+    if (!flagPosts.isEmpty()) {
       // Parse nested <post>
-      defaultPost = this.parsePost(elPost);
+      defaultPost = flagPosts.get(0);
     } else {
       Node postAttr = Node.fromRequiredAttr(el, "post");
       defaultPost = factory.getFeatures().get(postAttr.getValue(), Post.class);
+      flagPosts.add(defaultPost);
       if (defaultPost == null) {
         throw new InvalidXMLException("No post with ID '" + postAttr.getValue() + "'", postAttr);
       }
@@ -236,6 +245,7 @@ public class FlagParser {
             visible,
             color,
             defaultPost,
+            ImmutableList.copyOf(flagPosts),
             owner,
             pointsPerCapture,
             pointsPerSecond,
@@ -249,7 +259,8 @@ public class FlagParser {
             dropOnWater,
             showBeam,
             flagProximityMetric,
-            netProximityMetric);
+            netProximityMetric,
+            sequential);
     flags.add(flag);
     factory.getFeatures().addFeature(el, flag);
 

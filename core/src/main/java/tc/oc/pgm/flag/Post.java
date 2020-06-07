@@ -38,9 +38,14 @@ public class Post extends SelfIdentifyingFeatureDefinition {
   private final boolean permanent; // Flag enters Completed state when at this post
   private final double pointsPerSecond; // Points awarded while any flag is at this post
   private final Filter pickupFilter; // Filter players who can pickup a flag at this post
+  private final @Nullable String
+      postName; // The name of the post to be shown in chat when the flag is respawning
+
+  private boolean specifiedPost = false;
 
   public Post(
       @Nullable String id,
+      @Nullable String name,
       @Nullable FeatureReference<TeamFactory> owner,
       Duration recoverTime,
       @Nullable Duration respawnTime,
@@ -64,6 +69,11 @@ public class Post extends SelfIdentifyingFeatureDefinition {
     this.permanent = permanent;
     this.pointsPerSecond = pointsPerSecond;
     this.pickupFilter = pickupFilter;
+    this.postName = name;
+  }
+
+  public @Nullable String getPostName() {
+    return this.postName;
   }
 
   public @Nullable TeamFactory getOwner() {
@@ -114,6 +124,14 @@ public class Post extends SelfIdentifyingFeatureDefinition {
       location.setYaw(yawProvider.getAngle(location.toVector()));
     }
     return location;
+  }
+
+  public boolean isSpecifiedPost() {
+    return this.specifiedPost;
+  }
+
+  public void setSpecifiedPost(boolean value) {
+    this.specifiedPost = value;
   }
 
   private Location getReturnPoint(Flag flag) {

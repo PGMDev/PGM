@@ -1,5 +1,6 @@
 package tc.oc.pgm.flag;
 
+import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import javax.annotation.Nullable;
 import net.kyori.text.Component;
@@ -28,6 +29,7 @@ public class FlagDefinition extends ProximityGoalDefinition {
   private final @Nullable DyeColor
       color; // Flag color, null detects color from the banner at match load time
   private final Post defaultPost; // Flag starts the match at this post
+  private final ImmutableList<Post> posts;
   private final @Nullable FeatureReference<TeamFactory>
       owner; // Team that owns the flag, affects various things
   private final double
@@ -43,6 +45,7 @@ public class FlagDefinition extends ProximityGoalDefinition {
   private final @Nullable Component carryMessage; // Custom message to show flag carrier
   private final boolean dropOnWater; // Flag can freeze water to drop on it
   private final boolean showBeam;
+  private final boolean sequential;
 
   public FlagDefinition(
       @Nullable String id,
@@ -51,6 +54,7 @@ public class FlagDefinition extends ProximityGoalDefinition {
       boolean visible,
       @Nullable DyeColor color,
       Post defaultPost,
+      ImmutableList<Post> posts,
       @Nullable FeatureReference<TeamFactory> owner,
       double pointsPerCapture,
       double pointsPerSecond,
@@ -64,7 +68,8 @@ public class FlagDefinition extends ProximityGoalDefinition {
       boolean dropOnWater,
       boolean showBeam,
       ProximityMetric flagProximityMetric,
-      ProximityMetric netProximityMetric) {
+      ProximityMetric netProximityMetric,
+      boolean sequential) {
 
     // We can't use the owner field in OwnedGoal because our owner
     // is a reference that can't be resolved until after parsing.
@@ -79,6 +84,7 @@ public class FlagDefinition extends ProximityGoalDefinition {
 
     this.color = color;
     this.defaultPost = defaultPost;
+    this.posts = posts;
     this.owner = owner;
     this.pointsPerCapture = pointsPerCapture;
     this.pointsPerSecond = pointsPerSecond;
@@ -91,6 +97,7 @@ public class FlagDefinition extends ProximityGoalDefinition {
     this.carryMessage = carryMessage;
     this.dropOnWater = dropOnWater;
     this.showBeam = showBeam;
+    this.sequential = sequential;
   }
 
   public @Nullable DyeColor getColor() {
@@ -108,6 +115,10 @@ public class FlagDefinition extends ProximityGoalDefinition {
 
   public Post getDefaultPost() {
     return this.defaultPost;
+  }
+
+  public ImmutableList<Post> getPosts() {
+    return this.posts;
   }
 
   @Override
@@ -164,6 +175,10 @@ public class FlagDefinition extends ProximityGoalDefinition {
 
   public boolean showBeam() {
     return showBeam;
+  }
+
+  public boolean isSequential() {
+    return sequential;
   }
 
   @SuppressWarnings("unchecked")
