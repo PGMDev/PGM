@@ -14,6 +14,7 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchPhase;
 import tc.oc.pgm.api.party.Competitor;
@@ -37,7 +38,7 @@ public final class MatchCommand {
   @Command(
       aliases = {"match", "matchinfo"},
       desc = "Show the match info")
-  public void match(Audience viewer, CommandSender sender, MatchPlayer player, Match match) {
+  public void match(Audience viewer, CommandSender sender, Match match) {
     // indicates whether we have game information from the match yet
     boolean haveGameInfo =
         match.getPhase() == MatchPhase.RUNNING || match.getPhase() == MatchPhase.FINISHED;
@@ -120,6 +121,8 @@ public final class MatchCommand {
       if (tmm != null && gmm.getGoalsByCompetitor().size() > 0) {
         Multimap<Team, String> teamGoalTexts = HashMultimap.create();
 
+        MatchPlayer player = getMatchPlayer(sender, match);
+
         for (Team team : tmm.getParticipatingTeams()) {
           for (Goal<?> goal : gmm.getGoals(team)) {
             if (goal.isVisible()) {
@@ -158,6 +161,10 @@ public final class MatchCommand {
         }
       }
     }
+  }
+
+  private MatchPlayer getMatchPlayer(CommandSender sender, Match match) {
+    return sender instanceof Player ? match.getPlayer((Player) sender) : null;
   }
 
   // Modified from SidebarMatchModule to make formatting easier
