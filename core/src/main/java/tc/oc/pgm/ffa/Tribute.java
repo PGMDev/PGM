@@ -100,7 +100,7 @@ public class Tribute implements Competitor, MultiAudience {
 
   @Override
   public Component getName(NameStyle style) {
-    return PlayerComponent.of(player.getBukkit(), style);
+    return PlayerComponent.of(player != null ? player.getBukkit() : null, style);
   }
 
   @Override
