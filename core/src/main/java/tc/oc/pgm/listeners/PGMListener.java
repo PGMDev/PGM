@@ -55,9 +55,8 @@ import tc.oc.pgm.spawns.ObserverToolFactory;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.util.UsernameFormatUtils;
-import tc.oc.pgm.util.component.ComponentRenderers;
-import tc.oc.pgm.util.component.PeriodFormats;
 import tc.oc.pgm.util.localization.PlayerLocaleChangeEvent;
+import tc.oc.pgm.util.text.PeriodFormats;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class PGMListener implements Listener {
