@@ -59,6 +59,18 @@ public class Carried extends Spawned implements Missing {
     this.carrier = carrier;
     this.dropLocations.add(
         dropLocation); // Need an initial dropLocation in case the carrier never generates ones
+    if (this.flag.getDefinition().willShowRespawnOnPickup()) {
+      String postName = this.flag.predeterminePost(this.post);
+      if (postName != null) { // The post needs a name in order to display the message.
+        this.flag
+            .getMatch()
+            .sendMessage(
+                TranslatableComponent.of(
+                    "flag.willRespawn.next",
+                    this.flag.getComponentName(),
+                    TextComponent.of(postName, TextColor.AQUA)));
+      }
+    }
   }
 
   @Override

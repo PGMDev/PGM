@@ -88,6 +88,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   private final Set<Team> completers;
   private BaseState state;
   private boolean transitioning;
+  private @Nullable Post predeterminedPost;
 
   protected Flag(Match match, FlagDefinition definition, ImmutableSet<Net> nets)
       throws ModuleLoadException {
@@ -235,11 +236,15 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   }
 
   private int sequentialPostCounter = 1;
-  private Post returnPost;
 
   public Post getReturnPost(Post post) {
     if (post.isSpecifiedPost()) {
       return post;
+    }
+    if (predeterminedPost != null) {
+      Post returnPost = predeterminedPost;
+      predeterminedPost = null;
+      return returnPost;
     }
     if (definition.isSequential()) {
       sequentialPostCounter %= definition.getPosts().size();
@@ -250,8 +255,13 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   }
 
   public Location getReturnPoint(Post post) {
-    returnPost = getReturnPost(post);
+    Post returnPost = getReturnPost(post);
     return returnPost.getReturnPoint(this, this.bannerYawProvider).clone();
+  }
+
+  public String predeterminePost(Post post) {
+    predeterminedPost = getReturnPost(post);
+    return predeterminedPost.getPostName();
   }
 
   public AngleProvider getBannerYawProvider() {
