@@ -401,8 +401,9 @@ public class ChatDispatcher implements Listener {
 
   private void sendMutedMessage(MatchPlayer player) {
     Component warning =
-        TranslatableComponent.of("moderation.mute.message")
-            .args(TextComponent.of(muted.getOrDefault(player.getId(), ""), TextColor.AQUA));
+        TranslatableComponent.of(
+            "moderation.mute.message",
+            TextComponent.of(muted.getOrDefault(player.getId(), ""), TextColor.AQUA));
     player.sendWarning(warning);
   }
 

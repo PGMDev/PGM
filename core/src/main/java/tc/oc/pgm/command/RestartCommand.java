@@ -6,7 +6,6 @@ import app.ashcon.intake.parametric.annotation.Switch;
 import java.time.Duration;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
-import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.restart.RequestRestartEvent;
@@ -22,7 +21,6 @@ public final class RestartCommand {
       perms = Permissions.STOP)
   public void restart(
       Audience audience,
-      CommandSender sender,
       Match match,
       @Default("30s") Duration duration,
       @Switch('f') boolean force) {

@@ -3,7 +3,6 @@ package tc.oc.pgm.command;
 import app.ashcon.intake.Command;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
-import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.restart.CancelRestartEvent;
@@ -19,7 +18,7 @@ public final class CancelCommand {
       aliases = {"cancel", "cancelrestart", "cr"},
       desc = "Cancels all countdowns",
       perms = Permissions.STOP)
-  public void cancel(Audience audience, CommandSender sender, Match match) {
+  public void cancel(Audience audience, Match match) {
     if (RestartManager.isQueued()) {
       match.callEvent(new CancelRestartEvent());
       audience.sendMessage(
