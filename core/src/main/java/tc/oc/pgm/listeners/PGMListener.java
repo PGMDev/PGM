@@ -347,28 +347,25 @@ public class PGMListener implements Listener {
               .build();
 
       // No limit
-      Component forced = TranslatableComponent.of("pool.change.force", staffName, poolName);
+      Component forced = TranslatableComponent.of("pool.change.force", poolName, staffName);
       if (event.getTimeLimit() != null) {
-      Component time =
-              PeriodFormats.briefNaturalApproximate(event.getTimeLimit()).color(TextColor.GREEN);
+        Component time =
+            PeriodFormats.briefNaturalApproximate(event.getTimeLimit()).color(TextColor.GREEN);
 
         // If time & match limit are present, display both
         if (event.getMatchLimit() != 0) {
           Component timeAndLimit =
-              TranslatableComponent.of("misc.or", TextColor.GRAY).args(time, matchLimit);
+              TranslatableComponent.of("misc.or", TextColor.GRAY, time, matchLimit);
           forced =
-              TranslatableComponent.of("pool.change.forceLimit")
-                  .args(staffName, poolName, timeAndLimit);
+              TranslatableComponent.of("pool.change.forceTimed", poolName, timeAndLimit, staffName);
         } else {
           // Just time limit
-          forced =
-              TranslatableComponent.of("pool.change.forceLimit").args(staffName, poolName, time);
+          forced = TranslatableComponent.of("pool.change.forceTimed", poolName, time, staffName);
         }
       } else if (event.getMatchLimit() != 0) {
         // Just match limit
         forced =
-            TranslatableComponent.of("pool.change.forceLimit")
-                .args(staffName, poolName, matchLimit);
+            TranslatableComponent.of("pool.change.forceTimed", poolName, matchLimit, staffName);
       }
 
       ChatDispatcher.broadcastAdminChatMessage(forced.color(TextColor.GRAY), event.getMatch());
