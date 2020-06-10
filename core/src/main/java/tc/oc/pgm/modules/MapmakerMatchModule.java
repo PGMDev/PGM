@@ -24,12 +24,12 @@ public class MapmakerMatchModule implements MatchModule, Listener {
   @EventHandler(ignoreCancelled = true)
   public void onPlayerAddEvent(final MatchPlayerAddEvent event) {
     MatchPlayer player = event.getPlayer();
-    player
-        .getBukkit()
-        .addAttachment(
-            PGM.get(),
-            Permissions.MAPMAKER,
-            authors.stream().anyMatch(c -> c.isPlayer(player.getId())));
+    if (authors.stream().anyMatch(c -> c.isPlayer(player.getId()))) {
+      player.getBukkit().addAttachment(PGM.get(), Permissions.MAPMAKER, true);
+    } else {
+      player.getBukkit().removeAttachments(Permissions.MAPMAKER);
+    }
+
     PGM.get().getPrefixRegistry().removePlayer(player.getId()); // Refresh prefixes for the player
   }
 }
