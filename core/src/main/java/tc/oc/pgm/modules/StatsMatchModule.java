@@ -52,6 +52,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     private int killstreak;
     private int killstreakMax;
     private int longestBowKill;
+    private Future<?> task;
 
     private void onMurder() {
       kills++;
@@ -105,7 +106,7 @@ public class StatsMatchModule implements MatchModule, Listener {
 
       victimStats.onDeath();
 
-      sendLongHotbarMessage(victim, victimStats.getBasicStatsMessage());
+      sendPlayerStats(victim, victimStats);
     }
 
     if (murderer != null
@@ -127,7 +128,7 @@ public class StatsMatchModule implements MatchModule, Listener {
 
       murdererStats.onMurder();
 
-      sendLongHotbarMessage(murderer, murdererStats.getBasicStatsMessage());
+      sendPlayerStats(murderer, murdererStats);
     }
   }
 
@@ -202,13 +203,22 @@ public class StatsMatchModule implements MatchModule, Listener {
     return map.entrySet().stream().max(Comparator.comparingInt(Map.Entry::getValue)).orElse(null);
   }
 
-  private void sendLongHotbarMessage(MatchPlayer player, Component message) {
+  private void sendPlayerStats(MatchPlayer player, PlayerStats stats) {
+    if (stats.task != null && !stats.task.isDone()) {
+      stats.task.cancel(true);
+    }
+    stats.task = sendLongHotbarMessage(player, stats.getBasicStatsMessage());
+  }
+
+  private Future<?> sendLongHotbarMessage(MatchPlayer player, Component message) {
     Future<?> task =
         match
             .getExecutor(MatchScope.LOADED)
             .scheduleWithFixedDelay(() -> player.showHotbar(message), 0, 1, TimeUnit.SECONDS);
 
     match.getExecutor(MatchScope.LOADED).schedule(() -> task.cancel(true), 4, TimeUnit.SECONDS);
+
+    return task;
   }
 
   Component getMessage(String messageKey, Map.Entry<UUID, Integer> mapEntry, TextColor color) {
