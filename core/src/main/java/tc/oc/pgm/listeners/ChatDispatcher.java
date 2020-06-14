@@ -4,7 +4,8 @@ import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Text;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -57,7 +58,7 @@ public class ChatDispatcher implements Listener {
   private final VanishManager vanish;
   private final OnlinePlayerMapAdapter<UUID> lastMessagedBy;
 
-  private final Set<UUID> muted;
+  private final Map<UUID, String> muted;
 
   public static final TextComponent ADMIN_CHAT_PREFIX =
       TextComponent.builder()
@@ -85,12 +86,12 @@ public class ChatDispatcher implements Listener {
     this.manager = PGM.get().getMatchManager();
     this.vanish = PGM.get().getVanishManager();
     this.lastMessagedBy = new OnlinePlayerMapAdapter<>(PGM.get());
-    this.muted = Sets.newHashSet();
+    this.muted = Maps.newHashMap();
     PGM.get().getServer().getPluginManager().registerEvents(this, PGM.get());
   }
 
-  public void addMuted(MatchPlayer player) {
-    this.muted.add(player.getId());
+  public void addMuted(MatchPlayer player, String reason) {
+    this.muted.put(player.getId(), reason);
   }
 
   public void removeMuted(MatchPlayer player) {
@@ -98,11 +99,11 @@ public class ChatDispatcher implements Listener {
   }
 
   public boolean isMuted(MatchPlayer player) {
-    return player != null ? muted.contains(player.getId()) : false;
+    return player != null ? muted.containsKey(player.getId()) : false;
   }
 
   public Set<UUID> getMutedUUIDs() {
-    return muted;
+    return muted.keySet();
   }
 
   @Command(
@@ -399,7 +400,10 @@ public class ChatDispatcher implements Listener {
   }
 
   private void sendMutedMessage(MatchPlayer player) {
-    Component warning = TranslatableComponent.of("moderation.mute.message");
+    Component warning =
+        TranslatableComponent.of(
+            "moderation.mute.message",
+            TextComponent.of(muted.getOrDefault(player.getId(), ""), TextColor.AQUA));
     player.sendWarning(warning);
   }
 
