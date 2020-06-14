@@ -37,6 +37,8 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
   private TeamMatchModule tmm;
   private JoinMatchModule jmm;
   protected @Nullable String name = null;
+  protected @Nullable Component componentName;
+  protected @Nullable Component chatPrefix;
   protected Integer minPlayers, maxPlayers, maxOverfill;
 
   // Recorded in the match document, Tourney plugin sets this
@@ -126,7 +128,10 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
 
   @Override
   public Component getName(NameStyle style) {
-    return TextComponent.of(getNameLegacy(), TextFormatter.convert(getColor()));
+    if (componentName == null) {
+      this.componentName = TextComponent.of(getNameLegacy(), TextFormatter.convert(getColor()));
+    }
+    return componentName;
   }
 
   /**
@@ -161,6 +166,8 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
     if (Objects.equals(this.name, newName) || this.getNameLegacy().equals(newName)) return;
     String oldName = this.getNameLegacy();
     this.name = newName;
+    this.componentName = null;
+    this.chatPrefix = null;
     this.match.callEvent(new PartyRenameEvent(this, oldName, this.getNameLegacy()));
   }
 
@@ -176,7 +183,11 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
 
   @Override
   public Component getChatPrefix() {
-    return TextComponent.of("(" + getShortName() + ") ", TextFormatter.convert(getColor()));
+    if (chatPrefix == null) {
+      this.chatPrefix =
+          TextComponent.of("(" + getShortName() + ") ", TextFormatter.convert(getColor()));
+    }
+    return chatPrefix;
   }
 
   @Override
