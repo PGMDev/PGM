@@ -127,6 +127,12 @@ public final class TextFormatter {
    * Convert ChatColor -> TextColor
    */
   public static TextColor convert(Enum<?> color) {
-    return TextColor.valueOf(color.name());
+    TextColor textColor = TextColor.WHITE;
+    try {
+      textColor = TextColor.valueOf(color.name());
+    } catch (IllegalArgumentException e) {
+      // If not found use default
+    }
+    return textColor;
   }
 }

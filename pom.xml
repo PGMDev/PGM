@@ -80,15 +80,6 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- Compile-time library used to generate "Delegate" classes -->
-        <!-- TODO: remove after deprecation of tc.oc.util.bukkit.Component -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.12</version>
-            <scope>provided</scope>
-        </dependency>
-
         <!-- XML parsing library used for all "map.xml" configuration loading -->
         <dependency>
             <groupId>org.jdom</groupId>

@@ -5,7 +5,6 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
 import net.kyori.text.format.TextDecoration;
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.chat.BaseComponent;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
@@ -32,9 +31,6 @@ public class MapTabEntry extends DynamicTabEntry {
             TextComponent.of(map.getName(), TextColor.AQUA, TextDecoration.BOLD),
             TextFormatter.nameList(map.getAuthors(), NameStyle.FANCY, TextColor.GRAY));
 
-    return net.md_5.bungee.api.chat.TextComponent.fromLegacyToComponent(
-        LegacyComponentSerializer.legacy()
-            .serialize(TextTranslations.translate(text, view.getViewer().getLocale())),
-        false);
+    return TextTranslations.toBaseComponent(text, view.getViewer());
   }
 }

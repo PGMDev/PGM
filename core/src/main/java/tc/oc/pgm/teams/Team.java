@@ -38,7 +38,7 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
   private JoinMatchModule jmm;
   protected @Nullable String name = null;
   protected @Nullable Component componentName;
-  protected Component chatPrefix;
+  protected @Nullable Component chatPrefix;
   protected Integer minPlayers, maxPlayers, maxOverfill;
 
   // Recorded in the match document, Tourney plugin sets this
@@ -167,6 +167,7 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
     String oldName = this.getNameLegacy();
     this.name = newName;
     this.componentName = null;
+    this.chatPrefix = null;
     this.match.callEvent(new PartyRenameEvent(this, oldName, this.getNameLegacy()));
   }
 
