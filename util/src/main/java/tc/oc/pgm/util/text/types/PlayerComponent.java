@@ -92,7 +92,7 @@ public interface PlayerComponent {
     String displayName = player.getDisplayName();
     char colorChar = displayName.charAt((displayName.indexOf(player.getName()) - 1));
     TextColor color = TextFormatter.convert(ChatColor.getByChar(colorChar));
-    return TextComponent.builder().append(player.getName(), color);
+    return TextComponent.builder().append(player.getName()).color(color);
   }
 
   // Color, flair & teleport
@@ -109,7 +109,7 @@ public interface PlayerComponent {
     TextComponent.Builder colorName = formatColor(player);
 
     if (isDead(player)) {
-      colorName.color(TextColor.DARK_GRAY);
+      colorName = colorName.color(TextColor.DARK_GRAY);
     }
 
     if (isVanished(player)) {
