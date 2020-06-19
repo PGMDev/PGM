@@ -35,10 +35,19 @@ public interface PlayerComponent {
   }
 
   static Component of(Player player, NameStyle style) {
-    return of(player, "", style);
+    return of(player, style, null);
   }
 
-  static Component of(@Nullable Player player, String defName, NameStyle style) {
+  static Component of(Player player, String defName, NameStyle style) {
+    return of(player, defName, style, null);
+  }
+
+  static Component of(Player player, NameStyle style, @Nullable Player viewer) {
+    return of(player, "", style, viewer);
+  }
+
+  static Component of(
+      @Nullable Player player, String defName, NameStyle style, @Nullable Player viewer) {
     // Offline player or not visible
     if ((player == null || !player.isOnline())) {
       return formatOffline(defName, style == NameStyle.PLAIN).build();
@@ -62,7 +71,7 @@ public interface PlayerComponent {
         builder = formatFancy(player);
         break;
       case TAB:
-        builder = formatTab(player);
+        builder = formatTab(player, viewer);
         break;
       case VERBOSE:
         builder = formatVerbose(player);
@@ -104,16 +113,20 @@ public interface PlayerComponent {
   }
 
   // Color, flair, death status, and vanish
-  static TextComponent.Builder formatTab(Player player) {
+  static TextComponent.Builder formatTab(Player player, @Nullable Player viewer) {
     TextComponent.Builder prefix = getPrefixComponent(player);
     TextComponent.Builder colorName = formatColor(player);
 
     if (isDead(player)) {
-      colorName = colorName.color(TextColor.DARK_GRAY);
+      colorName.color(TextColor.DARK_GRAY);
     }
 
     if (isVanished(player)) {
       colorName = formatVanished(colorName);
+    }
+
+    if (viewer != null && player.equals(viewer)) {
+      colorName.decoration(TextDecoration.BOLD, true);
     }
 
     return prefix.append(colorName);

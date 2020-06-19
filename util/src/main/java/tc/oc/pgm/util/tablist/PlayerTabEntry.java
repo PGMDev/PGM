@@ -2,7 +2,6 @@ package tc.oc.pgm.util.tablist;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.kyori.text.format.TextDecoration;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Skin;
 import org.bukkit.entity.Player;
@@ -48,9 +47,7 @@ public class PlayerTabEntry extends DynamicTabEntry {
   @Override
   public BaseComponent getContent(TabView view) {
     return TextTranslations.toBaseComponent(
-        PlayerComponent.of(player, NameStyle.TAB)
-            .decoration(TextDecoration.BOLD, view.getViewer().equals(player)),
-        view.getViewer());
+        PlayerComponent.of(player, NameStyle.TAB, view.getViewer()), view.getViewer());
   }
 
   @Override
