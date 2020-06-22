@@ -1,8 +1,9 @@
 package tc.oc.pgm.rage;
 
+import java.util.List;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -18,9 +19,11 @@ import tc.oc.pgm.events.ListenerScope;
 public class RageMatchModule implements MatchModule, Listener {
 
   private final boolean allProjectiles;
+  private final List<EntityType> entities;
 
-  public RageMatchModule(Match match, boolean allProjectiles) {
+  public RageMatchModule(Match match, boolean allProjectiles, List<EntityType> entities) {
     this.allProjectiles = allProjectiles;
+    this.entities = entities;
   }
 
   @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
@@ -34,9 +37,11 @@ public class RageMatchModule implements MatchModule, Listener {
     if (damager instanceof Player) {
       Player player = (Player) damager;
       return player.getItemInHand().containsEnchantment(Enchantment.DAMAGE_ALL);
-    } else if (damager instanceof Arrow) {
-      Arrow arrow = (Arrow) damager; // Arrows with damage > 2 are from power bows.
-      return arrow.getShooter() instanceof Player && arrow.spigot().getDamage() > 2.0D;
-    } else return damager instanceof Projectile && allProjectiles;
+    } else if (damager instanceof Projectile) {
+      if (!(((Projectile) damager).getShooter() instanceof Player))
+        return false; // Block mobs from being instant kill - preserves old behavior.
+      return entities.contains(damager.getType()) || allProjectiles;
+    }
+    return false;
   }
 }
