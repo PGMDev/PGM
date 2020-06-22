@@ -2,6 +2,8 @@ package tc.oc.pgm.command;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
+import app.ashcon.intake.bukkit.parametric.Type;
+import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
 import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
@@ -24,12 +26,14 @@ import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.cycle.CycleCountdown;
+import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.rotation.MapPoll;
 import tc.oc.pgm.rotation.MapPool;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.Rotation;
 import tc.oc.pgm.rotation.VotingPool;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
+import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -274,6 +278,118 @@ public final class MapPoolCommand {
             .build();
 
     viewer.sendMessage(message);
+  }
+
+  @Command(
+      aliases = {"setvote", "sv"},
+      desc = "Set maps for a custom poll",
+      flags = "rcl",
+      usage = "[map name] -r (remove) -c (clear) -l (list)",
+      perms = Permissions.SETNEXT)
+  public void setVote(
+      Audience viewer,
+      CommandSender sender,
+      @Fallback(Type.NULL) @Text MapInfo map,
+      MapOrder mapOrder,
+      Match match,
+      @Switch('c') boolean clear,
+      @Switch('r') boolean remove,
+      @Switch('l') boolean list)
+      throws CommandException {
+    MapPool pool = getMapPoolManager(sender, mapOrder).getActiveMapPool();
+    VotingPool vote = (pool instanceof VotingPool ? ((VotingPool) pool) : null);
+
+    if (vote == null) {
+      viewer.sendWarning(TranslatableComponent.of("vote.disabled"));
+      return;
+    }
+
+    if (list) {
+      int currentMaps = vote.getCustomVoteMaps().size();
+      TextColor listNumColor =
+          currentMaps > 1 ? currentMaps < 5 ? TextColor.GREEN : TextColor.YELLOW : TextColor.RED;
+      Component listMsg =
+          TextComponent.builder()
+              .append(TranslatableComponent.of("map.setVote.list"))
+              .append(": (")
+              .append(Integer.toString(currentMaps), listNumColor)
+              .append("/")
+              .append(Integer.toString(VotingPool.MAX_VOTE_OPTIONS), TextColor.RED)
+              .append(")")
+              .color(TextColor.GRAY)
+              .build();
+      viewer.sendMessage(listMsg);
+
+      int index = 1;
+      for (MapInfo mi : vote.getCustomVoteMaps()) {
+        Component indexedName =
+            TextComponent.builder()
+                .append(Integer.toString(index), TextColor.YELLOW)
+                .append(". ", TextColor.GRAY)
+                .append(mi.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS))
+                .build();
+        viewer.sendMessage(indexedName);
+        index++;
+      }
+      return;
+    }
+
+    // Clear all custom vote maps
+    if (clear) {
+      Component current =
+          TextComponent.of(Integer.toString(vote.getCustomVoteMaps().size()), TextColor.RED);
+      vote.getCustomVoteMaps().clear();
+      Component clearedMsg =
+          TranslatableComponent.of(
+              "map.setVote.clear",
+              TextColor.GRAY,
+              UsernameFormatUtils.formatStaffName(sender, match));
+      clearedMsg =
+          clearedMsg.append(
+              TextComponent.builder()
+                  .append(" (")
+                  .append(current)
+                  .append(")")
+                  .color(TextColor.GRAY)
+                  .build());
+      ChatDispatcher.broadcastAdminChatMessage(clearedMsg, match);
+      return;
+    }
+
+    // Remove a single custom vote map
+    if (remove) {
+      if (vote.isCustomVote(map)) {
+        vote.removeCustomVote(map);
+        ChatDispatcher.broadcastAdminChatMessage(
+            TranslatableComponent.of(
+                "map.setVote.removeMap",
+                TextColor.GRAY,
+                UsernameFormatUtils.formatStaffName(sender, match),
+                map.getStyledName(MapNameStyle.COLOR)),
+            match);
+        return;
+      }
+    }
+
+    // Check if map is already added
+    if (vote.isCustomVote(map)) {
+      viewer.sendWarning(
+          TranslatableComponent.of(
+              "map.setVote.existing", TextColor.GRAY, map.getStyledName(MapNameStyle.COLOR)));
+      return;
+    }
+
+    if (vote.addCustomVoteMap(map)) {
+      ChatDispatcher.broadcastAdminChatMessage(
+          TranslatableComponent.of(
+              "map.setVote.addMap",
+              TextColor.GRAY,
+              UsernameFormatUtils.formatStaffName(sender, match),
+              map.getStyledName(MapNameStyle.COLOR)),
+          match);
+    } else {
+      viewer.sendWarning(TranslatableComponent.of("map.setVote.limit", TextColor.RED));
+    }
   }
 
   @Command(aliases = "votenext", desc = "Vote for the next map", usage = "map")
