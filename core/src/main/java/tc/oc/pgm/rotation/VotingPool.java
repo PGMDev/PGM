@@ -125,7 +125,7 @@ public class VotingPool extends MapPool {
     return customVoteMaps;
   }
 
-  public boolean isCustomVote(MapInfo info) {
+  public boolean isCustomMapSelected(MapInfo info) {
     return customVoteMaps.stream().anyMatch(s -> s.getName().equalsIgnoreCase(info.getName()));
   }
 

@@ -37,10 +37,9 @@ public class VotingCommand {
       MapOrder mapOrder,
       Match match)
       throws CommandException {
-
     VotingPool vote = getVotingPool(sender, mapOrder);
 
-    if (vote.isCustomVote(map)) {
+    if (vote.isCustomMapSelected(map)) {
       viewer.sendWarning(
           TranslatableComponent.of(
               "map.setVote.existing", TextColor.GRAY, map.getStyledName(MapNameStyle.COLOR)));
@@ -156,7 +155,8 @@ public class VotingCommand {
       if (manager.getActiveMapPool() instanceof VotingPool) {
         VotingPool votePool = (VotingPool) manager.getActiveMapPool();
         if (votePool.getCurrentPoll() != null) {
-          throw new CommandException(ChatColor.RED + TextTranslations.translate("map.setVote.existing", sender));
+          throw new CommandException(
+              ChatColor.RED + TextTranslations.translate("map.setVote.inProgress", sender));
         }
         return votePool;
       }
