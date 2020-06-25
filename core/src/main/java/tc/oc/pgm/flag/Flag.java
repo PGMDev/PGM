@@ -242,9 +242,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
       return post;
     }
     if (definition.isSequential()) {
-      if (sequentialPostCounter == definition.getPosts().size()) {
-        sequentialPostCounter = 0;
-      }
+      sequentialPostCounter %= definition.getPosts().size();
       return definition.getPosts().get(sequentialPostCounter++);
     }
     Random random = match.getRandom();
