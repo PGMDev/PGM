@@ -26,7 +26,7 @@ import tc.oc.pgm.util.text.TextTranslations;
 public class VotingCommand {
 
   @Command(
-      aliases = {"add", "set"},
+      aliases = {"add"},
       desc = "Add a custom map to the next vote",
       usage = "[map name]",
       perms = Permissions.SETNEXT)
@@ -42,20 +42,20 @@ public class VotingCommand {
     if (vote.isCustomMapSelected(map)) {
       viewer.sendWarning(
           TranslatableComponent.of(
-              "map.setVote.existing", TextColor.GRAY, map.getStyledName(MapNameStyle.COLOR)));
+              "vote.custom.existing", TextColor.GRAY, map.getStyledName(MapNameStyle.COLOR)));
       return;
     }
 
     if (vote.addCustomVoteMap(map)) {
       ChatDispatcher.broadcastAdminChatMessage(
           TranslatableComponent.of(
-              "map.setVote.addMap",
+              "vote.custom.add",
               TextColor.GRAY,
               UsernameFormatUtils.formatStaffName(sender, match),
               map.getStyledName(MapNameStyle.COLOR)),
           match);
     } else {
-      viewer.sendWarning(TranslatableComponent.of("map.setVote.limit", TextColor.RED));
+      viewer.sendWarning(TranslatableComponent.of("vote.custom.limit", TextColor.RED));
     }
   }
 
@@ -75,14 +75,14 @@ public class VotingCommand {
     if (vote.removeCustomVote(map)) {
       ChatDispatcher.broadcastAdminChatMessage(
           TranslatableComponent.of(
-              "map.setVote.removeMap",
+              "vote.custom.remove",
               TextColor.GRAY,
               UsernameFormatUtils.formatStaffName(sender, match),
               map.getStyledName(MapNameStyle.COLOR)),
           match);
     } else {
       viewer.sendWarning(
-          TranslatableComponent.of("map.setVote.notFound", map.getStyledName(MapNameStyle.COLOR)));
+          TranslatableComponent.of("vote.custom.notFound", map.getStyledName(MapNameStyle.COLOR)));
     }
   }
 
@@ -99,7 +99,7 @@ public class VotingCommand {
     vote.getCustomVoteMaps().clear();
     Component clearedMsg =
         TranslatableComponent.of(
-            "map.setVote.clear",
+            "vote.custom.clear",
             TextColor.GRAY,
             UsernameFormatUtils.formatStaffName(sender, match));
     clearedMsg =
@@ -125,7 +125,7 @@ public class VotingCommand {
         currentMaps > 1 ? currentMaps < 5 ? TextColor.GREEN : TextColor.YELLOW : TextColor.RED;
     Component listMsg =
         TextComponent.builder()
-            .append(TranslatableComponent.of("map.setVote.list"))
+            .append(TranslatableComponent.of("vote.custom.list"))
             .append(": (")
             .append(Integer.toString(currentMaps), listNumColor)
             .append("/")
@@ -156,7 +156,7 @@ public class VotingCommand {
         VotingPool votePool = (VotingPool) manager.getActiveMapPool();
         if (votePool.getCurrentPoll() != null) {
           throw new CommandException(
-              ChatColor.RED + TextTranslations.translate("map.setVote.inProgress", sender));
+              ChatColor.RED + TextTranslations.translate("vote.custom.inProgress", sender));
         }
         return votePool;
       }
