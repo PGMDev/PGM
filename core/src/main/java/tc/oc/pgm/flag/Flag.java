@@ -234,7 +234,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     }
   }
 
-  private int sequentialPostCounter = 0;
+  private int sequentialPostCounter = 1;
   private Post returnPost;
 
   public Post getReturnPost(Post post) {
@@ -242,11 +242,8 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
       return post;
     }
     if (definition.isSequential()) {
-      Post returnPost = definition.getPosts().get(sequentialPostCounter++);
-      if (sequentialPostCounter == definition.getPosts().size()) {
-        sequentialPostCounter = 0;
-      }
-      return returnPost;
+      sequentialPostCounter %= definition.getPosts().size();
+      return definition.getPosts().get(sequentialPostCounter++);
     }
     Random random = match.getRandom();
     return definition.getPosts().get(random.nextInt(definition.getPosts().size()));

@@ -346,7 +346,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
               "moderation.freeze.broadcast.frozen",
               TextColor.GRAY,
               senderName,
-              freezee.getName(NameStyle.FANCY)),
+              freezee.getName(NameStyle.CONCISE)),
           match);
     }
 
@@ -370,7 +370,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
               "moderation.freeze.broadcast.thaw",
               TextColor.GRAY,
               senderName,
-              freezee.getName(NameStyle.FANCY)),
+              freezee.getName(NameStyle.CONCISE)),
           match);
     }
 

@@ -65,7 +65,7 @@ public interface PlayerComponent {
         builder = formatTeleport(formatColor(player), player.getName());
         break;
       case CONCISE:
-        builder = formatConcise(player);
+        builder = formatConcise(player, false);
         break;
       case FANCY:
         builder = formatFancy(player);
@@ -132,12 +132,12 @@ public interface PlayerComponent {
     return prefix.append(colorName);
   }
 
-  // Color, flair, and vanish status
-  static TextComponent.Builder formatConcise(Player player) {
+  // Color and flair with optional vanish
+  static TextComponent.Builder formatConcise(Player player, boolean vanish) {
     TextComponent.Builder prefix = getPrefixComponent(player);
     TextComponent.Builder colorName = formatColor(player);
 
-    if (isVanished(player)) {
+    if (isVanished(player) && vanish) {
       colorName = formatVanished(colorName);
     }
 
@@ -146,7 +146,7 @@ public interface PlayerComponent {
 
   // Color, flair, vanished, and teleport
   static TextComponent.Builder formatVerbose(Player player) {
-    return formatTeleport(formatConcise(player), player.getName());
+    return formatTeleport(formatConcise(player, true), player.getName());
   }
 
   /**

@@ -5,6 +5,7 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.goals.GoalsVictoryCondition;
+import tc.oc.pgm.score.ScoreVictoryCondition;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamVictoryCondition;
@@ -33,6 +34,8 @@ public class VictoryConditions {
         return new TieVictoryCondition();
       case "objectives":
         return new GoalsVictoryCondition();
+      case "score":
+        return new ScoreVictoryCondition();
       default:
         if (match != null) {
           TeamFactory winner = Teams.getTeam(raw, match);

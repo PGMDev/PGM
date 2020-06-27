@@ -24,7 +24,7 @@ public class UsernameFormatUtils {
   public static Component formatStaffName(CommandSender sender, Match match) {
     if (sender != null && sender instanceof Player) {
       MatchPlayer matchPlayer = match.getPlayer((Player) sender);
-      if (matchPlayer != null) return matchPlayer.getName(NameStyle.FANCY);
+      if (matchPlayer != null) return matchPlayer.getName(NameStyle.CONCISE);
     }
     return CONSOLE_NAME;
   }
