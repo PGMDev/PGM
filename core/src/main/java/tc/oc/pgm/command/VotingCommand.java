@@ -94,8 +94,7 @@ public class VotingCommand {
       throws CommandException {
     VotingPool vote = getVotingPool(sender, mapOrder);
 
-    Component current =
-        TextComponent.of(Integer.toString(vote.getCustomVoteMaps().size()), TextColor.RED);
+    Component current = TextComponent.of(vote.getCustomVoteMaps().size(), TextColor.RED);
     vote.getCustomVoteMaps().clear();
     Component clearedMsg =
         TranslatableComponent.of(
@@ -122,7 +121,9 @@ public class VotingCommand {
 
     int currentMaps = vote.getCustomVoteMaps().size();
     TextColor listNumColor =
-        currentMaps > 1 ? currentMaps < 5 ? TextColor.GREEN : TextColor.YELLOW : TextColor.RED;
+        currentMaps >= VotingPool.MIN_CUSTOM_VOTE_OPTIONS
+            ? currentMaps < VotingPool.MAX_VOTE_OPTIONS ? TextColor.GREEN : TextColor.YELLOW
+            : TextColor.RED;
     Component listMsg =
         TextComponent.builder()
             .append(TranslatableComponent.of("vote.custom.list"))

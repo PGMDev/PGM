@@ -16,6 +16,8 @@ public class VotingPool extends MapPool {
 
   // Number of maps in the vote, unless not enough maps in pool
   public static final int MAX_VOTE_OPTIONS = 5;
+  // Number of maps required for a custom vote (/vote)
+  public static final int MIN_CUSTOM_VOTE_OPTIONS = 2;
   // If maps were single voted, it would avg to this default
   private static final double DEFAULT_WEIGHT = 1d / MAX_VOTE_OPTIONS;
 
@@ -130,7 +132,7 @@ public class VotingPool extends MapPool {
   }
 
   private boolean shouldCustomVote() {
-    return customVoteMaps.size() > 1;
+    return customVoteMaps.size() >= MIN_CUSTOM_VOTE_OPTIONS;
   }
 
   private Map<MapInfo, Double> getCustomVoteMapWeighted() {
