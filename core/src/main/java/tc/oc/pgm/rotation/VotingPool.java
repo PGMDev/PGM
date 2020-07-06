@@ -1,7 +1,10 @@
 package tc.oc.pgm.rotation;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.pgm.api.map.MapInfo;
@@ -12,7 +15,9 @@ import tc.oc.pgm.restart.RestartManager;
 public class VotingPool extends MapPool {
 
   // Number of maps in the vote, unless not enough maps in pool
-  private static final int MAX_VOTE_OPTIONS = 5;
+  public static final int MAX_VOTE_OPTIONS = 5;
+  // Number of maps required for a custom vote (/vote)
+  public static final int MIN_CUSTOM_VOTE_OPTIONS = 2;
   // If maps were single voted, it would avg to this default
   private static final double DEFAULT_WEIGHT = 1d / MAX_VOTE_OPTIONS;
 
@@ -22,6 +27,9 @@ public class VotingPool extends MapPool {
   private final Map<MapInfo, Double> mapScores = new HashMap<>();
 
   private MapPoll currentPoll;
+
+  /** Override pool is used when custom maps are defined, does not count for regular vote score * */
+  private Set<MapInfo> customVoteMaps = Sets.newHashSet();
 
   public VotingPool(MapPoolManager manager, ConfigurationSection section, String name) {
     super(manager, section, name);
@@ -58,6 +66,7 @@ public class VotingPool extends MapPool {
     if (currentPoll == null) return getRandom();
 
     MapInfo map = currentPoll.finishVote();
+    customVoteMaps.clear();
     currentPoll = null;
     return map != null ? map : getRandom();
   }
@@ -88,10 +97,47 @@ public class VotingPool extends MapPool {
               if (manager.getOverriderMap() != null) return;
               // If there is a restart queued, don't start a vote
               if (RestartManager.isQueued()) return;
-              currentPoll = new MapPoll(match, mapScores, VOTE_SIZE);
+              currentPoll =
+                  shouldCustomVote()
+                      ? new MapPoll(
+                          match,
+                          getCustomVoteMapWeighted(),
+                          Math.min(MAX_VOTE_OPTIONS, customVoteMaps.size()))
+                      : new MapPoll(match, mapScores, VOTE_SIZE);
+
               match.getPlayers().forEach(viewer -> currentPoll.sendBook(viewer, false));
             },
             5,
             TimeUnit.SECONDS);
+  }
+
+  public boolean addCustomVoteMap(MapInfo info) {
+    if (customVoteMaps.size() < MAX_VOTE_OPTIONS) {
+      this.customVoteMaps.add(info);
+      return true;
+    }
+    return false;
+  }
+
+  public boolean removeCustomVote(MapInfo map) {
+    return this.customVoteMaps.remove(map);
+  }
+
+  public Set<MapInfo> getCustomVoteMaps() {
+    return customVoteMaps;
+  }
+
+  public boolean isCustomMapSelected(MapInfo info) {
+    return customVoteMaps.stream().anyMatch(s -> s.getName().equalsIgnoreCase(info.getName()));
+  }
+
+  private boolean shouldCustomVote() {
+    return customVoteMaps.size() >= MIN_CUSTOM_VOTE_OPTIONS;
+  }
+
+  private Map<MapInfo, Double> getCustomVoteMapWeighted() {
+    Map<MapInfo, Double> maps = Maps.newHashMap();
+    customVoteMaps.forEach(map -> maps.put(map, DEFAULT_WEIGHT));
+    return maps;
   }
 }
