@@ -2,8 +2,7 @@ name: deploy
 on:
   push:
     branches:
-      - master
-      # - beta
+      - v*
   repository_dispatch:
   schedule:
     - cron: 0 1 * * *
