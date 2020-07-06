@@ -158,6 +158,14 @@ public class FlagParser {
       capturableFlags = ImmutableSet.copyOf(this.flags);
     }
 
+    if (capturableFlags.size() != 0 && returnPost != null) {
+      for (FlagDefinition flagDef : flags) {
+        if (capturableFlags.contains(flagDef)) {
+          flagDef.setShowRespawnOnPickup(false);
+        }
+      }
+    }
+
     ImmutableSet<FlagDefinition> returnableFlags;
     Node returnableNode = Node.fromAttr(el, "rescue", "return");
     if (returnableNode != null) {
@@ -211,6 +219,8 @@ public class FlagParser {
     boolean multiCarrier = XMLUtils.parseBoolean(el.getAttribute("shared"), false);
     boolean sequential = XMLUtils.parseBoolean(el.getAttribute("sequential"), false);
     Component carryMessage = XMLUtils.parseFormattedText(el, "carry-message");
+    boolean showRespawnOnPickup =
+        XMLUtils.parseBoolean(el.getAttribute("show-respawn-on-pickup"), true);
     boolean dropOnWater = XMLUtils.parseBoolean(el.getAttribute("drop-on-water"), true);
     boolean showBeam = XMLUtils.parseBoolean(el.getAttribute("beam"), true);
     ProximityMetric flagProximityMetric =
@@ -260,7 +270,8 @@ public class FlagParser {
             showBeam,
             flagProximityMetric,
             netProximityMetric,
-            sequential);
+            sequential,
+            showRespawnOnPickup);
     flags.add(flag);
     factory.getFeatures().addFeature(el, flag);
 

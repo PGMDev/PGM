@@ -46,6 +46,9 @@ public class FlagDefinition extends ProximityGoalDefinition {
   private final boolean dropOnWater; // Flag can freeze water to drop on it
   private final boolean showBeam;
   private final boolean sequential;
+  private boolean
+      showRespawnOnPickup; // When a flag is picked up, if true, it will display where it will
+  // respawn. Will be set to false if a net defines a different respawn post.
 
   public FlagDefinition(
       @Nullable String id,
@@ -69,7 +72,8 @@ public class FlagDefinition extends ProximityGoalDefinition {
       boolean showBeam,
       ProximityMetric flagProximityMetric,
       ProximityMetric netProximityMetric,
-      boolean sequential) {
+      boolean sequential,
+      boolean showRespawnOnPickup) {
 
     // We can't use the owner field in OwnedGoal because our owner
     // is a reference that can't be resolved until after parsing.
@@ -98,6 +102,7 @@ public class FlagDefinition extends ProximityGoalDefinition {
     this.dropOnWater = dropOnWater;
     this.showBeam = showBeam;
     this.sequential = sequential;
+    this.showRespawnOnPickup = showRespawnOnPickup;
   }
 
   public @Nullable DyeColor getColor() {
@@ -179,6 +184,14 @@ public class FlagDefinition extends ProximityGoalDefinition {
 
   public boolean isSequential() {
     return sequential;
+  }
+
+  public boolean willShowRespawnOnPickup() {
+    return showRespawnOnPickup;
+  }
+
+  public void setShowRespawnOnPickup(boolean value) {
+    this.showRespawnOnPickup = value;
   }
 
   @SuppressWarnings("unchecked")
