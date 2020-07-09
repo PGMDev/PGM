@@ -2,12 +2,15 @@ package tc.oc.pgm.start;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import InitiateMatchStartCountdown.InitiateMatchStartCountdown;
 import java.time.Duration;
 import javax.annotation.Nullable;
 import net.kyori.text.Component;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
+import org.bukkit.Bukkit;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.events.CancelMatchStartCountdownEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.TimeUtils;
@@ -49,11 +52,11 @@ public class StartCountdown extends PreMatchCountdown {
   @Override
   public void onStart(Duration remaining, Duration total) {
     super.onStart(remaining, total);
+    Bukkit.getPluginManager().callEvent(new InitiateMatchStartCountdown(match, remaining));
     this.autoBalanced = false;
   }
 
   @Override
-  @SuppressWarnings("deprecation")
   public void onTick(Duration remaining, Duration total) {
     super.onTick(remaining, total);
 
@@ -81,6 +84,12 @@ public class StartCountdown extends PreMatchCountdown {
         this.getMatch().playSound(COUNT_SOUND);
       }
     }
+  }
+
+  @Override
+  public void onCancel(Duration remaining, Duration total) {
+    super.onCancel(remaining, total);
+    Bukkit.getPluginManager().callEvent(new CancelMatchStartCountdownEvent(match, remaining));
   }
 
   @Override

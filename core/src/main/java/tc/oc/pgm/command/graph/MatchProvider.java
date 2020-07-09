@@ -9,7 +9,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.util.text.TextException;
 
-final class MatchProvider implements BukkitProvider<Match> {
+public final class MatchProvider implements BukkitProvider<Match> {
 
   @Override
   public boolean isProvided() {
