@@ -97,7 +97,7 @@ public class AntiGriefListener implements Listener {
         ChatDispatcher.broadcastAdminChatMessage(
                 TranslatableComponent.of(
                     "moderation.defuse.message",
-                        TextColor.DARK_RED,
+                        TextColor.RED,
                         clicker.getName(NameStyle.FANCY),
                         owner.getName(NameStyle.FANCY)),
                 clicker.getMatch());
