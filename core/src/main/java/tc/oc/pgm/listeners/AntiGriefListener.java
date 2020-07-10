@@ -3,8 +3,6 @@ package tc.oc.pgm.listeners;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
 import org.bukkit.*;
@@ -26,11 +24,9 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
-import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.tnt.TNTMatchModule;
 import tc.oc.pgm.tracker.Trackers;
-import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -95,12 +91,12 @@ public class AntiGriefListener implements Listener {
                     clicker.getBukkit(),
                     owner.getBukkit().getDisplayName(clicker.getBukkit()) + ChatColor.RED));
         ChatDispatcher.broadcastAdminChatMessage(
-                TranslatableComponent.of(
-                    "moderation.defuse.message",
-                        TextColor.RED,
-                        clicker.getName(NameStyle.FANCY),
-                        owner.getName(NameStyle.FANCY)),
-                clicker.getMatch());
+            TranslatableComponent.of(
+                "moderation.defuse.message",
+                TextColor.RED,
+                clicker.getName(NameStyle.FANCY),
+                owner.getName(NameStyle.FANCY)),
+            clicker.getMatch());
       } else {
         this.notifyDefuse(
             clicker,
