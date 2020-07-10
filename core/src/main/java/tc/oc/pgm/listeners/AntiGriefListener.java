@@ -30,6 +30,7 @@ import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.tnt.TNTMatchModule;
 import tc.oc.pgm.tracker.Trackers;
+import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -93,10 +94,13 @@ public class AntiGriefListener implements Listener {
                     "moderation.defuse.player",
                     clicker.getBukkit(),
                     owner.getBukkit().getDisplayName(clicker.getBukkit()) + ChatColor.RED));
-		final Component component =
-            TextComponent.of(
-                clicker.getName() + " defused " + owner.getName() + "'s TNT", TextColor.RED);
-        ChatDispatcher.broadcastAdminChatMessage(component, clicker.getMatch());		
+        ChatDispatcher.broadcastAdminChatMessage(
+                TranslatableComponent.of(
+                    "moderation.defuse.message",
+                        TextColor.DARK_RED,
+                        clicker.getName(NameStyle.FANCY),
+                        owner.getName(NameStyle.FANCY)),
+                clicker.getMatch());
       } else {
         this.notifyDefuse(
             clicker,
