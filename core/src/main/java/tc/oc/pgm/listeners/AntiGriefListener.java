@@ -3,6 +3,8 @@ package tc.oc.pgm.listeners;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
 import org.bukkit.*;
@@ -24,6 +26,7 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.tnt.TNTMatchModule;
 import tc.oc.pgm.tracker.Trackers;
@@ -90,6 +93,10 @@ public class AntiGriefListener implements Listener {
                     "moderation.defuse.player",
                     clicker.getBukkit(),
                     owner.getBukkit().getDisplayName(clicker.getBukkit()) + ChatColor.RED));
+		final Component component =
+            TextComponent.of(
+                clicker.getName() + " defused " + owner.getName() + "'s TNT", TextColor.RED);
+        ChatDispatcher.broadcastAdminChatMessage(component, clicker.getMatch());		
       } else {
         this.notifyDefuse(
             clicker,
