@@ -35,6 +35,7 @@ public class MapInfoImpl implements MapInfo {
   private final String id;
   private final Version proto;
   private final Version version;
+  private final MapLicense license;
   private final String name;
   private final String description;
   private final Collection<Contributor> authors;
@@ -51,6 +52,7 @@ public class MapInfoImpl implements MapInfo {
       @Nullable String id,
       Version proto,
       Version version,
+      MapLicense license,
       String name,
       String description,
       @Nullable Collection<Contributor> authors,
@@ -65,6 +67,7 @@ public class MapInfoImpl implements MapInfo {
     this.id = checkNotNull(MapInfo.normalizeName(id == null ? name : id));
     this.proto = checkNotNull(proto);
     this.version = checkNotNull(version);
+    this.license = license;
     this.description = checkNotNull(description);
     this.authors = authors == null ? new LinkedList<>() : authors;
     this.contributors = contributors == null ? new LinkedList<>() : contributors;
@@ -81,6 +84,7 @@ public class MapInfoImpl implements MapInfo {
         checkNotNull(info).getId(),
         info.getProto(),
         info.getVersion(),
+        info.getLicense(),
         info.getName(),
         info.getDescription(),
         info.getAuthors(),
@@ -95,19 +99,24 @@ public class MapInfoImpl implements MapInfo {
 
   public MapInfoImpl(Element root) throws InvalidXMLException {
     this(
-        checkNotNull(root).getChildTextNormalize("slug"),
-        XMLUtils.parseSemanticVersion(Node.fromRequiredAttr(root, "proto")),
-        XMLUtils.parseSemanticVersion(Node.fromRequiredChildOrAttr(root, "version")),
-        Node.fromRequiredChildOrAttr(root, "name").getValueNormalize(),
-        Node.fromRequiredChildOrAttr(root, "objective", "description").getValueNormalize(),
-        parseContributors(root, "author"),
-        parseContributors(root, "contributor"),
-        parseRules(root),
-        XMLUtils.parseEnum(
-                Node.fromLastChildOrAttr(root, "difficulty"),
-                Difficulty.class,
-                "difficulty",
-                Difficulty.NORMAL)
+            checkNotNull(root).getChildTextNormalize("slug"),
+            XMLUtils.parseSemanticVersion(Node.fromRequiredAttr(root, "proto")),
+            XMLUtils.parseSemanticVersion(Node.fromRequiredChildOrAttr(root, "version")),
+            XMLUtils.parseEnum(
+                    Node.fromLastChildOrAttr(root, "license"),
+                    MapLicense.class,
+                    "license",
+                    MapLicense.NONE),
+            Node.fromRequiredChildOrAttr(root, "name").getValueNormalize(),
+            Node.fromRequiredChildOrAttr(root, "objective", "description").getValueNormalize(),
+            parseContributors(root, "author"),
+            parseContributors(root, "contributor"),
+            parseRules(root),
+            XMLUtils.parseEnum(
+                    Node.fromLastChildOrAttr(root, "difficulty"),
+                    Difficulty.class,
+                    "difficulty",
+                    Difficulty.NORMAL)
             .ordinal(),
         null,
         null,
@@ -128,6 +137,11 @@ public class MapInfoImpl implements MapInfo {
   @Override
   public Version getVersion() {
     return version;
+  }
+
+  @Override
+  public MapLicense getLicense() {
+    return license;
   }
 
   @Override

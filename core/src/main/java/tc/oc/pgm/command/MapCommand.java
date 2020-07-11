@@ -208,6 +208,12 @@ public final class MapCommand {
               .build());
     }
 
+    audience.sendMessage(
+            TextComponent.builder()
+                    .append(mapInfoLabel("map.info.license"))
+                    .append(TextComponent.of(map.getLicense().getFullName(), TextColor.GOLD))
+                    .build());
+
     audience.sendMessage(createTagsComponent(map.getTags()));
 
     if (PGM.get().getMapOrder() instanceof MapPoolManager) {
