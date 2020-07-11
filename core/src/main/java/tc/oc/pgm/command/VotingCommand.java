@@ -157,7 +157,7 @@ public class VotingCommand {
 
     Component listMsg =
         TextComponent.builder()
-            .append(TranslatableComponent.of("vote.title.map"))
+            .append(TranslatableComponent.of("vote.title.selection"))
             .append(": (")
             .append(Integer.toString(currentMaps), listNumColor)
             .append("/")
