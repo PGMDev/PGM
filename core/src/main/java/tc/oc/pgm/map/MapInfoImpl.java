@@ -99,24 +99,20 @@ public class MapInfoImpl implements MapInfo {
 
   public MapInfoImpl(Element root) throws InvalidXMLException {
     this(
-            checkNotNull(root).getChildTextNormalize("slug"),
-            XMLUtils.parseSemanticVersion(Node.fromRequiredAttr(root, "proto")),
-            XMLUtils.parseSemanticVersion(Node.fromRequiredChildOrAttr(root, "version")),
-            XMLUtils.parseEnum(
-                    Node.fromLastChildOrAttr(root, "license"),
-                    MapLicense.class,
-                    "license",
-                    MapLicense.NONE),
-            Node.fromRequiredChildOrAttr(root, "name").getValueNormalize(),
-            Node.fromRequiredChildOrAttr(root, "objective", "description").getValueNormalize(),
-            parseContributors(root, "author"),
-            parseContributors(root, "contributor"),
-            parseRules(root),
-            XMLUtils.parseEnum(
-                    Node.fromLastChildOrAttr(root, "difficulty"),
-                    Difficulty.class,
-                    "difficulty",
-                    Difficulty.NORMAL)
+        checkNotNull(root).getChildTextNormalize("slug"),
+        XMLUtils.parseSemanticVersion(Node.fromRequiredAttr(root, "proto")),
+        XMLUtils.parseSemanticVersion(Node.fromRequiredChildOrAttr(root, "version")),
+        parseLicense(root),
+        Node.fromRequiredChildOrAttr(root, "name").getValueNormalize(),
+        Node.fromRequiredChildOrAttr(root, "objective", "description").getValueNormalize(),
+        parseContributors(root, "author"),
+        parseContributors(root, "contributor"),
+        parseRules(root),
+        XMLUtils.parseEnum(
+                Node.fromLastChildOrAttr(root, "difficulty"),
+                Difficulty.class,
+                "difficulty",
+                Difficulty.NORMAL)
             .ordinal(),
         null,
         null,
@@ -279,5 +275,18 @@ public class MapInfoImpl implements MapInfo {
   private static WorldInfo parseWorld(Element root) throws InvalidXMLException {
     final Element world = root.getChild("terrain");
     return world == null ? new WorldInfoImpl() : new WorldInfoImpl(world);
+  }
+
+  private static MapLicense parseLicense(Element root) throws InvalidXMLException {
+    Node licenseNode = Node.fromLastChildOrAttr(root, "license");
+    try {
+      return XMLUtils.parseEnum(licenseNode, MapLicense.class, "license", MapLicense.NONE);
+    } catch (
+        InvalidXMLException
+            e) { // Either means that no license is provided or that the user wants to specify a
+      // custom license
+      if (licenseNode == null) return MapLicense.NONE;
+      return MapLicense.CUSTOM.setNameIfCustom(licenseNode.getValue());
+    }
   }
 }

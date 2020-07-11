@@ -7,15 +7,21 @@ public enum MapLicense {
   CC_BY_NC("Attribution-NonCommercial 4.0 International"),
   CC_BY_NC_ND("Attribution-NonCommercial-NoDerivatives 4.0 International"),
   CC_BY_NC_SA("Attribution-NonCommercial-ShareAlike 4.0 International"),
+  CUSTOM(""),
   NONE("All Rights Reserved");
 
-  String fullName;
+  private String fullName;
 
   MapLicense(String fullName) {
     this.fullName = fullName;
   }
 
-  ;
+  MapLicense setNameIfCustom(String customName) {
+    if (this != MapLicense.CUSTOM)
+      return this; // Not allowed to set custom if the map license is not the custom one
+    this.fullName = customName;
+    return this;
+  }
 
   public String getFullName() {
     return fullName;

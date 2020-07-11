@@ -209,10 +209,10 @@ public final class MapCommand {
     }
 
     audience.sendMessage(
-            TextComponent.builder()
-                    .append(mapInfoLabel("map.info.license"))
-                    .append(TextComponent.of(map.getLicense().getFullName(), TextColor.GOLD))
-                    .build());
+        TextComponent.builder()
+            .append(mapInfoLabel("map.info.license"))
+            .append(TextComponent.of(map.getLicense().getFullName(), TextColor.GOLD))
+            .build());
 
     audience.sendMessage(createTagsComponent(map.getTags()));
 
