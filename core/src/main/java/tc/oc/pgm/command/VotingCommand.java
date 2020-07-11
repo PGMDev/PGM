@@ -10,6 +10,9 @@ import java.util.stream.Collectors;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
+import net.kyori.text.event.ClickEvent;
+import net.kyori.text.event.HoverEvent;
+import net.kyori.text.event.HoverEvent.Action;
 import net.kyori.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -88,6 +91,26 @@ public class VotingCommand {
   }
 
   @Command(
+      aliases = {"mode"},
+      desc = "Toggle the voting mode between replace and override",
+      perms = Permissions.SETNEXT)
+  public void mode(Audience viewer, CommandSender sender, MapOrder mapOrder, Match match)
+      throws CommandException {
+    VotingPool vote = getVotingPool(sender, mapOrder);
+    Component voteModeName =
+        TranslatableComponent.of(
+            vote.toggleVoteMode() ? "vote.mode.replace" : "vote.mode.create",
+            TextColor.LIGHT_PURPLE);
+    ChatDispatcher.broadcastAdminChatMessage(
+        TranslatableComponent.of(
+            "vote.toggle",
+            TextColor.GRAY,
+            UsernameFormatUtils.formatStaffName(sender, match),
+            voteModeName),
+        match);
+  }
+
+  @Command(
       aliases = {"clear"},
       desc = "Clear all custom map selections from the next vote",
       perms = Permissions.SETNEXT)
@@ -123,6 +146,15 @@ public class VotingCommand {
         currentMaps >= VotingPool.MIN_CUSTOM_VOTE_OPTIONS
             ? currentMaps < VotingPool.MAX_VOTE_OPTIONS ? TextColor.GREEN : TextColor.YELLOW
             : TextColor.RED;
+
+    String modeKey = vote.getVoteMode() ? "replace" : "create";
+    Component mode =
+        TranslatableComponent.of(String.format("vote.mode.%s", modeKey), TextColor.LIGHT_PURPLE)
+            .hoverEvent(
+                HoverEvent.of(
+                    Action.SHOW_TEXT, TranslatableComponent.of("vote.mode.hover", TextColor.AQUA)))
+            .clickEvent(ClickEvent.runCommand("/vote mode"));
+
     Component listMsg =
         TextComponent.builder()
             .append(TranslatableComponent.of("vote.title.map"))
@@ -130,7 +162,11 @@ public class VotingCommand {
             .append(Integer.toString(currentMaps), listNumColor)
             .append("/")
             .append(Integer.toString(VotingPool.MAX_VOTE_OPTIONS), TextColor.RED)
-            .append(")")
+            .append(") ")
+            .append("\u00BB", TextColor.GOLD)
+            .append(" [")
+            .append(mode)
+            .append("]")
             .color(TextColor.GRAY)
             .build();
     viewer.sendMessage(listMsg);

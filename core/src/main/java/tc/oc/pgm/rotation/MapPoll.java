@@ -45,13 +45,15 @@ public class MapPoll {
 
   private final WeakReference<Match> match;
   private final Map<MapInfo, Double> mapScores;
+  private final Set<MapInfo> overrides;
   private final int voteSize;
 
   private final Map<MapInfo, Set<UUID>> votes = new HashMap<>();
 
-  MapPoll(Match match, Map<MapInfo, Double> mapScores, int voteSize) {
+  MapPoll(Match match, Map<MapInfo, Double> mapScores, Set<MapInfo> overrides, int voteSize) {
     this.match = new WeakReference<>(match);
     this.mapScores = mapScores;
+    this.overrides = overrides;
     this.voteSize = voteSize;
 
     selectMaps();
@@ -68,7 +70,10 @@ public class MapPoll {
     NavigableMap<Double, MapInfo> cumulativeScores = new TreeMap<>();
     double maxWeight = cummulativeMap(0, sortedDist, cumulativeScores);
 
-    for (int i = 0; i < voteSize; i++) {
+    // Add all override maps before selecting random
+    overrides.forEach(map -> votes.put(map, new HashSet<>()));
+
+    for (int i = overrides.size(); i < voteSize; i++) {
       NavigableMap<Double, MapInfo> subMap =
           cumulativeScores.tailMap(Math.random() * maxWeight, true);
       Map.Entry<Double, MapInfo> selected = subMap.pollFirstEntry();

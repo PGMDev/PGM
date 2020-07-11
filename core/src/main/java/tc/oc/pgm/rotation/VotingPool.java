@@ -2,6 +2,7 @@ package tc.oc.pgm.rotation;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +31,9 @@ public class VotingPool extends MapPool {
 
   /** Override pool is used when custom maps are defined, does not count for regular vote score * */
   private Set<MapInfo> customVoteMaps = Sets.newHashSet();
+
+  /** Whether custom vote should replace existing maps or override the poll * */
+  private boolean replaceMaps = true;
 
   public VotingPool(MapPoolManager manager, ConfigurationSection section, String name) {
     super(manager, section, name);
@@ -98,12 +102,13 @@ public class VotingPool extends MapPool {
               // If there is a restart queued, don't start a vote
               if (RestartManager.isQueued()) return;
               currentPoll =
-                  shouldCustomVote()
+                  shouldOverride()
                       ? new MapPoll(
                           match,
                           getCustomVoteMapWeighted(),
+                          Collections.emptySet(),
                           Math.min(MAX_VOTE_OPTIONS, customVoteMaps.size()))
-                      : new MapPoll(match, mapScores, VOTE_SIZE);
+                      : new MapPoll(match, mapScores, customVoteMaps, VOTE_SIZE);
 
               match.getPlayers().forEach(viewer -> currentPoll.sendBook(viewer, false));
             },
@@ -131,8 +136,18 @@ public class VotingPool extends MapPool {
     return customVoteMaps.stream().anyMatch(s -> s.getName().equalsIgnoreCase(info.getName()));
   }
 
-  private boolean shouldCustomVote() {
-    return customVoteMaps.size() >= MIN_CUSTOM_VOTE_OPTIONS;
+  private boolean shouldOverride() {
+    return customVoteMaps.size() >= MIN_CUSTOM_VOTE_OPTIONS && !getVoteMode();
+  }
+
+  public boolean toggleVoteMode() {
+    this.replaceMaps = !replaceMaps;
+    return replaceMaps;
+  }
+
+  /** @return true if replace, false if override */
+  public boolean getVoteMode() {
+    return replaceMaps;
   }
 
   private Map<MapInfo, Double> getCustomVoteMapWeighted() {
