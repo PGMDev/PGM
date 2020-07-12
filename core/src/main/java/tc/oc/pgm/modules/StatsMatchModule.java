@@ -248,4 +248,9 @@ public class StatsMatchModule implements MatchModule, Listener {
     if (hasNoStats(player)) return putNewPlayer(player).getBasicStatsMessage();
     return allPlayerStats.get(player).getBasicStatsMessage();
   }
+
+  public int getPlayerKills(UUID player) {
+    if (hasNoStats(player)) return 0;
+    return allPlayerStats.get(player).kills;
+  }
 }

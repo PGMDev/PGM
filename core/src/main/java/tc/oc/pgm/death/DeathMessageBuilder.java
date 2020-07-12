@@ -7,13 +7,18 @@ import javax.annotation.Nullable;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.TextColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
+import tc.oc.pgm.api.setting.SettingKey;
+import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.tracker.info.*;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
+import tc.oc.pgm.modules.StatsMatchModule;
 import tc.oc.pgm.tracker.Trackers;
 import tc.oc.pgm.tracker.info.BlockInfo;
 import tc.oc.pgm.tracker.info.EntityInfo;
@@ -56,18 +61,19 @@ public class DeathMessageBuilder {
   private Component weapon = TextComponent.empty();
   private Component mob = TextComponent.empty();
   private Long distance;
+  private Match match;
 
   public DeathMessageBuilder(MatchPlayerDeathEvent event, Logger logger) {
     this.victim = event.getVictim();
     this.killer = event.getDamageInfo().getAttacker();
     this.predicted = event.isPredicted();
     this.logger = logger;
-
+    this.match = event.getMatch();
     build(event.getDamageInfo());
   }
 
-  public Component getMessage() {
-    Component message = TranslatableComponent.of(key, getArgs());
+  public Component getMessage(boolean showKillCount) {
+    Component message = TranslatableComponent.of(key, getArgs(showKillCount));
 
     if (predicted)
       message =
@@ -78,7 +84,11 @@ public class DeathMessageBuilder {
     return message;
   }
 
-  Component[] getArgs() {
+  public Component getMessage() {
+    return getMessage(false);
+  }
+
+  Component[] getArgs(boolean showKillCount) {
     Component[] args = new Component[5];
     args[0] = victim.getName(NameStyle.COLOR);
     args[1] = killer == null ? TextComponent.empty() : killer.getName(NameStyle.COLOR);
@@ -88,6 +98,32 @@ public class DeathMessageBuilder {
         distance == null
             ? TextComponent.empty()
             : TranslatableComponent.of(String.valueOf(distance));
+    if (showKillCount) {
+      int victimKillCount, killerKillCount = 0;
+      victimKillCount = match.needModule(StatsMatchModule.class).getPlayerKills(victim.getId());
+      Component newArg0 =
+          TextComponent.of("[", TextColor.GOLD)
+              .append(TextComponent.of(victimKillCount))
+              .append(TextComponent.of("] ", TextColor.GOLD));
+      if (victim.getSettings().getValue(SettingKey.STATS).equals(SettingValue.STATS_ON)) {
+        args[0] = newArg0.append(args[0]);
+      }
+      if (killer != null && killer.getPlayer().isPresent()) {
+        killerKillCount = match.needModule(StatsMatchModule.class).getPlayerKills(killer.getId());
+        Component newArg1 =
+            TextComponent.of("[", TextColor.GOLD)
+                .append(TextComponent.of(killerKillCount))
+                .append(TextComponent.of("] ", TextColor.GOLD));
+        if (killer
+            .getPlayer()
+            .get()
+            .getSettings()
+            .getValue(SettingKey.STATS)
+            .equals(SettingValue.STATS_ON)) {
+          args[1] = newArg1.append(args[1]);
+        }
+      }
+    }
     return args;
   }
 

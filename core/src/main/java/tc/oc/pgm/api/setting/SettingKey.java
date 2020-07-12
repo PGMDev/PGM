@@ -18,6 +18,7 @@ public enum SettingKey {
   CHAT("chat", CHAT_TEAM, CHAT_GLOBAL, CHAT_ADMIN), // Changes the default chat channel
   DEATH(
       Arrays.asList("death", "dms"), DEATH_ALL, DEATH_OWN), // Changes which death messages are seen
+  KILLS("kills", KILL_COUNT_ON, KILL_COUNT_OFF),
   PICKER("picker", PICKER_AUTO, PICKER_ON, PICKER_OFF), // Changes when the picker is displayed
   JOIN(Arrays.asList("join", "jms"), JOIN_ON, JOIN_OFF), // Changes if join messages are seen
   MESSAGE(

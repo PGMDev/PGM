@@ -15,6 +15,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.api.setting.SettingKey;
+import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.ListenerScope;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -36,9 +37,15 @@ public class DeathMessageMatchModule implements MatchModule, Listener {
     if (!event.getMatch().isRunning()) return;
 
     DeathMessageBuilder builder = new DeathMessageBuilder(event, logger);
-    Component message = builder.getMessage().color(TextColor.GRAY);
-
+    Component baseMessage = builder.getMessage().color(TextColor.GRAY);
+    Component killCountMessage = builder.getMessage(true).color(TextColor.GRAY);
     for (MatchPlayer viewer : event.getMatch().getPlayers()) {
+      Component message;
+      if (viewer.getSettings().getValue(SettingKey.KILLS).equals(SettingValue.KILL_COUNT_ON)) {
+        message = killCountMessage;
+      } else {
+        message = baseMessage;
+      }
       switch (viewer.getSettings().getValue(SettingKey.DEATH)) {
         case DEATH_OWN:
           if (event.isInvolved(viewer)) {

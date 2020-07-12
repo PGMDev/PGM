@@ -21,6 +21,9 @@ public enum SettingValue {
   DEATH_OWN("death", "own"), // Only send death messages involving self
   DEATH_ALL("death", "all"), // Send all death messages, highlight your own
 
+  KILL_COUNT_ON("kills", "on"), // Show the amount of kills a player has in death messages
+  KILL_COUNT_OFF("kills", "off"), // Don't show the amount of kills a player has in death messages
+
   PICKER_AUTO("picker", "auto"), // Display after cycle, or with permissions.
   PICKER_ON("picker", "on"), // Display the picker GUI always
   PICKER_OFF("picker", "off"), // Never display the picker GUI
