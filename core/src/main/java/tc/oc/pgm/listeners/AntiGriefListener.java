@@ -103,6 +103,12 @@ public class AntiGriefListener implements Listener {
             entity,
             ChatColor.RED
                 + TextTranslations.translate("moderation.defuse.world", clicker.getBukkit()));
+        ChatDispatcher.broadcastAdminChatMessage(
+            TranslatableComponent.of(
+                "moderation.defuse.message.unknown",
+                TextColor.RED,
+                clicker.getName(NameStyle.FANCY)),
+            clicker.getMatch());
       }
     }
   }
