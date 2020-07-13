@@ -3,6 +3,7 @@ package tc.oc.pgm.listeners;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
 import org.bukkit.*;
@@ -93,9 +94,10 @@ public class AntiGriefListener implements Listener {
         ChatDispatcher.broadcastAdminChatMessage(
             TranslatableComponent.of(
                 "moderation.defuse.message",
-                TextColor.RED,
+                TextColor.WHITE,
                 clicker.getName(NameStyle.FANCY),
-                owner.getName(NameStyle.FANCY)),
+                owner.getName(NameStyle.FANCY),
+                TextComponent.of("TNT", TextColor.DARK_RED)),
             clicker.getMatch());
       } else {
         this.notifyDefuse(
@@ -106,8 +108,9 @@ public class AntiGriefListener implements Listener {
         ChatDispatcher.broadcastAdminChatMessage(
             TranslatableComponent.of(
                 "moderation.defuse.message.unknown",
-                TextColor.RED,
-                clicker.getName(NameStyle.FANCY)),
+                TextColor.WHITE,
+                clicker.getName(NameStyle.FANCY),
+                TextComponent.of("TNT", TextColor.DARK_RED)),
             clicker.getMatch());
       }
     }
