@@ -7,13 +7,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
@@ -24,20 +24,10 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.match.ObservingParty;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.tablist.TabEntry;
 import tc.oc.pgm.util.tablist.TabView;
 
-public class MatchTabView extends TabView implements ListeningTabView {
-
-  public static class Factory implements Function<Player, TabView> {
-    @Override
-    public TabView apply(Player key) {
-      return ViaUtils.getProtocolVersion(key) >= ViaUtils.VERSION_1_8
-          ? new MatchTabView(key)
-          : new LegacyMatchTabView(key);
-    }
-  }
+public class MatchTabView extends TabView implements Listener {
 
   private final List<MatchPlayer> observerPlayers = new ArrayList<>();
   private final List<MatchPlayer> participantPlayers = new ArrayList<>();
@@ -236,7 +226,6 @@ public class MatchTabView extends TabView implements ListeningTabView {
     super.render();
   }
 
-  @Override
   public void onViewerJoinMatch(PlayerJoinMatchEvent event) {
     if (this.getViewer() == event.getPlayer().getBukkit()) {
       this.match = event.getMatch();
@@ -261,7 +250,6 @@ public class MatchTabView extends TabView implements ListeningTabView {
     }
   }
 
-  @Override
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onTeamChange(PlayerPartyChangeEvent event) {
     if (this.match != event.getMatch()) return;

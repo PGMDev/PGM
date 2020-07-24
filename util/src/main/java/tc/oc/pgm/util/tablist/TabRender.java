@@ -8,7 +8,6 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.minecraft.server.v1_8_R3.Packet;
 import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
 import org.bukkit.Location;
-import org.bukkit.Skin;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.nms.NMSHacks;
 
@@ -53,17 +52,16 @@ public class TabRender {
   }
 
   private void appendAddition(TabEntry entry, int index) {
-    Skin skin = entry.getSkin(this.view);
     BaseComponent displayName = this.getContent(entry, index);
     this.addPacket.b.add(
         NMSHacks.playerListPacketData(
             this.addPacket,
             entry.getId(),
             entry.getName(this.view),
-            displayName,
             entry.getGamemode(),
             entry.getPing(),
-            entry.getSkin(this.view)));
+            entry.getSkin(this.view),
+            displayName));
 
     // Due to a client bug, display name is ignored in ADD_PLAYER packets,
     // so we have to send an UPDATE_DISPLAY_NAME afterward.

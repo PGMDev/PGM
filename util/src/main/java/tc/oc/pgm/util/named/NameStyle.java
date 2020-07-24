@@ -9,8 +9,9 @@ public enum NameStyle {
   COLOR(true, false, false, true, false), // Color and teleport
   FANCY(true, true, false, true, false), // Color, flair, and teleport
   TAB(true, true, true, false, true), // Color, flair, death status, and vanish
+  LEGACY_TAB(true, true, false, false, true), // Color, flair, and vanish (crossed out)
   VERBOSE(true, true, false, true, true), // Color, flair, teleport, and vanish
-  CONCISE(true, true, false, false, true); // Color, flair, and vanish
+  CONCISE(true, true, false, false, true); // Color, flair, and vanish (offline)
 
   public final boolean isColor;
   public final boolean showPrefix;
