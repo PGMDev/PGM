@@ -122,7 +122,7 @@ public class MatchTabManager extends TabManager implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onJoin(PlayerJoinEvent event) {
-    if (ViaUtils.getProtocolVersion(event.getPlayer()) == ViaUtils.VERSION_1_7) return;
+    if (ViaUtils.getProtocolVersion(event.getPlayer()) <= ViaUtils.VERSION_1_7) return;
     MatchTabView view = this.getView(event.getPlayer());
     if (view != null) view.enable(this);
   }
@@ -143,6 +143,7 @@ public class MatchTabManager extends TabManager implements Listener {
   /** Delegated events */
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onJoinMatch(PlayerJoinMatchEvent event) {
+    if (ViaUtils.getProtocolVersion(event.getPlayer().getBukkit()) <= ViaUtils.VERSION_1_7) return;
     MatchTabView view = this.getView(event.getPlayer().getBukkit());
     if (view != null) view.onViewerJoinMatch(event);
     invalidate(event.getPlayer());

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import net.kyori.text.TextComponent;
 import net.kyori.text.adapter.bukkit.SpigotTextAdapter;
@@ -88,7 +89,7 @@ public class TabDisplay {
       listRemovePacket.b.add(NMSHacks.playerListPacketData(listRemovePacket, uuid, playerName));
     }
 
-    this.viewers = new OnlinePlayerMapAdapter<>(new HashMap<Player, String[]>(), plugin);
+    this.viewers = new OnlinePlayerMapAdapter<>(new HashMap<>(), plugin);
   }
 
   /** Register event listeners and allow the display to be used */
@@ -112,11 +113,19 @@ public class TabDisplay {
 
   private static final int MAX_COLORS = TextColor.values().length;
 
+  /**
+   * Creates an unique, invisible name for the slot. Uses a combination of color-codes and an
+   * invisible character for 1.7 clients, in a hex-like conversion. If _ is the empty char, Slot 3
+   * (0x3) becomes §0_§3_, while Slot 25 (0x19) becomes §0_§9_§1_
+   *
+   * @param slot The slot to create a unique player name for
+   * @return The base component array of invisible characters
+   */
   private BaseComponent[] slotName(int slot) {
     // This needs to avoid collision with the sidebar, which uses chars 0-15. Eventually we will add
     // a scoreboard API to Commons and this class can cooperate with it in a less hacky way.
     TextComponent.Builder builder = TextComponent.builder();
-    builder.append(NO_SPACE, TextColor.BLACK); // Avoid collision by adding a 0 on front
+    builder.append(NO_SPACE, TextColor.BLACK); // Avoid collision by adding a §0 on front
 
     do {
       builder.append(NO_SPACE, TextColor.values()[slot % MAX_COLORS]);
@@ -146,13 +155,17 @@ public class TabDisplay {
     this.set(viewer, this.slotIndex(x, y), text);
   }
 
+  public Set<Player> getViewers() {
+    return viewers.keySet();
+  }
+
   public void addViewer(Player viewer) {
     if (viewer.isOnline() && !this.viewers.containsKey(viewer)) {
 
+      NMSHacks.sendPacket(viewer, this.listAddPacket);
       for (int slot = 0; slot < this.slots; ++slot) {
         NMSHacks.sendPacket(viewer, this.teamCreatePackets[slot]);
       }
-      NMSHacks.sendPacket(viewer, this.listAddPacket);
 
       String[] names = new String[this.slots];
       Arrays.fill(names, "");
@@ -164,19 +177,20 @@ public class TabDisplay {
     if (this.viewers.containsKey(viewer)) {
       this.viewers.remove(viewer);
 
-      NMSHacks.sendPacket(viewer, this.listRemovePacket);
       for (int slot = 0; slot < this.slots; ++slot) {
         NMSHacks.sendPacket(viewer, this.teamRemovePackets[slot]);
       }
+      NMSHacks.sendPacket(viewer, this.listRemovePacket);
     }
   }
 
   public void clearViewers() {
     for (Player viewer : this.viewers.keySet()) {
-      NMSHacks.sendPacket(viewer, this.listRemovePacket);
+
       for (int slot = 0; slot < this.slots; ++slot) {
         NMSHacks.sendPacket(viewer, this.teamRemovePackets[slot]);
       }
+      NMSHacks.sendPacket(viewer, this.listRemovePacket);
     }
     this.viewers.clear();
   }

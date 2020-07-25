@@ -321,8 +321,8 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   private void registerListeners() {
     new BlockTransformListener(this).registerEvents();
     registerEvents(matchManager);
-    registerEvents(matchTabManager);
-    legacyMatchTabManager.enable();
+    if (matchTabManager != null) registerEvents(matchTabManager);
+    if (legacyMatchTabManager != null) registerEvents(legacyMatchTabManager);
     registerEvents(vanishManager);
     registerEvents(prefixRegistry);
     registerEvents(new GeneralizingListener(this));

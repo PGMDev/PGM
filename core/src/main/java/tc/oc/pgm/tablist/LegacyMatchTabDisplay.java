@@ -1,9 +1,10 @@
 package tc.oc.pgm.tablist;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
@@ -17,7 +18,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLocaleChangeEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.scheduler.BukkitTask;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
@@ -31,6 +31,7 @@ import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
 import tc.oc.pgm.ffa.Tribute;
+import tc.oc.pgm.match.ObservingParty;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
 import tc.oc.pgm.util.TimeUtils;
@@ -52,54 +53,29 @@ public class LegacyMatchTabDisplay implements Listener {
   // Number of players below the max before changing back to non-compact mode
   private static final int COMPACT_MODE_HYSTERESIS = 2;
 
-  private final PGM pgm;
   private final TabDisplay tabDisplay;
-  private BukkitTask timeUpdateTask;
-  private BukkitTask deferredRenderTask;
+  private Future<?> timeUpdateTask;
+  private Future<?> deferredRenderTask;
 
   // True: use all columns as a single list of all players
   // False: use a full column for each team
+  // For multi match support, this should be saved per-match
   private boolean compact;
 
   public LegacyMatchTabDisplay(PGM pgm) {
-    this.pgm = pgm;
     this.tabDisplay = new TabDisplay(pgm, WIDTH);
-  }
 
-  public void enable() {
-    this.tabDisplay.enable();
-
-    for (Player viewer : this.pgm.getServer().getOnlinePlayers()) {
-      if (ViaUtils.getProtocolVersion(viewer) != ViaUtils.VERSION_1_7) return;
-      this.tabDisplay.addViewer(viewer);
-    }
-
-    this.pgm.getServer().getPluginManager().registerEvents(this, this.pgm);
     this.timeUpdateTask =
-        this.pgm
-            .getServer()
-            .getScheduler()
-            .runTaskTimer(
-                this.pgm,
-                () -> {
-                  Iterator<Match> matches = PGM.get().getMatchManager().getMatches();
-                  if (matches.hasNext()) {
-                    for (MatchPlayer viewer : matches.next().getPlayers()) {
-                      LegacyMatchTabDisplay.this.renderTime(viewer);
-                    }
-                  }
-                },
-                0,
-                20);
+        pgm.getExecutor().scheduleWithFixedDelay(this::renderTime, 0, 1, TimeUnit.SECONDS);
   }
 
   public void disable() {
     if (this.deferredRenderTask != null) {
-      this.deferredRenderTask.cancel();
+      this.deferredRenderTask.cancel(true);
       this.deferredRenderTask = null;
     }
 
-    this.timeUpdateTask.cancel();
+    this.timeUpdateTask.cancel(true);
     this.timeUpdateTask = null;
 
     HandlerList.unregisterAll(this);
@@ -108,7 +84,7 @@ public class LegacyMatchTabDisplay implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerJoin(PlayerJoinEvent event) {
-    if (ViaUtils.getProtocolVersion(event.getPlayer()) != ViaUtils.VERSION_1_7) return;
+    if (ViaUtils.getProtocolVersion(event.getPlayer()) > ViaUtils.VERSION_1_7) return;
     this.tabDisplay.addViewer(event.getPlayer());
   }
 
@@ -147,32 +123,38 @@ public class LegacyMatchTabDisplay implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerLocaleChange(PlayerLocaleChangeEvent event) {
     MatchPlayer player = PGM.get().getMatchManager().getPlayer(event.getPlayer());
-    if (player != null) {
+    if (player != null && this.tabDisplay.getViewers().contains(player.getBukkit())) {
       this.render(player);
     }
   }
 
-  public void deferredRender() {
+  private void deferredRender() {
     if (this.deferredRenderTask != null) return;
 
     // Render one tick later so the effects of the event are visible, and so multiple updates are
     // batched
     this.deferredRenderTask =
-        PGM.get()
-            .getServer()
-            .getScheduler()
-            .runTask(
-                PGM.get(),
-                () -> {
-                  Match last = null;
-                  Iterator<Match> it = PGM.get().getMatchManager().getMatches();
-                  while (it.hasNext()) last = it.next();
-                  if (last != null) LegacyMatchTabDisplay.this.render(last);
-                  LegacyMatchTabDisplay.this.deferredRenderTask = null;
-                });
+        PGM.get().getExecutor().schedule((Runnable) this::render, 50, TimeUnit.MILLISECONDS);
   }
 
-  public void render(Match match) {
+  /** Re-render the whole tab for all players using this display */
+  private void render() {
+    boolean checkedCompact = false;
+    for (Player viewer : tabDisplay.getViewers()) {
+      MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(viewer);
+      if (matchPlayer == null) continue; // Player isn't in a match
+
+      // Attempt to toggle compact mode only once, for whatever the first match found is
+      if (!checkedCompact) {
+        checkCompactMode(matchPlayer.getMatch());
+        checkedCompact = true;
+      }
+      render(matchPlayer);
+    }
+    deferredRenderTask = null;
+  }
+
+  private void checkCompactMode(Match match) {
     int largestTeam = 0;
     for (Competitor team : match.getCompetitors()) {
       if (team.getPlayers().size() > largestTeam) {
@@ -185,14 +167,10 @@ public class LegacyMatchTabDisplay implements Listener {
         match.getCompetitors().size() > WIDTH
             || largestTeam > MAX_TEAM_SIZE
             || (this.compact && largestTeam > MAX_TEAM_SIZE - COMPACT_MODE_HYSTERESIS);
-
-    for (MatchPlayer viewer : match.getPlayers()) {
-      this.render(viewer);
-    }
   }
 
-  public void render(MatchPlayer viewer) {
-    if (viewer.getProtocolVersion() != ViaUtils.VERSION_1_7) return;
+  private void render(MatchPlayer viewer) {
+    if (viewer.getProtocolVersion() > ViaUtils.VERSION_1_7) return;
 
     Player bukkit = viewer.getBukkit();
     MapInfo mapInfo = viewer.getMatch().getMap();
@@ -218,7 +196,7 @@ public class LegacyMatchTabDisplay implements Listener {
                   TextColor.DARK_GRAY,
                   TextComponent.of(
                       mapInfo.getAuthors().iterator().next().getNameLegacy(), TextColor.GRAY)),
-              viewer.getBukkit()));
+              bukkit));
     } else {
       this.tabDisplay.set(
           bukkit,
@@ -229,18 +207,26 @@ public class LegacyMatchTabDisplay implements Listener {
                   "tablist.authors.tooMany",
                   TextColor.DARK_GRAY,
                   TextComponent.of("/map", TextColor.GRAY)),
-              viewer.getBukkit()));
+              bukkit));
     }
 
     // Time in top right corner
     this.renderTime(viewer);
 
     for (int x = 0; x < this.tabDisplay.getWidth(); ++x) {
-      this.tabDisplay.set(viewer.getBukkit(), x, 1, "");
+      this.tabDisplay.set(bukkit, x, 1, "");
     }
 
     // Use the rest of the rows for teams
     this.renderTeams(viewer, 2, TabDisplay.HEIGHT);
+  }
+
+  /** Re-render time for all players, ran once every second */
+  private void renderTime() {
+    for (Player viewer : tabDisplay.getViewers()) {
+      MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(viewer);
+      if (matchPlayer != null) renderTime(matchPlayer);
+    }
   }
 
   private void renderTime(MatchPlayer viewer) {
@@ -281,7 +267,7 @@ public class LegacyMatchTabDisplay implements Listener {
 
     // And the observers at the bottom
     if (PGM.get().getConfiguration().canParticipantsSeeObservers()
-        || viewer.getParty().isObserving()) {
+        || viewer.getParty() instanceof ObservingParty) {
       teams.add(match.getDefaultParty());
     }
 
@@ -396,7 +382,7 @@ public class LegacyMatchTabDisplay implements Listener {
   }
 
   private boolean renderTeamName(MatchPlayer viewer, Party party, int x, int y) {
-    if (party instanceof Tribute) return false;
+    if (party instanceof Tribute) return false; // Avoid rendering FFA
 
     String playerCount =
         ChatColor.WHITE.toString()
