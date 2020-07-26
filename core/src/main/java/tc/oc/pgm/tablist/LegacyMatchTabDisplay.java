@@ -204,7 +204,7 @@ public class LegacyMatchTabDisplay implements Listener {
           0,
           TextTranslations.translateLegacy(
               TranslatableComponent.of(
-                  "tablist.authors.tooMany",
+                  "map.info.commandHint",
                   TextColor.DARK_GRAY,
                   TextComponent.of("/map", TextColor.GRAY)),
               bukkit));
