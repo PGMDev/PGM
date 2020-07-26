@@ -106,7 +106,7 @@ public class TabManager implements Listener {
   public void render() {
     if (this.dirty) {
       for (TabView view : this.enabledViews.values()) {
-        view.render();
+        if (view != null) view.render();
       }
 
       this.dirty = false;

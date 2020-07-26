@@ -66,6 +66,7 @@ import tc.oc.pgm.restart.RestartListener;
 import tc.oc.pgm.restart.ShouldRestartTask;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.RandomMapOrder;
+import tc.oc.pgm.tablist.LegacyMatchTabDisplay;
 import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.pgm.util.FileUtils;
 import tc.oc.pgm.util.concurrent.BukkitExecutorService;
@@ -82,6 +83,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   private List<MapSourceFactory> mapSourceFactories;
   private MatchManager matchManager;
   private MatchTabManager matchTabManager;
+  private LegacyMatchTabDisplay legacyMatchTabManager;
   private MapOrder mapOrder;
   private PrefixRegistry prefixRegistry;
   private ScheduledExecutorService executorService;
@@ -194,6 +196,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
     if (config.showTabList()) {
       matchTabManager = new MatchTabManager(this);
+      legacyMatchTabManager = new LegacyMatchTabDisplay(this);
     }
 
     if (!config.getUptimeLimit().isNegative()) {
@@ -207,6 +210,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   @Override
   public void onDisable() {
     if (matchTabManager != null) matchTabManager.disable();
+    if (legacyMatchTabManager != null) legacyMatchTabManager.disable();
     if (matchManager != null) matchManager.getMatches().forEachRemaining(Match::unload);
     if (vanishManager != null) vanishManager.disable();
     if (executorService != null) executorService.shutdown();
@@ -317,7 +321,8 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   private void registerListeners() {
     new BlockTransformListener(this).registerEvents();
     registerEvents(matchManager);
-    registerEvents(matchTabManager);
+    if (matchTabManager != null) registerEvents(matchTabManager);
+    if (legacyMatchTabManager != null) registerEvents(legacyMatchTabManager);
     registerEvents(vanishManager);
     registerEvents(prefixRegistry);
     registerEvents(new GeneralizingListener(this));

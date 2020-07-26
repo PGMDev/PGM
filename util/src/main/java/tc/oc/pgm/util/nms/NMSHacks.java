@@ -60,10 +60,10 @@ public interface NMSHacks {
       PacketPlayOutPlayerInfo packet,
       UUID uuid,
       String name,
-      @Nullable BaseComponent displayName,
       GameMode gamemode,
       int ping,
-      @Nullable Skin skin) {
+      @Nullable Skin skin,
+      @Nullable BaseComponent... displayName) {
     GameProfile profile = new GameProfile(uuid, name);
     if (skin != null) {
       for (Map.Entry<String, Collection<Property>> entry :
@@ -77,18 +77,19 @@ public interface NMSHacks {
             ping,
             gamemode == null ? null : WorldSettings.EnumGamemode.getById(gamemode.getValue()),
             null); // ELECTROID
-    data.displayName = displayName == null ? null : new BaseComponent[] {displayName};
+    data.displayName = displayName == null || displayName.length == 0 ? null : displayName;
     return data;
   }
 
   static PacketPlayOutPlayerInfo.PlayerInfoData playerListPacketData(
-      PacketPlayOutPlayerInfo packet, UUID uuid, BaseComponent displayName) {
-    return playerListPacketData(packet, uuid, null, displayName, null, 0, null);
+      PacketPlayOutPlayerInfo packet, UUID uuid, BaseComponent... displayName) {
+    return playerListPacketData(
+        packet, uuid, uuid.toString().substring(0, 16), null, 0, null, displayName);
   }
 
   static PacketPlayOutPlayerInfo.PlayerInfoData playerListPacketData(
       PacketPlayOutPlayerInfo packet, UUID uuid) {
-    return playerListPacketData(packet, uuid, null, null, null, 0, null);
+    return playerListPacketData(packet, uuid, null, null, 0, null);
   }
 
   static Packet teamPacket(
@@ -142,6 +143,25 @@ public interface NMSHacks {
 
   static Packet teamRemovePacket(String name) {
     return teamPacket(1, name, null, null, null, false, false, null, Lists.<String>newArrayList());
+  }
+
+  static Packet teamUpdatePacket(
+      String name,
+      String displayName,
+      String prefix,
+      String suffix,
+      boolean friendlyFire,
+      boolean seeFriendlyInvisibles) {
+    return teamPacket(
+        2,
+        name,
+        displayName,
+        prefix,
+        suffix,
+        friendlyFire,
+        seeFriendlyInvisibles,
+        NameTagVisibility.ALWAYS,
+        Lists.newArrayList());
   }
 
   static Packet teamJoinPacket(String name, Collection<String> players) {

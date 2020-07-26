@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.bukkit.ChatColor;
 
 public final class StringUtils {
   private StringUtils() {}
@@ -83,5 +84,30 @@ public final class StringUtils {
     }
 
     return builder.toString();
+  }
+
+  public static final int MAX_PREFIX = 16; // Max chars in a team prefix
+  public static final int MAX_SUFFIX = 16; // Max chars in a team suffix
+
+  /**
+   * Split the row text into prefix and suffix, limited to 16 chars each. Because the player name is
+   * a color code, we have to restore the color at the split in the suffix. We also have to be
+   * careful not to split in the middle of a color code.
+   */
+  public static String[] splitIntoTeamPrefixAndSuffix(String text) {
+    int split = MAX_PREFIX - 1; // Start by assuming there is a color code right on the split
+    if (text.length() < MAX_PREFIX || text.charAt(split) != ChatColor.COLOR_CHAR) {
+      // If there isn't, we can fit one more char in the prefix
+      split++;
+    }
+
+    // Split and truncate the text, and restore the color in the suffix
+    String prefix = org.apache.commons.lang.StringUtils.substring(text, 0, split);
+    String lastColors = ChatColor.getLastColors(prefix);
+    String suffix =
+        lastColors
+            + org.apache.commons.lang.StringUtils.substring(
+                text, split, split + MAX_SUFFIX - lastColors.length());
+    return new String[] {prefix, suffix};
   }
 }

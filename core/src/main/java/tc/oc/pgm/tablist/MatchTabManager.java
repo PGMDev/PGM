@@ -27,10 +27,10 @@ import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
+import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.tablist.PlayerTabEntry;
 import tc.oc.pgm.util.tablist.TabManager;
-import tc.oc.pgm.util.tablist.TabView;
 
 public class MatchTabManager extends TabManager implements Listener {
 
@@ -46,7 +46,7 @@ public class MatchTabManager extends TabManager implements Listener {
   private Future<?> renderTask;
 
   public MatchTabManager(Plugin plugin) {
-    super(plugin, new MatchTabView.Factory(), null);
+    super(plugin, MatchTabView::new, null);
   }
 
   public void disable() {
@@ -76,10 +76,15 @@ public class MatchTabManager extends TabManager implements Listener {
   }
 
   @Override
-  public @Nullable TabView getView(Player viewer) {
-    TabView view = super.getView(viewer);
-    if (view instanceof ListeningTabView) {
-      plugin.getServer().getPluginManager().registerEvents((ListeningTabView) view, PGM.get());
+  public @Nullable MatchTabView getViewOrNull(Player viewer) {
+    return (MatchTabView) super.getViewOrNull(viewer);
+  }
+
+  @Override
+  public @Nullable MatchTabView getView(Player viewer) {
+    MatchTabView view = (MatchTabView) super.getView(viewer);
+    if (view != null) {
+      plugin.getServer().getPluginManager().registerEvents(view, PGM.get());
     }
     return view;
   }
@@ -117,7 +122,8 @@ public class MatchTabManager extends TabManager implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onJoin(PlayerJoinEvent event) {
-    TabView view = this.getView(event.getPlayer());
+    if (ViaUtils.getProtocolVersion(event.getPlayer()) <= ViaUtils.VERSION_1_7) return;
+    MatchTabView view = this.getView(event.getPlayer());
     if (view != null) view.enable(this);
   }
 
@@ -137,11 +143,9 @@ public class MatchTabManager extends TabManager implements Listener {
   /** Delegated events */
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onJoinMatch(PlayerJoinMatchEvent event) {
-    TabView view = this.getView(event.getPlayer().getBukkit());
-    if (view instanceof ListeningTabView) {
-      ((ListeningTabView) view).onViewerJoinMatch(event);
-    }
-
+    if (ViaUtils.getProtocolVersion(event.getPlayer().getBukkit()) <= ViaUtils.VERSION_1_7) return;
+    MatchTabView view = this.getView(event.getPlayer().getBukkit());
+    if (view != null) view.onViewerJoinMatch(event);
     invalidate(event.getPlayer());
   }
 

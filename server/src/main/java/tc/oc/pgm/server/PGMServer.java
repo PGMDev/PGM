@@ -214,6 +214,10 @@ public class PGMServer extends DedicatedServer implements Runnable {
     if (rewind != null) {
       loader.togglePlugin(rewind, true);
     }
+    final Plugin backwards = server.getPluginManager().getPlugin("ViaBackwards");
+    if (backwards != null) {
+      loader.togglePlugin(backwards, true);
+    }
 
     for (PluginDescriptionFile plugin : plugins) {
       loader.loadPlugin(plugin);

@@ -73,6 +73,9 @@ public interface PlayerComponent {
       case TAB:
         builder = formatTab(player, viewer);
         break;
+      case LEGACY_TAB:
+        builder = formatLegacyTab(player, viewer);
+        break;
       case VERBOSE:
         builder = formatVerbose(player);
         break;
@@ -120,6 +123,22 @@ public interface PlayerComponent {
     if (isDead(player)) {
       colorName.color(TextColor.DARK_GRAY);
     }
+
+    if (isVanished(player)) {
+      colorName = formatVanished(colorName);
+    }
+
+    if (viewer != null && player.equals(viewer)) {
+      colorName.decoration(TextDecoration.BOLD, true);
+    }
+
+    return prefix.append(colorName);
+  }
+
+  // Color, flair, and vanish
+  static TextComponent.Builder formatLegacyTab(Player player, @Nullable Player viewer) {
+    TextComponent.Builder prefix = getPrefixComponent(player);
+    TextComponent.Builder colorName = formatColor(player);
 
     if (isVanished(player)) {
       colorName = formatVanished(colorName);
