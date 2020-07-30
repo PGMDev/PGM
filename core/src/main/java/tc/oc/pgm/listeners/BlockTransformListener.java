@@ -298,9 +298,24 @@ public class BlockTransformListener implements Listener {
       newState.setType(event.getBlock().getType());
       newState.setRawData(event.getBlock().getData());
 
+      // When lava flows into water, it creates stone or cobblestone
+      if (isWater(oldState.getMaterial()) && isLava(newState.getMaterial())) {
+        newState.setMaterial(
+            event.getFace() == BlockFace.DOWN ? Material.STONE : Material.COBBLESTONE);
+        newState.setRawData((byte) 0);
+      }
+
       // Check for lava ownership
       this.callEvent(event, oldState, newState, Trackers.getOwner(event.getBlock()));
     }
+  }
+
+  private boolean isWater(Material material) {
+    return material == Material.WATER || material == Material.STATIONARY_WATER;
+  }
+
+  private boolean isLava(Material material) {
+    return material == Material.LAVA || material == Material.STATIONARY_LAVA;
   }
 
   @EventWrapper
