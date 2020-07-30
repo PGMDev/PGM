@@ -128,33 +128,7 @@ public final class PGMConfig implements Config {
     }
 
     for (Map<?, ?> repository : repositories) {
-      final URI uri = parseUri(String.valueOf(repository.get("uri")));
-
-      String branch = String.valueOf(repository.get("branch"));
-      if (branch.isEmpty() || branch.equals("null")) {
-        branch = null;
-      }
-
-      String path = String.valueOf(repository.get("path"));
-      final File folder;
-      if (path.isEmpty() || path.equals("null")) {
-        folder =
-            new File(
-                "maps", (uri.getHost() + uri.getPath()).replaceAll("[/._]", "-").toLowerCase());
-      } else {
-        folder = new File(path);
-      }
-
-      this.mapSourceFactories.add(new GitMapSourceFactory(folder, uri, branch));
-
-      final Object subFolders = repository.get("folders");
-      if (subFolders instanceof List) {
-        for (Object subFolder : (List) subFolders) {
-          folders.add(new File(folder, subFolder.toString()).getAbsolutePath());
-        }
-      } else {
-        folders.add(folder.getAbsolutePath());
-      }
+      registerRemoteMapSource(mapSourceFactories, repository);
     }
 
     for (String folder : folders) {
@@ -211,6 +185,46 @@ public final class PGMConfig implements Config {
     this.experiments = experiments == null ? ImmutableMap.of() : experiments.getValues(false);
   }
 
+  public static final Map<?, ?> DEFAULT_REMOTE_REPO =
+      ImmutableMap.of("uri", "https://github.com/PGMDev/Maps", "path", "default-maps");
+
+  public static void registerRemoteMapSource(
+      List<MapSourceFactory> mapSources, Map<?, ?> repository) {
+    final URI uri = parseUri(String.valueOf(repository.get("uri")));
+
+    String branch = String.valueOf(repository.get("branch"));
+    if (branch.isEmpty() || branch.equals("null")) {
+      branch = null;
+    }
+
+    String path = String.valueOf(repository.get("path"));
+    final File folder;
+    if (path.isEmpty() || path.equals("null")) {
+      folder =
+          new File("maps", (uri.getHost() + uri.getPath()).replaceAll("[/._]", "-").toLowerCase());
+    } else {
+      folder = new File(path);
+    }
+
+    mapSources.add(new GitMapSourceFactory(folder, uri, branch));
+
+    TreeSet<File> folders = new TreeSet<>();
+    final Object subFolders = repository.get("folders");
+    if (subFolders instanceof List) {
+      for (Object subFolder : (List) subFolders) {
+        folders.add(new File(folder, subFolder.toString()));
+      }
+    } else {
+      folders.add(folder);
+    }
+
+    for (File folderFile : folders) {
+      mapSources.add(
+          new SystemMapSourceFactory(
+              folderFile.isAbsolute() ? folderFile : folderFile.getAbsoluteFile()));
+    }
+  }
+
   // TODO: Can be removed after 1.0 release
   private static void handleLegacyConfig(FileConfiguration config, File dataFolder) {
     // v0.9 uses map.folders instead of map.sources
@@ -218,10 +232,7 @@ public final class PGMConfig implements Config {
       renameKey(config, "map.sources", "map.folders");
 
       if (config.getStringList("map.folders").contains("default")) {
-        config.set(
-            "map.repositories",
-            ImmutableList.of(
-                ImmutableMap.of("uri", "https://github.com/PGMDev/Maps", "path", "default-maps")));
+        config.set("map.repositories", ImmutableList.of(DEFAULT_REMOTE_REPO));
       }
 
       try {

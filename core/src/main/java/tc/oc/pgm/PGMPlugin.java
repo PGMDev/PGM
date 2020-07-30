@@ -156,8 +156,17 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     }
 
     if (!mapLibrary.getMaps().hasNext()) {
-      getServer().getPluginManager().disablePlugin(this);
-      return;
+      PGMConfig.registerRemoteMapSource(mapSourceFactories, PGMConfig.DEFAULT_REMOTE_REPO);
+      try {
+        mapLibrary.loadNewMaps(false).get(30, TimeUnit.SECONDS);
+      } catch (ExecutionException | InterruptedException | TimeoutException e) {
+        e.printStackTrace();
+      } finally {
+        if (!mapLibrary.getMaps().hasNext()) {
+          getServer().getPluginManager().disablePlugin(this);
+          return;
+        }
+      }
     }
 
     if (config.getMapPoolFile() == null) {
