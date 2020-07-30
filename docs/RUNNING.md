@@ -14,7 +14,7 @@ cd /path/to/folder
 2. Download the latest version of [SportPaper](https://github.com/Electroid/SportPaper), a fork of the Minecraft 1.8 server.
 ```bash
 curl https://github.com/PGMDev/PGM/releases/download/v0.8/SportPaper.jar -Lo sportpaper.jar
-curl https://pkg.ashcon.app/sportpaper-config -Lo sportpaper.yml
+curl https://raw.githubusercontent.com/PGMDev/PGM/dev/server/src/main/jib/server/sportpaper.yml -Lo sportpaper.yml
 ```
 
 3. Create a plugins folder and download the latest version of PGM.
