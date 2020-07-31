@@ -572,6 +572,7 @@ public final class LegacyFormatUtils {
     for (int i = 0; i < chars.length; i++) {
       switch (chars[i]) {
         case '.':
+        case ',': // Some locales will use , as the decimal separator
           chars[i] = '\u2024';
           break;
         default:

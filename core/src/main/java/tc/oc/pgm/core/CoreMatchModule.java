@@ -56,10 +56,18 @@ public class CoreMatchModule implements MatchModule, Listener {
   public void leakCheck(final BlockTransformEvent event) {
     if (event.getWorld() != this.match.getWorld()) return;
 
-    if (event.getNewState().getType() == Material.STATIONARY_LAVA) {
+    if (event.getNewState().getMaterial() == Material.STATIONARY_LAVA) {
       Vector blockVector = BlockVectors.center(event.getNewState()).toVector();
+      // Vector ensuring it's inside leak region if it's above
+      Vector minVector = blockVector.clone().setY(0.5);
       for (Core core : this.cores) {
-        if (!core.hasLeaked() && core.getLeakRegion().contains(blockVector)) {
+        if (core.hasLeaked() || !core.getLeakRegion().contains(minVector)) continue;
+
+        if (core.updateLeak(blockVector.getBlockY())) {
+          this.match.callEvent(new GoalStatusChangeEvent(this.match, core));
+        }
+
+        if (core.getLeakRegion().contains(blockVector)) {
           // core has leaked
           core.markLeaked();
           this.match.callEvent(new CoreLeakEvent(this.match, core, event.getNewState()));
