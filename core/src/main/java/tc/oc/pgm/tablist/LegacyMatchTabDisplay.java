@@ -186,6 +186,7 @@ public class LegacyMatchTabDisplay implements Listener {
     // If there is exactly one map author, show their name in the top middle slot.
     // Multiple names will surely not fit, so showing none of them is the only fair thing.
     if (mapInfo.getAuthors().size() == 1) {
+      String author = mapInfo.getAuthors().iterator().next().getNameLegacy();
       this.tabDisplay.set(
           bukkit,
           1,
@@ -194,8 +195,10 @@ public class LegacyMatchTabDisplay implements Listener {
               TranslatableComponent.of(
                   "misc.by",
                   TextColor.DARK_GRAY,
-                  TextComponent.of(
-                      mapInfo.getAuthors().iterator().next().getNameLegacy(), TextColor.GRAY)),
+                  (author == null)
+                      ? TranslatableComponent.of(
+                          "misc.unknown", TextColor.GRAY, TextDecoration.ITALIC)
+                      : TextComponent.of(author, TextColor.GRAY)),
               bukkit));
     } else {
       this.tabDisplay.set(
