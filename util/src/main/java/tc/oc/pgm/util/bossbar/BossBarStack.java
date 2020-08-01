@@ -7,8 +7,8 @@ import net.kyori.text.Component;
 import org.bukkit.entity.Player;
 
 /**
- * A {@link BossBar} that combines a mutable stack of child bars, and displays the topmost visible
- * bar. Invalidating any of the child bars causes the stack itself to be invalidated.
+ * A {@link BossBarSource} that combines a mutable stack of child bars, and displays the topmost
+ * visible bar. Invalidating any of the child bars causes the stack itself to be invalidated.
  *
  * <p>TODO: Invalidating any child bar causes the stack to re-render for all viewers, regardless of
  * whether the invalid child is visible to them or not. If we ever use viewer-specific bars, or
@@ -18,24 +18,24 @@ import org.bukkit.entity.Player;
 public class BossBarStack extends DynamicBossBar implements BossBarObserver {
 
   // Ordered most visible to least visible
-  private final Deque<BossBar> bars = new ArrayDeque<>();
+  private final Deque<BossBarSource> bars = new ArrayDeque<>();
 
-  private BossBar getTop() {
+  private BossBarSource getTop() {
     return Iterables.getFirst(bars, BlankBossBar.INSTANCE);
   }
 
-  public BossBar getTop(Player viewer) {
-    for (BossBar bar : bars) {
+  public BossBarSource getTop(Player viewer) {
+    for (BossBarSource bar : bars) {
       if (bar.isVisible(viewer)) return bar;
     }
     return BlankBossBar.INSTANCE;
   }
 
-  public boolean contains(BossBar bar) {
+  public boolean contains(BossBarSource bar) {
     return bars.contains(bar);
   }
 
-  public void push(BossBar bar) {
+  public void push(BossBarSource bar) {
     if (bar != getTop()) {
       bars.remove(bar);
       bars.addFirst(bar);
@@ -44,7 +44,7 @@ public class BossBarStack extends DynamicBossBar implements BossBarObserver {
     }
   }
 
-  public void remove(BossBar bar) {
+  public void remove(BossBarSource bar) {
     if (bars.remove(bar)) {
       bar.removeObserver(this);
       invalidate();
@@ -52,13 +52,13 @@ public class BossBarStack extends DynamicBossBar implements BossBarObserver {
   }
 
   @Override
-  public void invalidate(BossBar bar) {
+  public void invalidate(BossBarSource bar) {
     if (bars.contains(bar)) invalidate();
   }
 
   @Override
   public boolean isVisible(Player viewer) {
-    for (BossBar bar : bars) {
+    for (BossBarSource bar : bars) {
       if (bar.isVisible(viewer)) return true;
     }
     return false;
