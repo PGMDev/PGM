@@ -17,7 +17,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerLeaveMatchEvent;
-import tc.oc.pgm.util.bossbar.BossBar;
+import tc.oc.pgm.util.bossbar.BossBarSource;
 import tc.oc.pgm.util.bossbar.BossBarStack;
 import tc.oc.pgm.util.bossbar.BossBarView;
 import tc.oc.pgm.util.nms.NMSHacks;
@@ -39,7 +39,7 @@ public class BossBarMatchModule implements MatchModule, Listener {
   }
 
   /** Is the given bar currently anywhere in the display stack? */
-  public boolean containsBossBar(BossBar bar) {
+  public boolean containsBossBar(BossBarSource bar) {
     return stack.contains(bar);
   }
 
@@ -48,10 +48,10 @@ public class BossBarMatchModule implements MatchModule, Listener {
    * it will be moved to the top. A bar cannot be in multiple places in the stack simultaneously.
    *
    * <p>At any given time, the bar that is actually visible will be the highest one in the stack
-   * that returns true from {@link BossBar#isVisible}. This logic is applied seperately for each
-   * viewer, thus different viewers can see different bars.
+   * that returns true from {@link BossBarSource#isVisible}. This logic is applied seperately for
+   * each viewer, thus different viewers can see different bars.
    */
-  public void pushBossBar(BossBar bar) {
+  public void pushBossBar(BossBarSource bar) {
     stack.push(bar);
   }
 
@@ -60,18 +60,18 @@ public class BossBarMatchModule implements MatchModule, Listener {
    * false) then put it on top of the stack by calling {@link #pushBossBar}. If it is already in the
    * stack, do nothing.
    */
-  public void pushBossBarIfAbsent(BossBar bar) {
+  public void pushBossBarIfAbsent(BossBarSource bar) {
     if (!containsBossBar(bar)) pushBossBar(bar);
   }
 
   /** Remove the given bar from anywhere in the display stack. */
-  public void removeBossBar(BossBar bar) {
+  public void removeBossBar(BossBarSource bar) {
     stack.remove(bar);
   }
 
   @EventHandler
   public void onPlayerJoin(PlayerJoinMatchEvent event) {
-    BossBarView view = new BossBarView(PGM.get(), event.getPlayer().getBukkit(), entityId);
+    BossBarView view = BossBarView.of(PGM.get(), event.getPlayer().getBukkit(), entityId);
     view.setBar(stack);
     views.put(event.getPlayer().getBukkit(), view);
   }

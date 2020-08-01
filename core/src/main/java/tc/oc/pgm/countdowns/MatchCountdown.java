@@ -10,14 +10,14 @@ import org.bukkit.entity.Player;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.bossbar.BossBarMatchModule;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.bossbar.BossBar;
+import tc.oc.pgm.util.bossbar.BossBarSource;
 import tc.oc.pgm.util.bossbar.DynamicBossBar;
 
 public abstract class MatchCountdown extends Countdown {
   protected final Match match;
   protected final BossBarMatchModule bbmm;
   protected Duration remaining, total;
-  protected final BossBar bossBar;
+  protected final BossBarSource bossBar;
 
   class CountdownBar extends DynamicBossBar {
     @Override
@@ -36,7 +36,7 @@ public abstract class MatchCountdown extends Countdown {
     }
   };
 
-  public MatchCountdown(Match match, @Nullable BossBar bossBar) {
+  public MatchCountdown(Match match, @Nullable BossBarSource bossBar) {
     this.match = match;
     this.bbmm = match.needModule(BossBarMatchModule.class);
     if (bossBar != null) {

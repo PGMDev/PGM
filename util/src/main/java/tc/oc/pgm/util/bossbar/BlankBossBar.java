@@ -4,7 +4,7 @@ import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import org.bukkit.entity.Player;
 
-public class BlankBossBar implements BossBar {
+public class BlankBossBar implements BossBarSource {
 
   public static final BlankBossBar INSTANCE = new BlankBossBar();
 

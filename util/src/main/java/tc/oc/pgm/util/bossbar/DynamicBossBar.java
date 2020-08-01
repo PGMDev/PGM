@@ -3,7 +3,7 @@ package tc.oc.pgm.util.bossbar;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class DynamicBossBar implements BossBar {
+public abstract class DynamicBossBar implements BossBarSource {
 
   private final Set<BossBarObserver> observers = new HashSet<>();
 

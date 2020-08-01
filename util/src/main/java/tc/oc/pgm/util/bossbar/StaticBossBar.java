@@ -4,7 +4,7 @@ import net.kyori.text.Component;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.text.TextParser;
 
-public class StaticBossBar implements BossBar {
+public class StaticBossBar implements BossBarSource {
 
   private final Component text;
   private final float meter;
