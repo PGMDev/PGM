@@ -132,7 +132,7 @@
         <dependency>
             <groupId>app.ashcon.intake</groupId>
             <artifactId>intake-bukkit</artifactId>
-            <version>v1.2</version>
+            <version>v1.2.1</version>
             <scope>compile</scope>
         </dependency>
 
