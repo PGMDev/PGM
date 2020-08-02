@@ -20,6 +20,12 @@ import tc.oc.pgm.util.text.types.PlayerComponent;
  */
 public class PlayerTabEntry extends DynamicTabEntry {
 
+  private static boolean showPing = false;
+
+  public static void setShowRealPing(boolean showPing) {
+    PlayerTabEntry.showPing = showPing;
+  }
+
   private static UUID randomUUIDVersion2SameDefaultSkin(UUID original) {
     // Parity of UUID.hashCode determines if the player's default skin is Steve/Alex
     // To make the player list match, we generate a random UUID with the same hashCode parity.
@@ -63,6 +69,12 @@ public class PlayerTabEntry extends DynamicTabEntry {
   @Override
   public @Nullable Skin getSkin(TabView view) {
     return this.player.getSkin();
+  }
+
+  @Override
+  public int getPing() {
+    if (showPing) return NMSHacks.getPing(this.player);
+    return super.getPing();
   }
 
   // Dispatched by TabManager
