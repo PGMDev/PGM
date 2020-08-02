@@ -84,7 +84,7 @@ public interface NMSHacks {
   static PacketPlayOutPlayerInfo.PlayerInfoData playerListPacketData(
       PacketPlayOutPlayerInfo packet, UUID uuid, BaseComponent... displayName) {
     return playerListPacketData(
-        packet, uuid, uuid.toString().substring(0, 16), null, 0, null, displayName);
+        packet, uuid, "|" + uuid.toString().substring(0, 15), null, 0, null, displayName);
   }
 
   static PacketPlayOutPlayerInfo.PlayerInfoData playerListPacketData(
