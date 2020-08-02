@@ -161,6 +161,22 @@ public interface Config {
   Component getMatchFooter();
 
   /**
+   * Gets the left side text for the Tablist.
+   *
+   * @return The left side component, or null for none.
+   */
+  @Nullable
+  Component getLeftTablistText();
+
+  /**
+   * Gets the right side text for the Tablist.
+   *
+   * @return The right side component, or null for none.
+   */
+  @Nullable
+  Component getRightTablistText();
+
+  /**
    * Gets whether the tab list is rendered.
    *
    * @return If the tab list is rendered.

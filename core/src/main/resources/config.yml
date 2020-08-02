@@ -78,6 +78,13 @@ ui:
 sidebar:
   header: "" # A header, disabled if empty.
   footer: "" # A footer, disabled if empty.
+  
+# Customize text displayed in the footer of the tablist.
+# Color codes can be used ex. "&aHello World"  
+# To disable, set to an empty string.
+tablist:
+  left: ""
+  right: ""
 
 # Overrides the server MoTD.
 #
