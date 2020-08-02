@@ -69,6 +69,7 @@ gameplay:
 ui:
   sidebar: true    # Enable the side bar?
   tablist: true    # Enable the tab list?
+  ping: false      # Should tab list show real ping?
   proximity: false # Should the proximity of objectives be visible?
   fireworks: true  # Spawn fireworks after objectives are completed?
   participants-see-observers: true # Can participants see observers in the tab list?

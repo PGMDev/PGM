@@ -79,6 +79,7 @@ public final class PGMConfig implements Config {
   // ui.*
   private final boolean showSideBar;
   private final boolean showTabList;
+  private final boolean showTabListPing;
   private final boolean showProximity;
   private final boolean showFireworks;
   private final boolean participantsSeeObservers;
@@ -163,6 +164,7 @@ public final class PGMConfig implements Config {
     this.showProximity = parseBoolean(config.getString("ui.proximity", "false"));
     this.showSideBar = parseBoolean(config.getString("ui.sidebar", "true"));
     this.showTabList = parseBoolean(config.getString("ui.tablist", "true"));
+    this.showTabListPing = parseBoolean(config.getString("ui.ping", "true"));
     this.participantsSeeObservers =
         parseBoolean(config.getString("ui.participants-see-observers", "true"));
     this.showFireworks = parseBoolean(config.getString("ui.fireworks", "true"));
@@ -511,6 +513,11 @@ public final class PGMConfig implements Config {
   @Override
   public boolean showTabList() {
     return showTabList;
+  }
+
+  @Override
+  public boolean showTabListPing() {
+    return showTabListPing;
   }
 
   @Override

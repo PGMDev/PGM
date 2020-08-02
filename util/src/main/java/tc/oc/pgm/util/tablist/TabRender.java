@@ -17,6 +17,7 @@ public class TabRender {
   private final PacketPlayOutPlayerInfo removePacket;
   private final PacketPlayOutPlayerInfo addPacket;
   private final PacketPlayOutPlayerInfo updatePacket;
+  private final PacketPlayOutPlayerInfo updatePingPacket;
   private final List<Packet> deferredPackets;
 
   public TabRender(TabView view) {
@@ -29,6 +30,8 @@ public class TabRender {
     this.updatePacket =
         this.createPlayerInfoPacket(
             PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME);
+    this.updatePingPacket =
+        this.createPlayerInfoPacket(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY);
     this.deferredPackets = new ArrayList<>();
   }
 
@@ -96,6 +99,7 @@ public class TabRender {
     if (!this.removePacket.b.isEmpty()) this.send(this.removePacket);
     if (!this.addPacket.b.isEmpty()) this.send(this.addPacket);
     if (!this.updatePacket.b.isEmpty()) this.send(this.updatePacket);
+    if (!this.updatePingPacket.b.isEmpty()) this.send(this.updatePingPacket);
 
     for (Packet packet : this.deferredPackets) {
       this.send(packet);
@@ -145,6 +149,8 @@ public class TabRender {
     this.updatePacket.b.add(
         NMSHacks.playerListPacketData(
             this.updatePacket, entry.getId(), this.getContent(entry, index)));
+    this.updatePingPacket.b.add(
+        NMSHacks.playerListPacketData(this.updatePingPacket, entry.getId(), entry.getPing()));
   }
 
   public void setHeaderFooter(TabEntry header, TabEntry footer) {

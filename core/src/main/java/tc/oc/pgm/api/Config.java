@@ -168,6 +168,13 @@ public interface Config {
   boolean showTabList();
 
   /**
+   * Gets whether the tab list is should show real ping.
+   *
+   * @return If the tab list should show real ping.
+   */
+  boolean showTabListPing();
+
+  /**
    * Gets whether observers are shown to participants in the tab list.
    *
    * @return If observers should be visible to participants.

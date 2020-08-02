@@ -92,6 +92,11 @@ public interface NMSHacks {
     return playerListPacketData(packet, uuid, null, null, 0, null);
   }
 
+  static PacketPlayOutPlayerInfo.PlayerInfoData playerListPacketData(
+      PacketPlayOutPlayerInfo packet, UUID uuid, int ping) {
+    return playerListPacketData(packet, uuid, uuid.toString().substring(0, 16), null, ping, null);
+  }
+
   static Packet teamPacket(
       int operation,
       String name,
@@ -477,5 +482,9 @@ public interface NMSHacks {
 
   static int getProtocolVersion(Player player) {
     return ((CraftPlayer) player).getHandle().playerConnection.networkManager.protocolVersion;
+  }
+
+  static int getPing(Player player) {
+    return ((CraftPlayer) player).getHandle().ping;
   }
 }
