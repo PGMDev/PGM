@@ -409,17 +409,15 @@ public class SidebarMatchModule implements MatchModule, Listener {
     final GoalMatchModule gmm = match.needModule(GoalMatchModule.class);
 
     Set<Competitor> competitorsWithGoals = new HashSet<>();
-    List<Goal> sharedGoals = new ArrayList<>();
+    List<Goal<?>> sharedGoals = new ArrayList<>();
 
     // Count the rows used for goals
-    for (Goal goal : gmm.getGoals()) {
+    for (Goal<?> goal : gmm.getGoals()) {
       if (goal.isVisible()) {
         if (goal.isShared()) {
           sharedGoals.add(goal);
         } else {
-          for (Competitor competitor : gmm.getCompetitors(goal)) {
-            competitorsWithGoals.add(competitor);
-          }
+          competitorsWithGoals.addAll(gmm.getCompetitors(goal));
         }
       }
     }
@@ -459,18 +457,17 @@ public class SidebarMatchModule implements MatchModule, Listener {
       }
 
       // Team-specific goals
-      List<Competitor> sortedCompetitors = new ArrayList<>(competitorsWithGoals);
+      List<Competitor> sortedCompetitors = new ArrayList<>(match.getCompetitors());
+      sortedCompetitors.retainAll(competitorsWithGoals);
+
       if (viewingParty instanceof Competitor) {
         // Participants see competitors in arbitrary order, with their own at the top
-        Collections.sort(sortedCompetitors, Ordering.arbitrary());
+        sortedCompetitors.sort(Ordering.arbitrary());
 
         // Bump viewing party to the top of the list
         if (sortedCompetitors.remove(viewingParty)) {
           sortedCompetitors.add(0, (Competitor) viewingParty);
         }
-      } else {
-        // Observers see the competitors sorted by closeness to winning
-        // FIXME: Collections.sort(sortedCompetitors, match.getCompetitorRanking());
       }
 
       for (Competitor competitor : sortedCompetitors) {
