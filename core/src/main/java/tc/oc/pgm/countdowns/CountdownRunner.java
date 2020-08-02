@@ -62,15 +62,18 @@ public class CountdownRunner extends BukkitRunnable {
           "Repeat interval must be at least " + MIN_REPEAT_INTERVAL.toMillis() + " milliseconds");
     }
 
-    if (this.task == null && count > 0) {
+    if (count > 0) {
       this.count = count;
       this.interval = interval;
       this.start = match.getTick().instant;
       this.end = this.start.plus(remaining);
       this.secondsRemaining = remaining.getSeconds();
-      this.countdown.onStart(remaining, this.getTotalTime());
 
-      this.task = match.getExecutor(MatchScope.LOADED).submit(this);
+      // If the task was already started, don't re-start, just update fields
+      if (task == null) {
+        this.countdown.onStart(remaining, this.getTotalTime());
+        this.task = match.getExecutor(MatchScope.LOADED).submit(this);
+      }
     }
 
     return this;
@@ -113,15 +116,16 @@ public class CountdownRunner extends BukkitRunnable {
 
   @Override
   public void run() {
-    this.task = null;
-    if (this.end == null || this.secondsRemaining < 0) return;
-
-    // Get the total ticks remaining in the countdown
-    long ticksRemaining = TimeUtils.toTicks(Duration.between(match.getTick().instant, this.end));
+    if (this.end == null || this.secondsRemaining < 0) {
+      this.task = null;
+      return;
+    }
 
     // Handle any cycles since the last one
     for (;
-        this.secondsRemaining >= 0 && this.secondsRemaining * 20 >= ticksRemaining;
+        this.secondsRemaining >= 0
+            && this.secondsRemaining * 20
+                >= TimeUtils.toTicks(Duration.between(match.getTick().instant, this.end));
         this.secondsRemaining--) {
       this.countdown.onTick(Duration.ofSeconds(this.secondsRemaining), this.getTotalTime());
     }
@@ -130,6 +134,7 @@ public class CountdownRunner extends BukkitRunnable {
       // If there are cycles left, schedule the next run
       this.task = match.getExecutor(MatchScope.LOADED).schedule(this, 1, TimeUnit.SECONDS);
     } else {
+      this.task = null;
       // Otherwise, finish the countdown
       logger.fine("Ending countdown " + countdown);
 

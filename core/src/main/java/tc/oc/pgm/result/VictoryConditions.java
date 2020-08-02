@@ -37,19 +37,13 @@ public class VictoryConditions {
       case "score":
         return new ScoreVictoryCondition();
       default:
-        if (match != null) {
-          TeamFactory winner = Teams.getTeam(raw, match);
-          if (winner == null) {
-            throw TextException.invalidFormat(raw, Team.class, null);
-          }
-          return new TeamVictoryCondition(winner);
-        } else {
-          TeamFactory winner = Teams.getTeam(raw, factory);
-          if (winner == null) {
-            throw TextException.invalidFormat(raw, Team.class, null);
-          }
-          return new TeamVictoryCondition(winner);
+        TeamFactory winner;
+        if (match != null) winner = Teams.getTeam(raw, match);
+        else winner = Teams.getTeam(raw, factory);
+        if (winner == null) {
+          throw TextException.invalidFormat(raw, Team.class, null);
         }
+        return new TeamVictoryCondition(winner);
     }
   }
 }

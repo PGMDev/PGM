@@ -33,15 +33,13 @@ public class CountdownContext {
 
   /**
    * Start running the given {@link Countdown} in this context. If the given Countdown is already
-   * running, it will be cancelled and restarted with the given duration.
+   * running, it will be updated with the given duration.
    */
   public void start(
       Countdown countdown, Duration duration, @Nullable Duration interval, int count) {
-    CountdownRunner runner = this.runners.get(countdown);
-    if (runner != null) runner.cancel();
-    this.runners.put(
-        countdown,
-        new CountdownRunner(match, this.logger, countdown).start(duration, interval, count));
+    this.runners
+        .computeIfAbsent(countdown, c -> new CountdownRunner(match, logger, c))
+        .start(duration, interval, count);
   }
 
   public void cancel(Countdown countdown) {
@@ -128,6 +126,28 @@ public class CountdownContext {
     for (Iterator<Countdown> it = this.runners.keySet().iterator(); it.hasNext(); ) {
       Countdown countdown = it.next();
       if (!countdownClass.isInstance(countdown)) {
+        CountdownRunner runner = this.runners.get(countdown);
+        it.remove(); // Remove before callback to prevent infinite recursion
+        runner.cancel();
+        cancelled = true;
+      }
+    }
+    return cancelled;
+  }
+
+  /**
+   * Cancel all countdowns that are not of the given type
+   *
+   * @return true if any countdowns were cancelled
+   */
+  public boolean cancelOthers(Countdown except) {
+    logger.fine(
+        "Cancelling all countdowns except an instance of " + except.getClass().getSimpleName());
+
+    boolean cancelled = false;
+    for (Iterator<Countdown> it = this.runners.keySet().iterator(); it.hasNext(); ) {
+      Countdown countdown = it.next();
+      if (except != countdown) {
         CountdownRunner runner = this.runners.get(countdown);
         it.remove(); // Remove before callback to prevent infinite recursion
         runner.cancel();

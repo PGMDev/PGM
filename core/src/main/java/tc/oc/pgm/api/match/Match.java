@@ -329,6 +329,13 @@ public interface Match extends MatchPlayerResolver, MultiAudience, ModuleContext
   Collection<Competitor> getCompetitors();
 
   /**
+   * Get all the currently winning {@link Competitor}s in the {@link Match}.
+   *
+   * @return All the winning {@link Competitor}s.
+   */
+  Collection<Competitor> getWinners();
+
+  /**
    * Set or change the {@link Party} of a {@link MatchPlayer}.
    *
    * @param player The {@link MatchPlayer}.

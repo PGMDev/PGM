@@ -641,6 +641,12 @@ public class MatchImpl implements Match {
   }
 
   @Override
+  public Collection<Competitor> getWinners() {
+    competitors.invalidateRanking();
+    return ImmutableList.copyOf(competitors.getRank(0));
+  }
+
+  @Override
   public void addParty(Party party) {
     logger.fine("Adding party " + party);
     checkNotNull(party);
