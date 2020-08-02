@@ -88,6 +88,10 @@ public final class PGMConfig implements Config {
   private final Component header;
   private final Component footer;
 
+  // tablist.*
+  private final Component rightTablistText;
+  private final Component leftTablistText;
+
   // community.*
   private final boolean communityMode;
 
@@ -172,6 +176,11 @@ public final class PGMConfig implements Config {
     this.header = header == null || header.isEmpty() ? null : parseComponent(header);
     final String footer = config.getString("sidebar.footer");
     this.footer = footer == null || footer.isEmpty() ? null : parseComponent(footer);
+    final String leftText = config.getString("tablist.left");
+    this.leftTablistText = leftText == null || leftText.isEmpty() ? null : parseComponent(leftText);
+    final String rightText = config.getString("tablist.right");
+    this.rightTablistText =
+        rightText == null || rightText.isEmpty() ? null : parseComponent(rightText);
 
     this.communityMode = parseBoolean(config.getString("community.enabled", "true"));
 
@@ -508,6 +517,16 @@ public final class PGMConfig implements Config {
   @Override
   public Component getMatchFooter() {
     return footer;
+  }
+
+  @Override
+  public Component getLeftTablistText() {
+    return leftTablistText;
+  }
+
+  @Override
+  public Component getRightTablistText() {
+    return rightTablistText;
   }
 
   @Override
