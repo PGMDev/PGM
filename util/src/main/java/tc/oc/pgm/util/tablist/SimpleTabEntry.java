@@ -27,7 +27,8 @@ public abstract class SimpleTabEntry implements TabEntry {
     this.uuid = uuid;
 
     String name = this.uuid.toString();
-    this.name = name.substring(name.length() - 16); // Use last 16 chars, most likely to be unique
+    // Use a | and the last 15 chars, most likely to be unique, and appear sorted at the end
+    this.name = "|" + name.substring(name.length() - 15);
   }
 
   protected SimpleTabEntry() {
