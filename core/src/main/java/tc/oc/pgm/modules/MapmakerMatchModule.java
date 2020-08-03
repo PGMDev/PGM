@@ -10,8 +10,8 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.player.event.MatchPlayerAddEvent;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.events.PlayerJoinMatchEvent;
 
 @ListenerScope(MatchScope.LOADED)
 public class MapmakerMatchModule implements MatchModule, Listener {
@@ -22,14 +22,12 @@ public class MapmakerMatchModule implements MatchModule, Listener {
   }
 
   @EventHandler(ignoreCancelled = true)
-  public void onPlayerAddEvent(final MatchPlayerAddEvent event) {
+  public void onPlayerJoinMatchEvent(final PlayerJoinMatchEvent event) {
     MatchPlayer player = event.getPlayer();
     if (authors.stream().anyMatch(c -> c.isPlayer(player.getId()))) {
       player.getBukkit().addAttachment(PGM.get(), Permissions.MAPMAKER, true);
     } else {
       player.getBukkit().removeAttachments(Permissions.MAPMAKER);
     }
-
-    PGM.get().getPrefixRegistry().removePlayer(player.getId()); // Refresh prefixes for the player
   }
 }

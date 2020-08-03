@@ -1,33 +1,23 @@
 package tc.oc.pgm.api.event;
 
 import java.util.UUID;
-import javax.annotation.Nullable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public class PrefixChangeEvent extends Event {
+/**
+ * Event to be thrown in order for the name to be re-rendered, asking the name decoration provider
+ * what prefix & suffix to use
+ */
+public class NameDecorationChangeEvent extends Event {
 
   private final UUID uuid;
-  private final String oldPrefix;
-  private final String newPrefix;
 
-  public PrefixChangeEvent(UUID uuid, String oldPrefix, String newPrefix) {
+  public NameDecorationChangeEvent(UUID uuid) {
     this.uuid = uuid;
-    this.oldPrefix = oldPrefix;
-    this.newPrefix = newPrefix;
   }
 
   public UUID getUUID() {
     return uuid;
-  }
-
-  @Nullable
-  public String getOldPrefix() {
-    return oldPrefix;
-  }
-
-  public String getNewPrefix() {
-    return newPrefix;
   }
 
   private static final HandlerList handlers = new HandlerList();

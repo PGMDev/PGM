@@ -39,7 +39,6 @@ import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.module.Module;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.VanishManager;
-import tc.oc.pgm.api.prefix.PrefixRegistry;
 import tc.oc.pgm.command.graph.CommandExecutor;
 import tc.oc.pgm.command.graph.CommandGraph;
 import tc.oc.pgm.community.command.CommunityCommandGraph;
@@ -60,8 +59,9 @@ import tc.oc.pgm.listeners.WorldProblemListener;
 import tc.oc.pgm.map.MapLibraryImpl;
 import tc.oc.pgm.match.MatchManagerImpl;
 import tc.oc.pgm.match.NoopVanishManager;
-import tc.oc.pgm.prefix.ConfigPrefixProvider;
-import tc.oc.pgm.prefix.PrefixRegistryImpl;
+import tc.oc.pgm.namedecorations.ConfigDecorationProvider;
+import tc.oc.pgm.namedecorations.NameDecorationRegistry;
+import tc.oc.pgm.namedecorations.NameDecorationRegistryImpl;
 import tc.oc.pgm.restart.RestartListener;
 import tc.oc.pgm.restart.ShouldRestartTask;
 import tc.oc.pgm.rotation.MapPoolManager;
@@ -85,7 +85,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   private MatchTabManager matchTabManager;
   private LegacyMatchTabDisplay legacyMatchTabManager;
   private MapOrder mapOrder;
-  private PrefixRegistry prefixRegistry;
+  private NameDecorationRegistry nameDecorationRegistry;
   private ScheduledExecutorService executorService;
   private ScheduledExecutorService asyncExecutorService;
   private VanishManager vanishManager;
@@ -186,8 +186,9 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       }
     }
 
-    prefixRegistry =
-        new PrefixRegistryImpl(config.getGroups().isEmpty() ? null : new ConfigPrefixProvider());
+    nameDecorationRegistry =
+        new NameDecorationRegistryImpl(
+            config.getGroups().isEmpty() ? null : new ConfigDecorationProvider());
 
     // Sometimes match folders need to be cleaned up if the server previously crashed
     for (File dir : getServer().getWorldContainer().listFiles()) {
@@ -292,8 +293,8 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   }
 
   @Override
-  public PrefixRegistry getPrefixRegistry() {
-    return prefixRegistry;
+  public NameDecorationRegistry getNameDecorationRegistry() {
+    return nameDecorationRegistry;
   }
 
   @Override
@@ -333,7 +334,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     if (matchTabManager != null) registerEvents(matchTabManager);
     if (legacyMatchTabManager != null) registerEvents(legacyMatchTabManager);
     registerEvents(vanishManager);
-    registerEvents(prefixRegistry);
+    registerEvents(nameDecorationRegistry);
     registerEvents(new GeneralizingListener(this));
     registerEvents(new PGMListener(this, matchManager, vanishManager));
     registerEvents(new FormattingListener());

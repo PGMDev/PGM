@@ -196,8 +196,6 @@ public class MatchTabManager extends TabManager implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onVanish(PlayerVanishEvent event) {
-    PlayerTabEntry entry = getPlayerEntry(event.getPlayer());
-    entry.invalidate();
-    entry.refresh();
+    invalidate(event.getPlayer());
   }
 }

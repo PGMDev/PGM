@@ -35,7 +35,6 @@ import org.bukkit.event.vehicle.VehicleUpdateEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
@@ -180,7 +179,6 @@ public class PGMListener implements Listener {
     }
 
     match.removePlayer(event.getPlayer());
-    PGM.get().getPrefixRegistry().removePlayer(event.getPlayer().getUniqueId());
   }
 
   public static void announceJoinOrLeave(MatchPlayer player, boolean join, boolean staffOnly) {
