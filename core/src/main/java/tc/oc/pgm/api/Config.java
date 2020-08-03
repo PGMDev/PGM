@@ -228,6 +228,14 @@ public interface Config {
     String getPrefix();
 
     /**
+     * Gets the suffix to show next to each player's name.
+     *
+     * @return A chat suffix, or null for none.
+     */
+    @Nullable
+    String getSuffix();
+
+    /**
      * Gets the permission node required to be included in this group.
      *
      * @return A permission node, or "op" for server operator.
