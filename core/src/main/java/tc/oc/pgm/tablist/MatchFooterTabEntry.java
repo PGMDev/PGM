@@ -30,7 +30,7 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
   @Override
   public void addToView(TabView view) {
     super.addToView(view);
-    if (this.tickTask == null) {
+    if (this.tickTask == null && match.isLoaded()) {
       Runnable tick = MatchFooterTabEntry.this::invalidate;
       this.tickTask =
           match
