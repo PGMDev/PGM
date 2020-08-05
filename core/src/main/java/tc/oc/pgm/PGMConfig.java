@@ -67,6 +67,7 @@ public final class PGMConfig implements Config {
 
   // gameplay.*
   private final boolean woolRefill;
+  private final boolean globalLegacyFlagBeams;
 
   // join.*
   private final long minPlayers;
@@ -157,6 +158,8 @@ public final class PGMConfig implements Config {
     this.matchLimit = parseInteger(config.getString("restart.match-limit", "30"));
 
     this.woolRefill = parseBoolean(config.getString("gameplay.refill-wool", "true"));
+    this.globalLegacyFlagBeams =
+        parseBoolean(config.getString("gameplay.global-legacy-flag-beams", "true"));
 
     this.minPlayers = parseInteger(config.getString("join.min-players", "1"));
     this.limitJoin = parseBoolean(config.getString("join.limit", "true"));
@@ -502,6 +505,11 @@ public final class PGMConfig implements Config {
   @Override
   public boolean shouldRefillWool() {
     return woolRefill;
+  }
+
+  @Override
+  public boolean shouldShowLegacyFlagBeamsGlobally() {
+    return globalLegacyFlagBeams;
   }
 
   @Override

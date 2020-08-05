@@ -20,6 +20,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.api.Config;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -32,6 +34,7 @@ import tc.oc.pgm.events.PlayerLeaveMatchEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.flag.state.Carried;
 import tc.oc.pgm.flag.state.Spawned;
+import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.inventory.ItemBuilder;
 import tc.oc.pgm.util.nms.NMSHacks;
 
@@ -48,6 +51,13 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
   public LegacyFlagBeamMatchModule(Match match) {
     this.match = match;
     this.beams = new HashMap<>();
+  }
+
+  private boolean shouldShowBeams(Flag flag) {
+    FlagDefinition definition = flag.getDefinition();
+    Config configuration = PGM.get().getConfiguration();
+    return definition.showBeam() // considers the flag definition's flag beam setting.
+        && configuration.shouldShowLegacyFlagBeamsGlobally();
   }
 
   protected Stream<Flag> flags() {
@@ -70,7 +80,13 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
 
   protected void trackFlag(Flag flag, MatchPlayer player) {
     Map<Flag, Beam> flags = beams.containsKey(player) ? beams.get(player) : new HashMap<>();
-    if (flags.containsKey(flag)) {
+    if (flags.containsKey(flag) // beam duplication check
+        || !flag.getDefinition().showBeam() // considers the flag definition's flag beam setting.
+        || (ViaUtils.getProtocolVersion(player.getBukkit())
+                > ViaUtils.VERSION_1_7 // version greater than 1.7 &
+            && !PGM.get()
+                .getConfiguration()
+                .shouldShowLegacyFlagBeamsGlobally())) { // we shouldn't show to >1.7 players
       return;
     }
 
@@ -188,7 +204,8 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
       this.flag = flag;
       this.bukkit = bukkit;
       this.segments =
-          range(0, 32)
+          range(0, 100) // ~100 blocks is the height which the particles appear to be reasonably
+              // visible (similar amount to amount closest to the flag)
               .mapToObj(i -> new NMSHacks.FakeZombie(match.getWorld(), true, false))
               .collect(Collectors.toList());
       show();

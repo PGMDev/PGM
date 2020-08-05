@@ -226,6 +226,14 @@ public interface Config {
   boolean shouldRefillWool();
 
   /**
+   * Whether the wool flag beams created for older versions (pre-1.8) should be shown to all
+   * players.
+   *
+   * @return If the wool flag beams should be shown to players >=1.8
+   */
+  boolean shouldShowLegacyFlagBeamsGlobally();
+
+  /**
    * Gets a group of players, used for prefixes and player sorting.
    *
    * @return A list of groups.
