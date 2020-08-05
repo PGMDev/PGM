@@ -355,9 +355,10 @@ public class SidebarMatchModule implements MatchModule, Listener {
     sb.append(goal.renderSidebarStatusText(competitor, viewingParty));
 
     if (goal instanceof ProximityGoal) {
-      sb.append(" ");
       // Show teams their own proximity on shared goals
-      sb.append(((ProximityGoal) goal).renderProximity(competitor, viewingParty));
+      String proximity = ((ProximityGoal) goal).renderProximity(competitor, viewingParty);
+
+      if (!proximity.isEmpty()) sb.append(" ").append(proximity);
     }
 
     sb.append(" ");

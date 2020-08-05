@@ -22,7 +22,7 @@ public class CoreFactory extends ProximityGoalDefinition {
       @Nullable Boolean required,
       boolean visible,
       TeamFactory owner,
-      ProximityMetric proximityMetric,
+      @Nullable ProximityMetric proximityMetric,
       Region region,
       MaterialData material,
       int leakLevel,

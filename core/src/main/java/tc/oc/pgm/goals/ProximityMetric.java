@@ -1,5 +1,6 @@
 package tc.oc.pgm.goals;
 
+import javax.annotation.Nullable;
 import org.jdom2.Element;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -58,20 +59,28 @@ public class ProximityMetric {
     return result;
   }
 
-  public static ProximityMetric parse(Element el, ProximityMetric def) throws InvalidXMLException {
+  public static @Nullable ProximityMetric parse(Element el, ProximityMetric def)
+      throws InvalidXMLException {
     return parse(el, "", def);
   }
 
-  public static ProximityMetric parse(Element el, String prefix, ProximityMetric def)
+  public static @Nullable ProximityMetric parse(Element el, String prefix, ProximityMetric def)
       throws InvalidXMLException {
     if (!prefix.isEmpty()) prefix = prefix + "-";
 
-    return new ProximityMetric(
+    ProximityMetric.Type type =
         XMLUtils.parseEnum(
             Node.fromAttr(el, prefix + "proximity-metric"),
             ProximityMetric.Type.class,
             "proximity metric",
-            def.type),
+            def.type);
+
+    // If proximity metric is none, use null proximity so that it doesn't try to get tracked nor
+    // shows in the scoreboard
+    if (type == Type.NONE) return null;
+
+    return new ProximityMetric(
+        type,
         XMLUtils.parseBoolean(el.getAttribute(prefix + "proximity-horizontal"), def.horizontal));
   }
 }
