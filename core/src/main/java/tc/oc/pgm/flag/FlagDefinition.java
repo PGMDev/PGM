@@ -70,8 +70,8 @@ public class FlagDefinition extends ProximityGoalDefinition {
       @Nullable Component carryMessage,
       boolean dropOnWater,
       boolean showBeam,
-      ProximityMetric flagProximityMetric,
-      ProximityMetric netProximityMetric,
+      @Nullable ProximityMetric flagProximityMetric,
+      @Nullable ProximityMetric netProximityMetric,
       boolean sequential,
       boolean showRespawnOnPickup) {
 

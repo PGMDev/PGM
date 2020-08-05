@@ -300,11 +300,8 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
   @Override
   public boolean isProximityRelevant(Competitor team) {
-    if (hasTouched(team)) {
-      return canCapture(team.getQuery());
-    } else {
-      return canPickup(team.getQuery());
-    }
+    return getProximityMetric(team) != null
+        && (hasTouched(team) ? canCapture(team.getQuery()) : canPickup(team.getQuery()));
   }
 
   // Misc
