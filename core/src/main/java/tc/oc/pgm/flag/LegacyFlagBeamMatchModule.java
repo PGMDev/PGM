@@ -53,13 +53,6 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
     this.beams = new HashMap<>();
   }
 
-  private boolean shouldShowBeams(Flag flag) {
-    FlagDefinition definition = flag.getDefinition();
-    Config configuration = PGM.get().getConfiguration();
-    return definition.showBeam() // considers the flag definition's flag beam setting.
-        && configuration.shouldShowLegacyFlagBeamsGlobally();
-  }
-
   protected Stream<Flag> flags() {
     FlagMatchModule module = match.getModule(FlagMatchModule.class);
     return module == null ? Stream.empty() : module.getFlags().stream();
