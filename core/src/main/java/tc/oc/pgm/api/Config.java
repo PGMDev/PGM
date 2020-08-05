@@ -205,6 +205,14 @@ public interface Config {
   boolean showFireworks();
 
   /**
+   * Whether the wool flag beams created for older versions (pre-1.8) should be shown to all
+   * players.
+   *
+   * @return If the wool flag beams should be shown to players >=1.8
+   */
+  boolean useLegacyFlagBeams();
+
+  /**
    * Gets a format to override the server's "message of the day."
    *
    * <p>{0} = The existing MoTD.
@@ -224,14 +232,6 @@ public interface Config {
    * @return If wool auto refill is enabled.
    */
   boolean shouldRefillWool();
-
-  /**
-   * Whether the wool flag beams created for older versions (pre-1.8) should be shown to all
-   * players.
-   *
-   * @return If the wool flag beams should be shown to players >=1.8
-   */
-  boolean shouldShowLegacyFlagBeamsGlobally();
 
   /**
    * Gets a group of players, used for prefixes and player sorting.

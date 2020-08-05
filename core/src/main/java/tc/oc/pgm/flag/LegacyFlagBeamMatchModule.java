@@ -78,7 +78,7 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
                 > ViaUtils.VERSION_1_7 // version greater than 1.7 &
             && !PGM.get()
                 .getConfiguration()
-                .shouldShowLegacyFlagBeamsGlobally())) { // we shouldn't show to >1.7 players
+                .useLegacyFlagBeams())) { // we shouldn't show to >1.7 players
       return;
     }
 

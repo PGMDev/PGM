@@ -64,7 +64,6 @@ join:
 # Changes various gameplay mechanics.
 gameplay:
   refill-wool: true              # Should wool in wool rooms be automatically refilled?
-  global-legacy-flag-beams: true # Should everyone see legacy flag beams?
 
 # Toggles various user interfaces.
 ui:
@@ -74,6 +73,7 @@ ui:
   proximity: false # Should the proximity of objectives be visible?
   fireworks: true  # Spawn fireworks after objectives are completed?
   participants-see-observers: true # Can participants see observers in the tab list?
+  flag-beams: false # Should everyone see floating wool flag beams?
 
 # Overrides the header and footer of the side bar.
 sidebar:

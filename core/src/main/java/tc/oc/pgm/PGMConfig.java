@@ -158,8 +158,6 @@ public final class PGMConfig implements Config {
     this.matchLimit = parseInteger(config.getString("restart.match-limit", "30"));
 
     this.woolRefill = parseBoolean(config.getString("gameplay.refill-wool", "true"));
-    this.globalLegacyFlagBeams =
-        parseBoolean(config.getString("gameplay.global-legacy-flag-beams", "true"));
 
     this.minPlayers = parseInteger(config.getString("join.min-players", "1"));
     this.limitJoin = parseBoolean(config.getString("join.limit", "true"));
@@ -175,6 +173,8 @@ public final class PGMConfig implements Config {
     this.participantsSeeObservers =
         parseBoolean(config.getString("ui.participants-see-observers", "true"));
     this.showFireworks = parseBoolean(config.getString("ui.fireworks", "true"));
+    this.globalLegacyFlagBeams = parseBoolean(config.getString("ui.flag-beams", "false"));
+
     final String header = config.getString("sidebar.header");
     this.header = header == null || header.isEmpty() ? null : parseComponent(header);
     final String footer = config.getString("sidebar.footer");
@@ -508,11 +508,6 @@ public final class PGMConfig implements Config {
   }
 
   @Override
-  public boolean shouldShowLegacyFlagBeamsGlobally() {
-    return globalLegacyFlagBeams;
-  }
-
-  @Override
   public boolean showSideBar() {
     return showSideBar;
   }
@@ -560,6 +555,11 @@ public final class PGMConfig implements Config {
   @Override
   public boolean showFireworks() {
     return showFireworks;
+  }
+
+  @Override
+  public boolean useLegacyFlagBeams() {
+    return globalLegacyFlagBeams;
   }
 
   @Override
