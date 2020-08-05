@@ -201,12 +201,19 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
 
   @Override
   public void resetGamemode() {
-    boolean participating = canInteract();
+    boolean participating = canInteract(),
+        allowFlight = !participating && !(isDead() && getProtocolVersion() <= ViaUtils.VERSION_1_7);
     logger.fine("Refreshing gamemode as " + (participating ? "participant" : "observer"));
 
     if (!participating) getBukkit().leaveVehicle();
-    setGameMode(participating ? GameMode.SURVIVAL : GameMode.CREATIVE);
-    this.getBukkit().setAllowFlight(!participating);
+
+    // Due to a bug in updating player abilities in legacy versions, it's better to force
+    // them to adventure mode and not let them fly. Has the side effect that they can't fly on maps
+    // where respawn allows spectating while dead.
+    setGameMode(
+        participating ? GameMode.SURVIVAL : allowFlight ? GameMode.CREATIVE : GameMode.ADVENTURE);
+
+    this.getBukkit().setAllowFlight(allowFlight);
     this.getBukkit().spigot().setAffectsSpawning(participating);
     this.getBukkit().spigot().setCollidesWithEntities(participating);
     this.getBukkit().setDisplayName(getBukkit().getDisplayName());
