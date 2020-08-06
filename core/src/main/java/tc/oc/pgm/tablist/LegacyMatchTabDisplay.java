@@ -61,6 +61,7 @@ public class LegacyMatchTabDisplay implements Listener {
   // False: use a full column for each team
   // For multi match support, this should be saved per-match
   private boolean compact;
+  private Match match;
 
   public LegacyMatchTabDisplay(PGM pgm) {
     this.tabDisplay = new TabDisplay(pgm, WIDTH);
@@ -84,8 +85,25 @@ public class LegacyMatchTabDisplay implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerJoin(PlayerJoinEvent event) {
-    if (ViaUtils.getProtocolVersion(event.getPlayer()) > ViaUtils.VERSION_1_7) return;
-    this.tabDisplay.addViewer(event.getPlayer());
+    tryEnable(event.getPlayer());
+  }
+
+  /**
+   * Method that will try to enable the display for this player. This can only be done after the
+   * player has been successfully injected by via version, if done earlier, it results in 1.7
+   * clients sometimes not getting the 1.7 tab
+   *
+   * @param player The player to enable the display for
+   */
+  private void tryEnable(Player player) {
+    if (!player.isOnline()) return;
+    if (!ViaUtils.isReady(player)) {
+      // Player connection hasn't been setup yet, try next tick
+      PGM.get().getExecutor().schedule(() -> tryEnable(player), 50, TimeUnit.MILLISECONDS);
+      return;
+    }
+    if (ViaUtils.getProtocolVersion(player) >= ViaUtils.VERSION_1_8) return;
+    this.tabDisplay.addViewer(player);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -97,6 +115,7 @@ public class LegacyMatchTabDisplay implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerJoinMatch(final PlayerJoinMatchEvent event) {
+    if (event.getMatch() != null) this.match = event.getMatch();
     this.deferredRender();
   }
 
@@ -139,16 +158,11 @@ public class LegacyMatchTabDisplay implements Listener {
 
   /** Re-render the whole tab for all players using this display */
   private void render() {
-    boolean checkedCompact = false;
+    checkCompactMode(this.match);
     for (Player viewer : tabDisplay.getViewers()) {
       MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(viewer);
       if (matchPlayer == null) continue; // Player isn't in a match
 
-      // Attempt to toggle compact mode only once, for whatever the first match found is
-      if (!checkedCompact) {
-        checkCompactMode(matchPlayer.getMatch());
-        checkedCompact = true;
-      }
       render(matchPlayer);
     }
     deferredRenderTask = null;

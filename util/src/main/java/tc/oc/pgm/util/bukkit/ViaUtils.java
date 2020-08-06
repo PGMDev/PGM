@@ -42,6 +42,10 @@ public class ViaUtils {
     }
   }
 
+  public static boolean isReady(Player player) {
+    return !enabled() || Via.getAPI().isInjected(player.getUniqueId());
+  }
+
   public static BossBar<?> createBossBar() {
     return enabled() ? Via.getAPI().createBossBar("", BossColor.BLUE, BossStyle.SOLID) : null;
   }

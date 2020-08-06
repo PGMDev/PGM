@@ -72,6 +72,7 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   private final AtomicBoolean frozen;
   private final AtomicBoolean dead;
   private final AtomicBoolean visible;
+  private final AtomicBoolean protocolReady;
   private final AtomicInteger protocolVersion;
   private final AtomicBoolean vanished;
 
@@ -88,6 +89,7 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
     this.dead = new AtomicBoolean(false);
     this.visible = new AtomicBoolean(false);
     this.vanished = new AtomicBoolean(false);
+    this.protocolReady = new AtomicBoolean(ViaUtils.isReady(player));
     this.protocolVersion = new AtomicInteger(ViaUtils.getProtocolVersion(player));
   }
 
@@ -378,6 +380,10 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
 
   @Override
   public int getProtocolVersion() {
+    if (!protocolReady.get()) {
+      protocolReady.set(ViaUtils.isReady(getBukkit()));
+      protocolVersion.set(ViaUtils.getProtocolVersion(getBukkit()));
+    }
     return protocolVersion.get();
   }
 
