@@ -89,7 +89,7 @@ public class MatchTabManager extends TabManager implements Listener {
               MatchTabManager.this.render();
             }
           };
-      this.renderTask = PGM.get().getExecutor().schedule(render, 1, TimeUnit.SECONDS);
+      this.renderTask = PGM.get().getExecutor().schedule(render, 50, TimeUnit.MILLISECONDS);
     }
   }
 
@@ -147,9 +147,26 @@ public class MatchTabManager extends TabManager implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onJoin(PlayerJoinEvent event) {
-    if (ViaUtils.getProtocolVersion(event.getPlayer()) <= ViaUtils.VERSION_1_7) return;
-    MatchTabView view = this.getView(event.getPlayer());
-    if (view != null) view.enable(this);
+    tryEnable(event.getPlayer());
+  }
+
+  /**
+   * Method that will try to enable the view for this player. This can only be done after the player
+   * has been successfully injected by via version, if done earlier, it results in 1.7 clients
+   * sometimes getting 1.8 tab
+   *
+   * @param player The player to enable the view for
+   */
+  private void tryEnable(Player player) {
+    if (!player.isOnline()) return;
+    if (!ViaUtils.isReady(player)) {
+      // Player connection hasn't been setup yet, try next tick
+      PGM.get().getExecutor().schedule(() -> tryEnable(player), 50, TimeUnit.MILLISECONDS);
+      return;
+    }
+    MatchTabView view = getViewOrNull(player);
+    if (view == null || ViaUtils.getProtocolVersion(player) < ViaUtils.VERSION_1_8) return;
+    view.enable(this);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -168,7 +185,6 @@ public class MatchTabManager extends TabManager implements Listener {
   /** Delegated events */
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onJoinMatch(PlayerJoinMatchEvent event) {
-    if (ViaUtils.getProtocolVersion(event.getPlayer().getBukkit()) <= ViaUtils.VERSION_1_7) return;
     MatchTabView view = this.getView(event.getPlayer().getBukkit());
     if (view != null) view.onViewerJoinMatch(event);
     invalidate(event.getPlayer());
