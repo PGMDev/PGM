@@ -281,12 +281,8 @@ public class MapInfoImpl implements MapInfo {
     Node licenseNode = Node.fromLastChildOrAttr(root, "license");
     try {
       return XMLUtils.parseEnum(licenseNode, MapLicense.class, "license", MapLicense.NONE);
-    } catch (
-        InvalidXMLException
-            e) { // Either means that no license is provided or that the user wants to specify a
-      // custom license
-      if (licenseNode == null) return MapLicense.NONE;
-      return MapLicense.CUSTOM.setNameIfCustom(licenseNode.getValue());
+    } catch (InvalidXMLException e) {
+      return MapLicense.NONE;
     }
   }
 }

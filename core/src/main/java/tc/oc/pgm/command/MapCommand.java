@@ -212,6 +212,8 @@ public final class MapCommand {
         TextComponent.builder()
             .append(mapInfoLabel("map.info.license"))
             .append(TextComponent.of(map.getLicense().getFullName(), TextColor.GOLD))
+            .hoverEvent(HoverEvent.showText(TranslatableComponent.of("map.info.license.view")))
+            .clickEvent(ClickEvent.openUrl(map.getLicense().getURL()))
             .build());
 
     audience.sendMessage(createTagsComponent(map.getTags()));

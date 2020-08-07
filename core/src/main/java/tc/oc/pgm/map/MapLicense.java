@@ -1,29 +1,29 @@
 package tc.oc.pgm.map;
 
 public enum MapLicense {
-  CC_BY("Attribution 4.0 International"),
-  CC_BY_ND("Attribution-NoDerivatives 4.0 International"),
-  CC_BY_SA("Attribution-ShareAlike 4.0 International"),
-  CC_BY_NC("Attribution-NonCommercial 4.0 International"),
-  CC_BY_NC_ND("Attribution-NonCommercial-NoDerivatives 4.0 International"),
-  CC_BY_NC_SA("Attribution-NonCommercial-ShareAlike 4.0 International"),
-  CUSTOM(""),
-  NONE("All Rights Reserved");
+  CC_BY("Attribution", "https://creativecommons.org/licenses/by/4.0/"),
+  CC_BY_ND("Attribution-NoDerivs", "https://creativecommons.org/licenses/by-nd/4.0/"),
+  CC_BY_SA("Attribution-ShareAlike", "https://creativecommons.org/licenses/by-sa/4.0/"),
+  CC_BY_NC("Attribution-NonCommercial", "https://creativecommons.org/licenses/by-nc/4.0"),
+  CC_BY_NC_ND(
+      "Attribution-NonCommercial-NoDerivs", "https://creativecommons.org/licenses/by-nc-nd/4.0"),
+  CC_BY_NC_SA(
+      "Attribution-NonCommercial-ShareAlike", "https://creativecommons.org/licenses/by-nc-sa/4.0"),
+  NONE("All Rights Reserved", "https://en.wikipedia.org/wiki/All_rights_reserved");
 
-  private String fullName;
+  private final String fullName;
+  private final String URL;
 
-  MapLicense(String fullName) {
+  MapLicense(String fullName, String URL) {
     this.fullName = fullName;
-  }
-
-  MapLicense setNameIfCustom(String customName) {
-    if (this != MapLicense.CUSTOM)
-      return this; // Not allowed to set custom if the map license is not the custom one
-    this.fullName = customName;
-    return this;
+    this.URL = URL;
   }
 
   public String getFullName() {
     return fullName;
+  }
+
+  public String getURL() {
+    return URL;
   }
 }
