@@ -40,8 +40,8 @@ import tc.oc.pgm.util.nms.NMSHacks;
 @ListenerScope(MatchScope.LOADED)
 public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
 
-  private final static int UPDATE_DELAY = 0;
-  private final static int UPDATE_FREQUENCY = 50;
+  private static final int UPDATE_DELAY = 0;
+  private static final int UPDATE_FREQUENCY = 50;
 
   private UpdateTask task;
   private final Match match;
@@ -196,8 +196,9 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
       this.flag = flag;
       this.bukkit = bukkit;
       this.segments =
-          range(0, 100) // ~100 blocks is the height which the particles appear to be reasonably
-              // visible (similar amount to amount closest to the flag)
+          range(0, 64) // ~100 blocks is the height which the particles appear to be reasonably
+              // visible (similar amount to amount closest to the flag), we limit this to 64 blocks
+              // to reduce load on the client
               .mapToObj(i -> new NMSHacks.FakeZombie(match.getWorld(), true, false))
               .collect(Collectors.toList());
       show();
