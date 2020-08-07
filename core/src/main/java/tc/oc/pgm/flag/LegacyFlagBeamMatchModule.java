@@ -40,8 +40,8 @@ import tc.oc.pgm.util.nms.NMSHacks;
 @ListenerScope(MatchScope.LOADED)
 public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
 
-  private static int UPDATE_DELAY = 0;
-  private static int UPDATE_FREQUENCY = 50;
+  private final static int UPDATE_DELAY = 0;
+  private final static int UPDATE_FREQUENCY = 50;
 
   private UpdateTask task;
   private final Match match;
