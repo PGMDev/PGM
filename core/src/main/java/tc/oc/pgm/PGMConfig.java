@@ -67,7 +67,7 @@ public final class PGMConfig implements Config {
 
   // gameplay.*
   private final boolean woolRefill;
-  private final boolean globalLegacyFlagBeams;
+  private final boolean flagBeams;
 
   // join.*
   private final long minPlayers;
@@ -173,7 +173,7 @@ public final class PGMConfig implements Config {
     this.participantsSeeObservers =
         parseBoolean(config.getString("ui.participants-see-observers", "true"));
     this.showFireworks = parseBoolean(config.getString("ui.fireworks", "true"));
-    this.globalLegacyFlagBeams = parseBoolean(config.getString("ui.flag-beams", "false"));
+    this.flagBeams = parseBoolean(config.getString("ui.flag-beams", "false"));
 
     final String header = config.getString("sidebar.header");
     this.header = header == null || header.isEmpty() ? null : parseComponent(header);
@@ -559,7 +559,7 @@ public final class PGMConfig implements Config {
 
   @Override
   public boolean useLegacyFlagBeams() {
-    return globalLegacyFlagBeams;
+    return flagBeams;
   }
 
   @Override
