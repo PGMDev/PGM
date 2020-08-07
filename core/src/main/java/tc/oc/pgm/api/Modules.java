@@ -160,7 +160,7 @@ public interface Modules {
     register(StatsMatchModule.class, StatsMatchModule::new);
     register(MapmakerMatchModule.class, MapmakerMatchModule::new);
 
-    // Modules that depend help older player versions
+    // Modules that help older player versions
     register(LegacyFlagBeamMatchModule.class, LegacyFlagBeamMatchModule::new);
 
     // Community MatchModules
