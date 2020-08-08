@@ -43,11 +43,17 @@ public class ScoreMatchModule implements MatchModule, Listener {
   private final ScoreConfig config;
   private final Set<ScoreBox> scoreBoxes;
   private final Map<Competitor, Double> scores = new DefaultMapAdapter<>(new HashMap<>(), 0d);
+  private MercyRule mercyRule;
 
   public ScoreMatchModule(Match match, ScoreConfig config, Set<ScoreBox> scoreBoxes) {
     this.match = match;
     this.config = config;
     this.scoreBoxes = scoreBoxes;
+    this.match.getCompetitors().forEach(competitor -> this.scores.put(competitor, 0.0));
+
+    if (this.config.mercyLimit > 0) {
+      this.mercyRule = new MercyRule(this, config.scoreLimit, config.mercyLimit);
+    }
   }
 
   @Override
@@ -56,12 +62,25 @@ public class ScoreMatchModule implements MatchModule, Listener {
   }
 
   public boolean hasScoreLimit() {
-    return this.config.scoreLimit > 0;
+    return this.config.scoreLimit > 0 || hasMercyRule();
+  }
+
+  public boolean hasMercyRule() {
+    return this.mercyRule != null;
   }
 
   public int getScoreLimit() {
     checkState(hasScoreLimit());
+
+    if (hasMercyRule()) {
+      return this.mercyRule.getScoreLimit();
+    }
+
     return this.config.scoreLimit;
+  }
+
+  public Map<Competitor, Double> getScores() {
+    return this.scores;
   }
 
   public double getScore(Competitor competitor) {
@@ -225,6 +244,10 @@ public class ScoreMatchModule implements MatchModule, Listener {
     this.match.callEvent(event);
 
     this.scores.put(competitor, event.getNewScore());
+
+    if (hasMercyRule()) {
+      this.mercyRule.handleEvent(event);
+    }
 
     this.match.calculateVictory();
   }

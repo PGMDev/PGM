@@ -98,6 +98,7 @@ public class ScoreModule implements MapModule {
 
       for (Element scoreEl : scoreElements) {
         config.scoreLimit = XMLUtils.parseNumber(scoreEl.getChild("limit"), Integer.class, -1);
+        config.mercyLimit = XMLUtils.parseNumber(scoreEl.getChild("mercy"), Integer.class, -1);
 
         // For backwards compatibility, default kill/death points to 1 if proto is old and <king/>
         // tag
