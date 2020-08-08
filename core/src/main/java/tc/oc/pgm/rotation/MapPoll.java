@@ -32,6 +32,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
+import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -142,19 +143,27 @@ public class MapPoll {
   }
 
   public void sendBook(MatchPlayer viewer, boolean forceOpen) {
-    String title = ChatColor.GOLD + "" + ChatColor.BOLD;
-    title += TextTranslations.translate("vote.title.map", viewer.getBukkit());
+    if (viewer.getProtocolVersion() <= ViaUtils.VERSION_1_7) {
+      // Must use separate sendMessages, since 1.7 clients do not like the newline character
+      viewer.sendMessage(TranslatableComponent.of("vote.header.map", TextColor.DARK_PURPLE));
+      for (MapInfo pgmMap : votes.keySet()) viewer.sendMessage(getMapBookComponent(viewer, pgmMap));
+      return;
+    }
+
+    TextComponent.Builder content = TextComponent.builder();
+    content.append(TranslatableComponent.of("vote.header.map", TextColor.DARK_PURPLE));
+    content.append(TextComponent.newline());
+
+    for (MapInfo pgmMap : votes.keySet())
+      content.append(TextComponent.newline()).append(getMapBookComponent(viewer, pgmMap));
 
     ItemStack is = new ItemStack(Material.WRITTEN_BOOK);
     BookMeta meta = (BookMeta) is.getItemMeta();
     meta.setAuthor("PGM");
+
+    String title = ChatColor.GOLD + "" + ChatColor.BOLD;
+    title += TextTranslations.translate("vote.title.map", viewer.getBukkit());
     meta.setTitle(title);
-
-    TextComponent.Builder content = TextComponent.builder();
-    content.append(TranslatableComponent.of("vote.header.map", TextColor.DARK_PURPLE));
-    content.append(TextComponent.of("\n\n"));
-
-    for (MapInfo pgmMap : votes.keySet()) content.append(getMapBookComponent(viewer, pgmMap));
 
     NMSHacks.setBookPages(
         meta, TextTranslations.toBaseComponent(content.build(), viewer.getBukkit()));
@@ -179,7 +188,7 @@ public class MapPoll {
             voted ? SYMBOL_VOTED : SYMBOL_IGNORE, voted ? TextColor.DARK_GREEN : TextColor.DARK_RED)
         .append(
             TextComponent.of(" ").decoration(TextDecoration.BOLD, !voted)) // Fix 1px symbol diff
-        .append(map.getName() + "\n", TextColor.GOLD, TextDecoration.BOLD)
+        .append(map.getName(), TextColor.GOLD, TextDecoration.BOLD)
         .hoverEvent(
             HoverEvent.showText(
                 TextComponent.of(
