@@ -89,7 +89,7 @@ public class MatchTabManager extends TabManager implements Listener {
               MatchTabManager.this.render();
             }
           };
-      this.renderTask = PGM.get().getExecutor().schedule(render, 50, TimeUnit.MILLISECONDS);
+      this.renderTask = PGM.get().getExecutor().schedule(render, 250, TimeUnit.MILLISECONDS);
     }
   }
 
@@ -141,13 +141,19 @@ public class MatchTabManager extends TabManager implements Listener {
   /** Invalidates all player entries, used for ping to update */
   private void invalidatePlayers() {
     for (TabEntry value : playerEntries.values()) {
-      if (value instanceof DynamicTabEntry) ((DynamicTabEntry) value).invalidate();
+      if (value instanceof DynamicTabEntry) ((DynamicTabEntry) value).invalidatePing();
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onJoin(PlayerJoinEvent event) {
-    tryEnable(event.getPlayer());
+    if (ViaUtils.isReady(event.getPlayer())) tryEnable(event.getPlayer());
+    else {
+      // Player connection hasn't been setup yet, try next tick
+      PGM.get()
+          .getExecutor()
+          .schedule(() -> tryEnable(event.getPlayer()), 50, TimeUnit.MILLISECONDS);
+    }
   }
 
   /**
@@ -159,11 +165,6 @@ public class MatchTabManager extends TabManager implements Listener {
    */
   private void tryEnable(Player player) {
     if (!player.isOnline()) return;
-    if (!ViaUtils.isReady(player)) {
-      // Player connection hasn't been setup yet, try next tick
-      PGM.get().getExecutor().schedule(() -> tryEnable(player), 50, TimeUnit.MILLISECONDS);
-      return;
-    }
     MatchTabView view = getViewOrNull(player);
     if (view == null || ViaUtils.getProtocolVersion(player) < ViaUtils.VERSION_1_8) return;
     view.enable(this);
