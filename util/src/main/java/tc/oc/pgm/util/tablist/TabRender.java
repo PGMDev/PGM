@@ -149,12 +149,15 @@ public class TabRender {
     this.updatePacket.b.add(
         NMSHacks.playerListPacketData(
             this.updatePacket, entry.getId(), this.getContent(entry, index)));
+  }
+
+  public void updatePing(TabEntry entry, int index) {
     this.updatePingPacket.b.add(
         NMSHacks.playerListPacketData(this.updatePingPacket, entry.getId(), entry.getPing()));
   }
 
-  public void setHeaderFooter(TabEntry header, TabEntry footer) {
-    view.getViewer().setPlayerListHeaderFooter(header.getContent(view), footer.getContent(view));
+  public void setHeaderFooter(BaseComponent header, BaseComponent footer) {
+    view.getViewer().setPlayerListHeaderFooter(header, footer);
   }
 
   public void updateFakeEntity(TabEntry entry, boolean create) {

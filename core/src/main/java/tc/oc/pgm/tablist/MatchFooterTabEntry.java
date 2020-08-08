@@ -35,9 +35,7 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
     if (this.tickTask == null && match.isLoaded()) {
       Runnable tick = MatchFooterTabEntry.this::invalidate;
       this.tickTask =
-          match
-              .getExecutor(MatchScope.LOADED)
-              .scheduleWithFixedDelay(tick, 0, TimeUtils.TICK * 5, TimeUnit.MILLISECONDS);
+          match.getExecutor(MatchScope.LOADED).scheduleWithFixedDelay(tick, 0, 1, TimeUnit.SECONDS);
     }
   }
 

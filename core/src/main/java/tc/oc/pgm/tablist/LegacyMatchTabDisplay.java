@@ -85,7 +85,13 @@ public class LegacyMatchTabDisplay implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerJoin(PlayerJoinEvent event) {
-    tryEnable(event.getPlayer());
+    if (ViaUtils.isReady(event.getPlayer())) tryEnable(event.getPlayer());
+    else {
+      // Player connection hasn't been setup yet, try next tick
+      PGM.get()
+          .getExecutor()
+          .schedule(() -> tryEnable(event.getPlayer()), 50, TimeUnit.MILLISECONDS);
+    }
   }
 
   /**
@@ -97,11 +103,6 @@ public class LegacyMatchTabDisplay implements Listener {
    */
   private void tryEnable(Player player) {
     if (!player.isOnline()) return;
-    if (!ViaUtils.isReady(player)) {
-      // Player connection hasn't been setup yet, try next tick
-      PGM.get().getExecutor().schedule(() -> tryEnable(player), 50, TimeUnit.MILLISECONDS);
-      return;
-    }
     if (ViaUtils.getProtocolVersion(player) >= ViaUtils.VERSION_1_8) return;
     this.tabDisplay.addViewer(player);
   }
