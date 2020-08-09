@@ -28,19 +28,6 @@ public abstract class DynamicTabEntry extends SimpleTabEntry {
     cleanViews.clear();
   }
 
-  /** Mark all {@link TabView}s containing this entry dirty for both content and ping */
-  public void invalidatePing() {
-    if (cleanViews.isEmpty()) return;
-
-    for (TabView view : cleanViews) {
-      view.invalidateContent(this);
-      view.invalidatePing();
-    }
-
-    dirtyViews.addAll(cleanViews);
-    cleanViews.clear();
-  }
-
   @Override
   public boolean isDirty(TabView view) {
     return dirtyViews.contains(view);

@@ -12,7 +12,6 @@ import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.minecraft.server.v1_8_R3.Packet;
 import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -174,12 +173,7 @@ public class TabDisplay {
 
       // Force removing and re-adding all players, because tab list is FIFO in 1.7, re-adding
       // players makes them append at the end
-      for (Player player : Bukkit.getOnlinePlayers()) {
-        if (viewer.canSee(player)) {
-          viewer.hidePlayer(player);
-          viewer.showPlayer(player);
-        }
-      }
+      NMSHacks.removeAndAddAllTabPlayers(viewer);
     }
   }
 
