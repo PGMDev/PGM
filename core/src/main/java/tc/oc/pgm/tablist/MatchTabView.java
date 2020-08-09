@@ -3,11 +3,9 @@ package tc.oc.pgm.tablist;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -41,14 +39,6 @@ public class MatchTabView extends TabView implements Listener {
 
   public MatchTabView(Player viewer) {
     super(viewer); // All fields must be reset in PlayerJoinMatchEvent to prevent leaks
-  }
-
-  private void addObserver(MatchPlayer observer) {
-    observerPlayers.add(observer);
-  }
-
-  private void removeObserver(MatchPlayer player) {
-    this.observerPlayers.remove(player);
   }
 
   @Override
@@ -106,17 +96,13 @@ public class MatchTabView extends TabView implements Listener {
       this.setHeader(this.getManager().getMapEntry(this.match));
       this.setFooter(this.getManager().getFooterEntry(this.match));
 
-      Collection<MatchPlayer> observers = this.match.getObservers();
-
       // Number of players/staff on observers
       int observingPlayers = 0;
       int observingStaff = 0;
       if (PGM.get().getConfiguration().canParticipantsSeeObservers() || matchPlayer.isObserving()) {
-        observingPlayers =
-            Math.toIntExact(observers.stream().filter(o -> isVisible(o, matchPlayer)).count());
-        for (MatchPlayer player : observers) {
-          if (player.getBukkit().hasPermission(Permissions.STAFF)
-              && !isVisible(player, matchPlayer)) observingStaff++;
+        observingPlayers = observerPlayers.size();
+        for (MatchPlayer player : observerPlayers) {
+          if (player.getBukkit().hasPermission(Permissions.STAFF)) observingStaff++;
         }
       }
 
@@ -205,15 +191,9 @@ public class MatchTabView extends TabView implements Listener {
           this.setSlot(x, this.getHeight() - observerRows, null);
         }
 
-        final List<MatchPlayer> obs =
-            observerPlayers.stream()
-                .filter(mp -> isVisible(mp, matchPlayer))
-                .collect(Collectors.toList());
-        Collections.sort(obs, playerOrder);
-
         // Render observers
         this.renderTeam(
-            obs,
+            observerPlayers,
             null,
             false,
             0,
@@ -235,7 +215,8 @@ public class MatchTabView extends TabView implements Listener {
       this.teamOrder = new TeamOrder(this.matchPlayer);
 
       this.observerPlayers.clear();
-      this.match.getObservers().forEach(this::addObserver);
+      this.observerPlayers.addAll(this.match.getObservers());
+      if (hideVanished()) this.observerPlayers.removeIf(MatchPlayer::isVanished);
       this.participantPlayers.clear();
       this.participantPlayers.addAll(this.match.getParticipants());
 
@@ -256,13 +237,13 @@ public class MatchTabView extends TabView implements Listener {
 
     if (event.getOldParty() != null) {
       this.participantPlayers.remove(event.getPlayer());
-      removeObserver(event.getPlayer());
+      this.observerPlayers.remove(event.getPlayer());
     }
 
     if (event.getNewParty() != null) {
       if (event.getNewParty() instanceof ObservingParty) {
         if (!this.observerPlayers.contains(event.getPlayer())) {
-          addObserver(event.getPlayer());
+          this.observerPlayers.add(event.getPlayer());
         }
       } else {
         if (!this.participantPlayers.contains(event.getPlayer())) {
@@ -278,7 +259,7 @@ public class MatchTabView extends TabView implements Listener {
     }
 
     if (event.getNewParty() instanceof Team
-        && !this.teamPlayers.containsEntry(event.getNewParty(), event.getPlayer())) {
+        && !this.teamPlayers.containsEntry((Team) event.getNewParty(), event.getPlayer())) {
       this.teamPlayers.put((Team) event.getNewParty(), event.getPlayer());
     }
 
@@ -287,16 +268,17 @@ public class MatchTabView extends TabView implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerVanish(PlayerVanishEvent event) {
+    if (event.isVanished()) {
+      if (hideVanished()) this.observerPlayers.remove(event.getPlayer());
+    } else if (!this.observerPlayers.contains(event.getPlayer())) {
+      this.observerPlayers.add(event.getPlayer());
+    }
+
     this.invalidateLayout();
   }
 
-  private boolean isVanished(MatchPlayer player) {
-    return PGM.get().getVanishManager().isVanished(player.getId());
-  }
-
-  private boolean isVisible(MatchPlayer target, MatchPlayer viewer) {
-    if (viewer.getBukkit().hasPermission(Permissions.STAFF)) return true;
-    return !isVanished(target);
+  private boolean hideVanished() {
+    return !matchPlayer.getBukkit().hasPermission(Permissions.STAFF);
   }
 
   private static int divideRoundingUp(int numerator, int denominator) {

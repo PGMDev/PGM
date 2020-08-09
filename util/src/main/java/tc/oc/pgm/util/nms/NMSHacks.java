@@ -98,6 +98,28 @@ public interface NMSHacks {
     return playerListPacketData(packet, uuid, uuid.toString().substring(0, 16), null, ping, null);
   }
 
+  /**
+   * Removes all players from the tab for the viewer and re-adds them
+   *
+   * @param viewer The viewer to send the packets to
+   */
+  static void removeAndAddAllTabPlayers(Player viewer) {
+    List<EntityPlayer> players = new ArrayList<>();
+    for (Player player : Bukkit.getOnlinePlayers()) {
+      if (viewer.canSee(player) || player == viewer)
+        players.add(((CraftPlayer) player).getHandle());
+    }
+
+    sendPacket(
+        viewer,
+        new PacketPlayOutPlayerInfo(
+            PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, players));
+    sendPacket(
+        viewer,
+        new PacketPlayOutPlayerInfo(
+            PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, players));
+  }
+
   static Packet teamPacket(
       int operation,
       String name,

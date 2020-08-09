@@ -29,9 +29,7 @@ import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
-import tc.oc.pgm.util.tablist.DynamicTabEntry;
 import tc.oc.pgm.util.tablist.PlayerTabEntry;
-import tc.oc.pgm.util.tablist.TabEntry;
 import tc.oc.pgm.util.tablist.TabManager;
 
 public class MatchTabManager extends TabManager implements Listener {
@@ -53,11 +51,9 @@ public class MatchTabManager extends TabManager implements Listener {
 
     if (PGM.get().getConfiguration().showTabListPing()) {
       PlayerTabEntry.setShowRealPing(true);
-      // If ping is shown, invalidate player entries to force-update them every so often
+      // If ping is shown, update all views every 30 seconds like vanilla does
       pingUpdateTask =
-          PGM.get()
-              .getExecutor()
-              .scheduleWithFixedDelay(this::invalidatePlayers, 5, 15, TimeUnit.SECONDS);
+          PGM.get().getExecutor().scheduleWithFixedDelay(this::renderPing, 5, 30, TimeUnit.SECONDS);
     } else {
       PlayerTabEntry.setShowRealPing(false);
     }
@@ -135,13 +131,6 @@ public class MatchTabManager extends TabManager implements Listener {
         if (mapEntry != null) mapEntry.invalidate();
         break;
       }
-    }
-  }
-
-  /** Invalidates all player entries, used for ping to update */
-  private void invalidatePlayers() {
-    for (TabEntry value : playerEntries.values()) {
-      if (value instanceof DynamicTabEntry) ((DynamicTabEntry) value).invalidatePing();
     }
   }
 

@@ -27,7 +27,7 @@ public class TabView {
   protected @Nullable TabManager manager;
 
   // True when any slots/header/footer have been changed but not rendered
-  private boolean dirtyLayout, dirtyContent, dirtyHeader, dirtyFooter, dirtyPing;
+  private boolean dirtyLayout, dirtyContent, dirtyHeader, dirtyFooter;
   private final TabEntry[] slots, rendered;
   private BaseComponent header, footer;
 
@@ -71,7 +71,6 @@ public class TabView {
 
     this.invalidateLayout();
     this.invalidateContent();
-    this.invalidatePing();
     this.invalidateHeader();
     this.invalidateFooter();
   }
@@ -127,13 +126,6 @@ public class TabView {
   protected void invalidateFooter() {
     if (!this.dirtyFooter) {
       this.dirtyFooter = true;
-      this.invalidateManager();
-    }
-  }
-
-  protected void invalidatePing() {
-    if (!this.dirtyPing) {
-      this.dirtyPing = true;
       this.invalidateManager();
     }
   }
@@ -204,9 +196,22 @@ public class TabView {
     TabRender render = new TabRender(this);
     this.renderLayout(render);
     this.renderContent(render);
-    this.renderPing(render);
     this.markSlotsClean();
     this.renderHeaderFooter(render, false);
+    render.finish();
+  }
+
+  public void renderPing() {
+    if (this.manager == null) return;
+
+    TabRender render = new TabRender(this);
+
+    // Build the update packet from entries with updated ping that are not being added or removed
+    for (int i = 0; i < this.size; i++) {
+      TabEntry slot = this.slots[i];
+      if (slot instanceof PlayerTabEntry) render.updatePing(slot, i);
+    }
+
     render.finish();
   }
 
@@ -269,19 +274,6 @@ public class TabView {
       for (int i = 0; i < this.size; i++) {
         if (this.slots[i].isDirty(this)) {
           render.updateEntry(this.slots[i], i);
-        }
-      }
-    }
-  }
-
-  public void renderPing(TabRender render) {
-    if (this.dirtyPing) {
-      this.dirtyPing = false;
-
-      // Build the update packet from entries with updated ping that are not being added or removed
-      for (int i = 0; i < this.size; i++) {
-        if (this.slots[i].isDirty(this)) {
-          render.updatePing(this.slots[i], i);
         }
       }
     }

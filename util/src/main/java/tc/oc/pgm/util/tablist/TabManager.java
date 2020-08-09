@@ -113,6 +113,12 @@ public class TabManager implements Listener {
     }
   }
 
+  public void renderPing() {
+    for (TabView view : this.enabledViews.values()) {
+      if (view != null) view.renderPing();
+    }
+  }
+
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onQuit(PlayerQuitEvent event) {
     TabView view = this.getViewOrNull(event.getPlayer());
