@@ -18,12 +18,12 @@ public class MapTabEntry extends DynamicTabEntry {
 
   private final MapInfo map;
 
-  protected MapTabEntry(Match match) {
+  public MapTabEntry(Match match) {
     this.map = match.getMap();
   }
 
   @Override
-  public BaseComponent getContent(TabView view) {
+  public BaseComponent[] getContent(TabView view) {
     final Component text =
         TranslatableComponent.of(
             "misc.authorship",
@@ -31,6 +31,6 @@ public class MapTabEntry extends DynamicTabEntry {
             TextComponent.of(map.getName(), TextColor.AQUA, TextDecoration.BOLD),
             TextFormatter.nameList(map.getAuthors(), NameStyle.FANCY, TextColor.GRAY));
 
-    return TextTranslations.toBaseComponent(text, view.getViewer());
+    return TextTranslations.toBaseComponentArray(text, view.getViewer());
   }
 }

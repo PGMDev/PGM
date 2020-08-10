@@ -2,10 +2,12 @@ package tc.oc.pgm.match;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import java.io.File;
 import java.time.Duration;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -16,6 +18,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Difficulty;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -29,6 +33,7 @@ import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.FileUtils;
 import tc.oc.pgm.util.chunk.NullChunkGenerator;
+import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
 
@@ -342,6 +347,18 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
     private MoveMatchStage(Match match) {
       this.match = checkNotNull(match);
 
+      // Right before moving players, make sure they don't show up in tab list due to missing a team
+      for (Player viewer : Bukkit.getOnlinePlayers()) {
+        List<String> players = new ArrayList<>();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+          if (viewer.canSee(player) && viewer != player) players.add(player.getName());
+        }
+        NMSHacks.sendPacket(
+            viewer,
+            NMSHacks.teamCreatePacket(
+                "dummy", "dummy", ChatColor.AQUA.toString(), "", false, false, players));
+      }
+
       Duration delay = Duration.ZERO;
       try {
         delay =
@@ -362,9 +379,8 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
     }
 
     private Stage advanceSync() {
-      final Iterator<Match> iterator = PGM.get().getMatchManager().getMatches();
-      while (iterator.hasNext()) {
-        final Match otherMatch = iterator.next();
+      // Create copy to avoid CME on mach unload
+      for (Match otherMatch : Lists.newArrayList(PGM.get().getMatchManager().getMatches())) {
         if (match.equals(otherMatch)) continue;
 
         for (MatchPlayer player : otherMatch.getPlayers()) {
@@ -377,6 +393,9 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
         }
         otherMatch.unload();
       }
+
+      // After all players have been teleported, remove the dummy team
+      NMSHacks.sendPacket(NMSHacks.teamRemovePacket("dummy"));
 
       return null;
     }

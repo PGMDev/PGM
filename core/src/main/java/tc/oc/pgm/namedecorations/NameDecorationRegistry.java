@@ -1,6 +1,5 @@
 package tc.oc.pgm.namedecorations;
 
-import java.util.UUID;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.api.party.Party;
@@ -15,13 +14,6 @@ public interface NameDecorationRegistry extends Listener {
    * @return The name, decorated
    */
   String getDecoratedName(Player player, Party party);
-
-  /**
-   * Force-refresh this player's decoration
-   *
-   * @param uuid UUID of the player to refresh
-   */
-  void refreshPlayer(UUID uuid);
 
   /**
    * Set what name decoration provider this registry should use

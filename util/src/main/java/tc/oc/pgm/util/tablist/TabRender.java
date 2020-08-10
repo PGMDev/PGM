@@ -50,12 +50,12 @@ public class TabRender {
     return packet;
   }
 
-  private BaseComponent getContent(TabEntry entry, int index) {
+  private BaseComponent[] getContent(TabEntry entry, int index) {
     return entry.getContent(this.view);
   }
 
   private void appendAddition(TabEntry entry, int index) {
-    BaseComponent displayName = this.getContent(entry, index);
+    BaseComponent[] displayName = this.getContent(entry, index);
     this.addPacket.b.add(
         NMSHacks.playerListPacketData(
             this.addPacket,
@@ -156,7 +156,7 @@ public class TabRender {
         NMSHacks.playerListPacketData(this.updatePingPacket, entry.getId(), entry.getPing()));
   }
 
-  public void setHeaderFooter(BaseComponent header, BaseComponent footer) {
+  public void setHeaderFooter(BaseComponent[] header, BaseComponent[] footer) {
     view.getViewer().setPlayerListHeaderFooter(header, footer);
   }
 

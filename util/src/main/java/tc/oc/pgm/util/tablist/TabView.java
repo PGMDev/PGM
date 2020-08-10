@@ -29,7 +29,7 @@ public class TabView {
   // True when any slots/header/footer have been changed but not rendered
   private boolean dirtyLayout, dirtyContent, dirtyHeader, dirtyFooter;
   private final TabEntry[] slots, rendered;
-  private BaseComponent header, footer;
+  private BaseComponent[] header, footer;
 
   public TabView(Player viewer) {
     this.viewer = viewer;
