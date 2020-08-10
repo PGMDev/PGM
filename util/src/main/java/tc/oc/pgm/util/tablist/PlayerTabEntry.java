@@ -51,8 +51,8 @@ public class PlayerTabEntry extends DynamicTabEntry {
   }
 
   @Override
-  public BaseComponent getContent(TabView view) {
-    return TextTranslations.toBaseComponent(
+  public BaseComponent[] getContent(TabView view) {
+    return TextTranslations.toBaseComponentArray(
         PlayerComponent.of(player, NameStyle.TAB, view.getViewer()), view.getViewer());
   }
 

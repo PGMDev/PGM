@@ -20,7 +20,7 @@ public class FreeForAllTabEntry extends DynamicTabEntry {
   }
 
   @Override
-  public BaseComponent getContent(TabView view) {
+  public BaseComponent[] getContent(TabView view) {
     Component content =
         TextComponent.builder()
             .append(String.valueOf(match.getParticipants().size()), TextColor.WHITE)
@@ -31,6 +31,6 @@ public class FreeForAllTabEntry extends DynamicTabEntry {
                 TranslatableComponent.of(
                     "match.info.players", TextColor.YELLOW, TextDecoration.BOLD))
             .build();
-    return TextTranslations.toBaseComponent(content, view.getViewer());
+    return TextTranslations.toBaseComponentArray(content, view.getViewer());
   }
 }

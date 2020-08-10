@@ -20,7 +20,7 @@ public class TeamTabEntry extends DynamicTabEntry {
   }
 
   @Override
-  public BaseComponent getContent(TabView view) {
+  public BaseComponent[] getContent(TabView view) {
     Component content =
         TextComponent.builder()
             .append(String.valueOf(team.getPlayers().size()), TextColor.WHITE)
@@ -31,6 +31,6 @@ public class TeamTabEntry extends DynamicTabEntry {
                 team.getShortName(), TextFormatter.convert(team.getColor()), TextDecoration.BOLD)
             .build();
 
-    return TextTranslations.toBaseComponent(content, view.getViewer());
+    return TextTranslations.toBaseComponentArray(content, view.getViewer());
   }
 }

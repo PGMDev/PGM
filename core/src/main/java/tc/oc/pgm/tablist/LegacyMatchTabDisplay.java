@@ -18,8 +18,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLocaleChangeEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.event.NameDecorationChangeEvent;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
@@ -63,11 +65,11 @@ public class LegacyMatchTabDisplay implements Listener {
   private boolean compact;
   private Match match;
 
-  public LegacyMatchTabDisplay(PGM pgm) {
-    this.tabDisplay = new TabDisplay(pgm, WIDTH);
+  public LegacyMatchTabDisplay(Plugin plugin) {
+    this.tabDisplay = new TabDisplay(plugin, WIDTH);
 
     this.timeUpdateTask =
-        pgm.getExecutor().scheduleWithFixedDelay(this::renderTime, 0, 1, TimeUnit.SECONDS);
+        PGM.get().getExecutor().scheduleWithFixedDelay(this::renderTime, 0, 1, TimeUnit.SECONDS);
   }
 
   public void disable() {
@@ -135,8 +137,13 @@ public class LegacyMatchTabDisplay implements Listener {
     this.deferredRender();
   }
 
-  @EventHandler(priority = EventPriority.MONITOR)
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerVanish(PlayerVanishEvent event) {
+    this.deferredRender();
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerNameChange(NameDecorationChangeEvent event) {
     this.deferredRender();
   }
 
@@ -378,15 +385,10 @@ public class LegacyMatchTabDisplay implements Listener {
     }
   }
 
-  private boolean renderPlayerName(MatchPlayer viewer, MatchPlayer player, int x, int y) {
+  protected boolean renderPlayerName(MatchPlayer viewer, MatchPlayer player, int x, int y) {
     if (!isVisible(player, viewer)) return false;
-    this.tabDisplay.set(
-        viewer.getBukkit(),
-        x,
-        y,
-        TextTranslations.translateLegacy(
-            PlayerComponent.of(player.getBukkit(), NameStyle.LEGACY_TAB, viewer.getBukkit()),
-            viewer.getBukkit()));
+
+    this.tabDisplay.set(viewer.getBukkit(), x, y, getPlayerName(viewer, player));
     return true;
   }
 
@@ -399,9 +401,20 @@ public class LegacyMatchTabDisplay implements Listener {
     return match.getModule(FreeForAllMatchModule.class) != null;
   }
 
-  private boolean renderTeamName(MatchPlayer viewer, Party party, int x, int y) {
+  protected boolean renderTeamName(MatchPlayer viewer, Party party, int x, int y) {
     if (party instanceof Tribute) return false; // Avoid rendering FFA
 
+    this.tabDisplay.set(viewer.getBukkit(), x, y, getTeamName(viewer, party));
+    return true;
+  }
+
+  protected String getPlayerName(MatchPlayer viewer, MatchPlayer player) {
+    return TextTranslations.translateLegacy(
+        PlayerComponent.of(player.getBukkit(), NameStyle.LEGACY_TAB, viewer.getBukkit()),
+        viewer.getBukkit());
+  }
+
+  protected String getTeamName(MatchPlayer viewer, Party party) {
     String playerCount =
         ChatColor.WHITE.toString()
             + party.getPlayers().stream().filter(pl -> isVisible(pl, viewer)).count();
@@ -413,11 +426,6 @@ public class LegacyMatchTabDisplay implements Listener {
     if (name.toLowerCase().endsWith(" team")) {
       name = name.substring(0, name.length() - " team".length());
     }
-    this.tabDisplay.set(
-        viewer.getBukkit(),
-        x,
-        y,
-        playerCount + " " + party.getColor().toString() + ChatColor.BOLD + name);
-    return true;
+    return playerCount + " " + party.getColor().toString() + ChatColor.BOLD + name;
   }
 }

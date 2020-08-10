@@ -27,7 +27,7 @@ public class StaticTabEntry extends SimpleTabEntry {
   public void markClean(TabView view) {}
 
   @Override
-  public BaseComponent getContent(TabView view) {
-    return TextTranslations.toBaseComponent(content, view.getViewer());
+  public BaseComponent[] getContent(TabView view) {
+    return TextTranslations.toBaseComponentArray(content, view.getViewer());
   }
 }

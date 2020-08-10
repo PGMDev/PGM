@@ -42,6 +42,12 @@ public interface NMSHacks {
     return getTrackerEntry(((CraftEntity) entity).getHandle());
   }
 
+  static void sendPacket(Object packet) {
+    for (Player pl : Bukkit.getOnlinePlayers()) {
+      sendPacket(pl, packet);
+    }
+  }
+
   static void sendPacket(Player bukkitPlayer, Object packet) {
     if (bukkitPlayer.isOnline()) {
       EntityPlayer nmsPlayer = ((CraftPlayer) bukkitPlayer).getHandle();

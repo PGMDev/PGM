@@ -13,8 +13,6 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.tablist.MatchTabManager;
-import tc.oc.pgm.util.tablist.PlayerTabEntry;
 
 public class NameDecorationRegistryImpl implements NameDecorationRegistry, Listener {
 
@@ -38,7 +36,13 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
 
   @EventHandler
   public void onNameDecorationChange(NameDecorationChangeEvent event) {
-    refreshPlayer(event.getUUID());
+    if (event.getUUID() == null) return;
+
+    final Player player = Bukkit.getPlayer(event.getUUID());
+    final MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(player);
+    if (matchPlayer == null) return;
+
+    matchPlayer.getBukkit().setDisplayName(getDecoratedName(player, matchPlayer.getParty()));
   }
 
   @Override
@@ -56,23 +60,6 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
 
   public String getSuffix(UUID uuid) {
     return provider != null ? provider.getSuffix(uuid) : "";
-  }
-
-  @Override
-  public void refreshPlayer(UUID uuid) {
-    if (uuid == null) return;
-
-    final Player player = Bukkit.getPlayer(uuid);
-    final MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(player);
-    if (matchPlayer == null) return;
-
-    matchPlayer.getBukkit().setDisplayName(getDecoratedName(player, matchPlayer.getParty()));
-
-    final MatchTabManager tabManager = PGM.get().getMatchTabManager();
-    if (tabManager != null) {
-      final PlayerTabEntry tabEntry = (PlayerTabEntry) tabManager.getPlayerEntryOrNull(player);
-      if (tabEntry != null) tabEntry.invalidate();
-    }
   }
 
   @Override
