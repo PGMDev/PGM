@@ -216,7 +216,7 @@ public class MatchTabView extends TabView implements Listener {
 
       this.observerPlayers.clear();
       this.observerPlayers.addAll(this.match.getObservers());
-      if (hideVanished()) this.observerPlayers.removeIf(MatchPlayer::isVanished);
+      this.observerPlayers.removeIf(this::shouldHide);
       this.participantPlayers.clear();
       this.participantPlayers.addAll(this.match.getParticipants());
 
@@ -240,22 +240,15 @@ public class MatchTabView extends TabView implements Listener {
       this.observerPlayers.remove(event.getPlayer());
     }
 
-    if (event.getNewParty() != null) {
-      if (event.getNewParty() instanceof ObservingParty) {
-        if (!this.observerPlayers.contains(event.getPlayer())) {
-          this.observerPlayers.add(event.getPlayer());
-        }
-      } else {
-        if (!this.participantPlayers.contains(event.getPlayer())) {
-          this.participantPlayers.add(event.getPlayer());
-        }
-      }
+    if (event.getNewParty() != null && !shouldHide(event.getPlayer())) {
+      List<MatchPlayer> players =
+          event.getNewParty() instanceof ObservingParty ? observerPlayers : participantPlayers;
+
+      if (!players.contains(event.getPlayer())) players.add(event.getPlayer());
     }
 
     if (event.getOldParty() instanceof Team) {
-      this.teamPlayers
-          .get((Team) event.getOldParty())
-          .removeAll(Collections.singleton(event.getPlayer()));
+      this.teamPlayers.get((Team) event.getOldParty()).remove(event.getPlayer());
     }
 
     if (event.getNewParty() instanceof Team
@@ -269,7 +262,7 @@ public class MatchTabView extends TabView implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerVanish(PlayerVanishEvent event) {
     if (event.isVanished()) {
-      if (hideVanished()) this.observerPlayers.remove(event.getPlayer());
+      if (shouldHide(event.getPlayer())) this.observerPlayers.remove(event.getPlayer());
     } else if (!this.observerPlayers.contains(event.getPlayer())) {
       this.observerPlayers.add(event.getPlayer());
     }
@@ -277,8 +270,10 @@ public class MatchTabView extends TabView implements Listener {
     this.invalidateLayout();
   }
 
-  private boolean hideVanished() {
-    return !matchPlayer.getBukkit().hasPermission(Permissions.STAFF);
+  private boolean shouldHide(MatchPlayer other) {
+    return other != matchPlayer
+        && other.isVanished()
+        && !matchPlayer.getBukkit().hasPermission(Permissions.STAFF);
   }
 
   private static int divideRoundingUp(int numerator, int denominator) {
