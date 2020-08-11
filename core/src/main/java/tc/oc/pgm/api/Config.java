@@ -234,6 +234,13 @@ public interface Config {
   boolean shouldRefillWool();
 
   /**
+   * Gets at which score players should be no longer allowed to keep playing TDM
+   *
+   * @return The minimum score they must hold
+   */
+  int getGriefScore();
+
+  /**
    * Gets a group of players, used for prefixes and player sorting.
    *
    * @return A list of groups.

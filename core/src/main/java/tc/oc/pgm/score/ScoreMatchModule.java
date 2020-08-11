@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
@@ -20,6 +21,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.event.PlayerItemTransferEvent;
 import tc.oc.pgm.api.match.Match;
@@ -31,6 +33,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.events.PlayerParticipationStartEvent;
 import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
@@ -42,6 +45,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
   private final Match match;
   private final ScoreConfig config;
   private final Set<ScoreBox> scoreBoxes;
+  private final Map<UUID, Double> contributions = new DefaultMapAdapter<>(new HashMap<>(), 0d);
   private final Map<Competitor, Double> scores = new DefaultMapAdapter<>(new HashMap<>(), 0d);
 
   public ScoreMatchModule(Match match, ScoreConfig config, Set<ScoreBox> scoreBoxes) {
@@ -97,9 +101,11 @@ public class ScoreMatchModule implements MatchModule, Listener {
 
     // add +1 to killer's team if it was a kill, otherwise -1 to victim's team
     if (event.isChallengeKill()) {
-      this.incrementScore(event.getKiller().getParty(), this.config.killScore);
+      this.incrementScore(
+          event.getKiller().getId(), event.getKiller().getParty(), this.config.killScore);
     } else {
-      this.incrementScore(event.getVictim().getCompetitor(), -this.config.deathScore);
+      this.incrementScore(
+          event.getVictim().getId(), event.getVictim().getCompetitor(), -this.config.deathScore);
     }
   }
 
@@ -190,12 +196,20 @@ public class ScoreMatchModule implements MatchModule, Listener {
     }
   }
 
+  @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+  public void handleJoin(final PlayerParticipationStartEvent event) {
+    double contribution = contributions.get(event.getPlayer().getId());
+    if (contribution <= PGM.get().getConfiguration().getGriefScore()) {
+      event.cancel(TranslatableComponent.of("join.err.teamGrief", TextColor.RED));
+    }
+  }
+
   private void playerScore(ScoreBox box, MatchPlayer player, double points) {
     checkState(player.isParticipating());
 
     if (points == 0) return;
 
-    this.incrementScore(player.getCompetitor(), points);
+    this.incrementScore(player.getId(), player.getCompetitor(), points);
     box.setLastScoreTime(player.getState(), Instant.now());
 
     int wholePoints = (int) points;
@@ -210,6 +224,28 @@ public class ScoreMatchModule implements MatchModule, Listener {
                 TextComponent.of(Integer.toString(wholePoints), TextColor.DARK_AQUA)),
             player.getParty().getName()));
     player.playSound(new Sound("random.levelup"));
+  }
+
+  public void incrementScore(UUID player, Competitor competitor, double amount) {
+    double contribution = contributions.get(player) + amount;
+    contributions.put(player, contribution);
+    incrementScore(competitor, amount);
+
+    if (contribution <= PGM.get().getConfiguration().getGriefScore()) {
+      MatchPlayer mp = match.getPlayer(player);
+      if (mp == null) return;
+
+      // wait until the next tick to do this so stat recording and other stuff works
+      match
+          .getExecutor(MatchScope.RUNNING)
+          .execute(
+              () -> {
+                if (mp.getParty() instanceof Competitor) {
+                  match.setParty(mp, match.getDefaultParty());
+                  mp.sendWarning(TranslatableComponent.of("join.err.teamGrief", TextColor.RED));
+                }
+              });
+    }
   }
 
   public void incrementScore(Competitor competitor, double amount) {
