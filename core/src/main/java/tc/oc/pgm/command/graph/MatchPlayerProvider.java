@@ -11,7 +11,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.text.TextException;
 
-final class MatchPlayerProvider implements BukkitProvider<MatchPlayer> {
+public final class MatchPlayerProvider implements BukkitProvider<MatchPlayer> {
 
   @Override
   public boolean isProvided() {
