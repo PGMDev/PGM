@@ -36,6 +36,7 @@ import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.ffa.Tribute;
+import tc.oc.pgm.namedecorations.NameDecorationRegistry;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
@@ -57,6 +58,7 @@ public class ChatDispatcher implements Listener {
   private final MatchManager manager;
   private final VanishManager vanish;
   private final OnlinePlayerMapAdapter<UUID> lastMessagedBy;
+  private final NameDecorationRegistry names;
 
   private final Map<UUID, String> muted;
 
@@ -86,6 +88,7 @@ public class ChatDispatcher implements Listener {
     this.manager = PGM.get().getMatchManager();
     this.vanish = PGM.get().getVanishManager();
     this.lastMessagedBy = new OnlinePlayerMapAdapter<>(PGM.get());
+    this.names = PGM.get().getNameDecorationRegistry();
     this.muted = Maps.newHashMap();
     PGM.get().getServer().getPluginManager().registerEvents(this, PGM.get());
   }
@@ -112,7 +115,14 @@ public class ChatDispatcher implements Listener {
       usage = "[message]")
   public void sendGlobal(Match match, MatchPlayer sender, @Nullable @Text String message) {
     if (checkMute(sender)) {
-      send(match, sender, message, GLOBAL_FORMAT, viewer -> true, SettingValue.CHAT_GLOBAL);
+      send(
+          match,
+          sender,
+          message,
+          GLOBAL_FORMAT,
+          getChatFormat(null, sender, message),
+          viewer -> true,
+          SettingValue.CHAT_GLOBAL);
     }
   }
 
@@ -135,6 +145,7 @@ public class ChatDispatcher implements Listener {
           sender,
           message,
           TextTranslations.translateLegacy(party.getChatPrefix(), null) + PREFIX_FORMAT,
+          getChatFormat(party.getChatPrefix(), sender, message),
           viewer ->
               party.equals(viewer.getParty())
                   || (viewer.isObserving()
@@ -162,6 +173,7 @@ public class ChatDispatcher implements Listener {
         sender,
         message != null ? BukkitUtils.colorize(message) : message,
         AC_FORMAT,
+        getChatFormat(ADMIN_CHAT_PREFIX, sender, message),
         AC_FILTER,
         SettingValue.CHAT_ADMIN);
 
@@ -232,6 +244,10 @@ public class ChatDispatcher implements Listener {
         sender,
         message,
         formatPrivateMessage("misc.from", matchReceiver.getBukkit()),
+        getChatFormat(
+            TranslatableComponent.of("misc.from", TextColor.GRAY, TextDecoration.ITALIC),
+            sender,
+            message),
         viewer -> viewer.getBukkit().equals(receiver),
         null);
 
@@ -241,6 +257,10 @@ public class ChatDispatcher implements Listener {
         manager.getPlayer(receiver), // Allow for cross-match messages
         message,
         formatPrivateMessage("misc.to", sender.getBukkit()),
+        getChatFormat(
+            TranslatableComponent.of("misc.to", TextColor.GRAY, TextDecoration.ITALIC),
+            sender,
+            message),
         viewer -> viewer.getBukkit().equals(sender.getBukkit()),
         null);
   }
@@ -336,6 +356,7 @@ public class ChatDispatcher implements Listener {
       MatchPlayer sender,
       @Nullable String text,
       String format,
+      Component componentMsg,
       Predicate<MatchPlayer> filter,
       @Nullable SettingValue type) {
     // When a message is empty, this indicates the player wants to change their default chat channel
@@ -371,9 +392,9 @@ public class ChatDispatcher implements Listener {
                   return;
                 }
 
-                final String finalMessage =
-                    String.format(event.getFormat(), sender.getBukkit().getDisplayName(), message);
-                event.getRecipients().forEach(player -> player.sendMessage(finalMessage));
+                event.getRecipients().stream()
+                    .map(Audience::get)
+                    .forEach(player -> player.sendMessage(componentMsg));
               });
       return;
     }
@@ -441,5 +462,22 @@ public class ChatDispatcher implements Listener {
 
   private static boolean canPlaySound(MatchPlayer viewer) {
     return viewer.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ALL);
+  }
+
+  private Component getChatFormat(@Nullable Component prefix, MatchPlayer player, String message) {
+    Component msg = TextComponent.of(message != null ? message : "");
+    if (prefix == null)
+      return TextComponent.builder()
+          .append("<", TextColor.WHITE)
+          .append(names.getDecoratedNameComponent(player.getBukkit(), player.getParty()))
+          .append(">: ", TextColor.WHITE)
+          .append(msg)
+          .build();
+    return TextComponent.builder()
+        .append(prefix)
+        .append(names.getDecoratedNameComponent(player.getBukkit(), player.getParty()))
+        .append(": ", TextColor.WHITE)
+        .append(msg)
+        .build();
   }
 }

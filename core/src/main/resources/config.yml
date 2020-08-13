@@ -107,9 +107,20 @@ groups:
   # A special group for server operators.
   op:
     prefix: "&6❖"
+    suffix: ""
+    # Display name of the group - Displayed when hovering over prefix/suffix              
+    display-name: "&6Server Operator"
+    # Description of group - Displayed when hovering over prefix/suffix
+    description: "&7Administrator of the server"
+    # URL shown below description when hovering over prefix/suffix
+    click-link: "&bhttps://pgm.dev/"
 
   # customgroup:
   #   prefix: ""
+  #   suffix: ""
+  #   display-name: ""
+  #   description: ""
+  #   click-link: ""
   #   permissions:
   #    - "+pgm.premium"
   #   observer-permissions: []
