@@ -106,15 +106,24 @@ public final class TextFormatter {
    */
   public static Component horizontalLineHeading(
       CommandSender sender, Component text, TextColor lineColor, int width) {
+    return horizontalLineHeading(sender, text, lineColor, TextDecoration.STRIKETHROUGH, width);
+  }
+
+  public static Component horizontalLineHeading(
+      CommandSender sender,
+      Component text,
+      TextColor lineColor,
+      TextDecoration decoration,
+      int width) {
     text = TextComponent.builder().append(" ").append(text).append(" ").build();
     int textWidth = LegacyFormatUtils.pixelWidth(TextTranslations.translateLegacy(text, sender));
     int spaceCount =
         Math.max(0, ((width - textWidth) / 2 + 1) / (LegacyFormatUtils.SPACE_PIXEL_WIDTH + 1));
     String line = Strings.repeat(" ", spaceCount);
     return TextComponent.builder()
-        .append(line, lineColor, TextDecoration.STRIKETHROUGH)
+        .append(line, lineColor, decoration)
         .append(text)
-        .append(line, lineColor, TextDecoration.STRIKETHROUGH)
+        .append(line, lineColor, decoration)
         .build();
   }
 
