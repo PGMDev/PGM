@@ -14,6 +14,7 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.kits.Kit;
+import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.Named;
 
@@ -143,6 +144,15 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
    * @return Whether the {@link MatchPlayer} is vanished.
    */
   boolean isVanished();
+
+  /**
+   * Get whether the {@link MatchPlayer} is using a legacy version (1.7.X)
+   *
+   * @return Whether the {@link MatchPlayer} is using a legacy version
+   */
+  default boolean isLegacy() {
+    return getProtocolVersion() <= ViaUtils.VERSION_1_7;
+  }
 
   /**
    * Get whether the {@link MatchPlayer} can interact with things in the {@link Match}.

@@ -192,7 +192,7 @@ public class LegacyMatchTabDisplay implements Listener {
   }
 
   private void render(MatchPlayer viewer) {
-    if (viewer.getProtocolVersion() > ViaUtils.VERSION_1_7) return;
+    if (!viewer.isLegacy()) return;
 
     Player bukkit = viewer.getBukkit();
     MapInfo mapInfo = viewer.getMatch().getMap();
