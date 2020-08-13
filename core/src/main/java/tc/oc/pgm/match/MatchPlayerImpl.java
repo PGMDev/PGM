@@ -204,7 +204,7 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   @Override
   public void resetGamemode() {
     boolean participating = canInteract(),
-        allowFlight = !participating && !(isDead() && getProtocolVersion() <= ViaUtils.VERSION_1_7);
+        allowFlight = !participating && !(isDead() && isLegacy());
     logger.fine("Refreshing gamemode as " + (participating ? "participant" : "observer"));
 
     if (!participating) getBukkit().leaveVehicle();

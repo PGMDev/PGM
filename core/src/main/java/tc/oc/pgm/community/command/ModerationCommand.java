@@ -50,7 +50,6 @@ import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.UsernameFormatUtils;
-import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.named.NameStyle;
@@ -811,7 +810,7 @@ public class ModerationCommand implements Listener {
     Component subtitle = formatPunishmentReason(reason).color(TextColor.GOLD);
 
     // Legacy support - Displays a chat message instead of title
-    if (ViaUtils.getProtocolVersion(target.getBukkit()) <= ViaUtils.VERSION_1_7) {
+    if (target.isLegacy()) {
       target.sendMessage(
           TextFormatter.horizontalLineHeading(target.getBukkit(), title, TextColor.GRAY));
       target.sendMessage(TextComponent.empty());

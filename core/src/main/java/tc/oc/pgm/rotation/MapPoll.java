@@ -32,7 +32,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
-import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -143,7 +142,7 @@ public class MapPoll {
   }
 
   public void sendBook(MatchPlayer viewer, boolean forceOpen) {
-    if (viewer.getProtocolVersion() <= ViaUtils.VERSION_1_7) {
+    if (viewer.isLegacy()) {
       // Must use separate sendMessages, since 1.7 clients do not like the newline character
       viewer.sendMessage(TranslatableComponent.of("vote.header.map", TextColor.DARK_PURPLE));
       for (MapInfo pgmMap : votes.keySet()) viewer.sendMessage(getMapBookComponent(viewer, pgmMap));

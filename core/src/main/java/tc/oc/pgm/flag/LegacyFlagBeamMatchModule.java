@@ -33,7 +33,6 @@ import tc.oc.pgm.events.PlayerLeaveMatchEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.flag.state.Carried;
 import tc.oc.pgm.flag.state.Spawned;
-import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.inventory.ItemBuilder;
 import tc.oc.pgm.util.nms.NMSHacks;
 
@@ -74,8 +73,7 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
     Map<Flag, Beam> flags = beams.containsKey(player) ? beams.get(player) : new HashMap<>();
     if (flags.containsKey(flag) // beam duplication check
         || !flag.getDefinition().showBeam() // considers the flag definition's flag beam setting.
-        || (ViaUtils.getProtocolVersion(player.getBukkit())
-                > ViaUtils.VERSION_1_7 // version greater than 1.7 &
+        || (!player.isLegacy() // version greater than 1.7 &
             && !PGM.get()
                 .getConfiguration()
                 .useLegacyFlagBeams())) { // we shouldn't show to >1.7 players
