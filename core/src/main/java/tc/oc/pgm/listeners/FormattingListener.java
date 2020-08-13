@@ -44,7 +44,7 @@ public class FormattingListener implements Listener {
         .sendMessage(
             TranslatableComponent.of(
                 "core.complete.owned",
-                formatContributions(core.getContributions()),
+                formatContributions(core.getContributions(), false),
                 core.getComponentName(),
                 core.getOwner().getName()));
   }
@@ -59,12 +59,13 @@ public class FormattingListener implements Listener {
         .sendMessage(
             TranslatableComponent.of(
                 "destroyable.complete.owned",
-                formatContributions(event.getDestroyable().getContributions()),
+                formatContributions(event.getDestroyable().getContributions(), true),
                 destroyable.getComponentName(),
                 destroyable.getOwner().getName()));
   }
 
-  private Component formatContributions(Collection<? extends Contribution> contributions) {
+  private Component formatContributions(
+      Collection<? extends Contribution> contributions, boolean showPercentage) {
     List<? extends Contribution> sorted = new ArrayList<>(contributions);
     sorted.sort(
         (o1, o2) -> {
@@ -75,11 +76,15 @@ public class FormattingListener implements Listener {
     boolean someExcluded = false;
     for (Contribution entry : sorted) {
       if (entry.getPercentage() > 0.2) { // 20% necessary to be included
-        contributors.add(
-            TranslatableComponent.of(
-                "objective.credit.percentage",
-                entry.getPlayerState().getName(NameStyle.COLOR),
-                TextComponent.of(Math.round(entry.getPercentage() * 100), TextColor.AQUA)));
+        if (showPercentage) {
+          contributors.add(
+              TranslatableComponent.of(
+                  "objective.credit.percentage",
+                  entry.getPlayerState().getName(NameStyle.COLOR),
+                  TextComponent.of(Math.round(entry.getPercentage() * 100), TextColor.AQUA)));
+        } else {
+          contributors.add(entry.getPlayerState().getName(NameStyle.COLOR));
+        }
       } else {
         someExcluded = true;
       }
