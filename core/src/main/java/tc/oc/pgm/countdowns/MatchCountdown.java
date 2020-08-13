@@ -9,6 +9,9 @@ import net.kyori.text.format.TextColor;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.bossbar.BossBarMatchModule;
+import tc.oc.pgm.events.CountdownCancelEvent;
+import tc.oc.pgm.events.CountdownEndEvent;
+import tc.oc.pgm.events.CountdownStartEvent;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bossbar.BossBarSource;
 import tc.oc.pgm.util.bossbar.DynamicBossBar;
@@ -83,6 +86,7 @@ public abstract class MatchCountdown extends Countdown {
 
     showOrHideBossBar();
 
+    match.callEvent(new CountdownStartEvent(match, this));
     super.onStart(remaining, total);
   }
 
@@ -113,12 +117,14 @@ public abstract class MatchCountdown extends Countdown {
 
   @Override
   public void onEnd(Duration total) {
+    match.callEvent(new CountdownEndEvent(match, this));
     bbmm.removeBossBar(bossBar);
   }
 
   @Override
   public void onCancel(Duration remaining, Duration total) {
     super.onCancel(remaining, total);
+    match.callEvent(new CountdownCancelEvent(match, this));
     bbmm.removeBossBar(bossBar);
   }
 
@@ -165,5 +171,9 @@ public abstract class MatchCountdown extends Countdown {
 
   protected float bossBarProgress(Duration remaining, Duration total) {
     return total.isZero() ? 0f : (float) remaining.toMillis() / total.toMillis();
+  }
+
+  public Duration getRemaining() {
+    return remaining;
   }
 }
