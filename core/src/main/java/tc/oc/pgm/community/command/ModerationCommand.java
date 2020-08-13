@@ -50,6 +50,7 @@ import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.UsernameFormatUtils;
+import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.named.NameStyle;
@@ -809,7 +810,25 @@ public class ModerationCommand implements Listener {
         TextComponent.builder().append(WARN_SYMBOL).append(titleWord).append(WARN_SYMBOL).build();
     Component subtitle = formatPunishmentReason(reason).color(TextColor.GOLD);
 
-    target.showTitle(title, subtitle, 5, 200, 10);
+    // Legacy support - Displays a chat message instead of title
+    if (ViaUtils.getProtocolVersion(target.getBukkit()) <= ViaUtils.VERSION_1_7) {
+      target.sendMessage(
+          TextFormatter.horizontalLineHeading(target.getBukkit(), title, TextColor.GRAY));
+      target.sendMessage(TextComponent.empty());
+      target.sendMessage(
+          TextFormatter.horizontalLineHeading(
+              target.getBukkit(),
+              subtitle,
+              TextColor.YELLOW,
+              TextDecoration.OBFUSCATED,
+              LegacyFormatUtils.MAX_CHAT_WIDTH));
+      target.sendMessage(TextComponent.empty());
+      target.sendMessage(
+          TextFormatter.horizontalLineHeading(target.getBukkit(), title, TextColor.GRAY));
+
+    } else {
+      target.showTitle(title, subtitle, 5, 200, 10);
+    }
     target.playSound(WARN_SOUND);
   }
 
