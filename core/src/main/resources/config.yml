@@ -113,7 +113,12 @@ groups:
     # Description of group - Displayed when hovering over prefix/suffix
     description: "&7Administrator of the server"
     # URL shown below description when hovering over prefix/suffix
-    click-link: "&bhttps://pgm.dev/"
+    click-link: "https://pgm.dev/"
+    
+    # If you want to further customize prefix/suffix flairs, provide components here to override format
+    # Only use if you know what you're doing
+    prefix-component: ""
+    suffix-component: ""
 
   # customgroup:
   #   prefix: ""

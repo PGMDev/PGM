@@ -317,7 +317,14 @@ public interface Config {
 
     String getClickLink();
 
+    Component getPrefixOverride();
+
+    Component getSuffixOverride();
+
     default Component getComponent(boolean prefix) {
+      if (prefix ? getPrefixOverride() != null : getSuffixOverride() != null) {
+        return prefix ? getPrefixOverride() : getSuffixOverride();
+      }
       TextComponent.Builder hover = TextComponent.builder().append(getDisplayName());
       if (getDescription() != null && !getDescription().isEmpty()) {
         hover.append("\n").append(getDescription());

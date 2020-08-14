@@ -659,6 +659,8 @@ public final class PGMConfig implements Config {
     private String displayName;
     private String description;
     private String clickLink;
+    private Component prefixOverride;
+    private Component suffixOverride;
 
     public Flair(ConfigurationSection config) {
       final String prefix = config.getString("prefix");
@@ -675,6 +677,14 @@ public final class PGMConfig implements Config {
 
       final String link = config.getString("click-link");
       this.clickLink = link == null ? null : parseComponentLegacy(link);
+
+      final String prefixComp = config.getString("prefix-component");
+      this.prefixOverride =
+          prefixComp == null || prefixComp.isEmpty() ? null : parseComponent(prefixComp);
+
+      final String suffixComp = config.getString("suffix-component");
+      this.suffixOverride =
+          suffixComp == null || suffixComp.isEmpty() ? null : parseComponent(suffixComp);
     }
 
     @Override
@@ -700,6 +710,16 @@ public final class PGMConfig implements Config {
     @Override
     public String getClickLink() {
       return clickLink;
+    }
+
+    @Override
+    public Component getPrefixOverride() {
+      return prefixOverride;
+    }
+
+    @Override
+    public Component getSuffixOverride() {
+      return suffixOverride;
     }
   }
 
