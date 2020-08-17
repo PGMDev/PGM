@@ -6,11 +6,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
 import net.kyori.text.format.TextDecoration;
+import net.kyori.text.format.TextFormat;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.named.NameStyle;
@@ -134,5 +137,36 @@ public final class TextFormatter {
       // If not found use default
     }
     return textColor;
+  }
+
+  public static TextFormat convertFormat(Enum<?> color) {
+    TextFormat textColor = TextColor.WHITE;
+    try {
+      textColor = TextColor.valueOf(color.name());
+    } catch (IllegalArgumentException e) {
+      // If not found use default
+      if ((color instanceof ChatColor) && convertDecoration((ChatColor) color) != null) {
+        textColor = convertDecoration((ChatColor) color);
+      }
+    }
+    return textColor;
+  }
+
+  @Nullable
+  public static TextDecoration convertDecoration(ChatColor color) {
+    switch (color) {
+      case BOLD:
+        return TextDecoration.BOLD;
+      case ITALIC:
+        return TextDecoration.ITALIC;
+      case MAGIC:
+        return TextDecoration.OBFUSCATED;
+      case STRIKETHROUGH:
+        return TextDecoration.STRIKETHROUGH;
+      case UNDERLINE:
+        return TextDecoration.UNDERLINED;
+      default:
+        return null;
+    }
   }
 }
