@@ -68,7 +68,9 @@ public class MercyRule {
 
     // Score larger than trailing score
     if (event.getNewScore() > getTrailerScore()) {
-      setTrailer(event.getCompetitor(), event.getNewScore());
+      if (!isLeader(event.getCompetitor())) {
+        setTrailer(event.getCompetitor(), event.getNewScore());
+      }
       return;
     }
 
@@ -97,7 +99,7 @@ public class MercyRule {
       }
     }
 
-    setLeader(lead.getKey(), lead.getValue());
-    setTrailer(trail.getKey(), trail.getValue());
+    setLeader(lead.getKey(), lead.getKey() == null ? 0 : lead.getValue());
+    setTrailer(trail.getKey(), trail.getKey() == null ? 0 : trail.getValue());
   }
 }
