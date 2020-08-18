@@ -226,7 +226,6 @@ public class GeneralizingListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void detectBlockTrample(CoarsePlayerMoveEvent event) {
     if (!event.getPlayer().isOnGround()) return;
-    if (event.getPlayer().getGameMode() != GameMode.ADVENTURE) return;
 
     Block block = event.getBlockTo().getBlock();
     if (!block.getType().isSolid()) {
