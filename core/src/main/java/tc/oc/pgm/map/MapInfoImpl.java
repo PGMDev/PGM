@@ -2,6 +2,7 @@ package tc.oc.pgm.map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -33,7 +34,7 @@ public class MapInfoImpl implements MapInfo {
   private final Version version;
   private final String name;
   private final String description;
-  private final Date created;
+  private final LocalDate created;
   private final Collection<Contributor> authors;
   private final Collection<Contributor> contributors;
   private final Collection<String> rules;
@@ -50,7 +51,7 @@ public class MapInfoImpl implements MapInfo {
       Version version,
       String name,
       String description,
-      @Nullable Date created,
+      @Nullable LocalDate created,
       @Nullable Collection<Contributor> authors,
       @Nullable Collection<Contributor> contributors,
       @Nullable Collection<String> rules,
@@ -142,7 +143,7 @@ public class MapInfoImpl implements MapInfo {
   }
 
   @Override
-  public Date getCreated() {
+  public LocalDate getCreated() {
     return created;
   }
 

@@ -3,9 +3,10 @@ package tc.oc.pgm.util.xml;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1091,16 +1092,16 @@ public final class XMLUtils {
     return new Version(major, minor, patch);
   }
 
-  public static Date parseDate(Node node) throws InvalidXMLException {
+  public static LocalDate parseDate(Node node) throws InvalidXMLException {
     if (node == null) return null;
 
-    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+    DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
 
     try {
-      return format.parse(node.getValueNormalize());
-    } catch (ParseException exception) {
+      return LocalDate.parse(node.getValueNormalize(), formatter);
+    } catch (DateTimeParseException exception) {
       throw new InvalidXMLException(
-          "Invalid date '" + node.getValueNormalize() + "', expected format 'yyyy-MM-dd'", node);
+          "Invalid date '" + node.getValueNormalize() + "', expected format 'YYYY-MM-DD'", node);
     }
   }
 }

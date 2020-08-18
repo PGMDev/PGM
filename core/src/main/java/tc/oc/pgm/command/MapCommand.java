@@ -11,7 +11,8 @@ import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Sets;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -179,10 +180,10 @@ public final class MapCommand {
       }
     }
 
-    Date created = map.getCreated();
+    LocalDate created = map.getCreated();
     if (created != null) {
-      SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-      String date = formatter.format(created);
+      DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+      String date = created.format(formatter);
 
       audience.sendMessage(
           TextComponent.builder()
