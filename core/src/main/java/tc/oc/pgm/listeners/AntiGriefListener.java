@@ -28,6 +28,7 @@ import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.tnt.TNTMatchModule;
 import tc.oc.pgm.tracker.Trackers;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.MinecraftTranslations;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -96,7 +97,8 @@ public class AntiGriefListener implements Listener {
                 "moderation.defuse.alert.player",
                 TextColor.GRAY,
                 clicker.getName(NameStyle.FANCY),
-                owner.getName(NameStyle.FANCY)),
+                owner.getName(NameStyle.FANCY),
+                MinecraftTranslations.getEntity(entity.getType()).color(TextColor.DARK_RED)),
             clicker.getMatch());
       } else {
         this.notifyDefuse(
@@ -107,7 +109,10 @@ public class AntiGriefListener implements Listener {
 
         ChatDispatcher.broadcastAdminChatMessage(
             TranslatableComponent.of(
-                "moderation.defuse.alert.world", TextColor.GRAY, clicker.getName(NameStyle.FANCY)),
+                "moderation.defuse.alert.world",
+                TextColor.GRAY,
+                clicker.getName(NameStyle.FANCY),
+                MinecraftTranslations.getEntity(entity.getType()).color(TextColor.DARK_RED)),
             clicker.getMatch());
       }
     }
