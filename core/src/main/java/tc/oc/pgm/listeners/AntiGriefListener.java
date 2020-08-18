@@ -90,12 +90,25 @@ public class AntiGriefListener implements Listener {
                     "moderation.defuse.player",
                     clicker.getBukkit(),
                     owner.getBukkit().getDisplayName(clicker.getBukkit()) + ChatColor.RED));
+
+        ChatDispatcher.broadcastAdminChatMessage(
+            TranslatableComponent.of(
+                "moderation.defuse.alert.player",
+                TextColor.WHITE,
+                clicker.getName(NameStyle.FANCY),
+                owner.getName(NameStyle.FANCY)),
+            clicker.getMatch());
       } else {
         this.notifyDefuse(
             clicker,
             entity,
             ChatColor.RED
                 + TextTranslations.translate("moderation.defuse.world", clicker.getBukkit()));
+
+        ChatDispatcher.broadcastAdminChatMessage(
+            TranslatableComponent.of(
+                "moderation.defuse.alert.world", TextColor.WHITE, clicker.getName(NameStyle.FANCY)),
+            clicker.getMatch());
       }
     }
   }
