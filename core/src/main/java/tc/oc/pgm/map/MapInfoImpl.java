@@ -2,11 +2,7 @@ package tc.oc.pgm.map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.kyori.text.Component;
@@ -37,6 +33,7 @@ public class MapInfoImpl implements MapInfo {
   private final Version version;
   private final String name;
   private final String description;
+  private final Date created;
   private final Collection<Contributor> authors;
   private final Collection<Contributor> contributors;
   private final Collection<String> rules;
@@ -53,6 +50,7 @@ public class MapInfoImpl implements MapInfo {
       Version version,
       String name,
       String description,
+      @Nullable Date created,
       @Nullable Collection<Contributor> authors,
       @Nullable Collection<Contributor> contributors,
       @Nullable Collection<String> rules,
@@ -66,6 +64,7 @@ public class MapInfoImpl implements MapInfo {
     this.proto = checkNotNull(proto);
     this.version = checkNotNull(version);
     this.description = checkNotNull(description);
+    this.created = created;
     this.authors = authors == null ? new LinkedList<>() : authors;
     this.contributors = contributors == null ? new LinkedList<>() : contributors;
     this.rules = rules == null ? new LinkedList<>() : rules;
@@ -83,6 +82,7 @@ public class MapInfoImpl implements MapInfo {
         info.getVersion(),
         info.getName(),
         info.getDescription(),
+        info.getCreated(),
         info.getAuthors(),
         info.getContributors(),
         info.getRules(),
@@ -100,6 +100,7 @@ public class MapInfoImpl implements MapInfo {
         XMLUtils.parseSemanticVersion(Node.fromRequiredChildOrAttr(root, "version")),
         Node.fromRequiredChildOrAttr(root, "name").getValueNormalize(),
         Node.fromRequiredChildOrAttr(root, "objective", "description").getValueNormalize(),
+        XMLUtils.parseDate(Node.fromChildOrAttr(root, "created")),
         parseContributors(root, "author"),
         parseContributors(root, "contributor"),
         parseRules(root),
@@ -138,6 +139,11 @@ public class MapInfoImpl implements MapInfo {
   @Override
   public String getDescription() {
     return description;
+  }
+
+  @Override
+  public Date getCreated() {
+    return created;
   }
 
   @Override

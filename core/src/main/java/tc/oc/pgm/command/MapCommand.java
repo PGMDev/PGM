@@ -11,10 +11,8 @@ import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Sets;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -179,6 +177,18 @@ public final class MapCommand {
         audience.sendMessage(
             TextComponent.builder().append("  ").append(formatContribution(contributor)).build());
       }
+    }
+
+    Date created = map.getCreated();
+    if (created != null) {
+      SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+      String date = formatter.format(created);
+
+      audience.sendMessage(
+          TextComponent.builder()
+              .append(mapInfoLabel("map.info.created"))
+              .append(date, TextColor.GOLD)
+              .build());
     }
 
     if (!map.getRules().isEmpty()) {

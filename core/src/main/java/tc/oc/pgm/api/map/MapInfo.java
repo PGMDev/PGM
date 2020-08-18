@@ -2,6 +2,7 @@ package tc.oc.pgm.api.map;
 
 import java.text.Normalizer;
 import java.util.Collection;
+import java.util.Date;
 import javax.annotation.Nullable;
 import net.kyori.text.Component;
 import org.bukkit.command.CommandSender;
@@ -60,6 +61,13 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
    * @return A description.
    */
   String getDescription();
+
+  /**
+   * Get the creation date of the map.
+   *
+   * @return The creation date.
+   */
+  Date getCreated();
 
   /**
    * Get all {@link Contributor}s that contributed significantly to the map.
