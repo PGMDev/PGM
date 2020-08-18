@@ -5,8 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
 /**
- * Called when a {@link Player} tramples over a {@link Block} in {@link
- * org.bukkit.GameMode#ADVENTURE} mode.
+ * Called when a {@link Player} tramples over a {@link Block}.
  *
  * @see AdventureModeInteractEvent
  */

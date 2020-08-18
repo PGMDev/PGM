@@ -1,8 +1,5 @@
 package tc.oc.pgm.api.event;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
-import org.bukkit.GameMode;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -10,7 +7,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerActionBase;
 
 /**
- * An extended {@link Block} interact event for {@link Player}s in {@link
+ * An extended {@link Block} interact event for {@link Player}s sometimes in {@link
  * org.bukkit.GameMode#ADVENTURE} mode.
  */
 public abstract class AdventureModeInteractEvent extends PlayerActionBase implements Cancellable {
@@ -20,9 +17,6 @@ public abstract class AdventureModeInteractEvent extends PlayerActionBase implem
 
   public AdventureModeInteractEvent(Player player, Block block) {
     super(player);
-    checkArgument(
-        player.getGameMode() == GameMode.ADVENTURE,
-        "adventure interact event for non-adventure player");
     this.block = block;
   }
 
