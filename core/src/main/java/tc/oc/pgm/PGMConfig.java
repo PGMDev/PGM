@@ -11,6 +11,7 @@ import static tc.oc.pgm.util.text.TextParser.parseUri;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Range;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -67,7 +68,7 @@ public final class PGMConfig implements Config {
 
   // gameplay.*
   private final boolean woolRefill;
-  private final boolean flagBeams;
+  private final int griefScore;
 
   // join.*
   private final long minPlayers;
@@ -76,6 +77,7 @@ public final class PGMConfig implements Config {
   private final boolean balanceJoin;
   private final boolean queueJoin;
   private final boolean anytimeJoin;
+  private final boolean flagBeams;
 
   // ui.*
   private final boolean showSideBar;
@@ -158,6 +160,8 @@ public final class PGMConfig implements Config {
     this.matchLimit = parseInteger(config.getString("restart.match-limit", "30"));
 
     this.woolRefill = parseBoolean(config.getString("gameplay.refill-wool", "true"));
+    this.griefScore =
+        parseInteger(config.getString("gameplay.grief-score", "-10"), Range.atMost(0));
 
     this.minPlayers = parseInteger(config.getString("join.min-players", "1"));
     this.limitJoin = parseBoolean(config.getString("join.limit", "true"));
@@ -505,6 +509,11 @@ public final class PGMConfig implements Config {
   @Override
   public boolean shouldRefillWool() {
     return woolRefill;
+  }
+
+  @Override
+  public int getGriefScore() {
+    return griefScore;
   }
 
   @Override
