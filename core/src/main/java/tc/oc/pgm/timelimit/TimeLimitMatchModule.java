@@ -11,6 +11,7 @@ public class TimeLimitMatchModule implements MatchModule {
   private final TimeLimit defaultTimeLimit;
   private @Nullable TimeLimit timeLimit;
   private @Nullable TimeLimitCountdown countdown;
+  private @Nullable OvertimeCountdown overtime;
 
   public TimeLimitMatchModule(Match match, @Nullable TimeLimit timeLimit) {
     this.match = match;
@@ -48,7 +49,7 @@ public class TimeLimitMatchModule implements MatchModule {
   }
 
   public @Nullable TimeLimitCountdown getCountdown() {
-    return countdown;
+    return countdown != null ? countdown : overtime;
   }
 
   public @Nullable Duration getFinalRemaining() {
@@ -56,6 +57,8 @@ public class TimeLimitMatchModule implements MatchModule {
   }
 
   public void start() {
+    cancel();
+
     // Match.finish() will cancel this, so we don't have to
     if (this.timeLimit != null && match.isRunning()) {
       this.countdown = new TimeLimitCountdown(match, this.timeLimit);
@@ -63,10 +66,22 @@ public class TimeLimitMatchModule implements MatchModule {
     }
   }
 
+  public void startOvertime() {
+    cancel();
+    if (this.timeLimit != null && this.timeLimit.getOvertime() != null && match.isRunning()) {
+      this.overtime = new OvertimeCountdown(match, this.timeLimit);
+      this.overtime.start();
+    }
+  }
+
   public void cancel() {
     if (this.countdown != null) {
       this.countdown.cancel();
       this.countdown = null;
+    }
+    if (this.overtime != null) {
+      this.overtime.cancel();
+      this.overtime = null;
     }
   }
 }

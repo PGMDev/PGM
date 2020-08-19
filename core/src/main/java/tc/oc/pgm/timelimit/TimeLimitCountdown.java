@@ -19,7 +19,7 @@ public class TimeLimitCountdown extends MatchCountdown {
   private static final Sound CRESCENDO_SOUND =
       new Sound("portal.trigger", 1f, 0.78f); // Last few seconds
 
-  private final TimeLimit timeLimit;
+  protected final TimeLimit timeLimit;
 
   public TimeLimitCountdown(Match match, TimeLimit timeLimit) {
     super(match);
@@ -46,11 +46,15 @@ public class TimeLimitCountdown extends MatchCountdown {
     return this.timeLimit.getShow() && super.showBossBar();
   }
 
+  protected boolean playSounds() {
+    return this.timeLimit.getShow();
+  }
+
   @Override
   public void onTick(Duration remaining, Duration total) {
     super.onTick(remaining, total);
 
-    if (this.timeLimit.getShow()) {
+    if (this.playSounds()) {
       long secondsLeft = remaining.getSeconds();
       if (secondsLeft > 30) {
         // Beep for chat messages before the last 30 seconds
@@ -73,10 +77,19 @@ public class TimeLimitCountdown extends MatchCountdown {
     invalidateBossBar();
   }
 
+  protected boolean mayEnd() {
+    return timeLimit.getOvertime() == null || timeLimit.currentWinner(match) != null;
+  }
+
   @Override
   public void onEnd(Duration total) {
     super.onEnd(total);
-    this.getMatch().calculateVictory();
+    if (mayEnd()) {
+      this.getMatch().calculateVictory();
+    } else {
+      TimeLimitMatchModule tl = this.getMatch().getModule(TimeLimitMatchModule.class);
+      if (tl != null) tl.startOvertime();
+    }
     this.freeze(Duration.ZERO);
   }
 

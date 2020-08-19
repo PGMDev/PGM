@@ -14,7 +14,7 @@ public class SingleCountdownContext extends CountdownContext {
   @Override
   public void start(
       Countdown countdown, Duration duration, @Nullable Duration interval, int count) {
-    this.cancelAll();
+    this.cancelOthers(countdown);
     super.start(countdown, duration, interval, count);
   }
 

@@ -84,6 +84,8 @@ public class TimeLimitModule implements MapModule {
       return new TimeLimit(
           el.getAttributeValue("id"),
           TextParser.parseDuration(el.getTextNormalize()),
+          XMLUtils.parseDuration(el.getAttribute("overtime")),
+          XMLUtils.parseDuration(el.getAttribute("max-overtime")),
           parseVictoryCondition(factory, el.getAttribute("result")),
           XMLUtils.parseBoolean(el.getAttribute("show"), true));
     }
