@@ -4,15 +4,10 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.*;
 import java.time.Duration;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
@@ -1095,5 +1090,18 @@ public final class XMLUtils {
     int patch = parts.length < 3 ? 0 : parseNumber(node, parts[2], Integer.class);
 
     return new Version(major, minor, patch);
+  }
+
+  public static LocalDate parseDate(Node node) throws InvalidXMLException {
+    if (node == null) return null;
+
+    DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+
+    try {
+      return LocalDate.parse(node.getValueNormalize(), formatter);
+    } catch (DateTimeParseException exception) {
+      throw new InvalidXMLException(
+          "Invalid date '" + node.getValueNormalize() + "', expected format 'YYYY-MM-DD'", node);
+    }
   }
 }
