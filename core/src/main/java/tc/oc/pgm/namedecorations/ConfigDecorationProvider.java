@@ -3,6 +3,8 @@ package tc.oc.pgm.namedecorations;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.Config;
@@ -28,6 +30,25 @@ public class ConfigDecorationProvider implements NameDecorationProvider {
         .filter(g -> g.getSuffix() != null)
         .map(Config.Group::getSuffix)
         .collect(Collectors.joining());
+  }
+
+  @Override
+  public Component getPrefixComponent(UUID uuid) {
+    return generateFlair(groups(uuid), true);
+  }
+
+  @Override
+  public Component getSuffixComponent(UUID uuid) {
+    return generateFlair(groups(uuid), false);
+  }
+
+  private Component generateFlair(Stream<? extends Config.Group> flairs, boolean prefix) {
+    TextComponent.Builder builder = TextComponent.builder();
+    flairs
+        .filter(p -> prefix ? p.getPrefix() != null : p.getSuffix() != null)
+        .map(Config.Group::getFlair)
+        .forEach(flair -> builder.append(flair.getComponent(prefix)));
+    return builder.build();
   }
 
   private Stream<? extends Config.Group> groups(UUID uuid) {

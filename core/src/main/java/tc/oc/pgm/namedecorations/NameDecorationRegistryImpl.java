@@ -2,6 +2,9 @@ package tc.oc.pgm.namedecorations;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -13,6 +16,7 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
+import tc.oc.pgm.util.text.TextFormatter;
 
 public class NameDecorationRegistryImpl implements NameDecorationRegistry, Listener {
 
@@ -54,12 +58,31 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
         + ChatColor.WHITE;
   }
 
+  @Override
+  public Component getDecoratedNameComponent(Player player, Party party) {
+    return TextComponent.builder()
+        .append(getPrefixComponent(player.getUniqueId()))
+        .append(
+            player.getName(),
+            party == null ? TextColor.WHITE : TextFormatter.convert(party.getColor()))
+        .append(getSuffixComponent(player.getUniqueId()))
+        .build();
+  }
+
   public String getPrefix(UUID uuid) {
     return provider != null ? provider.getPrefix(uuid) : "";
   }
 
   public String getSuffix(UUID uuid) {
     return provider != null ? provider.getSuffix(uuid) : "";
+  }
+
+  public Component getPrefixComponent(UUID uuid) {
+    return provider != null ? provider.getPrefixComponent(uuid) : TextComponent.empty();
+  }
+
+  public Component getSuffixComponent(UUID uuid) {
+    return provider != null ? provider.getSuffixComponent(uuid) : TextComponent.empty();
   }
 
   @Override

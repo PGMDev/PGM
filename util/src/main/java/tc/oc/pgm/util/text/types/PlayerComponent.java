@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.text.types;
 
+import com.google.common.collect.Lists;
+import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.kyori.text.Component;
@@ -10,6 +12,7 @@ import net.kyori.text.event.HoverEvent;
 import net.kyori.text.event.HoverEvent.Action;
 import net.kyori.text.format.TextColor;
 import net.kyori.text.format.TextDecoration;
+import net.kyori.text.format.TextFormat;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -200,21 +203,32 @@ public interface PlayerComponent {
   static TextComponent.Builder stringToComponent(String str) {
     TextComponent.Builder component = TextComponent.builder();
     boolean isColor = false;
-    TextColor color = null;
+    TextFormat color = null;
+    List<TextFormat> decorations = Lists.newArrayList();
     for (int i = 0; i < str.length(); i++) {
       if (str.charAt(i) == ChatColor.COLOR_CHAR) {
         isColor = true;
         continue;
       }
-
       if (isColor) {
-        color = TextFormatter.convert(ChatColor.getByChar(str.charAt(i)));
+        TextFormat formatting = TextFormatter.convertFormat(ChatColor.getByChar(str.charAt(i)));
+        if (formatting instanceof TextColor) {
+          color = formatting;
+          decorations.clear();
+        } else {
+          decorations.add(formatting);
+        }
         isColor = false;
       } else {
-        component.append(String.valueOf(str.charAt(i)), color != null ? color : TextColor.WHITE);
+        TextComponent part =
+            TextComponent.of(
+                String.valueOf(str.charAt(i)),
+                (color != null ? TextColor.class.cast(color) : TextColor.WHITE));
+        for (TextFormat decoration : decorations)
+          part = part.decoration(TextDecoration.class.cast(decoration), true);
+        component.append(part);
       }
     }
-
     return component;
   }
 

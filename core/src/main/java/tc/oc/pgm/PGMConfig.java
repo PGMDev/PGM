@@ -593,18 +593,14 @@ public final class PGMConfig implements Config {
 
   private static class Group implements Config.Group {
     private final String id;
-    private final String prefix;
-    private final String suffix;
+    private final Flair flair;
     private final Permission permission;
     private final Permission observerPermission;
     private final Permission participantPermission;
 
     public Group(ConfigurationSection config) throws TextException {
       this.id = config.getName();
-      final String prefix = config.getString("prefix");
-      this.prefix = prefix == null ? null : parseComponentLegacy(prefix);
-      final String suffix = config.getString("suffix");
-      this.suffix = suffix == null ? null : parseComponentLegacy(suffix);
+      this.flair = new Flair(config);
       final PermissionDefault def =
           id.equalsIgnoreCase("op")
               ? PermissionDefault.OP
@@ -660,6 +656,47 @@ public final class PGMConfig implements Config {
     }
 
     @Override
+    public Flair getFlair() {
+      return flair;
+    }
+  }
+
+  private static class Flair implements Config.Flair {
+
+    private String prefix;
+    private String suffix;
+    private String displayName;
+    private String description;
+    private String clickLink;
+    private Component prefixOverride;
+    private Component suffixOverride;
+
+    public Flair(ConfigurationSection config) {
+      final String prefix = config.getString("prefix");
+      this.prefix = prefix == null ? null : parseComponentLegacy(prefix);
+
+      final String suffix = config.getString("suffix");
+      this.suffix = suffix == null ? null : parseComponentLegacy(suffix);
+
+      final String name = config.getString("display-name");
+      this.displayName = name == null ? null : parseComponentLegacy(name);
+
+      final String desc = config.getString("description");
+      this.description = desc == null ? null : parseComponentLegacy(desc);
+
+      final String link = config.getString("click-link");
+      this.clickLink = link == null ? null : parseComponentLegacy(link);
+
+      final String prefixComp = config.getString("prefix-component");
+      this.prefixOverride =
+          prefixComp == null || prefixComp.isEmpty() ? null : parseComponent(prefixComp);
+
+      final String suffixComp = config.getString("suffix-component");
+      this.suffixOverride =
+          suffixComp == null || suffixComp.isEmpty() ? null : parseComponent(suffixComp);
+    }
+
+    @Override
     public String getPrefix() {
       return prefix;
     }
@@ -667,6 +704,31 @@ public final class PGMConfig implements Config {
     @Override
     public String getSuffix() {
       return suffix;
+    }
+
+    @Override
+    public String getDescription() {
+      return description;
+    }
+
+    @Override
+    public String getDisplayName() {
+      return displayName;
+    }
+
+    @Override
+    public String getClickLink() {
+      return clickLink;
+    }
+
+    @Override
+    public Component getPrefixOverride() {
+      return prefixOverride;
+    }
+
+    @Override
+    public Component getSuffixOverride() {
+      return suffixOverride;
     }
   }
 

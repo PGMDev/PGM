@@ -6,6 +6,12 @@ import java.util.Map;
 import java.util.logging.Level;
 import javax.annotation.Nullable;
 import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.event.ClickEvent;
+import net.kyori.text.event.HoverEvent;
+import net.kyori.text.format.TextColor;
+import net.kyori.text.format.TextDecoration;
 import org.bukkit.permissions.Permission;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
 
@@ -258,12 +264,21 @@ public interface Config {
     String getId();
 
     /**
+     * Gets a flair object which holds all prefix/suffix related data
+     *
+     * @return A {@link Flair} for this group
+     */
+    Flair getFlair();
+
+    /**
      * Gets the prefix to show next to each player's name.
      *
      * @return A chat prefix, or null for none.
      */
     @Nullable
-    String getPrefix();
+    default String getPrefix() {
+      return getFlair().getPrefix();
+    }
 
     /**
      * Gets the suffix to show next to each player's name.
@@ -271,7 +286,9 @@ public interface Config {
      * @return A chat suffix, or null for none.
      */
     @Nullable
-    String getSuffix();
+    default String getSuffix() {
+      return getFlair().getSuffix();
+    }
 
     /**
      * Gets the permission node required to be included in this group.
@@ -293,6 +310,53 @@ public interface Config {
      * @return A permissions map.
      */
     Permission getParticipantPermission();
+  }
+
+  interface Flair {
+
+    String getPrefix();
+
+    String getSuffix();
+
+    String getDescription();
+
+    String getDisplayName();
+
+    String getClickLink();
+
+    Component getPrefixOverride();
+
+    Component getSuffixOverride();
+
+    default Component getComponent(boolean prefix) {
+      if (prefix ? getPrefixOverride() != null : getSuffixOverride() != null) {
+        return prefix ? getPrefixOverride() : getSuffixOverride();
+      }
+      TextComponent.Builder hover = TextComponent.builder().append(getDisplayName());
+      if (getDescription() != null && !getDescription().isEmpty()) {
+        hover.append("\n").append(getDescription());
+      }
+
+      if (getClickLink() != null && !getClickLink().isEmpty()) {
+        Component clickLink =
+            TranslatableComponent.of(
+                "chat.clickLink",
+                TextColor.DARK_AQUA,
+                TextComponent.of(getClickLink(), TextColor.AQUA, TextDecoration.UNDERLINED));
+        hover.append("\n").append(clickLink);
+      }
+
+      TextComponent.Builder component =
+          TextComponent.builder()
+              .append(prefix ? getPrefix() : getSuffix())
+              .hoverEvent(HoverEvent.showText(hover.build()));
+
+      if (getClickLink() != null && !getClickLink().isEmpty()) {
+        component.clickEvent(ClickEvent.openUrl(getClickLink()));
+      }
+
+      return component.build();
+    }
   }
 
   /**
