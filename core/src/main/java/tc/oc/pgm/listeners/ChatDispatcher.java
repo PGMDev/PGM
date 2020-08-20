@@ -245,7 +245,11 @@ public class ChatDispatcher implements Listener {
         message,
         formatPrivateMessage("misc.from", matchReceiver.getBukkit()),
         getChatFormat(
-            TranslatableComponent.of("misc.from", TextColor.GRAY, TextDecoration.ITALIC),
+            TextComponent.builder()
+                .append(
+                    TranslatableComponent.of("misc.from", TextColor.GRAY, TextDecoration.ITALIC))
+                .append(" ")
+                .build(),
             sender,
             message),
         viewer -> viewer.getBukkit().equals(receiver),
@@ -258,8 +262,11 @@ public class ChatDispatcher implements Listener {
         message,
         formatPrivateMessage("misc.to", sender.getBukkit()),
         getChatFormat(
-            TranslatableComponent.of("misc.to", TextColor.GRAY, TextDecoration.ITALIC),
-            sender,
+            TextComponent.builder()
+                .append(TranslatableComponent.of("misc.to", TextColor.GRAY, TextDecoration.ITALIC))
+                .append(" ")
+                .build(),
+            manager.getPlayer(receiver),
             message),
         viewer -> viewer.getBukkit().equals(sender.getBukkit()),
         null);
