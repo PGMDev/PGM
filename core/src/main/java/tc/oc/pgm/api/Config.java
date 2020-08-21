@@ -332,18 +332,27 @@ public interface Config {
       if (prefix ? getPrefixOverride() != null : getSuffixOverride() != null) {
         return prefix ? getPrefixOverride() : getSuffixOverride();
       }
-      TextComponent.Builder hover = TextComponent.builder().append(getDisplayName());
+      TextComponent.Builder hover = TextComponent.builder();
+      boolean addNewline = false;
+      if (getDisplayName() != null && !getDisplayName().isEmpty()) {
+        addNewline = true;
+        hover.append(getDisplayName());
+      }
       if (getDescription() != null && !getDescription().isEmpty()) {
-        hover.append("\n").append(getDescription());
+        if (addNewline) hover.append(TextComponent.newline());
+        addNewline = true;
+        hover.append(getDescription());
       }
 
       if (getClickLink() != null && !getClickLink().isEmpty()) {
+        if (addNewline) hover.append(TextComponent.newline());
+
         Component clickLink =
             TranslatableComponent.of(
                 "chat.clickLink",
                 TextColor.DARK_AQUA,
                 TextComponent.of(getClickLink(), TextColor.AQUA, TextDecoration.UNDERLINED));
-        hover.append("\n").append(clickLink);
+        hover.append(clickLink);
       }
 
       TextComponent.Builder component =
