@@ -473,6 +473,7 @@ public class ChatDispatcher implements Listener {
 
   private Component getChatFormat(@Nullable Component prefix, MatchPlayer player, String message) {
     Component msg = TextComponent.of(message != null ? message : "");
+    if (player.isVanished()) prefix = ADMIN_CHAT_PREFIX;
     if (prefix == null)
       return TextComponent.builder()
           .append("<", TextColor.WHITE)
