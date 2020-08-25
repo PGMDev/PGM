@@ -143,9 +143,9 @@ groups:
     #  "-" denotes a negative permission.
     #  "+" denotes a positive permission.
     permissions:
-      - "-bukkit.command.kill"
-      - "-bukkit.command.me"
-      - "-bukkit.command.tell"
+      - "-minecraft.command.kill"
+      - "-minecraft.command.me"
+      - "-minecraft.command.tell"
       - "-worldedit.navigation.ceiling"
       - "-worldedit.navigation.up"
       - "-worldedit.calc"
