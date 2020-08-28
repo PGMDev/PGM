@@ -132,7 +132,7 @@ public class VotingCommand {
     vote.getOptions().clear();
 
     if (maps.isEmpty()) {
-      viewer.sendWarning(TranslatableComponent.of("map.noMapsFound"));
+      viewer.sendWarning(TranslatableComponent.of("vote.noMapsFound"));
     } else {
       ChatDispatcher.broadcastAdminChatMessage(clearedMsg, match);
     }

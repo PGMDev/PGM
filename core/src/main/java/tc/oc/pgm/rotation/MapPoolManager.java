@@ -52,7 +52,7 @@ public class MapPoolManager implements MapOrder {
   private MapInfo overriderMap;
 
   /** Options related to voting pools, allows for custom voting @see {@link VotingPool} * */
-  private VotingPoolOptions options;
+  private CustomVotingPoolOptions options;
 
   private Datastore database;
 
@@ -60,7 +60,7 @@ public class MapPoolManager implements MapOrder {
     this.logger = logger;
     this.mapPoolsFile = mapPoolsFile;
     this.database = database;
-    this.options = new VotingPoolOptions();
+    this.options = new CustomVotingPoolOptions();
 
     if (!mapPoolsFile.exists()) {
       try {
@@ -216,7 +216,7 @@ public class MapPoolManager implements MapOrder {
     return overriderMap;
   }
 
-  public VotingPoolOptions getCustomVoteOptions() {
+  public CustomVotingPoolOptions getCustomVoteOptions() {
     return options;
   }
 

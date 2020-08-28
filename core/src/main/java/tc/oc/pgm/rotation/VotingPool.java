@@ -35,7 +35,7 @@ public class VotingPool extends MapPool {
       MapPoolManager manager,
       ConfigurationSection section,
       String name,
-      @Nullable VotingPoolOptions existingOptions) {
+      @Nullable CustomVotingPoolOptions existingOptions) {
     super(manager, section, name);
     VOTE_SIZE = Math.min(MAX_VOTE_OPTIONS, maps.size() - 1);
     ADJUST_FACTOR = 1d / (maps.size() * MAX_VOTE_OPTIONS);
@@ -117,7 +117,7 @@ public class VotingPool extends MapPool {
             TimeUnit.SECONDS);
   }
 
-  public VotingPoolOptions getOptions() {
+  public CustomVotingPoolOptions getOptions() {
     return manager.getCustomVoteOptions();
   }
 }

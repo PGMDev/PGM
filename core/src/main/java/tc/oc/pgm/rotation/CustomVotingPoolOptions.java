@@ -1,12 +1,12 @@
 package tc.oc.pgm.rotation;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import tc.oc.pgm.api.map.MapInfo;
 
-public class VotingPoolOptions {
+public class CustomVotingPoolOptions {
 
   // Set of maps to be used in custom vote selection
   private Set<MapInfo> customVoteMaps;
@@ -14,7 +14,7 @@ public class VotingPoolOptions {
   // Whether custom map selection should replace existing entries
   private boolean replace;
 
-  public VotingPoolOptions() {
+  public CustomVotingPoolOptions() {
     this.customVoteMaps = Sets.newHashSet();
     this.replace = true;
   }
@@ -57,8 +57,7 @@ public class VotingPoolOptions {
   }
 
   public Map<MapInfo, Double> getCustomVoteMapWeighted() {
-    Map<MapInfo, Double> maps = Maps.newHashMap();
-    customVoteMaps.forEach(map -> maps.put(map, VotingPool.DEFAULT_WEIGHT));
-    return maps;
+    return customVoteMaps.stream()
+        .collect(Collectors.toMap(map -> map, x -> VotingPool.DEFAULT_WEIGHT));
   }
 }
