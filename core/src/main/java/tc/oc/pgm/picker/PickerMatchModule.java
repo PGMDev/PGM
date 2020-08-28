@@ -50,6 +50,7 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.join.GenericJoinResult;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.join.JoinResult;
+import tc.oc.pgm.match.Observers;
 import tc.oc.pgm.spawns.events.DeathKitApplyEvent;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.teams.Team;
@@ -237,6 +238,13 @@ public class PickerMatchModule implements MatchModule, Listener {
         Lists.newArrayList(
             ChatColor.DARK_PURPLE
                 + TextTranslations.translate("picker.tooltip", player.getBukkit())));
+
+    // Color the leather helmet to match player team
+    if (!(player.getParty() instanceof Observers)) {
+      LeatherArmorMeta armorMeta = (LeatherArmorMeta) meta;
+      armorMeta.setColor(player.getParty().getFullColor());
+      meta = armorMeta;
+    }
 
     stack.setItemMeta(meta);
     return stack;
