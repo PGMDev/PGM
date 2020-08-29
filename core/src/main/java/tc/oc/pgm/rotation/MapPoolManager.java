@@ -51,12 +51,16 @@ public class MapPoolManager implements MapOrder {
   /** When a {@link MapInfo} is manually set next, it overrides the rotation order * */
   private MapInfo overriderMap;
 
+  /** Options related to voting pools, allows for custom voting @see {@link VotingPool} * */
+  private CustomVotingPoolOptions options;
+
   private Datastore database;
 
   public MapPoolManager(Logger logger, File mapPoolsFile, Datastore database) {
     this.logger = logger;
     this.mapPoolsFile = mapPoolsFile;
     this.database = database;
+    this.options = new CustomVotingPoolOptions();
 
     if (!mapPoolsFile.exists()) {
       try {
@@ -210,6 +214,10 @@ public class MapPoolManager implements MapOrder {
 
   protected MapInfo getOverriderMap() {
     return overriderMap;
+  }
+
+  public CustomVotingPoolOptions getCustomVoteOptions() {
+    return options;
   }
 
   @Override

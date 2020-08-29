@@ -52,12 +52,12 @@ public class VotingCommand {
             UsernameFormatUtils.formatStaffName(sender, match),
             map.getStyledName(MapNameStyle.COLOR));
 
-    if (vote.isCustomMapSelected(map)) {
+    if (vote.getOptions().isAdded(map)) {
       viewer.sendWarning(addMessage);
       return;
     }
 
-    if (vote.addCustomVoteMap(map)) {
+    if (vote.getOptions().addVote(map)) {
       ChatDispatcher.broadcastAdminChatMessage(addMessage, match);
     } else {
       viewer.sendWarning(TranslatableComponent.of("vote.limit", TextColor.RED));
@@ -77,7 +77,7 @@ public class VotingCommand {
       Match match)
       throws CommandException {
     VotingPool vote = getVotingPool(sender, mapOrder);
-    if (vote.removeCustomVote(map)) {
+    if (vote.getOptions().removeMap(map)) {
       ChatDispatcher.broadcastAdminChatMessage(
           TranslatableComponent.of(
               "vote.remove",
@@ -99,7 +99,7 @@ public class VotingCommand {
     VotingPool vote = getVotingPool(sender, mapOrder);
     Component voteModeName =
         TranslatableComponent.of(
-            vote.toggleVoteMode() ? "vote.mode.replace" : "vote.mode.create",
+            vote.getOptions().toggleMode() ? "vote.mode.replace" : "vote.mode.create",
             TextColor.LIGHT_PURPLE);
     ChatDispatcher.broadcastAdminChatMessage(
         TranslatableComponent.of(
@@ -114,12 +114,12 @@ public class VotingCommand {
       aliases = {"clear"},
       desc = "Clear all custom map selections from the next vote",
       perms = Permissions.SETNEXT)
-  public void clearMaps(CommandSender sender, Match match, MapOrder mapOrder)
+  public void clearMaps(Audience viewer, CommandSender sender, Match match, MapOrder mapOrder)
       throws CommandException {
     VotingPool vote = getVotingPool(sender, mapOrder);
 
     List<Component> maps =
-        vote.getCustomVoteMaps().stream()
+        vote.getOptions().getCustomVoteMaps().stream()
             .map(mi -> mi.getStyledName(MapNameStyle.COLOR))
             .collect(Collectors.toList());
     Component clearedMsg =
@@ -129,9 +129,13 @@ public class VotingCommand {
             UsernameFormatUtils.formatStaffName(sender, match),
             TextFormatter.list(maps, TextColor.GRAY));
 
-    vote.getCustomVoteMaps().clear();
+    vote.getOptions().clear();
 
-    ChatDispatcher.broadcastAdminChatMessage(clearedMsg, match);
+    if (maps.isEmpty()) {
+      viewer.sendWarning(TranslatableComponent.of("vote.noMapsFound"));
+    } else {
+      ChatDispatcher.broadcastAdminChatMessage(clearedMsg, match);
+    }
   }
 
   @Command(
@@ -141,13 +145,13 @@ public class VotingCommand {
       throws CommandException {
     VotingPool vote = getVotingPool(sender, mapOrder);
 
-    int currentMaps = vote.getCustomVoteMaps().size();
+    int currentMaps = vote.getOptions().getCustomVoteMaps().size();
     TextColor listNumColor =
         currentMaps >= VotingPool.MIN_CUSTOM_VOTE_OPTIONS
             ? currentMaps < VotingPool.MAX_VOTE_OPTIONS ? TextColor.GREEN : TextColor.YELLOW
             : TextColor.RED;
 
-    String modeKey = vote.getVoteMode() ? "replace" : "create";
+    String modeKey = vote.getOptions().isReplace() ? "replace" : "create";
     Component mode =
         TranslatableComponent.of(String.format("vote.mode.%s", modeKey), TextColor.LIGHT_PURPLE)
             .hoverEvent(
@@ -172,7 +176,7 @@ public class VotingCommand {
     viewer.sendMessage(listMsg);
 
     int index = 1;
-    for (MapInfo mi : vote.getCustomVoteMaps()) {
+    for (MapInfo mi : vote.getOptions().getCustomVoteMaps()) {
       Component indexedName =
           TextComponent.builder()
               .append(Integer.toString(index), TextColor.YELLOW)
@@ -192,7 +196,7 @@ public class VotingCommand {
         VotingPool votePool = (VotingPool) manager.getActiveMapPool();
         if (votePool.getCurrentPoll() != null) {
           throw new CommandException(
-              ChatColor.RED + TextTranslations.translate("vote.disabled", sender));
+              ChatColor.RED + TextTranslations.translate("vote.modify.disallow", sender));
         }
         return votePool;
       }
