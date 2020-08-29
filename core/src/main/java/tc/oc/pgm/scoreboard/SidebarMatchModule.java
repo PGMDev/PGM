@@ -533,12 +533,11 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
       final Component footer = PGM.get().getConfiguration().getMatchFooter();
       if (footer != null) {
+        // Only shows footer if there are one or two rows available
         if (rows.size() < MAX_ROWS - 2) {
           rows.add("");
-          rows.add(LegacyComponentSerializer.legacy().serialize(footer));
-        } else {
-          rows.set(MAX_ROWS - 2, LegacyComponentSerializer.legacy().serialize(footer));
         }
+        rows.add(LegacyComponentSerializer.legacy().serialize(footer));
       }
 
       // Need at least one row for the sidebar to show
