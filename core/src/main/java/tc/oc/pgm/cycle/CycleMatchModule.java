@@ -32,6 +32,8 @@ public class CycleMatchModule implements MatchModule, Listener {
 
   public void startCountdown(@Nullable Duration duration) {
     if (duration == null) duration = PGM.get().getConfiguration().getCycleTime();
+    // In case the cycle config is set to -1 used to disable autocycle
+    if (duration.isNegative()) duration = Duration.ofSeconds(30);
     match.finish();
     match.getCountdown().start(new CycleCountdown(match), duration);
   }
