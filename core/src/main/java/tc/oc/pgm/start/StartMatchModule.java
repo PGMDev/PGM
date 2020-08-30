@@ -236,6 +236,8 @@ public class StartMatchModule implements MatchModule, Listener {
       @Nullable Duration duration, @Nullable Duration huddle, boolean force) {
     final Config config = PGM.get().getConfiguration();
     if (duration == null) duration = config.getStartTime();
+    // In case the start config is set to -1 used to disable autostart
+    if (duration.isNegative()) duration = Duration.ofSeconds(30);
     if (huddle == null) huddle = config.getHuddleTime();
 
     match.getLogger().fine("STARTING countdown");

@@ -5,7 +5,6 @@ import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
 import java.time.Duration;
 import javax.annotation.Nullable;
-import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
@@ -22,7 +21,6 @@ public final class CycleCommand {
       perms = Permissions.START)
   public void cycle(
       Match match,
-      Config config,
       MapOrder mapOrder,
       @Nullable Duration duration,
       @Default("next") MapInfo map,
@@ -35,9 +33,7 @@ public final class CycleCommand {
       mapOrder.setNextMap(map);
     }
 
-    match
-        .needModule(CycleMatchModule.class)
-        .startCountdown(duration == null ? config.getCycleTime() : duration);
+    match.needModule(CycleMatchModule.class).startCountdown(duration);
   }
 
   @Command(
@@ -47,11 +43,7 @@ public final class CycleCommand {
       flags = "f",
       perms = Permissions.START)
   public void recycle(
-      Match match,
-      Config config,
-      MapOrder mapOrder,
-      @Nullable Duration duration,
-      @Switch('f') boolean force) {
-    cycle(match, config, mapOrder, duration, match.getMap(), force);
+      Match match, MapOrder mapOrder, @Nullable Duration duration, @Switch('f') boolean force) {
+    cycle(match, mapOrder, duration, match.getMap(), force);
   }
 }
