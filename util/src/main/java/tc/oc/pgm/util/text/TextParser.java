@@ -7,8 +7,11 @@ import static tc.oc.pgm.util.text.TextException.unknown;
 
 import com.google.common.collect.Range;
 import com.google.gson.JsonSyntaxException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -471,8 +474,9 @@ public final class TextParser {
 
     // Driver uris will always start with "jdbc:"
     try {
-      return DriverManager.getConnection("jdbc:" + uri.toString());
-    } catch (SQLException e) {
+      return DriverManager.getConnection(
+          URLDecoder.decode("jdbc:" + uri.toString(), StandardCharsets.UTF_8.name()));
+    } catch (UnsupportedEncodingException | SQLException e) {
       throw unknown(e); // TODO: wrap common database errors with more friendly messages
     }
   }
