@@ -33,8 +33,8 @@ public class TabView {
   private final TabEntry[] slots, rendered;
   private BaseComponent[] header, footer;
 
-  // Only used for legacy players
-  private final @Nullable TabDisplay display;
+  // Only used for legacy players, initialized on enable
+  private @Nullable TabDisplay display = null;
 
   public TabView(Player viewer) {
     this.viewer = viewer;
@@ -45,11 +45,6 @@ public class TabView {
     // Two extra slots for header/footer
     this.slots = new TabEntry[this.size + 2];
     this.rendered = new TabEntry[this.size + 2];
-
-    this.display =
-        ViaUtils.getProtocolVersion(viewer) < ViaUtils.VERSION_1_8
-            ? new TabDisplay(viewer, WIDTH)
-            : null;
   }
 
   private void assertEnabled() {
@@ -77,6 +72,10 @@ public class TabView {
   public void enable(TabManager manager) {
     if (this.manager != null) disable();
     this.manager = manager;
+
+    if (ViaUtils.getProtocolVersion(viewer) < ViaUtils.VERSION_1_8)
+      this.display = new TabDisplay(viewer, WIDTH);
+
     this.setup();
 
     this.invalidateLayout();
