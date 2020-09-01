@@ -30,20 +30,18 @@ public class MapmakerMatchModule implements MatchModule, Listener {
   }
 
   @EventHandler(ignoreCancelled = true)
-  public void onPlayerJoinMatchEvent(final MatchPlayerAddEvent event) {
+  public void onMatchPlayerAdd(final MatchPlayerAddEvent event) {
     MatchPlayer player = event.getPlayer();
+    UUID uuid = player.getId();
     PermissionAttachment attachment =
         player.getBukkit().addAttachment(PGM.get(), Permissions.MAPMAKER, true);
-    if (authors.stream().noneMatch(c -> c.isPlayer(player.getId()))) {
+    if (authors.stream().noneMatch(c -> c.isPlayer(uuid))) {
       attachment.remove();
     } else {
-      attachmentMap.put(player.getId(), attachment);
+      attachmentMap.put(uuid, attachment);
     }
 
-    event
-        .getMatch()
-        .callEvent(
-            new NameDecorationChangeEvent(player.getId())); // Refresh prefixes for the player
+    match.callEvent(new NameDecorationChangeEvent(uuid)); // Refresh prefixes for the player
   }
 
   @Override
