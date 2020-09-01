@@ -54,8 +54,10 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
     TextComponent.Builder content = TextComponent.builder();
 
     MatchPlayer viewer = match.getPlayer(view.getViewer());
+    boolean timeOnly = viewer != null && viewer.isLegacy();
 
-    if (viewer != null
+    if (!timeOnly
+        && viewer != null
         && viewer.getParty() instanceof Competitor
         && (match.isRunning() || match.isFinished())
         && viewer.getSettings().getValue(SettingKey.STATS).equals(SettingValue.STATS_ON)) {
@@ -66,7 +68,7 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
     final Component leftContent = PGM.get().getConfiguration().getLeftTablistText();
     final Component rightContent = PGM.get().getConfiguration().getRightTablistText();
 
-    if (leftContent != null) {
+    if (!timeOnly && leftContent != null) {
       content.append(leftContent.colorIfAbsent(TextColor.WHITE)).append(" - ", TextColor.DARK_GRAY);
     }
 
@@ -77,7 +79,7 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
             TimeUtils.formatDuration(match.getDuration()),
             this.match.isRunning() ? TextColor.GREEN : TextColor.GOLD);
 
-    if (rightContent != null) {
+    if (!timeOnly && rightContent != null) {
       content
           .append(" - ", TextColor.DARK_GRAY)
           .append(rightContent.colorIfAbsent(TextColor.WHITE));
