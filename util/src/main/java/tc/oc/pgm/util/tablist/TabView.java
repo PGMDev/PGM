@@ -1,5 +1,6 @@
 package tc.oc.pgm.util.tablist;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -7,6 +8,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import tc.oc.pgm.util.bukkit.ViaUtils;
 
 /**
  * A single player's tab list. When this view is enabled, it creates a scoreboard team for each slot
@@ -31,6 +33,9 @@ public class TabView {
   private final TabEntry[] slots, rendered;
   private BaseComponent[] header, footer;
 
+  // Only used for legacy players
+  private final @Nullable TabDisplay display;
+
   public TabView(Player viewer) {
     this.viewer = viewer;
     this.size = WIDTH * HEIGHT;
@@ -40,6 +45,11 @@ public class TabView {
     // Two extra slots for header/footer
     this.slots = new TabEntry[this.size + 2];
     this.rendered = new TabEntry[this.size + 2];
+
+    this.display =
+        ViaUtils.getProtocolVersion(viewer) < ViaUtils.VERSION_1_8
+            ? new TabDisplay(viewer, WIDTH)
+            : null;
   }
 
   private void assertEnabled() {
@@ -193,6 +203,11 @@ public class TabView {
   public void render() {
     if (this.manager == null) return;
 
+    if (this.display != null) {
+      renderLegacy();
+      return;
+    }
+
     TabRender render = new TabRender(this);
     this.renderLayout(render);
     this.renderContent(render);
@@ -201,8 +216,37 @@ public class TabView {
     render.finish();
   }
 
+  private void renderLegacy() {
+    if (this.manager == null || display == null) return;
+
+    if (this.dirtyLayout || this.dirtyContent) {
+      this.dirtyLayout = this.dirtyContent = false;
+
+      // X & Y are transposed in legacy versions, gotta convert
+      for (int x = 0; x < WIDTH; x++) {
+        for (int y = 0; y < HEIGHT; y++) {
+          int i = slotIndex(x, y);
+
+          if (this.slots[i] == this.rendered[i] && !this.slots[i].isDirty(this)) continue;
+          this.rendered[i] = this.slots[i];
+
+          this.display.set(x, y, toPlain(this.rendered[i].getContent(this)));
+        }
+      }
+    }
+    this.markSlotsClean();
+  }
+
+  private String toPlain(BaseComponent[] components) {
+    StringBuilder bl = new StringBuilder();
+    for (BaseComponent component : components) {
+      bl.append(component.toLegacyText());
+    }
+    return bl.toString();
+  }
+
   public void renderPing() {
-    if (this.manager == null) return;
+    if (this.manager == null || this.display != null) return;
 
     TabRender render = new TabRender(this);
 
@@ -216,7 +260,7 @@ public class TabView {
   }
 
   public void renderLayout(TabRender render) {
-    if (this.manager == null) return;
+    if (this.manager == null || this.display != null) return;
 
     if (this.dirtyLayout) {
       this.dirtyLayout = false;
@@ -265,7 +309,7 @@ public class TabView {
   }
 
   public void renderContent(TabRender render) {
-    if (this.manager == null) return;
+    if (this.manager == null || this.display != null) return;
 
     if (this.dirtyContent) {
       this.dirtyContent = false;
@@ -286,7 +330,7 @@ public class TabView {
   }
 
   public void renderHeaderFooter(TabRender render, boolean force) {
-    if (this.manager == null) return;
+    if (this.manager == null || this.display != null) return;
 
     if (force || this.dirtyHeader || this.dirtyFooter) {
       if (force || this.dirtyHeader) {
@@ -312,6 +356,13 @@ public class TabView {
       this.slots[slot].addToView(this);
     }
 
+    if (display != null) {
+      display.setup();
+      System.arraycopy(this.slots, 0, this.rendered, 0, this.size);
+
+      return;
+    }
+
     TabRender render = new TabRender(this);
 
     for (int index = 0; index < this.size; index++) {
@@ -325,6 +376,14 @@ public class TabView {
 
   private void tearDown() {
     if (this.manager == null) return;
+
+    if (this.display != null) {
+      Arrays.fill(this.slots, null);
+      Arrays.fill(this.rendered, null);
+      display.tearDown();
+
+      return;
+    }
 
     TabRender render = new TabRender(this);
 
@@ -341,7 +400,7 @@ public class TabView {
   }
 
   protected void refreshEntry(TabEntry entry) {
-    if (this.manager == null) return;
+    if (this.manager == null || this.display != null) return;
 
     TabRender render = new TabRender(this);
     int slot = getSlot(entry);
@@ -354,7 +413,7 @@ public class TabView {
   }
 
   protected void updateFakeEntity(TabEntry entry) {
-    if (this.manager == null) return;
+    if (this.manager == null || this.display != null) return;
 
     TabRender render = new TabRender(this);
     render.updateFakeEntity(entry, false);
@@ -362,7 +421,7 @@ public class TabView {
   }
 
   private void respawnFakeEntities() {
-    if (this.manager == null) return;
+    if (this.manager == null || this.display != null) return;
 
     this.viewer
         .getServer()

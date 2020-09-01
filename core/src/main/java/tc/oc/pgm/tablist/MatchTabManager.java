@@ -41,6 +41,7 @@ public class MatchTabManager extends TabManager implements Listener {
 
   private final Map<Team, TeamTabEntry> teamEntries;
   private final Map<Match, MapTabEntry> mapEntries;
+  private final Map<Match, TabEntry[]> legacyHeaderEntries;
   private final Map<Match, MatchFooterTabEntry> footerEntries;
   private final Map<Match, FreeForAllTabEntry> freeForAllEntries;
 
@@ -53,10 +54,13 @@ public class MatchTabManager extends TabManager implements Listener {
         PlayerTabEntry::new,
         TeamTabEntry::new,
         MapTabEntry::new,
+        MatchTabManager::headerFactory,
         MatchFooterTabEntry::new,
         FreeForAllTabEntry::new);
   }
 
+  @Deprecated
+  // Kept for compatibility until next release
   public MatchTabManager(
       Plugin plugin,
       Function<Player, ? extends PlayerTabEntry> playerProvider,
@@ -64,10 +68,29 @@ public class MatchTabManager extends TabManager implements Listener {
       Function<Match, ? extends MapTabEntry> headerProvider,
       Function<Match, ? extends MatchFooterTabEntry> footerProvider,
       Function<Match, ? extends FreeForAllTabEntry> ffaProvider) {
+    this(
+        plugin,
+        playerProvider,
+        teamProvider,
+        headerProvider,
+        MatchTabManager::headerFactory,
+        footerProvider,
+        ffaProvider);
+  }
+
+  public MatchTabManager(
+      Plugin plugin,
+      Function<Player, ? extends PlayerTabEntry> playerProvider,
+      Function<Team, ? extends TeamTabEntry> teamProvider,
+      Function<Match, ? extends MapTabEntry> headerProvider,
+      Function<Match, ? extends TabEntry[]> legacyHeaderProvider,
+      Function<Match, ? extends MatchFooterTabEntry> footerProvider,
+      Function<Match, ? extends FreeForAllTabEntry> ffaProvider) {
     super(plugin, MatchTabView::new, playerProvider);
 
     teamEntries = new DefaultMapAdapter<>(teamProvider, true);
     mapEntries = new DefaultMapAdapter<>(headerProvider, true);
+    legacyHeaderEntries = new DefaultMapAdapter<>(legacyHeaderProvider, true);
     footerEntries = new DefaultMapAdapter<>(footerProvider, true);
     freeForAllEntries = new DefaultMapAdapter<>(ffaProvider, true);
 
@@ -79,6 +102,15 @@ public class MatchTabManager extends TabManager implements Listener {
     } else {
       PlayerTabEntry.setShowRealPing(false);
     }
+  }
+
+  protected static TabEntry[] headerFactory(Match match) {
+    return new TabEntry[] {
+      new MapTabEntry(match),
+      new AuthorTabEntry(match, 0),
+      new AuthorTabEntry(match, 1),
+      new MatchFooterTabEntry(match)
+    };
   }
 
   public void disable() {
@@ -141,6 +173,10 @@ public class MatchTabManager extends TabManager implements Listener {
     return this.mapEntries.get(match);
   }
 
+  public TabEntry[] getHeaderEntries(Match match) {
+    return this.legacyHeaderEntries.get(match);
+  }
+
   public MatchFooterTabEntry getFooterEntry(Match match) {
     return this.footerEntries.get(match);
   }
@@ -177,8 +213,7 @@ public class MatchTabManager extends TabManager implements Listener {
   private void tryEnable(Player player) {
     if (!player.isOnline()) return;
     MatchTabView view = getViewOrNull(player);
-    if (view == null || ViaUtils.getProtocolVersion(player) < ViaUtils.VERSION_1_8) return;
-    view.enable(this);
+    if (view != null) view.enable(this);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -191,6 +226,7 @@ public class MatchTabManager extends TabManager implements Listener {
     }
     this.freeForAllEntries.remove(event.getMatch());
     this.mapEntries.remove(event.getMatch());
+    this.legacyHeaderEntries.remove(event.getMatch());
     this.footerEntries.remove(event.getMatch());
   }
 

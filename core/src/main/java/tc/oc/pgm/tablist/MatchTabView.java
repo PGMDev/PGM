@@ -35,6 +35,7 @@ public class MatchTabView extends TabView implements Listener {
   private Match match;
   private @Nullable TeamMatchModule tmm;
   private MatchPlayer matchPlayer;
+  private boolean isLegacy;
   private PlayerOrder playerOrder;
   private TeamOrder teamOrder;
 
@@ -101,13 +102,19 @@ public class MatchTabView extends TabView implements Listener {
     }
   }
 
+  public int getHeader() {
+    return isLegacy ? 2 : 0;
+  }
+
   @Override
   public void render() {
     if (this.manager == null) return;
 
     if (this.match != null && this.isLayoutDirty()) {
-      this.setHeader(this.getManager().getMapEntry(this.match));
-      this.setFooter(this.getManager().getFooterEntry(this.match));
+      if (!isLegacy) {
+        this.setHeader(this.getManager().getMapEntry(this.match));
+        this.setFooter(this.getManager().getFooterEntry(this.match));
+      }
 
       // Number of players/staff on observers
       int observingPlayers = 0;
@@ -119,7 +126,7 @@ public class MatchTabView extends TabView implements Listener {
         }
       }
 
-      int availableRows = this.getHeight();
+      int availableRows = this.getHeight() - this.getHeader();
       int observerRows;
 
       if (tmm != null) {
@@ -131,7 +138,7 @@ public class MatchTabView extends TabView implements Listener {
 
         int columnsPerTeam = Math.max(1, this.getWidth() / Math.max(1, teams.size()));
 
-        int y1 = 0;
+        int y1 = this.getHeader();
         Iterator<Team> teamIt = teams.iterator();
         while (teamIt.hasNext()) {
           int y2 = y1;
@@ -182,7 +189,7 @@ public class MatchTabView extends TabView implements Listener {
             true,
             0,
             this.getWidth(),
-            0,
+            getHeader(),
             participantRows);
       }
 
@@ -197,6 +204,15 @@ public class MatchTabView extends TabView implements Listener {
             this.getWidth(),
             this.getHeight() - observerRows,
             this.getHeight());
+      }
+
+      if (getHeader() > 0) {
+        TabEntry[] header = this.getManager().getHeaderEntries(match);
+        for (int i = 0; i < getWidth(); i++) {
+          setSlot(i, 0, i < header.length ? header[i] : null);
+        }
+
+        fillEmpty(0, getWidth(), 1, getHeader());
       }
     }
 
@@ -230,6 +246,7 @@ public class MatchTabView extends TabView implements Listener {
     if (this.getViewer() == event.getPlayer().getBukkit()) {
       this.match = event.getMatch();
       this.matchPlayer = event.getPlayer();
+      this.isLegacy = matchPlayer.isLegacy();
 
       this.playerOrder = new PlayerOrder(this.matchPlayer);
       this.teamOrder = new TeamOrder(this.matchPlayer);
