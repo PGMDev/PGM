@@ -35,7 +35,6 @@ public class MatchTabView extends TabView implements Listener {
   private Match match;
   private @Nullable TeamMatchModule tmm;
   private MatchPlayer matchPlayer;
-  private boolean isLegacy;
   private PlayerOrder playerOrder;
   private TeamOrder teamOrder;
 
@@ -63,12 +62,12 @@ public class MatchTabView extends TabView implements Listener {
       int y1,
       int y2) {
 
-    if (footer) { // Render an empty row underneath
+    if (footer && y2 < getHeight()) { // Render an empty row underneath
       y2 -= 1;
       for (int x = x1; x < x2; x++) this.setSlot(x, y2, null);
     }
 
-    if (header != null) { // Render the header row
+    if (header != null && y1 < y2) { // Render the header row
       for (int x = x1; x < x2; x++) this.setSlot(x, y1, x == x1 ? header : null);
       y1 += 1;
     }
@@ -103,7 +102,7 @@ public class MatchTabView extends TabView implements Listener {
   }
 
   public int getHeader() {
-    return isLegacy ? 2 : 0;
+    return display != null ? 2 : 0;
   }
 
   @Override
@@ -111,7 +110,7 @@ public class MatchTabView extends TabView implements Listener {
     if (this.manager == null) return;
 
     if (this.match != null && this.isLayoutDirty()) {
-      if (!isLegacy) {
+      if (display == null) {
         this.setHeader(this.getManager().getMapEntry(this.match));
         this.setFooter(this.getManager().getFooterEntry(this.match));
       }
@@ -149,7 +148,7 @@ public class MatchTabView extends TabView implements Listener {
             }
 
             Team team = teamIt.next();
-            int currY2 = participantRows; // Default to max height
+            int currY2 = participantRows + getHeader(); // Default to max height
             // Size tightly vertically when teams don't use multiple columns
             if (columnsPerTeam == 1) currY2 = Math.min(y1 + team.getPlayers().size() + 2, currY2);
 
@@ -159,7 +158,7 @@ public class MatchTabView extends TabView implements Listener {
               y2 = currY2;
             }
 
-            if (y2 > y1) { // At the very least team name will render
+            if (y2 > y1) { // At the very least one row will render
               renderTeam(
                   teamPlayers.get(team),
                   getManager().getTeamEntry(team),
@@ -190,7 +189,7 @@ public class MatchTabView extends TabView implements Listener {
             0,
             this.getWidth(),
             getHeader(),
-            participantRows);
+            participantRows + getHeader());
       }
 
       if (observerRows > 0) {
@@ -236,7 +235,7 @@ public class MatchTabView extends TabView implements Listener {
   }
 
   private int getObserverRows(int observers, int observingStaff, int participantRows) {
-    int obsRows = getHeight() - participantRows;
+    int obsRows = getHeight() - getHeader() - participantRows;
     obsRows = Math.min(divideRoundingUp(observers, this.getWidth()), obsRows);
     obsRows = Math.max(obsRows, divideRoundingUp(observingStaff, this.getWidth()));
     return obsRows;
@@ -246,7 +245,6 @@ public class MatchTabView extends TabView implements Listener {
     if (this.getViewer() == event.getPlayer().getBukkit()) {
       this.match = event.getMatch();
       this.matchPlayer = event.getPlayer();
-      this.isLegacy = matchPlayer.isLegacy();
 
       this.playerOrder = new PlayerOrder(this.matchPlayer);
       this.teamOrder = new TeamOrder(this.matchPlayer);

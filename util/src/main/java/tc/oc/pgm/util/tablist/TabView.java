@@ -34,7 +34,7 @@ public class TabView {
   private BaseComponent[] header, footer;
 
   // Only used for legacy players, initialized on enable
-  private @Nullable TabDisplay display = null;
+  protected @Nullable TabDisplay display = null;
 
   public TabView(Player viewer) {
     this.viewer = viewer;
