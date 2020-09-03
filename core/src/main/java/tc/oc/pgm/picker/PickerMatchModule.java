@@ -240,7 +240,7 @@ public class PickerMatchModule implements MatchModule, Listener {
                 + TextTranslations.translate("picker.tooltip", player.getBukkit())));
 
     // Color the leather helmet to match player team
-    if (!(player.getParty() instanceof Observers)) {
+    if (player != null && player.getParty() != null && !(player.getParty() instanceof Observers)) {
       LeatherArmorMeta armorMeta = (LeatherArmorMeta) meta;
       armorMeta.setColor(player.getParty().getFullColor());
       meta = armorMeta;
