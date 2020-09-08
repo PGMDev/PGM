@@ -173,7 +173,7 @@ public class ModerationCommand implements Listener {
       perms = Permissions.FREEZE)
   public void freeze(CommandSender sender, Match match, Player target, @Switch('s') boolean silent)
       throws CommandException {
-    setFreeze(sender, match, target, silent);
+    setFreeze(sender, match, target, checkSilent(silent, sender));
   }
 
   private void setFreeze(CommandSender sender, Match match, Player target, boolean silent) {
