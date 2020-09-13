@@ -485,7 +485,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
   @Override
   public double getCompletion() {
-    return (double) this.getBreaks() / this.getBreaksRequired();
+    return Math.min(1, (double) this.getBreaks() / this.getBreaksRequired());
   }
 
   @Override
