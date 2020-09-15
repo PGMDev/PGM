@@ -150,7 +150,7 @@ public class Dead extends Spawning {
                       spawnRequested
                           ? "death.respawn.confirmed.time"
                           : "death.respawn.unconfirmed.time",
-                      TextComponent.of((int) (ticks/ (float) 20), TextColor.AQUA))
+                      TextComponent.of((int) (ticks / (float) 20), TextColor.AQUA))
                   : super.getSubtitle())
               .color(TextColor.GREEN));
     }

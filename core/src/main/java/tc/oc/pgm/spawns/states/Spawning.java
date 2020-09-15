@@ -96,9 +96,7 @@ public abstract class Spawning extends Participating {
     }
   }
 
-  public void sendMessage() {
-
-  }
+  public void sendMessage() {}
 
   public void updateTitle() {
     player.showTitle(getTitle(), getSubtitle().color(TextColor.GREEN), 0, 3, 3);
