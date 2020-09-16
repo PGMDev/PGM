@@ -45,6 +45,7 @@ import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
+import tc.oc.pgm.util.text.types.PlayerComponent;
 
 public class ChatDispatcher implements Listener {
 
@@ -484,13 +485,13 @@ public class ChatDispatcher implements Listener {
     if (prefix == null)
       return TextComponent.builder()
           .append("<", TextColor.WHITE)
-          .append(names.getDecoratedNameComponent(player.getBukkit(), player.getParty()))
+          .append(player.getName(NameStyle.VERBOSE))
           .append(">: ", TextColor.WHITE)
           .append(msg)
           .build();
     return TextComponent.builder()
         .append(prefix)
-        .append(names.getDecoratedNameComponent(player.getBukkit(), player.getParty()))
+        .append(player.getName(NameStyle.VERBOSE))
         .append(": ", TextColor.WHITE)
         .append(msg)
         .build();

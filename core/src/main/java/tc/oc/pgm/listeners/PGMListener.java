@@ -52,8 +52,10 @@ import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.TimeLockModule;
 import tc.oc.pgm.util.UsernameFormatUtils;
+import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.PeriodFormats;
 import tc.oc.pgm.util.text.TextTranslations;
+import tc.oc.pgm.util.text.types.PlayerComponent;
 
 public class PGMListener implements Listener {
   private static final String DO_DAYLIGHT_CYCLE = "doDaylightCycle";
@@ -191,7 +193,7 @@ public class PGMListener implements Listener {
     checkNotNull(player);
     Collection<MatchPlayer> viewers =
         player.getMatch().getPlayers().stream()
-            .filter(p -> (staffOnly ? p.getBukkit().hasPermission(Permissions.STAFF) : true))
+            .filter(p -> !staffOnly || p.getBukkit().hasPermission(Permissions.STAFF))
             .collect(Collectors.toList());
 
     for (MatchPlayer viewer : viewers) {
@@ -205,11 +207,7 @@ public class PGMListener implements Listener {
 
       SettingValue option = viewer.getSettings().getValue(SettingKey.JOIN);
       if (option.equals(SettingValue.JOIN_ON)) {
-        Component name =
-            PGM.get()
-                .getNameDecorationRegistry()
-                .getDecoratedNameComponent(player.getBukkit(), player.getParty());
-        Component component = TranslatableComponent.of(key, TextColor.YELLOW, name);
+        Component component = TranslatableComponent.of(key, TextColor.YELLOW, player.getName(NameStyle.CONCISE));
         viewer.sendMessage(
             staffOnly
                 ? ChatDispatcher.ADMIN_CHAT_PREFIX.append(component.color(TextColor.YELLOW))
