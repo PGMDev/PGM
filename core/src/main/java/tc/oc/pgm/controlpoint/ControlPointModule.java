@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -70,11 +71,12 @@ public class ControlPointModule implements MapModule<ControlPointMatchModule> {
     public ControlPointModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       List<ControlPointDefinition> definitions = new ArrayList<>();
+      AtomicInteger serialNumber = new AtomicInteger(1);
 
       for (Element elControlPoint :
           XMLUtils.flattenElements(doc.getRootElement(), "control-points", "control-point")) {
         ControlPointDefinition definition =
-            ControlPointParser.parseControlPoint(factory, elControlPoint, false);
+            ControlPointParser.parseControlPoint(factory, elControlPoint, false, serialNumber);
         factory.getFeatures().addFeature(elControlPoint, definition);
         definitions.add(definition);
       }
@@ -82,7 +84,7 @@ public class ControlPointModule implements MapModule<ControlPointMatchModule> {
       for (Element kingEl : doc.getRootElement().getChildren("king")) {
         for (Element hillEl : XMLUtils.flattenElements(kingEl, "hills", "hill")) {
           ControlPointDefinition definition =
-              ControlPointParser.parseControlPoint(factory, hillEl, true);
+              ControlPointParser.parseControlPoint(factory, hillEl, true, serialNumber);
           factory.getFeatures().addFeature(kingEl, definition);
           definitions.add(definition);
         }
