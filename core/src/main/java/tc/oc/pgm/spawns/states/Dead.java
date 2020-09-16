@@ -139,4 +139,20 @@ public class Dead extends Spawning {
     super.onEvent(event);
     event.setCancelled(true);
   }
+
+  @Override
+  public void sendMessage() {
+    long ticks = options.delayTicks - age();
+    if (ticks % (ticks > 0 ? 20 : 100) == 0) {
+      player.sendMessage(
+          (ticks > 0
+                  ? TranslatableComponent.of(
+                      spawnRequested
+                          ? "death.respawn.confirmed.time"
+                          : "death.respawn.unconfirmed.time",
+                      TextComponent.of((int) (ticks / (float) 20), TextColor.AQUA))
+                  : super.getSubtitle())
+              .color(TextColor.GREEN));
+    }
+  }
 }
