@@ -22,6 +22,8 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.event.CompetitorAddEvent;
 import tc.oc.pgm.api.party.event.CompetitorRemoveEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.setting.SettingKey;
+import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
@@ -163,9 +165,13 @@ public class GoalMatchModule implements MatchModule, Listener {
       for (MatchPlayer player : event.getMatch().getPlayers()) {
         if (player.getParty() instanceof Competitor
             && event.isGood() != (event.getCompetitor() == player.getParty())) {
-          player.playSound(BAD_SOUND);
+          if (player.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ALL)) {
+            player.playSound(BAD_SOUND);
+          }
         } else {
-          player.playSound(GOOD_SOUND);
+          if (player.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ALL)) {
+            player.playSound(GOOD_SOUND);
+          }
         }
       }
     }
