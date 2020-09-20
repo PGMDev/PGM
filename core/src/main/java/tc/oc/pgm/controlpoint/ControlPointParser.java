@@ -61,7 +61,7 @@ public abstract class ControlPointParser {
     Attribute attrName = elControlPoint.getAttribute("name");
 
     if (attrName != null) {
-      name = attrName.getName();
+      name = attrName.getValue();
     } else {
       int serial = serialNumber.getAndIncrement();
       name = "Hill";
