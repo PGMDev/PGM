@@ -54,7 +54,6 @@ public class SpawnerModule implements MapModule {
           XMLUtils.flattenElements(doc.getRootElement(), "spawners", "spawner")) {
         Region spawnRegion = regionParser.parseRequiredRegionProperty(element, "spawn-region");
         Region playerRegion = regionParser.parseRequiredRegionProperty(element, "player-region");
-        String id = element.getAttributeValue("id");
         Attribute delayAttr = element.getAttribute("delay");
         Attribute minDelayAttr = element.getAttribute("min-delay");
         Attribute maxDelayAttr = element.getAttribute("max-delay");
@@ -89,7 +88,6 @@ public class SpawnerModule implements MapModule {
 
         SpawnerDefinition spawnerDefinition =
             new SpawnerDefinition(
-                id,
                 objects,
                 spawnRegion,
                 playerRegion,
