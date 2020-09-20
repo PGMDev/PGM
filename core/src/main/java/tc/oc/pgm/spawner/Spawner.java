@@ -11,7 +11,6 @@ import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
-import tc.oc.pgm.api.feature.Feature;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
@@ -20,7 +19,7 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 
-public class Spawner implements Feature<SpawnerDefinition>, Listener, Tickable {
+public class Spawner implements Listener, Tickable {
 
   public static final String METADATA_KEY = "spawner";
 
@@ -39,16 +38,6 @@ public class Spawner implements Feature<SpawnerDefinition>, Listener, Tickable {
     this.lastTick = match.getTick().tick;
     this.players = new OnlinePlayerMapAdapter<>(PGM.get());
     calculateDelay();
-  }
-
-  @Override
-  public String getId() {
-    return definition.id;
-  }
-
-  @Override
-  public SpawnerDefinition getDefinition() {
-    return definition;
   }
 
   @Override

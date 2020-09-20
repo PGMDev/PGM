@@ -11,7 +11,6 @@ import tc.oc.pgm.api.region.Region;
 public class SpawnerDefinition implements FeatureDefinition {
 
   public final Region spawnRegion;
-  public final String id;
   public final Region playerRegion;
   public final int maxEntities;
   public final Duration minDelay, maxDelay, delay;
@@ -19,7 +18,6 @@ public class SpawnerDefinition implements FeatureDefinition {
   public final Filter playerFilter;
 
   public SpawnerDefinition(
-      String id,
       List<Spawnable> objects,
       Region spawnRegion,
       Region playerRegion,
@@ -29,7 +27,6 @@ public class SpawnerDefinition implements FeatureDefinition {
       Duration maxDelay,
       int maxEntities) {
     this.spawnRegion = spawnRegion;
-    this.id = id;
     this.playerRegion = playerRegion;
     this.maxEntities = maxEntities;
     this.minDelay = minDelay;
