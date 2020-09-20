@@ -115,8 +115,7 @@ public class Spawner implements Feature<SpawnerDefinition>, Listener, Tickable {
   public void onPlayerMove(CoarsePlayerMoveEvent event) {
     final MatchPlayer player = match.getParticipant(event.getPlayer());
     if (player == null) return;
-    if (definition.playerRegion.contains(event.getPlayer())
-        && players.get(event.getPlayer()) == null) {
+    if (definition.playerRegion.contains(event.getPlayer())) {
       players.putIfAbsent(event.getPlayer(), player);
     } else {
       players.remove(event.getPlayer());
