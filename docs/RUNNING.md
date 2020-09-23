@@ -11,7 +11,7 @@ Installation
 cd /path/to/folder
 ```
 
-2. Download the latest version of [SportPaper](https://github.com/Electroid/SportPaper), a fork of the Minecraft 1.8 server.
+2. Download the latest version of [SportPaper](https://github.com/Electroid/SportPaper), a fork of the Minecraft 1.8 server, you can download it [here](https://pkg.ashcon.app/sportpaper) or run the following commands:
 ```bash
 curl https://pkg.ashcon.app/sportpaper -Lo sportpaper.jar
 curl https://pkg.ashcon.app/sportpaper-config -Lo sportpaper.yml
