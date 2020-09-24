@@ -105,7 +105,7 @@ public class CombatLogTracker implements Listener {
 
     if (player.getGameMode() == GameMode.CREATIVE) return;
 
-    if (player.isDead()) return;
+    if (player.hasMetadata("isDead") || player.isDead()) return;
 
     if (player.getNoDamageTicks() > 0) return;
 
@@ -221,7 +221,9 @@ public class CombatLogTracker implements Listener {
    */
   public @Nullable ImminentDeath getImminentDeath(Player player) {
     // If the player is already dead or in creative mode, we don't care
-    if (player.isDead() || player.getGameMode() == GameMode.CREATIVE) return null;
+    if (player.isDead()
+        || player.hasMetadata("isDead")
+        || player.getGameMode() == GameMode.CREATIVE) return null;
 
     // If the player was on the ground, or is flying, or is able to fly, they are fine
     if (!(player.isOnGround() || player.isFlying() || player.getAllowFlight())) {
