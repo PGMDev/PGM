@@ -6,22 +6,16 @@ import org.bukkit.util.BlockVector;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;
-import tc.oc.pgm.goals.GoalDefinition;
+import tc.oc.pgm.goals.ControllableGoalDefinition;
 import tc.oc.pgm.teams.TeamFactory;
 
 /**
  * An objective that is completed by players being inside a capture region for some amount of time.
  */
 @FeatureInfo(name = "control-point")
-public class ControlPointDefinition extends GoalDefinition {
+public class ControlPointDefinition extends ControllableGoalDefinition {
   // Players in this region are considered "on" the point
   private final Region captureRegion;
-
-  // Which players can capture the point
-  private final Filter captureFilter;
-
-  // Which players can prevent other teams from capturing the point
-  private final Filter playerFilter;
 
   // Blocks in this region are used to show capturing progress
   private final Region progressDisplayRegion;
@@ -45,15 +39,6 @@ public class ControlPointDefinition extends GoalDefinition {
   // The team that owns the point when the match starts, null for no owner (neutral state) or ffa
   @Nullable private final TeamFactory initialOwner;
 
-  // Conditions required for a team to capture:
-  public enum CaptureCondition {
-    EXCLUSIVE, // Team owns all players on the point
-    MAJORITY, // Team owns more than half the players on the point
-    LEAD // Team owns more players on the point than any other single team
-  }
-
-  private final CaptureCondition captureCondition;
-
   // true: progress is retained if capturing is interrupted
   // false: progress resets to zero if capturing is interrupted
   private final boolean incrementalCapture;
@@ -62,9 +47,6 @@ public class ControlPointDefinition extends GoalDefinition {
   // false: point transitions directly from one owner to the next
   // NOTE: points always start in an unowned state, regardless of this value
   private final boolean neutralState;
-
-  // If true, the point can only be captured once in the match
-  private final boolean permanent;
 
   // Rate that the owner's score increases, or 0 if the CP does not affect score
   private final float pointsPerSecond;
@@ -76,17 +58,14 @@ public class ControlPointDefinition extends GoalDefinition {
   // at an exponential rate, such that it doubles every time this many seconds elapses.
   private final float pointsGrowth;
 
-  // If true, capturing progress is displayed on the scoreboard
-  private final boolean showProgress;
-
   public ControlPointDefinition(
       @Nullable String id,
       String name,
       @Nullable Boolean required,
       boolean visible,
       Region captureRegion,
-      Filter captureFilter,
-      Filter playerFilter,
+      Filter controlFilter,
+      Filter dominateFilter,
       Region progressDisplayRegion,
       Region ownerDisplayRegion,
       Filter visualMaterials,
@@ -103,10 +82,17 @@ public class ControlPointDefinition extends GoalDefinition {
       float pointsGrowth,
       boolean progress) {
 
-    super(id, name, required, visible);
+    super(
+        id,
+        name,
+        required,
+        visible,
+        controlFilter,
+        dominateFilter,
+        captureCondition,
+        permanent,
+        progress);
     this.captureRegion = captureRegion;
-    this.captureFilter = captureFilter;
-    this.playerFilter = playerFilter;
     this.progressDisplayRegion = progressDisplayRegion;
     this.ownerDisplayRegion = ownerDisplayRegion;
     this.visualMaterials = visualMaterials;
@@ -114,14 +100,11 @@ public class ControlPointDefinition extends GoalDefinition {
     this.timeToCapture = timeToCapture;
     this.timeMultiplier = timeMultiplier;
     this.initialOwner = initialOwner;
-    this.captureCondition = captureCondition;
     this.incrementalCapture = incrementalCapture;
     this.neutralState = neutralState;
-    this.permanent = permanent;
     this.pointsPerSecond = pointsPerSecond;
     this.pointsOwner = pointsOwner;
     this.pointsGrowth = pointsGrowth;
-    this.showProgress = progress;
   }
 
   @Override
@@ -146,10 +129,10 @@ public class ControlPointDefinition extends GoalDefinition {
         + this.isPermanent()
         + " captureRegion="
         + this.getCaptureRegion()
-        + " captureFilter="
-        + this.getCaptureFilter()
-        + " playerFilter="
-        + this.getPlayerFilter()
+        + " controlFilter="
+        + this.getControlFilter()
+        + " dominateFilter="
+        + this.getDominateFilter()
         + " progressDisplay="
         + this.getProgressDisplayRegion()
         + " ownerDisplay="
@@ -162,14 +145,6 @@ public class ControlPointDefinition extends GoalDefinition {
 
   public Region getCaptureRegion() {
     return this.captureRegion;
-  }
-
-  public Filter getCaptureFilter() {
-    return this.captureFilter;
-  }
-
-  public Filter getPlayerFilter() {
-    return this.playerFilter;
   }
 
   public Region getProgressDisplayRegion() {
@@ -201,20 +176,12 @@ public class ControlPointDefinition extends GoalDefinition {
     return this.initialOwner;
   }
 
-  public CaptureCondition getCaptureCondition() {
-    return this.captureCondition;
-  }
-
   public boolean isIncrementalCapture() {
     return this.incrementalCapture;
   }
 
   public boolean hasNeutralState() {
     return this.neutralState;
-  }
-
-  public boolean isPermanent() {
-    return this.permanent;
   }
 
   public boolean affectsScore() {
@@ -231,9 +198,5 @@ public class ControlPointDefinition extends GoalDefinition {
 
   public float getPointsGrowth() {
     return this.pointsGrowth;
-  }
-
-  public boolean getShowProgress() {
-    return this.showProgress;
   }
 }

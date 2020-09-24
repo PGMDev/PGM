@@ -1,6 +1,6 @@
-package tc.oc.pgm.controlpoint;
+package tc.oc.pgm.regions;
 
-import com.google.common.collect.Sets;
+import java.util.HashSet;
 import java.util.Set;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -9,25 +9,32 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.util.MatchPlayers;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
-/** Tracks which players are on a control point and answers some queries about them */
-public class ControlPointPlayerTracker implements Listener {
-  protected final Match match;
-  protected final Region captureRegion;
-  protected final Set<MatchPlayer> playersOnPoint = Sets.newHashSet();
+/** Keeps track of players in the given {@link Region} */
+public class RegionPlayerTracker implements Listener {
+  private final Match match;
+  private Region region;
+  private final Set<MatchPlayer> players = new HashSet<>();
 
-  public ControlPointPlayerTracker(Match match, Region captureRegion) {
+  public RegionPlayerTracker(Match match, Region region) {
     this.match = match;
-    this.captureRegion = captureRegion;
+    this.region = region;
+    match.addListener(this, MatchScope.RUNNING);
   }
 
-  public Set<MatchPlayer> getPlayersOnPoint() {
-    return this.playersOnPoint;
+  public Set<MatchPlayer> getPlayersInRegion() {
+    return players;
+  }
+
+  public void setRegion(Region region) {
+    this.region = region;
+    updateNearbyPlayersManual();
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -40,19 +47,26 @@ public class ControlPointPlayerTracker implements Listener {
     this.handlePlayerMove(event.getPlayer(), event.getTo().toVector());
   }
 
+  // Used when moving regions to prevent players standing still staying in the region forever
+  public void updateNearbyPlayersManual() {
+    match
+        .getPlayers()
+        .forEach(p -> handlePlayerMove(p.getBukkit(), p.getBukkit().getLocation().toVector()));
+  }
+
   private void handlePlayerMove(Player bukkit, Vector to) {
     MatchPlayer player = this.match.getPlayer(bukkit);
     if (!MatchPlayers.canInteract(player)) return;
 
-    if (!player.getBukkit().isDead() && this.captureRegion.contains(to.toBlockVector())) {
-      this.playersOnPoint.add(player);
+    if (!player.isDead() && region.contains(to.toBlockVector())) {
+      this.players.add(player);
     } else {
-      this.playersOnPoint.remove(player);
+      this.players.remove(player);
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerDespawn(final ParticipantDespawnEvent event) {
-    playersOnPoint.remove(event.getPlayer());
+    players.remove(event.getPlayer());
   }
 }

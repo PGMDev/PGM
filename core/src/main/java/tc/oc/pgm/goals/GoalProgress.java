@@ -99,11 +99,13 @@ public class GoalProgress implements Comparable<GoalProgress> {
 
             if (goal instanceof IncrementalGoal) {
               IncrementalGoal incrementalGoal = (IncrementalGoal) goal;
-              progress.add(incrementalGoal.getCompletion());
+              progress.add(incrementalGoal.getCompletion(competitor));
             } else if (touchable != null && touchable.hasTouched(competitor)) {
               // A touched, non-incremental goal is worth 50% completion
               progress.add(0.5);
             }
+          } else if (goal instanceof IncrementalGoal) {
+            progress.add(((IncrementalGoal) goal).getCompletion(competitor));
           }
         }
       }

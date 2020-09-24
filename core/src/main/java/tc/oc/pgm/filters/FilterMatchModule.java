@@ -19,6 +19,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
+import tc.oc.pgm.payload.PayloadReachCheckpointEvent;
 import tc.oc.pgm.util.TimeUtils;
 
 @ListenerScope(MatchScope.LOADED)
@@ -36,8 +37,8 @@ public class FilterMatchModule implements MatchModule, Listener {
   /**
    * Listen for changes in the response by the given filter to a global {@link MatchQuery}. See
    * {@link FilterListener} for more details. Currently, only global queries are supported, and only
-   * {@link TimeFilter}s, {@link GoalFilter}s, {@link FlagStateFilter}s, and {@link
-   * CarryingFlagFilter}s are guaranteed to notify for all changes.
+   * {@link TimeFilter}s, {@link GoalFilter}s, {@link PayloadCheckpointFilter}s, {@link
+   * FlagStateFilter}s, and {@link CarryingFlagFilter}s are guaranteed to notify for all changes.
    */
   public void listen(Filter filter, FilterListener listener) {
     listeners.put(filter, listener);
@@ -112,6 +113,11 @@ public class FilterMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onFlagChange(FlagStateChangeEvent event) {
+    checkAll();
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onCheckpointReached(PayloadReachCheckpointEvent event) {
     checkAll();
   }
 }

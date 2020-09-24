@@ -1,8 +1,6 @@
 package tc.oc.pgm.controlpoint;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.event.HandlerList;
@@ -11,13 +9,12 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
-import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.controlpoint.events.CapturingTeamChangeEvent;
 import tc.oc.pgm.controlpoint.events.CapturingTimeChangeEvent;
 import tc.oc.pgm.controlpoint.events.ControllerChangeEvent;
+import tc.oc.pgm.goals.ControllableGoal;
 import tc.oc.pgm.goals.IncrementalGoal;
-import tc.oc.pgm.goals.SimpleGoal;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.score.ScoreMatchModule;
@@ -25,9 +22,8 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.collection.DefaultMapAdapter;
 
-public class ControlPoint extends SimpleGoal<ControlPointDefinition>
+public class ControlPoint extends ControllableGoal<ControlPointDefinition>
     implements IncrementalGoal<ControlPointDefinition> {
 
   public static final ChatColor COLOR_NEUTRAL_TEAM = ChatColor.WHITE;
@@ -35,7 +31,6 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
   public static final String SYMBOL_CP_INCOMPLETE = "\u29be"; // ⦾
   public static final String SYMBOL_CP_COMPLETE = "\u29bf"; // ⦿
 
-  protected final ControlPointPlayerTracker playerTracker;
   protected final ControlPointBlockDisplay blockDisplay;
 
   protected final Vector centerPoint;
@@ -68,9 +63,9 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
 
     this.centerPoint = this.getCaptureRegion().getBounds().getCenterPoint();
 
-    this.playerTracker = new ControlPointPlayerTracker(match, this.getCaptureRegion());
-
     this.blockDisplay = new ControlPointBlockDisplay(match, this);
+
+    setControllableRegion(this.getCaptureRegion());
   }
 
   public void registerEvents() {
@@ -82,15 +77,10 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
 
   public void unregisterEvents() {
     HandlerList.unregisterAll(this.blockDisplay);
-    HandlerList.unregisterAll(this.playerTracker);
   }
 
   public ControlPointBlockDisplay getBlockDisplay() {
     return blockDisplay;
-  }
-
-  public ControlPointPlayerTracker getPlayerTracker() {
-    return playerTracker;
   }
 
   public Region getCaptureRegion() {
@@ -199,7 +189,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
 
   @Override
   public boolean getShowProgress() {
-    return this.definition.getShowProgress();
+    return this.definition.shouldShowProgress();
   }
 
   @Override
@@ -209,7 +199,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
 
   @Override
   public boolean canComplete(Competitor team) {
-    return this.canCapture(team);
+    return this.canDominate(team);
   }
 
   @Override
@@ -220,16 +210,6 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
   @Override
   public boolean isCompleted(Competitor team) {
     return this.controllingTeam != null && this.controllingTeam == team;
-  }
-
-  private boolean canCapture(Competitor team) {
-    return this.definition.getCaptureFilter() == null
-        || this.definition.getCaptureFilter().query(team.getQuery()).isAllowed();
-  }
-
-  private boolean canDominate(MatchPlayer player) {
-    return this.definition.getPlayerFilter() == null
-        || this.definition.getPlayerFilter().query(player.getQuery()).isAllowed();
   }
 
   public float getEffectivePointsPerSecond() {
@@ -248,7 +228,6 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
   }
 
   public void tick(Duration duration) {
-    this.tickCapture(duration);
     this.tickScore(duration);
   }
 
@@ -267,78 +246,22 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
     }
   }
 
-  /** Do a capturing cycle on this ControlPoint over the given duration. */
-  protected void tickCapture(Duration duration) {
-    Map<Competitor, Integer> playerCounts = new DefaultMapAdapter<>(new HashMap<>(), 0);
-
-    // The teams with the most and second-most capturing players on the point, respectively
-    Competitor leader = null, runnerUp = null;
-
-    // The total number of players on the point who are allowed to dominate and not on the leading
-    // team
-    int defenderCount = 0;
-
-    for (MatchPlayer player : this.playerTracker.getPlayersOnPoint()) {
-      Competitor team = player.getCompetitor();
-      if (this.canDominate(player)) {
-        defenderCount++;
-        int playerCount = playerCounts.get(team) + 1;
-        playerCounts.put(team, playerCount);
-
-        if (team != leader) {
-          if (leader == null || playerCount > playerCounts.get(leader)) {
-            runnerUp = leader;
-            leader = team;
-          } else if (team != runnerUp
-              && (runnerUp == null || playerCount > playerCounts.get(runnerUp))) {
-            runnerUp = team;
-          }
-        }
-      }
-    }
-
-    int lead = 0;
-    if (leader != null) {
-      lead = playerCounts.get(leader);
-      defenderCount -= lead;
-
-      switch (this.definition.getCaptureCondition()) {
-        case EXCLUSIVE:
-          if (defenderCount > 0) {
-            lead = 0;
-          }
-          break;
-
-        case MAJORITY:
-          lead = Math.max(0, lead - defenderCount);
-          break;
-
-        case LEAD:
-          if (runnerUp != null) {
-            lead -= playerCounts.get(runnerUp);
-          }
-          break;
-      }
-    }
-
-    if (lead > 0) {
-      this.dominateAndFireEvents(leader, calculateDominateTime(lead, duration));
-    } else {
-      this.dominateAndFireEvents(null, duration);
-    }
-  }
-
   /**
    * Do a cycle of domination on this ControlPoint for the given team over the given duration. The
    * team can be null, which means no team is dominating the point, which can cause the state to
    * change in some configurations.
    */
-  private void dominateAndFireEvents(@Nullable Competitor dominantTeam, Duration dominantTime) {
+  // TODO Move javadoc into ControllableGoal
+  @Override
+  public void dominationCycle(@Nullable Competitor dominatingTeam, int lead, Duration duration) {
     Duration oldCapturingTime = this.capturingTime;
     Competitor oldCapturingTeam = this.capturingTeam;
     Competitor oldControllingTeam = this.controllingTeam;
 
-    this.dominate(dominantTeam, dominantTime);
+    Duration dominantTime =
+        dominatingTeam == null ? duration : calculateDominateTime(lead, duration);
+
+    this.dominate(dominatingTeam, dominantTime);
 
     if (oldCapturingTeam != this.capturingTeam || !oldCapturingTime.equals(this.capturingTime)) {
       this.match.callEvent(new CapturingTimeChangeEvent(this.match, this));
@@ -423,7 +346,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
       }
     } else if (dominantTeam != null
         && dominantTeam != this.controllingTeam
-        && this.canCapture(dominantTeam)) {
+        && this.canDominate(dominantTeam)) {
       // Point is not being captured and there is a dominant team that is not the owner, so they
       // start capturing
       this.capturingTeam = dominantTeam;

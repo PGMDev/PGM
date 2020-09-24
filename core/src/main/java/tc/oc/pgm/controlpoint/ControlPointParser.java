@@ -13,12 +13,12 @@ import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.AnyFilter;
 import tc.oc.pgm.filters.BlockFilter;
 import tc.oc.pgm.filters.FilterParser;
+import tc.oc.pgm.goals.ControllableGoalDefinition;
 import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public abstract class ControlPointParser {
@@ -97,12 +97,8 @@ public abstract class ControlPointParser {
     boolean visible = XMLUtils.parseBoolean(elControlPoint.getAttribute("show"), true);
     Boolean required = XMLUtils.parseBoolean(elControlPoint.getAttribute("required"), null);
 
-    ControlPointDefinition.CaptureCondition captureCondition =
-        XMLUtils.parseEnum(
-            Node.fromAttr(elControlPoint, "capture-rule"),
-            ControlPointDefinition.CaptureCondition.class,
-            "capture rule",
-            ControlPointDefinition.CaptureCondition.EXCLUSIVE);
+    ControllableGoalDefinition.CaptureCondition captureCondition =
+        ControllableGoalDefinition.parseCaptureCondition(elControlPoint);
 
     return new ControlPointDefinition(
         id,

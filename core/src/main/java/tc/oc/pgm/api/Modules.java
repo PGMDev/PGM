@@ -81,6 +81,8 @@ import tc.oc.pgm.modules.TimeLockModule;
 import tc.oc.pgm.modules.ToolRepairMatchModule;
 import tc.oc.pgm.modules.ToolRepairModule;
 import tc.oc.pgm.observers.ObserverToolsMatchModule;
+import tc.oc.pgm.payload.PayloadMatchModule;
+import tc.oc.pgm.payload.PayloadModule;
 import tc.oc.pgm.picker.PickerMatchModule;
 import tc.oc.pgm.portals.PortalMatchModule;
 import tc.oc.pgm.portals.PortalModule;
@@ -244,6 +246,7 @@ public interface Modules {
     register(
         WorldBorderModule.class, WorldBorderMatchModule.class, new WorldBorderModule.Factory());
     register(SpawnerModule.class, SpawnerMatchModule.class, new SpawnerModule.Factory());
+    register(PayloadModule.class, PayloadMatchModule.class, new PayloadModule.Factory());
 
     // MapModules that are also MatchModules
     register(TimeLockModule.class, TimeLockModule.class, new TimeLockModule.Factory());
