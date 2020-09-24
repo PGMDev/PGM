@@ -61,6 +61,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public class ModerationCommand implements Listener {
 
   private static final Sound WARN_SOUND = new Sound("mob.enderdragon.growl", 1f, 1f);
+  private static final Sound ALT_SOUND = new Sound("mob.wither.shoot", 0.8f, 1.3f);
 
   private static final Component WARN_SYMBOL = TextComponent.of(" \u26a0 ", TextColor.YELLOW);
   private static final Component BROADCAST_DIV = TextComponent.of(" \u00BB ", TextColor.GRAY);
@@ -954,7 +955,7 @@ public class ModerationCommand implements Listener {
           final Match match = matchPlayer.getMatch();
 
           ChatDispatcher.broadcastAdminChatMessage(
-              formatAltAccountBroadcast(info, matchPlayer), match);
+              formatAltAccountBroadcast(info, matchPlayer), match, Optional.of(ALT_SOUND));
         });
   }
 
@@ -996,6 +997,7 @@ public class ModerationCommand implements Listener {
         .append(
             TranslatableComponent.of(
                 "moderation.similarIP.loginEvent",
+                TextColor.RED,
                 player.getName(NameStyle.FANCY),
                 TextComponent.of(info.getUserName(), TextColor.DARK_AQUA)))
         .hoverEvent(HoverEvent.of(Action.SHOW_TEXT, info.getHoverMessage()))
