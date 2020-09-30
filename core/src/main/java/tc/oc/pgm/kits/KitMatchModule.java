@@ -122,7 +122,6 @@ public class KitMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerReset(final PlayerResetEvent event) {
-    this.lockedArmorSlots.removeAll(event.getPlayer());
     clearAttributeModifiers(event.getPlayer());
   }
 
