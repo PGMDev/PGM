@@ -101,14 +101,15 @@ public class PeriodFormats {
    * A (localized) interval phrase like "X seconds" or "X minutes". Uses the largest unit that fits
    * into the interval at least the given number of times. The interval must be non-zero.
    */
-  public static Component briefNaturalApproximate(Duration duration, long minQuantity) {
+  public static Component briefNaturalApproximate(
+      Duration duration, long minQuantity, boolean avoidMillis) {
     if (duration.isZero() || duration.isNegative()) {
       throw new IllegalArgumentException("Duration must be positive");
     }
 
     for (TemporalUnit unit : UNITS) {
       long quantity = periodAmount(unit, duration);
-      if (quantity >= minQuantity) {
+      if (quantity >= minQuantity || avoidMillis && unit == ChronoUnit.SECONDS) {
         return formatPeriod(unit, quantity);
       }
     }
@@ -116,7 +117,7 @@ public class PeriodFormats {
   }
 
   public static Component briefNaturalApproximate(Instant begin, Instant end, long minQuantity) {
-    return briefNaturalApproximate(Duration.between(begin, end), minQuantity);
+    return briefNaturalApproximate(Duration.between(begin, end), minQuantity, true);
   }
 
   /**
@@ -124,7 +125,7 @@ public class PeriodFormats {
    * into the interval at least twice. The interval must be non-zero.
    */
   public static Component briefNaturalApproximate(Duration duration) {
-    return briefNaturalApproximate(duration, 2);
+    return briefNaturalApproximate(duration, 2, true);
   }
 
   public static Component briefNaturalApproximate(Instant begin, Instant end) {

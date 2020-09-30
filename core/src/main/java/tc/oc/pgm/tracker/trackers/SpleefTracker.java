@@ -49,6 +49,7 @@ public class SpleefTracker implements Listener {
   public void onBlockBreak(final ParticipantBlockTransformEvent event) {
     if (!event.isBreak()) return;
     if (!Materials.isSolid(event.getOldState())) return;
+    if (!match.isRunning()) return;
 
     final Block block = event.getBlock();
     DamageInfo breaker = null;

@@ -208,6 +208,16 @@ public abstract class FilterParser {
     return new SameTeamFilter(parseChild(el));
   }
 
+  @MethodParser("participating")
+  public ParticipatingFilter parseParticipating(Element el) {
+    return ParticipatingFilter.PARTICIPATING;
+  }
+
+  @MethodParser("observing")
+  public ParticipatingFilter parseObserving(Element el) {
+    return ParticipatingFilter.OBSERVING;
+  }
+
   @MethodParser("attacker")
   public AttackerFilter parseAttacker(Element el) throws InvalidXMLException {
     return new AttackerFilter(parseChild(el));

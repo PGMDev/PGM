@@ -2,8 +2,10 @@ package tc.oc.pgm.controlpoint;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.bukkit.Material;
 import org.bukkit.util.Vector;
+import org.jdom2.Attribute;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -29,7 +31,8 @@ public abstract class ControlPointParser {
           new BlockFilter(Material.STAINED_GLASS_PANE));
 
   public static ControlPointDefinition parseControlPoint(
-      MapFactory factory, Element elControlPoint, boolean koth) throws InvalidXMLException {
+      MapFactory factory, Element elControlPoint, boolean koth, AtomicInteger serialNumber)
+      throws InvalidXMLException {
     String id = elControlPoint.getAttributeValue("id");
     RegionParser regionParser = factory.getRegions();
     FilterParser filterParser = factory.getFilters();
@@ -54,7 +57,17 @@ public abstract class ControlPointParser {
       visualMaterials = new AnyFilter(filters);
     }
 
-    String name = elControlPoint.getAttributeValue("name", "Hill");
+    String name;
+    Attribute attrName = elControlPoint.getAttribute("name");
+
+    if (attrName != null) {
+      name = attrName.getValue();
+    } else {
+      int serial = serialNumber.getAndIncrement();
+      name = "Hill";
+      if (serial > 1) name += " " + serial;
+    }
+
     TeamModule teams = factory.getModule(TeamModule.class);
     TeamFactory initialOwner =
         teams == null

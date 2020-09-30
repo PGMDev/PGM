@@ -336,9 +336,12 @@ public class FreezeMatchModule implements MatchModule, Listener {
       if (!silent) {
         freezeTitle.append(" ").append(by);
       }
-
-      freezee.showTitle(
-          TextComponent.empty(), freezeTitle.color(TextColor.RED).build(), 5, 9999, 5);
+      Component title = freezeTitle.color(TextColor.RED).build();
+      if (freezee.isLegacy()) {
+        freezee.sendWarning(title);
+      } else {
+        freezee.showTitle(TextComponent.empty(), title, 5, 9999, 5);
+      }
       freezee.playSound(FREEZE_SOUND);
 
       ChatDispatcher.broadcastAdminChatMessage(

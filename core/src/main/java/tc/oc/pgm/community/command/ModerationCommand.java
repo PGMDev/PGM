@@ -61,6 +61,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public class ModerationCommand implements Listener {
 
   private static final Sound WARN_SOUND = new Sound("mob.enderdragon.growl", 1f, 1f);
+  private static final Sound ALT_SOUND = new Sound("mob.wither.shoot", 0.8f, 1.3f);
 
   private static final Component WARN_SYMBOL = TextComponent.of(" \u26a0 ", TextColor.YELLOW);
   private static final Component BROADCAST_DIV = TextComponent.of(" \u00BB ", TextColor.GRAY);
@@ -173,7 +174,7 @@ public class ModerationCommand implements Listener {
       perms = Permissions.FREEZE)
   public void freeze(CommandSender sender, Match match, Player target, @Switch('s') boolean silent)
       throws CommandException {
-    setFreeze(sender, match, target, silent);
+    setFreeze(sender, match, target, checkSilent(silent, sender));
   }
 
   private void setFreeze(CommandSender sender, Match match, Player target, boolean silent) {
@@ -869,13 +870,15 @@ public class ModerationCommand implements Listener {
 
     Component reasonMsg = formatPunishmentReason(reason);
     Component formattedMsg =
-        UsernameFormatUtils.formatStaffName(sender, match)
+        TextComponent.builder()
+            .append(UsernameFormatUtils.formatStaffName(sender, match))
             .append(BROADCAST_DIV)
             .append(prefix)
             .append(BROADCAST_DIV)
             .append(target)
             .append(BROADCAST_DIV)
-            .append(reasonMsg);
+            .append(reasonMsg)
+            .build();
 
     if (!silent) {
       match.sendMessage(formattedMsg);
@@ -943,7 +946,7 @@ public class ModerationCommand implements Listener {
 
     ban.ifPresent(
         info -> {
-          if (!isBanStillValid(event.getPlayer())) {
+          if (!isBanStillValid(info.getUserName())) {
             removeCachedBan(info);
             return;
           }
@@ -952,7 +955,7 @@ public class ModerationCommand implements Listener {
           final Match match = matchPlayer.getMatch();
 
           ChatDispatcher.broadcastAdminChatMessage(
-              formatAltAccountBroadcast(info, matchPlayer), match);
+              formatAltAccountBroadcast(info, matchPlayer), match, Optional.of(ALT_SOUND));
         });
   }
 
@@ -989,17 +992,16 @@ public class ModerationCommand implements Listener {
     return Bukkit.getBanList(BanList.Type.NAME).isBanned(name);
   }
 
-  private boolean isBanStillValid(Player player) {
-    return isBanStillValid(player.getName());
-  }
-
   private Component formatAltAccountBroadcast(BannedAccountInfo info, MatchPlayer player) {
-    Component message =
-        TranslatableComponent.of(
-            "moderation.similarIP.loginEvent",
-            player.getName(NameStyle.FANCY),
-            TextComponent.of(info.getUserName(), TextColor.DARK_AQUA));
-    return message.hoverEvent(HoverEvent.of(Action.SHOW_TEXT, info.getHoverMessage()));
+    return TextComponent.builder()
+        .append(
+            TranslatableComponent.of(
+                "moderation.similarIP.loginEvent",
+                TextColor.RED,
+                player.getName(NameStyle.FANCY),
+                TextComponent.of(info.getUserName(), TextColor.DARK_AQUA)))
+        .hoverEvent(HoverEvent.of(Action.SHOW_TEXT, info.getHoverMessage()))
+        .build();
   }
 
   // Force vanished players to silent broadcast

@@ -69,6 +69,7 @@ public abstract class Spawning extends Participating {
   public void tick() {
     if (!trySpawn()) {
       updateTitle();
+      if (player.isLegacy()) sendMessage();
     }
 
     super.tick();
@@ -94,6 +95,8 @@ public abstract class Spawning extends Participating {
       return null;
     }
   }
+
+  public void sendMessage() {}
 
   public void updateTitle() {
     player.showTitle(getTitle(), getSubtitle().color(TextColor.GREEN), 0, 3, 3);
