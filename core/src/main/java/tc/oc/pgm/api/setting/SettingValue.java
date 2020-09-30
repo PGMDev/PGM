@@ -43,6 +43,9 @@ public enum SettingValue {
 
   STATS_ON("stats", "on"), // Track stats
   STATS_OFF("stats", "off"), // Don't track stats
+
+  EFFECTS_ON("effects", "on"), // Display special particle effects
+  EFFECTS_OFF("effects", "off"); // Don't display special particle effects
   ;
 
   private final String key;

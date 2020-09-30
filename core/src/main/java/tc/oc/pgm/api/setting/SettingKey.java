@@ -33,7 +33,8 @@ public enum SettingKey {
   SOUNDS("sounds", SOUNDS_ALL, SOUNDS_DM, SOUNDS_NONE), // Changes when sounds are played
   VOTE("vote", VOTE_ON, VOTE_OFF), // Changes if the vote book is shown on cycle
   STATS("stats", STATS_ON, STATS_OFF), // Changes if stats are tracked
-  ;
+  EFFECTS("effects", EFFECTS_ON, EFFECTS_OFF) // Changes if special particle effects are shown
+;
 
   private final List<String> aliases;
   private final SettingValue[] values;
