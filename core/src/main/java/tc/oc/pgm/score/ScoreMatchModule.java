@@ -122,15 +122,19 @@ public class ScoreMatchModule implements MatchModule, Listener {
       }
     }
     TextComponent returnMessage =
-        TextComponent.of("Score: ", TextColor.DARK_AQUA)
-            .append(TextFormatter.list(scoreMessages, TextColor.GRAY));
+        TextComponent.builder()
+            .append(TranslatableComponent.of("match.info.score").color(TextColor.DARK_AQUA))
+            .append(TextComponent.of(": ", TextColor.DARK_AQUA))
+            .append(TextFormatter.list(scoreMessages, TextColor.GRAY))
+            .build();
     if (matchPlayer != null && ffamm != null) {
       returnMessage =
           returnMessage.append(
               TextComponent.builder()
                   .color(TextColor.GRAY)
                   .append(" | ")
-                  .append("You: ")
+                  .append(TranslatableComponent.of("match.info.you"))
+                  .append(": ")
                   .color(TextColor.DARK_AQUA)
                   .append(
                       TextComponent.of(
