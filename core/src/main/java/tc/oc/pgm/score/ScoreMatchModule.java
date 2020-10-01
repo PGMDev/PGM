@@ -132,10 +132,10 @@ public class ScoreMatchModule implements MatchModule, Listener {
           returnMessage.append(
               TextComponent.builder()
                   .color(TextColor.GRAY)
-                  .append(" | ")
+                  .append(" | ", TextColor.GRAY)
                   .append(TranslatableComponent.of("match.info.you"))
                   .append(": ")
-                  .color(TextColor.DARK_AQUA)
+                  .color(TextFormatter.convert(matchPlayer.getCompetitor().getColor()))
                   .append(
                       TextComponent.of(
                           (int) scores.get(matchPlayer).doubleValue(), TextColor.WHITE))
