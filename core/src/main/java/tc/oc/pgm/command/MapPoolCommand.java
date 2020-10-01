@@ -284,21 +284,36 @@ public final class MapPoolCommand {
       @Switch('o') boolean forceOpen,
       @Text MapInfo map)
       throws CommandException {
+    MapPoll poll = getVotingPool(player, sender, mapOrder);
+    if (poll != null) {
+      boolean voteResult = poll.toggleVote(map, ((Player) sender).getUniqueId());
+      Component voteAction =
+          TranslatableComponent.of(
+              voteResult ? "vote.for" : "vote.abstain",
+              voteResult ? TextColor.GREEN : TextColor.RED,
+              map.getStyledName(MapNameStyle.COLOR));
+      player.sendMessage(voteAction);
+      poll.sendBook(player, forceOpen);
+    }
+  }
+
+  @Command(aliases = "votebook", desc = "Spawn a vote book")
+  public void voteBook(MatchPlayer player, CommandSender sender, MapOrder mapOrder)
+      throws CommandException {
+    MapPoll poll = getVotingPool(player, sender, mapOrder);
+    if (poll != null) {
+      poll.sendBook(player, false);
+    }
+  }
+
+  private static MapPoll getVotingPool(MatchPlayer player, CommandSender sender, MapOrder mapOrder)
+      throws CommandException {
     MapPool pool = getMapPoolManager(sender, mapOrder).getActiveMapPool();
     MapPoll poll = pool instanceof VotingPool ? ((VotingPool) pool).getCurrentPoll() : null;
     if (poll == null) {
       player.sendWarning(TranslatableComponent.of("vote.noVote"));
-      return;
     }
-    boolean voteResult = poll.toggleVote(map, ((Player) sender).getUniqueId());
-
-    Component voteAction =
-        TranslatableComponent.of(
-            voteResult ? "vote.for" : "vote.abstain",
-            voteResult ? TextColor.GREEN : TextColor.RED,
-            map.getStyledName(MapNameStyle.COLOR));
-    player.sendMessage(voteAction);
-    poll.sendBook(player, forceOpen);
+    return poll;
   }
 
   public static MapPoolManager getMapPoolManager(CommandSender sender, MapOrder mapOrder)
