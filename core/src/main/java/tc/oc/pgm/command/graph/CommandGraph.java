@@ -35,6 +35,7 @@ import tc.oc.pgm.command.InventoryCommand;
 import tc.oc.pgm.command.JoinCommand;
 import tc.oc.pgm.command.ListCommand;
 import tc.oc.pgm.command.MapCommand;
+import tc.oc.pgm.command.MapDevCommand;
 import tc.oc.pgm.command.MapOrderCommand;
 import tc.oc.pgm.command.MapPoolCommand;
 import tc.oc.pgm.command.MatchCommand;
@@ -85,6 +86,7 @@ public class CommandGraph extends BasicBukkitCommandGraph {
     register(new TeamCommand(), "team");
     register(new TimeLimitCommand());
     register(new VotingCommand(), "vote", "votes");
+    register(new MapDevCommand());
   }
 
   public void register(Object command, String... aliases) {
