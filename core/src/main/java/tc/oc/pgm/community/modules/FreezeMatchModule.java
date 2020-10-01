@@ -12,6 +12,8 @@ import javax.annotation.Nullable;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
+import net.kyori.text.event.ClickEvent;
+import net.kyori.text.event.HoverEvent;
 import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
@@ -345,11 +347,8 @@ public class FreezeMatchModule implements MatchModule, Listener {
       freezee.playSound(FREEZE_SOUND);
 
       ChatDispatcher.broadcastAdminChatMessage(
-          TranslatableComponent.of(
-              "moderation.freeze.broadcast.frozen",
-              TextColor.GRAY,
-              senderName,
-              freezee.getName(NameStyle.CONCISE)),
+          createInteractiveBroadcast(
+              freezee.getName(NameStyle.CONCISE), senderName, freezee.getBukkit().getName(), true),
           match);
     }
 
@@ -369,12 +368,25 @@ public class FreezeMatchModule implements MatchModule, Listener {
       freezee.sendMessage(thawedTitle.color(TextColor.GREEN).build());
 
       ChatDispatcher.broadcastAdminChatMessage(
-          TranslatableComponent.of(
-              "moderation.freeze.broadcast.thaw",
-              TextColor.GRAY,
-              senderName,
-              freezee.getName(NameStyle.CONCISE)),
+          createInteractiveBroadcast(
+              freezee.getName(NameStyle.CONCISE), senderName, freezee.getBukkit().getName(), false),
           match);
+    }
+
+    private Component createInteractiveBroadcast(
+        Component senderName, Component targetName, String username, boolean frozen) {
+      return TextComponent.builder()
+          .append(
+              TranslatableComponent.of(
+                  String.format("moderation.freeze.broadcast.%s", frozen ? "frozen" : "thaw"),
+                  TextColor.GRAY,
+                  senderName,
+                  targetName))
+          .hoverEvent(
+              HoverEvent.showText(
+                  TranslatableComponent.of("moderation.freeze.broadcast.hover", TextColor.GRAY)))
+          .clickEvent(ClickEvent.runCommand("/f " + username))
+          .build();
     }
 
     // Borrowed from WorldEdit
