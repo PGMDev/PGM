@@ -251,7 +251,7 @@ public abstract class KitParser {
       }
     }
 
-    return slotItems.isEmpty() ? null : new ItemKit(slotItems, freeItems);
+    return slotItems.isEmpty() && freeItems.isEmpty() ? null : new ItemKit(slotItems, freeItems);
   }
 
   public Slot parseInventorySlot(Node node) throws InvalidXMLException {
