@@ -93,6 +93,7 @@ public interface Permissions {
               .put(GAMEPLAY, true)
               .put(DEBUG, true)
               .put(RELOAD, true)
+              .put(MAPDEV, true)
               .build());
 
   Permission ALL =
