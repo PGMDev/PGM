@@ -45,34 +45,55 @@ public class ProjectileTrailMatchModule implements MatchModule, Listener {
               } else {
                 final Color color = (Color) projectile.getMetadata(TRAIL_META, PGM.get()).value();
 
-                match.getPlayers().stream()
-                    .filter(
-                        pl ->
-                            pl.getSettings().getValue(SettingKey.EFFECTS)
-                                == SettingValue.EFFECTS_ON)
-                    .forEach(
-                        player -> {
-                          player
-                              .getBukkit()
-                              .spigot()
-                              .playEffect(
-                                  projectile.getLocation(),
-                                  Effect.COLOURED_DUST,
-                                  0,
-                                  0,
-                                  rgbToParticle(color.getRed()),
-                                  rgbToParticle(color.getGreen()),
-                                  rgbToParticle(color.getBlue()),
-                                  1,
-                                  0,
-                                  50);
-                        });
+                for (MatchPlayer player : match.getPlayers()) {
+                  boolean colors =
+                      player
+                          .getSettings()
+                          .getValue(SettingKey.EFFECTS)
+                          .equals(SettingValue.EFFECTS_ON);
+                  if (colors) {
+                    player
+                        .getBukkit()
+                        .spigot()
+                        .playEffect(
+                            projectile.getLocation(),
+                            Effect.COLOURED_DUST,
+                            0,
+                            0,
+                            rgbToParticle(color.getRed()),
+                            rgbToParticle(color.getGreen()),
+                            rgbToParticle(color.getBlue()),
+                            1,
+                            0,
+                            50);
+                  } else {
+                    // Play the critical effect to those who have effects off, to replicate original
+                    // arrow behavior
+                    if (isCriticalArrow(projectile)) {
+                      player
+                          .getBukkit()
+                          .spigot()
+                          .playEffect(
+                              projectile.getLocation(), Effect.CRIT, 0, 0, 0, 0, 0, 1, 0, 50);
+                    }
+                  }
+                }
               }
             });
   }
 
   private float rgbToParticle(int rgb) {
     return Math.max(0.001f, (rgb / 255.0f));
+  }
+
+  private boolean isCriticalArrow(Projectile projectile) {
+    if (projectile instanceof Arrow) {
+      final Arrow arrow = (Arrow) projectile;
+      if (arrow.hasMetadata(CRITICAL_META)) {
+        return arrow.getMetadata(CRITICAL_META, PGM.get()).asBoolean();
+      }
+    }
+    return false;
   }
 
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
