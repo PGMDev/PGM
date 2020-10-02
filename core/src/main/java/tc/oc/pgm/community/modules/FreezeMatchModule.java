@@ -347,9 +347,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
       freezee.playSound(FREEZE_SOUND);
 
       ChatDispatcher.broadcastAdminChatMessage(
-          createInteractiveBroadcast(
-              freezee.getName(NameStyle.CONCISE), senderName, freezee.getBukkit().getName(), true),
-          match);
+          createInteractiveBroadcast(senderName, freezee, true), match);
     }
 
     private void thaw(MatchPlayer freezee, Component senderName, boolean silent) {
@@ -368,24 +366,22 @@ public class FreezeMatchModule implements MatchModule, Listener {
       freezee.sendMessage(thawedTitle.color(TextColor.GREEN).build());
 
       ChatDispatcher.broadcastAdminChatMessage(
-          createInteractiveBroadcast(
-              freezee.getName(NameStyle.CONCISE), senderName, freezee.getBukkit().getName(), false),
-          match);
+          createInteractiveBroadcast(senderName, freezee, false), match);
     }
 
     private Component createInteractiveBroadcast(
-        Component senderName, Component targetName, String username, boolean frozen) {
+        Component senderName, MatchPlayer freezee, boolean frozen) {
       return TextComponent.builder()
           .append(
               TranslatableComponent.of(
                   String.format("moderation.freeze.broadcast.%s", frozen ? "frozen" : "thaw"),
                   TextColor.GRAY,
                   senderName,
-                  targetName))
+                  freezee.getName(NameStyle.CONCISE)))
           .hoverEvent(
               HoverEvent.showText(
                   TranslatableComponent.of("moderation.freeze.broadcast.hover", TextColor.GRAY)))
-          .clickEvent(ClickEvent.runCommand("/f " + username))
+          .clickEvent(ClickEvent.runCommand("/f " + freezee.getBukkit().getName()))
           .build();
     }
 
