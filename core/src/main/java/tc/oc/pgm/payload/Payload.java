@@ -2,10 +2,7 @@ package tc.oc.pgm.payload;
 
 import com.google.common.collect.ImmutableList;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import javax.annotation.Nullable;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
@@ -16,7 +13,6 @@ import org.bukkit.Color;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Minecart;
@@ -60,7 +56,7 @@ public class Payload extends ControllableGoal<PayloadDefinition>
 
   // The team that currently owns the payload
   // Teams that can not push the payload CAN be the owner
-  // Is null if no players nearby
+  // Is null if no players nearby (Neutral state)
   @Nullable private Competitor currentOwner = null;
 
   // The amount of Paths in this payloads rail
@@ -69,16 +65,18 @@ public class Payload extends ControllableGoal<PayloadDefinition>
   private Minecart payloadEntity;
   private ArmorStand labelEntity;
 
-  // The final path in their respective direction
-  private Path headPath;
-  private Path tailPath;
-
   // The current whereabouts of the payload
   private Path currentPath;
   private Location payloadLocation;
 
   // The path the payload goes towards in the neutral state, the path the payload starts on;
   private Path middlePath;
+
+  private Competitor primaryOwner;
+  private Path primaryGoal;
+
+  @Nullable private Competitor secondaryOwner;
+  @Nullable private Path secondaryGoal;
 
   // Two paths used to store furthest progression in each direction
   private Path furthestHeadPath;
@@ -99,13 +97,13 @@ public class Payload extends ControllableGoal<PayloadDefinition>
 
   public static final String SYMBOL_PAYLOAD_NEUTRAL = "\u29be"; // ⦾
 
-  /** The default {@link MaterialMatcher} used for checking if a payload is on a checkpoint */
-  public static final MaterialMatcher STANDARD_CHECKPOINT_MATERIALS =
+  public static final MaterialMatcher RAIL_MATERIAL_MATCHER =
       new CompoundMaterialMatcher(
           ImmutableList.of(
               new SingleMaterialMatcher(Material.DETECTOR_RAIL),
               new SingleMaterialMatcher(Material.ACTIVATOR_RAIL),
-              new SingleMaterialMatcher(Material.POWERED_RAIL)));
+              new SingleMaterialMatcher(Material.POWERED_RAIL),
+              new SingleMaterialMatcher(Material.RAILS)));
 
   public Payload(Match match, PayloadDefinition definition) {
     super(definition, match);
@@ -137,6 +135,7 @@ public class Payload extends ControllableGoal<PayloadDefinition>
     return definition.shouldShowProgress();
   }
 
+  @Override
   public double getCompletion(Competitor competitor) {
 
     // The total amount of rails from the middle to the relevant goal
@@ -144,12 +143,11 @@ public class Payload extends ControllableGoal<PayloadDefinition>
     // The amount of rails this team has progressed from the middle towards the relevant goal
     int progress = 0;
 
-    if (tmm.getTeam(definition.getPrimaryOwner()) == competitor) {
+    if (primaryOwner == competitor) {
       total = railSize - middlePath.index();
       progress = (furthestHeadPath.index() - middlePath.index());
 
-    } else if (definition.getSecondaryOwner() != null
-        && tmm.getTeam(definition.getSecondaryOwner()) == competitor) {
+    } else if (secondaryOwner != null && secondaryOwner == competitor) {
       total = middlePath.index();
       progress = middlePath.index() - furthestTailPath.index();
     }
@@ -164,8 +162,10 @@ public class Payload extends ControllableGoal<PayloadDefinition>
    *
    * @return the remaining amount of paths until the next checkpoint
    */
-  public int pathsUntilNextCheckpoint() {
-    if (currentPath.index() == middlePath.index() || currentPath.isCheckpoint()) return 0;
+  private int pathsUntilNextCheckpoint() {
+    if ((currentPath.index() == middlePath.index() && secondaryOwner != null)
+        || currentPath.isCheckpoint()) return 0;
+    if (secondaryOwner == null) return primaryGoal.index();
     return Math.abs(
         currentPath.index() - getNextCheckpoint(currentPath.index() > middlePath.index()).index());
   }
@@ -174,12 +174,7 @@ public class Payload extends ControllableGoal<PayloadDefinition>
 
   @Override
   public boolean canComplete(Competitor team) {
-    if (team instanceof Team)
-      return ((Team) team).isInstance(definition.getPrimaryOwner())
-          || (((Team) team).isInstance(definition.getSecondaryOwner())
-              && !definition
-                  .shouldSecondaryTeamPushButNoGoal()); // If they have no goal they cant complete
-    // anything
+    if (team instanceof Team) return team == primaryOwner || team == secondaryOwner;
     return false;
   }
 
@@ -213,8 +208,9 @@ public class Payload extends ControllableGoal<PayloadDefinition>
 
   // Controllable
 
-  @Override // Called in ControllableGoal#contestCycle
+  @Override // Called in ControllableGoal#contbestCycle
   public void dominationCycle(@Nullable Competitor dominatingTeam, int lead, Duration duration) {
+    if (!isNeutral() && definition.isPermanent()) return;
     currentOwner = dominatingTeam; // The team that completes the CaptureCondition
   }
 
@@ -224,7 +220,7 @@ public class Payload extends ControllableGoal<PayloadDefinition>
     if (isCompleted()) return; // Freeze if completed
 
     // Move if conditions are present
-    tickMove();
+    boolean moved = tickMove();
 
     // Display the pretty circle around the payload
     tickDisplay();
@@ -234,33 +230,31 @@ public class Payload extends ControllableGoal<PayloadDefinition>
     // completion for the opposite side
     if (updateCompletion()) leadingTeam = currentOwner;
 
-    match.callEvent(new GoalStatusChangeEvent(match, this));
+    // If the payload has moved, trigger an update after calculating the leading team
+    if (moved) match.callEvent(new GoalStatusChangeEvent(match, this));
   }
 
-  private void tickMove() {
-
-    float speed = getControllingTeamSpeed(); // Fetches the speed for the current owner
-
-    final float points = definition.getPoints();
+  private boolean tickMove() {
 
     // Check if the payload has reached a finish
-    if ((isUnderPrimaryOwnerControl() ? !currentPath.hasNext() : !currentPath.hasPrevious())
-        && !(!isUnderPrimaryOwnerControl() && definition.shouldSecondaryTeamPushButNoGoal())) {
-      completed = true;
+    if (currentPath == primaryGoal || currentPath == secondaryGoal) {
+      completed = true; // Freeze the payload on completion
       match.callEvent(new GoalCompleteEvent(match, this, currentOwner, true));
 
       final ScoreMatchModule smm = match.needModule(ScoreMatchModule.class);
       if (smm != null) { // Increment points if the score module is present(default points is 0)
-        if (currentOwner != null) smm.incrementScore(currentOwner, points);
+        if (currentOwner != null) smm.incrementScore(currentOwner, definition.getPoints());
       }
 
-      return; // Dont execute a moving cycle if the payload has been completed
+      return false; // Dont execute a moving cycle if the payload has been completed
     }
 
-    speed = Math.abs(speed);
-    if (speed == 0) return; // Mainly for if neutral speed is 0
+    float speed = getControllingTeamSpeed(); // Fetches the speed for the current owner
+
+    if (speed == 0) return false; // Mainly for if neutral speed is 0
 
     move(speed / 10.0); // Move the entity
+    return true;
   }
 
   private void move(double distance) {
@@ -270,7 +264,10 @@ public class Payload extends ControllableGoal<PayloadDefinition>
     }
 
     // Dont try to do neutral moving if the payload has reached the middle
-    if (currentPath.index() == middlePath.index() && isNeutral()) return;
+    if (currentPath.index() == middlePath.index() && (isNeutral() || !canComplete(currentOwner))) {
+      payloadEntity.teleport(middlePath.getLocation());
+      return;
+    }
 
     // If the current Path is a checkpoint
     if (currentPath.isCheckpoint()) {
@@ -342,9 +339,9 @@ public class Payload extends ControllableGoal<PayloadDefinition>
         checkpointColor =
             TextFormatter.convert(
                 (relevantCheckpointKey > 0
-                    ? tmm.getTeam(definition.getPrimaryOwner()).getColor()
+                    ? primaryOwner.getColor()
                     // If any tail checkpoints exist, then the secondary team should NOT be null
-                    : tmm.getTeam(definition.getSecondaryOwner()).getColor()));
+                    : secondaryOwner.getColor()));
 
       final Component message =
           TranslatableComponent.of(
@@ -369,10 +366,15 @@ public class Payload extends ControllableGoal<PayloadDefinition>
    * Gets the next {@link PayloadCheckpoint} in the given direction
    *
    * @param head {@code true} if the next checkpoint in the head direction should be returned {@code
-   *     false} if the next checkpoint in the tail direction should be returned}
+   *     false} if the next checkpoint in the tail direction should be returned}.
+   * @return the next checkpoint, or the current checkpoint of there is no more checkpoints in the
+   *     given direction
    */
   private PayloadCheckpoint getNextCheckpoint(boolean head) {
-    return checkpointMap.get(lastReachedCheckpointKey - (head ? -1 : 1));
+    PayloadCheckpoint checkpoint;
+    return (checkpoint = checkpointMap.get(lastReachedCheckpointKey - (head ? -1 : 1))) == null
+        ? getLastReachedCheckpoint()
+        : checkpoint;
   }
 
   private boolean hasPayloadHitPermanentCheckpoint() {
@@ -386,6 +388,19 @@ public class Payload extends ControllableGoal<PayloadDefinition>
               && getLastReachedCheckpoint().isPermanent());
     }
     return false; // No checkpoint has been hit yet
+  }
+
+  /** {@code null} if no checkpoint with the given id exists for this payload */
+  @Nullable
+  public PayloadCheckpoint getCheckpoint(String id) {
+    return checkpointMap.values().stream()
+        .filter(
+            c -> {
+              if (c.getId() != null) return c.getId().equals(id);
+              return false;
+            })
+        .findFirst()
+        .orElse(null);
   }
 
   private void tickDisplay() {
@@ -506,9 +521,9 @@ public class Payload extends ControllableGoal<PayloadDefinition>
 
   /** Gets the relevant speed value from the {@link Payload}s {@link PayloadDefinition} */
   private float getControllingTeamSpeed() {
-    if (canDominate(currentOwner)) {
-      if (isUnderPrimaryOwnerControl()) return definition.getPrimaryOwnerSpeed();
-      if (isUnderSecondaryOwnerControl()) return definition.getSecondaryOwnerSpeed();
+    if (canDominate(currentOwner) && currentOwner instanceof Team) {
+      Float speed = definition.getSpeed((Team) currentOwner);
+      return speed == null ? canComplete(currentOwner) ? 1 : definition.getNeutralSpeed() : speed;
     }
 
     // If any non-pushing team controls the payload, neutral speed should be used
@@ -520,15 +535,13 @@ public class Payload extends ControllableGoal<PayloadDefinition>
   }
 
   private boolean isUnderPrimaryOwnerControl() {
-    return currentOwner == tmm.getTeam(definition.getPrimaryOwner());
+    return currentOwner == primaryOwner;
   }
 
   private boolean isUnderSecondaryOwnerControl() {
-    // Ensure that if there is no secondary owner (definition.getCompetingOwner = null)
+    // Ensure that if there is no secondary owner
     // this does not return true if the state is neutral (currentOwner = null)
-    if (definition.getSecondaryOwner() != null)
-      return currentOwner == tmm.getTeam(definition.getSecondaryOwner());
-    return false;
+    return secondaryOwner != null && currentOwner == secondaryOwner;
   }
 
   private boolean isNeutral() {
@@ -536,7 +549,7 @@ public class Payload extends ControllableGoal<PayloadDefinition>
   }
 
   protected void makeRail() {
-    final Location location = definition.getStartingLocation().toLocation(getMatch().getWorld());
+    final Location location = definition.getMiddleLocation().toLocation(getMatch().getWorld());
 
     if (!isValidStartLocation(location)) return;
 
@@ -544,29 +557,26 @@ public class Payload extends ControllableGoal<PayloadDefinition>
 
     BlockFace direction = startingRails.getDirection();
 
-    final List<Double> differingX = new ArrayList<>();
-    final List<Double> differingY = new ArrayList<>();
-    final List<Double> differingZ = new ArrayList<>();
+    middlePath = new Path(location);
 
-    differingY.add(0.0);
-    differingY.add(1.0);
-    differingY.add(-1.0);
+    Path previousPath = middlePath;
+    Path neighborRail = getNewNeighborPath(previousPath, direction, false);
 
-    headPath = new Path(railSize, location, null, null);
-    railSize++;
+    boolean flip = false; // Also check the other way
+    while (neighborRail != null || flip) {
 
-    Path previousPath = headPath;
-    Path neighborRail =
-        getNewNeighborPath(previousPath, direction, differingX, differingY, differingZ);
-
-    while (neighborRail != null) {
-
-      previousPath.setNext(neighborRail);
+      if (flip) {
+        if (neighborRail == null) {
+          break;
+        }
+        previousPath.setNext(neighborRail);
+        neighborRail.setPrevious(previousPath);
+      } else {
+        previousPath.setPrevious(neighborRail);
+        neighborRail.setNext(previousPath);
+      }
 
       previousPath = neighborRail;
-
-      differingX.clear();
-      differingZ.clear();
 
       if (previousPath.getLocation().getBlock().getState().getMaterialData() instanceof Rails) {
         direction =
@@ -576,185 +586,210 @@ public class Payload extends ControllableGoal<PayloadDefinition>
         direction = null;
       }
 
-      neighborRail =
-          getNewNeighborPath(previousPath, direction, differingX, differingY, differingZ);
-    }
-
-    tailPath = previousPath;
-
-    Path currentPath = headPath;
-    Path lastPath = null;
-
-    headPath = null;
-
-    boolean moreRails = currentPath.hasNext();
-    while (moreRails) {
-
-      Path nextPath = currentPath.next();
-      Location newLocation =
-          currentPath
-              .getLocation()
-              .toVector()
-              .midpoint(nextPath.getLocation().toVector())
-              .toLocation(getMatch().getWorld());
-      newLocation.setY(Math.max(currentPath.getLocation().getY(), nextPath.getLocation().getY()));
-      Path newPath;
-      if (headPath == null) {
-        Location headLocation =
-            newLocation.clone().add(currentPath.getLocation().subtract(nextPath.getLocation()));
-        headPath = new Path(railSize, headLocation, null, null);
+      neighborRail = getNewNeighborPath(previousPath, direction, flip);
+      if (neighborRail == null && !flip) {
+        flip = true; // Try looking the other way for more paths
+        previousPath = new Path(previousPath, railSize);
         railSize++;
-        newPath = new Path(railSize, newLocation, headPath, null);
-        railSize++;
-        headPath.setNext(newPath);
-        lastPath = newPath;
-        this.currentPath = headPath;
-      } else {
-        newPath = new Path(railSize, newLocation, lastPath, null, currentPath.isCheckpoint());
-        railSize++;
-        lastPath.setNext(newPath);
-        lastPath = newPath;
-        tailPath = lastPath;
+        while (previousPath
+            .hasNext()) { // Iterate over all paths existing at this point to add index numbers
+          previousPath.setNext(new Path(previousPath.next(), railSize));
+          railSize++;
+          previousPath = previousPath.next();
+        }
+        middlePath = previousPath;
+        neighborRail =
+            getNewNeighborPath(
+                previousPath,
+                ((Rails) middlePath.getLocation().getBlock().getState().getMaterialData())
+                    .getDirection(),
+                flip);
       }
-
-      currentPath = nextPath;
-      moreRails = currentPath.hasNext();
     }
-
-    Path tail = tailPath;
-    Path beforeTail = tail.previous();
-    Location newLocation =
-        tail.getLocation()
-            .toVector()
-            .midpoint(beforeTail.getLocation().toVector())
-            .toLocation(getMatch().getWorld());
-    newLocation.setY(Math.max(tail.getLocation().getY(), beforeTail.getLocation().getY()));
-    Location tailLocation =
-        newLocation.clone().add(currentPath.getLocation().subtract(beforeTail.getLocation()));
-    tailPath = new Path(tailLocation, tail, null);
-    tail.setNext(tailPath);
-
-    Location lookingFor = definition.getMiddleLocation().toLocation(match.getWorld());
-
-    middlePath = findPath(tail, lookingFor);
-
-    if (middlePath == null) match.getLogger().warning("No middle path found");
 
     this.currentPath = middlePath;
 
     furthestTailPath = middlePath;
     furthestHeadPath = middlePath;
 
+    findGoals();
+
     makeCheckpoints();
+  }
+
+  void findGoals() {
+    for (Competitor competitor : match.getCompetitors()) {
+      if (competitor instanceof Team) {
+        Vector goal;
+        goal = definition.getGoal((Team) competitor);
+        if (goal != null) {
+          Path goalPath = findPath(goal);
+          if (goalPath == null) {
+            match
+                .getLogger()
+                .warning("Goal location not found on rail for team: " + competitor.getNameLegacy());
+            continue;
+          }
+
+          boolean sameSide = false;
+          if (goalPath.index() > middlePath.index()) {
+            if (primaryOwner != null) sameSide = true;
+            primaryOwner = competitor;
+            primaryGoal = goalPath;
+          } else {
+            if (secondaryOwner != null) sameSide = true;
+            secondaryOwner = competitor;
+            secondaryGoal = goalPath;
+          }
+          if (sameSide)
+            match
+                .getLogger()
+                .warning("Both goals can not be on the same side of the starting location");
+        }
+      }
+    }
   }
 
   private void makeCheckpoints() {
     // Checkpoint calculation
 
-    final List<Integer> permanentHead = definition.getPermanentHeadCheckpoints();
-    final List<Integer> permanentTail = definition.getPermanentTailCheckpoints();
-
-    Path discoverCheckpoints = middlePath;
-    int h = 1; // 0 is reserved for middle
-    while (discoverCheckpoints.hasNext()) {
-      Path potentialCheckpoint =
-          discoverCheckpoints.next(); // No reason to check for a checkpoint ON the middle path
-      if (potentialCheckpoint.isCheckpoint()) {
-        int index = potentialCheckpoint.index();
-        boolean permanent = false;
-        if (permanentHead != null) permanent = permanentHead.contains(checkpointMap.size() + 1);
-        checkpointMap.put(h, new PayloadCheckpoint(index, h, permanent));
-        headCheckpointsAmount++;
-        h++;
+    List<PayloadCheckpoint> checkpoints = new ArrayList<>();
+    for (PayloadCheckpoint checkpoint : definition.getCheckpoints()) {
+      Path checkpointPath = findPath(checkpoint.getLocation());
+      if (checkpointPath == null) {
+        match
+            .getLogger()
+            .warning(
+                "Checkpoint "
+                    + (checkpoint.getId() == null ? "not" : checkpoint.getId() + " not")
+                    + " found, location: "
+                    + checkpoint.getLocation()
+                    + " is not on rail");
+        continue;
       }
-      discoverCheckpoints = discoverCheckpoints.next();
+      checkpoint.setIndex(checkpointPath.index());
+      checkpoints.add(checkpoint);
     }
 
-    // Adding the end in this direction as a checkpoint
-    checkpointMap.put(h, new PayloadCheckpoint(discoverCheckpoints.index(), h, false));
-
-    discoverCheckpoints = middlePath; // Reset
-
-    final int offset = checkpointMap.size();
-
-    int t = -1;
-    while (discoverCheckpoints.hasPrevious()) {
-      Path potentialCheckpoint = discoverCheckpoints.previous();
-      if (potentialCheckpoint.isCheckpoint()) {
-        int index = potentialCheckpoint.index();
-        boolean permanent = false;
-        if (permanentTail != null)
-          permanent = permanentTail.contains(checkpointMap.size() - offset + 1);
-        checkpointMap.put(t, new PayloadCheckpoint(index, t, permanent));
-        tailCheckpointsAmount++;
-        t--;
-      }
-      discoverCheckpoints = discoverCheckpoints.previous();
+    Comparator<PayloadCheckpoint> sort = Comparator.comparing(PayloadCheckpoint::index);
+    checkpoints.sort(sort);
+    List<PayloadCheckpoint> headCheckpoints = new ArrayList<>();
+    List<PayloadCheckpoint> tailCheckpoints = new ArrayList<>();
+    for (PayloadCheckpoint checkpoint : checkpoints) {
+      if (checkpoint.index() < middlePath.index()) tailCheckpoints.add(checkpoint);
+      else headCheckpoints.add(checkpoint);
     }
 
-    // Adding the end in this direction as a checkpoint
-    checkpointMap.put(t, new PayloadCheckpoint(discoverCheckpoints.index(), t, false));
+    for (int i = 0; i < headCheckpoints.size(); i++) {
+      int mapIndex = i + 1;
+      PayloadCheckpoint checkpoint = headCheckpoints.get(i);
+      if (primaryGoal.index() < checkpoint.index()) {
+        match
+            .getLogger()
+            .warning(
+                "Checkpoint "
+                    + (checkpoint.getId() == null
+                        ? " at " + checkpoint.getLocation()
+                        : checkpoint.getId())
+                    + "is after the goal and will be ignored");
+        continue;
+      }
+      checkpoint.setMapIndex(mapIndex);
+      checkpointMap.put(mapIndex, checkpoint);
+      headCheckpointsAmount++;
+    }
+    // Adding the goal as a checkpoint
+    headCheckpointsAmount++;
+    checkpointMap.put(
+        headCheckpointsAmount,
+        new PayloadCheckpoint(
+            "primary-goal",
+            primaryGoal.getLocation().toVector(),
+            false,
+            primaryGoal.index(),
+            headCheckpointsAmount));
+
+    for (int i = 0; i < tailCheckpoints.size(); i++) {
+      int mapIndex = -i - 1;
+      PayloadCheckpoint checkpoint = tailCheckpoints.get(i);
+      if (secondaryGoal != null && secondaryGoal.index() > checkpoint.index()) {
+        match
+            .getLogger()
+            .warning(
+                "Checkpoint "
+                    + (checkpoint.getId() == null
+                        ? " at " + checkpoint.getLocation()
+                        : checkpoint.getId())
+                    + "is after the goal and will be ignored");
+        continue;
+      }
+      checkpoint.setMapIndex(mapIndex);
+      checkpointMap.put(mapIndex, checkpoint);
+      tailCheckpointsAmount++;
+    }
+    if (tailCheckpointsAmount > 0 && secondaryGoal != null) {
+      tailCheckpointsAmount++;
+      checkpointMap.put(
+          -tailCheckpointsAmount,
+          new PayloadCheckpoint(
+              "secondary-goal",
+              secondaryGoal.getLocation().toVector(),
+              false,
+              secondaryGoal.index(),
+              -tailCheckpointsAmount));
+    }
 
     // Adding the middle as a checkpoint
-    checkpointMap.put(0, new PayloadCheckpoint(middlePath.index(), 0, false));
+    PayloadCheckpoint middleCheckpoint =
+        new PayloadCheckpoint(
+            "middle", middlePath.getLocation().toVector(), false, middlePath.index(), 0);
+    checkpointMap.put(0, middleCheckpoint);
   }
 
   /** Checks if a {@link Material} is any type of rail(normal, detector, activator, powered) */
   public boolean isRails(Material material) {
     // STANDARD_CHECKPOINT_MATERIALS covers all other types of rails
     // The fact that both isRails AND isCheckpoint can be true for a single Path is OK
-    return material.equals(Material.RAILS) || STANDARD_CHECKPOINT_MATERIALS.matches(material);
+    return RAIL_MATERIAL_MATCHER.matches(material);
   }
 
   private boolean isValidStartLocation(Location location) {
     // Payload must start on a rail
     if (!isRails(location.getBlock().getType())) {
-      getMatch().getLogger().warning("No rail found in starting position for payload");
+      match.getLogger().warning("No rail found in starting position for payload");
       return false;
     }
 
     final Rails startingRails = (Rails) location.getBlock().getState().getMaterialData();
 
     if (startingRails.isCurve() || startingRails.isOnSlope()) {
-      getMatch().getLogger().warning("Starting rail can not be either curved or in a slope");
+      match.getLogger().warning("Starting rail can not be either curved or in a slope");
       return false;
     }
 
-    if (isCheckpoint(location.getBlock())) {
-      getMatch().getLogger().warning("Starting rail can not be a checkpoint");
+    if (isCheckpoint(location)) {
+      match.getLogger().warning("Starting rail can not be a checkpoint");
       return false;
     }
     return true;
   }
 
-  /**
-   * Checks the given {@link Block} and the block below({@link BlockFace#DOWN}) for any {@link
-   * Material}s matching with either a xml-defined {@link MaterialMatcher} or {@link
-   * Payload#STANDARD_CHECKPOINT_MATERIALS} by default
-   */
-  private boolean isCheckpoint(Block block) {
-    final MaterialMatcher materialMatcher;
-
-    if (definition.getCheckpointMaterial() != null)
-      materialMatcher = definition.getCheckpointMaterial();
-    else materialMatcher = STANDARD_CHECKPOINT_MATERIALS;
-
-    return materialMatcher.matches(block.getType())
-        || materialMatcher.matches(block.getRelative(BlockFace.DOWN).getType());
+  private boolean isCheckpoint(Location location) {
+    return definition.getCheckpoints().stream()
+        .anyMatch(c -> c.getLocation().equals(location.toVector()));
   }
 
   /**
    * Looks along this {@link Payload}s rail for a {@link Path} that has a specific {@link Location}
    *
-   * @param start The starting point for this algorithm
    * @param lookingFor The point on this rail to look for
    * @return A {@link Path}, or {@code null} if no {@link Path} with the given {@link Location}
-   *     exsists on this rail
+   *     exists on this rail
    */
   @Nullable
-  private Path findPath(Path start, Location lookingFor) {
+  private Path findPath(Location lookingFor) {
     Path result = null;
-    Path backwards = start;
+    Path backwards = middlePath;
     while (backwards.hasPrevious()) { // Look behind and onwards
       Location here = backwards.getLocation().toCenterLocation();
       if (here.equals(lookingFor.toCenterLocation())) {
@@ -762,30 +797,42 @@ public class Payload extends ControllableGoal<PayloadDefinition>
         break;
       }
       backwards = backwards.previous();
+      if (backwards == null) break;
     }
     if (result == null) { // If not yet found, try looking the other way
-      Path forwards = start;
+      Path forwards = middlePath;
       while (forwards.hasNext()) {
         Location here = forwards.getLocation().toCenterLocation();
         if (here.equals(lookingFor.toCenterLocation())) {
           result = forwards;
           break;
         }
-        forwards = forwards.previous();
+        forwards = forwards.next();
+        if (forwards == null) break;
       }
     }
     return result;
   }
 
-  private Path getNewNeighborPath(
-      Path path,
-      BlockFace direction,
-      List<Double> differingX,
-      List<Double> differingY,
-      List<Double> differingZ) {
+  @Nullable
+  private Path findPath(Vector lookingFor) {
+    return findPath(lookingFor.toLocation(match.getWorld()));
+  }
+
+  private Path getNewNeighborPath(Path path, BlockFace direction, boolean flipped) {
+
+    final List<Double> differingX = new ArrayList<>();
+    final List<Double> differingY = new ArrayList<>();
+    final List<Double> differingZ = new ArrayList<>();
+
+    differingY.add(0.0);
+    differingY.add(1.0);
+    differingY.add(-1.0);
+
+    Path earlierPath = flipped ? path.previous() : path.next();
     Location previousLocation = null;
-    if (path.previous() != null) {
-      previousLocation = path.previous().getLocation();
+    if (earlierPath != null) {
+      previousLocation = earlierPath.getLocation();
     }
 
     Location location = path.getLocation();
@@ -828,42 +875,62 @@ public class Payload extends ControllableGoal<PayloadDefinition>
     }
 
     Location newLocation = location.clone();
-    for (double x : differingX) {
+    for (double x : differingX) { // Checking all relevant adjacent blocks
       for (double y : differingY) {
         for (double z : differingZ) {
           newLocation.add(x, y, z);
 
-          boolean isCheckpoint = isCheckpoint(newLocation.getBlock());
+          boolean isCheckpoint = isCheckpoint(newLocation);
 
-          if (isRails(newLocation.getBlock().getType()) || isCheckpoint) {
+          if (isRails(newLocation.getBlock().getType())) {
             Path currentPath = path;
-            if (currentPath.equals(headPath)) {
-              return new Path(newLocation, path, null, isCheckpoint);
-            }
 
             boolean alreadyExists = false;
-            while (currentPath.hasPrevious()) {
-              if (currentPath.getLocation().toVector().equals(newLocation.toVector())) {
+            while (currentPath.hasNext()) {
+              if (currentPath.getLocation().equals(newLocation)) {
                 alreadyExists = true;
                 break;
               }
-              currentPath = currentPath.previous();
+              currentPath = currentPath.next();
+            }
+
+            if (flipped) {
+              currentPath = path; // reset
+              while (currentPath.hasPrevious()) {
+                if (currentPath.getLocation().equals(newLocation)) {
+                  alreadyExists = true;
+                  break;
+                }
+                currentPath = currentPath.previous();
+              }
             }
 
             if (!alreadyExists) {
-              return new Path(newLocation, path, null, isCheckpoint);
+              return new Path(
+                  flipped ? railSize++ : 0,
+                  newLocation,
+                  flipped ? path : null,
+                  flipped ? null : path,
+                  isCheckpoint);
             }
           }
-
+          // If its not a valid rail block we can ignore it and try the next location
           newLocation.subtract(x, y, z);
         }
       }
     }
-    return null;
+    return null; // If there is no more positions to try then there is no new rails(We've hit an
+    // end)
   }
 
   /** Checks if the given {@link Minecart} is the payload minecart */
   public boolean isPayload(Minecart minecart) {
     return minecart == payloadEntity;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof Payload) return ((Payload) obj).isPayload(payloadEntity);
+    return false;
   }
 }

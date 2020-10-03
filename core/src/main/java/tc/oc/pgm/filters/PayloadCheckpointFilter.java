@@ -3,6 +3,7 @@ package tc.oc.pgm.filters;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.filters.query.MatchQuery;
 import tc.oc.pgm.payload.Payload;
+import tc.oc.pgm.payload.PayloadCheckpoint;
 import tc.oc.pgm.payload.PayloadDefinition;
 
 /** Checks if a given checkpoint has been passed by the given payload */
@@ -10,13 +11,11 @@ public class PayloadCheckpointFilter extends TypedFilter<MatchQuery> {
 
   private final FeatureReference<? extends PayloadDefinition> payload;
 
-  // A string in the form of "[ps]\d+"
-  private final String checkpointID;
+  private final String id;
 
-  public PayloadCheckpointFilter(
-      FeatureReference<? extends PayloadDefinition> payload, String checkpointID) {
+  public PayloadCheckpointFilter(FeatureReference<? extends PayloadDefinition> payload, String id) {
     this.payload = payload;
-    this.checkpointID = checkpointID;
+    this.id = id;
   }
 
   @Override
@@ -29,18 +28,20 @@ public class PayloadCheckpointFilter extends TypedFilter<MatchQuery> {
     Payload payload = (Payload) this.payload.get().getGoal(query.getMatch());
     if (payload == null) return QueryResponse.ABSTAIN;
 
-    // If no checkpoints has been reached
-    if (payload.getLastReachedCheckpoint().isMiddle()) return QueryResponse.DENY;
+    PayloadCheckpoint filterCheckpoint = payload.getCheckpoint(id);
+    PayloadCheckpoint lastReachedCheckpoint = payload.getLastReachedCheckpoint();
 
-    int lastReachedCheckpointKey = payload.getLastReachedCheckpoint().getMapIndex();
+    // If no checkpoints has been reached or the given checkpoint id is wrong
+    if (lastReachedCheckpoint.isMiddle() || filterCheckpoint == null) return QueryResponse.DENY;
 
-    // At this point we know that the String is a valid checkpoint(regexed in the filter parser)
-    if ((checkpointID.startsWith("s") && lastReachedCheckpointKey <= -1)
-        || checkpointID.startsWith("p") && lastReachedCheckpointKey >= 1) {
+    int lastReachedCheckpointKey = lastReachedCheckpoint.getMapIndex();
+    int filterCheckpointKey = filterCheckpoint.getMapIndex();
 
+    // if both keys are on the same side of 0 (both are positive/negative)
+    if ((lastReachedCheckpointKey ^ filterCheckpointKey) >> 31 == 0) {
+      // check if the furthest reached checkpoint is past/is this filters checkpoint
       return QueryResponse.fromBoolean(
-          Math.abs(Integer.parseInt(checkpointID.substring(1)))
-              <= Math.abs(lastReachedCheckpointKey));
+          Math.abs(lastReachedCheckpointKey) <= Math.abs(filterCheckpointKey));
     } else return QueryResponse.DENY;
   }
 }

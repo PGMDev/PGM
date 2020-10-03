@@ -1,10 +1,7 @@
 package tc.oc.pgm.payload;
 
 import com.google.common.collect.ImmutableList;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.util.Vector;
@@ -24,7 +21,6 @@ import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.teams.TeamModule;
-import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -97,24 +93,47 @@ public class PayloadModule implements MapModule<PayloadMatchModule> {
     String name = el.getAttributeValue("name", "Payload");
     boolean visible = XMLUtils.parseBoolean(el.getAttribute("visible"), true);
 
-    Vector startingLocation = XMLUtils.parseVector(new Node(el.getChild("starting-location")));
-
-    Vector middleLocation = XMLUtils.parseVector(new Node(el.getChild("middle-location")));
-
-    boolean shouldSecondaryTeamPushButNoGoal =
-        XMLUtils.parseBoolean(el.getAttribute("secondary-push-nogoal"), false);
+    Vector middleLocation = XMLUtils.parseVector(new Node(el.getChild("starting-location")));
 
     Filter playerPushFilter = filterParser.parseFilterProperty(el, "push-filter");
     Filter playerDominateFilter = filterParser.parseFilterProperty(el, "player-filter");
 
     TeamModule teams = factory.getModule(TeamModule.class);
 
-    TeamFactory primaryOwner = teams.parseTeam(el.getAttribute("primary-owner"), factory);
-    TeamFactory secondaryOwner = teams.parseTeam(el.getAttribute("secondary-owner"), factory);
+    Map<TeamFactory, Vector> goalsByTeam = new HashMap<>();
 
-    if (primaryOwner == null) throw new InvalidXMLException("No primary team found", el);
-    if (primaryOwner == secondaryOwner)
-      throw new InvalidXMLException("Primary and secondary team can not be the same team", el);
+    Element goalsEl = el.getChild("goals");
+
+    if (goalsEl == null) throw new InvalidXMLException("The payload needs at least 1 goal", el);
+
+    for (Element goalEl : goalsEl.getChildren("goal")) {
+      goalsByTeam.put(
+          teams.parseTeam(goalEl.getAttribute("team"), factory),
+          XMLUtils.parseVector(new Node(goalEl)));
+    }
+
+    if (goalsByTeam.isEmpty())
+      throw new InvalidXMLException("The Payload needs at least 1 team with a goal", goalsEl);
+    if (goalsByTeam.size() != goalsByTeam.keySet().stream().distinct().count())
+      throw new InvalidXMLException("A team can not have multiple goals", goalsEl);
+    if (goalsByTeam.size() > 2)
+      throw new InvalidXMLException("The Payload rail can not handle more than 2 goals", goalsEl);
+
+    Map<TeamFactory, Float> speedsByTeam = new HashMap<>();
+
+    Element speedsEl =
+        el.getChild("speeds");
+
+    float neutralSpeed = parseFloat("neutral-speed", 0.2f, speedsEl);
+    if (neutralSpeed < 0)
+      throw new InvalidXMLException("Neutral speed can not be under 0", speedsEl);
+
+    for (Element speedEl : XMLUtils.getChildren(speedsEl, "speed")) {
+      float speed = XMLUtils.parseNumber(new Node(speedEl), Float.class);
+      if (speed < 0) throw new InvalidXMLException("Payload speed can not be under 0", speedEl);
+
+      speedsByTeam.put(teams.parseTeam(speedEl.getAttribute("team"), factory), speed);
+    }
 
     ControllableGoalDefinition.CaptureCondition captureCondition =
         ControllableGoalDefinition.parseCaptureCondition(el);
@@ -124,26 +143,22 @@ public class PayloadModule implements MapModule<PayloadMatchModule> {
     float radius = parseFloat("radius", 3.5f, propertiesEl);
     float height = parseFloat("height", 5f, propertiesEl);
 
-    Element materialsElement = el.getChild("checkpoint-materials");
-    MaterialMatcher checkpointMaterials =
-        materialsElement == null ? null : XMLUtils.parseMaterialMatcher(materialsElement);
+    if (radius < 0 || height < 0)
+      throw new InvalidXMLException("Height and/or radius can not be under 0", propertiesEl);
 
-    List<Integer> permanentHeadCheckpoints = new ArrayList<>();
-    List<Integer> permanentTailCheckpoints = new ArrayList<>();
+    Element checkpointEl = el.getChild("checkpoints");
 
-    for (Element element : el.getChild("permanent-checkpoints").getChildren()) {
-      String string = element.getName();
-      if (string.startsWith("p"))
-        permanentHeadCheckpoints.add(Integer.parseInt(string.substring(1)));
-      if (string.startsWith("s"))
-        permanentTailCheckpoints.add(Integer.parseInt(string.substring(1)));
+    List<PayloadCheckpoint> checkpoints = new ArrayList<>();
+
+    if (checkpointEl != null) {
+      for (Element checkpoint : checkpointEl.getChildren()) {
+        checkpoints.add(
+            new PayloadCheckpoint(
+                checkpoint.getAttributeValue("id"),
+                XMLUtils.parseVector(new Node(checkpoint)),
+                XMLUtils.parseBoolean(checkpoint.getAttribute("permanent"), false)));
+      }
     }
-
-    Element speedEl = el.getChild("speeds");
-
-    float primaryOwnerSpeed = parseFloat("primary-owner-speed", 1f, speedEl);
-    float secondaryOwnerSpeed = parseFloat("secondary-owner-speed", 1f, speedEl);
-    float neutralSpeed = parseFloat("neutral-speed", 0.2f, speedEl);
 
     boolean permanent = XMLUtils.parseBoolean(el.getAttribute("permanent"), false);
 
@@ -158,29 +173,23 @@ public class PayloadModule implements MapModule<PayloadMatchModule> {
         name,
         required,
         visible,
-        startingLocation,
         middleLocation,
         playerPushFilter,
         playerDominateFilter,
-        primaryOwner,
-        secondaryOwner,
+        goalsByTeam,
+        speedsByTeam,
         captureCondition,
         radius,
         height,
-        shouldSecondaryTeamPushButNoGoal,
-        checkpointMaterials,
-        permanentHeadCheckpoints,
-        permanentTailCheckpoints,
-        primaryOwnerSpeed,
-        secondaryOwnerSpeed,
+        checkpoints,
         neutralSpeed,
         permanent,
         points,
         showProgress);
   }
 
-  // Why did i make this method again?...
   private static float parseFloat(String name, Float def, Element el) throws InvalidXMLException {
+    if (el == null) return def;
     return XMLUtils.parseNumber(el.getAttribute(name), Float.class, def);
   }
 }

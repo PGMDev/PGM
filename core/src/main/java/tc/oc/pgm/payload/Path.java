@@ -9,16 +9,17 @@ public class Path {
   private Path nextPath;
   private final boolean checkpoint;
 
-  Path(Location location, Path previousPath, Path nextPath) {
-    this(0, location, previousPath, nextPath, false);
+  Path(Location location) {
+    this(0, location, null, null, false);
   }
 
-  Path(int index, Location location, Path previousPath, Path nextPath) {
-    this(index, location, previousPath, nextPath, false);
-  }
-
-  Path(Location location, Path previousPath, Path nextPath, boolean checkpoint) {
-    this(0, location, previousPath, nextPath, checkpoint);
+  Path(Path oldPath, int nowWithIndex) {
+    this(
+        nowWithIndex,
+        oldPath.getLocation(),
+        oldPath.previous(),
+        oldPath.next(),
+        oldPath.isCheckpoint());
   }
 
   Path(int index, Location location, Path previousPath, Path nextPath, boolean checkpoint) {
