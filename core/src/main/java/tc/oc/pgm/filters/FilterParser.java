@@ -32,6 +32,7 @@ import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -357,6 +358,16 @@ public abstract class FilterParser {
   @MethodParser("can-fly")
   public CanFlyFilter parseCanFly(Element el) throws InvalidXMLException {
     return new CanFlyFilter();
+  }
+
+  @MethodParser("offset")
+  public OffsetFilter parseOffsetFilter(Element el) throws InvalidXMLException {
+    MaterialMatcher materials = XMLUtils.parseMaterialMatcher(el);
+    String relative = el.getAttributeValue("location").trim();
+    // Check vector format
+    XMLUtils.parseVector(new Node(el), relative.replace('^', ' ').replace('~', ' ').trim());
+
+    return new OffsetFilter(relative.split("\\s*,\\s*"), materials);
   }
 
   @MethodParser("objective")
