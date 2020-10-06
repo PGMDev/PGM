@@ -34,7 +34,7 @@ public class VictoryConditionProvider implements BukkitProvider<VictoryCondition
   public VictoryCondition get(
       CommandSender sender, CommandArgs args, List<? extends Annotation> list)
       throws MissingArgumentException, ProvisionException {
-    final String text = args.next();
+    final String text = args.hasNext() ? args.next() : null;
 
     final Match match = PGM.get().getMatchManager().getMatch(sender);
     if (match == null) {
