@@ -32,7 +32,6 @@ import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.StringUtils;
-import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -360,16 +359,6 @@ public abstract class FilterParser {
     return new CanFlyFilter();
   }
 
-  @MethodParser("offset")
-  public OffsetFilter parseOffsetFilter(Element el) throws InvalidXMLException {
-    MaterialMatcher materials = XMLUtils.parseMaterialMatcher(el);
-    String relative = el.getAttributeValue("location").trim();
-    // Check vector format
-    XMLUtils.parseVector(new Node(el), relative.replace('^', ' ').replace('~', ' ').trim());
-
-    return new OffsetFilter(relative.split("\\s*,\\s*"), materials);
-  }
-
   @MethodParser("objective")
   public GoalFilter parseGoal(Element el) throws InvalidXMLException {
     XMLFeatureReference<? extends GoalDefinition> goal =
@@ -463,5 +452,28 @@ public abstract class FilterParser {
   @MethodParser("score")
   public ScoreFilter parseScoreFilter(Element el) throws InvalidXMLException {
     return new ScoreFilter(XMLUtils.parseNumericRange(new Node(el), Integer.class));
+  }
+
+  // Methods for parsing QueryModifiers
+
+  @MethodParser("offset")
+  public LocationQueryModifier parseOffsetFilter(Element el) throws InvalidXMLException {
+    String relative = el.getAttributeValue("location");
+    // Check vector format
+    XMLUtils.parseVector(new Node(el), relative.replaceAll("[\\^~]", ""));
+
+    String[] coords = relative.split("\\s*,\\s*");
+
+    Boolean local = null;
+    for (String coord : coords) {
+      if (local == null) {
+        local = coord.startsWith("^");
+      }
+
+      if (coord.startsWith("^") != local)
+        throw new InvalidXMLException("Cannot mix world & local coordinates", el);
+    }
+
+    return new LocationQueryModifier(parseChild(el), coords, local);
   }
 }
