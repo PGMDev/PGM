@@ -25,30 +25,31 @@ public class LocationQueryModifier extends QueryModifier<LocationQuery> {
   protected LocationQuery modifyQuery(LocationQuery query) {
     Location location = query.getLocation();
 
-    Vector newVector;
+    Location newLocation;
 
     if (local) {
-      newVector = parseLocalLocation(query.getLocation(), coords[0], coords[1], coords[2]);
+      newLocation = parseLocalLocation(location, coords[0], coords[1], coords[2]);
     } else {
-      newVector =
-          new Vector(
-              parseRelativeLocation(coords[0], location.getX()),
-              parseRelativeLocation(coords[1], location.getY()),
-              parseRelativeLocation(coords[2], location.getZ()));
+      newLocation =
+          location
+              .clone()
+              .set(
+                  parseRelativeCoordinate(coords[0], location.getX()),
+                  parseRelativeCoordinate(coords[1], location.getY()),
+                  parseRelativeCoordinate(coords[2], location.getZ()));
     }
 
-    return new BlockQueryCustomLocation(
-        query.getEvent(), newVector.toLocation(query.getMatch().getWorld()));
+    return new BlockQueryCustomLocation(query.getEvent(), newLocation);
   }
 
-  private double parseRelativeLocation(String coordinate, double originalLocationCoordinate) {
+  private double parseRelativeCoordinate(String coordinate, double originalLocationCoordinate) {
     if (coordinate.startsWith("~")) {
       return originalLocationCoordinate + Double.parseDouble(coordinate.substring(1));
     }
     return Double.parseDouble(coordinate);
   }
 
-  private Vector parseLocalLocation(Location origin, String x, String y, String z) {
+  private Location parseLocalLocation(Location origin, String x, String y, String z) {
 
     double x1 = Double.parseDouble(x.substring(1));
     double y1 = Double.parseDouble(y.substring(1));
@@ -64,7 +65,7 @@ public class LocationQueryModifier extends QueryModifier<LocationQuery> {
     Vector dirY = new Vector(0, -Math.sin(Math.toRadians(pitch)), Math.cos(Math.toRadians(pitch)));
     newLoc = newLoc.add(dirY.multiply(y1));
 
-    return new Vector(newLoc.getX(), newLoc.getY(), newLoc.getZ());
+    return newLoc;
   }
 
   @Override
