@@ -15,7 +15,7 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
-import tc.oc.pgm.modules.StatsMatchModule;
+import tc.oc.pgm.stats.StatsMatchModule;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.tablist.DynamicTabEntry;
 import tc.oc.pgm.util.tablist.TabView;

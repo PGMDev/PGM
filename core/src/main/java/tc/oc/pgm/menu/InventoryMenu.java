@@ -1,50 +1,74 @@
 package tc.oc.pgm.menu;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.Lists;
+import java.util.List;
 import java.util.WeakHashMap;
 import javax.annotation.Nullable;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.observers.ObserverToolsMatchModule;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.text.TextTranslations;
 
-public abstract class InventoryMenu {
+public class InventoryMenu implements Listener {
 
   protected static final int ROW_WIDTH = 9; // Number of columns per row
   protected static final int MAX_ROWS = 6; // Max allowed row size
 
+  private final List<InventoryMenuItem> inventoryMenuItems;
+
   private final WeakHashMap<MatchPlayer, InventoryMenu> viewing =
       new WeakHashMap<>(); // Map of players who are viewing the gui, along with the menu
-  private final String title; // Title of the inventory
+  private final Component title; // Title of the inventory
   private final int rows; // The # of rows in the inventory
+  private final Match match; // The match this inventory exists in;
 
   /**
    * InventoryMenu: An easy way to make an GUI menu that users can interact with.
    *
    * <p>See {@link ObserverToolsMatchModule} for an example on implementation
    *
-   * <p>Note: Code here was extracted from PickerMatchModule to allow for reuse
+   * <p>Note: Code here was initially extracted from PickerMatchModule to allow for reuse
    *
-   * @param title - A string that will be translated and made the inventory title
+   * @param match - The match this inventory should exist it
+   * @param title - the inventory title
    * @param rows - The amount of rows the inventory will be created with
+   * @param items - The items this inventory will contain
    */
-  public InventoryMenu(String title, int rows) {
+  public InventoryMenu(Match match, Component title, int rows, List<InventoryMenuItem> items) {
     checkArgument(rows > 0 && rows <= MAX_ROWS, "Row size must be between 1 and " + MAX_ROWS);
-    this.title = checkNotNull(title);
+    this.title = title;
     this.rows = rows;
+    this.inventoryMenuItems = items;
+    this.match = match;
+    match.addListener(this, MatchScope.LOADED);
   }
 
-  /** Defines how the GUI will display the layout */
-  public abstract ItemStack[] createWindowContents(final MatchPlayer player);
+  public ItemStack[] createWindowContents(final MatchPlayer player) {
+    List<ItemStack> items = Lists.newArrayList();
+    for (InventoryMenuItem item : this.inventoryMenuItems) {
+      if (item == null) items.add(null);
+      else items.add(item.createItem(player));
+    }
+
+    return items.toArray(new ItemStack[items.size()]);
+  }
 
   public String getTranslatedTitle(MatchPlayer player) {
-    return TextTranslations.translateLegacy(TranslatableComponent.of(title), player.getBukkit());
+    return TextTranslations.translateLegacy(title, player.getBukkit());
   }
 
   public boolean isViewing(MatchPlayer player) {
@@ -56,8 +80,8 @@ public abstract class InventoryMenu {
     this.viewing.put(player, this);
   }
 
-  public void remove(MatchPlayer player) {
-    this.viewing.remove(player);
+  public boolean remove(MatchPlayer player) {
+    return this.viewing.remove(player) != null;
   }
 
   public void refreshAll() {
@@ -78,7 +102,7 @@ public abstract class InventoryMenu {
    * <p>If the player is not currently allowed to have the window open, close any window they have
    * open and return null.
    */
-  private @Nullable Inventory showWindow(MatchPlayer player) {
+  private Inventory showWindow(MatchPlayer player) {
     ItemStack[] contents = createWindowContents(player);
     Inventory inv = getOpenWindow(player);
     if (inv != null && inv.getSize() < contents.length) {
@@ -147,5 +171,35 @@ public abstract class InventoryMenu {
     player.getBukkit().openInventory(inv);
     viewing.put(player, this);
     return inv;
+  }
+
+  @EventHandler
+  public void onInventoryClick(final InventoryClickEvent event) {
+    if (inventoryMenuItems == null) return;
+    if (event.getCurrentItem() == null
+        || event.getCurrentItem().getItemMeta() == null
+        || event.getCurrentItem().getItemMeta().getDisplayName() == null) return;
+
+    if (event.getWhoClicked() instanceof Player) {
+      MatchPlayer player =
+          PGM.get().getMatchManager().getMatch(event.getWorld()).getPlayer(event.getWhoClicked());
+      if (isViewing(player)) {
+        ItemStack clicked = event.getCurrentItem();
+        for (InventoryMenuItem item : this.inventoryMenuItems) {
+          if (item == null) continue;
+
+          if (clicked.equals(item.createItem(player))) {
+            item.onInventoryClick(this, player, event.getClick());
+          }
+        }
+      }
+    }
+  }
+
+  @EventHandler
+  public void onInventoryClose(final InventoryCloseEvent event) {
+    // Remove viewing of menu upon inventory close
+    MatchPlayer player = match.getPlayer(event.getPlayer());
+    this.remove(player);
   }
 }

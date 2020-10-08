@@ -240,6 +240,13 @@ public interface Config {
   boolean shouldRefillWool();
 
   /**
+   * Gets whether to show a more verbose representation of the match stats at the end of each match
+   *
+   * @return If verbose stats at the end of the match is enabled
+   */
+  boolean showVerboseStats();
+
+  /**
    * Gets at which score players should be no longer allowed to keep playing TDM
    *
    * @return The minimum score they must hold

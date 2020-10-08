@@ -13,15 +13,15 @@ import tc.oc.pgm.util.text.TextTranslations;
 
 public interface InventoryMenuItem {
 
-  public Component getName();
+  Component getName();
 
-  public ChatColor getColor();
+  ChatColor getColor();
 
-  public List<String> getLore(MatchPlayer player);
+  List<String> getLore(MatchPlayer player);
 
-  public Material getMaterial(MatchPlayer player);
+  Material getMaterial(MatchPlayer player);
 
-  public void onInventoryClick(InventoryMenu menu, MatchPlayer player, ClickType clickType);
+  void onInventoryClick(InventoryMenu menu, MatchPlayer player, ClickType clickType);
 
   default ItemStack createItem(MatchPlayer player) {
     ItemStack stack = new ItemStack(getMaterial(player));
