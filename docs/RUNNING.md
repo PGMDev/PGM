@@ -11,13 +11,13 @@ Installation
 cd /path/to/folder
 ```
 
-2. Download the latest version of [SportPaper](https://github.com/Electroid/SportPaper), a fork of the Minecraft 1.8 server.
+2. Download the latest version of [SportPaper](https://pkg.ashcon.app/sportpaper), a fork of the Minecraft 1.8 server.
 ```bash
 curl https://pkg.ashcon.app/sportpaper -Lo sportpaper.jar
 curl https://pkg.ashcon.app/sportpaper-config -Lo sportpaper.yml
 ```
 
-3. Create a plugins folder and download the latest version of PGM.
+3. Create a plugins folder and download the latest version of [PGM](https://pkg.ashcon.app/pgm).
 ```bash
 mkdir plugins
 curl https://pkg.ashcon.app/pgm -Lo plugins/pgm.jar

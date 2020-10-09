@@ -189,9 +189,12 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
             config.getGroups().isEmpty() ? null : new ConfigDecorationProvider());
 
     // Sometimes match folders need to be cleaned up if the server previously crashed
-    for (File dir : getServer().getWorldContainer().listFiles()) {
-      if (dir.isDirectory() && dir.getName().startsWith("match")) {
-        FileUtils.delete(dir);
+    final File[] worldDirs = getServer().getWorldContainer().listFiles();
+    if (worldDirs != null) {
+      for (File dir : worldDirs) {
+        if (dir.isDirectory() && dir.getName().startsWith("match")) {
+          FileUtils.delete(dir);
+        }
       }
     }
 
