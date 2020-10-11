@@ -62,7 +62,7 @@ public class MatchAnnouncer implements Listener {
 
     // broadcast match finish message
     for (MatchPlayer viewer : match.getPlayers()) {
-      Component title, subtitle = TextComponent.empty();
+      Component title, subtitle = null;
       if (event.getWinner() == null) {
         title = TranslatableComponent.of("broadcast.gameOver");
       } else {
