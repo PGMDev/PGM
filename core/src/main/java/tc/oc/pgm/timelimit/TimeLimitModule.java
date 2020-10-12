@@ -14,15 +14,15 @@ import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.result.VictoryConditions;
+import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class TimeLimitModule implements MapModule {
+public class TimeLimitModule implements MapModule<TimeLimitMatchModule> {
   private static final Collection<MapTag> TAGS =
       ImmutableList.of(MapTag.create("timelimit", "Timelimit", false, true));
   private final @Nullable TimeLimit timeLimit;
@@ -37,11 +37,17 @@ public class TimeLimitModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public TimeLimitMatchModule createMatchModule(Match match) {
     return new TimeLimitMatchModule(match, this.timeLimit);
   }
 
   public static class Factory implements MapModuleFactory<TimeLimitModule> {
+    @Nullable
+    @Override
+    public Collection<Class<? extends MapModule>> getSoftDependencies() {
+      return ImmutableList.of(TeamModule.class);
+    }
+
     @Override
     public TimeLimitModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
