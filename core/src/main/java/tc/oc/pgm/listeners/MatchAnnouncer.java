@@ -21,6 +21,7 @@ import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
+import tc.oc.pgm.match.Observers;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.chat.Sound;
@@ -62,7 +63,7 @@ public class MatchAnnouncer implements Listener {
 
     // broadcast match finish message
     for (MatchPlayer viewer : match.getPlayers()) {
-      Component title, subtitle = null;
+      Component title, subtitle = TextComponent.empty();
       if (event.getWinner() == null) {
         title = TranslatableComponent.of("broadcast.gameOver");
       } else {
@@ -93,7 +94,7 @@ public class MatchAnnouncer implements Listener {
 
       viewer.showTitle(title, subtitle, 0, 40, 40);
       viewer.sendMessage(title);
-      if (subtitle != null) viewer.sendMessage(subtitle);
+      if (!(viewer.getParty() instanceof Observers)) viewer.sendMessage(subtitle);
     }
   }
 
