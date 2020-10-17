@@ -1,13 +1,12 @@
 package tc.oc.pgm.namedecorations;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.format.TextColor;
@@ -37,13 +36,15 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
 
   private NameDecorationProvider provider;
   private final LoadingCache<UUID, DecorationCacheEntry> decorationCache =
-      CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS)
-          .build(new CacheLoader<UUID, DecorationCacheEntry>() {
-            @Override
-            public DecorationCacheEntry load(@Nonnull UUID uuid) {
-              return new DecorationCacheEntry(uuid);
-            }
-          });
+      CacheBuilder.newBuilder()
+          .expireAfterAccess(1, TimeUnit.HOURS)
+          .build(
+              new CacheLoader<UUID, DecorationCacheEntry>() {
+                @Override
+                public DecorationCacheEntry load(@Nonnull UUID uuid) {
+                  return new DecorationCacheEntry(uuid);
+                }
+              });
 
   public NameDecorationRegistryImpl(@Nullable NameDecorationProvider provider) {
     setProvider(provider);
@@ -77,7 +78,9 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
     final MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(player);
     if (matchPlayer == null) return;
 
-    matchPlayer.getBukkit().setDisplayName(getDecoratedName(player, matchPlayer.getParty().getColor()));
+    matchPlayer
+        .getBukkit()
+        .setDisplayName(getDecoratedName(player, matchPlayer.getParty().getColor()));
   }
 
   @Override
@@ -109,9 +112,9 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
   }
 
   public TextColor getColor(UUID uuid) {
-    MatchPlayer pl = PGM.get().getMatchManager().getPlayer(uuid);
-    if (pl == null) return PlayerComponent.OFFLINE_COLOR;
-    return TextFormatter.convert(pl.getParty().getColor());
+    MatchPlayer player = PGM.get().getMatchManager().getPlayer(uuid);
+    if (player == null) return PlayerComponent.OFFLINE_COLOR;
+    return TextFormatter.convert(player.getParty().getColor());
   }
 
   public Component getPrefixComponent(UUID uuid) {

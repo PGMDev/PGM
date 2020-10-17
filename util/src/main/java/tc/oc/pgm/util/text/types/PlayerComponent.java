@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.text.types;
 
+import java.util.UUID;
+import javax.annotation.Nullable;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
@@ -16,16 +18,12 @@ import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.named.NameDecorationProvider;
 import tc.oc.pgm.util.named.NameStyle;
 
-import javax.annotation.Nullable;
-import java.util.UUID;
-
 /** PlayerComponent is used to format player names in a consistent manner with optional styling */
 public interface PlayerComponent {
 
   TextColor OFFLINE_COLOR = TextColor.DARK_AQUA;
   static Component UNKNOWN =
       TranslatableComponent.of("misc.unknown", OFFLINE_COLOR, TextDecoration.ITALIC);
-
 
   static Component of(UUID playerId, NameStyle style) {
     Player player = Bukkit.getPlayer(playerId);
@@ -52,12 +50,15 @@ public interface PlayerComponent {
 
   static Component of(
       @Nullable Player player, String defName, NameStyle style, @Nullable Player viewer) {
-    boolean isOffline = player == null || !player.isOnline() ||
-        (isDisguised(player) && style.has(NameStyle.Flag.DISGUISE_OFFLINE));
+    boolean isOffline =
+        player == null
+            || !player.isOnline()
+            || (isDisguised(player) && style.has(NameStyle.Flag.DISGUISE_OFFLINE));
 
     NameDecorationProvider provider = NameDecorationProvider.DEFAULT;
     if (player != null) {
-      MetadataValue metadata = player.getMetadata(NameDecorationProvider.METADATA_KEY, BukkitUtils.getPlugin());
+      MetadataValue metadata =
+          player.getMetadata(NameDecorationProvider.METADATA_KEY, BukkitUtils.getPlugin());
       if (metadata != null) provider = (NameDecorationProvider) metadata.value();
     }
 
@@ -83,9 +84,9 @@ public interface PlayerComponent {
     }
     if (!isOffline && style.has(NameStyle.Flag.TELEPORT)) {
       name.hoverEvent(
-          HoverEvent.of(
-              Action.SHOW_TEXT,
-              TranslatableComponent.of("misc.teleportTo", TextColor.GRAY, name.build())))
+              HoverEvent.of(
+                  Action.SHOW_TEXT,
+                  TranslatableComponent.of("misc.teleportTo", TextColor.GRAY, name.build())))
           .clickEvent(ClickEvent.runCommand("/tp " + player.getName()));
     }
 

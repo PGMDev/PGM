@@ -28,9 +28,7 @@ public interface NameDecorationProvider {
     return TextComponent.of(getSuffix(uuid));
   }
 
-  /**
-   * A No-op default decoration provider, used in the absence of a decoration provider
-   */
+  /** A No-op default decoration provider, used in the absence of a decoration provider */
   class NoOpNameDecorationProvider implements NameDecorationProvider {
     @Override
     public String getPrefix(UUID uuid) {

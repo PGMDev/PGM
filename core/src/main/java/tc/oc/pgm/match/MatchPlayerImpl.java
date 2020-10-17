@@ -421,7 +421,9 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
 
   @Override
   public String getPrefixedName() {
-    return PGM.get().getNameDecorationRegistry().getDecoratedName(getBukkit(), getParty().getColor());
+    return PGM.get()
+        .getNameDecorationRegistry()
+        .getDecoratedName(getBukkit(), getParty().getColor());
   }
 
   @Override

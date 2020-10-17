@@ -1,5 +1,8 @@
 package tc.oc.pgm.namedecorations;
 
+import java.util.UUID;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.format.TextColor;
@@ -8,14 +11,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.util.named.NameDecorationProvider;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.UUID;
-
 /**
  * The NameDecorationRegistry will take care of using a Provider, and applying the changes to the
- * player's display name, as well as (implementation-dependant) provide a cache for prefixes & suffixes.
- *
+ * player's display name, as well as (implementation-dependant) provide a cache for prefixes &
+ * suffixes.
  */
 public interface NameDecorationRegistry extends Listener, NameDecorationProvider {
 
@@ -42,28 +41,33 @@ public interface NameDecorationRegistry extends Listener, NameDecorationProvider
   }
 
   /**
-   * Set the name decoration provider this registry should use, if null, a NO-OP provider will be used
+   * Set the name decoration provider this registry should use, if null, a NO-OP provider will be
+   * used
    *
    * @param provider The name decoration provider to use
    */
   void setProvider(@Nullable NameDecorationProvider provider);
 
-  @Nonnull NameDecorationProvider getProvider();
+  @Nonnull
+  NameDecorationProvider getProvider();
 
   default String getPrefix(UUID uuid) {
     return getProvider().getPrefix(uuid);
   }
+
   default String getSuffix(UUID uuid) {
     return getProvider().getSuffix(uuid);
   }
+
   default TextColor getColor(UUID uuid) {
     return getProvider().getColor(uuid);
   }
+
   default Component getPrefixComponent(UUID uuid) {
     return getProvider().getPrefixComponent(uuid);
   }
+
   default Component getSuffixComponent(UUID uuid) {
     return getProvider().getSuffixComponent(uuid);
   }
-
 }
