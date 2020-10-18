@@ -279,16 +279,17 @@ public class MatchTabView extends TabView implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerVanish(PlayerVanishEvent event) {
-    updatePlayerParty(event.getPlayer(), event.getPlayer().getParty(), event.getPlayer().getParty());
+    updatePlayerParty(
+        event.getPlayer(), event.getPlayer().getParty(), event.getPlayer().getParty());
   }
 
-  private void updatePlayerParty(MatchPlayer player, @Nullable Party oldParty, @Nullable Party newParty) {
+  private void updatePlayerParty(
+      MatchPlayer player, @Nullable Party oldParty, @Nullable Party newParty) {
     if (oldParty != null) {
       this.participantPlayers.remove(player);
       this.observerPlayers.remove(player);
 
-      if (oldParty instanceof Team)
-        this.teamPlayers.get((Team) oldParty).remove(player);
+      if (oldParty instanceof Team) this.teamPlayers.get((Team) oldParty).remove(player);
     }
 
     if (newParty != null && !shouldHide(player)) {
