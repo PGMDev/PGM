@@ -157,7 +157,7 @@ public final class MatchCommand {
         // FIXME: this is not the best way to handle scores
         ScoreMatchModule smm = match.getModule(ScoreMatchModule.class);
         if (smm != null) {
-          sender.sendMessage(smm.getStatusMessage());
+          viewer.sendMessage(smm.getStatusMessage(getMatchPlayer(sender, match)));
         }
       }
     }
