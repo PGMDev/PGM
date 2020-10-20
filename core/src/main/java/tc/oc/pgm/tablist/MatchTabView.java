@@ -15,6 +15,7 @@ import org.bukkit.event.Listener;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.community.events.PlayerVanishEvent;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
@@ -273,36 +274,32 @@ public class MatchTabView extends TabView implements Listener {
   public void onTeamChange(PlayerPartyChangeEvent event) {
     if (this.match != event.getMatch()) return;
 
-    if (event.getOldParty() != null) {
-      this.participantPlayers.remove(event.getPlayer());
-      this.observerPlayers.remove(event.getPlayer());
-    }
-
-    if (event.getNewParty() != null && !shouldHide(event.getPlayer())) {
-      List<MatchPlayer> players =
-          event.getNewParty() instanceof ObservingParty ? observerPlayers : participantPlayers;
-
-      if (!players.contains(event.getPlayer())) players.add(event.getPlayer());
-    }
-
-    if (event.getOldParty() instanceof Team) {
-      this.teamPlayers.get((Team) event.getOldParty()).remove(event.getPlayer());
-    }
-
-    if (event.getNewParty() instanceof Team
-        && !this.teamPlayers.containsEntry((Team) event.getNewParty(), event.getPlayer())) {
-      this.teamPlayers.put((Team) event.getNewParty(), event.getPlayer());
-    }
-
-    this.invalidateLayout();
+    updatePlayerParty(event.getPlayer(), event.getOldParty(), event.getNewParty());
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerVanish(PlayerVanishEvent event) {
-    if (event.isVanished()) {
-      if (shouldHide(event.getPlayer())) this.observerPlayers.remove(event.getPlayer());
-    } else if (!this.observerPlayers.contains(event.getPlayer())) {
-      this.observerPlayers.add(event.getPlayer());
+    updatePlayerParty(
+        event.getPlayer(), event.getPlayer().getParty(), event.getPlayer().getParty());
+  }
+
+  private void updatePlayerParty(
+      MatchPlayer player, @Nullable Party oldParty, @Nullable Party newParty) {
+    if (oldParty != null) {
+      this.participantPlayers.remove(player);
+      this.observerPlayers.remove(player);
+
+      if (oldParty instanceof Team) this.teamPlayers.get((Team) oldParty).remove(player);
+    }
+
+    if (newParty != null && !shouldHide(player)) {
+      List<MatchPlayer> players =
+          newParty instanceof ObservingParty ? observerPlayers : participantPlayers;
+
+      if (!players.contains(player)) players.add(player);
+
+      if (newParty instanceof Team && !this.teamPlayers.containsEntry((Team) newParty, player))
+        this.teamPlayers.put((Team) newParty, player);
     }
 
     this.invalidateLayout();
