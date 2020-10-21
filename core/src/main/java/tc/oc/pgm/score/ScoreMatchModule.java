@@ -127,7 +127,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
             .append(TextComponent.of(": ", TextColor.DARK_AQUA))
             .append(TextFormatter.list(scoreMessages, TextColor.GRAY))
             .build();
-    if (matchPlayer != null && ffamm != null) {
+    if (matchPlayer != null && matchPlayer.getCompetitor() != null && ffamm != null) {
       returnMessage =
           returnMessage.append(
               TextComponent.builder()
@@ -138,7 +138,8 @@ public class ScoreMatchModule implements MatchModule, Listener {
                   .color(TextFormatter.convert(matchPlayer.getCompetitor().getColor()))
                   .append(
                       TextComponent.of(
-                          (int) scores.get(matchPlayer).doubleValue(), TextColor.WHITE))
+                          (int) scores.get(matchPlayer.getCompetitor()).doubleValue(),
+                          TextColor.WHITE))
                   .build());
     }
     return returnMessage;
