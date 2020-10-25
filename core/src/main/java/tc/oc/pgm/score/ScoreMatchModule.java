@@ -2,19 +2,20 @@ package tc.oc.pgm.score;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
-import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -34,10 +35,12 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerParticipationStartEvent;
+import tc.oc.pgm.ffa.FreeForAllMatchModule;
 import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.TextFormatter;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ScoreMatchModule implements MatchModule, Listener {
@@ -92,26 +95,65 @@ public class ScoreMatchModule implements MatchModule, Listener {
   }
 
   /** Gets the score message for the match. */
-  public String getScoreMessage() {
-    List<String> scores = Lists.newArrayList();
-    for (Entry<Competitor, Double> scorePair : this.scores.entrySet()) {
-      scores.add(scorePair.getKey().getColor().toString() + ((int) (double) scorePair.getValue()));
+  public Component getScoreMessage(MatchPlayer matchPlayer) {
+    List<Component> scoreMessages = Lists.newArrayList();
+    final FreeForAllMatchModule ffamm = match.getModule(FreeForAllMatchModule.class);
+    if (ffamm != null) {
+      scoreMessages =
+          this.scores.entrySet().stream()
+              .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+              .limit(10)
+              .map(
+                  x ->
+                      TextComponent.builder()
+                          .append(x.getKey().getName(NameStyle.VERBOSE))
+                          .append(TextComponent.of(": ", TextColor.GRAY))
+                          .append(TextComponent.of((int) x.getValue().doubleValue()))
+                          .color(TextColor.WHITE)
+                          .build())
+              .collect(Collectors.toList());
+    } else {
+
+      for (Entry<Competitor, Double> scorePair : this.scores.entrySet()) {
+        scoreMessages.add(
+            TextComponent.of(
+                ((int) scorePair.getValue().doubleValue()),
+                TextFormatter.convert(scorePair.getKey().getColor())));
+      }
     }
-    return ChatColor.DARK_AQUA + "Score: " + Joiner.on(" ").join(scores);
+    TextComponent returnMessage =
+        TextComponent.builder()
+            .append(TranslatableComponent.of("match.info.score").color(TextColor.DARK_AQUA))
+            .append(TextComponent.of(": ", TextColor.DARK_AQUA))
+            .append(TextFormatter.list(scoreMessages, TextColor.GRAY))
+            .build();
+    if (matchPlayer != null && matchPlayer.getCompetitor() != null && ffamm != null) {
+      returnMessage =
+          returnMessage.append(
+              TextComponent.builder()
+                  .color(TextColor.GRAY)
+                  .append(" | ", TextColor.GRAY)
+                  .append(TranslatableComponent.of("match.info.you"))
+                  .append(": ")
+                  .color(TextFormatter.convert(matchPlayer.getCompetitor().getColor()))
+                  .append(
+                      TextComponent.of(
+                          (int) scores.get(matchPlayer.getCompetitor()).doubleValue(),
+                          TextColor.WHITE))
+                  .build());
+    }
+    return returnMessage;
   }
 
   /** Gets the status message for the match. */
-  public String getStatusMessage() {
-    StringBuilder message = new StringBuilder(this.getScoreMessage());
+  public Component getStatusMessage(MatchPlayer matchPlayer) {
+    Component message = this.getScoreMessage(matchPlayer);
+
     if (this.config.scoreLimit > 0) {
-      message
-          .append("  ")
-          .append(ChatColor.GRAY)
-          .append("[")
-          .append(this.config.scoreLimit)
-          .append("]");
+      message =
+          message.append(TextComponent.of("  [" + this.config.scoreLimit + "]", TextColor.GRAY));
     }
-    return message.toString();
+    return message;
   }
 
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
