@@ -1,6 +1,8 @@
 package tc.oc.pgm.modules;
 
 import java.util.Set;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
@@ -22,7 +24,6 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.projectile.EntityLaunchEvent;
-import tc.oc.pgm.util.chat.Sound;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
@@ -32,7 +33,8 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
   private final float velocityMod;
   private final Set<PotionEffect> potionEffects;
 
-  private static final Sound PROJECTILE_SOUND = new Sound("random.successful_hit", 0.18f, 0.45f);
+  private static final Sound PROJECTILE_SOUND =
+      Sound.sound(Key.key("random.successful_hit"), Sound.Source.MASTER, 0.18f, 0.45f);
 
   public ModifyBowProjectileMatchModule(
       Match match, Class<? extends Entity> cls, float velocityMod, Set<PotionEffect> effects) {

@@ -208,6 +208,6 @@ public class VanishManagerImpl implements VanishManager, Listener {
     Component vanish =
         Component.translatable("vanish.hotbar", NamedTextColor.RED, TextDecoration.BOLD);
     Component message = Component.text().append(warning).append(vanish).append(warning).build();
-    player.showHotbar(message);
+    player.sendActionBar(message);
   }
 }

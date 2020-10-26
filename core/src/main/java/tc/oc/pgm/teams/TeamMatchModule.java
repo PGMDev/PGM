@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.commons.lang.math.Fraction;
@@ -39,7 +41,6 @@ import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
 import tc.oc.pgm.util.StringUtils;
-import tc.oc.pgm.util.chat.Sound;
 
 @ListenerScope(MatchScope.LOADED)
 public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
@@ -556,7 +557,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       kickMe.sendMessage(Component.translatable("join.ok.moved", kickTo.getName()));
       kickMe.sendMessage(Component.translatable("join.ok.moved.explanation"));
     } else {
-      kickMe.playSound(new Sound("mob.villager.hit"));
+      kickMe.playSound(Sound.sound(Key.key("mob.villager.hit"), Sound.Source.MASTER, 1, 1));
       if (forBalance) {
         kickMe.sendWarning(Component.translatable("join.ok.moved", kickTo.getName()));
       } else {

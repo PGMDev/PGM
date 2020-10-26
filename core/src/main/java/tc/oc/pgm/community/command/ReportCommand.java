@@ -17,6 +17,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -34,14 +36,14 @@ import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.chat.Audience;
-import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.PeriodFormats;
 import tc.oc.pgm.util.text.TextFormatter;
 
 public class ReportCommand {
 
-  private static final Sound REPORT_NOTIFY_SOUND = new Sound("random.pop", 1f, 1.2f);
+  private static final Sound REPORT_NOTIFY_SOUND =
+      Sound.sound(Key.key("random.pop"), Sound.Source.MASTER, 1f, 1.2f);
 
   private static final int REPORT_COOLDOWN_SECONDS = 15;
   private static final int REPORT_EXPIRE_HOURS = 1;

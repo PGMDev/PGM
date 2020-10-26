@@ -2,6 +2,8 @@ package tc.oc.pgm.listeners;
 
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.ChatColor;
@@ -22,16 +24,18 @@ import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.match.Observers;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.LegacyFormatUtils;
-import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 
 public class MatchAnnouncer implements Listener {
 
-  private static final Sound SOUND_MATCH_START = new Sound("note.pling", 1f, 1.59f);
-  private static final Sound SOUND_MATCH_WIN = new Sound("mob.wither.death", 1f, 1f);
-  private static final Sound SOUND_MATCH_LOSE = new Sound("mob.wither.spawn", 1f, 1f);
+  private static final Sound SOUND_MATCH_START =
+      Sound.sound(Key.key("note.pling"), Sound.Source.MASTER, 1f, 1.59f);
+  private static final Sound SOUND_MATCH_WIN =
+      Sound.sound(Key.key("mob.wither.death"), Sound.Source.MASTER, 1f, 1f);
+  private static final Sound SOUND_MATCH_LOSE =
+      Sound.sound(Key.key("mob.wither.spawn"), Sound.Source.MASTER, 1f, 1f);
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchLoad(final MatchLoadEvent event) {

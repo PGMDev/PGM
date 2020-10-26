@@ -128,7 +128,7 @@ public class Carried extends Spawned implements Missing {
     SidebarMatchModule smm = this.flag.getMatch().getModule(SidebarMatchModule.class);
     if (smm != null) smm.stopBlinkingGoal(this.flag);
 
-    this.carrier.showHotbar(Component.empty());
+    this.carrier.sendActionBar(Component.empty());
 
     this.carrier.getInventory().remove(this.flag.getBannerItem());
     this.carrier.getInventory().setHelmet(this.helmetItem);
@@ -186,7 +186,7 @@ public class Carried extends Spawned implements Missing {
     super.tickRunning();
 
     Component message = this.getMessage();
-    this.carrier.showHotbar(message);
+    this.carrier.sendActionBar(message);
 
     if (!message.equals(this.lastMessage)) {
       this.lastMessage = message;

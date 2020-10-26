@@ -9,6 +9,8 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -57,7 +59,6 @@ import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
-import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -274,8 +275,10 @@ public class FreezeMatchModule implements MatchModule, Listener {
 
   public class Freeze {
 
-    private final Sound FREEZE_SOUND = new Sound("mob.enderdragon.growl", 1f, 1f);
-    private final Sound THAW_SOUND = new Sound("mob.enderdragon.growl", 1f, 2f);
+    private final Sound FREEZE_SOUND =
+        Sound.sound(Key.key("mob.enderdragon.growl"), Sound.Source.MASTER, 1f, 1f);
+    private final Sound THAW_SOUND =
+        Sound.sound(Key.key("mob.enderdragon.growl"), Sound.Source.MASTER, 1f, 2f);
 
     private final OnlinePlayerMapAdapter<MatchPlayer> frozenPlayers;
     private final Cache<UUID, String> offlineFrozenCache =

@@ -1,79 +1,57 @@
 package tc.oc.pgm.util.chat;
 
+import static tc.oc.pgm.util.TimeUtils.fromTicks;
+
+import java.util.Collection;
+import net.kyori.adventure.audience.ForwardingAudience;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.title.Title;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 /** Receiver of chat messages, sounds, titles, and other media. */
-public interface Audience {
-
-  /**
-   * Send a chat message.
-   *
-   * @param message A message.
-   */
-  void sendMessage(Component message);
-
-  /**
-   * Send a warning chat message, with an audio cue.
-   *
-   * @param message A message.
-   */
-  void sendWarning(Component message);
-
-  /**
-   * Send a message above their hotbar.
-   *
-   * @param message A message.
-   */
-  void showHotbar(Component message);
-
-  /**
-   * Send a message as their boss bar, with a progress meter.
-   *
-   * @param message A message.
-   * @param progress The progress of the bar, represented as [0, 1].
-   */
-  void showBossbar(Component message, float progress);
-
-  /**
-   * Send a title with desired lengths.
-   *
-   * @param title The upper line
-   * @param subTitle The lower line
-   * @param inTicks Fade in time in ticks
-   * @param stayTicks Length title is displayed
-   * @param outTicks Fade out time in ticks
-   * @return
-   */
-  void showTitle(Component title, Component subTitle, int inTicks, int stayTicks, int outTicks);
-
-  /**
-   * Play a {@link Sound}, by the raw asset name.
-   *
-   * @param sound The sound.
-   */
-  void playSound(Sound sound);
-
-  ///////////////////////////////////////////////////////////////
-  // METHODS BELOW ARE ALL DEPRECATED AND WILL BE REMOVED SOON //
-  ///////////////////////////////////////////////////////////////
+@FunctionalInterface
+public interface Audience extends ForwardingAudience.Single {
 
   @Deprecated
-  void sendMessage(String message);
-
-  @Deprecated
-  default void sendWarning(String message, boolean audible) {
-    sendMessage(ChatColor.YELLOW + " \u26a0 " + ChatColor.RED + message);
+  default void sendMessage(String message) {
+    sendMessage(LegacyComponentSerializer.legacySection().deserialize(message));
   }
 
   @Deprecated
+  default void sendWarning(Component message) {
+    sendMessage(
+        Component.text(" \u26a0 ", NamedTextColor.YELLOW)
+            .append(message.colorIfAbsent(NamedTextColor.RED)));
+    playSound(Sound.sound(Key.key("note.bass"), Sound.Source.MASTER, 1f, 0.75f));
+  }
+
+  @Deprecated
+  default void showTitle(
+      Component title, Component subTitle, int inTicks, int stayTicks, int outTicks) {
+    showTitle(
+        Title.title(
+            title,
+            subTitle,
+            Title.Times.of(fromTicks(inTicks), fromTicks(stayTicks), fromTicks(outTicks))));
+  }
+
+  @Deprecated BukkitAudiences PROVIDER = BukkitAudiences.create(BukkitUtils.getPlugin());
+
   static Audience get(CommandSender sender) {
-    if (sender instanceof Player) {
-      return (PlayerAudience) () -> (Player) sender;
-    } else {
-      return (VirtualAudience) () -> sender;
-    }
+    return () -> PROVIDER.sender(sender);
+  }
+
+  static Audience get(Collection<? extends CommandSender> senders) {
+    return () -> PROVIDER.filter(senders::contains);
+  }
+
+  static Audience empty() {
+    return net.kyori.adventure.audience.Audience::empty;
   }
 }

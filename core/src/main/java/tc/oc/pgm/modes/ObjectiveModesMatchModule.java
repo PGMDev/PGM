@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
@@ -14,11 +16,11 @@ import org.bukkit.event.EventPriority;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.countdowns.CountdownContext;
-import tc.oc.pgm.util.chat.Sound;
 
 public class ObjectiveModesMatchModule implements MatchModule {
 
-  private static final Sound SOUND = new Sound("mob.zombie.remedy", 0.15f, 1.2f);
+  private static final Sound SOUND =
+      Sound.sound(Key.key("mob.zombie.remedy"), Sound.Source.MASTER, 0.15f, 1.2f);
 
   private final Match match;
   private final List<Mode> modes;

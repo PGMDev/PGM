@@ -54,6 +54,10 @@ public final class TimeUtils {
     }
   }
 
+  public static Duration fromTicks(long ticks) {
+    return Duration.ofMillis(ticks * TICK);
+  }
+
   public static boolean isShorterThan(Duration a, Duration b) {
     return a.compareTo(b) < 0;
   }

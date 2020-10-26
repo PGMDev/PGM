@@ -5,21 +5,22 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.time.Duration;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import tc.oc.pgm.api.filter.Filter;
-import tc.oc.pgm.util.chat.Sound;
 
 public class Broadcast implements Comparable<Broadcast> {
   public enum Type {
     TIP(
         Component.translatable("misc.tip", NamedTextColor.BLUE),
-        new Sound("mob.endermen.idle", 1, 1.2f)),
+        Sound.sound(Key.key("mob.endermen.idle"), Sound.Source.MASTER, 1, 1.2f)),
 
     ALERT(
         Component.translatable("misc.alert", NamedTextColor.YELLOW),
-        new Sound("note.pling", 1, 2f));
+        Sound.sound(Key.key("note.pling"), Sound.Source.MASTER, 1, 2f));
 
     final Component prefix;
     final Sound sound;

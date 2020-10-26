@@ -15,7 +15,6 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.chat.Audience;
-import tc.oc.pgm.util.chat.MultiAudience;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.types.PlayerComponent;
 
@@ -34,7 +33,7 @@ import tc.oc.pgm.util.text.types.PlayerComponent;
  * <p>Attempting to add the wrong player, or add multiple players, will throw {@link
  * UnsupportedOperationException}.
  */
-public class Tribute implements Competitor, MultiAudience {
+public class Tribute implements Competitor {
 
   public static final ChatColor TEXT_COLOR = ChatColor.YELLOW;
 
@@ -163,8 +162,8 @@ public class Tribute implements Competitor, MultiAudience {
   }
 
   @Override
-  public Iterable<? extends Audience> getAudiences() {
-    return player == null ? Collections.emptyList() : Collections.singleton(player);
+  public Audience audience() {
+    return player != null ? player : Audience.empty();
   }
 
   /**
