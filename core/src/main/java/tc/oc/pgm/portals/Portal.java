@@ -2,6 +2,8 @@ package tc.oc.pgm.portals;
 
 import com.google.common.base.Preconditions;
 import javax.annotation.Nullable;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -13,7 +15,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.region.Region;
-import tc.oc.pgm.util.chat.Sound;
 
 public class Portal implements FeatureDefinition {
   protected final Region region;
@@ -174,8 +175,12 @@ public class Portal implements FeatureDefinition {
       // because they will instantly teleport away and hear the one at the exit.
       for (MatchPlayer listener : match.getPlayers()) {
         if (listener != player && listener.getBukkit().canSee(player.getBukkit())) {
+          final Location loc = bukkit.getLocation();
           listener.playSound(
-              new Sound("mob.endermen.portal", 1f, 1f, bukkit.getLocation().toVector()));
+              Sound.sound(Key.key("mob.endermen.portal"), Sound.Source.MASTER, 1f, 1f),
+              loc.getX(),
+              loc.getY(),
+              loc.getZ());
         }
       }
     }
@@ -203,7 +208,10 @@ public class Portal implements FeatureDefinition {
                 for (MatchPlayer listener : match.getPlayers()) {
                   if (listener.getBukkit().canSee(player.getBukkit())) {
                     listener.playSound(
-                        new Sound("mob.endermen.portal", 1f, 1f, destinationClone.toVector()));
+                        Sound.sound(Key.key("mob.endermen.portal"), Sound.Source.MASTER, 1f, 1f),
+                        destinationClone.getX(),
+                        destinationClone.getY(),
+                        destinationClone.getZ());
                   }
                 }
               }

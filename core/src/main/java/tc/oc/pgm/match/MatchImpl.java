@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.time.Duration;
@@ -124,6 +123,7 @@ public class MatchImpl implements Match {
   private final AtomicReference<Party> queuedParticipants;
   private final Observers observers;
   private final MatchFeatureContext features;
+  private final Audience audience;
 
   protected MatchImpl(String id, MapContext map, World world) {
     this.id = checkNotNull(id);
@@ -166,6 +166,11 @@ public class MatchImpl implements Match {
     this.queuedParticipants = new AtomicReference<>();
     this.observers = new Observers(this);
     this.features = new MatchFeatureContext();
+    this.audience =
+        () ->
+            net.kyori.adventure.audience.Audience.audience(
+                net.kyori.adventure.audience.Audience.audience(getPlayers()),
+                Audience.get(Bukkit.getConsoleSender()));
   }
 
   @Override
@@ -735,9 +740,8 @@ public class MatchImpl implements Match {
   }
 
   @Override
-  public Iterable<? extends Audience> getAudiences() {
-    return Iterables.concat(
-        getPlayers(), Collections.singleton(Audience.get(Bukkit.getConsoleSender())));
+  public Audience audience() {
+    return this.audience;
   }
 
   private class ModuleLoader

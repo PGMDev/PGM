@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.api.match.Match;
@@ -31,7 +33,6 @@ import tc.oc.pgm.goals.events.GoalProximityChangeEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.pgm.util.chat.Sound;
 
 @ListenerScope(MatchScope.LOADED)
 public class GoalMatchModule implements MatchModule, Listener {
@@ -48,8 +49,10 @@ public class GoalMatchModule implements MatchModule, Listener {
     }
   }
 
-  protected static final Sound GOOD_SOUND = new Sound("portal.travel", 0.7f, 2f);
-  protected static final Sound BAD_SOUND = new Sound("mob.blaze.death", 0.8f, 0.8f);
+  protected static final Sound GOOD_SOUND =
+      Sound.sound(Key.key("portal.travel"), Sound.Source.MASTER, 0.7f, 2f);
+  protected static final Sound BAD_SOUND =
+      Sound.sound(Key.key("mob.blaze.death"), Sound.Source.MASTER, 0.8f, 0.8f);
 
   protected final Match match;
   protected final List<Goal> goals = new ArrayList<>();

@@ -2,7 +2,6 @@ package tc.oc.pgm.match;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
@@ -16,11 +15,10 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.util.chat.Audience;
-import tc.oc.pgm.util.chat.MultiAudience;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.types.PlayerComponent;
 
-public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
+public class MatchPlayerStateImpl implements MatchPlayerState {
 
   private final Match match;
   private final String username;
@@ -73,8 +71,9 @@ public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
   }
 
   @Override
-  public Iterable<? extends Audience> getAudiences() {
-    return getPlayer().map(Collections::singleton).orElseGet(Collections::emptySet);
+  public Audience audience() {
+    final Audience audience = getPlayer().orElse(null);
+    return audience != null ? audience : Audience.empty();
   }
 
   @Override
