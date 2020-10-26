@@ -1,8 +1,7 @@
 package tc.oc.pgm.modules;
 
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -161,7 +160,7 @@ public class EventFilterMatchModule implements MatchModule, Listener {
         true,
         event.getPlayer().getWorld(),
         match.getPlayer(event.getPlayer()),
-        TranslatableComponent.of("match.disabled.bed"));
+        Component.translatable("match.disabled.bed"));
   }
 
   // ---------------------------
@@ -263,7 +262,7 @@ public class EventFilterMatchModule implements MatchModule, Listener {
           true,
           event.getWorld(),
           event.getPlayer(),
-          TranslatableComponent.of("match.disabled.enderChest"));
+          Component.translatable("match.disabled.enderChest"));
     }
   }
 

@@ -2,10 +2,9 @@ package tc.oc.pgm.observers;
 
 import com.google.common.collect.Lists;
 import java.util.List;
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -127,8 +126,8 @@ public class ObserverToolsMatchModule implements MatchModule, Listener {
     ItemStack tool = new ItemStack(TOOL_MATERIAL);
     ItemMeta meta = tool.getItemMeta();
     Component displayName =
-        TranslatableComponent.of("setting.displayName", TextColor.AQUA, TextDecoration.BOLD);
-    Component lore = TranslatableComponent.of("setting.lore", TextColor.GRAY);
+        Component.translatable("setting.displayName", NamedTextColor.AQUA, TextDecoration.BOLD);
+    Component lore = Component.translatable("setting.lore", NamedTextColor.GRAY);
     meta.setDisplayName(TextTranslations.translateLegacy(displayName, player.getBukkit()));
     meta.setLore(Lists.newArrayList(TextTranslations.translateLegacy(lore, player.getBukkit())));
     meta.addItemFlags(ItemFlag.values());

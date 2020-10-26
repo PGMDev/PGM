@@ -3,8 +3,8 @@ package tc.oc.pgm.listeners;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -93,12 +93,12 @@ public class AntiGriefListener implements Listener {
                     owner.getBukkit().getDisplayName(clicker.getBukkit()) + ChatColor.RED));
 
         ChatDispatcher.broadcastAdminChatMessage(
-            TranslatableComponent.of(
+            Component.translatable(
                 "moderation.defuse.alert.player",
-                TextColor.GRAY,
+                NamedTextColor.GRAY,
                 clicker.getName(NameStyle.FANCY),
                 owner.getName(NameStyle.FANCY),
-                MinecraftTranslations.getEntity(entity.getType()).color(TextColor.DARK_RED)),
+                MinecraftTranslations.getEntity(entity.getType()).color(NamedTextColor.DARK_RED)),
             clicker.getMatch());
       } else {
         this.notifyDefuse(
@@ -108,11 +108,11 @@ public class AntiGriefListener implements Listener {
                 + TextTranslations.translate("moderation.defuse.world", clicker.getBukkit()));
 
         ChatDispatcher.broadcastAdminChatMessage(
-            TranslatableComponent.of(
+            Component.translatable(
                 "moderation.defuse.alert.world",
-                TextColor.GRAY,
+                NamedTextColor.GRAY,
                 clicker.getName(NameStyle.FANCY),
-                MinecraftTranslations.getEntity(entity.getType()).color(TextColor.DARK_RED)),
+                MinecraftTranslations.getEntity(entity.getType()).color(NamedTextColor.DARK_RED)),
             clicker.getMatch());
       }
     }
@@ -146,9 +146,9 @@ public class AntiGriefListener implements Listener {
     List<ParticipantState> owners = this.removeTnt(loc, 5.0);
     if (owners != null && !owners.isEmpty()) {
       player.sendMessage(
-          TranslatableComponent.of(
+          Component.translatable(
               "moderation.defuse.player",
-              TextFormatter.nameList(owners, NameStyle.COLOR, TextColor.WHITE)));
+              TextFormatter.nameList(owners, NameStyle.COLOR, NamedTextColor.WHITE)));
     }
   }
 

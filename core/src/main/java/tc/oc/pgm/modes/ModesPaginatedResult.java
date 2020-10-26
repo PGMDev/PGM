@@ -2,8 +2,8 @@ package tc.oc.pgm.modes;
 
 import com.google.common.base.Preconditions;
 import java.time.Duration;
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextDecoration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.ChatColor;
 import tc.oc.pgm.util.PrettyPaginatedResult;
 import tc.oc.pgm.util.TimeUtils;
@@ -40,8 +40,7 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
 
     if (this.isExpired(countdown)) {
       return TextTranslations.translateLegacy(
-          TextComponent.of(builder.toString()).decoration(TextDecoration.STRIKETHROUGH, true),
-          null);
+          Component.text(builder.toString()).decoration(TextDecoration.STRIKETHROUGH, true), null);
     } else {
       return builder.toString();
     }

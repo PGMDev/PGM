@@ -3,8 +3,7 @@ package tc.oc.pgm.teams;
 import java.util.Collection;
 import java.util.Objects;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.apache.commons.lang.math.Fraction;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
@@ -129,7 +128,7 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
   @Override
   public Component getName(NameStyle style) {
     if (componentName == null) {
-      this.componentName = TextComponent.of(getNameLegacy(), TextFormatter.convert(getColor()));
+      this.componentName = Component.text(getNameLegacy(), TextFormatter.convert(getColor()));
     }
     return componentName;
   }
@@ -185,7 +184,7 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
   public Component getChatPrefix() {
     if (chatPrefix == null) {
       this.chatPrefix =
-          TextComponent.of("(" + getShortName() + ") ", TextFormatter.convert(getColor()));
+          Component.text("(" + getShortName() + ") ", TextFormatter.convert(getColor()));
     }
     return chatPrefix;
   }

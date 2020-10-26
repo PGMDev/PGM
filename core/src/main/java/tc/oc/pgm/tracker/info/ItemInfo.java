@@ -1,8 +1,8 @@
 package tc.oc.pgm.tracker.info;
 
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -38,7 +38,7 @@ public class ItemInfo extends OwnerInfoBase implements PhysicalInfo {
     if (getItem().hasItemMeta()) {
       String customName = getItem().getItemMeta().getDisplayName();
       if (customName != null) {
-        return LegacyComponentSerializer.legacy().deserialize(customName);
+        return LegacyComponentSerializer.legacySection().deserialize(customName);
       }
     }
 

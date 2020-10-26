@@ -1,7 +1,6 @@
 package tc.oc.pgm.match;
 
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
@@ -30,7 +29,7 @@ public abstract class ObservingParty extends SimpleParty {
   @Override
   public Component getName(NameStyle style) {
     if (componentName == null) {
-      componentName = TextComponent.of(getDefaultName(), TextFormatter.convert(getColor()));
+      componentName = Component.text(getDefaultName(), TextFormatter.convert(getColor()));
     }
     return componentName;
   }
@@ -43,7 +42,7 @@ public abstract class ObservingParty extends SimpleParty {
   @Override
   public Component getChatPrefix() {
     if (chatPrefix == null) {
-      chatPrefix = TextComponent.of("(Obs) ", TextFormatter.convert(getColor()));
+      chatPrefix = Component.text("(Obs) ", TextFormatter.convert(getColor()));
     }
     return chatPrefix;
   }

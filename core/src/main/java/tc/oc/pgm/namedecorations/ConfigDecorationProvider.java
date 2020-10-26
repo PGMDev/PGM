@@ -3,8 +3,8 @@ package tc.oc.pgm.namedecorations;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.Config;
@@ -44,7 +44,7 @@ public class ConfigDecorationProvider implements NameDecorationProvider {
   }
 
   private Component generateFlair(Stream<? extends Config.Group> flairs, boolean prefix) {
-    TextComponent.Builder builder = TextComponent.builder();
+    TextComponent.Builder builder = Component.text();
     flairs
         .filter(p -> prefix ? p.getPrefix() != null : p.getSuffix() != null)
         .map(Config.Group::getFlair)

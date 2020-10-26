@@ -1,9 +1,7 @@
 package tc.oc.pgm.tablist;
 
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
@@ -30,11 +28,11 @@ public class AuthorTabEntry extends DynamicTabEntry {
             .findFirst()
             .<Component>map(
                 author ->
-                    TranslatableComponent.of(
+                    Component.translatable(
                         authorIdx == 0 ? "misc.by" : "misc.and",
-                        TextColor.GRAY,
+                        NamedTextColor.GRAY,
                         author.getName(NameStyle.FANCY)))
-            .orElse(TextComponent.empty()),
+            .orElse(Component.empty()),
         view.getViewer());
   }
 }

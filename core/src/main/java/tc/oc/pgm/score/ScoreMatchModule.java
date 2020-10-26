@@ -12,10 +12,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -105,41 +104,41 @@ public class ScoreMatchModule implements MatchModule, Listener {
               .limit(10)
               .map(
                   x ->
-                      TextComponent.builder()
+                      Component.text()
                           .append(x.getKey().getName(NameStyle.VERBOSE))
-                          .append(TextComponent.of(": ", TextColor.GRAY))
-                          .append(TextComponent.of((int) x.getValue().doubleValue()))
-                          .color(TextColor.WHITE)
+                          .append(Component.text(": ", NamedTextColor.GRAY))
+                          .append(Component.text((int) x.getValue().doubleValue()))
+                          .color(NamedTextColor.WHITE)
                           .build())
               .collect(Collectors.toList());
     } else {
 
       for (Entry<Competitor, Double> scorePair : this.scores.entrySet()) {
         scoreMessages.add(
-            TextComponent.of(
+            Component.text(
                 ((int) scorePair.getValue().doubleValue()),
                 TextFormatter.convert(scorePair.getKey().getColor())));
       }
     }
     TextComponent returnMessage =
-        TextComponent.builder()
-            .append(TranslatableComponent.of("match.info.score").color(TextColor.DARK_AQUA))
-            .append(TextComponent.of(": ", TextColor.DARK_AQUA))
-            .append(TextFormatter.list(scoreMessages, TextColor.GRAY))
+        Component.text()
+            .append(Component.translatable("match.info.score").color(NamedTextColor.DARK_AQUA))
+            .append(Component.text(": ", NamedTextColor.DARK_AQUA))
+            .append(TextFormatter.list(scoreMessages, NamedTextColor.GRAY))
             .build();
     if (matchPlayer != null && matchPlayer.getCompetitor() != null && ffamm != null) {
       returnMessage =
           returnMessage.append(
-              TextComponent.builder()
-                  .color(TextColor.GRAY)
-                  .append(" | ", TextColor.GRAY)
-                  .append(TranslatableComponent.of("match.info.you"))
-                  .append(": ")
+              Component.text()
+                  .color(NamedTextColor.GRAY)
+                  .append(Component.text(" | ", NamedTextColor.GRAY))
+                  .append(Component.translatable("match.info.you"))
+                  .append(Component.text(": "))
                   .color(TextFormatter.convert(matchPlayer.getCompetitor().getColor()))
                   .append(
-                      TextComponent.of(
+                      Component.text(
                           (int) scores.get(matchPlayer.getCompetitor()).doubleValue(),
-                          TextColor.WHITE))
+                          NamedTextColor.WHITE))
                   .build());
     }
     return returnMessage;
@@ -151,7 +150,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
 
     if (this.config.scoreLimit > 0) {
       message =
-          message.append(TextComponent.of("  [" + this.config.scoreLimit + "]", TextColor.GRAY));
+          message.append(Component.text("  [" + this.config.scoreLimit + "]", NamedTextColor.GRAY));
     }
     return message;
   }
@@ -261,7 +260,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
   public void handleJoin(final PlayerParticipationStartEvent event) {
     double contribution = contributions.get(event.getPlayer().getId());
     if (contribution <= PGM.get().getConfiguration().getGriefScore()) {
-      event.cancel(TranslatableComponent.of("join.err.teamGrief", TextColor.RED));
+      event.cancel(Component.translatable("join.err.teamGrief", NamedTextColor.RED));
     }
   }
 
@@ -277,12 +276,12 @@ public class ScoreMatchModule implements MatchModule, Listener {
     if (wholePoints < 1) return;
 
     match.sendMessage(
-        TranslatableComponent.of(
+        Component.translatable(
             "scorebox.scored",
             player.getName(NameStyle.COLOR),
-            TranslatableComponent.of(
+            Component.translatable(
                 wholePoints == 1 ? "misc.point" : "misc.points",
-                TextComponent.of(Integer.toString(wholePoints), TextColor.DARK_AQUA)),
+                Component.text(Integer.toString(wholePoints), NamedTextColor.DARK_AQUA)),
             player.getParty().getName()));
     player.playSound(new Sound("random.levelup"));
   }
@@ -303,7 +302,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
               () -> {
                 if (mp.getParty() instanceof Competitor) {
                   match.setParty(mp, match.getDefaultParty());
-                  mp.sendWarning(TranslatableComponent.of("join.err.teamGrief", TextColor.RED));
+                  mp.sendWarning(Component.translatable("join.err.teamGrief", NamedTextColor.RED));
                 }
               });
     }

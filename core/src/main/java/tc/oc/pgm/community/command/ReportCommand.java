@@ -17,13 +17,13 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.event.HoverEvent;
-import net.kyori.text.event.HoverEvent.Action;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.event.HoverEvent.Action;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.Permissions;
@@ -65,12 +65,12 @@ public class ReportCommand {
         Duration timeSinceReport = Duration.between(lastReport, Instant.now());
         long secondsRemaining = REPORT_COOLDOWN_SECONDS - timeSinceReport.getSeconds();
         if (secondsRemaining > 0) {
-          TextComponent secondsComponent = TextComponent.of(Long.toString(secondsRemaining));
+          TextComponent secondsComponent = Component.text(Long.toString(secondsRemaining));
           TranslatableComponent secondsLeftComponent =
-              TranslatableComponent.of(
+              Component.translatable(
                       secondsRemaining != 1 ? "misc.seconds" : "misc.second", secondsComponent)
-                  .color(TextColor.AQUA);
-          sender.sendWarning(TranslatableComponent.of("command.cooldown", secondsLeftComponent));
+                  .color(NamedTextColor.AQUA);
+          sender.sendWarning(Component.translatable("command.cooldown", secondsLeftComponent));
           return;
         }
       } else {
@@ -87,8 +87,8 @@ public class ReportCommand {
       // player is found.
       // TODO: Please upgrade if command framework uses locale
       sender.sendWarning(
-          TextComponent.of(
-              "Could not find player named '" + player.getName() + "'", TextColor.RED));
+          Component.text(
+              "Could not find player named '" + player.getName() + "'", NamedTextColor.RED));
       return;
     }
 
@@ -103,18 +103,18 @@ public class ReportCommand {
     }
 
     TranslatableComponent thanks =
-        TranslatableComponent.of("misc.thankYou", TextColor.GREEN)
-            .append(TextComponent.space())
-            .append(TranslatableComponent.of("moderation.report.acknowledge", TextColor.GOLD));
+        Component.translatable("misc.thankYou", NamedTextColor.GREEN)
+            .append(Component.space())
+            .append(Component.translatable("moderation.report.acknowledge", NamedTextColor.GOLD));
     sender.sendMessage(thanks);
 
     final Component component =
-        TranslatableComponent.of(
+        Component.translatable(
             "moderation.report.notify",
-            TextColor.YELLOW,
+            NamedTextColor.YELLOW,
             sender == null ? UsernameFormatUtils.CONSOLE_NAME : sender.getName(NameStyle.FANCY),
             accused.getName(NameStyle.FANCY),
-            TextComponent.of(reason.trim(), TextColor.WHITE));
+            Component.text(reason.trim(), NamedTextColor.WHITE));
 
     RECENT_REPORTS.put(
         UUID.randomUUID(),
@@ -142,7 +142,7 @@ public class ReportCommand {
       @Fallback(Type.NULL) @Switch('t') String target)
       throws CommandException {
     if (RECENT_REPORTS.asMap().isEmpty()) {
-      audience.sendMessage(TranslatableComponent.of("moderation.reports.none", TextColor.RED));
+      audience.sendMessage(Component.translatable("moderation.reports.none", NamedTextColor.RED));
       return;
     }
 
@@ -157,49 +157,50 @@ public class ReportCommand {
     Collections.sort(reportList); // Sort list
     Collections.reverse(reportList); // Reverse so most recent show up first
 
-    Component headerResultCount = TextComponent.of(Long.toString(reportList.size()), TextColor.RED);
+    Component headerResultCount =
+        Component.text(Long.toString(reportList.size()), NamedTextColor.RED);
 
     int perPage = 6;
     int pages = (reportList.size() + perPage - 1) / perPage;
 
     Component pageNum =
-        TranslatableComponent.of(
+        Component.translatable(
             "command.simplePageHeader",
-            TextColor.AQUA,
-            TextComponent.of(Integer.toString(page), TextColor.RED),
-            TextComponent.of(Integer.toString(pages), TextColor.RED));
+            NamedTextColor.AQUA,
+            Component.text(Integer.toString(page), NamedTextColor.RED),
+            Component.text(Integer.toString(pages), NamedTextColor.RED));
 
     Component header =
-        TranslatableComponent.of(
-                "moderation.reports.header", TextColor.GRAY, headerResultCount, pageNum)
+        Component.translatable(
+                "moderation.reports.header", NamedTextColor.GRAY, headerResultCount, pageNum)
             .append(
-                TextComponent.of(" (")
+                Component.text(" (")
                     .append(headerResultCount)
-                    .append(TextComponent.of(") » "))
+                    .append(Component.text(") » "))
                     .append(pageNum));
 
     Component formattedHeader =
-        TextFormatter.horizontalLineHeading(sender, header, TextColor.DARK_GRAY);
+        TextFormatter.horizontalLineHeading(sender, header, NamedTextColor.DARK_GRAY);
 
     new PrettyPaginatedComponentResults<Report>(formattedHeader, perPage) {
       @Override
       public Component format(Report data, int index) {
 
         Component reporter =
-            TranslatableComponent.of(
-                "moderation.reports.hover", TextColor.GRAY, data.getSenderComponent(match));
+            Component.translatable(
+                "moderation.reports.hover", NamedTextColor.GRAY, data.getSenderComponent(match));
 
         Component timeAgo =
             PeriodFormats.relativePastApproximate(
                     Instant.ofEpochMilli(data.getTimeSent().toEpochMilli()))
-                .color(TextColor.DARK_GREEN);
+                .color(NamedTextColor.DARK_GREEN);
 
-        return TextComponent.builder()
-            .append(timeAgo.hoverEvent(HoverEvent.of(Action.SHOW_TEXT, reporter)))
-            .append(": ", TextColor.GRAY)
+        return Component.text()
+            .append(timeAgo.hoverEvent(HoverEvent.hoverEvent(Action.SHOW_TEXT, reporter)))
+            .append(Component.text(": ", NamedTextColor.GRAY))
             .append(data.getTargetComponent(match))
-            .append(" « ", TextColor.YELLOW)
-            .append(data.getReason(), TextColor.WHITE, TextDecoration.ITALIC)
+            .append(Component.text(" « ", NamedTextColor.YELLOW))
+            .append(Component.text(data.getReason(), NamedTextColor.WHITE, TextDecoration.ITALIC))
             .build();
       }
     }.display(audience, reportList, page);
@@ -259,14 +260,14 @@ public class ReportCommand {
     private Component getUsername(UUID uuid, Match match) {
       MatchPlayer player = match.getPlayer(uuid);
       Component name =
-          TranslatableComponent.of("misc.unknown", TextColor.AQUA, TextDecoration.ITALIC);
+          Component.translatable("misc.unknown", NamedTextColor.AQUA, TextDecoration.ITALIC);
       if (match.getPlayer(uuid) != null) {
         name = player.getName(NameStyle.FANCY);
       } else {
         name =
-            TextComponent.of(
+            Component.text(
                 uuid.equals(targetUUID) ? getOfflineTargetName() : getOfflineSenderName(),
-                TextColor.DARK_AQUA,
+                NamedTextColor.DARK_AQUA,
                 TextDecoration.ITALIC);
       }
       return name;

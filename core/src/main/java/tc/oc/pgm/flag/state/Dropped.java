@@ -2,7 +2,7 @@ package tc.oc.pgm.flag.state;
 
 import java.time.Duration;
 import java.time.Instant;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import tc.oc.pgm.api.party.Party;
@@ -42,7 +42,7 @@ public class Dropped extends Uncarried implements Missing {
       this.flag.playStatusSound(Flag.DROP_SOUND_OWN, Flag.DROP_SOUND);
       this.flag
           .getMatch()
-          .sendMessage(TranslatableComponent.of("flag.drop", this.flag.getComponentName()));
+          .sendMessage(Component.translatable("flag.drop", this.flag.getComponentName()));
     }
 
     if (TimeUtils.isInfinite(getDuration())) {

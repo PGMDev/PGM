@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -210,7 +210,7 @@ public class CombatLogTracker implements Listener {
   public void onParticipationStop(PlayerParticipationStopEvent event) {
     if (event.getMatch().isRunning()
         && this.getImminentDeath(event.getPlayer().getBukkit()) != null) {
-      event.cancel(TranslatableComponent.of("leave.err.combatLog"));
+      event.cancel(Component.translatable("leave.err.combatLog"));
       event.setCancelled(true);
     }
   }

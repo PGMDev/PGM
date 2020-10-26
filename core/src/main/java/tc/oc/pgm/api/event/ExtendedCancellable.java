@@ -1,7 +1,7 @@
 package tc.oc.pgm.api.event;
 
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 

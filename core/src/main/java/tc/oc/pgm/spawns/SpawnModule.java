@@ -6,7 +6,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.MapModule;

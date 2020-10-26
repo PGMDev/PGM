@@ -2,10 +2,9 @@ package tc.oc.pgm.cycle;
 
 import com.google.common.collect.Range;
 import java.time.Duration;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
@@ -44,23 +43,23 @@ public class CycleCountdown extends MatchCountdown {
   @Override
   protected Component formatText() {
     Component mapName =
-        nextMap == null ? null : TextComponent.of(nextMap.getName(), TextColor.AQUA);
+        nextMap == null ? null : Component.text(nextMap.getName(), NamedTextColor.AQUA);
 
     TranslatableComponent cycleComponent;
     if (remaining.isZero()) {
       cycleComponent =
           mapName != null
-              ? TranslatableComponent.of("map.cycledMap", mapName)
-              : TranslatableComponent.of("map.cycled");
+              ? Component.translatable("map.cycledMap", mapName)
+              : Component.translatable("map.cycled");
     } else {
-      Component secs = secondsRemaining(TextColor.DARK_RED);
+      Component secs = secondsRemaining(NamedTextColor.DARK_RED);
       cycleComponent =
           mapName != null
-              ? TranslatableComponent.of("map.cycleMap", mapName, secs)
-              : TranslatableComponent.of("map.cycle", secs);
+              ? Component.translatable("map.cycleMap", mapName, secs)
+              : Component.translatable("map.cycle", secs);
     }
 
-    return cycleComponent.color(TextColor.DARK_AQUA);
+    return cycleComponent.color(NamedTextColor.DARK_AQUA);
   }
 
   @Override

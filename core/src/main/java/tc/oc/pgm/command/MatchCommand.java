@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -145,11 +145,12 @@ public final class MatchCommand {
             Collection<String> goalTexts = entry.getValue();
 
             viewer.sendMessage(
-                TextComponent.builder()
-                    .append("  ")
+                Component.text()
+                    .append(Component.space())
+                    .append(Component.space())
                     .append(team.getName())
-                    .append(": ", TextColor.GRAY)
-                    .append(Joiner.on("  ").join(goalTexts))
+                    .append(Component.text(": ", NamedTextColor.GRAY))
+                    .append(Component.text(Joiner.on("  ").join(goalTexts)))
                     .build());
           }
         }

@@ -3,10 +3,9 @@ package tc.oc.pgm.command;
 import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Text;
 import javax.annotation.Nullable;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.ChatColor;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -28,11 +27,12 @@ public final class ClassCommand {
 
     if (query == null) {
       player.sendMessage(
-          TranslatableComponent.of("match.class.current", TextColor.GREEN)
-              .append(TextComponent.space())
+          Component.translatable("match.class.current", NamedTextColor.GREEN)
+              .append(Component.space())
               .append(
-                  TextComponent.of(currentClass.getName(), TextColor.GOLD, TextDecoration.BOLD)));
-      player.sendMessage(TranslatableComponent.of("match.class.view", TextColor.GOLD));
+                  Component.text(
+                      currentClass.getName(), NamedTextColor.GOLD, TextDecoration.BOLD)));
+      player.sendMessage(Component.translatable("match.class.view", NamedTextColor.GOLD));
     } else {
       final PlayerClass newClass = StringUtils.bestFuzzyMatch(query, classes.getClasses(), 0.9);
 
@@ -47,12 +47,12 @@ public final class ClassCommand {
       }
 
       player.sendMessage(
-          TranslatableComponent.of(
+          Component.translatable(
               "match.class.ok",
-              TextColor.GREEN,
-              TextComponent.of(newClass.getName(), TextColor.GOLD, TextDecoration.UNDERLINED)));
+              NamedTextColor.GREEN,
+              Component.text(newClass.getName(), NamedTextColor.GOLD, TextDecoration.UNDERLINED)));
       if (player.isParticipating()) {
-        player.sendMessage(TranslatableComponent.of("match.class.queue", TextColor.GREEN));
+        player.sendMessage(Component.translatable("match.class.queue", NamedTextColor.GREEN));
       }
     }
   }

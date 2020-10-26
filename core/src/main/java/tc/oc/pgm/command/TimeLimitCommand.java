@@ -3,9 +3,8 @@ package tc.oc.pgm.command;
 import app.ashcon.intake.Command;
 import java.time.Duration;
 import javax.annotation.Nullable;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.VictoryCondition;
@@ -45,12 +44,12 @@ public final class TimeLimitCommand {
     time.start();
 
     audience.sendMessage(
-        TranslatableComponent.of(
+        Component.translatable(
             "match.timeLimit.commandOutput",
-            TextColor.YELLOW,
-            TextComponent.of(TimeUtils.formatDuration(duration), TextColor.AQUA),
+            NamedTextColor.YELLOW,
+            Component.text(TimeUtils.formatDuration(duration), NamedTextColor.AQUA),
             result != null
                 ? result.getDescription(match)
-                : TranslatableComponent.of("misc.unknown")));
+                : Component.translatable("misc.unknown")));
   }
 }

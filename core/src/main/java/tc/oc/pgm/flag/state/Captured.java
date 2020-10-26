@@ -1,6 +1,6 @@
 package tc.oc.pgm.flag.state;
 
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.filters.query.GoalQuery;
@@ -51,7 +51,7 @@ public class Captured extends BaseState implements Returning {
         this.flag
             .getMatch()
             .sendMessage(
-                TranslatableComponent.of("flag.respawnTogether", this.flag.getComponentName()));
+                Component.translatable("flag.respawnTogether", this.flag.getComponentName()));
       }
     }
 

@@ -6,10 +6,8 @@ import app.ashcon.intake.bukkit.parametric.Type;
 import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
 import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.Permissions;
@@ -37,9 +35,9 @@ public final class MapOrderCommand {
     }
 
     audience.sendMessage(
-        TranslatableComponent.of(
+        Component.translatable(
             "map.nextMap",
-            TextColor.DARK_PURPLE,
+            NamedTextColor.DARK_PURPLE,
             next.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS)));
   }
 
@@ -67,14 +65,14 @@ public final class MapOrderCommand {
         Component mapName = mapOrder.getNextMap().getStyledName(MapNameStyle.COLOR);
         mapOrder.resetNextMap();
         ChatDispatcher.broadcastAdminChatMessage(
-            TranslatableComponent.of(
+            Component.translatable(
                 "map.setNext.revert",
-                TextColor.GRAY,
+                NamedTextColor.GRAY,
                 UsernameFormatUtils.formatStaffName(sender, match),
                 mapName),
             match);
       } else {
-        viewer.sendWarning(TranslatableComponent.of("map.noNextMap"));
+        viewer.sendWarning(Component.translatable("map.noNextMap"));
       }
       return;
     }
@@ -84,14 +82,14 @@ public final class MapOrderCommand {
     if (RestartManager.isQueued()) {
       RestartManager.cancelRestart();
       viewer.sendWarning(
-          TranslatableComponent.of("admin.cancelRestart.restartUnqueued", TextColor.GREEN));
+          Component.translatable("admin.cancelRestart.restartUnqueued", NamedTextColor.GREEN));
     }
 
-    Component mapName = TextComponent.of(map.getName(), TextColor.GOLD);
+    Component mapName = Component.text(map.getName(), NamedTextColor.GOLD);
     Component successful =
-        TranslatableComponent.of(
+        Component.translatable(
             "map.setNext",
-            TextColor.GRAY,
+            NamedTextColor.GRAY,
             UsernameFormatUtils.formatStaffName(sender, match),
             mapName);
     ChatDispatcher.broadcastAdminChatMessage(successful, match);

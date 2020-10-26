@@ -3,8 +3,7 @@ package tc.oc.pgm.util.text;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.regex.Pattern;
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.potion.PotionEffectType;
@@ -79,6 +78,6 @@ public final class MinecraftTranslations {
 
   private static Component getKey(String format, String name) {
     final String key = String.format(format, name);
-    return TranslatableComponent.of(KEY_EXCEPTIONS.getOrDefault(key, key));
+    return Component.translatable(KEY_EXCEPTIONS.getOrDefault(key, key));
   }
 }

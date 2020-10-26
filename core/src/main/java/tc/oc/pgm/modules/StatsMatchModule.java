@@ -7,11 +7,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -80,13 +79,13 @@ public class StatsMatchModule implements MatchModule, Listener {
       } else {
         kd = decimalFormatKd.format(kills / (double) deaths);
       }
-      return TranslatableComponent.of(
+      return Component.translatable(
           "match.stats",
-          TextColor.GRAY,
-          TextComponent.of(Integer.toString(kills), TextColor.GREEN),
-          TextComponent.of(Integer.toString(killstreak), TextColor.GREEN),
-          TextComponent.of(Integer.toString(deaths), TextColor.RED),
-          TextComponent.of(kd, TextColor.GREEN));
+          NamedTextColor.GRAY,
+          Component.text(Integer.toString(kills), NamedTextColor.GREEN),
+          Component.text(Integer.toString(killstreak), NamedTextColor.GREEN),
+          Component.text(Integer.toString(deaths), NamedTextColor.RED),
+          Component.text(kd, NamedTextColor.GREEN));
     }
   }
 
@@ -154,14 +153,17 @@ public class StatsMatchModule implements MatchModule, Listener {
       allBowshots.put(playerUUID, playerStats.longestBowKill);
     }
 
-    Component killMessage = getMessage("match.stats.kills", sortStats(allKills), TextColor.GREEN);
+    Component killMessage =
+        getMessage("match.stats.kills", sortStats(allKills), NamedTextColor.GREEN);
     Component killstreakMessage =
-        getMessage("match.stats.killstreak", sortStats(allKillstreaks), TextColor.GREEN);
-    Component deathMessage = getMessage("match.stats.deaths", sortStats(allDeaths), TextColor.RED);
+        getMessage("match.stats.killstreak", sortStats(allKillstreaks), NamedTextColor.GREEN);
+    Component deathMessage =
+        getMessage("match.stats.deaths", sortStats(allDeaths), NamedTextColor.RED);
     Map.Entry<UUID, Integer> bestBowshot = sortStats(allBowshots);
     if (bestBowshot.getValue() == 1)
       bestBowshot.setValue(2); // Avoids translating "1 block" vs "n blocks"
-    Component bowshotMessage = getMessage("match.stats.bowshot", bestBowshot, TextColor.YELLOW);
+    Component bowshotMessage =
+        getMessage("match.stats.bowshot", bestBowshot, NamedTextColor.YELLOW);
 
     match
         .getExecutor(MatchScope.LOADED)
@@ -174,8 +176,8 @@ public class StatsMatchModule implements MatchModule, Listener {
                 viewer.sendMessage(
                     TextFormatter.horizontalLineHeading(
                         viewer.getBukkit(),
-                        TranslatableComponent.of("match.stats.overall", TextColor.YELLOW),
-                        TextColor.WHITE));
+                        Component.translatable("match.stats.overall", NamedTextColor.YELLOW),
+                        NamedTextColor.WHITE));
                 viewer.sendMessage(killMessage);
                 viewer.sendMessage(killstreakMessage);
                 viewer.sendMessage(deathMessage);
@@ -222,10 +224,10 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   Component getMessage(String messageKey, Map.Entry<UUID, Integer> mapEntry, TextColor color) {
-    return TranslatableComponent.of(
+    return Component.translatable(
         messageKey,
         playerName(mapEntry.getKey()),
-        TextComponent.of(Integer.toString(mapEntry.getValue()), color, TextDecoration.BOLD));
+        Component.text(Integer.toString(mapEntry.getValue()), color, TextDecoration.BOLD));
   }
 
   private Component playerName(UUID playerUUID) {

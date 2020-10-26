@@ -3,11 +3,10 @@ package tc.oc.pgm.timelimit;
 import java.time.Duration;
 import java.time.Instant;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.util.text.PeriodFormats;
@@ -29,22 +28,22 @@ public class OvertimeCountdown extends TimeLimitCountdown {
   protected TextColor urgencyColor() {
     long seconds = remaining.getSeconds();
     if (seconds > 20) {
-      return TextColor.GREEN;
+      return NamedTextColor.GREEN;
     } else if (seconds > 10) {
-      return TextColor.YELLOW;
+      return NamedTextColor.YELLOW;
     } else if (seconds > 5) {
-      return TextColor.GOLD;
+      return NamedTextColor.GOLD;
     } else {
-      return TextColor.DARK_RED;
+      return NamedTextColor.DARK_RED;
     }
   }
 
   @Override
   protected Component formatText() {
-    return TranslatableComponent.of(
+    return Component.translatable(
             "misc.overtime",
-            TextColor.YELLOW,
-            TextComponent.of(colonTime(), urgencyColor()).decoration(TextDecoration.BOLD, false))
+            NamedTextColor.YELLOW,
+            Component.text(colonTime(), urgencyColor()).decoration(TextDecoration.BOLD, false))
         .decoration(TextDecoration.BOLD, true);
   }
 
@@ -66,14 +65,14 @@ public class OvertimeCountdown extends TimeLimitCountdown {
     // Should never happen, but rather play safe
     if (timeLimit.getOvertime() == null) return;
 
-    match.sendMessage(TranslatableComponent.of("broadcast.overtime", TextColor.YELLOW));
+    match.sendMessage(Component.translatable("broadcast.overtime", NamedTextColor.YELLOW));
     if (timeLimit.getMaxOvertime() != null) {
       match.sendMessage(
-          TranslatableComponent.of(
+          Component.translatable(
               "broadcast.overtime.limit",
-              TextColor.YELLOW,
+              NamedTextColor.YELLOW,
               PeriodFormats.briefNaturalApproximate(timeLimit.getMaxOvertime())
-                  .color(TextColor.AQUA)));
+                  .color(NamedTextColor.AQUA)));
 
       maxRefresh = Instant.now().plus(timeLimit.getMaxOvertime()).minus(timeLimit.getOvertime());
     }

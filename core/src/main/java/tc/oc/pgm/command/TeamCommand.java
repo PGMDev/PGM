@@ -6,10 +6,8 @@ import app.ashcon.intake.parametric.annotation.Text;
 import com.google.common.collect.Range;
 import java.util.*;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
@@ -44,9 +42,9 @@ public final class TeamCommand {
     }
 
     sender.sendMessage(
-        TranslatableComponent.of(
+        Component.translatable(
             "join.ok.force",
-            TextColor.GRAY,
+            NamedTextColor.GRAY,
             joiner.getName(NameStyle.FANCY),
             joiner.getParty().getName(),
             oldParty.getName()));
@@ -69,7 +67,7 @@ public final class TeamCommand {
       teams.forceJoin(player, null);
     }
 
-    match.sendMessage(TranslatableComponent.of("match.shuffle.ok", TextColor.GREEN));
+    match.sendMessage(Component.translatable("match.shuffle.ok", NamedTextColor.GREEN));
   }
 
   @Command(
@@ -86,14 +84,14 @@ public final class TeamCommand {
 
     for (Team other : teams.getTeams()) {
       if (other.getNameLegacy().equalsIgnoreCase(newName)) {
-        throw TextException.of("match.alias.err", TextComponent.of(newName));
+        throw TextException.of("match.alias.err", Component.text(newName));
       }
     }
 
-    final Component oldName = team.getName().color(TextColor.GRAY);
+    final Component oldName = team.getName().color(NamedTextColor.GRAY);
     ((Team) team).setName(newName);
 
-    match.sendMessage(TranslatableComponent.of("match.alias.ok", oldName, team.getName()));
+    match.sendMessage(Component.translatable("match.alias.ok", oldName, team.getName()));
   }
 
   @Command(
@@ -121,10 +119,10 @@ public final class TeamCommand {
       }
 
       audience.sendMessage(
-          TranslatableComponent.of(
+          Component.translatable(
               "match.resize.max",
               team.getName(),
-              TextComponent.of(team.getMaxPlayers(), TextColor.AQUA)));
+              Component.text(team.getMaxPlayers(), NamedTextColor.AQUA)));
     }
   }
 
@@ -142,10 +140,10 @@ public final class TeamCommand {
       }
 
       audience.sendMessage(
-          TranslatableComponent.of(
+          Component.translatable(
               "match.resize.min",
               team.getName(),
-              TextComponent.of(team.getMinPlayers(), TextColor.AQUA)));
+              Component.text(team.getMinPlayers(), NamedTextColor.AQUA)));
     }
   }
 

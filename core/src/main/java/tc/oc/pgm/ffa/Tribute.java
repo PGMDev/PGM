@@ -4,8 +4,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.scoreboard.NameTagVisibility;
@@ -110,7 +109,7 @@ public class Tribute implements Competitor, MultiAudience {
 
   @Override
   public Component getChatPrefix() {
-    return TextComponent.empty();
+    return Component.empty();
   }
 
   @Override

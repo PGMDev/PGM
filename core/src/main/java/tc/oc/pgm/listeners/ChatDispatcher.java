@@ -14,11 +14,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -61,10 +60,10 @@ public class ChatDispatcher implements Listener {
   private final Map<UUID, String> muted;
 
   public static final TextComponent ADMIN_CHAT_PREFIX =
-      TextComponent.builder()
-          .append("[", TextColor.WHITE)
-          .append("A", TextColor.GOLD)
-          .append("] ", TextColor.WHITE)
+      Component.text()
+          .append(Component.text("[", NamedTextColor.WHITE))
+          .append(Component.text("A", NamedTextColor.GOLD))
+          .append(Component.text("] ", NamedTextColor.WHITE))
           .build();
 
   private static final Sound DM_SOUND = new Sound("random.orb", 1f, 1.2f);
@@ -171,7 +170,7 @@ public class ChatDispatcher implements Listener {
     if (sender != null && !sender.getBukkit().hasPermission(Permissions.ADMINCHAT)) {
       sender.getSettings().resetValue(SettingKey.CHAT);
       SettingKey.CHAT.update(sender);
-      sender.sendWarning(TranslatableComponent.of("misc.noPermission"));
+      sender.sendWarning(Component.translatable("misc.noPermission"));
       return;
     }
 
@@ -201,7 +200,7 @@ public class ChatDispatcher implements Listener {
     if (sender == null) return;
 
     if (vanish.isVanished(sender.getId())) {
-      sender.sendWarning(TranslatableComponent.of("vanish.chat.deny"));
+      sender.sendWarning(Component.translatable("vanish.chat.deny"));
       return;
     }
 
@@ -215,7 +214,7 @@ public class ChatDispatcher implements Listener {
 
       // Vanish Check - Don't allow messages to vanished
       if (vanish.isVanished(matchReceiver.getId())) {
-        sender.sendWarning(TranslatableComponent.of("command.playerNotFound"));
+        sender.sendWarning(Component.translatable("command.playerNotFound"));
         return;
       }
 
@@ -224,7 +223,7 @@ public class ChatDispatcher implements Listener {
       if (option.equals(SettingValue.MESSAGE_OFF)
           && !sender.getBukkit().hasPermission(Permissions.STAFF)) {
         Component blocked =
-            TranslatableComponent.of(
+            Component.translatable(
                 "command.message.blocked", matchReceiver.getName(NameStyle.FANCY));
         sender.sendWarning(blocked);
         return;
@@ -232,7 +231,7 @@ public class ChatDispatcher implements Listener {
 
       if (isMuted(matchReceiver) && !sender.getBukkit().hasPermission(Permissions.STAFF)) {
         Component muted =
-            TranslatableComponent.of(
+            Component.translatable(
                 "moderation.mute.target", matchReceiver.getName(NameStyle.CONCISE));
         sender.sendWarning(muted);
         return; // Only staff can message muted players
@@ -252,10 +251,10 @@ public class ChatDispatcher implements Listener {
         message,
         formatPrivateMessage("misc.from", matchReceiver.getBukkit()),
         getChatFormat(
-            TextComponent.builder()
+            Component.text()
                 .append(
-                    TranslatableComponent.of("misc.from", TextColor.GRAY, TextDecoration.ITALIC))
-                .append(" ")
+                    Component.translatable("misc.from", NamedTextColor.GRAY, TextDecoration.ITALIC))
+                .append(Component.space())
                 .build(),
             sender,
             message),
@@ -269,9 +268,10 @@ public class ChatDispatcher implements Listener {
         message,
         formatPrivateMessage("misc.to", sender.getBukkit()),
         getChatFormat(
-            TextComponent.builder()
-                .append(TranslatableComponent.of("misc.to", TextColor.GRAY, TextDecoration.ITALIC))
-                .append(" ")
+            Component.text()
+                .append(
+                    Component.translatable("misc.to", NamedTextColor.GRAY, TextDecoration.ITALIC))
+                .append(Component.space())
                 .build(),
             manager.getPlayer(receiver),
             message),
@@ -281,7 +281,7 @@ public class ChatDispatcher implements Listener {
 
   private String formatPrivateMessage(String key, CommandSender viewer) {
     Component action =
-        TranslatableComponent.of(key, TextColor.GRAY).decoration(TextDecoration.ITALIC, true);
+        Component.translatable(key, NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, true);
     return TextTranslations.translateLegacy(action, viewer) + " " + PREFIX_FORMAT;
   }
 
@@ -294,7 +294,7 @@ public class ChatDispatcher implements Listener {
     final MatchPlayer receiver = manager.getPlayer(lastMessagedBy.get(sender.getBukkit()));
     if (receiver == null) {
       audience.sendWarning(
-          TranslatableComponent.of("command.message.noReply", TextComponent.of("/msg")));
+          Component.translatable("command.message.noReply", Component.text("/msg")));
       return;
     }
 
@@ -322,7 +322,7 @@ public class ChatDispatcher implements Listener {
             getApproximatePlayer(player.getMatch(), target, player.getBukkit());
         if (receiver == null) {
           player.sendWarning(
-              TranslatableComponent.of("chat.message.unknownTarget", TextComponent.of(target)));
+              Component.translatable("chat.message.unknownTarget", Component.text(target)));
         } else {
           sendDirect(
               player.getMatch(),
@@ -434,9 +434,9 @@ public class ChatDispatcher implements Listener {
 
   private void sendMutedMessage(MatchPlayer player) {
     Component warning =
-        TranslatableComponent.of(
+        Component.translatable(
             "moderation.mute.message",
-            TextComponent.of(muted.getOrDefault(player.getId(), ""), TextColor.AQUA));
+            Component.text(muted.getOrDefault(player.getId(), ""), NamedTextColor.AQUA));
     player.sendWarning(warning);
   }
 
@@ -477,18 +477,18 @@ public class ChatDispatcher implements Listener {
   }
 
   private Component getChatFormat(@Nullable Component prefix, MatchPlayer player, String message) {
-    Component msg = TextComponent.of(message != null ? message : "");
+    Component msg = Component.text(message != null ? message : "");
     if (prefix == null)
-      return TextComponent.builder()
-          .append("<", TextColor.WHITE)
+      return Component.text()
+          .append(Component.text("<", NamedTextColor.WHITE))
           .append(player.getName(NameStyle.VERBOSE))
-          .append(">: ", TextColor.WHITE)
+          .append(Component.text(">: ", NamedTextColor.WHITE))
           .append(msg)
           .build();
-    return TextComponent.builder()
+    return Component.text()
         .append(prefix)
         .append(player.getName(NameStyle.VERBOSE))
-        .append(": ", TextColor.WHITE)
+        .append(Component.text(": ", NamedTextColor.WHITE))
         .append(msg)
         .build();
   }

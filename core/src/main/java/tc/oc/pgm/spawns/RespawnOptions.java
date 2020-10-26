@@ -2,7 +2,7 @@ package tc.oc.pgm.spawns;
 
 import java.time.Duration;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import tc.oc.pgm.util.TimeUtils;
 
 public class RespawnOptions {

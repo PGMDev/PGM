@@ -2,9 +2,9 @@ package tc.oc.pgm.observers.tools;
 
 import com.google.common.collect.Lists;
 import java.util.List;
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.ClickType;
@@ -19,7 +19,7 @@ public class FlySpeedTool implements InventoryMenuItem {
 
   @Override
   public Component getName() {
-    return TranslatableComponent.of("setting.flyspeed");
+    return Component.translatable("setting.flyspeed");
   }
 
   @Override
@@ -30,7 +30,7 @@ public class FlySpeedTool implements InventoryMenuItem {
   @Override
   public List<String> getLore(MatchPlayer player) {
     Component flySpeed = FlySpeed.of(player.getBukkit().getFlySpeed()).getName();
-    Component lore = TranslatableComponent.of("setting.flyspeed.lore", TextColor.GRAY, flySpeed);
+    Component lore = Component.translatable("setting.flyspeed.lore", NamedTextColor.GRAY, flySpeed);
     return Lists.newArrayList(TextTranslations.translateLegacy(lore, player.getBukkit()));
   }
 
@@ -51,10 +51,10 @@ public class FlySpeedTool implements InventoryMenuItem {
   }
 
   public static enum FlySpeed {
-    NORMAL(TextColor.YELLOW, 0.1f),
-    FAST(TextColor.GOLD, 0.25f),
-    FASTER(TextColor.RED, 0.5f),
-    HYPERSPEED(TextColor.LIGHT_PURPLE, 0.9f);
+    NORMAL(NamedTextColor.YELLOW, 0.1f),
+    FAST(NamedTextColor.GOLD, 0.25f),
+    FASTER(NamedTextColor.RED, 0.5f),
+    HYPERSPEED(NamedTextColor.LIGHT_PURPLE, 0.9f);
 
     private TextColor color;
     private float value;
@@ -71,7 +71,7 @@ public class FlySpeedTool implements InventoryMenuItem {
     }
 
     public Component getName() {
-      return TranslatableComponent.of(TRANSLATION_KEY + this.name().toLowerCase(), color);
+      return Component.translatable(TRANSLATION_KEY + this.name().toLowerCase(), color);
     }
 
     public FlySpeed getNext() {

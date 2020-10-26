@@ -1,9 +1,8 @@
 package tc.oc.pgm.restart;
 
 import java.time.Duration;
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.MatchCountdown;
@@ -18,10 +17,10 @@ public class RestartCountdown extends MatchCountdown {
   @Override
   protected Component formatText() {
     if (TimeUtils.isLongerThan(remaining, Duration.ZERO)) {
-      return TranslatableComponent.of(
-          "countdown.restart", TextColor.AQUA, secondsRemaining(TextColor.DARK_RED));
+      return Component.translatable(
+          "countdown.restart", NamedTextColor.AQUA, secondsRemaining(NamedTextColor.DARK_RED));
     } else {
-      return TranslatableComponent.of("misc.serverRestart", TextColor.RED);
+      return Component.translatable("misc.serverRestart", NamedTextColor.RED);
     }
   }
 

@@ -3,7 +3,7 @@ package tc.oc.pgm.util.bossbar;
 import com.google.common.collect.Iterables;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 
 /**

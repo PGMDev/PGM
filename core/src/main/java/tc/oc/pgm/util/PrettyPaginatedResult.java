@@ -4,7 +4,7 @@ import app.ashcon.intake.CommandException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import tc.oc.pgm.util.chat.Audience;
 
 /**
@@ -93,7 +93,7 @@ public abstract class PrettyPaginatedResult<T> {
    */
   public void display(Audience audience, List<? extends T> data, int page) throws CommandException {
     if (data.size() == 0) {
-      audience.sendMessage(TextComponent.of(formatEmpty()));
+      audience.sendMessage(Component.text(formatEmpty()));
       return;
     }
 
@@ -113,6 +113,6 @@ public abstract class PrettyPaginatedResult<T> {
       message.append(format(data.get(i), i));
       if (i != (data.size() - 1)) message.append("\n");
     }
-    audience.sendMessage(TextComponent.of(message.toString()));
+    audience.sendMessage(Component.text(message.toString()));
   }
 }
