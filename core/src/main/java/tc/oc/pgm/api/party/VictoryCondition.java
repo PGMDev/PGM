@@ -1,7 +1,7 @@
 package tc.oc.pgm.api.party;
 
 import java.util.Comparator;
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import tc.oc.pgm.api.match.Match;
 
 /**

@@ -170,7 +170,7 @@ public abstract class BaseState implements Runnable, State {
   }
 
   public ChatColor getStatusColor(Party viewer) {
-    return ChatColor.valueOf(this.flag.getChatColor().name());
+    return this.flag.getBukkitColor();
   }
 
   public ChatColor getLabelColor(Party viewer) {

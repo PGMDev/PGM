@@ -7,9 +7,9 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -94,11 +94,12 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
 
   @Override
   public Component getDecoratedNameComponent(Player player, ChatColor partyColor) {
-    return TextComponent.builder()
+    return Component.text()
         .append(getPrefixComponent(player.getUniqueId()))
         .append(
-            player.getName(),
-            partyColor == null ? TextColor.WHITE : TextFormatter.convert(partyColor))
+            Component.text(
+                player.getName(),
+                partyColor == null ? NamedTextColor.WHITE : TextFormatter.convert(partyColor)))
         .append(getSuffixComponent(player.getUniqueId()))
         .build();
   }

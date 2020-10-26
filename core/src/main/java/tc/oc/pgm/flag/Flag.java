@@ -6,11 +6,9 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
@@ -181,15 +179,19 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   }
 
   public TextColor getChatColor() {
-    return TextFormatter.convert(BukkitUtils.dyeColorToChatColor(this.getDyeColor()));
+    return TextFormatter.convert(getBukkitColor());
+  }
+
+  public ChatColor getBukkitColor() {
+    return BukkitUtils.dyeColorToChatColor(this.getDyeColor());
   }
 
   public String getColoredName() {
-    return LegacyComponentSerializer.INSTANCE.serialize(getComponentName());
+    return LegacyComponentSerializer.legacySection().serialize(getComponentName());
   }
 
   public Component getComponentName() {
-    return TextComponent.of(getName(), getChatColor());
+    return Component.text(getName(), getChatColor());
   }
 
   public ImmutableSet<Net> getNets() {
@@ -302,9 +304,9 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   @Override
   public Component getTouchMessage(ParticipantState toucher, boolean self) {
     if (self) {
-      return TranslatableComponent.of("flag.touch.you", getComponentName());
+      return Component.translatable("flag.touch.you", getComponentName());
     } else {
-      return TranslatableComponent.of(
+      return Component.translatable(
           "flag.touch.player", getComponentName(), toucher.getName(NameStyle.COLOR));
     }
   }

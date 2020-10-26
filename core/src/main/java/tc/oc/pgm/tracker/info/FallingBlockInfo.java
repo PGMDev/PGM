@@ -1,7 +1,7 @@
 package tc.oc.pgm.tracker.info;
 
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.FallingBlock;
 import tc.oc.pgm.api.player.ParticipantState;

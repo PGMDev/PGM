@@ -1,9 +1,9 @@
 package tc.oc.pgm.death;
 
 import java.util.logging.Logger;
-import net.kyori.text.Component;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -36,7 +36,7 @@ public class DeathMessageMatchModule implements MatchModule, Listener {
     if (!event.getMatch().isRunning()) return;
 
     DeathMessageBuilder builder = new DeathMessageBuilder(event, logger);
-    Component message = builder.getMessage().color(TextColor.GRAY);
+    Component message = builder.getMessage().color(NamedTextColor.GRAY);
 
     for (MatchPlayer viewer : event.getMatch().getPlayers()) {
       switch (viewer.getSettings().getValue(SettingKey.DEATH)) {

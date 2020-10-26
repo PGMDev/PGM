@@ -3,10 +3,8 @@ package tc.oc.pgm.listeners;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -27,7 +25,7 @@ public class FormattingListener implements Listener {
     event
         .getMatch()
         .sendMessage(
-            TranslatableComponent.of(
+            Component.translatable(
                 "wool.complete.owned",
                 event.getPlayer().getName(NameStyle.COLOR),
                 event.getWool().getComponentName(),
@@ -42,7 +40,7 @@ public class FormattingListener implements Listener {
     event
         .getMatch()
         .sendMessage(
-            TranslatableComponent.of(
+            Component.translatable(
                 "core.complete.owned",
                 formatContributions(core.getContributions(), false),
                 core.getComponentName(),
@@ -57,7 +55,7 @@ public class FormattingListener implements Listener {
     event
         .getMatch()
         .sendMessage(
-            TranslatableComponent.of(
+            Component.translatable(
                 "destroyable.complete.owned",
                 formatContributions(event.getDestroyable().getContributions(), true),
                 destroyable.getComponentName(),
@@ -78,10 +76,10 @@ public class FormattingListener implements Listener {
       if (entry.getPercentage() > 0.2) { // 20% necessary to be included
         if (showPercentage) {
           contributors.add(
-              TranslatableComponent.of(
+              Component.translatable(
                   "objective.credit.percentage",
                   entry.getPlayerState().getName(NameStyle.COLOR),
-                  TextComponent.of(Math.round(entry.getPercentage() * 100), TextColor.AQUA)));
+                  Component.text(Math.round(entry.getPercentage() * 100), NamedTextColor.AQUA)));
         } else {
           contributors.add(entry.getPlayerState().getName(NameStyle.COLOR));
         }
@@ -93,14 +91,13 @@ public class FormattingListener implements Listener {
     final Component credit;
     if (contributors.isEmpty()) {
       credit =
-          TranslatableComponent.of(
+          Component.translatable(
               someExcluded ? "objective.credit.many" : "objective.credit.unknown");
     } else {
       if (someExcluded) {
-        contributors.add(
-            TranslatableComponent.of("objective.credit.etc")); // Some contributors < 20%
+        contributors.add(Component.translatable("objective.credit.etc")); // Some contributors < 20%
       }
-      credit = TextFormatter.list(contributors, TextColor.WHITE);
+      credit = TextFormatter.list(contributors, NamedTextColor.WHITE);
     }
 
     return credit;

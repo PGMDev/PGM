@@ -7,9 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import tc.oc.pgm.api.match.Match;
@@ -95,10 +94,10 @@ public class ObjectiveModesMatchModule implements MatchModule {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onObjectiveModeChange(ObjectiveModeChangeEvent event) {
     Component broadcast =
-        TextComponent.builder()
-            .append("> > > > ", TextColor.DARK_AQUA)
-            .append(event.getName(), TextColor.DARK_RED)
-            .append(" < < < <", TextColor.DARK_AQUA)
+        Component.text()
+            .append(Component.text("> > > > ", NamedTextColor.DARK_AQUA))
+            .append(Component.text(event.getName(), NamedTextColor.DARK_RED))
+            .append(Component.text(" < < < <", NamedTextColor.DARK_AQUA))
             .build();
     event.getMatch().sendMessage(broadcast);
     event.getMatch().playSound(SOUND);

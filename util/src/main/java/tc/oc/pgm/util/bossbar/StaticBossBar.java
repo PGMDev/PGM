@@ -1,6 +1,6 @@
 package tc.oc.pgm.util.bossbar;
 
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.text.TextParser;
 

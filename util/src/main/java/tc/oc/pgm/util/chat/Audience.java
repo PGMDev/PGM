@@ -1,6 +1,6 @@
 package tc.oc.pgm.util.chat;
 
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;

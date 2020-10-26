@@ -4,9 +4,7 @@ import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -53,8 +51,8 @@ public class DeathMessageBuilder {
   private final boolean predicted;
 
   private String key;
-  private Component weapon = TextComponent.empty();
-  private Component mob = TextComponent.empty();
+  private Component weapon = Component.empty();
+  private Component mob = Component.empty();
   private Long distance;
 
   public DeathMessageBuilder(MatchPlayerDeathEvent event, Logger logger) {
@@ -67,13 +65,11 @@ public class DeathMessageBuilder {
   }
 
   public Component getMessage() {
-    Component message = TranslatableComponent.of(key, getArgs());
+    Component message = Component.translatable(key, getArgs());
 
     if (predicted)
       message =
-          message
-              .append(TextComponent.space())
-              .append(TranslatableComponent.of("death.predictedSuffix"));
+          message.append(Component.space()).append(Component.translatable("death.predictedSuffix"));
 
     return message;
   }
@@ -81,13 +77,11 @@ public class DeathMessageBuilder {
   Component[] getArgs() {
     Component[] args = new Component[5];
     args[0] = victim.getName(NameStyle.COLOR);
-    args[1] = killer == null ? TextComponent.empty() : killer.getName(NameStyle.COLOR);
+    args[1] = killer == null ? Component.empty() : killer.getName(NameStyle.COLOR);
     args[2] = weapon;
     args[3] = mob;
     args[4] =
-        distance == null
-            ? TextComponent.empty()
-            : TranslatableComponent.of(String.valueOf(distance));
+        distance == null ? Component.empty() : Component.translatable(String.valueOf(distance));
     return args;
   }
 
@@ -235,7 +229,7 @@ public class DeathMessageBuilder {
       } else if (option("entity")) {
         // PotionInfo.getName returns a potion name,
         // which doesn't work outside a potion death message.
-        weapon = TranslatableComponent.of("item.potion.name");
+        weapon = Component.translatable("item.potion.name");
         return true;
       }
     } else if (info instanceof EntityInfo) {

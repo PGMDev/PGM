@@ -2,8 +2,8 @@ package tc.oc.pgm.menu;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
+
+import net.kyori.adventure.text.Component;
 import tc.oc.pgm.api.match.Match;
 
 /** A collection of some static methods for building {@link InventoryMenu}s */
@@ -20,7 +20,7 @@ public class InventoryMenuUtils {
    * @return a pretty menu that fits any amount of {@link InventoryMenuItem}s
    */
   public static InventoryMenu prettyMenu(
-      Match match, TranslatableComponent title, List<InventoryMenuItem> itemsWithoutSpaces) {
+          Match match, Component title, List<InventoryMenuItem> itemsWithoutSpaces) {
     return prettyMenu(match, title, itemsWithoutSpaces, 0);
   }
 

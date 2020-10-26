@@ -5,9 +5,7 @@ import java.util.Collections;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -101,19 +99,16 @@ public class Core extends TouchableGoal<CoreFactory>
   public Component getTouchMessage(@Nullable ParticipantState toucher, boolean self) {
     // Core has same touch messages as Destroyable
     if (toucher == null) {
-      return TranslatableComponent.of(
-          "destroyable.touch.owned",
-          TextComponent.empty(),
-          getComponentName(),
-          getOwner().getName());
+      return Component.translatable(
+          "destroyable.touch.owned", Component.empty(), getComponentName(), getOwner().getName());
     } else if (self) {
-      return TranslatableComponent.of(
+      return Component.translatable(
           "destroyable.touch.owned.you",
-          TextComponent.empty(),
+          Component.empty(),
           getComponentName(),
           getOwner().getName());
     } else {
-      return TranslatableComponent.of(
+      return Component.translatable(
           "destroyable.touch.owned.player",
           toucher.getName(NameStyle.COLOR),
           getComponentName(),

@@ -4,7 +4,7 @@ import static tc.oc.pgm.api.map.MapProtos.MODES_IMPLEMENTATION_VERSION;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.minecart.ExplosiveMinecart;
@@ -93,7 +93,7 @@ public class CoreMatchModule implements MatchModule, Listener {
             Competitor team = player.getParty();
 
             if (team == core.getOwner()) {
-              event.setCancelled(true, TranslatableComponent.of("core.damageOwn"));
+              event.setCancelled(true, Component.translatable("core.damageOwn"));
             } else if (event.getOldState().getData().equals(core.getMaterial())) {
               this.match.callEvent(new CoreBlockBreakEvent(core, player, event.getOldState()));
               core.touch(player);
@@ -134,7 +134,7 @@ public class CoreMatchModule implements MatchModule, Listener {
           && core.getCasingRegion().contains(center)
           && player.getParty() == core.getOwner()) {
         event.setCancelled(true);
-        player.sendWarning(TranslatableComponent.of("core.damageOwn"));
+        player.sendWarning(Component.translatable("core.damageOwn"));
       }
     }
   }

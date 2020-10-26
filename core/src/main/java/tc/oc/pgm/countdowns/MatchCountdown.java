@@ -2,10 +2,9 @@ package tc.oc.pgm.countdowns;
 
 import java.time.Duration;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.bossbar.BossBarMatchModule;
@@ -105,8 +104,8 @@ public abstract class MatchCountdown extends Countdown {
     if (showTitle()) {
       getMatch()
           .showTitle(
-              TextComponent.of(String.valueOf(remaining.getSeconds()), TextColor.YELLOW),
-              TextComponent.empty(),
+              Component.text(String.valueOf(remaining.getSeconds()), NamedTextColor.YELLOW),
+              Component.empty(),
               0,
               5,
               15);
@@ -145,23 +144,22 @@ public abstract class MatchCountdown extends Countdown {
   protected TextColor urgencyColor() {
     long seconds = remaining.getSeconds();
     if (seconds > 60) {
-      return TextColor.GREEN;
+      return NamedTextColor.GREEN;
     } else if (seconds > 30) {
-      return TextColor.YELLOW;
+      return NamedTextColor.YELLOW;
     } else if (seconds > 5) {
-      return TextColor.GOLD;
+      return NamedTextColor.GOLD;
     } else {
-      return TextColor.DARK_RED;
+      return NamedTextColor.DARK_RED;
     }
   }
 
   protected Component secondsRemaining(TextColor color) {
     long seconds = remaining.getSeconds();
     if (seconds == 1) {
-      return TranslatableComponent.of("misc.second", TextComponent.of("1", color));
+      return Component.translatable("misc.second", Component.text("1", color));
     } else {
-      return TranslatableComponent.of(
-          "misc.seconds", TextComponent.of(String.valueOf(seconds), color));
+      return Component.translatable("misc.seconds", Component.text(String.valueOf(seconds), color));
     }
   }
 

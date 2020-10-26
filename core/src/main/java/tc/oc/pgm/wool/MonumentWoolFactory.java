@@ -1,8 +1,7 @@
 package tc.oc.pgm.wool;
 
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.DyeColor;
 import org.bukkit.inventory.Inventory;
@@ -41,7 +40,7 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
   }
 
   public static Component makeComponentName(DyeColor color) {
-    return TextComponent.of(
+    return Component.text(
         makeName(color), TextFormatter.convert((BukkitUtils.dyeColorToChatColor(color))));
   }
 

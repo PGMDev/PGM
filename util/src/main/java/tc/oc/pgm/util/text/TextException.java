@@ -3,11 +3,9 @@ package tc.oc.pgm.util.text;
 import com.google.common.collect.Range;
 import java.util.Locale;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.serializer.plain.PlainComponentSerializer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 
 /** An exception with a localized error message. */
 public class TextException extends RuntimeException {
@@ -19,15 +17,15 @@ public class TextException extends RuntimeException {
     super(key, cause);
     final boolean suggest = suggestion != null;
     this.message =
-        TranslatableComponent.builder(key)
+        Component.translatable()
+            .key(key)
             .args(args)
-            .color(TextColor.RED)
-            .append(suggest ? TextComponent.space() : TextComponent.empty())
+            .color(NamedTextColor.RED)
+            .append(suggest ? Component.space() : Component.empty())
             .append(
                 suggest
-                    ? TranslatableComponent.of(
-                        "error.suggestionSuffix", TextComponent.of(suggestion))
-                    : TextComponent.empty())
+                    ? Component.translatable("error.suggestionSuffix", Component.text(suggestion))
+                    : Component.empty())
             .build();
   }
 
@@ -38,7 +36,7 @@ public class TextException extends RuntimeException {
   @Override
   public String getLocalizedMessage() {
     final Component localized = TextTranslations.translate(message, Locale.getDefault());
-    return PlainComponentSerializer.INSTANCE.serialize(localized);
+    return PlainComponentSerializer.plain().serialize(localized);
   }
 
   public static TextException of(String key, Component... args) {
@@ -60,18 +58,18 @@ public class TextException extends RuntimeException {
   public static TextException invalidFormat(
       String text, Class<?> type, @Nullable String suggestion, @Nullable Throwable cause) {
     return new TextException(
-        cause, suggestion, "error.invalidFormat", TextComponent.of(text), format(type));
+        cause, suggestion, "error.invalidFormat", Component.text(text), format(type));
   }
 
   public static TextException outOfRange(String text, Range<?> range) {
-    return new TextException(null, null, "error.outOfRange", TextComponent.of(text), format(range));
+    return new TextException(null, null, "error.outOfRange", Component.text(text), format(range));
   }
 
   private static Component format(Range<?> range) {
-    return TextComponent.of(range.toString().replace("∞", "oo").replace("‥", ", "));
+    return Component.text(range.toString().replace("∞", "oo").replace("‥", ", "));
   }
 
   private static Component format(Class<?> type) {
-    return TranslatableComponent.of("type." + type.getSimpleName().toLowerCase());
+    return Component.translatable("type." + type.getSimpleName().toLowerCase());
   }
 }

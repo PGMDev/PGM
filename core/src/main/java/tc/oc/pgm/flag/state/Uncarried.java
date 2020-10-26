@@ -1,7 +1,7 @@
 package tc.oc.pgm.flag.state;
 
 import javax.annotation.Nullable;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -171,9 +171,9 @@ public abstract class Uncarried extends Spawned {
     Block flagBlock = this.location.getBlock();
 
     if (block.equals(flagBlock) || block.equals(flagBlock.getRelative(BlockFace.UP))) {
-      event.setCancelled(true, TranslatableComponent.of("flag.cannotBreakFlag"));
+      event.setCancelled(true, Component.translatable("flag.cannotBreakFlag"));
     } else if (block.equals(flagBlock.getRelative(BlockFace.DOWN))) {
-      event.setCancelled(true, TranslatableComponent.of("flag.cannotBreakBlockUnder"));
+      event.setCancelled(true, Component.translatable("flag.cannotBreakBlockUnder"));
     }
   }
 

@@ -4,7 +4,7 @@ import java.text.Normalizer;
 import java.time.LocalDate;
 import java.util.Collection;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.named.MapNameStyle;

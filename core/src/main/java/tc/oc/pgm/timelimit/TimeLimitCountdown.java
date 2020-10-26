@@ -2,10 +2,8 @@ package tc.oc.pgm.timelimit;
 
 import java.time.Duration;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.util.chat.Sound;
@@ -32,8 +30,8 @@ public class TimeLimitCountdown extends MatchCountdown {
 
   @Override
   protected Component formatText() {
-    return TranslatableComponent.of(
-        "misc.timeRemaining", TextColor.AQUA, TextComponent.of(colonTime(), urgencyColor()));
+    return Component.translatable(
+        "misc.timeRemaining", NamedTextColor.AQUA, Component.text(colonTime(), urgencyColor()));
   }
 
   @Override

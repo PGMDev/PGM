@@ -1,7 +1,6 @@
 package tc.oc.pgm.blitz;
 
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.VictoryCondition;
@@ -36,6 +35,6 @@ public class BlitzVictoryCondition implements VictoryCondition {
 
   @Override
   public Component getDescription(Match match) {
-    return TranslatableComponent.of("victoryCondition.blitz");
+    return Component.translatable("victoryCondition.blitz");
   }
 }

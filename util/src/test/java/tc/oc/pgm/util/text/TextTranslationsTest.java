@@ -6,8 +6,8 @@ import static tc.oc.pgm.util.text.TextTranslations.*;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Locale;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -49,14 +49,14 @@ public final class TextTranslationsTest {
   @Test
   void testTranslateOurs() {
     assertEquals(
-        TextComponent.of("☃"),
-        translate(TranslatableComponent.of("misc.snowman"), US),
+        Component.text("☃"),
+        translate(Component.translatable("misc.snowman"), US),
         "translation did not render");
   }
 
   @Test
   void testTranslateMojang() {
-    final TranslatableComponent text = TranslatableComponent.of("entity.Creeper.name");
+    final TranslatableComponent text = Component.translatable("entity.Creeper.name");
 
     assertEquals(text, translate(text, US), "mojang translation did not pass-through");
   }

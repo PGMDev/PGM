@@ -5,9 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
@@ -194,11 +192,7 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
     Audience.get(Bukkit.getConsoleSender()).sendMessage(message);
 
     if (!showEnemyTouches()) {
-      message =
-          TextComponent.builder()
-              .append(toucher.getParty().getChatPrefix())
-              .append(message)
-              .build();
+      message = Component.text().append(toucher.getParty().getChatPrefix()).append(message).build();
     }
 
     for (MatchPlayer viewer : getMatch().getPlayers()) {
@@ -215,7 +209,7 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
 
       if (getDeferTouches()) {
         toucher.sendMessage(
-            TranslatableComponent.of("objective.credit.future", TextComponent.of(this.getName())));
+            Component.translatable("objective.credit.future", Component.text(this.getName())));
       }
     }
   }

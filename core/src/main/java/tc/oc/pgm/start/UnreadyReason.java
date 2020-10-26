@@ -1,6 +1,6 @@
 package tc.oc.pgm.start;
 
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 
 /**
  * Other modules can register instances of this with {@link StartMatchModule} to preempt match start

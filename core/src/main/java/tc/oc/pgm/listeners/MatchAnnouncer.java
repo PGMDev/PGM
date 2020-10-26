@@ -2,10 +2,8 @@ package tc.oc.pgm.listeners;
 
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -47,11 +45,11 @@ public class MatchAnnouncer implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchBegin(final MatchStartEvent event) {
     Match match = event.getMatch();
-    match.sendMessage(TranslatableComponent.of("broadcast.matchStart", TextColor.GREEN));
+    match.sendMessage(Component.translatable("broadcast.matchStart", NamedTextColor.GREEN));
 
-    Component go = TranslatableComponent.of("broadcast.go", TextColor.GREEN);
+    Component go = Component.translatable("broadcast.go", NamedTextColor.GREEN);
     for (MatchPlayer player : match.getParticipants()) {
-      player.showTitle(go, TextComponent.empty(), 0, 5, 15);
+      player.showTitle(go, Component.empty(), 0, 5, 15);
     }
 
     match.playSound(SOUND_MATCH_START);
@@ -63,12 +61,12 @@ public class MatchAnnouncer implements Listener {
 
     // broadcast match finish message
     for (MatchPlayer viewer : match.getPlayers()) {
-      Component title, subtitle = TextComponent.empty();
+      Component title, subtitle = Component.empty();
       if (event.getWinner() == null) {
-        title = TranslatableComponent.of("broadcast.gameOver");
+        title = Component.translatable("broadcast.gameOver");
       } else {
         title =
-            TranslatableComponent.of(
+            Component.translatable(
                 event.getWinner().isNamePlural()
                     ? "broadcast.gameOver.teamWinners"
                     : "broadcast.gameOver.teamWinner",
@@ -78,13 +76,13 @@ public class MatchAnnouncer implements Listener {
           // Winner
           viewer.playSound(SOUND_MATCH_WIN);
           if (viewer.getParty() instanceof Team) {
-            subtitle = TranslatableComponent.of("broadcast.gameOver.teamWon", TextColor.GREEN);
+            subtitle = Component.translatable("broadcast.gameOver.teamWon", NamedTextColor.GREEN);
           }
         } else if (viewer.getParty() instanceof Competitor) {
           // Loser
           viewer.playSound(SOUND_MATCH_LOSE);
           if (viewer.getParty() instanceof Team) {
-            subtitle = TranslatableComponent.of("broadcast.gameOver.teamLost", TextColor.RED);
+            subtitle = Component.translatable("broadcast.gameOver.teamLost", NamedTextColor.RED);
           }
         } else {
           // Observer
@@ -119,7 +117,7 @@ public class MatchAnnouncer implements Listener {
     String title = ChatColor.AQUA.toString() + ChatColor.BOLD + mapInfo.getName();
     viewer.sendMessage(
         TextFormatter.horizontalLineHeading(
-            viewer.getBukkit(), TextComponent.of(title), TextColor.WHITE, 200));
+            viewer.getBukkit(), Component.text(title), NamedTextColor.WHITE, 200));
 
     String objective = " " + ChatColor.BLUE + ChatColor.ITALIC + mapInfo.getDescription();
     LegacyFormatUtils.wordWrap(objective, 200).forEach(viewer::sendMessage);
@@ -127,12 +125,12 @@ public class MatchAnnouncer implements Listener {
     Collection<Contributor> authors = mapInfo.getAuthors();
     if (!authors.isEmpty()) {
       viewer.sendMessage(
-          TextComponent.space()
+          Component.space()
               .append(
-                  TranslatableComponent.of(
+                  Component.translatable(
                       "misc.createdBy",
-                      TextColor.GRAY,
-                      TextFormatter.nameList(authors, NameStyle.FANCY, TextColor.GRAY))));
+                      NamedTextColor.GRAY,
+                      TextFormatter.nameList(authors, NameStyle.FANCY, NamedTextColor.GRAY))));
     }
 
     viewer.sendMessage(LegacyFormatUtils.horizontalLine(ChatColor.WHITE, 200));
@@ -140,9 +138,9 @@ public class MatchAnnouncer implements Listener {
 
   private void sendCurrentlyPlaying(MatchPlayer viewer) {
     viewer.sendMessage(
-        TranslatableComponent.of(
+        Component.translatable(
             "misc.playing",
-            TextColor.DARK_PURPLE,
+            NamedTextColor.DARK_PURPLE,
             viewer.getMatch().getMap().getStyledName(MapNameStyle.COLOR_WITH_AUTHORS)));
   }
 }

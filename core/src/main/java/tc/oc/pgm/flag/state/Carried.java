@@ -5,11 +5,9 @@ import java.util.Deque;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -66,10 +64,10 @@ public class Carried extends Spawned implements Missing {
         this.flag
             .getMatch()
             .sendMessage(
-                TranslatableComponent.of(
+                Component.translatable(
                     "flag.willRespawn.next",
                     this.flag.getComponentName(),
-                    TextComponent.of(postName, TextColor.AQUA)));
+                    Component.text(postName, NamedTextColor.AQUA)));
       }
     }
   }
@@ -131,7 +129,7 @@ public class Carried extends Spawned implements Missing {
     SidebarMatchModule smm = this.flag.getMatch().getModule(SidebarMatchModule.class);
     if (smm != null) smm.stopBlinkingGoal(this.flag);
 
-    this.carrier.showHotbar(TextComponent.empty());
+    this.carrier.showHotbar(Component.empty());
 
     this.carrier.getInventory().remove(this.flag.getBannerItem());
     this.carrier.getInventory().setHelmet(this.helmetItem);
@@ -163,24 +161,24 @@ public class Carried extends Spawned implements Missing {
       if (this.flag.getDefinition().getCarryMessage() != null) {
         message = this.flag.getDefinition().getCarryMessage();
       } else {
-        message = TranslatableComponent.of("flag.carrying", this.flag.getComponentName());
+        message = Component.translatable("flag.carrying", this.flag.getComponentName());
       }
 
-      return message.color(TextColor.AQUA).decoration(TextDecoration.BOLD, true);
+      return message.color(NamedTextColor.AQUA).decoration(TextDecoration.BOLD, true);
     } else {
       if (this.deniedByNet.getDenyMessage() != null) {
         message = this.deniedByNet.getDenyMessage();
       } else if (this.deniedByFlag != null) {
         message =
-            TranslatableComponent.of(
+            Component.translatable(
                 "flag.captureDenied.byFlag",
                 this.flag.getComponentName(),
                 this.deniedByFlag.getComponentName());
       } else {
-        message = TranslatableComponent.of("flag.captureDenied", this.flag.getComponentName());
+        message = Component.translatable("flag.captureDenied", this.flag.getComponentName());
       }
 
-      return message.color(TextColor.RED).decoration(TextDecoration.BOLD, true);
+      return message.color(NamedTextColor.RED).decoration(TextDecoration.BOLD, true);
     }
   }
 
@@ -193,7 +191,7 @@ public class Carried extends Spawned implements Missing {
 
     if (!message.equals(this.lastMessage)) {
       this.lastMessage = message;
-      this.carrier.showTitle(TextComponent.empty(), message, 0, 5, 35);
+      this.carrier.showTitle(Component.empty(), message, 0, 5, 35);
     }
 
     ScoreMatchModule smm = this.flag.getMatch().getModule(ScoreMatchModule.class);
@@ -233,12 +231,12 @@ public class Carried extends Spawned implements Missing {
 
   protected void captureFlag(Net net) {
     this.carrier.sendMessage(
-        TranslatableComponent.of("flag.capture.you", this.flag.getComponentName()));
+        Component.translatable("flag.capture.you", this.flag.getComponentName()));
 
     this.flag
         .getMatch()
         .sendMessage(
-            TranslatableComponent.of(
+            Component.translatable(
                 "flag.capture.player",
                 this.flag.getComponentName(),
                 this.carrier.getName(NameStyle.COLOR)));

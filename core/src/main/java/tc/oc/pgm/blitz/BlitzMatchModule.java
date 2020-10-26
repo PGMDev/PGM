@@ -3,9 +3,8 @@ package tc.oc.pgm.blitz;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -85,8 +84,9 @@ public class BlitzMatchModule implements MatchModule, Listener {
   public void handleJoin(final PlayerParticipationStartEvent event) {
     if (event.getMatch().isRunning()) {
       event.cancel(
-          TranslatableComponent.of(
-              "blitz.joinDenied", TranslatableComponent.of("gamemode.blitz.name", TextColor.AQUA)));
+          Component.translatable(
+              "blitz.joinDenied",
+              Component.translatable("gamemode.blitz.name", NamedTextColor.AQUA)));
     }
   }
 
@@ -97,14 +97,14 @@ public class BlitzMatchModule implements MatchModule, Listener {
       event
           .getPlayer()
           .showTitle(
-              TextComponent.empty(),
-              TranslatableComponent.of(
+              Component.empty(),
+              Component.translatable(
                   "blitz.livesRemaining",
-                  TextColor.RED,
-                  TranslatableComponent.of(
+                  NamedTextColor.RED,
+                  Component.translatable(
                       lives == 1 ? "misc.life" : "misc.lives",
-                      TextColor.AQUA,
-                      TextComponent.of(Integer.toString(lives)))),
+                      NamedTextColor.AQUA,
+                      Component.text(Integer.toString(lives)))),
               0,
               60,
               20);

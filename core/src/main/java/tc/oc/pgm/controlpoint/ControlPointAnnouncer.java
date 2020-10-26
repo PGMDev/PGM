@@ -1,7 +1,7 @@
 package tc.oc.pgm.controlpoint;
 
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -22,20 +22,21 @@ public class ControlPointAnnouncer implements Listener {
 
       if (event.getOldController() != null && event.getNewController() == null) {
         this.match.sendMessage(
-            TextComponent.builder()
+            Component.text()
                 .append(event.getOldController().getName())
-                .append(" lost ", TextColor.GRAY)
-                .append(event.getControlPoint().getName(), TextColor.WHITE)
+                .append(Component.text(" lost ", NamedTextColor.GRAY))
+                .append(Component.text(event.getControlPoint().getName(), NamedTextColor.WHITE))
                 .build());
 
       } else if (event.getNewController() != null) {
         this.match.sendMessage(
-            TextComponent.builder()
+            Component.text()
                 .append(event.getNewController().getName())
-                .append(" captured ", TextColor.GRAY)
+                .append(Component.text(" captured ", NamedTextColor.GRAY))
                 .append(
-                    event.getControlPoint().getName(),
-                    TextFormatter.convert(event.getNewController().getColor()))
+                    Component.text(
+                        event.getControlPoint().getName(),
+                        TextFormatter.convert(event.getNewController().getColor())))
                 .build());
       }
     }

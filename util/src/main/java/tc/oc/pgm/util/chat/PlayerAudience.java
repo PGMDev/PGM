@@ -1,7 +1,7 @@
 package tc.oc.pgm.util.chat;
 
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.github.paperspigot.Title;
