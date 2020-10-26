@@ -1,21 +1,31 @@
 package tc.oc.pgm.namedecorations;
 
+import java.util.UUID;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
+import net.kyori.text.format.TextColor;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.util.named.NameDecorationProvider;
 
-public interface NameDecorationRegistry extends Listener {
+/**
+ * The NameDecorationRegistry will take care of using a Provider, and applying the changes to the
+ * player's display name, as well as (implementation-dependant) provide a cache for prefixes &
+ * suffixes.
+ */
+public interface NameDecorationRegistry extends Listener, NameDecorationProvider {
 
   /**
    * Get the fully decorated name for this player
    *
    * @param player The player to decorate
-   * @param party The party this player is currently in
+   * @param partyColor The color of the party this player is currently in
    * @return The name, decorated
    */
-  String getDecoratedName(Player player, Party party);
+  String getDecoratedName(Player player, ChatColor partyColor);
 
   /**
    * Get the fully decorated name as a Component
@@ -23,19 +33,41 @@ public interface NameDecorationRegistry extends Listener {
    * <p>Note: Allows for prefix/suffix hover events
    *
    * @param player The player to decorate
-   * @param party The party this player is currently in
+   * @param partyColor The color of the party this player is currently in
    * @return The name, decorated, in component form
    */
-  default Component getDecoratedNameComponent(Player player, Party party) {
-    return TextComponent.of(getDecoratedName(player, party));
+  default Component getDecoratedNameComponent(Player player, ChatColor partyColor) {
+    return TextComponent.of(getDecoratedName(player, partyColor));
   }
 
   /**
-   * Set what name decoration provider this registry should use
+   * Set the name decoration provider this registry should use, if null, a NO-OP provider will be
+   * used
    *
    * @param provider The name decoration provider to use
    */
-  void setProvider(NameDecorationProvider provider);
+  void setProvider(@Nullable NameDecorationProvider provider);
 
+  @Nonnull
   NameDecorationProvider getProvider();
+
+  default String getPrefix(UUID uuid) {
+    return getProvider().getPrefix(uuid);
+  }
+
+  default String getSuffix(UUID uuid) {
+    return getProvider().getSuffix(uuid);
+  }
+
+  default TextColor getColor(UUID uuid) {
+    return getProvider().getColor(uuid);
+  }
+
+  default Component getPrefixComponent(UUID uuid) {
+    return getProvider().getPrefixComponent(uuid);
+  }
+
+  default Component getSuffixComponent(UUID uuid) {
+    return getProvider().getSuffixComponent(uuid);
+  }
 }

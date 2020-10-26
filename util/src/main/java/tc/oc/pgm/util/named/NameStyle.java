@@ -1,34 +1,43 @@
 package tc.oc.pgm.util.named;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 /**
  * The formatting properties for each different context in which names are displayed. This varies
  * only by context, and is independent of the viewer.
  */
 public enum NameStyle {
-  PLAIN(false, false, false, false, false), // No formatting
-  COLOR(true, false, false, true, false), // Color and teleport
-  FANCY(true, true, false, true, false), // Color, flair, and teleport
-  TAB(true, true, true, false, true), // Color, flair, death status, and vanish
-  LEGACY_TAB(true, true, false, false, true), // Color, flair, and vanish (crossed out)
-  VERBOSE(true, true, false, true, true), // Color, flair, teleport, and vanish
-  CONCISE(true, true, false, false, true); // Color, flair, and vanish (offline)
+  // No formatting
+  PLAIN(EnumSet.noneOf(Flag.class)),
+  // Simple formatting, just team color & teleport
+  COLOR(EnumSet.of(Flag.COLOR, Flag.TELEPORT)),
+  // Fancy formatting, flairs, color and click to teleport
+  FANCY(EnumSet.of(Flag.COLOR, Flag.FLAIR, Flag.TELEPORT, Flag.DISGUISE_OFFLINE)),
+  // Tab list format, flairs, color, death status, self, etc
+  TAB(EnumSet.of(Flag.COLOR, Flag.FLAIR, Flag.SELF, Flag.DISGUISE, Flag.DEATH)),
+  // Fancy plus allowing disguised status reveal
+  VERBOSE(EnumSet.of(Flag.COLOR, Flag.FLAIR, Flag.TELEPORT, Flag.DISGUISE)),
+  // Fancy without teleport
+  CONCISE(EnumSet.of(Flag.COLOR, Flag.FLAIR, Flag.TELEPORT));
 
-  public final boolean isColor;
-  public final boolean showPrefix;
-  public final boolean showDeath; // Grey out name if dead
-  public final boolean teleport; // Click name to teleport
-  public final boolean showVanish; // Whether to render name as online or not
+  private final Set<Flag> flags;
 
-  NameStyle(
-      boolean isColor,
-      boolean showPrefix,
-      boolean showDeath,
-      boolean teleport,
-      boolean showVanish) {
-    this.isColor = isColor;
-    this.showPrefix = showPrefix;
-    this.showDeath = showDeath;
-    this.teleport = teleport;
-    this.showVanish = showVanish;
+  NameStyle(Set<Flag> flags) {
+    this.flags = flags;
+  }
+
+  public boolean has(Flag flag) {
+    return flags.contains(flag);
+  }
+
+  public enum Flag {
+    COLOR, // Color
+    FLAIR, // Show flair (prefix & suffix)
+    SELF, // Bold if self
+    DISGUISE, // Strikethrough if disguised (vanish/nick)
+    DISGUISE_OFFLINE, // Appear offline if disguised (vanish/nick)
+    DEATH, // Grey out name if dead
+    TELEPORT // Click name to teleport
   }
 }

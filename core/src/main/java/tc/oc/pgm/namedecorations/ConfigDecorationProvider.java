@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.util.named.NameDecorationProvider;
 
 /**
  * A simple, config-based decoration provider, that will assign prefixes and suffixes based on

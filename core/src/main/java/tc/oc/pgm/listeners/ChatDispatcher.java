@@ -36,7 +36,6 @@ import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.ffa.Tribute;
-import tc.oc.pgm.namedecorations.NameDecorationRegistry;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
@@ -58,7 +57,6 @@ public class ChatDispatcher implements Listener {
   private final MatchManager manager;
   private final VanishManager vanish;
   private final OnlinePlayerMapAdapter<UUID> lastMessagedBy;
-  private final NameDecorationRegistry names;
 
   private final Map<UUID, String> muted;
 
@@ -88,7 +86,6 @@ public class ChatDispatcher implements Listener {
     this.manager = PGM.get().getMatchManager();
     this.vanish = PGM.get().getVanishManager();
     this.lastMessagedBy = new OnlinePlayerMapAdapter<>(PGM.get());
-    this.names = PGM.get().getNameDecorationRegistry();
     this.muted = Maps.newHashMap();
     PGM.get().getServer().getPluginManager().registerEvents(this, PGM.get());
   }
@@ -484,13 +481,13 @@ public class ChatDispatcher implements Listener {
     if (prefix == null)
       return TextComponent.builder()
           .append("<", TextColor.WHITE)
-          .append(names.getDecoratedNameComponent(player.getBukkit(), player.getParty()))
+          .append(player.getName(NameStyle.VERBOSE))
           .append(">: ", TextColor.WHITE)
           .append(msg)
           .build();
     return TextComponent.builder()
         .append(prefix)
-        .append(names.getDecoratedNameComponent(player.getBukkit(), player.getParty()))
+        .append(player.getName(NameStyle.VERBOSE))
         .append(": ", TextColor.WHITE)
         .append(msg)
         .build();
