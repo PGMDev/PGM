@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
@@ -30,7 +32,6 @@ import tc.oc.pgm.join.JoinResult;
 import tc.oc.pgm.match.QueuedParty;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
-import tc.oc.pgm.util.chat.Sound;
 
 @ListenerScope(MatchScope.LOADED)
 public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler {
@@ -201,7 +202,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     MatchPlayer kickMe = kickable.get(match.getRandom().nextInt(kickable.size()));
 
     kickMe.sendWarning(Component.translatable("leave.ok.priorityKick"));
-    kickMe.playSound(new Sound("mob.villager.hit"));
+    kickMe.playSound(Sound.sound(Key.key("mob.villager.hit"), Sound.Source.MASTER, 1, 1));
 
     match.setParty(kickMe, match.getDefaultParty());
 

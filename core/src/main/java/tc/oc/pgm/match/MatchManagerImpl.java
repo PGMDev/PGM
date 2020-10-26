@@ -2,7 +2,6 @@ package tc.oc.pgm.match;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Range;
 import java.lang.reflect.Field;
@@ -30,7 +29,6 @@ import tc.oc.pgm.api.match.event.MatchUnloadEvent;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.ClassLogger;
-import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
 
@@ -145,11 +143,6 @@ public class MatchManagerImpl implements MatchManager, Listener {
   @Override
   public Iterator<Match> getMatches() {
     return Iterators.unmodifiableIterator(matchById.values().iterator());
-  }
-
-  @Override
-  public Iterable<? extends Audience> getAudiences() {
-    return Iterables.unmodifiableIterable(matchById.values());
   }
 
   @Override

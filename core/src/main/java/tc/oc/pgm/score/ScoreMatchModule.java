@@ -12,6 +12,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -33,7 +35,6 @@ import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerParticipationStartEvent;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
-import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
@@ -283,7 +284,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
                 wholePoints == 1 ? "misc.point" : "misc.points",
                 Component.text(Integer.toString(wholePoints), NamedTextColor.DARK_AQUA)),
             player.getParty().getName()));
-    player.playSound(new Sound("random.levelup"));
+    player.playSound(Sound.sound(Key.key("random.levelup"), Sound.Source.MASTER, 1, 1));
   }
 
   public void incrementScore(UUID player, Competitor competitor, double amount) {

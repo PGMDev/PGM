@@ -48,12 +48,12 @@ import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.ViaUtils;
-import tc.oc.pgm.util.chat.PlayerAudience;
+import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.types.PlayerComponent;
 
-public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<MatchPlayer> {
+public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
 
   // TODO: Probably should be moved to a better location
   private static final int FROZEN_VEHICLE_ENTITY_ID = NMSHacks.allocateEntityId();
@@ -66,6 +66,7 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   private final Match match;
   private final UUID id;
   private final WeakReference<Player> bukkit;
+  private final Audience audience;
   private final AtomicReference<Party> party;
   private final AtomicReference<PlayerQuery> query;
   private final AtomicBoolean frozen;
@@ -82,6 +83,7 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
     this.match = match;
     this.id = player.getUniqueId();
     this.bukkit = new WeakReference<>(player);
+    this.audience = Audience.get(player);
     this.party = new AtomicReference<>(null);
     this.query = new AtomicReference<>(null);
     this.frozen = new AtomicBoolean(false);
@@ -426,8 +428,8 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   }
 
   @Override
-  public Player getAudience() {
-    return getBukkit();
+  public Audience audience() {
+    return audience;
   }
 
   @Override

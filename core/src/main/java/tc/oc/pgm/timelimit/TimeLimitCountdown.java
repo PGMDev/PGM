@@ -2,20 +2,21 @@ package tc.oc.pgm.timelimit;
 
 import java.time.Duration;
 import javax.annotation.Nullable;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.MatchCountdown;
-import tc.oc.pgm.util.chat.Sound;
 
 public class TimeLimitCountdown extends MatchCountdown {
 
   private static final Sound NOTICE_SOUND =
-      new Sound("note.pling", 1f, 1.19f); // Significant moments
+      Sound.sound(Key.key("note.pling"), Sound.Source.MASTER, 1f, 1.19f); // Significant moments
   private static final Sound IMMINENT_SOUND =
-      new Sound("random.click", 0.25f, 2f); // Last 30 seconds
+      Sound.sound(Key.key("random.click"), Sound.Source.MASTER, 0.25f, 2f); // Last 30 seconds
   private static final Sound CRESCENDO_SOUND =
-      new Sound("portal.trigger", 1f, 0.78f); // Last few seconds
+      Sound.sound(Key.key("portal.trigger"), Sound.Source.MASTER, 1f, 0.78f); // Last few seconds
 
   protected final TimeLimit timeLimit;
 

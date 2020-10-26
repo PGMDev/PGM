@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import javax.annotation.Nullable;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -58,7 +60,6 @@ import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -70,13 +71,19 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   public static final String DROPPED_SYMBOL = "\u2691"; // ⚑
   public static final String CARRIED_SYMBOL = "\u2794"; // ➔
 
-  public static final Sound PICKUP_SOUND_OWN = new Sound("mob.wither.idle", 0.7f, 1.2f);
-  public static final Sound DROP_SOUND_OWN = new Sound("mob.wither.hurt", 0.7f, 1);
-  public static final Sound RETURN_SOUND_OWN = new Sound("mob.zombie.unfect", 1.1f, 1.2f);
+  public static final Sound PICKUP_SOUND_OWN =
+      Sound.sound(Key.key("mob.wither.idle"), Sound.Source.MASTER, 0.7f, 1.2f);
+  public static final Sound DROP_SOUND_OWN =
+      Sound.sound(Key.key("mob.wither.hurt"), Sound.Source.MASTER, 0.7f, 1);
+  public static final Sound RETURN_SOUND_OWN =
+      Sound.sound(Key.key("mob.zombie.unfect"), Sound.Source.MASTER, 1.1f, 1.2f);
 
-  public static final Sound PICKUP_SOUND = new Sound("fireworks.largeBlast_far", 1f, 0.7f);
-  public static final Sound DROP_SOUND = new Sound("fireworks.twinkle_far", 1f, 1f);
-  public static final Sound RETURN_SOUND = new Sound("fireworks.twinkle_far", 1f, 1f);
+  public static final Sound PICKUP_SOUND =
+      Sound.sound(Key.key("fireworks.largeBlast_far"), Sound.Source.MASTER, 1f, 0.7f);
+  public static final Sound DROP_SOUND =
+      Sound.sound(Key.key("fireworks.twinkle_far"), Sound.Source.MASTER, 1f, 1f);
+  public static final Sound RETURN_SOUND =
+      Sound.sound(Key.key("fireworks.twinkle_far"), Sound.Source.MASTER, 1f, 1f);
 
   private final ImmutableSet<Net> nets;
   private final Location bannerLocation;

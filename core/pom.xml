@@ -46,7 +46,7 @@
                         <includes>
                             <include>tc.oc.pgm:*:*</include>
                             <include>org.jdom:jdom2:*</include>
-                            <include>net.kyori:text-*:*</include>
+                            <include>net.kyori:*:*</include>
                             <include>app.ashcon.intake:intake-*:*</include>
                             <include>org.eclipse.jgit:org.eclipse.jgit:*</include>
                             <include>org.slf4j:slf4j-api:*</include>

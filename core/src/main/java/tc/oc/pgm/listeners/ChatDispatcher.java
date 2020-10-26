@@ -14,6 +14,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -40,7 +42,6 @@ import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.pgm.util.chat.Audience;
-import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -66,8 +67,10 @@ public class ChatDispatcher implements Listener {
           .append(Component.text("] ", NamedTextColor.WHITE))
           .build();
 
-  private static final Sound DM_SOUND = new Sound("random.orb", 1f, 1.2f);
-  private static final Sound AC_SOUND = new Sound("random.orb", 1f, 0.7f);
+  private static final Sound DM_SOUND =
+      Sound.sound(Key.key("random.orb"), Sound.Source.MASTER, 1f, 1.2f);
+  private static final Sound AC_SOUND =
+      Sound.sound(Key.key("random.orb"), Sound.Source.MASTER, 1f, 0.7f);
 
   private static final String GLOBAL_SYMBOL = "!";
   private static final String DM_SYMBOL = "@";

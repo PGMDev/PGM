@@ -17,6 +17,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.event.HoverEvent.Action;
@@ -49,7 +51,6 @@ import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.chat.Audience;
-import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.PeriodFormats;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -58,8 +59,10 @@ import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ModerationCommand implements Listener {
 
-  private static final Sound WARN_SOUND = new Sound("mob.enderdragon.growl", 1f, 1f);
-  private static final Sound ALT_SOUND = new Sound("mob.wither.shoot", 0.8f, 1.3f);
+  private static final Sound WARN_SOUND =
+      Sound.sound(Key.key("mob.enderdragon.growl"), Sound.Source.MASTER, 1f, 1f);
+  private static final Sound ALT_SOUND =
+      Sound.sound(Key.key("mob.wither.shoot"), Sound.Source.MASTER, 0.8f, 1.3f);
 
   private static final Component WARN_SYMBOL = Component.text(" \u26a0 ", NamedTextColor.YELLOW);
   private static final Component BROADCAST_DIV = Component.text(" \u00BB ", NamedTextColor.GRAY);

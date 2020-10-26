@@ -216,7 +216,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     Future<?> task =
         match
             .getExecutor(MatchScope.LOADED)
-            .scheduleWithFixedDelay(() -> player.showHotbar(message), 0, 1, TimeUnit.SECONDS);
+            .scheduleWithFixedDelay(() -> player.sendActionBar(message), 0, 1, TimeUnit.SECONDS);
 
     match.getExecutor(MatchScope.LOADED).schedule(() -> task.cancel(true), 4, TimeUnit.SECONDS);
 
