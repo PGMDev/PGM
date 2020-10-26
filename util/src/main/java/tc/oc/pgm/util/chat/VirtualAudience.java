@@ -1,15 +1,18 @@
 package tc.oc.pgm.util.chat;
 
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.adapter.bukkit.TextAdapter;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.text.TextTranslations;
 
 /** An {@link Audience} that represents a virtual {@link CommandSender}. */
 @FunctionalInterface
 public interface VirtualAudience extends Audience {
+
+  // FIXME
+  BukkitAudiences PLATFORM = BukkitAudiences.create(BukkitUtils.getPlugin());
 
   /**
    * Get the {@link CommandSender} of this audience.
@@ -19,7 +22,7 @@ public interface VirtualAudience extends Audience {
   CommandSender getAudience();
 
   /**
-   * Render a {@link net.kyori.text.Component} to be relevant to this audience.
+   * Render a {@link net.kyori.adventure.text.Component} to be relevant to this audience.
    *
    * @param message A message.
    * @return A rendered message.
@@ -30,14 +33,14 @@ public interface VirtualAudience extends Audience {
 
   @Override
   default void sendMessage(Component message) {
-    TextAdapter.sendComponent(getAudience(), renderMessage(message));
+    PLATFORM.sender(getAudience()).sendMessage(renderMessage(message));
   }
 
   @Override
   default void sendWarning(Component message) {
     sendMessage(
-        TextComponent.of(" \u26a0 ", TextColor.YELLOW)
-            .append(message.colorIfAbsent(TextColor.RED)));
+        Component.text(" \u26a0 ", NamedTextColor.YELLOW)
+            .append(message.colorIfAbsent(NamedTextColor.RED)));
     playSound(new Sound("note.bass", 1f, 0.75f));
   }
 

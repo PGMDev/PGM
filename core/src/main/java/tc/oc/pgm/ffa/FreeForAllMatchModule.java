@@ -10,10 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -62,11 +60,11 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     @Override
     public Component getReason() {
       if (players == 1) {
-        return TranslatableComponent.of(
-            "join.wait.singular", TextComponent.of(String.valueOf(players), TextColor.AQUA));
+        return Component.translatable(
+            "join.wait.singular", Component.text(String.valueOf(players), NamedTextColor.AQUA));
       } else {
-        return TranslatableComponent.of(
-            "join.wait.plural", TextComponent.of(String.valueOf(players), TextColor.AQUA));
+        return Component.translatable(
+            "join.wait.plural", Component.text(String.valueOf(players), NamedTextColor.AQUA));
       }
     }
 
@@ -202,7 +200,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
 
     MatchPlayer kickMe = kickable.get(match.getRandom().nextInt(kickable.size()));
 
-    kickMe.sendWarning(TranslatableComponent.of("leave.ok.priorityKick"));
+    kickMe.sendWarning(Component.translatable("leave.ok.priorityKick"));
     kickMe.playSound(new Sound("mob.villager.hit"));
 
     match.setParty(kickMe, match.getDefaultParty());
@@ -240,11 +238,11 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
       GenericJoinResult genericResult = (GenericJoinResult) result;
       switch (genericResult.getStatus()) {
         case FULL:
-          joining.sendWarning(TranslatableComponent.of("join.err.full"));
+          joining.sendWarning(Component.translatable("join.err.full"));
           return true;
 
         case REDUNDANT:
-          joining.sendWarning(TranslatableComponent.of("join.err.alreadyJoined"));
+          joining.sendWarning(Component.translatable("join.err.alreadyJoined"));
           return true;
       }
     }
@@ -277,7 +275,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
 
   public boolean forceJoin(MatchPlayer joining) {
     if (joining.getParty() instanceof Tribute) {
-      joining.sendWarning(TranslatableComponent.of("join.err.alreadyJoined"));
+      joining.sendWarning(Component.translatable("join.err.alreadyJoined"));
     }
 
     return match.setParty(joining, getTribute(joining));
@@ -286,7 +284,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPartyChange(PlayerPartyChangeEvent event) {
     if (event.getNewParty() instanceof Tribute) {
-      event.getPlayer().sendMessage(TranslatableComponent.of("join.ok"));
+      event.getPlayer().sendMessage(Component.translatable("join.ok"));
     }
     updateReadiness();
   }

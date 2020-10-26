@@ -5,21 +5,21 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.time.Duration;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.util.chat.Sound;
 
 public class Broadcast implements Comparable<Broadcast> {
   public enum Type {
     TIP(
-        TranslatableComponent.of("misc.tip", TextColor.BLUE),
+        Component.translatable("misc.tip", NamedTextColor.BLUE),
         new Sound("mob.endermen.idle", 1, 1.2f)),
 
-    ALERT(TranslatableComponent.of("misc.alert", TextColor.YELLOW), new Sound("note.pling", 1, 2f));
+    ALERT(
+        Component.translatable("misc.alert", NamedTextColor.YELLOW),
+        new Sound("note.pling", 1, 2f));
 
     final Component prefix;
     final Sound sound;
@@ -30,16 +30,16 @@ public class Broadcast implements Comparable<Broadcast> {
     }
 
     public Component format(Component message) {
-      return TextComponent.builder()
-          .append("[")
+      return Component.text()
+          .append(Component.text("["))
           .append(prefix)
-          .append("] ")
+          .append(Component.text("] "))
           .append(
               message
-                  .color(TextColor.AQUA)
+                  .color(NamedTextColor.AQUA)
                   .decoration(TextDecoration.BOLD, false)
                   .decoration(TextDecoration.ITALIC, true))
-          .colorIfAbsent(TextColor.GRAY)
+          .colorIfAbsent(NamedTextColor.GRAY)
           .decoration(TextDecoration.BOLD, true)
           .build();
     }

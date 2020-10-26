@@ -1,8 +1,8 @@
 package tc.oc.pgm.command;
 
 import app.ashcon.intake.Command;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.restart.CancelRestartEvent;
@@ -22,7 +22,7 @@ public final class CancelCommand {
     if (RestartManager.isQueued()) {
       match.callEvent(new CancelRestartEvent());
       audience.sendMessage(
-          TranslatableComponent.of("admin.cancelRestart.restartUnqueued", TextColor.RED));
+          Component.translatable("admin.cancelRestart.restartUnqueued", NamedTextColor.RED));
       return;
     }
 
@@ -34,6 +34,6 @@ public final class CancelCommand {
 
     match.getCountdown().cancelAll();
     match.needModule(StartMatchModule.class).setAutoStart(false);
-    audience.sendMessage(TranslatableComponent.of("admin.cancelCountdowns", TextColor.GREEN));
+    audience.sendMessage(Component.translatable("admin.cancelCountdowns", NamedTextColor.GREEN));
   }
 }

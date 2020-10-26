@@ -2,9 +2,9 @@ package tc.oc.pgm.observers;
 
 import com.google.common.collect.Lists;
 import java.util.List;
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.ClickType;
@@ -12,6 +12,8 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.menu.InventoryMenu;
 import tc.oc.pgm.menu.InventoryMenuItem;
 import tc.oc.pgm.util.text.TextTranslations;
+
+import static net.kyori.adventure.text.Component.translatable;
 
 public class ObserverToolsInventoryMenuItem implements InventoryMenuItem {
 
@@ -23,7 +25,7 @@ public class ObserverToolsInventoryMenuItem implements InventoryMenuItem {
 
   @Override
   public Component getName() {
-    return TranslatableComponent.of("setting.displayName");
+    return translatable("setting.displayName");
   }
 
   @Override
@@ -35,7 +37,7 @@ public class ObserverToolsInventoryMenuItem implements InventoryMenuItem {
   public List<String> getLore(MatchPlayer player) {
     return Lists.newArrayList(
         TextTranslations.translateLegacy(
-            TranslatableComponent.of("setting.lore", TextColor.GRAY), player.getBukkit()));
+                translatable("setting.lore", NamedTextColor.GRAY), player.getBukkit()));
   }
 
   @Override

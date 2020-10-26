@@ -1,6 +1,6 @@
 package tc.oc.pgm.util.chat;
 
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 
 /** An {@link Audience} with multiple members. */
 @FunctionalInterface

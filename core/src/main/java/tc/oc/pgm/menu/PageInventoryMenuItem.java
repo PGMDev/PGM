@@ -1,12 +1,14 @@
 package tc.oc.pgm.menu;
 
 import java.util.List;
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
+
+import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.ClickType;
 import tc.oc.pgm.api.player.MatchPlayer;
+
+import static net.kyori.adventure.text.Component.translatable;
 
 public class PageInventoryMenuItem implements InventoryMenuItem {
   private final List<InventoryMenuItem> inventoryItems;
@@ -27,7 +29,7 @@ public class PageInventoryMenuItem implements InventoryMenuItem {
 
   @Override
   public Component getName() {
-    return TranslatableComponent.of(next ? "misc.nextPage" : "misc.previousPage");
+    return translatable(next ? "misc.nextPage" : "misc.previousPage");
   }
 
   @Override

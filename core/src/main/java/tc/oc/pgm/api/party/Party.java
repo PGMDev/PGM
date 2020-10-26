@@ -3,7 +3,7 @@ package tc.oc.pgm.api.party;
 import java.util.Collection;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import tc.oc.pgm.api.filter.query.PartyQuery;

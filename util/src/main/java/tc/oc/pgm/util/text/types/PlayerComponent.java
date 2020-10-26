@@ -2,14 +2,14 @@ package tc.oc.pgm.util.text.types;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.event.ClickEvent;
-import net.kyori.text.event.HoverEvent;
-import net.kyori.text.event.HoverEvent.Action;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.event.HoverEvent.Action;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -21,9 +21,9 @@ import tc.oc.pgm.util.named.NameStyle;
 /** PlayerComponent is used to format player names in a consistent manner with optional styling */
 public interface PlayerComponent {
 
-  TextColor OFFLINE_COLOR = TextColor.DARK_AQUA;
+  TextColor OFFLINE_COLOR = NamedTextColor.DARK_AQUA;
   static Component UNKNOWN =
-      TranslatableComponent.of("misc.unknown", OFFLINE_COLOR, TextDecoration.ITALIC);
+      Component.translatable("misc.unknown", OFFLINE_COLOR, TextDecoration.ITALIC);
 
   static Component of(UUID playerId, NameStyle style) {
     Player player = Bukkit.getPlayer(playerId);
@@ -33,7 +33,7 @@ public interface PlayerComponent {
   static Component of(CommandSender sender, NameStyle style) {
     return sender instanceof Player
         ? of((Player) sender, style)
-        : TranslatableComponent.of("misc.console", OFFLINE_COLOR);
+        : Component.translatable("misc.console", OFFLINE_COLOR);
   }
 
   static Component of(Player player, NameStyle style) {
@@ -64,15 +64,16 @@ public interface PlayerComponent {
 
     UUID uuid = !isOffline ? player.getUniqueId() : null;
 
-    TextComponent.Builder builder = TextComponent.builder();
+    TextComponent.Builder builder = Component.text();
     if (!isOffline && style.has(NameStyle.Flag.FLAIR)) {
       builder.append(provider.getPrefixComponent(uuid));
     }
 
-    TextComponent.Builder name = TextComponent.builder(player != null ? player.getName() : defName);
+    TextComponent.Builder name =
+        Component.text().content(player != null ? player.getName() : defName);
 
     if (!isOffline && style.has(NameStyle.Flag.DEATH) && isDead(player)) {
-      name.color(TextColor.DARK_GRAY);
+      name.color(NamedTextColor.DARK_GRAY);
     } else if (style.has(NameStyle.Flag.COLOR)) {
       name.color(isOffline ? OFFLINE_COLOR : provider.getColor(uuid));
     }
@@ -84,9 +85,9 @@ public interface PlayerComponent {
     }
     if (!isOffline && style.has(NameStyle.Flag.TELEPORT)) {
       name.hoverEvent(
-              HoverEvent.of(
+              HoverEvent.hoverEvent(
                   Action.SHOW_TEXT,
-                  TranslatableComponent.of("misc.teleportTo", TextColor.GRAY, name.build())))
+                  Component.translatable("misc.teleportTo", NamedTextColor.GRAY, name.build())))
           .clickEvent(ClickEvent.runCommand("/tp " + player.getName()));
     }
 

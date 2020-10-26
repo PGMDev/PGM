@@ -13,13 +13,12 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.event.ClickEvent;
-import net.kyori.text.event.HoverEvent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -122,19 +121,21 @@ public class MapPoll {
         winner.getStyledName(MapNameStyle.COLOR).decoration(TextDecoration.BOLD, true);
 
     viewer.showTitle(
-        top ? mapName : TextComponent.empty(), top ? TextComponent.empty() : mapName, 5, 60, 5);
+        top ? mapName : Component.empty(), top ? Component.empty() : mapName, 5, 60, 5);
   }
 
   private Component getMapChatComponent(MatchPlayer viewer, MapInfo map, boolean winner) {
     boolean voted = votes.get(map).contains(viewer.getId());
 
-    return TextComponent.builder()
-        .append("[")
-        .append(voted ? SYMBOL_VOTED : SYMBOL_IGNORE, voted ? TextColor.GREEN : TextColor.DARK_RED)
+    return Component.text()
+        .append(Component.text("["))
         .append(
-            TextComponent.of(" ").decoration(TextDecoration.BOLD, !voted)) // Fix 1px symbol diff
-        .append("" + countVotes(votes.get(map)), TextColor.YELLOW)
-        .append("] ")
+            Component.text(
+                voted ? SYMBOL_VOTED : SYMBOL_IGNORE,
+                voted ? NamedTextColor.GREEN : NamedTextColor.DARK_RED))
+        .append(Component.text(" ").decoration(TextDecoration.BOLD, !voted)) // Fix 1px symbol diff
+        .append(Component.text("" + countVotes(votes.get(map)), NamedTextColor.YELLOW))
+        .append(Component.text("] "))
         .append(
             map.getStyledName(
                 winner ? MapNameStyle.HIGHLIGHT_WITH_AUTHORS : MapNameStyle.COLOR_WITH_AUTHORS))
@@ -144,17 +145,17 @@ public class MapPoll {
   public void sendBook(MatchPlayer viewer, boolean forceOpen) {
     if (viewer.isLegacy()) {
       // Must use separate sendMessages, since 1.7 clients do not like the newline character
-      viewer.sendMessage(TranslatableComponent.of("vote.header.map", TextColor.DARK_PURPLE));
+      viewer.sendMessage(Component.translatable("vote.header.map", NamedTextColor.DARK_PURPLE));
       for (MapInfo pgmMap : votes.keySet()) viewer.sendMessage(getMapBookComponent(viewer, pgmMap));
       return;
     }
 
-    TextComponent.Builder content = TextComponent.builder();
-    content.append(TranslatableComponent.of("vote.header.map", TextColor.DARK_PURPLE));
-    content.append(TextComponent.newline());
+    TextComponent.Builder content = Component.text();
+    content.append(Component.translatable("vote.header.map", NamedTextColor.DARK_PURPLE));
+    content.append(Component.newline());
 
     for (MapInfo pgmMap : votes.keySet())
-      content.append(TextComponent.newline()).append(getMapBookComponent(viewer, pgmMap));
+      content.append(Component.newline()).append(getMapBookComponent(viewer, pgmMap));
 
     ItemStack is = new ItemStack(Material.WRITTEN_BOOK);
     BookMeta meta = (BookMeta) is.getItemMeta();
@@ -182,17 +183,18 @@ public class MapPoll {
   private Component getMapBookComponent(MatchPlayer viewer, MapInfo map) {
     boolean voted = votes.get(map).contains(viewer.getId());
 
-    return TextComponent.builder()
+    return Component.text()
         .append(
-            voted ? SYMBOL_VOTED : SYMBOL_IGNORE, voted ? TextColor.DARK_GREEN : TextColor.DARK_RED)
-        .append(
-            TextComponent.of(" ").decoration(TextDecoration.BOLD, !voted)) // Fix 1px symbol diff
-        .append(map.getName(), TextColor.GOLD, TextDecoration.BOLD)
+            Component.text(
+                voted ? SYMBOL_VOTED : SYMBOL_IGNORE,
+                voted ? NamedTextColor.DARK_GREEN : NamedTextColor.DARK_RED))
+        .append(Component.text(" ").decoration(TextDecoration.BOLD, !voted)) // Fix 1px symbol diff
+        .append(Component.text(map.getName(), NamedTextColor.GOLD, TextDecoration.BOLD))
         .hoverEvent(
             HoverEvent.showText(
-                TextComponent.of(
+                Component.text(
                     map.getTags().stream().map(MapTag::toString).collect(Collectors.joining(" ")),
-                    TextColor.YELLOW)))
+                    NamedTextColor.YELLOW)))
         .clickEvent(ClickEvent.runCommand("/votenext -o " + map.getName()))
         .build();
   }

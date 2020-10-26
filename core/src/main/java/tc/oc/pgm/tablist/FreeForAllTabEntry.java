@@ -1,10 +1,8 @@
 package tc.oc.pgm.tablist;
 
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.md_5.bungee.api.chat.BaseComponent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.util.tablist.DynamicTabEntry;
@@ -22,14 +20,16 @@ public class FreeForAllTabEntry extends DynamicTabEntry {
   @Override
   public BaseComponent[] getContent(TabView view) {
     Component content =
-        TextComponent.builder()
-            .append(String.valueOf(match.getParticipants().size()), TextColor.WHITE)
-            .append("/", TextColor.DARK_GRAY)
-            .append(String.valueOf(match.getMaxPlayers()), TextColor.GRAY)
-            .append(" ")
+        Component.text()
             .append(
-                TranslatableComponent.of(
-                    "match.info.players", TextColor.YELLOW, TextDecoration.BOLD))
+                Component.text(
+                    String.valueOf(match.getParticipants().size()), NamedTextColor.WHITE))
+            .append(Component.text("/", NamedTextColor.DARK_GRAY))
+            .append(Component.text(String.valueOf(match.getMaxPlayers()), NamedTextColor.GRAY))
+            .append(Component.space())
+            .append(
+                Component.translatable(
+                    "match.info.players", NamedTextColor.YELLOW, TextDecoration.BOLD))
             .build();
     return TextTranslations.toBaseComponentArray(content, view.getViewer());
   }

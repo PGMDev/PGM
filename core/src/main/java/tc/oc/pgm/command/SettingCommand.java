@@ -4,9 +4,8 @@ import app.ashcon.intake.Command;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
@@ -44,13 +43,13 @@ public final class SettingCommand {
 
     sendCurrentSetting(player, key, value);
     player.sendMessage(
-        TranslatableComponent.of(
+        Component.translatable(
             "setting.options",
             TextFormatter.list(
                 Stream.of(key.getPossibleValues())
-                    .map(option -> TextComponent.of(option.getName(), TextColor.GRAY))
+                    .map(option -> Component.text(option.getName(), NamedTextColor.GRAY))
                     .collect(Collectors.toList()),
-                TextColor.WHITE)));
+                NamedTextColor.WHITE)));
   }
 
   @Command(
@@ -75,20 +74,20 @@ public final class SettingCommand {
       sendCurrentSetting(player, key, old);
     } else {
       player.sendMessage(
-          TranslatableComponent.of(
+          Component.translatable(
               "setting.set",
-              TextComponent.of(key.getName()),
-              TextComponent.of(old.getName(), TextColor.GRAY),
-              TextComponent.of(value.getName(), TextColor.GREEN)));
+              Component.text(key.getName()),
+              Component.text(old.getName(), NamedTextColor.GRAY),
+              Component.text(value.getName(), NamedTextColor.GREEN)));
       key.update(player);
     }
   }
 
   private void sendCurrentSetting(MatchPlayer player, SettingKey key, SettingValue value) {
     player.sendMessage(
-        TranslatableComponent.of(
+        Component.translatable(
             "setting.get",
-            TextComponent.of(key.getName()),
-            TextComponent.of(value.getName(), TextColor.GREEN)));
+            Component.text(key.getName()),
+            Component.text(value.getName(), NamedTextColor.GREEN)));
   }
 }

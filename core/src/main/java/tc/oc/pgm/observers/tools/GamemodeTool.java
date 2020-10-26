@@ -2,12 +2,10 @@ package tc.oc.pgm.observers.tools;
 
 import com.google.common.collect.Lists;
 import java.util.List;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.event.ClickEvent;
-import net.kyori.text.event.HoverEvent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -18,11 +16,13 @@ import tc.oc.pgm.menu.InventoryMenu;
 import tc.oc.pgm.menu.InventoryMenuItem;
 import tc.oc.pgm.util.text.TextTranslations;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 public class GamemodeTool implements InventoryMenuItem {
 
   @Override
   public Component getName() {
-    return TranslatableComponent.of("setting.gamemode");
+    return translatable("setting.gamemode");
   }
 
   @Override
@@ -33,9 +33,9 @@ public class GamemodeTool implements InventoryMenuItem {
   @Override
   public List<String> getLore(MatchPlayer player) {
     Component gamemode =
-        TranslatableComponent.of(
-            "gameMode." + player.getGameMode().name().toLowerCase(), TextColor.AQUA);
-    Component lore = TranslatableComponent.of("setting.gamemode.lore", TextColor.GRAY, gamemode);
+        translatable(
+            "gameMode." + player.getGameMode().name().toLowerCase(), NamedTextColor.AQUA);
+    Component lore = translatable("setting.gamemode.lore", NamedTextColor.GRAY, gamemode);
     return Lists.newArrayList(TextTranslations.translateBaseComponent(lore, player.getBukkit()));
   }
 
@@ -68,12 +68,12 @@ public class GamemodeTool implements InventoryMenuItem {
 
   private Component getToggleMessage() {
     Component command =
-        TextComponent.of("/tools", TextColor.AQUA)
+        Component.text("/tools", NamedTextColor.AQUA)
             .hoverEvent(
                 HoverEvent.showText(
-                    TranslatableComponent.of("setting.gamemode.hover", TextColor.GRAY)))
+                    translatable("setting.gamemode.hover", NamedTextColor.GRAY)))
             .clickEvent(ClickEvent.runCommand("/tools"));
-    return TranslatableComponent.of("setting.gamemode.warning", TextColor.GRAY, command);
+    return translatable("setting.gamemode.warning", NamedTextColor.GRAY, command);
   }
 
   private GameMode getOppositeMode(GameMode mode) {

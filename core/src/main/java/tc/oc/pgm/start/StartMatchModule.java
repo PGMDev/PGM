@@ -9,8 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -137,7 +137,7 @@ public class StartMatchModule implements MatchModule, Listener {
     if (unreadyReasons.isEmpty()) {
       return null;
     } else {
-      return unreadyReasons.iterator().next().getReason().color(TextColor.RED);
+      return unreadyReasons.iterator().next().getReason().color(NamedTextColor.RED);
     }
   }
 

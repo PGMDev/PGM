@@ -5,10 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
@@ -28,7 +26,7 @@ public final class ListCommand {
   public void list(CommandSender sender, Audience viewer, Match match) {
     TeamMatchModule tmm = match.getModule(TeamMatchModule.class);
     if (tmm != null) {
-      viewer.sendMessage(TranslatableComponent.of("command.list.teams", TextColor.GRAY));
+      viewer.sendMessage(Component.translatable("command.list.teams", NamedTextColor.GRAY));
       tmm.getTeams()
           .forEach(
               team ->
@@ -38,7 +36,7 @@ public final class ListCommand {
       sendTeamInfo(
           viewer,
           sender,
-          TranslatableComponent.of("command.list.participants"),
+          Component.translatable("command.list.participants"),
           match.getParticipants(),
           match.getMaxPlayers());
     }
@@ -52,11 +50,11 @@ public final class ListCommand {
 
     // Total count
     viewer.sendMessage(
-        TranslatableComponent.of(
+        Component.translatable(
             "command.list.online",
-            TextColor.GRAY,
-            TextComponent.of(
-                Integer.toString(getSize(match.getPlayers(), false)), TextColor.GREEN)));
+            NamedTextColor.GRAY,
+            Component.text(
+                Integer.toString(getSize(match.getPlayers(), false)), NamedTextColor.GREEN)));
   }
 
   private void sendTeamInfo(
@@ -66,18 +64,18 @@ public final class ListCommand {
       Collection<MatchPlayer> players,
       int max) {
     Component teamLine =
-        TextComponent.builder()
+        Component.text()
             .append(teamName)
-            .append(": ", TextColor.GRAY)
-            .append(Integer.toString(getSize(players, false)))
+            .append(Component.text(": ", NamedTextColor.GRAY))
+            .append(Component.text(Integer.toString(getSize(players, false))))
             .append(
                 max != -1
-                    ? TextComponent.of("/" + Integer.toString(max), TextColor.GRAY)
-                    : TextComponent.empty())
+                    ? Component.text("/" + Integer.toString(max), NamedTextColor.GRAY)
+                    : Component.empty())
             .append(
                 getSize(players, true) > 0 && sender.hasPermission(Permissions.STAFF)
                     ? formatVanishCount(players)
-                    : TextComponent.empty())
+                    : Component.empty())
             .build();
     viewer.sendMessage(teamLine);
     if (!players.isEmpty()) {
@@ -92,15 +90,15 @@ public final class ListCommand {
             .map(mp -> mp.getName(NameStyle.VERBOSE))
             .collect(Collectors.toList());
 
-    return TextFormatter.list(names, TextColor.GRAY);
+    return TextFormatter.list(names, NamedTextColor.GRAY);
   }
 
   private Component formatVanishCount(Collection<MatchPlayer> players) {
-    return TextComponent.builder()
-        .append(" (")
-        .append(Integer.toString(getSize(players, true)), TextColor.WHITE)
-        .append(")")
-        .color(TextColor.GRAY)
+    return Component.text()
+        .append(Component.text(" ("))
+        .append(Component.text(Integer.toString(getSize(players, true)), NamedTextColor.WHITE))
+        .append(Component.text(")"))
+        .color(NamedTextColor.GRAY)
         .build();
   }
 

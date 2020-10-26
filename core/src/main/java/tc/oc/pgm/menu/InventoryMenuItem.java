@@ -1,7 +1,7 @@
 package tc.oc.pgm.menu;
 
 import java.util.List;
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.ClickType;

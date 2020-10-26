@@ -1,7 +1,7 @@
 package tc.oc.pgm.start;
 
 import java.time.Duration;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchPhase;
 import tc.oc.pgm.countdowns.MatchCountdown;
@@ -34,7 +34,7 @@ public abstract class PreMatchCountdown extends MatchCountdown {
   public void onCancel(Duration remaining, Duration total) {
     super.onCancel(remaining, total);
     getMatch().setPhase(MatchPhase.IDLE);
-    getMatch().sendWarning(TranslatableComponent.of("broadcast.startCancel"));
+    getMatch().sendWarning(Component.translatable("broadcast.startCancel"));
   }
 
   @Override

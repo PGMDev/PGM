@@ -1,9 +1,8 @@
 package tc.oc.pgm.spawns.states;
 
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -100,18 +99,18 @@ public abstract class Spawning extends Participating {
   public void sendMessage() {}
 
   public void updateTitle() {
-    player.showTitle(getTitle(), getSubtitle().color(TextColor.GREEN), 0, 3, 3);
+    player.showTitle(getTitle(), getSubtitle().color(NamedTextColor.GREEN), 0, 3, 3);
   }
 
   protected abstract Component getTitle();
 
   protected Component getSubtitle() {
     if (!spawnRequested) {
-      return TranslatableComponent.of("death.respawn.unconfirmed");
+      return Component.translatable("death.respawn.unconfirmed");
     } else if (options.message != null) {
       return options.message;
     } else {
-      return TranslatableComponent.of("death.respawn.confirmed.waiting");
+      return Component.translatable("death.respawn.confirmed.waiting");
     }
   }
 }

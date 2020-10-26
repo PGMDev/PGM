@@ -1,9 +1,9 @@
 package tc.oc.pgm.util.named;
 
 import java.util.UUID;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 
 /** This interface is intended to return what prefix and suffix a player should have */
 public interface NameDecorationProvider {
@@ -17,15 +17,15 @@ public interface NameDecorationProvider {
   String getSuffix(UUID uuid);
 
   default TextColor getColor(UUID uuid) {
-    return TextColor.WHITE;
+    return NamedTextColor.WHITE;
   }
 
   default Component getPrefixComponent(UUID uuid) {
-    return TextComponent.of(getPrefix(uuid));
+    return Component.text(getPrefix(uuid));
   }
 
   default Component getSuffixComponent(UUID uuid) {
-    return TextComponent.of(getSuffix(uuid));
+    return Component.text(getSuffix(uuid));
   }
 
   /** A No-op default decoration provider, used in the absence of a decoration provider */
