@@ -4,7 +4,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import java.util.UUID;
-import org.bukkit.Bukkit;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.map.MapActivity;
 import tc.oc.pgm.api.player.Username;
@@ -32,7 +31,6 @@ public class CacheDatastore implements Datastore {
                 });
     this.settings =
         CacheBuilder.newBuilder()
-            .maximumSize(Math.min(100, Bukkit.getMaxPlayers()))
             .build(
                 new CacheLoader<UUID, Settings>() {
                   @Override
