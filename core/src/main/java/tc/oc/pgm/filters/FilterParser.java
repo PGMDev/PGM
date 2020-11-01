@@ -18,6 +18,9 @@ import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.classes.ClassModule;
 import tc.oc.pgm.classes.PlayerClass;
 import tc.oc.pgm.features.XMLFeatureReference;
+import tc.oc.pgm.filters.modifier.location.LocalLocationQueryModifier;
+import tc.oc.pgm.filters.modifier.location.LocationQueryModifier;
+import tc.oc.pgm.filters.modifier.location.WorldLocationQueryModifier;
 import tc.oc.pgm.flag.FlagDefinition;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.state.Captured;
@@ -458,11 +461,11 @@ public abstract class FilterParser {
 
   @MethodParser("offset")
   public LocationQueryModifier parseOffsetFilter(Element el) throws InvalidXMLException {
-    String relative = el.getAttributeValue("location");
+    String value = el.getAttributeValue("location");
     // Check vector format
-    XMLUtils.parseVector(new Node(el), relative.replaceAll("[\\^~]", ""));
+    XMLUtils.parseVector(new Node(el), value.replaceAll("[\\^~]", ""));
 
-    String[] coords = relative.split("\\s*,\\s*");
+    String[] coords = value.split("\\s*,\\s*");
 
     Boolean local = null;
     for (String coord : coords) {
@@ -474,6 +477,25 @@ public abstract class FilterParser {
         throw new InvalidXMLException("Cannot mix world & local coordinates", el);
     }
 
-    return new LocationQueryModifier(parseChild(el), coords, local);
+    if (local == null) throw new InvalidXMLException("No coordinates provided", el);
+
+    if (local) {
+      double[] coordinates = new double[3];
+      coordinates[0] = Double.parseDouble(coords[0].substring(1));
+      coordinates[1] = Double.parseDouble(coords[1].substring(1));
+      coordinates[2] = Double.parseDouble(coords[2].substring(1));
+      return new LocalLocationQueryModifier(parseChild(el), coordinates);
+    } else {
+      boolean[] relative = new boolean[3];
+      double[] coordinates = new double[3];
+      for (int i = 0; i < coords.length; i++) {
+        String coord = coords[i];
+        boolean isRelative = coord.startsWith("~");
+        relative[i] = isRelative;
+        coordinates[i] = Double.parseDouble(isRelative ? coord.substring(1) : coord);
+      }
+
+      return new WorldLocationQueryModifier(parseChild(el), coordinates, relative);
+    }
   }
 }
