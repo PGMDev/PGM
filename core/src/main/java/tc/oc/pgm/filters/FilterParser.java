@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -15,6 +16,7 @@ import org.jdom2.Attribute;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.classes.ClassModule;
 import tc.oc.pgm.classes.PlayerClass;
@@ -456,6 +458,32 @@ public abstract class FilterParser {
   @MethodParser("score")
   public ScoreFilter parseScoreFilter(Element el) throws InvalidXMLException {
     return new ScoreFilter(XMLUtils.parseNumericRange(new Node(el), Integer.class));
+  }
+
+  @MethodParser("match-state")
+  public MatchStateFilter parseMatchStateFilter(Element el) throws InvalidXMLException {
+    String state = el.getValue();
+
+    Predicate<Match> matchPredicate = null;
+
+    switch (state) {
+      case "running":
+      case "started":
+        matchPredicate = Match::isRunning;
+        break;
+      case "finished":
+        matchPredicate = Match::isFinished;
+        break;
+      case "loaded":
+        matchPredicate = Match::isLoaded;
+        break;
+      case "before":
+        matchPredicate = match -> !match.isRunning() && !match.isFinished();
+    }
+    if (matchPredicate == null)
+      throw new InvalidXMLException("Invalid or no match state found", el);
+
+    return new MatchStateFilter(matchPredicate);
   }
 
   // Methods for parsing QueryModifiers
