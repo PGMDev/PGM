@@ -17,6 +17,7 @@ import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchPhase;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.classes.ClassModule;
 import tc.oc.pgm.classes.PlayerClass;
@@ -461,24 +462,46 @@ public abstract class FilterParser {
   }
 
   @MethodParser("match-state")
-  public MatchStateFilter parseMatchStateFilter(Element el) throws InvalidXMLException {
-    String state = el.getValue();
+  public MatchStateFilter parseMatchState(Element el) throws InvalidXMLException {
+    return parseMatchStateFilter(el.getValue(), el);
+  }
+
+  @MethodParser("match-started")
+  public MatchStateFilter parseMatchStarted(Element el) throws InvalidXMLException {
+    return parseMatchStateFilter("started", el);
+  }
+
+  @MethodParser("match-running")
+  public MatchStateFilter parseMatchRunning(Element el) throws InvalidXMLException {
+    return parseMatchStateFilter("running", el);
+  }
+
+  @MethodParser("match-finished")
+  public MatchStateFilter parseMatchFinished(Element el) throws InvalidXMLException {
+    return parseMatchStateFilter("finished", el);
+  }
+
+  public MatchStateFilter parseMatchStateFilter(String matchState, Element el)
+      throws InvalidXMLException {
 
     Predicate<Match> matchPredicate = null;
 
-    switch (state) {
+    switch (matchState) {
       case "running":
-      case "started":
-        matchPredicate = Match::isRunning;
+        matchPredicate = m -> m.getPhase() == MatchPhase.RUNNING;
         break;
       case "finished":
-        matchPredicate = Match::isFinished;
+        matchPredicate = m -> m.getPhase() == MatchPhase.FINISHED;
         break;
-      case "loaded":
-        matchPredicate = Match::isLoaded;
+      case "starting":
+        matchPredicate = m -> m.getPhase() == MatchPhase.STARTING;
         break;
       case "before":
-        matchPredicate = match -> !match.isRunning() && !match.isFinished();
+        matchPredicate = m -> m.getPhase() == MatchPhase.IDLE;
+        break;
+      case "started":
+        matchPredicate =
+            m -> m.getPhase() == MatchPhase.RUNNING || m.getPhase() == MatchPhase.FINISHED;
     }
     if (matchPredicate == null)
       throw new InvalidXMLException("Invalid or no match state found", el);
