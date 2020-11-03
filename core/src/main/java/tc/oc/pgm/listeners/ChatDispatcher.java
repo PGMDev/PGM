@@ -477,7 +477,7 @@ public class ChatDispatcher implements Listener {
                   });
               mp.sendMessage(formatted);
             });
-    PGM.get().getPGMAudiences().getConsoleAudience().sendMessage(formatted);
+    PGM.get().getPGMAudiences().console().sendMessage(formatted);
   }
 
   private static boolean canPlaySound(MatchPlayer viewer) {

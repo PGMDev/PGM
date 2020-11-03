@@ -188,7 +188,7 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
     if (!isVisible()) return;
 
     Component message = getTouchMessage(toucher, false);
-    PGM.get().getPGMAudiences().getConsoleAudience().sendMessage(message);
+    PGM.get().getPGMAudiences().console().sendMessage(message);
 
     if (!showEnemyTouches()) {
       message = Component.text().append(toucher.getParty().getChatPrefix()).append(message).build();

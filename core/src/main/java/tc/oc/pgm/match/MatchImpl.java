@@ -308,7 +308,7 @@ public class MatchImpl implements Match {
   @Override
   public @NonNull Iterable<? extends net.kyori.adventure.audience.Audience> audiences() {
     final Collection<Audience> audiences = new ArrayList<>(getPlayers());
-    audiences.add(PGM.get().getPGMAudiences().getConsoleAudience());
+    audiences.add(PGM.get().getPGMAudiences().console());
     return audiences;
   }
 

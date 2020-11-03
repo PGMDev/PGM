@@ -6,7 +6,6 @@ import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
 public class PGMAudiences {
@@ -17,8 +16,8 @@ public class PGMAudiences {
     this.PROVIDER = BukkitAudiences.create(plugin);
   }
 
-  public Audience getConsoleAudience() {
-    return PROVIDER.sender(Bukkit.getConsoleSender());
+  public final Audience console() {
+    return PROVIDER.console();
   }
 
   /** Sends a warning message to an audience */
