@@ -1,5 +1,8 @@
 package tc.oc.pgm.rotation;
 
+import static net.kyori.adventure.title.Title.title;
+import static tc.oc.pgm.util.TimeUtils.fromTicks;
+
 import app.ashcon.intake.CommandException;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
@@ -19,6 +22,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -121,7 +125,10 @@ public class MapPoll {
         winner.getStyledName(MapNameStyle.COLOR).decoration(TextDecoration.BOLD, true);
 
     viewer.showTitle(
-        top ? mapName : Component.empty(), top ? Component.empty() : mapName, 5, 60, 5);
+        title(
+            top ? mapName : Component.empty(),
+            top ? Component.empty() : mapName,
+            Title.Times.of(fromTicks(5), fromTicks(60), fromTicks(5))));
   }
 
   private Component getMapChatComponent(MatchPlayer viewer, MapInfo map, boolean winner) {

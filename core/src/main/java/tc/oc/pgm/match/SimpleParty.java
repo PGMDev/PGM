@@ -10,7 +10,6 @@ import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.util.chat.Audience;
 
 /** Represents a simple {@link Party} with a set of {@link MatchPlayer}s. */
 public abstract class SimpleParty implements Party {
@@ -19,8 +18,6 @@ public abstract class SimpleParty implements Party {
   protected final Map<UUID, MatchPlayer> players = new ConcurrentHashMap<>();
   protected final tc.oc.pgm.filters.query.PartyQuery query =
       new tc.oc.pgm.filters.query.PartyQuery(null, this);
-  protected final Audience audience =
-      () -> net.kyori.adventure.audience.Audience.audience(players.values());
 
   public SimpleParty(Match match) {
     this.match = match;
@@ -49,11 +46,6 @@ public abstract class SimpleParty implements Party {
   @Override
   public Collection<MatchPlayer> getPlayers() {
     return Collections.unmodifiableCollection(players.values());
-  }
-
-  @Override
-  public Audience audience() {
-    return audience;
   }
 
   @Override

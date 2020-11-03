@@ -75,14 +75,14 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   public static final Sound DROP_SOUND_OWN =
       Sound.sound(Key.key("mob.wither.hurt"), Sound.Source.MASTER, 0.7f, 1);
   public static final Sound RETURN_SOUND_OWN =
-      Sound.sound(Key.key("mob.zombie.unfect"), Sound.Source.MASTER, 1.1f, 1.2f);
+      Sound.sound(Key.key("mob.zombie.infect"), Sound.Source.MASTER, 1.1f, 1.2f);
 
   public static final Sound PICKUP_SOUND =
-      Sound.sound(Key.key("fireworks.largeBlast_far"), Sound.Source.MASTER, 1f, 0.7f);
+      Sound.sound(Key.key("entity.firework_rocket.blast_far"), Sound.Source.MASTER, 1f, 0.7f);
   public static final Sound DROP_SOUND =
-      Sound.sound(Key.key("fireworks.twinkle_far"), Sound.Source.MASTER, 1f, 1f);
+      Sound.sound(Key.key("entity.firework_rocket.twinkle_far"), Sound.Source.MASTER, 1f, 1f);
   public static final Sound RETURN_SOUND =
-      Sound.sound(Key.key("fireworks.twinkle_far"), Sound.Source.MASTER, 1f, 1f);
+      Sound.sound(Key.key("entity.firework_rocket.twinkle_far"), Sound.Source.MASTER, 1f, 1f);
 
   private final ImmutableSet<Net> nets;
   private final Location bannerLocation;

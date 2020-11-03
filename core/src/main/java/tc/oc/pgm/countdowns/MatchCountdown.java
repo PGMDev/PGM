@@ -1,10 +1,13 @@
 package tc.oc.pgm.countdowns;
 
+import static net.kyori.adventure.title.Title.title;
+
 import java.time.Duration;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.title.Title;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.bossbar.BossBarMatchModule;
@@ -104,11 +107,10 @@ public abstract class MatchCountdown extends Countdown {
     if (showTitle()) {
       getMatch()
           .showTitle(
-              Component.text(String.valueOf(remaining.getSeconds()), NamedTextColor.YELLOW),
-              Component.empty(),
-              0,
-              5,
-              15);
+              title(
+                  Component.text(remaining.getSeconds(), NamedTextColor.YELLOW),
+                  Component.empty(),
+                  Title.Times.of(Duration.ZERO, Duration.ofMillis(5), Duration.ofMillis(15))));
     }
 
     super.onTick(remaining, total);

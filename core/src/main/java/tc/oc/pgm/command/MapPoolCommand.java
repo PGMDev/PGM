@@ -1,5 +1,7 @@
 package tc.oc.pgm.command;
 
+import static tc.oc.pgm.PGMAudiences.sendWarning;
+
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Default;
@@ -321,7 +323,7 @@ public final class MapPoolCommand {
     MapPool pool = getMapPoolManager(sender, mapOrder).getActiveMapPool();
     MapPoll poll = pool instanceof VotingPool ? ((VotingPool) pool).getCurrentPoll() : null;
     if (poll == null) {
-      player.sendWarning(Component.translatable("vote.noVote"));
+      sendWarning(Component.translatable("vote.noVote"), player);
     }
     return poll;
   }

@@ -87,6 +87,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   private ScheduledExecutorService executorService;
   private ScheduledExecutorService asyncExecutorService;
   private VanishManager vanishManager;
+  private PGMAudiences audienceProvidor;
 
   public PGMPlugin() {
     super();
@@ -213,6 +214,8 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       asyncExecutorService.scheduleAtFixedRate(new ShouldRestartTask(), 0, 1, TimeUnit.MINUTES);
     }
 
+    audienceProvidor = new PGMAudiences(this);
+
     registerListeners();
     registerCommands();
   }
@@ -309,6 +312,11 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   @Override
   public VanishManager getVanishManager() {
     return vanishManager;
+  }
+
+  @Override
+  public PGMAudiences getPGMAudiences() {
+    return audienceProvidor;
   }
 
   private void registerCommands() {

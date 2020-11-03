@@ -1,5 +1,7 @@
 package tc.oc.pgm.listeners;
 
+import static tc.oc.pgm.PGMAudiences.sendWarning;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import java.lang.annotation.Retention;
@@ -555,7 +557,7 @@ public class BlockTransformListener implements Listener {
         && event.getCancelMessage() != null
         && event.isManual()) {
 
-      ((PlayerBlockTransformEvent) event).getPlayerState().sendWarning(event.getCancelMessage());
+      sendWarning(event.getCancelMessage(), ((PlayerBlockTransformEvent) event).getPlayerState());
     }
   }
 

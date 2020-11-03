@@ -1,5 +1,8 @@
 package tc.oc.pgm.community.command;
 
+import static net.kyori.adventure.title.Title.title;
+import static tc.oc.pgm.PGMAudiences.sendWarning;
+
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.bukkit.parametric.Type;
@@ -17,6 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -24,6 +28,7 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.event.HoverEvent.Action;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.BanEntry;
 import org.bukkit.BanList;
@@ -50,7 +55,6 @@ import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.UsernameFormatUtils;
-import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.PeriodFormats;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -136,7 +140,7 @@ public class ModerationCommand implements Listener {
     FreezeMatchModule fmm = match.getModule(FreezeMatchModule.class);
 
     if (fmm.getFrozenPlayers().isEmpty() && fmm.getOfflineFrozenCount() < 1) {
-      sender.sendWarning(Component.translatable("moderation.freeze.frozenList.none"));
+      sendWarning(Component.translatable("moderation.freeze.frozenList.none"), sender);
       return;
     }
 
@@ -198,9 +202,10 @@ public class ModerationCommand implements Listener {
       Audience viewer, CommandSender sender, Player target, Match match, @Text String reason) {
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
     if (chat.isMuted(targetMatchPlayer)) {
-      viewer.sendWarning(
+      sendWarning(
           Component.translatable(
-              "moderation.mute.existing", targetMatchPlayer.getName(NameStyle.FANCY)));
+              "moderation.mute.existing", targetMatchPlayer.getName(NameStyle.FANCY)),
+          viewer);
       return;
     }
 
@@ -276,7 +281,7 @@ public class ModerationCommand implements Listener {
   public void warn(CommandSender sender, Player target, Match match, @Text String reason) {
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
     if (punish(PunishmentType.WARN, targetMatchPlayer, sender, reason, true)) {
-      sendWarning(targetMatchPlayer, reason);
+      sendModerationWarning(targetMatchPlayer, reason);
     }
   }
 
@@ -414,14 +419,15 @@ public class ModerationCommand implements Listener {
 
       Component formattedTarget = Component.text(target, NamedTextColor.DARK_AQUA);
       if (onlineBans > 0) {
-        viewer.sendWarning(
+        sendWarning(
             Component.translatable(
                 "moderation.ipBan.bannedWithAlts",
                 formattedTarget,
                 Component.text(
                     Integer.toString(
                         targetPlayer == null ? onlineBans : Math.max(0, onlineBans - 1)),
-                    NamedTextColor.AQUA)));
+                    NamedTextColor.AQUA)),
+            viewer);
       } else {
         viewer.sendMessage(
             Component.translatable("moderation.ipBan.banned", NamedTextColor.RED, formattedTarget));
@@ -707,7 +713,7 @@ public class ModerationCommand implements Listener {
     target.getMatch().callEvent(event);
     if (event.isCancelled()) {
       if (event.getCancelMessage() != null) {
-        Audience.get(issuer).sendMessage(event.getCancelMessage());
+        PGM.get().getPGMAudiences().PROVIDER.sender(issuer).sendMessage(event.getCancelMessage());
       }
     }
 
@@ -814,16 +820,17 @@ public class ModerationCommand implements Listener {
   /*
    * Sends a formatted title and plays a sound warning a user of their actions
    */
-  private void sendWarning(MatchPlayer target, String reason) {
+  private void sendModerationWarning(MatchPlayer target, String reason) {
     Component titleWord = Component.translatable("misc.warning", NamedTextColor.DARK_RED);
-    Component title =
+    Component warningTitle =
         Component.text().append(WARN_SYMBOL).append(titleWord).append(WARN_SYMBOL).build();
     Component subtitle = formatPunishmentReason(reason).color(NamedTextColor.GOLD);
 
     // Legacy support - Displays a chat message instead of title
     if (target.isLegacy()) {
       target.sendMessage(
-          TextFormatter.horizontalLineHeading(target.getBukkit(), title, NamedTextColor.GRAY));
+          TextFormatter.horizontalLineHeading(
+              target.getBukkit(), warningTitle, NamedTextColor.GRAY));
       target.sendMessage(Component.empty());
       target.sendMessage(
           TextFormatter.horizontalLineHeading(
@@ -834,10 +841,15 @@ public class ModerationCommand implements Listener {
               LegacyFormatUtils.MAX_CHAT_WIDTH));
       target.sendMessage(Component.empty());
       target.sendMessage(
-          TextFormatter.horizontalLineHeading(target.getBukkit(), title, NamedTextColor.GRAY));
+          TextFormatter.horizontalLineHeading(
+              target.getBukkit(), warningTitle, NamedTextColor.GRAY));
 
     } else {
-      target.showTitle(title, subtitle, 5, 200, 10);
+      target.showTitle(
+          title(
+              warningTitle,
+              subtitle,
+              Title.Times.of(Duration.ofMillis(5), Duration.ofMillis(200), Duration.ofMillis(10))));
     }
     target.playSound(WARN_SOUND);
   }

@@ -4,8 +4,8 @@ import app.ashcon.intake.CommandException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import tc.oc.pgm.util.chat.Audience;
 
 public abstract class PrettyPaginatedComponentResults<T> {
 

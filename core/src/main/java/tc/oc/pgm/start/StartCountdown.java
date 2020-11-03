@@ -1,6 +1,7 @@
 package tc.oc.pgm.start;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.PGMAudiences.sendWarning;
 
 import java.time.Duration;
 import javax.annotation.Nullable;
@@ -71,7 +72,7 @@ public class StartCountdown extends PreMatchCountdown {
       for (Team team : this.tmm.getParticipatingTeams()) {
         if (team.isStacked()) {
           this.balanceWarningSent = true;
-          this.getMatch().sendWarning(Component.translatable("match.balanceTeams", team.getName()));
+          sendWarning(Component.translatable("match.balanceTeams", team.getName()), getMatch());
         }
       }
 

@@ -1,5 +1,7 @@
 package tc.oc.pgm.community.command;
 
+import static tc.oc.pgm.PGMAudiences.sendWarning;
+
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.bukkit.parametric.Type;
@@ -72,7 +74,7 @@ public class ReportCommand {
               Component.translatable(
                       secondsRemaining != 1 ? "misc.seconds" : "misc.second", secondsComponent)
                   .color(NamedTextColor.AQUA);
-          sender.sendWarning(Component.translatable("command.cooldown", secondsLeftComponent));
+          sendWarning(Component.translatable("command.cooldown", secondsLeftComponent), sender);
           return;
         }
       } else {
@@ -88,9 +90,10 @@ public class ReportCommand {
       // Due to Intake not accounting for player locale, this message matches what is sent when no
       // player is found.
       // TODO: Please upgrade if command framework uses locale
-      sender.sendWarning(
+      sendWarning(
           Component.text(
-              "Could not find player named '" + player.getName() + "'", NamedTextColor.RED));
+              "Could not find player named '" + player.getName() + "'", NamedTextColor.RED),
+          sender);
       return;
     }
 

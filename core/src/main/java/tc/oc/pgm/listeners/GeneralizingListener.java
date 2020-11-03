@@ -1,5 +1,7 @@
 package tc.oc.pgm.listeners;
 
+import static tc.oc.pgm.PGMAudiences.sendWarning;
+
 import java.util.Map;
 import java.util.WeakHashMap;
 import org.bukkit.GameMode;
@@ -16,11 +18,11 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.util.RayBlockIntersection;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.BlockPunchEvent;
 import tc.oc.pgm.api.event.BlockTrampleEvent;
 import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.util.block.BlockVectors;
-import tc.oc.pgm.util.chat.Audience;
 
 /**
  * Translates standard Bukkit events into a few extra events: {@link CoarsePlayerMoveEvent} {@link
@@ -243,7 +245,8 @@ public class GeneralizingListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void processCancelMessage(final CoarsePlayerMoveEvent event) {
     if (event.isCancelled() && event.getCancelMessage() != null) {
-      Audience.get(event.getPlayer()).sendWarning(event.getCancelMessage());
+      sendWarning(
+          event.getCancelMessage(), PGM.get().getPGMAudiences().PROVIDER.player(event.getPlayer()));
     }
   }
 }

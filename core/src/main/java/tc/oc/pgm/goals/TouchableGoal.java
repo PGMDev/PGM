@@ -6,11 +6,11 @@ import java.util.Iterator;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
@@ -21,7 +21,6 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
-import tc.oc.pgm.util.chat.Audience;
 
 /**
  * A {@link Goal} that may be 'touched' by players, meaning the player has made some tangible
@@ -189,7 +188,7 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
     if (!isVisible()) return;
 
     Component message = getTouchMessage(toucher, false);
-    Audience.get(Bukkit.getConsoleSender()).sendMessage(message);
+    PGM.get().getPGMAudiences().getConsoleAudience().sendMessage(message);
 
     if (!showEnemyTouches()) {
       message = Component.text().append(toucher.getParty().getChatPrefix()).append(message).build();

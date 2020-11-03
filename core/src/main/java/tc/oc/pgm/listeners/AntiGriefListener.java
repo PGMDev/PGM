@@ -1,11 +1,18 @@
 package tc.oc.pgm.listeners;
 
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import net.kyori.adventure.text.Component;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.*;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -36,6 +43,8 @@ public class AntiGriefListener implements Listener {
 
   private static final Material DEFUSE_ITEM = Material.SHEARS;
   private static final int DEFUSE_SLOT = 4;
+
+  private static final Sound DEFUSE_SOUND = sound(key("random.fizz"), Sound.Source.MASTER, 1, 1);
 
   private final MatchManager mm;
 
@@ -70,9 +79,7 @@ public class AntiGriefListener implements Listener {
     Block block = entity.getLocation().getBlock();
     if (block != null
         && (block.getType() == Material.WATER || block.getType() == Material.STATIONARY_WATER)) {
-      clicker.sendMessage(
-          ChatColor.RED
-              + TextTranslations.translate("moderation.defuse.water", clicker.getBukkit()));
+      clicker.sendMessage(translatable("moderation.defuse.water", NamedTextColor.RED));
       return;
     }
 
@@ -93,7 +100,7 @@ public class AntiGriefListener implements Listener {
                     owner.getBukkit().getDisplayName(clicker.getBukkit()) + ChatColor.RED));
 
         ChatDispatcher.broadcastAdminChatMessage(
-            Component.translatable(
+            translatable(
                 "moderation.defuse.alert.player",
                 NamedTextColor.GRAY,
                 clicker.getName(NameStyle.FANCY),
@@ -108,7 +115,7 @@ public class AntiGriefListener implements Listener {
                 + TextTranslations.translate("moderation.defuse.world", clicker.getBukkit()));
 
         ChatDispatcher.broadcastAdminChatMessage(
-            Component.translatable(
+            translatable(
                 "moderation.defuse.alert.world",
                 NamedTextColor.GRAY,
                 clicker.getName(NameStyle.FANCY),
@@ -119,10 +126,8 @@ public class AntiGriefListener implements Listener {
   }
 
   private void notifyDefuse(MatchPlayer clicker, Entity entity, String message) {
-    clicker.sendMessage(message);
-    for (Player viewer : Bukkit.getOnlinePlayers()) {
-      viewer.playSound(entity.getLocation(), Sound.FIZZ, 1, 1);
-    }
+    clicker.sendMessage(text(message));
+    clicker.getMatch().playSound(DEFUSE_SOUND);
   }
 
   @EventHandler(priority = EventPriority.HIGHEST)
@@ -146,7 +151,7 @@ public class AntiGriefListener implements Listener {
     List<ParticipantState> owners = this.removeTnt(loc, 5.0);
     if (owners != null && !owners.isEmpty()) {
       player.sendMessage(
-          Component.translatable(
+          translatable(
               "moderation.defuse.player",
               TextFormatter.nameList(owners, NameStyle.COLOR, NamedTextColor.WHITE)));
     }

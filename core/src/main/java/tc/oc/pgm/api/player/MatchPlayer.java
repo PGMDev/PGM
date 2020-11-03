@@ -2,6 +2,7 @@ package tc.oc.pgm.api.player;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
+import net.kyori.adventure.audience.ForwardingAudience;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
@@ -15,7 +16,6 @@ import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.util.bukkit.ViaUtils;
-import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.Named;
 
 /**
@@ -25,7 +25,7 @@ import tc.oc.pgm.util.named.Named;
  * this is used is to check if a {@link MatchPlayer} is involved in an event. If you need to access
  * or modify a {@link Player}, there should be a method added to {@link MatchPlayer}.
  */
-public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder {
+public interface MatchPlayer extends ForwardingAudience.Single, Named, Tickable, InventoryHolder {
 
   /**
    * Get the {@link Match} of the {@link MatchPlayer}.

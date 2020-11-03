@@ -1,5 +1,10 @@
 package tc.oc.pgm.community.modules;
 
+import static net.kyori.adventure.title.Title.title;
+import static tc.oc.pgm.PGMAudiences.sendWarning;
+import static tc.oc.pgm.util.TimeUtils.INFINITE_DURATION;
+import static tc.oc.pgm.util.TimeUtils.fromTicks;
+
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
@@ -16,6 +21,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.title.Title;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -342,9 +348,13 @@ public class FreezeMatchModule implements MatchModule, Listener {
       }
       Component title = freezeTitle.color(NamedTextColor.RED).build();
       if (freezee.isLegacy()) {
-        freezee.sendWarning(title);
+        sendWarning(title, freezee);
       } else {
-        freezee.showTitle(Component.empty(), title, 5, 9999, 5);
+        freezee.showTitle(
+            title(
+                Component.empty(),
+                title,
+                Title.Times.of(fromTicks(5), INFINITE_DURATION, fromTicks(5))));
       }
       freezee.playSound(FREEZE_SOUND);
 

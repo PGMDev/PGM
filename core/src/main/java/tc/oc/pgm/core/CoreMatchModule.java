@@ -1,5 +1,6 @@
 package tc.oc.pgm.core;
 
+import static tc.oc.pgm.PGMAudiences.sendWarning;
 import static tc.oc.pgm.api.map.MapProtos.MODES_IMPLEMENTATION_VERSION;
 
 import java.util.List;
@@ -134,7 +135,7 @@ public class CoreMatchModule implements MatchModule, Listener {
           && core.getCasingRegion().contains(center)
           && player.getParty() == core.getOwner()) {
         event.setCancelled(true);
-        player.sendWarning(Component.translatable("core.damageOwn"));
+        sendWarning(Component.translatable("core.damageOwn"), player);
       }
     }
   }

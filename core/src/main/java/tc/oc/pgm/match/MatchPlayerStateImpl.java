@@ -14,7 +14,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
-import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.types.PlayerComponent;
 
@@ -68,12 +67,6 @@ public class MatchPlayerStateImpl implements MatchPlayerState {
   @Override
   public String getNameLegacy() {
     return username;
-  }
-
-  @Override
-  public Audience audience() {
-    final Audience audience = getPlayer().orElse(null);
-    return audience != null ? audience : Audience.empty();
   }
 
   @Override

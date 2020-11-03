@@ -2,6 +2,7 @@ package tc.oc.pgm.teams;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.PGMAudiences.sendWarning;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -450,27 +451,29 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
       switch (teamResult.getStatus()) {
         case SWITCH_DISABLED:
-          joining.sendWarning(Component.translatable("join.err.noSwitch", lastTeam.getName()));
+          sendWarning(Component.translatable("join.err.noSwitch", lastTeam.getName()), joining);
           return true;
 
         case CHOICE_DISABLED:
         case CHOICE_DENIED:
-          joining.sendWarning(Component.translatable("join.err.noChoice"));
+          sendWarning(Component.translatable("join.err.noChoice"), joining);
           return true;
 
         case FULL:
           if (teamResult.getTeam() != null) {
-            joining.sendWarning(
-                Component.translatable("join.err.full.team", teamResult.getTeam().getName()));
+            sendWarning(
+                Component.translatable("join.err.full.team", teamResult.getTeam().getName()),
+                joining);
           } else {
-            joining.sendWarning(Component.translatable("join.err.full"));
+            sendWarning(Component.translatable("join.err.full"), joining);
           }
 
           return true;
 
         case REDUNDANT:
-          joining.sendWarning(
-              Component.translatable("join.err.alreadyJoined.team", joining.getParty().getName()));
+          sendWarning(
+              Component.translatable("join.err.alreadyJoined.team", joining.getParty().getName()),
+              joining);
           return true;
       }
 
@@ -559,10 +562,10 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     } else {
       kickMe.playSound(Sound.sound(Key.key("mob.villager.hit"), Sound.Source.MASTER, 1, 1));
       if (forBalance) {
-        kickMe.sendWarning(Component.translatable("join.ok.moved", kickTo.getName()));
+        sendWarning(Component.translatable("join.ok.moved", kickTo.getName()), kickMe);
       } else {
-        kickMe.sendWarning(
-            Component.translatable("leave.ok.priorityKick.team", kickFrom.getName()));
+        sendWarning(
+            Component.translatable("leave.ok.priorityKick.team", kickFrom.getName()), kickMe);
       }
     }
 

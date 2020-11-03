@@ -1,5 +1,7 @@
 package tc.oc.pgm.modules;
 
+import static tc.oc.pgm.PGMAudiences.sendWarning;
+
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
@@ -66,7 +68,7 @@ public class EventFilterMatchModule implements MatchModule, Listener {
     match.getLogger().fine("Cancel " + event + " actor=" + actor);
     event.setCancelled(true);
     if (actor != null && message != null) {
-      actor.sendWarning(message);
+      sendWarning(message, actor);
     }
     return true;
   }

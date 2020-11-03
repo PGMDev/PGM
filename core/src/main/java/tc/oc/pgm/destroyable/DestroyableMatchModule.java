@@ -1,5 +1,7 @@
 package tc.oc.pgm.destroyable;
 
+import static tc.oc.pgm.PGMAudiences.sendWarning;
+
 import java.util.Collection;
 import net.kyori.adventure.text.Component;
 import org.bukkit.block.Block;
@@ -114,7 +116,7 @@ public class DestroyableMatchModule implements MatchModule, Listener {
 
         event.setCancelled(true);
         // TODO: translate this
-        player.sendWarning(Component.text("You may not damage your own objective."));
+        sendWarning(Component.text("You may not damage your own objective."), player);
       }
     }
   }

@@ -11,7 +11,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -49,7 +51,6 @@ import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.ViaUtils;
-import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.types.PlayerComponent;
@@ -84,7 +85,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     this.match = match;
     this.id = player.getUniqueId();
     this.bukkit = new WeakReference<>(player);
-    this.audience = Audience.get(player);
+    this.audience = PGM.get().getPGMAudiences().PROVIDER.player(player);
     this.party = new AtomicReference<>(null);
     this.query = new AtomicReference<>(null);
     this.frozen = new AtomicBoolean(false);
@@ -445,7 +446,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   }
 
   @Override
-  public Audience audience() {
+  public @Nonnull Audience audience() {
     return audience;
   }
 
