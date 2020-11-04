@@ -5,13 +5,12 @@ import java.util.UUID;
 import org.bukkit.Location;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
-import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.Named;
 
 /**
  * Represents an immutable "snapshot" view of a {@link tc.oc.pgm.api.player.MatchPlayer} in time.
  */
-public interface MatchPlayerState extends Audience, Named {
+public interface MatchPlayerState extends tc.oc.pgm.util.chat.Audience, Named {
 
   /**
    * Get the {@link Match} of the {@link MatchPlayerState}.

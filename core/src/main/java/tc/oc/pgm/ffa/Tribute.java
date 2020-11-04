@@ -8,6 +8,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.scoreboard.NameTagVisibility;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
@@ -161,11 +162,6 @@ public class Tribute implements Competitor {
     return true;
   }
 
-  @Override
-  public Audience audience() {
-    return player != null ? player : Audience.empty();
-  }
-
   /**
    * If the player is online and participating, this delegates to {@link MatchPlayer#getQuery()}.
    * Otherwise it returns an {@link PlayerQuery}, which knows about the player's identity, but has
@@ -174,5 +170,10 @@ public class Tribute implements Competitor {
   @Override
   public PartyQuery getQuery() {
     return player != null ? (PartyQuery) player.getQuery() : query;
+  }
+
+  @Override
+  public @NonNull Audience audience() {
+    return player == null ? Audience.empty() : player;
   }
 }

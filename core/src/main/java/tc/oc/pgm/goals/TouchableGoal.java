@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -189,7 +188,7 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
     if (!isVisible()) return;
 
     Component message = getTouchMessage(toucher, false);
-    Audience.get(Bukkit.getConsoleSender()).sendMessage(message);
+    Audience.console().sendMessage(message);
 
     if (!showEnemyTouches()) {
       message = Component.text().append(toucher.getParty().getChatPrefix()).append(message).build();

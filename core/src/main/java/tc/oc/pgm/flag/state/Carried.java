@@ -1,5 +1,9 @@
 package tc.oc.pgm.flag.state;
 
+import static net.kyori.adventure.title.Title.title;
+import static tc.oc.pgm.util.TimeUtils.fromTicks;
+
+import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.stream.Collectors;
@@ -8,6 +12,7 @@ import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -190,7 +195,11 @@ public class Carried extends Spawned implements Missing {
 
     if (!message.equals(this.lastMessage)) {
       this.lastMessage = message;
-      this.carrier.showTitle(Component.empty(), message, 0, 5, 35);
+      this.carrier.showTitle(
+          title(
+              Component.empty(),
+              message,
+              Title.Times.of(Duration.ZERO, fromTicks(5), fromTicks(35))));
     }
 
     ScoreMatchModule smm = this.flag.getMatch().getModule(ScoreMatchModule.class);
