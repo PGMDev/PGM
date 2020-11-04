@@ -8,18 +8,7 @@ import java.io.File;
 import java.lang.ref.WeakReference;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
@@ -40,6 +29,7 @@ import org.bukkit.event.EventException;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredListener;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.feature.Feature;
@@ -122,7 +112,6 @@ public class MatchImpl implements Match {
   private final AtomicReference<Party> queuedParticipants;
   private final ObserverParty observers;
   private final MatchFeatureContext features;
-  private final Audience audience;
 
   protected MatchImpl(String id, MapContext map, World world) {
     this.id = checkNotNull(id);
@@ -165,11 +154,6 @@ public class MatchImpl implements Match {
     this.queuedParticipants = new AtomicReference<>();
     this.observers = new ObserverParty(this);
     this.features = new MatchFeatureContext();
-    this.audience =
-        () ->
-            net.kyori.adventure.audience.Audience.audience(
-                net.kyori.adventure.audience.Audience.audience(getPlayers()),
-                Audience.get(Bukkit.getConsoleSender()));
   }
 
   @Override
@@ -316,6 +300,13 @@ public class MatchImpl implements Match {
     for (Listener listener : listeners.get(scope)) {
       startListener(listener);
     }
+  }
+
+  @Override
+  public @NonNull Audience audience() {
+    final Collection<Audience> audiences = new ArrayList<>(getPlayers());
+    audiences.add(Audience.console());
+    return Audience.get(audiences);
   }
 
   private class EventExecutor implements org.bukkit.plugin.EventExecutor {
@@ -735,11 +726,6 @@ public class MatchImpl implements Match {
   @Nullable
   public MatchPlayer getPlayer(@Nullable Player player) {
     return player == null ? null : players.get(player.getUniqueId());
-  }
-
-  @Override
-  public Audience audience() {
-    return this.audience;
   }
 
   private class ModuleLoader

@@ -1,6 +1,8 @@
 package tc.oc.pgm.core;
 
-import org.bukkit.ChatColor;
+import static net.kyori.adventure.text.Component.text;
+
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 
 public class CoreConvertMonitor implements Runnable {
@@ -24,13 +26,11 @@ public class CoreConvertMonitor implements Runnable {
         name = this.nextMaterial.toString();
       }
       this.parent.match.sendMessage(
-          ChatColor.DARK_AQUA
-              + "> > > > "
-              + ChatColor.RED
-              + name
-              + " CORE MODE"
-              + ChatColor.DARK_AQUA
-              + " < < < <");
+          text()
+              .append(text("> > > > ", NamedTextColor.DARK_AQUA))
+              .append(text(name + " CORE MODE", NamedTextColor.RED))
+              .append(text(" < < < <", NamedTextColor.DARK_AQUA))
+              .build());
       this.nextMaterial = getNext(this.nextMaterial);
     }
   }

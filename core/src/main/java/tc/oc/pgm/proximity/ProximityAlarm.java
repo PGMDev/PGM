@@ -1,12 +1,14 @@
 package tc.oc.pgm.proximity;
 
+import static net.kyori.adventure.text.Component.text;
+
 import com.google.common.collect.Sets;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
@@ -102,7 +104,7 @@ public class ProximityAlarm implements Listener {
 
       for (MatchPlayer player : this.match.getPlayers()) {
         if (this.definition.alertFilter.query(player.getQuery()).isAllowed()) {
-          player.sendMessage(ChatColor.RED + this.definition.alertMessage);
+          player.sendMessage(text(this.definition.alertMessage, NamedTextColor.RED));
           player.playSound(SOUND);
         }
       }

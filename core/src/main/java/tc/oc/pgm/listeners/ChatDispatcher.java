@@ -1,5 +1,8 @@
 package tc.oc.pgm.listeners;
 
+import static net.kyori.adventure.identity.Identity.identity;
+import static net.kyori.adventure.text.Component.text;
+
 import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Text;
 import com.google.common.cache.Cache;
@@ -20,7 +23,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -61,10 +63,10 @@ public class ChatDispatcher implements Listener {
   private final Map<UUID, String> muted;
 
   public static final TextComponent ADMIN_CHAT_PREFIX =
-      Component.text()
-          .append(Component.text("[", NamedTextColor.WHITE))
-          .append(Component.text("A", NamedTextColor.GOLD))
-          .append(Component.text("] ", NamedTextColor.WHITE))
+      text()
+          .append(text("[", NamedTextColor.WHITE))
+          .append(text("A", NamedTextColor.GOLD))
+          .append(text("] ", NamedTextColor.WHITE))
           .build();
 
   private static final Sound DM_SOUND =
@@ -254,7 +256,7 @@ public class ChatDispatcher implements Listener {
         message,
         formatPrivateMessage("misc.from", matchReceiver.getBukkit()),
         getChatFormat(
-            Component.text()
+            text()
                 .append(
                     Component.translatable("misc.from", NamedTextColor.GRAY, TextDecoration.ITALIC))
                 .append(Component.space())
@@ -271,7 +273,7 @@ public class ChatDispatcher implements Listener {
         message,
         formatPrivateMessage("misc.to", sender.getBukkit()),
         getChatFormat(
-            Component.text()
+            text()
                 .append(
                     Component.translatable("misc.to", NamedTextColor.GRAY, TextDecoration.ITALIC))
                 .append(Component.space())
@@ -296,8 +298,7 @@ public class ChatDispatcher implements Listener {
     if (sender == null) return;
     final MatchPlayer receiver = manager.getPlayer(lastMessagedBy.get(sender.getBukkit()));
     if (receiver == null) {
-      audience.sendWarning(
-          Component.translatable("command.message.noReply", Component.text("/msg")));
+      audience.sendWarning(Component.translatable("command.message.noReply", text("/msg")));
       return;
     }
 
@@ -324,8 +325,7 @@ public class ChatDispatcher implements Listener {
         final MatchPlayer receiver =
             getApproximatePlayer(player.getMatch(), target, player.getBukkit());
         if (receiver == null) {
-          player.sendWarning(
-              Component.translatable("chat.message.unknownTarget", Component.text(target)));
+          player.sendWarning(Component.translatable("chat.message.unknownTarget", text(target)));
         } else {
           sendDirect(
               player.getMatch(),
@@ -417,7 +417,7 @@ public class ChatDispatcher implements Listener {
 
                 event.getRecipients().stream()
                     .map(Audience::get)
-                    .forEach(player -> player.sendMessage(componentMsg));
+                    .forEach(player -> player.sendMessage(identity(sender.getId()), componentMsg));
               });
       return;
     }
@@ -426,11 +426,12 @@ public class ChatDispatcher implements Listener {
         .forEach(
             player ->
                 player.sendMessage(
-                    String.format(
-                        format,
-                        TextTranslations.translate(
-                            UsernameFormatUtils.CONSOLE_NAME, player.getBukkit().getLocale()),
-                        message)));
+                    text(
+                        String.format(
+                            format,
+                            TextTranslations.translate(
+                                UsernameFormatUtils.CONSOLE_NAME, player.getBukkit().getLocale()),
+                            message))));
   }
 
   private MatchPlayer getApproximatePlayer(Match match, String query, CommandSender sender) {
@@ -447,7 +448,7 @@ public class ChatDispatcher implements Listener {
     Component warning =
         Component.translatable(
             "moderation.mute.message",
-            Component.text(muted.getOrDefault(player.getId(), ""), NamedTextColor.AQUA));
+            text(muted.getOrDefault(player.getId(), ""), NamedTextColor.AQUA));
     player.sendWarning(warning);
   }
 
@@ -480,7 +481,7 @@ public class ChatDispatcher implements Listener {
                   });
               mp.sendMessage(formatted);
             });
-    Audience.get(Bukkit.getConsoleSender()).sendMessage(formatted);
+    Audience.console().sendMessage(formatted);
   }
 
   private static boolean canPlaySound(MatchPlayer viewer) {
@@ -488,18 +489,18 @@ public class ChatDispatcher implements Listener {
   }
 
   private Component getChatFormat(@Nullable Component prefix, MatchPlayer player, String message) {
-    Component msg = Component.text(message != null ? message : "");
+    Component msg = text(message != null ? message : "");
     if (prefix == null)
-      return Component.text()
-          .append(Component.text("<", NamedTextColor.WHITE))
+      return text()
+          .append(text("<", NamedTextColor.WHITE))
           .append(player.getName(NameStyle.VERBOSE))
-          .append(Component.text(">: ", NamedTextColor.WHITE))
+          .append(text(">: ", NamedTextColor.WHITE))
           .append(msg)
           .build();
-    return Component.text()
+    return text()
         .append(prefix)
         .append(player.getName(NameStyle.VERBOSE))
-        .append(Component.text(": ", NamedTextColor.WHITE))
+        .append(text(": ", NamedTextColor.WHITE))
         .append(msg)
         .build();
   }

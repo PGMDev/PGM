@@ -1,5 +1,7 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.text;
+
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Default;
@@ -54,7 +56,7 @@ public final class ModeCommand {
           throwNoResults();
         }
 
-        audience.sendMessage(builder.toString());
+        audience.sendMessage(text(builder.toString()));
       }
     }
   }
@@ -100,7 +102,7 @@ public final class ModeCommand {
 
     builder.append("by ").append(TimeUtils.formatDuration(duration));
 
-    audience.sendMessage(builder.toString());
+    audience.sendMessage(text(builder.toString()));
   }
 
   private static void showList(int page, Audience audience, ObjectiveModesMatchModule modes)

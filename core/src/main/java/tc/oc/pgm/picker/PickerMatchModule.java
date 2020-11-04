@@ -1,6 +1,8 @@
 package tc.oc.pgm.picker;
 
 import static com.google.common.base.Preconditions.checkState;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -14,6 +16,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -689,14 +692,13 @@ public class PickerMatchModule implements MatchModule, Listener {
           if (cmm.getCanChangeClass(player.getId())) {
             cmm.setPlayerClass(player.getId(), cls);
             player.sendMessage(
-                ChatColor.GOLD
-                    + TextTranslations.translate(
-                        "match.class.ok", player.getBukkit(), ChatColor.GREEN + name));
+                text()
+                    .append(translatable("match.class.ok", NamedTextColor.GOLD))
+                    .append(text(name, NamedTextColor.GREEN))
+                    .build());
             scheduleRefresh(player);
           } else {
-            player.sendMessage(
-                ChatColor.RED
-                    + TextTranslations.translate("match.class.sticky", player.getBukkit()));
+            player.sendMessage(translatable("match.class.sticky", NamedTextColor.RED));
           }
         }
 

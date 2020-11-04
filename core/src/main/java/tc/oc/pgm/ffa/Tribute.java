@@ -11,6 +11,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.scoreboard.NameTagVisibility;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -155,8 +156,8 @@ public class Tribute implements Competitor {
   }
 
   @Override
-  public Iterable<? extends Audience> audiences() {
-    return this.players;
+  public net.kyori.adventure.audience.@NonNull Audience audience() {
+    return Audience.get(this.players);
   }
 
   /**

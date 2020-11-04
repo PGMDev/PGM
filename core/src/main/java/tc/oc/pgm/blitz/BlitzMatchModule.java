@@ -1,10 +1,15 @@
 package tc.oc.pgm.blitz;
 
+import static net.kyori.adventure.title.Title.title;
+import static tc.oc.pgm.util.TimeUtils.fromTicks;
+
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -98,17 +103,16 @@ public class BlitzMatchModule implements MatchModule, Listener {
       event
           .getPlayer()
           .showTitle(
-              Component.empty(),
-              Component.translatable(
-                  "blitz.livesRemaining",
-                  NamedTextColor.RED,
+              title(
+                  Component.empty(),
                   Component.translatable(
-                      lives == 1 ? "misc.life" : "misc.lives",
-                      NamedTextColor.AQUA,
-                      Component.text(Integer.toString(lives)))),
-              0,
-              60,
-              20);
+                      "blitz.livesRemaining",
+                      NamedTextColor.RED,
+                      Component.translatable(
+                          lives == 1 ? "misc.life" : "misc.lives",
+                          NamedTextColor.AQUA,
+                          Component.text(Integer.toString(lives)))),
+                  Title.Times.of(Duration.ZERO, fromTicks(60), fromTicks(20))));
     }
   }
 

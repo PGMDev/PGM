@@ -1,8 +1,13 @@
 package tc.oc.pgm.spawns.states;
 
+import static net.kyori.adventure.title.Title.title;
+import static tc.oc.pgm.util.TimeUtils.fromTicks;
+
+import java.time.Duration;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Location;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -99,7 +104,11 @@ public abstract class Spawning extends Participating {
   public void sendMessage() {}
 
   public void updateTitle() {
-    player.showTitle(getTitle(), getSubtitle().color(NamedTextColor.GREEN), 0, 3, 3);
+    player.showTitle(
+        title(
+            getTitle(),
+            getSubtitle().color(NamedTextColor.GREEN),
+            Title.Times.of(Duration.ZERO, fromTicks(3), fromTicks(3))));
   }
 
   protected abstract Component getTitle();

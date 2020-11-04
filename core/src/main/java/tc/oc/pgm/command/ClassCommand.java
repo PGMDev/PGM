@@ -1,5 +1,7 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.text;
+
 import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Text;
 import javax.annotation.Nullable;
@@ -29,9 +31,7 @@ public final class ClassCommand {
       player.sendMessage(
           Component.translatable("match.class.current", NamedTextColor.GREEN)
               .append(Component.space())
-              .append(
-                  Component.text(
-                      currentClass.getName(), NamedTextColor.GOLD, TextDecoration.BOLD)));
+              .append(text(currentClass.getName(), NamedTextColor.GOLD, TextDecoration.BOLD)));
       player.sendMessage(Component.translatable("match.class.view", NamedTextColor.GOLD));
     } else {
       final PlayerClass newClass = StringUtils.bestFuzzyMatch(query, classes.getClasses(), 0.9);
@@ -50,7 +50,7 @@ public final class ClassCommand {
           Component.translatable(
               "match.class.ok",
               NamedTextColor.GREEN,
-              Component.text(newClass.getName(), NamedTextColor.GOLD, TextDecoration.UNDERLINED)));
+              text(newClass.getName(), NamedTextColor.GOLD, TextDecoration.UNDERLINED)));
       if (player.isParticipating()) {
         player.sendMessage(Component.translatable("match.class.queue", NamedTextColor.GREEN));
       }
@@ -65,10 +65,12 @@ public final class ClassCommand {
     final PlayerClass currentClass = classes.getSelectedClass(player.getId());
 
     player.sendMessage(
-        LegacyFormatUtils.dashedChatMessage(
-            ChatColor.GOLD + TextTranslations.translate("match.class.title", player.getBukkit()),
-            "-",
-            ChatColor.RED.toString()));
+        text(
+            LegacyFormatUtils.dashedChatMessage(
+                ChatColor.GOLD
+                    + TextTranslations.translate("match.class.title", player.getBukkit()),
+                "-",
+                ChatColor.RED.toString())));
     int i = 1;
     for (PlayerClass cls : classes.getClasses()) {
       StringBuilder result = new StringBuilder();
@@ -94,7 +96,7 @@ public final class ClassCommand {
             .append(cls.getDescription());
       }
 
-      player.sendMessage(result.toString());
+      player.sendMessage(text(result.toString()));
     }
   }
 
