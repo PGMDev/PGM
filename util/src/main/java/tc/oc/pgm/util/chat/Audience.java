@@ -1,6 +1,6 @@
 package tc.oc.pgm.util.chat;
 
-import static tc.oc.pgm.util.TimeUtils.fromTicks;
+import static net.kyori.adventure.text.Component.text;
 
 import java.util.Collection;
 import net.kyori.adventure.audience.ForwardingAudience;
@@ -9,8 +9,6 @@ import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.kyori.adventure.title.Title;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 
@@ -18,30 +16,19 @@ import tc.oc.pgm.util.bukkit.BukkitUtils;
 @FunctionalInterface
 public interface Audience extends ForwardingAudience.Single {
 
-  @Deprecated
-  default void sendMessage(String message) {
-    sendMessage(LegacyComponentSerializer.legacySection().deserialize(message));
-  }
+  Sound WARNING_SOUND = Sound.sound(Key.key("note.bass"), Sound.Source.MASTER, 1f, 0.75f);
+  Component WARNING_MESSAGE = text(" \u26a0 ", NamedTextColor.YELLOW); // ⚠
 
-  @Deprecated
   default void sendWarning(Component message) {
-    sendMessage(
-        Component.text(" \u26a0 ", NamedTextColor.YELLOW)
-            .append(message.colorIfAbsent(NamedTextColor.RED)));
-    playSound(Sound.sound(Key.key("note.bass"), Sound.Source.MASTER, 1f, 0.75f));
+    sendMessage(WARNING_MESSAGE.append(message.colorIfAbsent(NamedTextColor.RED)));
+    playSound(WARNING_SOUND);
   }
 
-  @Deprecated
-  default void showTitle(
-      Component title, Component subTitle, int inTicks, int stayTicks, int outTicks) {
-    showTitle(
-        Title.title(
-            title,
-            subTitle,
-            Title.Times.of(fromTicks(inTicks), fromTicks(stayTicks), fromTicks(outTicks))));
-  }
+  BukkitAudiences PROVIDER = BukkitAudiences.create(BukkitUtils.getPlugin());
 
-  @Deprecated BukkitAudiences PROVIDER = BukkitAudiences.create(BukkitUtils.getPlugin());
+  static Audience console() {
+    return PROVIDER::console;
+  }
 
   static Audience get(CommandSender sender) {
     return () -> PROVIDER.sender(sender);
@@ -49,6 +36,11 @@ public interface Audience extends ForwardingAudience.Single {
 
   static Audience get(Collection<? extends CommandSender> senders) {
     return () -> PROVIDER.filter(senders::contains);
+  }
+
+  /** Makes a single audience from a group of audiences */
+  static Audience get(Iterable<? extends net.kyori.adventure.audience.Audience> audiences) {
+    return () -> net.kyori.adventure.audience.Audience.audience(audiences);
   }
 
   static Audience empty() {

@@ -1,5 +1,7 @@
 package tc.oc.pgm.community.command;
 
+import static net.kyori.adventure.title.Title.title;
+
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.bukkit.parametric.Type;
@@ -24,6 +26,7 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.event.HoverEvent.Action;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.BanEntry;
 import org.bukkit.BanList;
@@ -276,7 +279,7 @@ public class ModerationCommand implements Listener {
   public void warn(CommandSender sender, Player target, Match match, @Text String reason) {
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
     if (punish(PunishmentType.WARN, targetMatchPlayer, sender, reason, true)) {
-      sendWarning(targetMatchPlayer, reason);
+      sendModerationWarning(targetMatchPlayer, reason);
     }
   }
 
@@ -814,16 +817,17 @@ public class ModerationCommand implements Listener {
   /*
    * Sends a formatted title and plays a sound warning a user of their actions
    */
-  private void sendWarning(MatchPlayer target, String reason) {
+  private void sendModerationWarning(MatchPlayer target, String reason) {
     Component titleWord = Component.translatable("misc.warning", NamedTextColor.DARK_RED);
-    Component title =
+    Component warningTitle =
         Component.text().append(WARN_SYMBOL).append(titleWord).append(WARN_SYMBOL).build();
     Component subtitle = formatPunishmentReason(reason).color(NamedTextColor.GOLD);
 
     // Legacy support - Displays a chat message instead of title
     if (target.isLegacy()) {
       target.sendMessage(
-          TextFormatter.horizontalLineHeading(target.getBukkit(), title, NamedTextColor.GRAY));
+          TextFormatter.horizontalLineHeading(
+              target.getBukkit(), warningTitle, NamedTextColor.GRAY));
       target.sendMessage(Component.empty());
       target.sendMessage(
           TextFormatter.horizontalLineHeading(
@@ -834,10 +838,15 @@ public class ModerationCommand implements Listener {
               LegacyFormatUtils.MAX_CHAT_WIDTH));
       target.sendMessage(Component.empty());
       target.sendMessage(
-          TextFormatter.horizontalLineHeading(target.getBukkit(), title, NamedTextColor.GRAY));
+          TextFormatter.horizontalLineHeading(
+              target.getBukkit(), warningTitle, NamedTextColor.GRAY));
 
     } else {
-      target.showTitle(title, subtitle, 5, 200, 10);
+      target.showTitle(
+          title(
+              warningTitle,
+              subtitle,
+              Title.Times.of(Duration.ofMillis(5), Duration.ofMillis(200), Duration.ofMillis(10))));
     }
     target.playSound(WARN_SOUND);
   }

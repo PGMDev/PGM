@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Optional;
 import java.util.UUID;
+import javax.annotation.Nonnull;
 import net.kyori.adventure.text.Component;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -25,6 +26,7 @@ public class MatchPlayerStateImpl implements MatchPlayerState {
   private final UUID uuid;
   private final Party party;
   private final Vector location;
+  private final Audience audience;
 
   protected MatchPlayerStateImpl(MatchPlayer player) {
     this.match = checkNotNull(player).getMatch();
@@ -32,6 +34,7 @@ public class MatchPlayerStateImpl implements MatchPlayerState {
     this.uuid = player.getId();
     this.party = checkNotNull(player.getParty());
     this.location = player.getBukkit().getLocation().toVector();
+    this.audience = getPlayer().isPresent() ? getPlayer().get() : Audience.empty();
   }
 
   @Override
@@ -71,9 +74,9 @@ public class MatchPlayerStateImpl implements MatchPlayerState {
   }
 
   @Override
+  @Nonnull
   public Audience audience() {
-    final Audience audience = getPlayer().orElse(null);
-    return audience != null ? audience : Audience.empty();
+    return audience;
   }
 
   @Override

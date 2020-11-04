@@ -1,11 +1,17 @@
 package tc.oc.pgm.listeners;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.title.Title.title;
+import static tc.oc.pgm.util.TimeUtils.fromTicks;
+
+import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.title.Title;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -52,9 +58,8 @@ public class MatchAnnouncer implements Listener {
     match.sendMessage(Component.translatable("broadcast.matchStart", NamedTextColor.GREEN));
 
     Component go = Component.translatable("broadcast.go", NamedTextColor.GREEN);
-    for (MatchPlayer player : match.getParticipants()) {
-      player.showTitle(go, Component.empty(), 0, 5, 15);
-    }
+    match.showTitle(
+        title(go, Component.empty(), Title.Times.of(Duration.ZERO, fromTicks(5), fromTicks(15))));
 
     match.playSound(SOUND_MATCH_START);
   }
@@ -94,7 +99,8 @@ public class MatchAnnouncer implements Listener {
         }
       }
 
-      viewer.showTitle(title, subtitle, 0, 40, 40);
+      viewer.showTitle(
+          title(title, subtitle, Title.Times.of(Duration.ZERO, fromTicks(40), fromTicks(40))));
       viewer.sendMessage(title);
       if (!(viewer.getParty() instanceof Observers)) viewer.sendMessage(subtitle);
     }
@@ -121,10 +127,10 @@ public class MatchAnnouncer implements Listener {
     String title = ChatColor.AQUA.toString() + ChatColor.BOLD + mapInfo.getName();
     viewer.sendMessage(
         TextFormatter.horizontalLineHeading(
-            viewer.getBukkit(), Component.text(title), NamedTextColor.WHITE, 200));
+            viewer.getBukkit(), text(title), NamedTextColor.WHITE, 200));
 
     String objective = " " + ChatColor.BLUE + ChatColor.ITALIC + mapInfo.getDescription();
-    LegacyFormatUtils.wordWrap(objective, 200).forEach(viewer::sendMessage);
+    LegacyFormatUtils.wordWrap(objective, 200).forEach(m -> viewer.sendMessage(text(m)));
 
     Collection<Contributor> authors = mapInfo.getAuthors();
     if (!authors.isEmpty()) {
@@ -137,7 +143,7 @@ public class MatchAnnouncer implements Listener {
                       TextFormatter.nameList(authors, NameStyle.FANCY, NamedTextColor.GRAY))));
     }
 
-    viewer.sendMessage(LegacyFormatUtils.horizontalLine(ChatColor.WHITE, 200));
+    viewer.sendMessage(text(LegacyFormatUtils.horizontalLine(ChatColor.WHITE, 200)));
   }
 
   private void sendCurrentlyPlaying(MatchPlayer viewer) {

@@ -7,7 +7,8 @@ import java.util.List;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.util.chat.Audience;
 
-final class AudienceProvider implements BukkitProvider<Audience> {
+final class AudienceProvider
+    implements BukkitProvider<Audience> { // TODO Just use MatchPlayer, it extends Audience
 
   @Override
   public boolean isProvided() {
