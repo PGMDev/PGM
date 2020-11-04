@@ -8,12 +8,14 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.scoreboard.NameTagVisibility;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.types.PlayerComponent;
 
@@ -168,5 +170,10 @@ public class Tribute implements Competitor {
   @Override
   public PartyQuery getQuery() {
     return player != null ? (PartyQuery) player.getQuery() : query;
+  }
+
+  @Override
+  public @NonNull Audience audience() {
+    return player == null ? Audience.empty() : player;
   }
 }

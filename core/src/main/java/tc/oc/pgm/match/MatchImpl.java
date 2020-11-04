@@ -2,7 +2,6 @@ package tc.oc.pgm.match;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static tc.oc.pgm.PGMAudiences.sendWarning;
 
 import com.google.common.collect.ImmutableList;
 import java.io.File;
@@ -21,7 +20,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import net.kyori.adventure.audience.Audience;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -81,6 +79,7 @@ import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.FileUtils;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.Events;
+import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.collection.RankedSet;
 import tc.oc.pgm.util.concurrent.BukkitExecutorService;
 import tc.oc.pgm.util.nms.NMSHacks;
@@ -306,10 +305,10 @@ public class MatchImpl implements Match {
   }
 
   @Override
-  public @NonNull Iterable<? extends net.kyori.adventure.audience.Audience> audiences() {
+  public @NonNull Audience audience() {
     final Collection<Audience> audiences = new ArrayList<>(getPlayers());
-    audiences.add(PGM.get().getPGMAudiences().console());
-    return audiences;
+    audiences.add(Audience.console());
+    return Audience.get(audiences);
   }
 
   private class EventExecutor implements org.bukkit.plugin.EventExecutor {
@@ -507,7 +506,7 @@ public class MatchImpl implements Match {
         callEvent(request);
         if (request.isCancelled()
             && newParty != null) { // Can't cancel this if the player is leaving the match
-          sendWarning(request.getCancelReason(), player);
+          player.sendWarning(request.getCancelReason());
           return false;
         }
       }
@@ -518,7 +517,7 @@ public class MatchImpl implements Match {
         callEvent(request);
         if (request.isCancelled()
             && oldParty != null) { // Can't cancel this if the player is joining the match
-          sendWarning(request.getCancelReason(), player);
+          player.sendWarning(request.getCancelReason());
           return false;
         }
       }

@@ -1,7 +1,5 @@
 package tc.oc.pgm.ffa;
 
-import static tc.oc.pgm.PGMAudiences.sendWarning;
-
 import com.google.common.collect.Lists;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -199,7 +197,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
 
     MatchPlayer kickMe = kickable.get(match.getRandom().nextInt(kickable.size()));
 
-    sendWarning(Component.translatable("leave.ok.priorityKick"), kickMe);
+    kickMe.sendWarning(Component.translatable("leave.ok.priorityKick"));
     kickMe.playSound(Sound.sound(Key.key("mob.villager.hit"), Sound.Source.MASTER, 1, 1));
 
     match.setParty(kickMe, match.getDefaultParty());
@@ -237,11 +235,11 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
       GenericJoinResult genericResult = (GenericJoinResult) result;
       switch (genericResult.getStatus()) {
         case FULL:
-          sendWarning(Component.translatable("join.err.full"), joining);
+          joining.sendWarning(Component.translatable("join.err.full"));
           return true;
 
         case REDUNDANT:
-          sendWarning(Component.translatable("join.err.alreadyJoined"), joining);
+          joining.sendWarning(Component.translatable("join.err.alreadyJoined"));
           return true;
       }
     }
@@ -274,7 +272,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
 
   public boolean forceJoin(MatchPlayer joining) {
     if (joining.getParty() instanceof Tribute) {
-      sendWarning(Component.translatable("join.err.alreadyJoined"), joining);
+      joining.sendWarning(Component.translatable("join.err.alreadyJoined"));
     }
 
     return match.setParty(joining, getTribute(joining));

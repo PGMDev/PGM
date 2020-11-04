@@ -2,9 +2,6 @@ package tc.oc.pgm.api.player;
 
 import java.util.Optional;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.audience.ForwardingAudience;
 import org.bukkit.Location;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
@@ -13,7 +10,7 @@ import tc.oc.pgm.util.named.Named;
 /**
  * Represents an immutable "snapshot" view of a {@link tc.oc.pgm.api.player.MatchPlayer} in time.
  */
-public interface MatchPlayerState extends ForwardingAudience.Single, Named {
+public interface MatchPlayerState extends tc.oc.pgm.util.chat.Audience, Named {
 
   /**
    * Get the {@link Match} of the {@link MatchPlayerState}.
@@ -61,11 +58,5 @@ public interface MatchPlayerState extends ForwardingAudience.Single, Named {
    */
   default boolean isPlayer(MatchPlayer player) {
     return getPlayer().map(player::equals).orElse(false);
-  }
-
-  @Override
-  default @Nonnull Audience audience() {
-    final Audience audience = getPlayer().orElse(null);
-    return audience != null ? audience : Audience.empty();
   }
 }

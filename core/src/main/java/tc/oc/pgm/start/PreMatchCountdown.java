@@ -1,7 +1,5 @@
 package tc.oc.pgm.start;
 
-import static tc.oc.pgm.PGMAudiences.sendWarning;
-
 import java.time.Duration;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
@@ -38,7 +36,7 @@ public abstract class PreMatchCountdown extends MatchCountdown {
   public void onCancel(Duration remaining, Duration total) {
     super.onCancel(remaining, total);
     getMatch().setPhase(MatchPhase.IDLE);
-    sendWarning(Component.translatable("broadcast.startCancel"), getMatch());
+    getMatch().sendWarning(Component.translatable("broadcast.startCancel"));
   }
 
   @Override

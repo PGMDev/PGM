@@ -1,6 +1,7 @@
 package tc.oc.pgm.command;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static net.kyori.adventure.text.Component.text;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
@@ -23,7 +24,6 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
@@ -33,7 +33,6 @@ import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.rotation.MapPool;
 import tc.oc.pgm.rotation.MapPoolManager;
-import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.MapNameStyle;
@@ -91,9 +90,9 @@ public final class MapCommand {
     new PrettyPaginatedComponentResults<MapInfo>(listHeader, resultsPerPage) {
       @Override
       public Component format(MapInfo map, int index) {
-        return Component.text()
-            .append(Component.text(Integer.toString(index + 1)))
-            .append(Component.text(". "))
+        return text()
+            .append(text(Integer.toString(index + 1)))
+            .append(text(". "))
             .append(
                 map.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS)
                     .hoverEvent(
@@ -140,24 +139,22 @@ public final class MapCommand {
       usage = "[map name] - defaults to the current map")
   public void map(Audience audience, CommandSender sender, @Text MapInfo map) {
     audience.sendMessage(
-        LegacyFormatUtils.horizontalLineHeading(
-            ChatColor.DARK_AQUA
-                + map.getName()
-                + " "
-                + ChatColor.GRAY
-                + map.getVersion().toString(),
-            ChatColor.RED));
+        TextFormatter.horizontalLineHeading(
+            sender,
+            text(map.getName() + " ", NamedTextColor.DARK_AQUA)
+                .append(text(map.getVersion().toString(), NamedTextColor.GRAY)),
+            NamedTextColor.RED));
 
     audience.sendMessage(
-        Component.text()
+        text()
             .append(mapInfoLabel("map.info.objective"))
-            .append(Component.text(map.getDescription(), NamedTextColor.GOLD))
+            .append(text(map.getDescription(), NamedTextColor.GOLD))
             .build());
 
     Collection<Contributor> authors = map.getAuthors();
     if (authors.size() == 1) {
       audience.sendMessage(
-          Component.text()
+          text()
               .append(mapInfoLabel("map.info.author.singular"))
               .append(formatContribution(authors.iterator().next()))
               .build());
@@ -165,7 +162,7 @@ public final class MapCommand {
       audience.sendMessage(mapInfoLabel("map.info.author.plural"));
       for (Contributor author : authors) {
         audience.sendMessage(
-            Component.text()
+            text()
                 .append(Component.space())
                 .append(Component.space())
                 .append(formatContribution(author))
@@ -178,7 +175,7 @@ public final class MapCommand {
       audience.sendMessage(mapInfoLabel("map.info.contributors"));
       for (Contributor contributor : contributors) {
         audience.sendMessage(
-            Component.text()
+            text()
                 .append(Component.space())
                 .append(Component.space())
                 .append(formatContribution(contributor))
@@ -192,9 +189,9 @@ public final class MapCommand {
       String date = created.format(formatter);
 
       audience.sendMessage(
-          Component.text()
+          text()
               .append(mapInfoLabel("map.info.created"))
-              .append(Component.text(date, NamedTextColor.GOLD))
+              .append(text(date, NamedTextColor.GOLD))
               .build());
     }
 
@@ -204,24 +201,24 @@ public final class MapCommand {
       int i = 0;
       for (String rule : map.getRules()) {
         audience.sendMessage(
-            Component.text()
-                .append(Component.text(++i + ") ", NamedTextColor.WHITE))
-                .append(Component.text(rule, NamedTextColor.GOLD))
+            text()
+                .append(text(++i + ") ", NamedTextColor.WHITE))
+                .append(text(rule, NamedTextColor.GOLD))
                 .build());
       }
     }
 
     audience.sendMessage(
-        Component.text()
+        text()
             .append(mapInfoLabel("map.info.playerLimit"))
             .append(createPlayerLimitComponent(sender, map))
             .build());
 
     if (sender.hasPermission(Permissions.DEBUG)) {
       audience.sendMessage(
-          Component.text()
+          text()
               .append(mapInfoLabel("map.info.proto"))
-              .append(Component.text(map.getProto().toString(), NamedTextColor.GOLD))
+              .append(text(map.getProto().toString(), NamedTextColor.GOLD))
               .build());
     }
 
@@ -236,9 +233,9 @@ public final class MapCommand {
                   .collect(Collectors.joining(", "));
       if (!mapPools.isEmpty()) {
         audience.sendMessage(
-            Component.text()
+            text()
                 .append(mapInfoLabel("map.info.pools"))
-                .append(Component.text(mapPools))
+                .append(text(mapPools))
                 .colorIfAbsent(NamedTextColor.GOLD)
                 .decoration(TextDecoration.BOLD, false)
                 .build());
@@ -249,7 +246,7 @@ public final class MapCommand {
   private Component createTagsComponent(Collection<MapTag> tags) {
     checkNotNull(tags);
 
-    Builder result = Component.text().append(mapInfoLabel("map.info.tags"));
+    Builder result = text().append(mapInfoLabel("map.info.tags"));
     MapTag[] mapTags = tags.toArray(new MapTag[0]);
     for (int i = 0; i < mapTags.length; i++) {
       if (i != 0) {
@@ -259,16 +256,16 @@ public final class MapCommand {
       String mapTag = mapTags[i].getId();
 
       Component tag =
-          Component.text()
-              .append(Component.text("#"))
-              .append(Component.text(mapTag))
+          text()
+              .append(text("#"))
+              .append(text(mapTag))
               .clickEvent(ClickEvent.runCommand("/maps -t " + mapTag))
               .hoverEvent(
                   HoverEvent.showText(
                       Component.translatable(
                           "map.info.mapTag.hover",
                           NamedTextColor.GRAY,
-                          Component.text(mapTag, NamedTextColor.GOLD))))
+                          text(mapTag, NamedTextColor.GOLD))))
               .build();
 
       result.append(tag);
@@ -284,22 +281,22 @@ public final class MapCommand {
     if (maxPlayers.isEmpty()) {
       return Component.empty();
     } else if (maxPlayers.size() == 1) {
-      return Component.text(maxPlayers.iterator().next().toString(), NamedTextColor.GOLD);
+      return text(maxPlayers.iterator().next().toString(), NamedTextColor.GOLD);
     }
 
     int totalPlayers = maxPlayers.stream().mapToInt(i -> i).sum();
-    Component total = Component.text(Integer.toString(totalPlayers), NamedTextColor.GOLD);
+    Component total = text(Integer.toString(totalPlayers), NamedTextColor.GOLD);
 
     String verboseVs = " " + TextTranslations.translate("map.info.playerLimit.vs", sender) + " ";
     Component verbose =
-        Component.text()
-            .append(Component.text("("))
+        text()
+            .append(text("("))
             .append(
-                Component.text(
+                text(
                     maxPlayers.stream()
                         .map(Object::toString)
                         .collect(Collectors.joining(verboseVs))))
-            .append(Component.text(")"))
+            .append(text(")"))
             .color(NamedTextColor.GRAY)
             .build();
 
@@ -309,19 +306,17 @@ public final class MapCommand {
   private @Nullable Component formatContribution(Contributor contributor) {
     Component componentName = contributor.getName(NameStyle.FANCY);
     if (contributor.getContribution() == null) return componentName;
-    return Component.text()
+    return text()
         .append(componentName)
-        .append(Component.text(" - ", NamedTextColor.GRAY))
-        .append(
-            Component.text(
-                contributor.getContribution(), NamedTextColor.GRAY, TextDecoration.ITALIC))
+        .append(text(" - ", NamedTextColor.GRAY))
+        .append(text(contributor.getContribution(), NamedTextColor.GRAY, TextDecoration.ITALIC))
         .build();
   }
 
   private Component mapInfoLabel(String key) {
-    return Component.text()
+    return text()
         .append(Component.translatable(key, NamedTextColor.DARK_PURPLE, TextDecoration.BOLD))
-        .append(Component.text(": "))
+        .append(text(": "))
         .build();
   }
 }

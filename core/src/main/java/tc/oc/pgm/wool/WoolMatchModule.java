@@ -1,7 +1,5 @@
 package tc.oc.pgm.wool;
 
-import static tc.oc.pgm.PGMAudiences.sendWarning;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import java.util.HashMap;
@@ -184,10 +182,10 @@ public class WoolMatchModule implements MatchModule, Listener {
     if (player != null) { // wool can only be placed by a player
       Component woolName = wool.getComponentName();
       if (!isValidWool(wool.getDyeColor(), event.getNewState())) {
-        sendWarning(Component.translatable("wool.wrongWool", woolName), player);
+        player.sendWarning(Component.translatable("wool.wrongWool", woolName));
       } else if (wool.getOwner() != player.getParty()) {
-        sendWarning(
-            Component.translatable("wool.wrongTeam", wool.getOwner().getName(), woolName), player);
+        player.sendWarning(
+            Component.translatable("wool.wrongTeam", wool.getOwner().getName(), woolName));
       } else {
         event.setCancelled(false);
         wool.markPlaced();
@@ -216,9 +214,8 @@ public class WoolMatchModule implements MatchModule, Listener {
         for (MonumentWool wool : this.wools.values()) {
           if (wool.getDefinition().isObjectiveWool(result)) {
             if (!wool.getDefinition().isCraftable()) {
-              sendWarning(
-                  Component.translatable("wool.craftingDisabled", wool.getComponentName()),
-                  playerHolder);
+              playerHolder.sendWarning(
+                  Component.translatable("wool.craftingDisabled", wool.getComponentName()));
               event.getInventory().setResult(null);
             }
           }

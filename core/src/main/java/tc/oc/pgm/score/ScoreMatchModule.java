@@ -1,7 +1,6 @@
 package tc.oc.pgm.score;
 
 import static com.google.common.base.Preconditions.checkState;
-import static tc.oc.pgm.PGMAudiences.sendWarning;
 
 import com.google.common.collect.Lists;
 import java.time.Instant;
@@ -304,7 +303,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
               () -> {
                 if (mp.getParty() instanceof Competitor) {
                   match.setParty(mp, match.getDefaultParty());
-                  sendWarning(Component.translatable("join.err.teamGrief", NamedTextColor.RED), mp);
+                  mp.sendWarning(Component.translatable("join.err.teamGrief", NamedTextColor.RED));
                 }
               });
     }

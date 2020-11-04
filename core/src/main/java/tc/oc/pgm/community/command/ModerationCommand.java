@@ -1,7 +1,6 @@
 package tc.oc.pgm.community.command;
 
 import static net.kyori.adventure.title.Title.title;
-import static tc.oc.pgm.PGMAudiences.sendWarning;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
@@ -20,7 +19,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -55,6 +53,7 @@ import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.UsernameFormatUtils;
+import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.PeriodFormats;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -140,7 +139,7 @@ public class ModerationCommand implements Listener {
     FreezeMatchModule fmm = match.getModule(FreezeMatchModule.class);
 
     if (fmm.getFrozenPlayers().isEmpty() && fmm.getOfflineFrozenCount() < 1) {
-      sendWarning(Component.translatable("moderation.freeze.frozenList.none"), sender);
+      sender.sendWarning(Component.translatable("moderation.freeze.frozenList.none"));
       return;
     }
 
@@ -202,10 +201,9 @@ public class ModerationCommand implements Listener {
       Audience viewer, CommandSender sender, Player target, Match match, @Text String reason) {
     MatchPlayer targetMatchPlayer = match.getPlayer(target);
     if (chat.isMuted(targetMatchPlayer)) {
-      sendWarning(
+      viewer.sendWarning(
           Component.translatable(
-              "moderation.mute.existing", targetMatchPlayer.getName(NameStyle.FANCY)),
-          viewer);
+              "moderation.mute.existing", targetMatchPlayer.getName(NameStyle.FANCY)));
       return;
     }
 
@@ -419,15 +417,14 @@ public class ModerationCommand implements Listener {
 
       Component formattedTarget = Component.text(target, NamedTextColor.DARK_AQUA);
       if (onlineBans > 0) {
-        sendWarning(
+        viewer.sendWarning(
             Component.translatable(
                 "moderation.ipBan.bannedWithAlts",
                 formattedTarget,
                 Component.text(
                     Integer.toString(
                         targetPlayer == null ? onlineBans : Math.max(0, onlineBans - 1)),
-                    NamedTextColor.AQUA)),
-            viewer);
+                    NamedTextColor.AQUA)));
       } else {
         viewer.sendMessage(
             Component.translatable("moderation.ipBan.banned", NamedTextColor.RED, formattedTarget));
@@ -713,7 +710,7 @@ public class ModerationCommand implements Listener {
     target.getMatch().callEvent(event);
     if (event.isCancelled()) {
       if (event.getCancelMessage() != null) {
-        PGM.get().getPGMAudiences().PROVIDER.sender(issuer).sendMessage(event.getCancelMessage());
+        Audience.get(issuer).sendMessage(event.getCancelMessage());
       }
     }
 

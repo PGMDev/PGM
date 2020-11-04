@@ -1,7 +1,5 @@
 package tc.oc.pgm.observers.tools;
 
-import static tc.oc.pgm.PGMAudiences.sendWarning;
-
 import com.google.common.collect.Lists;
 import java.util.List;
 import net.kyori.adventure.text.Component;
@@ -53,7 +51,7 @@ public class GamemodeTool implements InventoryMenuItem {
   public void toggleObserverGameMode(MatchPlayer player) {
     player.setGameMode(getOppositeMode(player.getGameMode()));
     if (player.getGameMode() == GameMode.SPECTATOR) {
-      sendWarning(getToggleMessage(), player);
+      player.sendWarning(getToggleMessage());
     } else if (isCreative(player)) {
       // Note: When WorldEdit is present, this executes a command to ensure the player is not stuck
       if (Bukkit.getPluginManager().isPluginEnabled("WorldEdit")) {

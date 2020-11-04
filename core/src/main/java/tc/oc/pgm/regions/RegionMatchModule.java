@@ -1,6 +1,5 @@
 package tc.oc.pgm.regions;
 
-import static tc.oc.pgm.PGMAudiences.sendWarning;
 import static tc.oc.pgm.api.map.MapProtos.REGION_PRIORITY_VERSION;
 
 import javax.annotation.Nullable;
@@ -247,7 +246,7 @@ public class RegionMatchModule implements MatchModule, Listener {
       if (rfa.earlyWarning && rfa.region.contains(event.getBlock())) {
         if (processQuery(rfa, query)) {
           if (event.isCancelled() && rfa.message != null) {
-            sendWarning(rfa.message, player);
+            player.sendWarning(rfa.message);
           }
           if (this.useRegionPriority || rfa.useRegionPriority) {
             break;
@@ -326,7 +325,7 @@ public class RegionMatchModule implements MatchModule, Listener {
             pie.setUseInteractedBlock(Event.Result.DENY);
 
             if (rfa.message != null) {
-              sendWarning(rfa.message, player);
+              player.sendWarning(rfa.message);
             }
           }
           if (this.useRegionPriority || rfa.useRegionPriority) {
@@ -373,7 +372,7 @@ public class RegionMatchModule implements MatchModule, Listener {
         && query instanceof PlayerQuery) {
 
       MatchPlayer player = match.getPlayer(((PlayerQuery) query).getPlayerId());
-      if (player != null) sendWarning(rfa.message, player);
+      if (player != null) player.sendWarning(rfa.message);
     }
   }
 

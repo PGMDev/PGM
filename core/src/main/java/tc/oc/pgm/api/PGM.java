@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.plugin.Plugin;
-import tc.oc.pgm.PGMAudiences;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.MatchManager;
@@ -40,8 +39,6 @@ public interface PGM extends Plugin {
   ScheduledExecutorService getAsyncExecutor();
 
   VanishManager getVanishManager();
-
-  PGMAudiences getPGMAudiences();
 
   AtomicReference<PGM> GLOBAL = new AtomicReference<>(null);
 

@@ -1,7 +1,6 @@
 package tc.oc.pgm.community.modules;
 
 import static net.kyori.adventure.title.Title.title;
-import static tc.oc.pgm.PGMAudiences.sendWarning;
 import static tc.oc.pgm.util.TimeUtils.INFINITE_DURATION;
 import static tc.oc.pgm.util.TimeUtils.fromTicks;
 
@@ -348,7 +347,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
       }
       Component title = freezeTitle.color(NamedTextColor.RED).build();
       if (freezee.isLegacy()) {
-        sendWarning(title, freezee);
+        freezee.sendWarning(title);
       } else {
         freezee.showTitle(
             title(

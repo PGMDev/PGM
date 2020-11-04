@@ -6,10 +6,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.util.chat.Audience;
 
 /** Represents a simple {@link Party} with a set of {@link MatchPlayer}s. */
 public abstract class SimpleParty implements Party {
@@ -51,5 +53,10 @@ public abstract class SimpleParty implements Party {
   @Override
   public @Nullable MatchPlayer getPlayer(UUID playerId) {
     return players.get(playerId);
+  }
+
+  @Override
+  public @NonNull Audience audience() {
+    return Audience.get(getPlayers());
   }
 }

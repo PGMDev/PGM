@@ -1,7 +1,5 @@
 package tc.oc.pgm.join;
 
-import static tc.oc.pgm.PGMAudiences.sendWarning;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import java.util.Collection;
@@ -129,19 +127,19 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
 
       switch (genericResult.getStatus()) {
         case MATCH_STARTED:
-          sendWarning(Component.translatable("join.err.afterStart"), joining);
+          joining.sendWarning(Component.translatable("join.err.afterStart"));
           return true;
 
         case MATCH_FINISHED:
-          sendWarning(Component.translatable("join.err.afterFinish"), joining);
+          joining.sendWarning(Component.translatable("join.err.afterFinish"));
           return true;
 
         case NO_PERMISSION:
-          sendWarning(Component.translatable("join.err.noPermission"), joining);
+          joining.sendWarning(Component.translatable("join.err.noPermission"));
           return true;
 
         case VANISHED:
-          sendWarning(Component.translatable("join.err.vanish"), joining);
+          joining.sendWarning(Component.translatable("join.err.vanish"));
           return true;
       }
     }
@@ -171,14 +169,13 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
     if (cancelQueuedJoin(leaving)) return true;
 
     if (leaving.getParty() instanceof ObservingParty) {
-      sendWarning(
-          Component.translatable("join.err.alreadyJoined.team", leaving.getParty().getName()),
-          leaving);
+      leaving.sendWarning(
+          Component.translatable("join.err.alreadyJoined.team", leaving.getParty().getName()));
       return false;
     }
 
     if (!leaving.getBukkit().hasPermission(Permissions.LEAVE)) {
-      sendWarning(Component.translatable("leave.err.noPermission"), leaving);
+      leaving.sendWarning(Component.translatable("leave.err.noPermission"));
       return false;
     }
 

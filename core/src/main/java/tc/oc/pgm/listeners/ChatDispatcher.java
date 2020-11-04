@@ -1,8 +1,7 @@
 package tc.oc.pgm.listeners;
 
-import static net.kyori.adventure.audience.Audience.audience;
+import static net.kyori.adventure.identity.Identity.identity;
 import static net.kyori.adventure.text.Component.text;
-import static tc.oc.pgm.PGMAudiences.sendWarning;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Text;
@@ -19,7 +18,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -177,7 +175,7 @@ public class ChatDispatcher implements Listener {
     if (sender != null && !sender.getBukkit().hasPermission(Permissions.ADMINCHAT)) {
       sender.getSettings().resetValue(SettingKey.CHAT);
       SettingKey.CHAT.update(sender);
-      sendWarning(Component.translatable("misc.noPermission"), sender);
+      sender.sendWarning(Component.translatable("misc.noPermission"));
       return;
     }
 
@@ -207,7 +205,7 @@ public class ChatDispatcher implements Listener {
     if (sender == null) return;
 
     if (vanish.isVanished(sender.getId())) {
-      sendWarning(Component.translatable("vanish.chat.deny"), sender);
+      sender.sendWarning(Component.translatable("vanish.chat.deny"));
       return;
     }
 
@@ -221,7 +219,7 @@ public class ChatDispatcher implements Listener {
 
       // Vanish Check - Don't allow messages to vanished
       if (vanish.isVanished(matchReceiver.getId())) {
-        sendWarning(Component.translatable("command.playerNotFound"), sender);
+        sender.sendWarning(Component.translatable("command.playerNotFound"));
         return;
       }
 
@@ -232,7 +230,7 @@ public class ChatDispatcher implements Listener {
         Component blocked =
             Component.translatable(
                 "command.message.blocked", matchReceiver.getName(NameStyle.FANCY));
-        sendWarning(blocked, sender);
+        sender.sendWarning(blocked);
         return;
       }
 
@@ -240,7 +238,7 @@ public class ChatDispatcher implements Listener {
         Component muted =
             Component.translatable(
                 "moderation.mute.target", matchReceiver.getName(NameStyle.CONCISE));
-        sendWarning(muted, sender);
+        sender.sendWarning(muted);
         return; // Only staff can message muted players
       } else {
         playSound(matchReceiver, DM_SOUND);
@@ -327,7 +325,7 @@ public class ChatDispatcher implements Listener {
         final MatchPlayer receiver =
             getApproximatePlayer(player.getMatch(), target, player.getBukkit());
         if (receiver == null) {
-          sendWarning(Component.translatable("chat.message.unknownTarget", text(target)), player);
+          player.sendWarning(Component.translatable("chat.message.unknownTarget", text(target)));
         } else {
           sendDirect(
               player.getMatch(),
@@ -409,11 +407,9 @@ public class ChatDispatcher implements Listener {
                   return;
                 }
 
-                final BukkitAudiences provider = PGM.get().getPGMAudiences().PROVIDER;
-
                 event.getRecipients().stream()
-                    .map(provider::player)
-                    .forEach(player -> player.sendMessage(componentMsg));
+                    .map(Audience::get)
+                    .forEach(player -> player.sendMessage(identity(sender.getId()), componentMsg));
               });
       return;
     }
@@ -445,7 +441,7 @@ public class ChatDispatcher implements Listener {
         Component.translatable(
             "moderation.mute.message",
             text(muted.getOrDefault(player.getId(), ""), NamedTextColor.AQUA));
-    sendWarning(warning, player);
+    player.sendWarning(warning);
   }
 
   private boolean checkMute(MatchPlayer player) {
@@ -477,7 +473,7 @@ public class ChatDispatcher implements Listener {
                   });
               mp.sendMessage(formatted);
             });
-    PGM.get().getPGMAudiences().console().sendMessage(formatted);
+    Audience.console().sendMessage(formatted);
   }
 
   private static boolean canPlaySound(MatchPlayer viewer) {

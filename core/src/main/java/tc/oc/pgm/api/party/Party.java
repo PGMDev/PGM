@@ -3,18 +3,16 @@ package tc.oc.pgm.api.party;
 import java.util.Collection;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.match.ObservingParty;
+import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.Named;
 
 /**
@@ -23,7 +21,7 @@ import tc.oc.pgm.util.named.Named;
  * @see Competitor for participating {@link MatchPlayer}s.
  * @see ObservingParty for observing {@link MatchPlayer}s.
  */
-public interface Party extends ForwardingAudience, Named {
+public interface Party extends Audience, Named {
 
   /**
    * Get the {@link Match} that the {@link Party} is in.
@@ -134,9 +132,4 @@ public interface Party extends ForwardingAudience, Named {
    * @param player The {@link MatchPlayer} to remove.
    */
   void internalRemovePlayer(MatchPlayer player);
-
-  @Override
-  default @NonNull Iterable<? extends Audience> audiences() {
-    return getPlayers();
-  }
 }
