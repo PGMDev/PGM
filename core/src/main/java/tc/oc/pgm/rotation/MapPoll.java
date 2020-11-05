@@ -171,7 +171,7 @@ public class MapPoll {
     for (MapInfo pgmMap : votes.keySet())
       content.append(newline()).append(getMapBookComponent(viewer, pgmMap));
 
-    Book book = Book.builder().author(text("PGM")).pages(content.build()).build();
+    Book book = Book.builder().author(text(VOTE_BOOK_AUTHOR)).pages(content.build()).build();
 
     ItemStack held = viewer.getInventory().getItemInHand();
     if (held.getType() != Material.ENCHANTED_BOOK) {
