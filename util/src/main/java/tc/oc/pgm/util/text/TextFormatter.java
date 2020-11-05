@@ -1,5 +1,9 @@
 package tc.oc.pgm.util.text;
 
+import static net.kyori.adventure.text.Component.space;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import java.util.ArrayList;
@@ -20,6 +24,10 @@ import tc.oc.pgm.util.named.Named;
 
 /** A helper for formatting {@link Component}s. */
 public final class TextFormatter {
+
+  public static final int GUARANTEED_NO_WRAP_CHAT_PAGE_WIDTH = 55;
+  public static final int MAX_CHAT_WIDTH = 300;
+
   private TextFormatter() {}
 
   /**
@@ -38,18 +46,17 @@ public final class TextFormatter {
       case 1:
         return textList.get(0);
       case 2:
-        return Component.translatable("misc.list.pair", color, textList);
+        return translatable("misc.list.pair", color, textList);
       default:
         final Iterator<? extends Component> textIterator = textList.iterator();
         Component a =
-            Component.translatable(
-                "misc.list.start", color, textIterator.next(), textIterator.next());
+            translatable("misc.list.start", color, textIterator.next(), textIterator.next());
         Component b = textIterator.next();
         while (textIterator.hasNext()) {
-          a = Component.translatable("misc.list.middle", color, a, b);
+          a = translatable("misc.list.middle", color, a, b);
           b = textIterator.next();
         }
-        return Component.translatable("misc.list.end", color, a, b);
+        return translatable("misc.list.end", color, a, b);
     }
   }
 
@@ -85,17 +92,31 @@ public final class TextFormatter {
       TextColor mainColor,
       TextColor pageColor,
       boolean simple) {
-    return Component.text()
+    return text()
         .append(text)
-        .append(Component.space())
-        .append(Component.text("(", mainColor))
+        .append(space())
+        .append(text("(", mainColor))
         .append(
-            Component.translatable(
+            translatable(
                     simple ? "command.simplePageHeader" : "command.pageHeader",
                     NamedTextColor.DARK_AQUA)
-                .args(Component.text(page, pageColor), Component.text(pages, pageColor)))
-        .append(Component.text(")", mainColor))
+                .args(text(page, pageColor), text(pages, pageColor)))
+        .append(text(")", mainColor))
         .build();
+  }
+
+  /**
+   * Return a horizontal line spanning the width of the chat window
+   *
+   * @param lineColor color of the line
+   * @param width width of the line in pixels
+   * @return the line as a string
+   */
+  public static Component horizontalLine(TextColor lineColor, int width) {
+    return text(
+        Strings.repeat(" ", (width + 1) / (LegacyFormatUtils.SPACE_PIXEL_WIDTH + 1)),
+        lineColor,
+        TextDecoration.STRIKETHROUGH);
   }
 
   /**
@@ -118,16 +139,15 @@ public final class TextFormatter {
       TextColor lineColor,
       TextDecoration decoration,
       int width) {
-    text =
-        Component.text().append(Component.space()).append(text).append(Component.space()).build();
+    text = text().append(space()).append(text).append(space()).build();
     int textWidth = LegacyFormatUtils.pixelWidth(TextTranslations.translateLegacy(text, sender));
     int spaceCount =
         Math.max(0, ((width - textWidth) / 2 + 1) / (LegacyFormatUtils.SPACE_PIXEL_WIDTH + 1));
     String line = Strings.repeat(" ", spaceCount);
-    return Component.text()
-        .append(Component.text(line, lineColor, decoration))
+    return text()
+        .append(text(line, lineColor, decoration))
         .append(text)
-        .append(Component.text(line, lineColor, decoration))
+        .append(text(line, lineColor, decoration))
         .build();
   }
 
@@ -139,8 +159,8 @@ public final class TextFormatter {
   /*
    * Convert ChatColor -> TextColor
    */
-  public static TextColor convert(Enum<?> color) {
-    TextColor textColor = NamedTextColor.WHITE;
+  public static NamedTextColor convert(Enum<?> color) {
+    NamedTextColor textColor = NamedTextColor.WHITE;
     try {
       textColor = NamedTextColor.NAMES.value(color.name().toLowerCase());
     } catch (IllegalArgumentException e) {

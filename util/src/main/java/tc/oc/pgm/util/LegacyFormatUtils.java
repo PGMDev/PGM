@@ -6,9 +6,10 @@ import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 
 /**
- * These utilities should no longer be used, instead use {@linkTextFormatter}
+ * These utilities should no longer be used, instead use {@link tc.oc.pgm.util.text.TextFormatter}
  *
- * <p>TODO: Determine if any of these would be useful and move to {@link TextFormatter}
+ * <p>TODO: Determine if any of these would be useful and move to {@link
+ * tc.oc.pgm.util.text.TextFormatter}
  */
 public final class LegacyFormatUtils {
 

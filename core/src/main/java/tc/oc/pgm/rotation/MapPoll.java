@@ -1,5 +1,8 @@
 package tc.oc.pgm.rotation;
 
+import static net.kyori.adventure.text.Component.newline;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.title.Title.title;
 import static tc.oc.pgm.util.TimeUtils.fromTicks;
 
@@ -16,6 +19,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -27,7 +31,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
@@ -36,7 +40,6 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.util.named.MapNameStyle;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextTranslations;
 
 /** Represents a polling process, with a set of options. */
@@ -46,12 +49,16 @@ public class MapPoll {
 
   private static final int TITLE_LENGTH_CUTOFF = 15;
 
+  public static final String VOTE_BOOK_AUTHOR = "PGM";
+
   private final WeakReference<Match> match;
   private final Map<MapInfo, Double> mapScores;
   private final Set<MapInfo> overrides;
   private final int voteSize;
 
   private final Map<MapInfo, Set<UUID>> votes = new HashMap<>();
+
+  private final ItemStack dummyVoteBook = new ItemStack(Material.ENCHANTED_BOOK);
 
   MapPoll(Match match, Map<MapInfo, Double> mapScores, Set<MapInfo> overrides, int voteSize) {
     this.match = new WeakReference<>(match);
@@ -134,15 +141,15 @@ public class MapPoll {
   private Component getMapChatComponent(MatchPlayer viewer, MapInfo map, boolean winner) {
     boolean voted = votes.get(map).contains(viewer.getId());
 
-    return Component.text()
-        .append(Component.text("["))
+    return text()
+        .append(text("["))
         .append(
-            Component.text(
+            text(
                 voted ? SYMBOL_VOTED : SYMBOL_IGNORE,
                 voted ? NamedTextColor.GREEN : NamedTextColor.DARK_RED))
-        .append(Component.text(" ").decoration(TextDecoration.BOLD, !voted)) // Fix 1px symbol diff
-        .append(Component.text("" + countVotes(votes.get(map)), NamedTextColor.YELLOW))
-        .append(Component.text("] "))
+        .append(text(" ").decoration(TextDecoration.BOLD, !voted)) // Fix 1px symbol diff
+        .append(text("" + countVotes(votes.get(map)), NamedTextColor.YELLOW))
+        .append(text("] "))
         .append(
             map.getStyledName(
                 winner ? MapNameStyle.HIGHLIGHT_WITH_AUTHORS : MapNameStyle.COLOR_WITH_AUTHORS))
@@ -152,54 +159,56 @@ public class MapPoll {
   public void sendBook(MatchPlayer viewer, boolean forceOpen) {
     if (viewer.isLegacy()) {
       // Must use separate sendMessages, since 1.7 clients do not like the newline character
-      viewer.sendMessage(Component.translatable("vote.header.map", NamedTextColor.DARK_PURPLE));
+      viewer.sendMessage(translatable("vote.header.map", NamedTextColor.DARK_PURPLE));
       for (MapInfo pgmMap : votes.keySet()) viewer.sendMessage(getMapBookComponent(viewer, pgmMap));
       return;
     }
 
-    TextComponent.Builder content = Component.text();
-    content.append(Component.translatable("vote.header.map", NamedTextColor.DARK_PURPLE));
-    content.append(Component.newline());
+    TextComponent.Builder content = text();
+    content.append(translatable("vote.header.map", NamedTextColor.DARK_PURPLE));
+    content.append(newline());
 
     for (MapInfo pgmMap : votes.keySet())
-      content.append(Component.newline()).append(getMapBookComponent(viewer, pgmMap));
+      content.append(newline()).append(getMapBookComponent(viewer, pgmMap));
 
-    ItemStack is = new ItemStack(Material.WRITTEN_BOOK);
-    BookMeta meta = (BookMeta) is.getItemMeta();
-    meta.setAuthor("PGM");
-
-    String title = ChatColor.GOLD + "" + ChatColor.BOLD;
-    title += TextTranslations.translate("vote.title.map", viewer.getBukkit());
-    meta.setTitle(title);
-
-    NMSHacks.setBookPages(
-        meta, TextTranslations.toBaseComponent(content.build(), viewer.getBukkit()));
-    is.setItemMeta(meta);
+    Book book = Book.builder().author(text("PGM")).pages(content.build()).build();
 
     ItemStack held = viewer.getInventory().getItemInHand();
-    if (held.getType() != Material.WRITTEN_BOOK
-        || !title.equals(((BookMeta) is.getItemMeta()).getTitle())) {
+    if (held.getType() != Material.ENCHANTED_BOOK) {
       viewer.getInventory().setHeldItemSlot(2);
     }
-    viewer.getInventory().setItemInHand(is);
+
+    ItemStack personalDummyVoteBook = dummyVoteBook.clone();
+    ItemMeta meta = personalDummyVoteBook.getItemMeta();
+    // TODO serialize the translatable Component instead of legacy whenever translations is
+    // refactored
+    String dummyTitle =
+        ChatColor.GOLD
+            + ""
+            + ChatColor.BOLD
+            + TextTranslations.translate("vote.title.map", viewer.getBukkit());
+    meta.setDisplayName(dummyTitle);
+    personalDummyVoteBook.setItemMeta(meta);
+
+    viewer.getInventory().setItemInHand(personalDummyVoteBook);
 
     if (forceOpen || viewer.getSettings().getValue(SettingKey.VOTE) == SettingValue.VOTE_ON)
-      NMSHacks.openBook(is, viewer.getBukkit());
+      viewer.openBook(book);
   }
 
   private Component getMapBookComponent(MatchPlayer viewer, MapInfo map) {
     boolean voted = votes.get(map).contains(viewer.getId());
 
-    return Component.text()
+    return text()
         .append(
-            Component.text(
+            text(
                 voted ? SYMBOL_VOTED : SYMBOL_IGNORE,
                 voted ? NamedTextColor.DARK_GREEN : NamedTextColor.DARK_RED))
-        .append(Component.text(" ").decoration(TextDecoration.BOLD, !voted)) // Fix 1px symbol diff
-        .append(Component.text(map.getName(), NamedTextColor.GOLD, TextDecoration.BOLD))
+        .append(text(" ").decoration(TextDecoration.BOLD, !voted)) // Fix 1px symbol diff
+        .append(text(map.getName(), NamedTextColor.GOLD, TextDecoration.BOLD))
         .hoverEvent(
             HoverEvent.showText(
-                Component.text(
+                text(
                     map.getTags().stream().map(MapTag::toString).collect(Collectors.joining(" ")),
                     NamedTextColor.YELLOW)))
         .clickEvent(ClickEvent.runCommand("/votenext -o " + map.getName()))
