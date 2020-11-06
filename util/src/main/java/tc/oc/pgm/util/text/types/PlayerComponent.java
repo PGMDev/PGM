@@ -72,7 +72,7 @@ public interface PlayerComponent {
     TextComponent.Builder name = TextComponent.builder(player != null ? player.getName() : defName);
 
     if (!isOffline && style.has(NameStyle.Flag.DEATH) && isDead(player)) {
-      name.color(TextColor.GRAY);
+      name.color(TextColor.DARK_GRAY);
     } else if (style.has(NameStyle.Flag.COLOR)) {
       name.color(isOffline ? OFFLINE_COLOR : provider.getColor(uuid));
     }
