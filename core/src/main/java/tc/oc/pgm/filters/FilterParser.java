@@ -3,10 +3,7 @@ package tc.oc.pgm.filters;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Predicate;
+import java.util.*;
 import javax.annotation.Nullable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -16,7 +13,6 @@ import org.jdom2.Attribute;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
-import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchPhase;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.classes.ClassModule;
@@ -467,46 +463,46 @@ public abstract class FilterParser {
   }
 
   @MethodParser("match-started")
-  public MatchStateFilter parseMatchStarted(Element el) throws InvalidXMLException {
-    return parseMatchStateFilter("started", el);
+  public MatchPhaseFilter parseMatchStarted(Element el) throws InvalidXMLException {
+    return parseMatchPhaseFilter("started", el);
   }
 
   @MethodParser("match-running")
-  public MatchStateFilter parseMatchRunning(Element el) throws InvalidXMLException {
-    return parseMatchStateFilter("running", el);
+  public MatchPhaseFilter parseMatchRunning(Element el) throws InvalidXMLException {
+    return parseMatchPhaseFilter("running", el);
   }
 
   @MethodParser("match-finished")
-  public MatchStateFilter parseMatchFinished(Element el) throws InvalidXMLException {
-    return parseMatchStateFilter("finished", el);
+  public MatchPhaseFilter parseMatchFinished(Element el) throws InvalidXMLException {
+    return parseMatchPhaseFilter("finished", el);
   }
 
-  public MatchStateFilter parseMatchStateFilter(String matchState, Element el)
+  private MatchPhaseFilter parseMatchPhaseFilter(String matchState, Element el)
       throws InvalidXMLException {
 
-    Predicate<Match> matchPredicate = null;
+    Set<MatchPhase> matchPhases = new HashSet<>();
 
     switch (matchState) {
       case "running":
-        matchPredicate = m -> m.getPhase() == MatchPhase.RUNNING;
+        matchPhases.add(MatchPhase.RUNNING);
         break;
       case "finished":
-        matchPredicate = m -> m.getPhase() == MatchPhase.FINISHED;
+        matchPhases.add(MatchPhase.FINISHED);
         break;
       case "starting":
-        matchPredicate = m -> m.getPhase() == MatchPhase.STARTING;
+        matchPhases.add(MatchPhase.STARTING);
         break;
-      case "before":
-        matchPredicate = m -> m.getPhase() == MatchPhase.IDLE;
+      case "idle":
+        matchPhases.add(MatchPhase.IDLE);
         break;
       case "started":
-        matchPredicate =
-            m -> m.getPhase() == MatchPhase.RUNNING || m.getPhase() == MatchPhase.FINISHED;
+        matchPhases.add(MatchPhase.RUNNING);
+        matchPhases.add(MatchPhase.FINISHED);
+        break;
     }
-    if (matchPredicate == null)
-      throw new InvalidXMLException("Invalid or no match state found", el);
+    if (matchPhases.isEmpty()) throw new InvalidXMLException("Invalid or no match state found", el);
 
-    return new MatchStateFilter(matchPredicate);
+    return new MatchPhaseFilter(matchPhases);
   }
 
   // Methods for parsing QueryModifiers
