@@ -1,6 +1,7 @@
 package tc.oc.pgm.match;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.text.types.PlayerComponent.player;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -53,7 +54,6 @@ import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
-import tc.oc.pgm.util.text.types.PlayerComponent;
 
 public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
 
@@ -414,7 +414,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
 
   @Override
   public Component getName(NameStyle style) {
-    return PlayerComponent.of(getBukkit(), style);
+    return player(getBukkit(), style);
   }
 
   @Override
