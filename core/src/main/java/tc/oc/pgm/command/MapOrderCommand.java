@@ -1,5 +1,7 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.bukkit.parametric.Type;
@@ -8,7 +10,6 @@ import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
@@ -30,12 +31,12 @@ public final class MapOrderCommand {
     final MapInfo next = mapOrder.getNextMap();
 
     if (next == null) {
-      sender.sendMessage(ChatColor.RED + TextTranslations.translate("map.noNextMap", sender));
+      audience.sendMessage(translatable("map.noNextMap", NamedTextColor.RED));
       return;
     }
 
     audience.sendMessage(
-        Component.translatable(
+        translatable(
             "map.nextMap",
             NamedTextColor.DARK_PURPLE,
             next.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS)));
@@ -65,14 +66,14 @@ public final class MapOrderCommand {
         Component mapName = mapOrder.getNextMap().getStyledName(MapNameStyle.COLOR);
         mapOrder.resetNextMap();
         ChatDispatcher.broadcastAdminChatMessage(
-            Component.translatable(
+            translatable(
                 "map.setNext.revert",
                 NamedTextColor.GRAY,
                 UsernameFormatUtils.formatStaffName(sender, match),
                 mapName),
             match);
       } else {
-        viewer.sendWarning(Component.translatable("map.noNextMap"));
+        viewer.sendWarning(translatable("map.noNextMap"));
       }
       return;
     }
@@ -81,13 +82,12 @@ public final class MapOrderCommand {
 
     if (RestartManager.isQueued()) {
       RestartManager.cancelRestart();
-      viewer.sendWarning(
-          Component.translatable("admin.cancelRestart.restartUnqueued", NamedTextColor.GREEN));
+      viewer.sendWarning(translatable("admin.cancelRestart.restartUnqueued", NamedTextColor.GREEN));
     }
 
     Component mapName = Component.text(map.getName(), NamedTextColor.GOLD);
     Component successful =
-        Component.translatable(
+        translatable(
             "map.setNext",
             NamedTextColor.GRAY,
             UsernameFormatUtils.formatStaffName(sender, match),

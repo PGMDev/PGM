@@ -1,5 +1,7 @@
 package tc.oc.pgm.community.modules;
 
+import static net.kyori.adventure.text.Component.join;
+import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.title.Title.title;
 import static tc.oc.pgm.util.TimeUtils.INFINITE_DURATION;
 import static tc.oc.pgm.util.TimeUtils.fromTicks;
@@ -94,7 +96,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
     return freeze.getOfflineCount();
   }
 
-  public String getOfflineFrozenNames() {
+  public Component getOfflineFrozenNames() {
     return freeze.getOfflineFrozenNames();
   }
 
@@ -305,10 +307,12 @@ public class FreezeMatchModule implements MatchModule, Listener {
       return this.offlineFrozenCache.getIfPresent(uuid) != null;
     }
 
-    private String getOfflineFrozenNames() {
-      return offlineFrozenCache.asMap().values().stream()
-          .map(name -> ChatColor.DARK_AQUA + name)
-          .collect(Collectors.joining(ChatColor.GRAY + ", "));
+    private Component getOfflineFrozenNames() {
+      return join(
+          text(", ", NamedTextColor.GRAY),
+          offlineFrozenCache.asMap().values().stream()
+              .map(name -> text(name, NamedTextColor.DARK_AQUA))
+              .collect(Collectors.toList()));
     }
 
     private int getOfflineCount() {
@@ -340,7 +344,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
       Component freeze = Component.translatable("moderation.freeze.frozen");
       Component by = Component.translatable("misc.by", senderName);
 
-      TextComponent.Builder freezeTitle = Component.text();
+      TextComponent.Builder freezeTitle = text();
       freezeTitle.append(freeze);
       if (!silent) {
         freezeTitle.append(Component.space()).append(by);
@@ -367,7 +371,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
       Component thawed = Component.translatable("moderation.freeze.unfrozen");
       Component by = Component.translatable("misc.by", senderName);
 
-      TextComponent.Builder thawedTitle = Component.text().append(thawed);
+      TextComponent.Builder thawedTitle = text().append(thawed);
       if (!silent) {
         thawedTitle.append(Component.space()).append(by);
       }
@@ -382,7 +386,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
 
     private Component createInteractiveBroadcast(
         Component senderName, MatchPlayer freezee, boolean frozen) {
-      return Component.text()
+      return text()
           .append(
               Component.translatable(
                   String.format("moderation.freeze.broadcast.%s", frozen ? "frozen" : "thaw"),

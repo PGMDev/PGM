@@ -6,6 +6,7 @@ import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Text;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.ChatColor;
@@ -73,30 +74,26 @@ public final class ClassCommand {
                 ChatColor.RED.toString())));
     int i = 1;
     for (PlayerClass cls : classes.getClasses()) {
-      StringBuilder result = new StringBuilder();
+      TextComponent.Builder result = text().append(text(i++ + ". "));
 
-      result.append(i++).append(". ");
+      NamedTextColor color;
 
       if (cls == currentClass) {
-        result.append(ChatColor.GOLD);
+        color = NamedTextColor.GOLD;
       } else if (cls.canUse(player.getBukkit())) {
-        result.append(ChatColor.GREEN);
+        color = NamedTextColor.GREEN;
       } else {
-        result.append(ChatColor.RED);
+        color = NamedTextColor.RED;
       }
 
-      if (cls == currentClass) result.append(ChatColor.UNDERLINE);
-      result.append(cls.getName());
+      result.append(
+          text(cls.getName(), color).decoration(TextDecoration.UNDERLINED, cls == currentClass));
 
       if (cls.getDescription() != null) {
-        result
-            .append(ChatColor.DARK_PURPLE)
-            .append(" - ")
-            .append(ChatColor.RESET)
-            .append(cls.getDescription());
+        result.append(text(" - ", NamedTextColor.DARK_PURPLE)).append(text(cls.getDescription()));
       }
 
-      player.sendMessage(text(result.toString()));
+      player.sendMessage(result.build());
     }
   }
 

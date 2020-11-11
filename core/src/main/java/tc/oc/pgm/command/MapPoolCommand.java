@@ -1,5 +1,8 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Default;
@@ -61,7 +64,7 @@ public final class MapPoolCommand {
             : mapPoolManager.getMapPoolByName(poolName);
 
     if (mapPool == null) {
-      audience.sendWarning(Component.translatable("pool.noPoolMatch"));
+      audience.sendWarning(translatable("pool.noPoolMatch"));
       return;
     }
     List<MapInfo> maps = mapPool.getMaps();
@@ -71,11 +74,11 @@ public final class MapPoolCommand {
 
     Component mapPoolComponent =
         TextFormatter.paginate(
-            Component.text()
-                .append(Component.translatable("pool.name"))
-                .append(Component.text(" (", NamedTextColor.DARK_AQUA))
-                .append(Component.text(mapPool.getName(), NamedTextColor.AQUA))
-                .append(Component.text(")", NamedTextColor.DARK_AQUA))
+            text()
+                .append(translatable("pool.name"))
+                .append(text(" (", NamedTextColor.DARK_AQUA))
+                .append(text(mapPool.getName(), NamedTextColor.AQUA))
+                .append(text(")", NamedTextColor.DARK_AQUA))
                 .build(),
             page,
             pages,
@@ -106,18 +109,16 @@ public final class MapPoolCommand {
       public Component format(MapInfo map, int index) {
         index++;
         TextComponent.Builder entry =
-            Component.text()
+            text()
                 .append(
-                    Component.text(
+                    text(
                         index + ". ",
                         nextPos == index ? NamedTextColor.DARK_AQUA : NamedTextColor.WHITE));
         if (votes != null && scores)
           entry.append(
-              Component.text(
-                  SCORE_FORMAT.format(votes.getMapScore(map)) + " ", NamedTextColor.YELLOW));
+              text(SCORE_FORMAT.format(votes.getMapScore(map)) + " ", NamedTextColor.YELLOW));
         if (votes != null && chance)
-          entry.append(
-              Component.text(SCORE_FORMAT.format(chances.get(map)) + " ", NamedTextColor.YELLOW));
+          entry.append(text(SCORE_FORMAT.format(chances.get(map)) + " ", NamedTextColor.YELLOW));
         entry.append(map.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS));
         return entry.build();
       }
@@ -140,7 +141,7 @@ public final class MapPoolCommand {
 
     List<MapPool> mapPools = mapPoolManager.getMapPools();
     if (mapPools.isEmpty()) {
-      audience.sendWarning(Component.translatable("pool.noMapPools"));
+      audience.sendWarning(translatable("pool.noMapPools"));
       return;
     }
 
@@ -153,7 +154,7 @@ public final class MapPoolCommand {
 
     Component paginated =
         TextFormatter.paginate(
-            Component.translatable("pool.title"),
+            translatable("pool.title"),
             page,
             pages,
             NamedTextColor.DARK_AQUA,
@@ -167,36 +168,33 @@ public final class MapPoolCommand {
       @Override
       public Component format(MapPool mapPool, int index) {
         Component arrow =
-            Component.text(
+            text(
                 "» ",
                 mapPoolManager.getActiveMapPool().getName().equals(mapPool.getName())
                     ? NamedTextColor.GREEN
                     : NamedTextColor.WHITE);
 
         Component maps =
-            Component.text()
-                .append(Component.text(" (", NamedTextColor.DARK_AQUA))
-                .append(Component.translatable("map.title", NamedTextColor.DARK_GREEN))
-                .append(Component.text(": ", NamedTextColor.DARK_GREEN))
-                .append(
-                    Component.text(
-                        Integer.toString(mapPool.getMaps().size()), NamedTextColor.WHITE))
-                .append(Component.text(")", NamedTextColor.DARK_AQUA))
+            text()
+                .append(text(" (", NamedTextColor.DARK_AQUA))
+                .append(translatable("map.title", NamedTextColor.DARK_GREEN))
+                .append(text(": ", NamedTextColor.DARK_GREEN))
+                .append(text(Integer.toString(mapPool.getMaps().size()), NamedTextColor.WHITE))
+                .append(text(")", NamedTextColor.DARK_AQUA))
                 .build();
 
         Component players =
-            Component.text()
-                .append(Component.text(" (", NamedTextColor.DARK_AQUA))
-                .append(Component.translatable("match.info.players", NamedTextColor.AQUA))
-                .append(Component.text(": ", NamedTextColor.AQUA))
-                .append(
-                    Component.text(Integer.toString(mapPool.getPlayers()), NamedTextColor.WHITE))
-                .append(Component.text(")", NamedTextColor.DARK_AQUA))
+            text()
+                .append(text(" (", NamedTextColor.DARK_AQUA))
+                .append(translatable("match.info.players", NamedTextColor.AQUA))
+                .append(text(": ", NamedTextColor.AQUA))
+                .append(text(Integer.toString(mapPool.getPlayers()), NamedTextColor.WHITE))
+                .append(text(")", NamedTextColor.DARK_AQUA))
                 .build();
 
-        return Component.text()
+        return text()
             .append(arrow)
-            .append(Component.text(mapPool.getName(), NamedTextColor.GOLD))
+            .append(text(mapPool.getName(), NamedTextColor.GOLD))
             .append(maps)
             .append(mapPool.isDynamic() ? players : Component.empty())
             .build();
@@ -221,7 +219,7 @@ public final class MapPoolCommand {
       @Switch('m') Integer matchLimit)
       throws CommandException {
     if (!match.getCountdown().getAll(CycleCountdown.class).isEmpty()) {
-      sender.sendMessage(Component.translatable("admin.setPool.activeCycle", NamedTextColor.RED));
+      sender.sendMessage(translatable("admin.setPool.activeCycle", NamedTextColor.RED));
       return;
     }
     MapPoolManager mapPoolManager = getMapPoolManager(source, mapOrder);
@@ -231,14 +229,14 @@ public final class MapPoolCommand {
             : mapPoolManager.getMapPoolByName(poolName);
 
     if (newPool == null) {
-      sender.sendWarning(Component.translatable(reset ? "pool.noDynamic" : "pool.noPoolMatch"));
+      sender.sendWarning(translatable(reset ? "pool.noDynamic" : "pool.noPoolMatch"));
     } else {
       if (newPool.equals(mapPoolManager.getActiveMapPool())) {
         sender.sendMessage(
-            Component.translatable(
+            translatable(
                 "pool.matching",
                 NamedTextColor.GRAY,
-                Component.text(newPool.getName(), NamedTextColor.LIGHT_PURPLE)));
+                text(newPool.getName(), NamedTextColor.LIGHT_PURPLE)));
         return;
       }
 
@@ -257,30 +255,28 @@ public final class MapPoolCommand {
       throws CommandException {
 
     if (positions < 0) {
-      viewer.sendWarning(Component.translatable("pool.skip.negative"));
+      viewer.sendWarning(translatable("pool.skip.negative"));
       return;
     }
 
     MapPool pool = getMapPoolManager(sender, mapOrder).getActiveMapPool();
     if (!(pool instanceof Rotation)) {
-      viewer.sendWarning(Component.translatable("pool.noRotation"));
+      viewer.sendWarning(translatable("pool.noRotation"));
       return;
     }
 
     ((Rotation) pool).advance(positions);
 
     Component message =
-        Component.text()
-            .append(Component.text("[", NamedTextColor.WHITE))
-            .append(Component.translatable("pool.name", NamedTextColor.GOLD))
-            .append(Component.text("] [", NamedTextColor.WHITE))
-            .append(Component.text(pool.getName(), NamedTextColor.AQUA))
-            .append(Component.text("]", NamedTextColor.WHITE))
+        text()
+            .append(text("[", NamedTextColor.WHITE))
+            .append(translatable("pool.name", NamedTextColor.GOLD))
+            .append(text("] [", NamedTextColor.WHITE))
+            .append(text(pool.getName(), NamedTextColor.AQUA))
+            .append(text("]", NamedTextColor.WHITE))
             .append(
-                Component.translatable(
-                    "pool.skip",
-                    NamedTextColor.GREEN,
-                    Component.text(positions, NamedTextColor.AQUA)))
+                translatable(
+                    "pool.skip", NamedTextColor.GREEN, text(positions, NamedTextColor.AQUA)))
             .build();
 
     viewer.sendMessage(message);
@@ -298,7 +294,7 @@ public final class MapPoolCommand {
     if (poll != null) {
       boolean voteResult = poll.toggleVote(map, ((Player) sender).getUniqueId());
       Component voteAction =
-          Component.translatable(
+          translatable(
               voteResult ? "vote.for" : "vote.abstain",
               voteResult ? NamedTextColor.GREEN : NamedTextColor.RED,
               map.getStyledName(MapNameStyle.COLOR));
@@ -321,7 +317,7 @@ public final class MapPoolCommand {
     MapPool pool = getMapPoolManager(sender, mapOrder).getActiveMapPool();
     MapPoll poll = pool instanceof VotingPool ? ((VotingPool) pool).getCurrentPoll() : null;
     if (poll == null) {
-      player.sendWarning(Component.translatable("vote.noVote"));
+      player.sendWarning(translatable("vote.noVote"));
     }
     return poll;
   }

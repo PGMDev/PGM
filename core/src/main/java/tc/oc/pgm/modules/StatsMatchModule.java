@@ -1,5 +1,7 @@
 package tc.oc.pgm.modules;
 
+import static tc.oc.pgm.util.text.types.PlayerComponent.player;
+
 import java.text.DecimalFormat;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -30,7 +32,6 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
-import tc.oc.pgm.util.text.types.PlayerComponent;
 
 @ListenerScope(MatchScope.RUNNING)
 public class StatsMatchModule implements MatchModule, Listener {
@@ -231,7 +232,7 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   private Component playerName(UUID playerUUID) {
-    return PlayerComponent.of(
+    return player(
         Bukkit.getPlayer(playerUUID),
         cachedUsernames.getOrDefault(playerUUID, "Unknown"),
         NameStyle.FANCY);

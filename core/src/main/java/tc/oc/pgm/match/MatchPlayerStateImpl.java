@@ -1,6 +1,7 @@
 package tc.oc.pgm.match;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.text.types.PlayerComponent.player;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -17,7 +18,6 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.text.types.PlayerComponent;
 
 public class MatchPlayerStateImpl implements MatchPlayerState {
 
@@ -65,7 +65,7 @@ public class MatchPlayerStateImpl implements MatchPlayerState {
   @Override
   public Component getName(NameStyle style) {
     MatchPlayer player = match.getPlayer(uuid);
-    return PlayerComponent.of(player.getBukkit(), username, style);
+    return player(player.getBukkit(), username, style);
   }
 
   @Override

@@ -1,5 +1,7 @@
 package tc.oc.pgm.api;
 
+import static net.kyori.adventure.text.Component.text;
+
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -331,16 +333,16 @@ public interface Config {
       if (prefix ? getPrefixOverride() != null : getSuffixOverride() != null) {
         return prefix ? getPrefixOverride() : getSuffixOverride();
       }
-      TextComponent.Builder hover = Component.text();
+      TextComponent.Builder hover = text();
       boolean addNewline = false;
       if (getDisplayName() != null && !getDisplayName().isEmpty()) {
         addNewline = true;
-        hover.append(Component.text(getDisplayName()));
+        hover.append(text(getDisplayName()));
       }
       if (getDescription() != null && !getDescription().isEmpty()) {
         if (addNewline) hover.append(Component.newline());
         addNewline = true;
-        hover.append(Component.text(getDescription()));
+        hover.append(text(getDescription()));
       }
 
       if (getClickLink() != null && !getClickLink().isEmpty()) {
@@ -350,13 +352,13 @@ public interface Config {
             Component.translatable(
                 "chat.clickLink",
                 NamedTextColor.DARK_AQUA,
-                Component.text(getClickLink(), NamedTextColor.AQUA, TextDecoration.UNDERLINED));
+                text(getClickLink(), NamedTextColor.AQUA, TextDecoration.UNDERLINED));
         hover.append(clickLink);
       }
 
       TextComponent.Builder component =
-          Component.text()
-              .append(Component.text(prefix ? getPrefix() : getSuffix()))
+          text()
+              .append(text(prefix ? getPrefix() : getSuffix()))
               .hoverEvent(HoverEvent.showText(hover.build()));
 
       if (getClickLink() != null && !getClickLink().isEmpty()) {

@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.tablist;
 
+import static tc.oc.pgm.util.text.types.PlayerComponent.player;
+
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -9,7 +11,6 @@ import org.bukkit.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextTranslations;
-import tc.oc.pgm.util.text.types.PlayerComponent;
 
 /**
  * {@link TabEntry} showing a {@link Player}'s name and skin.
@@ -53,7 +54,7 @@ public class PlayerTabEntry extends DynamicTabEntry {
   @Override
   public BaseComponent[] getContent(TabView view) {
     return TextTranslations.toBaseComponentArray(
-        PlayerComponent.of(player, NameStyle.TAB, view.getViewer()), view.getViewer());
+        player(player, NameStyle.TAB, view.getViewer()), view.getViewer());
   }
 
   @Override

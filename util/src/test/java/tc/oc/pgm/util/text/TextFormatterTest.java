@@ -1,7 +1,9 @@
 package tc.oc.pgm.util.text;
 
+import static net.kyori.adventure.text.Component.text;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static tc.oc.pgm.util.text.TextFormatter.*;
+import static tc.oc.pgm.util.text.TextTranslations.translate;
 
 import com.google.common.collect.ImmutableList;
 import java.util.LinkedList;
@@ -30,10 +32,9 @@ public final class TextFormatterTest {
 
     final List<Component> text = new LinkedList<>();
     for (String person : people.subList(0, size)) {
-      text.add(Component.text(person));
+      text.add(text(person));
     }
-    final Component actual =
-        TextTranslations.translate(list(text, NamedTextColor.WHITE), Locale.US);
+    final Component actual = translate(list(text, NamedTextColor.WHITE), Locale.US);
 
     assertEquals(expected, PlainComponentSerializer.plain().serialize(actual));
   }

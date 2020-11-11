@@ -1,5 +1,7 @@
 package tc.oc.pgm.ffa;
 
+import static tc.oc.pgm.util.text.types.PlayerComponent.player;
+
 import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
@@ -17,7 +19,6 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.text.types.PlayerComponent;
 
 /**
  * Wraps a single {@link MatchPlayer} in a free-for-all match.
@@ -99,7 +100,7 @@ public class Tribute implements Competitor {
 
   @Override
   public Component getName(NameStyle style) {
-    return PlayerComponent.of(player != null ? player.getBukkit() : null, style);
+    return player(player != null ? player.getBukkit() : null, style);
   }
 
   @Override

@@ -111,6 +111,7 @@ public class VotingPool extends MapPool {
                           Math.min(MAX_VOTE_OPTIONS, getOptions().getCustomVoteMaps().size()))
                       : new MapPoll(match, mapScores, getOptions().getCustomVoteMaps(), VOTE_SIZE);
 
+              match.addListener(new VotingBookListener(this, match), MatchScope.LOADED);
               match.getPlayers().forEach(viewer -> currentPoll.sendBook(viewer, false));
             },
             5,
