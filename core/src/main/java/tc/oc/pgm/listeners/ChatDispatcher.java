@@ -2,6 +2,7 @@ package tc.oc.pgm.listeners;
 
 import static net.kyori.adventure.identity.Identity.identity;
 import static net.kyori.adventure.text.Component.text;
+import static tc.oc.pgm.util.text.TextTranslations.translate;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Text;
@@ -429,7 +430,7 @@ public class ChatDispatcher implements Listener {
                     text(
                         String.format(
                             format,
-                            TextTranslations.translate(
+                            translate(
                                 UsernameFormatUtils.CONSOLE_NAME, player.getBukkit().getLocale()),
                             message))));
   }

@@ -1,6 +1,7 @@
 package tc.oc.pgm.listeners;
 
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.title.Title.title;
 import static tc.oc.pgm.util.TimeUtils.fromTicks;
 
@@ -11,6 +12,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
@@ -54,9 +56,9 @@ public class MatchAnnouncer implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchBegin(final MatchStartEvent event) {
     Match match = event.getMatch();
-    match.sendMessage(Component.translatable("broadcast.matchStart", NamedTextColor.GREEN));
+    match.sendMessage(translatable("broadcast.matchStart", NamedTextColor.GREEN));
 
-    Component go = Component.translatable("broadcast.go", NamedTextColor.GREEN);
+    Component go = translatable("broadcast.go", NamedTextColor.GREEN);
     match.showTitle(
         title(go, Component.empty(), Title.Times.of(Duration.ZERO, fromTicks(5), fromTicks(15))));
 
@@ -71,10 +73,10 @@ public class MatchAnnouncer implements Listener {
     for (MatchPlayer viewer : match.getPlayers()) {
       Component title, subtitle = Component.empty();
       if (event.getWinner() == null) {
-        title = Component.translatable("broadcast.gameOver");
+        title = translatable("broadcast.gameOver");
       } else {
         title =
-            Component.translatable(
+            translatable(
                 event.getWinner().isNamePlural()
                     ? "broadcast.gameOver.teamWinners"
                     : "broadcast.gameOver.teamWinner",
@@ -84,13 +86,13 @@ public class MatchAnnouncer implements Listener {
           // Winner
           viewer.playSound(SOUND_MATCH_WIN);
           if (viewer.getParty() instanceof Team) {
-            subtitle = Component.translatable("broadcast.gameOver.teamWon", NamedTextColor.GREEN);
+            subtitle = translatable("broadcast.gameOver.teamWon", NamedTextColor.GREEN);
           }
         } else if (viewer.getParty() instanceof Competitor) {
           // Loser
           viewer.playSound(SOUND_MATCH_LOSE);
           if (viewer.getParty() instanceof Team) {
-            subtitle = Component.translatable("broadcast.gameOver.teamLost", NamedTextColor.RED);
+            subtitle = translatable("broadcast.gameOver.teamLost", NamedTextColor.RED);
           }
         } else {
           // Observer
@@ -123,10 +125,9 @@ public class MatchAnnouncer implements Listener {
   private void sendWelcomeMessage(MatchPlayer viewer) {
     MapInfo mapInfo = viewer.getMatch().getMap();
 
-    String title = ChatColor.AQUA.toString() + ChatColor.BOLD + mapInfo.getName();
+    Component title = text(mapInfo.getName(), NamedTextColor.AQUA, TextDecoration.BOLD);
     viewer.sendMessage(
-        TextFormatter.horizontalLineHeading(
-            viewer.getBukkit(), text(title), NamedTextColor.WHITE, 200));
+        TextFormatter.horizontalLineHeading(viewer.getBukkit(), title, NamedTextColor.WHITE, 200));
 
     String objective = " " + ChatColor.BLUE + ChatColor.ITALIC + mapInfo.getDescription();
     LegacyFormatUtils.wordWrap(objective, 200).forEach(m -> viewer.sendMessage(text(m)));
@@ -136,18 +137,18 @@ public class MatchAnnouncer implements Listener {
       viewer.sendMessage(
           Component.space()
               .append(
-                  Component.translatable(
+                  translatable(
                       "misc.createdBy",
                       NamedTextColor.GRAY,
                       TextFormatter.nameList(authors, NameStyle.FANCY, NamedTextColor.GRAY))));
     }
 
-    viewer.sendMessage(text(LegacyFormatUtils.horizontalLine(ChatColor.WHITE, 200)));
+    viewer.sendMessage(TextFormatter.horizontalLine(NamedTextColor.WHITE, 200));
   }
 
   private void sendCurrentlyPlaying(MatchPlayer viewer) {
     viewer.sendMessage(
-        Component.translatable(
+        translatable(
             "misc.playing",
             NamedTextColor.DARK_PURPLE,
             viewer.getMatch().getMap().getStyledName(MapNameStyle.COLOR_WITH_AUTHORS)));

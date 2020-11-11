@@ -8,7 +8,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.chat.ComponentSerializer;
 import net.minecraft.server.v1_8_R3.*;
 import net.minecraft.server.v1_8_R3.WorldBorder;
 import org.bukkit.*;
@@ -17,13 +16,11 @@ import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.*;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftMetaBook;
 import org.bukkit.craftbukkit.v1_8_R3.scoreboard.CraftTeam;
 import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers;
 import org.bukkit.craftbukkit.v1_8_R3.util.Skins;
 import org.bukkit.entity.*;
 import org.bukkit.entity.Entity;
-import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
@@ -541,17 +538,6 @@ public interface NMSHacks {
 
   static double getAbsorption(LivingEntity entity) {
     return ((CraftLivingEntity) entity).getHandle().getAbsorptionHearts();
-  }
-
-  static void setBookPages(BookMeta book, BaseComponent... pages) {
-    for (BaseComponent page : pages) {
-      ((CraftMetaBook) book)
-          .pages.add(IChatBaseComponent.ChatSerializer.a(ComponentSerializer.toString(page)));
-    }
-  }
-
-  static void openBook(org.bukkit.inventory.ItemStack book, Player player) {
-    ((CraftPlayer) player).getHandle().openBook(CraftItemStack.asNMSCopy(book));
   }
 
   static int getProtocolVersion(Player player) {
