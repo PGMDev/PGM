@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.text;
 
+import static tc.oc.pgm.util.text.TextTranslations.translate;
+
 import com.google.common.collect.Range;
 import java.util.Locale;
 import javax.annotation.Nullable;
@@ -35,7 +37,7 @@ public class TextException extends RuntimeException {
 
   @Override
   public String getLocalizedMessage() {
-    final Component localized = TextTranslations.translate(message, Locale.getDefault());
+    final Component localized = translate(message, Locale.getDefault());
     return PlainComponentSerializer.plain().serialize(localized);
   }
 
