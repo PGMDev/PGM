@@ -78,6 +78,13 @@
             <version>3.0.2-SNAPSHOT</version>
             <scope>provided</scope>
             <optional>true</optional>
+            <!-- Fix transitive dependency breaking builds -->
+            <exclusions>
+                <exclusion>
+                    <groupId>net.md-5</groupId>
+                    <artifactId>bungeecord-chat</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- XML parsing library used for all "map.xml" configuration loading -->
