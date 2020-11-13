@@ -15,7 +15,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -181,8 +180,7 @@ public class InventoryMenu implements Listener {
         || event.getCurrentItem().getItemMeta().getDisplayName() == null) return;
 
     if (event.getWhoClicked() instanceof Player) {
-      MatchPlayer player =
-          PGM.get().getMatchManager().getMatch(event.getWorld()).getPlayer(event.getWhoClicked());
+      MatchPlayer player = match.getPlayer(event.getWhoClicked());
       if (isViewing(player)) {
         ItemStack clicked = event.getCurrentItem();
         for (InventoryMenuItem item : this.inventoryMenuItems) {
