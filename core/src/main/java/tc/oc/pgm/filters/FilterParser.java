@@ -14,6 +14,7 @@ import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.classes.ClassModule;
@@ -463,7 +464,8 @@ public abstract class FilterParser {
   @MethodParser("offset")
   public LocationQueryModifier parseOffsetFilter(Element el) throws InvalidXMLException {
     String value = el.getAttributeValue("vector");
-    if (value == null) throw new InvalidXMLException("No vector provided", el);
+    if (value == null)
+      throw new InvalidXMLException("No vector provided", el);
     // Check vector format
     Vector vector = XMLUtils.parseVector(new Node(el), value.replaceAll("[\\^~]", ""));
 
@@ -485,12 +487,39 @@ public abstract class FilterParser {
       relative[i] = coord.startsWith("~");
     }
 
-    if (local == null) throw new InvalidXMLException("No coordinates provided", el);
+    if (local == null)
+      throw new InvalidXMLException("No coordinates provided", el);
 
     if (local) {
       return new LocalLocationQueryModifier(parseChild(el), vector);
     } else {
       return new WorldLocationQueryModifier(parseChild(el), vector, relative);
     }
+  }
+
+  @MethodParser("players")
+  public PlayerCountFilter parsePlayerCountFilter(Element el) throws InvalidXMLException {
+    Filter countFilter = parseFilterProperty(el, "count-filter", StaticFilter.ALLOW);
+
+    // TODO: Legacy syntax, maybe bump proto to deprecate
+    boolean participants = XMLUtils.parseBoolean(el.getAttribute("participants"), true);
+    boolean observers = XMLUtils.parseBoolean(el.getAttribute("observers"), false);
+    countFilter =
+        new TypedFilter<PlayerQuery>() {
+
+          @Override
+          public Class<? extends PlayerQuery> getQueryType() {
+            return PlayerQuery.class;
+          }
+
+          @Override
+          protected QueryResponse queryTyped(PlayerQuery query) {
+            return QueryResponse.fromBoolean(
+                ((observers && query.getPlayer().isObserving()))
+                    || (participants && query.getPlayer().isParticipating()));
+          }
+        };
+
+    return new PlayerCountFilter(XMLUtils.parseNumericRange(el, Integer.class), countFilter);
   }
 }
