@@ -3,6 +3,7 @@ package tc.oc.pgm.blitz;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
@@ -16,6 +17,7 @@ import org.bukkit.util.Vector;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
@@ -57,6 +59,13 @@ public class BlitzMatchModule implements MatchModule, Listener {
 
   public int getNumOfLives(UUID id) {
     return lifeManager.getLives(id);
+  }
+
+  @EventHandler
+  public void onStart(MatchStartEvent event) {
+    match
+        .getExecutor(MatchScope.RUNNING)
+        .schedule((Runnable) match::calculateVictory, 1, TimeUnit.SECONDS);
   }
 
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
