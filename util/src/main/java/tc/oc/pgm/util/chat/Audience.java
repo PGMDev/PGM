@@ -49,6 +49,9 @@ public interface Audience {
    */
   void showTitle(Component title, Component subTitle, int inTicks, int stayTicks, int outTicks);
 
+  /** Clear any currently shown title from the player's screen. */
+  void hideTitle();
+
   /**
    * Play a {@link Sound}, by the raw asset name.
    *

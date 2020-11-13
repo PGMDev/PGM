@@ -44,6 +44,11 @@ public interface PlayerAudience extends VirtualAudience {
   }
 
   @Override
+  default void hideTitle() {
+    getAudience().hideTitle();
+  }
+
+  @Override
   default void playSound(Sound sound) {
     final Player player = getAudience();
     final Location location =

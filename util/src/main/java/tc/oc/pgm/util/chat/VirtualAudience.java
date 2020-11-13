@@ -52,6 +52,9 @@ public interface VirtualAudience extends Audience {
       Component title, Component subTitle, int inTicks, int stayTicks, int outTicks) {}
 
   @Override
+  default void hideTitle() {}
+
+  @Override
   default void sendMessage(String message) {
     getAudience().sendMessage(message);
   }

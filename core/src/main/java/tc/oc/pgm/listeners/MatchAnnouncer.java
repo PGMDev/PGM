@@ -7,7 +7,6 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -100,9 +99,7 @@ public class MatchAnnouncer implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void clearTitle(PlayerJoinMatchEvent event) {
-    final Player player = event.getPlayer().getBukkit();
-
-    player.hideTitle();
+    event.getPlayer().hideTitle();
 
     // Bukkit assumes a player's locale is "en_US" before it receives a player's setting packet.
     // Thus, we delay sending this prominent message, so it is more likely its in the right locale.
