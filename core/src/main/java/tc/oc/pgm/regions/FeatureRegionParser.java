@@ -48,7 +48,7 @@ public class FeatureRegionParser extends RegionParser {
         && ((TransformedRegion) region).region instanceof XMLRegionReference) {
       factory
           .getFeatures()
-          .validate(((XMLRegionReference) ((TransformedRegion) region).region), validation);
+          .validate((XMLRegionReference) ((TransformedRegion) region).region, validation);
     } else {
       super.validate(region, validation, node);
     }
