@@ -443,4 +443,9 @@ public abstract class FilterParser {
   public TimeFilter parseTimeFilter(Element el) throws InvalidXMLException {
     return new TimeFilter(XMLUtils.parseDuration(el, null));
   }
+
+  @MethodParser("score")
+  public ScoreFilter parseScoreFilter(Element el) throws InvalidXMLException {
+    return new ScoreFilter(XMLUtils.parseNumericRange(new Node(el), Integer.class));
+  }
 }
