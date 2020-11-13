@@ -44,7 +44,7 @@ public class FeatureRegionParser extends RegionParser {
       throws InvalidXMLException {
     if (region instanceof XMLRegionReference) {
       factory.getFeatures().validate((XMLRegionReference) region, validation);
-    } else if (region instanceof TransformedRegion) {
+    } else if (region instanceof TransformedRegion && ((TransformedRegion) region).region instanceof XMLRegionReference) {
       factory.getFeatures().validate(((XMLRegionReference) ((TransformedRegion) region).region), validation);
     } else {
       super.validate(region, validation, node);
