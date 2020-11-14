@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -14,7 +15,6 @@ import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
-import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.classes.ClassModule;
@@ -504,21 +504,15 @@ public abstract class FilterParser {
     // TODO: Legacy syntax, maybe bump proto to deprecate
     boolean participants = XMLUtils.parseBoolean(el.getAttribute("participants"), true);
     boolean observers = XMLUtils.parseBoolean(el.getAttribute("observers"), false);
-    countFilter =
-        new TypedFilter<PlayerQuery>() {
-
-          @Override
-          public Class<? extends PlayerQuery> getQueryType() {
-            return PlayerQuery.class;
-          }
-
-          @Override
-          protected QueryResponse queryTyped(PlayerQuery query) {
-            return QueryResponse.fromBoolean(
-                ((observers && query.getPlayer().isObserving()))
-                    || (participants && query.getPlayer().isParticipating()));
-          }
-        };
+    if (participants && observers) {
+      countFilter =
+          new AnyFilter(
+              Arrays.asList(ParticipatingFilter.PARTICIPATING, ParticipatingFilter.OBSERVING));
+    } else if (participants) {
+      countFilter = ParticipatingFilter.PARTICIPATING;
+    } else if (observers) {
+      countFilter = ParticipatingFilter.OBSERVING;
+    }
 
     return new PlayerCountFilter(XMLUtils.parseNumericRange(el, Integer.class), countFilter);
   }
