@@ -463,46 +463,44 @@ public abstract class FilterParser {
   }
 
   @MethodParser("match-started")
-  public MatchPhaseFilter parseMatchStarted(Element el) throws InvalidXMLException {
+  public Filter parseMatchStarted(Element el) throws InvalidXMLException {
     return parseMatchPhaseFilter("started", el);
   }
 
   @MethodParser("match-running")
-  public MatchPhaseFilter parseMatchRunning(Element el) throws InvalidXMLException {
+  public Filter parseMatchRunning(Element el) throws InvalidXMLException {
     return parseMatchPhaseFilter("running", el);
   }
 
   @MethodParser("match-finished")
-  public MatchPhaseFilter parseMatchFinished(Element el) throws InvalidXMLException {
+  public Filter parseMatchFinished(Element el) throws InvalidXMLException {
     return parseMatchPhaseFilter("finished", el);
   }
 
-  private MatchPhaseFilter parseMatchPhaseFilter(String matchState, Element el)
-      throws InvalidXMLException {
+  private Filter parseMatchPhaseFilter(String matchState, Element el) throws InvalidXMLException {
 
-    Set<MatchPhase> matchPhases = new HashSet<>();
+    MatchPhase matchPhase = null;
 
     switch (matchState) {
       case "running":
-        matchPhases.add(MatchPhase.RUNNING);
+        matchPhase = MatchPhase.RUNNING;
         break;
       case "finished":
-        matchPhases.add(MatchPhase.FINISHED);
+        matchPhase = MatchPhase.FINISHED;
         break;
       case "starting":
-        matchPhases.add(MatchPhase.STARTING);
+        matchPhase = MatchPhase.STARTING;
         break;
       case "idle":
-        matchPhases.add(MatchPhase.IDLE);
+        matchPhase = MatchPhase.IDLE;
         break;
       case "started":
-        matchPhases.add(MatchPhase.RUNNING);
-        matchPhases.add(MatchPhase.FINISHED);
-        break;
+        return AnyFilter.of(
+            new MatchPhaseFilter(MatchPhase.RUNNING), new MatchPhaseFilter(MatchPhase.FINISHED));
     }
-    if (matchPhases.isEmpty()) throw new InvalidXMLException("Invalid or no match state found", el);
+    if (matchPhase == null) throw new InvalidXMLException("Invalid or no match state found", el);
 
-    return new MatchPhaseFilter(matchPhases);
+    return new MatchPhaseFilter(matchPhase);
   }
 
   // Methods for parsing QueryModifiers
