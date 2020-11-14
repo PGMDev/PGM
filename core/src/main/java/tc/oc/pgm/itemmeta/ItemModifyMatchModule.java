@@ -1,5 +1,6 @@
 package tc.oc.pgm.itemmeta;
 
+import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseEvent;
@@ -7,6 +8,7 @@ import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -58,6 +60,15 @@ public class ItemModifyMatchModule implements MatchModule, Listener {
       if (applyRules(contents[i])) {
         event.getInventory().setItem(i, contents[i]);
       }
+    }
+  }
+
+  @EventHandler
+  public void onArrowPickup(PlayerPickupItemEvent event) {
+    // Eagerly apply arrow rules on pickup instead of waiting for inventory open
+    ItemStack stack = event.getItem().getItemStack();
+    if (stack.getType() == Material.ARROW && applyRules(stack)) {
+      event.getItem().setItemStack(stack);
     }
   }
 

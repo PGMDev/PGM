@@ -31,9 +31,9 @@ public class ItemModifyModule implements MapModule<ItemModifyMatchModule> {
     if (stack == null || stack.getType() == Material.AIR || APPLIED.has(stack)) {
       return false;
     } else {
-      APPLIED.set(stack, true);
       for (ItemRule rule : rules) {
         if (rule.matches(stack)) {
+          APPLIED.set(stack, true);
           rule.apply(stack);
         }
       }
