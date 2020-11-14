@@ -276,15 +276,17 @@ public class ScoreMatchModule implements MatchModule, Listener {
     int wholePoints = (int) points;
     if (wholePoints < 1) return;
 
-    match.sendMessage(
-        TranslatableComponent.of(
-            "scorebox.scored",
-            player.getName(NameStyle.COLOR),
-            TranslatableComponent.of(
-                wholePoints == 1 ? "misc.point" : "misc.points",
-                TextComponent.of(Integer.toString(wholePoints), TextColor.DARK_AQUA)),
-            player.getParty().getName()));
-    player.playSound(new Sound("random.levelup"));
+    if (!box.isSilent()) {
+      match.sendMessage(
+          TranslatableComponent.of(
+              "scorebox.scored",
+              player.getName(NameStyle.COLOR),
+              TranslatableComponent.of(
+                  wholePoints == 1 ? "misc.point" : "misc.points",
+                  TextComponent.of(Integer.toString(wholePoints), TextColor.DARK_AQUA)),
+              player.getParty().getName()));
+      player.playSound(new Sound("random.levelup"));
+    }
   }
 
   public void incrementScore(UUID player, Competitor competitor, double amount) {
