@@ -141,6 +141,10 @@ public class TeamModule implements MapModule<TeamMatchModule> {
       throw new InvalidXMLException("Max overfill can not be less then max players.", el);
     }
 
+    if (maxPlayers <= minPlayers) {
+      throw new InvalidXMLException("Min players can not be less (or equal) to max players.", el);
+    }
+
     TeamFactory teamFactory =
         new TeamFactory(
             id,
