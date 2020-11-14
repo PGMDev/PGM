@@ -1,6 +1,7 @@
 package tc.oc.pgm.filters;
 
 import com.google.common.collect.Range;
+import java.util.Collection;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -23,8 +24,25 @@ public class PlayerCountFilter extends TypedFilter<MatchQuery> {
   @Override
   public QueryResponse queryTyped(MatchQuery query) {
     int count = 0;
-    for (MatchPlayer player : query.getMatch().getPlayers()) {
-      if (this.countFilter.query(player.getQuery()) == QueryResponse.ALLOW) count++;
+    Collection<MatchPlayer> allPlayers = query.getMatch().getPlayers();
+    int total = allPlayers.size();
+    boolean hasUpperBound = range.hasUpperBound();
+    boolean hasLowerBound = range.hasLowerBound();
+
+    // Not even enough players to consider checking
+    if (hasLowerBound && range.lowerEndpoint() > total) return QueryResponse.DENY;
+
+    for (MatchPlayer player : allPlayers) {
+      total--;
+      if (this.countFilter.query(player.getQuery()) == QueryResponse.ALLOW) {
+        count++;
+        // Too high, give up
+        if (hasUpperBound && range.upperEndpoint() < count) return QueryResponse.DENY;
+
+        // In the range - even if every other player passes the filter we won't go out of bounds
+        if (hasUpperBound && range.contains(count) && count + total <= range.upperEndpoint())
+          return QueryResponse.ALLOW;
+      }
     }
     return QueryResponse.fromBoolean(range.contains(count));
   }
