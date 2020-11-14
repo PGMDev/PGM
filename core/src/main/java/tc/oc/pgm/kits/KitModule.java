@@ -46,7 +46,7 @@ public class KitModule implements MapModule {
       // Apply any item-mods rules to item kits
       if (imm != null) {
         if (kit instanceof ItemKit) {
-          for (ItemStack stack : ((ItemKit) kit).getSlotItems().values()) {
+          for (ItemStack stack : ((ItemKit) kit).getItems()) {
             imm.applyRules(stack);
           }
         }
