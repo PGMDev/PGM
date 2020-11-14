@@ -9,11 +9,14 @@ import java.util.logging.Logger;
 import net.kyori.text.Component;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.filters.FilterParser;
+import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.points.PointParser;
 import tc.oc.pgm.regions.RegionModule;
@@ -29,9 +32,9 @@ public class SpawnModule implements MapModule {
 
   protected final Spawn defaultSpawn;
   protected final List<Spawn> spawns;
-  protected final RespawnOptions respawnOptions;
+  protected final List<RespawnOptions> respawnOptions;
 
-  public SpawnModule(Spawn defaultSpawn, List<Spawn> spawns, RespawnOptions respawnOptions) {
+  public SpawnModule(Spawn defaultSpawn, List<Spawn> spawns, List<RespawnOptions> respawnOptions) {
     assert defaultSpawn != null;
     this.defaultSpawn = defaultSpawn;
     this.spawns = spawns;
@@ -44,6 +47,8 @@ public class SpawnModule implements MapModule {
   }
 
   public static class Factory implements MapModuleFactory<SpawnModule> {
+    private FilterParser filterParser;
+
     @Override
     public Collection<Class<? extends MapModule>> getSoftDependencies() {
       return ImmutableList.of(RegionModule.class, KitModule.class);
@@ -57,6 +62,7 @@ public class SpawnModule implements MapModule {
     @Override
     public SpawnModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
+      this.filterParser = factory.getFilters();
       SpawnParser parser = new SpawnParser(factory, new PointParser(factory));
       List<Spawn> spawns = Lists.newArrayList();
 
@@ -68,29 +74,46 @@ public class SpawnModule implements MapModule {
         throw new InvalidXMLException("map must have a single default spawn", doc);
       }
 
-      return new SpawnModule(parser.getDefaultSpawn(), spawns, parseRespawnOptions(doc));
-    }
-  }
+      List<RespawnOptions> respawnOptions = Lists.newArrayList();
 
-  protected static RespawnOptions parseRespawnOptions(Document doc) throws InvalidXMLException {
-    Duration delay = MINIMUM_RESPAWN_DELAY;
-    boolean auto = doc.getRootElement().getChild("autorespawn") != null; // Legacy support
-    boolean blackout = false;
-    boolean spectate = false;
-    boolean bedSpawn = false;
-    Component message = null;
+      for (Element elRespawn :
+          XMLUtils.flattenElements(doc.getRootElement(), "respawns", "respawn")) {
+        respawnOptions.add(parseOptions(elRespawn, true, false));
+      }
 
-    for (Element elRespawn : doc.getRootElement().getChildren("respawn")) {
-      delay = XMLUtils.parseDuration(elRespawn.getAttribute("delay"), delay);
-      auto = XMLUtils.parseBoolean(elRespawn.getAttribute("auto"), auto);
-      blackout = XMLUtils.parseBoolean(elRespawn.getAttribute("blackout"), blackout);
-      spectate = XMLUtils.parseBoolean(elRespawn.getAttribute("spectate"), spectate);
-      bedSpawn = XMLUtils.parseBoolean(elRespawn.getAttribute("bed"), bedSpawn);
-      message = XMLUtils.parseFormattedText(elRespawn, "message", message);
+      respawnOptions.add(
+          parseOptions(
+              doc.getRootElement().getChild("respawn"),
+              false,
+              doc.getRootElement().getChild("autorespawn") == null));
 
-      if (TimeUtils.isShorterThan(delay, MINIMUM_RESPAWN_DELAY)) delay = MINIMUM_RESPAWN_DELAY;
+      this.filterParser = null; // Clean up just in case
+
+      return new SpawnModule(parser.getDefaultSpawn(), spawns, respawnOptions);
     }
 
-    return new RespawnOptions(delay, auto, blackout, spectate, bedSpawn, message);
+    private RespawnOptions parseOptions(Element el, boolean filterAllowed, boolean legacy)
+        throws InvalidXMLException {
+      Duration delay = XMLUtils.parseDuration(el.getAttribute("delay"), MINIMUM_RESPAWN_DELAY);
+      boolean auto = XMLUtils.parseBoolean(el.getAttribute("auto"), legacy); // Legacy support
+      boolean blackout = XMLUtils.parseBoolean(el.getAttribute("blackout"), false);
+      boolean spectate = XMLUtils.parseBoolean(el.getAttribute("spectate"), false);
+      boolean bedSpawn = XMLUtils.parseBoolean(el.getAttribute("bed"), false);
+      Component message = XMLUtils.parseFormattedText(el, "message");
+      Filter filter = filterParser.parseFilterProperty(el, "filter", StaticFilter.ALLOW);
+
+      if (filter != null && !filterAllowed)
+        throw new InvalidXMLException("Legacy respawn elements cannot use filters", el);
+
+      if (TimeUtils.isShorterThan(delay, MINIMUM_RESPAWN_DELAY)) {
+        if (!legacy)
+          throw new InvalidXMLException(
+              "Spawn delay must be at least " + MINIMUM_RESPAWN_DELAY.getSeconds() + "s", el);
+
+        delay = MINIMUM_RESPAWN_DELAY;
+      }
+
+      return new RespawnOptions(delay, auto, blackout, spectate, bedSpawn, message, filter);
+    }
   }
 }
