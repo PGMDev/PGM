@@ -47,6 +47,9 @@ public class BlitzModule implements MapModule {
       for (Element blitzEl : blitzElements) {
         boolean broadcastLives = XMLUtils.parseBoolean(blitzEl.getChild("broadcastLives"), true);
         int lives = XMLUtils.parseNumber(Node.fromChildOrAttr(blitzEl, "lives"), Integer.class, 1);
+
+        if (lives < 1) throw new InvalidXMLException("Blitz lives must be at least 1", blitzEl);
+
         config = new BlitzConfig(lives, broadcastLives);
       }
 
