@@ -299,6 +299,11 @@ public abstract class FilterParser {
       }
     }
 
+    if (!range.hasUpperBound() && repeat) {
+      throw new InvalidXMLException(
+          "kill-streak filters with repeat=\"true\" must define a max or count", el);
+    }
+
     return new KillStreakFilter(range, repeat);
   }
 
