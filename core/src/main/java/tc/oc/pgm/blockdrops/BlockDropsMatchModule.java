@@ -85,7 +85,7 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
     Random random = match.getRandom();
     for (Map.Entry<ItemStack, Double> entry : drops.items.entrySet()) {
       if (random.nextFloat() < yield * entry.getValue()) {
-        location.getWorld().dropItemNaturally(location, entry.getKey());
+        location.getWorld().dropItemNaturally(location.toCenterLocation(), entry.getKey());
       }
     }
   }
@@ -93,7 +93,10 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
   private void dropExperience(BlockDrops drops, Location location) {
     if (drops.experience != 0) {
       ExperienceOrb expOrb =
-          (ExperienceOrb) location.getWorld().spawnEntity(location, EntityType.EXPERIENCE_ORB);
+          (ExperienceOrb)
+              location
+                  .getWorld()
+                  .spawnEntity(location.toCenterLocation(), EntityType.EXPERIENCE_ORB);
       if (expOrb != null) {
         expOrb.setExperience(drops.experience);
       }
