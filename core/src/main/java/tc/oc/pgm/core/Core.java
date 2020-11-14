@@ -89,7 +89,11 @@ public class Core extends TouchableGoal<CoreFactory>
   // Remove @Nullable
   @Override
   public @Nonnull Team getOwner() {
-    return super.getOwner();
+    Team owner = super.getOwner();
+    if (owner == null) {
+      throw new IllegalStateException("core " + getId() + " has no owner");
+    }
+    return owner;
   }
 
   @Override
