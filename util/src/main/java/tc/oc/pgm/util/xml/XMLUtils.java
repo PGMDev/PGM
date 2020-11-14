@@ -491,15 +491,20 @@ public final class XMLUtils {
     }
   }
 
-  public static Duration parseDuration(Node node, Duration def) throws InvalidXMLException {
+  public static Duration parseDuration(Node node, Duration def, Range<Duration> validRange)
+      throws InvalidXMLException {
     if (node == null) {
       return def;
     }
     try {
-      return TextParser.parseDuration(node.getValueNormalize());
+      return TextParser.parseDuration(node.getValueNormalize(), validRange);
     } catch (TextException e) {
-      throw new InvalidXMLException("invalid time format", node, e);
+      throw new InvalidXMLException("invalid time format: " + e.getLocalizedMessage(), node);
     }
+  }
+
+  public static Duration parseDuration(Node node, Duration def) throws InvalidXMLException {
+    return parseDuration(node, def, null);
   }
 
   public static @Nullable Duration parseDuration(Node node) throws InvalidXMLException {
@@ -510,8 +515,22 @@ public final class XMLUtils {
     return parseDuration(Node.fromNullable(el), def);
   }
 
+  public static Duration parseDuration(Element el, Duration def, Range<Duration> validRange)
+      throws InvalidXMLException {
+    return parseDuration(Node.fromNullable(el), def, validRange);
+  }
+
+  public static Duration parseDuration(Element el) throws InvalidXMLException {
+    return parseDuration(Node.fromNullable(el), null);
+  }
+
   public static Duration parseDuration(Attribute attr, Duration def) throws InvalidXMLException {
     return parseDuration(Node.fromNullable(attr), def);
+  }
+
+  public static Duration parseDuration(Attribute attr, Duration def, Range<Duration> validDuration)
+      throws InvalidXMLException {
+    return parseDuration(Node.fromNullable(attr), def, validDuration);
   }
 
   public static Duration parseDuration(Attribute attr) throws InvalidXMLException {

@@ -18,7 +18,6 @@ import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.result.VictoryConditions;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.text.TextException;
-import tc.oc.pgm.util.text.TextParser;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
@@ -90,9 +89,9 @@ public class TimeLimitModule implements MapModule<TimeLimitMatchModule> {
 
       return new TimeLimit(
           el.getAttributeValue("id"),
-          TextParser.parseDuration(el.getTextNormalize()),
-          XMLUtils.parseDuration(el.getAttribute("overtime")),
-          XMLUtils.parseDuration(el.getAttribute("max-overtime")),
+          XMLUtils.parseDuration(el, null, TimeLimit.SAFE_RANGE),
+          XMLUtils.parseDuration(el.getAttribute("overtime"), null, TimeLimit.SAFE_RANGE),
+          XMLUtils.parseDuration(el.getAttribute("max-overtime"), null, TimeLimit.SAFE_RANGE),
           parseVictoryCondition(factory, el.getAttribute("result")),
           XMLUtils.parseBoolean(el.getAttribute("show"), true));
     }

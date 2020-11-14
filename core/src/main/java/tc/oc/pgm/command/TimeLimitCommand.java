@@ -14,6 +14,7 @@ import tc.oc.pgm.timelimit.TimeLimit;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.text.TextException;
 
 public final class TimeLimitCommand {
 
@@ -34,15 +35,22 @@ public final class TimeLimitCommand {
 
     final TimeLimitMatchModule time = match.needModule(TimeLimitMatchModule.class);
 
+    // Treat negative durations as a subtraction
+    if (duration.isNegative()
+        && time.getCountdown() != null
+        && time.getCountdown().getRemaining() != null) {
+      duration = time.getCountdown().getRemaining().minus(duration);
+      if (duration.isNegative()) duration = Duration.ZERO;
+    }
+
+    if (!TimeLimit.SAFE_RANGE.contains(duration)) {
+      audience.sendWarning(
+          TextException.outOfRange(duration.toString(), TimeLimit.SAFE_RANGE).getText());
+      return;
+    }
+
     time.cancel();
-    time.setTimeLimit(
-        new TimeLimit(
-            null,
-            duration.isNegative() ? Duration.ZERO : duration,
-            overtime,
-            maxOvertime,
-            result,
-            true));
+    time.setTimeLimit(new TimeLimit(null, duration, overtime, maxOvertime, result, true));
     time.start();
 
     audience.sendMessage(

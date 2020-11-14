@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
+import com.google.common.collect.Range;
 import java.time.Duration;
 import java.util.Collection;
 import javax.annotation.Nullable;
@@ -18,6 +19,9 @@ import tc.oc.pgm.util.collection.RankedSet;
 
 @FeatureInfo(name = "time-limit")
 public class TimeLimit extends SelfIdentifyingFeatureDefinition implements VictoryCondition {
+  public static final Range<Duration> SAFE_RANGE =
+      Range.closed(Duration.ZERO, Duration.ofDays(365));
+
   private final Duration duration, overtime, maxOvertime;
   private final @Nullable VictoryCondition result;
   private final boolean show;
