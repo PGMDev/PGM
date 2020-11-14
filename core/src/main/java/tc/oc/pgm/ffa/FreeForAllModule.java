@@ -86,6 +86,15 @@ public class FreeForAllModule implements MapModule {
           colors = XMLUtils.parseBoolean(Node.fromAttr(elPlayers, "colors"), colors);
         }
 
+        if (minPlayers > maxPlayers) {
+          if (elPlayers != null)
+            throw new InvalidXMLException("\"max\" must be greater than \"min\"", elPlayers);
+          else {
+            if (maxPlayers > 1) minPlayers = maxPlayers / 2;
+            logger.severe("Configured minimum needed players is over Bukkit max player limit");
+          }
+        }
+
         return new FreeForAllModule(
             new FreeForAllOptions(minPlayers, maxPlayers, maxOverfill, nameTagVisibility, colors));
       }
