@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -57,10 +56,10 @@ public class ItemModifyModule implements MapModule<ItemModifyMatchModule> {
 
         // Always use a PotionMeta so the rule can have potion effects, though it will only apply
         // those to potion items
-        PotionMeta meta = (PotionMeta) Bukkit.getItemFactory().getItemMeta(Material.POTION);
-        factory.getKits().parseItemMeta(XMLUtils.getRequiredUniqueChild(elRule, "modify"), meta);
+        ItemStack potion = new ItemStack(Material.POTION);
+        factory.getKits().parseItemMeta(XMLUtils.getRequiredUniqueChild(elRule, "modify"), potion);
 
-        ItemRule rule = new ItemRule(items, meta);
+        ItemRule rule = new ItemRule(items, (PotionMeta) potion.getItemMeta());
         rules.add(rule);
       }
 

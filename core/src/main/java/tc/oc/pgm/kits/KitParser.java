@@ -35,7 +35,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionType;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -404,10 +406,8 @@ public abstract class KitParser {
       throw new InvalidXMLException("Invalid item/block", el);
     }
 
-    ItemMeta meta = itemStack.getItemMeta();
-    if (meta != null) { // This happens if the item is "air"
-      parseItemMeta(el, meta);
-      itemStack.setItemMeta(meta);
+    if (itemStack.getItemMeta() != null) { // This happens if the item is "air"
+      parseItemMeta(el, itemStack);
     }
 
     parseCustomNBT(el, itemStack);
@@ -415,7 +415,8 @@ public abstract class KitParser {
     return itemStack;
   }
 
-  public void parseItemMeta(Element el, ItemMeta meta) throws InvalidXMLException {
+  public void parseItemMeta(Element el, ItemStack stack) throws InvalidXMLException {
+    ItemMeta meta = stack.getItemMeta();
     for (Map.Entry<Enchantment, Integer> enchant : parseEnchantments(el).entrySet()) {
       meta.addEnchant(enchant.getKey(), enchant.getValue(), true);
     }
@@ -428,16 +429,32 @@ public abstract class KitParser {
     }
 
     List<PotionEffect> potions = parsePotions(el);
-    if (!potions.isEmpty() && meta instanceof PotionMeta) {
-      PotionMeta potionMeta = (PotionMeta) meta;
+    if (!potions.isEmpty()) {
+      if (meta instanceof PotionMeta) {
+        PotionMeta potionMeta = (PotionMeta) meta;
 
-      for (PotionEffect effect : potionMeta.getCustomEffects()) {
-        potionMeta.removeCustomEffect(effect.getType());
-      }
+        for (PotionEffect effect : potionMeta.getCustomEffects()) {
+          potionMeta.removeCustomEffect(effect.getType());
+        }
 
-      for (PotionEffect effect : potions) {
-        potionMeta.addCustomEffect(effect, false);
-      }
+        for (PotionEffect effect : potions) {
+          potionMeta.addCustomEffect(effect, false);
+        }
+
+        // Needs to be before splash check
+        Node attr = Node.fromAttr(el, "display-type");
+        if (attr != null) {
+          PotionType type = XMLUtils.parseEnum(attr, PotionType.class, "potion type");
+          stack.setDurability((short) type.getDamageValue());
+        }
+
+        if (XMLUtils.parseBoolean(el.getAttribute("splash"), false)) {
+          Potion potion = Potion.fromItemStack(stack);
+          potion.setSplash(true);
+          stack.setDurability(potion.toDamageValue());
+        }
+
+      } else throw new InvalidXMLException("Tried to apply potion effects to a non potion", el);
     }
 
     for (Map.Entry<String, AttributeModifier> entry : parseAttributeModifiers(el).entries()) {
@@ -489,6 +506,7 @@ public abstract class KitParser {
     if (elCanPlaceOn != null) {
       meta.setCanPlaceOn(XMLUtils.parseMaterialMatcher(elCanPlaceOn).getMaterials());
     }
+    stack.setItemMeta(meta);
   }
 
   String itemFlagName(ItemFlag flag) {
