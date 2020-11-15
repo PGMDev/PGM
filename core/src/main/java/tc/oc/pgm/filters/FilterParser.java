@@ -1,6 +1,5 @@
 package tc.oc.pgm.filters;
 
-import com.google.common.collect.BoundType;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import java.lang.reflect.Method;
@@ -466,8 +465,7 @@ public abstract class FilterParser {
   @MethodParser("offset")
   public LocationQueryModifier parseOffsetFilter(Element el) throws InvalidXMLException {
     String value = el.getAttributeValue("vector");
-    if (value == null)
-      throw new InvalidXMLException("No vector provided", el);
+    if (value == null) throw new InvalidXMLException("No vector provided", el);
     // Check vector format
     Vector vector = XMLUtils.parseVector(new Node(el), value.replaceAll("[\\^~]", ""));
 
@@ -489,8 +487,7 @@ public abstract class FilterParser {
       relative[i] = coord.startsWith("~");
     }
 
-    if (local == null)
-      throw new InvalidXMLException("No coordinates provided", el);
+    if (local == null) throw new InvalidXMLException("No coordinates provided", el);
 
     if (local) {
       return new LocalLocationQueryModifier(parseChild(el), vector);
@@ -518,8 +515,10 @@ public abstract class FilterParser {
 
     Range<Integer> range = XMLUtils.parseNumericRange(el, Integer.class);
 
-    if (range.hasLowerBound() && range.lowerEndpoint() <= 0) throw new InvalidXMLException("Lower limit must be at least 0", el);
-    if (range.hasUpperBound() && range.upperEndpoint() < 0) throw new InvalidXMLException("Upper limit must be greater than 0", el);
+    if (range.hasLowerBound() && range.lowerEndpoint() <= 0)
+      throw new InvalidXMLException("Lower limit must be at least 0", el);
+    if (range.hasUpperBound() && range.upperEndpoint() < 0)
+      throw new InvalidXMLException("Upper limit must be greater than 0", el);
 
     // Shrink the range to be at least 0 - the maximum possible number of players that can be online
     // For example (assuming the max player count is 20):
