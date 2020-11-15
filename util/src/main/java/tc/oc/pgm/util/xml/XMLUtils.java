@@ -348,20 +348,27 @@ public final class XMLUtils {
 
   public static <T extends Number & Comparable<T>> T parseNumber(
       Element el, Class<T> type, Range<T> range) throws InvalidXMLException {
-    T value = parseNumber(el, type);
+    return parseNumber(new Node(el), type, range);
+  }
+
+  public static <T extends Number & Comparable<T>> T parseNumber(
+      Attribute attr, Class<T> type, Range<T> range) throws InvalidXMLException {
+    return parseNumber(new Node(attr), type, range);
+  }
+
+  public static <T extends Number & Comparable<T>> T parseNumber(
+      Node node, Class<T> type, Range<T> range) throws InvalidXMLException {
+    T value = parseNumber(node, type);
     if (!range.contains(value)) {
-      throw new InvalidXMLException(value + " is not in the range " + range, el);
+      throw new InvalidXMLException(value + " is not in the range " + range, node);
     }
     return value;
   }
 
   public static <T extends Number & Comparable<T>> T parseNumber(
-      Attribute attr, Class<T> type, Range<T> range) throws InvalidXMLException {
-    T value = parseNumber(attr, type);
-    if (!range.contains(value)) {
-      throw new InvalidXMLException(value + " is not in the range " + range, attr);
-    }
-    return value;
+      Node node, Class<T> type, Range<T> range, T def) throws InvalidXMLException {
+    if (node == null) return def;
+    else return parseNumber(node, type, range);
   }
 
   public static <T extends Number & Comparable<T>> T parseNumber(
