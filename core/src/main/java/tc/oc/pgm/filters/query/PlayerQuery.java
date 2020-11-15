@@ -3,6 +3,7 @@ package tc.oc.pgm.filters.query;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import org.bukkit.Location;
@@ -16,10 +17,16 @@ import tc.oc.pgm.api.player.MatchPlayer;
 public class PlayerQuery extends Query implements tc.oc.pgm.api.filter.query.PlayerQuery {
 
   private final MatchPlayer player;
+  private final Optional<Location> location;
 
-  public PlayerQuery(@Nullable Event event, MatchPlayer player) {
+  public PlayerQuery(@Nullable Event event, MatchPlayer player, @Nullable Location location) {
     super(event);
     this.player = checkNotNull(player);
+    this.location = Optional.ofNullable(location);
+  }
+
+  public PlayerQuery(@Nullable Event event, MatchPlayer player) {
+    this(event, player, null);
   }
 
   @Override
@@ -49,7 +56,7 @@ public class PlayerQuery extends Query implements tc.oc.pgm.api.filter.query.Pla
 
   @Override
   public Location getLocation() {
-    return player.getBukkit().getLocation();
+    return location.orElse(player.getBukkit().getLocation());
   }
 
   @Override

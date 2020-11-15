@@ -31,6 +31,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.util.BlockVector;
 import tc.oc.pgm.api.event.BlockTransformEvent;
+import tc.oc.pgm.api.filter.query.LocationQuery;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
@@ -230,6 +231,11 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   public boolean canDropOn(BlockState base) {
     return base.getType().isSolid()
         || (getDefinition().canDropOnWater() && Materials.isWater(base.getType()));
+  }
+
+  public boolean canDrop(LocationQuery query) {
+    return canDropAt(query.getLocation())
+        && getDefinition().getDropFilter().query(query).isAllowed();
   }
 
   public boolean canDropAt(Location location) {
