@@ -12,12 +12,14 @@ public class ScoreBoxFactory {
   private final int score;
   private final Filter filter;
   private final ImmutableMap<SingleMaterialMatcher, Double> redeemables;
+  private final boolean silent;
 
   public ScoreBoxFactory(
       Region region,
       int score,
       Filter filter,
-      ImmutableMap<SingleMaterialMatcher, Double> redeemables) {
+      ImmutableMap<SingleMaterialMatcher, Double> redeemables,
+      boolean silent) {
     Preconditions.checkNotNull(region, "region");
     Preconditions.checkNotNull(filter, "filter");
 
@@ -25,9 +27,10 @@ public class ScoreBoxFactory {
     this.score = score;
     this.filter = filter;
     this.redeemables = redeemables;
+    this.silent = silent;
   }
 
   public ScoreBox createScoreBox(Match match) {
-    return new ScoreBox(this.region, this.score, this.filter, this.redeemables);
+    return new ScoreBox(this.region, this.score, this.filter, this.redeemables, this.silent);
   }
 }
