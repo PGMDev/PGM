@@ -105,13 +105,7 @@ public class TeamModule implements MapModule<TeamMatchModule> {
     if (attr == null) {
       return null;
     }
-    String name = attr.getValue();
-    TeamFactory team = Teams.getTeam(name, factory);
-
-    if (team == null) {
-      throw new InvalidXMLException("unknown team '" + name + "'", attr);
-    }
-    return team;
+    return Teams.getTeam(new Node(attr), factory);
   }
 
   private static TeamFactory parseTeamDefinition(Element el, MapFactory factory)

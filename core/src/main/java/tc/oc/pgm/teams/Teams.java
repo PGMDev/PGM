@@ -17,10 +17,6 @@ public class Teams {
 
   private Teams() {}
 
-  /**
-   * Lookup a team by name or ID. Prior to {@link MapProtos#FILTER_FEATURES}, teams are looked up by
-   * name.
-   */
   public static TeamFactory getTeam(String team, MapFactory factory) {
     TeamFactory teamFactory = factory.getFeatures().get(team, TeamFactory.class);
     if (factory.getProto().isOlderThan(FILTER_FEATURES)) {
@@ -34,18 +30,28 @@ public class Teams {
     return teamFactory;
   }
 
+  /**
+   * Lookup a team by name or ID. Prior to {@link MapProtos#FILTER_FEATURES}, teams are looked up by
+   * name.
+   */
+  public static TeamFactory getTeam(Node node, MapFactory factory) throws InvalidXMLException {
+    TeamFactory teamFactory = getTeam(node.getValueNormalize(), factory);
+
+    if (teamFactory == null) {
+      throw new InvalidXMLException("unknown team '" + node.getValue() + "'", node);
+    }
+
+    return teamFactory;
+  }
+
   public static TeamFactory getTeam(String team, Match match) {
     return match.needModule(TeamMatchModule.class).bestFuzzyMatch(team).getInfo();
   }
 
   public static FeatureReference<TeamFactory> getTeamRef(Node node, MapFactory factory)
       throws InvalidXMLException {
-    String id = node.getValueNormalize();
     if (factory.getProto().isOlderThan(FILTER_FEATURES)) {
-      TeamFactory definition = getTeam(id, factory);
-      if (definition == null) {
-        throw new InvalidXMLException("Unknown team '" + id + "'", node);
-      }
+      TeamFactory definition = getTeam(node, factory);
       return new ImmediateFeatureReference<>(definition);
     } else {
       return factory.getFeatures().createReference(node, TeamFactory.class);
