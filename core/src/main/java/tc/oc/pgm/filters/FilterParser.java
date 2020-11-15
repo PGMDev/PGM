@@ -1,5 +1,6 @@
 package tc.oc.pgm.filters;
 
+import com.google.common.collect.BoundType;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import java.lang.reflect.Method;
@@ -8,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
@@ -514,6 +516,18 @@ public abstract class FilterParser {
       countFilter = ParticipatingFilter.OBSERVING;
     }
 
-    return new PlayerCountFilter(XMLUtils.parseNumericRange(el, Integer.class), countFilter);
+    Range<Integer> range = XMLUtils.parseNumericRange(el, Integer.class);
+
+    if (range.hasLowerBound() && range.lowerEndpoint() <= 0) throw new InvalidXMLException("Lower limit must be at least 0", el);
+    if (range.hasUpperBound() && range.upperEndpoint() < 0) throw new InvalidXMLException("Upper limit must be greater than 0", el);
+
+    // Shrink the range to be at least 0 - the maximum possible number of players that can be online
+    // For example (assuming the max player count is 20):
+    // - If the supplied range is -inf...50, the result is 0...20
+    // - If the supplied range is 5...10, the result is 5...10
+    // - If the supplied range is -inf...inf, the result is 0...20
+    range = Range.open(0, Bukkit.getMaxPlayers()).intersection(range);
+
+    return new PlayerCountFilter(range, countFilter);
   }
 }

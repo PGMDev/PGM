@@ -37,11 +37,10 @@ public class PlayerCountFilter extends TypedFilter<MatchQuery> {
       if (this.countFilter.query(player.getQuery()) == QueryResponse.ALLOW) {
         count++;
         // Too high, give up
-        if (hasUpperBound && range.upperEndpoint() < count) return QueryResponse.DENY;
+        if (hasUpperBound && range.upperEndpoint() < count) break;
 
         // In the range - even if every other player passes the filter we won't go out of bounds
-        if (hasUpperBound && range.contains(count) && count + total <= range.upperEndpoint())
-          return QueryResponse.ALLOW;
+        if (hasUpperBound && range.contains(count) && count + total <= range.upperEndpoint()) break;
       }
     }
     return QueryResponse.fromBoolean(range.contains(count));
