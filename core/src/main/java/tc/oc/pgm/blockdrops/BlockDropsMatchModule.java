@@ -85,7 +85,7 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
     Random random = match.getRandom();
     for (Map.Entry<ItemStack, Double> entry : drops.items.entrySet()) {
       if (random.nextFloat() < yield * entry.getValue()) {
-        location.getWorld().dropItemNaturally(location.toCenterLocation(), entry.getKey());
+        location.getWorld().dropItemNaturally(location, entry.getKey());
       }
     }
   }
@@ -199,14 +199,15 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
         // Defer item drops so the explosion doesn't destroy them
         match
             .getExecutor(MatchScope.RUNNING)
-            .execute(() -> dropItems(drops, newState.getLocation(), yield));
+            .execute(() -> dropItems(drops, newState.getLocation().toCenterLocation(), yield));
       } else {
         MatchPlayer player = ParticipantBlockTransformEvent.getParticipant(event);
         if (player == null
             || player.getBukkit().getGameMode()
                 != GameMode.CREATIVE) { // Don't drop items in creative mode
-          dropItems(drops, newState.getLocation(), 1d);
-          dropExperience(drops, newState.getLocation());
+          Location location = newState.getLocation().toCenterLocation();
+          dropItems(drops, location, 1d);
+          dropExperience(drops, location);
         }
       }
     }
@@ -242,7 +243,7 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
 
     MaterialData oldMaterial = hit.getBlock().getState().getData();
     replaceBlock(drops, hit.getBlock(), player);
-    Location location = hit.getPosition().toLocation(hit.getBlock().getWorld());
+    Location location = hit.getPosition().toLocation(hit.getBlock().getWorld()).toCenterLocation();
 
     Materials.playBreakEffect(location, oldMaterial);
     dropItems(drops, location, 1d);
@@ -260,7 +261,7 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
 
     replaceBlock(drops, event.getBlock(), player);
 
-    Location location = player.getBukkit().getLocation();
+    Location location = player.getBukkit().getLocation().toCenterLocation();
     dropItems(drops, location, 1d);
     dropExperience(drops, location);
   }
