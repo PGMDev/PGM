@@ -23,6 +23,7 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.filters.query.PlayerQuery;
 import tc.oc.pgm.filters.query.PlayerStateQuery;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.FlagDefinition;
@@ -220,7 +221,7 @@ public class Carried extends Spawned implements Missing {
 
   protected void dropFlag() {
     for (Location dropLocation : this.dropLocations) {
-      if (this.flag.canDropAt(dropLocation)) {
+      if (this.flag.canDrop(new PlayerQuery(null, carrier, dropLocation))) {
         this.flag.transition(new Dropped(this.flag, this.post, dropLocation, this.carrier));
         return;
       }
@@ -327,7 +328,10 @@ public class Carried extends Spawned implements Missing {
     if (this.isCarrier(event.getPlayer())) {
       Location playerLoc = event.getTo();
 
-      if (this.flag.canDropAt(playerLoc)) {
+      // Only check the filter if there are no other possible fallback locations and the last drop
+      // location hasn't already been chacked
+      if ((dropLocations.isEmpty() || !dropLocations.peekLast().equals(playerLoc))
+          && flag.canDrop(new PlayerQuery(null, carrier, playerLoc))) {
         if (this.dropLocations.size() >= DROP_QUEUE_SIZE) this.dropLocations.removeLast();
         this.dropLocations.addFirst(playerLoc);
       }

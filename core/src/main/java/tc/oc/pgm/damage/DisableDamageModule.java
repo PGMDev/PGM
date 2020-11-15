@@ -33,11 +33,10 @@ public class DisableDamageModule implements MapModule {
     public DisableDamageModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       SetMultimap<DamageCause, PlayerRelation> causes = HashMultimap.create();
-      DamageParser parser = new DamageParser();
 
       for (Element damageCauseElement : doc.getRootElement().getChildren("disabledamage")) {
         for (Element damageEl : damageCauseElement.getChildren("damage")) {
-          DamageCause cause = parser.parseDamageCause(damageEl);
+          DamageCause cause = XMLUtils.parseEnum(damageEl, DamageCause.class);
           for (PlayerRelation damagerType : PlayerRelation.values()) {
             // Legacy syntax used "other" instead of "neutral"
             String attrName = damagerType.name().toLowerCase();

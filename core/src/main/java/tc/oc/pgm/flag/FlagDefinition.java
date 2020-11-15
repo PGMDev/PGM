@@ -38,6 +38,7 @@ public class FlagDefinition extends ProximityGoalDefinition {
   private final double pointsPerSecond; // Points awarded while carrying this flag
   private final Filter pickupFilter; // Filter players who can pickup this flag
   private final Filter captureFilter; // Filter players who can capture this flag
+  private final Filter dropFilter; // Filter players who can drop the flag
   private final @Nullable Kit pickupKit; // Kit to give on flag pickup
   private final @Nullable Kit dropKit; // Kit to give carrier when they drop the flag
   private final @Nullable Kit carryKit; // Kit to give to/take from the flag carrier
@@ -63,6 +64,7 @@ public class FlagDefinition extends ProximityGoalDefinition {
       double pointsPerSecond,
       Filter pickupFilter,
       Filter captureFilter,
+      Filter dropFilter,
       @Nullable Kit pickupKit,
       @Nullable Kit dropKit,
       @Nullable Kit carryKit,
@@ -94,6 +96,7 @@ public class FlagDefinition extends ProximityGoalDefinition {
     this.pointsPerSecond = pointsPerSecond;
     this.pickupFilter = pickupFilter;
     this.captureFilter = captureFilter;
+    this.dropFilter = dropFilter;
     this.pickupKit = pickupKit;
     this.dropKit = dropKit;
     this.carryKit = carryKit;
@@ -148,6 +151,10 @@ public class FlagDefinition extends ProximityGoalDefinition {
 
   public Filter getPickupFilter() {
     return this.pickupFilter;
+  }
+
+  public Filter getDropFilter() {
+    return dropFilter;
   }
 
   public Filter getCaptureFilter() {

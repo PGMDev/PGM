@@ -16,6 +16,7 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.result.VictoryConditions;
+import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -41,6 +42,12 @@ public class TimeLimitModule implements MapModule<TimeLimitMatchModule> {
   }
 
   public static class Factory implements MapModuleFactory<TimeLimitModule> {
+
+    @Nullable
+    @Override
+    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+      return ImmutableList.of(TeamModule.class);
+    }
 
     @Override
     public TimeLimitModule parse(MapFactory factory, Logger logger, Document doc)
