@@ -138,9 +138,11 @@ public class ScoreModule implements MapModule {
               }
             }
           }
+          boolean silent = XMLUtils.parseBoolean(Node.fromAttr(scoreBoxEl, "silent"), false);
 
           scoreBoxFactories.add(
-              new ScoreBoxFactory(region, points, filter, ImmutableMap.copyOf(redeemables)));
+              new ScoreBoxFactory(
+                  region, points, filter, ImmutableMap.copyOf(redeemables), silent));
         }
       }
       return new ScoreModule(config, scoreBoxFactories.build());

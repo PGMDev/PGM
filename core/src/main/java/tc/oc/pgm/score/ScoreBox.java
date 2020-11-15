@@ -19,6 +19,7 @@ public class ScoreBox {
   private final int score;
   private final Filter filter;
   private final ImmutableMap<SingleMaterialMatcher, Double> redeemables;
+  private final boolean silent;
 
   private final Map<MatchPlayerState, Instant> lastScoreTime = Maps.newHashMap();
 
@@ -26,7 +27,8 @@ public class ScoreBox {
       Region region,
       int score,
       Filter filter,
-      ImmutableMap<SingleMaterialMatcher, Double> redeemables) {
+      ImmutableMap<SingleMaterialMatcher, Double> redeemables,
+      boolean silent) {
     Preconditions.checkNotNull(region, "region");
     Preconditions.checkNotNull(filter, "filter");
 
@@ -34,6 +36,7 @@ public class ScoreBox {
     this.score = score;
     this.filter = filter;
     this.redeemables = redeemables;
+    this.silent = silent;
   }
 
   public Region getRegion() {
@@ -50,6 +53,10 @@ public class ScoreBox {
 
   public Map<SingleMaterialMatcher, Double> getRedeemables() {
     return redeemables;
+  }
+
+  public boolean isSilent() {
+    return silent;
   }
 
   public @Nullable Instant getLastScoreTime(MatchPlayerState player) {
