@@ -26,7 +26,9 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.teams.TeamModule;
+import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class WoolModule implements MapModule {
@@ -84,7 +86,7 @@ public class WoolModule implements MapModule {
         String id = woolEl.getAttributeValue("id");
         boolean craftable = Boolean.parseBoolean(woolEl.getAttributeValue("craftable", "true"));
         TeamFactory team =
-            teamModule.parseTeam(XMLUtils.getRequiredAttribute(woolEl, "team"), factory);
+            Teams.getTeam(new Node(XMLUtils.getRequiredAttribute(woolEl, "team")), factory);
         DyeColor color = XMLUtils.parseDyeColor(XMLUtils.getRequiredAttribute(woolEl, "color"));
         Region placement;
         if (factory.getProto().isOlderThan(MapProtos.MODULE_SUBELEMENT_VERSION)) {

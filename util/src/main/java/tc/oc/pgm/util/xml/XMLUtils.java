@@ -382,11 +382,17 @@ public final class XMLUtils {
    * <p>[0, 1)
    *
    * <p>for a closed-open range from 0 to 1
+   *
+   * <p>Also supports singleton ranges derived from providing a number with no delimiter
    */
   public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
       Node node, Class<T> type) throws InvalidXMLException {
     Matcher matcher = RANGE_RE.matcher(node.getValue());
     if (!matcher.matches()) {
+      T value = parseNumber(node, node.getValue(), type, true);
+      if (value != null) {
+        return Range.singleton(value);
+      }
       throw new InvalidXMLException(
           "Invalid " + type.getSimpleName().toLowerCase() + " range '" + node.getValue() + "'",
           node);

@@ -213,6 +213,7 @@ public class FlagParser {
       pickupFilter = filterParser.parseFilterProperty(el, "filter", StaticFilter.ALLOW);
     Filter captureFilter =
         filterParser.parseFilterProperty(el, "capture-filter", StaticFilter.ALLOW);
+    Filter dropFilter = filterParser.parseFilterProperty(el, "drop-filter", StaticFilter.ALLOW);
     Kit pickupKit = factory.getKits().parseKitProperty(el, "pickup-kit", null);
     Kit dropKit = factory.getKits().parseKitProperty(el, "drop-kit", null);
     Kit carryKit = factory.getKits().parseKitProperty(el, "carry-kit", null);
@@ -261,6 +262,7 @@ public class FlagParser {
             pointsPerSecond,
             pickupFilter,
             captureFilter,
+            dropFilter,
             pickupKit,
             dropKit,
             carryKit,

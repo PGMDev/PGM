@@ -43,7 +43,7 @@ public class ControlPointDefinition extends GoalDefinition {
   private final float timeMultiplier;
 
   // The team that owns the point when the match starts, null for no owner (neutral state) or ffa
-  private final TeamFactory initialOwner;
+  @Nullable private final TeamFactory initialOwner;
 
   // Conditions required for a team to capture:
   public enum CaptureCondition {
@@ -90,7 +90,7 @@ public class ControlPointDefinition extends GoalDefinition {
       BlockVector capturableDisplayBeacon,
       Duration timeToCapture,
       float timeMultiplier,
-      TeamFactory initialOwner,
+      @Nullable TeamFactory initialOwner,
       CaptureCondition captureCondition,
       boolean incrementalCapture,
       boolean neutralState,
@@ -191,6 +191,7 @@ public class ControlPointDefinition extends GoalDefinition {
     return this.timeMultiplier;
   }
 
+  @Nullable
   public TeamFactory getInitialOwner() {
     return this.initialOwner;
   }

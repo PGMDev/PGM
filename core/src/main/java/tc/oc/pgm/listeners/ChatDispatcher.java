@@ -316,7 +316,7 @@ public class ChatDispatcher implements Listener {
 
       if (message.startsWith(GLOBAL_SYMBOL)) {
         sendGlobal(player.getMatch(), player, message.substring(1));
-      } else if (message.startsWith(DM_SYMBOL)) {
+      } else if (message.startsWith(DM_SYMBOL) && message.contains(" ")) {
         final String target = message.substring(1, message.indexOf(" "));
         final MatchPlayer receiver =
             getApproximatePlayer(player.getMatch(), target, player.getBukkit());
@@ -374,9 +374,17 @@ public class ChatDispatcher implements Listener {
       Predicate<MatchPlayer> filter,
       @Nullable SettingValue type) {
     // When a message is empty, this indicates the player wants to change their default chat channel
-    if (text == null && sender != null) {
+    if ((text == null || text.isEmpty()) && sender != null) {
       // FIXME: there should be a better way to do this
-      sender.getBukkit().performCommand("set " + SettingKey.CHAT + " " + type.getName());
+      PGM.get()
+          .getExecutor()
+          .schedule(
+              () ->
+                  sender
+                      .getBukkit()
+                      .performCommand("set " + SettingKey.CHAT + " " + type.getName()),
+              50,
+              TimeUnit.MILLISECONDS); // Run sync to stop console spam
       return;
     }
 
