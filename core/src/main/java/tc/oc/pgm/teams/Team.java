@@ -1,5 +1,8 @@
 package tc.oc.pgm.teams;
 
+import static net.kyori.adventure.text.Component.join;
+import static net.kyori.adventure.text.Component.text;
+
 import java.util.Collection;
 import java.util.Objects;
 import javax.annotation.Nullable;
@@ -128,7 +131,7 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
   @Override
   public Component getName(NameStyle style) {
     if (componentName == null) {
-      this.componentName = Component.text(getNameLegacy(), TextFormatter.convert(getColor()));
+      this.componentName = text(getNameLegacy(), TextFormatter.convert(getColor()));
     }
     return componentName;
   }
@@ -183,8 +186,7 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
   @Override
   public Component getChatPrefix() {
     if (chatPrefix == null) {
-      this.chatPrefix =
-          Component.text("(" + getShortName() + ") ", TextFormatter.convert(getColor()));
+      this.chatPrefix = text("(" + getShortName() + ") ", TextFormatter.convert(getColor()));
     }
     return chatPrefix;
   }

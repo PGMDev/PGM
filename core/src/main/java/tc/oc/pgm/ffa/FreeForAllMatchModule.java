@@ -1,5 +1,11 @@
 package tc.oc.pgm.ffa;
 
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
+import static net.kyori.adventure.text.Component.join;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.google.common.collect.Lists;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -10,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -61,11 +66,10 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     @Override
     public Component getReason() {
       if (players == 1) {
-        return Component.translatable(
-            "join.wait.singular", Component.text(String.valueOf(players), NamedTextColor.AQUA));
+        return translatable(
+            "join.wait.singular", text(String.valueOf(players), NamedTextColor.AQUA));
       } else {
-        return Component.translatable(
-            "join.wait.plural", Component.text(String.valueOf(players), NamedTextColor.AQUA));
+        return translatable("join.wait.plural", text(String.valueOf(players), NamedTextColor.AQUA));
       }
     }
 
@@ -197,8 +201,8 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
 
     MatchPlayer kickMe = kickable.get(match.getRandom().nextInt(kickable.size()));
 
-    kickMe.sendWarning(Component.translatable("leave.ok.priorityKick"));
-    kickMe.playSound(Sound.sound(Key.key("mob.villager.hit"), Sound.Source.MASTER, 1, 1));
+    kickMe.sendWarning(translatable("leave.ok.priorityKick"));
+    kickMe.playSound(sound(key("mob.villager.hit"), Sound.Source.MASTER, 1, 1));
 
     match.setParty(kickMe, match.getDefaultParty());
 
@@ -235,11 +239,11 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
       GenericJoinResult genericResult = (GenericJoinResult) result;
       switch (genericResult.getStatus()) {
         case FULL:
-          joining.sendWarning(Component.translatable("join.err.full"));
+          joining.sendWarning(translatable("join.err.full"));
           return true;
 
         case REDUNDANT:
-          joining.sendWarning(Component.translatable("join.err.alreadyJoined"));
+          joining.sendWarning(translatable("join.err.alreadyJoined"));
           return true;
       }
     }
@@ -272,7 +276,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
 
   public boolean forceJoin(MatchPlayer joining) {
     if (joining.getParty() instanceof Tribute) {
-      joining.sendWarning(Component.translatable("join.err.alreadyJoined"));
+      joining.sendWarning(translatable("join.err.alreadyJoined"));
     }
 
     return match.setParty(joining, getTribute(joining));
@@ -281,7 +285,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPartyChange(PlayerPartyChangeEvent event) {
     if (event.getNewParty() instanceof Tribute) {
-      event.getPlayer().sendMessage(Component.translatable("join.ok"));
+      event.getPlayer().sendMessage(translatable("join.ok"));
     }
     updateReadiness();
   }

@@ -1,5 +1,7 @@
 package tc.oc.pgm.events;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.event.Cancellable;
@@ -40,7 +42,7 @@ public abstract class PlayerParticipationEvent extends MatchPlayerEvent implemen
   }
 
   public Component getCancelReason() {
-    return cancelReason != null ? cancelReason : Component.translatable("error.unknown");
+    return cancelReason != null ? cancelReason : translatable("error.unknown");
   }
 
   private static final HandlerList handlers = new HandlerList();

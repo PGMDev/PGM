@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.xml;
 
+import static net.kyori.adventure.text.Component.text;
+
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.*;

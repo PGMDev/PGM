@@ -1,12 +1,16 @@
 package tc.oc.pgm.flag;
 
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.google.common.collect.ImmutableSet;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import javax.annotation.Nullable;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -71,18 +75,18 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   public static final String CARRIED_SYMBOL = "\u2794"; // ➔
 
   public static final Sound PICKUP_SOUND_OWN =
-      Sound.sound(Key.key("mob.wither.idle"), Sound.Source.MASTER, 0.7f, 1.2f);
+      sound(key("mob.wither.idle"), Sound.Source.MASTER, 0.7f, 1.2f);
   public static final Sound DROP_SOUND_OWN =
-      Sound.sound(Key.key("mob.wither.hurt"), Sound.Source.MASTER, 0.7f, 1);
+      sound(key("mob.wither.hurt"), Sound.Source.MASTER, 0.7f, 1);
   public static final Sound RETURN_SOUND_OWN =
-      Sound.sound(Key.key("mob.zombie.infect"), Sound.Source.MASTER, 1.1f, 1.2f);
+      sound(key("mob.zombie.infect"), Sound.Source.MASTER, 1.1f, 1.2f);
 
   public static final Sound PICKUP_SOUND =
-      Sound.sound(Key.key("entity.firework_rocket.blast_far"), Sound.Source.MASTER, 1f, 0.7f);
+      sound(key("entity.firework_rocket.blast_far"), Sound.Source.MASTER, 1f, 0.7f);
   public static final Sound DROP_SOUND =
-      Sound.sound(Key.key("entity.firework_rocket.twinkle_far"), Sound.Source.MASTER, 1f, 1f);
+      sound(key("entity.firework_rocket.twinkle_far"), Sound.Source.MASTER, 1f, 1f);
   public static final Sound RETURN_SOUND =
-      Sound.sound(Key.key("entity.firework_rocket.twinkle_far"), Sound.Source.MASTER, 1f, 1f);
+      sound(key("entity.firework_rocket.twinkle_far"), Sound.Source.MASTER, 1f, 1f);
 
   private final ImmutableSet<Net> nets;
   private final Location bannerLocation;
@@ -197,7 +201,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   }
 
   public Component getComponentName() {
-    return Component.text(getName(), getChatColor());
+    return text(getName(), getChatColor());
   }
 
   public ImmutableSet<Net> getNets() {
@@ -305,9 +309,9 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   @Override
   public Component getTouchMessage(ParticipantState toucher, boolean self) {
     if (self) {
-      return Component.translatable("flag.touch.you", getComponentName());
+      return translatable("flag.touch.you", getComponentName());
     } else {
-      return Component.translatable(
+      return translatable(
           "flag.touch.player", getComponentName(), toucher.getName(NameStyle.COLOR));
     }
   }

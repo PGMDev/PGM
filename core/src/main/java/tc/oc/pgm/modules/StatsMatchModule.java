@@ -1,5 +1,7 @@
 package tc.oc.pgm.modules;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.types.PlayerComponent.player;
 
 import java.text.DecimalFormat;
@@ -80,13 +82,13 @@ public class StatsMatchModule implements MatchModule, Listener {
       } else {
         kd = decimalFormatKd.format(kills / (double) deaths);
       }
-      return Component.translatable(
+      return translatable(
           "match.stats",
           NamedTextColor.GRAY,
-          Component.text(Integer.toString(kills), NamedTextColor.GREEN),
-          Component.text(Integer.toString(killstreak), NamedTextColor.GREEN),
-          Component.text(Integer.toString(deaths), NamedTextColor.RED),
-          Component.text(kd, NamedTextColor.GREEN));
+          text(Integer.toString(kills), NamedTextColor.GREEN),
+          text(Integer.toString(killstreak), NamedTextColor.GREEN),
+          text(Integer.toString(deaths), NamedTextColor.RED),
+          text(kd, NamedTextColor.GREEN));
     }
   }
 
@@ -177,7 +179,7 @@ public class StatsMatchModule implements MatchModule, Listener {
                 viewer.sendMessage(
                     TextFormatter.horizontalLineHeading(
                         viewer.getBukkit(),
-                        Component.translatable("match.stats.overall", NamedTextColor.YELLOW),
+                        translatable("match.stats.overall", NamedTextColor.YELLOW),
                         NamedTextColor.WHITE));
                 viewer.sendMessage(killMessage);
                 viewer.sendMessage(killstreakMessage);
@@ -225,10 +227,10 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   Component getMessage(String messageKey, Map.Entry<UUID, Integer> mapEntry, TextColor color) {
-    return Component.translatable(
+    return translatable(
         messageKey,
         playerName(mapEntry.getKey()),
-        Component.text(Integer.toString(mapEntry.getValue()), color, TextDecoration.BOLD));
+        text(Integer.toString(mapEntry.getValue()), color, TextDecoration.BOLD));
   }
 
   private Component playerName(UUID playerUUID) {

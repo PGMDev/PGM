@@ -1,5 +1,9 @@
 package tc.oc.pgm.modes;
 
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
+import static net.kyori.adventure.text.Component.text;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
@@ -7,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -20,7 +23,7 @@ import tc.oc.pgm.countdowns.CountdownContext;
 public class ObjectiveModesMatchModule implements MatchModule {
 
   private static final Sound SOUND =
-      Sound.sound(Key.key("mob.zombie.remedy"), Sound.Source.MASTER, 0.15f, 1.2f);
+      sound(key("mob.zombie.remedy"), Sound.Source.MASTER, 0.15f, 1.2f);
 
   private final Match match;
   private final List<Mode> modes;
@@ -96,10 +99,10 @@ public class ObjectiveModesMatchModule implements MatchModule {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onObjectiveModeChange(ObjectiveModeChangeEvent event) {
     Component broadcast =
-        Component.text()
-            .append(Component.text("> > > > ", NamedTextColor.DARK_AQUA))
-            .append(Component.text(event.getName(), NamedTextColor.DARK_RED))
-            .append(Component.text(" < < < <", NamedTextColor.DARK_AQUA))
+        text()
+            .append(text("> > > > ", NamedTextColor.DARK_AQUA))
+            .append(text(event.getName(), NamedTextColor.DARK_RED))
+            .append(text(" < < < <", NamedTextColor.DARK_AQUA))
             .build();
     event.getMatch().sendMessage(broadcast);
     event.getMatch().playSound(SOUND);

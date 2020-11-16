@@ -1,5 +1,8 @@
 package tc.oc.pgm.flag.state;
 
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.title.Title.title;
 import static tc.oc.pgm.util.TimeUtils.fromTicks;
 
@@ -68,10 +71,10 @@ public class Carried extends Spawned implements Missing {
         this.flag
             .getMatch()
             .sendMessage(
-                Component.translatable(
+                translatable(
                     "flag.willRespawn.next",
                     this.flag.getComponentName(),
-                    Component.text(postName, NamedTextColor.AQUA)));
+                    text(postName, NamedTextColor.AQUA)));
       }
     }
   }
@@ -133,7 +136,7 @@ public class Carried extends Spawned implements Missing {
     SidebarMatchModule smm = this.flag.getMatch().getModule(SidebarMatchModule.class);
     if (smm != null) smm.stopBlinkingGoal(this.flag);
 
-    this.carrier.sendActionBar(Component.empty());
+    this.carrier.sendActionBar(empty());
 
     this.carrier.getInventory().remove(this.flag.getBannerItem());
     this.carrier.getInventory().setHelmet(this.helmetItem);
@@ -165,7 +168,7 @@ public class Carried extends Spawned implements Missing {
       if (this.flag.getDefinition().getCarryMessage() != null) {
         message = this.flag.getDefinition().getCarryMessage();
       } else {
-        message = Component.translatable("flag.carrying", this.flag.getComponentName());
+        message = translatable("flag.carrying", this.flag.getComponentName());
       }
 
       return message.color(NamedTextColor.AQUA).decoration(TextDecoration.BOLD, true);
@@ -174,12 +177,12 @@ public class Carried extends Spawned implements Missing {
         message = this.deniedByNet.getDenyMessage();
       } else if (this.deniedByFlag != null) {
         message =
-            Component.translatable(
+            translatable(
                 "flag.captureDenied.byFlag",
                 this.flag.getComponentName(),
                 this.deniedByFlag.getComponentName());
       } else {
-        message = Component.translatable("flag.captureDenied", this.flag.getComponentName());
+        message = translatable("flag.captureDenied", this.flag.getComponentName());
       }
 
       return message.color(NamedTextColor.RED).decoration(TextDecoration.BOLD, true);
@@ -196,10 +199,7 @@ public class Carried extends Spawned implements Missing {
     if (!message.equals(this.lastMessage)) {
       this.lastMessage = message;
       this.carrier.showTitle(
-          title(
-              Component.empty(),
-              message,
-              Title.Times.of(Duration.ZERO, fromTicks(5), fromTicks(35))));
+          title(empty(), message, Title.Times.of(Duration.ZERO, fromTicks(5), fromTicks(35))));
     }
 
     ScoreMatchModule smm = this.flag.getMatch().getModule(ScoreMatchModule.class);
@@ -238,13 +238,12 @@ public class Carried extends Spawned implements Missing {
   }
 
   protected void captureFlag(Net net) {
-    this.carrier.sendMessage(
-        Component.translatable("flag.capture.you", this.flag.getComponentName()));
+    this.carrier.sendMessage(translatable("flag.capture.you", this.flag.getComponentName()));
 
     this.flag
         .getMatch()
         .sendMessage(
-            Component.translatable(
+            translatable(
                 "flag.capture.player",
                 this.flag.getComponentName(),
                 this.carrier.getName(NameStyle.COLOR)));

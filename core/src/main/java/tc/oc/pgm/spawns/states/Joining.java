@@ -1,5 +1,7 @@
 package tc.oc.pgm.spawns.states;
 
+import static net.kyori.adventure.text.Component.empty;
+
 import net.kyori.adventure.text.Component;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -23,7 +25,7 @@ public class Joining extends Spawning {
 
   @Override
   protected Component getTitle() {
-    return Component.empty();
+    return empty();
   }
 
   @Override

@@ -2,6 +2,11 @@ package tc.oc.pgm.teams;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
+import static net.kyori.adventure.text.Component.join;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,7 +17,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -58,23 +62,23 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     public Component getReason() {
       if (team != null) {
         if (players == 1) {
-          return Component.translatable(
+          return translatable(
               "join.wait.singular.team",
-              Component.text(String.valueOf(players), NamedTextColor.AQUA),
+              text(String.valueOf(players), NamedTextColor.AQUA),
               team.getName());
         } else {
-          return Component.translatable(
+          return translatable(
               "join.wait.plural.team",
-              Component.text(String.valueOf(players), NamedTextColor.AQUA),
+              text(String.valueOf(players), NamedTextColor.AQUA),
               team.getName());
         }
       } else {
         if (players == 1) {
-          return Component.translatable(
-              "join.wait.singular", Component.text(String.valueOf(players), NamedTextColor.AQUA));
+          return translatable(
+              "join.wait.singular", text(String.valueOf(players), NamedTextColor.AQUA));
         } else {
-          return Component.translatable(
-              "join.wait.plural", Component.text(String.valueOf(players), NamedTextColor.AQUA));
+          return translatable(
+              "join.wait.plural", text(String.valueOf(players), NamedTextColor.AQUA));
         }
       }
     }
@@ -450,27 +454,26 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
       switch (teamResult.getStatus()) {
         case SWITCH_DISABLED:
-          joining.sendWarning(Component.translatable("join.err.noSwitch", lastTeam.getName()));
+          joining.sendWarning(translatable("join.err.noSwitch", lastTeam.getName()));
           return true;
 
         case CHOICE_DISABLED:
         case CHOICE_DENIED:
-          joining.sendWarning(Component.translatable("join.err.noChoice"));
+          joining.sendWarning(translatable("join.err.noChoice"));
           return true;
 
         case FULL:
           if (teamResult.getTeam() != null) {
-            joining.sendWarning(
-                Component.translatable("join.err.full.team", teamResult.getTeam().getName()));
+            joining.sendWarning(translatable("join.err.full.team", teamResult.getTeam().getName()));
           } else {
-            joining.sendWarning(Component.translatable("join.err.full"));
+            joining.sendWarning(translatable("join.err.full"));
           }
 
           return true;
 
         case REDUNDANT:
           joining.sendWarning(
-              Component.translatable("join.err.alreadyJoined.team", joining.getParty().getName()));
+              translatable("join.err.alreadyJoined.team", joining.getParty().getName()));
           return true;
       }
 
@@ -554,15 +557,14 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
     // Give them the bad news
     if (jmm.canPriorityKick(kickMe)) {
-      kickMe.sendMessage(Component.translatable("join.ok.moved", kickTo.getName()));
-      kickMe.sendMessage(Component.translatable("join.ok.moved.explanation"));
+      kickMe.sendMessage(translatable("join.ok.moved", kickTo.getName()));
+      kickMe.sendMessage(translatable("join.ok.moved.explanation"));
     } else {
-      kickMe.playSound(Sound.sound(Key.key("mob.villager.hit"), Sound.Source.MASTER, 1, 1));
+      kickMe.playSound(sound(key("mob.villager.hit"), Sound.Source.MASTER, 1, 1));
       if (forBalance) {
-        kickMe.sendWarning(Component.translatable("join.ok.moved", kickTo.getName()));
+        kickMe.sendWarning(translatable("join.ok.moved", kickTo.getName()));
       } else {
-        kickMe.sendWarning(
-            Component.translatable("leave.ok.priorityKick.team", kickFrom.getName()));
+        kickMe.sendWarning(translatable("leave.ok.priorityKick.team", kickFrom.getName()));
       }
     }
 
@@ -581,9 +583,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
   public void onPartyChange(PlayerPartyChangeEvent event) {
     if (event.getNewParty() instanceof Team
         || (event.getNewParty() instanceof Observers && event.getOldParty() != null)) {
-      event
-          .getPlayer()
-          .sendMessage(Component.translatable("join.ok.team", event.getNewParty().getName()));
+      event.getPlayer().sendMessage(translatable("join.ok.team", event.getNewParty().getName()));
     }
     updateReadiness();
   }

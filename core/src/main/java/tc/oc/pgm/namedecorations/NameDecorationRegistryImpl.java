@@ -1,5 +1,7 @@
 package tc.oc.pgm.namedecorations;
 
+import static net.kyori.adventure.text.Component.text;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -94,10 +96,10 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
 
   @Override
   public Component getDecoratedNameComponent(Player player, ChatColor partyColor) {
-    return Component.text()
+    return text()
         .append(getPrefixComponent(player.getUniqueId()))
         .append(
-            Component.text(
+            text(
                 player.getName(),
                 partyColor == null ? NamedTextColor.WHITE : TextFormatter.convert(partyColor)))
         .append(getSuffixComponent(player.getUniqueId()))

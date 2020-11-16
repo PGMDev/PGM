@@ -1,8 +1,14 @@
 package tc.oc.pgm.community.command;
 
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.join;
+import static net.kyori.adventure.text.Component.newline;
+import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static net.kyori.adventure.title.Title.title;
 
 import app.ashcon.intake.Command;
@@ -22,11 +28,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.event.HoverEvent.Action;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
@@ -66,9 +69,9 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public class ModerationCommand implements Listener {
 
   private static final Sound WARN_SOUND =
-      Sound.sound(Key.key("mob.enderdragon.growl"), Sound.Source.MASTER, 1f, 1f);
+      sound(key("mob.enderdragon.growl"), Sound.Source.MASTER, 1f, 1f);
   private static final Sound ALT_SOUND =
-      Sound.sound(Key.key("mob.wither.shoot"), Sound.Source.MASTER, 0.8f, 1.3f);
+      sound(key("mob.wither.shoot"), Sound.Source.MASTER, 0.8f, 1.3f);
 
   private static final Component WARN_SYMBOL = text(" \u26a0 ", NamedTextColor.YELLOW);
   private static final Component BROADCAST_DIV = text(" \u00BB ", NamedTextColor.GRAY);
@@ -149,7 +152,7 @@ public class ModerationCommand implements Listener {
     // Online Players
     if (!fmm.getFrozenPlayers().isEmpty()) {
       Component names =
-          Component.join(
+          join(
               text(", ", NamedTextColor.GRAY),
               fmm.getFrozenPlayers().stream()
                   .map(m -> m.getName(NameStyle.FANCY))
@@ -232,7 +235,7 @@ public class ModerationCommand implements Listener {
               translatable("moderation.mute.none", NamedTextColor.RED), sender));
     }
 
-    Component names = Component.join(text(", ", NamedTextColor.GRAY), onlineMutes);
+    Component names = join(text(", ", NamedTextColor.GRAY), onlineMutes);
     Component message =
         text()
             .append(translatable("moderation.mute.list", NamedTextColor.GOLD))
@@ -634,7 +637,7 @@ public class ModerationCommand implements Listener {
                     "moderation.screen.signoff",
                     NamedTextColor.GRAY,
                     text(ban.getSource(), NamedTextColor.AQUA)))
-            .append(Component.space())
+            .append(space())
             .append(createdAgo)
             .build();
 
@@ -650,7 +653,7 @@ public class ModerationCommand implements Listener {
 
   private Component formatAltAccountList(MatchPlayer target, List<MatchPlayer> alts) {
     Component names =
-        Component.join(
+        join(
             text(", ", NamedTextColor.GRAY),
             alts.stream().map(mp -> mp.getName(NameStyle.CONCISE)).collect(Collectors.toList()));
     Component size = text(Integer.toString(alts.size()), NamedTextColor.YELLOW);
@@ -795,8 +798,7 @@ public class ModerationCommand implements Listener {
     lines.add(empty());
     lines.add(footer); // Footer line - END
 
-    return TextTranslations.translateLegacy(
-        Component.join(text("\n" + ChatColor.RESET), lines), null); // TODO add viewer
+    return TextTranslations.translateLegacy(join(newline(), lines), null); // TODO add viewer
   }
 
   /*
@@ -1005,7 +1007,7 @@ public class ModerationCommand implements Listener {
                 NamedTextColor.RED,
                 player.getName(NameStyle.FANCY),
                 text(info.getUserName(), NamedTextColor.DARK_AQUA)))
-        .hoverEvent(HoverEvent.hoverEvent(Action.SHOW_TEXT, info.getHoverMessage()))
+        .hoverEvent(showText(info.getHoverMessage()))
         .build();
   }
 

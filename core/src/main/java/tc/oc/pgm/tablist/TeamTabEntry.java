@@ -1,5 +1,8 @@
 package tc.oc.pgm.tablist;
 
+import static net.kyori.adventure.text.Component.space;
+import static net.kyori.adventure.text.Component.text;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -21,13 +24,13 @@ public class TeamTabEntry extends DynamicTabEntry {
   @Override
   public BaseComponent[] getContent(TabView view) {
     Component content =
-        Component.text()
-            .append(Component.text(String.valueOf(team.getPlayers().size()), NamedTextColor.WHITE))
-            .append(Component.text("/", NamedTextColor.DARK_GRAY))
-            .append(Component.text(String.valueOf(team.getMaxPlayers()), NamedTextColor.GRAY))
-            .append(Component.space())
+        text()
+            .append(text(String.valueOf(team.getPlayers().size()), NamedTextColor.WHITE))
+            .append(text("/", NamedTextColor.DARK_GRAY))
+            .append(text(String.valueOf(team.getMaxPlayers()), NamedTextColor.GRAY))
+            .append(space())
             .append(
-                Component.text(
+                text(
                     team.getShortName(),
                     TextFormatter.convert(team.getColor()),
                     TextDecoration.BOLD))

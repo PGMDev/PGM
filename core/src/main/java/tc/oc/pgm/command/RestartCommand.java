@@ -1,10 +1,11 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
 import java.time.Duration;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
@@ -31,11 +32,9 @@ public final class RestartCommand {
     }
 
     if (match.isRunning()) {
-      audience.sendMessage(
-          Component.translatable("admin.queueRestart.restartQueued", NamedTextColor.RED));
+      audience.sendMessage(translatable("admin.queueRestart.restartQueued", NamedTextColor.RED));
     } else {
-      audience.sendMessage(
-          Component.translatable("admin.queueRestart.restartingNow", NamedTextColor.GREEN));
+      audience.sendMessage(translatable("admin.queueRestart.restartingNow", NamedTextColor.GREEN));
     }
 
     match.callEvent(new RequestRestartEvent());

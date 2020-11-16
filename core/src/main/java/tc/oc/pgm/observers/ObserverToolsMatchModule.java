@@ -1,5 +1,7 @@
 package tc.oc.pgm.observers;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.google.common.collect.Lists;
 import java.util.List;
 import net.kyori.adventure.text.Component;
@@ -126,8 +128,8 @@ public class ObserverToolsMatchModule implements MatchModule, Listener {
     ItemStack tool = new ItemStack(TOOL_MATERIAL);
     ItemMeta meta = tool.getItemMeta();
     Component displayName =
-        Component.translatable("setting.displayName", NamedTextColor.AQUA, TextDecoration.BOLD);
-    Component lore = Component.translatable("setting.lore", NamedTextColor.GRAY);
+        translatable("setting.displayName", NamedTextColor.AQUA, TextDecoration.BOLD);
+    Component lore = translatable("setting.lore", NamedTextColor.GRAY);
     meta.setDisplayName(TextTranslations.translateLegacy(displayName, player.getBukkit()));
     meta.setLore(Lists.newArrayList(TextTranslations.translateLegacy(lore, player.getBukkit())));
     meta.addItemFlags(ItemFlag.values());

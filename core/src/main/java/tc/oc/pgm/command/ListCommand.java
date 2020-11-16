@@ -1,5 +1,9 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import app.ashcon.intake.Command;
 import java.util.Collection;
 import java.util.List;
@@ -26,7 +30,7 @@ public final class ListCommand {
   public void list(CommandSender sender, Audience viewer, Match match) {
     TeamMatchModule tmm = match.getModule(TeamMatchModule.class);
     if (tmm != null) {
-      viewer.sendMessage(Component.translatable("command.list.teams", NamedTextColor.GRAY));
+      viewer.sendMessage(translatable("command.list.teams", NamedTextColor.GRAY));
       tmm.getTeams()
           .forEach(
               team ->
@@ -36,7 +40,7 @@ public final class ListCommand {
       sendTeamInfo(
           viewer,
           sender,
-          Component.translatable("command.list.participants"),
+          translatable("command.list.participants"),
           match.getParticipants(),
           match.getMaxPlayers());
     }
@@ -50,11 +54,10 @@ public final class ListCommand {
 
     // Total count
     viewer.sendMessage(
-        Component.translatable(
+        translatable(
             "command.list.online",
             NamedTextColor.GRAY,
-            Component.text(
-                Integer.toString(getSize(match.getPlayers(), false)), NamedTextColor.GREEN)));
+            text(getSize(match.getPlayers(), false), NamedTextColor.GREEN)));
   }
 
   private void sendTeamInfo(
@@ -64,18 +67,15 @@ public final class ListCommand {
       Collection<MatchPlayer> players,
       int max) {
     Component teamLine =
-        Component.text()
+        text()
             .append(teamName)
-            .append(Component.text(": ", NamedTextColor.GRAY))
-            .append(Component.text(Integer.toString(getSize(players, false))))
-            .append(
-                max != -1
-                    ? Component.text("/" + Integer.toString(max), NamedTextColor.GRAY)
-                    : Component.empty())
+            .append(text(": ", NamedTextColor.GRAY))
+            .append(text(getSize(players, false)))
+            .append(max != -1 ? text("/" + max, NamedTextColor.GRAY) : empty())
             .append(
                 getSize(players, true) > 0 && sender.hasPermission(Permissions.STAFF)
                     ? formatVanishCount(players)
-                    : Component.empty())
+                    : empty())
             .build();
     viewer.sendMessage(teamLine);
     if (!players.isEmpty()) {
@@ -94,10 +94,10 @@ public final class ListCommand {
   }
 
   private Component formatVanishCount(Collection<MatchPlayer> players) {
-    return Component.text()
-        .append(Component.text(" ("))
-        .append(Component.text(Integer.toString(getSize(players, true)), NamedTextColor.WHITE))
-        .append(Component.text(")"))
+    return text()
+        .append(text(" ("))
+        .append(text(getSize(players, true), NamedTextColor.WHITE))
+        .append(text(")"))
         .color(NamedTextColor.GRAY)
         .build();
   }

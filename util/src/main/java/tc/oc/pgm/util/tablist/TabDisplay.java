@@ -1,12 +1,13 @@
 package tc.oc.pgm.util.tablist;
 
+import static net.kyori.adventure.text.Component.text;
+
 import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -111,12 +112,11 @@ public class TabDisplay {
   private BaseComponent[] slotName(int slot) {
     // This needs to avoid collision with the sidebar, which uses chars 0-15. Eventually we will add
     // a scoreboard API to Commons and this class can cooperate with it in a less hacky way.
-    TextComponent.Builder builder = Component.text();
-    builder.append(
-        Component.text(NO_SPACE, NamedTextColor.BLACK)); // Avoid collision by adding a §0 on front
+    TextComponent.Builder builder = text();
+    builder.append(text(NO_SPACE, NamedTextColor.BLACK)); // Avoid collision by adding a §0 on front
 
     do {
-      builder.append(Component.text(NO_SPACE, COLORS.get(slot % COLORS.size())));
+      builder.append(text(NO_SPACE, COLORS.get(slot % COLORS.size())));
       slot /= COLORS.size();
     } while (slot > 0);
     return TextTranslations.toBaseComponentArray(builder.build(), null);

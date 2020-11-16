@@ -1,6 +1,8 @@
 package tc.oc.pgm.picker;
 
 import static com.google.common.base.Preconditions.checkState;
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
@@ -14,7 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
@@ -677,7 +678,7 @@ public class PickerMatchModule implements MatchModule, Listener {
 
   private void handleInventoryClick(
       final MatchPlayer player, final String name, final MaterialData material) {
-    player.playSound(Sound.sound(Key.key("random.click"), Sound.Source.MASTER, 1, 2));
+    player.playSound(sound(key("random.click"), Sound.Source.MASTER, 1, 2));
 
     if (hasClasses) {
       ClassMatchModule cmm = player.getMatch().needModule(ClassMatchModule.class);

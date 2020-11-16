@@ -1,5 +1,6 @@
 package tc.oc.pgm.util.text;
 
+import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
@@ -42,7 +43,7 @@ public final class TextFormatter {
         texts instanceof List ? (List) texts : new ArrayList<>(texts);
     switch (textList.size()) {
       case 0:
-        return Component.empty();
+        return empty();
       case 1:
         return textList.get(0);
       case 2:

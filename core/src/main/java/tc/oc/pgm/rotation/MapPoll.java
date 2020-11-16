@@ -1,5 +1,6 @@
 package tc.oc.pgm.rotation;
 
+import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.newline;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
@@ -141,8 +142,8 @@ public class MapPoll {
 
     viewer.showTitle(
         title(
-            top ? mapName : Component.empty(),
-            top ? Component.empty() : mapName,
+            top ? mapName : empty(),
+            top ? empty() : mapName,
             Title.Times.of(fromTicks(5), fromTicks(60), fromTicks(5))));
   }
 

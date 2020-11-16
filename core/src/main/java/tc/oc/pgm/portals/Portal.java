@@ -1,8 +1,10 @@
 package tc.oc.pgm.portals;
 
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
+
 import com.google.common.base.Preconditions;
 import javax.annotation.Nullable;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -177,7 +179,7 @@ public class Portal implements FeatureDefinition {
         if (listener != player && listener.getBukkit().canSee(player.getBukkit())) {
           final Location loc = bukkit.getLocation();
           listener.playSound(
-              Sound.sound(Key.key("mob.endermen.portal"), Sound.Source.MASTER, 1f, 1f),
+              sound(key("mob.endermen.portal"), Sound.Source.MASTER, 1f, 1f),
               loc.getX(),
               loc.getY(),
               loc.getZ());
@@ -208,7 +210,7 @@ public class Portal implements FeatureDefinition {
                 for (MatchPlayer listener : match.getPlayers()) {
                   if (listener.getBukkit().canSee(player.getBukkit())) {
                     listener.playSound(
-                        Sound.sound(Key.key("mob.endermen.portal"), Sound.Source.MASTER, 1f, 1f),
+                        sound(key("mob.endermen.portal"), Sound.Source.MASTER, 1f, 1f),
                         destinationClone.getX(),
                         destinationClone.getY(),
                         destinationClone.getZ());

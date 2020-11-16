@@ -1,6 +1,7 @@
 package tc.oc.pgm.util.text;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static net.kyori.adventure.text.Component.text;
 import static tc.oc.pgm.util.text.TextException.invalidFormat;
 import static tc.oc.pgm.util.text.TextException.outOfRange;
 import static tc.oc.pgm.util.text.TextException.unknown;

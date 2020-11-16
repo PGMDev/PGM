@@ -1,5 +1,7 @@
 package tc.oc.pgm.observers.tools;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.google.common.collect.Lists;
 import java.util.List;
 import net.kyori.adventure.text.Component;
@@ -18,7 +20,7 @@ public class NightVisionTool implements InventoryMenuItem {
 
   @Override
   public Component getName() {
-    return Component.translatable("setting.nightvision");
+    return translatable("setting.nightvision");
   }
 
   @Override
@@ -29,11 +31,10 @@ public class NightVisionTool implements InventoryMenuItem {
   @Override
   public List<String> getLore(MatchPlayer player) {
     Component status =
-        Component.translatable(
+        translatable(
             hasNightVision(player) ? "misc.on" : "misc.off",
             hasNightVision(player) ? NamedTextColor.GREEN : NamedTextColor.RED);
-    Component lore =
-        Component.translatable("setting.nightvision.lore", NamedTextColor.GRAY, status);
+    Component lore = translatable("setting.nightvision.lore", NamedTextColor.GRAY, status);
     return Lists.newArrayList(TextTranslations.translateLegacy(lore, player.getBukkit()));
   }
 

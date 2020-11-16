@@ -1,5 +1,7 @@
 package tc.oc.pgm.observers.tools;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.google.common.collect.Lists;
 import java.util.List;
 import net.kyori.adventure.text.Component;
@@ -19,7 +21,7 @@ public class FlySpeedTool implements InventoryMenuItem {
 
   @Override
   public Component getName() {
-    return Component.translatable("setting.flyspeed");
+    return translatable("setting.flyspeed");
   }
 
   @Override
@@ -30,7 +32,7 @@ public class FlySpeedTool implements InventoryMenuItem {
   @Override
   public List<String> getLore(MatchPlayer player) {
     Component flySpeed = FlySpeed.of(player.getBukkit().getFlySpeed()).getName();
-    Component lore = Component.translatable("setting.flyspeed.lore", NamedTextColor.GRAY, flySpeed);
+    Component lore = translatable("setting.flyspeed.lore", NamedTextColor.GRAY, flySpeed);
     return Lists.newArrayList(TextTranslations.translateLegacy(lore, player.getBukkit()));
   }
 
@@ -71,7 +73,7 @@ public class FlySpeedTool implements InventoryMenuItem {
     }
 
     public Component getName() {
-      return Component.translatable(TRANSLATION_KEY + this.name().toLowerCase(), color);
+      return translatable(TRANSLATION_KEY + this.name().toLowerCase(), color);
     }
 
     public FlySpeed getNext() {

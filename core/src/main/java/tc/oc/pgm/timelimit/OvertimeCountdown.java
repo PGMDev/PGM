@@ -1,5 +1,8 @@
 package tc.oc.pgm.timelimit;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import java.time.Duration;
 import java.time.Instant;
 import javax.annotation.Nullable;
@@ -40,10 +43,10 @@ public class OvertimeCountdown extends TimeLimitCountdown {
 
   @Override
   protected Component formatText() {
-    return Component.translatable(
+    return translatable(
             "misc.overtime",
             NamedTextColor.YELLOW,
-            Component.text(colonTime(), urgencyColor()).decoration(TextDecoration.BOLD, false))
+            text(colonTime(), urgencyColor()).decoration(TextDecoration.BOLD, false))
         .decoration(TextDecoration.BOLD, true);
   }
 
@@ -65,10 +68,10 @@ public class OvertimeCountdown extends TimeLimitCountdown {
     // Should never happen, but rather play safe
     if (timeLimit.getOvertime() == null) return;
 
-    match.sendMessage(Component.translatable("broadcast.overtime", NamedTextColor.YELLOW));
+    match.sendMessage(translatable("broadcast.overtime", NamedTextColor.YELLOW));
     if (timeLimit.getMaxOvertime() != null) {
       match.sendMessage(
-          Component.translatable(
+          translatable(
               "broadcast.overtime.limit",
               NamedTextColor.YELLOW,
               PeriodFormats.briefNaturalApproximate(timeLimit.getMaxOvertime())

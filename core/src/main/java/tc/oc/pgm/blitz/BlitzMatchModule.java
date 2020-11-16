@@ -1,5 +1,8 @@
 package tc.oc.pgm.blitz;
 
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.title.Title.title;
 import static tc.oc.pgm.util.TimeUtils.fromTicks;
 
@@ -7,7 +10,6 @@ import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Effect;
@@ -89,9 +91,8 @@ public class BlitzMatchModule implements MatchModule, Listener {
   public void handleJoin(final PlayerParticipationStartEvent event) {
     if (event.getMatch().isRunning()) {
       event.cancel(
-          Component.translatable(
-              "blitz.joinDenied",
-              Component.translatable("gamemode.blitz.name", NamedTextColor.AQUA)));
+          translatable(
+              "blitz.joinDenied", translatable("gamemode.blitz.name", NamedTextColor.AQUA)));
     }
   }
 
@@ -103,14 +104,14 @@ public class BlitzMatchModule implements MatchModule, Listener {
           .getPlayer()
           .showTitle(
               title(
-                  Component.empty(),
-                  Component.translatable(
+                  empty(),
+                  translatable(
                       "blitz.livesRemaining",
                       NamedTextColor.RED,
-                      Component.translatable(
+                      translatable(
                           lives == 1 ? "misc.life" : "misc.lives",
                           NamedTextColor.AQUA,
-                          Component.text(Integer.toString(lives)))),
+                          text(Integer.toString(lives)))),
                   Title.Times.of(Duration.ZERO, fromTicks(60), fromTicks(20))));
     }
   }

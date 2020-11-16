@@ -1,5 +1,7 @@
 package tc.oc.pgm.modes;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 import java.time.Duration;
 import java.util.Set;
 import net.kyori.adventure.text.Component;
@@ -52,7 +54,7 @@ public class ModeChangeCountdown extends MatchCountdown implements Comparable<Mo
 
   @Override
   protected Component formatText() {
-    return Component.translatable(
+    return translatable(
         "objective.modeCountdown",
         NamedTextColor.DARK_AQUA,
         getMode().getComponentName(),

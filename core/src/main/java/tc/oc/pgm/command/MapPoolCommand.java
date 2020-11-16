@@ -1,5 +1,6 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
@@ -196,7 +197,7 @@ public final class MapPoolCommand {
             .append(arrow)
             .append(text(mapPool.getName(), NamedTextColor.GOLD))
             .append(maps)
-            .append(mapPool.isDynamic() ? players : Component.empty())
+            .append(mapPool.isDynamic() ? players : empty())
             .build();
       }
     }.display(audience, mapPools, page);

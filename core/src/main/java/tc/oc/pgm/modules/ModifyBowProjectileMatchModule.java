@@ -1,7 +1,9 @@
 package tc.oc.pgm.modules;
 
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
+
 import java.util.Set;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Arrow;
@@ -34,7 +36,7 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
   private final Set<PotionEffect> potionEffects;
 
   private static final Sound PROJECTILE_SOUND =
-      Sound.sound(Key.key("random.successful_hit"), Sound.Source.MASTER, 0.18f, 0.45f);
+      sound(key("random.successful_hit"), Sound.Source.MASTER, 0.18f, 0.45f);
 
   public ModifyBowProjectileMatchModule(
       Match match, Class<? extends Entity> cls, float velocityMod, Set<PotionEffect> effects) {

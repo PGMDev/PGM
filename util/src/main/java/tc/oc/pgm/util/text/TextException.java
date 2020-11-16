@@ -1,5 +1,9 @@
 package tc.oc.pgm.util.text;
 
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.space;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TextTranslations.translate;
 
 import com.google.common.collect.Range;
@@ -19,15 +23,12 @@ public class TextException extends RuntimeException {
     super(key, cause);
     final boolean suggest = suggestion != null;
     this.message =
-        Component.translatable()
+        translatable()
             .key(key)
             .args(args)
             .color(NamedTextColor.RED)
-            .append(suggest ? Component.space() : Component.empty())
-            .append(
-                suggest
-                    ? Component.translatable("error.suggestionSuffix", Component.text(suggestion))
-                    : Component.empty())
+            .append(suggest ? space() : empty())
+            .append(suggest ? translatable("error.suggestionSuffix", text(suggestion)) : empty())
             .build();
   }
 
@@ -59,19 +60,18 @@ public class TextException extends RuntimeException {
 
   public static TextException invalidFormat(
       String text, Class<?> type, @Nullable String suggestion, @Nullable Throwable cause) {
-    return new TextException(
-        cause, suggestion, "error.invalidFormat", Component.text(text), format(type));
+    return new TextException(cause, suggestion, "error.invalidFormat", text(text), format(type));
   }
 
   public static TextException outOfRange(String text, Range<?> range) {
-    return new TextException(null, null, "error.outOfRange", Component.text(text), format(range));
+    return new TextException(null, null, "error.outOfRange", text(text), format(range));
   }
 
   private static Component format(Range<?> range) {
-    return Component.text(range.toString().replace("∞", "oo").replace("‥", ", "));
+    return text(range.toString().replace("∞", "oo").replace("‥", ", "));
   }
 
   private static Component format(Class<?> type) {
-    return Component.translatable("type." + type.getSimpleName().toLowerCase());
+    return translatable("type." + type.getSimpleName().toLowerCase());
   }
 }

@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.named;
 
+import static net.kyori.adventure.text.Component.text;
+
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -21,11 +23,11 @@ public interface NameDecorationProvider {
   }
 
   default Component getPrefixComponent(UUID uuid) {
-    return Component.text(getPrefix(uuid));
+    return text(getPrefix(uuid));
   }
 
   default Component getSuffixComponent(UUID uuid) {
-    return Component.text(getSuffix(uuid));
+    return text(getSuffix(uuid));
   }
 
   /** A No-op default decoration provider, used in the absence of a decoration provider */

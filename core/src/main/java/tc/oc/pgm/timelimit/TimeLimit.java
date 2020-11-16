@@ -1,6 +1,8 @@
 package tc.oc.pgm.timelimit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
 import java.util.Collection;
@@ -98,11 +100,11 @@ public class TimeLimit extends SelfIdentifyingFeatureDefinition implements Victo
 
   @Override
   public Component getDescription(Match match) {
-    Component time = Component.text(TimeUtils.formatDuration(duration));
+    Component time = text(TimeUtils.formatDuration(duration));
     if (result == null) {
-      return Component.translatable("match.timeLimit.generic", time);
+      return translatable("match.timeLimit.generic", time);
     } else {
-      return Component.translatable("match.timeLimit.result", result.getDescription(match), time);
+      return translatable("match.timeLimit.result", result.getDescription(match), time);
     }
   }
 

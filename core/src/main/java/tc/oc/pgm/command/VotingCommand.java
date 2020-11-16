@@ -1,5 +1,10 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.event.ClickEvent.runCommand;
+import static net.kyori.adventure.text.event.HoverEvent.showText;
+
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.bukkit.parametric.Type;
@@ -8,9 +13,6 @@ import app.ashcon.intake.parametric.annotation.Text;
 import java.util.List;
 import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.event.HoverEvent.Action;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
@@ -45,7 +47,7 @@ public class VotingCommand {
     VotingPool vote = getVotingPool(sender, mapOrder);
 
     Component addMessage =
-        Component.translatable(
+        translatable(
             "vote.add",
             NamedTextColor.GRAY,
             UsernameFormatUtils.formatStaffName(sender, match),
@@ -59,7 +61,7 @@ public class VotingCommand {
     if (vote.getOptions().addVote(map)) {
       ChatDispatcher.broadcastAdminChatMessage(addMessage, match);
     } else {
-      viewer.sendWarning(Component.translatable("vote.limit", NamedTextColor.RED));
+      viewer.sendWarning(translatable("vote.limit", NamedTextColor.RED));
     }
   }
 
@@ -78,14 +80,14 @@ public class VotingCommand {
     VotingPool vote = getVotingPool(sender, mapOrder);
     if (vote.getOptions().removeMap(map)) {
       ChatDispatcher.broadcastAdminChatMessage(
-          Component.translatable(
+          translatable(
               "vote.remove",
               NamedTextColor.GRAY,
               UsernameFormatUtils.formatStaffName(sender, match),
               map.getStyledName(MapNameStyle.COLOR)),
           match);
     } else {
-      viewer.sendWarning(Component.translatable("map.notFound"));
+      viewer.sendWarning(translatable("map.notFound"));
     }
   }
 
@@ -97,11 +99,11 @@ public class VotingCommand {
       throws CommandException {
     VotingPool vote = getVotingPool(sender, mapOrder);
     Component voteModeName =
-        Component.translatable(
+        translatable(
             vote.getOptions().toggleMode() ? "vote.mode.replace" : "vote.mode.create",
             NamedTextColor.LIGHT_PURPLE);
     ChatDispatcher.broadcastAdminChatMessage(
-        Component.translatable(
+        translatable(
             "vote.toggle",
             NamedTextColor.GRAY,
             UsernameFormatUtils.formatStaffName(sender, match),
@@ -122,7 +124,7 @@ public class VotingCommand {
             .map(mi -> mi.getStyledName(MapNameStyle.COLOR))
             .collect(Collectors.toList());
     Component clearedMsg =
-        Component.translatable(
+        translatable(
             "vote.remove",
             NamedTextColor.GRAY,
             UsernameFormatUtils.formatStaffName(sender, match),
@@ -131,7 +133,7 @@ public class VotingCommand {
     vote.getOptions().clear();
 
     if (maps.isEmpty()) {
-      viewer.sendWarning(Component.translatable("vote.noMapsFound"));
+      viewer.sendWarning(translatable("vote.noMapsFound"));
     } else {
       ChatDispatcher.broadcastAdminChatMessage(clearedMsg, match);
     }
@@ -154,26 +156,22 @@ public class VotingCommand {
 
     String modeKey = vote.getOptions().isReplace() ? "replace" : "create";
     Component mode =
-        Component.translatable(String.format("vote.mode.%s", modeKey), NamedTextColor.LIGHT_PURPLE)
-            .hoverEvent(
-                HoverEvent.hoverEvent(
-                    Action.SHOW_TEXT,
-                    Component.translatable("vote.mode.hover", NamedTextColor.AQUA)))
-            .clickEvent(ClickEvent.runCommand("/vote mode"));
+        translatable(String.format("vote.mode.%s", modeKey), NamedTextColor.LIGHT_PURPLE)
+            .hoverEvent(showText(translatable("vote.mode.hover", NamedTextColor.AQUA)))
+            .clickEvent(runCommand("/vote mode"));
 
     Component listMsg =
-        Component.text()
-            .append(Component.translatable("vote.title.selection"))
-            .append(Component.text(": ("))
-            .append(Component.text(Integer.toString(currentMaps), listNumColor))
-            .append(Component.text("/"))
-            .append(
-                Component.text(Integer.toString(VotingPool.MAX_VOTE_OPTIONS), NamedTextColor.RED))
-            .append(Component.text(") "))
-            .append(Component.text("\u00BB", NamedTextColor.GOLD))
-            .append(Component.text(" ["))
+        text()
+            .append(translatable("vote.title.selection"))
+            .append(text(": ("))
+            .append(text(Integer.toString(currentMaps), listNumColor))
+            .append(text("/"))
+            .append(text(Integer.toString(VotingPool.MAX_VOTE_OPTIONS), NamedTextColor.RED))
+            .append(text(") "))
+            .append(text("\u00BB", NamedTextColor.GOLD))
+            .append(text(" ["))
             .append(mode)
-            .append(Component.text("]"))
+            .append(text("]"))
             .color(NamedTextColor.GRAY)
             .build();
     viewer.sendMessage(listMsg);
@@ -181,9 +179,9 @@ public class VotingCommand {
     int index = 1;
     for (MapInfo mi : vote.getOptions().getCustomVoteMaps()) {
       Component indexedName =
-          Component.text()
-              .append(Component.text(Integer.toString(index), NamedTextColor.YELLOW))
-              .append(Component.text(". ", NamedTextColor.WHITE))
+          text()
+              .append(text(Integer.toString(index), NamedTextColor.YELLOW))
+              .append(text(". ", NamedTextColor.WHITE))
               .append(mi.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS))
               .build();
       viewer.sendMessage(indexedName);

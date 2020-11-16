@@ -1,5 +1,6 @@
 package tc.oc.pgm.spawns.states;
 
+import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.title.Title.title;
 import static tc.oc.pgm.util.TimeUtils.fromTicks;
 
@@ -114,11 +115,11 @@ public abstract class Spawning extends Participating {
 
   protected Component getSubtitle() {
     if (!spawnRequested) {
-      return Component.translatable("death.respawn.unconfirmed");
+      return translatable("death.respawn.unconfirmed");
     } else if (options.message != null) {
       return options.message;
     } else {
-      return Component.translatable("death.respawn.confirmed.waiting");
+      return translatable("death.respawn.confirmed.waiting");
     }
   }
 }

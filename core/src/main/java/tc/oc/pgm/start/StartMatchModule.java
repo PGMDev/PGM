@@ -1,5 +1,7 @@
 package tc.oc.pgm.start;
 
+import static net.kyori.adventure.text.Component.empty;
+
 import com.google.common.collect.ImmutableList;
 import java.time.Duration;
 import java.util.ArrayList;

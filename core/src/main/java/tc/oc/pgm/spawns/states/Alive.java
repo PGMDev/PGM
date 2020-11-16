@@ -1,8 +1,10 @@
 package tc.oc.pgm.spawns.states;
 
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
+
 import java.util.List;
 import javax.annotation.Nullable;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Location;
 import org.bukkit.event.Event;
@@ -175,22 +177,21 @@ public class Alive extends Participating {
     for (MatchPlayer listener : player.getMatch().getPlayers()) {
       if (listener == player) {
         // Own death is normal pitch, full volume
-        listener.playSound(Sound.sound(Key.key("mob.irongolem.death"), Sound.Source.MASTER, 1, 1));
+        listener.playSound(sound(key("mob.irongolem.death"), Sound.Source.MASTER, 1, 1));
       } else if (killer != null && killer.isPlayer(listener)) {
         // Kill is higher pitch, quieter
-        listener.playSound(
-            Sound.sound(Key.key("mob.irongolem.death"), Sound.Source.MASTER, 0.75f, 4f / 3f));
+        listener.playSound(sound(key("mob.irongolem.death"), Sound.Source.MASTER, 0.75f, 4f / 3f));
       } else if (listener.getParty() == player.getParty()) {
         // Ally death is a shorter sound
         listener.playSound(
-            Sound.sound(Key.key("mob.irongolem.hit"), Sound.Source.MASTER, 1, 1),
+            sound(key("mob.irongolem.hit"), Sound.Source.MASTER, 1, 1),
             death.getX(),
             death.getY(),
             death.getZ());
       } else {
         // Enemy death is higher pitch
         listener.playSound(
-            Sound.sound(Key.key("mob.irongolem.hit"), Sound.Source.MASTER, 1, 4f / 3f),
+            sound(key("mob.irongolem.hit"), Sound.Source.MASTER, 1, 4f / 3f),
             death.getX(),
             death.getY(),
             death.getZ());

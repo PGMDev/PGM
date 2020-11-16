@@ -2,10 +2,10 @@ package tc.oc.pgm.menu;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static net.kyori.adventure.text.Component.translatable;
 
 import java.util.WeakHashMap;
 import javax.annotation.Nullable;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -44,7 +44,7 @@ public abstract class InventoryMenu {
   public abstract ItemStack[] createWindowContents(final MatchPlayer player);
 
   public String getTranslatedTitle(MatchPlayer player) {
-    return TextTranslations.translateLegacy(Component.translatable(title), player.getBukkit());
+    return TextTranslations.translateLegacy(translatable(title), player.getBukkit());
   }
 
   public boolean isViewing(MatchPlayer player) {

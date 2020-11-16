@@ -1,5 +1,7 @@
 package tc.oc.pgm.observers.tools;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.google.common.collect.Lists;
 import java.util.List;
 import net.kyori.adventure.text.Component;
@@ -19,7 +21,7 @@ public class VisibilityTool implements InventoryMenuItem {
 
   @Override
   public Component getName() {
-    return Component.translatable("setting.visibility");
+    return translatable("setting.visibility");
   }
 
   @Override
@@ -30,10 +32,10 @@ public class VisibilityTool implements InventoryMenuItem {
   @Override
   public List<String> getLore(MatchPlayer player) {
     Component status =
-        Component.translatable(
+        translatable(
             isVisible(player) ? "setting.visibility.shown" : "setting.visibility.hidden",
             isVisible(player) ? NamedTextColor.GREEN : NamedTextColor.RED);
-    Component lore = Component.translatable("setting.visibility.lore", NamedTextColor.GRAY, status);
+    Component lore = translatable("setting.visibility.lore", NamedTextColor.GRAY, status);
     return Lists.newArrayList(TextTranslations.translateLegacy(lore, player.getBukkit()));
   }
 

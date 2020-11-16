@@ -1,5 +1,7 @@
 package tc.oc.pgm.start;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 import java.time.Duration;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -18,7 +20,7 @@ public class HuddleCountdown extends PreMatchCountdown implements Listener {
 
   @Override
   protected Component formatText() {
-    return Component.translatable(
+    return translatable(
         "countdown.huddleEnd", NamedTextColor.YELLOW, secondsRemaining(NamedTextColor.DARK_RED));
   }
 

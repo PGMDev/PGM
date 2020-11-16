@@ -1,6 +1,9 @@
 package tc.oc.pgm.util.text;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Table;
@@ -35,7 +38,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public final class TextTranslations {
   private TextTranslations() {}
 
-  private static final Key NAMESPACE = Key.key("pgm", "translations");
+  private static final Key NAMESPACE = key("pgm", "translations");
 
   // Locale of the source code .properties files
   private static final Locale SOURCE_LOCALE = Locale.US;
@@ -254,7 +257,7 @@ public final class TextTranslations {
   public static String translate(String key, @Nullable CommandSender sender, Object... args) {
     final Locale locale = sender == null ? SOURCE_LOCALE : sender.getLocale();
     final Component text =
-        Component.translatable(
+        translatable(
             key,
             Stream.of(args).map(String::valueOf).map(Component::text).collect(Collectors.toList()));
 
