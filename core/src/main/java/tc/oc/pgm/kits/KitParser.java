@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
@@ -29,6 +30,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -418,6 +420,13 @@ public abstract class KitParser {
       meta.addEnchant(enchant.getKey(), enchant.getValue(), true);
     }
 
+    if (meta instanceof EnchantmentStorageMeta) {
+      for (Entry<Enchantment, Integer> enchant : parseEnchantments(el, "stored-").entrySet()) {
+        ((EnchantmentStorageMeta) meta)
+            .addStoredEnchant(enchant.getKey(), enchant.getValue(), true);
+      }
+    }
+
     List<PotionEffect> potions = parsePotions(el);
     if (!potions.isEmpty() && meta instanceof PotionMeta) {
       PotionMeta potionMeta = (PotionMeta) meta;
@@ -534,9 +543,14 @@ public abstract class KitParser {
   }
 
   public Map<Enchantment, Integer> parseEnchantments(Element el) throws InvalidXMLException {
+    return parseEnchantments(el, "");
+  }
+
+  public Map<Enchantment, Integer> parseEnchantments(Element el, String prefix)
+      throws InvalidXMLException {
     Map<Enchantment, Integer> enchantments = Maps.newHashMap();
 
-    Node attr = Node.fromAttr(el, "enchantment", "enchantments");
+    Node attr = Node.fromAttr(el, prefix + "enchantment", prefix + "enchantments");
     if (attr != null) {
       Iterable<String> enchantmentTexts = Splitter.on(";").split(attr.getValue());
       for (String enchantmentText : enchantmentTexts) {
@@ -550,7 +564,7 @@ public abstract class KitParser {
       }
     }
 
-    for (Element elEnchantment : el.getChildren("enchantment")) {
+    for (Element elEnchantment : el.getChildren(prefix + "enchantment")) {
       Map.Entry<Enchantment, Integer> entry = parseEnchantment(elEnchantment);
       enchantments.put(entry.getKey(), entry.getValue());
     }
