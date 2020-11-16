@@ -58,12 +58,18 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
     List<String> lore = new ArrayList<>();
     int teamKills = 0;
     int teamDeaths = 0;
+    double damageDone = 0;
+    double damageTaken = 0;
+    double bowDamage = 0;
     int shotsTaken = 0;
     int shotsHit = 0;
     for (MatchPlayer teamPlayer : team.getPlayers()) {
       PlayerStats stats = smm.getPlayerStat(teamPlayer.getId());
       teamKills += stats.getKills();
       teamDeaths += stats.getDeaths();
+      damageDone += stats.getDamageDone();
+      damageTaken += stats.getDamageTaken();
+      bowDamage += stats.getBowDamage();
       shotsTaken += stats.getShotsTaken();
       shotsHit += stats.getShotsHit();
     }
@@ -80,6 +86,13 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
     Component kdLore =
         TranslatableComponent.of(
             "match.stats.kd.concise", RESET, numberComponent(teamKD, TextColor.GREEN));
+    Component damageLore =
+        TranslatableComponent.of(
+            "match.stats.damage.concise",
+            RESET,
+            numberComponent(damageDone, TextColor.GREEN),
+            numberComponent(bowDamage, TextColor.YELLOW),
+            numberComponent(damageTaken, TextColor.RED));
     Component bowLore =
         TranslatableComponent.of(
             "match.stats.bow.concise",
@@ -92,6 +105,7 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
     lore.add(TextTranslations.translateLegacy(killLore, bukkit));
     lore.add(TextTranslations.translateLegacy(deathLore, bukkit));
     lore.add(TextTranslations.translateLegacy(kdLore, bukkit));
+    lore.add(TextTranslations.translateLegacy(damageLore, bukkit));
     lore.add(TextTranslations.translateLegacy(bowLore, bukkit));
 
     return lore;
