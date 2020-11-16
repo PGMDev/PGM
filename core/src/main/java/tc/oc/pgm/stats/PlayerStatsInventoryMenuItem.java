@@ -61,13 +61,6 @@ public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
             "match.stats.killstreak.concise",
             RESET,
             numberComponent(stats.getMaxKillstreak(), TextColor.GREEN));
-    Component damageLore =
-        TranslatableComponent.of(
-            "match.stats.damage.concise",
-            RESET,
-            numberComponent(stats.getDamageDone(), TextColor.GREEN),
-            numberComponent(stats.getBowDamage(), TextColor.YELLOW),
-            numberComponent(stats.getDamageTaken(), TextColor.RED));
     Component bowLore =
         TranslatableComponent.of(
             "match.stats.bow.concise",
@@ -81,7 +74,6 @@ public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
     lore.add(TextTranslations.translateLegacy(deathLore, bukkit));
     lore.add(TextTranslations.translateLegacy(kdLore, bukkit));
     lore.add(TextTranslations.translateLegacy(killstreakLore, bukkit));
-    lore.add(TextTranslations.translateLegacy(damageLore, bukkit));
     lore.add(TextTranslations.translateLegacy(bowLore, bukkit));
 
     if (!optionalStat(
