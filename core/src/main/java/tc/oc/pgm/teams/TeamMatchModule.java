@@ -63,22 +63,16 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       if (team != null) {
         if (players == 1) {
           return translatable(
-              "join.wait.singular.team",
-              text(String.valueOf(players), NamedTextColor.AQUA),
-              team.getName());
+              "join.wait.singular.team", text(players, NamedTextColor.AQUA), team.getName());
         } else {
           return translatable(
-              "join.wait.plural.team",
-              text(String.valueOf(players), NamedTextColor.AQUA),
-              team.getName());
+              "join.wait.plural.team", text(players, NamedTextColor.AQUA), team.getName());
         }
       } else {
         if (players == 1) {
-          return translatable(
-              "join.wait.singular", text(String.valueOf(players), NamedTextColor.AQUA));
+          return translatable("join.wait.singular", text(players, NamedTextColor.AQUA));
         } else {
-          return translatable(
-              "join.wait.plural", text(String.valueOf(players), NamedTextColor.AQUA));
+          return translatable("join.wait.plural", text(players, NamedTextColor.AQUA));
         }
       }
     }

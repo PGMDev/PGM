@@ -25,9 +25,9 @@ public class TeamTabEntry extends DynamicTabEntry {
   public BaseComponent[] getContent(TabView view) {
     Component content =
         text()
-            .append(text(String.valueOf(team.getPlayers().size()), NamedTextColor.WHITE))
+            .append(text(team.getPlayers().size(), NamedTextColor.WHITE))
             .append(text("/", NamedTextColor.DARK_GRAY))
-            .append(text(String.valueOf(team.getMaxPlayers()), NamedTextColor.GRAY))
+            .append(text(team.getMaxPlayers(), NamedTextColor.GRAY))
             .append(space())
             .append(
                 text(

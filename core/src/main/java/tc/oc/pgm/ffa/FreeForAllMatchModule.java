@@ -66,10 +66,9 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     @Override
     public Component getReason() {
       if (players == 1) {
-        return translatable(
-            "join.wait.singular", text(String.valueOf(players), NamedTextColor.AQUA));
+        return translatable("join.wait.singular", text(players, NamedTextColor.AQUA));
       } else {
-        return translatable("join.wait.plural", text(String.valueOf(players), NamedTextColor.AQUA));
+        return translatable("join.wait.plural", text(players, NamedTextColor.AQUA));
       }
     }
 

@@ -170,8 +170,8 @@ public class ReportCommand {
         translatable(
             "command.simplePageHeader",
             NamedTextColor.AQUA,
-            text(Integer.toString(page), NamedTextColor.RED),
-            text(Integer.toString(pages), NamedTextColor.RED));
+            text(page, NamedTextColor.RED),
+            text(pages, NamedTextColor.RED));
 
     Component header =
         translatable("moderation.reports.header", NamedTextColor.GRAY, headerResultCount, pageNum)

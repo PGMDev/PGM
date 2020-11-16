@@ -280,7 +280,7 @@ public final class MapCommand {
     }
 
     int totalPlayers = maxPlayers.stream().mapToInt(i -> i).sum();
-    Component total = text(Integer.toString(totalPlayers), NamedTextColor.GOLD);
+    Component total = text(totalPlayers, NamedTextColor.GOLD);
 
     String verboseVs = " " + TextTranslations.translate("map.info.playerLimit.vs", sender) + " ";
     Component verbose =

@@ -180,7 +180,7 @@ public final class MapPoolCommand {
                 .append(text(" (", NamedTextColor.DARK_AQUA))
                 .append(translatable("map.title", NamedTextColor.DARK_GREEN))
                 .append(text(": ", NamedTextColor.DARK_GREEN))
-                .append(text(Integer.toString(mapPool.getMaps().size()), NamedTextColor.WHITE))
+                .append(text(mapPool.getMaps().size(), NamedTextColor.WHITE))
                 .append(text(")", NamedTextColor.DARK_AQUA))
                 .build();
 
@@ -189,7 +189,7 @@ public final class MapPoolCommand {
                 .append(text(" (", NamedTextColor.DARK_AQUA))
                 .append(translatable("match.info.players", NamedTextColor.AQUA))
                 .append(text(": ", NamedTextColor.AQUA))
-                .append(text(Integer.toString(mapPool.getPlayers()), NamedTextColor.WHITE))
+                .append(text(mapPool.getPlayers(), NamedTextColor.WHITE))
                 .append(text(")", NamedTextColor.DARK_AQUA))
                 .build();
 

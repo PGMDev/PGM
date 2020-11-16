@@ -164,7 +164,7 @@ public abstract class MatchCountdown extends Countdown {
     if (seconds == 1) {
       return translatable("misc.second", text("1", color));
     } else {
-      return translatable("misc.seconds", text(String.valueOf(seconds), color));
+      return translatable("misc.seconds", text(seconds, color));
     }
   }
 

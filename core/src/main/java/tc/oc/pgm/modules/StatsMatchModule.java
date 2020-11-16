@@ -85,9 +85,9 @@ public class StatsMatchModule implements MatchModule, Listener {
       return translatable(
           "match.stats",
           NamedTextColor.GRAY,
-          text(Integer.toString(kills), NamedTextColor.GREEN),
-          text(Integer.toString(killstreak), NamedTextColor.GREEN),
-          text(Integer.toString(deaths), NamedTextColor.RED),
+          text(kills, NamedTextColor.GREEN),
+          text(killstreak, NamedTextColor.GREEN),
+          text(deaths, NamedTextColor.RED),
           text(kd, NamedTextColor.GREEN));
     }
   }
@@ -230,7 +230,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     return translatable(
         messageKey,
         playerName(mapEntry.getKey()),
-        text(Integer.toString(mapEntry.getValue()), color, TextDecoration.BOLD));
+        text(mapEntry.getValue(), color, TextDecoration.BOLD));
   }
 
   private Component playerName(UUID playerUUID) {

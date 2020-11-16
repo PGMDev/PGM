@@ -67,15 +67,14 @@ public class PeriodFormats {
 
   /** Return a localized description of the given time interval. */
   public static Component formatPeriod(TemporalUnit unit, long quantity) {
-    return translatable(periodKey(unit, quantity), text(String.valueOf(quantity)));
+    return translatable(periodKey(unit, quantity), text(quantity));
   }
 
   /**
    * Return a localized description of the given time period, which must contain exactly one field.
    */
   public static Component formatPeriod(Period period) {
-    return translatable(
-        periodKey(period), text(String.valueOf(period.get(period.getUnits().get(0)))));
+    return translatable(periodKey(period), text(period.get(period.getUnits().get(0))));
   }
 
   /**

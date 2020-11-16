@@ -111,7 +111,7 @@ public class BlitzMatchModule implements MatchModule, Listener {
                       translatable(
                           lives == 1 ? "misc.life" : "misc.lives",
                           NamedTextColor.AQUA,
-                          text(Integer.toString(lives)))),
+                          text(lives))),
                   Title.Times.of(Duration.ZERO, fromTicks(60), fromTicks(20))));
     }
   }

@@ -338,7 +338,7 @@ public class PGMListener implements Listener {
           UsernameFormatUtils.formatStaffName(event.getSender(), event.getMatch());
       Component matchLimit =
           text()
-              .append(text(Integer.toString(event.getMatchLimit()), NamedTextColor.GREEN))
+              .append(text(event.getMatchLimit(), NamedTextColor.GREEN))
               .append(space())
               .append(
                   translatable(

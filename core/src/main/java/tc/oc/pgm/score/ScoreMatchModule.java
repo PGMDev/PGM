@@ -284,7 +284,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
             player.getName(NameStyle.COLOR),
             translatable(
                 wholePoints == 1 ? "misc.point" : "misc.points",
-                text(Integer.toString(wholePoints), NamedTextColor.DARK_AQUA)),
+                text(wholePoints, NamedTextColor.DARK_AQUA)),
             player.getParty().getName()));
     player.playSound(sound(key("random.levelup"), Sound.Source.MASTER, 1, 1));
   }

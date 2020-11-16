@@ -25,9 +25,9 @@ public class FreeForAllTabEntry extends DynamicTabEntry {
   public BaseComponent[] getContent(TabView view) {
     Component content =
         text()
-            .append(text(String.valueOf(match.getParticipants().size()), NamedTextColor.WHITE))
+            .append(text(match.getParticipants().size(), NamedTextColor.WHITE))
             .append(text("/", NamedTextColor.DARK_GRAY))
-            .append(text(String.valueOf(match.getMaxPlayers()), NamedTextColor.GRAY))
+            .append(text(match.getMaxPlayers(), NamedTextColor.GRAY))
             .append(space())
             .append(translatable("match.info.players", NamedTextColor.YELLOW, TextDecoration.BOLD))
             .build();

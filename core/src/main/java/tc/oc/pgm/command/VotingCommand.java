@@ -164,9 +164,9 @@ public class VotingCommand {
         text()
             .append(translatable("vote.title.selection"))
             .append(text(": ("))
-            .append(text(Integer.toString(currentMaps), listNumColor))
+            .append(text(currentMaps, listNumColor))
             .append(text("/"))
-            .append(text(Integer.toString(VotingPool.MAX_VOTE_OPTIONS), NamedTextColor.RED))
+            .append(text(VotingPool.MAX_VOTE_OPTIONS, NamedTextColor.RED))
             .append(text(") "))
             .append(text("\u00BB", NamedTextColor.GOLD))
             .append(text(" ["))
@@ -180,7 +180,7 @@ public class VotingCommand {
     for (MapInfo mi : vote.getOptions().getCustomVoteMaps()) {
       Component indexedName =
           text()
-              .append(text(Integer.toString(index), NamedTextColor.YELLOW))
+              .append(text(index, NamedTextColor.YELLOW))
               .append(text(". ", NamedTextColor.WHITE))
               .append(mi.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS))
               .build();
