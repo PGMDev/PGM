@@ -3,6 +3,7 @@ package tc.oc.pgm.blitz;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Range;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
@@ -46,7 +47,10 @@ public class BlitzModule implements MapModule {
 
       for (Element blitzEl : blitzElements) {
         boolean broadcastLives = XMLUtils.parseBoolean(blitzEl.getChild("broadcastLives"), true);
-        int lives = XMLUtils.parseNumber(Node.fromChildOrAttr(blitzEl, "lives"), Integer.class, 1);
+        int lives =
+            XMLUtils.parseNumberInRange(
+                Node.fromChildOrAttr(blitzEl, "lives"), Integer.class, Range.atLeast(1), 1);
+
         config = new BlitzConfig(lives, broadcastLives);
       }
 
