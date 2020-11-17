@@ -1,12 +1,14 @@
 package tc.oc.pgm.join;
 
+import static net.kyori.adventure.text.Component.join;
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.annotation.Nullable;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -127,19 +129,19 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
 
       switch (genericResult.getStatus()) {
         case MATCH_STARTED:
-          joining.sendWarning(Component.translatable("join.err.afterStart"));
+          joining.sendWarning(translatable("join.err.afterStart"));
           return true;
 
         case MATCH_FINISHED:
-          joining.sendWarning(Component.translatable("join.err.afterFinish"));
+          joining.sendWarning(translatable("join.err.afterFinish"));
           return true;
 
         case NO_PERMISSION:
-          joining.sendWarning(Component.translatable("join.err.noPermission"));
+          joining.sendWarning(translatable("join.err.noPermission"));
           return true;
 
         case VANISHED:
-          joining.sendWarning(Component.translatable("join.err.vanish"));
+          joining.sendWarning(translatable("join.err.vanish"));
           return true;
       }
     }
@@ -170,12 +172,12 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
 
     if (leaving.getParty() instanceof ObservingParty) {
       leaving.sendWarning(
-          Component.translatable("join.err.alreadyJoined.team", leaving.getParty().getName()));
+          translatable("join.err.alreadyJoined.team", leaving.getParty().getName()));
       return false;
     }
 
     if (!leaving.getBukkit().hasPermission(Permissions.LEAVE)) {
-      leaving.sendWarning(Component.translatable("leave.err.noPermission"));
+      leaving.sendWarning(translatable("leave.err.noPermission"));
       return false;
     }
 
@@ -193,9 +195,9 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
   public boolean queueToJoin(MatchPlayer joining) {
     boolean joined = match.setParty(joining, queuedParticipants);
     if (joined) {
-      joining.sendMessage(Component.translatable("join.ok"));
+      joining.sendMessage(translatable("join.ok"));
     } else {
-      joining.sendMessage(Component.translatable("join.ok.queue", NamedTextColor.YELLOW));
+      joining.sendMessage(translatable("join.ok.queue", NamedTextColor.YELLOW));
     }
 
     return joined;
@@ -204,7 +206,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
   public boolean cancelQueuedJoin(MatchPlayer joining) {
     if (!isQueuedToJoin(joining)) return false;
     if (match.setParty(joining, match.getDefaultParty())) {
-      joining.sendMessage(Component.translatable("join.ok.dequeue", NamedTextColor.YELLOW));
+      joining.sendMessage(translatable("join.ok.dequeue", NamedTextColor.YELLOW));
       return true;
     } else {
       return false;

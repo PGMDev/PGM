@@ -1,12 +1,13 @@
 package tc.oc.pgm.tracker.trackers;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
-import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -210,7 +211,7 @@ public class CombatLogTracker implements Listener {
   public void onParticipationStop(PlayerParticipationStopEvent event) {
     if (event.getMatch().isRunning()
         && this.getImminentDeath(event.getPlayer().getBukkit()) != null) {
-      event.cancel(Component.translatable("leave.err.combatLog"));
+      event.cancel(translatable("leave.err.combatLog"));
       event.setCancelled(true);
     }
   }

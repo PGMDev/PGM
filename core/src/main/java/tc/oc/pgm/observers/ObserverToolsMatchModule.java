@@ -1,8 +1,8 @@
 package tc.oc.pgm.observers;
 
-import com.google.common.collect.ImmutableList;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

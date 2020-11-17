@@ -1,5 +1,8 @@
 package tc.oc.pgm.listeners;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -25,7 +28,7 @@ public class FormattingListener implements Listener {
     event
         .getMatch()
         .sendMessage(
-            Component.translatable(
+            translatable(
                 "wool.complete.owned",
                 event.getPlayer().getName(NameStyle.COLOR),
                 event.getWool().getComponentName(),
@@ -40,7 +43,7 @@ public class FormattingListener implements Listener {
     event
         .getMatch()
         .sendMessage(
-            Component.translatable(
+            translatable(
                 "core.complete.owned",
                 formatContributions(core.getContributions(), false),
                 core.getComponentName(),
@@ -55,7 +58,7 @@ public class FormattingListener implements Listener {
     event
         .getMatch()
         .sendMessage(
-            Component.translatable(
+            translatable(
                 "destroyable.complete.owned",
                 formatContributions(event.getDestroyable().getContributions(), true),
                 destroyable.getComponentName(),
@@ -76,10 +79,10 @@ public class FormattingListener implements Listener {
       if (entry.getPercentage() > 0.2) { // 20% necessary to be included
         if (showPercentage) {
           contributors.add(
-              Component.translatable(
+              translatable(
                   "objective.credit.percentage",
                   entry.getPlayerState().getName(NameStyle.COLOR),
-                  Component.text(Math.round(entry.getPercentage() * 100), NamedTextColor.AQUA)));
+                  text(Math.round(entry.getPercentage() * 100), NamedTextColor.AQUA)));
         } else {
           contributors.add(entry.getPlayerState().getName(NameStyle.COLOR));
         }
@@ -90,12 +93,10 @@ public class FormattingListener implements Listener {
 
     final Component credit;
     if (contributors.isEmpty()) {
-      credit =
-          Component.translatable(
-              someExcluded ? "objective.credit.many" : "objective.credit.unknown");
+      credit = translatable(someExcluded ? "objective.credit.many" : "objective.credit.unknown");
     } else {
       if (someExcluded) {
-        contributors.add(Component.translatable("objective.credit.etc")); // Some contributors < 20%
+        contributors.add(translatable("objective.credit.etc")); // Some contributors < 20%
       }
       credit = TextFormatter.list(contributors, NamedTextColor.WHITE);
     }

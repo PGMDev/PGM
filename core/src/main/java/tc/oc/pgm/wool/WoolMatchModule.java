@@ -1,5 +1,7 @@
 package tc.oc.pgm.wool;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import java.util.HashMap;
@@ -182,10 +184,9 @@ public class WoolMatchModule implements MatchModule, Listener {
     if (player != null) { // wool can only be placed by a player
       Component woolName = wool.getComponentName();
       if (!isValidWool(wool.getDyeColor(), event.getNewState())) {
-        player.sendWarning(Component.translatable("wool.wrongWool", woolName));
+        player.sendWarning(translatable("wool.wrongWool", woolName));
       } else if (wool.getOwner() != player.getParty()) {
-        player.sendWarning(
-            Component.translatable("wool.wrongTeam", wool.getOwner().getName(), woolName));
+        player.sendWarning(translatable("wool.wrongTeam", wool.getOwner().getName(), woolName));
       } else {
         event.setCancelled(false);
         wool.markPlaced();
@@ -215,7 +216,7 @@ public class WoolMatchModule implements MatchModule, Listener {
           if (wool.getDefinition().isObjectiveWool(result)) {
             if (!wool.getDefinition().isCraftable()) {
               playerHolder.sendWarning(
-                  Component.translatable("wool.craftingDisabled", wool.getComponentName()));
+                  translatable("wool.craftingDisabled", wool.getComponentName()));
               event.getInventory().setResult(null);
             }
           }

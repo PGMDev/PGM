@@ -1,12 +1,13 @@
 package tc.oc.pgm.proximity;
 
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 
 import com.google.common.collect.Sets;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Color;
@@ -26,7 +27,7 @@ public class ProximityAlarm implements Listener {
   private static final float FLARE_CHANCE = 0.25f;
 
   private static final Sound SOUND =
-      Sound.sound(Key.key("fireworks.largeBlast_far"), Sound.Source.MASTER, 1f, 0.7f);
+      sound(key("fireworks.largeBlast_far"), Sound.Source.MASTER, 1f, 0.7f);
 
   protected final Random random;
   protected final Match match;

@@ -1,5 +1,7 @@
 package tc.oc.pgm.scoreboard;
 
+import static net.kyori.adventure.text.Component.text;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.time.Duration;
@@ -154,7 +156,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
         this.rows[i] = null;
         this.scores[i] = -1;
 
-        this.players[i] = String.valueOf(ChatColor.COLOR_CHAR) + (char) i;
+        this.players[i] = String.valueOf(ChatColor.COLOR_CHAR + (char) i);
 
         this.teams[i] = this.scoreboard.registerNewTeam(IDENTIFIER + "-row-" + i);
         this.teams[i].setPrefix("");

@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.text;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -78,6 +80,6 @@ public final class MinecraftTranslations {
 
   private static Component getKey(String format, String name) {
     final String key = String.format(format, name);
-    return Component.translatable(KEY_EXCEPTIONS.getOrDefault(key, key));
+    return translatable(KEY_EXCEPTIONS.getOrDefault(key, key));
   }
 }

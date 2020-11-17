@@ -1,5 +1,7 @@
 package tc.oc.pgm.util;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -17,7 +19,7 @@ import tc.oc.pgm.util.named.NameStyle;
 public class UsernameFormatUtils {
 
   public static final Component CONSOLE_NAME =
-      Component.translatable("misc.console", NamedTextColor.DARK_AQUA)
+      translatable("misc.console", NamedTextColor.DARK_AQUA)
           .decoration(TextDecoration.ITALIC, true);
 
   public static Component formatStaffName(CommandSender sender, Match match) {

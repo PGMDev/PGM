@@ -1,5 +1,7 @@
 package tc.oc.pgm.namedecorations;
 
+import static net.kyori.adventure.text.Component.text;
+
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,7 +38,7 @@ public interface NameDecorationRegistry extends Listener, NameDecorationProvider
    * @return The name, decorated, in component form
    */
   default Component getDecoratedNameComponent(Player player, ChatColor partyColor) {
-    return Component.text(getDecoratedName(player, partyColor));
+    return text(getDecoratedName(player, partyColor));
   }
 
   /**

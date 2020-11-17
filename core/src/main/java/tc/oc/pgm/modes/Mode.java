@@ -1,5 +1,7 @@
 package tc.oc.pgm.modes;
 
+import static net.kyori.adventure.text.Component.text;
+
 import java.time.Duration;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
@@ -27,7 +29,7 @@ public class Mode {
     this.after = after;
     this.name = name;
     this.componentName =
-        Component.text(name != null ? name : getPreformattedMaterialName(), NamedTextColor.RED);
+        text(name != null ? name : getPreformattedMaterialName(), NamedTextColor.RED);
     this.showBefore = showBefore;
   }
 

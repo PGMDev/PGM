@@ -1,6 +1,7 @@
 package tc.oc.pgm.result;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static net.kyori.adventure.text.Component.translatable;
 
 import net.kyori.adventure.text.Component;
 import tc.oc.pgm.api.match.Match;
@@ -22,7 +23,7 @@ public class CompetitorVictoryCondition extends ImmediateVictoryCondition {
 
   @Override
   public Component getDescription(Match match) {
-    return Component.translatable(
+    return translatable(
         competitor.isNamePlural()
             ? "broadcast.gameOver.teamWinners"
             : "broadcast.gameOver.teamWinner",

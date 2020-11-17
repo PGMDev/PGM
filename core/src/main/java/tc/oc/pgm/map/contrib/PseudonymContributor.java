@@ -1,6 +1,7 @@
 package tc.oc.pgm.map.contrib;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static net.kyori.adventure.text.Component.text;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -34,7 +35,7 @@ public class PseudonymContributor implements Contributor {
 
   @Override
   public Component getName(NameStyle style) {
-    return Component.text(getNameLegacy(), NamedTextColor.DARK_AQUA);
+    return text(getNameLegacy(), NamedTextColor.DARK_AQUA);
   }
 
   @Override

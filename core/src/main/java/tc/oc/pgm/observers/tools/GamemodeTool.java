@@ -1,10 +1,13 @@
 package tc.oc.pgm.observers.tools;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.event.ClickEvent.runCommand;
+import static net.kyori.adventure.text.event.HoverEvent.showText;
+
 import com.google.common.collect.Lists;
 import java.util.List;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
@@ -68,11 +71,9 @@ public class GamemodeTool implements InventoryMenuItem {
 
   private Component getToggleMessage() {
     Component command =
-        Component.text("/tools", NamedTextColor.AQUA)
-            .hoverEvent(
-                HoverEvent.showText(
-                    translatable("setting.gamemode.hover", NamedTextColor.GRAY)))
-            .clickEvent(ClickEvent.runCommand("/tools"));
+        text("/tools", NamedTextColor.AQUA)
+            .hoverEvent(showText(translatable("setting.gamemode.hover", NamedTextColor.GRAY)))
+            .clickEvent(runCommand("/tools"));
     return translatable("setting.gamemode.warning", NamedTextColor.GRAY, command);
   }
 

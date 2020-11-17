@@ -1,11 +1,12 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Text;
 import javax.annotation.Nullable;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -30,10 +31,10 @@ public final class ClassCommand {
 
     if (query == null) {
       player.sendMessage(
-          Component.translatable("match.class.current", NamedTextColor.GREEN)
-              .append(Component.space())
+          translatable("match.class.current", NamedTextColor.GREEN)
+              .append(space())
               .append(text(currentClass.getName(), NamedTextColor.GOLD, TextDecoration.BOLD)));
-      player.sendMessage(Component.translatable("match.class.view", NamedTextColor.GOLD));
+      player.sendMessage(translatable("match.class.view", NamedTextColor.GOLD));
     } else {
       final PlayerClass newClass = StringUtils.bestFuzzyMatch(query, classes.getClasses(), 0.9);
 
@@ -48,12 +49,12 @@ public final class ClassCommand {
       }
 
       player.sendMessage(
-          Component.translatable(
+          translatable(
               "match.class.ok",
               NamedTextColor.GREEN,
               text(newClass.getName(), NamedTextColor.GOLD, TextDecoration.UNDERLINED)));
       if (player.isParticipating()) {
-        player.sendMessage(Component.translatable("match.class.queue", NamedTextColor.GREEN));
+        player.sendMessage(translatable("match.class.queue", NamedTextColor.GREEN));
       }
     }
   }

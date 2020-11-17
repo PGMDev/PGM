@@ -1,5 +1,8 @@
 package tc.oc.pgm.countdowns;
 
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.title.Title.title;
 
 import java.time.Duration;
@@ -108,8 +111,8 @@ public abstract class MatchCountdown extends Countdown {
       getMatch()
           .showTitle(
               title(
-                  Component.text(remaining.getSeconds(), NamedTextColor.YELLOW),
-                  Component.empty(),
+                  text(remaining.getSeconds(), NamedTextColor.YELLOW),
+                  empty(),
                   Title.Times.of(Duration.ZERO, Duration.ofMillis(5), Duration.ofMillis(15))));
     }
 
@@ -159,9 +162,9 @@ public abstract class MatchCountdown extends Countdown {
   protected Component secondsRemaining(TextColor color) {
     long seconds = remaining.getSeconds();
     if (seconds == 1) {
-      return Component.translatable("misc.second", Component.text("1", color));
+      return translatable("misc.second", text("1", color));
     } else {
-      return Component.translatable("misc.seconds", Component.text(String.valueOf(seconds), color));
+      return translatable("misc.seconds", text(seconds, color));
     }
   }
 

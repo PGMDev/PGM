@@ -1,5 +1,8 @@
 package tc.oc.pgm.spawns.states;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import java.util.List;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
@@ -111,16 +114,16 @@ public class Dead extends Spawning {
 
   @Override
   protected Component getTitle() {
-    return Component.translatable("deathScreen.title", NamedTextColor.RED);
+    return translatable("deathScreen.title", NamedTextColor.RED);
   }
 
   @Override
   protected Component getSubtitle() {
     long ticks = ticksUntilRespawn();
     if (ticks > 0) {
-      return Component.translatable(
+      return translatable(
           spawnRequested ? "death.respawn.confirmed.time" : "death.respawn.unconfirmed.time",
-          Component.text(String.format("%.1f", (ticks / (float) 20)), NamedTextColor.AQUA));
+          text(String.format("%.1f", (ticks / (float) 20)), NamedTextColor.AQUA));
     } else {
       return super.getSubtitle();
     }
@@ -144,11 +147,11 @@ public class Dead extends Spawning {
     if (ticks % (ticks > 0 ? 20 : 100) == 0) {
       player.sendMessage(
           (ticks > 0
-                  ? Component.translatable(
+                  ? translatable(
                       spawnRequested
                           ? "death.respawn.confirmed.time"
                           : "death.respawn.unconfirmed.time",
-                      Component.text((int) (ticks / (float) 20), NamedTextColor.AQUA))
+                      text((int) (ticks / (float) 20), NamedTextColor.AQUA))
                   : super.getSubtitle())
               .color(NamedTextColor.GREEN));
     }

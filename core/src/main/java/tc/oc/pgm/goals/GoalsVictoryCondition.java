@@ -1,5 +1,7 @@
 package tc.oc.pgm.goals;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 import java.util.Collection;
 import java.util.Map;
 import net.kyori.adventure.text.Component;
@@ -50,6 +52,6 @@ public class GoalsVictoryCondition implements VictoryCondition {
 
   @Override
   public Component getDescription(Match match) {
-    return Component.translatable("victoryCondition.goals");
+    return translatable("victoryCondition.goals");
   }
 }

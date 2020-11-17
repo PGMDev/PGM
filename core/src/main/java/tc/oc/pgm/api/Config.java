@@ -1,6 +1,10 @@
 package tc.oc.pgm.api;
 
+import static net.kyori.adventure.text.Component.newline;
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.event.ClickEvent.openUrl;
+import static net.kyori.adventure.text.event.HoverEvent.showText;
 
 import java.time.Duration;
 import java.util.List;
@@ -9,8 +13,6 @@ import java.util.logging.Level;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.permissions.Permission;
@@ -347,16 +349,16 @@ public interface Config {
         hover.append(text(getDisplayName()));
       }
       if (getDescription() != null && !getDescription().isEmpty()) {
-        if (addNewline) hover.append(Component.newline());
+        if (addNewline) hover.append(newline());
         addNewline = true;
         hover.append(text(getDescription()));
       }
 
       if (getClickLink() != null && !getClickLink().isEmpty()) {
-        if (addNewline) hover.append(Component.newline());
+        if (addNewline) hover.append(newline());
 
         Component clickLink =
-            Component.translatable(
+            translatable(
                 "chat.clickLink",
                 NamedTextColor.DARK_AQUA,
                 text(getClickLink(), NamedTextColor.AQUA, TextDecoration.UNDERLINED));
@@ -366,10 +368,10 @@ public interface Config {
       TextComponent.Builder component =
           text()
               .append(text(prefix ? getPrefix() : getSuffix()))
-              .hoverEvent(HoverEvent.showText(hover.build()));
+              .hoverEvent(showText(hover.build()));
 
       if (getClickLink() != null && !getClickLink().isEmpty()) {
-        component.clickEvent(ClickEvent.openUrl(getClickLink()));
+        component.clickEvent(openUrl(getClickLink()));
       }
 
       return component.build();

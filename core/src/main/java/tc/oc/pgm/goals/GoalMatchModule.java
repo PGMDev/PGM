@@ -1,5 +1,8 @@
 package tc.oc.pgm.goals;
 
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
@@ -11,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -50,9 +52,9 @@ public class GoalMatchModule implements MatchModule, Listener {
   }
 
   protected static final Sound GOOD_SOUND =
-      Sound.sound(Key.key("portal.travel"), Sound.Source.MASTER, 0.7f, 2f);
+      sound(key("portal.travel"), Sound.Source.MASTER, 0.7f, 2f);
   protected static final Sound BAD_SOUND =
-      Sound.sound(Key.key("mob.blaze.death"), Sound.Source.MASTER, 0.8f, 0.8f);
+      sound(key("mob.blaze.death"), Sound.Source.MASTER, 0.8f, 0.8f);
 
   protected final Match match;
   protected final List<Goal> goals = new ArrayList<>();

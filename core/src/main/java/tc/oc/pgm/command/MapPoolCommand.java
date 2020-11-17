@@ -1,5 +1,6 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
@@ -179,7 +180,7 @@ public final class MapPoolCommand {
                 .append(text(" (", NamedTextColor.DARK_AQUA))
                 .append(translatable("map.title", NamedTextColor.DARK_GREEN))
                 .append(text(": ", NamedTextColor.DARK_GREEN))
-                .append(text(Integer.toString(mapPool.getMaps().size()), NamedTextColor.WHITE))
+                .append(text(mapPool.getMaps().size(), NamedTextColor.WHITE))
                 .append(text(")", NamedTextColor.DARK_AQUA))
                 .build();
 
@@ -188,7 +189,7 @@ public final class MapPoolCommand {
                 .append(text(" (", NamedTextColor.DARK_AQUA))
                 .append(translatable("match.info.players", NamedTextColor.AQUA))
                 .append(text(": ", NamedTextColor.AQUA))
-                .append(text(Integer.toString(mapPool.getPlayers()), NamedTextColor.WHITE))
+                .append(text(mapPool.getPlayers(), NamedTextColor.WHITE))
                 .append(text(")", NamedTextColor.DARK_AQUA))
                 .build();
 
@@ -196,7 +197,7 @@ public final class MapPoolCommand {
             .append(arrow)
             .append(text(mapPool.getName(), NamedTextColor.GOLD))
             .append(maps)
-            .append(mapPool.isDynamic() ? players : Component.empty())
+            .append(mapPool.isDynamic() ? players : empty())
             .build();
       }
     }.display(audience, mapPools, page);
