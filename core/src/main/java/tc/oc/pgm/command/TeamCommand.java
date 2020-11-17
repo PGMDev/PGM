@@ -1,5 +1,8 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
@@ -42,7 +45,7 @@ public final class TeamCommand {
     }
 
     sender.sendMessage(
-        Component.translatable(
+        translatable(
             "join.ok.force",
             NamedTextColor.GRAY,
             joiner.getName(NameStyle.FANCY),
@@ -67,7 +70,7 @@ public final class TeamCommand {
       teams.forceJoin(player, null);
     }
 
-    match.sendMessage(Component.translatable("match.shuffle.ok", NamedTextColor.GREEN));
+    match.sendMessage(translatable("match.shuffle.ok", NamedTextColor.GREEN));
   }
 
   @Command(
@@ -84,14 +87,14 @@ public final class TeamCommand {
 
     for (Team other : teams.getTeams()) {
       if (other.getNameLegacy().equalsIgnoreCase(newName)) {
-        throw TextException.of("match.alias.err", Component.text(newName));
+        throw TextException.of("match.alias.err", text(newName));
       }
     }
 
     final Component oldName = team.getName().color(NamedTextColor.GRAY);
     ((Team) team).setName(newName);
 
-    match.sendMessage(Component.translatable("match.alias.ok", oldName, team.getName()));
+    match.sendMessage(translatable("match.alias.ok", oldName, team.getName()));
   }
 
   @Command(
@@ -119,10 +122,8 @@ public final class TeamCommand {
       }
 
       audience.sendMessage(
-          Component.translatable(
-              "match.resize.max",
-              team.getName(),
-              Component.text(team.getMaxPlayers(), NamedTextColor.AQUA)));
+          translatable(
+              "match.resize.max", team.getName(), text(team.getMaxPlayers(), NamedTextColor.AQUA)));
     }
   }
 
@@ -140,10 +141,8 @@ public final class TeamCommand {
       }
 
       audience.sendMessage(
-          Component.translatable(
-              "match.resize.min",
-              team.getName(),
-              Component.text(team.getMinPlayers(), NamedTextColor.AQUA)));
+          translatable(
+              "match.resize.min", team.getName(), text(team.getMinPlayers(), NamedTextColor.AQUA)));
     }
   }
 

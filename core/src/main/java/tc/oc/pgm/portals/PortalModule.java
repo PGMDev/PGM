@@ -1,5 +1,8 @@
 package tc.oc.pgm.portals;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -34,7 +37,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class PortalModule implements MapModule {
-  private static final Component PROTECT_MESSAGE = Component.translatable("map.protectPortal");
+  private static final Component PROTECT_MESSAGE = translatable("map.protectPortal");
 
   protected final Set<Portal> portals;
 

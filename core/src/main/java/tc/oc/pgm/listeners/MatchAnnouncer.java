@@ -1,5 +1,9 @@
 package tc.oc.pgm.listeners;
 
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.title.Title.title;
@@ -8,7 +12,6 @@ import static tc.oc.pgm.util.TimeUtils.fromTicks;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -38,11 +41,11 @@ import tc.oc.pgm.util.text.TextFormatter;
 public class MatchAnnouncer implements Listener {
 
   private static final Sound SOUND_MATCH_START =
-      Sound.sound(Key.key("note.pling"), Sound.Source.MASTER, 1f, 1.59f);
+      sound(key("note.pling"), Sound.Source.MASTER, 1f, 1.59f);
   private static final Sound SOUND_MATCH_WIN =
-      Sound.sound(Key.key("mob.wither.death"), Sound.Source.MASTER, 1f, 1f);
+      sound(key("mob.wither.death"), Sound.Source.MASTER, 1f, 1f);
   private static final Sound SOUND_MATCH_LOSE =
-      Sound.sound(Key.key("mob.wither.spawn"), Sound.Source.MASTER, 1f, 1f);
+      sound(key("mob.wither.spawn"), Sound.Source.MASTER, 1f, 1f);
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchLoad(final MatchLoadEvent event) {
@@ -59,8 +62,7 @@ public class MatchAnnouncer implements Listener {
     match.sendMessage(translatable("broadcast.matchStart", NamedTextColor.GREEN));
 
     Component go = translatable("broadcast.go", NamedTextColor.GREEN);
-    match.showTitle(
-        title(go, Component.empty(), Title.Times.of(Duration.ZERO, fromTicks(5), fromTicks(15))));
+    match.showTitle(title(go, empty(), Title.Times.of(Duration.ZERO, fromTicks(5), fromTicks(15))));
 
     match.playSound(SOUND_MATCH_START);
   }
@@ -71,7 +73,7 @@ public class MatchAnnouncer implements Listener {
 
     // broadcast match finish message
     for (MatchPlayer viewer : match.getPlayers()) {
-      Component title, subtitle = Component.empty();
+      Component title, subtitle = empty();
       if (event.getWinner() == null) {
         title = translatable("broadcast.gameOver");
       } else {
@@ -135,7 +137,7 @@ public class MatchAnnouncer implements Listener {
     Collection<Contributor> authors = mapInfo.getAuthors();
     if (!authors.isEmpty()) {
       viewer.sendMessage(
-          Component.space()
+          space()
               .append(
                   translatable(
                       "misc.createdBy",

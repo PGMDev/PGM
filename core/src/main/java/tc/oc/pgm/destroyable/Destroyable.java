@@ -1,5 +1,9 @@
 package tc.oc.pgm.destroyable;
 
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.time.Duration;
@@ -136,16 +140,13 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   @Override
   public Component getTouchMessage(@Nullable ParticipantState toucher, boolean self) {
     if (toucher == null) {
-      return Component.translatable(
-          "destroyable.touch.owned", Component.empty(), getComponentName(), getOwner().getName());
+      return translatable(
+          "destroyable.touch.owned", empty(), getComponentName(), getOwner().getName());
     } else if (self) {
-      return Component.translatable(
-          "destroyable.touch.owned.you",
-          Component.empty(),
-          getComponentName(),
-          getOwner().getName());
+      return translatable(
+          "destroyable.touch.owned.you", empty(), getComponentName(), getOwner().getName());
     } else {
-      return Component.translatable(
+      return translatable(
           "destroyable.touch.owned.player",
           toucher.getName(NameStyle.COLOR),
           getComponentName(),

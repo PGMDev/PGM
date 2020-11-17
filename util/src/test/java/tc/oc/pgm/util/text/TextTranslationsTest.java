@@ -1,12 +1,13 @@
 package tc.oc.pgm.util.text;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 import static org.junit.jupiter.api.Assertions.*;
 import static tc.oc.pgm.util.text.TextTranslations.*;
 
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Locale;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -49,14 +50,12 @@ public final class TextTranslationsTest {
   @Test
   void testTranslateOurs() {
     assertEquals(
-        Component.text("☃"),
-        translate(Component.translatable("misc.snowman"), US),
-        "translation did not render");
+        text("☃"), translate(translatable("misc.snowman"), US), "translation did not render");
   }
 
   @Test
   void testTranslateMojang() {
-    final TranslatableComponent text = Component.translatable("entity.Creeper.name");
+    final TranslatableComponent text = translatable("entity.Creeper.name");
 
     assertEquals(text, translate(text, US), "mojang translation did not pass-through");
   }

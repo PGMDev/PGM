@@ -1,5 +1,8 @@
 package tc.oc.pgm.community.features;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Switch;
@@ -129,9 +132,9 @@ public class VanishManagerImpl implements VanishManager, Listener {
       perms = Permissions.VANISH)
   public void vanish(MatchPlayer sender, @Switch('s') boolean silent) throws CommandException {
     if (setVanished(sender, !isVanished(sender.getId()), silent)) {
-      sender.sendWarning(Component.translatable("vanish.activate").color(NamedTextColor.GREEN));
+      sender.sendWarning(translatable("vanish.activate").color(NamedTextColor.GREEN));
     } else {
-      sender.sendWarning(Component.translatable("vanish.deactivate").color(NamedTextColor.RED));
+      sender.sendWarning(translatable("vanish.deactivate").color(NamedTextColor.RED));
     }
   }
 
@@ -203,11 +206,9 @@ public class VanishManagerImpl implements VanishManager, Listener {
   }
 
   private void sendHotbarVanish(MatchPlayer player, boolean flashColor) {
-    Component warning =
-        Component.text(" \u26a0 ", flashColor ? NamedTextColor.YELLOW : NamedTextColor.GOLD);
-    Component vanish =
-        Component.translatable("vanish.hotbar", NamedTextColor.RED, TextDecoration.BOLD);
-    Component message = Component.text().append(warning).append(vanish).append(warning).build();
+    Component warning = text(" \u26a0 ", flashColor ? NamedTextColor.YELLOW : NamedTextColor.GOLD);
+    Component vanish = translatable("vanish.hotbar", NamedTextColor.RED, TextDecoration.BOLD);
+    Component message = text().append(warning).append(vanish).append(warning).build();
     player.sendActionBar(message);
   }
 }

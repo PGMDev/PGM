@@ -1,6 +1,7 @@
 package tc.oc.pgm.ffa;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static net.kyori.adventure.text.Component.empty;
 import static tc.oc.pgm.util.text.types.PlayerComponent.player;
 
 import java.util.Collection;
@@ -102,7 +103,7 @@ public class Tribute implements Competitor {
 
   @Override
   public Component getChatPrefix() {
-    return Component.empty();
+    return empty();
   }
 
   @Override

@@ -1,9 +1,11 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import app.ashcon.intake.Command;
 import com.google.common.collect.Range;
 import javax.annotation.Nullable;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
@@ -28,10 +30,10 @@ public final class FreeForAllCommand {
     }
 
     audience.sendMessage(
-        Component.translatable(
+        translatable(
             "match.resize.max",
-            Component.translatable("match.info.players", NamedTextColor.YELLOW),
-            Component.text(ffa.getMinPlayers(), NamedTextColor.AQUA)));
+            translatable("match.info.players", NamedTextColor.YELLOW),
+            text(ffa.getMinPlayers(), NamedTextColor.AQUA)));
   }
 
   @Command(
@@ -54,16 +56,16 @@ public final class FreeForAllCommand {
     }
 
     audience.sendMessage(
-        Component.translatable(
+        translatable(
             "match.resize.max",
-            Component.translatable("match.info.players", NamedTextColor.YELLOW),
-            Component.text(ffa.getMaxPlayers(), NamedTextColor.AQUA)));
+            translatable("match.info.players", NamedTextColor.YELLOW),
+            text(ffa.getMaxPlayers(), NamedTextColor.AQUA)));
   }
 
   private FreeForAllMatchModule getFfa(Match match) {
     final FreeForAllMatchModule ffa = match.getModule(FreeForAllMatchModule.class);
     if (ffa == null) {
-      throw TextException.of("command.moduleNotFound", Component.text("free-for-all"));
+      throw TextException.of("command.moduleNotFound", text("free-for-all"));
     }
     return ffa;
   }

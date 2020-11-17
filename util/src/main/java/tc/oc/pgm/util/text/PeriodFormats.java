@@ -1,5 +1,8 @@
 package tc.oc.pgm.util.text;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.time.Period;
@@ -64,16 +67,14 @@ public class PeriodFormats {
 
   /** Return a localized description of the given time interval. */
   public static Component formatPeriod(TemporalUnit unit, long quantity) {
-    return Component.translatable(
-        periodKey(unit, quantity), Component.text(String.valueOf(quantity)));
+    return translatable(periodKey(unit, quantity), text(quantity));
   }
 
   /**
    * Return a localized description of the given time period, which must contain exactly one field.
    */
   public static Component formatPeriod(Period period) {
-    return Component.translatable(
-        periodKey(period), Component.text(String.valueOf(period.get(period.getUnits().get(0)))));
+    return translatable(periodKey(period), text(period.get(period.getUnits().get(0))));
   }
 
   /**
@@ -131,7 +132,7 @@ public class PeriodFormats {
   }
 
   public static Component relativePastApproximate(Instant then) {
-    return Component.translatable(
+    return translatable(
         "misc.timeAgo", briefNaturalApproximate(Duration.between(then, Instant.now())));
   }
 }

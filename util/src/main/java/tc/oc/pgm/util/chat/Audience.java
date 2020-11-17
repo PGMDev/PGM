@@ -1,10 +1,11 @@
 package tc.oc.pgm.util.chat;
 
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 
 import java.util.Collection;
 import net.kyori.adventure.audience.ForwardingAudience;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -16,7 +17,7 @@ import tc.oc.pgm.util.bukkit.BukkitUtils;
 @FunctionalInterface
 public interface Audience extends ForwardingAudience.Single {
 
-  Sound WARNING_SOUND = Sound.sound(Key.key("note.bass"), Sound.Source.MASTER, 1f, 0.75f);
+  Sound WARNING_SOUND = sound(key("note.bass"), Sound.Source.MASTER, 1f, 0.75f);
   Component WARNING_MESSAGE = text(" \u26a0 ", NamedTextColor.YELLOW); // ⚠
 
   default void sendWarning(Component message) {

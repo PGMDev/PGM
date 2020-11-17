@@ -1,5 +1,9 @@
 package tc.oc.pgm.core;
 
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.google.common.collect.ImmutableList;
 import java.util.Collections;
 import java.util.Set;
@@ -103,16 +107,13 @@ public class Core extends TouchableGoal<CoreFactory>
   public Component getTouchMessage(@Nullable ParticipantState toucher, boolean self) {
     // Core has same touch messages as Destroyable
     if (toucher == null) {
-      return Component.translatable(
-          "destroyable.touch.owned", Component.empty(), getComponentName(), getOwner().getName());
+      return translatable(
+          "destroyable.touch.owned", empty(), getComponentName(), getOwner().getName());
     } else if (self) {
-      return Component.translatable(
-          "destroyable.touch.owned.you",
-          Component.empty(),
-          getComponentName(),
-          getOwner().getName());
+      return translatable(
+          "destroyable.touch.owned.you", empty(), getComponentName(), getOwner().getName());
     } else {
-      return Component.translatable(
+      return translatable(
           "destroyable.touch.owned.player",
           toucher.getName(NameStyle.COLOR),
           getComponentName(),

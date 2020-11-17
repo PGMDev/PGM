@@ -1,5 +1,9 @@
 package tc.oc.pgm.tablist;
 
+import static net.kyori.adventure.text.Component.newline;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
@@ -50,7 +54,7 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
 
   @Override
   public BaseComponent[] getContent(TabView view) {
-    TextComponent.Builder content = Component.text();
+    TextComponent.Builder content = text();
 
     MatchPlayer viewer = match.getPlayer(view.getViewer());
     boolean timeOnly = viewer != null && viewer.isLegacy();
@@ -61,7 +65,7 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
         && (match.isRunning() || match.isFinished())
         && viewer.getSettings().getValue(SettingKey.STATS).equals(SettingValue.STATS_ON)) {
       content.append(match.needModule(StatsMatchModule.class).getBasicStatsMessage(viewer.getId()));
-      content.append(Component.newline());
+      content.append(newline());
     }
 
     final Component leftContent = PGM.get().getConfiguration().getLeftTablistText();
@@ -70,20 +74,20 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
     if (!timeOnly && leftContent != null) {
       content
           .append(leftContent.colorIfAbsent(NamedTextColor.WHITE))
-          .append(Component.text(" - ", NamedTextColor.DARK_GRAY));
+          .append(text(" - ", NamedTextColor.DARK_GRAY));
     }
 
     content
-        .append(Component.translatable("match.info.time", NamedTextColor.GRAY))
-        .append(Component.text(": ", NamedTextColor.GRAY))
+        .append(translatable("match.info.time", NamedTextColor.GRAY))
+        .append(text(": ", NamedTextColor.GRAY))
         .append(
-            Component.text(
+            text(
                 TimeUtils.formatDuration(match.getDuration()),
                 this.match.isRunning() ? NamedTextColor.GREEN : NamedTextColor.GOLD));
 
     if (!timeOnly && rightContent != null) {
       content
-          .append(Component.text(" - ", NamedTextColor.DARK_GRAY))
+          .append(text(" - ", NamedTextColor.DARK_GRAY))
           .append(rightContent.colorIfAbsent(NamedTextColor.WHITE));
     }
 

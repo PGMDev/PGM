@@ -1,5 +1,6 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import app.ashcon.intake.Command;
@@ -27,7 +28,7 @@ public final class MapOrderCommand {
   @Command(
       aliases = {"nextmap", "mn", "mapnext", "nm", "next"},
       desc = "Show which map is playing next")
-  public void nextmap(Audience audience, CommandSender sender, MapOrder mapOrder) {
+  public void nextmap(Audience audience, MapOrder mapOrder) {
     final MapInfo next = mapOrder.getNextMap();
 
     if (next == null) {
@@ -85,7 +86,7 @@ public final class MapOrderCommand {
       viewer.sendWarning(translatable("admin.cancelRestart.restartUnqueued", NamedTextColor.GREEN));
     }
 
-    Component mapName = Component.text(map.getName(), NamedTextColor.GOLD);
+    Component mapName = text(map.getName(), NamedTextColor.GOLD);
     Component successful =
         translatable(
             "map.setNext",

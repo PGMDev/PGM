@@ -1,6 +1,8 @@
 package tc.oc.pgm.modules;
 
-import net.kyori.adventure.key.Key;
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
+
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -33,7 +35,7 @@ public class SoundsMatchModule implements MatchModule, Listener {
   }
 
   private static final Sound RAINDROP_SOUND =
-      Sound.sound(Key.key("random.levelup"), Sound.Source.MASTER, 1f, 1.5f);
+      sound(key("random.levelup"), Sound.Source.MASTER, 1f, 1.5f);
 
   private void playSound(MatchPlayer player, Sound sound) {
     if (player.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ALL)) {

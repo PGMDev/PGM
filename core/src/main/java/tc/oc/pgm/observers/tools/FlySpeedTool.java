@@ -1,5 +1,7 @@
 package tc.oc.pgm.observers.tools;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.google.common.collect.Lists;
 import java.util.List;
 import net.kyori.adventure.text.Component;

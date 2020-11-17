@@ -1,6 +1,7 @@
 package tc.oc.pgm.start;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
 import javax.annotation.Nullable;
@@ -36,7 +37,7 @@ public class StartCountdown extends PreMatchCountdown {
 
   @Override
   protected Component formatText() {
-    return Component.translatable(
+    return translatable(
         "countdown.matchStart", NamedTextColor.GREEN, secondsRemaining(NamedTextColor.DARK_RED));
   }
 
@@ -71,7 +72,7 @@ public class StartCountdown extends PreMatchCountdown {
       for (Team team : this.tmm.getParticipatingTeams()) {
         if (team.isStacked()) {
           this.balanceWarningSent = true;
-          getMatch().sendWarning(Component.translatable("match.balanceTeams", team.getName()));
+          getMatch().sendWarning(translatable("match.balanceTeams", team.getName()));
         }
       }
 

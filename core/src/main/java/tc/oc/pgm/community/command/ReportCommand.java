@@ -1,5 +1,12 @@
 package tc.oc.pgm.community.command;
 
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
+import static net.kyori.adventure.text.Component.space;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.event.HoverEvent.showText;
+
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.bukkit.parametric.Type;
@@ -17,13 +24,10 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
-import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.event.HoverEvent.Action;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.CommandSender;
@@ -43,7 +47,7 @@ import tc.oc.pgm.util.text.TextFormatter;
 public class ReportCommand {
 
   private static final Sound REPORT_NOTIFY_SOUND =
-      Sound.sound(Key.key("random.pop"), Sound.Source.MASTER, 1f, 1.2f);
+      sound(key("random.pop"), Sound.Source.MASTER, 1f, 1.2f);
 
   private static final int REPORT_COOLDOWN_SECONDS = 15;
   private static final int REPORT_EXPIRE_HOURS = 1;
@@ -67,12 +71,11 @@ public class ReportCommand {
         Duration timeSinceReport = Duration.between(lastReport, Instant.now());
         long secondsRemaining = REPORT_COOLDOWN_SECONDS - timeSinceReport.getSeconds();
         if (secondsRemaining > 0) {
-          TextComponent secondsComponent = Component.text(Long.toString(secondsRemaining));
+          TextComponent secondsComponent = text(Long.toString(secondsRemaining));
           TranslatableComponent secondsLeftComponent =
-              Component.translatable(
-                      secondsRemaining != 1 ? "misc.seconds" : "misc.second", secondsComponent)
+              translatable(secondsRemaining != 1 ? "misc.seconds" : "misc.second", secondsComponent)
                   .color(NamedTextColor.AQUA);
-          sender.sendWarning(Component.translatable("command.cooldown", secondsLeftComponent));
+          sender.sendWarning(translatable("command.cooldown", secondsLeftComponent));
           return;
         }
       } else {
@@ -89,8 +92,7 @@ public class ReportCommand {
       // player is found.
       // TODO: Please upgrade if command framework uses locale
       sender.sendWarning(
-          Component.text(
-              "Could not find player named '" + player.getName() + "'", NamedTextColor.RED));
+          text("Could not find player named '" + player.getName() + "'", NamedTextColor.RED));
       return;
     }
 
@@ -105,18 +107,18 @@ public class ReportCommand {
     }
 
     TranslatableComponent thanks =
-        Component.translatable("misc.thankYou", NamedTextColor.GREEN)
-            .append(Component.space())
-            .append(Component.translatable("moderation.report.acknowledge", NamedTextColor.GOLD));
+        translatable("misc.thankYou", NamedTextColor.GREEN)
+            .append(space())
+            .append(translatable("moderation.report.acknowledge", NamedTextColor.GOLD));
     sender.sendMessage(thanks);
 
     final Component component =
-        Component.translatable(
+        translatable(
             "moderation.report.notify",
             NamedTextColor.YELLOW,
             sender == null ? UsernameFormatUtils.CONSOLE_NAME : sender.getName(NameStyle.FANCY),
             accused.getName(NameStyle.FANCY),
-            Component.text(reason.trim(), NamedTextColor.WHITE));
+            text(reason.trim(), NamedTextColor.WHITE));
 
     RECENT_REPORTS.put(
         UUID.randomUUID(),
@@ -144,7 +146,7 @@ public class ReportCommand {
       @Fallback(Type.NULL) @Switch('t') String target)
       throws CommandException {
     if (RECENT_REPORTS.asMap().isEmpty()) {
-      audience.sendMessage(Component.translatable("moderation.reports.none", NamedTextColor.RED));
+      audience.sendMessage(translatable("moderation.reports.none", NamedTextColor.RED));
       return;
     }
 
@@ -159,27 +161,21 @@ public class ReportCommand {
     Collections.sort(reportList); // Sort list
     Collections.reverse(reportList); // Reverse so most recent show up first
 
-    Component headerResultCount =
-        Component.text(Long.toString(reportList.size()), NamedTextColor.RED);
+    Component headerResultCount = text(Long.toString(reportList.size()), NamedTextColor.RED);
 
     int perPage = 6;
     int pages = (reportList.size() + perPage - 1) / perPage;
 
     Component pageNum =
-        Component.translatable(
+        translatable(
             "command.simplePageHeader",
             NamedTextColor.AQUA,
-            Component.text(Integer.toString(page), NamedTextColor.RED),
-            Component.text(Integer.toString(pages), NamedTextColor.RED));
+            text(page, NamedTextColor.RED),
+            text(pages, NamedTextColor.RED));
 
     Component header =
-        Component.translatable(
-                "moderation.reports.header", NamedTextColor.GRAY, headerResultCount, pageNum)
-            .append(
-                Component.text(" (")
-                    .append(headerResultCount)
-                    .append(Component.text(") » "))
-                    .append(pageNum));
+        translatable("moderation.reports.header", NamedTextColor.GRAY, headerResultCount, pageNum)
+            .append(text(" (").append(headerResultCount).append(text(") » ")).append(pageNum));
 
     Component formattedHeader =
         TextFormatter.horizontalLineHeading(sender, header, NamedTextColor.DARK_GRAY);
@@ -189,7 +185,7 @@ public class ReportCommand {
       public Component format(Report data, int index) {
 
         Component reporter =
-            Component.translatable(
+            translatable(
                 "moderation.reports.hover", NamedTextColor.GRAY, data.getSenderComponent(match));
 
         Component timeAgo =
@@ -197,12 +193,12 @@ public class ReportCommand {
                     Instant.ofEpochMilli(data.getTimeSent().toEpochMilli()))
                 .color(NamedTextColor.DARK_GREEN);
 
-        return Component.text()
-            .append(timeAgo.hoverEvent(HoverEvent.hoverEvent(Action.SHOW_TEXT, reporter)))
-            .append(Component.text(": ", NamedTextColor.GRAY))
+        return text()
+            .append(timeAgo.hoverEvent(showText(reporter)))
+            .append(text(": ", NamedTextColor.GRAY))
             .append(data.getTargetComponent(match))
-            .append(Component.text(" « ", NamedTextColor.YELLOW))
-            .append(Component.text(data.getReason(), NamedTextColor.WHITE, TextDecoration.ITALIC))
+            .append(text(" « ", NamedTextColor.YELLOW))
+            .append(text(data.getReason(), NamedTextColor.WHITE, TextDecoration.ITALIC))
             .build();
       }
     }.display(audience, reportList, page);
@@ -261,13 +257,12 @@ public class ReportCommand {
 
     private Component getUsername(UUID uuid, Match match) {
       MatchPlayer player = match.getPlayer(uuid);
-      Component name =
-          Component.translatable("misc.unknown", NamedTextColor.AQUA, TextDecoration.ITALIC);
+      Component name = translatable("misc.unknown", NamedTextColor.AQUA, TextDecoration.ITALIC);
       if (match.getPlayer(uuid) != null) {
         name = player.getName(NameStyle.FANCY);
       } else {
         name =
-            Component.text(
+            text(
                 uuid.equals(targetUUID) ? getOfflineTargetName() : getOfflineSenderName(),
                 NamedTextColor.DARK_AQUA,
                 TextDecoration.ITALIC);

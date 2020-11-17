@@ -1,6 +1,9 @@
 package tc.oc.pgm.command;
 
-import static net.kyori.adventure.text.Component.*;
+import static net.kyori.adventure.text.Component.join;
+import static net.kyori.adventure.text.Component.space;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 
 import app.ashcon.intake.Command;
 import com.google.common.collect.HashMultimap;
@@ -109,7 +112,7 @@ public final class MatchCommand {
                     NamedTextColor.WHITE))
             .build());
 
-    viewer.sendMessage(Component.join(text(" | ", NamedTextColor.DARK_GRAY), teamCountParts));
+    viewer.sendMessage(join(text(" | ", NamedTextColor.DARK_GRAY), teamCountParts));
 
     GoalMatchModule gmm = match.getModule(GoalMatchModule.class);
     if (haveGameInfo && gmm != null) {
@@ -145,7 +148,7 @@ public final class MatchCommand {
                     .append(space())
                     .append(team.getName())
                     .append(text(": ", NamedTextColor.GRAY))
-                    .append(Component.join(text("  "), goalTexts))
+                    .append(join(text("  "), goalTexts))
                     .build());
           }
         }

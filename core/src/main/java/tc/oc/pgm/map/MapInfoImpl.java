@@ -1,6 +1,9 @@
 package tc.oc.pgm.map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -72,7 +75,7 @@ public class MapInfoImpl implements MapInfo {
     this.tags = tags == null ? new TreeSet<>() : tags;
     this.players = players == null ? new LinkedList<>() : players;
     this.world = world == null ? new WorldInfoImpl() : world;
-    this.gamemode = gamemode == null ? Component.empty() : gamemode;
+    this.gamemode = gamemode == null ? empty() : gamemode;
   }
 
   public MapInfoImpl(MapInfo info) {
@@ -209,12 +212,12 @@ public class MapInfoImpl implements MapInfo {
 
   @Override
   public Component getStyledName(MapNameStyle style) {
-    TextComponent.Builder name = Component.text().content(getName());
+    TextComponent.Builder name = text().content(getName());
 
     if (style.isColor) name.color(NamedTextColor.GOLD);
     if (style.isHighlight) name.decoration(TextDecoration.UNDERLINED, true);
     if (style.showAuthors) {
-      return Component.translatable(
+      return translatable(
           "misc.authorship",
           NamedTextColor.DARK_PURPLE,
           name.build(),

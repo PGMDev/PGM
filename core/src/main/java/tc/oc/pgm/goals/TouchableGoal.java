@@ -1,5 +1,8 @@
 package tc.oc.pgm.goals;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.google.common.collect.ImmutableSet;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -191,7 +194,7 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
     Audience.console().sendMessage(message);
 
     if (!showEnemyTouches()) {
-      message = Component.text().append(toucher.getParty().getChatPrefix()).append(message).build();
+      message = text().append(toucher.getParty().getChatPrefix()).append(message).build();
     }
 
     for (MatchPlayer viewer : getMatch().getPlayers()) {
@@ -207,8 +210,7 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
       }
 
       if (getDeferTouches()) {
-        toucher.sendMessage(
-            Component.translatable("objective.credit.future", Component.text(this.getName())));
+        toucher.sendMessage(translatable("objective.credit.future", text(this.getName())));
       }
     }
   }

@@ -1,5 +1,8 @@
 package tc.oc.pgm.tablist;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -30,14 +33,14 @@ public class MapTabEntry extends DynamicTabEntry {
       String mapName = map.getName();
       if (mapName.length() > 15) mapName = mapName.substring(0, 13) + "...";
       return TextTranslations.toBaseComponentArray(
-          Component.text(mapName, NamedTextColor.AQUA), view.getViewer());
+          text(mapName, NamedTextColor.AQUA), view.getViewer());
     }
 
     final Component text =
-        Component.translatable(
+        translatable(
             "misc.authorship",
             NamedTextColor.GRAY,
-            Component.text(map.getName(), NamedTextColor.AQUA, TextDecoration.BOLD),
+            text(map.getName(), NamedTextColor.AQUA, TextDecoration.BOLD),
             TextFormatter.nameList(map.getAuthors(), NameStyle.FANCY, NamedTextColor.GRAY));
 
     return TextTranslations.toBaseComponentArray(text, view.getViewer());

@@ -1,5 +1,8 @@
 package tc.oc.pgm.cycle;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.google.common.collect.Range;
 import java.time.Duration;
 import net.kyori.adventure.text.Component;
@@ -42,21 +45,18 @@ public class CycleCountdown extends MatchCountdown {
 
   @Override
   protected Component formatText() {
-    Component mapName =
-        nextMap == null ? null : Component.text(nextMap.getName(), NamedTextColor.AQUA);
+    Component mapName = nextMap == null ? null : text(nextMap.getName(), NamedTextColor.AQUA);
 
     TranslatableComponent cycleComponent;
     if (remaining.isZero()) {
       cycleComponent =
-          mapName != null
-              ? Component.translatable("map.cycledMap", mapName)
-              : Component.translatable("map.cycled");
+          mapName != null ? translatable("map.cycledMap", mapName) : translatable("map.cycled");
     } else {
       Component secs = secondsRemaining(NamedTextColor.DARK_RED);
       cycleComponent =
           mapName != null
-              ? Component.translatable("map.cycleMap", mapName, secs)
-              : Component.translatable("map.cycle", secs);
+              ? translatable("map.cycleMap", mapName, secs)
+              : translatable("map.cycle", secs);
     }
 
     return cycleComponent.color(NamedTextColor.DARK_AQUA);
