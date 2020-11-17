@@ -30,7 +30,7 @@ public abstract class State {
     this.smm = smm;
     this.player = player;
     this.bukkit = player.getBukkit();
-    this.options = smm.getRespawnOptions(player);
+    this.options = smm.getRespawnOptions();
   }
 
   public void enterState() {

@@ -65,11 +65,8 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
     return match;
   }
 
-  public RespawnOptions getRespawnOptions(MatchPlayer player) {
-    return module.respawnOptions.stream()
-        .filter(o -> o.usageFilter.query(player.getQuery()).isAllowed())
-        .findFirst()
-        .orElseThrow(() -> new IllegalStateException("Out of spawn options to pick from"));
+  public RespawnOptions getRespawnOptions() {
+    return module.respawnOptions;
   }
 
   public Spawn getDefaultSpawn() {
