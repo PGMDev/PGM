@@ -69,8 +69,10 @@ public class StatsMatchModule implements MatchModule, Listener {
   private final boolean verboseStats = PGM.get().getConfiguration().showVerboseStats();
   private final Component verboseStatsTitle = TranslatableComponent.of("match.stats.title");
 
-  /** A common format used by all stats with decimals */
-  public static final DecimalFormat STATS_DECIMALFORMAT = new DecimalFormat("#.##");
+  /** Common formats used by stats with decimals */
+  public static final DecimalFormat TWO_DECIMALS = new DecimalFormat("#.##");
+
+  public static final DecimalFormat ONE_DECIMAL = new DecimalFormat("#.#");
 
   // Defined at match end, see #onMatchEnd
   private InventoryMenu endOfMatchMenu;
@@ -292,29 +294,38 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   /**
-   * Wraps a {@link Number} in a {@link TextComponent} that is bolded and colored with the given
-   * {@link TextColor}.
-   *
-   * <p>If the given number is a double, it is formatted with {@link
-   * StatsMatchModule#STATS_DECIMALFORMAT}.
+   * Wraps a {@link Number} in a {@link Component} that is bolded and colored with the given {@link
+   * TextColor}. Rounds the number to a maximum of 2 decimals
    *
    * <p>If the number is NaN "-" is wrapped instead
    *
-   * @param stat The number you want wrapped in a {@link Component}
+   * <p>If the number is >= 1000 it will be represented in the thousands (1k, 2.5k, 120.3k etc.)
+   *
+   * @param stat The number you want wrapped
    * @param color The color you want the number to be
-   * @return A bolded {@link Component} wrapping the given number or "-" if NaN
+   * @return A bolded and colored component wrapping the given number or "-" if NaN
    */
   public static Component numberComponent(Number stat, TextColor color) {
     double doubleStat = stat.doubleValue();
-    String returnValue;
+    boolean tenThousand = doubleStat >= 10000;
+    String returnValue = null;
     if (Double.isNaN(doubleStat)) returnValue = "-"; // If NaN, dont try to display as a number
-    else if (doubleStat % 1 == 0)
-      returnValue =
-          Integer.toString(
-              stat.intValue()); // Check if the given number can be displayed as an integer
-    else
-      returnValue = STATS_DECIMALFORMAT.format(doubleStat); // If not, display as a formatted double
-    return TextComponent.of(returnValue, color, TextDecoration.BOLD);
+    else if (doubleStat % 1 == 0) { // Can the given number can be displayed as an integer?
+      int value = stat.intValue();
+      if (!tenThousand
+          || value % 1000
+              == 0) // If the number is above 999 we also need to check if the shortened number can
+        // be displayed as an integer
+        returnValue = Integer.toString(tenThousand ? value / 1000 : value);
+    }
+    if (returnValue
+        == null) { // If not yet defined, display as a double with either 1 or 2 decimals
+      if (tenThousand) doubleStat /= 1000;
+      String decimals = Double.toString(doubleStat).split("\\.")[1];
+      if (decimals.chars().sum() == 1 || tenThousand) returnValue = ONE_DECIMAL.format(doubleStat);
+      else returnValue = TWO_DECIMALS.format(doubleStat);
+    }
+    return TextComponent.of(returnValue + (tenThousand ? "k" : ""), color, TextDecoration.BOLD);
   }
 
   @EventHandler
