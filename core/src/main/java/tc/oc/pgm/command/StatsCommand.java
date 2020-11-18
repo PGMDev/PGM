@@ -8,7 +8,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
-import tc.oc.pgm.modules.StatsMatchModule;
+import tc.oc.pgm.stats.StatsMatchModule;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextFormatter;

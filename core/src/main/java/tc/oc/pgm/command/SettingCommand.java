@@ -27,7 +27,7 @@ public final class SettingCommand {
       final ObserverToolsMatchModule tools =
           player.getMatch().getModule(ObserverToolsMatchModule.class);
       if (tools != null) {
-        tools.openMenu(player);
+        tools.openMenuManual(player);
       }
     } else {
       // TODO: reconsider when observer tools become settings

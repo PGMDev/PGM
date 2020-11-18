@@ -86,6 +86,7 @@ public final class PGMConfig implements Config {
   private final boolean showProximity;
   private final boolean showFireworks;
   private final boolean participantsSeeObservers;
+  private final boolean verboseStats;
 
   // sidebar.*
   private final Component header;
@@ -160,6 +161,7 @@ public final class PGMConfig implements Config {
     this.matchLimit = parseInteger(config.getString("restart.match-limit", "30"));
 
     this.woolRefill = parseBoolean(config.getString("gameplay.refill-wool", "true"));
+    this.verboseStats = parseBoolean(config.getString("ui.verbose-stats", "false"));
     this.griefScore =
         parseInteger(config.getString("gameplay.grief-score", "-10"), Range.atMost(0));
 
@@ -554,6 +556,10 @@ public final class PGMConfig implements Config {
   @Override
   public boolean canParticipantsSeeObservers() {
     return participantsSeeObservers;
+  }
+
+  public boolean showVerboseStats() {
+    return verboseStats;
   }
 
   @Override

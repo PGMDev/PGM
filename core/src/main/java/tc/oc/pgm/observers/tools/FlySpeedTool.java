@@ -15,7 +15,7 @@ import tc.oc.pgm.util.text.TextTranslations;
 
 public class FlySpeedTool implements InventoryMenuItem {
 
-  private static String TRANSLATION_KEY = "setting.flyspeed.";
+  private static final String TRANSLATION_KEY = "setting.flyspeed.";
 
   @Override
   public Component getName() {
@@ -50,7 +50,7 @@ public class FlySpeedTool implements InventoryMenuItem {
     menu.refreshWindow(player);
   }
 
-  public static enum FlySpeed {
+  public enum FlySpeed {
     NORMAL(TextColor.YELLOW, 0.1f),
     FAST(TextColor.GOLD, 0.25f),
     FASTER(TextColor.RED, 0.5f),
