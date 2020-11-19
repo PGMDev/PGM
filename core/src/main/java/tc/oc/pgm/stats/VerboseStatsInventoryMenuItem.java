@@ -41,7 +41,7 @@ public class VerboseStatsInventoryMenuItem implements InventoryMenuItem {
 
   @Override
   public Material getMaterial(MatchPlayer player) {
-    return Material.RED_SANDSTONE;
+    return Material.PAPER;
   }
 
   @Override
