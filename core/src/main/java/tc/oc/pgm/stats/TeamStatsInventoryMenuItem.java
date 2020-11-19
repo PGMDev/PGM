@@ -28,7 +28,7 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
   private final Competitor team;
   private final InventoryMenu teamSubGUI;
 
-  private final TextColor RESET = TextColor.WHITE;
+  private final TextColor RESET = TextColor.GRAY;
 
   TeamStatsInventoryMenuItem(Match match, Competitor team) {
     this.team = team;
@@ -77,35 +77,36 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
     double teamKD = teamDeaths == 0 ? teamKills : teamKills / (double) teamDeaths;
     double teamBowAcc = shotsTaken == 0 ? Double.NaN : shotsHit / (shotsTaken / (double) 100);
 
-    Component killLore =
+    Component statLore =
         TranslatableComponent.of(
-            "match.stats.kills.concise", RESET, numberComponent(teamKills, TextColor.GREEN));
-    Component deathLore =
+            "match.stats.concise",
+            RESET,
+            numberComponent(teamKills, TextColor.GREEN),
+            numberComponent(teamDeaths, TextColor.RED),
+            numberComponent(teamKD, TextColor.GREEN));
+
+    Component damageDealtLore =
         TranslatableComponent.of(
-            "match.stats.deaths.concise", RESET, numberComponent(teamDeaths, TextColor.RED));
-    Component kdLore =
-        TranslatableComponent.of(
-            "match.stats.kd.concise", RESET, numberComponent(teamKD, TextColor.GREEN));
-    Component damageLore =
-        TranslatableComponent.of(
-            "match.stats.damage.concise",
+            "match.stats.damage.dealt",
             RESET,
             numberComponent(damageDone, TextColor.GREEN),
-            numberComponent(bowDamage, TextColor.YELLOW),
-            numberComponent(damageTaken, TextColor.RED));
+            numberComponent(bowDamage, TextColor.YELLOW));
+    Component damageReceivedLore =
+        TranslatableComponent.of(
+            "match.stats.damage.received", RESET, numberComponent(damageTaken, TextColor.RED));
     Component bowLore =
         TranslatableComponent.of(
-            "match.stats.bow.concise",
+            "match.stats.bow",
             RESET,
+            numberComponent(shotsHit, TextColor.YELLOW),
             numberComponent(shotsTaken, TextColor.YELLOW),
             numberComponent(teamBowAcc, TextColor.YELLOW));
 
     Player bukkit = player.getBukkit();
 
-    lore.add(TextTranslations.translateLegacy(killLore, bukkit));
-    lore.add(TextTranslations.translateLegacy(deathLore, bukkit));
-    lore.add(TextTranslations.translateLegacy(kdLore, bukkit));
-    lore.add(TextTranslations.translateLegacy(damageLore, bukkit));
+    lore.add(TextTranslations.translateLegacy(statLore, bukkit));
+    lore.add(TextTranslations.translateLegacy(damageDealtLore, bukkit));
+    lore.add(TextTranslations.translateLegacy(damageReceivedLore, bukkit));
     lore.add(TextTranslations.translateLegacy(bowLore, bukkit));
 
     return lore;

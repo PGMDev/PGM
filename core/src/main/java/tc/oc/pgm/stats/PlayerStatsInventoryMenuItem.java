@@ -25,7 +25,7 @@ import tc.oc.pgm.util.text.TextTranslations;
 public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
 
   private final MatchPlayer player;
-  private final TextColor RESET = TextColor.WHITE;
+  private final TextColor RESET = TextColor.GRAY;
 
   PlayerStatsInventoryMenuItem(MatchPlayer player) {
     this.player = player;
@@ -45,43 +45,45 @@ public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
   public List<String> getLore(MatchPlayer player) {
     List<String> lore = new ArrayList<>();
     StatsMatchModule smm = player.getMatch().needModule(StatsMatchModule.class);
-    PlayerStats stats = smm.getPlayerStat(player.getId());
+    PlayerStats stats = smm.getPlayerStat(this.player.getId());
 
-    Component killLore =
+    Component statLore =
         TranslatableComponent.of(
-            "match.stats.kills.concise", RESET, numberComponent(stats.getKills(), TextColor.GREEN));
-    Component deathLore =
-        TranslatableComponent.of(
-            "match.stats.deaths.concise", RESET, numberComponent(stats.getDeaths(), TextColor.RED));
-    Component kdLore =
-        TranslatableComponent.of(
-            "match.stats.kd.concise", RESET, numberComponent(stats.getKD(), TextColor.GREEN));
+            "match.stats.concise",
+            RESET,
+            numberComponent(stats.getKills(), TextColor.GREEN),
+            numberComponent(stats.getDeaths(), TextColor.RED),
+            numberComponent(stats.getKD(), TextColor.GREEN));
     Component killstreakLore =
         TranslatableComponent.of(
             "match.stats.killstreak.concise",
             RESET,
             numberComponent(stats.getMaxKillstreak(), TextColor.GREEN));
-    Component damageLore =
+    Component damageDealtLore =
         TranslatableComponent.of(
-            "match.stats.damage.concise",
+            "match.stats.damage.dealt",
             RESET,
             numberComponent(stats.getDamageDone(), TextColor.GREEN),
-            numberComponent(stats.getBowDamage(), TextColor.YELLOW),
+            numberComponent(stats.getBowDamage(), TextColor.YELLOW));
+    Component damageReceivedLore =
+        TranslatableComponent.of(
+            "match.stats.damage.received",
+            RESET,
             numberComponent(stats.getDamageTaken(), TextColor.RED));
     Component bowLore =
         TranslatableComponent.of(
-            "match.stats.bow.concise",
+            "match.stats.bow",
             RESET,
+            numberComponent(stats.getShotsHit(), TextColor.YELLOW),
             numberComponent(stats.getShotsTaken(), TextColor.YELLOW),
             numberComponent(stats.getArrowAccuracy(), TextColor.YELLOW));
 
     Player bukkit = player.getBukkit();
 
-    lore.add(TextTranslations.translateLegacy(killLore, bukkit));
-    lore.add(TextTranslations.translateLegacy(deathLore, bukkit));
-    lore.add(TextTranslations.translateLegacy(kdLore, bukkit));
+    lore.add(TextTranslations.translateLegacy(statLore, bukkit));
     lore.add(TextTranslations.translateLegacy(killstreakLore, bukkit));
-    lore.add(TextTranslations.translateLegacy(damageLore, bukkit));
+    lore.add(TextTranslations.translateLegacy(damageDealtLore, bukkit));
+    lore.add(TextTranslations.translateLegacy(damageReceivedLore, bukkit));
     lore.add(TextTranslations.translateLegacy(bowLore, bukkit));
 
     if (!optionalStat(

@@ -14,7 +14,6 @@ import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Arrow;
@@ -269,12 +268,21 @@ public class StatsMatchModule implements MatchModule, Listener {
     if ((action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK)) {
       ItemStack item = event.getPlayer().getItemInHand();
 
-      if (item.getType() == Material.RED_SANDSTONE) {
+      if (item.getType() == Material.PAPER) {
         MatchPlayer player = match.getPlayer(event.getPlayer());
         if (player == null) return;
-        endOfMatchMenu.display(player);
+        displayVerboseStatsAndGiveItem(player);
       }
     }
+  }
+
+  public void displayVerboseStatsAndGiveItem(MatchPlayer player) {
+    if (endOfMatchMenu == null)
+      return; // If allPlayerStats.isEmpty() == null the menu never gets defined
+    player
+        .getInventory()
+        .setItem(7, new VerboseStatsInventoryMenuItem(endOfMatchMenu).createItem(player));
+    endOfMatchMenu.display(player);
   }
 
   private Map.Entry<UUID, Integer> sortStats(Map<UUID, Integer> map) {
@@ -294,8 +302,8 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   /**
-   * Wraps a {@link Number} in a {@link Component} that is bolded and colored with the given {@link
-   * TextColor}. Rounds the number to a maximum of 2 decimals
+   * Wraps a {@link Number} in a {@link Component} that is colored with the given {@link TextColor}.
+   * Rounds the number to a maximum of 2 decimals
    *
    * <p>If the number is NaN "-" is wrapped instead
    *
@@ -303,7 +311,7 @@ public class StatsMatchModule implements MatchModule, Listener {
    *
    * @param stat The number you want wrapped
    * @param color The color you want the number to be
-   * @return A bolded and colored component wrapping the given number or "-" if NaN
+   * @return a colored component wrapping the given number or "-" if NaN
    */
   public static Component numberComponent(Number stat, TextColor color) {
     double doubleStat = stat.doubleValue();
@@ -325,7 +333,7 @@ public class StatsMatchModule implements MatchModule, Listener {
       if (decimals.chars().sum() == 1 || tenThousand) returnValue = ONE_DECIMAL.format(doubleStat);
       else returnValue = TWO_DECIMALS.format(doubleStat);
     }
-    return TextComponent.of(returnValue + (tenThousand ? "k" : ""), color, TextDecoration.BOLD);
+    return TextComponent.of(returnValue + (tenThousand ? "k" : ""), color);
   }
 
   @EventHandler
