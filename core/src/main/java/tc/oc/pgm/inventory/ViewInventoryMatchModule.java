@@ -310,6 +310,9 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
           this.previewPlayerInventory(
               Bukkit.getServer().getPlayerExact(pl), tracker.getPlayerInventory());
         }
+      } else {
+        InventoryHolder holder = tracker.getWatched().getHolder();
+        this.previewInventory(Bukkit.getServer().getPlayerExact(pl), holder.getInventory());
       }
     }
   }
