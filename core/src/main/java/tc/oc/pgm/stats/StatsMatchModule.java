@@ -1,5 +1,7 @@
 package tc.oc.pgm.stats;
 
+import static net.kyori.text.ComponentBuilders.text;
+
 import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Comparator;
@@ -22,6 +24,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -73,6 +76,8 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   public static final DecimalFormat ONE_DECIMAL = new DecimalFormat("#.#");
 
+  public static final Component HEART_SYMBOL = text("\u2764").build(); // ❤
+
   // Defined at match end, see #onMatchEnd
   private InventoryMenu endOfMatchMenu;
 
@@ -87,8 +92,11 @@ public class StatsMatchModule implements MatchModule, Listener {
     ParticipantState damaged = match.getParticipantState(event.getEntity());
     if ((damaged != null && damager != null) && damaged.getId() == damager.getId()) return;
     boolean bow = event.getDamager() instanceof Arrow;
-    if (damager != null) getPlayerStat(damager).onDamage(event.getFinalDamage(), bow);
-    if (damaged != null) getPlayerStat(damaged).onDamaged(event.getFinalDamage());
+    // Absorbed damage gets removed so we add it back
+    double realFinalDamage =
+        event.getFinalDamage() - event.getDamage(EntityDamageEvent.DamageModifier.ABSORPTION);
+    if (damager != null) getPlayerStat(damager).onDamage(realFinalDamage, bow);
+    if (damaged != null) getPlayerStat(damaged).onDamaged(realFinalDamage);
   }
 
   @EventHandler
@@ -131,18 +139,15 @@ public class StatsMatchModule implements MatchModule, Listener {
     if (event.getKiller() != null)
       murderer = event.getKiller().getParty().getPlayer(event.getKiller().getId());
 
-    if (victim.getSettings().getValue(SettingKey.STATS).equals(SettingValue.STATS_ON)) {
-      PlayerStats victimStats = getPlayerStat(victim);
+    PlayerStats victimStats = getPlayerStat(victim);
 
-      victimStats.onDeath();
+    victimStats.onDeath();
 
-      sendPlayerStats(victim, victimStats);
-    }
+    sendPlayerStats(victim, victimStats);
 
     if (murderer != null
         && PlayerRelation.get(victim.getParticipantState(), murderer) != PlayerRelation.ALLY
-        && PlayerRelation.get(victim.getParticipantState(), murderer) != PlayerRelation.SELF
-        && murderer.getSettings().getValue(SettingKey.STATS).equals(SettingValue.STATS_ON)) {
+        && PlayerRelation.get(victim.getParticipantState(), murderer) != PlayerRelation.SELF) {
 
       PlayerStats murdererStats = getPlayerStat(murderer);
 
@@ -334,6 +339,14 @@ public class StatsMatchModule implements MatchModule, Listener {
       else returnValue = TWO_DECIMALS.format(doubleStat);
     }
     return TextComponent.of(returnValue + (tenThousand ? "k" : ""), color);
+  }
+
+  /** Formats raw damage to damage relative to the amount of hearths the player would have broken */
+  public static Component damageComponent(double damage, TextColor color) {
+
+    double hearts = damage / (double) 2;
+
+    return numberComponent(hearts, color).append(HEART_SYMBOL);
   }
 
   @EventHandler

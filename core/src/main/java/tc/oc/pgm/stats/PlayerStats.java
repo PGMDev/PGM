@@ -1,10 +1,11 @@
 package tc.oc.pgm.stats;
 
+import static tc.oc.pgm.stats.StatsMatchModule.numberComponent;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.Future;
 import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.TextColor;
 
@@ -101,10 +102,10 @@ class PlayerStats {
     return TranslatableComponent.of(
         "match.stats",
         TextColor.GRAY,
-        TextComponent.of(kills, TextColor.GREEN),
-        TextComponent.of(killstreak, TextColor.GREEN),
-        TextComponent.of(deaths, TextColor.RED),
-        TextComponent.of(getKD(), TextColor.GREEN));
+        numberComponent(kills, TextColor.GREEN),
+        numberComponent(killstreak, TextColor.GREEN),
+        numberComponent(deaths, TextColor.RED),
+        numberComponent(getKD(), TextColor.GREEN));
   }
 
   // Getters, both raw stats and some handy calculations

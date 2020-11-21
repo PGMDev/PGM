@@ -1,5 +1,6 @@
 package tc.oc.pgm.stats;
 
+import static tc.oc.pgm.stats.StatsMatchModule.damageComponent;
 import static tc.oc.pgm.stats.StatsMatchModule.numberComponent;
 
 import java.util.ArrayList;
@@ -89,11 +90,11 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
         TranslatableComponent.of(
             "match.stats.damage.dealt",
             RESET,
-            numberComponent(damageDone, TextColor.GREEN),
-            numberComponent(bowDamage, TextColor.YELLOW));
+            damageComponent(damageDone, TextColor.GREEN),
+            damageComponent(bowDamage, TextColor.YELLOW));
     Component damageReceivedLore =
         TranslatableComponent.of(
-            "match.stats.damage.received", RESET, numberComponent(damageTaken, TextColor.RED));
+            "match.stats.damage.received", RESET, damageComponent(damageTaken, TextColor.RED));
     Component bowLore =
         TranslatableComponent.of(
             "match.stats.bow",
