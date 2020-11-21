@@ -9,6 +9,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
+import tc.oc.pgm.ffa.Tribute;
 import tc.oc.pgm.stats.StatsMatchModule;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.text.TextException;
@@ -20,7 +21,10 @@ public final class StatsCommand {
       aliases = {"stats"},
       desc = "Show your stats for the match")
   public void stats(Audience audience, CommandSender sender, MatchPlayer player, Match match) {
-    if (match.isFinished() && PGM.get().getConfiguration().showVerboseStats()) {
+    if (match.isFinished()
+        && PGM.get().getConfiguration().showVerboseStats()
+        && !match.getCompetitors().stream()
+            .allMatch(c -> c instanceof Tribute)) { // Should not try to trigger on FFA
       match.needModule(StatsMatchModule.class).displayVerboseStatsAndGiveItem(player);
     } else if (player.getSettings().getValue(SettingKey.STATS).equals(SettingValue.STATS_ON)) {
       audience.sendMessage(

@@ -9,15 +9,18 @@ import org.bukkit.event.inventory.ClickType;
 import tc.oc.pgm.api.player.MatchPlayer;
 
 public class PageInventoryMenuItem implements InventoryMenuItem {
-  private final List<InventoryMenuItem> to;
+  private final List<InventoryMenuItem> inventoryItems;
   private final int toPage;
   private final boolean next;
   private final Component inventoryTitle;
 
   PageInventoryMenuItem(
-      Component inventoryTitle, List<InventoryMenuItem> to, int currentPage, boolean next) {
+      Component inventoryTitle,
+      List<InventoryMenuItem> inventoryItems,
+      int currentPage,
+      boolean next) {
     this.inventoryTitle = inventoryTitle;
-    this.to = to;
+    this.inventoryItems = inventoryItems;
     this.toPage = next ? ++currentPage : --currentPage;
     this.next = next;
   }
@@ -44,6 +47,7 @@ public class PageInventoryMenuItem implements InventoryMenuItem {
 
   @Override
   public void onInventoryClick(InventoryMenu menu, MatchPlayer player, ClickType clickType) {
-    InventoryMenuUtils.prettyMenu(player.getMatch(), inventoryTitle, to, toPage).display(player);
+    InventoryMenuUtils.prettyMenu(player.getMatch(), inventoryTitle, inventoryItems, toPage)
+        .display(player);
   }
 }

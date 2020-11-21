@@ -31,11 +31,11 @@ public class InventoryMenuUtils {
 
     final int offset = 18 * page;
 
-    final int size = itemsWithoutSpaces.size() - offset;
+    final int size = itemsWithoutSpaces.size() - offset; // The amount of items left to place
 
     if (size > 13)
       for (int i = 13; i < 18; i++) {
-        itemsWithSpaces.add(size > i ? itemsWithoutSpaces.get(i) : null);
+        itemsWithSpaces.add(size > i ? itemsWithoutSpaces.get(i + offset) : null);
         if (i != 17) itemsWithSpaces.add(null);
       }
     else emptyRow(itemsWithSpaces);
@@ -43,14 +43,14 @@ public class InventoryMenuUtils {
     if (size > 0)
       for (int i = 0; i < 4; i++) {
         itemsWithSpaces.add(null);
-        itemsWithSpaces.add(size > i ? itemsWithoutSpaces.get(i) : null);
+        itemsWithSpaces.add(size > i ? itemsWithoutSpaces.get(i + offset) : null);
         if (i == 3) itemsWithSpaces.add(null);
       }
     else emptyRow(itemsWithSpaces);
 
     if (size > 8)
       for (int i = 8; i < 13; i++) {
-        itemsWithSpaces.add(size > i ? itemsWithoutSpaces.get(i) : null);
+        itemsWithSpaces.add(size > i ? itemsWithoutSpaces.get(i + offset) : null);
         if (i != 12) itemsWithSpaces.add(null);
       }
     else emptyRow(itemsWithSpaces);
@@ -58,7 +58,7 @@ public class InventoryMenuUtils {
     if (size > 4)
       for (int i = 4; i < 8; i++) {
         itemsWithSpaces.add(null);
-        itemsWithSpaces.add(size > i ? itemsWithoutSpaces.get(i) : null);
+        itemsWithSpaces.add(size > i ? itemsWithoutSpaces.get(i + offset) : null);
         if (i == 7) itemsWithSpaces.add(null);
       }
     else emptyRow(itemsWithSpaces);
@@ -73,7 +73,7 @@ public class InventoryMenuUtils {
     itemsWithSpaces.add(null);
     itemsWithSpaces.add(null);
     itemsWithSpaces.add(
-        size > offset && offset != 0
+        itemsWithoutSpaces.size() > offset + 18 // Does the menu need another page?
             ? new PageInventoryMenuItem(inventoryTitle, itemsWithoutSpaces, page, true)
             : null);
     itemsWithSpaces.add(null);
