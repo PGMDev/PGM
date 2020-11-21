@@ -42,10 +42,10 @@ import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.command.graph.CommandExecutor;
 import tc.oc.pgm.command.graph.CommandGraph;
-import tc.oc.pgm.community.command.CommunityCommandGraph;
-import tc.oc.pgm.community.features.VanishManagerImpl;
 import tc.oc.pgm.db.CacheDatastore;
 import tc.oc.pgm.db.SQLDatastore;
+import tc.oc.pgm.friends.FriendRegistry;
+import tc.oc.pgm.friends.FriendRegistryImpl;
 import tc.oc.pgm.listeners.AntiGriefListener;
 import tc.oc.pgm.listeners.BlockTransformListener;
 import tc.oc.pgm.listeners.ChatDispatcher;
@@ -57,7 +57,6 @@ import tc.oc.pgm.listeners.ServerPingDataListener;
 import tc.oc.pgm.listeners.WorldProblemListener;
 import tc.oc.pgm.map.MapLibraryImpl;
 import tc.oc.pgm.match.MatchManagerImpl;
-import tc.oc.pgm.match.NoopVanishManager;
 import tc.oc.pgm.namedecorations.ConfigDecorationProvider;
 import tc.oc.pgm.namedecorations.NameDecorationRegistry;
 import tc.oc.pgm.namedecorations.NameDecorationRegistryImpl;
@@ -77,6 +76,8 @@ import tc.oc.pgm.util.listener.PlayerMoveListener;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextTranslations;
 import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.vanish.NoopVanishManager;
+import tc.oc.pgm.vanish.VanishManagerImpl;
 
 public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
@@ -92,6 +93,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   private ScheduledExecutorService executorService;
   private ScheduledExecutorService asyncExecutorService;
   private VanishManager vanishManager;
+  private FriendRegistry friendRegistry;
 
   public PGMPlugin() {
     super();
@@ -194,6 +196,8 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
         new NameDecorationRegistryImpl(
             config.getGroups().isEmpty() ? null : new ConfigDecorationProvider());
 
+    friendRegistry = new FriendRegistryImpl(null);
+
     // Sometimes match folders need to be cleaned up if the server previously crashed
     final File[] worldDirs = getServer().getWorldContainer().listFiles();
     if (worldDirs != null) {
@@ -207,7 +211,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     matchManager = new MatchManagerImpl(logger);
 
     vanishManager =
-        config.isCommunityMode()
+        config.isVanishEnabled()
             ? new VanishManagerImpl(matchManager, executorService)
             : new NoopVanishManager();
 
@@ -322,9 +326,13 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     return vanishManager;
   }
 
+  @Override
+  public FriendRegistry getFriendRegistry() {
+    return friendRegistry;
+  }
+
   private void registerCommands() {
-    final CommandGraph graph =
-        config.isCommunityMode() ? new CommunityCommandGraph() : new CommandGraph();
+    final CommandGraph graph = new CommandGraph();
 
     graph.register(vanishManager);
     graph.register(ChatDispatcher.get());
@@ -350,6 +358,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     if (matchTabManager != null) registerEvents(matchTabManager);
     registerEvents(vanishManager);
     registerEvents(nameDecorationRegistry);
+    registerEvents(friendRegistry);
     registerEvents(new PGMListener(this, matchManager, vanishManager));
     registerEvents(new FormattingListener());
     registerEvents(new AntiGriefListener(matchManager));

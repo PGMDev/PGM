@@ -17,7 +17,6 @@ import tc.oc.pgm.broadcast.BroadcastMatchModule;
 import tc.oc.pgm.broadcast.BroadcastModule;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.ClassModule;
-import tc.oc.pgm.community.modules.FreezeMatchModule;
 import tc.oc.pgm.controlpoint.ControlPointMatchModule;
 import tc.oc.pgm.controlpoint.ControlPointModule;
 import tc.oc.pgm.core.CoreMatchModule;
@@ -62,6 +61,7 @@ import tc.oc.pgm.modules.ArrowRemovalMatchModule;
 import tc.oc.pgm.modules.DiscardPotionBottlesMatchModule;
 import tc.oc.pgm.modules.DiscardPotionBottlesModule;
 import tc.oc.pgm.modules.EventFilterMatchModule;
+import tc.oc.pgm.modules.FreezeMatchModule;
 import tc.oc.pgm.modules.FriendlyFireRefundMatchModule;
 import tc.oc.pgm.modules.FriendlyFireRefundModule;
 import tc.oc.pgm.modules.InternalMatchModule;
@@ -159,15 +159,13 @@ public interface Modules {
     register(StatsMatchModule.class, StatsMatchModule::new);
     register(MapmakerMatchModule.class, MapmakerMatchModule::new);
     register(TNTRenderMatchModule.class, TNTRenderMatchModule::new);
+    register(FreezeMatchModule.class, FreezeMatchModule::new);
 
     // FIXME: Disabled due to lag - look into future optimization
     // register(ProjectileTrailMatchModule.class, ProjectileTrailMatchModule::new);
 
     // Modules that help older player versions
     register(LegacyFlagBeamMatchModule.class, new LegacyFlagBeamMatchModule.Factory());
-
-    // Community MatchModules
-    register(FreezeMatchModule.class, FreezeMatchModule::new);
 
     // MatchModules that require other dependencies
     register(GoalMatchModule.class, new GoalMatchModule.Factory());

@@ -1,4 +1,4 @@
-package tc.oc.pgm.match;
+package tc.oc.pgm.vanish;
 
 import com.google.common.collect.Lists;
 import java.util.Collection;

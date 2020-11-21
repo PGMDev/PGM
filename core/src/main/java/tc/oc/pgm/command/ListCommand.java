@@ -60,6 +60,37 @@ public final class ListCommand {
             text(getSize(match.getPlayers(), false), NamedTextColor.GREEN)));
   }
 
+  @Command(
+      aliases = {"staff", "mods", "admins"},
+      desc = "List the online staff members")
+  public void staff(Audience viewer, CommandSender sender, Match match) {
+    // List of online staff based off of permission
+    List<Component> onlineStaff =
+        match.getPlayers().stream()
+            .filter(
+                player ->
+                    (player.getBukkit().hasPermission(Permissions.STAFF)
+                        && (!player.isVanished() || sender.hasPermission(Permissions.STAFF))))
+            .map(p -> p.getName(NameStyle.VERBOSE))
+            .collect(Collectors.toList());
+
+    // FORMAT: Online Staff ({count}): {names}
+    Component staffCount =
+        TextComponent.of(Integer.toString(onlineStaff.size()))
+            .color(onlineStaff.isEmpty() ? TextColor.RED : TextColor.AQUA);
+
+    Component content =
+        onlineStaff.isEmpty()
+            ? TranslatableComponent.of("moderation.staff.empty")
+            : TextFormatter.list(onlineStaff, TextColor.GRAY);
+
+    Component staff =
+        TranslatableComponent.of("moderation.staff.name", TextColor.GRAY, staffCount, content);
+
+    // Send message
+    viewer.sendMessage(staff);
+  }
+
   private void sendTeamInfo(
       Audience viewer,
       CommandSender sender,

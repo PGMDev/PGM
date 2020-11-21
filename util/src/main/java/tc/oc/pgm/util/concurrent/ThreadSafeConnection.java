@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -80,6 +81,32 @@ public class ThreadSafeConnection implements Closeable {
           } catch (SQLException e) {
             e.printStackTrace();
           }
+        });
+  }
+
+  /**
+   * Submits and returns a query as a {@link CompletableFuture}
+   *
+   * @see Query
+   * @param query
+   * @return A CompletableFuture query
+   */
+  public CompletableFuture<Query> submitQueryComplete(Query query) {
+    return CompletableFuture.supplyAsync(
+        () -> {
+          try {
+            final Connection connection = acquireConnection();
+
+            try (final PreparedStatement statement =
+                connection.prepareStatement(query.getFormat())) {
+              query.query(statement);
+            }
+
+            releaseConnection(connection);
+          } catch (SQLException e) {
+            e.printStackTrace();
+          }
+          return query;
         });
   }
 

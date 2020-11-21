@@ -17,14 +17,21 @@ import tc.oc.pgm.api.player.MatchPlayer;
 public enum SettingKey {
   CHAT("chat", CHAT_TEAM, CHAT_GLOBAL, CHAT_ADMIN), // Changes the default chat channel
   DEATH(
-      Arrays.asList("death", "dms"), DEATH_ALL, DEATH_OWN), // Changes which death messages are seen
+      Arrays.asList("death", "dms"),
+      DEATH_ALL,
+      DEATH_OWN,
+      DEATH_FRIENDS), // Changes which death messages are seen
   PICKER("picker", PICKER_AUTO, PICKER_ON, PICKER_OFF), // Changes when the picker is displayed
-  JOIN(Arrays.asList("join", "jms"), JOIN_ON, JOIN_OFF), // Changes if join messages are seen
+  JOIN(
+      Arrays.asList("join", "jms"),
+      JOIN_ON,
+      JOIN_FRIENDS,
+      JOIN_OFF), // Changes if join messages are seen
   MESSAGE(
       Arrays.asList("message", "dm"),
       MESSAGE_ON,
       MESSAGE_OFF), // Changes if direct messages are accepted
-  OBSERVERS(Arrays.asList("observers", "obs"), OBSERVERS_ON, OBSERVERS_OFF) {
+  OBSERVERS(Arrays.asList("observers", "obs"), OBSERVERS_ON, OBSERVERS_FRIEND, OBSERVERS_OFF) {
     @Override
     public void update(MatchPlayer player) {
       player.resetVisibility();

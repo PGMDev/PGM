@@ -4,10 +4,13 @@ import java.util.logging.Logger;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -16,6 +19,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.util.friends.FriendProvider;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DeathMessageMatchModule implements MatchModule, Listener {
@@ -47,6 +51,13 @@ public class DeathMessageMatchModule implements MatchModule, Listener {
             viewer.sendMessage(message.decoration(TextDecoration.ITALIC, true));
           }
           break;
+        case DEATH_FRIENDS:
+          if (event.isInvolved(viewer)) {
+            viewer.sendMessage(message.decoration(TextDecoration.BOLD, true));
+          } else if (isFriendInvolved(viewer.getBukkit(), event)) {
+            viewer.sendMessage(message);
+          }
+          break;
         case DEATH_ALL:
           if (event.isInvolved(viewer)) {
             viewer.sendMessage(message.decoration(TextDecoration.BOLD, true));
@@ -56,5 +67,13 @@ public class DeathMessageMatchModule implements MatchModule, Listener {
           break;
       }
     }
+  }
+
+  private boolean isFriendInvolved(Player viewer, MatchPlayerDeathEvent event) {
+    FriendProvider friends = PGM.get().getFriendRegistry().getProvider();
+    return (event.getKiller() != null && event.getKiller().getPlayer().isPresent()
+            ? friends.areFriends(viewer, event.getKiller().getPlayer().get().getBukkit())
+            : false)
+        || (event.getVictim() != null && friends.areFriends(viewer, event.getVictim().getBukkit()));
   }
 }

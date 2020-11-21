@@ -273,6 +273,13 @@ public interface Config {
   int getGriefScore();
 
   /**
+   * Gets whether vanish features are enabled
+   *
+   * @return If vanish features are enabled.
+   */
+  boolean isVanishEnabled();
+
+  /**
    * Gets a group of players, used for prefixes and player sorting.
    *
    * @return A list of groups.
@@ -393,15 +400,6 @@ public interface Config {
       return component.build();
     }
   }
-
-  /**
-   * Gets whether "community mode" should be installed if not present.
-   *
-   * <p>Includes features such as /report, /warn, /freeze, and more.
-   *
-   * @return If community mode is enabled.
-   */
-  boolean isCommunityMode();
 
   /**
    * Gets experimental configuration settings that are not yet stable.

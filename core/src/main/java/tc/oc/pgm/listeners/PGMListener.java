@@ -204,9 +204,17 @@ public class PGMListener implements Listener {
               + (staffOnly && (player.isVanished() || force) ? ".quiet" : "");
 
       SettingValue option = viewer.getSettings().getValue(SettingKey.JOIN);
-      if (option.equals(SettingValue.JOIN_ON)) {
-        Component component =
-            translatable(key, NamedTextColor.YELLOW, player.getName(NameStyle.CONCISE));
+      if (option.equals(SettingValue.JOIN_ON)
+          || (option.equals(SettingValue.JOIN_FRIENDS)
+              && PGM.get()
+                  .getFriendRegistry()
+                  .areFriends(player.getBukkit(), viewer.getBukkit()))) {
+        Component name =
+            PGM.get()
+                .getNameDecorationRegistry()
+                .getDecoratedNameComponent(player.getBukkit(), player.getParty().getColor());
+        Component component = translatable(key, NamedTextColor.YELLOW, name);
+
         viewer.sendMessage(
             staffOnly
                 ? ChatDispatcher.ADMIN_CHAT_PREFIX.append(component.color(NamedTextColor.YELLOW))

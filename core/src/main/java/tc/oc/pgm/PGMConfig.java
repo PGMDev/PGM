@@ -33,12 +33,10 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import tc.oc.pgm.api.Config;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.pgm.map.source.GitMapSourceFactory;
 import tc.oc.pgm.map.source.SystemMapSourceFactory;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.text.TextException;
 
 public final class PGMConfig implements Config {
@@ -100,8 +98,8 @@ public final class PGMConfig implements Config {
   private final Component rightTablistText;
   private final Component leftTablistText;
 
-  // community.*
-  private final boolean communityMode;
+  // vanish.*
+  private final boolean vanishEnabled;
 
   // groups.*
   private final List<Group> groups;
@@ -184,6 +182,7 @@ public final class PGMConfig implements Config {
         parseBoolean(config.getString("ui.participants-see-observers", "true"));
     this.showFireworks = parseBoolean(config.getString("ui.fireworks", "true"));
     this.flagBeams = parseBoolean(config.getString("ui.flag-beams", "false"));
+    this.vanishEnabled = parseBoolean(config.getString("vanish.enabled", "true"));
 
     this.verboseStats = parseBoolean(config.getString("stats.verbose", "true"));
     this.statsShowAfter = parseDuration(config.getString("stats.show-after", "6s"));
@@ -199,8 +198,6 @@ public final class PGMConfig implements Config {
     final String rightText = config.getString("tablist.right");
     this.rightTablistText =
         rightText == null || rightText.isEmpty() ? null : parseComponent(rightText);
-
-    this.communityMode = parseBoolean(config.getString("community.enabled", "true"));
 
     final ConfigurationSection section = config.getConfigurationSection("groups");
     this.groups = new ArrayList<>();
@@ -607,6 +604,11 @@ public final class PGMConfig implements Config {
   }
 
   @Override
+  public boolean isVanishEnabled() {
+    return vanishEnabled;
+  }
+
+  @Override
   public String getMotd() {
     return motd;
   }
@@ -614,11 +616,6 @@ public final class PGMConfig implements Config {
   @Override
   public List<Group> getGroups() {
     return groups;
-  }
-
-  @Override
-  public boolean isCommunityMode() {
-    return communityMode;
   }
 
   @Override
@@ -764,30 +761,6 @@ public final class PGMConfig implements Config {
     @Override
     public Component getSuffixOverride() {
       return suffixOverride;
-    }
-  }
-
-  @Deprecated
-  public static class Moderation {
-
-    public static boolean isRuleLinkVisible() {
-      return getRulesLink().length() > 0;
-    }
-
-    public static String getRulesLink() {
-      return BukkitUtils.colorize(PGM.get().getConfig().getString("community.rules-link", ""));
-    }
-
-    public static String getServerName() {
-      return BukkitUtils.colorize(PGM.get().getConfig().getString("community.server-name", ""));
-    }
-
-    public static String getAppealMessage() {
-      return BukkitUtils.colorize(PGM.get().getConfig().getString("community.appeal-msg", ""));
-    }
-
-    public static boolean isAppealVisible() {
-      return getAppealMessage().length() > 0;
     }
   }
 }

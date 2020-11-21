@@ -11,6 +11,7 @@ import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.VanishManager;
+import tc.oc.pgm.friends.FriendRegistry;
 import tc.oc.pgm.namedecorations.NameDecorationRegistry;
 import tc.oc.pgm.tablist.MatchTabManager;
 
@@ -39,6 +40,8 @@ public interface PGM extends Plugin {
   ScheduledExecutorService getAsyncExecutor();
 
   VanishManager getVanishManager();
+
+  FriendRegistry getFriendRegistry();
 
   AtomicReference<PGM> GLOBAL = new AtomicReference<>(null);
 

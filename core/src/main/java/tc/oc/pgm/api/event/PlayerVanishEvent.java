@@ -1,4 +1,4 @@
-package tc.oc.pgm.community.events;
+package tc.oc.pgm.api.event;
 
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.player.MatchPlayer;

@@ -9,7 +9,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.community.command.ModerationCommand;
 import tc.oc.pgm.util.named.NameStyle;
 
 /**

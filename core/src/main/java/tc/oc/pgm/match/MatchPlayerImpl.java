@@ -204,7 +204,9 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     if (other.isParticipating()) return true;
     if (other.isVanished() && !getBukkit().hasPermission(Permissions.VANISH)) return false;
     return isObserving()
-        && getSettings().getValue(SettingKey.OBSERVERS) == SettingValue.OBSERVERS_ON;
+        && (getSettings().getValue(SettingKey.OBSERVERS) == SettingValue.OBSERVERS_ON
+            || getSettings().getValue(SettingKey.OBSERVERS) == SettingValue.OBSERVERS_FRIEND
+                && PGM.get().getFriendRegistry().areFriends(getBukkit(), other.getBukkit()));
   }
 
   @Override
