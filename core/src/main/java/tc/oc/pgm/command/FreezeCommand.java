@@ -74,6 +74,6 @@ public class FreezeCommand {
 
   private Component formatFrozenList(String key, int count, Component names) {
     return TranslatableComponent.of(
-        key, TextColor.GRAY, TextComponent.of(Integer.toString(count), TextColor.AQUA), names);
+        key, TextColor.GRAY, TextComponent.of(count, TextColor.AQUA), names);
   }
 }
