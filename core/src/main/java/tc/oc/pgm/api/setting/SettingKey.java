@@ -19,19 +19,19 @@ public enum SettingKey {
   DEATH(
       Arrays.asList("death", "dms"),
       DEATH_ALL,
-      DEATH_FRIENDS,
-      DEATH_OWN), // Changes which death messages are seen
+      DEATH_OWN,
+      DEATH_FRIENDS), // Changes which death messages are seen
   PICKER("picker", PICKER_AUTO, PICKER_ON, PICKER_OFF), // Changes when the picker is displayed
   JOIN(
       Arrays.asList("join", "jms"),
       JOIN_ON,
-      JOIN_FRIENDS,
-      JOIN_OFF), // Changes if join messages are seen
+      JOIN_OFF,
+      JOIN_FRIENDS), // Changes if join messages are seen
   MESSAGE(
       Arrays.asList("message", "dm"),
       MESSAGE_ON,
       MESSAGE_OFF), // Changes if direct messages are accepted
-  OBSERVERS(Arrays.asList("observers", "obs"), OBSERVERS_ON, OBSERVERS_FRIEND, OBSERVERS_OFF) {
+  OBSERVERS(Arrays.asList("observers", "obs"), OBSERVERS_ON, OBSERVERS_OFF, OBSERVERS_FRIEND) {
     @Override
     public void update(MatchPlayer player) {
       player.resetVisibility();
