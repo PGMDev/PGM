@@ -48,6 +48,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
@@ -281,6 +282,13 @@ public class FreezeMatchModule implements MatchModule, Listener {
   public void onPlayerQuit(PlayerQuitEvent event) {
     if (freeze.isFrozen(event.getPlayer())) {
       freeze.cachePlayer(event.getPlayer());
+    }
+  }
+
+  @EventHandler
+  public void onPlayerKick(PlayerKickEvent event) {
+    if (freeze.isFrozen(event.getPlayer())) {
+      freeze.setFrozen(Bukkit.getConsoleSender(), match.getPlayer(event.getPlayer()), false, true);
     }
   }
 
