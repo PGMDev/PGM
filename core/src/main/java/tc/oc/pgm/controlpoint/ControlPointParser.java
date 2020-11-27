@@ -87,8 +87,8 @@ public abstract class ControlPointParser {
     boolean permanent = XMLUtils.parseBoolean(elControlPoint.getAttribute("permanent"), false);
     float pointsPerSecond =
         XMLUtils.parseNumber(elControlPoint.getAttribute("points"), Float.class, 1f);
-    float pointsBonus =
-        XMLUtils.parseNumber(elControlPoint.getAttribute("bonus-points"), Float.class, 1f);
+    float pointsOwner =
+        XMLUtils.parseNumber(elControlPoint.getAttribute("owner-points"), Float.class, 0f);
     float pointsGrowth =
         XMLUtils.parseNumber(
             elControlPoint.getAttribute("points-growth"), Float.class, Float.POSITIVE_INFINITY);
@@ -124,7 +124,7 @@ public abstract class ControlPointParser {
         neutralState,
         permanent,
         pointsPerSecond,
-        pointsBonus,
+        pointsOwner,
         pointsGrowth,
         showProgress);
   }
