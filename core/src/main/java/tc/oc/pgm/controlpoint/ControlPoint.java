@@ -348,6 +348,11 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
     if (oldCapturingTeam != this.capturingTeam) {
       this.match.callEvent(
           new CapturingTeamChangeEvent(this.match, this, oldCapturingTeam, this.capturingTeam));
+      ScoreMatchModule scoreMatchModule = this.getMatch().getModule(ScoreMatchModule.class);
+      // Gives a set number of bonus points to a team when captured.
+      if (this.capturingTeam != null && scoreMatchModule != null) {
+        scoreMatchModule.incrementScore(this.capturingTeam, this.getDefinition().getPointsBonus());
+      }
     }
 
     if (oldControllingTeam != this.controllingTeam) {
