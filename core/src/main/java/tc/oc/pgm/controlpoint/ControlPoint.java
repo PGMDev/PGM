@@ -355,8 +355,8 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
           new ControllerChangeEvent(this.match, this, oldControllingTeam, this.controllingTeam));
 
       ScoreMatchModule scoreMatchModule = this.getMatch().getModule(ScoreMatchModule.class);
-      // Gives a set number of owner points to a team when captured.
-      if (this.controllingTeam != null && scoreMatchModule != null) {
+      // Gives a set number of owner points to a team when captured, lost when an enemy captures
+      if (scoreMatchModule != null) {
         if (oldControllingTeam != null) {
           scoreMatchModule.incrementScore(
               oldControllingTeam, getDefinition().getPointsOwner() * -1);
