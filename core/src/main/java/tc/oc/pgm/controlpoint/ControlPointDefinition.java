@@ -69,6 +69,9 @@ public class ControlPointDefinition extends GoalDefinition {
   // Rate that the owner's score increases, or 0 if the CP does not affect score
   private final float pointsPerSecond;
 
+  // Set number of points given to owner
+  private final float pointsOwner;
+
   // If this is less than +inf, the effective pointsPerSecond will increase over time
   // at an exponential rate, such that it doubles every time this many seconds elapses.
   private final float pointsGrowth;
@@ -96,6 +99,7 @@ public class ControlPointDefinition extends GoalDefinition {
       boolean neutralState,
       boolean permanent,
       float pointsPerSecond,
+      float pointsOwner,
       float pointsGrowth,
       boolean progress) {
 
@@ -115,6 +119,7 @@ public class ControlPointDefinition extends GoalDefinition {
     this.neutralState = neutralState;
     this.permanent = permanent;
     this.pointsPerSecond = pointsPerSecond;
+    this.pointsOwner = pointsOwner;
     this.pointsGrowth = pointsGrowth;
     this.showProgress = progress;
   }
@@ -218,6 +223,10 @@ public class ControlPointDefinition extends GoalDefinition {
 
   public float getPointsPerSecond() {
     return this.pointsPerSecond;
+  }
+
+  public float getPointsOwner() {
+    return this.pointsOwner;
   }
 
   public float getPointsGrowth() {
