@@ -77,7 +77,6 @@ import tc.oc.pgm.modules.MobsModule;
 import tc.oc.pgm.modules.ModifyBowProjectileMatchModule;
 import tc.oc.pgm.modules.ModifyBowProjectileModule;
 import tc.oc.pgm.modules.MultiTradeMatchModule;
-import tc.oc.pgm.modules.ProjectileTrailMatchModule;
 import tc.oc.pgm.modules.SoundsMatchModule;
 import tc.oc.pgm.modules.TimeLockModule;
 import tc.oc.pgm.modules.ToolRepairMatchModule;
@@ -160,7 +159,9 @@ public interface Modules {
     register(FireworkMatchModule.class, FireworkMatchModule::new);
     register(StatsMatchModule.class, StatsMatchModule::new);
     register(MapmakerMatchModule.class, MapmakerMatchModule::new);
-    register(ProjectileTrailMatchModule.class, ProjectileTrailMatchModule::new);
+
+    // FIXME: Disabled due to lag - look into future optimization
+    // register(ProjectileTrailMatchModule.class, ProjectileTrailMatchModule::new);
 
     // Modules that help older player versions
     register(LegacyFlagBeamMatchModule.class, LegacyFlagBeamMatchModule::new);
