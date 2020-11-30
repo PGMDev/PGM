@@ -7,6 +7,7 @@ import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.util.friends.FriendProvider;
 
 /**
  * The default order that players are listed for a given viewer. Roughly speaking, the order is: 1.
@@ -38,6 +39,17 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
 
     boolean aStaff = a.hasPermission(Permissions.STAFF);
     boolean bStaff = b.hasPermission(Permissions.STAFF);
+
+    FriendProvider friends = PGM.get().getFriendRegistry().getProvider();
+    boolean aFriend = friends.areFriends(viewer, a);
+    boolean bFriend = friends.areFriends(viewer, b);
+
+    // Friends are always first :)
+    if (aFriend && !bFriend) {
+      return -1;
+    } else if (bFriend && !aFriend) {
+      return 1;
+    }
 
     // Staff take priority
     if (aStaff && !bStaff) {
