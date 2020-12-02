@@ -31,7 +31,6 @@ import tc.oc.pgm.command.ClassCommand;
 import tc.oc.pgm.command.CycleCommand;
 import tc.oc.pgm.command.FinishCommand;
 import tc.oc.pgm.command.FreeForAllCommand;
-import tc.oc.pgm.command.FreezeCommand;
 import tc.oc.pgm.command.InventoryCommand;
 import tc.oc.pgm.command.JoinCommand;
 import tc.oc.pgm.command.ListCommand;
@@ -86,7 +85,6 @@ public class CommandGraph extends BasicBukkitCommandGraph {
     register(new TeamCommand(), "team");
     register(new TimeLimitCommand());
     register(new VotingCommand(), "vote", "votes");
-    register(new FreezeCommand());
   }
 
   public void register(Object command, String... aliases) {
