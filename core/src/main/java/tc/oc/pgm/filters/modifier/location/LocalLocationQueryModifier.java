@@ -6,9 +6,9 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.LocationQuery;
 
 public class LocalLocationQueryModifier extends LocationQueryModifier {
-  private final double[] coords;
+  private final Vector coords;
 
-  public LocalLocationQueryModifier(Filter child, double[] coords) {
+  public LocalLocationQueryModifier(Filter child, Vector coords) {
     super(child);
     this.coords = coords;
   }
@@ -16,9 +16,9 @@ public class LocalLocationQueryModifier extends LocationQueryModifier {
   @Override
   protected BlockQueryCustomLocation modifyQuery(LocationQuery query) {
     Location origin = query.getLocation();
-    double x = coords[0];
-    double y = coords[1];
-    double z = coords[2];
+    double x = coords.getX();
+    double y = coords.getY();
+    double z = coords.getZ();
     Vector dirZ = origin.getDirection().normalize();
     Location newLoc = origin.clone().add(dirZ.multiply(z));
 

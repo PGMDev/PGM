@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
@@ -480,11 +481,10 @@ public abstract class FilterParser {
     if (local == null) throw new InvalidXMLException("No coordinates provided", el);
 
     if (local) {
-      double[] coordinates = new double[3];
-      coordinates[0] = Double.parseDouble(coords[0].substring(1));
-      coordinates[1] = Double.parseDouble(coords[1].substring(1));
-      coordinates[2] = Double.parseDouble(coords[2].substring(1));
-      return new LocalLocationQueryModifier(parseChild(el), coordinates);
+      double x = Double.parseDouble(coords[0].substring(1));
+      double y = Double.parseDouble(coords[1].substring(1));
+      double z = Double.parseDouble(coords[2].substring(1));
+      return new LocalLocationQueryModifier(parseChild(el), new Vector(x, y, z));
     } else {
       boolean[] relative = new boolean[3];
       double[] coordinates = new double[3];
@@ -495,7 +495,8 @@ public abstract class FilterParser {
         coordinates[i] = Double.parseDouble(isRelative ? coord.substring(1) : coord);
       }
 
-      return new WorldLocationQueryModifier(parseChild(el), coordinates, relative);
+      return new WorldLocationQueryModifier(
+          parseChild(el), new Vector(coordinates[0], coordinates[1], coordinates[2]), relative);
     }
   }
 }
