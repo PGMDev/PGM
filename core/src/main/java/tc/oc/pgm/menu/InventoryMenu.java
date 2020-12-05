@@ -1,8 +1,6 @@
 package tc.oc.pgm.menu;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.Lists;
 import java.util.List;

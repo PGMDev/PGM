@@ -1,14 +1,14 @@
 package tc.oc.pgm.stats;
 
+import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.stats.StatsMatchModule.damageComponent;
 import static tc.oc.pgm.stats.StatsMatchModule.numberComponent;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -29,14 +29,14 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
   private final Competitor team;
   private final InventoryMenu teamSubGUI;
 
-  private final TextColor RESET = TextColor.GRAY;
+  private final NamedTextColor RESET = NamedTextColor.GRAY;
 
   TeamStatsInventoryMenuItem(Match match, Competitor team) {
     this.team = team;
     this.teamSubGUI =
         InventoryMenuUtils.prettyMenu(
             match,
-            TranslatableComponent.of("match.stats.title"),
+            translatable("match.stats.title"),
             team.getPlayers().stream()
                 .map(PlayerStatsInventoryMenuItem::new)
                 .collect(Collectors.toList()));
@@ -44,7 +44,7 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
 
   @Override
   public Component getName() {
-    return TranslatableComponent.of("match.stats.team", team.getName());
+    return translatable("match.stats.team", team.getName());
   }
 
   @Override
@@ -79,29 +79,29 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
     double teamBowAcc = shotsTaken == 0 ? Double.NaN : shotsHit / (shotsTaken / (double) 100);
 
     Component statLore =
-        TranslatableComponent.of(
+        translatable(
             "match.stats.concise",
             RESET,
-            numberComponent(teamKills, TextColor.GREEN),
-            numberComponent(teamDeaths, TextColor.RED),
-            numberComponent(teamKD, TextColor.GREEN));
+            numberComponent(teamKills, NamedTextColor.GREEN),
+            numberComponent(teamDeaths, NamedTextColor.RED),
+            numberComponent(teamKD, NamedTextColor.GREEN));
 
     Component damageDealtLore =
-        TranslatableComponent.of(
+        translatable(
             "match.stats.damage.dealt",
             RESET,
-            damageComponent(damageDone, TextColor.GREEN),
-            damageComponent(bowDamage, TextColor.YELLOW));
+            damageComponent(damageDone, NamedTextColor.GREEN),
+            damageComponent(bowDamage, NamedTextColor.YELLOW));
     Component damageReceivedLore =
-        TranslatableComponent.of(
-            "match.stats.damage.received", RESET, damageComponent(damageTaken, TextColor.RED));
+        translatable(
+            "match.stats.damage.received", RESET, damageComponent(damageTaken, NamedTextColor.RED));
     Component bowLore =
-        TranslatableComponent.of(
+        translatable(
             "match.stats.bow",
             RESET,
-            numberComponent(shotsHit, TextColor.YELLOW),
-            numberComponent(shotsTaken, TextColor.YELLOW),
-            numberComponent(teamBowAcc, TextColor.YELLOW));
+            numberComponent(shotsHit, NamedTextColor.YELLOW),
+            numberComponent(shotsTaken, NamedTextColor.YELLOW),
+            numberComponent(teamBowAcc, NamedTextColor.YELLOW));
 
     Player bukkit = player.getBukkit();
 

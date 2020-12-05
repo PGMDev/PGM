@@ -1,9 +1,10 @@
 package tc.oc.pgm.observers;
 
-import java.util.List;
+import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -32,8 +33,6 @@ import tc.oc.pgm.observers.tools.NightVisionTool;
 import tc.oc.pgm.observers.tools.VisibilityTool;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.util.text.TextTranslations;
-
-import static net.kyori.adventure.text.Component.translatable;
 
 @ListenerScope(MatchScope.LOADED)
 public class ObserverToolsMatchModule implements MatchModule, Listener {
