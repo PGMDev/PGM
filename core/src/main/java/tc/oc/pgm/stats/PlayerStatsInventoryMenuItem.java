@@ -1,15 +1,16 @@
 package tc.oc.pgm.stats;
 
+import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.stats.StatsMatchModule.damageComponent;
 import static tc.oc.pgm.stats.StatsMatchModule.numberComponent;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -26,7 +27,7 @@ import tc.oc.pgm.util.text.TextTranslations;
 public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
 
   private final MatchPlayer player;
-  private final TextColor RESET = TextColor.GRAY;
+  private final TextColor RESET = NamedTextColor.GRAY;
 
   PlayerStatsInventoryMenuItem(MatchPlayer player) {
     this.player = player;
@@ -49,35 +50,35 @@ public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
     PlayerStats stats = smm.getPlayerStat(this.player.getId());
 
     Component statLore =
-        TranslatableComponent.of(
+        translatable(
             "match.stats.concise",
             RESET,
-            numberComponent(stats.getKills(), TextColor.GREEN),
-            numberComponent(stats.getDeaths(), TextColor.RED),
-            numberComponent(stats.getKD(), TextColor.GREEN));
+            numberComponent(stats.getKills(), NamedTextColor.GREEN),
+            numberComponent(stats.getDeaths(), NamedTextColor.RED),
+            numberComponent(stats.getKD(), NamedTextColor.GREEN));
     Component killstreakLore =
-        TranslatableComponent.of(
+        translatable(
             "match.stats.killstreak.concise",
             RESET,
-            numberComponent(stats.getMaxKillstreak(), TextColor.GREEN));
+            numberComponent(stats.getMaxKillstreak(), NamedTextColor.GREEN));
     Component damageDealtLore =
-        TranslatableComponent.of(
+        translatable(
             "match.stats.damage.dealt",
             RESET,
-            damageComponent(stats.getDamageDone(), TextColor.GREEN),
-            damageComponent(stats.getBowDamage(), TextColor.YELLOW));
+            damageComponent(stats.getDamageDone(), NamedTextColor.GREEN),
+            damageComponent(stats.getBowDamage(), NamedTextColor.YELLOW));
     Component damageReceivedLore =
-        TranslatableComponent.of(
+        translatable(
             "match.stats.damage.received",
             RESET,
-            damageComponent(stats.getDamageTaken(), TextColor.RED));
+            damageComponent(stats.getDamageTaken(), NamedTextColor.RED));
     Component bowLore =
-        TranslatableComponent.of(
+        translatable(
             "match.stats.bow",
             RESET,
-            numberComponent(stats.getShotsHit(), TextColor.YELLOW),
-            numberComponent(stats.getShotsTaken(), TextColor.YELLOW),
-            numberComponent(stats.getArrowAccuracy(), TextColor.YELLOW));
+            numberComponent(stats.getShotsHit(), NamedTextColor.YELLOW),
+            numberComponent(stats.getShotsTaken(), NamedTextColor.YELLOW),
+            numberComponent(stats.getArrowAccuracy(), NamedTextColor.YELLOW));
 
     Player bukkit = player.getBukkit();
 
@@ -93,11 +94,11 @@ public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
         lore.add(null);
         lore.add(
             TextTranslations.translateLegacy(
-                TranslatableComponent.of(
+                translatable(
                     "match.stats.flaghold.concise",
                     RESET,
                     PeriodFormats.briefNaturalApproximate(stats.getLongestFlagHold())
-                        .color(TextColor.AQUA)
+                        .color(NamedTextColor.AQUA)
                         .decoration(TextDecoration.BOLD, true)),
                 bukkit));
       }
@@ -111,7 +112,7 @@ public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
     if (stat.doubleValue() > 0) {
       lore.add(null);
       Component loreComponent =
-          TranslatableComponent.of(key, RESET, numberComponent(stat, TextColor.AQUA));
+          translatable(key, RESET, numberComponent(stat, NamedTextColor.AQUA));
       lore.add(TextTranslations.translateLegacy(loreComponent, bukkit));
       return true;
     }

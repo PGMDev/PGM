@@ -19,8 +19,6 @@ import tc.oc.pgm.menu.InventoryMenu;
 import tc.oc.pgm.menu.InventoryMenuItem;
 import tc.oc.pgm.util.text.TextTranslations;
 
-import static net.kyori.adventure.text.Component.translatable;
-
 public class GamemodeTool implements InventoryMenuItem {
 
   @Override
@@ -36,8 +34,7 @@ public class GamemodeTool implements InventoryMenuItem {
   @Override
   public List<String> getLore(MatchPlayer player) {
     Component gamemode =
-        translatable(
-            "gameMode." + player.getGameMode().name().toLowerCase(), NamedTextColor.AQUA);
+        translatable("gameMode." + player.getGameMode().name().toLowerCase(), NamedTextColor.AQUA);
     Component lore = translatable("setting.gamemode.lore", NamedTextColor.GRAY, gamemode);
     return Lists.newArrayList(TextTranslations.translateBaseComponent(lore, player.getBukkit()));
   }

@@ -1,13 +1,13 @@
 package tc.oc.pgm.stats;
 
+import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.stats.StatsMatchModule.numberComponent;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.Future;
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 /** A wrapper for stat info belonging to a {@link tc.oc.pgm.api.player.MatchPlayer} */
 class PlayerStats {
@@ -99,13 +99,13 @@ class PlayerStats {
   // Makes a simple stat message for this player that fits in one line
 
   public Component getBasicStatsMessage() {
-    return TranslatableComponent.of(
+    return translatable(
         "match.stats",
-        TextColor.GRAY,
-        numberComponent(kills, TextColor.GREEN),
-        numberComponent(killstreak, TextColor.GREEN),
-        numberComponent(deaths, TextColor.RED),
-        numberComponent(getKD(), TextColor.GREEN));
+        NamedTextColor.GRAY,
+        numberComponent(kills, NamedTextColor.GREEN),
+        numberComponent(killstreak, NamedTextColor.GREEN),
+        numberComponent(deaths, NamedTextColor.RED),
+        numberComponent(getKD(), NamedTextColor.GREEN));
   }
 
   // Getters, both raw stats and some handy calculations

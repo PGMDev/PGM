@@ -16,8 +16,6 @@ import tc.oc.pgm.menu.InventoryMenu;
 import tc.oc.pgm.menu.InventoryMenuItem;
 import tc.oc.pgm.util.text.TextTranslations;
 
-import static net.kyori.adventure.text.Component.translatable;
-
 public class NightVisionTool implements InventoryMenuItem {
 
   @Override

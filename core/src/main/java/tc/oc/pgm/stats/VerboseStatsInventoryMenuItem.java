@@ -1,11 +1,12 @@
 package tc.oc.pgm.stats;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.google.common.collect.Lists;
 import java.util.List;
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.ClickType;
@@ -24,7 +25,7 @@ public class VerboseStatsInventoryMenuItem implements InventoryMenuItem {
 
   @Override
   public Component getName() {
-    return TranslatableComponent.of("match.stats.title", TextColor.GREEN, TextDecoration.BOLD);
+    return translatable("match.stats.title", NamedTextColor.GREEN, TextDecoration.BOLD);
   }
 
   @Override
@@ -36,7 +37,7 @@ public class VerboseStatsInventoryMenuItem implements InventoryMenuItem {
   public List<String> getLore(MatchPlayer player) {
     return Lists.newArrayList(
         TextTranslations.translateLegacy(
-            TranslatableComponent.of("setting.lore", TextColor.GRAY), player.getBukkit()));
+            translatable("setting.lore", NamedTextColor.GRAY), player.getBukkit()));
   }
 
   @Override

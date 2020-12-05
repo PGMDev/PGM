@@ -15,8 +15,6 @@ import tc.oc.pgm.menu.InventoryMenu;
 import tc.oc.pgm.menu.InventoryMenuItem;
 import tc.oc.pgm.util.text.TextTranslations;
 
-import static net.kyori.adventure.text.Component.translatable;
-
 public class FlySpeedTool implements InventoryMenuItem {
 
   private static final String TRANSLATION_KEY = "setting.flyspeed.";
