@@ -464,39 +464,34 @@ public abstract class FilterParser {
   public LocationQueryModifier parseOffsetFilter(Element el) throws InvalidXMLException {
     String value = el.getAttributeValue("location");
     // Check vector format
-    XMLUtils.parseVector(new Node(el), value.replaceAll("[\\^~]", ""));
+    Vector vector = XMLUtils.parseVector(new Node(el), value.replaceAll("[\\^~]", ""));
 
     String[] coords = value.split("\\s*,\\s*");
 
+    boolean[] relative = new boolean[3];
+
     Boolean local = null;
-    for (String coord : coords) {
+    for (int i = 0; i < coords.length; i++) {
+      String coord = coords[i];
+
       if (local == null) {
         local = coord.startsWith("^");
       }
 
       if (coord.startsWith("^") != local)
         throw new InvalidXMLException("Cannot mix world & local coordinates", el);
+
+      relative[i] = coord.startsWith("~");
+
     }
 
     if (local == null) throw new InvalidXMLException("No coordinates provided", el);
 
     if (local) {
-      double x = Double.parseDouble(coords[0].substring(1));
-      double y = Double.parseDouble(coords[1].substring(1));
-      double z = Double.parseDouble(coords[2].substring(1));
-      return new LocalLocationQueryModifier(parseChild(el), new Vector(x, y, z));
+      return new LocalLocationQueryModifier(parseChild(el), vector);
     } else {
-      boolean[] relative = new boolean[3];
-      double[] coordinates = new double[3];
-      for (int i = 0; i < coords.length; i++) {
-        String coord = coords[i];
-        boolean isRelative = coord.startsWith("~");
-        relative[i] = isRelative;
-        coordinates[i] = Double.parseDouble(isRelative ? coord.substring(1) : coord);
-      }
-
       return new WorldLocationQueryModifier(
-          parseChild(el), new Vector(coordinates[0], coordinates[1], coordinates[2]), relative);
+          parseChild(el), vector, relative);
     }
   }
 }
