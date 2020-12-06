@@ -207,7 +207,7 @@ public interface NMSHacks {
     return ENTITY_IDS.decrementAndGet();
   }
 
-  static class EntityMetadata {
+  class EntityMetadata {
     public final DataWatcher dataWatcher;
 
     public EntityMetadata(DataWatcher watcher) {
@@ -233,37 +233,12 @@ public interface NMSHacks {
     }
   }
 
-  static EntityMetadata createBossMetadata(String name, float health) {
-    EntityMetadata data = createEntityMetadata();
-    setEntityMetadata(data, (byte) 0x20, (short) 300);
-    setLivingEntityMetadata(data, health, Color.BLACK, false, (byte) 0, name, true, true);
-    return data;
-  }
-
-  static EntityMetadata createWitherMetadata(String name, float health) {
-    EntityMetadata data = createBossMetadata(name, health);
-    DataWatcher watcher = data.dataWatcher;
-    watcher.a(20, 890); // Invulnerability countdown
-    return data;
-  }
-
-  static void spawnWither(
-      Player player, int entityId, Location location, String name, float health) {
-    EntityMetadata data = createWitherMetadata(name, health);
-    spawnLivingEntity(player, EntityType.WITHER, entityId, location, data);
-  }
-
   static Packet destroyEntitiesPacket(int... entityIds) {
     return new PacketPlayOutEntityDestroy(entityIds);
   }
 
   static void destroyEntities(Player player, int... entityIds) {
     sendPacket(player, destroyEntitiesPacket(entityIds));
-  }
-
-  static void updateBoss(Player player, int entityId, String name, float health) {
-    EntityMetadata data = createBossMetadata(name, health);
-    sendPacket(player, new PacketPlayOutEntityMetadata(entityId, data.dataWatcher, true));
   }
 
   static Packet spawnPlayerPacket(int entityId, UUID uuid, Location location, Player player) {
@@ -364,10 +339,6 @@ public interface NMSHacks {
         true); // On Ground + Height Correction
   }
 
-  static void teleportEntity(Player player, int entityId, Location location) {
-    sendPacket(player, teleportEntityPacket(entityId, location));
-  }
-
   static Packet entityMetadataPacket(int entityId, Entity entity, boolean complete) {
     return new PacketPlayOutEntityMetadata(
         entityId,
@@ -400,25 +371,6 @@ public interface NMSHacks {
     if (eatingOrBlocking) flags |= 0x10;
     if (invisible) flags |= 0x20;
     setEntityMetadata(metadata, (byte) flags, air);
-  }
-
-  static void setLivingEntityMetadata(
-      EntityMetadata metadata,
-      float health,
-      Color potionEffectColor,
-      boolean potionEffectAmbient,
-      byte arrowCount,
-      String name,
-      boolean showName,
-      boolean noAI) {
-    DataWatcher dataWatcher = metadata.dataWatcher;
-    dataWatcher.a(6, (float) health);
-    dataWatcher.a(7, (int) potionEffectColor.asRGB());
-    dataWatcher.a(8, (byte) (potionEffectAmbient ? 1 : 0));
-    dataWatcher.a(9, (byte) arrowCount);
-    dataWatcher.a(2, name);
-    dataWatcher.a(3, (byte) (showName ? 1 : 0));
-    dataWatcher.a(15, (byte) (noAI ? 1 : 0));
   }
 
   static void setArmorStandFlags(
@@ -634,10 +586,6 @@ public interface NMSHacks {
   }
 
   class FakeZombie extends FakeLivingEntity<EntityZombie> {
-
-    public FakeZombie(World world, boolean invisible) {
-      this(world, invisible, false);
-    }
 
     public FakeZombie(World world, boolean invisible, boolean baby) {
       super(new EntityZombie(((CraftWorld) world).getHandle()));

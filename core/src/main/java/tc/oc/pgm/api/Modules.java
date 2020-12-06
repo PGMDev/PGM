@@ -13,7 +13,6 @@ import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.blitz.BlitzModule;
 import tc.oc.pgm.blockdrops.BlockDropsMatchModule;
 import tc.oc.pgm.blockdrops.BlockDropsModule;
-import tc.oc.pgm.bossbar.BossBarMatchModule;
 import tc.oc.pgm.broadcast.BroadcastMatchModule;
 import tc.oc.pgm.broadcast.BroadcastModule;
 import tc.oc.pgm.classes.ClassMatchModule;
@@ -144,7 +143,6 @@ public interface Modules {
 
   static void registerAll() {
     // MatchModules that are always created
-    register(BossBarMatchModule.class, BossBarMatchModule::new);
     register(EventFilterMatchModule.class, EventFilterMatchModule::new);
     register(MultiTradeMatchModule.class, MultiTradeMatchModule::new);
     register(DeathMessageMatchModule.class, DeathMessageMatchModule::new);

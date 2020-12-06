@@ -5,6 +5,8 @@ import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 
 import java.util.Collection;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.sound.Sound;
@@ -42,6 +44,11 @@ public interface Audience extends ForwardingAudience.Single {
   /** Makes a single audience from a group of audiences */
   static Audience get(Iterable<? extends net.kyori.adventure.audience.Audience> audiences) {
     return () -> net.kyori.adventure.audience.Audience.audience(audiences);
+  }
+
+  /** Filter out an audience from a group of audiences */
+  static <T extends Audience> Audience filter(Predicate<T> filter, Collection<T> audiences) {
+    return get(audiences.stream().filter(filter).collect(Collectors.toList()));
   }
 
   static Audience empty() {
