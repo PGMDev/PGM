@@ -462,7 +462,8 @@ public abstract class FilterParser {
 
   @MethodParser("offset")
   public LocationQueryModifier parseOffsetFilter(Element el) throws InvalidXMLException {
-    String value = el.getAttributeValue("location");
+    String value = el.getAttributeValue("vector");
+    if (value == null) throw new InvalidXMLException("No vector provided", el);
     // Check vector format
     Vector vector = XMLUtils.parseVector(new Node(el), value.replaceAll("[\\^~]", ""));
 
@@ -482,7 +483,6 @@ public abstract class FilterParser {
         throw new InvalidXMLException("Cannot mix world & local coordinates", el);
 
       relative[i] = coord.startsWith("~");
-
     }
 
     if (local == null) throw new InvalidXMLException("No coordinates provided", el);
@@ -490,8 +490,7 @@ public abstract class FilterParser {
     if (local) {
       return new LocalLocationQueryModifier(parseChild(el), vector);
     } else {
-      return new WorldLocationQueryModifier(
-          parseChild(el), vector, relative);
+      return new WorldLocationQueryModifier(parseChild(el), vector, relative);
     }
   }
 }
