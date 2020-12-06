@@ -1,8 +1,8 @@
 package tc.oc.pgm.start;
 
+import static net.kyori.adventure.bossbar.BossBar.bossBar;
 import static net.kyori.adventure.text.Component.empty;
 
-import com.google.common.collect.ImmutableList;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,9 +11,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.api.Config;
@@ -25,44 +25,21 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
-import tc.oc.pgm.bossbar.BossBarMatchModule;
 import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.countdowns.SingleCountdownContext;
 import tc.oc.pgm.cycle.CycleMatchModule;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerLeaveMatchEvent;
-import tc.oc.pgm.util.bossbar.DynamicBossBar;
 
 @ListenerScope(MatchScope.LOADED)
 public class StartMatchModule implements MatchModule, Listener {
 
   public static class Factory implements MatchModuleFactory<StartMatchModule> {
-    @Override
-    public Collection<Class<? extends MatchModule>> getSoftDependencies() {
-      return ImmutableList.of(BossBarMatchModule.class);
-    }
 
     @Override
     public StartMatchModule createMatchModule(Match match) throws ModuleLoadException {
       return new StartMatchModule(match);
-    }
-  }
-
-  class UnreadyBar extends DynamicBossBar {
-    @Override
-    public boolean isVisible(Player viewer) {
-      return !match.isRunning() && !unreadyReasons.isEmpty();
-    }
-
-    @Override
-    public Component getText(Player viewer) {
-      return formatUnreadyReason();
-    }
-
-    @Override
-    public float getMeter(Player viewer) {
-      return 1f;
     }
   }
 
@@ -89,29 +66,24 @@ public class StartMatchModule implements MatchModule, Listener {
   }
 
   protected final Match match;
-  protected final UnreadyBar unreadyBar;
+  protected final BossBar unreadyBar;
   protected final Set<UnreadyReason> unreadyReasons = new HashSet<>();
-  protected BossBarMatchModule bbmm;
   protected boolean autoStart; // Initialized from config, but is mutable
 
   private StartMatchModule(Match match) {
     this.match = match;
-    this.unreadyBar = new UnreadyBar();
+    this.unreadyBar = bossBar(Component.empty(), 1, BossBar.Color.PURPLE, BossBar.Overlay.PROGRESS);
     this.autoStart = !PGM.get().getConfiguration().getStartTime().isNegative();
   }
 
   @Override
   public void load() {
-    if (bbmm == null) {
-      bbmm = match.needModule(BossBarMatchModule.class);
-    }
-    bbmm.pushBossBar(unreadyBar);
     update();
   }
 
   @EventHandler
   public void onCommit(MatchStartEvent event) {
-    bbmm.removeBossBar(unreadyBar);
+    match.hideBossBar(unreadyBar);
     unreadyReasons.clear();
   }
 
@@ -135,9 +107,9 @@ public class StartMatchModule implements MatchModule, Listener {
     }
   }
 
-  public @Nullable Component formatUnreadyReason() {
+  public Component formatUnreadyReason() {
     if (unreadyReasons.isEmpty()) {
-      return null;
+      return empty();
     } else {
       return unreadyReasons.iterator().next().getReason().color(NamedTextColor.RED);
     }
@@ -280,14 +252,22 @@ public class StartMatchModule implements MatchModule, Listener {
       cancelCountdown();
     }
 
+    unreadyBar.name(formatUnreadyReason());
+
+    if (!ready) {
+      match.showBossBar(unreadyBar);
+    }
+    // adventure closes this.... when leaving, concurrent exception
+    else {
+      match.hideBossBar(unreadyBar);
+    }
+
     final UnreadyTimeout timeout = cc().getCountdown(UnreadyTimeout.class);
     if (timeout == null && !ready && !empty) {
       startUnreadyTimeout();
     } else if (timeout != null && (ready || empty)) {
       cancelUnreadyTimeout();
     }
-
-    unreadyBar.invalidate();
   }
 
   @EventHandler
