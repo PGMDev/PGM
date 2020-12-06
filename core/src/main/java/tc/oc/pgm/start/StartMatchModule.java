@@ -254,7 +254,7 @@ public class StartMatchModule implements MatchModule, Listener {
 
     unreadyBar.name(formatUnreadyReason());
 
-    if (!ready) {
+    if (!ready && isAutoStart()) {
       match.showBossBar(unreadyBar);
     }
     // adventure closes this.... when leaving, concurrent exception
