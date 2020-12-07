@@ -257,8 +257,7 @@ public class StartMatchModule implements MatchModule, Listener {
     if (!ready && isAutoStart()) {
       match.showBossBar(unreadyBar);
     }
-    // adventure closes this.... when leaving, concurrent exception
-    else {
+    else if (!empty) {
       match.hideBossBar(unreadyBar);
     }
 
