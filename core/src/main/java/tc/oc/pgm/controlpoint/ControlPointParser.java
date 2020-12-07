@@ -50,7 +50,7 @@ public abstract class ControlPointParser {
     Filter playerFilter = filterParser.parseFilterProperty(elControlPoint, "player-filter");
 
     Filter visualMaterials;
-    List<Filter> filters = filterParser.parseFiltersProperty(elControlPoint, "visual-world");
+    List<Filter> filters = filterParser.parseFiltersProperty(elControlPoint, "visual-materials");
     if (filters.isEmpty()) {
       visualMaterials = VISUAL_MATERIALS;
     } else {
