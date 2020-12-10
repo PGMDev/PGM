@@ -11,12 +11,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.util.chat.Sound;
+import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
 public class ProximityAlarm implements Listener {
   private static final long MESSAGE_INTERVAL = 5000;
@@ -37,7 +37,7 @@ public class ProximityAlarm implements Listener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onPlayerMove(final CoarsePlayerMoveEvent event) {
+  public void onPlayerMove(final PlayerCoarseMoveEvent event) {
     updatePlayer(this.match.getPlayer(event.getPlayer()), event.getTo());
   }
 

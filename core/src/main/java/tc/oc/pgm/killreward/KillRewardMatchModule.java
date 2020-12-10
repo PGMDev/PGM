@@ -17,7 +17,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
-import tc.oc.pgm.api.event.PlayerItemTransferEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -29,6 +28,8 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.filters.query.DamageQuery;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
+import tc.oc.pgm.util.event.ItemTransferEvent;
+import tc.oc.pgm.util.event.PlayerItemTransferEvent;
 
 @ListenerScope(MatchScope.RUNNING)
 public class KillRewardMatchModule implements MatchModule, Listener {
@@ -77,12 +78,10 @@ public class KillRewardMatchModule implements MatchModule, Listener {
         PlayerItemTransferEvent event =
             new PlayerItemTransferEvent(
                 null,
-                PlayerItemTransferEvent.Type.PLUGIN,
+                ItemTransferEvent.Reason.PLUGIN,
                 killer.getBukkit(),
                 null,
-                null,
                 killer.getBukkit().getInventory(),
-                null,
                 clone,
                 null,
                 clone.getAmount(),

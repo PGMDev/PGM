@@ -379,7 +379,7 @@ public class BlockTransformListener implements Listener {
       if (block.getType() != Material.TNT) {
         // Don't cancel the explosion when individual blocks are cancelled
         callEvent(event, block.getState(), BlockStates.toAir(block), playerState)
-            .setPropagateCancel(false);
+            .setPropagate(false);
       }
     }
   }
@@ -552,10 +552,12 @@ public class BlockTransformListener implements Listener {
   public void processCancelMessage(final BlockTransformEvent event) {
     if (event instanceof PlayerBlockTransformEvent
         && event.isCancelled()
-        && event.getCancelMessage() != null
+        && event.getCancellationReason() != null
         && event.isManual()) {
 
-      ((PlayerBlockTransformEvent) event).getPlayerState().sendWarning(event.getCancelMessage());
+      ((PlayerBlockTransformEvent) event)
+          .getPlayerState()
+          .sendWarning(event.getCancellationReason());
     }
   }
 

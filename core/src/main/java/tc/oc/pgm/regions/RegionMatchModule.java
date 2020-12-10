@@ -31,8 +31,6 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.event.BlockTransformEvent;
-import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
-import tc.oc.pgm.api.event.GeneralizingEvent;
 import tc.oc.pgm.api.filter.Filter.QueryResponse;
 import tc.oc.pgm.api.filter.query.BlockQuery;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
@@ -51,6 +49,8 @@ import tc.oc.pgm.flag.event.FlagPickupEvent;
 import tc.oc.pgm.util.MatchPlayers;
 import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.event.GeneralizedEvent;
+import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
 @ListenerScope(MatchScope.LOADED)
 public class RegionMatchModule implements MatchModule, Listener {
@@ -109,7 +109,7 @@ public class RegionMatchModule implements MatchModule, Listener {
   }
 
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-  public void checkEnterLeave(final CoarsePlayerMoveEvent event) {
+  public void checkEnterLeave(final PlayerCoarseMoveEvent event) {
     this.checkEnterLeave(
         event, this.match.getPlayer(event.getPlayer()), event.getBlockFrom(), event.getBlockTo());
   }
@@ -121,7 +121,7 @@ public class RegionMatchModule implements MatchModule, Listener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void applyEffects(final CoarsePlayerMoveEvent event) {
+  public void applyEffects(final PlayerCoarseMoveEvent event) {
     MatchPlayer player = this.match.getPlayer(event.getPlayer());
     if (player == null) return;
 
@@ -432,8 +432,8 @@ public class RegionMatchModule implements MatchModule, Listener {
         return true;
 
       case DENY:
-        if (query.getEvent() instanceof GeneralizingEvent) {
-          ((GeneralizingEvent) query.getEvent()).setCancelled(true, rfa.message);
+        if (query.getEvent() instanceof GeneralizedEvent) {
+          ((GeneralizedEvent) query.getEvent()).setCancelled(rfa.message);
         } else if (query.getEvent() instanceof Cancellable) {
           ((Cancellable) query.getEvent()).setCancelled(true);
         }

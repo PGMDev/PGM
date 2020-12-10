@@ -37,7 +37,6 @@ import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.world.PortalCreateEvent;
-import tc.oc.pgm.api.event.AdventureModeInteractEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -46,6 +45,7 @@ import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.event.ObserverInteractEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerBlockTransformEvent;
+import tc.oc.pgm.util.event.PlayerBlockEvent;
 
 /**
  * Listens to many events at low priority and cancels them if the actor is not allowed to interact
@@ -282,7 +282,7 @@ public class EventFilterMatchModule implements MatchModule, Listener {
   }
 
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-  public void onAdventureModeInteract(final AdventureModeInteractEvent event) {
+  public void onAdventureModeInteract(final PlayerBlockEvent event) {
     cancelUnlessInteracting(event, event.getActor());
   }
 

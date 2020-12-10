@@ -10,7 +10,6 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
@@ -18,6 +17,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
+import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
 public class Spawner implements Listener, Tickable {
 
@@ -101,7 +101,7 @@ public class Spawner implements Listener, Tickable {
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
-  public void onPlayerMove(CoarsePlayerMoveEvent event) {
+  public void onPlayerMove(PlayerCoarseMoveEvent event) {
     final MatchPlayer player = match.getParticipant(event.getPlayer());
     if (player == null) return;
     if (definition.playerRegion.contains(event.getPlayer())) {

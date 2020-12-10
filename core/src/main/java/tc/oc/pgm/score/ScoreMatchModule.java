@@ -23,8 +23,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
-import tc.oc.pgm.api.event.PlayerItemTransferEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -38,6 +36,8 @@ import tc.oc.pgm.events.PlayerParticipationStartEvent;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
 import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
+import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
+import tc.oc.pgm.util.event.PlayerItemTransferEvent;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -207,7 +207,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void playerEnterBox(CoarsePlayerMoveEvent event) {
+  public void playerEnterBox(PlayerCoarseMoveEvent event) {
     MatchPlayer player = this.match.getPlayer(event.getPlayer());
     if (player == null || !player.canInteract() || player.getBukkit().isDead()) return;
 

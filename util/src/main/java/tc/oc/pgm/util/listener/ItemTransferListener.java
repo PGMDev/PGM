@@ -1,4 +1,4 @@
-package tc.oc.pgm.listeners;
+package tc.oc.pgm.util.listener;
 
 import java.util.Map;
 import org.bukkit.Bukkit;
@@ -13,58 +13,17 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.*;
-import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.event.ItemTransferEvent;
-import tc.oc.pgm.api.event.PlayerItemTransferEvent;
+import tc.oc.pgm.util.event.ItemTransferEvent;
+import tc.oc.pgm.util.event.PlayerItemTransferEvent;
 
+/** A listener that calls {@link ItemTransferEvent} and {@link PlayerItemTransferEvent}. */
 public class ItemTransferListener implements Listener {
   // Track players dropping an item stack from within an inventory GUI
   private boolean ignoreNextDropEvent;
   private boolean collectToCursor;
 
-  private Inventory getLocalInventory(InventoryView view, int rawSlot) {
-    int cookedSlot = view.convertSlot(rawSlot);
-    if (cookedSlot == rawSlot) {
-      return view.getTopInventory();
-    } else {
-      return view.getBottomInventory();
-    }
-  }
-
-  private static Inventory getOtherInventory(InventoryView view, Inventory inventory) {
-    if (view.getTopInventory() == inventory) {
-      return view.getBottomInventory();
-    } else {
-      return view.getTopInventory();
-    }
-  }
-
-  private static int getQuantityPlaceable(ItemStack stack, Inventory inventory) {
-    int transferrable = 0;
-    for (ItemStack slotStack : inventory.getContents()) {
-      if (slotStack == null) {
-        return stack.getAmount();
-      } else if (slotStack.isSimilar(stack)) {
-        transferrable += stack.getMaxStackSize() - slotStack.getAmount();
-        if (transferrable >= stack.getAmount()) {
-          return stack.getAmount();
-        }
-      }
-    }
-    return transferrable;
-  }
-
-  private void dropFromPlayer(Player player, ItemStack stack) {
-    Item entity = player.getWorld().dropItem(player.getEyeLocation(), stack);
-    entity.setVelocity(player.getLocation().getDirection().multiply(0.3));
-  }
-
-  private void callEvent(ItemTransferEvent event) {
-    Bukkit.getPluginManager().callEvent(event);
-  }
-
   @EventHandler
-  public void onPlayerPickupItem(PlayerPickupItemEvent event) {
+  public void onPlayerPickupItem(final PlayerPickupItemEvent event) {
     // When this event is fired, the ItemStack in the Item being picked up is temporarily
     // set to the amount that will actually be picked up, while the difference from the
     // actual amount in the stack is available from getRemaining(). When the event returns,
@@ -75,18 +34,16 @@ public class ItemTransferListener implements Listener {
     PlayerItemTransferEvent transferEvent =
         new PlayerItemTransferEvent(
             event,
-            ItemTransferEvent.Type.PICKUP,
+            ItemTransferEvent.Reason.PICKUP,
             event.getPlayer(),
             null,
-            null,
             event.getPlayer().getInventory(),
-            null,
             event.getItem().getItemStack(),
             event.getItem(),
             initialQuantity,
             event.getPlayer().getOpenInventory().getCursor());
 
-    this.callEvent(transferEvent);
+    callEvent(transferEvent);
 
     int quantity = Math.min(transferEvent.getQuantity(), initialQuantity);
 
@@ -106,22 +63,20 @@ public class ItemTransferListener implements Listener {
   }
 
   @EventHandler
-  public void onBlockPickupItem(InventoryPickupItemEvent event) {
+  public void onBlockPickupItem(final InventoryPickupItemEvent event) {
     int initialQuantity =
         getQuantityPlaceable(event.getItem().getItemStack(), event.getInventory());
     ItemTransferEvent transferEvent =
         new ItemTransferEvent(
             event,
-            ItemTransferEvent.Type.PICKUP,
-            null,
+            ItemTransferEvent.Reason.PICKUP,
             null,
             event.getInventory(),
-            null,
             event.getItem().getItemStack(),
             event.getItem(),
             initialQuantity);
 
-    this.callEvent(transferEvent);
+    callEvent(transferEvent);
 
     if (initialQuantity != transferEvent.getQuantity() && !event.isCancelled()) {
       event.setCancelled(true);
@@ -134,7 +89,7 @@ public class ItemTransferListener implements Listener {
   }
 
   @EventHandler
-  public void onPlayerClickInventory(InventoryClickEvent event) {
+  public void onPlayerClickInventory(final InventoryClickEvent event) {
     // Ignored actions
     switch (event.getAction()) {
       case CLONE_STACK: // Out of scope
@@ -152,16 +107,14 @@ public class ItemTransferListener implements Listener {
     Player player = (Player) event.getWhoClicked();
 
     // In a dual-inventory view, InventoryClickEvent.getInventory() always returns the top
-    // inventory,
-    // so to figure out which one was actually clicked, we compare the view slot with the inv slot.
-    // If they are the same, the click is in the top inv, because it is always mapped to view slot
-    // 0.
-    // Otherwise, the click is in the bottom inv. This is the Bukkit recommended way to do this.
+    // inventory, so to figure out which one was actually clicked, we compare the view
+    // slot with the inv slot. If they are the same, the click is in the top inv, because
+    // it is always mapped to view slot 0. Otherwise, the click is in the bottom inv.
+    // This is the Bukkit recommended way to do this.
     Inventory inventory = getLocalInventory(event.getView(), event.getRawSlot());
 
     if (event.getAction() == InventoryAction.SWAP_WITH_CURSOR) {
-      // Click on a stack while already holding a stack, fire two events for the stacks being
-      // swapped
+      // Click on a stack while holding a stack, fire 2 events for the stacks being swapped
       if (inventory.getHolder() == player) {
         // Swap with own inventory is not a transfer
         return;
@@ -173,11 +126,9 @@ public class ItemTransferListener implements Listener {
       PlayerItemTransferEvent transferEvent =
           new PlayerItemTransferEvent(
               event,
-              ItemTransferEvent.Type.TAKE,
+              ItemTransferEvent.Reason.TAKE,
               player,
               inventory,
-              event.getSlot(),
-              null,
               null,
               event.getCurrentItem(),
               null,
@@ -194,12 +145,10 @@ public class ItemTransferListener implements Listener {
       transferEvent =
           new PlayerItemTransferEvent(
               event,
-              ItemTransferEvent.Type.PLACE,
+              ItemTransferEvent.Reason.PLACE,
               player,
               null,
-              null,
               inventory,
-              event.getSlot(),
               event.getCursor(),
               null,
               event.getCursor().getAmount(),
@@ -213,11 +162,9 @@ public class ItemTransferListener implements Listener {
     }
 
     // The remaining actions will generate one event at most
-    ItemTransferEvent.Type type;
+    ItemTransferEvent.Reason type;
     Inventory fromInventory = null;
-    Integer fromSlot = null;
     Inventory toInventory = null;
-    Integer toSlot = null;
     ItemStack itemStack;
 
     // Determine inv, slot, and stack
@@ -230,10 +177,9 @@ public class ItemTransferListener implements Listener {
           // Taking from own inventory is not a transfer
           return;
         }
-        type = ItemTransferEvent.Type.TAKE;
+        type = ItemTransferEvent.Reason.TAKE;
         itemStack = event.getCurrentItem();
         fromInventory = inventory;
-        fromSlot = event.getSlot();
         break;
 
       case PLACE_ALL:
@@ -243,30 +189,27 @@ public class ItemTransferListener implements Listener {
           // Placing in own inventory is not a transfer
           return;
         }
-        type = ItemTransferEvent.Type.PLACE;
+        type = ItemTransferEvent.Reason.PLACE;
         itemStack = event.getCursor();
         toInventory = inventory;
-        toSlot = event.getSlot();
         break;
 
       case DROP_ONE_SLOT:
       case DROP_ALL_SLOT:
-        type = ItemTransferEvent.Type.DROP;
+        type = ItemTransferEvent.Reason.DROP;
         itemStack = event.getCurrentItem();
         fromInventory = inventory;
-        fromSlot = event.getSlot();
         break;
 
       case DROP_ONE_CURSOR:
       case DROP_ALL_CURSOR:
-        type = ItemTransferEvent.Type.DROP;
+        type = ItemTransferEvent.Reason.DROP;
         itemStack = event.getCursor();
         break;
 
       case MOVE_TO_OTHER_INVENTORY:
         itemStack = event.getCurrentItem();
         fromInventory = inventory;
-        fromSlot = event.getSlot();
         toInventory = getOtherInventory(event.getView(), fromInventory);
 
         if (toInventory == null || fromInventory.getHolder() == toInventory.getHolder()) {
@@ -275,11 +218,11 @@ public class ItemTransferListener implements Listener {
         }
 
         if (fromInventory.getHolder() == player && toInventory.getHolder() != player) {
-          type = ItemTransferEvent.Type.PLACE;
+          type = ItemTransferEvent.Reason.PLACE;
         } else if (fromInventory.getHolder() != player && toInventory.getHolder() == player) {
-          type = ItemTransferEvent.Type.TAKE;
+          type = ItemTransferEvent.Reason.TAKE;
         } else {
-          type = ItemTransferEvent.Type.TRANSFER;
+          type = ItemTransferEvent.Reason.TRANSFER;
         }
         break;
 
@@ -295,31 +238,24 @@ public class ItemTransferListener implements Listener {
         }
         if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR) {
           // Moving an item onto the hotbar
-          type = ItemTransferEvent.Type.TAKE;
+          type = ItemTransferEvent.Reason.TAKE;
           itemStack = event.getCurrentItem();
           fromInventory = inventory;
-          fromSlot = event.getSlot();
           toInventory = player.getInventory();
-          toSlot = event.getHotbarButton();
         } else {
           itemStack = player.getInventory().getItem(event.getHotbarButton());
           if (itemStack == null || itemStack.getType() == Material.AIR) {
             return;
           }
           // Moving an item out of the hotbar
-          type = ItemTransferEvent.Type.PLACE;
+          type = ItemTransferEvent.Reason.PLACE;
           fromInventory = player.getInventory();
-          fromSlot = event.getHotbarButton();
           toInventory = inventory;
-          toSlot = event.getSlot();
         }
         break;
 
       default:
-        PGM.get()
-            .getLogger()
-            .warning(
-                "ItemTransferListener.onPlayerClickItem: Unhandled action " + event.getAction());
+        // TODO: add logger warning
         return;
     }
 
@@ -384,14 +320,13 @@ public class ItemTransferListener implements Listener {
             type,
             player,
             fromInventory,
-            fromSlot,
             toInventory,
-            toSlot,
             itemStack,
             null,
             initialQuantity,
             event.getCursor());
-    this.callEvent(transferEvent);
+
+    callEvent(transferEvent);
     int quantity = Math.min(transferEvent.getQuantity(), initialQuantity);
 
     if (quantity < initialQuantity) {
@@ -425,7 +360,6 @@ public class ItemTransferListener implements Listener {
               item = otherItem.clone();
               item.setAmount(quantity);
               event.setCurrentItem(item);
-              PGM.get().getLogger().info("Placing " + item + " in slot " + event.getRawSlot());
             } else {
               item.setAmount(item.getAmount() + quantity);
             }
@@ -439,7 +373,7 @@ public class ItemTransferListener implements Listener {
 
             item = otherItem.clone();
             item.setAmount(quantity);
-            this.dropFromPlayer(player, item);
+            dropFromPlayer(player, item);
             break;
 
           case DROP_ALL_SLOT:
@@ -449,7 +383,7 @@ public class ItemTransferListener implements Listener {
 
             item = item.clone();
             item.setAmount(quantity);
-            this.dropFromPlayer(player, item);
+            dropFromPlayer(player, item);
             break;
 
           case MOVE_TO_OTHER_INVENTORY:
@@ -517,17 +451,15 @@ public class ItemTransferListener implements Listener {
       PlayerItemTransferEvent transferEvent =
           new PlayerItemTransferEvent(
               event,
-              ItemTransferEvent.Type.DROP,
+              ItemTransferEvent.Reason.DROP,
               event.getPlayer(),
               event.getPlayer().getInventory(),
-              null,
-              null,
               null,
               stack,
               event.getItemDrop(),
               initialQuantity,
               event.getPlayer().getOpenInventory().getCursor());
-      this.callEvent(transferEvent);
+      callEvent(transferEvent);
 
       if (!transferEvent.isCancelled() && transferEvent.getQuantity() < initialQuantity) {
         int diff = initialQuantity - transferEvent.getQuantity();
@@ -592,17 +524,15 @@ public class ItemTransferListener implements Listener {
               PlayerItemTransferEvent transferEvent =
                   new PlayerItemTransferEvent(
                       event,
-                      ItemTransferEvent.Type.TAKE,
+                      ItemTransferEvent.Reason.TAKE,
                       player,
                       localInventory,
-                      event.getView().convertSlot(rawSlot),
-                      null,
                       null,
                       stack,
                       null,
                       quantity,
                       cursor);
-              this.callEvent(transferEvent);
+              callEvent(transferEvent);
               if (transferEvent.isCancelled()) {
                 // If the event is cancelled, don't transfer from this slot
                 quantity = 0;
@@ -655,18 +585,16 @@ public class ItemTransferListener implements Listener {
       PlayerItemTransferEvent transferEvent =
           new PlayerItemTransferEvent(
               event,
-              ItemTransferEvent.Type.PLACE,
+              ItemTransferEvent.Reason.PLACE,
               player,
               null,
-              null,
               externalInventory,
-              null,
               transferred,
               null,
               initialQuantity,
               event.getOldCursor());
 
-      this.callEvent(transferEvent);
+      callEvent(transferEvent);
 
       if (initialQuantity != transferEvent.getQuantity()) {
         // If the quantity changes, we have to cancel the entire drag,
@@ -674,5 +602,46 @@ public class ItemTransferListener implements Listener {
         event.setCancelled(true);
       }
     }
+  }
+
+  private static void callEvent(final ItemTransferEvent event) {
+    Bukkit.getPluginManager().callEvent(event);
+  }
+
+  private static void dropFromPlayer(final Player player, final ItemStack stack) {
+    final Item entity = player.getWorld().dropItem(player.getEyeLocation(), stack);
+    entity.setVelocity(player.getLocation().getDirection().multiply(0.3));
+  }
+
+  private static Inventory getLocalInventory(final InventoryView view, final int rawSlot) {
+    final int cookedSlot = view.convertSlot(rawSlot);
+    if (cookedSlot == rawSlot) {
+      return view.getTopInventory();
+    } else {
+      return view.getBottomInventory();
+    }
+  }
+
+  private static Inventory getOtherInventory(final InventoryView view, final Inventory inventory) {
+    if (view.getTopInventory() == inventory) {
+      return view.getBottomInventory();
+    } else {
+      return view.getTopInventory();
+    }
+  }
+
+  private static int getQuantityPlaceable(final ItemStack stack, final Inventory inventory) {
+    int transferrable = 0;
+    for (ItemStack slotStack : inventory.getContents()) {
+      if (slotStack == null) {
+        return stack.getAmount();
+      } else if (slotStack.isSimilar(stack)) {
+        transferrable += stack.getMaxStackSize() - slotStack.getAmount();
+        if (transferrable >= stack.getAmount()) {
+          return stack.getAmount();
+        }
+      }
+    }
+    return transferrable;
   }
 }

@@ -12,7 +12,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.inventory.ItemStack;
-import tc.oc.pgm.api.event.PlayerItemTransferEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
@@ -26,6 +25,7 @@ import tc.oc.pgm.kits.ApplyKitEvent;
 import tc.oc.pgm.kits.ArmorKit;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.event.PlayerItemTransferEvent;
 import tc.oc.pgm.util.named.NameStyle;
 
 public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
@@ -122,7 +122,7 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onItemTransfer(PlayerItemTransferEvent event) {
-    if (event.isAcquiring()) handleWoolAcquisition(event.getPlayer(), event.getItemStack());
+    if (event.isAcquiring()) handleWoolAcquisition(event.getPlayer(), event.getItem());
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

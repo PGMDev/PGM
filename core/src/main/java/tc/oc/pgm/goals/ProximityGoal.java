@@ -9,7 +9,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
@@ -24,6 +23,7 @@ import tc.oc.pgm.goals.events.GoalTouchEvent;
 import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
+import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
 public abstract class ProximityGoal<T extends ProximityGoalDefinition> extends OwnedGoal<T>
     implements Listener {
@@ -179,7 +179,7 @@ public abstract class ProximityGoal<T extends ProximityGoalDefinition> extends O
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onPlayerMove(CoarsePlayerMoveEvent event) {
+  public void onPlayerMove(PlayerCoarseMoveEvent event) {
     MatchPlayer player = getMatch().getParticipant(event.getPlayer());
     if (player != null
         && getProximityMetricType(player.getCompetitor()) == ProximityMetric.Type.CLOSEST_PLAYER) {

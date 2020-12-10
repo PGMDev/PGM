@@ -13,15 +13,15 @@ import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
-import tc.oc.pgm.api.event.BlockPunchEvent;
-import tc.oc.pgm.api.event.BlockTrampleEvent;
-import tc.oc.pgm.api.event.GeneralizingEvent;
 import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.api.tracker.info.*;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ItemInfo;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
+import tc.oc.pgm.util.event.GeneralizedEvent;
+import tc.oc.pgm.util.event.PlayerPunchBlockEvent;
+import tc.oc.pgm.util.event.PlayerTrampleBlockEvent;
 
 public class CauseFilter extends TypedFilter<MatchQuery> {
 
@@ -75,8 +75,8 @@ public class CauseFilter extends TypedFilter<MatchQuery> {
 
   private boolean matches(MatchQuery query) {
     Event event = query.getEvent();
-    if (event instanceof GeneralizingEvent) {
-      event = ((GeneralizingEvent) event).getCause();
+    if (event instanceof GeneralizedEvent) {
+      event = ((GeneralizedEvent) event).getCause();
     }
 
     TrackerMatchModule tracker = query.getMatch().needModule(TrackerMatchModule.class);
@@ -117,10 +117,10 @@ public class CauseFilter extends TypedFilter<MatchQuery> {
 
         // Block actions
       case PUNCH:
-        return event instanceof BlockPunchEvent || punchDamage;
+        return event instanceof PlayerPunchBlockEvent || punchDamage;
 
       case TRAMPLE:
-        return event instanceof BlockTrampleEvent;
+        return event instanceof PlayerTrampleBlockEvent;
 
       case MINE:
         return event instanceof BlockDamageEvent

@@ -1,18 +1,15 @@
-package tc.oc.pgm.api.event;
+package tc.oc.pgm.util.event;
 
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-/**
- * Called when a {@link Player} tramples over a {@link Block}.
- *
- * @see AdventureModeInteractEvent
- */
-public class BlockTrampleEvent extends AdventureModeInteractEvent {
+/** An event when a {@link Player} tramples over a {@link Block}. */
+public class PlayerTrampleBlockEvent extends PlayerBlockEvent {
 
-  public BlockTrampleEvent(Player player, Block block) {
-    super(player, block);
+  public PlayerTrampleBlockEvent(final Event cause, final Player player, final Block block) {
+    super(cause, player, block);
   }
 
   private static final HandlerList handlers = new HandlerList();

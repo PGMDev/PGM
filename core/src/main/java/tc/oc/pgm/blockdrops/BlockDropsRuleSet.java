@@ -12,8 +12,6 @@ import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
-import tc.oc.pgm.api.event.BlockPunchEvent;
-import tc.oc.pgm.api.event.BlockTrampleEvent;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -21,6 +19,8 @@ import tc.oc.pgm.filters.query.MaterialQuery;
 import tc.oc.pgm.filters.query.Queries;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.util.block.BlockStates;
+import tc.oc.pgm.util.event.PlayerPunchBlockEvent;
+import tc.oc.pgm.util.event.PlayerTrampleBlockEvent;
 import tc.oc.pgm.util.nms.NMSHacks;
 
 public class BlockDropsRuleSet {
@@ -101,8 +101,8 @@ public class BlockDropsRuleSet {
     }
 
     for (BlockDropsRule rule : this.rules) {
-      if (event instanceof BlockPunchEvent && !rule.punch) continue;
-      if (event instanceof BlockTrampleEvent && !rule.trample) continue;
+      if (event instanceof PlayerPunchBlockEvent && !rule.punch) continue;
+      if (event instanceof PlayerTrampleBlockEvent && !rule.trample) continue;
       if (rule.region != null && !rule.region.contains(block)) continue;
 
       if (rule.filter != null) {

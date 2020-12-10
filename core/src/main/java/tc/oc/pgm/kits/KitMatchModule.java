@@ -17,7 +17,6 @@ import org.bukkit.event.player.PlayerItemBreakEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.event.ItemTransferEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -26,6 +25,7 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerResetEvent;
 import tc.oc.pgm.kits.tag.Grenade;
 import tc.oc.pgm.kits.tag.ItemTags;
+import tc.oc.pgm.util.event.ItemTransferEvent;
 
 @ListenerScope(MatchScope.RUNNING)
 public class KitMatchModule implements MatchModule, Listener {
@@ -175,8 +175,8 @@ public class KitMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void checkItemTransfer(ItemTransferEvent event) {
-    if (event.getType() == ItemTransferEvent.Type.PLACE
-        && ItemTags.PREVENT_SHARING.has(event.getItemStack())) {
+    if (event.getReason() == ItemTransferEvent.Reason.PLACE
+        && ItemTags.PREVENT_SHARING.has(event.getItem())) {
       event.setCancelled(true);
     }
   }

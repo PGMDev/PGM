@@ -49,8 +49,6 @@ import tc.oc.pgm.listeners.AntiGriefListener;
 import tc.oc.pgm.listeners.BlockTransformListener;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.listeners.FormattingListener;
-import tc.oc.pgm.listeners.GeneralizingListener;
-import tc.oc.pgm.listeners.ItemTransferListener;
 import tc.oc.pgm.listeners.MatchAnnouncer;
 import tc.oc.pgm.listeners.MotdListener;
 import tc.oc.pgm.listeners.PGMListener;
@@ -69,6 +67,9 @@ import tc.oc.pgm.rotation.RandomMapOrder;
 import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.pgm.util.FileUtils;
 import tc.oc.pgm.util.concurrent.BukkitExecutorService;
+import tc.oc.pgm.util.listener.ItemTransferListener;
+import tc.oc.pgm.util.listener.PlayerBlockListener;
+import tc.oc.pgm.util.listener.PlayerMoveListener;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextTranslations;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -328,16 +329,17 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   }
 
   private void registerListeners() {
+    registerEvents(new PlayerBlockListener());
+    registerEvents(new PlayerMoveListener());
+    registerEvents(new ItemTransferListener());
     new BlockTransformListener(this).registerEvents();
     registerEvents(matchManager);
     if (matchTabManager != null) registerEvents(matchTabManager);
     registerEvents(vanishManager);
     registerEvents(nameDecorationRegistry);
-    registerEvents(new GeneralizingListener(this));
     registerEvents(new PGMListener(this, matchManager, vanishManager));
     registerEvents(new FormattingListener());
     registerEvents(new AntiGriefListener(matchManager));
-    registerEvents(new ItemTransferListener());
     registerEvents(new RestartListener(this, matchManager));
     registerEvents(new WorldProblemListener(this));
     registerEvents(new MatchAnnouncer());

@@ -5,12 +5,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.time.Duration;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
-import tc.oc.pgm.api.event.ExtendedCancellable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.community.command.ModerationCommand.PunishmentType;
+import tc.oc.pgm.util.event.PreemptiveEvent;
 
 /** Called when a punishment command is run * */
-public class PlayerPunishmentEvent extends ExtendedCancellable {
+public class PlayerPunishmentEvent extends PreemptiveEvent {
 
   private final CommandSender sender;
   private final MatchPlayer player;

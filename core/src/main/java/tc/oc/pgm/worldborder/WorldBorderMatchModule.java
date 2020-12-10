@@ -14,7 +14,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerTeleportEvent;
-import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -25,6 +24,7 @@ import tc.oc.pgm.filters.query.MatchQuery;
 import tc.oc.pgm.goals.events.GoalEvent;
 import tc.oc.pgm.util.bukkit.WorldBorders;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
+import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
 @ListenerScope(MatchScope.LOADED)
 public class WorldBorderMatchModule implements MatchModule, Listener {
@@ -166,7 +166,7 @@ public class WorldBorderMatchModule implements MatchModule, Listener {
   }
 
   @EventHandler(priority = EventPriority.HIGH)
-  public void onPlayerMove(final CoarsePlayerMoveEvent event) {
+  public void onPlayerMove(final PlayerCoarseMoveEvent event) {
     MatchPlayer player = match.getPlayer(event.getPlayer());
     if (player != null && player.isObserving()) {
       Location location = event.getTo();

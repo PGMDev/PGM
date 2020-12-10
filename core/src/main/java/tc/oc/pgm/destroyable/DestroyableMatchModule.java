@@ -74,7 +74,7 @@ public class DestroyableMatchModule implements MatchModule, Listener {
               event.getNewState(),
               ParticipantBlockTransformEvent.getPlayerState(event));
       if (reasonKey != null) {
-        event.setCancelled(true, TranslatableComponent.of(reasonKey));
+        event.setCancelled(TranslatableComponent.of(reasonKey));
         return;
       }
     }

@@ -19,9 +19,10 @@ import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.material.MaterialData;
 import tc.oc.pgm.blockdrops.BlockDrops;
 import tc.oc.pgm.util.block.BlockStates;
+import tc.oc.pgm.util.event.GeneralizedEvent;
 
 /** Called when a {@link Block} transforms from one {@link BlockState} to another. */
-public class BlockTransformEvent extends GeneralizingEvent {
+public class BlockTransformEvent extends GeneralizedEvent {
 
   private final Block block;
   private final BlockState oldState;

@@ -96,8 +96,8 @@ public class ReportCommand {
     match.callEvent(event);
 
     if (event.isCancelled()) {
-      if (event.getCancelMessage() != null) {
-        sender.sendMessage(event.getCancelMessage());
+      if (event.getCancellationReason() != null) {
+        sender.sendMessage(event.getCancellationReason());
       }
       return;
     }
