@@ -258,7 +258,7 @@ public interface Config {
    *
    * @return length of death animation
    */
-  int getDeathAnimationLength();
+  int getDeathTicks();
 
   /**
    * Gets a group of players, used for prefixes and player sorting.
