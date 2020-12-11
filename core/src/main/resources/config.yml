@@ -65,6 +65,7 @@ join:
 gameplay:
   refill-wool: true # Should wool in wool rooms be automatically refilled?
   grief-score: -10 # Score under which players should be kept out of the match
+  death-ticks: 15 # Number of ticks the death animation should last
 
 # Toggles various user interfaces.
 ui:

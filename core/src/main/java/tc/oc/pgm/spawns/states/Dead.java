@@ -9,6 +9,7 @@ import net.kyori.text.format.TextColor;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinPartyEvent;
@@ -21,7 +22,7 @@ import tc.oc.pgm.util.nms.NMSHacks;
 
 /** Player is waiting to respawn after dying in-game */
 public class Dead extends Spawning {
-  private static final long CORPSE_ROT_TICKS = 15;
+  private static long CORPSE_ROT_TICKS;
 
   private final long deathTick;
   private boolean kitted, rotted;
@@ -32,6 +33,7 @@ public class Dead extends Spawning {
 
   public Dead(SpawnMatchModule smm, MatchPlayer player, long deathTick) {
     super(smm, player);
+    CORPSE_ROT_TICKS = PGM.get().getConfiguration().getDeathTicks();
     this.deathTick = deathTick;
   }
 
