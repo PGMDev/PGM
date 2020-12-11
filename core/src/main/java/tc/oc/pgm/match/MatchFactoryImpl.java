@@ -270,7 +270,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
               .createWorld(
                   creator
                       .environment(environments[info.getEnvironment()])
-                      .generator(info.hasTerrain() ? null : new NullChunkGenerator())
+                      .generator(info.hasTerrain() ? null : NullChunkGenerator.INSTANCE)
                       .seed(info.hasTerrain() ? info.getSeed() : creator.seed()));
       if (world == null) throw new IllegalStateException("Unable to load a null world");
 

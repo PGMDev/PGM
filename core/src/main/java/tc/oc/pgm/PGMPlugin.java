@@ -20,6 +20,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Listener;
+import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -66,6 +67,7 @@ import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.RandomMapOrder;
 import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.pgm.util.FileUtils;
+import tc.oc.pgm.util.chunk.NullChunkGenerator;
 import tc.oc.pgm.util.concurrent.BukkitExecutorService;
 import tc.oc.pgm.util.listener.ItemTransferListener;
 import tc.oc.pgm.util.listener.PlayerBlockListener;
@@ -255,6 +257,11 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     if (mapOrder != null) {
       mapOrder.reload();
     }
+  }
+
+  @Override
+  public ChunkGenerator getDefaultWorldGenerator(final String worldName, final String id) {
+    return NullChunkGenerator.INSTANCE;
   }
 
   @Override
