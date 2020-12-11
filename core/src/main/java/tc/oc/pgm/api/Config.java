@@ -254,6 +254,13 @@ public interface Config {
   int getGriefScore();
 
   /**
+   * Gets the length in ticks for how long the death animation is shown
+   *
+   * @return length of death animation
+   */
+  int getDeathAnimationLength();
+
+  /**
    * Gets a group of players, used for prefixes and player sorting.
    *
    * @return A list of groups.
