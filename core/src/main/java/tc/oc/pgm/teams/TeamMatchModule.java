@@ -35,8 +35,8 @@ import tc.oc.pgm.join.GenericJoinResult;
 import tc.oc.pgm.join.JoinHandler;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.join.JoinResult;
-import tc.oc.pgm.join.QueuedParticipants;
-import tc.oc.pgm.match.Observers;
+import tc.oc.pgm.match.ObserverParty;
+import tc.oc.pgm.match.QueuedParty;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
@@ -154,13 +154,13 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     if (match.isRunning()) return;
 
     final int playersQueued =
-        match.needModule(JoinMatchModule.class).getQueuedParticipants().getPlayers().size();
+        match.needModule(JoinMatchModule.class).getQueuedParticipants().getMembers().size();
     final int playersJoined = match.getParticipants().size();
 
     Team singleTeam = null;
     int teamNeeded = 0;
     for (Team t : teams) {
-      int p = t.getMinPlayers() - t.getPlayers().size();
+      int p = t.getMinPlayers() - t.getMembers().size();
       if (p > 0) {
         singleTeam = teamNeeded == 0 ? t : null;
         teamNeeded += p;
@@ -492,7 +492,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
   }
 
   @Override
-  public void queuedJoin(QueuedParticipants queue) {
+  public void queuedJoin(QueuedParty queue) {
     // First, eliminate any players who cannot join at all, so they do not influence the even teams
     // logic
     List<MatchPlayer> shortList = new ArrayList<>();
@@ -531,7 +531,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
     // Find all players who can be bumped
     List<MatchPlayer> kickable = new ArrayList<>();
-    for (MatchPlayer player : kickFrom.getPlayers()) {
+    for (MatchPlayer player : kickFrom.getMembers()) {
       if (!jmm.canPriorityKick(player) || (forBalance && isAutoJoin(player))) {
         // Premium players can be auto-balanced if they auto-joined
         kickable.add(player);
@@ -582,7 +582,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPartyChange(PlayerPartyChangeEvent event) {
     if (event.getNewParty() instanceof Team
-        || (event.getNewParty() instanceof Observers && event.getOldParty() != null)) {
+        || (event.getNewParty() instanceof ObserverParty && event.getOldParty() != null)) {
       event
           .getPlayer()
           .sendMessage(TranslatableComponent.of("join.ok.team", event.getNewParty().getName()));

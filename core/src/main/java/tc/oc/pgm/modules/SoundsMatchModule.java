@@ -44,7 +44,7 @@ public class SoundsMatchModule implements MatchModule, Listener {
   }
 
   private void playSound(Competitor competitor, Sound sound) {
-    competitor.getPlayers().forEach(player -> playSound(player, sound));
+    competitor.getMembers().forEach(player -> playSound(player, sound));
   }
 
   @EventHandler(priority = EventPriority.MONITOR)

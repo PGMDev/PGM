@@ -1,7 +1,10 @@
 package tc.oc.pgm.ffa;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.kyori.text.Component;
@@ -9,11 +12,10 @@ import net.kyori.text.TextComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.scoreboard.NameTagVisibility;
-import tc.oc.pgm.api.filter.query.PartyQuery;
-import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.filters.query.PartyQuery;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.chat.MultiAudience;
@@ -37,50 +39,41 @@ import tc.oc.pgm.util.text.types.PlayerComponent;
  */
 public class Tribute implements Competitor, MultiAudience {
 
-  public static final ChatColor TEXT_COLOR = ChatColor.YELLOW;
+  private final Match match;
+  private final FreeForAllMatchModule ffa;
 
-  protected final Match match;
-  protected final FreeForAllMatchModule ffa;
-  protected final UUID playerId;
-  protected final String username;
-  protected final ChatColor color;
-  protected final tc.oc.pgm.filters.query.PartyQuery query =
-      new tc.oc.pgm.filters.query.PartyQuery(null, this);
+  private final UUID id;
+  private final String username;
+  private final ChatColor chatColor;
+  private final Color color;
+  private final PartyQuery query;
 
   protected @Nullable MatchPlayer player;
-  protected Set<MatchPlayer> players = Collections.emptySet();
+  protected List<MatchPlayer> players = Collections.emptyList();
 
-  public Tribute(MatchPlayer player, @Nullable ChatColor color) {
+  public Tribute(final MatchPlayer player, final @Nullable ChatColor color) {
     this.match = player.getMatch();
     this.ffa = match.needModule(FreeForAllMatchModule.class);
-
-    this.playerId = player.getId();
+    this.id = player.getId();
     this.username = player.getBukkit().getName();
-    this.color = color == null ? TEXT_COLOR : color;
-  }
-
-  @Override
-  public String toString() {
-    return getClass().getSimpleName() + "{match=" + getMatch() + ", name=" + getDefaultName() + "}";
-  }
-
-  public UUID getPlayerId() {
-    return playerId;
+    this.chatColor = color == null ? ChatColor.YELLOW : color;
+    this.color = BukkitUtils.colorOf(this.chatColor);
+    this.query = new PartyQuery(null, this);
   }
 
   @Override
   public Match getMatch() {
-    return match;
+    return this.match;
   }
 
   @Override
   public String getId() {
-    return playerId.toString();
+    return this.username;
   }
 
   @Override
   public String getDefaultName() {
-    return username;
+    return this.username;
   }
 
   @Override
@@ -90,16 +83,16 @@ public class Tribute implements Competitor, MultiAudience {
 
   @Override
   public ChatColor getColor() {
-    return color;
+    return this.chatColor;
   }
 
   @Override
   public Color getFullColor() {
-    return BukkitUtils.colorOf(color);
+    return this.color;
   }
 
   @Override
-  public Component getName(NameStyle style) {
+  public Component getName(final NameStyle style) {
     return PlayerComponent.of(player != null ? player.getBukkit() : null, style);
   }
 
@@ -115,47 +108,47 @@ public class Tribute implements Competitor, MultiAudience {
 
   @Override
   public boolean isParticipating() {
-    return getMatch().isRunning();
+    return this.getMatch().isRunning();
   }
 
   @Override
   public boolean isObserving() {
-    return !getMatch().isRunning();
+    return !this.getMatch().isRunning();
   }
 
   @Override
   public NameTagVisibility getNameTagVisibility() {
-    return ffa.getOptions().nameTagVisibility;
+    return this.ffa.getOptions().nameTagVisibility;
   }
 
   @Override
-  public Set<MatchPlayer> getPlayers() {
-    return players;
+  public Collection<MatchPlayer> getMembers() {
+    return this.players;
   }
 
   @Override
-  public @Nullable MatchPlayer getPlayer(UUID playerId) {
+  public @Nullable MatchPlayer getMember(final UUID playerId) {
     return player != null && player.getId().equals(playerId) ? player : null;
   }
 
-  protected void checkPlayer(MatchPlayer player) {
-    if (!player.getId().equals(playerId)) {
+  private void checkPlayer(final UUID playerId) {
+    if (!this.id.equals(playerId)) {
       throw new UnsupportedOperationException();
     }
   }
 
   @Override
-  public void internalAddPlayer(MatchPlayer player) {
-    checkPlayer(player);
+  public void addMember(final MatchPlayer player) {
+    checkPlayer(checkNotNull(player).getId());
     this.player = player;
-    this.players = Collections.singleton(player);
+    this.players = Collections.unmodifiableList(Collections.singletonList(player));
   }
 
   @Override
-  public void internalRemovePlayer(MatchPlayer player) {
-    checkPlayer(player);
+  public void removeMember(final UUID playerId) {
+    checkPlayer(playerId);
     this.player = null;
-    this.players = Collections.emptySet();
+    this.players = Collections.emptyList();
   }
 
   @Override
@@ -165,16 +158,21 @@ public class Tribute implements Competitor, MultiAudience {
 
   @Override
   public Iterable<? extends Audience> getAudiences() {
-    return player == null ? Collections.emptyList() : Collections.singleton(player);
+    return this.players;
   }
 
   /**
    * If the player is online and participating, this delegates to {@link MatchPlayer#getQuery()}.
-   * Otherwise it returns an {@link PlayerQuery}, which knows about the player's identity, but has
-   * no properties related to physical presence in the match.
+   * Otherwise it returns an PlayerQuery, which knows about the player's identity, but has no
+   * properties related to physical presence in the match.
    */
   @Override
-  public PartyQuery getQuery() {
-    return player != null ? (PartyQuery) player.getQuery() : query;
+  public tc.oc.pgm.api.filter.query.PartyQuery getQuery() {
+    return player != null ? player.getQuery() : query;
+  }
+
+  @Override
+  public void setName(final String name) {
+    throw new UnsupportedOperationException("Cannot rename tribute: " + name);
   }
 }

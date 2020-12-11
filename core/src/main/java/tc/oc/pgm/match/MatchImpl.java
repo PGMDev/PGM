@@ -84,7 +84,6 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.features.MatchFeatureContext;
 import tc.oc.pgm.filters.query.MatchQuery;
 import tc.oc.pgm.filters.query.Query;
-import tc.oc.pgm.join.QueuedParticipants;
 import tc.oc.pgm.result.CompetitorVictoryCondition;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.FileUtils;
@@ -122,7 +121,7 @@ public class MatchImpl implements Match {
   private final RankedSet<VictoryCondition> victory;
   private final RankedSet<Competitor> competitors;
   private final AtomicReference<Party> queuedParticipants;
-  private final Observers observers;
+  private final ObserverParty observers;
   private final MatchFeatureContext features;
 
   protected MatchImpl(String id, MapContext map, World world) {
@@ -164,7 +163,7 @@ public class MatchImpl implements Match {
               return 0;
             });
     this.queuedParticipants = new AtomicReference<>();
-    this.observers = new Observers(this);
+    this.observers = new ObserverParty(this);
     this.features = new MatchFeatureContext();
   }
 
@@ -403,11 +402,11 @@ public class MatchImpl implements Match {
   @Override
   public Collection<MatchPlayer> getObservers() {
     final Party queued = queuedParticipants.get();
-    if (queued == null) return observers.getPlayers();
+    if (queued == null) return observers.getMembers();
 
     return ImmutableList.<MatchPlayer>builder()
-        .addAll(queued.getPlayers())
-        .addAll(observers.getPlayers())
+        .addAll(queued.getMembers())
+        .addAll(observers.getMembers())
         .build();
   }
 
@@ -416,7 +415,7 @@ public class MatchImpl implements Match {
     final ImmutableList.Builder<MatchPlayer> builder = ImmutableList.builder();
 
     for (Competitor competitor : getCompetitors()) {
-      builder.addAll(competitor.getPlayers());
+      builder.addAll(competitor.getMembers());
     }
 
     return builder.build();
@@ -545,7 +544,7 @@ public class MatchImpl implements Match {
         }
 
         // Update the old party's state
-        oldParty.internalRemovePlayer(player);
+        oldParty.removeMember(player.getId());
       }
 
       // Update the player's state
@@ -563,7 +562,7 @@ public class MatchImpl implements Match {
       } else {
         // Player is joining a party
         // Update the new party's state
-        newParty.internalAddPlayer(player);
+        newParty.addMember(player);
 
         if (oldParty == null) {
           // If they are not leaving an old party, they are also joining the match
@@ -574,7 +573,7 @@ public class MatchImpl implements Match {
       }
 
       // Removing the party will fire an event, so do it after all other state changes
-      if (oldParty != null && oldParty.isAutomatic() && oldParty.getPlayers().isEmpty()) {
+      if (oldParty != null && oldParty.isAutomatic() && oldParty.getMembers().isEmpty()) {
         removeParty(oldParty);
       }
 
@@ -650,12 +649,12 @@ public class MatchImpl implements Match {
   public void addParty(Party party) {
     logger.fine("Adding party " + party);
     checkNotNull(party);
-    checkState(party.getPlayers().isEmpty(), "Party already contains players");
+    checkState(party.getMembers().isEmpty(), "Party already contains players");
     checkState(parties.add(party), "Party is already in this match");
 
     if (party instanceof Competitor) {
       competitors.add((Competitor) party);
-    } else if (party instanceof QueuedParticipants) {
+    } else if (party instanceof QueuedParty) {
       queuedParticipants.set(party);
     }
 
@@ -671,7 +670,7 @@ public class MatchImpl implements Match {
 
     checkNotNull(party);
     checkState(parties.contains(party), "Party is not in this match");
-    checkState(party.getPlayers().isEmpty(), "Party still has players in it");
+    checkState(party.getMembers().isEmpty(), "Party still has players in it");
 
     callEvent(
         party instanceof Competitor
@@ -679,7 +678,7 @@ public class MatchImpl implements Match {
             : new PartyRemoveEvent(party));
 
     if (party instanceof Competitor) competitors.remove(party);
-    if (party instanceof QueuedParticipants) queuedParticipants.set(null);
+    if (party instanceof QueuedParty) queuedParticipants.set(null);
     parties.remove(party);
   }
 

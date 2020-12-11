@@ -37,7 +37,7 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
         InventoryMenuUtils.prettyMenu(
             match,
             TranslatableComponent.of("match.stats.title"),
-            team.getPlayers().stream()
+            team.getMembers().stream()
                 .map(PlayerStatsInventoryMenuItem::new)
                 .collect(Collectors.toList()));
   }
@@ -64,7 +64,7 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
     double bowDamage = 0;
     int shotsTaken = 0;
     int shotsHit = 0;
-    for (MatchPlayer teamPlayer : team.getPlayers()) {
+    for (MatchPlayer teamPlayer : team.getMembers()) {
       PlayerStats stats = smm.getPlayerStat(teamPlayer.getId());
       teamKills += stats.getKills();
       teamDeaths += stats.getDeaths();

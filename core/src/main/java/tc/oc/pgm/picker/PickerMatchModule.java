@@ -50,7 +50,7 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.join.GenericJoinResult;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.join.JoinResult;
-import tc.oc.pgm.match.Observers;
+import tc.oc.pgm.match.ObserverParty;
 import tc.oc.pgm.spawns.events.DeathKitApplyEvent;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.teams.Team;
@@ -240,7 +240,9 @@ public class PickerMatchModule implements MatchModule, Listener {
                 + TextTranslations.translate("picker.tooltip", player.getBukkit())));
 
     // Color the leather helmet to match player team
-    if (player != null && player.getParty() != null && !(player.getParty() instanceof Observers)) {
+    if (player != null
+        && player.getParty() != null
+        && !(player.getParty() instanceof ObserverParty)) {
       LeatherArmorMeta armorMeta = (LeatherArmorMeta) meta;
       armorMeta.setColor(player.getParty().getFullColor());
       meta = armorMeta;
@@ -621,7 +623,7 @@ public class PickerMatchModule implements MatchModule, Listener {
 
     ItemStack item = new ItemStack(Button.TEAM_JOIN.material);
     String capacityMessage =
-        this.getTeamSizeDescription(team.getPlayers().size(), team.getMaxPlayers());
+        this.getTeamSizeDescription(team.getMembers().size(), team.getMaxPlayers());
     List<String> lore = Lists.newArrayList(capacityMessage);
 
     JoinResult result = jmm.queryJoin(player, team);

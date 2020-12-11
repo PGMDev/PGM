@@ -3,6 +3,7 @@ package tc.oc.pgm.join;
 import javax.annotation.Nullable;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.match.QueuedParty;
 
 /**
  * Something that is able to join the player to the match. {@link JoinGuard}s that are NOT {@link
@@ -27,5 +28,5 @@ public interface JoinHandler extends JoinGuard {
    * becomes empty. Any players left in the queue will be joined through {@link #join}, and finally
    * sent to obs if that fails.
    */
-  void queuedJoin(QueuedParticipants queue);
+  void queuedJoin(QueuedParty queue);
 }

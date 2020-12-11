@@ -79,7 +79,7 @@ public final class MatchCommand {
             .append(": ")
             .append(ChatColor.WHITE)
             .append(
-                team.getPlayers().stream()
+                team.getMembers().stream()
                     .filter(mp -> !mp.isVanished())
                     .collect(Collectors.toList())
                     .size());

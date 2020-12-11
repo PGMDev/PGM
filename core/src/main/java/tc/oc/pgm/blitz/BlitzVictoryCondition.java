@@ -22,7 +22,7 @@ public class BlitzVictoryCondition implements VictoryCondition {
   public boolean isCompleted(Match match) {
     int count = 0;
     for (Competitor competitor : match.getCompetitors()) {
-      if (!competitor.getPlayers().isEmpty()) {
+      if (!competitor.getMembers().isEmpty()) {
         if (++count >= 2) return false;
       }
     }
@@ -31,7 +31,7 @@ public class BlitzVictoryCondition implements VictoryCondition {
 
   @Override
   public int compare(Competitor a, Competitor b) {
-    return Integer.compare(b.getPlayers().size(), a.getPlayers().size());
+    return Integer.compare(b.getMembers().size(), a.getMembers().size());
   }
 
   @Override

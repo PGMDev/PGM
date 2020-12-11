@@ -1,23 +1,20 @@
 package tc.oc.pgm.api.party;
 
 import org.bukkit.scoreboard.NameTagVisibility;
-import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.player.MatchPlayer;
 
-/** A {@link Party} that can exclusively win a {@link Match}. */
+/** A party that can participate in a match. */
 public interface Competitor extends Party {
-
   /**
-   * Get the constant, unique identifier for the {@link Competitor}
+   * Gets an immutable, unique identifier.
    *
-   * @return The unique identifier.
+   * @return an identifier
    */
   String getId();
 
   /**
-   * Get the {@link NameTagVisibility} for {@link MatchPlayer}s.
+   * Gets the name tag visibility among members.
    *
-   * @return The {@link NameTagVisibility}.
+   * @return a visibility
    */
   NameTagVisibility getNameTagVisibility();
 }

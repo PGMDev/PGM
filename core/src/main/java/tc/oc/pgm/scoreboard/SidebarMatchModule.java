@@ -382,7 +382,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
       return ChatColor.WHITE.toString() + bmm.getRemainingPlayers(competitor);
     } else if (competitor instanceof Tribute && bmm.getConfig().getNumLives() > 1) {
       return ChatColor.WHITE.toString()
-          + bmm.getNumOfLives(competitor.getPlayers().iterator().next().getId());
+          + bmm.getNumOfLives(competitor.getMembers().iterator().next().getId());
     } else {
       return "";
     }

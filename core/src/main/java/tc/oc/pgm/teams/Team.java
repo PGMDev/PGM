@@ -1,68 +1,49 @@
 package tc.oc.pgm.teams;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collection;
-import java.util.Objects;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
 import org.apache.commons.lang.math.Fraction;
-import org.bukkit.ChatColor;
-import org.bukkit.Color;
 import org.bukkit.scoreboard.NameTagVisibility;
 import tc.oc.pgm.api.feature.Feature;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
-import tc.oc.pgm.api.party.event.PartyRenameEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.join.GenericJoinResult;
 import tc.oc.pgm.join.JoinMatchModule;
-import tc.oc.pgm.match.SimpleParty;
+import tc.oc.pgm.match.PartyImpl;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.text.TextFormatter;
 
-/**
- * Mutable class to represent a team created from a TeamInfo instance that is tied to a specific
- * match and will only live as long as the match lives. Teams support custom names and colors that
- * differ from the defaults specified by the map creator.
- */
-public class Team extends SimpleParty implements Competitor, Feature<TeamFactory> {
+/** A team of players. */
+public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> {
   // The maximum allowed ratio between the "fullness" of any two teams in a match,
   // as measured by the Team.getFullness method. An imbalance of one player is
   // always allowed, even if it exceeds this ratio.
   public static final float MAX_IMBALANCE = 1.2f;
 
-  protected final TeamFactory info;
+  private final TeamFactory info;
+  private int min, max, overfill;
+
   private TeamMatchModule tmm;
   private JoinMatchModule jmm;
-  protected @Nullable String name = null;
-  protected @Nullable Component componentName;
-  protected @Nullable Component chatPrefix;
-  protected Integer minPlayers, maxPlayers, maxOverfill;
 
-  // Recorded in the match document, Tourney plugin sets this
-  protected @Nullable String leagueTeamId;
-
-  /**
-   * Construct a Team instance with the necessary information.
-   *
-   * @param info Defaults to use for name and color.
-   * @param match Match this team is in.
-   */
-  public Team(TeamFactory info, Match match) {
-    super(match);
+  public Team(final TeamFactory info, final Match match) {
+    super(match, requireNonNull(info).getDefaultName(), info.getDefaultColor());
     this.info = info;
+    this.min = info.getMinPlayers();
+    this.max = info.getMaxPlayers();
+    this.overfill = info.getMaxOverfill();
   }
 
-  protected JoinMatchModule join() {
+  private JoinMatchModule join() {
     if (jmm == null) {
       jmm = getMatch().needModule(JoinMatchModule.class);
     }
     return jmm;
   }
 
-  protected TeamMatchModule module() {
+  private TeamMatchModule module() {
     if (tmm == null) {
       tmm = getMatch().needModule(TeamMatchModule.class);
     }
@@ -70,33 +51,15 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
   }
 
   @Override
-  public String toString() {
-    return getClass().getSimpleName() + "{match=" + getMatch() + ", name=" + getNameLegacy() + "}";
-  }
-
-  @Override
   public String getId() {
     return this.info.getId();
   }
 
-  /**
-   * Gets map specified information about this team.
-   *
-   * @return Map-specific information about the team.
-   */
   public TeamFactory getInfo() {
     return this.info;
   }
 
-  public @Nullable String getLeagueTeamId() {
-    return leagueTeamId;
-  }
-
-  public void setLeagueTeamId(@Nullable String leagueTeamId) {
-    this.leagueTeamId = leagueTeamId;
-  }
-
-  public boolean isInstance(TeamFactory definition) {
+  public boolean isInstance(final TeamFactory definition) {
     return info.equals(definition);
   }
 
@@ -107,42 +70,12 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
 
   @Override
   public boolean isParticipating() {
-    return match.isRunning();
+    return this.getMatch().isRunning();
   }
 
   @Override
   public boolean isObserving() {
-    return !match.isRunning();
-  }
-
-  @Override
-  public String getDefaultName() {
-    return info.getDefaultName();
-  }
-
-  @Override
-  public boolean isNamePlural() {
-    // Assume custom names are singular
-    return this.name == null && this.info.isDefaultNamePlural();
-  }
-
-  @Override
-  public Component getName(NameStyle style) {
-    if (componentName == null) {
-      this.componentName = TextComponent.of(getNameLegacy(), TextFormatter.convert(getColor()));
-    }
-    return componentName;
-  }
-
-  /**
-   * Gets the name of this team that can be modified using setTeam. If no custom name is set then
-   * this will return the default team name as specified in the team info.
-   *
-   * @return Name of the team without colors.
-   */
-  @Override
-  public String getNameLegacy() {
-    return name != null ? name : getDefaultName();
+    return !this.getMatch().isRunning();
   }
 
   public String getShortName() {
@@ -156,59 +89,25 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
     }
   }
 
-  /**
-   * Sets a custom name for this team that should be unique in the match. Note that setting the name
-   * to null will reset it to the default name as specified in the team info.
-   *
-   * @param newName New name for this team. Should not include colors.
-   */
-  public void setName(@Nullable String newName) {
-    if (Objects.equals(this.name, newName) || this.getNameLegacy().equals(newName)) return;
-    String oldName = this.getNameLegacy();
-    this.name = newName;
-    this.componentName = null;
-    this.chatPrefix = null;
-    this.match.callEvent(new PartyRenameEvent(this, oldName, this.getNameLegacy()));
-  }
-
-  @Override
-  public ChatColor getColor() {
-    return this.info.getDefaultColor();
-  }
-
-  @Override
-  public Color getFullColor() {
-    return BukkitUtils.colorOf(this.getColor());
-  }
-
-  @Override
-  public Component getChatPrefix() {
-    if (chatPrefix == null) {
-      this.chatPrefix =
-          TextComponent.of("(" + getShortName() + ") ", TextFormatter.convert(getColor()));
-    }
-    return chatPrefix;
-  }
-
   @Override
   public NameTagVisibility getNameTagVisibility() {
     return info.getNameTagVisibility();
   }
 
   public int getMinPlayers() {
-    return this.minPlayers != null ? minPlayers : this.info.getMinPlayers();
+    return this.min;
   }
 
   public int getMaxPlayers() {
-    return this.maxPlayers != null ? maxPlayers : this.info.getMaxPlayers();
+    return this.max;
   }
 
   public int getMaxOverfill() {
-    return this.maxOverfill != null ? maxOverfill : this.info.getMaxOverfill();
+    return this.overfill;
   }
 
   public void setMinSize(@Nullable Integer minPlayers) {
-    this.minPlayers = minPlayers;
+    this.min = minPlayers;
     getMatch().callEvent(new TeamResizeEvent(this));
   }
 
@@ -217,8 +116,8 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
   }
 
   public void setMaxSize(@Nullable Integer maxPlayers, @Nullable Integer maxOverfill) {
-    this.maxPlayers = maxPlayers;
-    this.maxOverfill = maxOverfill;
+    this.max = maxPlayers;
+    this.overfill = maxOverfill;
     getMatch().callEvent(new TeamResizeEvent(this));
     module().updateMaxPlayers();
   }
@@ -255,7 +154,7 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
    */
   public int getSizeAfterJoin(
       @Nullable MatchPlayer joining, @Nullable Team newTeam, boolean priority) {
-    Collection<MatchPlayer> members = this.getPlayers();
+    Collection<MatchPlayer> members = this.getMembers();
     int size = members.size();
 
     if (joining != null) {
@@ -273,7 +172,7 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
   }
 
   public boolean isMinSize() {
-    return getPlayers().size() >= getMinPlayers();
+    return getMembers().size() >= getMinPlayers();
   }
 
   /** Return a normalized "fullness" ratio for this team. */
@@ -318,7 +217,7 @@ public class Team extends SimpleParty implements Competitor, Feature<TeamFactory
     // Count existing team members with and without join privileges
     int normal = 0, privileged = 0;
 
-    for (MatchPlayer player : this.getPlayers()) {
+    for (MatchPlayer player : this.getMembers()) {
       if (player != joining) {
         if (join().canPriorityKick(player)) privileged++;
         else normal++;

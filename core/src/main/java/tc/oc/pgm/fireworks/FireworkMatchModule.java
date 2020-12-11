@@ -96,7 +96,7 @@ public class FireworkMatchModule implements MatchModule, Listener {
       if (this.iterations < ITERATION_COUNT) {
         // Build this list fresh every time, because MatchPlayers can unload, but Competitors can't.
         final List<MatchPlayer> players =
-            winners.stream().flatMap(c -> c.getPlayers().stream()).collect(Collectors.toList());
+            winners.stream().flatMap(c -> c.getMembers().stream()).collect(Collectors.toList());
         Collections.shuffle(players);
 
         for (int i = 0; i < players.size() && i < ROCKET_COUNT; i++) {

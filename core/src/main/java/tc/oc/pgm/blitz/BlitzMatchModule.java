@@ -52,7 +52,7 @@ public class BlitzMatchModule implements MatchModule, Listener {
 
   public int getRemainingPlayers(Competitor competitor) {
     // TODO: this becomes a bit more complex when eliminated players are not forced to observers
-    return competitor.getPlayers().size();
+    return competitor.getMembers().size();
   }
 
   public int getNumOfLives(UUID id) {

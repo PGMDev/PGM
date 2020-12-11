@@ -8,128 +8,128 @@ import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.filters.query.Query;
-import tc.oc.pgm.match.ObservingParty;
 import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.Named;
 
 /**
- * A group of related {@link MatchPlayer}s in a {@link Match}.
+ * A group of {@link MatchPlayer}s.
  *
- * @see Competitor for participating {@link MatchPlayer}s.
- * @see ObservingParty for observing {@link MatchPlayer}s.
+ * @see Competitor
  */
 public interface Party extends Audience, Named {
-
   /**
-   * Get the {@link Match} that the {@link Party} is in.
+   * Gets the match.
    *
-   * @return The {@link Match}.
+   * @return a match
    */
   Match getMatch();
 
   /**
-   * Get all {@link MatchPlayer}s that are in the {@link Party}.
+   * Gets the collection of party members.
    *
-   * @return All the {@link MatchPlayer}s in the {@link Party}.
+   * @return a collection of players
    */
-  Collection<MatchPlayer> getPlayers();
+  Collection<MatchPlayer> getMembers();
 
   /**
-   * Get a {@link MatchPlayer} member, based on its unique identifier.
+   * Gets the {@link MatchPlayer} of a member.
    *
-   * @param playerId The unique identifier of the {@link MatchPlayer}.
-   * @return The {@link MatchPlayer} or {@code null} if not in the {@link Party}.
+   * @param playerId a player id
+   * @return a player or {@code null} if not a member
    */
   @Nullable
-  MatchPlayer getPlayer(UUID playerId);
+  MatchPlayer getMember(final UUID playerId);
 
   /**
-   * Get a filter {@link Query} that only matches this {@link Party}.
+   * Adds a {@link MatchPlayer} to the party.
    *
-   * @return The exclusive {@link Query}.
+   * @param player a player
+   */
+  void addMember(final MatchPlayer player);
+
+  /**
+   * Removes a {@link MatchPlayer} from the party.
+   *
+   * @param playerId a player id
+   */
+  void removeMember(final UUID playerId);
+
+  /**
+   * Gets a query that matches the party.
+   *
+   * @return a party query
    */
   PartyQuery getQuery();
 
   /**
-   * Get the name of the {@link Party}, which cannot change during {@link Match} time.
+   * Sets the party name.
    *
-   * @return The constant name of the {@link Party}.
+   * @param name a name
+   */
+  void setName(final String name);
+
+  /**
+   * Gets the initial party name, which cannot change.
+   *
+   * @return a name
    */
   String getDefaultName();
 
   /**
-   * Get whether {@link #getDisplayName()} is grammatically a plural word.
+   * Checks if {@link #getName()} is grammatically plural.
    *
-   * @return Whether {@link #getDisplayName()} is plural.
+   * @return if the party name is plural
    */
   boolean isNamePlural();
 
   /**
-   * Get the Minecraft {@link ChatColor} of the {@link Party}.
+   * Gets the {@link ChatColor} of the party.
    *
-   * @return The {@link ChatColor}.
+   * @return a chat color
    */
   ChatColor getColor();
 
   /**
-   * Get the RGB {@link Color} of the {@link Party}.
+   * Gets the {@link Color} of the party.
    *
-   * @return The {@link Color}.
+   * @return a color
    */
   Color getFullColor();
 
   /**
-   * Get the prefix in chat for all {@link MatchPlayer}s in the {@link Party}.
+   * Gets a chat prefix for the party.
    *
-   * @return The chat prefix.
+   * @return a component
    */
   Component getChatPrefix();
 
   /**
-   * Get whether {@link Match} should automatically add or remove {@link MatchPlayer}s from the
-   * {@link Party}.
+   * Checks if players should automatically be added to the party.
    *
-   * <p>Otherwise, the {@link MatchModule} that registers the {@link Party} must handle that logic.
-   *
-   * @see Match#setParty(MatchPlayer, Party)
-   * @return Whether the {@link Party} is automatically managed.
+   * @return if the party is default
    */
   boolean isAutomatic();
 
   /**
-   * Get whether this {@link Party} is a {@link Competitor}.
+   * Tests if the party is a {@link Competitor}.
    *
-   * @return Whether the {@link Party} is participating.
+   * @return if the party is a competitor
+   * @deprecated {@code x instanceof Competitor}
    */
+  @Deprecated
   default boolean isParticipating() {
     return this instanceof Competitor;
   }
 
   /**
-   * Get whether this {@link Party} is not a {@link Competitor}.
+   * Tests if the party is not a {@link Competitor}.
    *
-   * @return Whether the {@link Party} is observing.
+   * @return if the party is not a competitor
+   * @deprecated {@code !(x instanceof Competitor)}
    */
+  @Deprecated
   default boolean isObserving() {
-    return !isParticipating();
+    return !this.isParticipating();
   }
-
-  /**
-   * Adds a {@link MatchPlayer} to the {@link Party}'s internal state.
-   *
-   * @see Match#setParty(MatchPlayer, Party)
-   * @param player The {@link MatchPlayer} to add.
-   */
-  void internalAddPlayer(MatchPlayer player);
-
-  /**
-   * Removes a {@link MatchPlayer} from the {@link Party}'s internal state.
-   *
-   * @see Match#setParty(MatchPlayer, Party)
-   * @param player The {@link MatchPlayer} to remove.
-   */
-  void internalRemovePlayer(MatchPlayer player);
 }

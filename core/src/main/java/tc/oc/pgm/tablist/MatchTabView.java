@@ -15,12 +15,12 @@ import org.bukkit.event.Listener;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.community.events.PlayerVanishEvent;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.match.ObservingParty;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.tablist.TabEntry;
@@ -151,7 +151,7 @@ public class MatchTabView extends TabView implements Listener {
             Team team = teamIt.next();
             int currY2 = participantRows + getHeader(); // Default to max height
             // Size tightly vertically when teams don't use multiple columns
-            if (columnsPerTeam == 1) currY2 = Math.min(y1 + team.getPlayers().size() + 2, currY2);
+            if (columnsPerTeam == 1) currY2 = Math.min(y1 + team.getMembers().size() + 2, currY2);
 
             if (currY2 > y2) {
               // If the max y on this row of teams increases, fill the void under previous teams
@@ -228,7 +228,7 @@ public class MatchTabView extends TabView implements Listener {
     while (teamIt.hasNext()) {
       int biggestTeam = 0;
       for (int x = 0; x < teamsPerColumn && teamIt.hasNext(); x++)
-        biggestTeam = Math.max(biggestTeam, teamIt.next().getPlayers().size());
+        biggestTeam = Math.max(biggestTeam, teamIt.next().getMembers().size());
 
       biggestTeamColumn += 2 + divideRoundingUp(biggestTeam, columnsPerTeam);
     }
@@ -262,7 +262,7 @@ public class MatchTabView extends TabView implements Listener {
       if (this.tmm != null) {
         for (Team team : this.tmm.getParticipatingTeams()) {
           this.teams.add(team);
-          this.teamPlayers.putAll(team, team.getPlayers());
+          this.teamPlayers.putAll(team, team.getMembers());
         }
       }
 
@@ -294,7 +294,7 @@ public class MatchTabView extends TabView implements Listener {
 
     if (newParty != null && !shouldHide(player)) {
       List<MatchPlayer> players =
-          newParty instanceof ObservingParty ? observerPlayers : participantPlayers;
+          newParty instanceof Competitor ? participantPlayers : observerPlayers;
 
       if (!players.contains(player)) players.add(player);
 

@@ -58,7 +58,7 @@ public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
 
   @Override
   public Optional<MatchPlayer> getPlayer() {
-    return Optional.ofNullable(getParty().getPlayer(getId()));
+    return Optional.ofNullable(getParty().getMember(getId()));
   }
 
   @Override

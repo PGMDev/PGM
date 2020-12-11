@@ -44,8 +44,9 @@ public class Teams {
     return teamFactory;
   }
 
-  public static TeamFactory getTeam(String team, Match match) {
-    return match.needModule(TeamMatchModule.class).bestFuzzyMatch(team).getInfo();
+  public static TeamFactory getTeam(String name, Match match) {
+    final Team team = match.needModule(TeamMatchModule.class).bestFuzzyMatch(name);
+    return team == null ? null : team.getInfo();
   }
 
   public static FeatureReference<TeamFactory> getTeamRef(Node node, MapFactory factory)

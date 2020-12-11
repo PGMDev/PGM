@@ -23,7 +23,8 @@ import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.match.ObservingParty;
+import tc.oc.pgm.match.ObserverParty;
+import tc.oc.pgm.match.QueuedParty;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 
 @ListenerScope(MatchScope.LOADED)
@@ -45,12 +46,12 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
   private final Set<JoinHandler> handlers = new LinkedHashSet<>();
 
   // Players who have requested to join before match start
-  private final QueuedParticipants queuedParticipants;
+  private final QueuedParty queuedParticipants;
   private final Match match;
 
   private JoinMatchModule(Match match) {
     this.match = match;
-    queuedParticipants = new QueuedParticipants(match);
+    queuedParticipants = new QueuedParty(match);
   }
 
   @Override
@@ -168,7 +169,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
   public boolean leave(MatchPlayer leaving) {
     if (cancelQueuedJoin(leaving)) return true;
 
-    if (leaving.getParty() instanceof ObservingParty) {
+    if (leaving.getParty() instanceof ObserverParty) {
       leaving.sendWarning(
           TranslatableComponent.of("join.err.alreadyJoined.team", leaving.getParty().getName()));
       return false;
@@ -182,7 +183,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
     return match.setParty(leaving, match.getDefaultParty());
   }
 
-  public QueuedParticipants getQueuedParticipants() {
+  public QueuedParty getQueuedParticipants() {
     return queuedParticipants;
   }
 
@@ -212,10 +213,10 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
   }
 
   @Override
-  public void queuedJoin(QueuedParticipants queue) {
+  public void queuedJoin(QueuedParty queue) {
     // Give all handlers a chance to bulk join
     for (JoinHandler handler : handlers) {
-      if (queue.getPlayers().isEmpty()) break;
+      if (queue.getMembers().isEmpty()) break;
       handler.queuedJoin(queue);
     }
 

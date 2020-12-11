@@ -29,7 +29,7 @@ import tc.oc.pgm.join.GenericJoinResult;
 import tc.oc.pgm.join.JoinHandler;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.join.JoinResult;
-import tc.oc.pgm.join.QueuedParticipants;
+import tc.oc.pgm.match.QueuedParty;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
 import tc.oc.pgm.util.chat.Sound;
@@ -93,9 +93,13 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     this.match = match;
     this.options = options;
 
-    final List<ChatColor> colors = Lists.newArrayList(COLORS);
-    Collections.shuffle(colors);
-    colors.forEach(this.colors::push);
+    if (options.colors) {
+      final List<ChatColor> colors = Lists.newArrayList(COLORS);
+      Collections.shuffle(colors);
+      colors.forEach(this.colors::push);
+    } else {
+      colors.add(ChatColor.YELLOW);
+    }
   }
 
   private JoinMatchModule join() {
@@ -145,7 +149,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     int players = 0;
     for (Competitor competitor : match.getCompetitors()) {
       if (competitor instanceof Tribute) {
-        players += competitor.getPlayers().size();
+        players += competitor.getMembers().size();
       }
     }
 
@@ -260,7 +264,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
   }
 
   @Override
-  public void queuedJoin(QueuedParticipants queue) {
+  public void queuedJoin(QueuedParty queue) {
     for (MatchPlayer player : queue.getOrderedPlayers()) {
       join(player, null, queryJoin(player, null));
     }
