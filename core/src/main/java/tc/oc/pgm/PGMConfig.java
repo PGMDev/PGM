@@ -166,7 +166,7 @@ public final class PGMConfig implements Config {
     this.griefScore =
         parseInteger(config.getString("gameplay.grief-score", "-10"), Range.atMost(0));
     this.deathTicks =
-        parseInteger(config.getString("gameplay.death-tick", "15"), Range.atLeast(0));
+        parseInteger(config.getString("gameplay.death-ticks", "15"), Range.closed(0, 20));
 
     this.minPlayers = parseInteger(config.getString("join.min-players", "1"));
     this.limitJoin = parseBoolean(config.getString("join.limit", "true"));

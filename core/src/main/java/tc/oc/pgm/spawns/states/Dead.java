@@ -22,7 +22,7 @@ import tc.oc.pgm.util.nms.NMSHacks;
 
 /** Player is waiting to respawn after dying in-game */
 public class Dead extends Spawning {
-  private long CORPSE_ROT_TICKS;
+  private static long CORPSE_ROT_TICKS;
 
   private final long deathTick;
   private boolean kitted, rotted;
@@ -33,7 +33,7 @@ public class Dead extends Spawning {
 
   public Dead(SpawnMatchModule smm, MatchPlayer player, long deathTick) {
     super(smm, player);
-    CORPSE_ROT_TICKS = PGM.get().getConfiguration().getDeathAnimationLength();
+    CORPSE_ROT_TICKS = PGM.get().getConfiguration().getDeathTicks();
     this.deathTick = deathTick;
   }
 
