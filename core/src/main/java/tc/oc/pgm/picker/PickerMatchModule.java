@@ -623,7 +623,7 @@ public class PickerMatchModule implements MatchModule, Listener {
 
     ItemStack item = new ItemStack(Button.TEAM_JOIN.material);
     String capacityMessage =
-        this.getTeamSizeDescription(team.getMembers().size(), team.getMaxPlayers());
+        this.getTeamSizeDescription(team.getPlayers().size(), team.getMaxPlayers());
     List<String> lore = Lists.newArrayList(capacityMessage);
 
     JoinResult result = jmm.queryJoin(player, team);

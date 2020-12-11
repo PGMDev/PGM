@@ -154,13 +154,13 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     if (match.isRunning()) return;
 
     final int playersQueued =
-        match.needModule(JoinMatchModule.class).getQueuedParticipants().getMembers().size();
+        match.needModule(JoinMatchModule.class).getQueuedParticipants().getPlayers().size();
     final int playersJoined = match.getParticipants().size();
 
     Team singleTeam = null;
     int teamNeeded = 0;
     for (Team t : teams) {
-      int p = t.getMinPlayers() - t.getMembers().size();
+      int p = t.getMinPlayers() - t.getPlayers().size();
       if (p > 0) {
         singleTeam = teamNeeded == 0 ? t : null;
         teamNeeded += p;
@@ -531,7 +531,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
     // Find all players who can be bumped
     List<MatchPlayer> kickable = new ArrayList<>();
-    for (MatchPlayer player : kickFrom.getMembers()) {
+    for (MatchPlayer player : kickFrom.getPlayers()) {
       if (!jmm.canPriorityKick(player) || (forBalance && isAutoJoin(player))) {
         // Premium players can be auto-balanced if they auto-joined
         kickable.add(player);

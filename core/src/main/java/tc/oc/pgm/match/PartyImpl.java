@@ -60,22 +60,22 @@ public class PartyImpl implements Party, MultiAudience {
   }
 
   @Override
-  public Collection<MatchPlayer> getMembers() {
+  public Collection<MatchPlayer> getPlayers() {
     return this.memberList;
   }
 
   @Override
-  public void addMember(final MatchPlayer player) {
+  public void addPlayer(final MatchPlayer player) {
     this.memberMap.put(requireNonNull(player).getId(), player);
   }
 
   @Override
-  public void removeMember(final UUID playerId) {
+  public void removePlayer(final UUID playerId) {
     this.memberMap.remove(playerId);
   }
 
   @Override
-  public @Nullable MatchPlayer getMember(final UUID playerId) {
+  public @Nullable MatchPlayer getPlayer(final UUID playerId) {
     return this.memberMap.get(playerId);
   }
 
@@ -147,6 +147,6 @@ public class PartyImpl implements Party, MultiAudience {
 
   @Override
   public Iterable<? extends Audience> getAudiences() {
-    return this.getMembers();
+    return this.getPlayers();
   }
 }

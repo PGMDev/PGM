@@ -33,7 +33,7 @@ public final class ListCommand {
           .forEach(
               team ->
                   sendTeamInfo(
-                      viewer, sender, team.getName(), team.getMembers(), team.getMaxPlayers()));
+                      viewer, sender, team.getName(), team.getPlayers(), team.getMaxPlayers()));
     } else {
       sendTeamInfo(
           viewer,
@@ -47,7 +47,7 @@ public final class ListCommand {
         viewer,
         sender,
         match.getDefaultParty().getName(),
-        match.getDefaultParty().getMembers(),
+        match.getDefaultParty().getPlayers(),
         -1);
 
     // Total count

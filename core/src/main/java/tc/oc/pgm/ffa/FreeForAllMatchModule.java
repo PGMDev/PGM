@@ -149,7 +149,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     int players = 0;
     for (Competitor competitor : match.getCompetitors()) {
       if (competitor instanceof Tribute) {
-        players += competitor.getMembers().size();
+        players += competitor.getPlayers().size();
       }
     }
 

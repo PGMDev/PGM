@@ -30,7 +30,7 @@ public interface Party extends Audience, Named {
    *
    * @return a collection of players
    */
-  Collection<MatchPlayer> getMembers();
+  Collection<MatchPlayer> getPlayers();
 
   /**
    * Gets the {@link MatchPlayer} of a member.
@@ -39,21 +39,21 @@ public interface Party extends Audience, Named {
    * @return a player or {@code null} if not a member
    */
   @Nullable
-  MatchPlayer getMember(final UUID playerId);
+  MatchPlayer getPlayer(final UUID playerId);
 
   /**
    * Adds a {@link MatchPlayer} to the party.
    *
    * @param player a player
    */
-  void addMember(final MatchPlayer player);
+  void addPlayer(final MatchPlayer player);
 
   /**
    * Removes a {@link MatchPlayer} from the party.
    *
    * @param playerId a player id
    */
-  void removeMember(final UUID playerId);
+  void removePlayer(final UUID playerId);
 
   /**
    * Gets a query that matches the party.

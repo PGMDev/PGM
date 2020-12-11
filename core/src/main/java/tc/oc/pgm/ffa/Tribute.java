@@ -122,12 +122,12 @@ public class Tribute implements Competitor, MultiAudience {
   }
 
   @Override
-  public Collection<MatchPlayer> getMembers() {
+  public Collection<MatchPlayer> getPlayers() {
     return this.players;
   }
 
   @Override
-  public @Nullable MatchPlayer getMember(final UUID playerId) {
+  public @Nullable MatchPlayer getPlayer(final UUID playerId) {
     return player != null && player.getId().equals(playerId) ? player : null;
   }
 
@@ -138,14 +138,14 @@ public class Tribute implements Competitor, MultiAudience {
   }
 
   @Override
-  public void addMember(final MatchPlayer player) {
+  public void addPlayer(final MatchPlayer player) {
     checkPlayer(checkNotNull(player).getId());
     this.player = player;
     this.players = Collections.unmodifiableList(Collections.singletonList(player));
   }
 
   @Override
-  public void removeMember(final UUID playerId) {
+  public void removePlayer(final UUID playerId) {
     checkPlayer(playerId);
     this.player = null;
     this.players = Collections.emptyList();

@@ -98,7 +98,7 @@ public class ScoreboardMatchModule implements MatchModule, Listener {
 
     Team team = scoreboard.registerNewTeam(getScoreboardTeamName(party));
     updatePartyScoreboardTeam(party, team, forObservers);
-    for (MatchPlayer player : party.getMembers()) {
+    for (MatchPlayer player : party.getPlayers()) {
       team.addPlayer(player.getBukkit());
     }
 

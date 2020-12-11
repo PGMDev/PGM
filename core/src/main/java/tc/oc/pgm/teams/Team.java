@@ -154,7 +154,7 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
    */
   public int getSizeAfterJoin(
       @Nullable MatchPlayer joining, @Nullable Team newTeam, boolean priority) {
-    Collection<MatchPlayer> members = this.getMembers();
+    Collection<MatchPlayer> members = this.getPlayers();
     int size = members.size();
 
     if (joining != null) {
@@ -172,7 +172,7 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
   }
 
   public boolean isMinSize() {
-    return getMembers().size() >= getMinPlayers();
+    return getPlayers().size() >= getMinPlayers();
   }
 
   /** Return a normalized "fullness" ratio for this team. */
@@ -217,7 +217,7 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
     // Count existing team members with and without join privileges
     int normal = 0, privileged = 0;
 
-    for (MatchPlayer player : this.getMembers()) {
+    for (MatchPlayer player : this.getPlayers()) {
       if (player != joining) {
         if (join().canPriorityKick(player)) privileged++;
         else normal++;

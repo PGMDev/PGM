@@ -216,7 +216,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
   public void queuedJoin(QueuedParty queue) {
     // Give all handlers a chance to bulk join
     for (JoinHandler handler : handlers) {
-      if (queue.getMembers().isEmpty()) break;
+      if (queue.getPlayers().isEmpty()) break;
       handler.queuedJoin(queue);
     }
 

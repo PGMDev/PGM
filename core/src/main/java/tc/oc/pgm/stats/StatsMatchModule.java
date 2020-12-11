@@ -137,7 +137,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     MatchPlayer murderer = null;
 
     if (event.getKiller() != null)
-      murderer = event.getKiller().getParty().getMember(event.getKiller().getId());
+      murderer = event.getKiller().getParty().getPlayer(event.getKiller().getId());
 
     PlayerStats victimStats = getPlayerStat(victim);
 

@@ -40,14 +40,14 @@ public class QueuedParty extends PartyImpl {
   }
 
   @Override
-  public void addMember(final MatchPlayer player) {
-    super.addMember(player);
+  public void addPlayer(final MatchPlayer player) {
+    super.addPlayer(player);
     invalidateOrder();
   }
 
   @Override
-  public void removeMember(final UUID playerId) {
-    super.removeMember(playerId);
+  public void removePlayer(final UUID playerId) {
+    super.removePlayer(playerId);
     invalidateOrder();
   }
 
@@ -57,7 +57,7 @@ public class QueuedParty extends PartyImpl {
 
   public List<MatchPlayer> getOrderedPlayers() {
     if (this.memberOrder == null) {
-      this.memberOrder = new ArrayList<>(getMembers());
+      this.memberOrder = new ArrayList<>(getPlayers());
       Collections.shuffle(this.memberOrder);
 
       if (PGM.get().getConfiguration().canPriorityKick()) {

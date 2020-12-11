@@ -402,11 +402,11 @@ public class MatchImpl implements Match {
   @Override
   public Collection<MatchPlayer> getObservers() {
     final Party queued = queuedParticipants.get();
-    if (queued == null) return observers.getMembers();
+    if (queued == null) return observers.getPlayers();
 
     return ImmutableList.<MatchPlayer>builder()
-        .addAll(queued.getMembers())
-        .addAll(observers.getMembers())
+        .addAll(queued.getPlayers())
+        .addAll(observers.getPlayers())
         .build();
   }
 
@@ -415,7 +415,7 @@ public class MatchImpl implements Match {
     final ImmutableList.Builder<MatchPlayer> builder = ImmutableList.builder();
 
     for (Competitor competitor : getCompetitors()) {
-      builder.addAll(competitor.getMembers());
+      builder.addAll(competitor.getPlayers());
     }
 
     return builder.build();
@@ -544,7 +544,7 @@ public class MatchImpl implements Match {
         }
 
         // Update the old party's state
-        oldParty.removeMember(player.getId());
+        oldParty.removePlayer(player.getId());
       }
 
       // Update the player's state
@@ -562,7 +562,7 @@ public class MatchImpl implements Match {
       } else {
         // Player is joining a party
         // Update the new party's state
-        newParty.addMember(player);
+        newParty.addPlayer(player);
 
         if (oldParty == null) {
           // If they are not leaving an old party, they are also joining the match
@@ -573,7 +573,7 @@ public class MatchImpl implements Match {
       }
 
       // Removing the party will fire an event, so do it after all other state changes
-      if (oldParty != null && oldParty.isAutomatic() && oldParty.getMembers().isEmpty()) {
+      if (oldParty != null && oldParty.isAutomatic() && oldParty.getPlayers().isEmpty()) {
         removeParty(oldParty);
       }
 
@@ -649,7 +649,7 @@ public class MatchImpl implements Match {
   public void addParty(Party party) {
     logger.fine("Adding party " + party);
     checkNotNull(party);
-    checkState(party.getMembers().isEmpty(), "Party already contains players");
+    checkState(party.getPlayers().isEmpty(), "Party already contains players");
     checkState(parties.add(party), "Party is already in this match");
 
     if (party instanceof Competitor) {
@@ -670,7 +670,7 @@ public class MatchImpl implements Match {
 
     checkNotNull(party);
     checkState(parties.contains(party), "Party is not in this match");
-    checkState(party.getMembers().isEmpty(), "Party still has players in it");
+    checkState(party.getPlayers().isEmpty(), "Party still has players in it");
 
     callEvent(
         party instanceof Competitor
