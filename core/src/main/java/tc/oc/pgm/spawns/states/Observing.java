@@ -3,6 +3,7 @@ package tc.oc.pgm.spawns.states;
 import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Set;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -34,6 +35,8 @@ public class Observing extends State {
       Sets.newHashSet(
           Material.WATER_LILY, Material.BUCKET, Material.LAVA_BUCKET, Material.WATER_BUCKET);
 
+  private static final double VOID_HEIGHT = -64;
+
   private final boolean reset;
   private final boolean teleport;
   private PermissionAttachment permissionAttachment;
@@ -57,11 +60,13 @@ public class Observing extends State {
 
     if (reset) player.reset();
     player.setDead(false);
-    player.resetGamemode();
+    player.resetInteraction();
+    bukkit.setGameMode(GameMode.CREATIVE);
+    bukkit.setAllowFlight(true);
 
     Spawn spawn = smm.getDefaultSpawn();
 
-    if (teleport) {
+    if (teleport || player.getBukkit().getLocation().getY() <= VOID_HEIGHT) {
       Location location = spawn.getSpawn(player);
       if (location != null) {
         PlayerRespawnEvent event = new PlayerRespawnEvent(player.getBukkit(), location, false);
@@ -89,7 +94,7 @@ public class Observing extends State {
 
     player.getBukkit().updateInventory();
     player.setVisible(true);
-    player.resetGamemode();
+    player.resetVisibility();
 
     // The player is not standing on anything, turn their flying on
     if (bukkit.getAllowFlight()) {

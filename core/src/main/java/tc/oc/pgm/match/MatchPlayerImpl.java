@@ -22,7 +22,6 @@ import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -202,24 +201,15 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   }
 
   @Override
-  public void resetGamemode() {
-    boolean participating = canInteract(),
-        allowFlight = !participating && !(isDead() && isLegacy());
-    logger.fine("Refreshing gamemode as " + (participating ? "participant" : "observer"));
+  public void resetInteraction() {
+    Player player = getBukkit();
+    if (player == null) return;
 
-    if (!participating) getBukkit().leaveVehicle();
+    boolean interact = canInteract();
 
-    // Due to a bug in updating player abilities in legacy versions, it's better to force
-    // them to adventure mode and not let them fly. Has the side effect that they can't fly on maps
-    // where respawn allows spectating while dead.
-    setGameMode(
-        participating ? GameMode.SURVIVAL : allowFlight ? GameMode.CREATIVE : GameMode.ADVENTURE);
-
-    this.getBukkit().setAllowFlight(allowFlight);
-    this.getBukkit().spigot().setAffectsSpawning(participating);
-    this.getBukkit().spigot().setCollidesWithEntities(participating);
-    this.getBukkit().setDisplayName(getBukkit().getDisplayName());
-    this.resetVisibility();
+    if (!interact) player.leaveVehicle();
+    player.spigot().setAffectsSpawning(interact);
+    player.spigot().setCollidesWithEntities(interact);
   }
 
   @Override
@@ -231,6 +221,7 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   @Override
   public void resetVisibility() {
     final Player bukkit = getBukkit();
+    if (bukkit == null) return;
 
     bukkit.showInvisibles(isObserving());
 
@@ -251,10 +242,9 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
 
   @Override
   public void reset() {
-    getMatch().callEvent(new PlayerResetEvent(this));
-
-    setFrozen(false);
     Player bukkit = getBukkit();
+    if (bukkit == null) return;
+
     bukkit.closeInventory();
     resetInventory();
     bukkit.setArrowsStuck(0);
@@ -293,6 +283,8 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
 
     // we only reset bed spawn here so people don't have to see annoying messages when they respawn
     bukkit.setBedSpawnLocation(null);
+
+    getMatch().callEvent(new PlayerResetEvent(this));
   }
 
   @Override
@@ -315,24 +307,15 @@ public class MatchPlayerImpl implements MatchPlayer, PlayerAudience, Comparable<
   public void setFrozen(boolean yes) {
     if (frozen.compareAndSet(!yes, yes)) {
       Player bukkit = getBukkit();
-      if (yes) {
-        resetGamemode();
+      if (bukkit == null) return;
 
-        NMSHacks.EntityMetadata metadata = NMSHacks.createEntityMetadata();
-        NMSHacks.setEntityMetadata(metadata, false, false, false, false, true, (short) 0);
-        NMSHacks.setArmorStandFlags(metadata, false, false, false, false);
-        NMSHacks.spawnLivingEntity(
-            bukkit,
-            EntityType.ARMOR_STAND,
-            FROZEN_VEHICLE_ENTITY_ID,
-            bukkit.getLocation().subtract(0, 1.1, 0),
-            metadata);
+      if (yes) {
+        NMSHacks.spawnFreezeEntity(bukkit, FROZEN_VEHICLE_ENTITY_ID, isLegacy());
         NMSHacks.entityAttach(bukkit, bukkit.getEntityId(), FROZEN_VEHICLE_ENTITY_ID, false);
       } else {
         NMSHacks.destroyEntities(bukkit, FROZEN_VEHICLE_ENTITY_ID);
-
-        resetGamemode();
       }
+      resetInteraction();
     }
   }
 

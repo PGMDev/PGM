@@ -314,6 +314,44 @@ public interface NMSHacks {
         metadata.dataWatcher);
   }
 
+  static void spawnEntity(Player player, int type, int entityId, Location location) {
+    sendPacket(player, spawnEntityPacket(type, entityId, location));
+  }
+
+  static Packet spawnEntityPacket(int type, int entityId, Location location) {
+    return new PacketPlayOutSpawnEntity(
+        entityId,
+        location.getX(),
+        location.getY(),
+        location.getZ(),
+        0,
+        0,
+        0,
+        (int) location.getPitch(),
+        (int) location.getYaw(),
+        type,
+        0);
+  }
+
+  static void spawnFreezeEntity(Player player, int entityId, boolean legacy) {
+    if (legacy) {
+      Location location = player.getLocation().add(0, 0.286, 0);
+      if (location.getY() < -64) {
+        location.setY(-64);
+        player.teleport(location);
+      }
+
+      NMSHacks.spawnEntity(player, 66, entityId, location);
+    } else {
+      Location loc = player.getLocation().subtract(0, 1.1, 0);
+
+      NMSHacks.EntityMetadata metadata = NMSHacks.createEntityMetadata();
+      NMSHacks.setEntityMetadata(metadata, false, false, false, false, true, (short) 0);
+      NMSHacks.setArmorStandFlags(metadata, false, false, false, false);
+      NMSHacks.spawnLivingEntity(player, EntityType.ARMOR_STAND, entityId, loc, metadata);
+    }
+  }
+
   static void entityAttach(Player player, int entityID, int vehicleID, boolean leash) {
     sendPacket(player, new PacketPlayOutAttachEntity(entityID, vehicleID, leash));
   }

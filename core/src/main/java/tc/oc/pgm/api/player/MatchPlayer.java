@@ -169,8 +169,8 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
    */
   boolean canSee(MatchPlayer other);
 
-  /** Reset the {@link MatchPlayer} when changing between {@link org.bukkit.GameMode}s. */
-  void resetGamemode();
+  /** Reset the {@link MatchPlayer} ability to interact with the world . */
+  void resetInteraction();
 
   /** Reset the {@link #getInventory()} of the {@link MatchPlayer}. */
   void resetInventory();

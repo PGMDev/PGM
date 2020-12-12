@@ -33,6 +33,10 @@ public abstract class State {
     this.options = smm.getRespawnOptions();
   }
 
+  public boolean isCurrent() {
+    return entered && !exited;
+  }
+
   public void enterState() {
     if (exited) {
       throw new IllegalStateException("Tried to enter already exited state " + this);

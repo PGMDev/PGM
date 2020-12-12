@@ -218,7 +218,6 @@ public class MatchImpl implements Match {
         end.set(System.currentTimeMillis());
       }
 
-      getPlayers().forEach(MatchPlayer::resetGamemode);
       return true;
     }
     return false;

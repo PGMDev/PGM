@@ -29,7 +29,8 @@ public abstract class Spawning extends Participating {
     super.enterState();
 
     player.setDead(true);
-    player.resetGamemode();
+    player.resetInteraction();
+    player.resetVisibility();
   }
 
   public void requestSpawn() {
