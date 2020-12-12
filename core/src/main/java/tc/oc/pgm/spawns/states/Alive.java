@@ -2,6 +2,7 @@ package tc.oc.pgm.spawns.states;
 
 import java.util.List;
 import javax.annotation.Nullable;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -9,7 +10,6 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -42,7 +42,7 @@ public class Alive extends Participating {
 
     player.reset();
     player.setDead(false);
-    player.resetGamemode();
+    player.resetInteraction();
 
     // Fire Bukkit's event
     PlayerRespawnEvent respawnEvent = new PlayerRespawnEvent(player.getBukkit(), location, false);
@@ -65,7 +65,9 @@ public class Alive extends Participating {
     }
 
     player.setVisible(true);
-    player.resetGamemode();
+    player.resetVisibility();
+    player.setGameMode(GameMode.SURVIVAL);
+    bukkit.setAllowFlight(false);
 
     // Apply spawn kit
     spawn.applyKit(player);
@@ -107,7 +109,8 @@ public class Alive extends Participating {
   @Override
   public void onEvent(PlayerDeathEvent event) {
     // Prevent default death, but allow item drops
-    bukkit.setHealth(player.getBukkit().getMaxHealth());
+    bukkit.setMaxHealth(20);
+    bukkit.setHealth(bukkit.getMaxHealth());
   }
 
   @Override
@@ -120,11 +123,11 @@ public class Alive extends Participating {
   public void die(@Nullable ParticipantState killer) {
     player.setDead(true);
 
-    // setting a player's gamemode resets their fall distance
-    // we need the fall distance for the death message
-    // we set the fall distance back to 0 when we refresh the player
+    // Setting a player's gamemode resets their fall distance.
+    // We need the fall distance for the death message.
+    // We set the fall distance back to 0 when we refresh the player.
     float fallDistance = bukkit.getFallDistance();
-    player.resetGamemode();
+    bukkit.setGameMode(GameMode.CREATIVE);
     bukkit.setFallDistance(fallDistance);
 
     playDeathEffect(killer);
@@ -145,27 +148,6 @@ public class Alive extends Participating {
         bukkit.removePotionEffect(effect.getType());
       }
     }
-
-    // Flash/wobble the screen. If we don't delay this then the client glitches out
-    // when the player dies from a potion effect. I have no idea why it happens,
-    // but this fixes it. We could investigate a better fix at some point.
-    smm.getMatch()
-        .getExecutor(MatchScope.LOADED)
-        .execute(
-            () -> {
-              if (bukkit.isOnline()) {
-                bukkit.addPotionEffect(
-                    new PotionEffect(
-                        PotionEffectType.BLINDNESS,
-                        options.blackout ? Integer.MAX_VALUE : 21,
-                        0,
-                        true,
-                        false),
-                    true);
-                bukkit.addPotionEffect(
-                    new PotionEffect(PotionEffectType.CONFUSION, 100, 0, true, false), true);
-              }
-            });
   }
 
   private void playDeathSound(@Nullable ParticipantState killer) {
