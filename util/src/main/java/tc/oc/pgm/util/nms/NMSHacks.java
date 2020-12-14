@@ -475,7 +475,7 @@ public interface NMSHacks {
 
   static void playDeathAnimation(Player player) {
     EntityPlayer handle = ((CraftPlayer) player).getHandle();
-    PacketPlayOutEntityMetadata packet =
+    PacketPlayOutEntityMetadata metadata =
         new PacketPlayOutEntityMetadata(handle.getId(), handle.getDataWatcher(), false);
 
     // Add/replace health to zero
@@ -483,25 +483,32 @@ public interface NMSHacks {
     DataWatcher.WatchableObject zeroHealth =
         new DataWatcher.WatchableObject(3, 6, 0f); // type 3 (float), index 6 (health)
 
-    if (packet.b != null) {
-      for (int i = 0; i < packet.b.size(); i++) {
-        DataWatcher.WatchableObject wo = packet.b.get(i);
+    if (metadata.b != null) {
+      for (int i = 0; i < metadata.b.size(); i++) {
+        DataWatcher.WatchableObject wo = metadata.b.get(i);
         if (wo.a() == 6) {
-          packet.b.set(i, zeroHealth);
+          metadata.b.set(i, zeroHealth);
           replaced = true;
         }
       }
     }
 
     if (!replaced) {
-      if (packet.b == null) {
-        packet.b = Collections.singletonList(zeroHealth);
-      } else {
-        packet.b.add(zeroHealth);
-      }
+      if (metadata.b != null) metadata.b.add(zeroHealth);
+      else metadata.b = Collections.singletonList(zeroHealth);
     }
 
-    sendPacketToViewers(player, packet);
+    Location location = player.getLocation();
+    PacketPlayOutBed useBed =
+        new PacketPlayOutBed(
+            ((CraftPlayer) player).getHandle(),
+            new BlockPosition(location.getX(), location.getY(), location.getZ()));
+
+    Packet<?> teleport = teleportEntityPacket(player.getEntityId(), location);
+
+    sendPacketToViewers(player, metadata);
+    sendPacketToViewers(player, useBed);
+    sendPacketToViewers(player, teleport);
   }
 
   static org.bukkit.enchantments.Enchantment getEnchantment(String key) {

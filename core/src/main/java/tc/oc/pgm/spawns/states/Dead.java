@@ -11,7 +11,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -25,7 +24,7 @@ import tc.oc.pgm.util.nms.NMSHacks;
 
 /** Player is waiting to respawn after dying in-game */
 public class Dead extends Spawning {
-  private static final long CORPSE_ROT_TICKS = PGM.get().getConfiguration().getDeathTicks();
+  private static final long CORPSE_ROT_TICKS = 20;
 
   private static final PotionEffect CONFUSION =
       new PotionEffect(PotionEffectType.CONFUSION, 100, 0, true, false);
