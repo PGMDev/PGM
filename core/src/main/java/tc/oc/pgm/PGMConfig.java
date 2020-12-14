@@ -69,7 +69,6 @@ public final class PGMConfig implements Config {
   // gameplay.*
   private final boolean woolRefill;
   private final int griefScore;
-  private final int deathTicks;
 
   // join.*
   private final long minPlayers;
@@ -165,8 +164,6 @@ public final class PGMConfig implements Config {
     this.verboseStats = parseBoolean(config.getString("ui.verbose-stats", "false"));
     this.griefScore =
         parseInteger(config.getString("gameplay.grief-score", "-10"), Range.atMost(0));
-    this.deathTicks =
-        parseInteger(config.getString("gameplay.death-ticks", "15"), Range.closed(0, 20));
 
     this.minPlayers = parseInteger(config.getString("join.min-players", "1"));
     this.limitJoin = parseBoolean(config.getString("join.limit", "true"));
@@ -519,11 +516,6 @@ public final class PGMConfig implements Config {
   @Override
   public int getGriefScore() {
     return griefScore;
-  }
-
-  @Override
-  public int getDeathTicks() {
-    return deathTicks;
   }
 
   @Override
