@@ -56,6 +56,8 @@ public class DeathMessageMatchModule implements MatchModule, Listener {
             viewer.sendMessage(message.decoration(TextDecoration.BOLD, true));
           } else if (isFriendInvolved(viewer.getBukkit(), event)) {
             viewer.sendMessage(message);
+          } else if (event.isTeamKill() && viewer.getBukkit().hasPermission(Permissions.STAFF)) {
+            viewer.sendMessage(message.decoration(TextDecoration.ITALIC, true));
           }
           break;
         case DEATH_ALL:
