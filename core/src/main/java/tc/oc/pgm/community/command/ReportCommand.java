@@ -39,7 +39,7 @@ import tc.oc.pgm.community.events.PlayerReportEvent;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.UsernameFormatUtils;
-import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.adventure.Audience;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.PeriodFormats;
 import tc.oc.pgm.util.text.TextFormatter;

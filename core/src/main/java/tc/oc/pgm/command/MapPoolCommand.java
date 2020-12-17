@@ -33,7 +33,7 @@ import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.Rotation;
 import tc.oc.pgm.rotation.VotingPool;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
-import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.adventure.Audience;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;

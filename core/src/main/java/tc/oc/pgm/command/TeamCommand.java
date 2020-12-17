@@ -19,7 +19,7 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.adventure.Audience;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;

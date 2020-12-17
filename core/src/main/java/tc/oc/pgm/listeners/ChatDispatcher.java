@@ -45,9 +45,9 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.ffa.Tribute;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.UsernameFormatUtils;
+import tc.oc.pgm.util.adventure.Audience;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
-import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
 

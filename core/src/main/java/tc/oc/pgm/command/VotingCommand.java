@@ -25,7 +25,7 @@ import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.VotingPool;
 import tc.oc.pgm.util.UsernameFormatUtils;
-import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.adventure.Audience;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;

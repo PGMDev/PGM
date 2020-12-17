@@ -11,7 +11,7 @@ import tc.oc.pgm.restart.RestartManager;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.timelimit.TimeLimitCountdown;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
-import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.adventure.Audience;
 
 public final class CancelCommand {
 

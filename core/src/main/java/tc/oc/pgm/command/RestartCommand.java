@@ -11,7 +11,7 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.restart.RequestRestartEvent;
 import tc.oc.pgm.restart.RestartManager;
-import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.adventure.Audience;
 
 public final class RestartCommand {
 

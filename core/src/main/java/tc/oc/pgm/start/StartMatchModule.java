@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
@@ -79,6 +80,9 @@ public class StartMatchModule implements MatchModule, Listener {
   @Override
   public void load() {
     update();
+    // Schedule an update to prevent the unready bar deciding it wants to hide itself
+    // This is probably because of async magic
+    match.getExecutor(MatchScope.LOADED).schedule(this::update, 1, TimeUnit.SECONDS);
   }
 
   @EventHandler
@@ -242,7 +246,7 @@ public class StartMatchModule implements MatchModule, Listener {
     }
   }
 
-  private void update() {
+  public void update() {
     final StartCountdown countdown = cc().getCountdown(StartCountdown.class);
     final boolean ready = canStart(countdown != null && countdown.isForced());
     final boolean empty = match.getPlayers().isEmpty();
@@ -254,10 +258,10 @@ public class StartMatchModule implements MatchModule, Listener {
 
     unreadyBar.name(formatUnreadyReason());
 
-    if (!ready && isAutoStart()) {
+    if (!ready && isAutoStart() && !empty) {
+      match.hideBossBar(unreadyBar);
       match.showBossBar(unreadyBar);
-    }
-    else if (!empty) {
+    } else if (!empty) {
       match.hideBossBar(unreadyBar);
     }
 
@@ -269,17 +273,15 @@ public class StartMatchModule implements MatchModule, Listener {
     }
   }
 
+  // We refresh the bossbar whenever a player leaves/joins to ensure everybody gets to see it
+
   @EventHandler
   public void onJoin(PlayerJoinMatchEvent event) {
-    if (match.getPlayers().size() == 1) {
-      update();
-    }
+    if (!match.isRunning()) update();
   }
 
   @EventHandler
   public void onLeave(PlayerLeaveMatchEvent event) {
-    if (match.getPlayers().isEmpty()) {
-      update();
-    }
+    if (!match.isRunning()) update();
   }
 }
