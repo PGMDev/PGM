@@ -28,7 +28,7 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.features.MatchFeatureContext;
 import tc.oc.pgm.filters.query.Query;
-import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.adventure.Audience;
 
 /**
  * A PvP game that takes place in a {@link World} loaded with a {@link MapInfo}.

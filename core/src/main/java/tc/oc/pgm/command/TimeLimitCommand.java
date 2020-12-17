@@ -13,7 +13,7 @@ import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.timelimit.TimeLimit;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.adventure.Audience;
 
 public final class TimeLimitCommand {
 

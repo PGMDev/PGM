@@ -12,7 +12,7 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.match.ObservingParty;
-import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.adventure.Audience;
 import tc.oc.pgm.util.named.Named;
 
 /**
@@ -61,9 +61,9 @@ public interface Party extends Audience, Named {
   String getDefaultName();
 
   /**
-   * Get whether {@link #getDisplayName()} is grammatically a plural word.
+   * Get whether {@link #getDefaultName()} is grammatically a plural word.
    *
-   * @return Whether {@link #getDisplayName()} is plural.
+   * @return Whether {@link #getDefaultName()} is plural.
    */
   boolean isNamePlural();
 

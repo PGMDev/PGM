@@ -10,7 +10,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.start.StartCountdown;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
-import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.adventure.Audience;
 import tc.oc.pgm.util.text.TextException;
 
 public final class StartCommand {
