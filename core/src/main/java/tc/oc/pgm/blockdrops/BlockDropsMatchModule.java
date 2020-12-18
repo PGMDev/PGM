@@ -93,10 +93,7 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
   private void dropExperience(BlockDrops drops, Location location) {
     if (drops.experience != 0) {
       ExperienceOrb expOrb =
-          (ExperienceOrb)
-              location
-                  .getWorld()
-                  .spawnEntity(location.toCenterLocation(), EntityType.EXPERIENCE_ORB);
+          (ExperienceOrb) location.getWorld().spawnEntity(location, EntityType.EXPERIENCE_ORB);
       if (expOrb != null) {
         expOrb.setExperience(drops.experience);
       }
