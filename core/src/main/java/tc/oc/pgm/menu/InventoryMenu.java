@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.WeakHashMap;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

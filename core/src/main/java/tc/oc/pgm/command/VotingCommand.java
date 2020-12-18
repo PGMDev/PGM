@@ -1,5 +1,10 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.event.ClickEvent.runCommand;
+import static net.kyori.adventure.text.event.HoverEvent.showText;
+
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.bukkit.parametric.Type;
@@ -7,13 +12,9 @@ import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
 import app.ashcon.intake.parametric.annotation.Text;
 import java.util.List;
 import java.util.stream.Collectors;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.event.ClickEvent;
-import net.kyori.text.event.HoverEvent;
-import net.kyori.text.event.HoverEvent.Action;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.Permissions;
@@ -23,8 +24,8 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.VotingPool;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.UsernameFormatUtils;
-import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -46,9 +47,9 @@ public class VotingCommand {
     VotingPool vote = getVotingPool(sender, mapOrder);
 
     Component addMessage =
-        TranslatableComponent.of(
+        translatable(
             "vote.add",
-            TextColor.GRAY,
+            NamedTextColor.GRAY,
             UsernameFormatUtils.formatStaffName(sender, match),
             map.getStyledName(MapNameStyle.COLOR));
 
@@ -60,7 +61,7 @@ public class VotingCommand {
     if (vote.getOptions().addVote(map)) {
       ChatDispatcher.broadcastAdminChatMessage(addMessage, match);
     } else {
-      viewer.sendWarning(TranslatableComponent.of("vote.limit", TextColor.RED));
+      viewer.sendWarning(translatable("vote.limit", NamedTextColor.RED));
     }
   }
 
@@ -79,14 +80,14 @@ public class VotingCommand {
     VotingPool vote = getVotingPool(sender, mapOrder);
     if (vote.getOptions().removeMap(map)) {
       ChatDispatcher.broadcastAdminChatMessage(
-          TranslatableComponent.of(
+          translatable(
               "vote.remove",
-              TextColor.GRAY,
+              NamedTextColor.GRAY,
               UsernameFormatUtils.formatStaffName(sender, match),
               map.getStyledName(MapNameStyle.COLOR)),
           match);
     } else {
-      viewer.sendWarning(TranslatableComponent.of("map.notFound"));
+      viewer.sendWarning(translatable("map.notFound"));
     }
   }
 
@@ -98,13 +99,13 @@ public class VotingCommand {
       throws CommandException {
     VotingPool vote = getVotingPool(sender, mapOrder);
     Component voteModeName =
-        TranslatableComponent.of(
+        translatable(
             vote.getOptions().toggleMode() ? "vote.mode.replace" : "vote.mode.create",
-            TextColor.LIGHT_PURPLE);
+            NamedTextColor.LIGHT_PURPLE);
     ChatDispatcher.broadcastAdminChatMessage(
-        TranslatableComponent.of(
+        translatable(
             "vote.toggle",
-            TextColor.GRAY,
+            NamedTextColor.GRAY,
             UsernameFormatUtils.formatStaffName(sender, match),
             voteModeName),
         match);
@@ -123,16 +124,16 @@ public class VotingCommand {
             .map(mi -> mi.getStyledName(MapNameStyle.COLOR))
             .collect(Collectors.toList());
     Component clearedMsg =
-        TranslatableComponent.of(
+        translatable(
             "vote.remove",
-            TextColor.GRAY,
+            NamedTextColor.GRAY,
             UsernameFormatUtils.formatStaffName(sender, match),
-            TextFormatter.list(maps, TextColor.GRAY));
+            TextFormatter.list(maps, NamedTextColor.GRAY));
 
     vote.getOptions().clear();
 
     if (maps.isEmpty()) {
-      viewer.sendWarning(TranslatableComponent.of("vote.noMapsFound"));
+      viewer.sendWarning(translatable("vote.noMapsFound"));
     } else {
       ChatDispatcher.broadcastAdminChatMessage(clearedMsg, match);
     }
@@ -148,39 +149,39 @@ public class VotingCommand {
     int currentMaps = vote.getOptions().getCustomVoteMaps().size();
     TextColor listNumColor =
         currentMaps >= VotingPool.MIN_CUSTOM_VOTE_OPTIONS
-            ? currentMaps < VotingPool.MAX_VOTE_OPTIONS ? TextColor.GREEN : TextColor.YELLOW
-            : TextColor.RED;
+            ? currentMaps < VotingPool.MAX_VOTE_OPTIONS
+                ? NamedTextColor.GREEN
+                : NamedTextColor.YELLOW
+            : NamedTextColor.RED;
 
     String modeKey = vote.getOptions().isReplace() ? "replace" : "create";
     Component mode =
-        TranslatableComponent.of(String.format("vote.mode.%s", modeKey), TextColor.LIGHT_PURPLE)
-            .hoverEvent(
-                HoverEvent.of(
-                    Action.SHOW_TEXT, TranslatableComponent.of("vote.mode.hover", TextColor.AQUA)))
-            .clickEvent(ClickEvent.runCommand("/vote mode"));
+        translatable(String.format("vote.mode.%s", modeKey), NamedTextColor.LIGHT_PURPLE)
+            .hoverEvent(showText(translatable("vote.mode.hover", NamedTextColor.AQUA)))
+            .clickEvent(runCommand("/vote mode"));
 
     Component listMsg =
-        TextComponent.builder()
-            .append(TranslatableComponent.of("vote.title.selection"))
-            .append(": (")
-            .append(Integer.toString(currentMaps), listNumColor)
-            .append("/")
-            .append(Integer.toString(VotingPool.MAX_VOTE_OPTIONS), TextColor.RED)
-            .append(") ")
-            .append("\u00BB", TextColor.GOLD)
-            .append(" [")
+        text()
+            .append(translatable("vote.title.selection"))
+            .append(text(": ("))
+            .append(text(currentMaps, listNumColor))
+            .append(text("/"))
+            .append(text(VotingPool.MAX_VOTE_OPTIONS, NamedTextColor.RED))
+            .append(text(") "))
+            .append(text("\u00BB", NamedTextColor.GOLD))
+            .append(text(" ["))
             .append(mode)
-            .append("]")
-            .color(TextColor.GRAY)
+            .append(text("]"))
+            .color(NamedTextColor.GRAY)
             .build();
     viewer.sendMessage(listMsg);
 
     int index = 1;
     for (MapInfo mi : vote.getOptions().getCustomVoteMaps()) {
       Component indexedName =
-          TextComponent.builder()
-              .append(Integer.toString(index), TextColor.YELLOW)
-              .append(". ", TextColor.WHITE)
+          text()
+              .append(text(index, NamedTextColor.YELLOW))
+              .append(text(". ", NamedTextColor.WHITE))
               .append(mi.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS))
               .build();
       viewer.sendMessage(indexedName);

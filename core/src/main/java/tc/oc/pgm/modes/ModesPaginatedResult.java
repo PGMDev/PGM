@@ -1,13 +1,15 @@
 package tc.oc.pgm.modes;
 
+import static net.kyori.adventure.text.Component.text;
+
 import com.google.common.base.Preconditions;
 import java.time.Duration;
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextDecoration;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import tc.oc.pgm.util.PrettyPaginatedResult;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.text.TextTranslations;
 
 /** Class used to display a paginated list of monument modes */
 public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountdown> {
@@ -20,36 +22,27 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
   }
 
   @Override
-  public String format(ModeChangeCountdown countdown, int index) {
+  public Component format(ModeChangeCountdown countdown, int index) {
     String materialName = countdown.getMode().getPreformattedMaterialName();
     Duration timeFromStart = countdown.getMode().getAfter();
 
-    StringBuilder builder = new StringBuilder();
+    TextComponent.Builder builder = text();
 
-    builder.append(ChatColor.GOLD).append(index + 1).append(". ");
-    builder.append(ChatColor.LIGHT_PURPLE).append(materialName).append(" - ");
-    builder.append(ChatColor.AQUA).append(TimeUtils.formatDuration(timeFromStart));
+    builder.append(text((index + 1) + ". ", NamedTextColor.GOLD));
+    builder.append(text(materialName + " - ", NamedTextColor.LIGHT_PURPLE));
+    builder.append(text(TimeUtils.formatDuration(timeFromStart), NamedTextColor.AQUA));
 
     if (countdown.getMatch().isRunning()) {
-      builder
-          .append(ChatColor.DARK_AQUA)
-          .append(" (")
-          .append(this.formatSingleCountdown(countdown))
-          .append(')');
+      builder.append(
+          text(" (" + this.formatSingleCountdown(countdown) + ')', NamedTextColor.DARK_AQUA));
     }
 
-    if (this.isExpired(countdown)) {
-      return TextTranslations.translateLegacy(
-          TextComponent.of(builder.toString()).decoration(TextDecoration.STRIKETHROUGH, true),
-          null);
-    } else {
-      return builder.toString();
-    }
+    return builder.decoration(TextDecoration.STRIKETHROUGH, this.isExpired(countdown)).build();
   }
 
   /**
    * Formats a {@link tc.oc.pgm.modes.ModeChangeCountdown} to the following format 'm:ss' and
-   * appends 'left' to the text
+   * appends 'left' to the text //TODO make translatable
    *
    * @param countdown to format
    * @return Formatted text

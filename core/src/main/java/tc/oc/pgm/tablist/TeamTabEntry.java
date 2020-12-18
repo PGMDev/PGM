@@ -1,9 +1,11 @@
 package tc.oc.pgm.tablist;
 
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import static net.kyori.adventure.text.Component.space;
+import static net.kyori.adventure.text.Component.text;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.md_5.bungee.api.chat.BaseComponent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.tablist.DynamicTabEntry;
@@ -22,13 +24,16 @@ public class TeamTabEntry extends DynamicTabEntry {
   @Override
   public BaseComponent[] getContent(TabView view) {
     Component content =
-        TextComponent.builder()
-            .append(String.valueOf(team.getPlayers().size()), TextColor.WHITE)
-            .append("/", TextColor.DARK_GRAY)
-            .append(String.valueOf(team.getMaxPlayers()), TextColor.GRAY)
-            .append(" ")
+        text()
+            .append(text(team.getPlayers().size(), NamedTextColor.WHITE))
+            .append(text("/", NamedTextColor.DARK_GRAY))
+            .append(text(team.getMaxPlayers(), NamedTextColor.GRAY))
+            .append(space())
             .append(
-                team.getShortName(), TextFormatter.convert(team.getColor()), TextDecoration.BOLD)
+                text(
+                    team.getShortName(),
+                    TextFormatter.convert(team.getColor()),
+                    TextDecoration.BOLD))
             .build();
 
     return TextTranslations.toBaseComponentArray(content, view.getViewer());

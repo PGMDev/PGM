@@ -1,8 +1,9 @@
 package tc.oc.pgm.broadcast;
 
+import static net.kyori.adventure.text.Component.empty;
+
 import java.time.Duration;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.countdowns.MatchCountdown;
@@ -27,7 +28,7 @@ public class BroadcastCountdown extends MatchCountdown {
 
   @Override
   protected Component formatText() {
-    return TextComponent.empty();
+    return empty();
   }
 
   @Override

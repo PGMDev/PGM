@@ -1,8 +1,9 @@
 package tc.oc.pgm.goals;
 
+import static net.kyori.adventure.text.Component.text;
+
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 
@@ -39,7 +40,7 @@ public abstract class GoalDefinition extends SelfIdentifyingFeatureDefinition {
   }
 
   public Component getComponentName() {
-    return TextComponent.of(getName());
+    return text(getName());
   }
 
   public @Nullable Boolean isRequired() {

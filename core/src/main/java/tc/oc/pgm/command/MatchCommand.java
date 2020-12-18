@@ -1,18 +1,21 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.join;
+import static net.kyori.adventure.text.Component.space;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import app.ashcon.intake.Command;
-import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextColor;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.match.Match;
@@ -27,9 +30,9 @@ import tc.oc.pgm.goals.ProximityGoal;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.pgm.util.LegacyFormatUtils;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;
 
 // TODO: improve format and translate
@@ -43,83 +46,78 @@ public final class MatchCommand {
     boolean haveGameInfo =
         match.getPhase() == MatchPhase.RUNNING || match.getPhase() == MatchPhase.FINISHED;
 
-    sender.sendMessage(
-        LegacyFormatUtils.horizontalLineHeading(
-            ChatColor.YELLOW
-                + TextTranslations.translate("match.title", sender)
-                + " #"
-                + match.getId(),
-            ChatColor.WHITE,
-            LegacyFormatUtils.MAX_CHAT_WIDTH));
+    viewer.sendMessage(
+        TextFormatter.horizontalLineHeading(
+            sender,
+            translatable("match.title")
+                .append(text(" #" + match.getId()))
+                .color(NamedTextColor.YELLOW),
+            NamedTextColor.WHITE,
+            TextFormatter.MAX_CHAT_WIDTH));
 
     if (haveGameInfo) {
       // show match time
-      sender.sendMessage(
-          ChatColor.DARK_PURPLE
-              + TextTranslations.translate("match.info.time", sender)
-              + ": "
-              + ChatColor.GOLD
-              + TimeUtils.formatDuration(match.getDuration()));
+      viewer.sendMessage(
+          translatable("match.info.time", NamedTextColor.DARK_PURPLE)
+              .append(text(": ", NamedTextColor.DARK_PURPLE))
+              .append(text(TimeUtils.formatDuration(match.getDuration()), NamedTextColor.GOLD)));
     }
 
     TeamMatchModule tmm = match.getModule(TeamMatchModule.class);
     FreeForAllMatchModule ffamm = match.getModule(FreeForAllMatchModule.class);
-    List<String> teamCountParts = Lists.newArrayList();
+    List<Component> teamCountParts = Lists.newArrayList();
 
     if (tmm != null) {
       for (Team team : tmm.getTeams()) {
-        StringBuilder msg = new StringBuilder();
+        TextComponent.Builder msg = text();
 
         String teamName = team.getNameLegacy();
         if (teamName.endsWith(" Team")) teamName = teamName.substring(0, teamName.length() - 5);
 
-        msg.append(team.getColor())
-            .append(teamName)
-            .append(ChatColor.GRAY)
-            .append(": ")
-            .append(ChatColor.WHITE)
+        msg.append(text(teamName, TextFormatter.convert(team.getColor())))
             .append(
-                team.getPlayers().stream()
-                    .filter(mp -> !mp.isVanished())
-                    .collect(Collectors.toList())
-                    .size());
+                text(": ", NamedTextColor.GRAY)
+                    .append(
+                        text(
+                            team.getPlayers().stream().filter(mp -> !mp.isVanished()).count(),
+                            NamedTextColor.WHITE)));
 
         if (team.getMaxPlayers() != Integer.MAX_VALUE) {
-          msg.append(ChatColor.GRAY).append("/").append(team.getMaxPlayers());
+          msg.append(text("/" + team.getMaxPlayers(), NamedTextColor.GRAY));
         }
 
-        teamCountParts.add(msg.toString());
+        teamCountParts.add(msg.build());
       }
     } else if (ffamm != null) {
       teamCountParts.add(
-          ChatColor.YELLOW
-              + TextTranslations.translate("match.info.players", sender)
-              + ChatColor.GRAY
-              + ": "
-              + ChatColor.WHITE
-              + match.getParticipants().size()
-              + ChatColor.GRAY
-              + '/'
-              + ffamm.getMaxPlayers());
+          text()
+              .append(
+                  translatable("match.info.players", NamedTextColor.YELLOW)
+                      .append(text(": ", NamedTextColor.GRAY))
+                      .append(text(match.getParticipants().size(), NamedTextColor.WHITE))
+                      .append(text('/' + ffamm.getMaxPlayers(), NamedTextColor.GRAY)))
+              .build());
     }
 
     teamCountParts.add(
-        ChatColor.AQUA
-            + TextTranslations.translate("match.info.observers", sender)
-            + ChatColor.GRAY
-            + ": "
-            + ChatColor.WHITE
-            + match.getObservers().stream()
-                .filter(mp -> !mp.isVanished())
-                .collect(Collectors.toList())
-                .size());
+        text()
+            .append(
+                text(
+                    TextTranslations.translate("match.info.observers", sender),
+                    NamedTextColor.AQUA))
+            .append(text(": ", NamedTextColor.GRAY))
+            .append(
+                text(
+                    match.getObservers().stream().filter(mp -> !mp.isVanished()).count(),
+                    NamedTextColor.WHITE))
+            .build());
 
-    sender.sendMessage(Joiner.on(ChatColor.DARK_GRAY + " | ").join(teamCountParts));
+    viewer.sendMessage(join(text(" | ", NamedTextColor.DARK_GRAY), teamCountParts));
 
     GoalMatchModule gmm = match.getModule(GoalMatchModule.class);
     if (haveGameInfo && gmm != null) {
       if (tmm != null && gmm.getGoalsByCompetitor().size() > 0) {
-        Multimap<Team, String> teamGoalTexts = HashMultimap.create();
+        Multimap<Team, Component> teamGoalTexts = HashMultimap.create();
 
         MatchPlayer player = getMatchPlayer(sender, match);
 
@@ -137,19 +135,20 @@ public final class MatchCommand {
         }
 
         if (!teamGoalTexts.isEmpty()) {
-          sender.sendMessage(
-              ChatColor.DARK_PURPLE + TextTranslations.translate("match.info.goals", sender) + ":");
+          viewer.sendMessage(
+              translatable("match.info.goals").append(text(":")).color(NamedTextColor.DARK_PURPLE));
 
-          for (Map.Entry<Team, Collection<String>> entry : teamGoalTexts.asMap().entrySet()) {
+          for (Map.Entry<Team, Collection<Component>> entry : teamGoalTexts.asMap().entrySet()) {
             Team team = entry.getKey();
-            Collection<String> goalTexts = entry.getValue();
+            Collection<Component> goalTexts = entry.getValue();
 
             viewer.sendMessage(
-                TextComponent.builder()
-                    .append("  ")
+                text()
+                    .append(space())
+                    .append(space())
                     .append(team.getName())
-                    .append(": ", TextColor.GRAY)
-                    .append(Joiner.on("  ").join(goalTexts))
+                    .append(text(": ", NamedTextColor.GRAY))
+                    .append(join(text("  "), goalTexts))
                     .build());
           }
         }
@@ -168,23 +167,27 @@ public final class MatchCommand {
   }
 
   // Modified from SidebarMatchModule to make formatting easier
-  private static String renderGoal(
+  private static Component renderGoal(
       Goal<?> goal, @Nullable Competitor competitor, Party viewingParty) {
-    StringBuilder sb = new StringBuilder(" ");
+    TextComponent.Builder sb = text().append(space());
 
-    sb.append(goal.renderSidebarStatusColor(competitor, viewingParty));
-    sb.append(goal.renderSidebarStatusText(competitor, viewingParty));
+    sb.append(
+        text(
+            goal.renderSidebarStatusText(competitor, viewingParty),
+            TextFormatter.convert(goal.renderSidebarStatusColor(competitor, viewingParty))));
 
     if (goal instanceof ProximityGoal) {
-      sb.append(" ");
+      sb.append(space());
       // Show teams their own proximity on shared goals
-      sb.append(((ProximityGoal) goal).renderProximity(competitor, viewingParty));
+      sb.append(text(((ProximityGoal) goal).renderProximity(competitor, viewingParty)));
     }
 
-    sb.append(" ");
-    sb.append(goal.renderSidebarLabelColor(competitor, viewingParty));
-    sb.append(goal.renderSidebarLabelText(competitor, viewingParty));
+    sb.append(space());
+    sb.append(
+        text(
+            goal.renderSidebarLabelText(competitor, viewingParty),
+            TextFormatter.convert(goal.renderSidebarLabelColor(competitor, viewingParty))));
 
-    return sb.toString();
+    return sb.build();
   }
 }

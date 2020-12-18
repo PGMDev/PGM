@@ -28,7 +28,7 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.features.MatchFeatureContext;
 import tc.oc.pgm.filters.query.Query;
-import tc.oc.pgm.util.chat.MultiAudience;
+import tc.oc.pgm.util.Audience;
 
 /**
  * A PvP game that takes place in a {@link World} loaded with a {@link MapInfo}.
@@ -38,7 +38,7 @@ import tc.oc.pgm.util.chat.MultiAudience;
  * {@link Match}. This should allow multiple {@link Match}es to run concurrently on the same {@link
  * org.bukkit.Server}, as long as resources are cleaned up after {@link #unload()}.
  */
-public interface Match extends MatchPlayerResolver, MultiAudience, ModuleContext<MatchModule> {
+public interface Match extends MatchPlayerResolver, Audience, ModuleContext<MatchModule> {
 
   /**
    * Get the global {@link Logger} for the {@link Match}.

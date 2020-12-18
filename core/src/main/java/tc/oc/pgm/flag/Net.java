@@ -2,7 +2,7 @@ package tc.oc.pgm.flag;
 
 import com.google.common.collect.ImmutableSet;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.feature.FeatureReference;

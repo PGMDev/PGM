@@ -1,5 +1,7 @@
 package tc.oc.pgm.kits;
 
+import static net.kyori.adventure.text.Component.text;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import org.bukkit.Material;
@@ -95,7 +97,7 @@ public class KitMatchModule implements MatchModule, Listener {
       case HOTBAR_MOVE_AND_READD:
       case COLLECT_TO_CURSOR:
         event.setCancelled(true);
-        player.sendWarning("This piece of armor cannot be removed", true);
+        player.sendWarning(text("This piece of armor cannot be removed"));
         break;
     }
   }

@@ -1,10 +1,11 @@
 package tc.oc.pgm.db;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.text.types.PlayerComponent.player;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.util.UsernameResolver;
@@ -34,9 +35,7 @@ class UsernameImpl implements Username {
 
   @Override
   public Component getName(NameStyle style) {
-    return name == null
-        ? PlayerComponent.UNKNOWN
-        : PlayerComponent.of(Bukkit.getPlayer(id), name, style);
+    return name == null ? PlayerComponent.UNKNOWN : player(Bukkit.getPlayer(id), name, style);
   }
 
   @Override

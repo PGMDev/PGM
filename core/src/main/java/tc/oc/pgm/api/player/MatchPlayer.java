@@ -14,8 +14,8 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.kits.Kit;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.bukkit.ViaUtils;
-import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.Named;
 
 /**

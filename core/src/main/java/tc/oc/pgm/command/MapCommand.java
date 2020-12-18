@@ -1,6 +1,12 @@
 package tc.oc.pgm.command;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.space;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.event.ClickEvent.runCommand;
+import static net.kyori.adventure.text.event.HoverEvent.showText;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
@@ -17,15 +23,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TextComponent.Builder;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.event.ClickEvent;
-import net.kyori.text.event.HoverEvent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent.Builder;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
@@ -35,9 +36,8 @@ import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.rotation.MapPool;
 import tc.oc.pgm.rotation.MapPoolManager;
-import tc.oc.pgm.util.LegacyFormatUtils;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
-import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -82,29 +82,29 @@ public final class MapCommand {
 
     Component title =
         TextFormatter.paginate(
-            TranslatableComponent.of("map.title"),
+            translatable("map.title"),
             page,
             pages,
-            TextColor.DARK_AQUA,
-            TextColor.AQUA,
+            NamedTextColor.DARK_AQUA,
+            NamedTextColor.AQUA,
             true);
-    Component listHeader = TextFormatter.horizontalLineHeading(sender, title, TextColor.BLUE);
+    Component listHeader = TextFormatter.horizontalLineHeading(sender, title, NamedTextColor.BLUE);
 
     new PrettyPaginatedComponentResults<MapInfo>(listHeader, resultsPerPage) {
       @Override
       public Component format(MapInfo map, int index) {
-        return TextComponent.builder()
-            .append(Integer.toString(index + 1))
-            .append(". ")
+        return text()
+            .append(text(index + 1))
+            .append(text(". "))
             .append(
                 map.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS)
                     .hoverEvent(
-                        HoverEvent.showText(
-                            TranslatableComponent.of(
+                        showText(
+                            translatable(
                                 "command.maps.hover",
-                                TextColor.GRAY,
+                                NamedTextColor.GRAY,
                                 map.getStyledName(MapNameStyle.COLOR))))
-                    .clickEvent(ClickEvent.runCommand("/map " + map.getName())))
+                    .clickEvent(runCommand("/map " + map.getName())))
             .build();
       }
     }.display(audience, ImmutableSortedSet.copyOf(maps), page);
@@ -142,24 +142,22 @@ public final class MapCommand {
       usage = "[map name] - defaults to the current map")
   public void map(Audience audience, CommandSender sender, @Text MapInfo map) {
     audience.sendMessage(
-        LegacyFormatUtils.horizontalLineHeading(
-            ChatColor.DARK_AQUA
-                + map.getName()
-                + " "
-                + ChatColor.GRAY
-                + map.getVersion().toString(),
-            ChatColor.RED));
+        TextFormatter.horizontalLineHeading(
+            sender,
+            text(map.getName() + " ", NamedTextColor.DARK_AQUA)
+                .append(text(map.getVersion().toString(), NamedTextColor.GRAY)),
+            NamedTextColor.RED));
 
     audience.sendMessage(
-        TextComponent.builder()
+        text()
             .append(mapInfoLabel("map.info.objective"))
-            .append(map.getDescription(), TextColor.GOLD)
+            .append(text(map.getDescription(), NamedTextColor.GOLD))
             .build());
 
     Collection<Contributor> authors = map.getAuthors();
     if (authors.size() == 1) {
       audience.sendMessage(
-          TextComponent.builder()
+          text()
               .append(mapInfoLabel("map.info.author.singular"))
               .append(formatContribution(authors.iterator().next()))
               .build());
@@ -167,7 +165,7 @@ public final class MapCommand {
       audience.sendMessage(mapInfoLabel("map.info.author.plural"));
       for (Contributor author : authors) {
         audience.sendMessage(
-            TextComponent.builder().append("  ").append(formatContribution(author)).build());
+            text().append(space()).append(space()).append(formatContribution(author)).build());
       }
     }
 
@@ -176,7 +174,7 @@ public final class MapCommand {
       audience.sendMessage(mapInfoLabel("map.info.contributors"));
       for (Contributor contributor : contributors) {
         audience.sendMessage(
-            TextComponent.builder().append("  ").append(formatContribution(contributor)).build());
+            text().append(space()).append(space()).append(formatContribution(contributor)).build());
       }
     }
 
@@ -186,9 +184,9 @@ public final class MapCommand {
       String date = created.format(formatter);
 
       audience.sendMessage(
-          TextComponent.builder()
+          text()
               .append(mapInfoLabel("map.info.created"))
-              .append(date, TextColor.GOLD)
+              .append(text(date, NamedTextColor.GOLD))
               .build());
     }
 
@@ -198,24 +196,24 @@ public final class MapCommand {
       int i = 0;
       for (String rule : map.getRules()) {
         audience.sendMessage(
-            TextComponent.builder()
-                .append(++i + ") ", TextColor.WHITE)
-                .append(rule, TextColor.GOLD)
+            text()
+                .append(text(++i + ") ", NamedTextColor.WHITE))
+                .append(text(rule, NamedTextColor.GOLD))
                 .build());
       }
     }
 
     audience.sendMessage(
-        TextComponent.builder()
+        text()
             .append(mapInfoLabel("map.info.playerLimit"))
             .append(createPlayerLimitComponent(sender, map))
             .build());
 
     if (sender.hasPermission(Permissions.DEBUG)) {
       audience.sendMessage(
-          TextComponent.builder()
+          text()
               .append(mapInfoLabel("map.info.proto"))
-              .append(map.getProto().toString(), TextColor.GOLD)
+              .append(text(map.getProto().toString(), NamedTextColor.GOLD))
               .build());
     }
 
@@ -230,10 +228,10 @@ public final class MapCommand {
                   .collect(Collectors.joining(", "));
       if (!mapPools.isEmpty()) {
         audience.sendMessage(
-            TextComponent.builder()
+            text()
                 .append(mapInfoLabel("map.info.pools"))
-                .append(TextComponent.of(mapPools))
-                .colorIfAbsent(TextColor.GOLD)
+                .append(text(mapPools))
+                .colorIfAbsent(NamedTextColor.GOLD)
                 .decoration(TextDecoration.BOLD, false)
                 .build());
       }
@@ -243,31 +241,31 @@ public final class MapCommand {
   private Component createTagsComponent(Collection<MapTag> tags) {
     checkNotNull(tags);
 
-    Builder result = TextComponent.builder().append(mapInfoLabel("map.info.tags"));
+    Builder result = text().append(mapInfoLabel("map.info.tags"));
     MapTag[] mapTags = tags.toArray(new MapTag[0]);
     for (int i = 0; i < mapTags.length; i++) {
       if (i != 0) {
-        result.append(TextComponent.space());
+        result.append(space());
       }
 
       String mapTag = mapTags[i].getId();
 
       Component tag =
-          TextComponent.builder()
-              .append("#")
-              .append(mapTag)
-              .clickEvent(ClickEvent.runCommand("/maps -t " + mapTag))
+          text()
+              .append(text("#"))
+              .append(text(mapTag))
+              .clickEvent(runCommand("/maps -t " + mapTag))
               .hoverEvent(
-                  HoverEvent.showText(
-                      TranslatableComponent.of(
+                  showText(
+                      translatable(
                           "map.info.mapTag.hover",
-                          TextColor.GRAY,
-                          TextComponent.of(mapTag, TextColor.GOLD))))
+                          NamedTextColor.GRAY,
+                          text(mapTag, NamedTextColor.GOLD))))
               .build();
 
       result.append(tag);
     }
-    return result.color(TextColor.GOLD).build();
+    return result.color(NamedTextColor.GOLD).build();
   }
 
   private static Component createPlayerLimitComponent(CommandSender sender, MapInfo map) {
@@ -276,41 +274,44 @@ public final class MapCommand {
 
     Collection<Integer> maxPlayers = map.getMaxPlayers();
     if (maxPlayers.isEmpty()) {
-      return TextComponent.empty();
+      return empty();
     } else if (maxPlayers.size() == 1) {
-      return TextComponent.of(maxPlayers.iterator().next().toString(), TextColor.GOLD);
+      return text(maxPlayers.iterator().next().toString(), NamedTextColor.GOLD);
     }
 
     int totalPlayers = maxPlayers.stream().mapToInt(i -> i).sum();
-    Component total = TextComponent.of(Integer.toString(totalPlayers), TextColor.GOLD);
+    Component total = text(totalPlayers, NamedTextColor.GOLD);
 
     String verboseVs = " " + TextTranslations.translate("map.info.playerLimit.vs", sender) + " ";
     Component verbose =
-        TextComponent.builder()
-            .append("(")
+        text()
+            .append(text("("))
             .append(
-                maxPlayers.stream().map(Object::toString).collect(Collectors.joining(verboseVs)))
-            .append(")")
-            .color(TextColor.GRAY)
+                text(
+                    maxPlayers.stream()
+                        .map(Object::toString)
+                        .collect(Collectors.joining(verboseVs))))
+            .append(text(")"))
+            .color(NamedTextColor.GRAY)
             .build();
 
-    return total.append(TextComponent.space()).append(verbose);
+    return total.append(space()).append(verbose);
   }
 
-  private @Nullable Component formatContribution(Contributor contributor) {
+  private Component formatContribution(Contributor contributor) {
     Component componentName = contributor.getName(NameStyle.FANCY);
     if (contributor.getContribution() == null) return componentName;
-    return TextComponent.builder()
+    return text()
         .append(componentName)
-        .append(" - ", TextColor.GRAY)
-        .append(contributor.getContribution(), TextColor.GRAY, TextDecoration.ITALIC)
+        .append(text(" - ", NamedTextColor.GRAY))
+        .append(text(contributor.getContribution(), NamedTextColor.GRAY, TextDecoration.ITALIC))
         .build();
   }
 
   private Component mapInfoLabel(String key) {
-    return TextComponent.builder()
-        .append(TranslatableComponent.of(key, TextColor.DARK_PURPLE, TextDecoration.BOLD))
-        .append(": ")
+    return text()
+        .append(translatable(key, NamedTextColor.DARK_PURPLE, TextDecoration.BOLD))
+        .append(text(": "))
         .build();
   }
 }

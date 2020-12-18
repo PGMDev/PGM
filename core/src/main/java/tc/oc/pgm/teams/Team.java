@@ -78,6 +78,11 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
     return !this.getMatch().isRunning();
   }
 
+  @Override
+  public String getDefaultName() {
+    return info.getDefaultName();
+  }
+
   public String getShortName() {
     String lower = getNameLegacy().toLowerCase();
     if (lower.endsWith(" team")) {

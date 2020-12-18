@@ -4,7 +4,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.time.Duration;
 import java.util.logging.Logger;
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;

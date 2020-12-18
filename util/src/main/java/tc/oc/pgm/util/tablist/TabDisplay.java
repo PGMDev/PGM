@@ -1,12 +1,15 @@
 package tc.oc.pgm.util.tablist;
 
+import static net.kyori.adventure.text.Component.text;
+
+import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import net.kyori.text.TextComponent;
-import net.kyori.text.adapter.bukkit.SpigotTextAdapter;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.minecraft.server.v1_8_R3.Packet;
 import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
@@ -14,6 +17,7 @@ import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.text.TextTranslations;
 
 /**
  * Render arbitrary strings to the TAB list AKA player list. Before this is used with a player,
@@ -94,7 +98,8 @@ public class TabDisplay {
     return y * this.width + x;
   }
 
-  private static final int MAX_COLORS = TextColor.values().length;
+  private static final List<NamedTextColor> COLORS =
+      Lists.newArrayList(NamedTextColor.NAMES.values());
 
   /**
    * Creates an unique, invisible name for the slot. Uses a combination of color-codes and an
@@ -107,14 +112,14 @@ public class TabDisplay {
   private BaseComponent[] slotName(int slot) {
     // This needs to avoid collision with the sidebar, which uses chars 0-15. Eventually we will add
     // a scoreboard API to Commons and this class can cooperate with it in a less hacky way.
-    TextComponent.Builder builder = TextComponent.builder();
-    builder.append(NO_SPACE, TextColor.BLACK); // Avoid collision by adding a §0 on front
+    TextComponent.Builder builder = text();
+    builder.append(text(NO_SPACE, NamedTextColor.BLACK)); // Avoid collision by adding a §0 on front
 
     do {
-      builder.append(NO_SPACE, TextColor.values()[slot % MAX_COLORS]);
-      slot /= MAX_COLORS;
+      builder.append(text(NO_SPACE, COLORS.get(slot % COLORS.size())));
+      slot /= COLORS.size();
     } while (slot > 0);
-    return SpigotTextAdapter.toBungeeCord(builder.build());
+    return TextTranslations.toBaseComponentArray(builder.build(), null);
   }
 
   private String slotTeamName(int slot) {

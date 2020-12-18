@@ -1,9 +1,10 @@
 package tc.oc.pgm.start;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 import java.time.Duration;
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.api.match.Match;
@@ -19,8 +20,8 @@ public class HuddleCountdown extends PreMatchCountdown implements Listener {
 
   @Override
   protected Component formatText() {
-    return TranslatableComponent.of(
-        "countdown.huddleEnd", TextColor.YELLOW, secondsRemaining(TextColor.DARK_RED));
+    return translatable(
+        "countdown.huddleEnd", NamedTextColor.YELLOW, secondsRemaining(NamedTextColor.DARK_RED));
   }
 
   @Override

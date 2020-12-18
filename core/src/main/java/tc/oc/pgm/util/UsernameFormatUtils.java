@@ -1,9 +1,10 @@
 package tc.oc.pgm.util;
 
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import static net.kyori.adventure.text.Component.translatable;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.match.Match;
@@ -18,7 +19,7 @@ import tc.oc.pgm.util.named.NameStyle;
 public class UsernameFormatUtils {
 
   public static final Component CONSOLE_NAME =
-      TranslatableComponent.of("misc.console", TextColor.DARK_AQUA)
+      translatable("misc.console", NamedTextColor.DARK_AQUA)
           .decoration(TextDecoration.ITALIC, true);
 
   public static Component formatStaffName(CommandSender sender, Match match) {

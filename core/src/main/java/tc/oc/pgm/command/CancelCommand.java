@@ -1,8 +1,9 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 import app.ashcon.intake.Command;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.format.NamedTextColor;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.restart.CancelRestartEvent;
@@ -10,7 +11,7 @@ import tc.oc.pgm.restart.RestartManager;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.timelimit.TimeLimitCountdown;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
-import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.Audience;
 
 public final class CancelCommand {
 
@@ -21,8 +22,7 @@ public final class CancelCommand {
   public void cancel(Audience audience, Match match) {
     if (RestartManager.isQueued()) {
       match.callEvent(new CancelRestartEvent());
-      audience.sendMessage(
-          TranslatableComponent.of("admin.cancelRestart.restartUnqueued", TextColor.RED));
+      audience.sendMessage(translatable("admin.cancelRestart.restartUnqueued", NamedTextColor.RED));
       return;
     }
 
@@ -34,6 +34,6 @@ public final class CancelCommand {
 
     match.getCountdown().cancelAll();
     match.needModule(StartMatchModule.class).setAutoStart(false);
-    audience.sendMessage(TranslatableComponent.of("admin.cancelCountdowns", TextColor.GREEN));
+    audience.sendMessage(translatable("admin.cancelCountdowns", NamedTextColor.GREEN));
   }
 }

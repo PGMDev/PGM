@@ -1,15 +1,17 @@
 package tc.oc.pgm.util.text.types;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.event.ClickEvent.runCommand;
+import static net.kyori.adventure.text.event.HoverEvent.showText;
+
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.event.ClickEvent;
-import net.kyori.text.event.HoverEvent;
-import net.kyori.text.event.HoverEvent.Action;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -21,34 +23,33 @@ import tc.oc.pgm.util.named.NameStyle;
 /** PlayerComponent is used to format player names in a consistent manner with optional styling */
 public interface PlayerComponent {
 
-  TextColor OFFLINE_COLOR = TextColor.DARK_AQUA;
-  static Component UNKNOWN =
-      TranslatableComponent.of("misc.unknown", OFFLINE_COLOR, TextDecoration.ITALIC);
+  TextColor OFFLINE_COLOR = NamedTextColor.DARK_AQUA;
+  Component UNKNOWN = translatable("misc.unknown", OFFLINE_COLOR, TextDecoration.ITALIC);
 
-  static Component of(UUID playerId, NameStyle style) {
+  static Component player(UUID playerId, NameStyle style) {
     Player player = Bukkit.getPlayer(playerId);
-    return player != null ? of(player, style) : UNKNOWN;
+    return player != null ? player(player, style) : UNKNOWN;
   }
 
-  static Component of(CommandSender sender, NameStyle style) {
+  static Component player(CommandSender sender, NameStyle style) {
     return sender instanceof Player
-        ? of((Player) sender, style)
-        : TranslatableComponent.of("misc.console", OFFLINE_COLOR);
+        ? player((Player) sender, style)
+        : translatable("misc.console", OFFLINE_COLOR);
   }
 
-  static Component of(Player player, NameStyle style) {
-    return of(player, style, null);
+  static Component player(Player player, NameStyle style) {
+    return player(player, style, null);
   }
 
-  static Component of(Player player, String defName, NameStyle style) {
-    return of(player, defName, style, null);
+  static Component player(Player player, String defName, NameStyle style) {
+    return player(player, defName, style, null);
   }
 
-  static Component of(Player player, NameStyle style, @Nullable Player viewer) {
-    return of(player, "", style, viewer);
+  static Component player(Player player, NameStyle style, @Nullable Player viewer) {
+    return player(player, "", style, viewer);
   }
 
-  static Component of(
+  static Component player(
       @Nullable Player player, String defName, NameStyle style, @Nullable Player viewer) {
     boolean isOffline =
         player == null
@@ -64,15 +65,15 @@ public interface PlayerComponent {
 
     UUID uuid = !isOffline ? player.getUniqueId() : null;
 
-    TextComponent.Builder builder = TextComponent.builder();
+    TextComponent.Builder builder = text();
     if (!isOffline && style.has(NameStyle.Flag.FLAIR)) {
       builder.append(provider.getPrefixComponent(uuid));
     }
 
-    TextComponent.Builder name = TextComponent.builder(player != null ? player.getName() : defName);
+    TextComponent.Builder name = text().content(player != null ? player.getName() : defName);
 
     if (!isOffline && style.has(NameStyle.Flag.DEATH) && isDead(player)) {
-      name.color(TextColor.DARK_GRAY);
+      name.color(NamedTextColor.DARK_GRAY);
     } else if (style.has(NameStyle.Flag.COLOR)) {
       name.color(isOffline ? OFFLINE_COLOR : provider.getColor(uuid));
     }
@@ -83,11 +84,8 @@ public interface PlayerComponent {
       name.decoration(TextDecoration.STRIKETHROUGH, true);
     }
     if (!isOffline && style.has(NameStyle.Flag.TELEPORT)) {
-      name.hoverEvent(
-              HoverEvent.of(
-                  Action.SHOW_TEXT,
-                  TranslatableComponent.of("misc.teleportTo", TextColor.GRAY, name.build())))
-          .clickEvent(ClickEvent.runCommand("/tp " + player.getName()));
+      name.hoverEvent(showText(translatable("misc.teleportTo", NamedTextColor.GRAY, name.build())))
+          .clickEvent(runCommand("/tp " + player.getName()));
     }
 
     builder.append(name);

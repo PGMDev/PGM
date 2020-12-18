@@ -1,10 +1,11 @@
 package tc.oc.pgm.modes;
 
+import static net.kyori.adventure.text.Component.text;
+
 import java.time.Duration;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.material.MaterialData;
 
 public class Mode {
@@ -28,7 +29,7 @@ public class Mode {
     this.after = after;
     this.name = name;
     this.componentName =
-        TextComponent.of(name != null ? name : getPreformattedMaterialName(), TextColor.RED);
+        text(name != null ? name : getPreformattedMaterialName(), NamedTextColor.RED);
     this.showBefore = showBefore;
   }
 

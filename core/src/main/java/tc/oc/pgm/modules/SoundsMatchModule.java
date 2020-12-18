@@ -1,5 +1,9 @@
 package tc.oc.pgm.modules;
 
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
+
+import net.kyori.adventure.sound.Sound;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -18,7 +22,6 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
-import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.wool.PlayerWoolPlaceEvent;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -31,7 +34,8 @@ public class SoundsMatchModule implements MatchModule, Listener {
     }
   }
 
-  private static final Sound RAINDROP_SOUND = new Sound("random.levelup", 1f, 1.5f);
+  private static final Sound RAINDROP_SOUND =
+      sound(key("random.levelup"), Sound.Source.MASTER, 1f, 1.5f);
 
   private void playSound(MatchPlayer player, Sound sound) {
     if (player.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ALL)) {

@@ -1,7 +1,8 @@
 package tc.oc.pgm.result;
 
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
+import static net.kyori.adventure.text.Component.translatable;
+
+import net.kyori.adventure.text.Component;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 
@@ -15,6 +16,6 @@ public class TieVictoryCondition extends ImmediateVictoryCondition {
 
   @Override
   public Component getDescription(Match match) {
-    return TranslatableComponent.of("victoryCondition.tie");
+    return translatable("victoryCondition.tie");
   }
 }

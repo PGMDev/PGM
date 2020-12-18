@@ -1,13 +1,15 @@
 package tc.oc.pgm.portals;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Set;
 import java.util.logging.Logger;
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -35,7 +37,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class PortalModule implements MapModule {
-  private static final Component PROTECT_MESSAGE = TranslatableComponent.of("map.protectPortal");
+  private static final Component PROTECT_MESSAGE = translatable("map.protectPortal");
 
   protected final Set<Portal> portals;
 

@@ -1,10 +1,11 @@
 package tc.oc.pgm.tablist;
 
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.md_5.bungee.api.chat.BaseComponent;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
@@ -32,15 +33,15 @@ public class MapTabEntry extends DynamicTabEntry {
       String mapName = map.getName();
       if (mapName.length() > 15) mapName = mapName.substring(0, 13) + "...";
       return TextTranslations.toBaseComponentArray(
-          TextComponent.of(mapName, TextColor.AQUA), view.getViewer());
+          text(mapName, NamedTextColor.AQUA), view.getViewer());
     }
 
     final Component text =
-        TranslatableComponent.of(
+        translatable(
             "misc.authorship",
-            TextColor.GRAY,
-            TextComponent.of(map.getName(), TextColor.AQUA, TextDecoration.BOLD),
-            TextFormatter.nameList(map.getAuthors(), NameStyle.FANCY, TextColor.GRAY));
+            NamedTextColor.GRAY,
+            text(map.getName(), NamedTextColor.AQUA, TextDecoration.BOLD),
+            TextFormatter.nameList(map.getAuthors(), NameStyle.FANCY, NamedTextColor.GRAY));
 
     return TextTranslations.toBaseComponentArray(text, view.getViewer());
   }

@@ -1,8 +1,9 @@
 package tc.oc.pgm.destroyable;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import java.util.Collection;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
 import org.bukkit.block.Block;
 import org.bukkit.entity.minecart.ExplosiveMinecart;
 import org.bukkit.event.EventHandler;
@@ -74,7 +75,7 @@ public class DestroyableMatchModule implements MatchModule, Listener {
               event.getNewState(),
               ParticipantBlockTransformEvent.getPlayerState(event));
       if (reasonKey != null) {
-        event.setCancelled(TranslatableComponent.of(reasonKey));
+        event.setCancelled(translatable(reasonKey));
         return;
       }
     }
@@ -115,7 +116,7 @@ public class DestroyableMatchModule implements MatchModule, Listener {
 
         event.setCancelled(true);
         // TODO: translate this
-        player.sendWarning(TextComponent.of("You may not damage your own objective."));
+        player.sendWarning(text("You may not damage your own objective."));
       }
     }
   }

@@ -1,51 +1,35 @@
 package tc.oc.pgm.countdowns;
 
+import static net.kyori.adventure.bossbar.BossBar.bossBar;
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.title.Title.title;
+
 import java.time.Duration;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
-import org.bukkit.entity.Player;
+import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.title.Title;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.bossbar.BossBarMatchModule;
 import tc.oc.pgm.events.CountdownCancelEvent;
 import tc.oc.pgm.events.CountdownEndEvent;
 import tc.oc.pgm.events.CountdownStartEvent;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.bossbar.BossBarSource;
-import tc.oc.pgm.util.bossbar.DynamicBossBar;
 
 public abstract class MatchCountdown extends Countdown {
   protected final Match match;
-  protected final BossBarMatchModule bbmm;
   protected Duration remaining, total;
-  protected final BossBarSource bossBar;
+  protected final BossBar bossBar;
 
-  class CountdownBar extends DynamicBossBar {
-    @Override
-    public boolean isVisible(Player viewer) {
-      return true;
-    }
-
-    @Override
-    public Component getText(Player viewer) {
-      return formatText();
-    }
-
-    @Override
-    public float getMeter(Player viewer) {
-      return bossBarProgress(remaining, total);
-    }
-  };
-
-  public MatchCountdown(Match match, @Nullable BossBarSource bossBar) {
+  public MatchCountdown(Match match, @Nullable BossBar bossBar) {
     this.match = match;
-    this.bbmm = match.needModule(BossBarMatchModule.class);
     if (bossBar != null) {
       this.bossBar = bossBar;
-    } else {
-      this.bossBar = new CountdownBar();
+    } else { // Passing empty values here because #secondsRemaining throws an NPE at this point
+      this.bossBar = bossBar(empty(), 1, BossBar.Color.PURPLE, BossBar.Overlay.PROGRESS);
     }
   }
 
@@ -105,11 +89,10 @@ public abstract class MatchCountdown extends Countdown {
     if (showTitle()) {
       getMatch()
           .showTitle(
-              TextComponent.of(String.valueOf(remaining.getSeconds()), TextColor.YELLOW),
-              TextComponent.empty(),
-              0,
-              5,
-              15);
+              title(
+                  text(remaining.getSeconds(), NamedTextColor.YELLOW),
+                  empty(),
+                  Title.Times.of(Duration.ZERO, Duration.ofMillis(5), Duration.ofMillis(15))));
     }
 
     super.onTick(remaining, total);
@@ -118,50 +101,48 @@ public abstract class MatchCountdown extends Countdown {
   @Override
   public void onEnd(Duration total) {
     match.callEvent(new CountdownEndEvent(match, this));
-    bbmm.removeBossBar(bossBar);
+    match.hideBossBar(bossBar);
   }
 
   @Override
   public void onCancel(Duration remaining, Duration total) {
     super.onCancel(remaining, total);
     match.callEvent(new CountdownCancelEvent(match, this));
-    bbmm.removeBossBar(bossBar);
+    match.hideBossBar(bossBar);
   }
 
   protected void invalidateBossBar() {
-    if (bossBar instanceof DynamicBossBar) {
-      ((DynamicBossBar) bossBar).invalidate();
-    }
+    bossBar.progress(bossBarProgress(remaining, total));
+    bossBar.name(formatText());
   }
 
   private void showOrHideBossBar() {
     if (showBossBar()) {
-      bbmm.pushBossBarIfAbsent(bossBar);
+      match.showBossBar(bossBar);
     } else {
-      bbmm.removeBossBar(bossBar);
+      match.hideBossBar(bossBar);
     }
   }
 
   protected TextColor urgencyColor() {
     long seconds = remaining.getSeconds();
     if (seconds > 60) {
-      return TextColor.GREEN;
+      return NamedTextColor.GREEN;
     } else if (seconds > 30) {
-      return TextColor.YELLOW;
+      return NamedTextColor.YELLOW;
     } else if (seconds > 5) {
-      return TextColor.GOLD;
+      return NamedTextColor.GOLD;
     } else {
-      return TextColor.DARK_RED;
+      return NamedTextColor.DARK_RED;
     }
   }
 
   protected Component secondsRemaining(TextColor color) {
     long seconds = remaining.getSeconds();
     if (seconds == 1) {
-      return TranslatableComponent.of("misc.second", TextComponent.of("1", color));
+      return translatable("misc.second", text("1", color));
     } else {
-      return TranslatableComponent.of(
-          "misc.seconds", TextComponent.of(String.valueOf(seconds), color));
+      return translatable("misc.seconds", text(seconds, color));
     }
   }
 
@@ -170,7 +151,7 @@ public abstract class MatchCountdown extends Countdown {
   }
 
   protected float bossBarProgress(Duration remaining, Duration total) {
-    return total.isZero() ? 0f : (float) remaining.toMillis() / total.toMillis();
+    return total.isZero() ? 0f : Math.max(1f, (float) remaining.toMillis() / total.toMillis());
   }
 
   public Duration getRemaining() {

@@ -1,6 +1,8 @@
 package tc.oc.pgm.stats;
 
-import static net.kyori.text.ComponentBuilders.text;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.text.types.PlayerComponent.player;
 
 import java.text.DecimalFormat;
 import java.util.Collection;
@@ -12,10 +14,9 @@ import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Arrow;
@@ -57,7 +58,6 @@ import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
-import tc.oc.pgm.util.text.types.PlayerComponent;
 
 @ListenerScope(MatchScope.LOADED)
 public class StatsMatchModule implements MatchModule, Listener {
@@ -69,14 +69,14 @@ public class StatsMatchModule implements MatchModule, Listener {
   private final Map<UUID, String> cachedUsernames = new HashMap<>();
 
   private final boolean verboseStats = PGM.get().getConfiguration().showVerboseStats();
-  private final Component verboseStatsTitle = TranslatableComponent.of("match.stats.title");
+  private final Component verboseStatsTitle = translatable("match.stats.title");
 
   /** Common formats used by stats with decimals */
   public static final DecimalFormat TWO_DECIMALS = new DecimalFormat("#.##");
 
   public static final DecimalFormat ONE_DECIMAL = new DecimalFormat("#.#");
 
-  public static final Component HEART_SYMBOL = text("\u2764").build(); // ❤
+  public static final Component HEART_SYMBOL = text("\u2764"); // ❤
 
   // Defined at match end, see #onMatchEnd
   private InventoryMenu endOfMatchMenu;
@@ -176,7 +176,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     Future<?> task =
         match
             .getExecutor(MatchScope.LOADED)
-            .scheduleWithFixedDelay(() -> player.showHotbar(message), 0, 1, TimeUnit.SECONDS);
+            .scheduleWithFixedDelay(() -> player.sendActionBar(message), 0, 1, TimeUnit.SECONDS);
 
     match.getExecutor(MatchScope.LOADED).schedule(() -> task.cancel(true), 4, TimeUnit.SECONDS);
 
@@ -207,16 +207,19 @@ public class StatsMatchModule implements MatchModule, Listener {
       allDamage.put(playerUUID, playerStats.getDamageDone());
     }
 
-    Component killMessage = getMessage("match.stats.kills", sortStats(allKills), TextColor.GREEN);
+    Component killMessage =
+        getMessage("match.stats.kills", sortStats(allKills), NamedTextColor.GREEN);
     Component killstreakMessage =
-        getMessage("match.stats.killstreak", sortStats(allKillstreaks), TextColor.GREEN);
-    Component deathMessage = getMessage("match.stats.deaths", sortStats(allDeaths), TextColor.RED);
+        getMessage("match.stats.killstreak", sortStats(allKillstreaks), NamedTextColor.GREEN);
+    Component deathMessage =
+        getMessage("match.stats.deaths", sortStats(allDeaths), NamedTextColor.RED);
     Map.Entry<UUID, Integer> bestBowshot = sortStats(allBowshots);
     if (bestBowshot.getValue() == 1)
       bestBowshot.setValue(2); // Avoids translating "1 block" vs "n blocks"
-    Component bowshotMessage = getMessage("match.stats.bowshot", bestBowshot, TextColor.YELLOW);
+    Component bowshotMessage =
+        getMessage("match.stats.bowshot", bestBowshot, NamedTextColor.YELLOW);
     Component damageMessage =
-        getMessage("match.stats.damage", sortStatsDouble(allDamage), TextColor.GREEN);
+        getMessage("match.stats.damage", sortStatsDouble(allDamage), NamedTextColor.GREEN);
 
     final Collection<Competitor> competitors = match.getCompetitors();
 
@@ -249,8 +252,8 @@ public class StatsMatchModule implements MatchModule, Listener {
                 viewer.sendMessage(
                     TextFormatter.horizontalLineHeading(
                         viewer.getBukkit(),
-                        TranslatableComponent.of("match.stats.title", TextColor.YELLOW),
-                        TextColor.WHITE));
+                        translatable("match.stats.title", NamedTextColor.YELLOW),
+                        NamedTextColor.WHITE));
                 viewer.sendMessage(killMessage);
                 viewer.sendMessage(killstreakMessage);
                 viewer.sendMessage(deathMessage);
@@ -302,7 +305,7 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   Component getMessage(
       String messageKey, Map.Entry<UUID, ? extends Number> mapEntry, TextColor color) {
-    return TranslatableComponent.of(
+    return translatable(
         messageKey, playerName(mapEntry.getKey()), numberComponent(mapEntry.getValue(), color));
   }
 
@@ -338,7 +341,7 @@ public class StatsMatchModule implements MatchModule, Listener {
       if (decimals.chars().sum() == 1 || tenThousand) returnValue = ONE_DECIMAL.format(doubleStat);
       else returnValue = TWO_DECIMALS.format(doubleStat);
     }
-    return TextComponent.of(returnValue + (tenThousand ? "k" : ""), color);
+    return text(returnValue + (tenThousand ? "k" : ""), color);
   }
 
   /** Formats raw damage to damage relative to the amount of hearths the player would have broken */
@@ -363,7 +366,7 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   private Component playerName(UUID playerUUID) {
-    return PlayerComponent.of(
+    return player(
         Bukkit.getPlayer(playerUUID),
         cachedUsernames.getOrDefault(playerUUID, "Unknown"),
         NameStyle.FANCY);

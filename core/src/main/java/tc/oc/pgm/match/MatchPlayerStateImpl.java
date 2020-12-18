@@ -1,11 +1,12 @@
 package tc.oc.pgm.match;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.text.types.PlayerComponent.player;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
-import net.kyori.text.Component;
+import javax.annotation.Nonnull;
+import net.kyori.adventure.text.Component;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -15,18 +16,17 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
-import tc.oc.pgm.util.chat.Audience;
-import tc.oc.pgm.util.chat.MultiAudience;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.text.types.PlayerComponent;
 
-public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
+public class MatchPlayerStateImpl implements MatchPlayerState {
 
   private final Match match;
   private final String username;
   private final UUID uuid;
   private final Party party;
   private final Vector location;
+  private final Audience audience;
 
   protected MatchPlayerStateImpl(MatchPlayer player) {
     this.match = checkNotNull(player).getMatch();
@@ -34,6 +34,7 @@ public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
     this.uuid = player.getId();
     this.party = checkNotNull(player.getParty());
     this.location = player.getBukkit().getLocation().toVector();
+    this.audience = getPlayer().isPresent() ? getPlayer().get() : Audience.empty();
   }
 
   @Override
@@ -64,7 +65,7 @@ public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
   @Override
   public Component getName(NameStyle style) {
     MatchPlayer player = match.getPlayer(uuid);
-    return PlayerComponent.of(player.getBukkit(), username, style);
+    return player(player.getBukkit(), username, style);
   }
 
   @Override
@@ -73,8 +74,9 @@ public class MatchPlayerStateImpl implements MatchPlayerState, MultiAudience {
   }
 
   @Override
-  public Iterable<? extends Audience> getAudiences() {
-    return getPlayer().map(Collections::singleton).orElseGet(Collections::emptySet);
+  @Nonnull
+  public Audience audience() {
+    return audience;
   }
 
   @Override

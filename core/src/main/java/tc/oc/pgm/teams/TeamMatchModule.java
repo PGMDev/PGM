@@ -2,6 +2,10 @@ package tc.oc.pgm.teams;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,10 +16,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.commons.lang.math.Fraction;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -41,7 +44,6 @@ import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
 import tc.oc.pgm.util.StringUtils;
-import tc.oc.pgm.util.chat.Sound;
 
 @ListenerScope(MatchScope.LOADED)
 public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
@@ -59,23 +61,17 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     public Component getReason() {
       if (team != null) {
         if (players == 1) {
-          return TranslatableComponent.of(
-              "join.wait.singular.team",
-              TextComponent.of(String.valueOf(players), TextColor.AQUA),
-              team.getName());
+          return translatable(
+              "join.wait.singular.team", text(players, NamedTextColor.AQUA), team.getName());
         } else {
-          return TranslatableComponent.of(
-              "join.wait.plural.team",
-              TextComponent.of(String.valueOf(players), TextColor.AQUA),
-              team.getName());
+          return translatable(
+              "join.wait.plural.team", text(players, NamedTextColor.AQUA), team.getName());
         }
       } else {
         if (players == 1) {
-          return TranslatableComponent.of(
-              "join.wait.singular", TextComponent.of(String.valueOf(players), TextColor.AQUA));
+          return translatable("join.wait.singular", text(players, NamedTextColor.AQUA));
         } else {
-          return TranslatableComponent.of(
-              "join.wait.plural", TextComponent.of(String.valueOf(players), TextColor.AQUA));
+          return translatable("join.wait.plural", text(players, NamedTextColor.AQUA));
         }
       }
     }
@@ -186,7 +182,6 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       // Whenever playersNeeded reaches a new minimum, reset the unready timeout
       if (playersNeeded < minPlayersNeeded) {
         minPlayersNeeded = playersNeeded;
-        smm.restartUnreadyTimeout();
       }
     } else {
       smm.removeUnreadyReason(NeedMorePlayers.class);
@@ -451,28 +446,26 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
       switch (teamResult.getStatus()) {
         case SWITCH_DISABLED:
-          joining.sendWarning(TranslatableComponent.of("join.err.noSwitch", lastTeam.getName()));
+          joining.sendWarning(translatable("join.err.noSwitch", lastTeam.getName()));
           return true;
 
         case CHOICE_DISABLED:
         case CHOICE_DENIED:
-          joining.sendWarning(TranslatableComponent.of("join.err.noChoice"));
+          joining.sendWarning(translatable("join.err.noChoice"));
           return true;
 
         case FULL:
           if (teamResult.getTeam() != null) {
-            joining.sendWarning(
-                TranslatableComponent.of("join.err.full.team", teamResult.getTeam().getName()));
+            joining.sendWarning(translatable("join.err.full.team", teamResult.getTeam().getName()));
           } else {
-            joining.sendWarning(TranslatableComponent.of("join.err.full"));
+            joining.sendWarning(translatable("join.err.full"));
           }
 
           return true;
 
         case REDUNDANT:
           joining.sendWarning(
-              TranslatableComponent.of(
-                  "join.err.alreadyJoined.team", joining.getParty().getName()));
+              translatable("join.err.alreadyJoined.team", joining.getParty().getName()));
           return true;
       }
 
@@ -556,15 +549,14 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
     // Give them the bad news
     if (jmm.canPriorityKick(kickMe)) {
-      kickMe.sendMessage(TranslatableComponent.of("join.ok.moved", kickTo.getName()));
-      kickMe.sendMessage(TranslatableComponent.of("join.ok.moved.explanation"));
+      kickMe.sendMessage(translatable("join.ok.moved", kickTo.getName()));
+      kickMe.sendMessage(translatable("join.ok.moved.explanation"));
     } else {
-      kickMe.playSound(new Sound("mob.villager.hit"));
+      kickMe.playSound(sound(key("mob.villager.hit"), Sound.Source.MASTER, 1, 1));
       if (forBalance) {
-        kickMe.sendWarning(TranslatableComponent.of("join.ok.moved", kickTo.getName()));
+        kickMe.sendWarning(translatable("join.ok.moved", kickTo.getName()));
       } else {
-        kickMe.sendWarning(
-            TranslatableComponent.of("leave.ok.priorityKick.team", kickFrom.getName()));
+        kickMe.sendWarning(translatable("leave.ok.priorityKick.team", kickFrom.getName()));
       }
     }
 
@@ -583,9 +575,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
   public void onPartyChange(PlayerPartyChangeEvent event) {
     if (event.getNewParty() instanceof Team
         || (event.getNewParty() instanceof ObserverParty && event.getOldParty() != null)) {
-      event
-          .getPlayer()
-          .sendMessage(TranslatableComponent.of("join.ok.team", event.getNewParty().getName()));
+      event.getPlayer().sendMessage(translatable("join.ok.team", event.getNewParty().getName()));
     }
     updateReadiness();
   }

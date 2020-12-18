@@ -1,6 +1,10 @@
 package tc.oc.pgm.picker;
 
 import static com.google.common.base.Preconditions.checkState;
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -12,6 +16,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
+import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -57,7 +63,6 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.StringUtils;
-import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -675,7 +680,7 @@ public class PickerMatchModule implements MatchModule, Listener {
 
   private void handleInventoryClick(
       final MatchPlayer player, final String name, final MaterialData material) {
-    player.playSound(new Sound("random.click", 1, 2));
+    player.playSound(sound(key("random.click"), Sound.Source.MASTER, 1, 2));
 
     if (hasClasses) {
       ClassMatchModule cmm = player.getMatch().needModule(ClassMatchModule.class);
@@ -688,14 +693,13 @@ public class PickerMatchModule implements MatchModule, Listener {
           if (cmm.getCanChangeClass(player.getId())) {
             cmm.setPlayerClass(player.getId(), cls);
             player.sendMessage(
-                ChatColor.GOLD
-                    + TextTranslations.translate(
-                        "match.class.ok", player.getBukkit(), ChatColor.GREEN + name));
+                text()
+                    .append(translatable("match.class.ok", NamedTextColor.GOLD))
+                    .append(text(name, NamedTextColor.GREEN))
+                    .build());
             scheduleRefresh(player);
           } else {
-            player.sendMessage(
-                ChatColor.RED
-                    + TextTranslations.translate("match.class.sticky", player.getBukkit()));
+            player.sendMessage(translatable("match.class.sticky", NamedTextColor.RED));
           }
         }
 

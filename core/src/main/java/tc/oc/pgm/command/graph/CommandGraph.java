@@ -48,7 +48,7 @@ import tc.oc.pgm.command.TeamCommand;
 import tc.oc.pgm.command.TimeLimitCommand;
 import tc.oc.pgm.command.VotingCommand;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.Audience;
 
 public class CommandGraph extends BasicBukkitCommandGraph {
 

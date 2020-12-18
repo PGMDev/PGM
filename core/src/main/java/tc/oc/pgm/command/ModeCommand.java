@@ -1,20 +1,24 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.space;
+import static net.kyori.adventure.text.Component.text;
+
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Default;
 import java.time.Duration;
 import java.util.List;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.commons.lang.WordUtils;
-import org.bukkit.ChatColor;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.modes.ModeChangeCountdown;
 import tc.oc.pgm.modes.ModesPaginatedResult;
 import tc.oc.pgm.modes.ObjectiveModesMatchModule;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.text.TextException;
 
 // TODO: make the output nicer and translate
@@ -34,27 +38,29 @@ public final class ModeCommand {
       if (countdowns.isEmpty()) {
         throwNoResults();
       } else {
-        StringBuilder builder = new StringBuilder(ChatColor.DARK_PURPLE + "Next mode: ");
+        TextComponent.Builder builder =
+            text().append(text("Next Mode: ", NamedTextColor.DARK_PURPLE));
 
         ModeChangeCountdown next = countdowns.get(0);
         Duration timeLeft = modes.getCountdown().getTimeLeft(next);
 
         if (timeLeft == null) {
-          builder.append(ChatColor.GOLD).append(next.getMode().getPreformattedMaterialName());
+          builder.append(text(next.getMode().getPreformattedMaterialName(), NamedTextColor.GOLD));
         } else if (timeLeft.getSeconds() >= 0) {
-          builder
-              .append(ChatColor.GOLD)
-              .append(WordUtils.capitalize(next.getMode().getPreformattedMaterialName()))
-              .append(" ")
-              .append(ChatColor.AQUA)
-              .append("(")
-              .append(new ModesPaginatedResult(modes).formatSingleCountdown(next))
-              .append(")");
+          builder.append(
+              text(
+                      WordUtils.capitalize(next.getMode().getPreformattedMaterialName()),
+                      NamedTextColor.GOLD)
+                  .append(space())
+                  .append(
+                      text(
+                          "(" + new ModesPaginatedResult(modes).formatSingleCountdown(next) + ")",
+                          NamedTextColor.AQUA)));
         } else {
           throwNoResults();
         }
 
-        audience.sendMessage(builder.toString());
+        audience.sendMessage(builder.build());
       }
     }
   }
@@ -91,16 +97,17 @@ public final class ModeCommand {
       }
     }
 
-    StringBuilder builder = new StringBuilder(ChatColor.GOLD + "All modes have been pushed ");
+    TextComponent.Builder builder =
+        text().append(text("All modes have been pushed ", NamedTextColor.GOLD));
     if (duration.isNegative()) {
-      builder.append("backwards ");
+      builder.append(text("backwards "));
     } else {
-      builder.append("forwards ");
+      builder.append(text("forwards "));
     }
 
-    builder.append("by ").append(TimeUtils.formatDuration(duration));
+    builder.append(text("by " + TimeUtils.formatDuration(duration)));
 
-    audience.sendMessage(builder.toString());
+    audience.sendMessage(text(builder.toString()));
   }
 
   private static void showList(int page, Audience audience, ObjectiveModesMatchModule modes)

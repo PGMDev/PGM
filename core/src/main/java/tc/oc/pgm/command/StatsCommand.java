@@ -1,8 +1,9 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 import app.ashcon.intake.Command;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
@@ -11,7 +12,7 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.ffa.Tribute;
 import tc.oc.pgm.stats.StatsMatchModule;
-import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextFormatter;
 
@@ -30,8 +31,8 @@ public final class StatsCommand {
       audience.sendMessage(
           TextFormatter.horizontalLineHeading(
               sender,
-              TranslatableComponent.of("match.stats.you", TextColor.DARK_GREEN),
-              TextColor.WHITE));
+              translatable("match.stats.you", NamedTextColor.DARK_GREEN),
+              NamedTextColor.WHITE));
       audience.sendMessage(
           match.needModule(StatsMatchModule.class).getBasicStatsMessage(player.getId()));
     } else {

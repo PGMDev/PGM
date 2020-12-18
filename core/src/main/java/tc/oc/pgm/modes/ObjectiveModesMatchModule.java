@@ -1,5 +1,9 @@
 package tc.oc.pgm.modes;
 
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
+import static net.kyori.adventure.text.Component.text;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
@@ -7,19 +11,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.countdowns.CountdownContext;
-import tc.oc.pgm.util.chat.Sound;
 
 public class ObjectiveModesMatchModule implements MatchModule {
 
-  private static final Sound SOUND = new Sound("mob.zombie.remedy", 0.15f, 1.2f);
+  private static final Sound SOUND =
+      sound(key("mob.zombie.remedy"), Sound.Source.MASTER, 0.15f, 1.2f);
 
   private final Match match;
   private final List<Mode> modes;
@@ -95,10 +99,10 @@ public class ObjectiveModesMatchModule implements MatchModule {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onObjectiveModeChange(ObjectiveModeChangeEvent event) {
     Component broadcast =
-        TextComponent.builder()
-            .append("> > > > ", TextColor.DARK_AQUA)
-            .append(event.getName(), TextColor.DARK_RED)
-            .append(" < < < <", TextColor.DARK_AQUA)
+        text()
+            .append(text("> > > > ", NamedTextColor.DARK_AQUA))
+            .append(text(event.getName(), NamedTextColor.DARK_RED))
+            .append(text(" < < < <", NamedTextColor.DARK_AQUA))
             .build();
     event.getMatch().sendMessage(broadcast);
     event.getMatch().playSound(SOUND);

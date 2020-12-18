@@ -1,5 +1,7 @@
 package tc.oc.pgm.scoreboard;
 
+import static net.kyori.adventure.text.Component.text;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.time.Duration;
@@ -17,8 +19,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
@@ -92,9 +94,10 @@ public class SidebarMatchModule implements MatchModule, Listener {
   private static String renderSidebarTitle(
       Collection<MapTag> tags, @Nullable Component gamemodeName) {
     final Component configTitle = PGM.get().getConfiguration().getMatchHeader();
-    if (configTitle != null) return LegacyComponentSerializer.legacy().serialize(configTitle);
+    if (configTitle != null)
+      return LegacyComponentSerializer.legacyAmpersand().serialize(configTitle);
     if (gamemodeName != null) {
-      String customGamemode = LegacyComponentSerializer.legacy().serialize(gamemodeName);
+      String customGamemode = LegacyComponentSerializer.legacySection().serialize(gamemodeName);
       if (!customGamemode.isEmpty()) return ChatColor.AQUA + customGamemode;
     }
 
@@ -534,7 +537,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
         if (rows.size() < MAX_ROWS - 2) {
           rows.add("");
         }
-        rows.add(LegacyComponentSerializer.legacy().serialize(footer));
+        rows.add(LegacyComponentSerializer.legacySection().serialize(footer));
       }
 
       // Need at least one row for the sidebar to show

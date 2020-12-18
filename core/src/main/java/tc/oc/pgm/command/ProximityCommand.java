@@ -1,5 +1,7 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.text;
+
 import app.ashcon.intake.Command;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,7 +79,7 @@ public final class ProximityCommand {
     }
 
     for (String line : lines) {
-      player.sendMessage(line);
+      player.sendMessage(text(line));
     }
   }
 }

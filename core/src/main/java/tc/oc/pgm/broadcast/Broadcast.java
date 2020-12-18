@@ -1,25 +1,29 @@
 package tc.oc.pgm.broadcast;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import tc.oc.pgm.api.filter.Filter;
-import tc.oc.pgm.util.chat.Sound;
 
 public class Broadcast implements Comparable<Broadcast> {
   public enum Type {
     TIP(
-        TranslatableComponent.of("misc.tip", TextColor.BLUE),
-        new Sound("mob.endermen.idle", 1, 1.2f)),
+        translatable("misc.tip", NamedTextColor.BLUE),
+        sound(key("mob.endermen.idle"), Sound.Source.MASTER, 1, 1.2f)),
 
-    ALERT(TranslatableComponent.of("misc.alert", TextColor.YELLOW), new Sound("note.pling", 1, 2f));
+    ALERT(
+        translatable("misc.alert", NamedTextColor.YELLOW),
+        sound(key("note.pling"), Sound.Source.MASTER, 1, 2f));
 
     final Component prefix;
     final Sound sound;
@@ -30,16 +34,16 @@ public class Broadcast implements Comparable<Broadcast> {
     }
 
     public Component format(Component message) {
-      return TextComponent.builder()
-          .append("[")
+      return text()
+          .append(text("["))
           .append(prefix)
-          .append("] ")
+          .append(text("] "))
           .append(
               message
-                  .color(TextColor.AQUA)
+                  .color(NamedTextColor.AQUA)
                   .decoration(TextDecoration.BOLD, false)
                   .decoration(TextDecoration.ITALIC, true))
-          .colorIfAbsent(TextColor.GRAY)
+          .colorIfAbsent(NamedTextColor.GRAY)
           .decoration(TextDecoration.BOLD, true)
           .build();
     }

@@ -1,16 +1,18 @@
 package tc.oc.pgm.listeners;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static net.kyori.adventure.text.Component.join;
+import static net.kyori.adventure.text.Component.space;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Server;
@@ -206,11 +208,11 @@ public class PGMListener implements Listener {
       SettingValue option = viewer.getSettings().getValue(SettingKey.JOIN);
       if (option.equals(SettingValue.JOIN_ON)) {
         Component component =
-            TranslatableComponent.of(key, TextColor.YELLOW, player.getName(NameStyle.CONCISE));
+            translatable(key, NamedTextColor.YELLOW, player.getName(NameStyle.CONCISE));
         viewer.sendMessage(
             staffOnly
-                ? ChatDispatcher.ADMIN_CHAT_PREFIX.append(component.color(TextColor.YELLOW))
-                : component.color(TextColor.YELLOW));
+                ? ChatDispatcher.ADMIN_CHAT_PREFIX.append(component.color(NamedTextColor.YELLOW))
+                : component.color(NamedTextColor.YELLOW));
       }
     }
   }
@@ -331,55 +333,53 @@ public class PGMListener implements Listener {
   public void announceDynamicMapPoolChange(MapPoolAdjustEvent event) {
     // Send feedback to staff, alerting them that the map pool has changed by force
     if (event.isForced()) {
-      Component poolName = TextComponent.of(event.getNewPool().getName(), TextColor.LIGHT_PURPLE);
+      Component poolName = text(event.getNewPool().getName(), NamedTextColor.LIGHT_PURPLE);
       Component staffName =
           UsernameFormatUtils.formatStaffName(event.getSender(), event.getMatch());
       Component matchLimit =
-          TextComponent.builder()
-              .append(Integer.toString(event.getMatchLimit()), TextColor.GREEN)
-              .append(" ")
+          text()
+              .append(text(event.getMatchLimit(), NamedTextColor.GREEN))
+              .append(space())
               .append(
-                  TranslatableComponent.of(
-                      "match.name" + (event.getMatchLimit() != 1 ? ".plural" : ""), TextColor.GRAY))
+                  translatable(
+                      "match.name" + (event.getMatchLimit() != 1 ? ".plural" : ""),
+                      NamedTextColor.GRAY))
               .build();
 
       // No limit
-      Component forced = TranslatableComponent.of("pool.change.force", poolName, staffName);
+      Component forced = translatable("pool.change.force", poolName, staffName);
       if (event.getTimeLimit() != null) {
         Component time =
-            PeriodFormats.briefNaturalApproximate(event.getTimeLimit()).color(TextColor.GREEN);
+            PeriodFormats.briefNaturalApproximate(event.getTimeLimit()).color(NamedTextColor.GREEN);
 
         // If time & match limit are present, display both
         if (event.getMatchLimit() != 0) {
-          Component timeAndLimit =
-              TranslatableComponent.of("misc.or", TextColor.GRAY, time, matchLimit);
-          forced =
-              TranslatableComponent.of("pool.change.forceTimed", poolName, timeAndLimit, staffName);
+          Component timeAndLimit = translatable("misc.or", NamedTextColor.GRAY, time, matchLimit);
+          forced = translatable("pool.change.forceTimed", poolName, timeAndLimit, staffName);
         } else {
           // Just time limit
-          forced = TranslatableComponent.of("pool.change.forceTimed", poolName, time, staffName);
+          forced = translatable("pool.change.forceTimed", poolName, time, staffName);
         }
       } else if (event.getMatchLimit() != 0) {
         // Just match limit
-        forced =
-            TranslatableComponent.of("pool.change.forceTimed", poolName, matchLimit, staffName);
+        forced = translatable("pool.change.forceTimed", poolName, matchLimit, staffName);
       }
 
-      ChatDispatcher.broadcastAdminChatMessage(forced.color(TextColor.GRAY), event.getMatch());
+      ChatDispatcher.broadcastAdminChatMessage(forced.color(NamedTextColor.GRAY), event.getMatch());
     }
 
     // Broadcast map pool changes due to size
     if (event.getNewPool().isDynamic()) {
       Component broadcast =
-          TextComponent.builder()
-              .append("[", TextColor.WHITE)
-              .append(TranslatableComponent.of("pool.name", TextColor.GOLD))
-              .append("] ", TextColor.WHITE)
+          text()
+              .append(text("[", NamedTextColor.WHITE))
+              .append(translatable("pool.name", NamedTextColor.GOLD))
+              .append(text("] ", NamedTextColor.WHITE))
               .append(
-                  TranslatableComponent.of(
+                  translatable(
                       "pool.change",
-                      TextColor.GREEN,
-                      TextComponent.of(event.getNewPool().getName(), TextColor.AQUA)))
+                      NamedTextColor.GREEN,
+                      text(event.getNewPool().getName(), NamedTextColor.AQUA)))
               .build();
 
       event.getMatch().sendMessage(broadcast);

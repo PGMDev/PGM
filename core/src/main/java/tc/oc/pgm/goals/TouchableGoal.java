@@ -1,14 +1,14 @@
 package tc.oc.pgm.goals;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.google.common.collect.ImmutableSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import org.bukkit.Bukkit;
+import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -23,7 +23,7 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
-import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.Audience;
 
 /**
  * A {@link Goal} that may be 'touched' by players, meaning the player has made some tangible
@@ -191,14 +191,10 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
     if (!isVisible()) return;
 
     Component message = getTouchMessage(toucher, false);
-    Audience.get(Bukkit.getConsoleSender()).sendMessage(message);
+    Audience.console().sendMessage(message);
 
     if (!showEnemyTouches()) {
-      message =
-          TextComponent.builder()
-              .append(toucher.getParty().getChatPrefix())
-              .append(message)
-              .build();
+      message = text().append(toucher.getParty().getChatPrefix()).append(message).build();
     }
 
     for (MatchPlayer viewer : getMatch().getPlayers()) {
@@ -214,8 +210,7 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
       }
 
       if (getDeferTouches()) {
-        toucher.sendMessage(
-            TranslatableComponent.of("objective.credit.future", TextComponent.of(this.getName())));
+        toucher.sendMessage(translatable("objective.credit.future", text(this.getName())));
       }
     }
   }

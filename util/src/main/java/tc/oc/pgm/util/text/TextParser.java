@@ -1,6 +1,7 @@
 package tc.oc.pgm.util.text;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static net.kyori.adventure.text.Component.text;
 import static tc.oc.pgm.util.text.TextException.invalidFormat;
 import static tc.oc.pgm.util.text.TextException.outOfRange;
 import static tc.oc.pgm.util.text.TextException.unknown;
@@ -20,9 +21,9 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
-import net.kyori.text.Component;
-import net.kyori.text.serializer.gson.GsonComponentSerializer;
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Chunk;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.util.LiquidMetal;
@@ -380,13 +381,13 @@ public final class TextParser {
 
     if (text.startsWith("{") && text.endsWith("}")) {
       try {
-        return GsonComponentSerializer.INSTANCE.deserialize(text);
+        return GsonComponentSerializer.gson().deserialize(text);
       } catch (JsonSyntaxException e) {
         throw invalidFormat(text, Component.class, e);
       }
     }
 
-    return LegacyComponentSerializer.legacy().deserialize(text, '&');
+    return LegacyComponentSerializer.legacyAmpersand().deserialize(text);
   }
 
   /**
@@ -399,7 +400,7 @@ public final class TextParser {
    */
   @Deprecated
   public static String parseComponentLegacy(String text) throws TextException {
-    return LegacyComponentSerializer.legacy().serialize(parseComponent(text));
+    return LegacyComponentSerializer.legacySection().serialize(parseComponent(text));
   }
 
   /**

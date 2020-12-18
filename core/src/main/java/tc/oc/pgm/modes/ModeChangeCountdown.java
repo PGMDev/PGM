@@ -1,10 +1,11 @@
 package tc.oc.pgm.modes;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 import java.time.Duration;
 import java.util.Set;
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.CountdownContext;
@@ -53,11 +54,11 @@ public class ModeChangeCountdown extends MatchCountdown implements Comparable<Mo
 
   @Override
   protected Component formatText() {
-    return TranslatableComponent.of(
+    return translatable(
         "objective.modeCountdown",
-        TextColor.DARK_AQUA,
+        NamedTextColor.DARK_AQUA,
         getMode().getComponentName(),
-        secondsRemaining(TextColor.AQUA));
+        secondsRemaining(NamedTextColor.AQUA));
   }
 
   @Override

@@ -3,13 +3,13 @@ package tc.oc.pgm.api.party;
 import java.util.Collection;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.named.Named;
 
 /**

@@ -1,6 +1,6 @@
 package tc.oc.pgm.util.named;
 
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 
 public interface Named {
 

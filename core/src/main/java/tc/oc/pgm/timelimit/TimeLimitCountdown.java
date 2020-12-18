@@ -1,23 +1,26 @@
 package tc.oc.pgm.timelimit;
 
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import java.time.Duration;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.MatchCountdown;
-import tc.oc.pgm.util.chat.Sound;
 
 public class TimeLimitCountdown extends MatchCountdown {
 
   private static final Sound NOTICE_SOUND =
-      new Sound("note.pling", 1f, 1.19f); // Significant moments
+      sound(key("note.pling"), Sound.Source.MASTER, 1f, 1.19f); // Significant moments
   private static final Sound IMMINENT_SOUND =
-      new Sound("random.click", 0.25f, 2f); // Last 30 seconds
+      sound(key("random.click"), Sound.Source.MASTER, 0.25f, 2f); // Last 30 seconds
   private static final Sound CRESCENDO_SOUND =
-      new Sound("portal.trigger", 1f, 0.78f); // Last few seconds
+      sound(key("portal.trigger"), Sound.Source.MASTER, 1f, 0.78f); // Last few seconds
 
   protected final TimeLimit timeLimit;
 
@@ -32,8 +35,8 @@ public class TimeLimitCountdown extends MatchCountdown {
 
   @Override
   protected Component formatText() {
-    return TranslatableComponent.of(
-        "misc.timeRemaining", TextColor.AQUA, TextComponent.of(colonTime(), urgencyColor()));
+    return translatable(
+        "misc.timeRemaining", NamedTextColor.AQUA, text(colonTime(), urgencyColor()));
   }
 
   @Override

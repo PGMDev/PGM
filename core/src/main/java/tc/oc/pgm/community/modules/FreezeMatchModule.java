@@ -1,5 +1,18 @@
 package tc.oc.pgm.community.modules;
 
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.join;
+import static net.kyori.adventure.text.Component.space;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.event.ClickEvent.runCommand;
+import static net.kyori.adventure.text.event.HoverEvent.showText;
+import static net.kyori.adventure.title.Title.title;
+import static tc.oc.pgm.util.TimeUtils.INFINITE_DURATION;
+import static tc.oc.pgm.util.TimeUtils.fromTicks;
+
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
@@ -9,12 +22,11 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.event.ClickEvent;
-import net.kyori.text.event.HoverEvent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.title.Title;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -58,7 +70,6 @@ import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
-import tc.oc.pgm.util.chat.Sound;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -89,7 +100,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
     return freeze.getOfflineCount();
   }
 
-  public String getOfflineFrozenNames() {
+  public Component getOfflineFrozenNames() {
     return freeze.getOfflineFrozenNames();
   }
 
@@ -275,8 +286,10 @@ public class FreezeMatchModule implements MatchModule, Listener {
 
   public class Freeze {
 
-    private final Sound FREEZE_SOUND = new Sound("mob.enderdragon.growl", 1f, 1f);
-    private final Sound THAW_SOUND = new Sound("mob.enderdragon.growl", 1f, 2f);
+    private final Sound FREEZE_SOUND =
+        sound(key("mob.enderdragon.growl"), Sound.Source.MASTER, 1f, 1f);
+    private final Sound THAW_SOUND =
+        sound(key("mob.enderdragon.growl"), Sound.Source.MASTER, 1f, 2f);
 
     private final OnlinePlayerMapAdapter<MatchPlayer> frozenPlayers;
     private final Cache<UUID, String> offlineFrozenCache =
@@ -298,10 +311,12 @@ public class FreezeMatchModule implements MatchModule, Listener {
       return this.offlineFrozenCache.getIfPresent(uuid) != null;
     }
 
-    private String getOfflineFrozenNames() {
-      return offlineFrozenCache.asMap().values().stream()
-          .map(name -> ChatColor.DARK_AQUA + name)
-          .collect(Collectors.joining(ChatColor.GRAY + ", "));
+    private Component getOfflineFrozenNames() {
+      return join(
+          text(", ", NamedTextColor.GRAY),
+          offlineFrozenCache.asMap().values().stream()
+              .map(name -> text(name, NamedTextColor.DARK_AQUA))
+              .collect(Collectors.toList()));
     }
 
     private int getOfflineCount() {
@@ -330,19 +345,20 @@ public class FreezeMatchModule implements MatchModule, Listener {
 
       removeEntities(freezee.getBukkit().getLocation(), 10);
 
-      Component freeze = TranslatableComponent.of("moderation.freeze.frozen");
-      Component by = TranslatableComponent.of("misc.by", senderName);
+      Component freeze = translatable("moderation.freeze.frozen");
+      Component by = translatable("misc.by", senderName);
 
-      TextComponent.Builder freezeTitle = TextComponent.builder();
+      TextComponent.Builder freezeTitle = text();
       freezeTitle.append(freeze);
       if (!silent) {
-        freezeTitle.append(" ").append(by);
+        freezeTitle.append(space()).append(by);
       }
-      Component title = freezeTitle.color(TextColor.RED).build();
+      Component title = freezeTitle.color(NamedTextColor.RED).build();
       if (freezee.isLegacy()) {
         freezee.sendWarning(title);
       } else {
-        freezee.showTitle(TextComponent.empty(), title, 5, 9999, 5);
+        freezee.showTitle(
+            title(empty(), title, Title.Times.of(fromTicks(5), INFINITE_DURATION, fromTicks(5))));
       }
       freezee.playSound(FREEZE_SOUND);
 
@@ -353,17 +369,17 @@ public class FreezeMatchModule implements MatchModule, Listener {
     private void thaw(MatchPlayer freezee, Component senderName, boolean silent) {
       frozenPlayers.remove(freezee.getBukkit());
 
-      Component thawed = TranslatableComponent.of("moderation.freeze.unfrozen");
-      Component by = TranslatableComponent.of("misc.by", senderName);
+      Component thawed = translatable("moderation.freeze.unfrozen");
+      Component by = translatable("misc.by", senderName);
 
-      TextComponent.Builder thawedTitle = TextComponent.builder().append(thawed);
+      TextComponent.Builder thawedTitle = text().append(thawed);
       if (!silent) {
-        thawedTitle.append(" ").append(by);
+        thawedTitle.append(space()).append(by);
       }
 
       freezee.getBukkit().hideTitle();
       freezee.playSound(THAW_SOUND);
-      freezee.sendMessage(thawedTitle.color(TextColor.GREEN).build());
+      freezee.sendMessage(thawedTitle.color(NamedTextColor.GREEN).build());
 
       ChatDispatcher.broadcastAdminChatMessage(
           createInteractiveBroadcast(senderName, freezee, false), match);
@@ -371,17 +387,16 @@ public class FreezeMatchModule implements MatchModule, Listener {
 
     private Component createInteractiveBroadcast(
         Component senderName, MatchPlayer freezee, boolean frozen) {
-      return TextComponent.builder()
+      return text()
           .append(
-              TranslatableComponent.of(
+              translatable(
                   String.format("moderation.freeze.broadcast.%s", frozen ? "frozen" : "thaw"),
-                  TextColor.GRAY,
+                  NamedTextColor.GRAY,
                   senderName,
                   freezee.getName(NameStyle.CONCISE)))
           .hoverEvent(
-              HoverEvent.showText(
-                  TranslatableComponent.of("moderation.freeze.broadcast.hover", TextColor.GRAY)))
-          .clickEvent(ClickEvent.runCommand("/f " + freezee.getBukkit().getName()))
+              showText(translatable("moderation.freeze.broadcast.hover", NamedTextColor.GRAY)))
+          .clickEvent(runCommand("/f " + freezee.getBukkit().getName()))
           .build();
     }
 

@@ -1,11 +1,14 @@
 package tc.oc.pgm.util;
 
+import static net.kyori.adventure.text.Component.newline;
+import static net.kyori.adventure.text.Component.text;
+
 import app.ashcon.intake.CommandException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import net.kyori.text.TextComponent;
-import tc.oc.pgm.util.chat.Audience;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 
 /**
  * Class used to display a paginated list of items that are formatted
@@ -58,7 +61,7 @@ public abstract class PrettyPaginatedResult<T> {
    * @param index if the data
    * @return Formatted item
    */
-  public abstract String format(T data, int index);
+  public abstract Component format(T data, int index);
 
   /**
    * Format sent to the player if no data is provided
@@ -93,7 +96,7 @@ public abstract class PrettyPaginatedResult<T> {
    */
   public void display(Audience audience, List<? extends T> data, int page) throws CommandException {
     if (data.size() == 0) {
-      audience.sendMessage(TextComponent.of(formatEmpty()));
+      audience.sendMessage(text(formatEmpty()));
       return;
     }
 
@@ -106,13 +109,13 @@ public abstract class PrettyPaginatedResult<T> {
     if (page <= 0 || page > maxPages)
       throw new CommandException("Unknown page selected! " + maxPages + " total pages.");
 
-    StringBuilder message = new StringBuilder(header + "\n");
+    TextComponent.Builder message = text().append(text((header + "\n")));
     for (int i = resultsPerPage * (page - 1);
         i < this.resultsPerPage * page && i < data.size();
         i++) {
       message.append(format(data.get(i), i));
-      if (i != (data.size() - 1)) message.append("\n");
+      if (i != (data.size() - 1)) message.append(newline());
     }
-    audience.sendMessage(TextComponent.of(message.toString()));
+    audience.sendMessage(message.build());
   }
 }

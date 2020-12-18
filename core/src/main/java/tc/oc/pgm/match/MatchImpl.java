@@ -4,23 +4,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
@@ -41,6 +29,7 @@ import org.bukkit.event.EventException;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredListener;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.feature.Feature;
@@ -85,11 +74,11 @@ import tc.oc.pgm.features.MatchFeatureContext;
 import tc.oc.pgm.filters.query.MatchQuery;
 import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.result.CompetitorVictoryCondition;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.FileUtils;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.Events;
-import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.collection.RankedSet;
 import tc.oc.pgm.util.concurrent.BukkitExecutorService;
 import tc.oc.pgm.util.nms.NMSHacks;
@@ -311,6 +300,13 @@ public class MatchImpl implements Match {
     for (Listener listener : listeners.get(scope)) {
       startListener(listener);
     }
+  }
+
+  @Override
+  public @NonNull Audience audience() {
+    final Collection<Audience> audiences = new ArrayList<>(getPlayers());
+    audiences.add(Audience.console());
+    return Audience.get(audiences);
   }
 
   private class EventExecutor implements org.bukkit.plugin.EventExecutor {
@@ -730,12 +726,6 @@ public class MatchImpl implements Match {
   @Nullable
   public MatchPlayer getPlayer(@Nullable Player player) {
     return player == null ? null : players.get(player.getUniqueId());
-  }
-
-  @Override
-  public Iterable<? extends Audience> getAudiences() {
-    return Iterables.concat(
-        getPlayers(), Collections.singleton(Audience.get(Bukkit.getConsoleSender())));
   }
 
   private class ModuleLoader

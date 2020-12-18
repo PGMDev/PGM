@@ -1,5 +1,9 @@
 package tc.oc.pgm.destroyable;
 
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.time.Duration;
@@ -12,9 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -138,19 +140,13 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   @Override
   public Component getTouchMessage(@Nullable ParticipantState toucher, boolean self) {
     if (toucher == null) {
-      return TranslatableComponent.of(
-          "destroyable.touch.owned",
-          TextComponent.empty(),
-          getComponentName(),
-          getOwner().getName());
+      return translatable(
+          "destroyable.touch.owned", empty(), getComponentName(), getOwner().getName());
     } else if (self) {
-      return TranslatableComponent.of(
-          "destroyable.touch.owned.you",
-          TextComponent.empty(),
-          getComponentName(),
-          getOwner().getName());
+      return translatable(
+          "destroyable.touch.owned.you", empty(), getComponentName(), getOwner().getName());
     } else {
-      return TranslatableComponent.of(
+      return translatable(
           "destroyable.touch.owned.player",
           toucher.getName(NameStyle.COLOR),
           getComponentName(),

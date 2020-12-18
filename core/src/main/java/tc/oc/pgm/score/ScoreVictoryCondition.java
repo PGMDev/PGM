@@ -1,7 +1,8 @@
 package tc.oc.pgm.score;
 
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
+import static net.kyori.adventure.text.Component.translatable;
+
+import net.kyori.adventure.text.Component;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.VictoryCondition;
@@ -38,6 +39,6 @@ public class ScoreVictoryCondition implements VictoryCondition {
 
   @Override
   public Component getDescription(Match match) {
-    return TranslatableComponent.of("victoryCondition.score");
+    return translatable("victoryCondition.score");
   }
 }

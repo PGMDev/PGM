@@ -1,12 +1,13 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import app.ashcon.intake.Command;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
@@ -44,13 +45,13 @@ public final class SettingCommand {
 
     sendCurrentSetting(player, key, value);
     player.sendMessage(
-        TranslatableComponent.of(
+        translatable(
             "setting.options",
             TextFormatter.list(
                 Stream.of(key.getPossibleValues())
-                    .map(option -> TextComponent.of(option.getName(), TextColor.GRAY))
+                    .map(option -> text(option.getName(), NamedTextColor.GRAY))
                     .collect(Collectors.toList()),
-                TextColor.WHITE)));
+                NamedTextColor.WHITE)));
   }
 
   @Command(
@@ -75,20 +76,18 @@ public final class SettingCommand {
       sendCurrentSetting(player, key, old);
     } else {
       player.sendMessage(
-          TranslatableComponent.of(
+          translatable(
               "setting.set",
-              TextComponent.of(key.getName()),
-              TextComponent.of(old.getName(), TextColor.GRAY),
-              TextComponent.of(value.getName(), TextColor.GREEN)));
+              text(key.getName()),
+              text(old.getName(), NamedTextColor.GRAY),
+              text(value.getName(), NamedTextColor.GREEN)));
       key.update(player);
     }
   }
 
   private void sendCurrentSetting(MatchPlayer player, SettingKey key, SettingValue value) {
     player.sendMessage(
-        TranslatableComponent.of(
-            "setting.get",
-            TextComponent.of(key.getName()),
-            TextComponent.of(value.getName(), TextColor.GREEN)));
+        translatable(
+            "setting.get", text(key.getName()), text(value.getName(), NamedTextColor.GREEN)));
   }
 }

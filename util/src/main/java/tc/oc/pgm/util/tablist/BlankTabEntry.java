@@ -1,9 +1,9 @@
 package tc.oc.pgm.util.tablist;
 
-import net.kyori.text.TextComponent;
+import static net.kyori.adventure.text.Component.empty;
 
 public class BlankTabEntry extends StaticTabEntry {
   public BlankTabEntry() {
-    super(TextComponent.empty());
+    super(empty());
   }
 }

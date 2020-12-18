@@ -1,12 +1,15 @@
 package tc.oc.pgm.tablist;
 
+import static net.kyori.adventure.text.Component.newline;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
@@ -51,7 +54,7 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
 
   @Override
   public BaseComponent[] getContent(TabView view) {
-    TextComponent.Builder content = TextComponent.builder();
+    TextComponent.Builder content = text();
 
     MatchPlayer viewer = match.getPlayer(view.getViewer());
     boolean timeOnly = viewer != null && viewer.isLegacy();
@@ -62,30 +65,33 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
         && (match.isRunning() || match.isFinished())
         && viewer.getSettings().getValue(SettingKey.STATS).equals(SettingValue.STATS_ON)) {
       content.append(match.needModule(StatsMatchModule.class).getBasicStatsMessage(viewer.getId()));
-      content.append(TextComponent.newline());
+      content.append(newline());
     }
 
     final Component leftContent = PGM.get().getConfiguration().getLeftTablistText();
     final Component rightContent = PGM.get().getConfiguration().getRightTablistText();
 
     if (!timeOnly && leftContent != null) {
-      content.append(leftContent.colorIfAbsent(TextColor.WHITE)).append(" - ", TextColor.DARK_GRAY);
+      content
+          .append(leftContent.colorIfAbsent(NamedTextColor.WHITE))
+          .append(text(" - ", NamedTextColor.DARK_GRAY));
     }
 
     content
-        .append(TranslatableComponent.of("match.info.time", TextColor.GRAY))
-        .append(": ", TextColor.GRAY)
+        .append(translatable("match.info.time", NamedTextColor.GRAY))
+        .append(text(": ", NamedTextColor.GRAY))
         .append(
-            TimeUtils.formatDuration(match.getDuration()),
-            this.match.isRunning() ? TextColor.GREEN : TextColor.GOLD);
+            text(
+                TimeUtils.formatDuration(match.getDuration()),
+                this.match.isRunning() ? NamedTextColor.GREEN : NamedTextColor.GOLD));
 
     if (!timeOnly && rightContent != null) {
       content
-          .append(" - ", TextColor.DARK_GRAY)
-          .append(rightContent.colorIfAbsent(TextColor.WHITE));
+          .append(text(" - ", NamedTextColor.DARK_GRAY))
+          .append(rightContent.colorIfAbsent(NamedTextColor.WHITE));
     }
 
     return TextTranslations.toBaseComponentArray(
-        content.colorIfAbsent(TextColor.DARK_GRAY).build(), view.getViewer());
+        content.colorIfAbsent(NamedTextColor.DARK_GRAY).build(), view.getViewer());
   }
 }

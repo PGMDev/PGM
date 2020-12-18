@@ -1,12 +1,13 @@
 package tc.oc.pgm.regions;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
@@ -74,7 +75,7 @@ public class RegionFilterApplicationParser {
             new TeamFilter(
                 Teams.getTeamRef(new Node(XMLUtils.getRequiredAttribute(el, "team")), factory)));
     final Region region = parseRegion(el);
-    final Component message = TranslatableComponent.of("match.laneExit");
+    final Component message = translatable("match.laneExit");
 
     prepend(el, new RegionFilterApplication(RFAScope.PLAYER_ENTER, region, filter, message, false));
     prepend(
@@ -92,7 +93,7 @@ public class RegionFilterApplicationParser {
                 Double.NEGATIVE_INFINITY),
             new Vector(
                 Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY));
-    final Component message = TranslatableComponent.of("match.maxBuildHeight");
+    final Component message = translatable("match.maxBuildHeight");
 
     for (RFAScope scope : Lists.newArrayList(RFAScope.BLOCK_PLACE)) {
       prepend(el, new RegionFilterApplication(scope, region, StaticFilter.DENY, message, false));
@@ -101,7 +102,7 @@ public class RegionFilterApplicationParser {
 
   public void parsePlayable(Element el) throws InvalidXMLException {
     final Region region = new NegativeRegion(parseRegion(el));
-    final Component message = TranslatableComponent.of("match.outOfBounds");
+    final Component message = translatable("match.outOfBounds");
 
     for (RFAScope scope :
         Lists.newArrayList(RFAScope.BLOCK_PLACE, RFAScope.BLOCK_BREAK, RFAScope.PLAYER_ENTER)) {

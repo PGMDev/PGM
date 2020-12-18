@@ -1,16 +1,18 @@
 package tc.oc.pgm.map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Difficulty;
 import org.jdom2.Element;
@@ -73,7 +75,7 @@ public class MapInfoImpl implements MapInfo {
     this.tags = tags == null ? new TreeSet<>() : tags;
     this.players = players == null ? new LinkedList<>() : players;
     this.world = world == null ? new WorldInfoImpl() : world;
-    this.gamemode = gamemode == null ? TextComponent.empty() : gamemode;
+    this.gamemode = gamemode == null ? empty() : gamemode;
   }
 
   public MapInfoImpl(MapInfo info) {
@@ -210,20 +212,20 @@ public class MapInfoImpl implements MapInfo {
 
   @Override
   public Component getStyledName(MapNameStyle style) {
-    TextComponent.Builder name = TextComponent.builder(getName());
+    TextComponent.Builder name = text().content(getName());
 
-    if (style.isColor) name.color(TextColor.GOLD);
+    if (style.isColor) name.color(NamedTextColor.GOLD);
     if (style.isHighlight) name.decoration(TextDecoration.UNDERLINED, true);
     if (style.showAuthors) {
-      return TranslatableComponent.of(
+      return translatable(
           "misc.authorship",
-          TextColor.DARK_PURPLE,
+          NamedTextColor.DARK_PURPLE,
           name.build(),
           TextFormatter.list(
               getAuthors().stream()
-                  .map(c -> c.getName(NameStyle.PLAIN).color(TextColor.RED))
+                  .map(c -> c.getName(NameStyle.PLAIN).color(NamedTextColor.RED))
                   .collect(Collectors.toList()),
-              TextColor.DARK_PURPLE));
+              NamedTextColor.DARK_PURPLE));
     }
 
     return name.build();

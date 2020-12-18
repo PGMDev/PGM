@@ -1,5 +1,8 @@
 package tc.oc.pgm.community.features;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Switch;
@@ -12,11 +15,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -131,9 +132,9 @@ public class VanishManagerImpl implements VanishManager, Listener {
       perms = Permissions.VANISH)
   public void vanish(MatchPlayer sender, @Switch('s') boolean silent) throws CommandException {
     if (setVanished(sender, !isVanished(sender.getId()), silent)) {
-      sender.sendWarning(TranslatableComponent.of("vanish.activate").color(TextColor.GREEN));
+      sender.sendWarning(translatable("vanish.activate").color(NamedTextColor.GREEN));
     } else {
-      sender.sendWarning(TranslatableComponent.of("vanish.deactivate").color(TextColor.RED));
+      sender.sendWarning(translatable("vanish.deactivate").color(NamedTextColor.RED));
     }
   }
 
@@ -205,12 +206,9 @@ public class VanishManagerImpl implements VanishManager, Listener {
   }
 
   private void sendHotbarVanish(MatchPlayer player, boolean flashColor) {
-    Component warning =
-        TextComponent.of(" \u26a0 ", flashColor ? TextColor.YELLOW : TextColor.GOLD);
-    Component vanish =
-        TranslatableComponent.of("vanish.hotbar", TextColor.RED, TextDecoration.BOLD);
-    Component message =
-        TextComponent.builder().append(warning).append(vanish).append(warning).build();
-    player.showHotbar(message);
+    Component warning = text(" \u26a0 ", flashColor ? NamedTextColor.YELLOW : NamedTextColor.GOLD);
+    Component vanish = translatable("vanish.hotbar", NamedTextColor.RED, TextDecoration.BOLD);
+    Component message = text().append(warning).append(vanish).append(warning).build();
+    player.sendActionBar(message);
   }
 }

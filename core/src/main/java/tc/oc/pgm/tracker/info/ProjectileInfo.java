@@ -1,10 +1,10 @@
 package tc.oc.pgm.tracker.info;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static net.kyori.adventure.text.Component.translatable;
 
 import javax.annotation.Nullable;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Location;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
@@ -59,13 +59,13 @@ public class ProjectileInfo implements PhysicalInfo, DamageInfo, RangedInfo {
   }
 
   @Override
-  public net.kyori.text.Component getName() {
+  public net.kyori.adventure.text.Component getName() {
     if (customName != null) {
-      return LegacyComponentSerializer.legacy().deserialize(customName);
+      return LegacyComponentSerializer.legacySection().deserialize(customName);
     } else if (getProjectile() instanceof PotionInfo) {
       // PotionInfo.getName returns a potion name,
       // which doesn't work outside a potion death message.
-      return TranslatableComponent.of("item.potion.name");
+      return translatable("item.potion.name");
     } else {
       return getProjectile().getName();
     }

@@ -1,15 +1,16 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
 import app.ashcon.intake.Command;
 import com.google.common.collect.Range;
 import javax.annotation.Nullable;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.format.NamedTextColor;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
-import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
 
@@ -29,10 +30,10 @@ public final class FreeForAllCommand {
     }
 
     audience.sendMessage(
-        TranslatableComponent.of(
+        translatable(
             "match.resize.max",
-            TranslatableComponent.of("match.info.players", TextColor.YELLOW),
-            TextComponent.of(ffa.getMinPlayers(), TextColor.AQUA)));
+            translatable("match.info.players", NamedTextColor.YELLOW),
+            text(ffa.getMinPlayers(), NamedTextColor.AQUA)));
   }
 
   @Command(
@@ -55,16 +56,16 @@ public final class FreeForAllCommand {
     }
 
     audience.sendMessage(
-        TranslatableComponent.of(
+        translatable(
             "match.resize.max",
-            TranslatableComponent.of("match.info.players", TextColor.YELLOW),
-            TextComponent.of(ffa.getMaxPlayers(), TextColor.AQUA)));
+            translatable("match.info.players", NamedTextColor.YELLOW),
+            text(ffa.getMaxPlayers(), NamedTextColor.AQUA)));
   }
 
   private FreeForAllMatchModule getFfa(Match match) {
     final FreeForAllMatchModule ffa = match.getModule(FreeForAllMatchModule.class);
     if (ffa == null) {
-      throw TextException.of("command.moduleNotFound", TextComponent.of("free-for-all"));
+      throw TextException.of("command.moduleNotFound", text("free-for-all"));
     }
     return ffa;
   }
