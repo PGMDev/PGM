@@ -242,8 +242,9 @@ public class MatchTabView extends TabView implements Listener {
 
   private int getColumnsForTeam(Team team, Collection<Team> teams) {
     if (teams.size() < getWidth()) {
-      int aimCols = Math.round((float) team.getMaxPlayers() * getWidth() / match.getMaxPlayers());
-      return Math.max(1, Math.min(aimCols, getWidth() - teams.size() + 1));
+      float cols = (float) team.getMaxPlayers() * getWidth() / match.getMaxPlayers();
+      if (cols % 1 == 0.5 && cols > ((float) getWidth() / teams.size())) cols -= 0.5;
+      return Math.max(1, Math.min(Math.round(cols), getWidth() - teams.size() + 1));
     } else {
       return 1;
     }
