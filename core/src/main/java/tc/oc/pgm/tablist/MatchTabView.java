@@ -136,22 +136,21 @@ public class MatchTabView extends TabView implements Listener {
         observerRows = getObserverRows(observingPlayers, observingStaff, participantRows);
         participantRows = availableRows - observerRows;
 
-        int columnsPerTeam = Math.max(1, this.getWidth() / Math.max(1, teams.size()));
-
         int y1 = this.getHeader();
         Iterator<Team> teamIt = teams.iterator();
         while (teamIt.hasNext()) {
           int y2 = y1;
-          for (int x1 = 0; x1 < getWidth(); x1 += columnsPerTeam) {
+          for (int x1 = 0; x1 < getWidth(); ) {
             if (!teamIt.hasNext()) {
-              fillEmpty(x1, x1 + columnsPerTeam, y1, y2);
-              continue;
+              fillEmpty(x1, this.getWidth(), y1, y2);
+              break;
             }
 
             Team team = teamIt.next();
+            int columnsForTeam = getColumnsForTeam(team, teams);
             int currY2 = participantRows + getHeader(); // Default to max height
             // Size tightly vertically when teams don't use multiple columns
-            if (columnsPerTeam == 1) currY2 = Math.min(y1 + team.getPlayers().size() + 2, currY2);
+            if (columnsForTeam == 1) currY2 = Math.min(y1 + team.getPlayers().size() + 2, currY2);
 
             if (currY2 > y2) {
               // If the max y on this row of teams increases, fill the void under previous teams
@@ -166,10 +165,12 @@ public class MatchTabView extends TabView implements Listener {
                   true,
                   true,
                   x1,
-                  x1 + columnsPerTeam,
+                  x1 + columnsForTeam,
                   y1,
                   y2);
             }
+
+            x1 += columnsForTeam;
           }
 
           y1 = y2;
@@ -220,19 +221,32 @@ public class MatchTabView extends TabView implements Listener {
   }
 
   private int getMinimumParticipantRows(Collection<Team> teams) {
-    int columnsPerTeam = Math.max(1, this.getWidth() / Math.max(1, teams.size()));
     int teamsPerColumn = Math.min(this.getWidth(), teams.size());
 
     int biggestTeamColumn = 0;
     Iterator<Team> teamIt = teams.iterator();
     while (teamIt.hasNext()) {
-      int biggestTeam = 0;
-      for (int x = 0; x < teamsPerColumn && teamIt.hasNext(); x++)
-        biggestTeam = Math.max(biggestTeam, teamIt.next().getPlayers().size());
+      int mostRows = 0;
+      for (int x = 0; x < teamsPerColumn && teamIt.hasNext(); x++) {
+        Team team = teamIt.next();
+        mostRows =
+            Math.max(
+                mostRows,
+                divideRoundingUp(team.getPlayers().size(), getColumnsForTeam(team, teams)));
+      }
 
-      biggestTeamColumn += 2 + divideRoundingUp(biggestTeam, columnsPerTeam);
+      biggestTeamColumn += 2 + mostRows;
     }
     return biggestTeamColumn;
+  }
+
+  private int getColumnsForTeam(Team team, Collection<Team> teams) {
+    if (teams.size() < getWidth()) {
+      int aimCols = Math.round((float) team.getMaxPlayers() * getWidth() / match.getMaxPlayers());
+      return Math.max(1, Math.min(aimCols, getWidth() - teams.size() + 1));
+    } else {
+      return 1;
+    }
   }
 
   private int getObserverRows(int observers, int observingStaff, int participantRows) {
