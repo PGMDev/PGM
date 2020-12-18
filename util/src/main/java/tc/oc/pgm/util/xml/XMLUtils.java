@@ -499,7 +499,7 @@ public final class XMLUtils {
     try {
       return TextParser.parseDuration(node.getValueNormalize(), validRange);
     } catch (TextException e) {
-      throw new InvalidXMLException("invalid time format: " + e.getLocalizedMessage(), node);
+      throw new InvalidXMLException("invalid time format", node, e);
     }
   }
 
