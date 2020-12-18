@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
@@ -18,6 +19,9 @@ import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.classes.ClassModule;
 import tc.oc.pgm.classes.PlayerClass;
 import tc.oc.pgm.features.XMLFeatureReference;
+import tc.oc.pgm.filters.modifier.location.LocalLocationQueryModifier;
+import tc.oc.pgm.filters.modifier.location.LocationQueryModifier;
+import tc.oc.pgm.filters.modifier.location.WorldLocationQueryModifier;
 import tc.oc.pgm.flag.FlagDefinition;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.state.Captured;
@@ -452,5 +456,41 @@ public abstract class FilterParser {
   @MethodParser("score")
   public ScoreFilter parseScoreFilter(Element el) throws InvalidXMLException {
     return new ScoreFilter(XMLUtils.parseNumericRange(new Node(el), Integer.class));
+  }
+
+  // Methods for parsing QueryModifiers
+
+  @MethodParser("offset")
+  public LocationQueryModifier parseOffsetFilter(Element el) throws InvalidXMLException {
+    String value = el.getAttributeValue("vector");
+    if (value == null) throw new InvalidXMLException("No vector provided", el);
+    // Check vector format
+    Vector vector = XMLUtils.parseVector(new Node(el), value.replaceAll("[\\^~]", ""));
+
+    String[] coords = value.split("\\s*,\\s*");
+
+    boolean[] relative = new boolean[3];
+
+    Boolean local = null;
+    for (int i = 0; i < coords.length; i++) {
+      String coord = coords[i];
+
+      if (local == null) {
+        local = coord.startsWith("^");
+      }
+
+      if (coord.startsWith("^") != local)
+        throw new InvalidXMLException("Cannot mix world & local coordinates", el);
+
+      relative[i] = coord.startsWith("~");
+    }
+
+    if (local == null) throw new InvalidXMLException("No coordinates provided", el);
+
+    if (local) {
+      return new LocalLocationQueryModifier(parseChild(el), vector);
+    } else {
+      return new WorldLocationQueryModifier(parseChild(el), vector, relative);
+    }
   }
 }
