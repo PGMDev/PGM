@@ -26,9 +26,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
-import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.countdowns.SingleCountdownContext;
-import tc.oc.pgm.cycle.CycleMatchModule;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerLeaveMatchEvent;
@@ -41,28 +39,6 @@ public class StartMatchModule implements MatchModule, Listener {
     @Override
     public StartMatchModule createMatchModule(Match match) throws ModuleLoadException {
       return new StartMatchModule(match);
-    }
-  }
-
-  class UnreadyTimeout extends MatchCountdown {
-    public UnreadyTimeout(Match match) {
-      super(match);
-    }
-
-    @Override
-    protected boolean showChat() {
-      return false;
-    }
-
-    @Override
-    protected Component formatText() {
-      return formatUnreadyReason();
-    }
-
-    @Override
-    public void onEnd(Duration total) {
-      super.onEnd(total);
-      match.needModule(CycleMatchModule.class).cycleNow();
     }
   }
 
@@ -202,14 +178,6 @@ public class StartMatchModule implements MatchModule, Listener {
     return isAutoStart() && canStart(false) && startCountdown(null, null, false);
   }
 
-  public boolean restartUnreadyTimeout() {
-    if (cc().getCountdown() instanceof UnreadyTimeout) {
-      startUnreadyTimeout();
-      return true;
-    }
-    return false;
-  }
-
   private boolean startCountdown(
       @Nullable Duration duration, @Nullable Duration huddle, boolean force) {
     final Config config = PGM.get().getConfiguration();
@@ -232,20 +200,6 @@ public class StartMatchModule implements MatchModule, Listener {
     return false;
   }
 
-  private void startUnreadyTimeout() {
-    Duration duration = null; // Removed after config update
-    if (duration != null) {
-      match.getLogger().fine("STARTING unready timeout with duration " + duration);
-      cc().start(new UnreadyTimeout(match), duration);
-    }
-  }
-
-  private void cancelUnreadyTimeout() {
-    if (cc().cancelAll(UnreadyTimeout.class)) {
-      match.getLogger().fine("Cancelled unready timeout");
-    }
-  }
-
   public void update() {
     final StartCountdown countdown = cc().getCountdown(StartCountdown.class);
     final boolean ready = canStart(countdown != null && countdown.isForced());
@@ -263,13 +217,6 @@ public class StartMatchModule implements MatchModule, Listener {
       match.showBossBar(unreadyBar);
     } else if (!empty) {
       match.hideBossBar(unreadyBar);
-    }
-
-    final UnreadyTimeout timeout = cc().getCountdown(UnreadyTimeout.class);
-    if (timeout == null && !ready && !empty) {
-      startUnreadyTimeout();
-    } else if (timeout != null && (ready || empty)) {
-      cancelUnreadyTimeout();
     }
   }
 
