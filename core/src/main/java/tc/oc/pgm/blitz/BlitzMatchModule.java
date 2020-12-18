@@ -62,6 +62,7 @@ public class BlitzMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   public void handleDeath(final MatchPlayerDeathEvent event) {
     MatchPlayer victim = event.getVictim();
+    if (config.getFilter().query(victim.getQuery()).isDenied()) return;
     if (victim.getParty() instanceof Competitor) {
       Competitor competitor = (Competitor) victim.getParty();
 
@@ -92,7 +93,7 @@ public class BlitzMatchModule implements MatchModule, Listener {
 
   @EventHandler
   public void handleSpawn(final ParticipantSpawnEvent event) {
-    if (this.config.broadcastLives) {
+    if (this.config.getBroadcastLives()) {
       int lives = this.lifeManager.getLives(event.getPlayer().getId());
       event
           .getPlayer()
