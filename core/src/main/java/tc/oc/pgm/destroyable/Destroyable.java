@@ -123,7 +123,11 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   // Remove @Nullable
   @Override
   public @Nonnull Team getOwner() {
-    return super.getOwner();
+    Team owner = super.getOwner();
+    if (owner == null) {
+      throw new IllegalStateException("destroyable " + getId() + " has no owner");
+    }
+    return owner;
   }
 
   @Override

@@ -59,7 +59,11 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
   // Remove @Nullable
   @Override
   public Team getOwner() {
-    return super.getOwner();
+    Team owner = super.getOwner();
+    if (owner == null) {
+      throw new IllegalStateException("wool " + getId() + " has no owner");
+    }
+    return owner;
   }
 
   @Override
