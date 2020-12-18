@@ -18,7 +18,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.query.PartyQuery;
-import tc.oc.pgm.util.adventure.Audience;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.named.NameStyle;
 
@@ -158,7 +158,7 @@ public class Tribute implements Competitor {
 
   @Override
   public net.kyori.adventure.audience.@NonNull Audience audience() {
-    return Audience.get(this.players);
+    return player != null ? this.player : Audience.empty();
   }
 
   /**

@@ -75,11 +75,7 @@ public class DestroyableMatchModule implements MatchModule, Listener {
               event.getNewState(),
               ParticipantBlockTransformEvent.getPlayerState(event));
       if (reasonKey != null) {
-<<<<<<< HEAD
-        event.setCancelled(Component.translatable(reasonKey));
-=======
-        event.setCancelled(true, translatable(reasonKey));
->>>>>>> 788b68f... Use static imports for adventure
+        event.setCancelled(translatable(reasonKey));
         return;
       }
     }

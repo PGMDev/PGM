@@ -13,7 +13,7 @@ import com.google.common.base.Joiner;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
-import tc.oc.pgm.util.adventure.Audience;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.text.TextException;
 
 public final class CommandExecutor extends BukkitIntake {

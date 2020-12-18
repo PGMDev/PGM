@@ -18,8 +18,8 @@ import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.restart.RestartManager;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.UsernameFormatUtils;
-import tc.oc.pgm.util.adventure.Audience;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
 

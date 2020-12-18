@@ -17,8 +17,8 @@ import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.modes.ModeChangeCountdown;
 import tc.oc.pgm.modes.ModesPaginatedResult;
 import tc.oc.pgm.modes.ObjectiveModesMatchModule;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.adventure.Audience;
 import tc.oc.pgm.util.text.TextException;
 
 // TODO: make the output nicer and translate

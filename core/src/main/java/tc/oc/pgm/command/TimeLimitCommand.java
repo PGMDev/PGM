@@ -12,8 +12,8 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.timelimit.TimeLimit;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.adventure.Audience;
 
 public final class TimeLimitCommand {
 

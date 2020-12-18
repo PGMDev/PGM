@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.adventure;
+package tc.oc.pgm.util;
 
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;

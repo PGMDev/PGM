@@ -23,7 +23,7 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
-import tc.oc.pgm.util.adventure.Audience;
+import tc.oc.pgm.util.Audience;
 
 /**
  * A {@link Goal} that may be 'touched' by players, meaning the player has made some tangible

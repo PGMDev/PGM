@@ -12,7 +12,7 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.ffa.Tribute;
 import tc.oc.pgm.stats.StatsMatchModule;
-import tc.oc.pgm.util.adventure.Audience;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextFormatter;
 

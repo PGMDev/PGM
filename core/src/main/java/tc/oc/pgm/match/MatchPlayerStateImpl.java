@@ -16,7 +16,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
-import tc.oc.pgm.util.adventure.Audience;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.named.NameStyle;
 
 public class MatchPlayerStateImpl implements MatchPlayerState {

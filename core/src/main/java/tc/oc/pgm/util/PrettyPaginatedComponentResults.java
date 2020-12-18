@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import net.kyori.adventure.text.Component;
-import tc.oc.pgm.util.adventure.Audience;
 
 public abstract class PrettyPaginatedComponentResults<T> {
 

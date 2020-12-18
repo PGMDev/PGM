@@ -166,7 +166,6 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
       // Whenever playersNeeded reaches a new minimum, reset the unready timeout
       if (playersNeeded < minPlayersNeeded) {
         minPlayersNeeded = playersNeeded;
-        smm.restartUnreadyTimeout();
       }
     }
   }

@@ -182,7 +182,6 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       // Whenever playersNeeded reaches a new minimum, reset the unready timeout
       if (playersNeeded < minPlayersNeeded) {
         minPlayersNeeded = playersNeeded;
-        smm.restartUnreadyTimeout();
       }
     } else {
       smm.removeUnreadyReason(NeedMorePlayers.class);
@@ -575,7 +574,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPartyChange(PlayerPartyChangeEvent event) {
     if (event.getNewParty() instanceof Team
-      || (event.getNewParty() instanceof ObserverParty && event.getOldParty() != null)) {
+        || (event.getNewParty() instanceof ObserverParty && event.getOldParty() != null)) {
       event.getPlayer().sendMessage(translatable("join.ok.team", event.getNewParty().getName()));
     }
     updateReadiness();
