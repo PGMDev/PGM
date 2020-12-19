@@ -3,9 +3,8 @@ package tc.oc.pgm.util.text.formatting;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.bukkit.command.CommandException;
-
 import net.kyori.adventure.text.Component;
+import org.bukkit.command.CommandException;
 import tc.oc.pgm.util.Audience;
 
 /** TODO: Migrate everywhere to use this version over {@link PrettyPaginatedComponentResults} */

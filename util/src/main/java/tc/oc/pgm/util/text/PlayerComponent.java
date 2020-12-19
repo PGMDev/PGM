@@ -33,7 +33,7 @@ public final class PlayerComponent {
     Player player = Bukkit.getPlayer(playerId);
     return player != null ? player(player, style) : UNKNOWN;
   }
-  
+
   static Component player(UUID playerId, String defName, NameStyle style) {
     Player player = Bukkit.getPlayer(playerId);
     return player != null
