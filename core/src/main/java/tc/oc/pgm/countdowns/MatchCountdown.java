@@ -151,7 +151,7 @@ public abstract class MatchCountdown extends Countdown {
   }
 
   protected float bossBarProgress(Duration remaining, Duration total) {
-    return total.isZero() ? 0f : Math.max(1f, (float) remaining.toMillis() / total.toMillis());
+    return total.isZero() ? 0f : Math.min(1f, (float) remaining.toMillis() / total.toMillis());
   }
 
   public Duration getRemaining() {
