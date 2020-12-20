@@ -62,10 +62,7 @@ public class CycleCountdown extends MatchCountdown {
     return cycleComponent.color(NamedTextColor.DARK_AQUA);
   }
 
-  @Override
-  public void onTick(Duration remaining, Duration total) {
-    super.onTick(remaining, total);
-
+  private void checkSetNext() {
     final MapOrder mapOrder = PGM.get().getMapOrder();
     if (remaining.getSeconds() <= preloadSecs) {
       if (nextMatch != null) return;
@@ -75,6 +72,18 @@ public class CycleCountdown extends MatchCountdown {
     } else {
       nextMap = mapOrder.getNextMap();
     }
+  }
+
+  @Override
+  public void onStart(Duration remaining, Duration total) {
+    super.onStart(remaining, total);
+    checkSetNext();
+  }
+
+  @Override
+  public void onTick(Duration remaining, Duration total) {
+    super.onTick(remaining, total);
+    checkSetNext();
   }
 
   @Override
