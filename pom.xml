@@ -135,6 +135,14 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- Small reflection library for Scoreboards -->
+        <dependency>
+            <groupId>fr.mrmicky</groupId>
+            <artifactId>FastBoard</artifactId>
+            <version>1.1.0</version>
+            <scope>compile</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>

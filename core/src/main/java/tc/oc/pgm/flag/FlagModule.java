@@ -21,7 +21,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 public class FlagModule implements MapModule {
 
   private static final Collection<MapTag> TAGS =
-      ImmutableList.of(MapTag.create("flag", "Capture the Flag", true, false));
+      ImmutableList.of(new MapTag("ctf", "flag", "Capture the Flag", true, false));
   private final ImmutableList<Post> posts;
   private final ImmutableList<Net> nets;
   private final ImmutableList<FlagDefinition> flags;

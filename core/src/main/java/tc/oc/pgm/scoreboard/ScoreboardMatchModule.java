@@ -99,7 +99,7 @@ public class ScoreboardMatchModule implements MatchModule, Listener {
     Team team = scoreboard.registerNewTeam(getScoreboardTeamName(party));
     updatePartyScoreboardTeam(party, team, forObservers);
     for (MatchPlayer player : party.getPlayers()) {
-      team.addPlayer(player.getBukkit());
+      team.addEntry(player.getNameLegacy());
     }
 
     return team;
@@ -175,8 +175,7 @@ public class ScoreboardMatchModule implements MatchModule, Listener {
                     + toString(team)
                     + " on scoreboard "
                     + toString(scoreboard));
-        team.addPlayer(
-            player.getBukkit()); // This also removes the player from their old team, if any
+        team.addEntry(player.getNameLegacy());
       } else if (oldParty != null) {
         Team team = scoreboard.getTeam(teamName);
         match

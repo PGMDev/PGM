@@ -1,9 +1,10 @@
 package tc.oc.pgm.scoreboard;
 
-import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import fr.mrmicky.fastboard.FastBoard;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,26 +12,26 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.apache.commons.lang.StringUtils;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
+import org.bukkit.event.player.PlayerLocaleChangeEvent;
+import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -42,14 +43,15 @@ import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.party.event.CompetitorScoreChangeEvent;
-import tc.oc.pgm.api.party.event.PartyAddEvent;
-import tc.oc.pgm.api.party.event.PartyRemoveEvent;
 import tc.oc.pgm.api.party.event.PartyRenameEvent;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.destroyable.Destroyable;
 import tc.oc.pgm.events.FeatureChangeEvent;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.events.PlayerJoinMatchEvent;
+import tc.oc.pgm.events.PlayerLeaveMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.ffa.Tribute;
 import tc.oc.pgm.goals.Goal;
@@ -63,6 +65,7 @@ import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.events.TeamRespawnsChangeEvent;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;
 import tc.oc.pgm.wool.MonumentWool;
 import tc.oc.pgm.wool.WoolMatchModule;
@@ -86,123 +89,17 @@ public class SidebarMatchModule implements MatchModule, Listener {
   public static final int MAX_PREFIX = 16; // Max chars in a team prefix
   public static final int MAX_SUFFIX = 16; // Max chars in a team suffix
 
-  protected final Map<Party, Sidebar> sidebars = new HashMap<>();
+  protected final Map<UUID, FastBoard> sidebars = new HashMap<>();
   protected final Map<Goal, BlinkTask> blinkingGoals = new HashMap<>();
 
   protected @Nullable Future<?> renderTask;
 
-  private static String renderSidebarTitle(
-      Collection<MapTag> tags, @Nullable Component gamemodeName) {
-    final Component configTitle = PGM.get().getConfiguration().getMatchHeader();
-    if (configTitle != null)
-      return LegacyComponentSerializer.legacyAmpersand().serialize(configTitle);
-    if (gamemodeName != null) {
-      String customGamemode = LegacyComponentSerializer.legacySection().serialize(gamemodeName);
-      if (!customGamemode.isEmpty()) return ChatColor.AQUA + customGamemode;
-    }
-
-    final List<String> gamemode =
-        tags.stream()
-            .filter(MapTag::isGamemode)
-            .filter(tag -> !tag.isAuxiliary())
-            .map(MapTag::getName)
-            .collect(Collectors.toList());
-    final List<String> auxiliary =
-        tags.stream()
-            .filter(MapTag::isGamemode)
-            .filter(MapTag::isAuxiliary)
-            .map(MapTag::getName)
-            .collect(Collectors.toList());
-
-    String title = "";
-
-    if (gamemode.size() == 1) {
-      title = gamemode.get(0);
-    } else if (gamemode.size() >= 2) {
-      title = "Objectives";
-    }
-
-    if (auxiliary.size() == 1) {
-      title += (title.isEmpty() ? "" : " & ") + auxiliary.get(0);
-    } else if (gamemode.isEmpty() && auxiliary.size() == 2) {
-      title = auxiliary.get(0) + " & " + auxiliary.get(1);
-    }
-
-    return ChatColor.AQUA + (title.isEmpty() ? "Match" : title);
-  }
-
-  private class Sidebar {
-
-    private static final String IDENTIFIER = "pgm";
-
-    private final Scoreboard scoreboard;
-    private final Objective objective;
-
-    // Each row has its own scoreboard team
-    protected final String[] rows = new String[MAX_ROWS];
-    protected final int[] scores = new int[MAX_ROWS];
-    protected final Team[] teams = new Team[MAX_ROWS];
-    protected final String[] players = new String[MAX_ROWS];
-
-    private Sidebar(Party party) {
-      this.scoreboard = match.needModule(ScoreboardMatchModule.class).getScoreboard(party);
-      this.objective = this.scoreboard.registerNewObjective(IDENTIFIER, "dummy");
-      this.objective.setDisplayName(
-          StringUtils.left(
-              renderSidebarTitle(match.getMap().getTags(), match.getMap().getGamemode()), 32));
-      this.objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-
-      for (int i = 0; i < MAX_ROWS; ++i) {
-        this.rows[i] = null;
-        this.scores[i] = -1;
-
-        this.players[i] = String.valueOf(ChatColor.COLOR_CHAR) + (char) i;
-
-        this.teams[i] = this.scoreboard.registerNewTeam(IDENTIFIER + "-row-" + i);
-        this.teams[i].setPrefix("");
-        this.teams[i].setSuffix("");
-        this.teams[i].addEntry(this.players[i]);
-      }
-    }
-
-    public Scoreboard getScoreboard() {
-      return this.scoreboard;
-    }
-
-    public Objective getObjective() {
-      return this.objective;
-    }
-
-    private void setRow(int maxScore, int row, @Nullable String text) {
-      if (row < 0 || row >= MAX_ROWS) return;
-
-      int score = text == null ? -1 : maxScore - row - 1;
-      if (this.scores[row] != score) {
-        this.scores[row] = score;
-
-        if (score == -1) {
-          this.scoreboard.resetScores(this.players[row]);
-        } else {
-          this.objective.getScore(this.players[row]).setScore(score);
-        }
-      }
-
-      if (!Objects.equals(this.rows[row], text)) {
-        this.rows[row] = text;
-
-        if (text != null) {
-          String[] split = tc.oc.pgm.util.StringUtils.splitIntoTeamPrefixAndSuffix(text);
-          this.teams[row].setPrefix(split[0]);
-          this.teams[row].setSuffix(split[1]);
-        }
-      }
-    }
-  }
-
   private final Match match;
+  private final Component title;
 
   public SidebarMatchModule(Match match) {
     this.match = match;
+    this.title = renderTitle(PGM.get().getConfiguration(), match.getMap());
   }
 
   private boolean hasScores() {
@@ -235,14 +132,15 @@ public class SidebarMatchModule implements MatchModule, Listener {
     return !(rowsUsed < MAX_ROWS);
   }
 
-  private void addSidebar(Party party) {
-    match.getLogger().fine("Adding sidebar for party " + party);
-    sidebars.put(party, new Sidebar(party));
+  private void addSidebar(MatchPlayer player) {
+    sidebars.put(player.getId(), new FastBoard(player.getBukkit()));
   }
 
   @Override
   public void load() {
-    for (Party party : match.getParties()) addSidebar(party);
+    for (MatchPlayer player : match.getPlayers()) {
+      addSidebar(player);
+    }
     renderSidebarDebounce();
   }
 
@@ -256,18 +154,23 @@ public class SidebarMatchModule implements MatchModule, Listener {
     for (BlinkTask task : ImmutableSet.copyOf(this.blinkingGoals.values())) {
       task.stop();
     }
+    this.sidebars.clear();
   }
 
   @EventHandler
-  public void addParty(PartyAddEvent event) {
-    addSidebar(event.getParty());
+  public void localChange(PlayerLocaleChangeEvent event) {
     renderSidebarDebounce();
   }
 
   @EventHandler
-  public void removeParty(PartyRemoveEvent event) {
-    match.getLogger().fine("Removing sidebar for party " + event.getParty());
-    sidebars.remove(event.getParty());
+  public void addPlayer(PlayerJoinMatchEvent event) {
+    addSidebar(event.getPlayer());
+    renderSidebarDebounce();
+  }
+
+  @EventHandler
+  public void removePlayer(PlayerLeaveMatchEvent event) {
+    sidebars.remove(event.getPlayer().getId());
     renderSidebarDebounce();
   }
 
@@ -345,7 +248,50 @@ public class SidebarMatchModule implements MatchModule, Listener {
     renderSidebarDebounce();
   }
 
-  private String renderGoal(Goal<?> goal, @Nullable Competitor competitor, Party viewingParty) {
+  private Component renderTitle(final Config config, final MapInfo map) {
+    final Component header = config.getMatchHeader();
+    if (header != null) {
+      return header.colorIfAbsent(NamedTextColor.AQUA);
+    }
+
+    final Component game = map.getGamemode();
+    if (game != null) {
+      return game.colorIfAbsent(NamedTextColor.AQUA);
+    }
+
+    final List<Component> games = new LinkedList<>();
+
+    // First, find a primary game mode
+    for (final MapTag tag : map.getTags()) {
+      if (!tag.isGamemode() || tag.isAuxiliary()) continue;
+
+      if (games.isEmpty()) {
+        games.add(tag.getName().color(NamedTextColor.AQUA));
+        continue;
+      }
+
+      // When there are multiple, primary game modes
+      games.set(0, translatable("gamemode.generic.name", NamedTextColor.AQUA));
+      break;
+    }
+
+    // Second, append auxiliary game modes
+    for (final MapTag tag : map.getTags()) {
+      if (!tag.isGamemode() || !tag.isAuxiliary()) continue;
+
+      // There can only be 2 game modes
+      if (games.size() < 2) {
+        games.add(tag.getName().color(NamedTextColor.AQUA));
+      } else {
+        break;
+      }
+    }
+
+    return TextFormatter.list(games, NamedTextColor.AQUA);
+  }
+
+  private String renderGoal(
+      Goal<?> goal, @Nullable Competitor competitor, Party viewingParty, CommandSender viewer) {
     StringBuilder sb = new StringBuilder(" ");
 
     BlinkTask blinkTask = this.blinkingGoals.get(goal);
@@ -365,12 +311,14 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
     sb.append(" ");
     sb.append(goal.renderSidebarLabelColor(competitor, viewingParty));
-    sb.append(goal.renderSidebarLabelText(competitor, viewingParty));
+    sb.append(
+        TextTranslations.translateLegacy(
+            goal.renderSidebarLabelText(competitor, viewingParty), viewer));
 
     return sb.toString();
   }
 
-  private String renderScore(Competitor competitor, Party viewingParty) {
+  private String renderScore(Competitor competitor) {
     ScoreMatchModule smm = match.needModule(ScoreMatchModule.class);
     String text = ChatColor.WHITE.toString() + (int) smm.getScore(competitor);
     if (smm.hasScoreLimit()) {
@@ -379,7 +327,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
     return text;
   }
 
-  private String renderBlitz(Competitor competitor, Party viewingParty) {
+  private String renderBlitz(Competitor competitor) {
     BlitzMatchModule bmm = match.needModule(BlitzMatchModule.class);
     if (competitor instanceof tc.oc.pgm.teams.Team) {
       return ChatColor.WHITE.toString() + bmm.getRemainingPlayers(competitor);
@@ -426,23 +374,25 @@ public class SidebarMatchModule implements MatchModule, Listener {
     }
     final boolean isSuperCompact = isSuperCompact(competitorsWithGoals);
 
-    for (Map.Entry<Party, Sidebar> entry : this.sidebars.entrySet()) {
-      Party viewingParty = entry.getKey();
-      Sidebar sidebar = entry.getValue();
+    for (MatchPlayer player : this.match.getPlayers()) {
+      final FastBoard sidebar = this.sidebars.get(player.getId());
+      if (sidebar == null) continue;
 
-      List<String> rows = new ArrayList<>(MAX_ROWS);
+      final Player viewer = player.getBukkit();
+      final Party party = player.getParty();
+      final List<String> rows = new ArrayList<>(MAX_ROWS);
 
       // Scores/Blitz
       if (hasScores || isBlitz) {
         for (Competitor competitor : match.getCompetitors()) {
           String text;
           if (hasScores) {
-            text = renderScore(competitor, viewingParty);
+            text = renderScore(competitor);
           } else {
-            text = renderBlitz(competitor, viewingParty);
+            text = renderBlitz(competitor);
           }
           if (text.length() != 0) text += " ";
-          rows.add(text + TextTranslations.translateLegacy(competitor.getName(), null));
+          rows.add(text + TextTranslations.translateLegacy(competitor.getName(), viewer));
         }
 
         if (!competitorsWithGoals.isEmpty() || !sharedGoals.isEmpty()) {
@@ -456,18 +406,17 @@ public class SidebarMatchModule implements MatchModule, Listener {
       // Shared goals i.e. not grouped under a specific team
       for (Goal goal : sharedGoals) {
         firstTeam = false;
-        rows.add(this.renderGoal(goal, null, viewingParty));
+        rows.add(this.renderGoal(goal, null, party, viewer));
       }
 
       // Team-specific goals
       List<Competitor> sortedCompetitors = new ArrayList<>(match.getCompetitors());
       sortedCompetitors.retainAll(competitorsWithGoals);
 
-      if (viewingParty instanceof Competitor) {
-
+      if (party instanceof Competitor) {
         // Bump viewing party to the top of the list
-        if (sortedCompetitors.remove(viewingParty)) {
-          sortedCompetitors.add(0, (Competitor) viewingParty);
+        if (sortedCompetitors.remove(party)) {
+          sortedCompetitors.add(0, (Competitor) party);
         }
       }
 
@@ -482,7 +431,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
         firstTeam = false;
 
         // Add a row for the team name
-        rows.add(TextTranslations.translateLegacy(competitor.getName(), null));
+        rows.add(TextTranslations.translateLegacy(competitor.getName(), viewer));
 
         if (isCompactWool) {
           boolean firstWool = true;
@@ -514,8 +463,8 @@ public class SidebarMatchModule implements MatchModule, Listener {
               woolText += " ";
               if (!firstWool && !horizontalCompact) woolText += "  ";
               firstWool = false;
-              woolText += wool.renderSidebarStatusColor(competitor, viewingParty);
-              woolText += wool.renderSidebarStatusText(competitor, viewingParty);
+              woolText += wool.renderSidebarStatusColor(competitor, party);
+              woolText += wool.renderSidebarStatusText(competitor, party);
             }
           }
           // Add a row for the compact wools
@@ -525,7 +474,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
           // Not compact; add a row for each of this team's goals
           for (Goal goal : gmm.getGoals()) {
             if (!goal.isShared() && goal.canComplete(competitor) && goal.isVisible()) {
-              rows.add(this.renderGoal(goal, competitor, viewingParty));
+              rows.add(this.renderGoal(goal, competitor, party, viewer));
             }
           }
         }
@@ -537,7 +486,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
         if (rows.size() < MAX_ROWS - 2) {
           rows.add("");
         }
-        rows.add(LegacyComponentSerializer.legacySection().serialize(footer));
+        rows.add(TextTranslations.translateLegacy(footer, viewer));
       }
 
       // Need at least one row for the sidebar to show
@@ -545,13 +494,8 @@ public class SidebarMatchModule implements MatchModule, Listener {
         rows.add("");
       }
 
-      for (int i = 0; i < MAX_ROWS; i++) {
-        if (i < rows.size()) {
-          sidebar.setRow(rows.size(), i, rows.get(i));
-        } else {
-          sidebar.setRow(rows.size(), i, null);
-        }
-      }
+      sidebar.updateTitle(TextTranslations.translateLegacy(title, viewer));
+      sidebar.updateLines(rows);
     }
   }
 

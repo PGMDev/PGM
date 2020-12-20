@@ -68,5 +68,5 @@ public interface Goal<T extends GoalDefinition> extends Feature<T> {
 
   ChatColor renderSidebarLabelColor(@Nullable Competitor competitor, Party viewer);
 
-  String renderSidebarLabelText(@Nullable Competitor competitor, Party viewer);
+  Component renderSidebarLabelText(@Nullable Competitor competitor, Party viewer);
 }

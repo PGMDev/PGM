@@ -1,7 +1,6 @@
 package tc.oc.pgm.map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
@@ -61,7 +60,7 @@ public class MapInfoImpl implements MapInfo {
       @Nullable Collection<MapTag> tags,
       @Nullable Collection<Integer> players,
       @Nullable WorldInfo world,
-      Component gamemode) {
+      @Nullable Component gamemode) {
     this.name = checkNotNull(name);
     this.id = checkNotNull(MapInfo.normalizeName(id == null ? name : id));
     this.proto = checkNotNull(proto);
@@ -75,7 +74,7 @@ public class MapInfoImpl implements MapInfo {
     this.tags = tags == null ? new TreeSet<>() : tags;
     this.players = players == null ? new LinkedList<>() : players;
     this.world = world == null ? new WorldInfoImpl() : world;
-    this.gamemode = gamemode == null ? empty() : gamemode;
+    this.gamemode = gamemode;
   }
 
   public MapInfoImpl(MapInfo info) {

@@ -16,7 +16,7 @@ import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamModule;
 
 public class MapContextImpl extends MapInfoImpl implements MapContext {
-  private static final MapTag TERRAIN = MapTag.create("terrain", "Terrain", false, true);
+  private static final MapTag TERRAIN = new MapTag("terrain", "Terrain", false, true);
 
   private final MapSource source;
   private final List<MapModule> modules;

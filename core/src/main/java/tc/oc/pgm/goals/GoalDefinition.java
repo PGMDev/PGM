@@ -1,9 +1,14 @@
 package tc.oc.pgm.goals;
 
+import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 
+import com.google.common.base.Splitter;
+import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 
@@ -17,11 +22,13 @@ public abstract class GoalDefinition extends SelfIdentifyingFeatureDefinition {
   private final @Nullable Boolean required;
   private final boolean visible;
   private final String name;
+  private final Component component;
 
   public GoalDefinition(
       @Nullable String id, String name, @Nullable Boolean required, boolean visible) {
     super(id);
     this.name = name;
+    this.component = translateName(name);
     this.required = required;
     this.visible = visible;
   }
@@ -40,7 +47,7 @@ public abstract class GoalDefinition extends SelfIdentifyingFeatureDefinition {
   }
 
   public Component getComponentName() {
-    return text(getName());
+    return this.component;
   }
 
   public @Nullable Boolean isRequired() {
@@ -53,5 +60,34 @@ public abstract class GoalDefinition extends SelfIdentifyingFeatureDefinition {
 
   public Goal<? extends GoalDefinition> getGoal(Match match) {
     return (Goal<? extends GoalDefinition>) match.getFeatureContext().get(this.getId());
+  }
+
+  // See "objective.name.monument" for examples
+  private static final Pattern OBJECTIVE_PATTERN =
+      Pattern.compile(
+          "Monument|Core|Wool|Flag|Antenna|Base|Ship|Orb|Tower|Inhibitor|Reactor|Engine");
+
+  // See "misc.top" for examples
+  private static final Pattern DESCRIPTOR_PATTERN =
+      Pattern.compile("Top|Bottom|Front|Back|Rear|Left|Right|Center|Mid|North|South|East|West");
+
+  // TODO: Support languages where words are ordered right-to-left
+  private static Component translateName(final String name) {
+    final TextComponent.Builder text = text();
+    int results = 0;
+    for (final String section : Splitter.on(' ').omitEmptyStrings().trimResults().split(name)) {
+      if (results > 0) {
+        text.append(space());
+      }
+      if (OBJECTIVE_PATTERN.matcher(section).matches()) {
+        text.append(translatable("objective.name." + section.toLowerCase()));
+      } else if (DESCRIPTOR_PATTERN.matcher(section).matches()) {
+        text.append(translatable("misc." + section.toLowerCase()));
+      } else {
+        text.append(text(section));
+      }
+      results++;
+    }
+    return text.build();
   }
 }

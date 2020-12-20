@@ -2,7 +2,6 @@ package tc.oc.pgm.flag;
 
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
-import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableSet;
@@ -13,7 +12,6 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
@@ -66,7 +64,6 @@ import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.text.TextFormatter;
 
 public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
@@ -189,20 +186,12 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     return color;
   }
 
-  public TextColor getChatColor() {
-    return TextFormatter.convert(getBukkitColor());
-  }
-
   public ChatColor getBukkitColor() {
     return BukkitUtils.dyeColorToChatColor(this.getDyeColor());
   }
 
   public String getColoredName() {
     return LegacyComponentSerializer.legacySection().serialize(getComponentName());
-  }
-
-  public Component getComponentName() {
-    return text(getName(), getChatColor());
   }
 
   public ImmutableSet<Net> getNets() {

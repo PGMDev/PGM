@@ -1,49 +1,113 @@
 package tc.oc.pgm.api.map;
 
-import org.apache.commons.lang3.builder.CompareToBuilder;
-import tc.oc.pgm.map.MapTagImpl;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+
+import java.util.regex.Pattern;
+import net.kyori.adventure.text.Component;
 
 /** A "#hashtag" that describes a {@link MapInfo} feature. */
-public interface MapTag extends Comparable<MapTag> {
+public final class MapTag implements Comparable<MapTag> {
+  private static final Pattern PATTERN = Pattern.compile("^[a-z0-9_-]+$");
+  private static final String SYMBOL = "#";
+
+  private final String id;
+  private final Component name;
+  private final Component acronym;
+  private final boolean gamemode;
+  private final boolean auxiliary;
+
+  public MapTag(
+      final String id, final String name, final boolean gamemode, final boolean auxiliary) {
+    this(id, id, name, gamemode, auxiliary);
+  }
+
+  public MapTag(
+      final String internalId,
+      final String id,
+      final String name,
+      final boolean gamemode,
+      final boolean auxiliary) {
+    checkArgument(
+        PATTERN.matcher(checkNotNull(id)).matches(), name + " must match " + PATTERN.pattern());
+    this.id = id;
+    if (gamemode) {
+      this.name = translatable("gamemode." + internalId + ".name");
+      this.acronym = translatable("gamemode." + internalId + ".acronym");
+    } else {
+      this.name = text(name);
+      this.acronym = empty();
+    }
+    this.gamemode = gamemode;
+    this.auxiliary = auxiliary;
+  }
 
   /**
    * Get a short id for the tag.
    *
    * @return A short, lowercase id without the "#".
    */
-  String getId();
+  public String getId() {
+    return this.id;
+  }
 
   /**
    * Get a full name for the tag.
    *
    * @return A full name.
    */
-  String getName();
+  public Component getName() {
+    return this.name;
+  }
+
+  /**
+   * Gets an acronym for the tag.
+   *
+   * @return An acronym.
+   */
+  public Component getAcronym() {
+    return this.acronym;
+  }
 
   /**
    * Get whether this tag represents a "gamemode."
    *
    * @return If a gamemode.
    */
-  boolean isGamemode();
+  public boolean isGamemode() {
+    return this.gamemode;
+  }
 
   /**
    * Get whether this tag is an auxiliary feature.
    *
    * @return If an auxiliary feature.
    */
-  boolean isAuxiliary();
-
-  @Override
-  default int compareTo(MapTag o) {
-    return new CompareToBuilder()
-        .append(isGamemode(), o.isGamemode())
-        .append(isAuxiliary(), o.isAuxiliary())
-        .append(getId(), o.getId())
-        .build();
+  public boolean isAuxiliary() {
+    return this.auxiliary;
   }
 
-  static MapTag create(String id, String name, boolean gamemode, boolean auxiliary) {
-    return new MapTagImpl(id, name, gamemode, auxiliary);
+  @Override
+  public int hashCode() {
+    return this.id.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof MapTag)) return false;
+    return this.id.equalsIgnoreCase(((MapTag) obj).id);
+  }
+
+  @Override
+  public String toString() {
+    return SYMBOL + this.id;
+  }
+
+  @Override
+  public int compareTo(MapTag o) {
+    return this.id.compareToIgnoreCase(o.id);
   }
 }

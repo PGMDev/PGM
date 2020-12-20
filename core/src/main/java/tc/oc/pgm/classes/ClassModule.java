@@ -34,7 +34,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public class ClassModule implements MapModule {
 
   private static final Collection<MapTag> TAGS =
-      ImmutableList.of(MapTag.create("classes", "Classes", false, true));
+      ImmutableList.of(new MapTag("classes", "Classes", false, true));
   final String family;
   final Map<String, PlayerClass> classes;
   final PlayerClass defaultClass;

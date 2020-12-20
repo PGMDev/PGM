@@ -102,7 +102,7 @@ public abstract class SimpleGoal<T extends GoalDefinition> implements Goal<T> {
     return ChatColor.WHITE;
   }
 
-  public String renderSidebarLabelText(@Nullable Competitor competitor, Party viewer) {
-    return getName();
+  public Component renderSidebarLabelText(@Nullable Competitor competitor, Party viewer) {
+    return getComponentName();
   }
 }

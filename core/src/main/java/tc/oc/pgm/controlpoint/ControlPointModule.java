@@ -24,12 +24,16 @@ import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ControlPointModule implements MapModule<ControlPointMatchModule> {
 
-  private static final Collection<MapTag> TAGS =
-      ImmutableList.of(MapTag.create("controlpoint", "Control the Point", true, false));
+  private static final Collection<MapTag> TAGS_CP =
+      ImmutableList.of(new MapTag("cp", "controlpoint", "Control the Point", true, false));
+  private static final Collection<MapTag> TAGS_KOTH =
+      ImmutableList.of(new MapTag("koth", "controlpoint", "King of the Hill", true, false));
   private final List<ControlPointDefinition> definitions;
+  private final boolean koth;
 
-  public ControlPointModule(List<ControlPointDefinition> definitions) {
+  public ControlPointModule(List<ControlPointDefinition> definitions, boolean koth) {
     this.definitions = definitions;
+    this.koth = koth;
   }
 
   @Override
@@ -53,7 +57,7 @@ public class ControlPointModule implements MapModule<ControlPointMatchModule> {
 
   @Override
   public Collection<MapTag> getTags() {
-    return TAGS;
+    return this.koth ? TAGS_KOTH : TAGS_CP;
   }
 
   public static class Factory implements MapModuleFactory<ControlPointModule> {
@@ -72,6 +76,7 @@ public class ControlPointModule implements MapModule<ControlPointMatchModule> {
         throws InvalidXMLException {
       List<ControlPointDefinition> definitions = new ArrayList<>();
       AtomicInteger serialNumber = new AtomicInteger(1);
+      boolean koth = false;
 
       for (Element elControlPoint :
           XMLUtils.flattenElements(doc.getRootElement(), "control-points", "control-point")) {
@@ -83,6 +88,7 @@ public class ControlPointModule implements MapModule<ControlPointMatchModule> {
 
       for (Element kingEl : doc.getRootElement().getChildren("king")) {
         for (Element hillEl : XMLUtils.flattenElements(kingEl, "hills", "hill")) {
+          koth = true;
           ControlPointDefinition definition =
               ControlPointParser.parseControlPoint(factory, hillEl, true, serialNumber);
           factory.getFeatures().addFeature(kingEl, definition);
@@ -91,7 +97,7 @@ public class ControlPointModule implements MapModule<ControlPointMatchModule> {
       }
 
       if (!definitions.isEmpty()) {
-        return new ControlPointModule(definitions);
+        return new ControlPointModule(definitions, koth);
       } else {
         return null;
       }

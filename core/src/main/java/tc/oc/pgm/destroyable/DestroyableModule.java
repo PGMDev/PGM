@@ -34,7 +34,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public class DestroyableModule implements MapModule {
 
   private static final Collection<MapTag> TAGS =
-      ImmutableList.of(MapTag.create("monument", "Destroy the Monument", true, false));
+      ImmutableList.of(new MapTag("dtm", "monument", "Destroy the Monument", true, false));
   protected final List<DestroyableFactory> destroyableFactories;
 
   public DestroyableModule(List<DestroyableFactory> destroyableFactories) {

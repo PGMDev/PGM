@@ -14,7 +14,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 
 public class RageModule implements MapModule {
   private static final Collection<MapTag> TAGS =
-      ImmutableList.of(MapTag.create("rage", "Rage", true, true));
+      ImmutableList.of(new MapTag("rage", "Rage", true, true));
 
   @Override
   public MatchModule createMatchModule(Match match) {

@@ -7,9 +7,9 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
@@ -40,7 +40,7 @@ public final class TextFormatter {
    */
   public static Component list(Collection<? extends Component> texts, TextColor color) {
     final List<? extends Component> textList =
-        texts instanceof List ? (List) texts : new ArrayList<>(texts);
+        texts instanceof List ? (List) texts : new LinkedList<>(texts);
     switch (textList.size()) {
       case 0:
         return empty();

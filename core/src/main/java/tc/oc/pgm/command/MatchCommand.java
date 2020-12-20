@@ -184,9 +184,8 @@ public final class MatchCommand {
 
     sb.append(space());
     sb.append(
-        text(
-            goal.renderSidebarLabelText(competitor, viewingParty),
-            TextFormatter.convert(goal.renderSidebarLabelColor(competitor, viewingParty))));
+        goal.renderSidebarLabelText(competitor, viewingParty)
+            .color(TextFormatter.convert(goal.renderSidebarLabelColor(competitor, viewingParty))));
 
     return sb.build();
   }

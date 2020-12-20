@@ -24,7 +24,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public class BlitzModule implements MapModule {
 
   private static final Collection<MapTag> TAGS =
-      ImmutableList.of(MapTag.create("blitz", "Blitz", true, true));
+      ImmutableList.of(new MapTag("blitz", "Blitz", true, true));
   private final BlitzConfig config;
 
   public BlitzModule(BlitzConfig config) {

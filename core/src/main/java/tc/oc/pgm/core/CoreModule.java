@@ -34,7 +34,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public class CoreModule implements MapModule {
 
   private static final Collection<MapTag> TAGS =
-      ImmutableList.of(MapTag.create("core", "Destroy the Core", true, false));
+      ImmutableList.of(new MapTag("dtc", "core", "Destroy the Core", true, false));
   protected final List<CoreFactory> coreFactories;
 
   public CoreModule(List<CoreFactory> coreFactories) {

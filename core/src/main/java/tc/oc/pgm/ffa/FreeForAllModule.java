@@ -24,7 +24,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public class FreeForAllModule implements MapModule {
 
   private static final Collection<MapTag> TAGS =
-      ImmutableList.of(MapTag.create("ffa", "Free for All", false, false));
+      ImmutableList.of(new MapTag("ffa", "Free for All", false, false));
   private final FreeForAllOptions options;
 
   public FreeForAllModule(FreeForAllOptions options) {

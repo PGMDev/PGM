@@ -48,6 +48,7 @@
                             <include>org.jdom:jdom2:*</include>
                             <include>net.kyori:*:*</include>
                             <include>app.ashcon.intake:intake-*:*</include>
+                            <include>fr.mrmicky:*:*</include>
                             <include>org.eclipse.jgit:org.eclipse.jgit:*</include>
                             <include>org.slf4j:slf4j-api:*</include>
                         </includes>
@@ -68,6 +69,10 @@
                         <relocation>
                             <pattern>net.kyori</pattern>
                             <shadedPattern>tc.oc.pgm.lib.net.kyori</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>fr.mrmicky</pattern>
+                            <shadedPattern>tc.oc.pgm.lib.fr.mrmicky</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>org.jdom2</pattern>

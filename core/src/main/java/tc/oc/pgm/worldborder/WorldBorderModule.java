@@ -23,7 +23,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 
 public class WorldBorderModule implements MapModule {
   private final Collection<MapTag> TAGS =
-      ImmutableList.of(MapTag.create("border", "World Border", false, true));
+      ImmutableList.of(new MapTag("border", "World Border", false, true));
   private final List<WorldBorder> borders;
 
   public WorldBorderModule(List<WorldBorder> borders) {

@@ -45,7 +45,7 @@ public class TeamModule implements MapModule<TeamMatchModule> {
     if (tags == null) {
       tags =
           ImmutableList.of(
-              MapTag.create(
+              new MapTag(
                   id + "team" + (id == 1 ? "" : "s"),
                   id + " Team" + (id == 1 ? "" : "s"),
                   false,

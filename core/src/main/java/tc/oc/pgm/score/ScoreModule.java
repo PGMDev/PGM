@@ -34,8 +34,9 @@ import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ScoreModule implements MapModule {
-  private static final MapTag SCORE_TAG = MapTag.create("deathmatch", "Deathmatch", true, false);
-  private static final MapTag BOX_TAG = MapTag.create("scorebox", "Scorebox", false, true);
+  private static final MapTag SCORE_TAG =
+      new MapTag("tdm", "deathmatch", "Deathmatch", true, false);
+  private static final MapTag BOX_TAG = new MapTag("scorebox", "Scorebox", false, true);
 
   public ScoreModule(@Nonnull ScoreConfig config, @Nonnull Set<ScoreBoxFactory> scoreBoxFactories) {
     Preconditions.checkNotNull(config, "score config");

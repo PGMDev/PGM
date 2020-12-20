@@ -33,7 +33,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 
 public class WoolModule implements MapModule {
   private static final Collection<MapTag> TAGS =
-      ImmutableList.of(MapTag.create("wool", "Capture the Wool", true, false));
+      ImmutableList.of(new MapTag("ctw", "wool", "Capture the Wool", true, false));
 
   protected final Multimap<TeamFactory, MonumentWoolFactory> woolFactories;
 
