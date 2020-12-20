@@ -15,7 +15,6 @@ import org.jdom2.Attribute;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
-import tc.oc.pgm.api.match.MatchPhase;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.classes.ClassModule;
 import tc.oc.pgm.classes.PlayerClass;
@@ -481,28 +480,20 @@ public abstract class FilterParser {
 
   private Filter parseMatchPhaseFilter(String matchState, Element el) throws InvalidXMLException {
 
-    MatchPhase matchPhase = null;
-
     switch (matchState) {
       case "running":
-        matchPhase = MatchPhase.RUNNING;
-        break;
+        return MatchPhaseFilter.RUNNING;
       case "finished":
-        matchPhase = MatchPhase.FINISHED;
-        break;
+        return MatchPhaseFilter.FINISHED;
       case "starting":
-        matchPhase = MatchPhase.STARTING;
-        break;
+        return MatchPhaseFilter.STARTING;
       case "idle":
-        matchPhase = MatchPhase.IDLE;
-        break;
+        return MatchPhaseFilter.IDLE;
       case "started":
-        return AnyFilter.of(
-            new MatchPhaseFilter(MatchPhase.RUNNING), new MatchPhaseFilter(MatchPhase.FINISHED));
+        return MatchPhaseFilter.STARTED;
     }
-    if (matchPhase == null) throw new InvalidXMLException("Invalid or no match state found", el);
 
-    return new MatchPhaseFilter(matchPhase);
+    throw new InvalidXMLException("Invalid or no match state found", el);
   }
 
   // Methods for parsing QueryModifiers
