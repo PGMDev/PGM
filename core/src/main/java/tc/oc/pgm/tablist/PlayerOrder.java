@@ -41,8 +41,8 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
     boolean bStaff = b.hasPermission(Permissions.STAFF);
 
     FriendProvider friends = PGM.get().getFriendRegistry().getProvider();
-    boolean aFriend = friends.areFriends(viewer, a);
-    boolean bFriend = friends.areFriends(viewer, b);
+    boolean aFriend = friends.areFriends(viewer.getUniqueId(), a.getUniqueId());
+    boolean bFriend = friends.areFriends(viewer.getUniqueId(), b.getUniqueId());
 
     // Friends are always first :)
     if (aFriend && !bFriend) {

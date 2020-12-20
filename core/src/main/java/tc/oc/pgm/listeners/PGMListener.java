@@ -206,9 +206,7 @@ public class PGMListener implements Listener {
       SettingValue option = viewer.getSettings().getValue(SettingKey.JOIN);
       if (option.equals(SettingValue.JOIN_ON)
           || (option.equals(SettingValue.JOIN_FRIENDS)
-              && PGM.get()
-                  .getFriendRegistry()
-                  .areFriends(player.getBukkit(), viewer.getBukkit()))) {
+              && PGM.get().getFriendRegistry().areFriends(player.getId(), viewer.getId()))) {
         Component name =
             PGM.get()
                 .getNameDecorationRegistry()

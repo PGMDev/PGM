@@ -206,7 +206,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     return isObserving()
         && (getSettings().getValue(SettingKey.OBSERVERS) == SettingValue.OBSERVERS_ON
             || getSettings().getValue(SettingKey.OBSERVERS) == SettingValue.OBSERVERS_FRIEND
-                && PGM.get().getFriendRegistry().areFriends(getBukkit(), other.getBukkit()));
+                && PGM.get().getFriendRegistry().areFriends(getId(), other.getId()));
   }
 
   @Override

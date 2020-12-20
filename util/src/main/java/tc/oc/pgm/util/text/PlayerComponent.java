@@ -34,7 +34,7 @@ public final class PlayerComponent {
     return player != null ? player(player, style) : UNKNOWN;
   }
 
-  static Component player(UUID playerId, String defName, NameStyle style) {
+  public static Component player(UUID playerId, String defName, NameStyle style) {
     Player player = Bukkit.getPlayer(playerId);
     return player != null
         ? player(player, style)
@@ -106,7 +106,7 @@ public final class PlayerComponent {
     if (!isOffline
         && style.has(NameStyle.Flag.FRIEND)
         && viewer != null
-        && friendProvider.areFriends(viewer, player)) {
+        && friendProvider.areFriends(viewer.getUniqueId(), player.getUniqueId())) {
       name.decoration(TextDecoration.ITALIC, true);
     }
 

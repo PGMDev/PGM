@@ -73,8 +73,9 @@ public class DeathMessageMatchModule implements MatchModule, Listener {
   private boolean isFriendInvolved(Player viewer, MatchPlayerDeathEvent event) {
     FriendProvider friends = PGM.get().getFriendRegistry().getProvider();
     return (event.getKiller() != null && event.getKiller().getPlayer().isPresent()
-            ? friends.areFriends(viewer, event.getKiller().getPlayer().get().getBukkit())
+            ? friends.areFriends(viewer.getUniqueId(), event.getKiller().getPlayer().get().getId())
             : false)
-        || (event.getVictim() != null && friends.areFriends(viewer, event.getVictim().getBukkit()));
+        || (event.getVictim() != null
+            && friends.areFriends(viewer.getUniqueId(), event.getVictim().getId()));
   }
 }

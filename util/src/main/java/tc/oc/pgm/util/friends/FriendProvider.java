@@ -1,5 +1,6 @@
 package tc.oc.pgm.util.friends;
 
+import java.util.UUID;
 import org.bukkit.entity.Player;
 
 /** Interface which returns whether two {@link Player}s are friends * */
@@ -9,11 +10,11 @@ public interface FriendProvider {
 
   FriendProvider DEFAULT = new NoopFriendProvider();
 
-  boolean areFriends(Player player, Player other);
+  boolean areFriends(UUID playerId, UUID otherId);
 
   public class NoopFriendProvider implements FriendProvider {
     @Override
-    public boolean areFriends(Player player, Player other) {
+    public boolean areFriends(UUID playerId, UUID otherId) {
       return false;
     }
   }

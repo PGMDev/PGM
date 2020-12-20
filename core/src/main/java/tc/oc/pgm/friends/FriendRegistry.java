@@ -1,6 +1,6 @@
 package tc.oc.pgm.friends;
 
-import org.bukkit.entity.Player;
+import java.util.UUID;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.util.friends.FriendProvider;
 
@@ -10,8 +10,8 @@ import tc.oc.pgm.util.friends.FriendProvider;
  */
 public interface FriendRegistry extends Listener, FriendProvider {
 
-  default boolean areFriends(Player viewer, Player other) {
-    return getProvider().areFriends(viewer, other);
+  default boolean areFriends(UUID viewerId, UUID otherId) {
+    return getProvider().areFriends(viewerId, otherId);
   }
 
   FriendProvider getProvider();
