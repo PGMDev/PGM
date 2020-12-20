@@ -46,6 +46,7 @@ import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.event.ObserverInteractEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerBlockTransformEvent;
+import tc.oc.pgm.util.MatchPlayers;
 import tc.oc.pgm.util.event.PlayerBlockEvent;
 
 /**
@@ -106,7 +107,7 @@ public class EventFilterMatchModule implements MatchModule, Listener {
 
     return cancel(
         event,
-        match.getParticipant(entity) == null,
+        !MatchPlayers.canInteract(match.getParticipant(entity)),
         entity.getWorld(),
         match.getPlayer(entity),
         null);
