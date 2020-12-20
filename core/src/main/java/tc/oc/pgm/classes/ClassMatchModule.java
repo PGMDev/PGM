@@ -52,8 +52,6 @@ public class ClassMatchModule implements MatchModule, Listener {
 
   @Override
   public void unload() {
-    classes.clear();
-    classesByName.clear();
     selectedClasses.clear();
     lastPlayedClass.clear();
   }
