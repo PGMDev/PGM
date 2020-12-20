@@ -18,9 +18,10 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.menu.InventoryMenu;
-import tc.oc.pgm.menu.InventoryMenuItem;
+import tc.oc.pgm.util.menu.InventoryMenu;
+import tc.oc.pgm.util.menu.InventoryMenuItem;
 import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -44,9 +45,10 @@ public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
   }
 
   @Override
-  public List<String> getLore(MatchPlayer player) {
+  public List<String> getLore(Player player) {
     List<String> lore = new ArrayList<>();
-    StatsMatchModule smm = player.getMatch().needModule(StatsMatchModule.class);
+    StatsMatchModule smm =
+        PGM.get().getMatchManager().getPlayer(player).getMatch().needModule(StatsMatchModule.class);
     PlayerStats stats = smm.getPlayerStat(this.player.getId());
 
     Component statLore =
@@ -80,16 +82,14 @@ public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
             numberComponent(stats.getShotsTaken(), NamedTextColor.YELLOW),
             numberComponent(stats.getArrowAccuracy(), NamedTextColor.YELLOW));
 
-    Player bukkit = player.getBukkit();
-
-    lore.add(TextTranslations.translateLegacy(statLore, bukkit));
-    lore.add(TextTranslations.translateLegacy(killstreakLore, bukkit));
-    lore.add(TextTranslations.translateLegacy(damageDealtLore, bukkit));
-    lore.add(TextTranslations.translateLegacy(damageReceivedLore, bukkit));
-    lore.add(TextTranslations.translateLegacy(bowLore, bukkit));
+    lore.add(TextTranslations.translateLegacy(statLore, player));
+    lore.add(TextTranslations.translateLegacy(killstreakLore, player));
+    lore.add(TextTranslations.translateLegacy(damageDealtLore, player));
+    lore.add(TextTranslations.translateLegacy(damageReceivedLore, player));
+    lore.add(TextTranslations.translateLegacy(bowLore, player));
 
     if (!optionalStat(
-        lore, stats.getFlagsCaptured(), "match.stats.flagsCaptured.concise", bukkit)) {
+        lore, stats.getFlagsCaptured(), "match.stats.flagsCaptured.concise", player)) {
       if (!stats.getLongestFlagHold().equals(Duration.ZERO)) {
         lore.add(null);
         lore.add(
@@ -100,35 +100,35 @@ public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
                     TemporalComponent.briefNaturalApproximate(stats.getLongestFlagHold())
                         .color(NamedTextColor.AQUA)
                         .decoration(TextDecoration.BOLD, true)),
-                bukkit));
+                player));
       }
     }
-    optionalStat(lore, stats.getDestroyablePiecesBroken(), "match.stats.broken.concise", bukkit);
+    optionalStat(lore, stats.getDestroyablePiecesBroken(), "match.stats.broken.concise", player);
 
     return lore;
   }
 
-  private boolean optionalStat(List<String> lore, Number stat, String key, Player bukkit) {
+  private boolean optionalStat(List<String> lore, Number stat, String key, Player player) {
     if (stat.doubleValue() > 0) {
       lore.add(null);
       Component loreComponent =
           translatable(key, RESET, numberComponent(stat, NamedTextColor.AQUA));
-      lore.add(TextTranslations.translateLegacy(loreComponent, bukkit));
+      lore.add(TextTranslations.translateLegacy(loreComponent, player));
       return true;
     }
     return false;
   }
 
   @Override
-  public Material getMaterial(MatchPlayer player) {
+  public Material getMaterial(Player player) {
     return Material.SKULL_ITEM;
   }
 
   @Override
-  public void onInventoryClick(InventoryMenu menu, MatchPlayer player, ClickType clickType) {}
+  public void onInventoryClick(InventoryMenu menu, Player player, ClickType clickType) {}
 
   @Override
-  public ItemStack createItem(MatchPlayer player) {
+  public ItemStack createItem(Player player) {
     ItemStack stack = new ItemStack(getMaterial(player), 1, (byte) 3);
     SkullMeta meta = (SkullMeta) stack.getItemMeta();
 
@@ -137,7 +137,7 @@ public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
     meta.setDisplayName(
         getColor()
             + ChatColor.BOLD.toString()
-            + TextTranslations.translateLegacy(getName(), player.getBukkit()));
+            + TextTranslations.translateLegacy(getName(), player));
     meta.setLore(getLore(player));
     meta.addItemFlags(ItemFlag.values());
 

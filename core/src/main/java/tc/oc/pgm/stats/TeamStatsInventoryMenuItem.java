@@ -16,12 +16,13 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.menu.InventoryMenu;
-import tc.oc.pgm.menu.InventoryMenuItem;
-import tc.oc.pgm.menu.InventoryMenuUtils;
+import tc.oc.pgm.util.menu.InventoryMenu;
+import tc.oc.pgm.util.menu.InventoryMenuItem;
+import tc.oc.pgm.util.menu.pattern.Dynamic5RowMenuArranger;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
@@ -34,12 +35,13 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
   TeamStatsInventoryMenuItem(Match match, Competitor team) {
     this.team = team;
     this.teamSubGUI =
-        InventoryMenuUtils.prettyMenu(
-            match,
+        new InventoryMenu(
+            match.getWorld(),
             translatable("match.stats.title"),
             team.getPlayers().stream()
                 .map(PlayerStatsInventoryMenuItem::new)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()),
+            new Dynamic5RowMenuArranger());
   }
 
   @Override
@@ -53,9 +55,10 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
   }
 
   @Override
-  public List<String> getLore(MatchPlayer player) {
+  public List<String> getLore(Player player) {
 
-    StatsMatchModule smm = player.getMatch().needModule(StatsMatchModule.class);
+    StatsMatchModule smm =
+        PGM.get().getMatchManager().getPlayer(player).getMatch().needModule(StatsMatchModule.class);
     List<String> lore = new ArrayList<>();
     int teamKills = 0;
     int teamDeaths = 0;
@@ -103,35 +106,33 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
             numberComponent(shotsTaken, NamedTextColor.YELLOW),
             numberComponent(teamBowAcc, NamedTextColor.YELLOW));
 
-    Player bukkit = player.getBukkit();
-
-    lore.add(TextTranslations.translateLegacy(statLore, bukkit));
-    lore.add(TextTranslations.translateLegacy(damageDealtLore, bukkit));
-    lore.add(TextTranslations.translateLegacy(damageReceivedLore, bukkit));
-    lore.add(TextTranslations.translateLegacy(bowLore, bukkit));
+    lore.add(TextTranslations.translateLegacy(statLore, player));
+    lore.add(TextTranslations.translateLegacy(damageDealtLore, player));
+    lore.add(TextTranslations.translateLegacy(damageReceivedLore, player));
+    lore.add(TextTranslations.translateLegacy(bowLore, player));
 
     return lore;
   }
 
   @Override
-  public Material getMaterial(MatchPlayer player) {
+  public Material getMaterial(Player player) {
     return Material.LEATHER_CHESTPLATE;
   }
 
   @Override
-  public void onInventoryClick(InventoryMenu menu, MatchPlayer player, ClickType clickType) {
+  public void onInventoryClick(InventoryMenu menu, Player player, ClickType clickType) {
     teamSubGUI.display(player);
   }
 
   @Override
-  public ItemStack createItem(MatchPlayer player) {
+  public ItemStack createItem(Player player) {
     ItemStack stack = new ItemStack(getMaterial(player));
     LeatherArmorMeta meta = (LeatherArmorMeta) stack.getItemMeta();
 
     meta.setDisplayName(
         getColor()
             + ChatColor.BOLD.toString()
-            + TextTranslations.translateLegacy(getName(), player.getBukkit()));
+            + TextTranslations.translateLegacy(getName(), player));
     meta.setLore(getLore(player));
     meta.addItemFlags(ItemFlag.values());
     meta.setColor(team.getFullColor());
