@@ -349,7 +349,7 @@ public class PickerMatchModule implements MatchModule, Listener {
     this.picking.remove(match.getPlayer((Player) event.getPlayer()));
   }
 
-  @EventHandler(priority = EventPriority.HIGHEST)
+  @EventHandler
   public void rightClickIcon(final ObserverInteractEvent event) {
     final boolean right = event.getClickType() == ClickType.RIGHT;
     final boolean left = event.getClickType() == ClickType.LEFT;
