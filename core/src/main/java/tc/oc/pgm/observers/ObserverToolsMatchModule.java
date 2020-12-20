@@ -24,14 +24,14 @@ import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.menu.InventoryMenu;
-import tc.oc.pgm.menu.InventoryMenuItem;
-import tc.oc.pgm.menu.InventoryMenuUtils;
 import tc.oc.pgm.observers.tools.FlySpeedTool;
 import tc.oc.pgm.observers.tools.GamemodeTool;
 import tc.oc.pgm.observers.tools.NightVisionTool;
 import tc.oc.pgm.observers.tools.VisibilityTool;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
+import tc.oc.pgm.util.menu.InventoryMenu;
+import tc.oc.pgm.util.menu.InventoryMenuItem;
+import tc.oc.pgm.util.menu.pattern.SingleRowMenuArranger;
 import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.LOADED)
@@ -62,8 +62,11 @@ public class ObserverToolsMatchModule implements MatchModule, Listener {
             new FlySpeedTool(), new NightVisionTool(), new VisibilityTool(), new GamemodeTool());
 
     this.menu =
-        InventoryMenuUtils.smallMenu(
-            match, translatable("setting.title", NamedTextColor.AQUA), tools);
+        new InventoryMenu(
+            match.getWorld(),
+            translatable("setting.title", NamedTextColor.AQUA),
+            tools,
+            new SingleRowMenuArranger());
 
     this.toolItem = new ObserverToolsInventoryMenuItem(this.menu);
   }
@@ -80,14 +83,14 @@ public class ObserverToolsMatchModule implements MatchModule, Listener {
       MatchPlayer player = match.getPlayer(event.getPlayer());
 
       if (item.getType().equals(TOOL_MATERIAL) && player != null && canUse(player)) {
-        this.toolItem.onInventoryClick(null, player, ClickType.RIGHT);
+        this.toolItem.onInventoryClick(null, player.getBukkit(), ClickType.RIGHT);
       }
     }
   }
 
   public void openMenuManual(MatchPlayer player) {
     if (canUse(player)) {
-      menu.display(player);
+      menu.display(player.getBukkit());
     }
   }
 
