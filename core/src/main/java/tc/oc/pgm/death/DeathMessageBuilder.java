@@ -336,6 +336,7 @@ public class DeathMessageBuilder {
     PhysicalInfo info = projectile.getProjectile();
     if (info instanceof EntityInfo) {
       switch (((EntityInfo) info).getEntityType()) {
+        case UNKNOWN:
         case ARROW:
         case WITHER_SKULL:
           info = null; // "shot by arrow" is redundant
