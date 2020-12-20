@@ -6,18 +6,20 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 import net.kyori.adventure.text.Component;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.potion.PotionEffectType;
 import tc.oc.pgm.util.StringUtils;
 
 /** A singleton for accessing {@link Component} translations for Minecraft clients. */
-public final class MinecraftTranslations {
-  private MinecraftTranslations() {}
+public final class MinecraftComponent {
+  private MinecraftComponent() {}
 
   private static final String ENTITY_KEY = "entity.%s.name";
   private static final String MATERIAL_KEY = "item.%s.name";
   private static final String POTION_KEY = "potion.%s";
+  private static final String WOOL_KEY = "tile.cloth.%s.name";
 
   // TODO: Bukkit 1.13+ exposes NamespaceKey, which is significantly more accurate than this
   private static final Map<Pattern, String> MATERIAL_REPLACEMENTS =
@@ -47,7 +49,7 @@ public final class MinecraftTranslations {
    * @param entity An entity type.
    * @return An translated entity name.
    */
-  public static Component getEntity(EntityType entity) {
+  public static Component entity(EntityType entity) {
     return getKey(ENTITY_KEY, entity.getName());
   }
 
@@ -59,7 +61,7 @@ public final class MinecraftTranslations {
    * @param material A material.
    * @return A material name.
    */
-  public static Component getMaterial(Material material) {
+  public static Component material(Material material) {
     String name = material.name();
     for (Map.Entry<Pattern, String> entry : MATERIAL_REPLACEMENTS.entrySet()) {
       name = entry.getKey().matcher(name).replaceAll(entry.getValue());
@@ -74,8 +76,12 @@ public final class MinecraftTranslations {
    * @param potion A potion type.
    * @return A potion name.
    */
-  public static Component getPotion(PotionEffectType potion) {
+  public static Component potion(PotionEffectType potion) {
     return getKey(POTION_KEY, StringUtils.camelCase(potion.getName()));
+  }
+
+  public static Component wool(DyeColor color) {
+    return getKey(WOOL_KEY, StringUtils.camelCase(color.name()));
   }
 
   private static Component getKey(String format, String name) {

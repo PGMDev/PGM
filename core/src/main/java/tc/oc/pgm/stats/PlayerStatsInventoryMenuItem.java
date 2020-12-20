@@ -21,7 +21,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.menu.InventoryMenu;
 import tc.oc.pgm.menu.InventoryMenuItem;
-import tc.oc.pgm.util.text.PeriodFormats;
+import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
@@ -97,7 +97,7 @@ public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
                 translatable(
                     "match.stats.flaghold.concise",
                     RESET,
-                    PeriodFormats.briefNaturalApproximate(stats.getLongestFlagHold())
+                    TemporalComponent.briefNaturalApproximate(stats.getLongestFlagHold())
                         .color(NamedTextColor.AQUA)
                         .decoration(TextDecoration.BOLD, true)),
                 bukkit));

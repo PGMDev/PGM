@@ -6,7 +6,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.material.MaterialData;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
-import tc.oc.pgm.util.text.MinecraftTranslations;
+import tc.oc.pgm.util.text.MinecraftComponent;
 
 public class BlockInfo extends OwnerInfoBase implements PhysicalInfo {
 
@@ -40,7 +40,7 @@ public class BlockInfo extends OwnerInfoBase implements PhysicalInfo {
 
   @Override
   public Component getName() {
-    return MinecraftTranslations.getMaterial(getMaterial().getItemType());
+    return MinecraftComponent.material(getMaterial().getItemType());
   }
 
   @Override

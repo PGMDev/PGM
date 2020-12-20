@@ -1,6 +1,7 @@
 package tc.oc.pgm.command;
 
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.text.TextException.exception;
 
 import app.ashcon.intake.Command;
 import java.time.Duration;
@@ -11,7 +12,6 @@ import tc.oc.pgm.start.StartCountdown;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
 import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.text.TextException;
 
 public final class StartCommand {
 
@@ -21,9 +21,9 @@ public final class StartCommand {
       perms = Permissions.START)
   public void start(Audience audience, Match match, @Nullable Duration duration) {
     if (match.isRunning()) {
-      throw TextException.of("admin.start.matchRunning");
+      throw exception("admin.start.matchRunning");
     } else if (match.isFinished()) {
-      throw TextException.of("admin.start.matchFinished");
+      throw exception("admin.start.matchFinished");
     }
 
     final StartMatchModule start = match.needModule(StartMatchModule.class);

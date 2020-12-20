@@ -29,7 +29,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -44,6 +43,7 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.util.inventory.tag.ItemTag;
 import tc.oc.pgm.util.named.MapNameStyle;
+import tc.oc.pgm.util.text.TextTranslations;
 
 /** Represents a polling process, with a set of options. */
 public class MapPoll {
@@ -201,7 +201,7 @@ public class MapPoll {
     ItemMeta meta = personalDummyVoteBook.getItemMeta();
 
     Component dummyTitle = translate(VOTE_BOOK_TITLE, locale);
-    meta.setDisplayName(LegacyComponentSerializer.legacySection().serialize(dummyTitle));
+    meta.setDisplayName(TextTranslations.translateLegacy(dummyTitle, viewer.getBukkit()));
 
     personalDummyVoteBook.setItemMeta(meta);
 

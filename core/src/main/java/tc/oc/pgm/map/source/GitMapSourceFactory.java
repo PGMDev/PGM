@@ -1,5 +1,8 @@
 package tc.oc.pgm.map.source;
 
+import static tc.oc.pgm.util.text.TextException.invalidFormat;
+import static tc.oc.pgm.util.text.TextException.unknown;
+
 import com.google.common.collect.Iterators;
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +24,6 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
-import tc.oc.pgm.util.text.TextException;
 
 public class GitMapSourceFactory implements MapSourceFactory {
 
@@ -65,12 +67,12 @@ public class GitMapSourceFactory implements MapSourceFactory {
       try {
         git = clone.call();
       } catch (InvalidRemoteException e1) {
-        throw TextException.invalidFormat(uri.toString(), URI.class, e1);
+        throw invalidFormat(uri.toString(), URI.class, e1);
       } catch (GitAPIException e2) {
-        throw TextException.unknown(e2);
+        throw unknown(e2);
       }
     } catch (IOException e) {
-      throw TextException.unknown(e);
+      throw unknown(e);
     }
     this.git = git;
   }

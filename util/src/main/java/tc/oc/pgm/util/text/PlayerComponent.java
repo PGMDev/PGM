@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.text.types;
+package tc.oc.pgm.util.text;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
@@ -21,35 +21,37 @@ import tc.oc.pgm.util.named.NameDecorationProvider;
 import tc.oc.pgm.util.named.NameStyle;
 
 /** PlayerComponent is used to format player names in a consistent manner with optional styling */
-public interface PlayerComponent {
+public final class PlayerComponent {
+  private PlayerComponent() {}
 
-  TextColor OFFLINE_COLOR = NamedTextColor.DARK_AQUA;
-  Component UNKNOWN = translatable("misc.unknown", OFFLINE_COLOR, TextDecoration.ITALIC);
+  public static final TextColor OFFLINE_COLOR = NamedTextColor.DARK_AQUA;
+  public static final Component UNKNOWN =
+      translatable("misc.unknown", OFFLINE_COLOR, TextDecoration.ITALIC);
 
-  static Component player(UUID playerId, NameStyle style) {
+  public static Component player(UUID playerId, NameStyle style) {
     Player player = Bukkit.getPlayer(playerId);
     return player != null ? player(player, style) : UNKNOWN;
   }
 
-  static Component player(CommandSender sender, NameStyle style) {
+  public static Component player(CommandSender sender, NameStyle style) {
     return sender instanceof Player
         ? player((Player) sender, style)
         : translatable("misc.console", OFFLINE_COLOR);
   }
 
-  static Component player(Player player, NameStyle style) {
+  public static Component player(Player player, NameStyle style) {
     return player(player, style, null);
   }
 
-  static Component player(Player player, String defName, NameStyle style) {
+  public static Component player(Player player, String defName, NameStyle style) {
     return player(player, defName, style, null);
   }
 
-  static Component player(Player player, NameStyle style, @Nullable Player viewer) {
+  public static Component player(Player player, NameStyle style, @Nullable Player viewer) {
     return player(player, "", style, viewer);
   }
 
-  static Component player(
+  public static Component player(
       @Nullable Player player, String defName, NameStyle style, @Nullable Player viewer) {
     boolean isOffline =
         player == null
@@ -97,11 +99,11 @@ public interface PlayerComponent {
   }
 
   // Player state checks
-  static boolean isDisguised(Player player) {
+  public static boolean isDisguised(Player player) {
     return player.hasMetadata("isVanished");
   }
 
-  static boolean isDead(Player player) {
+  public static boolean isDead(Player player) {
     return player.hasMetadata("isDead") || player.isDead();
   }
 }

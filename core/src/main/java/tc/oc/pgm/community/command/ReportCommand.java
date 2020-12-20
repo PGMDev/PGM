@@ -41,7 +41,7 @@ import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.text.PeriodFormats;
+import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextFormatter;
 
 public class ReportCommand {
@@ -189,7 +189,7 @@ public class ReportCommand {
                 "moderation.reports.hover", NamedTextColor.GRAY, data.getSenderComponent(match));
 
         Component timeAgo =
-            PeriodFormats.relativePastApproximate(
+            TemporalComponent.relativePastApproximate(
                     Instant.ofEpochMilli(data.getTimeSent().toEpochMilli()))
                 .color(NamedTextColor.DARK_GREEN);
 

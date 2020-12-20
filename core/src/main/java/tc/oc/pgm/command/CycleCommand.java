@@ -1,5 +1,7 @@
 package tc.oc.pgm.command;
 
+import static tc.oc.pgm.util.text.TextException.exception;
+
 import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
@@ -10,7 +12,6 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.cycle.CycleMatchModule;
-import tc.oc.pgm.util.text.TextException;
 
 public final class CycleCommand {
 
@@ -26,7 +27,7 @@ public final class CycleCommand {
       @Default("next") MapInfo map,
       @Switch('f') boolean force) {
     if (match.isRunning() && !force) {
-      throw TextException.of("admin.matchRunning.cycle");
+      throw exception("admin.matchRunning.cycle");
     }
 
     if (map != null && mapOrder.getNextMap() != map) {

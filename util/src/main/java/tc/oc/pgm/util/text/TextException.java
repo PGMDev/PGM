@@ -12,9 +12,10 @@ import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
+import net.kyori.adventure.util.ComponentMessageThrowable;
 
 /** An exception with a localized error message. */
-public class TextException extends RuntimeException {
+public class TextException extends RuntimeException implements ComponentMessageThrowable {
 
   private final Component message;
 
@@ -32,8 +33,9 @@ public class TextException extends RuntimeException {
             .build();
   }
 
-  public Component getText() {
-    return message;
+  @Override
+  public Component componentMessage() {
+    return this.message;
   }
 
   @Override
@@ -42,12 +44,12 @@ public class TextException extends RuntimeException {
     return PlainComponentSerializer.plain().serialize(localized);
   }
 
-  public static TextException of(String key, Component... args) {
+  public static TextException exception(String key, Component... args) {
     return new TextException(null, null, key, args);
   }
 
   public static TextException noPermission() {
-    return TextException.of("misc.noPermission");
+    return exception("misc.noPermission");
   }
 
   public static TextException unknown(@Nullable Throwable cause) {

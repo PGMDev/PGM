@@ -2,6 +2,7 @@ package tc.oc.pgm.command;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.text.TextException.exception;
 
 import app.ashcon.intake.Command;
 import java.util.stream.Collectors;
@@ -14,7 +15,6 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.observers.ObserverToolsMatchModule;
-import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextFormatter;
 
 // TODO: remove some of these when settings UI is released
@@ -32,7 +32,7 @@ public final class SettingCommand {
       }
     } else {
       // TODO: reconsider when observer tools become settings
-      throw TextException.of("setting.observersOnly");
+      throw exception("setting.observersOnly");
     }
   }
 

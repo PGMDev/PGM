@@ -1,7 +1,7 @@
 package tc.oc.pgm.match;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static tc.oc.pgm.util.text.types.PlayerComponent.player;
+import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;

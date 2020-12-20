@@ -1,6 +1,7 @@
 package tc.oc.pgm.command;
 
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.text.TextException.exception;
 
 import app.ashcon.intake.Command;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -13,7 +14,6 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.ffa.Tribute;
 import tc.oc.pgm.stats.StatsMatchModule;
 import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextFormatter;
 
 public final class StatsCommand {
@@ -36,7 +36,7 @@ public final class StatsCommand {
       audience.sendMessage(
           match.needModule(StatsMatchModule.class).getBasicStatsMessage(player.getId()));
     } else {
-      throw TextException.of("match.stats.disabled");
+      throw exception("match.stats.disabled");
     }
   }
 }

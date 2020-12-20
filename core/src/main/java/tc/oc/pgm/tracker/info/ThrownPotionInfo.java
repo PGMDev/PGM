@@ -7,7 +7,7 @@ import org.bukkit.potion.PotionEffectType;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
 import tc.oc.pgm.util.inventory.InventoryUtils;
-import tc.oc.pgm.util.text.MinecraftTranslations;
+import tc.oc.pgm.util.text.MinecraftComponent;
 
 public class ThrownPotionInfo extends EntityInfo implements PotionInfo {
 
@@ -34,7 +34,7 @@ public class ThrownPotionInfo extends EntityInfo implements PotionInfo {
 
   @Override
   public Component getName() {
-    return MinecraftTranslations.getPotion(getPotionEffect());
+    return MinecraftComponent.potion(getPotionEffect());
   }
 
   @Override

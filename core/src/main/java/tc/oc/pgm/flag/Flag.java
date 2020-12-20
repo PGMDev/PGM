@@ -12,7 +12,6 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
@@ -64,6 +63,8 @@ import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.TextFormatter;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
@@ -190,8 +191,13 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     return BukkitUtils.dyeColorToChatColor(this.getDyeColor());
   }
 
+  @Override
+  public Component getComponentName() {
+    return super.getComponentName().color(TextFormatter.convert(getBukkitColor()));
+  }
+
   public String getColoredName() {
-    return LegacyComponentSerializer.legacySection().serialize(getComponentName());
+    return TextTranslations.translateLegacy(getComponentName(), null);
   }
 
   public ImmutableSet<Net> getNets() {

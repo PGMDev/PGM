@@ -1,11 +1,12 @@
 package tc.oc.pgm.command;
 
+import static tc.oc.pgm.util.text.TextException.exception;
+
 import app.ashcon.intake.Command;
 import app.ashcon.intake.bukkit.parametric.annotation.Sender;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.inventory.ViewInventoryMatchModule;
-import tc.oc.pgm.util.text.TextException;
 
 public final class InventoryCommand {
 
@@ -18,7 +19,7 @@ public final class InventoryCommand {
     if (inventories.canPreviewInventory(viewer, holder)) {
       inventories.previewInventory(viewer, holder.getInventory());
     } else {
-      throw TextException.of("preview.notViewable");
+      throw exception("preview.notViewable");
     }
   }
 }

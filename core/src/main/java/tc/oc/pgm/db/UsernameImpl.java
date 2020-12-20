@@ -1,7 +1,7 @@
 package tc.oc.pgm.db;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static tc.oc.pgm.util.text.types.PlayerComponent.player;
+import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -10,7 +10,7 @@ import org.bukkit.Bukkit;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.util.UsernameResolver;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.text.types.PlayerComponent;
+import tc.oc.pgm.util.text.PlayerComponent;
 
 class UsernameImpl implements Username {
 

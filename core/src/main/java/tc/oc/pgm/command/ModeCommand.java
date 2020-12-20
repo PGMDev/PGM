@@ -2,6 +2,7 @@ package tc.oc.pgm.command;
 
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
+import static tc.oc.pgm.util.text.TextException.exception;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
@@ -19,7 +20,6 @@ import tc.oc.pgm.modes.ModesPaginatedResult;
 import tc.oc.pgm.modes.ObjectiveModesMatchModule;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.text.TextException;
 
 // TODO: make the output nicer and translate
 public final class ModeCommand {
@@ -124,6 +124,6 @@ public final class ModeCommand {
   }
 
   private static void throwNoResults() {
-    throw TextException.of("command.noResults");
+    throw exception("command.noResults");
   }
 }

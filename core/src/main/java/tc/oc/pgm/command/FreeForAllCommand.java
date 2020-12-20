@@ -2,6 +2,7 @@ package tc.oc.pgm.command;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.text.TextException.exception;
 
 import app.ashcon.intake.Command;
 import com.google.common.collect.Range;
@@ -11,7 +12,6 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
 import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
 
 public final class FreeForAllCommand {
@@ -65,7 +65,7 @@ public final class FreeForAllCommand {
   private FreeForAllMatchModule getFfa(Match match) {
     final FreeForAllMatchModule ffa = match.getModule(FreeForAllMatchModule.class);
     if (ffa == null) {
-      throw TextException.of("command.moduleNotFound", text("free-for-all"));
+      throw exception("command.moduleNotFound", text("free-for-all"));
     }
     return ffa;
   }

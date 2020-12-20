@@ -189,7 +189,7 @@ public final class TextParser {
     }
 
     if (range != null && !range.contains(duration)) {
-      throw TextException.outOfRange(text, range);
+      throw outOfRange(text, range);
     }
 
     return duration;

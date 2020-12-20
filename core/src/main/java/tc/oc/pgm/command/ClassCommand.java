@@ -3,6 +3,7 @@ package tc.oc.pgm.command;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.text.TextException.exception;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Text;
@@ -17,7 +18,6 @@ import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.PlayerClass;
 import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.StringUtils;
-import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public final class ClassCommand {
@@ -39,13 +39,13 @@ public final class ClassCommand {
       final PlayerClass newClass = StringUtils.bestFuzzyMatch(query, classes.getClasses(), 0.9);
 
       if (newClass == null) {
-        throw TextException.of("match.class.notFound");
+        throw exception("match.class.notFound");
       }
 
       try {
         classes.setPlayerClass(player.getId(), newClass);
       } catch (IllegalStateException e) {
-        throw TextException.of("match.class.sticky");
+        throw exception("match.class.sticky");
       }
 
       player.sendMessage(
@@ -101,7 +101,7 @@ public final class ClassCommand {
   private ClassMatchModule getClasses(Match match) {
     final ClassMatchModule classes = match.getModule(ClassMatchModule.class);
     if (classes == null) {
-      throw TextException.of("match.class.notEnabled");
+      throw exception("match.class.notEnabled");
     }
     return classes;
   }

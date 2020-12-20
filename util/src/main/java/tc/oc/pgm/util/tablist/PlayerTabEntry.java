@@ -1,6 +1,6 @@
 package tc.oc.pgm.util.tablist;
 
-import static tc.oc.pgm.util.text.types.PlayerComponent.player;
+import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.util.UUID;
 import javax.annotation.Nullable;

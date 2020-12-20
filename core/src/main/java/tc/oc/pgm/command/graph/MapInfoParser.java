@@ -1,5 +1,7 @@
 package tc.oc.pgm.command.graph;
 
+import static tc.oc.pgm.util.text.TextException.exception;
+
 import app.ashcon.intake.argument.ArgumentException;
 import app.ashcon.intake.argument.CommandArgs;
 import app.ashcon.intake.argument.MissingArgumentException;
@@ -12,7 +14,6 @@ import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.util.text.TextException;
 
 final class MapInfoParser implements BukkitProvider<MapInfo> {
 
@@ -39,7 +40,7 @@ final class MapInfoParser implements BukkitProvider<MapInfo> {
     }
 
     if (map == null && !isNextMap(annotations)) {
-      throw TextException.of("map.notFound");
+      throw exception("map.notFound");
     }
 
     return map;

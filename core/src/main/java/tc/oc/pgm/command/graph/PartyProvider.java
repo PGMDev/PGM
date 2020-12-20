@@ -1,5 +1,8 @@
 package tc.oc.pgm.command.graph;
 
+import static tc.oc.pgm.util.text.TextException.exception;
+import static tc.oc.pgm.util.text.TextException.invalidFormat;
+
 import app.ashcon.intake.argument.CommandArgs;
 import app.ashcon.intake.argument.MissingArgumentException;
 import app.ashcon.intake.bukkit.parametric.provider.BukkitProvider;
@@ -12,7 +15,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.pgm.util.text.TextException;
 
 final class PartyProvider implements BukkitProvider<Party> {
 
@@ -28,7 +30,7 @@ final class PartyProvider implements BukkitProvider<Party> {
 
     final Match match = PGM.get().getMatchManager().getMatch(sender);
     if (match == null) {
-      throw TextException.of("command.onlyPlayers");
+      throw exception("command.onlyPlayers");
     }
 
     if (text.startsWith("obs")) {
@@ -37,12 +39,12 @@ final class PartyProvider implements BukkitProvider<Party> {
 
     final TeamMatchModule teams = match.getModule(TeamMatchModule.class);
     if (teams == null) {
-      throw TextException.of("command.noTeams");
+      throw exception("command.noTeams");
     }
 
     final Team team = teams.bestFuzzyMatch(text);
     if (team == null) {
-      throw TextException.invalidFormat(text, Team.class, null);
+      throw invalidFormat(text, Team.class, null);
     }
 
     return team;

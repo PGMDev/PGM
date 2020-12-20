@@ -2,7 +2,7 @@ package tc.oc.pgm.stats;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
-import static tc.oc.pgm.util.text.types.PlayerComponent.player;
+import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.text.DecimalFormat;
 import java.util.Collection;

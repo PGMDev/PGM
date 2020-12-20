@@ -54,7 +54,7 @@ import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.TimeLockModule;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.text.PeriodFormats;
+import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class PGMListener implements Listener {
@@ -350,7 +350,8 @@ public class PGMListener implements Listener {
       Component forced = translatable("pool.change.force", poolName, staffName);
       if (event.getTimeLimit() != null) {
         Component time =
-            PeriodFormats.briefNaturalApproximate(event.getTimeLimit()).color(NamedTextColor.GREEN);
+            TemporalComponent.briefNaturalApproximate(event.getTimeLimit())
+                .color(NamedTextColor.GREEN);
 
         // If time & match limit are present, display both
         if (event.getMatchLimit() != 0) {

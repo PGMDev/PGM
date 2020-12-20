@@ -2,6 +2,7 @@ package tc.oc.pgm.command.graph;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.text.TextException.unknown;
 
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.InvalidUsageException;
@@ -10,11 +11,12 @@ import app.ashcon.intake.bukkit.BukkitIntake;
 import app.ashcon.intake.fluent.CommandGraph;
 import app.ashcon.intake.util.auth.AuthorizationException;
 import com.google.common.base.Joiner;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.util.ComponentMessageThrowable;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.text.TextException;
 
 public final class CommandExecutor extends BukkitIntake {
 
@@ -34,10 +36,13 @@ public final class CommandExecutor extends BukkitIntake {
     } catch (AuthorizationException e) {
       audience.sendWarning(translatable("misc.noPermission"));
     } catch (InvocationCommandException e) {
-      if (e.getCause() instanceof TextException) {
-        audience.sendWarning(((TextException) e.getCause()).getText());
+      if (e.getCause() instanceof ComponentMessageThrowable) {
+        final Component message = ((ComponentMessageThrowable) e.getCause()).componentMessage();
+        if (message != null) {
+          audience.sendWarning(message);
+        }
       } else {
-        audience.sendWarning(TextException.unknown(e).getText());
+        audience.sendWarning(unknown(e).componentMessage());
         e.printStackTrace();
       }
     } catch (InvalidUsageException e) {

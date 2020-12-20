@@ -1,5 +1,7 @@
 package tc.oc.pgm.command.graph;
 
+import static tc.oc.pgm.util.text.TextException.exception;
+
 import app.ashcon.intake.argument.CommandArgs;
 import app.ashcon.intake.argument.MissingArgumentException;
 import app.ashcon.intake.argument.Namespace;
@@ -20,7 +22,6 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.timelimit.TimeLimit;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
-import tc.oc.pgm.util.text.TextException;
 
 public class VictoryConditionProvider implements BukkitProvider<VictoryCondition> {
 
@@ -38,7 +39,7 @@ public class VictoryConditionProvider implements BukkitProvider<VictoryCondition
 
     final Match match = PGM.get().getMatchManager().getMatch(sender);
     if (match == null) {
-      throw TextException.of("command.onlyPlayers");
+      throw exception("command.onlyPlayers");
     }
 
     // Default to current tl victory condition

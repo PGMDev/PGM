@@ -7,7 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
-import tc.oc.pgm.util.text.MinecraftTranslations;
+import tc.oc.pgm.util.text.MinecraftComponent;
 
 public class ItemInfo extends OwnerInfoBase implements PhysicalInfo {
 
@@ -42,7 +42,7 @@ public class ItemInfo extends OwnerInfoBase implements PhysicalInfo {
       }
     }
 
-    return MinecraftTranslations.getMaterial(getItem().getType());
+    return MinecraftComponent.material(getItem().getType());
   }
 
   @Override

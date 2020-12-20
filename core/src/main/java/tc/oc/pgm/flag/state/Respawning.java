@@ -13,7 +13,7 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
-import tc.oc.pgm.util.text.PeriodFormats;
+import tc.oc.pgm.util.text.TemporalComponent;
 
 /**
  * State of a flag while it is waiting to respawn at a {@link Post} after being {@link Captured}.
@@ -58,7 +58,7 @@ public class Respawning extends Spawned implements Returning {
       // Respawn is delayed
       String postName = this.respawnToPost.getPostName();
       Component timeComponent =
-          PeriodFormats.briefNaturalApproximate(respawnTime).color(NamedTextColor.AQUA);
+          TemporalComponent.briefNaturalApproximate(respawnTime).color(NamedTextColor.AQUA);
 
       if (postName != null) {
         this.flag

@@ -1,5 +1,7 @@
 package tc.oc.pgm.command.graph;
 
+import static tc.oc.pgm.util.text.TextException.invalidFormat;
+
 import app.ashcon.intake.argument.ArgumentException;
 import app.ashcon.intake.argument.CommandArgs;
 import app.ashcon.intake.argument.Namespace;
@@ -9,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.setting.SettingKey;
-import tc.oc.pgm.util.text.TextException;
 
 final class SettingKeyParser implements BukkitProvider<SettingKey> {
 
@@ -30,7 +31,7 @@ final class SettingKeyParser implements BukkitProvider<SettingKey> {
       }
     }
 
-    throw TextException.invalidFormat(query, SettingKey.class, null);
+    throw invalidFormat(query, SettingKey.class, null);
   }
 
   @Override

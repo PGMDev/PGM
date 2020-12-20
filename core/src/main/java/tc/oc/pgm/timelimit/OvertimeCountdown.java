@@ -12,7 +12,7 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
-import tc.oc.pgm.util.text.PeriodFormats;
+import tc.oc.pgm.util.text.TemporalComponent;
 
 public class OvertimeCountdown extends TimeLimitCountdown {
 
@@ -74,7 +74,7 @@ public class OvertimeCountdown extends TimeLimitCountdown {
           translatable(
               "broadcast.overtime.limit",
               NamedTextColor.YELLOW,
-              PeriodFormats.briefNaturalApproximate(timeLimit.getMaxOvertime())
+              TemporalComponent.briefNaturalApproximate(timeLimit.getMaxOvertime())
                   .color(NamedTextColor.AQUA)));
 
       maxRefresh = Instant.now().plus(timeLimit.getMaxOvertime()).minus(timeLimit.getOvertime());

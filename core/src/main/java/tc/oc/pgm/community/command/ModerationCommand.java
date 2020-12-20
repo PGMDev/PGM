@@ -61,7 +61,7 @@ import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.text.PeriodFormats;
+import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -599,11 +599,11 @@ public class ModerationCommand implements Listener {
     if (expires) {
       String length =
           TextTranslations.translateLegacy(
-              PeriodFormats.briefNaturalApproximate(
+              TemporalComponent.briefNaturalApproximate(
                   ban.getCreated().toInstant(), ban.getExpiration().toInstant()),
               sender);
       Component remaining =
-          PeriodFormats.briefNaturalApproximate(Instant.now(), ban.getExpiration().toInstant())
+          TemporalComponent.briefNaturalApproximate(Instant.now(), ban.getExpiration().toInstant())
               .color(NamedTextColor.YELLOW);
 
       banType =
@@ -618,7 +618,7 @@ public class ModerationCommand implements Listener {
     }
 
     Component createdAgo =
-        PeriodFormats.relativePastApproximate(ban.getCreated().toInstant())
+        TemporalComponent.relativePastApproximate(ban.getCreated().toInstant())
             .color(NamedTextColor.GRAY);
 
     Component banTypeFormatted = translatable("moderation.type", NamedTextColor.GRAY, banType);
@@ -770,7 +770,7 @@ public class ModerationCommand implements Listener {
     // If punishment expires, inform user when
     if (expires != null) {
       Component timeLeft =
-          PeriodFormats.briefNaturalApproximate(Duration.ofSeconds(expires.getSeconds()));
+          TemporalComponent.briefNaturalApproximate(Duration.ofSeconds(expires.getSeconds()));
       lines.add(translatable("moderation.screen.expires", NamedTextColor.GRAY, timeLeft));
       lines.add(empty());
     }
@@ -863,7 +863,7 @@ public class ModerationCommand implements Listener {
     if (length != null && !length.isZero()) {
       String time =
           TextTranslations.translateLegacy(
-              PeriodFormats.briefNaturalApproximate(Duration.ofSeconds(length.getSeconds())),
+              TemporalComponent.briefNaturalApproximate(Duration.ofSeconds(length.getSeconds())),
               sender);
       prefix =
           type.getPunishmentPrefix(
@@ -923,7 +923,7 @@ public class ModerationCommand implements Listener {
 
     public Component getHoverMessage() {
       Component timeAgo =
-          PeriodFormats.relativePastApproximate(time).color(NamedTextColor.DARK_AQUA);
+          TemporalComponent.relativePastApproximate(time).color(NamedTextColor.DARK_AQUA);
       return translatable(
           "moderation.similarIP.hover", NamedTextColor.GRAY, getPunisher(), timeAgo);
     }

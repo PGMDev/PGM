@@ -9,7 +9,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
-import tc.oc.pgm.util.text.MinecraftTranslations;
+import tc.oc.pgm.util.text.MinecraftComponent;
 
 public class EntityInfo extends OwnerInfoBase implements PhysicalInfo {
 
@@ -53,7 +53,7 @@ public class EntityInfo extends OwnerInfoBase implements PhysicalInfo {
     if (getCustomName() != null) {
       return LegacyComponentSerializer.legacySection().deserialize(getCustomName());
     } else {
-      return MinecraftTranslations.getEntity(getEntityType());
+      return MinecraftComponent.entity(getEntityType());
     }
   }
 

@@ -264,16 +264,6 @@ public final class TextTranslations {
     return LegacyComponentSerializer.legacySection().serialize(translate(text, locale));
   }
 
-  /** BaseComponent support kept for tabs & handling non-legacy translations */
-  public static String translateBaseComponent(Component component, @Nullable CommandSender viewer) {
-    return toBaseComponent(component, viewer).toLegacyText();
-  }
-
-  public static BaseComponent toBaseComponent(Component component, @Nullable CommandSender viewer) {
-    return new net.md_5.bungee.api.chat.TextComponent(
-        TextTranslations.toBaseComponentArray(component, viewer));
-  }
-
   public static BaseComponent[] toBaseComponentArray(
       Component component, @Nullable CommandSender viewer) {
     Component translated = translate(component, viewer.getLocale());

@@ -2,6 +2,7 @@ package tc.oc.pgm.command;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.text.TextException.exception;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Switch;
@@ -21,7 +22,6 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
 
 public final class TeamCommand {
@@ -33,7 +33,7 @@ public final class TeamCommand {
   public void force(
       Match match, TeamMatchModule teams, MatchPlayer sender, Player player, @Nullable Party team) {
     final MatchPlayer joiner = match.getPlayer(player);
-    if (joiner == null) throw TextException.of("command.playerNotFound");
+    if (joiner == null) throw exception("command.playerNotFound");
 
     final Party oldParty = joiner.getParty();
     if (team == null) {
@@ -61,7 +61,7 @@ public final class TeamCommand {
   public void shuffle(
       Match match, TeamMatchModule teams, @Switch('a') boolean all, @Switch('f') boolean force) {
     if (match.isRunning() && !force) {
-      throw TextException.of("match.shuffle.err");
+      throw exception("match.shuffle.err");
     }
 
     List<MatchPlayer> players = new ArrayList<>(all ? match.getPlayers() : match.getParticipants());
@@ -82,12 +82,12 @@ public final class TeamCommand {
     if (newName.length() > 32) {
       newName = newName.substring(0, 32);
     } else if (!(team instanceof Team)) {
-      throw TextException.of("command.teamNotFound");
+      throw exception("command.teamNotFound");
     }
 
     for (Team other : teams.getTeams()) {
       if (other.getNameLegacy().equalsIgnoreCase(newName)) {
-        throw TextException.of("match.alias.err", text(newName));
+        throw exception("match.alias.err", text(newName));
       }
     }
 
@@ -156,7 +156,7 @@ public final class TeamCommand {
     }
 
     if (list.isEmpty()) {
-      throw TextException.of("command.teamNotFound");
+      throw exception("command.teamNotFound");
     }
     return list;
   }

@@ -5,7 +5,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.potion.PotionEffectType;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
-import tc.oc.pgm.util.text.MinecraftTranslations;
+import tc.oc.pgm.util.text.MinecraftComponent;
 
 public class GenericPotionInfo implements PotionInfo {
 
@@ -28,7 +28,7 @@ public class GenericPotionInfo implements PotionInfo {
 
   @Override
   public Component getName() {
-    return MinecraftTranslations.getPotion(getPotionEffect());
+    return MinecraftComponent.potion(getPotionEffect());
   }
 
   @Override

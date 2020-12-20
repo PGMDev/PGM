@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -310,10 +311,11 @@ public class SidebarMatchModule implements MatchModule, Listener {
     }
 
     sb.append(" ");
-    sb.append(goal.renderSidebarLabelColor(competitor, viewingParty));
+    final TextColor color =
+        TextFormatter.convert(goal.renderSidebarLabelColor(competitor, viewingParty));
     sb.append(
         TextTranslations.translateLegacy(
-            goal.renderSidebarLabelText(competitor, viewingParty), viewer));
+            goal.renderSidebarLabelText(competitor, viewingParty).color(color), viewer));
 
     return sb.toString();
   }
