@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import net.kyori.adventure.bossbar.BossBar;
@@ -46,6 +47,7 @@ public class StartMatchModule implements MatchModule, Listener {
   protected final BossBar unreadyBar;
   protected final Set<UnreadyReason> unreadyReasons = new HashSet<>();
   protected boolean autoStart; // Initialized from config, but is mutable
+  protected ScheduledFuture<?> barTask;
 
   private StartMatchModule(Match match) {
     this.match = match;
@@ -58,13 +60,22 @@ public class StartMatchModule implements MatchModule, Listener {
     update();
     // Schedule an update to prevent the unready bar deciding it wants to hide itself
     // This is probably because of async magic
-    match.getExecutor(MatchScope.LOADED).schedule(this::update, 1, TimeUnit.SECONDS);
+    barTask = match.getExecutor(MatchScope.LOADED).schedule(this::update, 1, TimeUnit.SECONDS);
+  }
+
+  @Override
+  public void unload() {
+    if (barTask != null) {
+      barTask.cancel(true);
+      barTask = null;
+    }
+    match.hideBossBar(unreadyBar);
+    unreadyReasons.clear();
   }
 
   @EventHandler
   public void onCommit(MatchStartEvent event) {
-    match.hideBossBar(unreadyBar);
-    unreadyReasons.clear();
+    this.unload();
   }
 
   // FIXME: Unsafe cast to SingleCountdownContext
