@@ -3,9 +3,6 @@ package tc.oc.pgm.util.bukkit;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.nms.NMSHacks;
 import us.myles.ViaVersion.api.Via;
-import us.myles.ViaVersion.api.boss.BossBar;
-import us.myles.ViaVersion.api.boss.BossColor;
-import us.myles.ViaVersion.api.boss.BossStyle;
 
 public class ViaUtils {
   /** Minecraft 1.7.6 &ndash; 1.7.10 */
@@ -44,9 +41,5 @@ public class ViaUtils {
 
   public static boolean isReady(Player player) {
     return !enabled() || Via.getAPI().isInjected(player.getUniqueId());
-  }
-
-  public static BossBar<?> createBossBar() {
-    return enabled() ? Via.getAPI().createBossBar("", BossColor.BLUE, BossStyle.SOLID) : null;
   }
 }

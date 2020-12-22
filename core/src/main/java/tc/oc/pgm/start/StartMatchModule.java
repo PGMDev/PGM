@@ -2,6 +2,7 @@ package tc.oc.pgm.start;
 
 import static net.kyori.adventure.bossbar.BossBar.bossBar;
 import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.space;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -24,7 +25,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchPhase;
 import tc.oc.pgm.api.match.MatchScope;
-import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.countdowns.SingleCountdownContext;
@@ -51,7 +51,7 @@ public class StartMatchModule implements MatchModule, Listener {
 
   private StartMatchModule(Match match) {
     this.match = match;
-    this.unreadyBar = bossBar(Component.empty(), 1, BossBar.Color.PURPLE, BossBar.Overlay.PROGRESS);
+    this.unreadyBar = bossBar(space(), 1, BossBar.Color.RED, BossBar.Overlay.PROGRESS);
     this.autoStart = !PGM.get().getConfiguration().getStartTime().isNegative();
   }
 
@@ -73,9 +73,22 @@ public class StartMatchModule implements MatchModule, Listener {
     unreadyReasons.clear();
   }
 
-  @EventHandler
-  public void onCommit(MatchStartEvent event) {
+  @Override
+  public void enable() {
+    // When the match starts, unload the unready bar
     this.unload();
+  }
+
+  @EventHandler
+  public void onJoin(PlayerJoinMatchEvent event) {
+    if (!match.isRunning()) {
+      event.getPlayer().showBossBar(unreadyBar);
+    }
+  }
+
+  @EventHandler
+  public void onLeave(PlayerLeaveMatchEvent event) {
+    event.getPlayer().hideBossBar(unreadyBar);
   }
 
   // FIXME: Unsafe cast to SingleCountdownContext
@@ -229,17 +242,5 @@ public class StartMatchModule implements MatchModule, Listener {
     } else if (!empty) {
       match.hideBossBar(unreadyBar);
     }
-  }
-
-  // We refresh the bossbar whenever a player leaves/joins to ensure everybody gets to see it
-
-  @EventHandler
-  public void onJoin(PlayerJoinMatchEvent event) {
-    if (!match.isRunning()) update();
-  }
-
-  @EventHandler
-  public void onLeave(PlayerLeaveMatchEvent event) {
-    if (!match.isRunning()) update();
   }
 }

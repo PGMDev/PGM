@@ -8,7 +8,6 @@ import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.title.Title.title;
 
 import java.time.Duration;
-import javax.annotation.Nullable;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -25,17 +24,17 @@ public abstract class MatchCountdown extends Countdown {
   protected final BossBar bossBar;
   protected Duration remaining, total;
 
-  public MatchCountdown(Match match, @Nullable BossBar bossBar) {
+  public MatchCountdown(Match match, BossBar bossBar) {
     this.match = match;
-    if (bossBar != null) {
-      this.bossBar = bossBar;
-    } else { // Passing empty values here because #secondsRemaining throws an NPE at this point
-      this.bossBar = bossBar(space(), 1, BossBar.Color.PURPLE, BossBar.Overlay.PROGRESS);
-    }
+    this.bossBar = bossBar;
+  }
+
+  public MatchCountdown(Match match, BossBar.Color color) {
+    this(match, bossBar(space(), 1, color, BossBar.Overlay.PROGRESS));
   }
 
   public MatchCountdown(Match match) {
-    this(match, null);
+    this(match, BossBar.Color.PURPLE);
   }
 
   public Match getMatch() {
@@ -101,13 +100,17 @@ public abstract class MatchCountdown extends Countdown {
   @Override
   public void onEnd(Duration total) {
     match.callEvent(new CountdownEndEvent(match, this));
-    match.hideBossBar(bossBar);
+    hideBossBar();
   }
 
   @Override
   public void onCancel(Duration remaining, Duration total) {
     super.onCancel(remaining, total);
     match.callEvent(new CountdownCancelEvent(match, this));
+    hideBossBar();
+  }
+
+  protected void hideBossBar() {
     match.hideBossBar(bossBar);
   }
 
@@ -118,7 +121,7 @@ public abstract class MatchCountdown extends Countdown {
 
       match.showBossBar(bossBar);
     } else {
-      match.hideBossBar(bossBar);
+      hideBossBar();
     }
   }
 

@@ -7,6 +7,7 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
 import javax.annotation.Nullable;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -25,7 +26,7 @@ public class TimeLimitCountdown extends MatchCountdown {
   protected final TimeLimit timeLimit;
 
   public TimeLimitCountdown(Match match, TimeLimit timeLimit) {
-    super(match);
+    super(match, BossBar.Color.BLUE);
     this.timeLimit = timeLimit;
   }
 
@@ -77,7 +78,7 @@ public class TimeLimitCountdown extends MatchCountdown {
 
   protected void freeze(Duration remaining) {
     this.remaining = remaining;
-    invalidateBossBar();
+    hideBossBar();
   }
 
   protected boolean mayEnd() {

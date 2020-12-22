@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.Range;
 import java.time.Duration;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -27,7 +28,7 @@ public class CycleCountdown extends MatchCountdown {
   private MatchFactory nextMatch;
 
   public CycleCountdown(Match match) {
-    super(match);
+    super(match, BossBar.Color.BLUE);
 
     try {
       this.preloadSecs =

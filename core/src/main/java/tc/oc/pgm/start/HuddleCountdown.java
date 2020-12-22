@@ -3,6 +3,7 @@ package tc.oc.pgm.start;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.HandlerList;
@@ -15,7 +16,7 @@ import tc.oc.pgm.join.JoinMatchModule;
 public class HuddleCountdown extends PreMatchCountdown implements Listener {
 
   public HuddleCountdown(Match match) {
-    super(match);
+    super(match, BossBar.Color.YELLOW);
   }
 
   @Override

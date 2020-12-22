@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
 import javax.annotation.Nullable;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import tc.oc.pgm.api.match.Match;
@@ -25,7 +26,7 @@ public class StartCountdown extends PreMatchCountdown {
   protected final boolean forced;
 
   public StartCountdown(Match match, boolean forced, Duration huddle) {
-    super(match);
+    super(match, BossBar.Color.GREEN);
     this.huddle = checkNotNull(huddle);
     this.forced = forced;
     this.tmm = match.getModule(TeamMatchModule.class);

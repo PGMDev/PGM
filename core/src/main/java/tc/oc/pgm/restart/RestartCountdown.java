@@ -3,6 +3,7 @@ package tc.oc.pgm.restart;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -13,7 +14,7 @@ import tc.oc.pgm.util.TimeUtils;
 public class RestartCountdown extends MatchCountdown {
 
   public RestartCountdown(Match match) {
-    super(match);
+    super(match, BossBar.Color.RED);
   }
 
   @Override

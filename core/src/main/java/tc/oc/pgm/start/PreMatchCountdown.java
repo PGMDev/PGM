@@ -5,6 +5,7 @@ import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.sound.Sound;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchPhase;
@@ -16,8 +17,8 @@ public abstract class PreMatchCountdown extends MatchCountdown {
   protected static final Sound COUNT_SOUND =
       sound(key("note.pling"), Sound.Source.MASTER, 1f, 1.19f);
 
-  public PreMatchCountdown(Match match) {
-    super(match);
+  public PreMatchCountdown(Match match, BossBar.Color color) {
+    super(match, color);
   }
 
   @Override
