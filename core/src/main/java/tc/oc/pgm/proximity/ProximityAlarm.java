@@ -27,7 +27,7 @@ public class ProximityAlarm implements Listener {
   private static final float FLARE_CHANCE = 0.25f;
 
   private static final Sound SOUND =
-      sound(key("fireworks.largeBlast_far"), Sound.Source.MASTER, 1f, 0.7f);
+      sound(key("fireworks.blast_far"), Sound.Source.MASTER, 1f, 0.7f);
 
   protected final Random random;
   protected final Match match;
