@@ -2,6 +2,7 @@ package tc.oc.pgm.death;
 
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.space;
+import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.util.SortedSet;
@@ -82,7 +83,7 @@ public class DeathMessageBuilder {
     args[1] = killer == null ? empty() : killer.getName(NameStyle.COLOR);
     args[2] = weapon;
     args[3] = mob;
-    args[4] = distance == null ? empty() : translatable(String.valueOf(distance));
+    args[4] = distance == null ? empty() : text(distance);
     return args;
   }
 
