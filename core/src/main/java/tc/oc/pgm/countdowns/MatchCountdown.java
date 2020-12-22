@@ -2,6 +2,7 @@ package tc.oc.pgm.countdowns;
 
 import static net.kyori.adventure.bossbar.BossBar.bossBar;
 import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.title.Title.title;
@@ -21,15 +22,15 @@ import tc.oc.pgm.util.TimeUtils;
 
 public abstract class MatchCountdown extends Countdown {
   protected final Match match;
-  protected Duration remaining, total;
   protected final BossBar bossBar;
+  protected Duration remaining, total;
 
   public MatchCountdown(Match match, @Nullable BossBar bossBar) {
     this.match = match;
     if (bossBar != null) {
       this.bossBar = bossBar;
     } else { // Passing empty values here because #secondsRemaining throws an NPE at this point
-      this.bossBar = bossBar(empty(), 1, BossBar.Color.PURPLE, BossBar.Overlay.PROGRESS);
+      this.bossBar = bossBar(space(), 1, BossBar.Color.PURPLE, BossBar.Overlay.PROGRESS);
     }
   }
 
@@ -68,7 +69,7 @@ public abstract class MatchCountdown extends Countdown {
     this.remaining = remaining;
     this.total = total;
 
-    showOrHideBossBar();
+    invalidateBossBar();
 
     match.callEvent(new CountdownStartEvent(match, this));
     super.onStart(remaining, total);
@@ -79,7 +80,6 @@ public abstract class MatchCountdown extends Countdown {
     this.remaining = remaining;
     this.total = total;
 
-    showOrHideBossBar();
     invalidateBossBar();
 
     if (showChat()) {
@@ -112,12 +112,10 @@ public abstract class MatchCountdown extends Countdown {
   }
 
   protected void invalidateBossBar() {
-    bossBar.progress(bossBarProgress(remaining, total));
-    bossBar.name(formatText());
-  }
-
-  private void showOrHideBossBar() {
     if (showBossBar()) {
+      bossBar.progress(bossBarProgress(remaining, total));
+      bossBar.name(formatText());
+
       match.showBossBar(bossBar);
     } else {
       match.hideBossBar(bossBar);
