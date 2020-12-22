@@ -1,6 +1,5 @@
 package tc.oc.pgm.death;
 
-import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
@@ -56,8 +55,10 @@ public class DeathMessageBuilder {
   private final boolean predicted;
 
   private String key;
-  private Component weapon = empty();
-  private Component mob = empty();
+  // FIXME: Adventure filters out empty() from translatable arguments
+  // and it causes issues with the indexes of translations.
+  private Component weapon = space();
+  private Component mob = space();
   private Long distance;
 
   public DeathMessageBuilder(MatchPlayerDeathEvent event, Logger logger) {
@@ -80,10 +81,10 @@ public class DeathMessageBuilder {
   Component[] getArgs() {
     Component[] args = new Component[5];
     args[0] = victim.getName(NameStyle.COLOR);
-    args[1] = killer == null ? empty() : killer.getName(NameStyle.COLOR);
+    args[1] = killer == null ? space() : killer.getName(NameStyle.COLOR);
     args[2] = weapon;
     args[3] = mob;
-    args[4] = distance == null ? empty() : text(distance);
+    args[4] = distance == null ? space() : text(distance);
     return args;
   }
 
