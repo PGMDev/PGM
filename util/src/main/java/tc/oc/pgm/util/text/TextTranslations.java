@@ -266,7 +266,8 @@ public final class TextTranslations {
 
   public static BaseComponent[] toBaseComponentArray(
       Component component, @Nullable CommandSender viewer) {
-    Component translated = translate(component, viewer.getLocale());
+    Component translated =
+        translate(component, viewer == null ? SOURCE_LOCALE : viewer.getLocale());
     return BungeeComponentSerializer.get().serialize(translated);
   }
 }
