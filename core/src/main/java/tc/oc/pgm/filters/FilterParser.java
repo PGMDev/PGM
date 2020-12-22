@@ -19,6 +19,7 @@ import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.classes.ClassModule;
 import tc.oc.pgm.classes.PlayerClass;
 import tc.oc.pgm.features.XMLFeatureReference;
+import tc.oc.pgm.filters.modifier.PlayerBlockQueryModifier;
 import tc.oc.pgm.filters.modifier.location.LocalLocationQueryModifier;
 import tc.oc.pgm.filters.modifier.location.LocationQueryModifier;
 import tc.oc.pgm.filters.modifier.location.WorldLocationQueryModifier;
@@ -492,5 +493,10 @@ public abstract class FilterParser {
     } else {
       return new WorldLocationQueryModifier(parseChild(el), vector, relative);
     }
+  }
+
+  @MethodParser("player")
+  public PlayerBlockQueryModifier parsePlayerFilter(Element el) throws InvalidXMLException {
+    return new PlayerBlockQueryModifier(parseChild(el));
   }
 }
