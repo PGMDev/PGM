@@ -18,6 +18,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class MobsModule implements MapModule {
+
   private final Filter mobsFilter;
 
   public MobsModule(Filter mobsFilter) {
@@ -51,7 +52,7 @@ public class MobsModule implements MapModule {
           }
         }
       }
-      return mobsFilter == null ? null : new MobsModule(mobsFilter);
+      return new MobsModule(mobsFilter);
     }
   }
 }

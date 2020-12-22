@@ -1,6 +1,6 @@
 package tc.oc.pgm.modules;
 
-import org.bukkit.entity.ArmorStand;
+import javax.annotation.Nullable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -15,7 +15,7 @@ import tc.oc.pgm.filters.query.EntitySpawnQuery;
 @ListenerScope(MatchScope.LOADED)
 public class MobsMatchModule implements MatchModule, Listener {
   private final Match match;
-  private final Filter mobsFilter;
+  private final @Nullable Filter mobsFilter;
 
   public MobsMatchModule(Match match, Filter mobsFilter) {
     this.match = match;
@@ -34,14 +34,31 @@ public class MobsMatchModule implements MatchModule, Listener {
 
   @EventHandler(ignoreCancelled = true)
   public void checkSpawn(final CreatureSpawnEvent event) {
-    if (event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.CUSTOM
-        || event.getEntity() instanceof ArmorStand) {
-      return;
+    // Allow obscure spawn reasons that can only occur if
+    // the player has access to certain creative-only items.
+    switch (event.getSpawnReason()) {
+      case CUSTOM:
+      case DEFAULT: // Caused by /summon
+      case SPAWNER:
+      case SPAWNER_EGG:
+      case DISPENSE_EGG:
+      case SILVERFISH_BLOCK:
+        return;
     }
 
-    QueryResponse response =
-        this.mobsFilter.query(
-            new EntitySpawnQuery(event, event.getEntity(), event.getSpawnReason()));
-    event.setCancelled(response.isDenied());
+    // Always allow armor stands since they are not really mobs.
+    switch (event.getEntityType()) {
+      case ARMOR_STAND:
+        return;
+    }
+
+    if (this.mobsFilter == null) {
+      event.setCancelled(true);
+    } else {
+      final QueryResponse response =
+          this.mobsFilter.query(
+              new EntitySpawnQuery(event, event.getEntity(), event.getSpawnReason()));
+      event.setCancelled(response.isDenied());
+    }
   }
 }
