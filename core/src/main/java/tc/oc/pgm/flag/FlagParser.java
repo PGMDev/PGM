@@ -222,6 +222,7 @@ public class FlagParser {
     Component carryMessage = XMLUtils.parseFormattedText(el, "carry-message");
     boolean showRespawnOnPickup =
         XMLUtils.parseBoolean(el.getAttribute("show-respawn-on-pickup"), true);
+    boolean repeatPosts = XMLUtils.parseBoolean(el.getAttribute("repeat-posts"), true);
     boolean dropOnWater = XMLUtils.parseBoolean(el.getAttribute("drop-on-water"), true);
     boolean showBeam = XMLUtils.parseBoolean(el.getAttribute("beam"), true);
     ProximityMetric flagProximityMetric =
@@ -273,7 +274,8 @@ public class FlagParser {
             flagProximityMetric,
             netProximityMetric,
             sequential,
-            showRespawnOnPickup);
+            showRespawnOnPickup,
+            repeatPosts);
     flags.add(flag);
     factory.getFeatures().addFeature(el, flag);
 

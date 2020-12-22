@@ -50,6 +50,7 @@ public class FlagDefinition extends ProximityGoalDefinition {
   private boolean
       showRespawnOnPickup; // When a flag is picked up, if true, it will display where it will
   // respawn. Will be set to false if a net defines a different respawn post.
+  private final boolean repeatPosts;
 
   public FlagDefinition(
       @Nullable String id,
@@ -75,7 +76,8 @@ public class FlagDefinition extends ProximityGoalDefinition {
       @Nullable ProximityMetric flagProximityMetric,
       @Nullable ProximityMetric netProximityMetric,
       boolean sequential,
-      boolean showRespawnOnPickup) {
+      boolean showRespawnOnPickup,
+      boolean repeatPosts) {
 
     // We can't use the owner field in OwnedGoal because our owner
     // is a reference that can't be resolved until after parsing.
@@ -106,6 +108,7 @@ public class FlagDefinition extends ProximityGoalDefinition {
     this.showBeam = showBeam;
     this.sequential = sequential;
     this.showRespawnOnPickup = showRespawnOnPickup;
+    this.repeatPosts = repeatPosts;
   }
 
   public @Nullable DyeColor getColor() {
@@ -195,6 +198,10 @@ public class FlagDefinition extends ProximityGoalDefinition {
 
   public boolean willShowRespawnOnPickup() {
     return showRespawnOnPickup;
+  }
+
+  public boolean willRepeatPosts() {
+    return repeatPosts;
   }
 
   public void setShowRespawnOnPickup(boolean value) {

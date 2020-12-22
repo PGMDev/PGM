@@ -6,9 +6,11 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -99,6 +101,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   private BaseState state;
   private boolean transitioning;
   private @Nullable Post predeterminedPost;
+  private @Nullable Post previousPost;
 
   protected Flag(Match match, FlagDefinition definition, ImmutableSet<Net> nets)
       throws ModuleLoadException {
@@ -168,6 +171,8 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     this.bannerYawProvider = new StaticAngleProvider(this.bannerLocation.getYaw());
     this.bannerItem = new ItemStack(Material.BANNER);
     this.bannerItem.setItemMeta(this.getBannerMeta());
+
+    this.previousPost = definition.getDefaultPost();
   }
 
   private static Banner toBanner(Block block) {
@@ -264,20 +269,32 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   private int sequentialPostCounter = 1;
 
   public Post getReturnPost(Post post) {
-    if (post.isSpecifiedPost()) {
-      return post;
-    }
-    if (predeterminedPost != null) {
-      Post returnPost = predeterminedPost;
-      predeterminedPost = null;
-      return returnPost;
-    }
-    if (definition.isSequential()) {
-      sequentialPostCounter %= definition.getPosts().size();
-      return definition.getPosts().get(sequentialPostCounter++);
-    }
     Random random = match.getRandom();
-    return definition.getPosts().get(random.nextInt(definition.getPosts().size()));
+    Post returnPost;
+    if (post.isSpecifiedPost()) {
+      returnPost = post;
+    } else if (predeterminedPost != null) {
+      returnPost = predeterminedPost;
+      predeterminedPost = null;
+    } else if (definition.isSequential()) {
+      sequentialPostCounter %= definition.getPosts().size();
+      returnPost = definition.getPosts().get(sequentialPostCounter++);
+    } else if (!definition.willRepeatPosts()) {
+      List<Post> possiblePosts;
+      possiblePosts =
+          definition.getPosts().stream()
+              .filter(p -> !p.equals(previousPost))
+              .collect(Collectors.toList());
+      if (possiblePosts.size() == 0) {
+        returnPost = previousPost;
+      } else {
+        returnPost = possiblePosts.get(random.nextInt(possiblePosts.size()));
+      }
+    } else {
+      returnPost = definition.getPosts().get(random.nextInt(definition.getPosts().size()));
+    }
+    previousPost = returnPost;
+    return returnPost;
   }
 
   public Location getReturnPoint(Post post) {
