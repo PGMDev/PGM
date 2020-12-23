@@ -65,7 +65,7 @@ public class MatchPlayerStateImpl implements MatchPlayerState {
   @Override
   public Component getName(NameStyle style) {
     MatchPlayer player = match.getPlayer(uuid);
-    return player(player.getBukkit(), username, style);
+    return player(player != null ? player.getBukkit() : null, username, style);
   }
 
   @Override
