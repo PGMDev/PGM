@@ -29,7 +29,8 @@ final class VotingBookListener implements Listener {
     MatchPlayer player = match.getPlayer(event.getPlayer());
     if (isRightClick(event.getAction())
         && event.getMaterial() == Material.ENCHANTED_BOOK
-        && player != null) {
+        && player != null
+        && votingPool.getCurrentPoll() != null) {
       String validator = VOTE_BOOK_TAG.get(event.getItem());
       if (validator != null && validator.equals(VOTE_BOOK_METADATA))
         votingPool.getCurrentPoll().sendBook(player, true);
