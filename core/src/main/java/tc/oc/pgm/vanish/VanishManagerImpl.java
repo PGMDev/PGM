@@ -160,9 +160,10 @@ public class VanishManagerImpl implements VanishManager, Listener {
   public void onJoin(PlayerJoinEvent event) {
     MatchPlayer player = matchManager.getPlayer(event.getPlayer());
     if (player == null) return;
+    if (!player.getBukkit().hasPermission(Permissions.VANISH)) return; // No perms, no vanish :P
     if (player.getParty() instanceof Competitor) return; // Do not vanish players on a team
 
-    if (isVanished(player.getId())) {
+    if (isVanished(player.getId())) { // Player is already vanished
       player.setVanished(true);
       return;
     }
