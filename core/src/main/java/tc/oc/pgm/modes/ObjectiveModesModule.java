@@ -57,6 +57,7 @@ public class ObjectiveModesModule implements MapModule {
       }
 
       for (Element modeEl : XMLUtils.flattenElements(doc.getRootElement(), "modes", "mode")) {
+        String id = modeEl.getAttributeValue("id");
         if (modeEl.getAttributeValue("after") == null) {
           throw new InvalidXMLException("No period has been specified", modeEl);
         }
@@ -85,7 +86,7 @@ public class ObjectiveModesModule implements MapModule {
                 "Already scheduled a mode for " + after.getSeconds() + "s", modeEl);
           }
         }
-        parsedModes.add(new Mode(material, after, name, showBefore));
+        parsedModes.add(new Mode(id, material, after, name, showBefore));
       }
 
       return new ObjectiveModesModule(parsedModes);
