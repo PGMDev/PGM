@@ -126,7 +126,13 @@ public class DestroyableMatchModule implements MatchModule, Listener {
     for (Destroyable destroyable : this.destroyables) {
       if (destroyable.isAffectedByModeChanges()) {
         double oldCompletion = destroyable.getCompletion();
-        destroyable.replaceBlocks(event.getMode().getMaterialData());
+        if (destroyable.getMode() == null) {
+          destroyable.replaceBlocks(event.getMode().getMaterialData());
+        } else if (destroyable.getMode() != null) {
+          if (destroyable.getMode().equals(event.getMode().getId())) {
+            destroyable.replaceBlocks(event.getMode().getMaterialData());
+          }
+        }
         if (oldCompletion != destroyable.getCompletion()) {
           // Multi-stage destroyables can have their total completion changed by this
           this.match.callEvent(new DestroyableHealthChangeEvent(this.match, destroyable, null));

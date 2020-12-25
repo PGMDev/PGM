@@ -155,7 +155,11 @@ public class CoreMatchModule implements MatchModule, Listener {
   public void onObjectiveModeSwitch(final ObjectiveModeChangeEvent event) {
     for (Core core : this.cores) {
       if (core.isAffectedByModeChanges()) {
-        core.replaceBlocks(event.getMode().getMaterialData());
+        if (core.getMode() == null) {
+          core.replaceBlocks(event.getMode().getMaterialData());
+        } else if (core.getMode() != null && core.getMode().equals(event.getMode().getId())) {
+          core.replaceBlocks(event.getMode().getMaterialData());
+        }
       }
     }
   }
