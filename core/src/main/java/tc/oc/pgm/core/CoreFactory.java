@@ -13,6 +13,7 @@ public class CoreFactory extends ProximityGoalDefinition {
   protected final Region region;
   protected final MaterialData material;
   protected final int leakLevel;
+  protected final String mode;
   protected final boolean modeChanges;
   protected final boolean showProgress;
 
@@ -26,6 +27,7 @@ public class CoreFactory extends ProximityGoalDefinition {
       Region region,
       MaterialData material,
       int leakLevel,
+      @Nullable String mode,
       boolean modeChanges,
       boolean showProgress) {
 
@@ -33,12 +35,17 @@ public class CoreFactory extends ProximityGoalDefinition {
     this.region = region;
     this.material = material;
     this.leakLevel = leakLevel;
+    this.mode = mode;
     this.modeChanges = modeChanges;
     this.showProgress = showProgress;
   }
 
   public Region getRegion() {
     return this.region;
+  }
+
+  public String getMode() {
+    return this.mode;
   }
 
   public MaterialData getMaterial() {

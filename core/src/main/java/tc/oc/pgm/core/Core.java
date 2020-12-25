@@ -160,6 +160,10 @@ public class Core extends TouchableGoal<CoreFactory>
     this.leaked = true;
   }
 
+  public String getMode() {
+    return this.definition.getMode();
+  }
+
   public boolean hasLeaked() {
     return this.leaked;
   }
