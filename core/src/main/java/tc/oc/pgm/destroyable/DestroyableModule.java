@@ -111,6 +111,7 @@ public class DestroyableModule implements MapModule {
         Set<SingleMaterialMatcher> materials =
             XMLUtils.parseMaterialPatternSet(
                 Node.fromRequiredAttr(destroyableEl, "materials", "material"));
+        String mode = destroyableEl.getAttributeValue("mode");
         boolean modeChanges =
             XMLUtils.parseBoolean(destroyableEl.getAttribute("mode-changes"), false);
         boolean showProgress =
@@ -134,6 +135,7 @@ public class DestroyableModule implements MapModule {
                 region,
                 materials,
                 destructionRequired,
+                mode,
                 modeChanges,
                 showProgress,
                 sparks,

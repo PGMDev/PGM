@@ -14,6 +14,7 @@ public class DestroyableFactory extends ProximityGoalDefinition {
   protected final Region region;
   protected final Set<SingleMaterialMatcher> materials;
   protected final double destructionRequired;
+  protected final String mode;
   protected final boolean modeChanges;
   protected final boolean showProgress;
   protected final boolean sparks;
@@ -30,6 +31,7 @@ public class DestroyableFactory extends ProximityGoalDefinition {
       Region region,
       Set<SingleMaterialMatcher> materials,
       double destructionRequired,
+      String mode,
       boolean modeChanges,
       boolean showProgress,
       boolean sparks,
@@ -38,6 +40,7 @@ public class DestroyableFactory extends ProximityGoalDefinition {
     this.region = region;
     this.materials = materials;
     this.destructionRequired = destructionRequired;
+    this.mode = mode;
     this.modeChanges = modeChanges;
     this.showProgress = showProgress;
     this.sparks = sparks;
@@ -51,6 +54,10 @@ public class DestroyableFactory extends ProximityGoalDefinition {
 
   public Set<SingleMaterialMatcher> getMaterials() {
     return this.materials;
+  }
+
+  public String getMode() {
+    return this.mode;
   }
 
   public double getDestructionRequired() {
