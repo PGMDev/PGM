@@ -128,8 +128,7 @@ public class DestroyableMatchModule implements MatchModule, Listener {
         double oldCompletion = destroyable.getCompletion();
         if (destroyable.getMode() == null) {
           destroyable.replaceBlocks(event.getMode().getMaterialData());
-        } else if (destroyable.getMode() != null
-            && destroyable.getMode().equals(event.getMode().getStage())) {
+        } else if (destroyable.getMode().equals(event.getMode().getStage())) {
           destroyable.replaceBlocks(event.getMode().getMaterialData());
         }
         if (oldCompletion != destroyable.getCompletion()) {
