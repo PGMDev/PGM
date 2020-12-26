@@ -157,7 +157,7 @@ public class CoreMatchModule implements MatchModule, Listener {
       if (core.isAffectedByModeChanges()) {
         if (core.getMode() == null) {
           core.replaceBlocks(event.getMode().getMaterialData());
-        } else if (core.getMode() != null && core.getMode().equals(event.getMode().getId())) {
+        } else if (core.getMode() != null && core.getMode().equals(event.getMode().getStage())) {
           core.replaceBlocks(event.getMode().getMaterialData());
         }
       }
