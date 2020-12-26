@@ -417,6 +417,12 @@ public abstract class FilterParser {
         this.factory.getFeatures().createReference(new Node(el), FlagDefinition.class));
   }
 
+  @MethodParser("previous-post")
+  public PreviousPostFilter parsePreviousPost(Element el) throws InvalidXMLException {
+    return new PreviousPostFilter(
+        this.factory.getFeatures().createReference(new Node(el), Post.class));
+  }
+
   @MethodParser("cause")
   public CauseFilter parseCause(Element el) throws InvalidXMLException {
     return new CauseFilter(XMLUtils.parseEnum(el, CauseFilter.Cause.class, "cause filter"));

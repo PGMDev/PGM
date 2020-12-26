@@ -38,6 +38,7 @@ public class Post extends SelfIdentifyingFeatureDefinition {
   private final boolean permanent; // Flag enters Completed state when at this post
   private final double pointsPerSecond; // Points awarded while any flag is at this post
   private final Filter pickupFilter; // Filter players who can pickup a flag at this post
+  private final Filter respawnFilter; // Filter if a flag can respawn to this post
   private final @Nullable String
       postName; // The name of the post to be shown in chat when the flag is respawning
 
@@ -54,7 +55,8 @@ public class Post extends SelfIdentifyingFeatureDefinition {
       boolean sequential,
       boolean permanent,
       double pointsPerSecond,
-      Filter pickupFilter) {
+      Filter pickupFilter,
+      Filter respawnFilter) {
 
     super(id);
     checkArgument(respawnTime == null || respawnSpeed == null);
@@ -69,6 +71,7 @@ public class Post extends SelfIdentifyingFeatureDefinition {
     this.permanent = permanent;
     this.pointsPerSecond = pointsPerSecond;
     this.pickupFilter = pickupFilter;
+    this.respawnFilter = respawnFilter;
     this.postName = name;
   }
 
@@ -116,6 +119,10 @@ public class Post extends SelfIdentifyingFeatureDefinition {
 
   public Filter getPickupFilter() {
     return this.pickupFilter;
+  }
+
+  public Filter getRespawnFilter() {
+    return this.respawnFilter;
   }
 
   public Location getReturnPoint(Flag flag, AngleProvider yawProvider) {
