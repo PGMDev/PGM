@@ -115,7 +115,7 @@ public class CoreModule implements MapModule {
           serialNumbers.put(owner, serial + 1);
         }
 
-        String mode = coreEl.getAttributeValue("mode");
+        String mode = coreEl.getAttributeValue("modes");
         boolean modeChanges = XMLUtils.parseBoolean(coreEl.getAttribute("mode-changes"), false);
         boolean showProgress = XMLUtils.parseBoolean(coreEl.getAttribute("show-progress"), false);
         boolean visible = XMLUtils.parseBoolean(coreEl.getAttribute("show"), true);

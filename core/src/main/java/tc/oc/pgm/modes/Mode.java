@@ -10,7 +10,7 @@ import org.bukkit.material.MaterialData;
 
 public class Mode {
 
-  private final @Nullable String id;
+  private final @Nullable String stage;
   private final MaterialData material;
   private final Duration after;
   private final @Nullable String name;
@@ -22,12 +22,12 @@ public class Mode {
   }
 
   public Mode(
-      final @Nullable String id,
+      final @Nullable String stage,
       final MaterialData material,
       final Duration after,
       final @Nullable String name,
       Duration showBefore) {
-    this.id = id;
+    this.stage = stage;
     this.material = material;
     this.after = after;
     this.name = name;
@@ -60,7 +60,7 @@ public class Mode {
     return this.name;
   }
 
-  public @Nullable String getId() {
-    return this.id;
+  public @Nullable String getStage() {
+    return this.stage;
   }
 }
