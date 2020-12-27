@@ -4,10 +4,11 @@ import com.google.common.collect.ImmutableList;
 import java.time.Duration;
 import java.util.*;
 import javax.annotation.Nullable;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Effect;
@@ -35,6 +36,9 @@ import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.text.TextFormatter;
+
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 
 // ---------------------------Terminology-----------------------------
 // -- Rail -> A collection of nested Paths(Stored in each other)     I
@@ -334,7 +338,7 @@ public class Payload extends ControllableGoal<PayloadDefinition>
 
       int relevantCheckpointKey = forwards ? lastReachedCheckpointKey : oldCheckpointKey;
 
-      TextColor checkpointColor = TextColor.WHITE;
+      TextColor checkpointColor = NamedTextColor.WHITE;
       if (relevantCheckpointKey != 0)
         checkpointColor =
             TextFormatter.convert(
@@ -344,13 +348,13 @@ public class Payload extends ControllableGoal<PayloadDefinition>
                     : secondaryOwner.getColor()));
 
       final Component message =
-          TranslatableComponent.of(
+          translatable(
               forwards
                   ? "payload.reachedCheckpoint.forwards"
                   : "payload.reachedCheckpoint.backwards",
               this.getComponentName().color(TextFormatter.convert(getControllingTeamColor())),
-              TextComponent.of(Math.abs(relevantCheckpointKey), checkpointColor),
-              TextComponent.of(
+              text(Math.abs(relevantCheckpointKey), checkpointColor),
+              text(
                   relevantCheckpointKey > 0 ? headCheckpointsAmount : tailCheckpointsAmount,
                   checkpointColor));
       match.sendMessage(message);

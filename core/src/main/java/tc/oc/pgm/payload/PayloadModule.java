@@ -56,7 +56,7 @@ public class PayloadModule implements MapModule<PayloadMatchModule> {
 
   @Override
   public Collection<MapTag> getTags() {
-    return ImmutableList.of(MapTag.create("payload", "Payload", true, false));
+    return ImmutableList.of(new MapTag("payload", "Payload", true, false));
   }
 
   public static class Factory implements MapModuleFactory<PayloadModule> {
