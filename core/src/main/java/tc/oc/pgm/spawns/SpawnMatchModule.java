@@ -22,6 +22,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerAttackEntityEvent;
 import org.bukkit.event.player.PlayerInitialSpawnEvent;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -64,8 +66,12 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
     return match;
   }
 
-  public RespawnOptions getRespawnOptions() {
-    return module.respawnOptions;
+  public RespawnOptions getRespawnOptions(Query query) {
+    return module.respawnOptions.stream()
+        .filter(
+            respawnOption -> respawnOption.filter.query(query).equals(Filter.QueryResponse.ALLOW))
+        .findFirst()
+        .orElseThrow(() -> new IllegalStateException("No respawn option could be used"));
   }
 
   public Spawn getDefaultSpawn() {
