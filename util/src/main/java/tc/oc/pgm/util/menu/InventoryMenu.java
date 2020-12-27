@@ -7,13 +7,13 @@ import static tc.oc.pgm.util.menu.InventoryMenuUtils.howManyRows;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.WeakHashMap;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_8_R3.util.WeakCollection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
@@ -31,6 +31,18 @@ import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.menu.pattern.MenuArranger;
 import tc.oc.pgm.util.text.TextTranslations;
 
+/**
+ * A way to make a GUI menu that users can interact with.
+ *
+ * <p>The {@link MenuArranger} is what decides whether a menu will be paginated, and how the items
+ * will be scattered throughout the GUI. This means any list passed in the constructor of an {@link
+ * InventoryMenu} should only have <b>non-{@code null}</b> elements.
+ *
+ * <p>Whenever an item in this inventory is clicked it will automatically call the items {@code
+ * onInventoryClick} method. If that (or any) method changes something in the GUI {@link
+ * #refreshWindow(Player)} or {@link #refreshAll()} should be called to rebuild the GUI for the
+ * relevant players.
+ */
 public class InventoryMenu implements Listener {
 
   protected static final int ROW_WIDTH = 9; // Number of columns per row
@@ -38,7 +50,7 @@ public class InventoryMenu implements Listener {
 
   private final List<InventoryMenuItem> inventoryMenuItems;
 
-  private final WeakCollection<Player> viewing = new WeakCollection<>();
+  private final WeakHashMap<Player, Boolean> viewing = new WeakHashMap<>();
 
   private final Component title; // Title of the inventory
   private int rows; // The # of rows in the inventory
@@ -57,7 +69,7 @@ public class InventoryMenu implements Listener {
    * @param rows - The maximum amount of rows the menu can have
    * @param pagesPossible internal boolean used to prevent infinite pages
    */
-  InventoryMenu(
+  private InventoryMenu(
       World world,
       Component title,
       List<InventoryMenuItem> items,
@@ -67,6 +79,8 @@ public class InventoryMenu implements Listener {
     this.title = title;
     this.rows = rows;
     this.inventoryMenuItems = applyPatternAndAddPages(items, menuArranger, pagesPossible);
+    // This argument check needs to be under the applyPattern call because it can increase the row
+    // number(pagination)
     checkArgument(rows > 0 && rows <= MAX_ROWS, "Row size must be between 1 and " + MAX_ROWS);
     this.world = world;
     enableInventory();
@@ -105,12 +119,12 @@ public class InventoryMenu implements Listener {
   }
 
   public boolean isViewing(Player player) {
-    return viewing.contains(player);
+    return viewing.containsKey(player);
   }
 
   public void display(Player player) {
     this.showWindow(player);
-    this.viewing.add(player);
+    this.viewing.put(player, true);
   }
 
   public boolean remove(Player player) {
@@ -118,7 +132,7 @@ public class InventoryMenu implements Listener {
   }
 
   public void refreshAll() {
-    viewing.forEach(this::refreshWindow);
+    viewing.keySet().forEach(this::refreshWindow);
   }
 
   private int getInventorySize() {
@@ -200,7 +214,7 @@ public class InventoryMenu implements Listener {
 
     inv.setContents(contents);
     player.openInventory(inv);
-    viewing.add(player);
+    viewing.put(player, true);
     return inv;
   }
 
@@ -241,7 +255,7 @@ public class InventoryMenu implements Listener {
   }
 
   public void disableInventory() {
-    viewing.forEach(this::closeWindow);
+    viewing.keySet().forEach(this::closeWindow);
     viewing.clear();
     HandlerList.unregisterAll(this);
   }
@@ -265,26 +279,30 @@ public class InventoryMenu implements Listener {
 
     List<List<InventoryMenuItem>> pages = new ArrayList<>();
 
+    // Put items into pages
     List<InventoryMenuItem> page = new ArrayList<>();
     for (int i = 0; !mutableItems.isEmpty(); i++) {
       page.add(mutableItems.remove(0));
-      if (i + 1 == menuArranger.automatedPaginationLimit() || mutableItems.isEmpty()) {
+      if (i + 1 == menuArranger.automatedPaginationLimit() || mutableItems.isEmpty()) { // new page
         pages.add(new ArrayList<>(menuArranger.arrangeItems(page)));
         page.clear();
-        i = 0; // new page
+        i = 0;
       }
     }
 
+    // Insert pagination items on every page
     for (int i = 0; i < pages.size(); i++) {
       List<InventoryMenuItem> currentPage = pages.get(i);
       currentPage.add(null);
       currentPage.add(null);
       currentPage.add(
+          // Is there a previous page?
           i == 0 ? null : new PageInventoryMenuItem(pages.get(i - 1), menuArranger, false));
       currentPage.add(null);
       currentPage.add(null);
       currentPage.add(null);
       currentPage.add(
+          // Is there a next page?
           pages.size() - 1 == i
               ? null
               : new PageInventoryMenuItem(pages.get(i + 1), menuArranger, true));
