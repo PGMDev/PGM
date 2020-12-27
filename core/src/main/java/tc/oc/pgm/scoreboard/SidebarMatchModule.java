@@ -9,7 +9,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -87,8 +86,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
   }
 
   public static final int MAX_ROWS = 16; // Max rows on the scoreboard
-  public static final int MAX_PREFIX = 16; // Max chars in a team prefix
-  public static final int MAX_SUFFIX = 16; // Max chars in a team suffix
+  public static final int MAX_LENGTH = 30; // Max characters per line allowed
 
   protected final Map<UUID, FastBoard> sidebars = new HashMap<>();
   protected final Map<Goal, BlinkTask> blinkingGoals = new HashMap<>();
@@ -123,7 +121,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
     int rowsUsed = competitorsWithGoals.size() * 2 - 1;
 
     if (isCompactWool()) {
-      WoolMatchModule wmm = match.getModule(WoolMatchModule.class);
+      WoolMatchModule wmm = match.needModule(WoolMatchModule.class);
       rowsUsed += wmm.getWools().keySet().size();
     } else {
       GoalMatchModule gmm = match.needModule(GoalMatchModule.class);
@@ -439,19 +437,11 @@ public class SidebarMatchModule implements MatchModule, Listener {
           boolean firstWool = true;
 
           List<Goal> sortedWools = new ArrayList<>(gmm.getGoals(competitor));
-          Collections.sort(
-              sortedWools,
-              new Comparator<Goal>() {
-                @Override
-                public int compare(Goal a, Goal b) {
-                  return a.getName().compareToIgnoreCase(b.getName());
-                }
-              });
+          Collections.sort(sortedWools, (a, b) -> a.getName().compareToIgnoreCase(b.getName()));
 
           // Calculate whether having three spaces between each wool would fit on the scoreboard.
           boolean horizontalCompact =
-              (MAX_PREFIX + MAX_SUFFIX)
-                  < (3 * sortedWools.size()) + (3 * (sortedWools.size() - 1)) + 1;
+              MAX_LENGTH < (3 * sortedWools.size()) + (3 * (sortedWools.size() - 1)) + 1;
           String woolText = "";
           if (!horizontalCompact) {
             // If there is extra room, add another space to the left of the wools to make them
@@ -459,7 +449,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
             woolText += " ";
           }
 
-          for (Goal goal : sortedWools) {
+          for (Goal<?> goal : sortedWools) {
             if (goal instanceof MonumentWool && goal.isVisible()) {
               MonumentWool wool = (MonumentWool) goal;
               woolText += " ";
@@ -494,6 +484,12 @@ public class SidebarMatchModule implements MatchModule, Listener {
       // Need at least one row for the sidebar to show
       if (rows.isEmpty()) {
         rows.add("");
+      }
+
+      // Limit sidebar to MAX_LENGTH characters
+      // Avoids FastBoard throwing errors and stopping the rendering
+      for (int i = 0; i < rows.size(); i++) {
+        if (rows.get(i).length() > MAX_LENGTH) rows.set(i, rows.get(i).substring(0, MAX_LENGTH));
       }
 
       sidebar.updateTitle(TextTranslations.translateLegacy(title, viewer));
