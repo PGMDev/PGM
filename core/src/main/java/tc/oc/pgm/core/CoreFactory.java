@@ -1,5 +1,6 @@
 package tc.oc.pgm.core;
 
+import java.util.List;
 import javax.annotation.Nullable;
 import org.bukkit.material.MaterialData;
 import tc.oc.pgm.api.feature.FeatureInfo;
@@ -13,7 +14,7 @@ public class CoreFactory extends ProximityGoalDefinition {
   protected final Region region;
   protected final MaterialData material;
   protected final int leakLevel;
-  protected final String mode;
+  protected final List<String> modeList;
   protected final boolean modeChanges;
   protected final boolean showProgress;
 
@@ -27,7 +28,7 @@ public class CoreFactory extends ProximityGoalDefinition {
       Region region,
       MaterialData material,
       int leakLevel,
-      @Nullable String mode,
+      @Nullable List<String> modeList,
       boolean modeChanges,
       boolean showProgress) {
 
@@ -35,7 +36,7 @@ public class CoreFactory extends ProximityGoalDefinition {
     this.region = region;
     this.material = material;
     this.leakLevel = leakLevel;
-    this.mode = mode;
+    this.modeList = modeList;
     this.modeChanges = modeChanges;
     this.showProgress = showProgress;
   }
@@ -44,8 +45,8 @@ public class CoreFactory extends ProximityGoalDefinition {
     return this.region;
   }
 
-  public String getMode() {
-    return this.mode;
+  public List<String> getModeList() {
+    return this.modeList;
   }
 
   public MaterialData getMaterial() {

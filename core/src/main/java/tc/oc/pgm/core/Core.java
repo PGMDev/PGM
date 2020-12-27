@@ -6,6 +6,7 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -160,8 +161,8 @@ public class Core extends TouchableGoal<CoreFactory>
     this.leaked = true;
   }
 
-  public String getMode() {
-    return this.definition.getMode();
+  public List<String> getModeList() {
+    return this.definition.getModeList();
   }
 
   public boolean hasLeaked() {

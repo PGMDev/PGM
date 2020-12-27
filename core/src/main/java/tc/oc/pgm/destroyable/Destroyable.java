@@ -450,8 +450,8 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return this.definition.hasModeChanges();
   }
 
-  public String getMode() {
-    return this.definition.getMode();
+  public List<String> getModeList() {
+    return this.definition.getModeList();
   }
 
   public double getDestructionRequired() {

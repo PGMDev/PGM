@@ -1,5 +1,6 @@
 package tc.oc.pgm.destroyable;
 
+import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
@@ -14,7 +15,7 @@ public class DestroyableFactory extends ProximityGoalDefinition {
   protected final Region region;
   protected final Set<SingleMaterialMatcher> materials;
   protected final double destructionRequired;
-  protected final String mode;
+  protected final List<String> modeList;
   protected final boolean modeChanges;
   protected final boolean showProgress;
   protected final boolean sparks;
@@ -31,7 +32,7 @@ public class DestroyableFactory extends ProximityGoalDefinition {
       Region region,
       Set<SingleMaterialMatcher> materials,
       double destructionRequired,
-      String mode,
+      @Nullable List<String> modeList,
       boolean modeChanges,
       boolean showProgress,
       boolean sparks,
@@ -40,7 +41,7 @@ public class DestroyableFactory extends ProximityGoalDefinition {
     this.region = region;
     this.materials = materials;
     this.destructionRequired = destructionRequired;
-    this.mode = mode;
+    this.modeList = modeList;
     this.modeChanges = modeChanges;
     this.showProgress = showProgress;
     this.sparks = sparks;
@@ -56,8 +57,8 @@ public class DestroyableFactory extends ProximityGoalDefinition {
     return this.materials;
   }
 
-  public String getMode() {
-    return this.mode;
+  public List<String> getModeList() {
+    return this.modeList;
   }
 
   public double getDestructionRequired() {

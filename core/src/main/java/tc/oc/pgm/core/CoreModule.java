@@ -1,7 +1,9 @@
 package tc.oc.pgm.core;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -115,7 +117,17 @@ public class CoreModule implements MapModule {
           serialNumbers.put(owner, serial + 1);
         }
 
-        String mode = coreEl.getAttributeValue("modes");
+        String modes = coreEl.getAttributeValue("modes");
+        List<String> modeList = new ArrayList<>();
+        if (modes != null) {
+          Node node = Node.fromAttr(coreEl, modes);
+          if (node != null) {
+            for (String mode : Splitter.on(" ").split(node.getValue())) {
+              modeList.add(mode);
+            }
+          }
+        }
+
         boolean modeChanges = XMLUtils.parseBoolean(coreEl.getAttribute("mode-changes"), false);
         boolean showProgress = XMLUtils.parseBoolean(coreEl.getAttribute("show-progress"), false);
         boolean visible = XMLUtils.parseBoolean(coreEl.getAttribute("show"), true);
@@ -135,7 +147,7 @@ public class CoreModule implements MapModule {
                 region,
                 material,
                 leakLevel,
-                mode,
+                modeList,
                 modeChanges,
                 showProgress);
         context.getFeatures().addFeature(coreEl, factory);

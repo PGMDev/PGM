@@ -1,8 +1,10 @@
 package tc.oc.pgm.destroyable;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -111,7 +113,17 @@ public class DestroyableModule implements MapModule {
         Set<SingleMaterialMatcher> materials =
             XMLUtils.parseMaterialPatternSet(
                 Node.fromRequiredAttr(destroyableEl, "materials", "material"));
-        String mode = destroyableEl.getAttributeValue("modes");
+
+        String modes = destroyableEl.getAttributeValue("modes");
+        List<String> modeList = new ArrayList<>();
+        if (modes != null) {
+          Node node = Node.fromAttr(destroyableEl, modes);
+          if (node != null) {
+            for (String mode : Splitter.on(" ").split(node.getValue())) {
+              modeList.add(mode);
+            }
+          }
+        }
         boolean modeChanges =
             XMLUtils.parseBoolean(destroyableEl.getAttribute("mode-changes"), false);
         boolean showProgress =
@@ -135,7 +147,7 @@ public class DestroyableModule implements MapModule {
                 region,
                 materials,
                 destructionRequired,
-                mode,
+                modeList,
                 modeChanges,
                 showProgress,
                 sparks,
