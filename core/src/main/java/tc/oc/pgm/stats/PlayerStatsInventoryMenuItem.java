@@ -1,5 +1,6 @@
 package tc.oc.pgm.stats;
 
+import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.stats.StatsMatchModule.damageComponent;
 import static tc.oc.pgm.stats.StatsMatchModule.numberComponent;
@@ -80,7 +81,7 @@ public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
             RESET,
             numberComponent(stats.getShotsHit(), NamedTextColor.YELLOW),
             numberComponent(stats.getShotsTaken(), NamedTextColor.YELLOW),
-            numberComponent(stats.getArrowAccuracy(), NamedTextColor.YELLOW));
+            numberComponent(stats.getArrowAccuracy(), NamedTextColor.YELLOW).append(text('%')));
 
     lore.add(TextTranslations.translateLegacy(statLore, player));
     lore.add(TextTranslations.translateLegacy(killstreakLore, player));

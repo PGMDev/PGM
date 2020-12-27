@@ -8,6 +8,13 @@ public abstract class MenuArranger {
 
   public abstract List<InventoryMenuItem> arrangeItems(List<InventoryMenuItem> itemsWithoutSpaces);
 
+  /**
+   * How many rows does the inventory need to fit the items arranged by this
+   *
+   * @return the amount of rows
+   */
+  public abstract int rows();
+
   // If the items surpass this limit a pagination row will be added to the inventory using this
   // arranger
   public int automatedPaginationLimit() {

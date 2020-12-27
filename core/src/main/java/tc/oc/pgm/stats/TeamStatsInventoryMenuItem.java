@@ -1,5 +1,6 @@
 package tc.oc.pgm.stats;
 
+import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.stats.StatsMatchModule.damageComponent;
 import static tc.oc.pgm.stats.StatsMatchModule.numberComponent;
@@ -22,7 +23,8 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.menu.InventoryMenu;
 import tc.oc.pgm.util.menu.InventoryMenuItem;
-import tc.oc.pgm.util.menu.pattern.Dynamic5RowMenuArranger;
+import tc.oc.pgm.util.menu.pattern.DoubleRowMenuArranger;
+import tc.oc.pgm.util.menu.pattern.IdentityMenuArranger;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
@@ -41,7 +43,9 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
             team.getPlayers().stream()
                 .map(PlayerStatsInventoryMenuItem::new)
                 .collect(Collectors.toList()),
-            new Dynamic5RowMenuArranger());
+            team.getPlayers().size() > 10
+                ? new IdentityMenuArranger(5)
+                : new DoubleRowMenuArranger());
   }
 
   @Override
@@ -104,7 +108,7 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
             RESET,
             numberComponent(shotsHit, NamedTextColor.YELLOW),
             numberComponent(shotsTaken, NamedTextColor.YELLOW),
-            numberComponent(teamBowAcc, NamedTextColor.YELLOW));
+            numberComponent(teamBowAcc, NamedTextColor.YELLOW).append(text('%')));
 
     lore.add(TextTranslations.translateLegacy(statLore, player));
     lore.add(TextTranslations.translateLegacy(damageDealtLore, player));

@@ -25,7 +25,7 @@ import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.menu.pattern.MenuArranger;
@@ -41,7 +41,7 @@ public class InventoryMenu implements Listener {
   private final WeakCollection<Player> viewing = new WeakCollection<>();
 
   private final Component title; // Title of the inventory
-  private final int rows; // The # of rows in the inventory
+  private int rows; // The # of rows in the inventory
   private final World world; // The world this inventory exists in;
 
   /**
@@ -52,15 +52,42 @@ public class InventoryMenu implements Listener {
    * @param world - The world this inventory should exist it
    * @param title - the inventory title
    * @param items - The items this inventory will contain, null counts as spaces
+   * @param menuArranger arranges the items in different ways while also assisting pagination, is
+   *     null when called by page items
+   * @param rows - The maximum amount of rows the menu can have
+   * @param pagesPossible internal boolean used to prevent infinite pages
    */
-  public InventoryMenu(
-      World world, Component title, List<InventoryMenuItem> items, MenuArranger menuArranger) {
+  InventoryMenu(
+      World world,
+      Component title,
+      List<InventoryMenuItem> items,
+      @Nullable MenuArranger menuArranger,
+      int rows,
+      boolean pagesPossible) {
     this.title = title;
-    this.inventoryMenuItems = applyPatternAndAddPages(items, menuArranger);
-    this.rows = howManyRows(inventoryMenuItems);
+    this.rows = rows;
+    this.inventoryMenuItems = applyPatternAndAddPages(items, menuArranger, pagesPossible);
     checkArgument(rows > 0 && rows <= MAX_ROWS, "Row size must be between 1 and " + MAX_ROWS);
     this.world = world;
     enableInventory();
+  }
+
+  public InventoryMenu(
+      World world,
+      Component title,
+      List<InventoryMenuItem> items,
+      MenuArranger menuArranger,
+      int rows) {
+    this(world, title, items, menuArranger, rows, true);
+  }
+
+  public InventoryMenu(
+      World world, Component title, List<InventoryMenuItem> items, MenuArranger menuArranger) {
+    this(world, title, items, menuArranger, menuArranger.rows(), true);
+  }
+
+  private InventoryMenu(World world, Component title, List<InventoryMenuItem> items) {
+    this(world, title, items, null, howManyRows(items), false);
   }
 
   public ItemStack[] createWindowContents(final Player player) {
@@ -224,19 +251,28 @@ public class InventoryMenu implements Listener {
   }
 
   private List<InventoryMenuItem> applyPatternAndAddPages(
-      List<InventoryMenuItem> items, MenuArranger menuArranger) {
+      List<InventoryMenuItem> items, MenuArranger menuArranger, boolean pagesPossible) {
+
+    List<InventoryMenuItem> mutableItems = new ArrayList<>(items);
+    if (!pagesPossible) return items;
+
     // Quick exit if we dont need any pages
-    if (menuArranger.automatedPaginationLimit() >= items.size())
-      return menuArranger.arrangeItems(items);
+    if (menuArranger.automatedPaginationLimit() > mutableItems.size())
+      return menuArranger.arrangeItems(mutableItems);
+
+    // We need pages!!
+    rows++;
 
     List<List<InventoryMenuItem>> pages = new ArrayList<>();
 
     List<InventoryMenuItem> page = new ArrayList<>();
-    for (int i = 0; i < items.size(); i++) {
-      page.add(items.remove(0));
-      if (i == menuArranger.automatedPaginationLimit()) pages.add(new ArrayList<>(page));
-      page.clear();
-      i = 0;
+    for (int i = 0; !mutableItems.isEmpty(); i++) {
+      page.add(mutableItems.remove(0));
+      if (i + 1 == menuArranger.automatedPaginationLimit() || mutableItems.isEmpty()) {
+        pages.add(new ArrayList<>(menuArranger.arrangeItems(page)));
+        page.clear();
+        i = 0; // new page
+      }
     }
 
     for (int i = 0; i < pages.size(); i++) {
@@ -260,11 +296,13 @@ public class InventoryMenu implements Listener {
   }
 
   private class PageInventoryMenuItem implements InventoryMenuItem {
-    private final InventoryMenu inventoryMenu;
+    private final List<InventoryMenuItem> inventoryMenu;
+    private final MenuArranger menuArranger;
     private final boolean next; // Does this represent the next page
 
     PageInventoryMenuItem(List<InventoryMenuItem> items, MenuArranger menuArranger, boolean next) {
-      this.inventoryMenu = new InventoryMenu(world, title, items, menuArranger);
+      this.inventoryMenu = items;
+      this.menuArranger = menuArranger;
       this.next = next;
     }
 
@@ -285,20 +323,18 @@ public class InventoryMenu implements Listener {
 
     @Override
     public Material getMaterial(Player player) {
-      return Material.SKULL_ITEM;
+      return Material.ARROW;
     }
 
     @Override
     public void onInventoryClick(InventoryMenu menu, Player player, ClickType clickType) {
-      inventoryMenu.display(player);
+      new InventoryMenu(world, title, inventoryMenu).display(player);
     }
 
     @Override
     public ItemStack createItem(Player player) {
-      ItemStack stack = new ItemStack(getMaterial(player), 1, (byte) 3);
-      SkullMeta meta = (SkullMeta) stack.getItemMeta();
-
-      meta.setOwner("MHF_" + (next ? "ArrowRight" : "ArrowLeft"));
+      ItemStack stack = new ItemStack(getMaterial(player), 1);
+      ItemMeta meta = stack.getItemMeta();
 
       meta.setDisplayName(
           getColor()

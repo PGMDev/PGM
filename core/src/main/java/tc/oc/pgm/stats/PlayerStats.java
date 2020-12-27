@@ -114,6 +114,7 @@ class PlayerStats {
     return kills / Math.max(1d, deaths);
   }
 
+  // 0..100
   public double getArrowAccuracy() {
     if (shotsTaken == 0) return Double.NaN;
     return shotsHit / (shotsTaken / (double) 100);

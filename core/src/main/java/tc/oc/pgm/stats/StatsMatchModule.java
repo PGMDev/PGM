@@ -55,7 +55,7 @@ import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.util.menu.InventoryMenu;
 import tc.oc.pgm.util.menu.InventoryMenuItem;
-import tc.oc.pgm.util.menu.pattern.Dynamic5RowMenuArranger;
+import tc.oc.pgm.util.menu.pattern.DoubleRowMenuArranger;
 import tc.oc.pgm.util.menu.pattern.SingleRowMenuArranger;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -290,6 +290,7 @@ public class StatsMatchModule implements MatchModule, Listener {
             .map(c -> new TeamStatsInventoryMenuItem(match, c))
             .collect(Collectors.toList());
 
+    // Add the player item in the middle
     items.add((items.size() - 1) / 2 + 1, new PlayerStatsInventoryMenuItem(player));
 
     final InventoryMenu menu =
@@ -297,7 +298,7 @@ public class StatsMatchModule implements MatchModule, Listener {
             match.getWorld(),
             verboseStatsTitle,
             items,
-            competitors.size() <= 4 ? new SingleRowMenuArranger() : new Dynamic5RowMenuArranger());
+            competitors.size() <= 4 ? new SingleRowMenuArranger() : new DoubleRowMenuArranger());
 
     player
         .getInventory()
