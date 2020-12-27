@@ -23,6 +23,7 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.ProximityMetric;
+import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
@@ -118,13 +119,14 @@ public class CoreModule implements MapModule {
         }
 
         String modes = coreEl.getAttributeValue("modes");
-        List<String> modeList = new ArrayList<>();
+        List<Mode> modeList = new ArrayList<>();
         if (modes != null) {
-          Node node = Node.fromAttr(coreEl, modes);
-          if (node != null) {
-            for (String mode : Splitter.on(" ").split(node.getValue())) {
-              modeList.add(mode);
-            }
+          for (String mode : Splitter.on(" ").split(modes)) {
+            Iterable bigcontext = context.getFeatures().getAll(Mode.class);
+            System.out.println(bigcontext);
+            Mode mode1 = context.getFeatures().get(mode, Mode.class);
+            modeList.add(mode1);
+            System.out.println(mode1);
           }
         }
 

@@ -28,6 +28,7 @@ import tc.oc.pgm.goals.Contribution;
 import tc.oc.pgm.goals.IncrementalGoal;
 import tc.oc.pgm.goals.ModeChangeGoal;
 import tc.oc.pgm.goals.TouchableGoal;
+import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.modes.ModeUtils;
 import tc.oc.pgm.regions.CuboidRegion;
 import tc.oc.pgm.regions.FiniteBlockRegion;
@@ -161,7 +162,7 @@ public class Core extends TouchableGoal<CoreFactory>
     this.leaked = true;
   }
 
-  public List<String> getModeList() {
+  public List<Mode> getModeList() {
     return this.definition.getModeList();
   }
 

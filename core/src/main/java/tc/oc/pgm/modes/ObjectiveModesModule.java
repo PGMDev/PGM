@@ -79,14 +79,15 @@ public class ObjectiveModesModule implements MapModule {
         if (!legacyShowBossBar) {
           showBefore = Duration.ZERO;
         }
-
         for (Mode mode : parsedModes) {
           if (mode.getAfter().equals(after)) {
             throw new InvalidXMLException(
                 "Already scheduled a mode for " + after.getSeconds() + "s", modeEl);
           }
         }
-        parsedModes.add(new Mode(id, material, after, name, showBefore));
+        Mode mode = new Mode(id, material, after, name, showBefore);
+        parsedModes.add(mode);
+        factory.getFeatures().addFeature(modeEl, mode);
       }
 
       return new ObjectiveModesModule(parsedModes);
