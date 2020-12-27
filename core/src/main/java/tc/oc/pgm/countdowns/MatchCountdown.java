@@ -41,6 +41,10 @@ public abstract class MatchCountdown extends Countdown {
     return this.match;
   }
 
+  public BossBar getBossBar() {
+    return this.bossBar;
+  }
+
   protected abstract Component formatText();
 
   protected boolean showChat() {
