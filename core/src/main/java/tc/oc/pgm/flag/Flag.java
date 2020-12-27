@@ -290,7 +290,6 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
       if (definition.isSequential()) {
         // Start posts collection at sequential count
         Collections.rotate(possiblePosts, -sequentialPostCounter);
-        sequentialPostCounter++;
       } else {
         Collections.shuffle(possiblePosts);
       }
@@ -303,7 +302,11 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
   private Post getNextPost(Collection<Post> posts) {
     return posts.stream()
-        .filter(post -> post.getRespawnFilter().query(query).isAllowed())
+        .filter(
+            post -> {
+              sequentialPostCounter++;
+              return post.getRespawnFilter().query(query).isAllowed();
+            })
         .findFirst()
         .orElse(definition.getDefaultPost());
   }
