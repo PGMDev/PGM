@@ -1,13 +1,9 @@
 package tc.oc.pgm.destroyable;
 
-import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -20,6 +16,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.blockdrops.BlockDropsModule;
+import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.regions.BlockBoundedValidation;
@@ -76,6 +73,20 @@ public class DestroyableModule implements MapModule {
       return ImmutableList.of(TeamModule.class, RegionModule.class);
     }
 
+    public ImmutableSet<SelfIdentifyingFeatureDefinition> parseModeSet(
+        Node node, MapFactory context) throws InvalidXMLException {
+      ImmutableSet.Builder<SelfIdentifyingFeatureDefinition> modes = ImmutableSet.builder();
+      for (String modeId : node.getValue().split("\\s")) {
+        SelfIdentifyingFeatureDefinition mode =
+            context.getFeatures().get(modeId, SelfIdentifyingFeatureDefinition.class);
+        if (mode == null) {
+          throw new InvalidXMLException("No mode with ID '" + modeId + "'", node);
+        }
+        modes.add(mode);
+      }
+      return modes.build();
+    }
+
     @Override
     public DestroyableModule parse(MapFactory context, Logger logger, Document doc)
         throws InvalidXMLException {
@@ -114,16 +125,12 @@ public class DestroyableModule implements MapModule {
             XMLUtils.parseMaterialPatternSet(
                 Node.fromRequiredAttr(destroyableEl, "materials", "material"));
 
-        String modes = destroyableEl.getAttributeValue("modes");
-        List<String> modeList = new ArrayList<>();
-        if (modes != null) {
-          Node node = Node.fromAttr(destroyableEl, modes);
-          if (node != null) {
-            for (String mode : Splitter.on(" ").split(node.getValue())) {
-              modeList.add(mode);
-            }
-          }
+        ImmutableSet<SelfIdentifyingFeatureDefinition> modeList = null;
+        if (!destroyableEl.getAttributeValue("modes").isEmpty()) {
+          modeList =
+              parseModeSet(Objects.requireNonNull(Node.fromAttr(destroyableEl, "modes")), context);
         }
+
         boolean modeChanges =
             XMLUtils.parseBoolean(destroyableEl.getAttribute("mode-changes"), false);
         boolean showProgress =

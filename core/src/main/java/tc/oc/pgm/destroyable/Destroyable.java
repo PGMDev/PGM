@@ -36,6 +36,7 @@ import tc.oc.pgm.blockdrops.BlockDrops;
 import tc.oc.pgm.blockdrops.BlockDropsMatchModule;
 import tc.oc.pgm.blockdrops.BlockDropsRuleSet;
 import tc.oc.pgm.events.FeatureChangeEvent;
+import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.goals.IncrementalGoal;
 import tc.oc.pgm.goals.ModeChangeGoal;
 import tc.oc.pgm.goals.TouchableGoal;
@@ -450,7 +451,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return this.definition.hasModeChanges();
   }
 
-  public List<String> getModeList() {
+  public Set<SelfIdentifyingFeatureDefinition> getModeList() {
     return this.definition.getModeList();
   }
 

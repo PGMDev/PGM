@@ -1,12 +1,9 @@
 package tc.oc.pgm.core;
 
-import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 import org.bukkit.Material;
 import org.bukkit.material.MaterialData;
@@ -21,9 +18,9 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.ProximityMetric;
-import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
@@ -74,6 +71,20 @@ public class CoreModule implements MapModule {
       return ImmutableList.of(RegionModule.class, TeamModule.class);
     }
 
+    public ImmutableSet<SelfIdentifyingFeatureDefinition> parseModeSet(
+        Node node, MapFactory context) throws InvalidXMLException {
+      ImmutableSet.Builder<SelfIdentifyingFeatureDefinition> modes = ImmutableSet.builder();
+      for (String modeId : node.getValue().split("\\s")) {
+        SelfIdentifyingFeatureDefinition mode =
+            context.getFeatures().get(modeId, SelfIdentifyingFeatureDefinition.class);
+        if (mode == null) {
+          throw new InvalidXMLException("No mode with ID '" + modeId + "'", node);
+        }
+        modes.add(mode);
+      }
+      return modes.build();
+    }
+
     @Override
     public CoreModule parse(MapFactory context, Logger logger, Document doc)
         throws InvalidXMLException {
@@ -118,16 +129,9 @@ public class CoreModule implements MapModule {
           serialNumbers.put(owner, serial + 1);
         }
 
-        String modes = coreEl.getAttributeValue("modes");
-        List<Mode> modeList = new ArrayList<>();
-        if (modes != null) {
-          for (String mode : Splitter.on(" ").split(modes)) {
-            Iterable bigcontext = context.getFeatures().getAll(Mode.class);
-            System.out.println(bigcontext);
-            Mode mode1 = context.getFeatures().get(mode, Mode.class);
-            modeList.add(mode1);
-            System.out.println(mode1);
-          }
+        ImmutableSet<SelfIdentifyingFeatureDefinition> modeList = null;
+        if (!coreEl.getAttributeValue("modes").isEmpty()) {
+          modeList = parseModeSet(Objects.requireNonNull(Node.fromAttr(coreEl, "modes")), context);
         }
 
         boolean modeChanges = XMLUtils.parseBoolean(coreEl.getAttribute("mode-changes"), false);

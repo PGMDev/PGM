@@ -1,10 +1,11 @@
 package tc.oc.pgm.destroyable;
 
-import java.util.List;
+import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 import javax.annotation.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.goals.ProximityGoalDefinition;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.teams.TeamFactory;
@@ -15,7 +16,7 @@ public class DestroyableFactory extends ProximityGoalDefinition {
   protected final Region region;
   protected final Set<SingleMaterialMatcher> materials;
   protected final double destructionRequired;
-  protected final List<String> modeList;
+  protected final ImmutableSet<SelfIdentifyingFeatureDefinition> modeList;
   protected final boolean modeChanges;
   protected final boolean showProgress;
   protected final boolean sparks;
@@ -32,7 +33,7 @@ public class DestroyableFactory extends ProximityGoalDefinition {
       Region region,
       Set<SingleMaterialMatcher> materials,
       double destructionRequired,
-      @Nullable List<String> modeList,
+      @Nullable ImmutableSet<SelfIdentifyingFeatureDefinition> modeList,
       boolean modeChanges,
       boolean showProgress,
       boolean sparks,
@@ -57,7 +58,7 @@ public class DestroyableFactory extends ProximityGoalDefinition {
     return this.materials;
   }
 
-  public List<String> getModeList() {
+  public Set<SelfIdentifyingFeatureDefinition> getModeList() {
     return this.modeList;
   }
 
