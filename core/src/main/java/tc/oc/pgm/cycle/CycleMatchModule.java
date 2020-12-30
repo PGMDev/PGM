@@ -2,6 +2,7 @@ package tc.oc.pgm.cycle;
 
 import java.time.Duration;
 import javax.annotation.Nullable;
+import net.kyori.adventure.bossbar.BossBar;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -12,6 +13,7 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.events.PlayerLeaveMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.restart.RestartManager;
 
@@ -20,6 +22,7 @@ public class CycleMatchModule implements MatchModule, Listener {
 
   private final MapOrder mapOrder;
   private final Match match;
+  private BossBar bossbar;
 
   public CycleMatchModule(Match match) {
     this.match = match;
@@ -35,7 +38,9 @@ public class CycleMatchModule implements MatchModule, Listener {
     // In case the cycle config is set to -1 used to disable autocycle
     if (duration.isNegative()) duration = Duration.ofSeconds(30);
     match.finish();
-    match.getCountdown().start(new CycleCountdown(match), duration);
+    CycleCountdown countdown = new CycleCountdown(match);
+    match.getCountdown().start(countdown, duration);
+    this.bossbar = countdown.getBossBar();
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -60,5 +65,10 @@ public class CycleMatchModule implements MatchModule, Listener {
         startCountdown(duration);
       }
     }
+  }
+
+  @EventHandler
+  public void onLeave(PlayerLeaveMatchEvent event) {
+    if (bossbar != null) event.getPlayer().hideBossBar(bossbar);
   }
 }
