@@ -6,6 +6,7 @@ import static net.kyori.adventure.text.Component.translatable;
 import java.time.Duration;
 import java.time.Instant;
 import javax.annotation.Nullable;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -48,6 +49,11 @@ public class OvertimeCountdown extends TimeLimitCountdown {
             NamedTextColor.YELLOW,
             text(colonTime(), urgencyColor()).decoration(TextDecoration.BOLD, false))
         .decoration(TextDecoration.BOLD, true);
+  }
+
+  @Nullable
+  protected BossBar.Color barColor() {
+    return BossBar.Color.YELLOW;
   }
 
   @Override

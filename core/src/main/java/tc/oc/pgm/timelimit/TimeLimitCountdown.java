@@ -26,7 +26,7 @@ public class TimeLimitCountdown extends MatchCountdown {
   protected final TimeLimit timeLimit;
 
   public TimeLimitCountdown(Match match, TimeLimit timeLimit) {
-    super(match, BossBar.Color.BLUE);
+    super(match);
     this.timeLimit = timeLimit;
   }
 
@@ -73,6 +73,18 @@ public class TimeLimitCountdown extends MatchCountdown {
         // Play the portal crescendo sound up to the last moment
         this.getMatch().playSound(CRESCENDO_SOUND);
       }
+    }
+  }
+
+  @Nullable
+  protected BossBar.Color barColor() {
+    long seconds = remaining.getSeconds();
+    if (seconds > 60) {
+      return BossBar.Color.GREEN;
+    } else if (seconds > 30) {
+      return BossBar.Color.YELLOW;
+    } else {
+      return BossBar.Color.RED;
     }
   }
 
