@@ -16,7 +16,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.blockdrops.BlockDropsModule;
-import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.modes.Mode;
@@ -74,7 +73,8 @@ public class DestroyableModule implements MapModule {
       return ImmutableList.of(TeamModule.class, RegionModule.class);
     }
 
-    public ImmutableSet<Mode> parseModeSet(Node node, MapFactory context) throws InvalidXMLException {
+    public ImmutableSet<Mode> parseModeSet(Node node, MapFactory context)
+        throws InvalidXMLException {
       ImmutableSet.Builder<Mode> modes = ImmutableSet.builder();
       for (String modeId : node.getValue().split("\\s")) {
         Mode mode = context.getFeatures().get(modeId, Mode.class);
@@ -161,7 +161,6 @@ public class DestroyableModule implements MapModule {
                 materials,
                 destructionRequired,
                 modeSet,
-                modeChanges,
                 showProgress,
                 sparks,
                 repairable);

@@ -11,6 +11,4 @@ public interface ModeChangeGoal<T extends GoalDefinition> extends Goal<T> {
   boolean isObjectiveMaterial(Block block);
 
   String getModeChangeMessage(Material material);
-
-  boolean isAffectedByModeChanges();
 }

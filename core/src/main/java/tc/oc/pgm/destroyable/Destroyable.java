@@ -36,7 +36,6 @@ import tc.oc.pgm.blockdrops.BlockDrops;
 import tc.oc.pgm.blockdrops.BlockDropsMatchModule;
 import tc.oc.pgm.blockdrops.BlockDropsRuleSet;
 import tc.oc.pgm.events.FeatureChangeEvent;
-import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.goals.IncrementalGoal;
 import tc.oc.pgm.goals.ModeChangeGoal;
 import tc.oc.pgm.goals.TouchableGoal;
@@ -167,6 +166,10 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
                   .toLocation(getOwner().getMatch().getWorld()));
     }
     return proximityLocations;
+  }
+
+  public Set<Mode> getModes() {
+    return this.definition.getModes();
   }
 
   void addMaterials(SingleMaterialMatcher pattern) {
@@ -445,15 +448,6 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
   public int getBreaks() {
     return this.maxHealth - this.health;
-  }
-
-  @Override
-  public boolean isAffectedByModeChanges() {
-    return this.definition.hasModeChanges();
-  }
-
-  public Set<Mode> getModes() {
-    return this.definition.getModes();
   }
 
   public double getDestructionRequired() {

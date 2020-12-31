@@ -3,7 +3,6 @@ package tc.oc.pgm.core;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -74,7 +73,8 @@ public class CoreModule implements MapModule {
       return ImmutableList.of(RegionModule.class, TeamModule.class);
     }
 
-    public ImmutableSet<Mode> parseModeSet(Node node, MapFactory context) throws InvalidXMLException {
+    public ImmutableSet<Mode> parseModeSet(Node node, MapFactory context)
+        throws InvalidXMLException {
       ImmutableSet.Builder<Mode> modes = ImmutableSet.builder();
       for (String modeId : node.getValue().split("\\s")) {
         Mode mode = context.getFeatures().get(modeId, Mode.class);
@@ -163,7 +163,6 @@ public class CoreModule implements MapModule {
                 material,
                 leakLevel,
                 modeSet,
-                modeChanges,
                 showProgress);
         context.getFeatures().addFeature(coreEl, factory);
         coreFactories.add(factory);

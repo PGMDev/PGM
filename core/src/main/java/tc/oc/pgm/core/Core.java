@@ -5,12 +5,11 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import java.util.Collections;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import com.google.common.collect.ImmutableSet;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -134,6 +133,10 @@ public class Core extends TouchableGoal<CoreFactory>
     return proximityLocations;
   }
 
+  public ImmutableSet<Mode> getModes() {
+    return this.definition.getModes();
+  }
+
   public MaterialData getMaterial() {
     return this.material;
   }
@@ -163,10 +166,6 @@ public class Core extends TouchableGoal<CoreFactory>
     this.leaked = true;
   }
 
-  public ImmutableSet<Mode> getModes() {
-    return this.definition.getModes();
-  }
-
   public boolean hasLeaked() {
     return this.leaked;
   }
@@ -189,11 +188,6 @@ public class Core extends TouchableGoal<CoreFactory>
   @Override
   public boolean isCompleted(Competitor team) {
     return this.leaked && this.canComplete(team);
-  }
-
-  @Override
-  public boolean isAffectedByModeChanges() {
-    return this.definition.hasModeChanges();
   }
 
   @Override
