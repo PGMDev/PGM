@@ -14,7 +14,7 @@ import tc.oc.pgm.util.TimeUtils;
 public class RestartCountdown extends MatchCountdown {
 
   public RestartCountdown(Match match) {
-    super(match, BossBar.Color.RED);
+    super(match, BossBar.Color.BLUE);
   }
 
   @Override
