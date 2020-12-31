@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import com.google.common.collect.ImmutableSet;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -23,11 +25,11 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.region.Region;
-import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.goals.Contribution;
 import tc.oc.pgm.goals.IncrementalGoal;
 import tc.oc.pgm.goals.ModeChangeGoal;
 import tc.oc.pgm.goals.TouchableGoal;
+import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.modes.ModeUtils;
 import tc.oc.pgm.regions.CuboidRegion;
 import tc.oc.pgm.regions.FiniteBlockRegion;
@@ -161,8 +163,8 @@ public class Core extends TouchableGoal<CoreFactory>
     this.leaked = true;
   }
 
-  public Set<SelfIdentifyingFeatureDefinition> getModeList() {
-    return this.definition.getModeList();
+  public ImmutableSet<Mode> getModes() {
+    return this.definition.getModes();
   }
 
   public boolean hasLeaked() {

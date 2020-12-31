@@ -19,6 +19,7 @@ import tc.oc.pgm.blockdrops.BlockDropsModule;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.ProximityMetric;
+import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
@@ -73,12 +74,10 @@ public class DestroyableModule implements MapModule {
       return ImmutableList.of(TeamModule.class, RegionModule.class);
     }
 
-    public ImmutableSet<SelfIdentifyingFeatureDefinition> parseModeSet(
-        Node node, MapFactory context) throws InvalidXMLException {
-      ImmutableSet.Builder<SelfIdentifyingFeatureDefinition> modes = ImmutableSet.builder();
+    public ImmutableSet<Mode> parseModeSet(Node node, MapFactory context) throws InvalidXMLException {
+      ImmutableSet.Builder<Mode> modes = ImmutableSet.builder();
       for (String modeId : node.getValue().split("\\s")) {
-        SelfIdentifyingFeatureDefinition mode =
-            context.getFeatures().get(modeId, SelfIdentifyingFeatureDefinition.class);
+        Mode mode = context.getFeatures().get(modeId, Mode.class);
         if (mode == null) {
           throw new InvalidXMLException("No mode with ID '" + modeId + "'", node);
         }
@@ -125,10 +124,17 @@ public class DestroyableModule implements MapModule {
             XMLUtils.parseMaterialPatternSet(
                 Node.fromRequiredAttr(destroyableEl, "materials", "material"));
 
-        ImmutableSet<SelfIdentifyingFeatureDefinition> modeList = null;
-        if (!destroyableEl.getAttributeValue("modes").isEmpty()) {
-          modeList =
-              parseModeSet(Objects.requireNonNull(Node.fromAttr(destroyableEl, "modes")), context);
+        ImmutableSet<Mode> modeSet;
+        Node modes = Node.fromAttr(destroyableEl, "modes");
+        if (modes != null) {
+          if (destroyableEl.getAttribute("mode-changes") != null) {
+            throw new InvalidXMLException("Cannot combine modes and mode-changes", destroyableEl);
+          }
+          modeSet = parseModeSet(modes, context); // Specific set of modes
+        } else if (XMLUtils.parseBoolean(destroyableEl.getAttribute("mode-changes"), false)) {
+          modeSet = null; // All modes
+        } else {
+          modeSet = ImmutableSet.of(); // No modes
         }
 
         boolean modeChanges =
@@ -154,7 +160,7 @@ public class DestroyableModule implements MapModule {
                 region,
                 materials,
                 destructionRequired,
-                modeList,
+                modeSet,
                 modeChanges,
                 showProgress,
                 sparks,

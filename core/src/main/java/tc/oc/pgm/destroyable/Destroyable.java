@@ -42,6 +42,7 @@ import tc.oc.pgm.goals.ModeChangeGoal;
 import tc.oc.pgm.goals.TouchableGoal;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
+import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.modes.ModeUtils;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.teams.Team;
@@ -451,8 +452,8 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return this.definition.hasModeChanges();
   }
 
-  public Set<SelfIdentifyingFeatureDefinition> getModeList() {
-    return this.definition.getModeList();
+  public Set<Mode> getModes() {
+    return this.definition.getModes();
   }
 
   public double getDestructionRequired() {

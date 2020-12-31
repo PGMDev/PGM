@@ -124,12 +124,9 @@ public class DestroyableMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onObjectiveModeSwitch(final ObjectiveModeChangeEvent event) {
     for (Destroyable destroyable : this.destroyables) {
-      if (destroyable.isAffectedByModeChanges()) {
+      if (destroyable.getModes() == null || destroyable.getModes().contains(event.getMode())) {
         double oldCompletion = destroyable.getCompletion();
-        if (destroyable.getModeList() == null
-            || destroyable.getModeList().contains(event.getMode())) {
-          destroyable.replaceBlocks(event.getMode().getMaterialData());
-        }
+        destroyable.replaceBlocks(event.getMode().getMaterialData());
         if (oldCompletion != destroyable.getCompletion()) {
           // Multi-stage destroyables can have their total completion changed by this
           this.match.callEvent(new DestroyableHealthChangeEvent(this.match, destroyable, null));
