@@ -6,7 +6,6 @@ import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 import org.bukkit.Material;
 import org.bukkit.material.MaterialData;
@@ -165,8 +164,8 @@ public class CoreModule implements MapModule {
         return null;
       }
     }
-    public ImmutableSet<Mode> parseModeSet(Node node)
-            throws InvalidXMLException {
+
+    public ImmutableSet<Mode> parseModeSet(Node node) throws InvalidXMLException {
       ImmutableSet.Builder<Mode> modes = ImmutableSet.builder();
       for (String modeId : node.getValue().split("\\s")) {
         Mode mode = factory.getFeatures().get(modeId, Mode.class);

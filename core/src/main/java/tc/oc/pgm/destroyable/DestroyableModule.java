@@ -3,7 +3,6 @@ package tc.oc.pgm.destroyable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -166,8 +165,8 @@ public class DestroyableModule implements MapModule {
         return null;
       }
     }
-    public ImmutableSet<Mode> parseModeSet(Node node)
-            throws InvalidXMLException {
+
+    public ImmutableSet<Mode> parseModeSet(Node node) throws InvalidXMLException {
       ImmutableSet.Builder<Mode> modes = ImmutableSet.builder();
       for (String modeId : node.getValue().split("\\s")) {
         Mode mode = factory.getFeatures().get(modeId, Mode.class);
