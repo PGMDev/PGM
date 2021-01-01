@@ -3,7 +3,10 @@ package tc.oc.pgm.destroyable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import java.util.*;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -63,6 +66,8 @@ public class DestroyableModule implements MapModule {
   }
 
   public static class Factory implements MapModuleFactory<DestroyableModule> {
+    private MapFactory factory;
+
     @Override
     public Collection<Class<? extends MapModule>> getWeakDependencies() {
       return ImmutableList.of(BlockDropsModule.class);
@@ -73,22 +78,10 @@ public class DestroyableModule implements MapModule {
       return ImmutableList.of(TeamModule.class, RegionModule.class);
     }
 
-    public ImmutableSet<Mode> parseModeSet(Node node, MapFactory context)
-        throws InvalidXMLException {
-      ImmutableSet.Builder<Mode> modes = ImmutableSet.builder();
-      for (String modeId : node.getValue().split("\\s")) {
-        Mode mode = context.getFeatures().get(modeId, Mode.class);
-        if (mode == null) {
-          throw new InvalidXMLException("No mode with ID '" + modeId + "'", node);
-        }
-        modes.add(mode);
-      }
-      return modes.build();
-    }
-
     @Override
     public DestroyableModule parse(MapFactory context, Logger logger, Document doc)
         throws InvalidXMLException {
+      this.factory = context;
       List<DestroyableFactory> destroyables = Lists.newArrayList();
       TeamModule teamModule = context.getModule(TeamModule.class);
       RegionParser regionParser = context.getRegions();
@@ -130,15 +123,13 @@ public class DestroyableModule implements MapModule {
           if (destroyableEl.getAttribute("mode-changes") != null) {
             throw new InvalidXMLException("Cannot combine modes and mode-changes", destroyableEl);
           }
-          modeSet = parseModeSet(modes, context); // Specific set of modes
+          modeSet = parseModeSet(modes); // Specific set of modes
         } else if (XMLUtils.parseBoolean(destroyableEl.getAttribute("mode-changes"), false)) {
           modeSet = null; // All modes
         } else {
           modeSet = ImmutableSet.of(); // No modes
         }
 
-        boolean modeChanges =
-            XMLUtils.parseBoolean(destroyableEl.getAttribute("mode-changes"), false);
         boolean showProgress =
             XMLUtils.parseBoolean(destroyableEl.getAttribute("show-progress"), false);
         boolean sparks = XMLUtils.parseBoolean(destroyableEl.getAttribute("sparks"), false);
@@ -174,6 +165,18 @@ public class DestroyableModule implements MapModule {
       } else {
         return null;
       }
+    }
+    public ImmutableSet<Mode> parseModeSet(Node node)
+            throws InvalidXMLException {
+      ImmutableSet.Builder<Mode> modes = ImmutableSet.builder();
+      for (String modeId : node.getValue().split("\\s")) {
+        Mode mode = factory.getFeatures().get(modeId, Mode.class);
+        if (mode == null) {
+          throw new InvalidXMLException("No mode with ID '" + modeId + "'", node);
+        }
+        modes.add(mode);
+      }
+      return modes.build();
     }
   }
 }

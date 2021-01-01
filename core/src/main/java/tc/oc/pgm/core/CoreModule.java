@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import org.bukkit.Material;
 import org.bukkit.material.MaterialData;
@@ -68,27 +69,17 @@ public class CoreModule implements MapModule {
   }
 
   public static class Factory implements MapModuleFactory<CoreModule> {
+    private MapFactory factory;
+
     @Override
     public Collection<Class<? extends MapModule>> getSoftDependencies() {
       return ImmutableList.of(RegionModule.class, TeamModule.class);
     }
 
-    public ImmutableSet<Mode> parseModeSet(Node node, MapFactory context)
-        throws InvalidXMLException {
-      ImmutableSet.Builder<Mode> modes = ImmutableSet.builder();
-      for (String modeId : node.getValue().split("\\s")) {
-        Mode mode = context.getFeatures().get(modeId, Mode.class);
-        if (mode == null) {
-          throw new InvalidXMLException("No mode with ID '" + modeId + "'", node);
-        }
-        modes.add(mode);
-      }
-      return modes.build();
-    }
-
     @Override
     public CoreModule parse(MapFactory context, Logger logger, Document doc)
         throws InvalidXMLException {
+      this.factory = context;
       List<CoreFactory> coreFactories = Lists.newArrayList();
       HashMap<TeamFactory, Integer> serialNumbers = new HashMap<>();
 
@@ -136,14 +127,13 @@ public class CoreModule implements MapModule {
           if (coreEl.getAttribute("mode-changes") != null) {
             throw new InvalidXMLException("Cannot combine modes and mode-changes", coreEl);
           }
-          modeSet = parseModeSet(modes, context); // Specific set of modes
+          modeSet = parseModeSet(modes); // Specific set of modes
         } else if (XMLUtils.parseBoolean(coreEl.getAttribute("mode-changes"), false)) {
           modeSet = null; // All modes
         } else {
           modeSet = ImmutableSet.of(); // No modes
         }
 
-        boolean modeChanges = XMLUtils.parseBoolean(coreEl.getAttribute("mode-changes"), false);
         boolean showProgress = XMLUtils.parseBoolean(coreEl.getAttribute("show-progress"), false);
         boolean visible = XMLUtils.parseBoolean(coreEl.getAttribute("show"), true);
         Boolean required = XMLUtils.parseBoolean(coreEl.getAttribute("required"), null);
@@ -174,6 +164,18 @@ public class CoreModule implements MapModule {
       } else {
         return null;
       }
+    }
+    public ImmutableSet<Mode> parseModeSet(Node node)
+            throws InvalidXMLException {
+      ImmutableSet.Builder<Mode> modes = ImmutableSet.builder();
+      for (String modeId : node.getValue().split("\\s")) {
+        Mode mode = factory.getFeatures().get(modeId, Mode.class);
+        if (mode == null) {
+          throw new InvalidXMLException("No mode with ID '" + modeId + "'", node);
+        }
+        modes.add(mode);
+      }
+      return modes.build();
     }
   }
 }
