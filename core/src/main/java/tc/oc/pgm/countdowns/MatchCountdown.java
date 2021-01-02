@@ -8,6 +8,7 @@ import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.title.Title.title;
 
 import java.time.Duration;
+import javax.annotation.Nullable;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -34,7 +35,7 @@ public abstract class MatchCountdown extends Countdown {
   }
 
   public MatchCountdown(Match match) {
-    this(match, BossBar.Color.PURPLE);
+    this(match, BossBar.Color.BLUE);
   }
 
   public Match getMatch() {
@@ -122,6 +123,8 @@ public abstract class MatchCountdown extends Countdown {
     if (showBossBar()) {
       bossBar.progress(bossBarProgress(remaining, total));
       bossBar.name(formatText());
+      BossBar.Color color = barColor();
+      if (color != null) bossBar.color(color);
 
       match.showBossBar(bossBar);
     } else {
@@ -140,6 +143,11 @@ public abstract class MatchCountdown extends Countdown {
     } else {
       return NamedTextColor.DARK_RED;
     }
+  }
+
+  @Nullable
+  protected BossBar.Color barColor() {
+    return null;
   }
 
   protected Component secondsRemaining(TextColor color) {

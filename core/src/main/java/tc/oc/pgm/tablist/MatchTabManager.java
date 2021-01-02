@@ -40,7 +40,7 @@ import tc.oc.pgm.util.tablist.TabManager;
 public class MatchTabManager extends TabManager implements Listener {
 
   // Min and max delay to trigger an update after tablist is invalidated
-  private static final int MIN_DELAY = 100, MAX_DELAY = 1000, TIME_RATIO = 20;
+  private static final int MIN_DELAY = 100, MAX_DELAY = 2000, TIME_RATIO = 40;
 
   private final Map<Team, TeamTabEntry> teamEntries;
   private final Map<Match, MapTabEntry> mapEntries;

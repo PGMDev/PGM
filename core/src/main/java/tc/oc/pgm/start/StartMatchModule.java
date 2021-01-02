@@ -11,8 +11,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
@@ -46,8 +44,8 @@ public class StartMatchModule implements MatchModule, Listener {
   protected final Match match;
   protected final BossBar unreadyBar;
   protected final Set<UnreadyReason> unreadyReasons = new HashSet<>();
+  protected @Nullable BossBar startBar;
   protected boolean autoStart; // Initialized from config, but is mutable
-  protected ScheduledFuture<?> barTask;
 
   private StartMatchModule(Match match) {
     this.match = match;
@@ -58,17 +56,10 @@ public class StartMatchModule implements MatchModule, Listener {
   @Override
   public void load() {
     update();
-    // Schedule an update to prevent the unready bar deciding it wants to hide itself
-    // This is probably because of async magic
-    barTask = match.getExecutor(MatchScope.LOADED).schedule(this::update, 1, TimeUnit.SECONDS);
   }
 
   @Override
   public void unload() {
-    if (barTask != null) {
-      barTask.cancel(true);
-      barTask = null;
-    }
     match.hideBossBar(unreadyBar);
     unreadyReasons.clear();
   }
@@ -81,14 +72,13 @@ public class StartMatchModule implements MatchModule, Listener {
 
   @EventHandler
   public void onJoin(PlayerJoinMatchEvent event) {
-    if (!match.isRunning()) {
-      event.getPlayer().showBossBar(unreadyBar);
-    }
+    if (!match.isRunning() && !unreadyReasons.isEmpty()) event.getPlayer().showBossBar(unreadyBar);
   }
 
   @EventHandler
   public void onLeave(PlayerLeaveMatchEvent event) {
     event.getPlayer().hideBossBar(unreadyBar);
+    if (startBar != null) event.getPlayer().hideBossBar(startBar);
   }
 
   // FIXME: Unsafe cast to SingleCountdownContext
@@ -211,7 +201,9 @@ public class StartMatchModule implements MatchModule, Listener {
     if (huddle == null) huddle = config.getHuddleTime();
 
     match.getLogger().fine("STARTING countdown");
-    cc().start(new StartCountdown(match, force, huddle), duration);
+    StartCountdown countdown = new StartCountdown(match, force, huddle);
+    cc().start(countdown, duration);
+    this.startBar = countdown.getBossBar();
 
     return true;
   }
@@ -236,11 +228,11 @@ public class StartMatchModule implements MatchModule, Listener {
 
     unreadyBar.name(formatUnreadyReason());
 
-    if (!ready && isAutoStart() && !empty) {
-      match.hideBossBar(unreadyBar);
+    if (!match.isRunning() && !unreadyReasons.isEmpty()) {
       match.showBossBar(unreadyBar);
-    } else if (!empty) {
+    } else {
       match.hideBossBar(unreadyBar);
     }
+    // TODO: if match isn't empty and autostart is enabled, unready countdown should start
   }
 }

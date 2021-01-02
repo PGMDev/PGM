@@ -393,6 +393,9 @@ public class SidebarMatchModule implements MatchModule, Listener {
           }
           if (text.length() != 0) text += " ";
           rows.add(text + TextTranslations.translateLegacy(competitor.getName(), viewer));
+
+          // No point rendering more scores, usually seen in FFA
+          if (rows.size() >= MAX_ROWS) break;
         }
 
         if (!competitorsWithGoals.isEmpty() || !sharedGoals.isEmpty()) {
@@ -493,7 +496,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
       }
 
       sidebar.updateTitle(TextTranslations.translateLegacy(title, viewer));
-      sidebar.updateLines(rows);
+      sidebar.updateLines(rows.size() < MAX_ROWS ? rows : rows.subList(0, MAX_ROWS));
     }
   }
 

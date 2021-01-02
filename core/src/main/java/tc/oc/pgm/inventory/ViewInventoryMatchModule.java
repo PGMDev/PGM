@@ -17,6 +17,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -149,7 +150,14 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
       }
     } else if (event.getClickedEntity() instanceof InventoryHolder
         && !(event.getClickedEntity() instanceof Player)) {
+
       event.setCancelled(true);
+
+      if (event.getClickedEntity() instanceof Villager) {
+        event.getPlayer().getBukkit().openMerchantCopy((Villager) event.getClickedEntity());
+        return;
+      }
+
       this.previewInventory(
           event.getPlayer().getBukkit(),
           ((InventoryHolder) event.getClickedEntity()).getInventory());

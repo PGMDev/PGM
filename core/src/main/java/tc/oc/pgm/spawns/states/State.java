@@ -30,7 +30,7 @@ public abstract class State {
     this.smm = smm;
     this.player = player;
     this.bukkit = player.getBukkit();
-    this.options = smm.getRespawnOptions();
+    this.options = smm.getRespawnOptions(player.getQuery());
   }
 
   public boolean isCurrent() {
