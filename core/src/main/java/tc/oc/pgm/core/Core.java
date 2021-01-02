@@ -245,7 +245,6 @@ public class Core extends TouchableGoal<CoreFactory>
         && block.getData() == this.material.getData();
   }
 
-  @Override
   public String getModeChangeMessage(Material material) {
     return ModeUtils.formatMaterial(material) + " CORE MODE";
   }

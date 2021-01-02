@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import java.time.Duration;
 import java.time.Instant;
@@ -168,7 +169,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return proximityLocations;
   }
 
-  public Set<Mode> getModes() {
+  public ImmutableSet<Mode> getModes() {
     return this.definition.getModes();
   }
 
@@ -618,7 +619,6 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return this.hasMaterial(block.getState().getData());
   }
 
-  @Override
   public String getModeChangeMessage(Material material) {
     return ModeUtils.formatMaterial(material) + " OBJECTIVE MODE";
   }

@@ -55,7 +55,7 @@ public class DestroyableFactory extends ProximityGoalDefinition {
     return this.materials;
   }
 
-  public Set<Mode> getModes() {
+  public ImmutableSet<Mode> getModes() {
     return this.modeList;
   }
 

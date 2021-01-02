@@ -21,6 +21,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.goals.GoalMatchModule;
+import tc.oc.pgm.goals.ModeChangeGoal;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.regions.BlockBoundedValidation;
