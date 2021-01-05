@@ -23,7 +23,9 @@ pools:
     dynamic: true
     players: 1
 
-    # A list of map names in this pool. Names are case-sensitive.
+    # A list of map names in this pool.
+    # Uses map name given in map.xml, do not use folder name.
+    # Names are case-sensitive.
     maps:
       - Airship Battle
       - Harb
