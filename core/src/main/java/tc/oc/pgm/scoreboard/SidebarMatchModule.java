@@ -87,6 +87,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
   public static final int MAX_ROWS = 16; // Max rows on the scoreboard
   public static final int MAX_LENGTH = 30; // Max characters per line allowed
+  public static final int MAX_TITLE = 32; // Max characters allowed in title
 
   protected final Map<UUID, FastBoard> sidebars = new HashMap<>();
   protected final Map<Goal, BlinkTask> blinkingGoals = new HashMap<>();
@@ -495,7 +496,8 @@ public class SidebarMatchModule implements MatchModule, Listener {
         if (rows.get(i).length() > MAX_LENGTH) rows.set(i, rows.get(i).substring(0, MAX_LENGTH));
       }
 
-      sidebar.updateTitle(TextTranslations.translateLegacy(title, viewer));
+      String titleStr = TextTranslations.translateLegacy(title, viewer);
+      sidebar.updateTitle(titleStr.substring(0, Math.min(titleStr.length(), MAX_TITLE)));
       sidebar.updateLines(rows.size() < MAX_ROWS ? rows : rows.subList(0, MAX_ROWS));
     }
   }
