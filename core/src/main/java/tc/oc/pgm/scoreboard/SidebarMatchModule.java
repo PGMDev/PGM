@@ -153,6 +153,10 @@ public class SidebarMatchModule implements MatchModule, Listener {
     for (BlinkTask task : ImmutableSet.copyOf(this.blinkingGoals.values())) {
       task.stop();
     }
+  }
+
+  @Override
+  public void unload() {
     this.sidebars.clear();
   }
 
@@ -169,7 +173,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
   @EventHandler
   public void removePlayer(PlayerLeaveMatchEvent event) {
-    sidebars.remove(event.getPlayer().getId());
+    sidebars.remove(event.getPlayer().getId()).delete();
     renderSidebarDebounce();
   }
 
