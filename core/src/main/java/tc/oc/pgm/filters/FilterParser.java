@@ -459,6 +459,44 @@ public abstract class FilterParser {
     return new ScoreFilter(XMLUtils.parseNumericRange(new Node(el), Integer.class));
   }
 
+  @MethodParser("match-phase")
+  public Filter parseMatchPhase(Element el) throws InvalidXMLException {
+    return parseMatchPhaseFilter(el.getValue(), el);
+  }
+
+  @MethodParser("match-started")
+  public Filter parseMatchStarted(Element el) throws InvalidXMLException {
+    return parseMatchPhaseFilter("started", el);
+  }
+
+  @MethodParser("match-running")
+  public Filter parseMatchRunning(Element el) throws InvalidXMLException {
+    return parseMatchPhaseFilter("running", el);
+  }
+
+  @MethodParser("match-finished")
+  public Filter parseMatchFinished(Element el) throws InvalidXMLException {
+    return parseMatchPhaseFilter("finished", el);
+  }
+
+  private Filter parseMatchPhaseFilter(String matchState, Element el) throws InvalidXMLException {
+
+    switch (matchState) {
+      case "running":
+        return MatchPhaseFilter.RUNNING;
+      case "finished":
+        return MatchPhaseFilter.FINISHED;
+      case "starting":
+        return MatchPhaseFilter.STARTING;
+      case "idle":
+        return MatchPhaseFilter.IDLE;
+      case "started":
+        return MatchPhaseFilter.STARTED;
+    }
+
+    throw new InvalidXMLException("Invalid or no match state found", el);
+  }
+
   // Methods for parsing QueryModifiers
 
   @MethodParser("offset")
