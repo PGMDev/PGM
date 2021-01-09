@@ -2,7 +2,9 @@ package tc.oc.pgm.filters.query;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -13,6 +15,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
+import tc.oc.pgm.filters.Filterable;
 
 public class PlayerStateQuery extends Query implements PlayerQuery {
 
@@ -69,5 +72,17 @@ public class PlayerStateQuery extends Query implements PlayerQuery {
   @Override
   public int hashCode() {
     return playerState.hashCode();
+  }
+
+  @Override
+  public Optional<? extends Filterable<? super tc.oc.pgm.filters.query.PlayerQuery>>
+      filterableParent() {
+    return Optional.of(getParty());
+  }
+
+  @Override
+  public Stream<? extends Filterable<? extends tc.oc.pgm.filters.query.PlayerQuery>>
+      filterableChildren() {
+    return Stream.of();
   }
 }

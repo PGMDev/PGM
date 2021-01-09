@@ -9,6 +9,17 @@ public interface Filter {
 
   QueryResponse query(Query query);
 
+  default boolean response(Query query) {
+    switch (query(query)) {
+      case ALLOW:
+        return true;
+      case DENY:
+        return false;
+      default:
+        throw new UnsupportedOperationException("Filter did not respond to the query");
+    }
+  }
+
   enum QueryResponse {
     ALLOW,
     DENY,
