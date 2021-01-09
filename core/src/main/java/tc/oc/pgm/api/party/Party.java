@@ -13,11 +13,8 @@ import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.filters.Filterable;
-import tc.oc.pgm.filters.query.Query;
-import tc.oc.pgm.match.ObservingParty;
-import tc.oc.pgm.util.chat.Audience;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.named.Named;
 
 /**
@@ -141,22 +138,6 @@ public interface Party extends Audience, Named, Filterable<PartyQuery> {
   default boolean isObserving() {
     return !this.isParticipating();
   }
-
-  /**
-   * Adds a {@link MatchPlayer} to the {@link Party}'s internal state.
-   *
-   * @see Match#setParty(MatchPlayer, Party)
-   * @param player The {@link MatchPlayer} to add.
-   */
-  void internalAddPlayer(MatchPlayer player);
-
-  /**
-   * Removes a {@link MatchPlayer} from the {@link Party}'s internal state.
-   *
-   * @see Match#setParty(MatchPlayer, Party)
-   * @param player The {@link MatchPlayer} to remove.
-   */
-  void internalRemovePlayer(MatchPlayer player);
 
   @Override
   default Optional<? extends Filterable<? super PartyQuery>> filterableParent() {

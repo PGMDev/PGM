@@ -18,7 +18,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.event.CoarsePlayerMoveEvent;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.filter.query.Query;
@@ -37,6 +36,7 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.util.MapUtils;
+import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
 @ListenerScope(MatchScope.LOADED)
 public class FilterMatchModule implements MatchModule, Listener, FilterDispatcher, Tickable {
@@ -273,7 +273,7 @@ public class FilterMatchModule implements MatchModule, Listener, FilterDispatche
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
-  public void onPlayerMove(CoarsePlayerMoveEvent event) {
+  public void onPlayerMove(PlayerCoarseMoveEvent event) {
     // On movement events, check the player immediately instead of invalidating them.
     // We can't wait until the end of the tick because the player could move several
     // more times by then (i.e. if we received multiple packets from them in the same

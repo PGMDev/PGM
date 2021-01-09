@@ -9,8 +9,13 @@ public class RelativeDoubleProvider implements DoubleProvider {
   }
 
   @Override
-  public double get(double old) {
+  public double apply(double old) {
     return old + this.delta;
+  }
+
+  @Override
+  public boolean invertible() {
+    return true;
   }
 
   public RelativeDoubleProvider inverse() {

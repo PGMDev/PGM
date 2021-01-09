@@ -1,42 +1,44 @@
 package tc.oc.pgm.portals;
 
+import java.util.HashSet;
 import java.util.Set;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerTeleportEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.Tickable;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
+import tc.oc.pgm.filters.FilterMatchModule;
 
 @ListenerScope(MatchScope.LOADED)
-public class PortalMatchModule implements MatchModule, Listener {
+public class PortalMatchModule implements MatchModule, Listener, Tickable {
 
   private final Match match;
   protected final Set<Portal> portals;
+
+  static final Set<MatchPlayer> teleportedPlayers = new HashSet<>();
 
   public PortalMatchModule(Match match, Set<Portal> portals) {
     this.match = match;
     this.portals = portals;
   }
 
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void checkPortalEntry(PlayerCoarseMoveEvent event) {
-    if (event.getCause() instanceof PlayerTeleportEvent) {
-      return;
-    }
+  @Override
+  public void load() throws ModuleLoadException {
+    FilterMatchModule fmm = match.needModule(FilterMatchModule.class);
 
-    MatchPlayer player = this.match.getPlayer(event.getPlayer());
-    if (player == null) return;
+    portals.forEach(portal -> portal.load(fmm));
+  }
 
-    for (Portal portal : this.portals) {
-      if (portal.teleportEligiblePlayer(
-          player, event.getBlockFrom().toVector(), event.getBlockTo().toVector(), event.getTo())) {
-        break;
-      }
-    }
+  public static boolean teleported(MatchPlayer player) {
+    return !teleportedPlayers.add(player);
+  }
+
+  @Override
+  public void tick(Match match, Tick tick) {
+    teleportedPlayers.clear();
   }
 }

@@ -8,7 +8,17 @@ public class StaticDoubleProvider implements DoubleProvider {
   }
 
   @Override
-  public double get(double old) {
+  public double apply(double old) {
     return this.value;
+  }
+
+  @Override
+  public boolean invertible() {
+    return false;
+  }
+
+  @Override
+  public DoubleProvider inverse() {
+    return null;
   }
 }

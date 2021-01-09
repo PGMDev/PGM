@@ -312,7 +312,8 @@ public class MatchImpl implements Match {
     final Collection<Audience> audiences = new ArrayList<>(getPlayers());
     audiences.add(Audience.console());
     return Audience.get(audiences);
-    
+  }
+
   public Match getMatch() {
     return this;
   }

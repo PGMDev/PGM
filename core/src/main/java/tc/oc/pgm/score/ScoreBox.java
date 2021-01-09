@@ -17,7 +17,7 @@ import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 public class ScoreBox {
   private final Region region;
   private final int score;
-  private final Filter filter;
+  private final Filter trigger;
   private final ImmutableMap<SingleMaterialMatcher, Double> redeemables;
   private final boolean silent;
 
@@ -34,7 +34,7 @@ public class ScoreBox {
 
     this.region = region;
     this.score = score;
-    this.filter = filter;
+    this.trigger = filter;
     this.redeemables = redeemables;
     this.silent = silent;
   }
@@ -48,7 +48,7 @@ public class ScoreBox {
   }
 
   public Filter getFilter() {
-    return this.filter;
+    return this.trigger;
   }
 
   public Map<SingleMaterialMatcher, Double> getRedeemables() {
@@ -66,7 +66,7 @@ public class ScoreBox {
   }
 
   public boolean canScore(ParticipantState player) {
-    return this.filter.query(new PlayerStateQuery(null, player)).isAllowed();
+    return this.trigger.query(new PlayerStateQuery(null, player)).isAllowed();
   }
 
   public boolean isCoolingDown(MatchPlayerState player) {
