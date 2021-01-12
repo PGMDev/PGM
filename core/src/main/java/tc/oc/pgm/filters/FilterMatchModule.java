@@ -19,7 +19,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.Filter;
-import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -257,10 +256,6 @@ public class FilterMatchModule implements MatchModule, Listener, FilterDispatche
     }
   }
 
-  public void invalidate(MatchPlayer player) {
-    invalidate(player.getQuery());
-  }
-
   public void invalidate(Filterable<?> filterable) {
     if (dirtySet.add(filterable)) {
       filterable.filterableChildren().forEach(this::invalidate);
@@ -309,20 +304,19 @@ public class FilterMatchModule implements MatchModule, Listener, FilterDispatche
           .columnMap()
           .forEach(
               (scope, column) -> {
-                if (scope.isInstance(event.getPlayer().getQuery())) {
+                if (scope.isInstance(event.getPlayer())) {
                   // For each filter in this scope
                   column.forEach(
                       (filter, filterListeners) -> {
                         // If player joined very recently, they may not have a cached response yet
-                        final Boolean response =
-                            lastResponses.get(filter, event.getPlayer().getQuery());
+                        final Boolean response = lastResponses.get(filter, event.getPlayer());
                         if (response != null && response) {
                           filterListeners.fall.forEach(
                               listener ->
                                   dispatch(
-                                      (FilterListener<? super PlayerQuery>) listener,
+                                      (FilterListener<? super MatchPlayer>) listener,
                                       filter,
-                                      event.getPlayer().getQuery(),
+                                      event.getPlayer(),
                                       false));
                         }
                       });

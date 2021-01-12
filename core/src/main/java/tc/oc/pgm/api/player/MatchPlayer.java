@@ -1,9 +1,12 @@
 package tc.oc.pgm.api.player;
 
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.PlayerInventory;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
@@ -12,6 +15,7 @@ import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.setting.Settings;
+import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.util.Audience;
@@ -27,7 +31,8 @@ import tc.oc.pgm.util.named.Named;
  * this is used is to check if a {@link MatchPlayer} is involved in an event. If you need to access
  * or modify a {@link Player}, there should be a method added to {@link MatchPlayer}.
  */
-public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder {
+public interface MatchPlayer
+    extends Audience, Named, Tickable, InventoryHolder, Filterable<PlayerQuery> {
 
   /**
    * Get the {@link Match} of the {@link MatchPlayer}.
@@ -257,4 +262,20 @@ public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder 
 
   @Deprecated
   void internalSetParty(Party party);
+
+  @Override
+  default Optional<? extends Filterable<? super PlayerQuery>> filterableParent() {
+    return Optional.of(getParty());
+  }
+
+  @Override
+  default Stream<? extends Filterable<? extends PlayerQuery>> filterableChildren() {
+    return Stream.of();
+  }
+
+  @Nullable
+  @Override
+  default Event getEvent() {
+    return null;
+  }
 }

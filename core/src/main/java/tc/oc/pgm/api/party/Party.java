@@ -146,7 +146,7 @@ public interface Party extends Audience, Named, Filterable<PartyQuery> {
 
   @Override
   default Stream<? extends Filterable<? extends PlayerQuery>> filterableChildren() {
-    return getPlayers().stream().map(MatchPlayer::getQuery);
+    return getPlayers().stream();
   }
 
   @Nullable

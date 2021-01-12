@@ -10,7 +10,6 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
-import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.FilterMatchModule;
@@ -42,16 +41,14 @@ public class Portal implements FeatureDefinition {
 
   public void load(FilterMatchModule fmm) {
     fmm.onRise(
-        PlayerQuery.class,
+        MatchPlayer.class,
         trigger,
-        playerQuery -> {
-          MatchPlayer matchPlayer = playerQuery.getPlayer();
+        matchPlayer -> {
           if (matchPlayer != null
               && canUse(matchPlayer)
               && !PortalMatchModule.teleported(matchPlayer)) {
             teleportPlayer(matchPlayer, matchPlayer.getBukkit().getLocation());
           }
-          ;
         });
   }
 
