@@ -33,7 +33,7 @@ import tc.oc.pgm.util.event.PlayerItemTransferEvent;
 @ListenerScope(MatchScope.RUNNING)
 public class KillRewardMatchModule implements MatchModule, Listener {
   private final Match match;
-  private final Map<UUID, Integer> killStreaks; // TODO: switch to fastutil Object2IntMap??
+  private final Map<UUID, Integer> killStreaks;
   private final ImmutableList<KillReward> killRewards;
   private final Multimap<UUID, KillReward> deadPlayerRewards;
 

@@ -200,7 +200,16 @@ public class MapInfoImpl implements MapInfo {
 
   @Override
   public String toString() {
-    return "MapInfoImpl{" + "id='" + id + '\'' + ", version=" + version + '}';
+    return "MapInfoImpl{"
+        + "id='"
+        + id
+        + '\''
+        + ", name='"
+        + name
+        + '\''
+        + ", version="
+        + version
+        + '}';
   }
 
   @Override
