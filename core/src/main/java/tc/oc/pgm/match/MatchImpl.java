@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -887,12 +886,18 @@ public class MatchImpl implements Match {
 
   @Override
   public String toString() {
-    return new ToStringBuilder(this)
-        .append("id", getId())
-        .append("map", getMap())
-        .append("world", getWorld())
-        .append("scope", getScope())
-        .append("state", getPhase())
-        .build();
+    return "MatchImpl{"
+        + "id='"
+        + id
+        + '\''
+        + ", map="
+        + map
+        + ", world="
+        + world
+        + ", state="
+        + state
+        + ", scope="
+        + getScope()
+        + '}';
   }
 }

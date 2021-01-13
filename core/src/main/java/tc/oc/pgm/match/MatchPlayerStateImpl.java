@@ -3,13 +3,11 @@ package tc.oc.pgm.match;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static tc.oc.pgm.util.text.PlayerComponent.player;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import net.kyori.adventure.text.Component;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.match.Match;
@@ -80,28 +78,34 @@ public class MatchPlayerStateImpl implements MatchPlayerState {
   }
 
   @Override
-  public int hashCode() {
-    return new HashCodeBuilder().append(getMatch()).append(getParty()).append(getId()).build();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (!(obj instanceof MatchPlayerState)) return false;
-    final MatchPlayerState o = (MatchPlayerState) obj;
-    return new EqualsBuilder()
-        .append(getMatch(), o.getMatch())
-        .append(getParty(), o.getParty())
-        .append(getId(), o.getId())
-        .isEquals();
-  }
-
-  @Override
   public String toString() {
-    return new ToStringBuilder(this)
-        .append("id", getId())
-        .append("party", getParty().getDefaultName())
-        .append("match", getMatch().getId())
-        .append("location", location)
-        .build();
+    return "MatchPlayerStateImpl{"
+        + "match="
+        + match
+        + ", username='"
+        + username
+        + '\''
+        + ", uuid="
+        + uuid
+        + ", party="
+        + party
+        + ", location="
+        + location
+        + '}';
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    MatchPlayerStateImpl that = (MatchPlayerStateImpl) o;
+    return Objects.equals(match, that.match)
+        && Objects.equals(uuid, that.uuid)
+        && Objects.equals(party, that.party);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(match, uuid, party);
   }
 }

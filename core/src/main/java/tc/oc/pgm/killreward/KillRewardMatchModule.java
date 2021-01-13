@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -34,19 +33,19 @@ import tc.oc.pgm.util.event.PlayerItemTransferEvent;
 @ListenerScope(MatchScope.RUNNING)
 public class KillRewardMatchModule implements MatchModule, Listener {
   private final Match match;
-  private final Map<UUID, MutableInt> killStreaks;
+  private final Map<UUID, Integer> killStreaks; // TODO: switch to fastutil Object2IntMap??
   private final ImmutableList<KillReward> killRewards;
   private final Multimap<UUID, KillReward> deadPlayerRewards;
 
   public KillRewardMatchModule(Match match, List<KillReward> killRewards) {
     this.match = match;
     this.killRewards = ImmutableList.copyOf(killRewards);
-    this.killStreaks = new DefaultMapAdapter<>(key -> new MutableInt(), true);
+    this.killStreaks = new DefaultMapAdapter<>(key -> 0, true);
     this.deadPlayerRewards = ArrayListMultimap.create();
   }
 
   public int getKillStreak(UUID uuid) {
-    return killStreaks.get(uuid).intValue();
+    return killStreaks.get(uuid);
   }
 
   private Collection<KillReward> getRewards(
@@ -100,12 +99,12 @@ public class KillRewardMatchModule implements MatchModule, Listener {
   public void onDeath(MatchPlayerDeathEvent event) {
     final ParticipantState killer = event.getKiller();
     if (event.isChallengeKill() && killer != null) {
-      killStreaks.get(killer.getId()).increment();
+      killStreaks.computeIfPresent(killer.getId(), (uuid, integer) -> integer + 1);
     }
 
     final MatchPlayer victim = event.getVictim();
     if (victim != null) {
-      killStreaks.get(victim.getId()).setValue(0);
+      killStreaks.computeIfPresent(victim.getId(), (uuid, integer) -> 0);
     }
 
     if (!event.isChallengeKill() || killer == null) return;

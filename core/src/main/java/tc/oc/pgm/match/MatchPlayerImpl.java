@@ -6,6 +6,7 @@ import static tc.oc.pgm.util.text.PlayerComponent.player;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -15,10 +16,6 @@ import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
-import org.apache.commons.lang3.builder.CompareToBuilder;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.GameMode;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
@@ -54,7 +51,7 @@ import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 
-public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
+public class MatchPlayerImpl implements MatchPlayer {
 
   // TODO: Probably should be moved to a better location
   private static final int FROZEN_VEHICLE_ENTITY_ID = NMSHacks.allocateEntityId();
@@ -434,34 +431,20 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   }
 
   @Override
-  public int compareTo(MatchPlayer o) {
-    return new CompareToBuilder()
-        .append(getMatch(), o.getMatch())
-        .append(getId(), o.getId())
-        .build();
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    MatchPlayerImpl that = (MatchPlayerImpl) o;
+    return match.equals(that.match) && id.equals(that.id);
   }
 
   @Override
   public int hashCode() {
-    return new HashCodeBuilder().append(getMatch()).append(getId()).build();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (!(obj instanceof MatchPlayer)) return false;
-    final MatchPlayer o = (MatchPlayer) obj;
-    return new EqualsBuilder()
-        .append(getMatch(), o.getMatch())
-        .append(getId(), o.getId())
-        .isEquals();
+    return Objects.hash(match, id);
   }
 
   @Override
   public String toString() {
-    return new ToStringBuilder(this)
-        .append("id", getId())
-        .append("bukkit", getBukkit())
-        .append("match", getMatch().getId())
-        .build();
+    return "MatchPlayerImpl{" + "match=" + match + ", id=" + id + ", bukkit=" + bukkit + '}';
   }
 }

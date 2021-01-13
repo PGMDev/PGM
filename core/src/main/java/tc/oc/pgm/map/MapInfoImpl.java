@@ -12,7 +12,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Difficulty;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.Contributor;
@@ -201,7 +200,7 @@ public class MapInfoImpl implements MapInfo {
 
   @Override
   public String toString() {
-    return new ToStringBuilder(this).append("id", getId()).build();
+    return "MapInfoImpl{" + "id='" + id + '\'' + ", version=" + version + '}';
   }
 
   @Override
