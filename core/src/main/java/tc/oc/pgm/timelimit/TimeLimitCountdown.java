@@ -76,7 +76,6 @@ public class TimeLimitCountdown extends MatchCountdown {
     }
   }
 
-
   protected BossBar.@Nullable Color barColor() {
     long seconds = remaining.getSeconds();
     if (seconds > 60) {
