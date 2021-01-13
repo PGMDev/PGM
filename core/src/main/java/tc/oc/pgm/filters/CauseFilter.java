@@ -5,7 +5,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EntityAction;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
@@ -13,6 +12,7 @@ import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.api.tracker.info.*;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
@@ -96,10 +96,7 @@ public class CauseFilter extends TypedFilter<MatchQuery> {
       }
     }
 
-    Entity actor = null;
-    if (event instanceof EntityAction) {
-      actor = ((EntityAction) event).getActor();
-    }
+    @Nullable Entity actor = GeneralizedEvent.getActorIfPresent(event);
 
     switch (this.cause) {
         // Actor types

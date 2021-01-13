@@ -1,15 +1,17 @@
 package tc.oc.pgm.util.event;
 
 import javax.annotation.Nullable;
-import org.bukkit.Physical;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Cancellable;
-import org.bukkit.event.EntityAction;
 import org.bukkit.event.Event;
+import org.bukkit.event.EventException;
+import org.bukkit.event.entity.EntityEvent;
+import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.event.world.WorldEvent;
 
 /** An event that wraps another event. */
-public abstract class GeneralizedEvent extends PreemptiveEvent implements Physical, EntityAction {
+public abstract class GeneralizedEvent extends PreemptiveEvent {
 
   private final @Nullable Event cause;
   private boolean propagate;
@@ -48,14 +50,21 @@ public abstract class GeneralizedEvent extends PreemptiveEvent implements Physic
     }
   }
 
-  // TODO: Un-implement Physical and EntityAction, since they are SportPaper only
-  @Override
-  public World getWorld() {
-    return getCause() instanceof Physical ? ((Physical) getCause()).getWorld() : null;
+  public @Nullable World getWorld() throws EventException {
+    if (getCause() == null) return null;
+    if (!getCause().getClass().isAssignableFrom(WorldEvent.class))
+      throw new EventException("Event has no associated world");
+    return ((WorldEvent) getCause()).getWorld();
   }
 
-  @Override
-  public Entity getActor() {
-    return getCause() instanceof EntityAction ? ((EntityAction) getCause()).getActor() : null;
+  public @Nullable Entity getActor() {
+    return getActorIfPresent(getCause());
+  }
+
+  public static @Nullable Entity getActorIfPresent(Event event) {
+    if (event == null) return null;
+    return event instanceof EntityEvent
+        ? ((EntityEvent) event).getEntity()
+        : event instanceof PlayerEvent ? ((PlayerEvent) event).getPlayer() : null;
   }
 }
