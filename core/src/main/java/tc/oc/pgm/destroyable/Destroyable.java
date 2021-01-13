@@ -14,8 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -25,6 +23,8 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
@@ -124,7 +124,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
   // Remove @Nullable
   @Override
-  public @Nonnull Team getOwner() {
+  public @NonNull Team getOwner() {
     Team owner = super.getOwner();
     if (owner == null) {
       throw new IllegalStateException("destroyable " + getId() + " has no owner");
@@ -543,11 +543,11 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return this.isDestroyed() && this.canComplete(team);
   }
 
-  public @Nonnull List<DestroyableHealthChange> getEvents() {
+  public @NonNull List<DestroyableHealthChange> getEvents() {
     return ImmutableList.copyOf(this.events);
   }
 
-  public @Nonnull ImmutableList<DestroyableContribution> getContributions() {
+  public @NonNull ImmutableList<DestroyableContribution> getContributions() {
     if (this.contributions != null) {
       return this.contributions;
     }

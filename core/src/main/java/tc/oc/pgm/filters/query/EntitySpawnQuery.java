@@ -2,10 +2,10 @@ package tc.oc.pgm.filters.query;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import javax.annotation.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class EntitySpawnQuery extends EntityQuery
     implements tc.oc.pgm.api.filter.query.EntitySpawnQuery {

@@ -2,8 +2,8 @@ package tc.oc.pgm.modes;
 
 import com.google.common.base.Preconditions;
 import java.util.Collection;
-import javax.annotation.Nonnull;
 import org.bukkit.event.HandlerList;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.event.MatchEvent;
 import tc.oc.pgm.core.Core;
@@ -46,7 +46,7 @@ public class ObjectiveModeChangeEvent extends MatchEvent {
     return this.mode;
   }
 
-  public void setName(@Nonnull String name) {
+  public void setName(@NonNull String name) {
     this.name = Preconditions.checkNotNull(name, "name");
   }
 

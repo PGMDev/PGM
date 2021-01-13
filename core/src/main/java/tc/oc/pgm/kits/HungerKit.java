@@ -1,8 +1,8 @@
 package tc.oc.pgm.kits;
 
 import java.util.List;
-import javax.annotation.Nullable;
 import org.bukkit.inventory.ItemStack;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 
 public class HungerKit extends AbstractKit {

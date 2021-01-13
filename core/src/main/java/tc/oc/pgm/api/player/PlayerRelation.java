@@ -2,7 +2,7 @@ package tc.oc.pgm.api.player;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Represents the competitive relationship between two {@link ParticipantState}s. The attacker can

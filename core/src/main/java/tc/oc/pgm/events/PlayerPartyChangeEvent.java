@@ -2,8 +2,8 @@ package tc.oc.pgm.events;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import javax.annotation.Nullable;
 import org.bukkit.event.HandlerList;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerEvent;

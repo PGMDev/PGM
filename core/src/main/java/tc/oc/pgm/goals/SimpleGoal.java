@@ -1,11 +1,11 @@
 package tc.oc.pgm.goals;
 
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;

@@ -3,8 +3,8 @@ package tc.oc.pgm.map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Random;
-import javax.annotation.Nullable;
 import org.bukkit.World;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.WorldInfo;
 import tc.oc.pgm.util.xml.InvalidXMLException;

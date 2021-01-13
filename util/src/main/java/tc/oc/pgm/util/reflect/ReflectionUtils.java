@@ -1,7 +1,7 @@
 package tc.oc.pgm.util.reflect;
 
 import java.lang.reflect.Field;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class ReflectionUtils {
   private ReflectionUtils() {}

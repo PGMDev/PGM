@@ -5,13 +5,13 @@ import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.util.Optional;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 import net.kyori.adventure.text.Component;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -74,7 +74,7 @@ public class MatchPlayerStateImpl implements MatchPlayerState {
   }
 
   @Override
-  @Nonnull
+  @NonNull
   public Audience audience() {
     return audience;
   }

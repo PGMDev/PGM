@@ -1,9 +1,9 @@
 package tc.oc.pgm.filters;
 
-import javax.annotation.Nullable;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.util.BlockVector;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /** Utility methods useful for implementing filters */
 public class Filters {

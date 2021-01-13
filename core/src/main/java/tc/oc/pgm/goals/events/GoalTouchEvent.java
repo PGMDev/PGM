@@ -2,9 +2,9 @@ package tc.oc.pgm.goals.events;
 
 import com.google.common.base.Preconditions;
 import java.time.Instant;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.bukkit.event.HandlerList;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.goals.TouchableGoal;
@@ -61,7 +61,7 @@ public class GoalTouchEvent extends GoalEvent {
   }
 
   @Override
-  public @Nonnull Competitor getCompetitor() { // remove @Nullable
+  public @NonNull Competitor getCompetitor() { // remove @Nullable
     //noinspection ConstantConditions
     return super.getCompetitor();
   }

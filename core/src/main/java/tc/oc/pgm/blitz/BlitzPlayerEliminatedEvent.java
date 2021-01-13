@@ -1,9 +1,9 @@
 package tc.oc.pgm.blitz;
 
 import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
 import org.bukkit.Location;
 import org.bukkit.event.HandlerList;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.event.MatchEvent;
 import tc.oc.pgm.api.party.Competitor;
@@ -17,10 +17,10 @@ import tc.oc.pgm.api.player.MatchPlayer;
  */
 public class BlitzPlayerEliminatedEvent extends MatchEvent {
   public BlitzPlayerEliminatedEvent(
-      @Nonnull Match match,
-      @Nonnull MatchPlayer player,
-      @Nonnull Competitor competitor,
-      @Nonnull Location deathLocation) {
+      @NonNull Match match,
+      @NonNull MatchPlayer player,
+      @NonNull Competitor competitor,
+      @NonNull Location deathLocation) {
     super(match);
 
     Preconditions.checkNotNull(player, "match player");
@@ -37,7 +37,7 @@ public class BlitzPlayerEliminatedEvent extends MatchEvent {
    *
    * @return Eliminated player
    */
-  public @Nonnull MatchPlayer getPlayer() {
+  public @NonNull MatchPlayer getPlayer() {
     return this.player;
   }
 
@@ -46,7 +46,7 @@ public class BlitzPlayerEliminatedEvent extends MatchEvent {
    *
    * @return Player team
    */
-  public @Nonnull Competitor getCompetitor() {
+  public @NonNull Competitor getCompetitor() {
     return this.competitor;
   }
 
@@ -55,13 +55,13 @@ public class BlitzPlayerEliminatedEvent extends MatchEvent {
    *
    * @return Death location
    */
-  public @Nonnull Location getDeathLocation() {
+  public @NonNull Location getDeathLocation() {
     return this.deathLocation;
   }
 
-  private final @Nonnull MatchPlayer player;
-  private final @Nonnull Competitor competitor;
-  private final @Nonnull Location deathLocation;
+  private final @NonNull MatchPlayer player;
+  private final @NonNull Competitor competitor;
+  private final @NonNull Location deathLocation;
 
   private static final HandlerList handlers = new HandlerList();
 

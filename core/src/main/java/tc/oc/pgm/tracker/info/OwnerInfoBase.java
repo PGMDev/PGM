@@ -1,6 +1,6 @@
 package tc.oc.pgm.tracker.info;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.OwnerInfo;
 

@@ -1,7 +1,7 @@
 package tc.oc.pgm.destroyable;
 
-import javax.annotation.Nonnull;
 import org.bukkit.event.HandlerList;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import tc.oc.pgm.api.match.Match;
 
 /**
@@ -10,7 +10,7 @@ import tc.oc.pgm.api.match.Match;
  * <p>Event is called after the destroyable state has been updated.
  */
 public class DestroyableDestroyedEvent extends DestroyableEvent {
-  public DestroyableDestroyedEvent(@Nonnull Match match, @Nonnull Destroyable destroyable) {
+  public DestroyableDestroyedEvent(@NonNull Match match, @NonNull Destroyable destroyable) {
     super(match, destroyable);
   }
 

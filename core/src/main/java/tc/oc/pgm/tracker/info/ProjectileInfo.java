@@ -3,9 +3,9 @@ package tc.oc.pgm.tracker.info;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static net.kyori.adventure.text.Component.translatable;
 
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Location;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;

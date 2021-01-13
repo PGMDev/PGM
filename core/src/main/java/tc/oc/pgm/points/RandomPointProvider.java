@@ -1,9 +1,9 @@
 package tc.oc.pgm.points;
 
 import java.util.Collection;
-import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.match.Match;
 
 /** Try a random child up to 100 times */

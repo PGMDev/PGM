@@ -6,8 +6,8 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
 import java.util.Collection;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;

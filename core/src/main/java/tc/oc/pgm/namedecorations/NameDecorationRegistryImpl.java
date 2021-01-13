@@ -7,8 +7,6 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -21,6 +19,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.NameDecorationChangeEvent;
 import tc.oc.pgm.api.party.Party;
@@ -43,7 +43,7 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
           .build(
               new CacheLoader<UUID, DecorationCacheEntry>() {
                 @Override
-                public DecorationCacheEntry load(@Nonnull UUID uuid) {
+                public DecorationCacheEntry load(@NonNull UUID uuid) {
                   return new DecorationCacheEntry(uuid);
                 }
               });
@@ -135,7 +135,7 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
   }
 
   @Override
-  @Nonnull
+  @NonNull
   public NameDecorationProvider getProvider() {
     return provider;
   }

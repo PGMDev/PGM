@@ -3,11 +3,11 @@ package tc.oc.pgm.util.tablist;
 import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.util.UUID;
-import javax.annotation.Nullable;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Skin;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerSkinPartsChangeEvent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextTranslations;

@@ -7,12 +7,12 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 
 public class Broadcast implements Comparable<Broadcast> {
@@ -72,7 +72,7 @@ public class Broadcast implements Comparable<Broadcast> {
   }
 
   @Override
-  public int compareTo(@Nonnull Broadcast o) {
+  public int compareTo(@NonNull Broadcast o) {
     return this.after.compareTo(o.after);
   }
 

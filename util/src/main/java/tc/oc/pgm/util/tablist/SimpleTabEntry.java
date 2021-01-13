@@ -1,10 +1,10 @@
 package tc.oc.pgm.util.tablist;
 
 import java.util.UUID;
-import javax.annotation.Nullable;
 import org.bukkit.GameMode;
 import org.bukkit.Skin;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /** Implements part of {@link TabEntry} with a few generally useful properties */
 public abstract class SimpleTabEntry implements TabEntry {

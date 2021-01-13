@@ -1,7 +1,7 @@
 package tc.oc.pgm.api.map.factory;
 
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jdom2.Document;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.module.ModuleFactory;

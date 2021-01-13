@@ -1,12 +1,12 @@
 package tc.oc.pgm.util.event;
 
-import javax.annotation.Nullable;
 import org.bukkit.Physical;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EntityAction;
 import org.bukkit.event.Event;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /** An event that wraps another event. */
 public abstract class GeneralizedEvent extends PreemptiveEvent implements Physical, EntityAction {

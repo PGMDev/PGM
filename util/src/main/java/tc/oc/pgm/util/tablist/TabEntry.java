@@ -1,11 +1,11 @@
 package tc.oc.pgm.util.tablist;
 
 import java.util.UUID;
-import javax.annotation.Nullable;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.GameMode;
 import org.bukkit.Skin;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /** Content for a slot in a {@link TabView} */
 public interface TabEntry {

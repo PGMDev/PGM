@@ -2,8 +2,8 @@ package tc.oc.pgm.filters.query;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import javax.annotation.Nullable;
 import org.bukkit.event.Event;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.match.Match;
 
 public class MatchQuery extends Query implements tc.oc.pgm.api.filter.query.MatchQuery {

@@ -1,9 +1,9 @@
 package tc.oc.pgm.flag.state;
 
 import java.util.Collections;
-import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.flag.Flag;

@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 
 /** A dependency graph for {@link Module}s and their {@link ModuleFactory}s. */

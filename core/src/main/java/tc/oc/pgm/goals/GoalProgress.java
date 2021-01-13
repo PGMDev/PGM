@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 
@@ -121,7 +121,7 @@ public class GoalProgress implements Comparable<GoalProgress> {
   }
 
   @Override
-  public int compareTo(@Nonnull GoalProgress that) {
+  public int compareTo(@NonNull GoalProgress that) {
     // This team has more completed goals, so they take the lead
     if (this.completed > that.completed) return -1;
     if (this.completed < that.completed) return 1;

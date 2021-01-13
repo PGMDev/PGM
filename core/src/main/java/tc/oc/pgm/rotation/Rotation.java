@@ -1,8 +1,8 @@
 package tc.oc.pgm.rotation;
 
 import java.util.logging.Level;
-import javax.annotation.Nullable;
 import org.bukkit.configuration.ConfigurationSection;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
 

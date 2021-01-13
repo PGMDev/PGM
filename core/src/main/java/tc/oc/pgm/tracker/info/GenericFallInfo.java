@@ -2,8 +2,8 @@ package tc.oc.pgm.tracker.info;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import javax.annotation.Nullable;
 import org.bukkit.Location;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.FallInfo;
 import tc.oc.pgm.api.tracker.info.TrackerInfo;

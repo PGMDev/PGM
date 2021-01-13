@@ -6,11 +6,11 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
-import javax.annotation.Nullable;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.MatchCountdown;
 
@@ -76,8 +76,8 @@ public class TimeLimitCountdown extends MatchCountdown {
     }
   }
 
-  @Nullable
-  protected BossBar.Color barColor() {
+
+  protected BossBar.@Nullable Color barColor() {
     long seconds = remaining.getSeconds();
     if (seconds > 60) {
       return BossBar.Color.GREEN;

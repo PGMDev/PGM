@@ -2,7 +2,7 @@ package tc.oc.pgm.db;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.map.MapActivity;
 
 class MapActivityImpl implements MapActivity {

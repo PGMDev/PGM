@@ -5,12 +5,12 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
 import java.time.Instant;
-import javax.annotation.Nullable;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.util.text.TemporalComponent;
@@ -51,8 +51,7 @@ public class OvertimeCountdown extends TimeLimitCountdown {
         .decoration(TextDecoration.BOLD, true);
   }
 
-  @Nullable
-  protected BossBar.Color barColor() {
+  protected BossBar.@Nullable Color barColor() {
     return BossBar.Color.YELLOW;
   }
 

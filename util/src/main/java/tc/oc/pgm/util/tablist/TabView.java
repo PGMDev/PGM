@@ -3,11 +3,11 @@ package tc.oc.pgm.util.tablist;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Nullable;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 
 /**

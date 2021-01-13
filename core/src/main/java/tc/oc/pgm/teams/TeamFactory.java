@@ -1,8 +1,8 @@
 package tc.oc.pgm.teams;
 
-import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.scoreboard.NameTagVisibility;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;

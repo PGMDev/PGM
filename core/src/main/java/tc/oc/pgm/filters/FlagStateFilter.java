@@ -1,6 +1,6 @@
 package tc.oc.pgm.filters;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.flag.Flag;

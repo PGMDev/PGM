@@ -1,7 +1,7 @@
 package tc.oc.pgm.api.filter.query;
 
 import java.util.UUID;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 
 /** A query for a player that may or may not be online or participating in the match. */

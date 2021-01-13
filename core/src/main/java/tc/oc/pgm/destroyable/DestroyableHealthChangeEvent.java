@@ -1,8 +1,8 @@
 package tc.oc.pgm.destroyable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.bukkit.event.HandlerList;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.match.Match;
 
 /**
@@ -14,8 +14,8 @@ import tc.oc.pgm.api.match.Match;
  */
 public class DestroyableHealthChangeEvent extends DestroyableEvent {
   public DestroyableHealthChangeEvent(
-      @Nonnull Match match,
-      @Nonnull Destroyable destroyable,
+      @NonNull Match match,
+      @NonNull Destroyable destroyable,
       @Nullable DestroyableHealthChange change) {
     super(match, destroyable);
     this.change = change;

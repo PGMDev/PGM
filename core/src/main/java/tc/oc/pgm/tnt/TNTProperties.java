@@ -1,7 +1,7 @@
 package tc.oc.pgm.tnt;
 
 import java.time.Duration;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class TNTProperties {
   public final @Nullable Float yield;

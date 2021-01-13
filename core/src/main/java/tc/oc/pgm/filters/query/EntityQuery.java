@@ -2,9 +2,9 @@ package tc.oc.pgm.filters.query;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import javax.annotation.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.query.EntityTypeQuery;
 import tc.oc.pgm.api.match.Match;

@@ -3,10 +3,10 @@ package tc.oc.pgm.modes;
 import static net.kyori.adventure.text.Component.text;
 
 import java.time.Duration;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.material.MaterialData;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class Mode {
 

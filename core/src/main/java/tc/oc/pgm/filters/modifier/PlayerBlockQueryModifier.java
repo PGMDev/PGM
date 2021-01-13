@@ -1,6 +1,6 @@
 package tc.oc.pgm.filters.modifier;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.filter.query.Query;

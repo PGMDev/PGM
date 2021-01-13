@@ -6,9 +6,9 @@ import java.time.Instant;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.util.ClassLogger;
@@ -32,7 +32,7 @@ public class CountdownRunner extends BukkitRunnable {
 
   private Future<?> task = null;
 
-  public CountdownRunner(@Nonnull Match match, Logger parentLogger, @Nonnull Countdown countdown) {
+  public CountdownRunner(@NonNull Match match, Logger parentLogger, @NonNull Countdown countdown) {
     Preconditions.checkNotNull(match, "match");
     Preconditions.checkNotNull(countdown, "countdown");
 
@@ -45,15 +45,15 @@ public class CountdownRunner extends BukkitRunnable {
     return this.task != null;
   }
 
-  public @Nonnull CountdownRunner start(Duration remaining) {
+  public @NonNull CountdownRunner start(Duration remaining) {
     return this.start(remaining, null);
   }
 
-  public @Nonnull CountdownRunner start(Duration remaining, @Nullable Duration interval) {
+  public @NonNull CountdownRunner start(Duration remaining, @Nullable Duration interval) {
     return this.start(remaining, interval, 1);
   }
 
-  public @Nonnull CountdownRunner start(
+  public @NonNull CountdownRunner start(
       Duration remaining, @Nullable Duration interval, int count) {
     logger.fine("STARTING countdown " + countdown + " for duration " + remaining);
 
@@ -150,7 +150,7 @@ public class CountdownRunner extends BukkitRunnable {
     }
   }
 
-  public @Nonnull Countdown getCountdown() {
+  public @NonNull Countdown getCountdown() {
     return this.countdown;
   }
 }

@@ -3,7 +3,6 @@ package tc.oc.pgm.util.bukkit;
 import com.google.common.base.Preconditions;
 import java.lang.reflect.Method;
 import java.util.logging.Level;
-import javax.annotation.Nonnull;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -13,10 +12,11 @@ import org.bukkit.plugin.AuthorNagException;
 import org.bukkit.plugin.IllegalPluginAccessException;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredListener;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface Events {
 
-  static void callEvent(@Nonnull Event event, @Nonnull EventPriority priority) {
+  static void callEvent(@NonNull Event event, @NonNull EventPriority priority) {
     Preconditions.checkNotNull(event, "event");
     Preconditions.checkNotNull(priority, "priority");
 

@@ -2,8 +2,8 @@ package tc.oc.pgm.kits;
 
 import com.google.common.base.Preconditions;
 import java.util.List;
-import javax.annotation.Nullable;
 import org.bukkit.inventory.ItemStack;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 
 public class FlyKit extends AbstractKit {

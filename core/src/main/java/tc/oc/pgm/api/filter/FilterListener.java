@@ -1,6 +1,6 @@
 package tc.oc.pgm.api.filter;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.filter.query.Query;
 
 /**
@@ -13,6 +13,6 @@ public interface FilterListener {
   void filterQueryChanged(
       Filter filter,
       Query query,
-      @Nullable Filter.QueryResponse oldResponse,
+      Filter.@Nullable QueryResponse oldResponse,
       Filter.QueryResponse newResponse);
 }

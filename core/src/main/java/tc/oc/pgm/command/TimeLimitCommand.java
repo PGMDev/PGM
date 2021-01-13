@@ -5,8 +5,8 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import app.ashcon.intake.Command;
 import java.time.Duration;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.VictoryCondition;

@@ -2,11 +2,11 @@ package tc.oc.pgm.filters.query;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.Event;
 import org.bukkit.material.MaterialData;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.filter.query.BlockQuery;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;

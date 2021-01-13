@@ -1,8 +1,8 @@
 package tc.oc.pgm.filters.modifier.location;
 
-import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.event.Event;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.LocationQuery;
 import tc.oc.pgm.filters.modifier.QueryModifier;

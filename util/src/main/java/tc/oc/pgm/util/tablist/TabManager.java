@@ -3,7 +3,6 @@ package tc.oc.pgm.util.tablist;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -13,6 +12,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerSkinPartsChangeEvent;
 import org.bukkit.plugin.Plugin;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 

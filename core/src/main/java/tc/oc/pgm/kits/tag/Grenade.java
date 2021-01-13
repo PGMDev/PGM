@@ -1,10 +1,10 @@
 package tc.oc.pgm.kits.tag;
 
-import javax.annotation.Nullable;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.Metadatable;
 import org.bukkit.plugin.Plugin;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.util.inventory.tag.ItemTag;
 
 public class Grenade {

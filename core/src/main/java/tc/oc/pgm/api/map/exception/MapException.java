@@ -2,7 +2,7 @@ package tc.oc.pgm.api.map.exception;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.factory.MapFactory;

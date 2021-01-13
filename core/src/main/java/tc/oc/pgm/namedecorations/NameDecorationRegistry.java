@@ -3,13 +3,13 @@ package tc.oc.pgm.namedecorations;
 import static net.kyori.adventure.text.Component.text;
 
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.util.named.NameDecorationProvider;
 
 /**
@@ -49,7 +49,7 @@ public interface NameDecorationRegistry extends Listener, NameDecorationProvider
    */
   void setProvider(@Nullable NameDecorationProvider provider);
 
-  @Nonnull
+  @NonNull
   NameDecorationProvider getProvider();
 
   default String getPrefix(UUID uuid) {

@@ -1,6 +1,6 @@
 package tc.oc.pgm.api.tracker.info;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface CauseInfo extends TrackerInfo {
   @Nullable

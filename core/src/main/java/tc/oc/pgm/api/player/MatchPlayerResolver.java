@@ -1,10 +1,10 @@
 package tc.oc.pgm.api.player;
 
 import java.util.UUID;
-import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Helper interface to resolve a {@link MatchPlayer}, {@link MatchPlayerState}, or {@link

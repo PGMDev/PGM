@@ -2,7 +2,7 @@ package tc.oc.pgm.tracker.info;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.api.tracker.info.CauseInfo;

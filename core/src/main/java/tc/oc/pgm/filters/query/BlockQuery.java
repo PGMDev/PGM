@@ -3,7 +3,6 @@ package tc.oc.pgm.filters.query;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Objects;
-import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -11,6 +10,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.event.Event;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 

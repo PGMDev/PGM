@@ -2,9 +2,9 @@ package tc.oc.pgm.flag;
 
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.DyeColor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filter;

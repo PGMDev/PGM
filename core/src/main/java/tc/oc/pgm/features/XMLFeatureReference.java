@@ -1,7 +1,7 @@
 package tc.oc.pgm.features;
 
 import java.lang.ref.WeakReference;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.util.xml.InvalidXMLException;

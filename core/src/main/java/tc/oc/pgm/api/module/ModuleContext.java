@@ -1,7 +1,7 @@
 package tc.oc.pgm.api.module;
 
 import java.util.Collection;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 
 /** A contextual collection of {@link Module}s indexed by their class. */

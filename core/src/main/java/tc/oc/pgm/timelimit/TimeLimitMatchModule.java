@@ -1,7 +1,7 @@
 package tc.oc.pgm.timelimit;
 
 import java.time.Duration;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.party.VictoryCondition;

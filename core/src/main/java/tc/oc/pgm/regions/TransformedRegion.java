@@ -1,8 +1,8 @@
 package tc.oc.pgm.regions;
 
 import java.util.Random;
-import javax.annotation.Nullable;
 import org.bukkit.util.Vector;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.region.Region;
 
 public abstract class TransformedRegion extends AbstractRegion {

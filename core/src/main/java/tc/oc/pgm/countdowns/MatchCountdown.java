@@ -8,12 +8,12 @@ import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.title.Title.title;
 
 import java.time.Duration;
-import javax.annotation.Nullable;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.title.Title;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.events.CountdownCancelEvent;
 import tc.oc.pgm.events.CountdownEndEvent;
@@ -145,8 +145,7 @@ public abstract class MatchCountdown extends Countdown {
     }
   }
 
-  @Nullable
-  protected BossBar.Color barColor() {
+  protected BossBar.@Nullable Color barColor() {
     return null;
   }
 
