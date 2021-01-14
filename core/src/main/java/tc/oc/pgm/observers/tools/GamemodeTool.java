@@ -15,7 +15,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.menu.InventoryMenu;
 import tc.oc.pgm.util.menu.InventoryMenuItem;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -54,10 +54,11 @@ public class GamemodeTool implements InventoryMenuItem {
   public void toggleObserverGameMode(Player player) {
     player.setGameMode(getOppositeMode(player.getGameMode()));
     if (player.getGameMode() == GameMode.SPECTATOR) {
-      PGM.get().getMatchManager().getPlayer(player).sendWarning(getToggleMessage());
+      Audience.get(player).sendWarning(getToggleMessage());
     } else if (isCreative(player)) {
       // Note: When WorldEdit is present, this executes a command to ensure the player is not stuck
-      if (Bukkit.getPluginManager().isPluginEnabled("WorldEdit")) {
+      if (Bukkit.getPluginManager().isPluginEnabled("WorldEdit")
+          && player.hasPermission("worldedit.navigation.unstuck")) {
         player.performCommand("worldedit:!");
       }
     }

@@ -20,7 +20,6 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
@@ -242,13 +241,6 @@ public class InventoryMenu implements Listener {
   }
 
   @EventHandler
-  public void onInventoryClose(final InventoryCloseEvent event) {
-    // Remove viewing of menu upon inventory close
-    Player player = (Player) event.getPlayer();
-    this.remove(player);
-  }
-
-  @EventHandler
   public void onWorldUnload(WorldUnloadEvent event) {
     if (this.world != event.getWorld()) return;
     disableInventory();
@@ -293,21 +285,14 @@ public class InventoryMenu implements Listener {
     // Insert pagination items on every page
     for (int i = 0; i < pages.size(); i++) {
       List<InventoryMenuItem> currentPage = pages.get(i);
-      currentPage.add(null);
-      currentPage.add(null);
-      currentPage.add(
-          // Is there a previous page?
-          i == 0 ? null : new PageInventoryMenuItem(pages.get(i - 1), menuArranger, false));
-      currentPage.add(null);
-      currentPage.add(null);
-      currentPage.add(null);
-      currentPage.add(
-          // Is there a next page?
-          pages.size() - 1 == i
-              ? null
-              : new PageInventoryMenuItem(pages.get(i + 1), menuArranger, true));
-      currentPage.add(null);
-      currentPage.add(null);
+      for (int item = 0; item < ROW_WIDTH; item++) currentPage.add(null);
+      if (i > 0) // Is there a previous page?
+      currentPage.set(
+            2 + (ROW_WIDTH * (rows - 1)), new PageInventoryMenuItem(pages.get(i - 1), false));
+
+      if (i < pages.size() - 1) // Is there a next page?
+      currentPage.set(
+            6 + (ROW_WIDTH * (rows - 1)), new PageInventoryMenuItem(pages.get(i + 1), true));
     }
 
     return pages.get(0);
@@ -315,12 +300,10 @@ public class InventoryMenu implements Listener {
 
   private class PageInventoryMenuItem implements InventoryMenuItem {
     private final List<InventoryMenuItem> inventoryMenu;
-    private final MenuArranger menuArranger;
     private final boolean next; // Does this represent the next page
 
-    PageInventoryMenuItem(List<InventoryMenuItem> items, MenuArranger menuArranger, boolean next) {
+    PageInventoryMenuItem(List<InventoryMenuItem> items, boolean next) {
       this.inventoryMenu = items;
-      this.menuArranger = menuArranger;
       this.next = next;
     }
 

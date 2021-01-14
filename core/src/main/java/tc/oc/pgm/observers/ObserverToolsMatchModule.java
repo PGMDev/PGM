@@ -83,7 +83,7 @@ public class ObserverToolsMatchModule implements MatchModule, Listener {
       MatchPlayer player = match.getPlayer(event.getPlayer());
 
       if (item.getType().equals(TOOL_MATERIAL) && player != null && canUse(player)) {
-        this.toolItem.onInventoryClick(null, player.getBukkit(), ClickType.RIGHT);
+        this.toolItem.onInventoryClick(null, event.getPlayer(), ClickType.RIGHT);
       }
     }
   }
