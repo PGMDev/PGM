@@ -12,14 +12,13 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.menu.InventoryMenu;
 import tc.oc.pgm.util.menu.InventoryMenuItem;
@@ -36,20 +35,14 @@ public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
   }
 
   @Override
-  public Component getName() {
-    return player.getName();
-  }
-
-  @Override
-  public ChatColor getColor() {
-    return ChatColor.GOLD;
+  public Component getDisplayName() {
+    return player.getName().color(NamedTextColor.GOLD);
   }
 
   @Override
   public List<String> getLore(Player player) {
     List<String> lore = new ArrayList<>();
-    StatsMatchModule smm =
-        PGM.get().getMatchManager().getPlayer(player).getMatch().needModule(StatsMatchModule.class);
+    StatsMatchModule smm = this.player.getMatch().needModule(StatsMatchModule.class);
     PlayerStats stats = smm.getPlayerStat(this.player.getId());
 
     Component statLore =
@@ -129,20 +122,26 @@ public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
   public void onInventoryClick(InventoryMenu menu, Player player, ClickType clickType) {}
 
   @Override
+  public ItemMeta modifyMeta(ItemMeta meta) {
+    SkullMeta skullMeta = (SkullMeta) meta;
+
+    skullMeta.setOwner(this.player.getNameLegacy());
+
+    return skullMeta;
+  }
+
+  @Override
   public ItemStack createItem(Player player) {
     ItemStack stack = new ItemStack(getMaterial(player), 1, (byte) 3);
-    SkullMeta meta = (SkullMeta) stack.getItemMeta();
-
-    meta.setOwner(this.player.getNameLegacy());
+    ItemMeta meta = stack.getItemMeta();
 
     meta.setDisplayName(
-        getColor()
-            + ChatColor.BOLD.toString()
-            + TextTranslations.translateLegacy(getName(), player));
+        TextTranslations.translateLegacy(
+            getDisplayName().decoration(TextDecoration.BOLD, true), player));
     meta.setLore(getLore(player));
     meta.addItemFlags(ItemFlag.values());
 
-    stack.setItemMeta(meta);
+    stack.setItemMeta(modifyMeta(meta));
 
     return stack;
   }

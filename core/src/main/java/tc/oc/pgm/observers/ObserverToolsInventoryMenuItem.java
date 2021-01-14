@@ -6,7 +6,6 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -23,13 +22,8 @@ public class ObserverToolsInventoryMenuItem implements InventoryMenuItem {
   }
 
   @Override
-  public Component getName() {
-    return translatable("setting.displayName");
-  }
-
-  @Override
-  public ChatColor getColor() {
-    return ChatColor.AQUA;
+  public Component getDisplayName() {
+    return translatable("setting.displayName", NamedTextColor.AQUA);
   }
 
   @Override
@@ -41,7 +35,7 @@ public class ObserverToolsInventoryMenuItem implements InventoryMenuItem {
 
   @Override
   public Material getMaterial(Player player) {
-    return Material.DIAMOND;
+    return ObserverToolsMatchModule.TOOL_MATERIAL;
   }
 
   @Override

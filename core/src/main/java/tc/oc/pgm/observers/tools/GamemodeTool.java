@@ -9,7 +9,6 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -23,13 +22,8 @@ import tc.oc.pgm.util.text.TextTranslations;
 public class GamemodeTool implements InventoryMenuItem {
 
   @Override
-  public Component getName() {
-    return translatable("setting.gamemode");
-  }
-
-  @Override
-  public ChatColor getColor() {
-    return ChatColor.DARK_AQUA;
+  public Component getDisplayName() {
+    return translatable("setting.gamemode", NamedTextColor.DARK_AQUA);
   }
 
   @Override

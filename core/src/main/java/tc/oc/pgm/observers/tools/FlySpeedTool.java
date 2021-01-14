@@ -7,7 +7,6 @@ import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -20,13 +19,8 @@ public class FlySpeedTool implements InventoryMenuItem {
   private static final String TRANSLATION_KEY = "setting.flyspeed.";
 
   @Override
-  public Component getName() {
-    return translatable("setting.flyspeed");
-  }
-
-  @Override
-  public ChatColor getColor() {
-    return ChatColor.DARK_RED;
+  public Component getDisplayName() {
+    return translatable("setting.flyspeed", NamedTextColor.DARK_RED);
   }
 
   @Override

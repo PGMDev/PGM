@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.WeakHashMap;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -22,9 +22,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.menu.pattern.MenuArranger;
@@ -308,13 +306,8 @@ public class InventoryMenu implements Listener {
     }
 
     @Override
-    public Component getName() {
-      return translatable(next ? "misc.nextPage" : "misc.previousPage");
-    }
-
-    @Override
-    public ChatColor getColor() {
-      return ChatColor.WHITE;
+    public Component getDisplayName() {
+      return translatable(next ? "misc.nextPage" : "misc.previousPage", NamedTextColor.WHITE);
     }
 
     @Override
@@ -330,23 +323,6 @@ public class InventoryMenu implements Listener {
     @Override
     public void onInventoryClick(InventoryMenu menu, Player player, ClickType clickType) {
       new InventoryMenu(world, title, inventoryMenu).display(player);
-    }
-
-    @Override
-    public ItemStack createItem(Player player) {
-      ItemStack stack = new ItemStack(getMaterial(player), 1);
-      ItemMeta meta = stack.getItemMeta();
-
-      meta.setDisplayName(
-          getColor()
-              + ChatColor.BOLD.toString()
-              + TextTranslations.translateLegacy(getName(), player));
-      meta.setLore(getLore(player));
-      meta.addItemFlags(ItemFlag.values());
-
-      stack.setItemMeta(meta);
-
-      return stack;
     }
   }
 }

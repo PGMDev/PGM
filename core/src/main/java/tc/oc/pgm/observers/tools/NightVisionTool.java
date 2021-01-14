@@ -6,7 +6,6 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -19,13 +18,8 @@ import tc.oc.pgm.util.text.TextTranslations;
 public class NightVisionTool implements InventoryMenuItem {
 
   @Override
-  public Component getName() {
-    return translatable("setting.nightvision");
-  }
-
-  @Override
-  public ChatColor getColor() {
-    return ChatColor.DARK_PURPLE;
+  public Component getDisplayName() {
+    return translatable("setting.nightvision", NamedTextColor.DARK_PURPLE);
   }
 
   @Override

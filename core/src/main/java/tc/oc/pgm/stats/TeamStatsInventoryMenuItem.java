@@ -10,14 +10,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -31,6 +28,7 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
 
   private final Competitor team;
   private final InventoryMenu teamSubGUI;
+  private final Match match;
 
   private final NamedTextColor RESET = NamedTextColor.GRAY;
 
@@ -46,23 +44,18 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
             team.getPlayers().size() > 10
                 ? new IdentityMenuArranger(5)
                 : new DoubleRowMenuArranger());
+    this.match = match;
   }
 
   @Override
-  public Component getName() {
-    return translatable("match.stats.team", team.getName());
-  }
-
-  @Override
-  public ChatColor getColor() {
-    return ChatColor.valueOf(team.getColor().name());
+  public Component getDisplayName() {
+    return translatable("match.stats.team", team.getName().color(), team.getName());
   }
 
   @Override
   public List<String> getLore(Player player) {
 
-    StatsMatchModule smm =
-        PGM.get().getMatchManager().getPlayer(player).getMatch().needModule(StatsMatchModule.class);
+    StatsMatchModule smm = match.needModule(StatsMatchModule.class);
     List<String> lore = new ArrayList<>();
     int teamKills = 0;
     int teamDeaths = 0;
@@ -129,20 +122,11 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
   }
 
   @Override
-  public ItemStack createItem(Player player) {
-    ItemStack stack = new ItemStack(getMaterial(player));
-    LeatherArmorMeta meta = (LeatherArmorMeta) stack.getItemMeta();
+  public ItemMeta modifyMeta(ItemMeta meta) {
+    LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) meta;
 
-    meta.setDisplayName(
-        getColor()
-            + ChatColor.BOLD.toString()
-            + TextTranslations.translateLegacy(getName(), player));
-    meta.setLore(getLore(player));
-    meta.addItemFlags(ItemFlag.values());
-    meta.setColor(team.getFullColor());
+    leatherArmorMeta.setColor(team.getFullColor());
 
-    stack.setItemMeta(meta);
-
-    return stack;
+    return leatherArmorMeta;
   }
 }
