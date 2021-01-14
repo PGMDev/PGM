@@ -53,7 +53,7 @@ public abstract class GeneralizedEvent extends PreemptiveEvent {
   public @Nullable World getWorld() throws EventException {
     if (getCause() == null) return null;
     if (!(getCause() instanceof WorldEvent))
-      throw new EventException("Event has no associated world");
+      throw new EventException(getCause().getEventName() + " has no associated world");
     return ((WorldEvent) getCause()).getWorld();
   }
 

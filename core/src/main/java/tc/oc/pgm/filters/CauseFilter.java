@@ -12,7 +12,6 @@ import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.api.tracker.info.*;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
@@ -22,6 +21,8 @@ import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.util.event.GeneralizedEvent;
 import tc.oc.pgm.util.event.PlayerPunchBlockEvent;
 import tc.oc.pgm.util.event.PlayerTrampleBlockEvent;
+
+import javax.annotation.Nullable;
 
 public class CauseFilter extends TypedFilter<MatchQuery> {
 
