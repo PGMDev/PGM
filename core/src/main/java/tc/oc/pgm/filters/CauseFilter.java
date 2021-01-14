@@ -1,6 +1,7 @@
 package tc.oc.pgm.filters;
 
 import com.google.common.base.Preconditions;
+import javax.annotation.Nullable;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -21,8 +22,6 @@ import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.util.event.GeneralizedEvent;
 import tc.oc.pgm.util.event.PlayerPunchBlockEvent;
 import tc.oc.pgm.util.event.PlayerTrampleBlockEvent;
-
-import javax.annotation.Nullable;
 
 public class CauseFilter extends TypedFilter<MatchQuery> {
 
