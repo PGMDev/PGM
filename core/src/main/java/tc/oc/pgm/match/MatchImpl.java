@@ -191,10 +191,9 @@ public class MatchImpl implements Match {
           break;
         case FINISHED:
           calculateVictory(); // Winners must be calculated and saved prior to cancel.
-          Set<Competitor> winners = competitors.getRank(0);
           getExecutor(MatchScope.RUNNING).shutdownNow();
           getCountdown().cancelAll();
-          callEvent(new MatchFinishEvent(this, winners));
+          callEvent(new MatchFinishEvent(this, competitors.getRank(0)));
           break;
       }
 
