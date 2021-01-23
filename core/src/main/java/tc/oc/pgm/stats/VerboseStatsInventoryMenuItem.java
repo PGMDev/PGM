@@ -7,12 +7,11 @@ import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.menu.InventoryMenu;
-import tc.oc.pgm.menu.InventoryMenuItem;
+import tc.oc.pgm.util.menu.InventoryMenu;
+import tc.oc.pgm.util.menu.InventoryMenuItem;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class VerboseStatsInventoryMenuItem implements InventoryMenuItem {
@@ -24,29 +23,24 @@ public class VerboseStatsInventoryMenuItem implements InventoryMenuItem {
   }
 
   @Override
-  public Component getName() {
+  public Component getDisplayName() {
     return translatable("match.stats.title", NamedTextColor.GREEN, TextDecoration.BOLD);
   }
 
   @Override
-  public ChatColor getColor() {
-    return ChatColor.GREEN;
-  }
-
-  @Override
-  public List<String> getLore(MatchPlayer player) {
+  public List<String> getLore(Player player) {
     return Lists.newArrayList(
         TextTranslations.translateLegacy(
-            translatable("setting.lore", NamedTextColor.GRAY), player.getBukkit()));
+            translatable("setting.lore", NamedTextColor.GRAY), player));
   }
 
   @Override
-  public Material getMaterial(MatchPlayer player) {
+  public Material getMaterial(Player player) {
     return Material.PAPER;
   }
 
   @Override
-  public void onInventoryClick(InventoryMenu menu, MatchPlayer player, ClickType clickType) {
+  public void onInventoryClick(InventoryMenu menu, Player player, ClickType clickType) {
     verboseStatsMenu.display(player);
   }
 }

@@ -26,7 +26,7 @@ public final class StatsCommand {
         && PGM.get().getConfiguration().showVerboseStats()
         && !match.getCompetitors().stream()
             .allMatch(c -> c instanceof Tribute)) { // Should not try to trigger on FFA
-      match.needModule(StatsMatchModule.class).displayVerboseStatsAndGiveItem(player);
+      match.needModule(StatsMatchModule.class).giveVerboseStatsItem(player, true);
     } else if (player.getSettings().getValue(SettingKey.STATS).equals(SettingValue.STATS_ON)) {
       audience.sendMessage(
           TextFormatter.horizontalLineHeading(

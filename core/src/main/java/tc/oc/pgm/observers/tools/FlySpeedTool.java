@@ -7,12 +7,11 @@ import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.menu.InventoryMenu;
-import tc.oc.pgm.menu.InventoryMenuItem;
+import tc.oc.pgm.util.menu.InventoryMenu;
+import tc.oc.pgm.util.menu.InventoryMenuItem;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class FlySpeedTool implements InventoryMenuItem {
@@ -20,34 +19,29 @@ public class FlySpeedTool implements InventoryMenuItem {
   private static final String TRANSLATION_KEY = "setting.flyspeed.";
 
   @Override
-  public Component getName() {
-    return translatable("setting.flyspeed");
+  public Component getDisplayName() {
+    return translatable("setting.flyspeed", NamedTextColor.DARK_RED);
   }
 
   @Override
-  public ChatColor getColor() {
-    return ChatColor.DARK_RED;
-  }
-
-  @Override
-  public List<String> getLore(MatchPlayer player) {
-    Component flySpeed = FlySpeed.of(player.getBukkit().getFlySpeed()).getName();
+  public List<String> getLore(Player player) {
+    Component flySpeed = FlySpeed.of(player.getFlySpeed()).getName();
     Component lore = translatable("setting.flyspeed.lore", NamedTextColor.GRAY, flySpeed);
-    return Lists.newArrayList(TextTranslations.translateLegacy(lore, player.getBukkit()));
+    return Lists.newArrayList(TextTranslations.translateLegacy(lore, player));
   }
 
   @Override
-  public Material getMaterial(MatchPlayer player) {
+  public Material getMaterial(Player player) {
     return Material.FEATHER;
   }
 
   @Override
-  public void onInventoryClick(InventoryMenu menu, MatchPlayer player, ClickType clickType) {
-    FlySpeed speed = FlySpeed.of(player.getBukkit().getFlySpeed());
+  public void onInventoryClick(InventoryMenu menu, Player player, ClickType clickType) {
+    FlySpeed speed = FlySpeed.of(player.getFlySpeed());
     if (clickType.isRightClick()) {
-      player.getBukkit().setFlySpeed(speed.getPrev().getValue());
+      player.setFlySpeed(speed.getPrev().getValue());
     } else {
-      player.getBukkit().setFlySpeed(speed.getNext().getValue());
+      player.setFlySpeed(speed.getNext().getValue());
     }
     menu.refreshWindow(player);
   }

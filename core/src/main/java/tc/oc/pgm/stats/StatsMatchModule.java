@@ -50,12 +50,13 @@ import tc.oc.pgm.flag.event.FlagCaptureEvent;
 import tc.oc.pgm.flag.event.FlagPickupEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.flag.state.Carried;
-import tc.oc.pgm.menu.InventoryMenu;
-import tc.oc.pgm.menu.InventoryMenuItem;
-import tc.oc.pgm.menu.InventoryMenuUtils;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
+import tc.oc.pgm.util.menu.InventoryMenu;
+import tc.oc.pgm.util.menu.InventoryMenuItem;
+import tc.oc.pgm.util.menu.pattern.DoubleRowMenuArranger;
+import tc.oc.pgm.util.menu.pattern.SingleRowMenuArranger;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 
@@ -77,9 +78,6 @@ public class StatsMatchModule implements MatchModule, Listener {
   public static final DecimalFormat ONE_DECIMAL = new DecimalFormat("#.#");
 
   public static final Component HEART_SYMBOL = text("\u2764"); // ❤
-
-  // Defined at match end, see #onMatchEnd
-  private InventoryMenu endOfMatchMenu;
 
   public StatsMatchModule(Match match) {
     this.match = match;
@@ -166,6 +164,7 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   private void sendPlayerStats(MatchPlayer player, PlayerStats stats) {
+    if (player.getSettings().getValue(SettingKey.STATS) == SettingValue.STATS_OFF) return;
     if (stats.getHotbarTask() != null && !stats.getHotbarTask().isDone()) {
       stats.getHotbarTask().cancel(true);
     }
@@ -186,8 +185,10 @@ public class StatsMatchModule implements MatchModule, Listener {
   @EventHandler
   public void onMatchEnd(MatchFinishEvent event) {
 
+    // No players with stats -> no stats to show
     if (allPlayerStats.isEmpty()) return;
 
+    // Gather all player stats from this match
     Map<UUID, Integer> allKills = new HashMap<>();
     Map<UUID, Integer> allKillstreaks = new HashMap<>();
     Map<UUID, Integer> allDeaths = new HashMap<>();
@@ -207,45 +208,39 @@ public class StatsMatchModule implements MatchModule, Listener {
       allDamage.put(playerUUID, playerStats.getDamageDone());
     }
 
+    // Sort and create messages for the best stats
+
+    // kills/deaths
     Component killMessage =
         getMessage("match.stats.kills", sortStats(allKills), NamedTextColor.GREEN);
     Component killstreakMessage =
         getMessage("match.stats.killstreak", sortStats(allKillstreaks), NamedTextColor.GREEN);
     Component deathMessage =
         getMessage("match.stats.deaths", sortStats(allDeaths), NamedTextColor.RED);
+
+    // bow
     Map.Entry<UUID, Integer> bestBowshot = sortStats(allBowshots);
     if (bestBowshot.getValue() == 1)
       bestBowshot.setValue(2); // Avoids translating "1 block" vs "n blocks"
     Component bowshotMessage =
         getMessage("match.stats.bowshot", bestBowshot, NamedTextColor.YELLOW);
+
+    // damage
+    Map.Entry<UUID, Double> bestDamage = sortStatsDouble(allDamage);
     Component damageMessage =
-        getMessage("match.stats.damage", sortStatsDouble(allDamage), NamedTextColor.GREEN);
+        translatable(
+            "match.stats.damage",
+            playerName(bestDamage.getKey()),
+            damageComponent(bestDamage.getValue(), NamedTextColor.GREEN));
 
-    final Collection<Competitor> competitors = match.getCompetitors();
-
-    boolean showAllVerboseStats =
-        verboseStats && competitors.stream().allMatch(c -> c instanceof Team);
-
-    if (showAllVerboseStats) {
-
-      final List<InventoryMenuItem> items =
-          competitors.stream()
-              .map(c -> new TeamStatsInventoryMenuItem(match, c))
-              .collect(Collectors.toList());
-
-      endOfMatchMenu =
-          competitors.size() <= 4
-              ? InventoryMenuUtils.smallMenu(match, verboseStatsTitle, items)
-              : InventoryMenuUtils.progressiveMenu(match, verboseStatsTitle, items);
-    }
-
-    InventoryMenuItem verboseStatsItem = new VerboseStatsInventoryMenuItem(endOfMatchMenu);
-
+    // Send everything created to all players in the match
+    // (stat messages and items)
     match
         .getExecutor(MatchScope.LOADED)
         .schedule(
             () -> {
               for (MatchPlayer viewer : match.getPlayers()) {
+                // Does this player care about stats?
                 if (viewer.getSettings().getValue(SettingKey.STATS) == SettingValue.STATS_OFF)
                   continue;
 
@@ -259,8 +254,7 @@ public class StatsMatchModule implements MatchModule, Listener {
                 viewer.sendMessage(deathMessage);
                 if (bestBowshot.getValue() != 0) viewer.sendMessage(bowshotMessage);
                 if (verboseStats) viewer.sendMessage(damageMessage);
-                if (showAllVerboseStats)
-                  viewer.getInventory().setItem(7, verboseStatsItem.createItem(viewer));
+                giveVerboseStatsItem(viewer, false);
               }
             },
             5 + 1, // NOTE: This is 1 second after the votebook appears
@@ -279,18 +273,37 @@ public class StatsMatchModule implements MatchModule, Listener {
       if (item.getType() == Material.PAPER) {
         MatchPlayer player = match.getPlayer(event.getPlayer());
         if (player == null) return;
-        displayVerboseStatsAndGiveItem(player);
+        giveVerboseStatsItem(player, true);
       }
     }
   }
 
-  public void displayVerboseStatsAndGiveItem(MatchPlayer player) {
-    if (endOfMatchMenu == null)
-      return; // If allPlayerStats.isEmpty() == null the menu never gets defined
+  public void giveVerboseStatsItem(MatchPlayer player, boolean forceOpen) {
+    // Find out if verbose stats is relevant for this match
+    final Collection<Competitor> competitors = match.getCompetitors();
+    boolean showAllVerboseStats =
+        verboseStats && competitors.stream().allMatch(c -> c instanceof Team);
+    if (!showAllVerboseStats) return;
+
+    final List<InventoryMenuItem> items =
+        competitors.stream()
+            .map(c -> new TeamStatsInventoryMenuItem(match, c))
+            .collect(Collectors.toList());
+
+    // Add the player item in the middle
+    items.add((items.size() - 1) / 2 + 1, new PlayerStatsInventoryMenuItem(player));
+
+    final InventoryMenu menu =
+        new InventoryMenu(
+            match.getWorld(),
+            verboseStatsTitle,
+            items,
+            competitors.size() <= 4 ? new SingleRowMenuArranger() : new DoubleRowMenuArranger());
+
     player
         .getInventory()
-        .setItem(7, new VerboseStatsInventoryMenuItem(endOfMatchMenu).createItem(player));
-    endOfMatchMenu.display(player);
+        .setItem(7, new VerboseStatsInventoryMenuItem(menu).createItem(player.getBukkit()));
+    if (forceOpen) menu.display(player.getBukkit());
   }
 
   private Map.Entry<UUID, Integer> sortStats(Map<UUID, Integer> map) {
@@ -315,7 +328,7 @@ public class StatsMatchModule implements MatchModule, Listener {
    *
    * <p>If the number is NaN "-" is wrapped instead
    *
-   * <p>If the number is >= 1000 it will be represented in the thousands (1k, 2.5k, 120.3k etc.)
+   * <p>If the number is >= 10000 it will be represented in the thousands (10k, 25.5k, 120.3k etc.)
    *
    * @param stat The number you want wrapped
    * @param color The color you want the number to be

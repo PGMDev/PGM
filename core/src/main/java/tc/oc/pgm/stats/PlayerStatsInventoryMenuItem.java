@@ -1,5 +1,6 @@
 package tc.oc.pgm.stats;
 
+import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.stats.StatsMatchModule.damageComponent;
 import static tc.oc.pgm.stats.StatsMatchModule.numberComponent;
@@ -11,16 +12,16 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.menu.InventoryMenu;
-import tc.oc.pgm.menu.InventoryMenuItem;
+import tc.oc.pgm.util.menu.InventoryMenu;
+import tc.oc.pgm.util.menu.InventoryMenuItem;
 import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -34,19 +35,14 @@ public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
   }
 
   @Override
-  public Component getName() {
-    return player.getName();
+  public Component getDisplayName() {
+    return player.getName().color(NamedTextColor.GOLD);
   }
 
   @Override
-  public ChatColor getColor() {
-    return ChatColor.GOLD;
-  }
-
-  @Override
-  public List<String> getLore(MatchPlayer player) {
+  public List<String> getLore(Player player) {
     List<String> lore = new ArrayList<>();
-    StatsMatchModule smm = player.getMatch().needModule(StatsMatchModule.class);
+    StatsMatchModule smm = this.player.getMatch().needModule(StatsMatchModule.class);
     PlayerStats stats = smm.getPlayerStat(this.player.getId());
 
     Component statLore =
@@ -78,18 +74,16 @@ public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
             RESET,
             numberComponent(stats.getShotsHit(), NamedTextColor.YELLOW),
             numberComponent(stats.getShotsTaken(), NamedTextColor.YELLOW),
-            numberComponent(stats.getArrowAccuracy(), NamedTextColor.YELLOW));
+            numberComponent(stats.getArrowAccuracy(), NamedTextColor.YELLOW).append(text('%')));
 
-    Player bukkit = player.getBukkit();
-
-    lore.add(TextTranslations.translateLegacy(statLore, bukkit));
-    lore.add(TextTranslations.translateLegacy(killstreakLore, bukkit));
-    lore.add(TextTranslations.translateLegacy(damageDealtLore, bukkit));
-    lore.add(TextTranslations.translateLegacy(damageReceivedLore, bukkit));
-    lore.add(TextTranslations.translateLegacy(bowLore, bukkit));
+    lore.add(TextTranslations.translateLegacy(statLore, player));
+    lore.add(TextTranslations.translateLegacy(killstreakLore, player));
+    lore.add(TextTranslations.translateLegacy(damageDealtLore, player));
+    lore.add(TextTranslations.translateLegacy(damageReceivedLore, player));
+    lore.add(TextTranslations.translateLegacy(bowLore, player));
 
     if (!optionalStat(
-        lore, stats.getFlagsCaptured(), "match.stats.flagsCaptured.concise", bukkit)) {
+        lore, stats.getFlagsCaptured(), "match.stats.flagsCaptured.concise", player)) {
       if (!stats.getLongestFlagHold().equals(Duration.ZERO)) {
         lore.add(null);
         lore.add(
@@ -100,48 +94,54 @@ public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
                     TemporalComponent.briefNaturalApproximate(stats.getLongestFlagHold())
                         .color(NamedTextColor.AQUA)
                         .decoration(TextDecoration.BOLD, true)),
-                bukkit));
+                player));
       }
     }
-    optionalStat(lore, stats.getDestroyablePiecesBroken(), "match.stats.broken.concise", bukkit);
+    optionalStat(lore, stats.getDestroyablePiecesBroken(), "match.stats.broken.concise", player);
 
     return lore;
   }
 
-  private boolean optionalStat(List<String> lore, Number stat, String key, Player bukkit) {
+  private boolean optionalStat(List<String> lore, Number stat, String key, Player player) {
     if (stat.doubleValue() > 0) {
       lore.add(null);
       Component loreComponent =
           translatable(key, RESET, numberComponent(stat, NamedTextColor.AQUA));
-      lore.add(TextTranslations.translateLegacy(loreComponent, bukkit));
+      lore.add(TextTranslations.translateLegacy(loreComponent, player));
       return true;
     }
     return false;
   }
 
   @Override
-  public Material getMaterial(MatchPlayer player) {
+  public Material getMaterial(Player player) {
     return Material.SKULL_ITEM;
   }
 
   @Override
-  public void onInventoryClick(InventoryMenu menu, MatchPlayer player, ClickType clickType) {}
+  public void onInventoryClick(InventoryMenu menu, Player player, ClickType clickType) {}
 
   @Override
-  public ItemStack createItem(MatchPlayer player) {
-    ItemStack stack = new ItemStack(getMaterial(player), 1, (byte) 3);
-    SkullMeta meta = (SkullMeta) stack.getItemMeta();
+  public ItemMeta modifyMeta(ItemMeta meta) {
+    SkullMeta skullMeta = (SkullMeta) meta;
 
-    meta.setOwner(this.player.getNameLegacy());
+    skullMeta.setOwner(this.player.getNameLegacy());
+
+    return skullMeta;
+  }
+
+  @Override
+  public ItemStack createItem(Player player) {
+    ItemStack stack = new ItemStack(getMaterial(player), 1, (byte) 3);
+    ItemMeta meta = stack.getItemMeta();
 
     meta.setDisplayName(
-        getColor()
-            + ChatColor.BOLD.toString()
-            + TextTranslations.translateLegacy(getName(), player.getBukkit()));
+        TextTranslations.translateLegacy(
+            getDisplayName().decoration(TextDecoration.BOLD, true), player));
     meta.setLore(getLore(player));
     meta.addItemFlags(ItemFlag.values());
 
-    stack.setItemMeta(meta);
+    stack.setItemMeta(modifyMeta(meta));
 
     return stack;
   }
