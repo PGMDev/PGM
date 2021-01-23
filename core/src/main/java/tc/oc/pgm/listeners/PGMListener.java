@@ -1,7 +1,6 @@
 package tc.oc.pgm.listeners;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
@@ -126,7 +125,8 @@ public class PGMListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW)
   public void addPlayerOnJoin(final PlayerJoinEvent event) {
-    if (this.mm.getMatch(event.getWorld()) == null) {
+    Match match = this.mm.getMatch(event.getWorld());
+    if (match == null) {
       event
           .getPlayer()
           .kickPlayer(
@@ -140,7 +140,7 @@ public class PGMListener implements Listener {
       return;
     }
 
-    this.mm.getMatch(event.getWorld()).addPlayer(event.getPlayer());
+    match.addPlayer(event.getPlayer());
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -153,35 +153,24 @@ public class PGMListener implements Listener {
       event.setJoinMessage(null);
       MatchPlayer player = match.getPlayer(event.getPlayer());
       if (player != null) {
-        if (!vm.isVanished(player.getId())) {
-          announceJoinOrLeave(player, true, false);
-        } else {
-          // Announce actual staff join
-          announceJoinOrLeave(player, true, true);
-        }
+        // Announce actual staff join
+        announceJoinOrLeave(player, true, vm.isVanished(player.getId()));
       }
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void removePlayerOnDisconnect(PlayerQuitEvent event) {
-    Match match = this.mm.getMatch(event.getWorld());
-    if (match == null) return;
+    MatchPlayer player = this.mm.getPlayer(event.getPlayer());
+    if (player == null) return;
 
     if (event.getQuitMessage() != null) {
-      MatchPlayer player = match.getPlayer(event.getPlayer());
-      if (player != null) {
-        if (!vm.isVanished(player.getId())) {
-          announceJoinOrLeave(player, false, false);
-        } else {
-          // Announce actual staff quit
-          announceJoinOrLeave(player, false, true);
-        }
-      }
+      // Announce actual staff quit
+      announceJoinOrLeave(player, false, vm.isVanished(player.getId()));
       event.setQuitMessage(null);
     }
 
-    match.removePlayer(event.getPlayer());
+    player.getMatch().removePlayer(event.getPlayer());
   }
 
   public static void announceJoinOrLeave(MatchPlayer player, boolean join, boolean staffOnly) {
