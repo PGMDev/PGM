@@ -73,8 +73,7 @@ public class TimeLimit extends SelfIdentifyingFeatureDefinition implements Victo
 
   @Override
   public boolean isCompleted(Match match) {
-    TimeLimitCountdown countdown = match.needModule(TimeLimitMatchModule.class).getCountdown();
-    return countdown != null && match.getCountdown().isFinished(countdown);
+    return match.needModule(TimeLimitMatchModule.class).isFinished();
   }
 
   public @Nullable Competitor currentWinner(Match match) {

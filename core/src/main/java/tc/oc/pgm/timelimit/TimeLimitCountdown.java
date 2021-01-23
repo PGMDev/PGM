@@ -100,11 +100,12 @@ public class TimeLimitCountdown extends MatchCountdown {
   @Override
   public void onEnd(Duration total) {
     super.onEnd(total);
+    TimeLimitMatchModule tl = this.getMatch().needModule(TimeLimitMatchModule.class);
     if (mayEnd()) {
+      tl.setFinished(true);
       this.getMatch().calculateVictory();
     } else {
-      TimeLimitMatchModule tl = this.getMatch().getModule(TimeLimitMatchModule.class);
-      if (tl != null) tl.startOvertime();
+      tl.startOvertime();
     }
     this.freeze(Duration.ZERO);
   }
