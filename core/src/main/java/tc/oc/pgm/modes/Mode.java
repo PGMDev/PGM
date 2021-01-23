@@ -7,9 +7,9 @@ import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.material.MaterialData;
+import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 
-public class Mode {
-
+public class Mode extends SelfIdentifyingFeatureDefinition {
   private final MaterialData material;
   private final Duration after;
   private final @Nullable String name;
@@ -17,14 +17,16 @@ public class Mode {
   private final Duration showBefore;
 
   public Mode(final MaterialData material, final Duration after, Duration showBefore) {
-    this(material, after, null, showBefore);
+    this(null, material, after, null, showBefore);
   }
 
   public Mode(
+      final @Nullable String id,
       final MaterialData material,
       final Duration after,
       final @Nullable String name,
       Duration showBefore) {
+    super(id);
     this.material = material;
     this.after = after;
     this.name = name;

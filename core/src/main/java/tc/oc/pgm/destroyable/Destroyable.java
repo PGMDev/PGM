@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import java.time.Duration;
 import java.time.Instant;
@@ -41,6 +42,7 @@ import tc.oc.pgm.goals.ModeChangeGoal;
 import tc.oc.pgm.goals.TouchableGoal;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
+import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.modes.ModeUtils;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.teams.Team;
@@ -165,6 +167,10 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
                   .toLocation(getOwner().getMatch().getWorld()));
     }
     return proximityLocations;
+  }
+
+  public ImmutableSet<Mode> getModes() {
+    return this.definition.getModes();
   }
 
   void addMaterials(SingleMaterialMatcher pattern) {
@@ -445,11 +451,6 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return this.maxHealth - this.health;
   }
 
-  @Override
-  public boolean isAffectedByModeChanges() {
-    return this.definition.hasModeChanges();
-  }
-
   public double getDestructionRequired() {
     return this.destructionRequired;
   }
@@ -618,7 +619,6 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return this.hasMaterial(block.getState().getData());
   }
 
-  @Override
   public String getModeChangeMessage(Material material) {
     return ModeUtils.formatMaterial(material) + " OBJECTIVE MODE";
   }

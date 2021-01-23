@@ -1,8 +1,9 @@
 package tc.oc.pgm.goals;
 
-import org.bukkit.Material;
+import com.google.common.collect.ImmutableSet;
 import org.bukkit.block.Block;
 import org.bukkit.material.MaterialData;
+import tc.oc.pgm.modes.Mode;
 
 public interface ModeChangeGoal<T extends GoalDefinition> extends Goal<T> {
 
@@ -10,7 +11,5 @@ public interface ModeChangeGoal<T extends GoalDefinition> extends Goal<T> {
 
   boolean isObjectiveMaterial(Block block);
 
-  String getModeChangeMessage(Material material);
-
-  boolean isAffectedByModeChanges();
+  ImmutableSet<Mode> getModes();
 }

@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import java.util.Collections;
 import java.util.Set;
 import javax.annotation.Nonnull;
@@ -27,6 +28,7 @@ import tc.oc.pgm.goals.Contribution;
 import tc.oc.pgm.goals.IncrementalGoal;
 import tc.oc.pgm.goals.ModeChangeGoal;
 import tc.oc.pgm.goals.TouchableGoal;
+import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.modes.ModeUtils;
 import tc.oc.pgm.regions.CuboidRegion;
 import tc.oc.pgm.regions.FiniteBlockRegion;
@@ -131,6 +133,10 @@ public class Core extends TouchableGoal<CoreFactory>
     return proximityLocations;
   }
 
+  public ImmutableSet<Mode> getModes() {
+    return this.definition.getModes();
+  }
+
   public MaterialData getMaterial() {
     return this.material;
   }
@@ -182,11 +188,6 @@ public class Core extends TouchableGoal<CoreFactory>
   @Override
   public boolean isCompleted(Competitor team) {
     return this.leaked && this.canComplete(team);
-  }
-
-  @Override
-  public boolean isAffectedByModeChanges() {
-    return this.definition.hasModeChanges();
   }
 
   @Override
@@ -244,7 +245,6 @@ public class Core extends TouchableGoal<CoreFactory>
         && block.getData() == this.material.getData();
   }
 
-  @Override
   public String getModeChangeMessage(Material material) {
     return ModeUtils.formatMaterial(material) + " CORE MODE";
   }
