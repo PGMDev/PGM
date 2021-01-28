@@ -3,7 +3,6 @@ package tc.oc.pgm.map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Sets;
 import java.lang.ref.SoftReference;
 import java.util.Collections;
 import java.util.HashSet;
@@ -13,10 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.Spliterators;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
 import tc.oc.pgm.api.map.MapContext;
@@ -52,7 +53,7 @@ public class MapLibraryImpl implements MapLibrary {
   public MapLibraryImpl(Logger logger, List<MapSourceFactory> factories) {
     this.logger = checkNotNull(logger); // Logger should be visible in-game
     this.factories = Collections.synchronizedList(checkNotNull(factories));
-    this.maps = new ConcurrentSkipListMap<>();
+    this.maps = Collections.synchronizedSortedMap(new ConcurrentSkipListMap<>());
     this.failed = Collections.synchronizedSet(new HashSet<>());
   }
 
@@ -149,8 +150,10 @@ public class MapLibraryImpl implements MapLibrary {
 
     return CompletableFuture.runAsync(
             () ->
-                Sets.newHashSet(Iterators.concat(sources.iterator()))
-                    .parallelStream()
+                StreamSupport.stream(
+                        Spliterators.spliteratorUnknownSize(
+                            Iterators.concat(sources.iterator()), 0),
+                        true)
                     .forEach(source -> loadMapSafe(source, null)))
         .thenRunAsync(() -> logMapSuccess(fail, ok))
         .thenRunAsync(UsernameResolver::resolveAll);
@@ -200,7 +203,10 @@ public class MapLibraryImpl implements MapLibrary {
           t.getCause());
     }
 
-    maps.put(context.getId(), new MapEntry(source, context.clone(), context));
+    maps.merge(
+        context.getId(),
+        new MapEntry(source, context.clone(), context),
+        (m1, m2) -> m1.info.getVersion().isOlderThan(m2.info.getVersion()) ? m2 : m1);
     failed.remove(source);
 
     return context;
