@@ -243,7 +243,7 @@ public class MapPoolManager implements MapOrder {
   }
 
   public Optional<MapPool> getAppropriateDynamicPool(Match match) {
-    double obsBias = match.getModule(BlitzMatchModule.class) != null ? 0.5 : 0.85;
+    double obsBias = match.getModule(BlitzMatchModule.class) != null ? 0.85 : 0.5;
     double activePlayers = match.getParticipants().size() + match.getObservers().size() * obsBias;
     return mapPools.keySet().stream()
         .filter(MapPool::isDynamic)
