@@ -21,6 +21,7 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.command.graph.DefaultCommand;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.VotingPool;
@@ -142,6 +143,7 @@ public class VotingCommand {
   @Command(
       aliases = {"list", "ls"},
       desc = "View a list of maps that have been selected for the next vote")
+  @DefaultCommand
   public void listMaps(CommandSender sender, Audience viewer, MapOrder mapOrder)
       throws CommandException {
     VotingPool vote = getVotingPool(sender, mapOrder);

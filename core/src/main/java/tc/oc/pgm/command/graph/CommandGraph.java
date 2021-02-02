@@ -1,7 +1,9 @@
 package tc.oc.pgm.command.graph;
 
+import app.ashcon.intake.Command;
 import app.ashcon.intake.argument.CommandArgs;
 import app.ashcon.intake.bukkit.graph.BasicBukkitCommandGraph;
+import app.ashcon.intake.dispatcher.SimpleDispatcher;
 import app.ashcon.intake.fluent.DispatcherNode;
 import app.ashcon.intake.parametric.AbstractModule;
 import app.ashcon.intake.parametric.Module;
@@ -9,6 +11,7 @@ import app.ashcon.intake.parametric.Provider;
 import app.ashcon.intake.parametric.provider.EnumProvider;
 import com.google.common.collect.ImmutableList;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.List;
 import java.util.function.Function;
@@ -90,7 +93,24 @@ public class CommandGraph extends BasicBukkitCommandGraph {
   public void register(Object command, String... aliases) {
     DispatcherNode node = getRootDispatcherNode();
     if (aliases.length > 0) {
-      node = node.registerNode(aliases);
+      String defaultCommand = null;
+      for (Method method : command.getClass().getDeclaredMethods()) {
+        Command definition = method.getAnnotation(Command.class);
+        if (definition == null) continue;
+
+        if (method.getAnnotation(DefaultCommand.class) != null)
+          defaultCommand = definition.aliases()[0];
+      }
+
+      if (defaultCommand != null) {
+        // there is a method with a @DefaultCommand annotation, therefore use the
+        // custom dispatcher
+        SimpleDispatcher nestedDispatcher = new DefaultCommandDispatcher(defaultCommand);
+        node.getDispatcher().registerCommand(nestedDispatcher, aliases);
+        node = new DispatcherNode(this, node, nestedDispatcher);
+      } else {
+        node = node.registerNode(aliases);
+      }
     }
     node.registerCommands(command);
   }

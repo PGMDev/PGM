@@ -14,6 +14,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.commons.lang.WordUtils;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.command.graph.DefaultCommand;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.modes.ModeChangeCountdown;
 import tc.oc.pgm.modes.ModesPaginatedResult;
@@ -69,6 +70,7 @@ public final class ModeCommand {
       aliases = {"list", "page"},
       desc = "List all objectivs modes",
       usage = "[page]")
+  @DefaultCommand
   public void list(Audience audience, Match match, @Default("1") int page) throws CommandException {
     showList(page, audience, getModes(match));
   }
