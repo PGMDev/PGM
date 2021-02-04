@@ -203,7 +203,7 @@ public class VanishManagerImpl implements VanishManager, Listener {
     }
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.MONITOR)
   public void checkMatchPlayer(MatchPlayerAddEvent event) {
     MatchPlayer player = event.getPlayer();
     // Player is joining to a team so broadcast join
