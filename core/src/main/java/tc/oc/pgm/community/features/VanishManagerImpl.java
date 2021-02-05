@@ -31,6 +31,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
+import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.player.event.MatchPlayerAddEvent;
@@ -158,9 +159,15 @@ public class VanishManagerImpl implements VanishManager, Listener {
   @EventHandler(priority = EventPriority.HIGH)
   public void onJoin(PlayerJoinEvent event) {
     MatchPlayer player = matchManager.getPlayer(event.getPlayer());
-    if (isVanished(player.getId())) { // Player is already vanished
+    if (player == null) return;
+    if (player.getParty() instanceof Competitor) return; // Do not vanish players on a team
+
+    if (isVanished(player.getId())) {
       player.setVanished(true);
-    } else if (player
+      return;
+    }
+
+    if (player
         .getBukkit()
         .hasPermission(Permissions.VANISH)) { // Player is not vanished, but has permission to
 
@@ -196,9 +203,15 @@ public class VanishManagerImpl implements VanishManager, Listener {
     }
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.MONITOR)
   public void checkMatchPlayer(MatchPlayerAddEvent event) {
-    event.getPlayer().setVanished(isVanished(event.getPlayer().getId()));
+    MatchPlayer player = event.getPlayer();
+    // Player is joining to a team so broadcast join
+    if (event.getInitialParty() instanceof Competitor) {
+      setVanished(player, false, false);
+    }
+
+    player.setVanished(isVanished(player.getId()));
   }
 
   private boolean isVanishSubdomain(String address) {
