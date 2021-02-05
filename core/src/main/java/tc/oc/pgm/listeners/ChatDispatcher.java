@@ -49,6 +49,7 @@ import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.PlayerComponent;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class ChatDispatcher implements Listener {
@@ -123,14 +124,7 @@ public class ChatDispatcher implements Listener {
     }
 
     if (checkMute(sender)) {
-      send(
-          match,
-          sender,
-          message,
-          GLOBAL_FORMAT,
-          getChatFormat(null, sender, message),
-          viewer -> true,
-          SettingValue.CHAT_GLOBAL);
+      send(match, sender, message, GLOBAL_FORMAT, null, viewer -> true, SettingValue.CHAT_GLOBAL);
     }
   }
 
@@ -158,7 +152,7 @@ public class ChatDispatcher implements Listener {
           sender,
           message,
           TextTranslations.translateLegacy(party.getChatPrefix(), null) + PREFIX_FORMAT,
-          getChatFormat(party.getChatPrefix(), sender, message),
+          party.getChatPrefix(),
           viewer ->
               party.equals(viewer.getParty())
                   || (viewer.isObserving()
@@ -186,7 +180,7 @@ public class ChatDispatcher implements Listener {
         sender,
         message != null ? BukkitUtils.colorize(message) : null,
         AC_FORMAT,
-        getChatFormat(ADMIN_CHAT_PREFIX, sender, message),
+        ADMIN_CHAT_PREFIX,
         AC_FILTER,
         SettingValue.CHAT_ADMIN);
 
@@ -255,13 +249,10 @@ public class ChatDispatcher implements Listener {
         sender,
         message,
         formatPrivateMessage("misc.from", matchReceiver.getBukkit()),
-        getChatFormat(
-            text()
-                .append(translatable("misc.from", NamedTextColor.GRAY, TextDecoration.ITALIC))
-                .append(space())
-                .build(),
-            sender,
-            message),
+        text()
+            .append(translatable("misc.from", NamedTextColor.GRAY, TextDecoration.ITALIC))
+            .append(space())
+            .build(),
         viewer -> viewer.getBukkit().equals(receiver),
         null);
 
@@ -271,13 +262,10 @@ public class ChatDispatcher implements Listener {
         manager.getPlayer(receiver), // Allow for cross-match messages
         message,
         formatPrivateMessage("misc.to", sender.getBukkit()),
-        getChatFormat(
-            text()
-                .append(translatable("misc.to", NamedTextColor.GRAY, TextDecoration.ITALIC))
-                .append(space())
-                .build(),
-            manager.getPlayer(receiver),
-            message),
+        text()
+            .append(translatable("misc.to", NamedTextColor.GRAY, TextDecoration.ITALIC))
+            .append(space())
+            .build(),
         viewer -> viewer.getBukkit().equals(sender.getBukkit()),
         null);
   }
@@ -371,7 +359,7 @@ public class ChatDispatcher implements Listener {
       MatchPlayer sender,
       @Nullable String text,
       String format,
-      Component componentMsg,
+      @Nullable Component prefix,
       Predicate<MatchPlayer> filter,
       @Nullable SettingValue type) {
     // When a message is empty, this indicates the player wants to change their default chat channel
@@ -414,8 +402,17 @@ public class ChatDispatcher implements Listener {
                 }
 
                 event.getRecipients().stream()
-                    .map(Audience::get)
-                    .forEach(player -> player.sendMessage(identity(sender.getId()), componentMsg));
+                    .forEach(
+                        player -> {
+                          Audience audience = Audience.get(player);
+                          audience.sendMessage(
+                              identity(sender.getId()),
+                              getChatFormat(
+                                  prefix,
+                                  PlayerComponent.player(
+                                      sender.getBukkit(), NameStyle.VERBOSE, player),
+                                  message));
+                        });
               });
       return;
     }
@@ -485,18 +482,18 @@ public class ChatDispatcher implements Listener {
     return viewer.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ALL);
   }
 
-  private Component getChatFormat(@Nullable Component prefix, MatchPlayer player, String message) {
+  private Component getChatFormat(@Nullable Component prefix, Component name, String message) {
     Component msg = text(message != null ? message : "");
     if (prefix == null)
       return text()
           .append(text("<", NamedTextColor.WHITE))
-          .append(player.getName(NameStyle.VERBOSE))
+          .append(name)
           .append(text(">: ", NamedTextColor.WHITE))
           .append(msg)
           .build();
     return text()
         .append(prefix)
-        .append(player.getName(NameStyle.VERBOSE))
+        .append(name)
         .append(text(": ", NamedTextColor.WHITE))
         .append(msg)
         .build();
