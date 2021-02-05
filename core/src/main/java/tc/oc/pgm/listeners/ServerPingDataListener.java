@@ -83,13 +83,13 @@ public class ServerPingDataListener implements Listener {
     Iterator<Player> playerSample = event.iterator();
     while (playerSample.hasNext()) {
       Player player = playerSample.next();
-      //FIXME: Figure out how to rename nicked players instead of removing
+      // FIXME: Figure out how to rename nicked players instead of removing
       if (vanishManager.isVanished(player.getUniqueId())
           || nick.getNick(player.getUniqueId()).isPresent()) {
         playerSample.remove();
       }
     }
-    
+
     try {
       JsonObject root = event.getOrCreateExtra(PGM.get());
       this.matchManager

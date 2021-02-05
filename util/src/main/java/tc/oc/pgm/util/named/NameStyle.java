@@ -19,7 +19,7 @@ public enum NameStyle {
   // Fancy plus allowing disguised status reveal
   VERBOSE(EnumSet.of(Flag.COLOR, Flag.FLAIR, Flag.TELEPORT, Flag.DISGUISE, Flag.REVEAL)),
   // Fancy without teleport
-  CONCISE(EnumSet.of(Flag.COLOR, Flag.FLAIR, Flag.TELEPORT));
+  CONCISE(EnumSet.of(Flag.COLOR, Flag.FLAIR, Flag.TELEPORT, Flag.DISGUISE_OFFLINE));
 
   private final Set<Flag> flags;
 

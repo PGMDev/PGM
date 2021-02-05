@@ -64,10 +64,6 @@ public final class PlayerComponent {
 
   public static Component player(
       @Nullable Player player, String defName, NameStyle style, @Nullable Player viewer) {
-    boolean isOffline =
-        player == null
-            || !player.isOnline()
-            || (isDisguised(player) && style.has(NameStyle.Flag.DISGUISE_OFFLINE));
 
     NameDecorationProvider provider = NameDecorationProvider.DEFAULT;
     if (player != null && player.hasMetadata(NameDecorationProvider.METADATA_KEY)) {
@@ -92,9 +88,15 @@ public final class PlayerComponent {
       if (nickMeta != null) nickProvider = (NickProvider) nickMeta.value();
     }
 
+    boolean isOffline =
+        player == null
+            || !player.isOnline()
+            || ((isDisguised(player) || nickProvider.getNick(player.getUniqueId()).isPresent())
+                && style.has(NameStyle.Flag.DISGUISE_OFFLINE));
+
     UUID uuid = !isOffline ? player.getUniqueId() : null;
     boolean isNicked = uuid != null && nickProvider.getNick(uuid).isPresent();
-    String nicked = player != null ? nickProvider.getPlayerName(player) : defName;
+    String nicked = !isOffline && player != null ? nickProvider.getPlayerName(player) : defName;
 
     TextComponent.Builder builder = text();
     if (!isOffline
@@ -170,12 +172,12 @@ public final class PlayerComponent {
   }
 
   static String getName(
-      @Nullable Player player, @Nullable Player viewer, FriendProvider friends, String nickName) {
+      @Nullable Player player, @Nullable Player viewer, FriendProvider friends, String defName) {
     if (player != null
         && viewer != null
         && (viewer == player || friends.areFriends(player.getUniqueId(), viewer.getUniqueId()))) {
       return player.getName();
     }
-    return nickName;
+    return defName;
   }
 }
