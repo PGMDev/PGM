@@ -1,7 +1,6 @@
 package tc.oc.pgm.util.listener;
 
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.event.Event;
@@ -21,7 +20,6 @@ public class PlayerBlockListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerAnimation(final PlayerAnimationEvent event) {
     if (event.getAnimationType() != PlayerAnimationType.ARM_SWING) return;
-    if (event.getPlayer().getGameMode() != GameMode.ADVENTURE) return;
 
     // Client cannot punch blocks in adventure mode, so we detect it ourselves.
     RayBlockIntersection hit = event.getPlayer().getTargetedBlock(true, false);
@@ -33,8 +31,6 @@ public class PlayerBlockListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerCoarseMove(final PlayerCoarseMoveEvent event) {
     if (!event.getPlayer().isOnGround()) return;
-    if (!(event.getPlayer().getGameMode() == GameMode.SURVIVAL
-        || event.getPlayer().getGameMode() == GameMode.ADVENTURE)) return;
 
     Block block = event.getBlockTo().getBlock();
     if (!block.getType().isSolid()) {
