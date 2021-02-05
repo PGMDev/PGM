@@ -38,7 +38,8 @@ import tc.oc.pgm.util.Audience;
  * {@link Match}. This should allow multiple {@link Match}es to run concurrently on the same {@link
  * org.bukkit.Server}, as long as resources are cleaned up after {@link #unload()}.
  */
-public interface Match extends MatchPlayerResolver, Audience, ModuleContext<MatchModule> {
+public interface Match
+    extends MatchPlayerResolver, Audience, ModuleContext<MatchModule>, Comparable<Match> {
 
   /**
    * Get the global {@link Logger} for the {@link Match}.

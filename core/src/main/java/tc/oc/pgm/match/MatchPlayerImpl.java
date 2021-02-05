@@ -431,6 +431,15 @@ public class MatchPlayerImpl implements MatchPlayer {
   }
 
   @Override
+  public int compareTo(MatchPlayer o) {
+    int where = this.match.compareTo(o.getMatch());
+    if (where == 0) {
+      return this.id.compareTo(o.getId());
+    }
+    return where;
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;

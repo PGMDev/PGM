@@ -875,6 +875,11 @@ public class MatchImpl implements Match {
   }
 
   @Override
+  public int compareTo(Match o) {
+    return this.id.compareTo(o.getId());
+  }
+
+  @Override
   public int hashCode() {
     return getId().hashCode();
   }

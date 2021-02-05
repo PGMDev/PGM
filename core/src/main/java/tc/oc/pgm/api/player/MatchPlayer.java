@@ -25,7 +25,8 @@ import tc.oc.pgm.util.named.Named;
  * this is used is to check if a {@link MatchPlayer} is involved in an event. If you need to access
  * or modify a {@link Player}, there should be a method added to {@link MatchPlayer}.
  */
-public interface MatchPlayer extends Audience, Named, Tickable, InventoryHolder {
+public interface MatchPlayer
+    extends Audience, Named, Tickable, InventoryHolder, Comparable<MatchPlayer> {
 
   /**
    * Get the {@link Match} of the {@link MatchPlayer}.
