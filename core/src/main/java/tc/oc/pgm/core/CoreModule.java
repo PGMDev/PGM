@@ -23,6 +23,7 @@ import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.modes.Mode;
+import tc.oc.pgm.modes.ObjectiveModesModule;
 import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
@@ -72,7 +73,7 @@ public class CoreModule implements MapModule {
 
     @Override
     public Collection<Class<? extends MapModule>> getSoftDependencies() {
-      return ImmutableList.of(RegionModule.class, TeamModule.class);
+      return ImmutableList.of(RegionModule.class, TeamModule.class, ObjectiveModesModule.class);
     }
 
     @Override
