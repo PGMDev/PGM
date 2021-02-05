@@ -377,7 +377,9 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     registerEvents(new WorldProblemListener(this));
     registerEvents(new MatchAnnouncer());
     registerEvents(new MotdListener());
-    registerEvents(new ServerPingDataListener(matchManager, mapOrder, getLogger(), vanishManager));
+    registerEvents(
+        new ServerPingDataListener(
+            matchManager, mapOrder, getLogger(), vanishManager, nickRegistry));
   }
 
   private class InGameHandler extends Handler {

@@ -28,6 +28,7 @@ import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.map.contrib.PlayerContributor;
+import tc.oc.pgm.nick.NickRegistry;
 import tc.oc.pgm.util.ClassLogger;
 
 public class ServerPingDataListener implements Listener {
@@ -39,16 +40,19 @@ public class ServerPingDataListener implements Listener {
   private final AtomicBoolean legacySportPaper;
   private final LoadingCache<Match, JsonObject> matchCache;
   private final VanishManager vanishManager;
+  private final NickRegistry nick;
 
   public ServerPingDataListener(
       MatchManager matchManager,
       MapOrder mapOrder,
       Logger parentLogger,
-      VanishManager vanishManager) {
+      VanishManager vanishManager,
+      NickRegistry nick) {
     this.matchManager = checkNotNull(matchManager);
     this.mapOrder = checkNotNull(mapOrder);
     this.logger = ClassLogger.get(checkNotNull(parentLogger), ServerPingDataListener.class);
     this.vanishManager = checkNotNull(vanishManager);
+    this.nick = checkNotNull(nick);
     this.ready = new AtomicBoolean();
     this.legacySportPaper = new AtomicBoolean();
     this.matchCache =
@@ -75,15 +79,17 @@ public class ServerPingDataListener implements Listener {
   public void onServerListPing(ServerListPingEvent event) {
     if (!ready.get() || legacySportPaper.get()) return;
 
-    // Remove vanished players from player sample/ping count
+    // Remove disguised players from player sample/ping count
     Iterator<Player> playerSample = event.iterator();
     while (playerSample.hasNext()) {
       Player player = playerSample.next();
-      if (vanishManager.isVanished(player.getUniqueId())) {
+      //FIXME: Figure out how to rename nicked players instead of removing
+      if (vanishManager.isVanished(player.getUniqueId())
+          || nick.getNick(player.getUniqueId()).isPresent()) {
         playerSample.remove();
       }
     }
-
+    
     try {
       JsonObject root = event.getOrCreateExtra(PGM.get());
       this.matchManager
