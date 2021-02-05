@@ -160,6 +160,7 @@ public final class PlayerComponent {
 
   static boolean canViewNick(Player player, @Nullable Player viewer, FriendProvider friends) {
     if (viewer == null) return false;
+    if (viewer == player) return true;
     return viewer.hasPermission("pgm.staff")
         || friends.areFriends(player.getUniqueId(), viewer.getUniqueId()); // TODO: maybe change
   }
