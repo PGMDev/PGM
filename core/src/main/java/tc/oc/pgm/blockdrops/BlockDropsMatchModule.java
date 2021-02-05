@@ -229,7 +229,7 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onBlockPunch(PlayerPunchBlockEvent event) {
     final MatchPlayer player = match.getPlayer(event.getPlayer());
-    if (player == null) return;
+    if (player == null || !player.canInteract()) return;
 
     RayBlockIntersection hit = event.getRay();
 
@@ -249,7 +249,7 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onBlockTrample(PlayerTrampleBlockEvent event) {
     final MatchPlayer player = match.getPlayer(event.getPlayer());
-    if (player == null) return;
+    if (player == null || !player.canInteract()) return;
 
     BlockDrops drops =
         getRuleSet().getDrops(event, event.getBlock().getState(), player.getParticipantState());
