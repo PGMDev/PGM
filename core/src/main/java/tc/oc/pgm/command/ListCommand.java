@@ -87,7 +87,7 @@ public final class ListCommand {
     List<Component> names =
         players.stream()
             .filter(mp -> sender.hasPermission(Permissions.STAFF) || !isVanished(mp.getId()))
-            .map(mp -> mp.getName(NameStyle.VERBOSE))
+            .map(mp -> mp.getName(NameStyle.VERBOSE, sender))
             .collect(Collectors.toList());
 
     return TextFormatter.list(names, NamedTextColor.GRAY);

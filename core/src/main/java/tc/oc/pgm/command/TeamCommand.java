@@ -49,7 +49,7 @@ public final class TeamCommand {
         translatable(
             "join.ok.force",
             NamedTextColor.GRAY,
-            joiner.getName(NameStyle.FANCY),
+            joiner.getName(NameStyle.FANCY, sender.getBukkit()),
             joiner.getParty().getName(),
             oldParty.getName()));
   }

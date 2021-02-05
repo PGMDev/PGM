@@ -27,6 +27,7 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
+import tc.oc.pgm.nick.NickRegistry;
 import tc.oc.pgm.util.named.NameDecorationProvider;
 import tc.oc.pgm.util.text.PlayerComponent;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -37,6 +38,7 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
   private final MetadataValue METADATA_VALUE = new FixedMetadataValue(PGM.get(), this);
 
   private NameDecorationProvider provider;
+  private NickRegistry nickProvider;
   private final LoadingCache<UUID, DecorationCacheEntry> decorationCache =
       CacheBuilder.newBuilder()
           .expireAfterAccess(1, TimeUnit.HOURS)
@@ -48,8 +50,10 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
                 }
               });
 
-  public NameDecorationRegistryImpl(@Nullable NameDecorationProvider provider) {
+  public NameDecorationRegistryImpl(
+      @Nullable NameDecorationProvider provider, NickRegistry nickProvider) {
     setProvider(provider);
+    this.nickProvider = nickProvider;
   }
 
   @EventHandler(priority = EventPriority.LOW)
@@ -87,8 +91,14 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
 
   @Override
   public String getDecoratedName(Player player, ChatColor partyColor) {
+    ChatColor party = (partyColor == null ? ChatColor.RESET : partyColor);
+
+    if (nickProvider.getNick(player).isPresent()) {
+      return party + nickProvider.getNick(player).get();
+    }
+
     return getPrefix(player.getUniqueId())
-        + (partyColor == null ? ChatColor.RESET : partyColor)
+        + party
         + player.getName()
         + getSuffix(player.getUniqueId())
         + ChatColor.WHITE;
@@ -96,12 +106,16 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
 
   @Override
   public Component getDecoratedNameComponent(Player player, ChatColor partyColor) {
+    TextColor partyTextColor =
+        partyColor == null ? NamedTextColor.WHITE : TextFormatter.convert(partyColor);
+
+    if (nickProvider.getNick(player).isPresent()) {
+      return text(nickProvider.getPlayerName(player), partyTextColor);
+    }
+
     return text()
         .append(getPrefixComponent(player.getUniqueId()))
-        .append(
-            text(
-                player.getName(),
-                partyColor == null ? NamedTextColor.WHITE : TextFormatter.convert(partyColor)))
+        .append(text(player.getName(), partyTextColor))
         .append(getSuffixComponent(player.getUniqueId()))
         .build();
   }

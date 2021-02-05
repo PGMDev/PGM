@@ -10,6 +10,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.bukkit.entity.Player;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.util.named.NameStyle;
 
@@ -34,7 +35,7 @@ public class PseudonymContributor implements Contributor {
   }
 
   @Override
-  public Component getName(NameStyle style) {
+  public Component getName(NameStyle style, Player viewer) {
     return text(getNameLegacy(), NamedTextColor.DARK_AQUA);
   }
 

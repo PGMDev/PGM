@@ -67,7 +67,11 @@ public class PlayerTabEntry extends DynamicTabEntry {
 
   @Override
   public @Nullable Skin getSkin(TabView view) {
-    return NMSHacks.getPlayerSkin(this.player);
+      //TODO: UH fix this to re-support 1.8 spigot
+	  //return NMSHacks.getPlayerSkin(this.player);
+    return view.getViewer() != null && this.player.hasFakeSkin(view.getViewer())
+        ? new Skin(this.player.getFakeSkin(view.getViewer()).getData(), this.player.getFakeSkin(view.getViewer()).getSignature())
+        : NMSHacks.getPlayerSkin(this.player);
   }
 
   @Override

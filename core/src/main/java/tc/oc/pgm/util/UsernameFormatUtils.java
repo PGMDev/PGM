@@ -2,6 +2,7 @@ package tc.oc.pgm.util;
 
 import static net.kyori.adventure.text.Component.translatable;
 
+import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -21,10 +22,15 @@ public class UsernameFormatUtils {
       translatable("misc.console", NamedTextColor.DARK_AQUA)
           .decoration(TextDecoration.ITALIC, true);
 
-  public static Component formatStaffName(CommandSender sender, Match match) {
-    if (sender != null && sender instanceof Player) {
-      MatchPlayer matchPlayer = match.getPlayer((Player) sender);
-      if (matchPlayer != null) return matchPlayer.getName(NameStyle.CONCISE);
+  public static Component formatStaffName(CommandSender name, Match match) {
+    return formatStaffName(name, match, null);
+  }
+
+  public static Component formatStaffName(
+      CommandSender name, Match match, @Nullable CommandSender viewer) {
+    if (name != null && name instanceof Player) {
+      MatchPlayer matchPlayer = match.getPlayer((Player) name);
+      if (matchPlayer != null) return matchPlayer.getName(NameStyle.CONCISE, viewer);
     }
     return CONSOLE_NAME;
   }

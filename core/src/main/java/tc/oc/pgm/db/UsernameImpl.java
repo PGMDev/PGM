@@ -7,6 +7,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.util.UsernameResolver;
 import tc.oc.pgm.util.named.NameStyle;
@@ -35,7 +36,14 @@ class UsernameImpl implements Username {
 
   @Override
   public Component getName(NameStyle style) {
-    return name == null ? PlayerComponent.UNKNOWN : player(Bukkit.getPlayer(id), name, style);
+    return getName(style, null);
+  }
+
+  @Override
+  public Component getName(NameStyle style, @Nullable Player viewer) {
+    return name == null
+        ? PlayerComponent.UNKNOWN
+        : player(Bukkit.getPlayer(id), name, style, viewer);
   }
 
   @Override

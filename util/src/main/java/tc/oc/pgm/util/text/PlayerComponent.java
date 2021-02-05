@@ -1,5 +1,6 @@
 package tc.oc.pgm.util.text;
 
+import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.event.ClickEvent.runCommand;
@@ -20,6 +21,8 @@ import tc.oc.pgm.util.bukkit.MetadataUtils;
 import tc.oc.pgm.util.friends.FriendProvider;
 import tc.oc.pgm.util.named.NameDecorationProvider;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.named.NameStyle.Flag;
+import tc.oc.pgm.util.nick.NickProvider;
 
 /** PlayerComponent is used to format player names in a consistent manner with optional styling */
 public final class PlayerComponent {
@@ -82,14 +85,23 @@ public final class PlayerComponent {
       if (friendMeta != null) friendProvider = (FriendProvider) friendMeta.value();
     }
 
+    NickProvider nickProvider = NickProvider.DEFAULT;
+    if (player != null) {
+      MetadataValue nickMeta =
+          player.getMetadata(NickProvider.METADATA_KEY, BukkitUtils.getPlugin());
+      if (nickMeta != null) nickProvider = (NickProvider) nickMeta.value();
+    }
+
     UUID uuid = !isOffline ? player.getUniqueId() : null;
+    boolean isNicked = uuid != null && nickProvider.getNick(uuid).isPresent();
+    String nicked = player != null ? nickProvider.getPlayerName(player) : defName;
 
     TextComponent.Builder builder = text();
-    if (!isOffline && style.has(NameStyle.Flag.FLAIR)) {
+    if (!isOffline && style.has(NameStyle.Flag.FLAIR) && !isNicked) {
       builder.append(provider.getPrefixComponent(uuid));
     }
 
-    TextComponent.Builder name = text().content(player != null ? player.getName() : defName);
+    TextComponent.Builder name = text().content(getName(player, viewer, friendProvider, nicked));
 
     if (!isOffline && style.has(NameStyle.Flag.DEATH) && isDead(player)) {
       name.color(NamedTextColor.DARK_GRAY);
@@ -99,8 +111,22 @@ public final class PlayerComponent {
     if (!isOffline && style.has(NameStyle.Flag.SELF) && player == viewer) {
       name.decoration(TextDecoration.BOLD, true);
     }
-    if (!isOffline && style.has(NameStyle.Flag.DISGUISE) && isDisguised(player)) {
+    if (!isOffline
+        && style.has(NameStyle.Flag.DISGUISE)
+        && (isDisguised(player) || isNicked && canViewNick(player, viewer, friendProvider))) {
+
       name.decoration(TextDecoration.STRIKETHROUGH, true);
+
+      // Reveal nickname
+      if (isNicked && style.has(Flag.REVEAL) && viewer != null) {
+        name.append(space().decoration(TextDecoration.STRIKETHROUGH, false))
+            .append(
+                text(
+                        nickProvider.getPlayerName(player),
+                        provider.getColor(player.getUniqueId()),
+                        TextDecoration.ITALIC)
+                    .decoration(TextDecoration.STRIKETHROUGH, false));
+      }
     }
 
     if (!isOffline
@@ -117,18 +143,34 @@ public final class PlayerComponent {
 
     builder.append(name);
 
-    if (style.has(NameStyle.Flag.FLAIR) && !isOffline) {
+    if (!isOffline && style.has(NameStyle.Flag.FLAIR) && !isNicked) {
       builder.append(provider.getSuffixComponent(uuid));
     }
     return builder.build();
   }
 
   // Player state checks
-  public static boolean isDisguised(Player player) {
+  static boolean isDisguised(Player player) {
     return player.hasMetadata("isVanished");
   }
 
-  public static boolean isDead(Player player) {
+  static boolean isDead(Player player) {
     return player.hasMetadata("isDead") || player.isDead();
+  }
+
+  static boolean canViewNick(Player player, @Nullable Player viewer, FriendProvider friends) {
+    if (viewer == null) return false;
+    return viewer.hasPermission("pgm.staff")
+        || friends.areFriends(player.getUniqueId(), viewer.getUniqueId()); // TODO: maybe change
+  }
+
+  static String getName(
+      @Nullable Player player, @Nullable Player viewer, FriendProvider friends, String nickName) {
+    if (player != null
+        && viewer != null
+        && (viewer == player || friends.areFriends(player.getUniqueId(), viewer.getUniqueId()))) {
+      return player.getName();
+    }
+    return nickName;
   }
 }

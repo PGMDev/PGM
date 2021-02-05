@@ -70,7 +70,7 @@ public final class MapOrderCommand {
             translatable(
                 "map.setNext.revert",
                 NamedTextColor.GRAY,
-                UsernameFormatUtils.formatStaffName(sender, match),
+                UsernameFormatUtils.formatStaffName(sender, match, sender),
                 mapName),
             match);
       } else {
@@ -91,7 +91,7 @@ public final class MapOrderCommand {
         translatable(
             "map.setNext",
             NamedTextColor.GRAY,
-            UsernameFormatUtils.formatStaffName(sender, match),
+            UsernameFormatUtils.formatStaffName(sender, match, sender),
             mapName);
     ChatDispatcher.broadcastAdminChatMessage(successful, match);
   }

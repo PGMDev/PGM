@@ -37,6 +37,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.player.event.MatchPlayerAddEvent;
 import tc.oc.pgm.listeners.PGMListener;
+import tc.oc.pgm.nick.NickRegistry;
 
 public class VanishManagerImpl implements VanishManager, Listener {
 
@@ -45,14 +46,17 @@ public class VanishManagerImpl implements VanishManager, Listener {
 
   private final List<UUID> vanishedPlayers;
   private final MatchManager matchManager;
+  private final NickRegistry nicks;
 
   private final Future<?>
       hotbarTask; // Task is run every second to ensure vanished players retain hotbar message
   private boolean hotbarFlash;
 
-  public VanishManagerImpl(MatchManager matchManager, ScheduledExecutorService tasks) {
+  public VanishManagerImpl(
+      MatchManager matchManager, ScheduledExecutorService tasks, NickRegistry nicks) {
     this.vanishedPlayers = Lists.newArrayList();
     this.matchManager = matchManager;
+    this.nicks = nicks;
     this.hotbarFlash = false;
     this.hotbarTask =
         tasks.scheduleAtFixedRate(
@@ -132,6 +136,11 @@ public class VanishManagerImpl implements VanishManager, Listener {
       desc = "Toggle vanish status",
       perms = Permissions.VANISH)
   public void vanish(MatchPlayer sender, @Switch('s') boolean silent) throws CommandException {
+    if (nicks.getNick(sender.getId()).isPresent()) {
+      sender.sendWarning(translatable("vanish.deny.nick"));
+      return;
+    }
+
     if (setVanished(sender, !isVanished(sender.getId()), silent)) {
       sender.sendWarning(translatable("vanish.activate").color(NamedTextColor.GREEN));
     } else {
@@ -160,8 +169,9 @@ public class VanishManagerImpl implements VanishManager, Listener {
   public void onJoin(PlayerJoinEvent event) {
     MatchPlayer player = matchManager.getPlayer(event.getPlayer());
     if (player == null) return;
-    if (!player.getBukkit().hasPermission(Permissions.VANISH)) return; // No perms, no vanish :P
     if (player.getParty() instanceof Competitor) return; // Do not vanish players on a team
+    if (!player.getBukkit().hasPermission(Permissions.VANISH)) return; // No perms
+    if (nicks.getNick(event.getPlayer()).isPresent()) return; // No vanish for nick
 
     if (isVanished(player.getId())) { // Player is already vanished
       player.setVanished(true);

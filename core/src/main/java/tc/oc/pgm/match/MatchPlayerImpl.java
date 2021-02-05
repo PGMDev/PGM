@@ -405,8 +405,8 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   }
 
   @Override
-  public Component getName(NameStyle style) {
-    return player(getBukkit(), style);
+  public Component getName(NameStyle style, Player viewer) {
+    return player(getBukkit(), style, viewer);
   }
 
   @Override
