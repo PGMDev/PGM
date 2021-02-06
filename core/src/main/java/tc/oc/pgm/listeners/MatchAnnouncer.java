@@ -141,7 +141,7 @@ public class MatchAnnouncer implements Listener {
                   translatable(
                       "misc.createdBy",
                       NamedTextColor.GRAY,
-                      TextFormatter.nameList(authors, NameStyle.FANCY, NamedTextColor.GRAY))));
+                      TextFormatter.nameList(authors, NameStyle.CONCISE, NamedTextColor.GRAY))));
     }
 
     viewer.sendMessage(TextFormatter.horizontalLine(NamedTextColor.WHITE, 200));

@@ -99,10 +99,10 @@ public final class PlayerComponent {
     String nicked = !isOffline && player != null ? nickProvider.getPlayerName(player) : defName;
 
     TextComponent.Builder builder = text();
-    if (!isOffline
-        && style.has(NameStyle.Flag.FLAIR)
-        && canViewNick(player, viewer, friendProvider)) {
-      builder.append(provider.getPrefixComponent(uuid));
+    if (!isOffline && style.has(NameStyle.Flag.FLAIR)) {
+      if (!isNicked || canViewNick(player, viewer, friendProvider)) {
+        builder.append(provider.getPrefixComponent(uuid));
+      }
     }
 
     TextComponent.Builder name = text().content(getName(player, viewer, friendProvider, nicked));
@@ -117,7 +117,7 @@ public final class PlayerComponent {
     }
     if (!isOffline
         && style.has(NameStyle.Flag.DISGUISE)
-        && (isDisguised(player) || isNicked && canViewNick(player, viewer, friendProvider))) {
+        && (isDisguised(player) || (isNicked && canViewNick(player, viewer, friendProvider)))) {
 
       name.decoration(TextDecoration.STRIKETHROUGH, true);
 
@@ -175,7 +175,9 @@ public final class PlayerComponent {
       @Nullable Player player, @Nullable Player viewer, FriendProvider friends, String defName) {
     if (player != null
         && viewer != null
-        && (viewer == player || friends.areFriends(player.getUniqueId(), viewer.getUniqueId()))) {
+        && (viewer == player
+            || friends.areFriends(player.getUniqueId(), viewer.getUniqueId())
+            || viewer.hasPermission("pgm.staff"))) {
       return player.getName();
     }
     return defName;

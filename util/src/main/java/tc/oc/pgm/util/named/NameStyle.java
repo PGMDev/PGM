@@ -13,7 +13,7 @@ public enum NameStyle {
   // Simple formatting, just team color & teleport
   COLOR(EnumSet.of(Flag.COLOR, Flag.TELEPORT)),
   // Fancy formatting, flairs, color and click to teleport
-  FANCY(EnumSet.of(Flag.COLOR, Flag.FLAIR, Flag.TELEPORT, Flag.DISGUISE_OFFLINE, Flag.REVEAL)),
+  FANCY(EnumSet.of(Flag.COLOR, Flag.FLAIR, Flag.TELEPORT, Flag.REVEAL)),
   // Tab list format, flairs, color, death status, self, friend, etc
   TAB(EnumSet.of(Flag.COLOR, Flag.FLAIR, Flag.SELF, Flag.DISGUISE, Flag.DEATH, Flag.FRIEND)),
   // Fancy plus allowing disguised status reveal

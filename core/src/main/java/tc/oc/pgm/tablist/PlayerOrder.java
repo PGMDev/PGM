@@ -8,6 +8,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.friends.FriendProvider;
+import tc.oc.pgm.util.nick.NickProvider;
 
 /**
  * The default order that players are listed for a given viewer. Roughly speaking, the order is: 1.
@@ -44,11 +45,26 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
     boolean aFriend = friends.areFriends(viewer.getUniqueId(), a.getUniqueId());
     boolean bFriend = friends.areFriends(viewer.getUniqueId(), b.getUniqueId());
 
+    NickProvider nick = PGM.get().getNickRegistry().getProvider();
+    boolean aNicked = nick.getNick(a.getUniqueId()).isPresent();
+    boolean bNicked = nick.getNick(b.getUniqueId()).isPresent();
+
     // Friends are always first :)
     if (aFriend && !bFriend) {
       return -1;
     } else if (bFriend && !aFriend) {
       return 1;
+    }
+
+    // If either nicked, compare alphabetically
+    if (aNicked && !bNicked) {
+      return nick.getNick(a.getUniqueId()).get().compareToIgnoreCase(b.getName());
+    } else if (!aNicked && bNicked) {
+      return nick.getNick(b.getUniqueId()).get().compareToIgnoreCase(a.getName());
+    } else if (aNicked && bNicked) {
+      return nick.getNick(a.getUniqueId())
+          .get()
+          .compareToIgnoreCase(nick.getNick(b.getUniqueId()).get());
     }
 
     // Staff take priority
