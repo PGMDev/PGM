@@ -38,16 +38,16 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
     Player b = mb.getBukkit();
     Player viewer = this.viewer.getBukkit();
 
-    boolean aStaff = a.hasPermission(Permissions.STAFF);
-    boolean bStaff = b.hasPermission(Permissions.STAFF);
+    NickProvider nick = PGM.get().getNickRegistry().getProvider();
+    boolean aNicked = nick.getNick(a.getUniqueId()).isPresent();
+    boolean bNicked = nick.getNick(b.getUniqueId()).isPresent();
+
+    boolean aStaff = a.hasPermission(Permissions.STAFF) && !aNicked;
+    boolean bStaff = b.hasPermission(Permissions.STAFF) && !bNicked;
 
     FriendProvider friends = PGM.get().getFriendRegistry().getProvider();
     boolean aFriend = friends.areFriends(viewer.getUniqueId(), a.getUniqueId());
     boolean bFriend = friends.areFriends(viewer.getUniqueId(), b.getUniqueId());
-
-    NickProvider nick = PGM.get().getNickRegistry().getProvider();
-    boolean aNicked = nick.getNick(a.getUniqueId()).isPresent();
-    boolean bNicked = nick.getNick(b.getUniqueId()).isPresent();
 
     // Friends are always first :)
     if (aFriend && !bFriend) {
@@ -56,18 +56,13 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
       return 1;
     }
 
-    // If either nicked, compare alphabetically
     if (aNicked && !bNicked) {
-      return nick.getNick(a.getUniqueId()).get().compareToIgnoreCase(b.getName());
-    } else if (!aNicked && bNicked) {
-      return nick.getNick(b.getUniqueId()).get().compareToIgnoreCase(a.getName());
-    } else if (aNicked && bNicked) {
-      return nick.getNick(a.getUniqueId())
-          .get()
-          .compareToIgnoreCase(nick.getNick(b.getUniqueId()).get());
+      return nick.getPlayerName(a).compareToIgnoreCase(b.getName(viewer));
+    } else if (bNicked && !aNicked) {
+      return a.getName(viewer).compareToIgnoreCase(nick.getPlayerName(b));
     }
 
-    // Staff take priority
+    // Staff take priority, unless they are nicked
     if (aStaff && !bStaff) {
       return -1;
     } else if (bStaff && !aStaff) {
