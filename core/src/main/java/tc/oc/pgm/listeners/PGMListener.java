@@ -207,11 +207,9 @@ public class PGMListener implements Listener {
       if (option.equals(SettingValue.JOIN_ON)
           || (option.equals(SettingValue.JOIN_FRIENDS)
               && PGM.get().getFriendRegistry().areFriends(player.getId(), viewer.getId()))) {
-        Component name =
-            PGM.get()
-                .getNameDecorationRegistry()
-                .getDecoratedNameComponent(player.getBukkit(), player.getParty().getColor());
-        Component component = translatable(key, NamedTextColor.YELLOW, name);
+        Component component =
+            translatable(
+                key, NamedTextColor.YELLOW, player.getName(NameStyle.VERBOSE, viewer.getBukkit()));
 
         viewer.sendMessage(
             staffOnly
