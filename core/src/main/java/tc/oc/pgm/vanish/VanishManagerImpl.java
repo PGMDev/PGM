@@ -171,7 +171,12 @@ public class VanishManagerImpl implements VanishManager, Listener {
     if (player == null) return;
     if (player.getParty() instanceof Competitor) return; // Do not vanish players on a team
     if (!player.getBukkit().hasPermission(Permissions.VANISH)) return; // No perms
-    if (nicks.getNick(event.getPlayer()).isPresent()) return; // No vanish for nick
+    if (nicks.getNick(event.getPlayer()).isPresent()) {
+      if (isVanished(player.getId())) {
+        removeVanished(player); // Unvanish nicked players
+      }
+      return; // No vanish for nick
+    }
 
     if (isVanished(player.getId())) { // Player is already vanished
       player.setVanished(true);
