@@ -70,7 +70,7 @@ public class DestroyableModule implements MapModule {
 
     @Override
     public Collection<Class<? extends MapModule>> getWeakDependencies() {
-      return ImmutableList.of(BlockDropsModule.class, ObjectiveModesModule.class );
+      return ImmutableList.of(BlockDropsModule.class, ObjectiveModesModule.class);
     }
 
     @Override
