@@ -72,8 +72,13 @@ public class CoreModule implements MapModule {
     private MapFactory factory;
 
     @Override
+    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+      return ImmutableList.of(ObjectiveModesModule.class);
+    }
+
+    @Override
     public Collection<Class<? extends MapModule>> getSoftDependencies() {
-      return ImmutableList.of(RegionModule.class, TeamModule.class, ObjectiveModesModule.class);
+      return ImmutableList.of(RegionModule.class, TeamModule.class);
     }
 
     @Override
