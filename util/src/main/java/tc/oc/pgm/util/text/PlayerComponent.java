@@ -122,7 +122,10 @@ public final class PlayerComponent {
       name.decoration(TextDecoration.STRIKETHROUGH, true);
 
       // Reveal nickname
-      if (isNicked && style.has(Flag.REVEAL) && viewer != null) {
+      if (isNicked
+          && style.has(Flag.REVEAL)
+          && viewer != null
+          && canViewNick(player, viewer, friendProvider)) {
         name.append(space().decoration(TextDecoration.STRIKETHROUGH, false))
             .append(
                 text(
