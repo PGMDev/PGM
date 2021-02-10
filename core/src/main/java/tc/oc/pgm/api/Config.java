@@ -273,13 +273,6 @@ public interface Config {
   int getGriefScore();
 
   /**
-   * Gets whether vanish features are enabled
-   *
-   * @return If vanish features are enabled.
-   */
-  boolean isVanishEnabled();
-
-  /**
    * Gets a group of players, used for prefixes and player sorting.
    *
    * @return A list of groups.

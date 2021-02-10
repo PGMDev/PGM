@@ -78,7 +78,6 @@ import tc.oc.pgm.util.listener.PlayerMoveListener;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextTranslations;
 import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.vanish.NoopVanishManager;
 import tc.oc.pgm.vanish.VanishManagerImpl;
 
 public class PGMPlugin extends JavaPlugin implements PGM, Listener {
@@ -215,10 +214,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
     matchManager = new MatchManagerImpl(logger);
 
-    vanishManager =
-        config.isVanishEnabled()
-            ? new VanishManagerImpl(matchManager, executorService, nickRegistry)
-            : new NoopVanishManager();
+    vanishManager = new VanishManagerImpl();
 
     if (config.showTabList()) {
       matchTabManager = new MatchTabManager(this);

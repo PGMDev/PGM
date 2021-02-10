@@ -2,6 +2,7 @@ package tc.oc.pgm.api.player;
 
 import java.util.Collection;
 import java.util.UUID;
+import javax.annotation.Nonnull;
 
 /** A manager that holds information related to {@link MatchPlayer}s who are vanished. */
 public interface VanishManager {
@@ -33,4 +34,9 @@ public interface VanishManager {
 
   /** Called when the vanish manager is disabled */
   void disable();
+
+  @Nonnull
+  VanishManager getManager();
+
+  void setManager(VanishManager manager);
 }

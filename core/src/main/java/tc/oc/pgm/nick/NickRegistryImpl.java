@@ -84,8 +84,13 @@ public class NickRegistryImpl implements NickRegistry {
   public void onPlayerJoin(PlayerJoinEvent event) {
     Player player = event.getPlayer();
     player.setMetadata(METADATA_KEY, METADATA_VALUE);
-
     offlineSkins.invalidate(player.getUniqueId());
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void refreshNamesOnLogin(PlayerJoinEvent event) {
+    refreshPlayer(event.getPlayer());
+    refreshSelfView(event.getPlayer());
   }
 
   // SPORTPAPER STUFF - TODO: Add alternative method and check if server is running SportPaper to
@@ -133,22 +138,6 @@ public class NickRegistryImpl implements NickRegistry {
     } else {
       player.setFakeDisplayName(viewer, null);
       player.setFakeNameAndSkin(viewer, null, null);
-    }
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void refreshNamesOnLogin(PlayerJoinEvent event) {
-    refreshPlayer(event.getPlayer());
-    refreshSelfView(event.getPlayer());
-
-    Player player = event.getPlayer();
-    if (provider != null) {
-      getNick(player)
-          .ifPresent(
-              nickname -> {
-                String fakeName = player.getFakeDisplayName(Bukkit.getConsoleSender());
-                logger.info(player.getName() + " has logged in disguised as " + fakeName);
-              });
     }
   }
 }
