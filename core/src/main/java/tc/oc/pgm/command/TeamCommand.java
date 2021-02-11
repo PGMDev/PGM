@@ -35,6 +35,7 @@ public final class TeamCommand {
     final MatchPlayer joiner = match.getPlayer(player);
     if (joiner == null) throw exception("command.playerNotFound");
 
+    teams.setForced(joiner, true);
     final Party oldParty = joiner.getParty();
     if (team == null) {
       teams.forceJoin(joiner, null);

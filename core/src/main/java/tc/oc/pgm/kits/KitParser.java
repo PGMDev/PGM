@@ -46,6 +46,8 @@ import tc.oc.pgm.kits.tag.ItemTags;
 import tc.oc.pgm.projectile.ProjectileDefinition;
 import tc.oc.pgm.shield.ShieldKit;
 import tc.oc.pgm.shield.ShieldParameters;
+import tc.oc.pgm.teams.TeamFactory;
+import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -137,6 +139,7 @@ public abstract class KitParser {
     kits.add(this.parseFlyKit(el));
     kits.add(this.parseGameModeKit(el));
     kits.add(this.parseShieldKit(el));
+    kits.add(this.parseTeamSwitchKit(el));
     kits.addAll(this.parseRemoveKits(el));
 
     kits.removeAll(Collections.singleton((Kit) null)); // Remove any nulls returned above
@@ -669,5 +672,17 @@ public abstract class KitParser {
     Duration rechargeDelay =
         XMLUtils.parseDuration(el.getAttribute("delay"), ShieldParameters.DEFAULT_DELAY);
     return new ShieldKit(new ShieldParameters(health, rechargeDelay));
+  }
+
+  public TeamSwitchKit parseTeamSwitchKit(Element parent) throws InvalidXMLException {
+    Element el = XMLUtils.getUniqueChild(parent, "team-switch");
+    if (el == null) return null;
+
+    TeamFactory team = Teams.getTeam(el.getAttributeValue("team"), factory);
+    if (team == null) {
+      throw new InvalidXMLException(
+          el.getAttributeValue("team") + " is not a valid team name!", el);
+    }
+    return new TeamSwitchKit(team);
   }
 }

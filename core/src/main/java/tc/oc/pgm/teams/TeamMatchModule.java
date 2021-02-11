@@ -107,6 +107,9 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
   // Players who autojoined their current team
   private final Set<MatchPlayer> autoJoins = new HashSet<>();
 
+  // Players who were forced into the match
+  private final Set<MatchPlayer> forced = new HashSet<>();
+
   // Minimum at any time of the number of additional players needed to start the match
   private int minPlayersNeeded = Integer.MAX_VALUE;
 
@@ -226,6 +229,18 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   protected boolean isAutoJoin(MatchPlayer player) {
     return autoJoins.contains(player);
+  }
+
+  public void setForced(MatchPlayer player, boolean force) {
+    if (force) {
+      forced.add(player);
+    } else {
+      forced.remove(player);
+    }
+  }
+
+  public boolean isForced(MatchPlayer player) {
+    return forced.contains(player);
   }
 
   public boolean canSwitchTeams(MatchPlayer joining) {
@@ -576,6 +591,10 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     if (event.getNewParty() instanceof Team
         || (event.getNewParty() instanceof ObserverParty && event.getOldParty() != null)) {
       event.getPlayer().sendMessage(translatable("join.ok.team", event.getNewParty().getName()));
+    }
+
+    if (event.getNewParty() instanceof ObserverParty) {
+      setForced(event.getPlayer(), false);
     }
     updateReadiness();
   }
