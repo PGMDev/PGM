@@ -232,7 +232,7 @@ public interface Config {
   int showStatsAfter();
 
   /** @return If stats on match end should shown high scores */
-  boolean showHighStats();
+  boolean showBestStats();
 
   /** @return If stats on match end should show your own stats */
   boolean showOwnStats();

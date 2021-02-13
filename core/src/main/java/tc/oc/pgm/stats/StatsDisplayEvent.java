@@ -8,21 +8,21 @@ import tc.oc.pgm.api.match.event.MatchEvent;
 public class StatsDisplayEvent extends MatchEvent implements Cancellable {
 
   private boolean cancelled = false;
-  private boolean showHigh;
+  private boolean showBest;
   private boolean showOwn;
 
-  public StatsDisplayEvent(Match match, boolean showHigh, boolean showOwn) {
+  public StatsDisplayEvent(Match match, boolean showBest, boolean showOwn) {
     super(match);
-    this.showHigh = showHigh;
+    this.showBest = showBest;
     this.showOwn = showOwn;
   }
 
-  public boolean isShowHigh() {
-    return showHigh;
+  public boolean isShowBest() {
+    return showBest;
   }
 
-  public void setShowHigh(boolean showHigh) {
-    this.showHigh = showHigh;
+  public void setShowBest(boolean showBest) {
+    this.showBest = showBest;
   }
 
   public boolean isShowOwn() {

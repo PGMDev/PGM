@@ -78,7 +78,7 @@ ui:
   verbose-stats: false # Enable more thorough stats at the end of each match
   stats:
     show-after: 120 # Ticks to wait to show stats
-    shown-high: true # Should the leaderboards show
+    shown-best: true # Should each best stat for anyone in the match show
     show-own: true   # Should your own stats show
 
 # Overrides the header and footer of the side bar.

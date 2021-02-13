@@ -88,7 +88,7 @@ public final class PGMConfig implements Config {
   private final boolean participantsSeeObservers;
   private final boolean verboseStats;
   private final Integer statsShowAfter;
-  private final boolean statsShowHigh;
+  private final boolean statsShowBest;
   private final boolean statsShowOwn;
 
   // sidebar.*
@@ -184,7 +184,7 @@ public final class PGMConfig implements Config {
     this.flagBeams = parseBoolean(config.getString("ui.flag-beams", "false"));
     this.verboseStats = parseBoolean(config.getString("ui.verbose-stats", "false"));
     this.statsShowAfter = parseInteger(config.getString("ui.stats.show-after", "120"));
-    this.statsShowHigh = parseBoolean(config.getString("ui.stats.show-high", "true"));
+    this.statsShowBest = parseBoolean(config.getString("ui.stats.show-best", "true"));
     this.statsShowOwn = parseBoolean(config.getString("ui.stats.show-own", "true"));
 
     final String header = config.getString("sidebar.header");
@@ -589,8 +589,8 @@ public final class PGMConfig implements Config {
   }
 
   @Override
-  public boolean showHighStats() {
-    return statsShowHigh;
+  public boolean showBestStats() {
+    return statsShowBest;
   }
 
   @Override

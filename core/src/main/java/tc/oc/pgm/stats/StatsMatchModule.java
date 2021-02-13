@@ -73,7 +73,7 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   private final boolean verboseStats = PGM.get().getConfiguration().showVerboseStats();
   private final int showAfter = PGM.get().getConfiguration().showStatsAfter();
-  private final boolean highStats = PGM.get().getConfiguration().showHighStats();
+  private final boolean bestStats = PGM.get().getConfiguration().showBestStats();
   private final boolean ownStats = PGM.get().getConfiguration().showOwnStats();
   private final Component verboseStatsTitle = translatable("match.stats.title");
 
@@ -195,7 +195,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     match
         .getExecutor(MatchScope.LOADED)
         .schedule(
-            () -> match.callEvent(new StatsDisplayEvent(match, highStats, ownStats)),
+            () -> match.callEvent(new StatsDisplayEvent(match, bestStats, ownStats)),
             showAfter * 50L,
             TimeUnit.MILLISECONDS);
   }
@@ -207,7 +207,7 @@ public class StatsMatchModule implements MatchModule, Listener {
 
     // Gather all player stats from this match
     Map<UUID, Integer> allKills = new HashMap<>();
-    Map<UUID, Integer> allKillstreaks = new HashMap<>();
+    Map<UUID, Integer> allStreaks = new HashMap<>();
     Map<UUID, Integer> allDeaths = new HashMap<>();
     Map<UUID, Integer> allBowshots = new HashMap<>();
     Map<UUID, Double> allDamage = new HashMap<>();
@@ -219,7 +219,7 @@ public class StatsMatchModule implements MatchModule, Listener {
       getPlayerStat(playerUUID);
 
       allKills.put(playerUUID, playerStats.getKills());
-      allKillstreaks.put(playerUUID, playerStats.getMaxKillstreak());
+      allStreaks.put(playerUUID, playerStats.getMaxKillstreak());
       allDeaths.put(playerUUID, playerStats.getDeaths());
       allBowshots.put(playerUUID, playerStats.getLongestBowKill());
       allDamage.put(playerUUID, playerStats.getDamageDone());
@@ -228,22 +228,21 @@ public class StatsMatchModule implements MatchModule, Listener {
     // Sort and create messages for the best stats
 
     // kills/deaths
-    List<Component> highest = new ArrayList<>();
-    if (event.isShowHigh()) {
-      highest.add(getMessage("match.stats.kills", sortStats(allKills), NamedTextColor.GREEN));
-      highest.add(
-          getMessage("match.stats.killstreak", sortStats(allKillstreaks), NamedTextColor.GREEN));
-      highest.add(getMessage("match.stats.deaths", sortStats(allDeaths), NamedTextColor.RED));
+    List<Component> best = new ArrayList<>();
+    if (event.isShowBest()) {
+      best.add(getMessage("match.stats.kills", sortStats(allKills), NamedTextColor.GREEN));
+      best.add(getMessage("match.stats.killstreak", sortStats(allStreaks), NamedTextColor.GREEN));
+      best.add(getMessage("match.stats.deaths", sortStats(allDeaths), NamedTextColor.RED));
 
       // bow
       Map.Entry<UUID, Integer> bestBowshot = sortStats(allBowshots);
       if (bestBowshot.getValue() > 1)
-        highest.add(getMessage("match.stats.bowshot", bestBowshot, NamedTextColor.YELLOW));
+        best.add(getMessage("match.stats.bowshot", bestBowshot, NamedTextColor.YELLOW));
 
       // damage
       if (verboseStats) {
         Map.Entry<UUID, Double> bestDamage = sortStatsDouble(allDamage);
-        highest.add(
+        best.add(
             translatable(
                 "match.stats.damage",
                 playerName(bestDamage.getKey()),
@@ -261,7 +260,7 @@ public class StatsMatchModule implements MatchModule, Listener {
               translatable("match.stats.title", NamedTextColor.YELLOW),
               NamedTextColor.WHITE));
 
-      highest.forEach(viewer::sendMessage);
+      best.forEach(viewer::sendMessage);
 
       PlayerStats stats = allPlayerStats.get(viewer.getId());
       if (event.isShowOwn() && stats != null) {
