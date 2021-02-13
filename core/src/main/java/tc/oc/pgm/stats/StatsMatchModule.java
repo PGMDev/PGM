@@ -2,9 +2,11 @@ package tc.oc.pgm.stats;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -70,6 +72,9 @@ public class StatsMatchModule implements MatchModule, Listener {
   private final Map<UUID, String> cachedUsernames = new HashMap<>();
 
   private final boolean verboseStats = PGM.get().getConfiguration().showVerboseStats();
+  private final int showAfter = PGM.get().getConfiguration().showStatsAfter();
+  private final boolean highStats = PGM.get().getConfiguration().showHighStats();
+  private final boolean ownStats = PGM.get().getConfiguration().showOwnStats();
   private final Component verboseStatsTitle = translatable("match.stats.title");
 
   /** Common formats used by stats with decimals */
@@ -184,7 +189,19 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   @EventHandler
   public void onMatchEnd(MatchFinishEvent event) {
+    if (allPlayerStats.isEmpty() || showAfter < 0) return;
 
+    // Schedule displaying stats after match end
+    match
+        .getExecutor(MatchScope.LOADED)
+        .schedule(
+            () -> match.callEvent(new StatsDisplayEvent(match, highStats, ownStats)),
+            showAfter * 50L,
+            TimeUnit.MILLISECONDS);
+  }
+
+  @EventHandler(ignoreCancelled = true)
+  public void onStatsDisplay(StatsDisplayEvent event) {
     // No players with stats -> no stats to show
     if (allPlayerStats.isEmpty()) return;
 
@@ -211,54 +228,61 @@ public class StatsMatchModule implements MatchModule, Listener {
     // Sort and create messages for the best stats
 
     // kills/deaths
-    Component killMessage =
-        getMessage("match.stats.kills", sortStats(allKills), NamedTextColor.GREEN);
-    Component killstreakMessage =
-        getMessage("match.stats.killstreak", sortStats(allKillstreaks), NamedTextColor.GREEN);
-    Component deathMessage =
-        getMessage("match.stats.deaths", sortStats(allDeaths), NamedTextColor.RED);
+    List<Component> highest = new ArrayList<>();
+    if (event.isShowHigh()) {
+      highest.add(getMessage("match.stats.kills", sortStats(allKills), NamedTextColor.GREEN));
+      highest.add(
+          getMessage("match.stats.killstreak", sortStats(allKillstreaks), NamedTextColor.GREEN));
+      highest.add(getMessage("match.stats.deaths", sortStats(allDeaths), NamedTextColor.RED));
 
-    // bow
-    Map.Entry<UUID, Integer> bestBowshot = sortStats(allBowshots);
-    if (bestBowshot.getValue() == 1)
-      bestBowshot.setValue(2); // Avoids translating "1 block" vs "n blocks"
-    Component bowshotMessage =
-        getMessage("match.stats.bowshot", bestBowshot, NamedTextColor.YELLOW);
+      // bow
+      Map.Entry<UUID, Integer> bestBowshot = sortStats(allBowshots);
+      if (bestBowshot.getValue() > 1)
+        highest.add(getMessage("match.stats.bowshot", bestBowshot, NamedTextColor.YELLOW));
 
-    // damage
-    Map.Entry<UUID, Double> bestDamage = sortStatsDouble(allDamage);
-    Component damageMessage =
-        translatable(
-            "match.stats.damage",
-            playerName(bestDamage.getKey()),
-            damageComponent(bestDamage.getValue(), NamedTextColor.GREEN));
+      // damage
+      if (verboseStats) {
+        Map.Entry<UUID, Double> bestDamage = sortStatsDouble(allDamage);
+        highest.add(
+            translatable(
+                "match.stats.damage",
+                playerName(bestDamage.getKey()),
+                damageComponent(bestDamage.getValue(), NamedTextColor.GREEN)));
+      }
+    }
 
-    // Send everything created to all players in the match
-    // (stat messages and items)
-    match
-        .getExecutor(MatchScope.LOADED)
-        .schedule(
-            () -> {
-              for (MatchPlayer viewer : match.getPlayers()) {
-                // Does this player care about stats?
-                if (viewer.getSettings().getValue(SettingKey.STATS) == SettingValue.STATS_OFF)
-                  continue;
+    for (MatchPlayer viewer : match.getPlayers()) {
+      // Does this player care about stats?
+      if (viewer.getSettings().getValue(SettingKey.STATS) == SettingValue.STATS_OFF) continue;
 
-                viewer.sendMessage(
-                    TextFormatter.horizontalLineHeading(
-                        viewer.getBukkit(),
-                        translatable("match.stats.title", NamedTextColor.YELLOW),
-                        NamedTextColor.WHITE));
-                viewer.sendMessage(killMessage);
-                viewer.sendMessage(killstreakMessage);
-                viewer.sendMessage(deathMessage);
-                if (bestBowshot.getValue() != 0) viewer.sendMessage(bowshotMessage);
-                if (verboseStats) viewer.sendMessage(damageMessage);
-                giveVerboseStatsItem(viewer, false);
-              }
-            },
-            5 + 1, // NOTE: This is 1 second after the votebook appears
-            TimeUnit.SECONDS);
+      viewer.sendMessage(
+          TextFormatter.horizontalLineHeading(
+              viewer.getBukkit(),
+              translatable("match.stats.title", NamedTextColor.YELLOW),
+              NamedTextColor.WHITE));
+
+      highest.forEach(viewer::sendMessage);
+
+      PlayerStats stats = allPlayerStats.get(viewer.getId());
+      if (event.isShowOwn() && stats != null) {
+        Component ksHover =
+            translatable(
+                "match.stats.killstreak.concise",
+                numberComponent(stats.getKillstreak(), NamedTextColor.GREEN));
+
+        viewer.sendMessage(
+            translatable(
+                "match.stats.own",
+                numberComponent(stats.getKills(), NamedTextColor.GREEN),
+                numberComponent(stats.getKillstreak(), NamedTextColor.GREEN)
+                    .hoverEvent(showText(ksHover)),
+                numberComponent(stats.getDeaths(), NamedTextColor.RED),
+                numberComponent(stats.getKD(), NamedTextColor.GREEN),
+                damageComponent(stats.getDamageDone(), NamedTextColor.GREEN)));
+      }
+
+      giveVerboseStatsItem(viewer, false);
+    }
   }
 
   @EventHandler

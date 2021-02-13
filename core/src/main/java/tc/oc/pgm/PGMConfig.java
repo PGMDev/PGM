@@ -87,6 +87,9 @@ public final class PGMConfig implements Config {
   private final boolean showFireworks;
   private final boolean participantsSeeObservers;
   private final boolean verboseStats;
+  private final Integer statsShowAfter;
+  private final boolean statsShowHigh;
+  private final boolean statsShowOwn;
 
   // sidebar.*
   private final Component header;
@@ -161,7 +164,6 @@ public final class PGMConfig implements Config {
     this.matchLimit = parseInteger(config.getString("restart.match-limit", "30"));
 
     this.woolRefill = parseBoolean(config.getString("gameplay.refill-wool", "true"));
-    this.verboseStats = parseBoolean(config.getString("ui.verbose-stats", "false"));
     this.griefScore =
         parseInteger(config.getString("gameplay.grief-score", "-10"), Range.atMost(0));
 
@@ -180,6 +182,10 @@ public final class PGMConfig implements Config {
         parseBoolean(config.getString("ui.participants-see-observers", "true"));
     this.showFireworks = parseBoolean(config.getString("ui.fireworks", "true"));
     this.flagBeams = parseBoolean(config.getString("ui.flag-beams", "false"));
+    this.verboseStats = parseBoolean(config.getString("ui.verbose-stats", "false"));
+    this.statsShowAfter = parseInteger(config.getString("ui.stats.show-after", "120"));
+    this.statsShowHigh = parseBoolean(config.getString("ui.stats.show-high", "true"));
+    this.statsShowOwn = parseBoolean(config.getString("ui.stats.show-own", "true"));
 
     final String header = config.getString("sidebar.header");
     this.header = header == null || header.isEmpty() ? null : parseComponent(header);
@@ -558,10 +564,6 @@ public final class PGMConfig implements Config {
     return participantsSeeObservers;
   }
 
-  public boolean showVerboseStats() {
-    return verboseStats;
-  }
-
   @Override
   public boolean canAnytimeJoin() {
     return anytimeJoin;
@@ -575,6 +577,25 @@ public final class PGMConfig implements Config {
   @Override
   public boolean useLegacyFlagBeams() {
     return flagBeams;
+  }
+
+  public boolean showVerboseStats() {
+    return verboseStats;
+  }
+
+  @Override
+  public int showStatsAfter() {
+    return statsShowAfter;
+  }
+
+  @Override
+  public boolean showHighStats() {
+    return statsShowHigh;
+  }
+
+  @Override
+  public boolean showOwnStats() {
+    return statsShowOwn;
   }
 
   @Override

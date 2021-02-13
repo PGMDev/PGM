@@ -76,6 +76,10 @@ ui:
   participants-see-observers: true # Can participants see observers in the tab list?
   flag-beams: false # Should everyone see floating wool flag beams?
   verbose-stats: false # Enable more thorough stats at the end of each match
+  stats:
+    show-after: 120 # Ticks to wait to show stats
+    shown-high: true # Should the leaderboards show
+    show-own: true   # Should your own stats show
 
 # Overrides the header and footer of the side bar.
 sidebar:

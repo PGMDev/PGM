@@ -222,6 +222,22 @@ public interface Config {
   boolean useLegacyFlagBeams();
 
   /**
+   * Gets whether to show a more verbose representation of the match stats at the end of each match
+   *
+   * @return If verbose stats at the end of the match is enabled
+   */
+  boolean showVerboseStats();
+
+  /** @return How many ticks should wait until showing stats */
+  int showStatsAfter();
+
+  /** @return If stats on match end should shown high scores */
+  boolean showHighStats();
+
+  /** @return If stats on match end should show your own stats */
+  boolean showOwnStats();
+
+  /**
    * Gets a format to override the server's "message of the day."
    *
    * <p>{0} = The existing MoTD.
@@ -241,13 +257,6 @@ public interface Config {
    * @return If wool auto refill is enabled.
    */
   boolean shouldRefillWool();
-
-  /**
-   * Gets whether to show a more verbose representation of the match stats at the end of each match
-   *
-   * @return If verbose stats at the end of the match is enabled
-   */
-  boolean showVerboseStats();
 
   /**
    * Gets at which score players should be no longer allowed to keep playing TDM
