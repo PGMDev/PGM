@@ -2,13 +2,14 @@ package tc.oc.pgm.spawner;
 
 import org.bukkit.Effect;
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
+import org.bukkit.event.entity.ItemMergeEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.metadata.MetadataValue;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.Tickable;
@@ -50,9 +51,7 @@ public class Spawner implements Listener, Tickable {
         spawnable.spawn(location, match);
         match.getWorld().spigot().playEffect(location, Effect.FLAME, 0, 0, 0, 0.15f, 0, 0, 40, 64);
 
-        if (spawnable.isTracked()) {
-          spawnedEntities = spawnedEntities + spawnable.getSpawnCount();
-        }
+        spawnedEntities = spawnedEntities + spawnable.getSpawnCount();
       }
       calculateDelay();
     }
@@ -80,24 +79,87 @@ public class Spawner implements Listener, Tickable {
     return false;
   }
 
-  private boolean isTracked(Entity entity) {
-    return entity.getMetadata(METADATA_KEY, PGM.get()) != null;
+  @EventHandler(priority = EventPriority.HIGHEST)
+  public void onItemMerge(ItemMergeEvent event) {
+    boolean entityTracked = false;
+    boolean targetTracked = false;
+    if (event.getEntity().hasMetadata(METADATA_KEY)) {
+      entityTracked = true;
+    }
+    if (event.getTarget().hasMetadata(METADATA_KEY)) {
+      targetTracked = true;
+    }
+
+    // Do nothing if neither item is from a PGM Spawner
+    if (!entityTracked && !targetTracked) {
+      return;
+    }
+
+    // Cancel the merge if only 1 of the items is from a PGM Spawner
+    if ((entityTracked && !targetTracked) || (!entityTracked && targetTracked)) {
+      event.setCancelled(true);
+      return;
+    }
+
+    int entitySpawnerID = -1;
+    int targetSpawnerID = -1;
+    for (MetadataValue mv : event.getEntity().getMetadata(METADATA_KEY)) {
+      if (mv.getOwningPlugin().equals(PGM.get())) {
+        entitySpawnerID = mv.asInt();
+        break;
+      }
+    }
+    for (MetadataValue mv : event.getTarget().getMetadata(METADATA_KEY)) {
+      if (mv.getOwningPlugin().equals(PGM.get())) {
+        targetSpawnerID = mv.asInt();
+        break;
+      }
+    }
+    // Cancel the merge if the items are from different PGM spawners
+    if (entitySpawnerID != targetSpawnerID) {
+      event.setCancelled(true);
+      return;
+    }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onEntityDeath(EntityDeathEvent event) {
-    if (isTracked(event.getEntity())) spawnedEntities--;
+    if (event.getEntity().hasMetadata(METADATA_KEY)) {
+      for (MetadataValue mv : event.getEntity().getMetadata(METADATA_KEY)) {
+        if (mv.getOwningPlugin().equals(PGM.get()) && mv.asInt() == definition.numericID) {
+          spawnedEntities--;
+          spawnedEntities = Math.max(0, spawnedEntities);
+          return;
+        }
+      }
+    }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onItemDespawn(ItemDespawnEvent event) {
-    if (isTracked(event.getEntity()))
-      spawnedEntities -= event.getEntity().getItemStack().getAmount();
+    if (event.getEntity().hasMetadata(METADATA_KEY)) {
+      for (MetadataValue mv : event.getEntity().getMetadata(METADATA_KEY)) {
+        if (mv.getOwningPlugin().equals(PGM.get()) && mv.asInt() == definition.numericID) {
+          spawnedEntities -= event.getEntity().getItemStack().getAmount();
+          spawnedEntities = Math.max(0, spawnedEntities);
+          return;
+        }
+      }
+    }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerPickup(PlayerPickupItemEvent event) {
-    if (isTracked(event.getItem())) spawnedEntities -= event.getItem().getItemStack().getAmount();
+    if (!event.isCancelled() && event.getItem().hasMetadata(METADATA_KEY)) {
+      for (MetadataValue mv : event.getItem().getMetadata(METADATA_KEY)) {
+        if (mv.getOwningPlugin().equals(PGM.get()) && mv.asInt() == definition.numericID) {
+          event.getItem().removeMetadata(METADATA_KEY, PGM.get());
+          spawnedEntities -= event.getItem().getItemStack().getAmount();
+          spawnedEntities = Math.max(0, spawnedEntities);
+          return;
+        }
+      }
+    }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
