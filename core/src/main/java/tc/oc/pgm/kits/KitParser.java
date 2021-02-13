@@ -678,7 +678,7 @@ public abstract class KitParser {
     Element el = XMLUtils.getUniqueChild(parent, "team-switch");
     if (el == null) return null;
 
-    boolean showTitle = XMLUtils.parseBoolean(el.getAttribute("title"), true);
+    boolean showTitle = XMLUtils.parseBoolean(el.getAttribute("show-title"), true);
     TeamFactory team = Teams.getTeam(el.getAttributeValue("team"), factory);
     if (team == null) {
       throw new InvalidXMLException(
