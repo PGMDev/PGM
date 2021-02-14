@@ -87,7 +87,7 @@ public final class PGMConfig implements Config {
   private final boolean showFireworks;
   private final boolean participantsSeeObservers;
   private final boolean verboseStats;
-  private final Integer statsShowAfter;
+  private final Duration statsShowAfter;
   private final boolean statsShowBest;
   private final boolean statsShowOwn;
 
@@ -182,10 +182,11 @@ public final class PGMConfig implements Config {
         parseBoolean(config.getString("ui.participants-see-observers", "true"));
     this.showFireworks = parseBoolean(config.getString("ui.fireworks", "true"));
     this.flagBeams = parseBoolean(config.getString("ui.flag-beams", "false"));
-    this.verboseStats = parseBoolean(config.getString("ui.verbose-stats", "false"));
-    this.statsShowAfter = parseInteger(config.getString("ui.stats.show-after", "120"));
-    this.statsShowBest = parseBoolean(config.getString("ui.stats.show-best", "true"));
-    this.statsShowOwn = parseBoolean(config.getString("ui.stats.show-own", "true"));
+
+    this.verboseStats = parseBoolean(config.getString("stats.verbose", "true"));
+    this.statsShowAfter = parseDuration(config.getString("stats.show-after", "6s"));
+    this.statsShowBest = parseBoolean(config.getString("stats.show-best", "true"));
+    this.statsShowOwn = parseBoolean(config.getString("stats.show-own", "true"));
 
     final String header = config.getString("sidebar.header");
     this.header = header == null || header.isEmpty() ? null : parseComponent(header);
@@ -584,7 +585,7 @@ public final class PGMConfig implements Config {
   }
 
   @Override
-  public int showStatsAfter() {
+  public Duration showStatsAfter() {
     return statsShowAfter;
   }
 

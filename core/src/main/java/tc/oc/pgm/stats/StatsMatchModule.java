@@ -6,6 +6,7 @@ import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.text.DecimalFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -38,6 +39,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
+import tc.oc.pgm.api.match.event.MatchStatsEvent;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -72,7 +74,7 @@ public class StatsMatchModule implements MatchModule, Listener {
   private final Map<UUID, String> cachedUsernames = new HashMap<>();
 
   private final boolean verboseStats = PGM.get().getConfiguration().showVerboseStats();
-  private final int showAfter = PGM.get().getConfiguration().showStatsAfter();
+  private final Duration showAfter = PGM.get().getConfiguration().showStatsAfter();
   private final boolean bestStats = PGM.get().getConfiguration().showBestStats();
   private final boolean ownStats = PGM.get().getConfiguration().showOwnStats();
   private final Component verboseStatsTitle = translatable("match.stats.title");
@@ -189,20 +191,19 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   @EventHandler
   public void onMatchEnd(MatchFinishEvent event) {
-    if (allPlayerStats.isEmpty() || showAfter < 0) return;
+    if (allPlayerStats.isEmpty() || showAfter.isNegative()) return;
 
     // Schedule displaying stats after match end
     match
         .getExecutor(MatchScope.LOADED)
         .schedule(
-            () -> match.callEvent(new StatsDisplayEvent(match, bestStats, ownStats)),
-            showAfter * 50L,
+            () -> match.callEvent(new MatchStatsEvent(match, bestStats, ownStats)),
+            showAfter.toMillis(),
             TimeUnit.MILLISECONDS);
   }
 
   @EventHandler(ignoreCancelled = true)
-  public void onStatsDisplay(StatsDisplayEvent event) {
-    // No players with stats -> no stats to show
+  public void onStatsDisplay(MatchStatsEvent event) {
     if (allPlayerStats.isEmpty()) return;
 
     // Gather all player stats from this match
@@ -225,21 +226,16 @@ public class StatsMatchModule implements MatchModule, Listener {
       allDamage.put(playerUUID, playerStats.getDamageDone());
     }
 
-    // Sort and create messages for the best stats
-
-    // kills/deaths
     List<Component> best = new ArrayList<>();
     if (event.isShowBest()) {
       best.add(getMessage("match.stats.kills", sortStats(allKills), NamedTextColor.GREEN));
       best.add(getMessage("match.stats.killstreak", sortStats(allStreaks), NamedTextColor.GREEN));
       best.add(getMessage("match.stats.deaths", sortStats(allDeaths), NamedTextColor.RED));
 
-      // bow
       Map.Entry<UUID, Integer> bestBowshot = sortStats(allBowshots);
       if (bestBowshot.getValue() > 1)
         best.add(getMessage("match.stats.bowshot", bestBowshot, NamedTextColor.YELLOW));
 
-      // damage
       if (verboseStats) {
         Map.Entry<UUID, Double> bestDamage = sortStatsDouble(allDamage);
         best.add(
@@ -251,7 +247,6 @@ public class StatsMatchModule implements MatchModule, Listener {
     }
 
     for (MatchPlayer viewer : match.getPlayers()) {
-      // Does this player care about stats?
       if (viewer.getSettings().getValue(SettingKey.STATS) == SettingValue.STATS_OFF) continue;
 
       viewer.sendMessage(

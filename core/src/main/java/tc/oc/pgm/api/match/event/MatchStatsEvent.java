@@ -1,17 +1,16 @@
-package tc.oc.pgm.stats;
+package tc.oc.pgm.api.match.event;
 
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.event.MatchEvent;
 
-public class StatsDisplayEvent extends MatchEvent implements Cancellable {
+public class MatchStatsEvent extends MatchEvent implements Cancellable {
 
   private boolean cancelled = false;
   private boolean showBest;
   private boolean showOwn;
 
-  public StatsDisplayEvent(Match match, boolean showBest, boolean showOwn) {
+  public MatchStatsEvent(Match match, boolean showBest, boolean showOwn) {
     super(match);
     this.showBest = showBest;
     this.showOwn = showOwn;

@@ -229,7 +229,7 @@ public interface Config {
   boolean showVerboseStats();
 
   /** @return How many ticks should wait until showing stats */
-  int showStatsAfter();
+  Duration showStatsAfter();
 
   /** @return If stats on match end should shown high scores */
   boolean showBestStats();
