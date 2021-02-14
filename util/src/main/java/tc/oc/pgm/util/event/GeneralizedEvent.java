@@ -7,6 +7,7 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityEvent;
@@ -18,7 +19,6 @@ import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
 import org.bukkit.event.vehicle.VehicleEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
-import org.bukkit.event.vehicle.VehicleMoveEvent;
 import org.bukkit.event.weather.WeatherEvent;
 import org.bukkit.event.world.WorldEvent;
 
@@ -79,33 +79,22 @@ public abstract class GeneralizedEvent extends PreemptiveEvent {
     if (event == null) return null;
 
     if (event instanceof EntityEvent) return ((EntityEvent) event).getEntity();
-
     if (event instanceof PlayerEvent) return ((PlayerEvent) event).getPlayer();
-
     if (event instanceof BlockEvent) {
-
-      if (event instanceof BlockBreakEvent) return ((BlockBreakEvent) event).getActor();
-
-      if (event instanceof FurnaceExtractEvent) return ((FurnaceExtractEvent) event).getActor();
-
-      if (event instanceof SignChangeEvent) return ((SignChangeEvent) event).getActor();
+      if (event instanceof BlockBreakEvent) return ((BlockBreakEvent) event).getPlayer();
+      if (event instanceof BlockDamageEvent) return ((BlockDamageEvent) event).getPlayer();
+      if (event instanceof FurnaceExtractEvent) return ((FurnaceExtractEvent) event).getPlayer();
+      if (event instanceof SignChangeEvent) return ((SignChangeEvent) event).getPlayer();
     }
-
     if (event instanceof VehicleEvent) {
-      if (event instanceof VehicleMoveEvent) return ((VehicleMoveEvent) event).getActor();
-
-      if (event instanceof VehicleExitEvent) return ((VehicleExitEvent) event).getActor();
-
-      if (event instanceof VehicleDamageEvent) return ((VehicleDamageEvent) event).getActor();
-
-      if (event instanceof VehicleDestroyEvent) return ((VehicleDestroyEvent) event).getActor();
-
-      if (event instanceof VehicleEnterEvent) return ((VehicleEnterEvent) event).getActor();
-
+      if (event instanceof VehicleExitEvent) return ((VehicleExitEvent) event).getExited();
+      if (event instanceof VehicleDamageEvent) return ((VehicleDamageEvent) event).getAttacker();
+      if (event instanceof VehicleDestroyEvent) return ((VehicleDestroyEvent) event).getAttacker();
+      if (event instanceof VehicleEnterEvent) return ((VehicleEnterEvent) event).getEntered();
       if (event instanceof VehicleEntityCollisionEvent)
-        return ((VehicleEntityCollisionEvent) event).getActor();
+        return ((VehicleEntityCollisionEvent) event).getEntity();
+      return ((VehicleEvent) event).getVehicle();
     }
-
     if (event instanceof GeneralizedEvent) return ((GeneralizedEvent) event).getActor();
 
     return null;
@@ -117,17 +106,11 @@ public abstract class GeneralizedEvent extends PreemptiveEvent {
    * @param event The event to look for a {@link World} in
    */
   public static @Nullable World getWorldIfPresent(Event event) {
-
     if (event instanceof WorldEvent) return ((WorldEvent) event).getWorld();
-
     if (event instanceof PlayerEvent) return ((PlayerEvent) event).getPlayer().getWorld();
-
     if (event instanceof EntityEvent) return ((EntityEvent) event).getEntity().getWorld();
-
     if (event instanceof BlockEvent) return ((BlockEvent) event).getBlock().getWorld();
-
     if (event instanceof VehicleEvent) return ((VehicleEvent) event).getVehicle().getWorld();
-
     if (event instanceof WeatherEvent) return ((WeatherEvent) event).getWorld();
 
     return null;
