@@ -625,7 +625,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
         setTeamSwitchKit(player, false, false);
       }
 
-      if (title) {
+      if (title && !player.isLegacy()) {
         player.showTitle(
             title(
                 space(),
