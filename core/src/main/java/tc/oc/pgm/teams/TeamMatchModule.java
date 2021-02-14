@@ -4,8 +4,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
+import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.title.Title.title;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,6 +21,8 @@ import javax.annotation.Nullable;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.title.Title.Times;
+import net.kyori.adventure.util.Ticks;
 import org.apache.commons.lang.math.Fraction;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -106,6 +110,12 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   // Players who autojoined their current team
   private final Set<MatchPlayer> autoJoins = new HashSet<>();
+
+  // Players who were forced into the match
+  private final Set<MatchPlayer> forced = new HashSet<>();
+
+  // Players who are being switched between teams see TeamSwitchKit
+  private final Map<MatchPlayer, Boolean> teamSwitchKit = new HashMap<>();
 
   // Minimum at any time of the number of additional players needed to start the match
   private int minPlayersNeeded = Integer.MAX_VALUE;
@@ -226,6 +236,35 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   protected boolean isAutoJoin(MatchPlayer player) {
     return autoJoins.contains(player);
+  }
+
+  public void setForced(MatchPlayer player, boolean force) {
+    if (force) {
+      forced.add(player);
+    } else {
+      forced.remove(player);
+    }
+  }
+
+  public boolean isForced(MatchPlayer player) {
+    return forced.contains(player);
+  }
+
+  public void setTeamSwitchKit(MatchPlayer player, boolean showTitle, boolean add) {
+    setForced(player, add);
+    if (add) {
+      teamSwitchKit.put(player, showTitle);
+    } else {
+      teamSwitchKit.remove(player);
+    }
+  }
+
+  public boolean hasTeamSwitchKit(MatchPlayer player) {
+    return teamSwitchKit.containsKey(player);
+  }
+
+  public boolean showTeamSwitchTitle(MatchPlayer player) {
+    return teamSwitchKit.getOrDefault(player, false);
   }
 
   public boolean canSwitchTeams(MatchPlayer joining) {
@@ -573,9 +612,32 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPartyChange(PlayerPartyChangeEvent event) {
+    MatchPlayer player = event.getPlayer();
+
     if (event.getNewParty() instanceof Team
         || (event.getNewParty() instanceof ObserverParty && event.getOldParty() != null)) {
-      event.getPlayer().sendMessage(translatable("join.ok.team", event.getNewParty().getName()));
+      Component joinMsg = translatable("join.ok.team", event.getNewParty().getName());
+      boolean title = false;
+
+      // Players with team switch kit, check for title value and remove from map
+      if (hasTeamSwitchKit(player)) {
+        title = showTeamSwitchTitle(player);
+        setTeamSwitchKit(player, false, false);
+      }
+
+      if (title && !player.isLegacy()) {
+        player.showTitle(
+            title(
+                space(),
+                joinMsg,
+                Times.of(Ticks.duration(5), Ticks.duration(20), Ticks.duration(5))));
+      } else {
+        player.sendMessage(joinMsg);
+      }
+    }
+
+    if (event.getNewParty() instanceof ObserverParty) {
+      setForced(event.getPlayer(), false);
     }
     updateReadiness();
   }
