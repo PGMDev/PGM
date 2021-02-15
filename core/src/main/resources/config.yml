@@ -44,6 +44,7 @@ countdown:
   start: "30s"    # After a match cycles or /start
   cycle: "30s"    # After a match ends or /cycle
   huddle: -1      # Before a match starts (only recommended for "ranked" matches)
+  restart: "30s"  # After a restart countdown is queued or /qr
 
 # Sets thresholds for when to restart the server.
 #

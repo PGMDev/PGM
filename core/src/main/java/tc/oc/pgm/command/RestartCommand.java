@@ -3,9 +3,9 @@ package tc.oc.pgm.command;
 import static net.kyori.adventure.text.Component.translatable;
 
 import app.ashcon.intake.Command;
-import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
 import java.time.Duration;
+import javax.annotation.Nullable;
 import net.kyori.adventure.text.format.NamedTextColor;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
@@ -21,10 +21,7 @@ public final class RestartCommand {
       flags = "f",
       perms = Permissions.STOP)
   public void restart(
-      Audience audience,
-      Match match,
-      @Default("30s") Duration duration,
-      @Switch('f') boolean force) {
+      Audience audience, Match match, @Nullable Duration duration, @Switch('f') boolean force) {
     RestartManager.queueRestart("Restart requested via /queuerestart command", duration);
 
     if (force && match.isRunning()) {
