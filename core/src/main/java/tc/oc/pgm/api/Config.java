@@ -82,6 +82,13 @@ public interface Config {
   Duration getCycleTime();
 
   /**
+   * Gets a duration to wait before restarting the server.
+   *
+   * @return A duration.
+   */
+  Duration getRestartTime();
+
+  /**
    * Gets a duration to wait before the server should restart.
    *
    * @return A duration, disabled if non-positive.

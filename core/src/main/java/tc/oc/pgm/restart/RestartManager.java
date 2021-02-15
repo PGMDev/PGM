@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nullable;
+import tc.oc.pgm.api.PGM;
 
 public class RestartManager {
 
@@ -16,19 +17,15 @@ public class RestartManager {
 
   /** Queues a restart to be initiated at next available opportunity. */
   public static boolean queueRestart(String reason) {
-    if (!isQueued()) {
-      RestartManager.queuedAt = Instant.now();
-      RestartManager.reason = reason;
-      return true;
-    }
-    return false;
+    return queueRestart(reason, null);
   }
 
-  public static boolean queueRestart(String reason, Duration countdown) {
+  public static boolean queueRestart(String reason, @Nullable Duration countdown) {
     if (!isQueued()) {
       RestartManager.queuedAt = Instant.now();
       RestartManager.reason = reason;
-      RestartManager.countdown = countdown;
+      RestartManager.countdown =
+          (countdown != null) ? countdown : PGM.get().getConfiguration().getRestartTime();
       return true;
     }
     return false;
