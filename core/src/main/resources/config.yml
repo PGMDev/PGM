@@ -75,11 +75,13 @@ ui:
   fireworks: true  # Spawn fireworks after objectives are completed?
   participants-see-observers: true # Can participants see observers in the tab list?
   flag-beams: false # Should everyone see floating wool flag beams?
-  verbose-stats: false # Enable more thorough stats at the end of each match
-  stats:
-    show-after: 120 # Ticks to wait to show stats
-    shown-best: true # Should each best stat for anyone in the match show
-    show-own: true   # Should your own stats show
+
+# Changes how stats are shown.
+stats:
+  verbose: true   # Enable more detailed stats?
+  show-after: 6s  # How long to wait after the match ends to show stats?
+  show-best: true # Should show best players stats?
+  show-own: true  # Should show each players own stats?
 
 # Overrides the header and footer of the side bar.
 sidebar:
