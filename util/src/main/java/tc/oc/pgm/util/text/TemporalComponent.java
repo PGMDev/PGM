@@ -7,7 +7,9 @@ import java.time.Duration;
 import java.time.Instant;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.format.TextColor;
 
 public final class TemporalComponent {
   private TemporalComponent() {}
@@ -19,7 +21,25 @@ public final class TemporalComponent {
   private static final long WEEK = DAY * 7;
   private static final long MONTH = DAY * 30;
   private static final long YEAR = DAY * 365;
-  private static final long A_LONG_TIME = 3 * YEAR;
+  private static final long A_LONG_TIME = 10 * YEAR;
+
+  private static final String CLOCK_FORMAT = "%02d:%02d"; // MM:SS
+  private static final String CLOCK_FORMAT_LONG = "%d:" + CLOCK_FORMAT; // HH:MM:SS
+
+  /**
+   * Creates a {@link Component} that represents a temporal duration.
+   *
+   * @param duration a duration
+   * @param color a unit color
+   * @return a component builder
+   */
+  public static TranslatableComponent.Builder duration(
+      final @Nullable Duration duration, final @Nullable TextColor color) {
+    if (duration == null) {
+      return duration(A_LONG_TIME, color);
+    }
+    return duration(Math.abs(duration.getSeconds()), color);
+  }
 
   /**
    * Creates a {@link Component} that represents a temporal duration.
@@ -28,19 +48,18 @@ public final class TemporalComponent {
    * @return a component builder
    */
   public static TranslatableComponent.Builder duration(final @Nullable Duration duration) {
-    if (duration == null) {
-      return duration(A_LONG_TIME);
-    }
-    return duration(Math.abs(duration.getSeconds()));
+    return duration(duration, null);
   }
 
   /**
    * Creates a {@link Component} that represents a temporal duration.
    *
    * @param seconds a number of seconds
+   * @param color a unit color
    * @return a component builder
    */
-  public static TranslatableComponent.Builder duration(final long seconds) {
+  public static TranslatableComponent.Builder duration(
+      final long seconds, final @Nullable TextColor color) {
     final String key;
     long quantity = 1;
 
@@ -73,7 +92,67 @@ public final class TemporalComponent {
       key = "misc.eon";
     }
 
-    return translatable().key(key).args(text(quantity));
+    return translatable().key(key).args(color == null ? text(quantity) : text(quantity, color));
+  }
+
+  /**
+   * Creates a {@link Component} that represents a ticking duration.
+   *
+   * @param seconds a number of seconds
+   * @return a component builder
+   */
+  public static TextComponent.Builder ticker(final long seconds) {
+    if (seconds >= MINUTE) {
+      return text().content((seconds % HOUR) / MINUTE + "m");
+    } else if (seconds >= SECOND) {
+      return text().content(seconds + "s");
+    } else {
+      return text().content("<1s");
+    }
+  }
+
+  /**
+   * Creates a {@link Component} that represents a ticking duration.
+   *
+   * @param duration a duration
+   * @return a component builder
+   */
+  public static TextComponent.Builder ticker(final Duration duration) {
+    return ticker(duration.getSeconds());
+  }
+
+  /**
+   * Creates a {@link Component} that represents a clock.
+   *
+   * @param seconds a number of seconds
+   * @return a component builder
+   */
+  public static TextComponent.Builder clock(final long seconds) {
+    if (seconds >= HOUR) {
+      return text()
+          .content(
+              String.format(
+                  CLOCK_FORMAT_LONG,
+                  seconds / HOUR,
+                  (seconds % HOUR) / MINUTE,
+                  (seconds % MINUTE)));
+    } else {
+      return text()
+          .content(String.format(CLOCK_FORMAT, (seconds % HOUR) / MINUTE, (seconds % MINUTE)));
+    }
+  }
+
+  /**
+   * Creates a {@link Component} that represents a clock.
+   *
+   * @param duration a duration
+   * @return a component builder
+   */
+  public static TextComponent.Builder clock(final Duration duration) {
+    if (duration.isNegative()) {
+      return clock(0);
+    }
+    return clock(duration.getSeconds());
   }
 
   // TODO: Change these signature after the Community refactor

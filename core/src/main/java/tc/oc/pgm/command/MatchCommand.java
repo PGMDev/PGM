@@ -4,6 +4,7 @@ import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.text.TemporalComponent.clock;
 
 import app.ashcon.intake.Command;
 import com.google.common.collect.HashMultimap;
@@ -31,7 +32,6 @@ import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -60,7 +60,7 @@ public final class MatchCommand {
       viewer.sendMessage(
           translatable("match.info.time", NamedTextColor.DARK_PURPLE)
               .append(text(": ", NamedTextColor.DARK_PURPLE))
-              .append(text(TimeUtils.formatDuration(match.getDuration()), NamedTextColor.GOLD)));
+              .append(clock(match.getDuration()).color(NamedTextColor.GOLD)));
     }
 
     TeamMatchModule tmm = match.getModule(TeamMatchModule.class);

@@ -1,5 +1,7 @@
 package tc.oc.pgm.projectile;
 
+import static tc.oc.pgm.util.text.TemporalComponent.ticker;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.Future;
@@ -12,6 +14,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.kits.tag.ItemTags;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class ProjectileCooldown {
   private final MatchPlayer matchPlayer;
@@ -36,7 +39,7 @@ public class ProjectileCooldown {
   }
 
   public String getTimeLeftString() {
-    return TimeUtils.formatDurationShort(getTimeLeft());
+    return TextTranslations.translateLegacy(ticker(getTimeLeft()).build(), matchPlayer.getBukkit());
   }
 
   public boolean isActive() {
