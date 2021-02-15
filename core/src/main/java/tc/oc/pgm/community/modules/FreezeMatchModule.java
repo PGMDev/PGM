@@ -10,7 +10,7 @@ import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.event.ClickEvent.runCommand;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static net.kyori.adventure.title.Title.title;
-import static tc.oc.pgm.util.TimeUtils.INFINITE_DURATION;
+import static tc.oc.pgm.util.TimeUtils.MAX_TICK;
 import static tc.oc.pgm.util.TimeUtils.fromTicks;
 
 import com.google.common.cache.Cache;
@@ -358,7 +358,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
         freezee.sendWarning(title);
       } else {
         freezee.showTitle(
-            title(empty(), title, Title.Times.of(fromTicks(5), INFINITE_DURATION, fromTicks(5))));
+            title(empty(), title, Title.Times.of(fromTicks(5), fromTicks(MAX_TICK), fromTicks(5))));
       }
       freezee.playSound(FREEZE_SOUND);
 
