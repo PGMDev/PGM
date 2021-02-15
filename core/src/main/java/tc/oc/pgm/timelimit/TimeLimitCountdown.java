@@ -2,7 +2,6 @@ package tc.oc.pgm.timelimit;
 
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
-import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
@@ -36,8 +35,7 @@ public class TimeLimitCountdown extends MatchCountdown {
 
   @Override
   protected Component formatText() {
-    return translatable(
-        "misc.timeRemaining", NamedTextColor.AQUA, text(colonTime(), urgencyColor()));
+    return translatable("misc.timeRemaining", NamedTextColor.AQUA, colonTime());
   }
 
   @Override

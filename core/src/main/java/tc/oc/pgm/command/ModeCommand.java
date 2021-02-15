@@ -2,6 +2,7 @@ package tc.oc.pgm.command;
 
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
+import static tc.oc.pgm.util.text.TemporalComponent.clock;
 import static tc.oc.pgm.util.text.TextException.exception;
 
 import app.ashcon.intake.Command;
@@ -19,7 +20,6 @@ import tc.oc.pgm.modes.ModeChangeCountdown;
 import tc.oc.pgm.modes.ModesPaginatedResult;
 import tc.oc.pgm.modes.ObjectiveModesMatchModule;
 import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.TimeUtils;
 
 // TODO: make the output nicer and translate
 public final class ModeCommand {
@@ -52,10 +52,12 @@ public final class ModeCommand {
                       WordUtils.capitalize(next.getMode().getPreformattedMaterialName()),
                       NamedTextColor.GOLD)
                   .append(space())
+                  .append(text("(", NamedTextColor.AQUA))
                   .append(
-                      text(
-                          "(" + new ModesPaginatedResult(modes).formatSingleCountdown(next) + ")",
-                          NamedTextColor.AQUA)));
+                      new ModesPaginatedResult(modes)
+                          .formatSingleCountdown(next)
+                          .color(NamedTextColor.AQUA))
+                  .append(text(")", NamedTextColor.AQUA)));
         } else {
           throwNoResults();
         }
@@ -100,14 +102,15 @@ public final class ModeCommand {
     TextComponent.Builder builder =
         text().append(text("All modes have been pushed ", NamedTextColor.GOLD));
     if (duration.isNegative()) {
-      builder.append(text("backwards "));
+      builder.append(text("backwards ", NamedTextColor.GOLD));
     } else {
-      builder.append(text("forwards "));
+      builder.append(text("forwards ", NamedTextColor.GOLD));
     }
 
-    builder.append(text("by " + TimeUtils.formatDuration(duration)));
+    builder.append(text("by ", NamedTextColor.GOLD));
+    builder.append(clock(Math.abs(duration.getSeconds())).color(NamedTextColor.AQUA));
 
-    audience.sendMessage(text(builder.toString()));
+    audience.sendMessage(builder);
   }
 
   private static void showList(int page, Audience audience, ObjectiveModesMatchModule modes)

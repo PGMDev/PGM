@@ -1,7 +1,7 @@
 package tc.oc.pgm.command;
 
-import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.text.TemporalComponent.clock;
 
 import app.ashcon.intake.Command;
 import java.time.Duration;
@@ -13,7 +13,6 @@ import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.timelimit.TimeLimit;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.TimeUtils;
 
 public final class TimeLimitCommand {
 
@@ -49,7 +48,7 @@ public final class TimeLimitCommand {
         translatable(
             "match.timeLimit.commandOutput",
             NamedTextColor.YELLOW,
-            text(TimeUtils.formatDuration(duration), NamedTextColor.AQUA),
+            clock(duration).color(NamedTextColor.AQUA),
             result != null ? result.getDescription(match) : translatable("misc.unknown")));
   }
 }
