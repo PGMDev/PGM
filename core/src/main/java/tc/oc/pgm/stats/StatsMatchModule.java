@@ -2,9 +2,12 @@ package tc.oc.pgm.stats;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.text.DecimalFormat;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -36,6 +39,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
+import tc.oc.pgm.api.match.event.MatchStatsEvent;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -70,6 +74,9 @@ public class StatsMatchModule implements MatchModule, Listener {
   private final Map<UUID, String> cachedUsernames = new HashMap<>();
 
   private final boolean verboseStats = PGM.get().getConfiguration().showVerboseStats();
+  private final Duration showAfter = PGM.get().getConfiguration().showStatsAfter();
+  private final boolean bestStats = PGM.get().getConfiguration().showBestStats();
+  private final boolean ownStats = PGM.get().getConfiguration().showOwnStats();
   private final Component verboseStatsTitle = translatable("match.stats.title");
 
   /** Common formats used by stats with decimals */
@@ -184,13 +191,24 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   @EventHandler
   public void onMatchEnd(MatchFinishEvent event) {
+    if (allPlayerStats.isEmpty() || showAfter.isNegative()) return;
 
-    // No players with stats -> no stats to show
+    // Schedule displaying stats after match end
+    match
+        .getExecutor(MatchScope.LOADED)
+        .schedule(
+            () -> match.callEvent(new MatchStatsEvent(match, bestStats, ownStats)),
+            showAfter.toMillis(),
+            TimeUnit.MILLISECONDS);
+  }
+
+  @EventHandler(ignoreCancelled = true)
+  public void onStatsDisplay(MatchStatsEvent event) {
     if (allPlayerStats.isEmpty()) return;
 
     // Gather all player stats from this match
     Map<UUID, Integer> allKills = new HashMap<>();
-    Map<UUID, Integer> allKillstreaks = new HashMap<>();
+    Map<UUID, Integer> allStreaks = new HashMap<>();
     Map<UUID, Integer> allDeaths = new HashMap<>();
     Map<UUID, Integer> allBowshots = new HashMap<>();
     Map<UUID, Double> allDamage = new HashMap<>();
@@ -202,63 +220,63 @@ public class StatsMatchModule implements MatchModule, Listener {
       getPlayerStat(playerUUID);
 
       allKills.put(playerUUID, playerStats.getKills());
-      allKillstreaks.put(playerUUID, playerStats.getMaxKillstreak());
+      allStreaks.put(playerUUID, playerStats.getMaxKillstreak());
       allDeaths.put(playerUUID, playerStats.getDeaths());
       allBowshots.put(playerUUID, playerStats.getLongestBowKill());
       allDamage.put(playerUUID, playerStats.getDamageDone());
     }
 
-    // Sort and create messages for the best stats
+    List<Component> best = new ArrayList<>();
+    if (event.isShowBest()) {
+      best.add(getMessage("match.stats.kills", sortStats(allKills), NamedTextColor.GREEN));
+      best.add(getMessage("match.stats.killstreak", sortStats(allStreaks), NamedTextColor.GREEN));
+      best.add(getMessage("match.stats.deaths", sortStats(allDeaths), NamedTextColor.RED));
 
-    // kills/deaths
-    Component killMessage =
-        getMessage("match.stats.kills", sortStats(allKills), NamedTextColor.GREEN);
-    Component killstreakMessage =
-        getMessage("match.stats.killstreak", sortStats(allKillstreaks), NamedTextColor.GREEN);
-    Component deathMessage =
-        getMessage("match.stats.deaths", sortStats(allDeaths), NamedTextColor.RED);
+      Map.Entry<UUID, Integer> bestBowshot = sortStats(allBowshots);
+      if (bestBowshot.getValue() > 1)
+        best.add(getMessage("match.stats.bowshot", bestBowshot, NamedTextColor.YELLOW));
 
-    // bow
-    Map.Entry<UUID, Integer> bestBowshot = sortStats(allBowshots);
-    if (bestBowshot.getValue() == 1)
-      bestBowshot.setValue(2); // Avoids translating "1 block" vs "n blocks"
-    Component bowshotMessage =
-        getMessage("match.stats.bowshot", bestBowshot, NamedTextColor.YELLOW);
+      if (verboseStats) {
+        Map.Entry<UUID, Double> bestDamage = sortStatsDouble(allDamage);
+        best.add(
+            translatable(
+                "match.stats.damage",
+                playerName(bestDamage.getKey()),
+                damageComponent(bestDamage.getValue(), NamedTextColor.GREEN)));
+      }
+    }
 
-    // damage
-    Map.Entry<UUID, Double> bestDamage = sortStatsDouble(allDamage);
-    Component damageMessage =
-        translatable(
-            "match.stats.damage",
-            playerName(bestDamage.getKey()),
-            damageComponent(bestDamage.getValue(), NamedTextColor.GREEN));
+    for (MatchPlayer viewer : match.getPlayers()) {
+      if (viewer.getSettings().getValue(SettingKey.STATS) == SettingValue.STATS_OFF) continue;
 
-    // Send everything created to all players in the match
-    // (stat messages and items)
-    match
-        .getExecutor(MatchScope.LOADED)
-        .schedule(
-            () -> {
-              for (MatchPlayer viewer : match.getPlayers()) {
-                // Does this player care about stats?
-                if (viewer.getSettings().getValue(SettingKey.STATS) == SettingValue.STATS_OFF)
-                  continue;
+      viewer.sendMessage(
+          TextFormatter.horizontalLineHeading(
+              viewer.getBukkit(),
+              translatable("match.stats.title", NamedTextColor.YELLOW),
+              NamedTextColor.WHITE));
 
-                viewer.sendMessage(
-                    TextFormatter.horizontalLineHeading(
-                        viewer.getBukkit(),
-                        translatable("match.stats.title", NamedTextColor.YELLOW),
-                        NamedTextColor.WHITE));
-                viewer.sendMessage(killMessage);
-                viewer.sendMessage(killstreakMessage);
-                viewer.sendMessage(deathMessage);
-                if (bestBowshot.getValue() != 0) viewer.sendMessage(bowshotMessage);
-                if (verboseStats) viewer.sendMessage(damageMessage);
-                giveVerboseStatsItem(viewer, false);
-              }
-            },
-            5 + 1, // NOTE: This is 1 second after the votebook appears
-            TimeUnit.SECONDS);
+      best.forEach(viewer::sendMessage);
+
+      PlayerStats stats = allPlayerStats.get(viewer.getId());
+      if (event.isShowOwn() && stats != null) {
+        Component ksHover =
+            translatable(
+                "match.stats.killstreak.concise",
+                numberComponent(stats.getKillstreak(), NamedTextColor.GREEN));
+
+        viewer.sendMessage(
+            translatable(
+                "match.stats.own",
+                numberComponent(stats.getKills(), NamedTextColor.GREEN),
+                numberComponent(stats.getKillstreak(), NamedTextColor.GREEN)
+                    .hoverEvent(showText(ksHover)),
+                numberComponent(stats.getDeaths(), NamedTextColor.RED),
+                numberComponent(stats.getKD(), NamedTextColor.GREEN),
+                damageComponent(stats.getDamageDone(), NamedTextColor.GREEN)));
+      }
+
+      giveVerboseStatsItem(viewer, false);
+    }
   }
 
   @EventHandler
