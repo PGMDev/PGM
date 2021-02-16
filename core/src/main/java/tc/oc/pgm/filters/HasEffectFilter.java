@@ -8,9 +8,16 @@ import tc.oc.pgm.api.player.MatchPlayer;
 
 public class HasEffectFilter extends ParticipantFilter {
   protected final PotionEffect base;
+  // min/max duration are stored in ticks
+  protected final long minDuration;
+  protected final long maxDuration;
+  protected final boolean amplifier;
 
-  public HasEffectFilter(PotionEffect base) {
+  public HasEffectFilter(PotionEffect base, long minDuration, long maxDuration, boolean amplifier) {
     this.base = Preconditions.checkNotNull(base);
+    this.minDuration = minDuration;
+    this.maxDuration = maxDuration;
+    this.amplifier = amplifier;
   }
 
   protected Collection<PotionEffect> getEffects(MatchPlayer player) {
@@ -22,11 +29,10 @@ public class HasEffectFilter extends ParticipantFilter {
     for (PotionEffect effect : getEffects(player)) {
       if (effect == null) continue;
 
-      // Match if the effects are the same type and amplifier, and if the player has at least the
-      // desired duration left.
       if (effect.getType().equals(base.getType())
-          && (effect.getAmplifier() == base.getAmplifier())
-          && (effect.getDuration() >= base.getDuration())) {
+          && (!amplifier || (effect.getAmplifier() == base.getAmplifier()))
+          && ((minDuration == -1) || (effect.getDuration() >= minDuration))
+          && ((maxDuration == -1) || (effect.getDuration() <= maxDuration))) {
         return QueryResponse.ALLOW;
       }
     }

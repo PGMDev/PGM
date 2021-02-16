@@ -444,13 +444,17 @@ public abstract class FilterParser {
     return new WearingItemFilter(factory.getKits().parseRequiredItem(el));
   }
 
-  @MethodParser("has-effect")
+  @MethodParser("effect")
   public HasEffectFilter parseHasEffect(Element el) throws InvalidXMLException {
-    Element effect = el.getChild("effect");
-    if (effect == null) {
-      throw new InvalidXMLException("Effect expected", el);
-    }
-    return new HasEffectFilter(XMLUtils.parsePotionEffect(effect));
+    Attribute minAttribute = el.getAttribute("min-duration");
+    Attribute maxAttribute = el.getAttribute("max-duration");
+    Attribute amplifierAttribute = el.getAttribute("amplifier");
+    long minDuration =
+        minAttribute != null ? XMLUtils.parseDuration(minAttribute).getSeconds() * 20 : -1;
+    long maxDuration =
+        maxAttribute != null ? XMLUtils.parseDuration(maxAttribute).getSeconds() * 20 : -1;
+    boolean amplifier = (amplifierAttribute != null);
+    return new HasEffectFilter(XMLUtils.parsePotionEffect(el), minDuration, maxDuration, amplifier);
   }
 
   @MethodParser("structural-load")
