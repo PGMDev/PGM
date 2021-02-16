@@ -444,6 +444,15 @@ public abstract class FilterParser {
     return new WearingItemFilter(factory.getKits().parseRequiredItem(el));
   }
 
+  @MethodParser("has-effect")
+  public HasEffectFilter parseHasEffect(Element el) throws InvalidXMLException {
+    Element effect = el.getChild("effect");
+    if (effect == null) {
+      throw new InvalidXMLException("Effect expected", el);
+    }
+    return new HasEffectFilter(XMLUtils.parsePotionEffect(effect));
+  }
+
   @MethodParser("structural-load")
   public StructuralLoadFilter parseStructuralLoad(Element el) throws InvalidXMLException {
     return new StructuralLoadFilter(XMLUtils.parseNumber(el, Integer.class));
