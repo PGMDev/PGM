@@ -1,6 +1,7 @@
 package tc.oc.pgm.modes;
 
 import static net.kyori.adventure.text.Component.text;
+import static tc.oc.pgm.util.text.TemporalComponent.clock;
 
 import com.google.common.base.Preconditions;
 import java.time.Duration;
@@ -9,7 +10,6 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import tc.oc.pgm.util.PrettyPaginatedResult;
-import tc.oc.pgm.util.TimeUtils;
 
 /** Class used to display a paginated list of monument modes */
 public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountdown> {
@@ -30,11 +30,12 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
 
     builder.append(text((index + 1) + ". ", NamedTextColor.GOLD));
     builder.append(text(materialName + " - ", NamedTextColor.LIGHT_PURPLE));
-    builder.append(text(TimeUtils.formatDuration(timeFromStart), NamedTextColor.AQUA));
+    builder.append(clock(timeFromStart).color(NamedTextColor.AQUA));
 
     if (countdown.getMatch().isRunning()) {
-      builder.append(
-          text(" (" + this.formatSingleCountdown(countdown) + ')', NamedTextColor.DARK_AQUA));
+      builder.append(text(" (", NamedTextColor.DARK_AQUA));
+      builder.append(this.formatSingleCountdown(countdown).color(NamedTextColor.DARK_AQUA));
+      builder.append(text(")", NamedTextColor.DARK_AQUA));
     }
 
     return builder.decoration(TextDecoration.STRIKETHROUGH, this.isExpired(countdown)).build();
@@ -47,19 +48,14 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
    * @param countdown to format
    * @return Formatted text
    */
-  public String formatSingleCountdown(ModeChangeCountdown countdown) {
+  public TextComponent.Builder formatSingleCountdown(ModeChangeCountdown countdown) {
     Duration currentTimeLeft = modes.getCountdown().getTimeLeft(countdown);
-    StringBuilder builder = new StringBuilder();
 
     if (countdown.getMatch().isRunning()) {
-      if (this.isRunning(countdown)) {
-        builder.append(TimeUtils.formatDuration(currentTimeLeft)).append(" left");
-      } else {
-        builder.append("0:00 left");
-      }
+      return clock(currentTimeLeft).append(text(" left"));
     }
 
-    return builder.toString();
+    return text();
   }
 
   private boolean isRunning(ModeChangeCountdown countdown) {

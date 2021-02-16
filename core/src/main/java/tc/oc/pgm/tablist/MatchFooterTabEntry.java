@@ -3,6 +3,7 @@ package tc.oc.pgm.tablist;
 import static net.kyori.adventure.text.Component.newline;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.text.TemporalComponent.clock;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -19,7 +20,6 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.stats.StatsMatchModule;
-import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.tablist.DynamicTabEntry;
 import tc.oc.pgm.util.tablist.TabView;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -81,9 +81,8 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
         .append(translatable("match.info.time", NamedTextColor.GRAY))
         .append(text(": ", NamedTextColor.GRAY))
         .append(
-            text(
-                TimeUtils.formatDuration(match.getDuration()),
-                this.match.isRunning() ? NamedTextColor.GREEN : NamedTextColor.GOLD));
+            clock(match.getDuration())
+                .color(this.match.isRunning() ? NamedTextColor.GREEN : NamedTextColor.GOLD));
 
     if (!timeOnly && rightContent != null) {
       content

@@ -1,6 +1,5 @@
 package tc.oc.pgm.timelimit;
 
-import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
@@ -47,7 +46,7 @@ public class OvertimeCountdown extends TimeLimitCountdown {
     return translatable(
             "misc.overtime",
             NamedTextColor.YELLOW,
-            text(colonTime(), urgencyColor()).decoration(TextDecoration.BOLD, false))
+            colonTime().decoration(TextDecoration.BOLD, false))
         .decoration(TextDecoration.BOLD, true);
   }
 
