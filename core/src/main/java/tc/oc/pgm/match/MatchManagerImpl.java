@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
@@ -148,8 +149,15 @@ public class MatchManagerImpl implements MatchManager, Listener {
   @Override
   public MatchPlayer getPlayer(@Nullable Player bukkit) {
     if (bukkit == null) return null;
-    final Match match = getMatch(bukkit.getWorld());
-    if (match == null) return null;
-    return match.getPlayer(bukkit);
+    Match match = getMatch(bukkit.getWorld());
+    if (match != null) {
+      MatchPlayer mp = match.getPlayer(bukkit);
+      if (mp != null) return mp;
+    }
+    return matchById.values().stream()
+        .map(m -> m.getPlayer(bukkit))
+        .filter(Objects::nonNull)
+        .findFirst()
+        .orElse(null);
   }
 }
