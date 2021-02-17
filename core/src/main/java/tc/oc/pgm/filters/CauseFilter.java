@@ -1,11 +1,11 @@
 package tc.oc.pgm.filters;
 
 import com.google.common.base.Preconditions;
+import javax.annotation.Nullable;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EntityAction;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
@@ -96,10 +96,7 @@ public class CauseFilter extends TypedFilter<MatchQuery> {
       }
     }
 
-    Entity actor = null;
-    if (event instanceof EntityAction) {
-      actor = ((EntityAction) event).getActor();
-    }
+    @Nullable Entity actor = GeneralizedEvent.getActorIfPresent(event);
 
     switch (this.cause) {
         // Actor types

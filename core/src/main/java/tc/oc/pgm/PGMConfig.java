@@ -61,6 +61,7 @@ public final class PGMConfig implements Config {
   private final Duration startTime;
   private final Duration huddleTime;
   private final Duration cycleTime;
+  private final Duration restartTime;
 
   // restart.*
   private final Duration uptimeLimit;
@@ -159,6 +160,7 @@ public final class PGMConfig implements Config {
     this.startTime = parseDuration(config.getString("countdown.start", "30s"));
     this.huddleTime = parseDuration(config.getString("countdown.huddle", "0s"));
     this.cycleTime = parseDuration(config.getString("countdown.cycle", "30s"));
+    this.restartTime = parseDuration(config.getString("countdown.restart", "30s"));
 
     this.uptimeLimit = parseDuration(config.getString("restart.uptime", "1d"));
     this.matchLimit = parseInteger(config.getString("restart.match-limit", "30"));
@@ -473,6 +475,11 @@ public final class PGMConfig implements Config {
   @Override
   public Duration getCycleTime() {
     return cycleTime;
+  }
+
+  @Override
+  public Duration getRestartTime() {
+    return restartTime;
   }
 
   @Override

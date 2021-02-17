@@ -312,6 +312,32 @@ public abstract class FilterParser {
     return new KillStreakFilter(range, repeat);
   }
 
+  @MethodParser("lives")
+  public LivesFilter parseLives(Element el) throws InvalidXMLException {
+    Integer count = XMLUtils.parseNumber(el.getAttribute("count"), Integer.class, (Integer) null);
+    Integer min = XMLUtils.parseNumber(el.getAttribute("min"), Integer.class, (Integer) null);
+    Integer max = XMLUtils.parseNumber(el.getAttribute("max"), Integer.class, (Integer) null);
+    Range<Integer> range;
+
+    if (count != null) {
+      range = Range.singleton(count);
+    } else if (min == null) {
+      if (max == null) {
+        throw new InvalidXMLException("lives filter must have a count, min, or max", el);
+      } else {
+        range = Range.atMost(max);
+      }
+    } else {
+      if (max == null) {
+        range = Range.atLeast(min);
+      } else {
+        range = Range.closed(min, max);
+      }
+    }
+
+    return new LivesFilter(range);
+  }
+
   @MethodParser("random")
   public RandomFilter parseRandom(Element el) throws InvalidXMLException {
     Node node = new Node(el);

@@ -16,6 +16,7 @@ public class SpawnerDefinition implements FeatureDefinition {
   public final Duration minDelay, maxDelay, delay;
   public final List<Spawnable> objects;
   public final Filter playerFilter;
+  public final int numericID;
 
   public SpawnerDefinition(
       List<Spawnable> objects,
@@ -25,7 +26,8 @@ public class SpawnerDefinition implements FeatureDefinition {
       Duration delay,
       Duration minDelay,
       Duration maxDelay,
-      int maxEntities) {
+      int maxEntities,
+      int numericID) {
     this.spawnRegion = spawnRegion;
     this.playerRegion = playerRegion;
     this.maxEntities = maxEntities;
@@ -34,5 +36,6 @@ public class SpawnerDefinition implements FeatureDefinition {
     this.delay = delay;
     this.objects = objects;
     this.playerFilter = playerFilter;
+    this.numericID = numericID;
   }
 }

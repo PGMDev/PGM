@@ -50,6 +50,7 @@ public class SpawnerModule implements MapModule {
       KitParser kitParser = factory.getKits();
       FilterParser filterParser = factory.getFilters();
 
+      int numericID = 0;
       for (Element element :
           XMLUtils.flattenElements(doc.getRootElement(), "spawners", "spawner")) {
         Region spawnRegion = regionParser.parseRequiredRegionProperty(element, "spawn-region");
@@ -82,7 +83,7 @@ public class SpawnerModule implements MapModule {
             XMLUtils.getChildren(
                 element, "item")) { // TODO Add more types of spawnables once entity parser is built
           ItemStack stack = kitParser.parseItem(spawnable, false);
-          SpawnableItem item = new SpawnableItem(stack);
+          SpawnableItem item = new SpawnableItem(stack, numericID);
           objects.add(item);
         }
 
@@ -95,9 +96,11 @@ public class SpawnerModule implements MapModule {
                 delay,
                 minDelay,
                 maxDelay,
-                maxEntities);
+                maxEntities,
+                numericID);
         factory.getFeatures().addFeature(element, spawnerDefinition);
         spawnerModule.spawnerDefinitions.add(spawnerDefinition);
+        numericID++;
       }
 
       return spawnerModule.spawnerDefinitions.isEmpty() ? null : spawnerModule;
