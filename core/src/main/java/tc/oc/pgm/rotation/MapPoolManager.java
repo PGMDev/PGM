@@ -232,7 +232,7 @@ public class MapPoolManager implements MapOrder {
   @Override
   public void setNextMap(MapInfo map) {
     overriderMap = map;
-    activeMapPool.setNextMap(map); // Notify pool a next map has been set
+    if (activeMapPool != null) activeMapPool.setNextMap(map); // Notify pool a next map has been set
   }
 
   @Override

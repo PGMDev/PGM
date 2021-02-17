@@ -170,11 +170,12 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       }
     }
 
-    if (config.getMapPoolFile() == null) {
-      mapOrder = new RandomMapOrder(Lists.newArrayList(mapLibrary.getMaps()));
-    } else {
-      mapOrder = new MapPoolManager(logger, new File(config.getMapPoolFile()), datastore);
+    if (config.getMapPoolFile() != null) {
+      MapPoolManager manager =
+          new MapPoolManager(logger, new File(config.getMapPoolFile()), datastore);
+      if (manager.getActiveMapPool() != null) mapOrder = manager;
     }
+    if (mapOrder == null) mapOrder = new RandomMapOrder(Lists.newArrayList(mapLibrary.getMaps()));
 
     // FIXME: To avoid startup lag, we "prefetch" usernames after map pools are loaded.
     // Change MapPoolManager so it doesn't depend on all maps being loaded.
