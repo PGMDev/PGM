@@ -3,6 +3,7 @@ package tc.oc.pgm.filters;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -472,15 +473,14 @@ public abstract class FilterParser {
 
   @MethodParser("effect")
   public HasEffectFilter parseHasEffect(Element el) throws InvalidXMLException {
-    Attribute minAttribute = el.getAttribute("min-duration");
-    Attribute maxAttribute = el.getAttribute("max-duration");
-    Attribute amplifierAttribute = el.getAttribute("amplifier");
-    long minDuration =
-        minAttribute != null ? XMLUtils.parseDuration(minAttribute).getSeconds() * 20 : -1;
-    long maxDuration =
-        maxAttribute != null ? XMLUtils.parseDuration(maxAttribute).getSeconds() * 20 : -1;
-    boolean amplifier = (amplifierAttribute != null);
-    return new HasEffectFilter(XMLUtils.parsePotionEffect(el), minDuration, maxDuration, amplifier);
+    Duration minDuration = XMLUtils.parseDuration(Node.fromAttr(el, "min-duration"));
+    Duration maxDuration = XMLUtils.parseDuration(Node.fromAttr(el, "max-duration"));
+    boolean amplifier = Node.fromAttr(el, "amplifier") != null ? true : false;
+    return new HasEffectFilter(
+        XMLUtils.parsePotionEffect(el),
+        minDuration != null ? minDuration.getSeconds() * 20 : -1,
+        maxDuration != null ? maxDuration.getSeconds() * 20 : -1,
+        amplifier);
   }
 
   @MethodParser("structural-load")
