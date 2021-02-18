@@ -472,15 +472,21 @@ public abstract class FilterParser {
   }
 
   @MethodParser("effect")
-  public HasEffectFilter parseHasEffect(Element el) throws InvalidXMLException {
+  public EffectFilter parseEffect(Element el) throws InvalidXMLException {
     Duration minDuration = XMLUtils.parseDuration(Node.fromAttr(el, "min-duration"));
     Duration maxDuration = XMLUtils.parseDuration(Node.fromAttr(el, "max-duration"));
-    boolean amplifier = Node.fromAttr(el, "amplifier") != null ? true : false;
-    return new HasEffectFilter(
-        XMLUtils.parsePotionEffect(el),
-        minDuration != null ? minDuration.getSeconds() * 20 : -1,
-        maxDuration != null ? maxDuration.getSeconds() * 20 : -1,
-        amplifier);
+    Range<Long> duration;
+    if (minDuration == null && maxDuration == null) {
+      duration = Range.all();
+    } else if (minDuration == null) {
+      duration = Range.atMost(maxDuration.getSeconds() * 20);
+    } else if (maxDuration == null) {
+      duration = Range.atLeast(minDuration.getSeconds() * 20);
+    } else {
+      duration = Range.closed(minDuration.getSeconds() * 20, maxDuration.getSeconds() * 20);
+    }
+    boolean amplifier = Node.fromAttr(el, "amplifier") != null;
+    return new EffectFilter(XMLUtils.parsePotionEffect(el), duration, amplifier);
   }
 
   @MethodParser("structural-load")

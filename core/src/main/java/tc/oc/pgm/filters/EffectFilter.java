@@ -1,22 +1,21 @@
 package tc.oc.pgm.filters;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Range;
 import java.util.Collection;
 import org.bukkit.potion.PotionEffect;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.player.MatchPlayer;
 
-public class HasEffectFilter extends ParticipantFilter {
+public class EffectFilter extends ParticipantFilter {
   protected final PotionEffect base;
-  // min/max duration are stored in ticks
-  protected final long minDuration;
-  protected final long maxDuration;
+  // duration is stored in ticks
+  protected final Range<Long> duration;
   protected final boolean amplifier;
 
-  public HasEffectFilter(PotionEffect base, long minDuration, long maxDuration, boolean amplifier) {
+  public EffectFilter(PotionEffect base, Range<Long> duration, boolean amplifier) {
     this.base = Preconditions.checkNotNull(base);
-    this.minDuration = minDuration;
-    this.maxDuration = maxDuration;
+    this.duration = duration;
     this.amplifier = amplifier;
   }
 
@@ -31,8 +30,7 @@ public class HasEffectFilter extends ParticipantFilter {
 
       if (effect.getType().equals(base.getType())
           && (!amplifier || (effect.getAmplifier() == base.getAmplifier()))
-          && ((minDuration == -1) || (effect.getDuration() >= minDuration))
-          && ((maxDuration == -1) || (effect.getDuration() <= maxDuration))) {
+          && duration.contains((long) effect.getDuration())) {
         return QueryResponse.ALLOW;
       }
     }
