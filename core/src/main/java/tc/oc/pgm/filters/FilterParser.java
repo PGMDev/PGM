@@ -475,15 +475,17 @@ public abstract class FilterParser {
   public EffectFilter parseEffect(Element el) throws InvalidXMLException {
     Duration minDuration = XMLUtils.parseDuration(Node.fromAttr(el, "min-duration"));
     Duration maxDuration = XMLUtils.parseDuration(Node.fromAttr(el, "max-duration"));
-    Range<Long> duration;
+    Range<Integer> duration;
     if (minDuration == null && maxDuration == null) {
       duration = Range.all();
     } else if (minDuration == null) {
-      duration = Range.atMost(maxDuration.getSeconds() * 20);
+      duration = Range.atMost((int) (maxDuration.getSeconds() * 20));
     } else if (maxDuration == null) {
-      duration = Range.atLeast(minDuration.getSeconds() * 20);
+      duration = Range.atLeast((int) (minDuration.getSeconds() * 20));
     } else {
-      duration = Range.closed(minDuration.getSeconds() * 20, maxDuration.getSeconds() * 20);
+      duration =
+          Range.closed(
+              (int) (minDuration.getSeconds() * 20), (int) (maxDuration.getSeconds() * 20));
     }
     boolean amplifier = Node.fromAttr(el, "amplifier") != null;
     return new EffectFilter(XMLUtils.parsePotionEffect(el), duration, amplifier);

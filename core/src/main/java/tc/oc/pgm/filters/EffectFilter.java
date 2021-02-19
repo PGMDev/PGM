@@ -10,10 +10,10 @@ import tc.oc.pgm.api.player.MatchPlayer;
 public class EffectFilter extends ParticipantFilter {
   protected final PotionEffect base;
   // duration is stored in ticks
-  protected final Range<Long> duration;
+  protected final Range<Integer> duration;
   protected final boolean amplifier;
 
-  public EffectFilter(PotionEffect base, Range<Long> duration, boolean amplifier) {
+  public EffectFilter(PotionEffect base, Range<Integer> duration, boolean amplifier) {
     this.base = Preconditions.checkNotNull(base);
     this.duration = duration;
     this.amplifier = amplifier;
@@ -30,7 +30,7 @@ public class EffectFilter extends ParticipantFilter {
 
       if (effect.getType().equals(base.getType())
           && (!amplifier || (effect.getAmplifier() == base.getAmplifier()))
-          && duration.contains((long) effect.getDuration())) {
+          && duration.contains(effect.getDuration())) {
         return QueryResponse.ALLOW;
       }
     }
