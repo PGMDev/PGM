@@ -268,7 +268,7 @@ public class StatsMatchModule implements MatchModule, Listener {
             translatable(
                 "match.stats.own",
                 numberComponent(stats.getKills(), NamedTextColor.GREEN),
-                numberComponent(stats.getKillstreak(), NamedTextColor.GREEN)
+                numberComponent(stats.getMaxKillstreak(), NamedTextColor.GREEN)
                     .hoverEvent(showText(ksHover)),
                 numberComponent(stats.getDeaths(), NamedTextColor.RED),
                 numberComponent(stats.getKD(), NamedTextColor.GREEN),
