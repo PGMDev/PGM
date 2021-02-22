@@ -95,13 +95,19 @@ public class StatsMatchModule implements MatchModule, Listener {
     ParticipantState damager =
         match.needModule(TrackerMatchModule.class).getOwner(event.getDamager());
     ParticipantState damaged = match.getParticipantState(event.getEntity());
-    if ((damaged != null && damager != null) && damaged.getId() == damager.getId()) return;
+
+    // Prevent tracking damage to entities or self
+    if (damaged == null || (damager != null && damaged.getId() == damager.getId())) return;
+
     boolean bow = event.getDamager() instanceof Arrow;
     // Absorbed damage gets removed so we add it back
+    double absorptionHearts = -event.getDamage(EntityDamageEvent.DamageModifier.ABSORPTION);
     double realFinalDamage =
-        event.getFinalDamage() - event.getDamage(EntityDamageEvent.DamageModifier.ABSORPTION);
+        Math.min(event.getFinalDamage(), ((Player) event.getEntity()).getHealth())
+            + absorptionHearts;
+
     if (damager != null) getPlayerStat(damager).onDamage(realFinalDamage, bow);
-    if (damaged != null) getPlayerStat(damaged).onDamaged(realFinalDamage);
+    getPlayerStat(damaged).onDamaged(realFinalDamage);
   }
 
   @EventHandler
