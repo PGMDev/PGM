@@ -30,7 +30,6 @@ public class TimeSetModule implements MapModule, MatchModule {
       Element TimeSetEl = doc.getRootElement().getChild("timeset");
       if (TimeSetEl != null) {
         Long time = XMLUtils.parseNumber(doc.getRootElement().getChild("timeset"), Long.class);
-        System.out.println("nyaa");
         return new TimeSetModule(time);
       } else {
         return null;
