@@ -58,28 +58,7 @@ import tc.oc.pgm.kits.KitMatchModule;
 import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.modes.ObjectiveModesMatchModule;
 import tc.oc.pgm.modes.ObjectiveModesModule;
-import tc.oc.pgm.modules.ArrowRemovalMatchModule;
-import tc.oc.pgm.modules.DiscardPotionBottlesMatchModule;
-import tc.oc.pgm.modules.DiscardPotionBottlesModule;
-import tc.oc.pgm.modules.EventFilterMatchModule;
-import tc.oc.pgm.modules.FriendlyFireRefundMatchModule;
-import tc.oc.pgm.modules.FriendlyFireRefundModule;
-import tc.oc.pgm.modules.InternalMatchModule;
-import tc.oc.pgm.modules.InternalModule;
-import tc.oc.pgm.modules.ItemDestroyMatchModule;
-import tc.oc.pgm.modules.ItemDestroyModule;
-import tc.oc.pgm.modules.ItemKeepMatchModule;
-import tc.oc.pgm.modules.ItemKeepModule;
-import tc.oc.pgm.modules.MapmakerMatchModule;
-import tc.oc.pgm.modules.MobsMatchModule;
-import tc.oc.pgm.modules.MobsModule;
-import tc.oc.pgm.modules.ModifyBowProjectileMatchModule;
-import tc.oc.pgm.modules.ModifyBowProjectileModule;
-import tc.oc.pgm.modules.MultiTradeMatchModule;
-import tc.oc.pgm.modules.SoundsMatchModule;
-import tc.oc.pgm.modules.TimeLockModule;
-import tc.oc.pgm.modules.ToolRepairMatchModule;
-import tc.oc.pgm.modules.ToolRepairModule;
+import tc.oc.pgm.modules.*;
 import tc.oc.pgm.observers.ObserverToolsMatchModule;
 import tc.oc.pgm.picker.PickerMatchModule;
 import tc.oc.pgm.portals.PortalMatchModule;
@@ -247,5 +226,7 @@ public interface Modules {
 
     // MapModules that are also MatchModules
     register(TimeLockModule.class, TimeLockModule.class, new TimeLockModule.Factory());
+    register(TimeSetModule.class, TimeSetModule.class, new TimeSetModule.Factory());
+    register(TimeRandomModule.class, TimeRandomModule.class, new TimeRandomModule.Factory());
   }
 }

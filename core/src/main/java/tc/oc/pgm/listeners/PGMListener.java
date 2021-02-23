@@ -6,6 +6,7 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.util.Collection;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -51,6 +52,8 @@ import tc.oc.pgm.events.MapPoolAdjustEvent;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.TimeLockModule;
+import tc.oc.pgm.modules.TimeRandomModule;
+import tc.oc.pgm.modules.TimeSetModule;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TemporalComponent;
@@ -276,6 +279,38 @@ public class PGMListener implements Listener {
   @EventHandler
   public void lockTime(final MatchFinishEvent event) {
     event.getMatch().getWorld().setGameRuleValue(DO_DAYLIGHT_CYCLE, Boolean.toString(false));
+  }
+
+  @EventHandler
+  public void setTime(final MatchLoadEvent event) {
+    Long time = event.getMatch().getModule(TimeSetModule.class).getTime();
+    if (time != null) {
+      event.getMatch().getWorld().setTime(time);
+    }
+  }
+
+  @EventHandler
+  public void randomTime(final MatchLoadEvent event) {
+    if (event.getMatch().getModule(TimeRandomModule.class).isTimeRandom()) {
+      /*
+      0
+      1000  /time set day
+      6000  noon, sun is at its peak
+      12000 /time set sunset
+      12610 dusk
+      13000 /time set night
+      13188 first tick when monsters spawn
+      14000
+      18000 midnight, moon is at its peak
+      21000
+      23000 /time set sunrise
+      23460 undead mobs start to burn
+      */
+      long[] times = {0, 1000, 6000, 12000, 12610, 13000, 13188, 14000, 18000, 21000, 23000, 23460};
+      Random rand = new Random();
+      long time = times[rand.nextInt(times.length)];
+      event.getMatch().getWorld().setTime(time);
+    }
   }
 
   @EventHandler
