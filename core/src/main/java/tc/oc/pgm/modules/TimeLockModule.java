@@ -29,7 +29,7 @@ public class TimeLockModule implements MapModule, MatchModule {
       boolean lock = true;
       Element worldEl = doc.getRootElement().getChild("world");
       Element timelockEl = worldEl.getChild("timelock");
-      //legacy
+      // legacy
       if (timelockEl == null) {
         timelockEl = doc.getRootElement().getChild("timelock");
       }
