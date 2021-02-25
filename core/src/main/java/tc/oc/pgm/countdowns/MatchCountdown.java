@@ -6,7 +6,7 @@ import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.title.Title.title;
 import static tc.oc.pgm.util.text.TemporalComponent.clock;
-import static tc.oc.pgm.util.text.TemporalComponent.duration;
+import static tc.oc.pgm.util.text.TemporalComponent.seconds;
 
 import java.time.Duration;
 import javax.annotation.Nullable;
@@ -152,7 +152,7 @@ public abstract class MatchCountdown extends Countdown {
   }
 
   protected Component secondsRemaining(TextColor color) {
-    return duration(remaining, color).build();
+    return seconds(remaining.getSeconds(), color).build();
   }
 
   protected TextComponent.Builder colonTime() {
