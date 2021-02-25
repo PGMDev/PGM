@@ -155,6 +155,20 @@ public final class TemporalComponent {
     return clock(duration.getSeconds());
   }
 
+  /**
+   * Creates a {@link Component} that represents a duration in seconds.
+   *
+   * @param seconds a number of seconds
+   * @param color a unit color
+   * @return a component builder
+   */
+  public static TranslatableComponent.Builder seconds(
+      final long seconds, final @Nullable TextColor color) {
+    return translatable()
+        .key((seconds == 1) ? "misc.second" : "misc.seconds")
+        .args(color == null ? text(seconds) : text(seconds, color));
+  }
+
   // TODO: Change these signature after the Community refactor
 
   @Deprecated
