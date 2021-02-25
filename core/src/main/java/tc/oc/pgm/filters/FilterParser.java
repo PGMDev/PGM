@@ -390,6 +390,11 @@ public abstract class FilterParser {
     return new CanFlyFilter();
   }
 
+  @MethodParser("grounded")
+  public GroundedFilter parseGrounded(Element el) throws InvalidXMLException {
+    return GroundedFilter.INSTANCE;
+  }
+
   @MethodParser("objective")
   public GoalFilter parseGoal(Element el) throws InvalidXMLException {
     XMLFeatureReference<? extends GoalDefinition> goal =
