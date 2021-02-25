@@ -27,7 +27,12 @@ public class TimeLockModule implements MapModule, MatchModule {
     public TimeLockModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       boolean lock = true;
-      Element timelockEl = doc.getRootElement().getChild("timelock");
+      Element worldEl = doc.getRootElement().getChild("world");
+      Element timelockEl = worldEl.getChild("timelock");
+      //legacy
+      if (timelockEl == null) {
+        timelockEl = doc.getRootElement().getChild("timelock");
+      }
       if (timelockEl != null) {
         if (timelockEl.getTextNormalize().equalsIgnoreCase("off")) {
           lock = false;

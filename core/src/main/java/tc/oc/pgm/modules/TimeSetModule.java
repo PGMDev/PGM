@@ -27,9 +27,9 @@ public class TimeSetModule implements MapModule, MatchModule {
     @Override
     public TimeSetModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      Element TimeSetEl = doc.getRootElement().getChild("timeset");
+      Element TimeSetEl = doc.getRootElement().getChild("world").getChild("timeset");
       if (TimeSetEl != null) {
-        Long time = XMLUtils.parseNumber(doc.getRootElement().getChild("timeset"), Long.class);
+        Long time = XMLUtils.parseNumber(TimeSetEl, Long.class);
         return new TimeSetModule(time);
       } else {
         return null;

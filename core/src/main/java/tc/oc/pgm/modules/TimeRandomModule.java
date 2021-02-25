@@ -26,7 +26,7 @@ public class TimeRandomModule implements MapModule, MatchModule {
     @Override
     public TimeRandomModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      Element TimeRandomEl = doc.getRootElement().getChild("randomtime");
+      Element TimeRandomEl = doc.getRootElement().getChild("world").getChild("randomtime");
       if (TimeRandomEl != null) {
         return new TimeRandomModule(true);
       } else {
