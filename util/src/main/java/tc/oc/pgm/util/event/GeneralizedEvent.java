@@ -9,6 +9,7 @@ import org.bukkit.event.EventException;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.event.inventory.FurnaceExtractEvent;
@@ -81,6 +82,7 @@ public abstract class GeneralizedEvent extends PreemptiveEvent {
     if (event instanceof EntityEvent) return ((EntityEvent) event).getEntity();
     if (event instanceof PlayerEvent) return ((PlayerEvent) event).getPlayer();
     if (event instanceof BlockEvent) {
+      if (event instanceof BlockPlaceEvent) return ((BlockPlaceEvent) event).getPlayer();
       if (event instanceof BlockBreakEvent) return ((BlockBreakEvent) event).getPlayer();
       if (event instanceof BlockDamageEvent) return ((BlockDamageEvent) event).getPlayer();
       if (event instanceof FurnaceExtractEvent) return ((FurnaceExtractEvent) event).getPlayer();

@@ -3,6 +3,7 @@ package tc.oc.pgm.filters;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -390,6 +391,11 @@ public abstract class FilterParser {
     return new CanFlyFilter();
   }
 
+  @MethodParser("grounded")
+  public GroundedFilter parseGrounded(Element el) throws InvalidXMLException {
+    return GroundedFilter.INSTANCE;
+  }
+
   @MethodParser("objective")
   public GoalFilter parseGoal(Element el) throws InvalidXMLException {
     XMLFeatureReference<? extends GoalDefinition> goal =
@@ -468,6 +474,26 @@ public abstract class FilterParser {
   @MethodParser("wearing")
   public WearingItemFilter parseWearingItem(Element el) throws InvalidXMLException {
     return new WearingItemFilter(factory.getKits().parseRequiredItem(el));
+  }
+
+  @MethodParser("effect")
+  public EffectFilter parseEffect(Element el) throws InvalidXMLException {
+    Duration minDuration = XMLUtils.parseDuration(Node.fromAttr(el, "min-duration"));
+    Duration maxDuration = XMLUtils.parseDuration(Node.fromAttr(el, "max-duration"));
+    Range<Integer> duration;
+    if (minDuration == null && maxDuration == null) {
+      duration = Range.all();
+    } else if (minDuration == null) {
+      duration = Range.atMost((int) (maxDuration.getSeconds() * 20));
+    } else if (maxDuration == null) {
+      duration = Range.atLeast((int) (minDuration.getSeconds() * 20));
+    } else {
+      duration =
+          Range.closed(
+              (int) (minDuration.getSeconds() * 20), (int) (maxDuration.getSeconds() * 20));
+    }
+    boolean amplifier = Node.fromAttr(el, "amplifier") != null;
+    return new EffectFilter(XMLUtils.parsePotionEffect(el), duration, amplifier);
   }
 
   @MethodParser("structural-load")
