@@ -291,18 +291,12 @@ public class PGMListener implements Listener {
   public void randomTime(final MatchLoadEvent event) {
     if (event.getMatch().getModule(WorldTimeModule.class).isTimeRandom()) {
       /*
-      0
       1000  /time set day
       6000  noon, sun is at its peak
-      12000 /time set sunset
       12610 dusk
       13000 /time set night
-      13188 first tick when monsters spawn
       14000
       18000 midnight, moon is at its peak
-      21000
-      23000 /time set sunrise
-      23460 undead mobs start to burn
       */
       long[] times = {1000, 6000, 12610, 13000, 14000, 18000};
       Random rand = new Random();
