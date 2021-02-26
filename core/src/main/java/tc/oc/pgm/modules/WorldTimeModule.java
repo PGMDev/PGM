@@ -10,21 +10,34 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.XMLUtils;
 
-public class TimeLockModule implements MapModule, MatchModule {
+public class WorldTimeModule implements MapModule, MatchModule {
   private final boolean lock;
+  private final Long time;
+  private final boolean random;
 
-  public TimeLockModule(boolean lock) {
+  public WorldTimeModule(boolean lock, Long time, boolean random) {
     this.lock = lock;
+    this.time = time;
+    this.random = random;
   }
 
   public boolean isTimeLocked() {
     return this.lock;
   }
 
-  public static class Factory implements MapModuleFactory<TimeLockModule> {
+  public Long getTime() {
+    return this.time;
+  }
+
+  public boolean isTimeRandom() {
+    return this.random;
+  }
+
+  public static class Factory implements MapModuleFactory<WorldTimeModule> {
     @Override
-    public TimeLockModule parse(MapFactory factory, Logger logger, Document doc)
+    public WorldTimeModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       boolean lock = true;
       Element worldEl = doc.getRootElement().getChild("world");
@@ -38,7 +51,19 @@ public class TimeLockModule implements MapModule, MatchModule {
           lock = false;
         }
       }
-      return new TimeLockModule(lock);
+
+      Element TimeSetEl = worldEl.getChild("timeset");
+      Long time = null;
+      if (TimeSetEl != null) {
+        time = XMLUtils.parseNumber(TimeSetEl, Long.class);
+      }
+
+      Element TimeRandomEl = worldEl.getChild("randomtime");
+      boolean random = false;
+      if (TimeRandomEl != null) {
+        random = true;
+      }
+      return new WorldTimeModule(lock, time, random);
     }
   }
 

@@ -51,9 +51,7 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.MapPoolAdjustEvent;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
-import tc.oc.pgm.modules.TimeLockModule;
-import tc.oc.pgm.modules.TimeRandomModule;
-import tc.oc.pgm.modules.TimeSetModule;
+import tc.oc.pgm.modules.WorldTimeModule;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TemporalComponent;
@@ -264,7 +262,7 @@ public class PGMListener implements Listener {
   @EventHandler
   public void unlockTime(final MatchStartEvent event) {
     boolean unlockTime = false;
-    if (!event.getMatch().getModule(TimeLockModule.class).isTimeLocked()) {
+    if (!event.getMatch().getModule(WorldTimeModule.class).isTimeLocked()) {
       unlockTime = true;
     }
 
@@ -283,7 +281,7 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void setTime(final MatchLoadEvent event) {
-    Long time = event.getMatch().getModule(TimeSetModule.class).getTime();
+    Long time = event.getMatch().getModule(WorldTimeModule.class).getTime();
     if (time != null) {
       event.getMatch().getWorld().setTime(time);
     }
@@ -291,7 +289,7 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void randomTime(final MatchLoadEvent event) {
-    if (event.getMatch().getModule(TimeRandomModule.class).isTimeRandom()) {
+    if (event.getMatch().getModule(WorldTimeModule.class).isTimeRandom()) {
       /*
       0
       1000  /time set day
