@@ -304,7 +304,7 @@ public class PGMListener implements Listener {
       23000 /time set sunrise
       23460 undead mobs start to burn
       */
-      long[] times = {0, 1000, 6000, 12000, 12610, 13000, 13188, 14000, 18000, 21000, 23000, 23460};
+      long[] times = {1000, 6000, 12610, 13000, 14000, 18000};
       Random rand = new Random();
       long time = times[rand.nextInt(times.length)];
       event.getMatch().getWorld().setTime(time);
