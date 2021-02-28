@@ -59,6 +59,7 @@ import tc.oc.pgm.util.text.TextTranslations;
 
 public class PGMListener implements Listener {
   private static final String DO_DAYLIGHT_CYCLE = "doDaylightCycle";
+  private static final long[] times = {1000, 6000, 12610, 13000, 14000, 18000};
 
   private final Plugin parent;
   private final MatchManager mm;
@@ -298,8 +299,7 @@ public class PGMListener implements Listener {
       14000
       18000 midnight, moon is at its peak
       */
-      long[] times = {1000, 6000, 12610, 13000, 14000, 18000};
-      Random rand = new Random();
+      Random rand = event.getMatch().getRandom();
       long time = times[rand.nextInt(times.length)];
       event.getMatch().getWorld().setTime(time);
     }
