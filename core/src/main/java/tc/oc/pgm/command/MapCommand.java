@@ -48,14 +48,15 @@ public final class MapCommand {
   @Command(
       aliases = {"maps", "maplist", "ml"},
       desc = "List all maps loaded",
-      usage = "[-a <author>] [-t <tag1>,<tag2>]")
+      usage = "[-a <author>] [-t <tag1>,<tag2>] [-n <name>]")
   public void maps(
       Audience audience,
       CommandSender sender,
       MapLibrary library,
       @Default("1") Integer page,
       @Fallback(Type.NULL) @Switch('t') String tags,
-      @Fallback(Type.NULL) @Switch('a') String author)
+      @Fallback(Type.NULL) @Switch('a') String author,
+      @Fallback(Type.NULL) @Switch('n') String name)
       throws CommandException {
     Stream<MapInfo> search = Sets.newHashSet(library.getMaps()).stream();
     if (tags != null) {
@@ -74,6 +75,10 @@ public final class MapCommand {
 
     if (author != null) {
       search = search.filter(map -> matchesAuthor(map, author));
+    }
+
+    if (name != null) {
+      search = search.filter(map -> matchesName(map, name));
     }
 
     Set<MapInfo> maps = search.collect(Collectors.toCollection(TreeSet::new));
@@ -134,6 +139,12 @@ public final class MapCommand {
       }
     }
     return false;
+  }
+
+  private static boolean matchesName(MapInfo map, String query) {
+    checkNotNull(map);
+    query = checkNotNull(query).toLowerCase();
+    return map.getName().toLowerCase().contains(query);
   }
 
   @Command(
