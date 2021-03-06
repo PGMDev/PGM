@@ -1,7 +1,11 @@
 package tc.oc.pgm.goals;
 
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
+
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
@@ -21,6 +25,11 @@ public abstract class SimpleGoal<T extends GoalDefinition> implements Goal<T> {
 
   public static final String SYMBOL_INCOMPLETE = "\u2715"; // ✕
   public static final String SYMBOL_COMPLETE = "\u2714"; // ✔
+
+  protected static final Sound GOOD_SOUND =
+      sound(key("portal.travel"), Sound.Source.MASTER, 0.7f, 2f);
+  protected static final Sound BAD_SOUND =
+      sound(key("mob.blaze.death"), Sound.Source.MASTER, 0.8f, 0.8f);
 
   protected final Logger logger;
   protected final T definition;
@@ -70,6 +79,11 @@ public abstract class SimpleGoal<T extends GoalDefinition> implements Goal<T> {
   @Override
   public DyeColor getDyeColor() {
     return DyeColor.WHITE;
+  }
+
+  @Override
+  public Sound getCompletionSound(boolean isGood) {
+    return isGood ? GOOD_SOUND : BAD_SOUND;
   }
 
   @Override

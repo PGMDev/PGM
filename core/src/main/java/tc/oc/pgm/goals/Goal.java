@@ -1,6 +1,7 @@
 package tc.oc.pgm.goals;
 
 import javax.annotation.Nullable;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
@@ -61,6 +62,8 @@ public interface Goal<T extends GoalDefinition> extends Feature<T> {
   Color getColor();
 
   DyeColor getDyeColor();
+
+  Sound getCompletionSound(boolean positive);
 
   ChatColor renderSidebarStatusColor(@Nullable Competitor competitor, Party viewer);
 

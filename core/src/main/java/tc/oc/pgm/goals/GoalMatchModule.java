@@ -1,8 +1,5 @@
 package tc.oc.pgm.goals;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
@@ -50,11 +47,6 @@ public class GoalMatchModule implements MatchModule, Listener {
       return new GoalMatchModule(match);
     }
   }
-
-  protected static final Sound GOOD_SOUND =
-      sound(key("portal.travel"), Sound.Source.MASTER, 0.7f, 2f);
-  protected static final Sound BAD_SOUND =
-      sound(key("mob.blaze.death"), Sound.Source.MASTER, 0.8f, 0.8f);
 
   protected final Match match;
   protected final List<Goal> goals = new ArrayList<>();
@@ -167,16 +159,18 @@ public class GoalMatchModule implements MatchModule, Listener {
     // Don't play the objective sound if the match is over, because the win/lose sound will play
     // instead
     if (!match.calculateVictory() && event.getGoal().isVisible()) {
+      Sound goodSound = event.getGoal().getCompletionSound(true);
+      Sound badSound = event.getGoal().getCompletionSound(false);
+
       for (MatchPlayer player : event.getMatch().getPlayers()) {
+        if (!player.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ALL))
+          continue;
+
         if (player.getParty() instanceof Competitor
             && event.isGood() != (event.getCompetitor() == player.getParty())) {
-          if (player.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ALL)) {
-            player.playSound(BAD_SOUND);
-          }
+          if (badSound != null) player.playSound(badSound);
         } else {
-          if (player.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ALL)) {
-            player.playSound(GOOD_SOUND);
-          }
+          if (goodSound != null) player.playSound(goodSound);
         }
       }
     }
