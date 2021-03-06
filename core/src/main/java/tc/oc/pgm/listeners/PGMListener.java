@@ -59,7 +59,15 @@ import tc.oc.pgm.util.text.TextTranslations;
 
 public class PGMListener implements Listener {
   private static final String DO_DAYLIGHT_CYCLE = "doDaylightCycle";
-  private static final long[] times = {1000, 6000, 12610, 13000, 14000, 18000};
+  /*
+  1000  /time set day
+  6000  noon, sun is at its peak
+  12610 dusk
+  13000 /time set night
+  14000
+  18000 midnight, moon is at its peak
+  */
+  private static final long[] WORLD_TIMES = {1000, 6000, 12610, 13000, 14000, 18000};
 
   private final Plugin parent;
   private final MatchManager mm;
@@ -291,16 +299,8 @@ public class PGMListener implements Listener {
   @EventHandler
   public void randomTime(final MatchLoadEvent event) {
     if (event.getMatch().getModule(WorldTimeModule.class).isTimeRandom()) {
-      /*
-      1000  /time set day
-      6000  noon, sun is at its peak
-      12610 dusk
-      13000 /time set night
-      14000
-      18000 midnight, moon is at its peak
-      */
       Random rand = event.getMatch().getRandom();
-      long time = times[rand.nextInt(times.length)];
+      long time = WORLD_TIMES[rand.nextInt(WORLD_TIMES.length)];
       event.getMatch().getWorld().setTime(time);
     }
   }
