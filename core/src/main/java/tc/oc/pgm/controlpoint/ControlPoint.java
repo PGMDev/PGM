@@ -1,9 +1,13 @@
 package tc.oc.pgm.controlpoint;
 
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
+
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
+import net.kyori.adventure.sound.Sound;
 import org.bukkit.ChatColor;
 import org.bukkit.event.HandlerList;
 import org.bukkit.util.Vector;
@@ -34,6 +38,11 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
 
   public static final String SYMBOL_CP_INCOMPLETE = "\u29be"; // ⦾
   public static final String SYMBOL_CP_COMPLETE = "\u29bf"; // ⦿
+
+  protected static final Sound GOOD_SOUND =
+      sound(key("portal.travel"), Sound.Source.MASTER, 0.35f, 2f);
+  protected static final Sound BAD_SOUND =
+      sound(key("mob.blaze.death"), Sound.Source.MASTER, 0.4f, 0.8f);
 
   protected final ControlPointPlayerTracker playerTracker;
   protected final ControlPointBlockDisplay blockDisplay;
@@ -146,6 +155,11 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
   /** Progress towards "capturing" the ControlPoint for the current capturingTeam */
   public Duration getCapturingTime() {
     return this.capturingTime;
+  }
+
+  @Override
+  public Sound getCompletionSound(boolean isGood) {
+    return isGood ? GOOD_SOUND : BAD_SOUND;
   }
 
   /**
