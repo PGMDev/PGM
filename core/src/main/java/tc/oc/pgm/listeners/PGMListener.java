@@ -6,6 +6,7 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.util.Collection;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -50,7 +51,7 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.MapPoolAdjustEvent;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
-import tc.oc.pgm.modules.TimeLockModule;
+import tc.oc.pgm.modules.WorldTimeModule;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TemporalComponent;
@@ -58,6 +59,15 @@ import tc.oc.pgm.util.text.TextTranslations;
 
 public class PGMListener implements Listener {
   private static final String DO_DAYLIGHT_CYCLE = "doDaylightCycle";
+  /*
+  1000  /time set day
+  6000  noon, sun is at its peak
+  12610 dusk
+  13000 /time set night
+  14000
+  18000 midnight, moon is at its peak
+  */
+  private static final long[] WORLD_TIMES = {1000, 6000, 12610, 13000, 14000, 18000};
 
   private final Plugin parent;
   private final MatchManager mm;
@@ -261,7 +271,7 @@ public class PGMListener implements Listener {
   @EventHandler
   public void unlockTime(final MatchStartEvent event) {
     boolean unlockTime = false;
-    if (!event.getMatch().getModule(TimeLockModule.class).isTimeLocked()) {
+    if (!event.getMatch().getModule(WorldTimeModule.class).isTimeLocked()) {
       unlockTime = true;
     }
 
@@ -276,6 +286,23 @@ public class PGMListener implements Listener {
   @EventHandler
   public void lockTime(final MatchFinishEvent event) {
     event.getMatch().getWorld().setGameRuleValue(DO_DAYLIGHT_CYCLE, Boolean.toString(false));
+  }
+
+  @EventHandler
+  public void setTime(final MatchLoadEvent event) {
+    Long time = event.getMatch().getModule(WorldTimeModule.class).getTime();
+    if (time != null) {
+      event.getMatch().getWorld().setTime(time);
+    }
+  }
+
+  @EventHandler
+  public void randomTime(final MatchLoadEvent event) {
+    if (event.getMatch().getModule(WorldTimeModule.class).isTimeRandom()) {
+      Random rand = event.getMatch().getRandom();
+      long time = WORLD_TIMES[rand.nextInt(WORLD_TIMES.length)];
+      event.getMatch().getWorld().setTime(time);
+    }
   }
 
   @EventHandler
