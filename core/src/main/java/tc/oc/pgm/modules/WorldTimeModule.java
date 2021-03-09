@@ -41,30 +41,40 @@ public class WorldTimeModule implements MapModule, MatchModule {
         throws InvalidXMLException {
       boolean lock = true;
       Element worldEl = doc.getRootElement().getChild("world");
-      Element timelockEl = worldEl.getChild("timelock");
       // legacy
-      if (timelockEl == null) {
-        timelockEl = doc.getRootElement().getChild("timelock");
-      }
+      Element timelockEl = doc.getRootElement().getChild("timelock");
       if (timelockEl != null) {
-        if (timelockEl.getTextNormalize().equalsIgnoreCase("off")) {
-          lock = false;
-        }
+        lock = parseTimeLock(timelockEl);
       }
 
-      Element TimeSetEl = worldEl.getChild("timeset");
       Long time = null;
-      if (TimeSetEl != null) {
-        time = XMLUtils.parseNumber(TimeSetEl, Long.class);
-      }
-
-      Element TimeRandomEl = worldEl.getChild("randomtime");
       boolean random = false;
-      if (TimeRandomEl != null) {
-        random = true;
+      if (worldEl != null) {
+        if (timelockEl == null) {
+          timelockEl = worldEl.getChild("timelock");
+          if (timelockEl != null) {
+            lock = parseTimeLock(timelockEl);
+          }
+        }
+        Element timeSetEl = worldEl.getChild("timeset");
+        if (timeSetEl != null) {
+          time = XMLUtils.parseNumber(timeSetEl, Long.class);
+        }
+        Element timeRandomEl = worldEl.getChild("randomtime");
+        if (timeRandomEl != null) {
+          random = true;
+        }
       }
       return new WorldTimeModule(lock, time, random);
     }
+  }
+
+  public static boolean parseTimeLock(Element timelockEl) {
+    boolean lock = true;
+    if (timelockEl.getTextNormalize().equalsIgnoreCase("off")) {
+      lock = false;
+    }
+    return lock;
   }
 
   @Override
