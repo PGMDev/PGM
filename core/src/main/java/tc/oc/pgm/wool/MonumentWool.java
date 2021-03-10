@@ -19,7 +19,6 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.goals.Goal;
-import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.goals.TouchableGoal;
 import tc.oc.pgm.kits.ApplyItemKitEvent;
 import tc.oc.pgm.kits.ApplyKitEvent;
@@ -108,19 +107,6 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
       ParticipantState participant = this.getMatch().getParticipantState(player);
       if (participant != null && this.canComplete(participant.getParty())) {
         touch(participant);
-
-        // Initialize monument proximity
-        ProximityMetric metric = getProximityMetric(participant.getParty());
-        if (metric != null) {
-          switch (metric.type) {
-            case CLOSEST_BLOCK:
-              updateProximity(participant, this.woolLocation);
-              break;
-            case CLOSEST_PLAYER:
-              updateProximity(participant, player.getLocation());
-              break;
-          }
-        }
       }
     }
   }
