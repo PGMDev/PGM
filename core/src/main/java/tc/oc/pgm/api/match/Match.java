@@ -329,6 +329,13 @@ public interface Match extends MatchPlayerResolver, Audience, ModuleContext<Matc
   Collection<Competitor> getCompetitors();
 
   /**
+   * Get all the {@link Competitor}s in the {@link Match} ordered by closest to winning.
+   *
+   * @return All the {@link Competitor}s in closeness to winning order.
+   */
+  Collection<Competitor> getSortedCompetitors();
+
+  /**
    * Get all the currently winning {@link Competitor}s in the {@link Match}.
    *
    * @return All the winning {@link Competitor}s.

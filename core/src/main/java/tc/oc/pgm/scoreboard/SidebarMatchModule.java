@@ -389,7 +389,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
       // Scores/Blitz
       if (hasScores || isBlitz) {
-        for (Competitor competitor : match.getCompetitors()) {
+        for (Competitor competitor : match.getSortedCompetitors()) {
           String text;
           if (hasScores) {
             text = renderScore(competitor);
@@ -418,7 +418,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
       }
 
       // Team-specific goals
-      List<Competitor> sortedCompetitors = new ArrayList<>(match.getCompetitors());
+      List<Competitor> sortedCompetitors = new ArrayList<>(match.getSortedCompetitors());
       sortedCompetitors.retainAll(competitorsWithGoals);
 
       if (party instanceof Competitor) {
