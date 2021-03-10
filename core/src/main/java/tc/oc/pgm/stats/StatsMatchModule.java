@@ -304,7 +304,7 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   public void giveVerboseStatsItem(MatchPlayer player, boolean forceOpen) {
     // Find out if verbose stats is relevant for this match
-    final Collection<Competitor> competitors = match.getCompetitors();
+    final Collection<Competitor> competitors = match.getSortedCompetitors();
     boolean showAllVerboseStats =
         verboseStats && competitors.stream().allMatch(c -> c instanceof Team);
     if (!showAllVerboseStats) return;

@@ -108,7 +108,8 @@ public class MatchImpl implements Match {
   private final Map<MatchPlayer, Party> partyChanges;
   private final Set<Party> parties;
   private final RankedSet<VictoryCondition> victory;
-  private final RankedSet<Competitor> competitors;
+  private final Set<Competitor> competitors;
+  private final RankedSet<Competitor> winners;
   private final AtomicReference<Party> queuedParticipants;
   private final ObserverParty observers;
   private final MatchFeatureContext features;
@@ -141,8 +142,13 @@ public class MatchImpl implements Match {
     this.players = new ConcurrentHashMap<>();
     this.partyChanges = new WeakHashMap<>();
     this.parties = new LinkedHashSet<>();
-    this.victory = new RankedSet<>(Comparator.comparing(VictoryCondition::getPriority));
-    this.competitors =
+    this.victory =
+        new RankedSet<>(
+            Comparator.<VictoryCondition, Boolean>comparing(
+                    vc -> !vc.isCompleted(this), Boolean::compare)
+                .thenComparing(VictoryCondition::getPriority));
+    this.competitors = new HashSet<>();
+    this.winners =
         new RankedSet<>(
             (Competitor a, Competitor b) -> {
               for (VictoryCondition condition : getVictoryConditions()) {
@@ -190,10 +196,10 @@ public class MatchImpl implements Match {
           callEvent(new MatchStartEvent(this));
           break;
         case FINISHED:
-          calculateVictory(); // Winners must be calculated and saved prior to cancel.
+          winners.invalidateRanking();
           getExecutor(MatchScope.RUNNING).shutdownNow();
           getCountdown().cancelAll();
-          callEvent(new MatchFinishEvent(this, competitors.getRank(0)));
+          callEvent(new MatchFinishEvent(this, winners.getRank(0)));
           break;
       }
 
@@ -596,6 +602,7 @@ public class MatchImpl implements Match {
 
   @Override
   public Collection<VictoryCondition> getVictoryConditions() {
+    victory.invalidateRanking();
     return ImmutableList.copyOf(victory);
   }
 
@@ -604,7 +611,7 @@ public class MatchImpl implements Match {
     if (isFinished()) return true;
     if (!isRunning()) return false;
 
-    competitors.invalidateRanking();
+    winners.invalidateRanking();
 
     logger.fine("Checking for match finish");
     for (VictoryCondition condition : getVictoryConditions()) {
@@ -634,9 +641,14 @@ public class MatchImpl implements Match {
   }
 
   @Override
+  public Collection<Competitor> getSortedCompetitors() {
+    return ImmutableList.copyOf(winners);
+  }
+
+  @Override
   public Collection<Competitor> getWinners() {
-    competitors.invalidateRanking();
-    return ImmutableList.copyOf(competitors.getRank(0));
+    winners.invalidateRanking();
+    return ImmutableList.copyOf(winners.getRank(0));
   }
 
   @Override
@@ -648,6 +660,7 @@ public class MatchImpl implements Match {
 
     if (party instanceof Competitor) {
       competitors.add((Competitor) party);
+      winners.add((Competitor) party);
     } else if (party instanceof QueuedParty) {
       queuedParticipants.set(party);
     }
@@ -671,7 +684,10 @@ public class MatchImpl implements Match {
             ? new CompetitorRemoveEvent((Competitor) party)
             : new PartyRemoveEvent(party));
 
-    if (party instanceof Competitor) competitors.remove(party);
+    if (party instanceof Competitor) {
+      competitors.remove(party);
+      winners.remove(party);
+    }
     if (party instanceof QueuedParty) queuedParticipants.set(null);
     parties.remove(party);
   }
@@ -846,6 +862,7 @@ public class MatchImpl implements Match {
     parties.clear();
     victory.clear();
     competitors.clear();
+    winners.clear();
   }
 
   @Override
