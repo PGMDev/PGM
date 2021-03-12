@@ -29,7 +29,8 @@ public final class TimeLimitCommand {
       Duration duration,
       @Nullable VictoryCondition result,
       @Nullable Duration overtime,
-      @Nullable Duration maxOvertime) {
+      @Nullable Duration maxOvertime,
+      @Nullable Duration endOvertime) {
 
     final TimeLimitMatchModule time = match.needModule(TimeLimitMatchModule.class);
 
@@ -40,6 +41,7 @@ public final class TimeLimitCommand {
             duration.isNegative() ? Duration.ZERO : duration,
             overtime,
             maxOvertime,
+            endOvertime,
             result,
             true));
     time.start();

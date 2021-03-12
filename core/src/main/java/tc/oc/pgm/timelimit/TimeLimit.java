@@ -17,7 +17,7 @@ import tc.oc.pgm.util.collection.RankedSet;
 
 @FeatureInfo(name = "time-limit")
 public class TimeLimit extends SelfIdentifyingFeatureDefinition implements VictoryCondition {
-  private final Duration duration, overtime, maxOvertime;
+  private final Duration duration, overtime, maxOvertime, endOvertime;
   private final @Nullable VictoryCondition result;
   private final boolean show;
 
@@ -26,12 +26,14 @@ public class TimeLimit extends SelfIdentifyingFeatureDefinition implements Victo
       Duration duration,
       @Nullable Duration overtime,
       @Nullable Duration maxOvertime,
+      @Nullable Duration minOvertime,
       @Nullable VictoryCondition result,
       boolean show) {
     super(id);
     this.duration = checkNotNull(duration);
     this.overtime = overtime;
     this.maxOvertime = maxOvertime;
+    this.endOvertime = minOvertime;
     this.result = result;
     this.show = show;
   }
@@ -46,6 +48,10 @@ public class TimeLimit extends SelfIdentifyingFeatureDefinition implements Victo
 
   public @Nullable Duration getMaxOvertime() {
     return maxOvertime;
+  }
+
+  public @Nullable Duration getEndOvertime() {
+    return endOvertime;
   }
 
   public @Nullable VictoryCondition getResult() {

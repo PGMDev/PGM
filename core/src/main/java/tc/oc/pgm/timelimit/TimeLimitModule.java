@@ -93,6 +93,7 @@ public class TimeLimitModule implements MapModule<TimeLimitMatchModule> {
           TextParser.parseDuration(el.getTextNormalize()),
           XMLUtils.parseDuration(el.getAttribute("overtime")),
           XMLUtils.parseDuration(el.getAttribute("max-overtime")),
+          XMLUtils.parseDuration(el.getAttribute("end-overtime")),
           parseVictoryCondition(factory, el.getAttribute("result")),
           XMLUtils.parseBoolean(el.getAttribute("show"), true));
     }
