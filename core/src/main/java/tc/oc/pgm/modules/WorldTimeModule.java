@@ -14,17 +14,23 @@ import tc.oc.pgm.util.xml.XMLUtils;
 
 public class WorldTimeModule implements MapModule, MatchModule {
   private final boolean lock;
+  private final boolean lockAbsent;
   private final Long time;
   private final boolean random;
 
-  public WorldTimeModule(boolean lock, Long time, boolean random) {
+  public WorldTimeModule(boolean lock, boolean lockAbsent, Long time, boolean random) {
     this.lock = lock;
+    this.lockAbsent = lockAbsent;
     this.time = time;
     this.random = random;
   }
 
   public boolean isTimeLocked() {
     return this.lock;
+  }
+
+  public boolean isLockAbsent() {
+    return this.lockAbsent;
   }
 
   public Long getTime() {
@@ -40,11 +46,13 @@ public class WorldTimeModule implements MapModule, MatchModule {
     public WorldTimeModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       boolean lock = false;
+      boolean lockAbsent = true;
       Element worldEl = doc.getRootElement().getChild("world");
       // legacy
       Element timelockEl = doc.getRootElement().getChild("timelock");
       if (timelockEl != null) {
         lock = parseTimeLock(timelockEl);
+        lockAbsent = false;
       }
 
       Long time = null;
@@ -54,6 +62,7 @@ public class WorldTimeModule implements MapModule, MatchModule {
           timelockEl = worldEl.getChild("timelock");
           if (timelockEl != null) {
             lock = parseTimeLock(timelockEl);
+            lockAbsent = false;
           }
         }
         Element timeSetEl = worldEl.getChild("timeset");
@@ -65,7 +74,7 @@ public class WorldTimeModule implements MapModule, MatchModule {
           random = true;
         }
       }
-      return new WorldTimeModule(lock, time, random);
+      return new WorldTimeModule(lock, lockAbsent, time, random);
     }
   }
 

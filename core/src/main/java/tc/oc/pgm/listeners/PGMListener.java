@@ -272,12 +272,13 @@ public class PGMListener implements Listener {
   public void unlockTime(final MatchStartEvent event) {
     boolean unlockTime = false;
     boolean isTimeLocked = event.getMatch().getModule(WorldTimeModule.class).isTimeLocked();
+    boolean isLockAbsent = event.getMatch().getModule(WorldTimeModule.class).isLockAbsent();
     boolean isDaylightCycle =
         Boolean.parseBoolean(event.getMatch().getWorld().getGameRuleValue(DO_DAYLIGHT_CYCLE));
     // isTimeLocked() will be false if no timelock module is found
-    // if timelock is false and daylightcycle is true, set unlockTime to true
-    // if timelock is false and daylightcycle is false, set to true
-    if ((!isTimeLocked && isDaylightCycle) || !isTimeLocked && !isDaylightCycle) {
+    // if there is no timelock module and daylight cycle is enabled, unlock time
+    // if there is timelock module and its off, unlock time
+    if ((isLockAbsent && isDaylightCycle) || (!isLockAbsent && !isTimeLocked)) {
       unlockTime = true;
     }
 
