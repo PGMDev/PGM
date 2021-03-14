@@ -76,6 +76,8 @@ public class PGMListener implements Listener {
   // Single-write, multi-read lock used to create the first match
   private final ReentrantReadWriteLock lock;
 
+  private boolean isDaylightCycle = false;
+
   public PGMListener(Plugin parent, MatchManager mm, VanishManager vm) {
     this.parent = parent;
     this.mm = mm;
@@ -265,21 +267,18 @@ public class PGMListener implements Listener {
   //
   @EventHandler
   public void lockTime(final MatchLoadEvent event) {
+    isDaylightCycle =
+        Boolean.parseBoolean(event.getMatch().getWorld().getGameRuleValue(DO_DAYLIGHT_CYCLE));
     event.getMatch().getWorld().setGameRuleValue(DO_DAYLIGHT_CYCLE, Boolean.toString(false));
   }
 
   @EventHandler
   public void unlockTime(final MatchStartEvent event) {
-    boolean unlockTime = false;
     Boolean isTimeLocked = event.getMatch().getModule(WorldTimeModule.class).isTimeLocked();
-    boolean isDaylightCycle =
-        Boolean.parseBoolean(event.getMatch().getWorld().getGameRuleValue(DO_DAYLIGHT_CYCLE));
     // isTimeLocked() will be null if no timelock module is found
     // if there is no timelock module and daylight cycle is enabled, unlock time
     // if there is timelock module and its off, unlock time
-    if (((isTimeLocked == null) && isDaylightCycle) || (isTimeLocked != null && !isTimeLocked)) {
-      unlockTime = true;
-    }
+    boolean unlockTime = isTimeLocked == null ? isDaylightCycle : !isTimeLocked;
 
     GameRulesMatchModule gameRulesModule = event.getMatch().getModule(GameRulesMatchModule.class);
     if (gameRulesModule != null && gameRulesModule.getGameRules().containsKey(DO_DAYLIGHT_CYCLE)) {
