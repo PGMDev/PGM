@@ -13,17 +13,17 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class WorldTimeModule implements MapModule, MatchModule {
-  private final Boolean lock;
+  private final boolean lock;
   private final Long time;
   private final boolean random;
 
-  public WorldTimeModule(Boolean lock, Long time, boolean random) {
+  public WorldTimeModule(boolean lock, Long time, boolean random) {
     this.lock = lock;
     this.time = time;
     this.random = random;
   }
 
-  public Boolean isTimeLocked() {
+  public boolean isTimeLocked() {
     return this.lock;
   }
 
@@ -39,7 +39,7 @@ public class WorldTimeModule implements MapModule, MatchModule {
     @Override
     public WorldTimeModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      Boolean lock = null;
+      boolean lock = true;
       Element worldEl = doc.getRootElement().getChild("world");
       // legacy
       Element timelockEl = doc.getRootElement().getChild("timelock");
