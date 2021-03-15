@@ -16,9 +16,10 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.MetadataUtils;
-import tc.oc.pgm.util.friends.FriendProvider;
+import org.bukkit.metadata.MetadataValue;
+import tc.oc.pgm.integration.FriendIntegration;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.named.NameDecorationProvider;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.named.NameStyle.Flag;
@@ -74,13 +75,6 @@ public final class PlayerComponent {
                   .value();
     }
 
-    FriendProvider friendProvider = FriendProvider.DEFAULT;
-    if (player != null) {
-      MetadataValue friendMeta =
-          player.getMetadata(FriendProvider.METADATA_KEY, BukkitUtils.getPlugin());
-      if (friendMeta != null) friendProvider = (FriendProvider) friendMeta.value();
-    }
-
     NickProvider nickProvider = NickProvider.DEFAULT;
     if (player != null) {
       MetadataValue nickMeta =
@@ -100,12 +94,12 @@ public final class PlayerComponent {
 
     TextComponent.Builder builder = text();
     if (!isOffline && style.has(NameStyle.Flag.FLAIR)) {
-      if (!isNicked || canViewNick(player, viewer, friendProvider)) {
+      if (!isNicked || canViewNick(player, viewer)) {
         builder.append(provider.getPrefixComponent(uuid));
       }
     }
 
-    TextComponent.Builder name = text().content(getName(player, viewer, friendProvider, nicked));
+    TextComponent.Builder name = text().content(getName(player, viewer, nicked));
 
     if (!isOffline && style.has(NameStyle.Flag.DEATH) && isDead(player)) {
       name.color(NamedTextColor.DARK_GRAY);
@@ -117,15 +111,12 @@ public final class PlayerComponent {
     }
     if (!isOffline
         && style.has(NameStyle.Flag.DISGUISE)
-        && (isDisguised(player) || (isNicked && canViewNick(player, viewer, friendProvider)))) {
+        && (isDisguised(player) || (isNicked && canViewNick(player, viewer)))) {
 
       name.decoration(TextDecoration.STRIKETHROUGH, true);
 
       // Reveal nickname
-      if (isNicked
-          && style.has(Flag.REVEAL)
-          && viewer != null
-          && canViewNick(player, viewer, friendProvider)) {
+      if (isNicked && style.has(Flag.REVEAL) && viewer != null && canViewNick(player, viewer)) {
         name.append(space().decoration(TextDecoration.STRIKETHROUGH, false))
             .append(
                 text(
@@ -139,7 +130,7 @@ public final class PlayerComponent {
     if (!isOffline
         && style.has(NameStyle.Flag.FRIEND)
         && viewer != null
-        && friendProvider.areFriends(viewer.getUniqueId(), player.getUniqueId())) {
+        && FriendIntegration.isFriend(viewer, player)) {
       name.decoration(TextDecoration.ITALIC, true);
     }
 
@@ -150,9 +141,7 @@ public final class PlayerComponent {
 
     builder.append(name);
 
-    if (!isOffline
-        && style.has(NameStyle.Flag.FLAIR)
-        && canViewNick(player, viewer, friendProvider)) {
+    if (!isOffline && style.has(NameStyle.Flag.FLAIR) && canViewNick(player, viewer)) {
       builder.append(provider.getSuffixComponent(uuid));
     }
     return builder.build();
@@ -167,19 +156,17 @@ public final class PlayerComponent {
     return player.hasMetadata("isDead") || player.isDead();
   }
 
-  static boolean canViewNick(Player player, @Nullable Player viewer, FriendProvider friends) {
+  static boolean canViewNick(Player player, @Nullable Player viewer) {
     if (viewer == null) return false;
     if (viewer == player) return true;
-    return viewer.hasPermission("pgm.staff")
-        || friends.areFriends(player.getUniqueId(), viewer.getUniqueId()); // TODO: maybe change
+    return viewer.hasPermission("pgm.staff") || FriendIntegration.isFriend(player, viewer);
   }
 
-  static String getName(
-      @Nullable Player player, @Nullable Player viewer, FriendProvider friends, String defName) {
+  static String getName(@Nullable Player player, @Nullable Player viewer, String defName) {
     if (player != null
         && viewer != null
         && (viewer == player
-            || friends.areFriends(player.getUniqueId(), viewer.getUniqueId())
+            || FriendIntegration.isFriend(player, viewer)
             || viewer.hasPermission("pgm.staff"))) {
       return player.getName();
     }

@@ -7,7 +7,7 @@ import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.util.friends.FriendProvider;
+import tc.oc.pgm.integration.FriendIntegration;
 import tc.oc.pgm.util.nick.NickProvider;
 
 /**
@@ -45,9 +45,8 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
     boolean aStaff = a.hasPermission(Permissions.STAFF) && !aNicked;
     boolean bStaff = b.hasPermission(Permissions.STAFF) && !bNicked;
 
-    FriendProvider friends = PGM.get().getFriendRegistry().getProvider();
-    boolean aFriend = friends.areFriends(viewer.getUniqueId(), a.getUniqueId());
-    boolean bFriend = friends.areFriends(viewer.getUniqueId(), b.getUniqueId());
+    boolean aFriend = FriendIntegration.isFriend(viewer, a);
+    boolean bFriend = FriendIntegration.isFriend(viewer, b);
 
     // Friends are always first :)
     if (aFriend && !bFriend) {

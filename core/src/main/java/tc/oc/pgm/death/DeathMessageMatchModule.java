@@ -9,7 +9,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -18,7 +17,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.util.friends.FriendProvider;
+import tc.oc.pgm.integration.FriendIntegration;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DeathMessageMatchModule implements MatchModule, Listener {
@@ -71,11 +70,10 @@ public class DeathMessageMatchModule implements MatchModule, Listener {
   }
 
   private boolean isFriendInvolved(Player viewer, MatchPlayerDeathEvent event) {
-    FriendProvider friends = PGM.get().getFriendRegistry().getProvider();
     return (event.getKiller() != null && event.getKiller().getPlayer().isPresent()
-            ? friends.areFriends(viewer.getUniqueId(), event.getKiller().getPlayer().get().getId())
+            ? FriendIntegration.isFriend(viewer, event.getKiller().getPlayer().get().getBukkit())
             : false)
         || (event.getVictim() != null
-            && friends.areFriends(viewer.getUniqueId(), event.getVictim().getId()));
+            && FriendIntegration.isFriend(viewer, event.getVictim().getBukkit()));
   }
 }

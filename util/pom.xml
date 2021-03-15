@@ -12,6 +12,16 @@
     <artifactId>util</artifactId>
     <packaging>jar</packaging>
 
+
+	<dependencies>
+		<!-- Third-party integration classes -->
+		<dependency>
+			<groupId>tc.oc.pgm</groupId>
+			<artifactId>integration</artifactId>
+			<version>0.11-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+
     <build>
         <resources>
             <resource>
