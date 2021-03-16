@@ -12,6 +12,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerSkinPartsChangeEvent;
 import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.NameDecorationChangeEvent;
@@ -34,7 +35,6 @@ import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.friends.FriendStatusChangeEvent;
 import tc.oc.pgm.util.tablist.DynamicTabEntry;
-import tc.oc.pgm.util.tablist.PlayerTabEntry;
 import tc.oc.pgm.util.tablist.TabEntry;
 import tc.oc.pgm.util.tablist.TabManager;
 
@@ -306,5 +306,13 @@ public class MatchTabManager extends TabManager implements Listener {
   public void onFriendStatusChange(FriendStatusChangeEvent event) {
     TabEntry entry = getPlayerEntryOrNull(Bukkit.getPlayer(event.getPlayerId()));
     if (entry != null && entry instanceof DynamicTabEntry) ((DynamicTabEntry) entry).invalidate();
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onSkinPartsChange(PlayerSkinPartsChangeEvent event) {
+    TabEntry entry = this.getPlayerEntryOrNull(event.getPlayer());
+    if (entry instanceof PlayerTabEntry) {
+      ((PlayerTabEntry) entry).onSkinPartsChange(event);
+    }
   }
 }

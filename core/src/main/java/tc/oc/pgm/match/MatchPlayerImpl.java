@@ -1,7 +1,7 @@
 package tc.oc.pgm.match;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static tc.oc.pgm.util.text.PlayerComponent.player;
+import static tc.oc.pgm.api.text.PlayerComponent.player;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -30,6 +30,7 @@ import org.bukkit.potion.PotionEffect;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
@@ -42,7 +43,6 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.PlayerResetEvent;
-import tc.oc.pgm.integration.FriendIntegration;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.MaxHealthKit;
 import tc.oc.pgm.kits.WalkSpeedKit;
@@ -207,7 +207,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     return isObserving()
         && (getSettings().getValue(SettingKey.OBSERVERS) == SettingValue.OBSERVERS_ON
             || getSettings().getValue(SettingKey.OBSERVERS) == SettingValue.OBSERVERS_FRIEND
-                && FriendIntegration.isFriend(getBukkit(), other.getBukkit()));
+                && Integration.isFriend(getBukkit(), other.getBukkit()));
   }
 
   @Override

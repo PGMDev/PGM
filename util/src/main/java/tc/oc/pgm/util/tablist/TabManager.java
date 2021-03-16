@@ -55,7 +55,6 @@ public class TabManager implements Listener {
       @Nullable Function<Player, ? extends TabEntry> playerEntryProvider) {
 
     if (viewProvider == null) viewProvider = TabView::new;
-    if (playerEntryProvider == null) playerEntryProvider = PlayerTabEntry::new;
 
     this.logger = ClassLogger.get(plugin.getLogger(), getClass());
     this.plugin = plugin;
@@ -139,13 +138,5 @@ public class TabManager implements Listener {
   public void onWorldChange(PlayerChangedWorldEvent event) {
     TabView view = this.getViewOrNull(event.getPlayer());
     if (view != null) view.onWorldChange(event);
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onSkinPartsChange(PlayerSkinPartsChangeEvent event) {
-    TabEntry entry = this.getPlayerEntryOrNull(event.getPlayer());
-    if (entry instanceof PlayerTabEntry) {
-      ((PlayerTabEntry) entry).onSkinPartsChange(event);
-    }
   }
 }

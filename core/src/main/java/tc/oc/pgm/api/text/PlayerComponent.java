@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.text;
+package tc.oc.pgm.api.text;
 
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
@@ -18,7 +18,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.bukkit.MetadataUtils;
 import org.bukkit.metadata.MetadataValue;
-import tc.oc.pgm.integration.FriendIntegration;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.named.NameDecorationProvider;
 import tc.oc.pgm.util.named.NameStyle;
@@ -130,7 +130,7 @@ public final class PlayerComponent {
     if (!isOffline
         && style.has(NameStyle.Flag.FRIEND)
         && viewer != null
-        && FriendIntegration.isFriend(viewer, player)) {
+        && Integration.isFriend(viewer, player)) {
       name.decoration(TextDecoration.ITALIC, true);
     }
 
@@ -159,14 +159,14 @@ public final class PlayerComponent {
   static boolean canViewNick(Player player, @Nullable Player viewer) {
     if (viewer == null) return false;
     if (viewer == player) return true;
-    return viewer.hasPermission("pgm.staff") || FriendIntegration.isFriend(player, viewer);
+    return viewer.hasPermission("pgm.staff") || Integration.isFriend(player, viewer);
   }
 
   static String getName(@Nullable Player player, @Nullable Player viewer, String defName) {
     if (player != null
         && viewer != null
         && (viewer == player
-            || FriendIntegration.isFriend(player, viewer)
+            || Integration.isFriend(player, viewer)
             || viewer.hasPermission("pgm.staff"))) {
       return player.getName();
     }

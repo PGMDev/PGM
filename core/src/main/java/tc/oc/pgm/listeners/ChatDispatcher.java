@@ -42,6 +42,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
+import tc.oc.pgm.api.text.PlayerComponent;
 import tc.oc.pgm.ffa.Tribute;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.StringUtils;
@@ -49,7 +50,6 @@ import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.text.PlayerComponent;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class ChatDispatcher implements Listener {

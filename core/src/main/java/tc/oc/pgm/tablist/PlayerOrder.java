@@ -6,8 +6,8 @@ import org.bukkit.permissions.Permission;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.integration.FriendIntegration;
 import tc.oc.pgm.util.nick.NickProvider;
 
 /**
@@ -45,8 +45,8 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
     boolean aStaff = a.hasPermission(Permissions.STAFF) && !aNicked;
     boolean bStaff = b.hasPermission(Permissions.STAFF) && !bNicked;
 
-    boolean aFriend = FriendIntegration.isFriend(viewer, a);
-    boolean bFriend = FriendIntegration.isFriend(viewer, b);
+    boolean aFriend = Integration.isFriend(viewer, a);
+    boolean bFriend = Integration.isFriend(viewer, b);
 
     // Friends are always first :)
     if (aFriend && !bFriend) {
