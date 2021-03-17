@@ -7,13 +7,12 @@ import static net.kyori.adventure.text.Component.translatable;
 import app.ashcon.intake.Command;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.teams.TeamMatchModule;
@@ -86,7 +85,7 @@ public final class ListCommand {
   private Component formatNames(Collection<MatchPlayer> players, CommandSender sender) {
     List<Component> names =
         players.stream()
-            .filter(mp -> sender.hasPermission(Permissions.STAFF) || !isVanished(mp.getId()))
+            .filter(mp -> sender.hasPermission(Permissions.STAFF) || !isVanished(mp))
             .map(mp -> mp.getName(NameStyle.VERBOSE, sender))
             .collect(Collectors.toList());
 
@@ -103,11 +102,10 @@ public final class ListCommand {
   }
 
   private int getSize(Collection<MatchPlayer> players, boolean vanished) {
-    return Math.toIntExact(
-        players.stream().filter(mp -> vanished == isVanished(mp.getId())).count());
+    return Math.toIntExact(players.stream().filter(mp -> vanished == isVanished(mp)).count());
   }
 
-  private boolean isVanished(UUID playerId) {
-    return PGM.get().getVanishManager().isVanished(playerId);
+  private boolean isVanished(MatchPlayer player) {
+    return Integration.isVanished(player.getBukkit());
   }
 }

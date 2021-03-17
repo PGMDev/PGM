@@ -23,12 +23,12 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.NameDecorationChangeEvent;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.text.PlayerComponent;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.nick.NickRegistry;
 import tc.oc.pgm.util.named.NameDecorationProvider;
 import tc.oc.pgm.util.text.TextFormatter;
 
@@ -38,7 +38,6 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
   private final MetadataValue METADATA_VALUE = new FixedMetadataValue(PGM.get(), this);
 
   private NameDecorationProvider provider;
-  private NickRegistry nickProvider;
   private final LoadingCache<UUID, DecorationCacheEntry> decorationCache =
       CacheBuilder.newBuilder()
           .expireAfterAccess(1, TimeUnit.HOURS)
@@ -50,10 +49,8 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
                 }
               });
 
-  public NameDecorationRegistryImpl(
-      @Nullable NameDecorationProvider provider, NickRegistry nickProvider) {
+  public NameDecorationRegistryImpl(@Nullable NameDecorationProvider provider) {
     setProvider(provider);
-    this.nickProvider = nickProvider;
   }
 
   @EventHandler(priority = EventPriority.LOW)
@@ -93,8 +90,8 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
   public String getDecoratedName(Player player, ChatColor partyColor) {
     ChatColor party = (partyColor == null ? ChatColor.RESET : partyColor);
 
-    if (nickProvider.getNick(player).isPresent()) {
-      return party + nickProvider.getNick(player).get();
+    if (Integration.getNick(player) != null) {
+      return party + Integration.getNick(player);
     }
 
     return getPrefix(player.getUniqueId())
@@ -109,8 +106,8 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
     TextColor partyTextColor =
         partyColor == null ? NamedTextColor.WHITE : TextFormatter.convert(partyColor);
 
-    if (nickProvider.getNick(player).isPresent()) {
-      return text(nickProvider.getPlayerName(player), partyTextColor);
+    if (Integration.getNick(player) != null) {
+      return text(Integration.getNick(player), partyTextColor);
     }
 
     return text()

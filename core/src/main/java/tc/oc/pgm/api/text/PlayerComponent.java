@@ -23,7 +23,6 @@ import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.named.NameDecorationProvider;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.named.NameStyle.Flag;
-import tc.oc.pgm.util.nick.NickProvider;
 
 /** PlayerComponent is used to format player names in a consistent manner with optional styling */
 public final class PlayerComponent {
@@ -75,22 +74,15 @@ public final class PlayerComponent {
                   .value();
     }
 
-    NickProvider nickProvider = NickProvider.DEFAULT;
-    if (player != null) {
-      MetadataValue nickMeta =
-          player.getMetadata(NickProvider.METADATA_KEY, BukkitUtils.getPlugin());
-      if (nickMeta != null) nickProvider = (NickProvider) nickMeta.value();
-    }
-
     boolean isOffline =
         player == null
             || !player.isOnline()
-            || ((isDisguised(player) || nickProvider.getNick(player.getUniqueId()).isPresent())
+            || ((isDisguised(player) || Integration.hasNick(player))
                 && style.has(NameStyle.Flag.DISGUISE_OFFLINE));
 
     UUID uuid = !isOffline ? player.getUniqueId() : null;
-    boolean isNicked = uuid != null && nickProvider.getNick(uuid).isPresent();
-    String nicked = !isOffline && player != null ? nickProvider.getPlayerName(player) : defName;
+    boolean isNicked = uuid != null && Integration.hasNick(player);
+    String nicked = !isOffline && player != null ? Integration.getNick(player) : defName;
 
     TextComponent.Builder builder = text();
     if (!isOffline && style.has(NameStyle.Flag.FLAIR)) {
@@ -120,7 +112,7 @@ public final class PlayerComponent {
         name.append(space().decoration(TextDecoration.STRIKETHROUGH, false))
             .append(
                 text(
-                        nickProvider.getPlayerName(player),
+                        Integration.getNick(player),
                         provider.getColor(player.getUniqueId()),
                         TextDecoration.ITALIC)
                     .decoration(TextDecoration.STRIKETHROUGH, false));

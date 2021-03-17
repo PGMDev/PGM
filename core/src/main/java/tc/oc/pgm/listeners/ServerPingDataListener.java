@@ -19,6 +19,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerListPingEvent;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
@@ -26,9 +27,7 @@ import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
-import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.map.contrib.PlayerContributor;
-import tc.oc.pgm.nick.NickRegistry;
 import tc.oc.pgm.util.ClassLogger;
 
 public class ServerPingDataListener implements Listener {
@@ -39,20 +38,11 @@ public class ServerPingDataListener implements Listener {
   private final AtomicBoolean ready;
   private final AtomicBoolean legacySportPaper;
   private final LoadingCache<Match, JsonObject> matchCache;
-  private final VanishManager vanishManager;
-  private final NickRegistry nick;
 
-  public ServerPingDataListener(
-      MatchManager matchManager,
-      MapOrder mapOrder,
-      Logger parentLogger,
-      VanishManager vanishManager,
-      NickRegistry nick) {
+  public ServerPingDataListener(MatchManager matchManager, MapOrder mapOrder, Logger parentLogger) {
     this.matchManager = checkNotNull(matchManager);
     this.mapOrder = checkNotNull(mapOrder);
     this.logger = ClassLogger.get(checkNotNull(parentLogger), ServerPingDataListener.class);
-    this.vanishManager = checkNotNull(vanishManager);
-    this.nick = checkNotNull(nick);
     this.ready = new AtomicBoolean();
     this.legacySportPaper = new AtomicBoolean();
     this.matchCache =
@@ -84,8 +74,7 @@ public class ServerPingDataListener implements Listener {
     while (playerSample.hasNext()) {
       Player player = playerSample.next();
       // FIXME: Figure out how to rename nicked players instead of removing
-      if (vanishManager.isVanished(player.getUniqueId())
-          || nick.getNick(player.getUniqueId()).isPresent()) {
+      if (Integration.isVanished(player) || Integration.getNick(player) != null) {
         playerSample.remove();
       }
     }

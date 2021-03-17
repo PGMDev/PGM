@@ -45,7 +45,6 @@ import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.MapPoolAdjustEvent;
@@ -73,15 +72,13 @@ public class PGMListener implements Listener {
 
   private final Plugin parent;
   private final MatchManager mm;
-  private final VanishManager vm;
 
   // Single-write, multi-read lock used to create the first match
   private final ReentrantReadWriteLock lock;
 
-  public PGMListener(Plugin parent, MatchManager mm, VanishManager vm) {
+  public PGMListener(Plugin parent, MatchManager mm) {
     this.parent = parent;
     this.mm = mm;
-    this.vm = vm;
     this.lock = new ReentrantReadWriteLock();
   }
 
@@ -163,7 +160,7 @@ public class PGMListener implements Listener {
       MatchPlayer player = match.getPlayer(event.getPlayer());
       if (player != null) {
         // Announce actual staff join
-        announceJoinOrLeave(player, true, vm.isVanished(player.getId()));
+        announceJoinOrLeave(player, true, Integration.isVanished(player.getBukkit()));
       }
     }
   }
@@ -175,7 +172,7 @@ public class PGMListener implements Listener {
 
     if (event.getQuitMessage() != null) {
       // Announce actual staff quit
-      announceJoinOrLeave(player, false, vm.isVanished(player.getId()));
+      announceJoinOrLeave(player, false, Integration.isVanished(player.getBukkit()));
       event.setQuitMessage(null);
     }
 

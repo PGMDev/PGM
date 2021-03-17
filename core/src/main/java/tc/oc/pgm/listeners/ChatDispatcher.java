@@ -35,11 +35,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.text.PlayerComponent;
@@ -62,7 +62,6 @@ public class ChatDispatcher implements Listener {
   }
 
   private final MatchManager manager;
-  private final VanishManager vanish;
   private final OnlinePlayerMapAdapter<UUID> lastMessagedBy;
 
   private final Map<UUID, String> muted;
@@ -91,7 +90,6 @@ public class ChatDispatcher implements Listener {
 
   public ChatDispatcher() {
     this.manager = PGM.get().getMatchManager();
-    this.vanish = PGM.get().getVanishManager();
     this.lastMessagedBy = new OnlinePlayerMapAdapter<>(PGM.get());
     this.muted = Maps.newHashMap();
     PGM.get().getServer().getPluginManager().registerEvents(this, PGM.get());
@@ -200,7 +198,7 @@ public class ChatDispatcher implements Listener {
   public void sendDirect(Match match, MatchPlayer sender, Player receiver, @Text String message) {
     if (sender == null) return;
 
-    if (vanish.isVanished(sender.getId())) {
+    if (Integration.isVanished(sender.getBukkit())) {
       sender.sendWarning(translatable("vanish.chat.deny"));
       return;
     }
@@ -214,7 +212,7 @@ public class ChatDispatcher implements Listener {
     if (matchReceiver != null) {
 
       // Vanish Check - Don't allow messages to vanished
-      if (vanish.isVanished(matchReceiver.getId())) {
+      if (Integration.isVanished(receiver)) {
         sender.sendWarning(translatable("command.playerNotFound"));
         return;
       }

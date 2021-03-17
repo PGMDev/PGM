@@ -8,7 +8,6 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.util.nick.NickProvider;
 
 /**
  * The default order that players are listed for a given viewer. Roughly speaking, the order is: 1.
@@ -38,9 +37,8 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
     Player b = mb.getBukkit();
     Player viewer = this.viewer.getBukkit();
 
-    NickProvider nick = PGM.get().getNickRegistry().getProvider();
-    boolean aNicked = nick.getNick(a.getUniqueId()).isPresent();
-    boolean bNicked = nick.getNick(b.getUniqueId()).isPresent();
+    boolean aNicked = Integration.getNick(a) != null;
+    boolean bNicked = Integration.getNick(b) != null;
 
     boolean aStaff = a.hasPermission(Permissions.STAFF) && !aNicked;
     boolean bStaff = b.hasPermission(Permissions.STAFF) && !bNicked;
@@ -56,9 +54,9 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
     }
 
     if (aNicked && !bNicked) {
-      return nick.getPlayerName(a).compareToIgnoreCase(b.getName(viewer));
+      return Integration.getNick(a).compareToIgnoreCase(b.getName(viewer));
     } else if (bNicked && !aNicked) {
-      return a.getName(viewer).compareToIgnoreCase(nick.getPlayerName(b));
+      return a.getName(viewer).compareToIgnoreCase(Integration.getNick(b));
     }
 
     // Staff take priority, unless they are nicked
