@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.util.ImmutableMaterialSet;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
@@ -42,15 +43,17 @@ public class ItemRule {
 
       InventoryUtils.addEnchantments(meta, this.meta.getEnchants());
 
-      for (String attribute : this.meta.getModifiedAttributes()) {
-        for (AttributeModifier modifier : this.meta.getAttributeModifiers(attribute)) {
-          meta.addAttributeModifier(attribute, modifier);
+      if (BukkitUtils.isSportPaper()) {
+        for (String attribute : this.meta.getModifiedAttributes()) {
+          for (AttributeModifier modifier : this.meta.getAttributeModifiers(attribute)) {
+            meta.addAttributeModifier(attribute, modifier);
+          }
         }
+        meta.setCanDestroy(unionMaterials(meta.getCanDestroy(), this.meta.getCanDestroy()));
+        meta.setCanPlaceOn(unionMaterials(meta.getCanPlaceOn(), this.meta.getCanPlaceOn()));
       }
 
       if (this.meta.spigot().isUnbreakable()) meta.spigot().setUnbreakable(true);
-      meta.setCanDestroy(unionMaterials(meta.getCanDestroy(), this.meta.getCanDestroy()));
-      meta.setCanPlaceOn(unionMaterials(meta.getCanPlaceOn(), this.meta.getCanPlaceOn()));
 
       stack.setItemMeta(meta);
     }

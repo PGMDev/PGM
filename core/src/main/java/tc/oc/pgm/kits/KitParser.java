@@ -127,10 +127,13 @@ public abstract class KitParser {
       kits.add(this.parse(child));
     }
 
+    if (BukkitUtils.isSportPaper()) {
+      kits.add(this.parseAttributeKit(el));
+    }
+
     kits.add(this.parseArmorKit(el));
     kits.add(this.parseItemKit(el));
     kits.add(this.parsePotionKit(el));
-    kits.add(this.parseAttributeKit(el));
     kits.add(this.parseHealthKit(el));
     kits.add(this.parseHungerKit(el));
     kits.add(this.parseKnockbackReductionKit(el));
@@ -445,8 +448,10 @@ public abstract class KitParser {
       }
     }
 
-    for (Map.Entry<String, AttributeModifier> entry : parseAttributeModifiers(el).entries()) {
-      meta.addAttributeModifier(entry.getKey(), entry.getValue());
+    if (BukkitUtils.isSportPaper()) {
+      for (Map.Entry<String, AttributeModifier> entry : parseAttributeModifiers(el).entries()) {
+        meta.addAttributeModifier(entry.getKey(), entry.getValue());
+      }
     }
 
     String customName = el.getAttributeValue("name");
@@ -485,14 +490,16 @@ public abstract class KitParser {
       meta.spigot().setUnbreakable(true);
     }
 
-    Element elCanDestroy = el.getChild("can-destroy");
-    if (elCanDestroy != null) {
-      meta.setCanDestroy(XMLUtils.parseMaterialMatcher(elCanDestroy).getMaterials());
-    }
+    if (BukkitUtils.isSportPaper()) {
+      Element elCanDestroy = el.getChild("can-destroy");
+      if (elCanDestroy != null) {
+        meta.setCanDestroy(XMLUtils.parseMaterialMatcher(elCanDestroy).getMaterials());
+      }
 
-    Element elCanPlaceOn = el.getChild("can-place-on");
-    if (elCanPlaceOn != null) {
-      meta.setCanPlaceOn(XMLUtils.parseMaterialMatcher(elCanPlaceOn).getMaterials());
+      Element elCanPlaceOn = el.getChild("can-place-on");
+      if (elCanPlaceOn != null) {
+        meta.setCanPlaceOn(XMLUtils.parseMaterialMatcher(elCanPlaceOn).getMaterials());
+      }
     }
   }
 

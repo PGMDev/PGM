@@ -7,7 +7,7 @@ import java.util.Collection;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
-import org.bukkit.util.ImmutableMaterialSet;
+import tc.oc.pgm.util.collection.ImmutableMaterialSet;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
 public class BlockMaterialMatcher implements MaterialMatcher {
