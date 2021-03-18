@@ -66,11 +66,11 @@ public class TabDisplay {
     this.teamCreatePackets = new Packet[this.slots];
     this.teamRemovePackets = new Packet[this.slots];
 
-    this.listAddPacket = new PacketPlayOutPlayerInfo();
-    this.listAddPacket.a = PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER;
-
-    this.listRemovePacket = new PacketPlayOutPlayerInfo();
-    this.listRemovePacket.a = PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER;
+    this.listAddPacket =
+        TabRender.createPlayerInfoPacket(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER);
+    this.listRemovePacket =
+        TabRender.createPlayerInfoPacket(
+            PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER);
 
     for (int slot = 0; slot < this.slots; ++slot) {
       BaseComponent[] playerName = this.slotName(slot);
@@ -83,10 +83,12 @@ public class TabDisplay {
       this.teamRemovePackets[slot] = NMSHacks.teamRemovePacket(teamName);
       UUID uuid = UUID.randomUUID();
 
-      listAddPacket.b.add(
-          NMSHacks.playerListPacketData(
-              listAddPacket, uuid, name, GameMode.SURVIVAL, PING, null, playerName));
-      listRemovePacket.b.add(NMSHacks.playerListPacketData(listRemovePacket, uuid, playerName));
+      TabRender.getBField(listAddPacket)
+          .add(
+              NMSHacks.playerListPacketData(
+                  listAddPacket, uuid, name, GameMode.SURVIVAL, PING, null, playerName));
+      TabRender.getBField(listRemovePacket)
+          .add(NMSHacks.playerListPacketData(listRemovePacket, uuid, playerName));
     }
   }
 

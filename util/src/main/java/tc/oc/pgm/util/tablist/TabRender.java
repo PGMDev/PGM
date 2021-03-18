@@ -39,7 +39,8 @@ public class TabRender {
     this.deferredPackets = new ArrayList<>();
   }
 
-  private List<PacketPlayOutPlayerInfo.PlayerInfoData> getBField(PacketPlayOutPlayerInfo packet) {
+  protected static List<PacketPlayOutPlayerInfo.PlayerInfoData> getBField(
+      PacketPlayOutPlayerInfo packet) {
     if (BukkitUtils.isSportPaper()) {
       return packet.b;
     } else {
@@ -56,7 +57,7 @@ public class TabRender {
     NMSHacks.sendPacket(this.view.getViewer(), packet);
   }
 
-  private PacketPlayOutPlayerInfo createPlayerInfoPacket(
+  protected static PacketPlayOutPlayerInfo createPlayerInfoPacket(
       PacketPlayOutPlayerInfo.EnumPlayerInfoAction action) {
     PacketPlayOutPlayerInfo packet = new PacketPlayOutPlayerInfo();
     if (BukkitUtils.isSportPaper()) {
