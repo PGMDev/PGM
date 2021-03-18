@@ -11,7 +11,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.player.PlayerSkinPartsChangeEvent;
 import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
@@ -141,11 +140,12 @@ public class TabManager implements Listener {
     if (view != null) view.onWorldChange(event);
   }
 
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onSkinPartsChange(PlayerSkinPartsChangeEvent event) {
-    TabEntry entry = this.getPlayerEntryOrNull(event.getPlayer());
-    if (entry instanceof PlayerTabEntry) {
-      ((PlayerTabEntry) entry).onSkinPartsChange(event);
-    }
-  }
+  // TODO: This is not in spigot
+  //  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  //  public void onSkinPartsChange(PlayerSkinPartsChangeEvent event) {
+  //    TabEntry entry = this.getPlayerEntryOrNull(event.getPlayer());
+  //    if (entry instanceof PlayerTabEntry) {
+  //      ((PlayerTabEntry) entry).onSkinPartsChange(event);
+  //    }
+  //  }
 }

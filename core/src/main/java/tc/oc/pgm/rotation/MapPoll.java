@@ -194,7 +194,7 @@ public class MapPoll {
   }
 
   private ItemStack createVoteBookItem(MatchPlayer viewer) {
-    Locale locale = viewer.getBukkit().getLocale();
+    Locale locale = TextTranslations.getLocale(viewer.getBukkit());
 
     ItemStack personalDummyVoteBook = new ItemStack(Material.ENCHANTED_BOOK);
     VOTE_BOOK_TAG.set(personalDummyVoteBook, VOTE_BOOK_METADATA);

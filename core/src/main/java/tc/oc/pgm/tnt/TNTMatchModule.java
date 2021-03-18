@@ -15,7 +15,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.ExplosionPrimeByEntityEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
@@ -47,10 +46,7 @@ public class TNTMatchModule implements MatchModule, Listener {
   }
 
   private boolean callPrimeEvent(TNTPrimed tnt, @Nullable Entity primer) {
-    ExplosionPrimeEvent primeEvent =
-        primer != null
-            ? new ExplosionPrimeByEntityEvent(tnt, primer)
-            : new ExplosionPrimeEvent(tnt);
+    ExplosionPrimeEvent primeEvent = new ExplosionPrimeEvent(tnt);
     match.callEvent(primeEvent);
     if (primeEvent.isCancelled()) {
       tnt.remove();

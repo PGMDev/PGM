@@ -19,6 +19,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ProjectileTrailMatchModule implements MatchModule, Listener {
@@ -43,7 +44,11 @@ public class ProjectileTrailMatchModule implements MatchModule, Listener {
               if (projectile.isDead() || projectile.isOnGround()) {
                 projectile.removeMetadata(TRAIL_META, PGM.get());
               } else {
-                final Color color = (Color) projectile.getMetadata(TRAIL_META, PGM.get()).value();
+                final Color color =
+                    (Color)
+                        (BukkitUtils.isSportPaper()
+                            ? projectile.getMetadata(TRAIL_META, PGM.get()).value()
+                            : projectile.getMetadata(TRAIL_META).get(0));
 
                 for (MatchPlayer player : match.getPlayers()) {
                   boolean colors =
@@ -90,7 +95,11 @@ public class ProjectileTrailMatchModule implements MatchModule, Listener {
     if (projectile instanceof Arrow) {
       final Arrow arrow = (Arrow) projectile;
       if (arrow.hasMetadata(CRITICAL_META)) {
-        return arrow.getMetadata(CRITICAL_META, PGM.get()).asBoolean();
+        if (BukkitUtils.isSportPaper()) {
+          return arrow.getMetadata(CRITICAL_META, PGM.get()).asBoolean();
+        } else {
+          return arrow.getMetadata(CRITICAL_META).get(0).asBoolean();
+        }
       }
     }
     return false;
@@ -123,7 +132,11 @@ public class ProjectileTrailMatchModule implements MatchModule, Listener {
       if (projectile instanceof Arrow) {
         final Arrow arrow = (Arrow) projectile;
         if (arrow.hasMetadata(CRITICAL_META)) {
-          arrow.setCritical(arrow.getMetadata(CRITICAL_META, PGM.get()).asBoolean());
+          if (BukkitUtils.isSportPaper()) {
+            arrow.setCritical(arrow.getMetadata(CRITICAL_META, PGM.get()).asBoolean());
+          } else {
+            arrow.setCritical(arrow.getMetadata(CRITICAL_META).get(0).asBoolean());
+          }
         }
       }
     }

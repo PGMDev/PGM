@@ -4,8 +4,8 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.GameMode;
-import org.bukkit.Skin;
 import org.bukkit.entity.Player;
+import tc.oc.pgm.util.skin.Skin;
 
 /** Content for a slot in a {@link TabView} */
 public interface TabEntry {
@@ -63,7 +63,11 @@ public interface TabEntry {
   /** Ping value for the entry */
   int getPing();
 
-  /** Skin for the entry's icon */
+  /**
+   * Skin for the entry's icon
+   *
+   * @return
+   */
   @Nullable
   Skin getSkin(TabView view);
 }

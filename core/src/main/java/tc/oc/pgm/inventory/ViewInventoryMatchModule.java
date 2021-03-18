@@ -26,7 +26,6 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryClickedEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -170,7 +169,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
-  public void updateMonitoredClick(final InventoryClickedEvent event) {
+  public void updateMonitoredClick(final InventoryClickEvent event) {
     if (event.getWhoClicked() instanceof Player) {
       Player player = (Player) event.getWhoClicked();
 

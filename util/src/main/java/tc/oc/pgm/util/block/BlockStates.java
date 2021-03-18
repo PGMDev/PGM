@@ -49,7 +49,7 @@ public interface BlockStates {
         + ", "
         + state.getZ()
         + ") world="
-        + state.getMaterialData()
+        + state.getData()
         + "}";
   }
 }

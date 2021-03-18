@@ -260,7 +260,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
     private Stage advanceSync() throws IllegalStateException {
       final WorldInfo info = map.getWorld();
-      WorldCreator creator = PGM.get().getServer().detectWorld(worldName);
+      WorldCreator creator = NMSHacks.detectWorld(worldName);
       if (creator == null) {
         creator = new WorldCreator(worldName);
       }

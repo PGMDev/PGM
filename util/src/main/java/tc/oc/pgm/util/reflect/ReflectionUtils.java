@@ -25,4 +25,21 @@ public final class ReflectionUtils {
       field.setAccessible(wasAccessible);
     }
   }
+
+  public static void setField(Class<?> parent, Object base, Object value, String fieldName) {
+    try {
+      setField(base, value, parent.getDeclaredField(fieldName));
+    } catch (NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static void setField(Object base, Object value, Field field) {
+    field.setAccessible(true);
+    try {
+      field.set(base, value);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

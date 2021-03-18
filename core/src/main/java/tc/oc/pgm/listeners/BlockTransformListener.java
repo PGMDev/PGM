@@ -28,7 +28,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockFadeEvent;
-import org.bukkit.event.block.BlockFallEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockGrowEvent;
@@ -191,8 +190,8 @@ public class BlockTransformListener implements Listener {
 
   private void callEvent(final BlockTransformEvent event, boolean checked) {
     if (!checked) {
-      MaterialData oldData = event.getOldState().getMaterialData();
-      MaterialData newData = event.getNewState().getMaterialData();
+      MaterialData oldData = event.getOldState().getData();
+      MaterialData newData = event.getNewState().getData();
       if (oldData instanceof Door) {
         handleDoor(event, (Door) oldData);
       }
@@ -298,10 +297,10 @@ public class BlockTransformListener implements Listener {
       newState.setType(event.getBlock().getType());
       newState.setRawData(event.getBlock().getData());
 
+      // TODO: getType is deprecated getMaterial and setMaterial are SportPaper only
       // When lava flows into water, it creates stone or cobblestone
-      if (isWater(oldState.getMaterial()) && isLava(newState.getMaterial())) {
-        newState.setMaterial(
-            event.getFace() == BlockFace.DOWN ? Material.STONE : Material.COBBLESTONE);
+      if (isWater(oldState.getType()) && isLava(newState.getType())) {
+        newState.setType(event.getFace() == BlockFace.DOWN ? Material.STONE : Material.COBBLESTONE);
         newState.setRawData((byte) 0);
       }
 
@@ -529,12 +528,14 @@ public class BlockTransformListener implements Listener {
     }
   }
 
-  @EventWrapper
-  public void onBlockFall(BlockFallEvent event) {
-    this.callEvent(
-        new BlockTransformEvent(
-            event, event.getBlock().getState(), BlockStates.toAir(event.getBlock().getState())));
-  }
+  // TODO: Check if this is running on SportPaper
+  //  @EventWrapper
+  //  public void onBlockFall(BlockFallEvent event) {
+  //    this.callEvent(
+  //        new BlockTransformEvent(
+  //            event, event.getBlock().getState(),
+  // BlockStates.toAir(event.getBlock().getState())));
+  //  }
 
   private static Material getTrampledType(Material newType) {
     switch (newType) {

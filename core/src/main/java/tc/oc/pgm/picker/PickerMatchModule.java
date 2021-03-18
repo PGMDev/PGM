@@ -28,7 +28,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.player.PlayerLocaleChangeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -339,10 +338,10 @@ public class PickerMatchModule implements MatchModule, Listener {
     }
   }
 
-  @EventHandler
-  public void handleLocaleChange(final PlayerLocaleChangeEvent event) {
-    refreshKit(match.getPlayer(event.getPlayer()));
-  }
+  //  @EventHandler
+  //  public void handleLocaleChange(final PlayerLocaleChangeEvent event) {
+  //    refreshKit(match.getPlayer(event.getPlayer()));
+  //  }
 
   @EventHandler
   public void closeMonitoredInventory(final InventoryCloseEvent event) {

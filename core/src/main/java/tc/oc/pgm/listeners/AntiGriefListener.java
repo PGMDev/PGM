@@ -22,7 +22,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.player.PlayerAttackEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -60,10 +59,11 @@ public class AntiGriefListener implements Listener {
     this.participantDefuse(event.getPlayer(), event.getRightClicked());
   }
 
-  @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-  public void leftClickDefuse(final PlayerAttackEntityEvent event) {
-    this.participantDefuse(event.getPlayer(), event.getLeftClicked());
-  }
+  // TODO: This is only in SportPaper
+  //  @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+  //  public void leftClickDefuse(final PlayerAttackEntityEvent event) {
+  //    this.participantDefuse(event.getPlayer(), event.getLeftClicked());
+  //  }
 
   private void participantDefuse(Player player, Entity entity) {
     // check tnt

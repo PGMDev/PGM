@@ -82,7 +82,7 @@ public class BlockTracker implements Listener {
 
   public void trackBlockState(BlockState state, @Nullable TrackerInfo info) {
     checkNotNull(state);
-    trackBlockState(state.getBlock(), state.getMaterial(), info);
+    trackBlockState(state.getBlock(), state.getType(), info);
   }
 
   public void clearBlock(Block block) {
@@ -96,7 +96,7 @@ public class BlockTracker implements Listener {
     // If block was registered with a specific world, check that the new state
     // has the same world, otherwise assume the block is still placed.
     Material material = materials.get(state.getBlock());
-    return material == null || material == state.getMaterial();
+    return material == null || material == state.getType();
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

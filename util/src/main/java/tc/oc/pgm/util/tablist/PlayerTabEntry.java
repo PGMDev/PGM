@@ -5,11 +5,11 @@ import static tc.oc.pgm.util.text.PlayerComponent.player;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.chat.BaseComponent;
-import org.bukkit.Skin;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TextTranslations;
 
 /**
@@ -69,7 +69,8 @@ public class PlayerTabEntry extends DynamicTabEntry {
 
   @Override
   public @Nullable Skin getSkin(TabView view) {
-    return this.player.getSkin();
+    return NMSHacks.getPlayerSkin(this.player);
+    //    return this.player.getSkin();
   }
 
   @Override

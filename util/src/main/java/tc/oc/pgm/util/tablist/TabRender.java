@@ -5,11 +5,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent;
 import net.minecraft.server.v1_8_R3.Packet;
 import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
+import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerListHeaderFooter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.reflect.ReflectionUtils;
 
 public class TabRender {
   private final TabView view;
@@ -35,6 +39,15 @@ public class TabRender {
     this.deferredPackets = new ArrayList<>();
   }
 
+  private List<PacketPlayOutPlayerInfo.PlayerInfoData> getBField(PacketPlayOutPlayerInfo packet) {
+    if (BukkitUtils.isSportPaper()) {
+      return packet.b;
+    } else {
+      return (List<PacketPlayOutPlayerInfo.PlayerInfoData>)
+          ReflectionUtils.readField(packet.getClass(), packet, List.class, "b");
+    }
+  }
+
   private String teamName(int slot) {
     return "\u0001TabView" + String.format("%03d", slot);
   }
@@ -46,7 +59,11 @@ public class TabRender {
   private PacketPlayOutPlayerInfo createPlayerInfoPacket(
       PacketPlayOutPlayerInfo.EnumPlayerInfoAction action) {
     PacketPlayOutPlayerInfo packet = new PacketPlayOutPlayerInfo();
-    packet.a = action;
+    if (BukkitUtils.isSportPaper()) {
+      packet.a = action;
+    } else {
+      ReflectionUtils.setField(packet.getClass(), packet, action, "a");
+    }
     return packet;
   }
 
@@ -56,26 +73,28 @@ public class TabRender {
 
   private void appendAddition(TabEntry entry, int index) {
     BaseComponent[] displayName = this.getContent(entry, index);
-    this.addPacket.b.add(
-        NMSHacks.playerListPacketData(
-            this.addPacket,
-            entry.getId(),
-            entry.getName(this.view),
-            entry.getGamemode(),
-            entry.getPing(),
-            entry.getSkin(this.view),
-            displayName));
+    getBField(this.addPacket)
+        .add(
+            NMSHacks.playerListPacketData(
+                this.addPacket,
+                entry.getId(),
+                entry.getName(this.view),
+                entry.getGamemode(),
+                entry.getPing(),
+                entry.getSkin(this.view),
+                displayName));
 
     // Due to a client bug, display name is ignored in ADD_PLAYER packets,
     // so we have to send an UPDATE_DISPLAY_NAME afterward.
-    this.updatePacket.b.add(
-        NMSHacks.playerListPacketData(this.updatePacket, entry.getId(), displayName));
+    getBField(this.updatePacket)
+        .add(NMSHacks.playerListPacketData(this.updatePacket, entry.getId(), displayName));
 
     this.updateFakeEntity(entry, true);
   }
 
   private void appendRemoval(TabEntry entry) {
-    this.removePacket.b.add(NMSHacks.playerListPacketData(this.removePacket, entry.getId()));
+    getBField(this.removePacket)
+        .add(NMSHacks.playerListPacketData(this.removePacket, entry.getId()));
 
     int entityId = entry.getFakeEntityId(this.view);
     if (entityId >= 0) {
@@ -96,10 +115,10 @@ public class TabRender {
   }
 
   public void finish() {
-    if (!this.removePacket.b.isEmpty()) this.send(this.removePacket);
-    if (!this.addPacket.b.isEmpty()) this.send(this.addPacket);
-    if (!this.updatePacket.b.isEmpty()) this.send(this.updatePacket);
-    if (!this.updatePingPacket.b.isEmpty()) this.send(this.updatePingPacket);
+    if (!getBField(this.removePacket).isEmpty()) this.send(this.removePacket);
+    if (!getBField(this.addPacket).isEmpty()) this.send(this.addPacket);
+    if (!getBField(this.updatePacket).isEmpty()) this.send(this.updatePacket);
+    if (!getBField(this.updatePingPacket).isEmpty()) this.send(this.updatePingPacket);
 
     for (Packet packet : this.deferredPackets) {
       this.send(packet);
@@ -146,18 +165,36 @@ public class TabRender {
   }
 
   public void updateEntry(TabEntry entry, int index) {
-    this.updatePacket.b.add(
-        NMSHacks.playerListPacketData(
-            this.updatePacket, entry.getId(), this.getContent(entry, index)));
+    getBField(this.updatePacket)
+        .add(
+            NMSHacks.playerListPacketData(
+                this.updatePacket, entry.getId(), this.getContent(entry, index)));
   }
 
   public void updatePing(TabEntry entry, int index) {
-    this.updatePingPacket.b.add(
-        NMSHacks.playerListPacketData(this.updatePingPacket, entry.getId(), entry.getPing()));
+    getBField(this.updatePingPacket)
+        .add(NMSHacks.playerListPacketData(this.updatePingPacket, entry.getId(), entry.getPing()));
   }
 
   public void setHeaderFooter(BaseComponent[] header, BaseComponent[] footer) {
-    view.getViewer().setPlayerListHeaderFooter(header, footer);
+    if (BukkitUtils.isSportPaper()) {
+      view.getViewer().setPlayerListHeaderFooter(header, footer);
+    } else {
+      PacketPlayOutPlayerListHeaderFooter packet = new PacketPlayOutPlayerListHeaderFooter();
+      ReflectionUtils.setField(
+          packet.getClass(),
+          packet,
+          IChatBaseComponent.ChatSerializer.a(
+              net.md_5.bungee.chat.ComponentSerializer.toString(header)),
+          "a");
+      ReflectionUtils.setField(
+          packet.getClass(),
+          packet,
+          IChatBaseComponent.ChatSerializer.a(
+              net.md_5.bungee.chat.ComponentSerializer.toString(footer)),
+          "b");
+      send(packet);
+    }
   }
 
   public void updateFakeEntity(TabEntry entry, boolean create) {

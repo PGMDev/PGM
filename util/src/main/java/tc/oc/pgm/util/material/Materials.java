@@ -93,7 +93,7 @@ public interface Materials {
   }
 
   static boolean isSolid(BlockState block) {
-    return isSolid(block.getMaterial());
+    return isSolid(block.getType());
   }
 
   static boolean isWater(Material material) {
@@ -109,7 +109,7 @@ public interface Materials {
   }
 
   static boolean isWater(BlockState block) {
-    return isWater(block.getMaterial());
+    return isWater(block.getType());
   }
 
   static boolean isLava(Material material) {
@@ -125,7 +125,7 @@ public interface Materials {
   }
 
   static boolean isLava(BlockState block) {
-    return isLava(block.getMaterial());
+    return isLava(block.getType());
   }
 
   static boolean isLiquid(Material material) {

@@ -12,6 +12,7 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  * An item tag that encodes data in an item's lore.
@@ -42,7 +43,7 @@ final class LegacyItemTag implements ItemTag<String> {
   @Nullable
   @Override
   public String get(ItemStack item) {
-    final List<String> lore = item.getLore();
+    final List<String> lore = item.getItemMeta().getLore();
     if (lore == null || lore.isEmpty()) return null;
 
     final Matcher matcher = regex.matcher(lore.get(0));
@@ -51,28 +52,32 @@ final class LegacyItemTag implements ItemTag<String> {
 
   @Override
   public void set(ItemStack item, String value) {
-    List<String> lore = item.getLore();
+    ItemMeta itemMeta = item.getItemMeta();
+    List<String> lore = itemMeta.getLore();
 
     // If the item has no lore, ensure there is at least 1 line.
     if (lore == null || lore.isEmpty()) {
-      item.setLore(Collections.singletonList(""));
-      lore = item.getLore();
+      itemMeta.setLore(Collections.singletonList(""));
+      lore = itemMeta.getLore();
     }
 
     lore.set(0, sequence + encode(value) + sequence + regex.matcher(lore.get(0)).replaceAll(""));
-    item.setLore(lore);
+    itemMeta.setLore(lore);
+    item.setItemMeta(itemMeta);
   }
 
   @Override
   public void clear(ItemStack item) {
-    final List<String> lore = item.getLore();
+    ItemMeta itemMeta = item.getItemMeta();
+    final List<String> lore = itemMeta.getLore();
     if (lore == null || lore.isEmpty()) return;
 
     String line = lore.get(0);
     lore.set(0, line = regex.matcher(line).replaceAll(""));
     if (line.isEmpty()) lore.remove(0);
 
-    item.setLore(lore);
+    itemMeta.setLore(lore);
+    item.setItemMeta(itemMeta);
   }
 
   private static ChatColor nextId() {

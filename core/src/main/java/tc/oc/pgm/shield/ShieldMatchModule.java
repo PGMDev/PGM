@@ -8,7 +8,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.PotionEffectRemoveEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -68,9 +67,9 @@ public class ShieldMatchModule implements MatchModule, Listener, Tickable {
     if (shield != null) shield.onEvent(event);
   }
 
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onPotionRemove(PotionEffectRemoveEvent event) {
-    ShieldPlayerModule shield = getShield(event.getEntity());
-    if (shield != null) shield.onEvent(event);
-  }
+  //  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  //  public void onPotionRemove(PotionEffectRemoveEvent event) {
+  //    ShieldPlayerModule shield = getShield(event.getEntity());
+  //    if (shield != null) shield.onEvent(event);
+  //  }
 }

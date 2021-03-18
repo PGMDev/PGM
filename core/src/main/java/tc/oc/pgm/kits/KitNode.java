@@ -7,6 +7,7 @@ import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.StaticFilter;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 public class KitNode extends AbstractKit {
   private final List<Kit> kits;
@@ -29,7 +30,7 @@ public class KitNode extends AbstractKit {
         kit.apply(player, this.force != null ? this.force : force, displacedItems);
       }
 
-      if (this.potionParticles != null) {
+      if (BukkitUtils.isSportPaper() && this.potionParticles != null) {
         player.getBukkit().setPotionParticles(this.potionParticles);
       }
     }

@@ -3,6 +3,7 @@ package tc.oc.pgm.projectile;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
 import org.bukkit.Material;
@@ -40,6 +41,7 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.filters.query.PlayerBlockQuery;
 import tc.oc.pgm.kits.tag.ItemTags;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ProjectileMatchModule implements MatchModule, Listener {
@@ -237,15 +239,20 @@ public class ProjectileMatchModule implements MatchModule, Listener {
   }
 
   public static @Nullable ProjectileDefinition getProjectileDefinition(Entity entity) {
-    MetadataValue metadataValue = entity.getMetadata("projectileDefinition", PGM.get());
+    if (BukkitUtils.isSportPaper()) {
+      MetadataValue metadataValue = entity.getMetadata("projectileDefinition", PGM.get());
 
-    if (metadataValue != null) {
-      return (ProjectileDefinition) metadataValue.value();
-    } else if (launchingDefinition.get() != null) {
-      return launchingDefinition.get();
+      if (metadataValue != null) {
+        return (ProjectileDefinition) metadataValue.value();
+      }
     } else {
-      return null;
+      List<MetadataValue> metadataValue = entity.getMetadata("projectileDefinition");
+
+      if (!metadataValue.isEmpty()) {
+        return (ProjectileDefinition) metadataValue.get(0).value();
+      }
     }
+    return launchingDefinition.get();
   }
 
   private static boolean isValidProjectileAction(Action action, ClickAction clickAction) {

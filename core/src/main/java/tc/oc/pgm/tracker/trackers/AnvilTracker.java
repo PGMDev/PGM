@@ -23,7 +23,7 @@ public class AnvilTracker extends AbstractTracker<AnvilInfo> {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlace(ParticipantBlockTransformEvent event) {
-    if (event.getNewState().getMaterial() == Material.ANVIL) {
+    if (event.getNewState().getType() == Material.ANVIL) {
       blocks().trackBlockState(event.getNewState(), new AnvilInfo(event.getPlayerState()));
     }
   }

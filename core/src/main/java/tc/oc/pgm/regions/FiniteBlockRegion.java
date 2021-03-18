@@ -57,7 +57,7 @@ public class FiniteBlockRegion extends AbstractRegion {
       min = Vector.getMinimum(min, center.clone().subtract(half));
       max = Vector.getMaximum(max, center.add(half)); // mutates, but disposed
 
-      materialsBuilder.add(block.getState().getMaterialData());
+      materialsBuilder.add(block.getState().getData());
     }
 
     this.bounds = new Bounds(min, max);

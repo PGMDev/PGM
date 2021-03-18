@@ -50,6 +50,7 @@ import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.material.Materials;
+import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -363,7 +364,8 @@ public abstract class KitParser {
   public ItemStack parseHead(Element el) throws InvalidXMLException {
     ItemStack itemStack = parseItem(el, Material.SKULL_ITEM, (short) 3);
     SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
-    meta.setOwner(
+    NMSHacks.setSkullMetaOwner(
+        meta,
         XMLUtils.parseUsername(Node.fromChildOrAttr(el, "name")),
         XMLUtils.parseUuid(Node.fromRequiredChildOrAttr(el, "uuid")),
         XMLUtils.parseUnsignedSkin(Node.fromRequiredChildOrAttr(el, "skin")));

@@ -23,7 +23,7 @@ public class TNTTracker extends AbstractTracker<TNTInfo> {
 
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
   public void onPlace(ParticipantBlockTransformEvent event) {
-    if (event.getNewState().getMaterial() == Material.TNT) {
+    if (event.getNewState().getType() == Material.TNT) {
       blocks()
           .trackBlockState(
               event.getNewState(),

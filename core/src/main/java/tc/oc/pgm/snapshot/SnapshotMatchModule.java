@@ -70,7 +70,7 @@ public class SnapshotMatchModule implements MatchModule, Listener {
               chunkSnapshot.getBlockData(
                   chunkPos.getBlockX(), chunkPos.getBlockY(), chunkPos.getBlockZ()));
     } else {
-      return match.getWorld().getBlockAt(x, y, z).getState().getMaterialData();
+      return match.getWorld().getBlockAt(x, y, z).getState().getData();
     }
   }
 

@@ -22,6 +22,10 @@ public interface BukkitUtils {
     return PLUGIN.get();
   }
 
+  static boolean isSportPaper() {
+    return Bukkit.getServer().getVersion().contains("SportPaper");
+  }
+
   /** Makes strings have pretty colors */
   static String colorize(String s) {
     return ChatColor.translateAlternateColorCodes(

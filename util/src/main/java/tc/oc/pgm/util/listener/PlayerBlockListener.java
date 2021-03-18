@@ -10,6 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerAnimationType;
 import org.bukkit.util.RayBlockIntersection;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 import tc.oc.pgm.util.event.PlayerPunchBlockEvent;
 import tc.oc.pgm.util.event.PlayerTrampleBlockEvent;
@@ -19,6 +20,8 @@ public class PlayerBlockListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerAnimation(final PlayerAnimationEvent event) {
+    if (!BukkitUtils.isSportPaper())
+      return; // This can be removed if we implement getTargetedBlock in PGM
     if (event.getAnimationType() != PlayerAnimationType.ARM_SWING) return;
 
     // Client cannot punch blocks in adventure mode, so we detect it ourselves.

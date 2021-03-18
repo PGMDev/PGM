@@ -428,7 +428,8 @@ public class ChatDispatcher implements Listener {
                         String.format(
                             format,
                             translate(
-                                UsernameFormatUtils.CONSOLE_NAME, player.getBukkit().getLocale()),
+                                UsernameFormatUtils.CONSOLE_NAME,
+                                TextTranslations.getLocale(player.getBukkit())),
                             message))));
   }
 

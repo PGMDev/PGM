@@ -5,6 +5,7 @@ import java.util.Set;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 public class PotionKit extends AbstractKit {
   protected final Set<PotionEffect> effects;
@@ -23,8 +24,10 @@ public class PotionKit extends AbstractKit {
       player.getBukkit().addPotionEffects(this.effects);
     }
 
-    // No swirls by default, KitNode can re-enable them if it so desires
-    player.getBukkit().setPotionParticles(false);
+    if (BukkitUtils.isSportPaper()) {
+      // No swirls by default, KitNode can re-enable them if it so desires
+      player.getBukkit().setPotionParticles(false);
+    }
   }
 
   @Override

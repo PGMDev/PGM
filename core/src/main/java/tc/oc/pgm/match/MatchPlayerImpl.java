@@ -21,9 +21,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.GameMode;
 import org.bukkit.World;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -50,6 +47,7 @@ import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
@@ -58,7 +56,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
 
   // TODO: Probably should be moved to a better location
   private static final int FROZEN_VEHICLE_ENTITY_ID = NMSHacks.allocateEntityId();
-  private static final Attribute[] ATTRIBUTES = Attribute.values();
+  //  private static final Attribute[] ATTRIBUTES = Attribute.values();
 
   private static final String DEATH_KEY = "isDead";
   private static final MetadataValue DEATH_VALUE = new FixedMetadataValue(PGM.get(), true);
@@ -211,7 +209,9 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     boolean interact = canInteract();
 
     if (!interact) player.leaveVehicle();
-    player.spigot().setAffectsSpawning(interact);
+    if (BukkitUtils.isSportPaper()) {
+      player.spigot().setAffectsSpawning(interact);
+    }
     player.spigot().setCollidesWithEntities(interact);
   }
 
@@ -226,7 +226,9 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     final Player bukkit = getBukkit();
     if (bukkit == null) return;
 
-    bukkit.showInvisibles(isObserving());
+    if (BukkitUtils.isSportPaper()) {
+      bukkit.showInvisibles(isObserving());
+    }
 
     for (MatchPlayer other : getMatch().getPlayers()) {
       if (canSee(other)) {
@@ -250,7 +252,6 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
 
     bukkit.closeInventory();
     resetInventory();
-    bukkit.setArrowsStuck(0);
     bukkit.setExhaustion(0);
     bukkit.setFallDistance(0);
     bukkit.setFireTicks(0);
@@ -264,8 +265,12 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     bukkit.setSneaking(false);
     bukkit.setSprinting(false);
     bukkit.setFlySpeed(0.1f);
-    bukkit.setKnockbackReduction(0);
     bukkit.setWalkSpeed(WalkSpeedKit.BUKKIT_DEFAULT);
+
+    if (BukkitUtils.isSportPaper()) {
+      bukkit.setArrowsStuck(0);
+      bukkit.setKnockbackReduction(0);
+    }
 
     for (PotionEffect effect : bukkit.getActivePotionEffects()) {
       if (effect.getType() != null) {
@@ -273,14 +278,14 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
       }
     }
 
-    for (Attribute attribute : ATTRIBUTES) {
-      AttributeInstance attributes = bukkit.getAttribute(attribute);
-      if (attributes == null) continue;
-
-      for (AttributeModifier modifier : attributes.getModifiers()) {
-        attributes.removeModifier(modifier);
-      }
-    }
+    //    for (Attribute attribute : ATTRIBUTES) {
+    //      AttributeInstance attributes = bukkit.getAttribute(attribute);
+    //      if (attributes == null) continue;
+    //
+    //      for (AttributeModifier modifier : attributes.getModifiers()) {
+    //        attributes.removeModifier(modifier);
+    //      }
+    //    }
 
     NMSHacks.setAbsorption(bukkit, 0);
 

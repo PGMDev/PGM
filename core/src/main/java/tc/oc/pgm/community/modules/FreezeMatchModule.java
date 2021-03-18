@@ -377,7 +377,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
         thawedTitle.append(space()).append(by);
       }
 
-      freezee.getBukkit().hideTitle();
+      freezee.clearTitle();
       freezee.playSound(THAW_SOUND);
       freezee.sendMessage(thawedTitle.color(NamedTextColor.GREEN).build());
 

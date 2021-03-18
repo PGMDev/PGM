@@ -28,7 +28,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerLocaleChangeEvent;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
@@ -161,10 +160,10 @@ public class SidebarMatchModule implements MatchModule, Listener {
     this.sidebars.clear();
   }
 
-  @EventHandler
-  public void localChange(PlayerLocaleChangeEvent event) {
-    renderSidebarDebounce();
-  }
+  //  @EventHandler
+  //  public void localChange(PlayerLocaleChangeEvent event) {
+  //    renderSidebarDebounce();
+  //  }
 
   @EventHandler
   public void addPlayer(PlayerJoinMatchEvent event) {

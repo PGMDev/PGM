@@ -31,7 +31,9 @@ import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.Translator;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 /** A singleton for accessing {@link MessageFormat} and {@link Component} translations. */
 @SuppressWarnings("UnstableApiUsage")
@@ -220,6 +222,35 @@ public final class TextTranslations {
     return keysFound;
   }
 
+  private static java.util.Locale parseLocale(String locale) {
+    try {
+      final String[] split = locale.split("[-_]");
+      switch (split.length) {
+        case 1: // language
+          return new java.util.Locale(split[0]);
+        case 2: // language and country
+          return new java.util.Locale(split[0], split[1]);
+        case 3: // language, country, and variant
+          return new java.util.Locale(split[0], split[1], split[2]);
+      }
+    } catch (IllegalArgumentException e) {
+      // ignore
+    }
+
+    // bad locale sent?
+    return java.util.Locale.US;
+  }
+
+  public static Locale getLocale(@Nullable CommandSender sender) {
+    if (sender == null || sender instanceof CraftPlayer) {
+      return SOURCE_LOCALE;
+    }
+    if (BukkitUtils.isSportPaper()) {
+      return sender.getLocale();
+    }
+    return parseLocale(((CraftPlayer) sender).spigot().getLocale());
+  }
+
   /**
    * Gets a translated text component.
    *
@@ -240,8 +271,7 @@ public final class TextTranslations {
    */
   @Deprecated
   public static String translateLegacy(Component text, @Nullable CommandSender sender) {
-    return LegacyComponentSerializer.legacySection()
-        .serialize(translate(text, sender == null ? SOURCE_LOCALE : sender.getLocale()));
+    return LegacyComponentSerializer.legacySection().serialize(translate(text, getLocale(sender)));
   }
 
   /**
@@ -255,7 +285,7 @@ public final class TextTranslations {
    */
   @Deprecated
   public static String translate(String key, @Nullable CommandSender sender, Object... args) {
-    final Locale locale = sender == null ? SOURCE_LOCALE : sender.getLocale();
+    final Locale locale = getLocale(sender);
     final Component text =
         translatable(
             key,
@@ -266,8 +296,7 @@ public final class TextTranslations {
 
   public static BaseComponent[] toBaseComponentArray(
       Component component, @Nullable CommandSender viewer) {
-    Component translated =
-        translate(component, viewer == null ? SOURCE_LOCALE : viewer.getLocale());
+    Component translated = translate(component, viewer == null ? SOURCE_LOCALE : getLocale(viewer));
     return BungeeComponentSerializer.get().serialize(translated);
   }
 }

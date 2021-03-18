@@ -4,30 +4,37 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.minecraft.server.v1_8_R3.*;
+import net.minecraft.server.v1_8_R3.Item;
 import net.minecraft.server.v1_8_R3.WorldBorder;
 import org.bukkit.*;
+import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_8_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.*;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_8_R3.scoreboard.CraftTeam;
 import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers;
-import org.bukkit.craftbukkit.v1_8_R3.util.Skins;
 import org.bukkit.entity.*;
 import org.bukkit.entity.Entity;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
+import tc.oc.pgm.util.skin.Skin;
+import tc.oc.pgm.util.skin.Skins;
 
 public interface NMSHacks {
 
@@ -77,14 +84,45 @@ public interface NMSHacks {
         profile.getProperties().putAll(entry.getKey(), entry.getValue());
       }
     }
-    PacketPlayOutPlayerInfo.PlayerInfoData data =
-        packet.constructData(
-            profile,
-            ping,
-            gamemode == null ? null : WorldSettings.EnumGamemode.getById(gamemode.getValue()),
-            null); // ELECTROID
-    data.displayName = displayName == null || displayName.length == 0 ? null : displayName;
-    return data;
+
+    if (BukkitUtils.isSportPaper()) {
+      PacketPlayOutPlayerInfo.PlayerInfoData data =
+          packet.constructData(
+              profile,
+              ping,
+              gamemode == null ? null : WorldSettings.EnumGamemode.getById(gamemode.getValue()),
+              null); // ELECTROID
+      data.displayName = displayName == null || displayName.length == 0 ? null : displayName;
+      return data;
+    } else {
+      try {
+
+        Constructor<PacketPlayOutPlayerInfo.PlayerInfoData> constructor =
+            PacketPlayOutPlayerInfo.PlayerInfoData.class.getConstructor(
+                PacketPlayOutPlayerInfo.class,
+                GameProfile.class,
+                int.class,
+                WorldSettings.EnumGamemode.class,
+                IChatBaseComponent.class);
+
+        constructor.setAccessible(true);
+
+        WorldSettings.EnumGamemode enumGamemode =
+            gamemode == null ? null : WorldSettings.EnumGamemode.getById(gamemode.getValue());
+        IChatBaseComponent iChatBaseComponent =
+            displayName == null || displayName.length == 0
+                ? null
+                : IChatBaseComponent.ChatSerializer.a(
+                    net.md_5.bungee.chat.ComponentSerializer.toString(displayName));
+
+        return constructor.newInstance(packet, profile, ping, enumGamemode, iChatBaseComponent);
+      } catch (NoSuchMethodException
+          | InstantiationException
+          | IllegalAccessException
+          | InvocationTargetException e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 
   static PacketPlayOutPlayerInfo.PlayerInfoData playerListPacketData(
@@ -137,19 +175,59 @@ public interface NMSHacks {
       Collection<String> players) {
 
     PacketPlayOutScoreboardTeam packet = new PacketPlayOutScoreboardTeam();
-    packet.a = name;
-    packet.b = displayName;
-    packet.c = prefix;
-    packet.d = suffix;
-    packet.e = nameTagVisibility == null ? null : CraftTeam.bukkitToNotch(nameTagVisibility).e;
-    // packet.f = color
-    packet.g = players;
-    packet.h = operation;
-    if (friendlyFire) {
-      packet.i |= 1;
-    }
-    if (seeFriendlyInvisibles) {
-      packet.i |= 2;
+
+    if (BukkitUtils.isSportPaper()) {
+      packet.a = name;
+      packet.b = displayName;
+      packet.c = prefix;
+      packet.d = suffix;
+      packet.e = nameTagVisibility == null ? null : CraftTeam.bukkitToNotch(nameTagVisibility).e;
+      // packet.f = color
+      packet.g = players;
+      packet.h = operation;
+      if (friendlyFire) {
+        packet.i |= 1;
+      }
+      if (seeFriendlyInvisibles) {
+        packet.i |= 2;
+      }
+    } else {
+      ReflectionUtils.setField(packet.getClass(), packet, name, "a");
+      ReflectionUtils.setField(packet.getClass(), packet, displayName, "b");
+      ReflectionUtils.setField(packet.getClass(), packet, prefix, "c");
+      ReflectionUtils.setField(packet.getClass(), packet, suffix, "d");
+
+      String e = null;
+      if (nameTagVisibility != null) {
+        switch (nameTagVisibility) {
+          case ALWAYS:
+            e = "always";
+            break;
+          case NEVER:
+            e = "never";
+            break;
+          case HIDE_FOR_OTHER_TEAMS:
+            e = "hideForOtherTeams";
+            break;
+          case HIDE_FOR_OWN_TEAM:
+            e = "hideForOwnTeam";
+            break;
+        }
+      }
+
+      ReflectionUtils.setField(packet.getClass(), packet, e, "e");
+      ReflectionUtils.setField(packet.getClass(), packet, players, "g");
+      ReflectionUtils.setField(packet.getClass(), packet, operation, "h");
+
+      int i = ReflectionUtils.readField(packet.getClass(), packet, Integer.class, "i");
+      if (friendlyFire) {
+        i |= 1;
+      }
+      if (seeFriendlyInvisibles) {
+        i |= 2;
+      }
+
+      ReflectionUtils.setField(packet.getClass(), packet, i, "i");
     }
     return packet;
   }
@@ -264,16 +342,48 @@ public interface NMSHacks {
       Location location,
       org.bukkit.inventory.ItemStack heldItem,
       EntityMetadata metadata) {
-    return new PacketPlayOutNamedEntitySpawn(
-        entityId,
-        uuid,
-        location.getX(),
-        location.getY(),
-        location.getZ(),
-        (byte) location.getYaw(),
-        (byte) location.getPitch(),
-        CraftItemStack.asNMSCopy(heldItem),
-        metadata.dataWatcher);
+    if (BukkitUtils.isSportPaper()) {
+      return new PacketPlayOutNamedEntitySpawn(
+          entityId,
+          uuid,
+          location.getX(),
+          location.getY(),
+          location.getZ(),
+          (byte) location.getYaw(),
+          (byte) location.getPitch(),
+          CraftItemStack.asNMSCopy(heldItem),
+          metadata.dataWatcher);
+    } else {
+      PacketPlayOutNamedEntitySpawn packet = new PacketPlayOutNamedEntitySpawn();
+
+      ReflectionUtils.setField(packet.getClass(), packet, entityId, "a");
+      ReflectionUtils.setField(packet.getClass(), packet, uuid, "b");
+      ReflectionUtils.setField(
+          packet.getClass(), packet, MathHelper.floor(location.getX() * 32.0D), "c");
+      ReflectionUtils.setField(
+          packet.getClass(), packet, MathHelper.floor(location.getY() * 32.0D), "d");
+      ReflectionUtils.setField(
+          packet.getClass(), packet, MathHelper.floor(location.getZ() * 32.0D), "e");
+      ReflectionUtils.setField(
+          packet.getClass(),
+          packet,
+          (byte) ((int) (((byte) location.getYaw()) * 256.0F / 360.0F)),
+          "f");
+      ReflectionUtils.setField(
+          packet.getClass(),
+          packet,
+          (byte) ((int) (((byte) location.getPitch()) * 256.0F / 360.0F)),
+          "g");
+      ReflectionUtils.setField(
+          packet.getClass(),
+          packet,
+          heldItem == null ? 0 : Item.getId(CraftItemStack.asNMSCopy(heldItem).getItem()),
+          "h");
+      ReflectionUtils.setField(packet.getClass(), packet, metadata.dataWatcher, "i");
+      ReflectionUtils.setField(packet.getClass(), packet, metadata.dataWatcher.b(), "j");
+
+      return packet;
+    }
   }
 
   static void spawnLivingEntity(
@@ -284,19 +394,50 @@ public interface NMSHacks {
   @SuppressWarnings("deprecation")
   static Packet spawnLivingEntityPacket(
       EntityType type, int entityId, Location location, EntityMetadata metadata) {
-    return new PacketPlayOutSpawnEntityLiving(
-        entityId,
-        (byte) type.getTypeId(),
-        location.getX(),
-        location.getY(),
-        location.getZ(),
-        location.getYaw(),
-        location.getPitch(),
-        location.getPitch(),
-        0,
-        0,
-        0,
-        metadata.dataWatcher);
+    if (BukkitUtils.isSportPaper()) {
+      return new PacketPlayOutSpawnEntityLiving(
+          entityId,
+          (byte) type.getTypeId(),
+          location.getX(),
+          location.getY(),
+          location.getZ(),
+          location.getYaw(),
+          location.getPitch(),
+          location.getPitch(),
+          0,
+          0,
+          0,
+          metadata.dataWatcher);
+    } else {
+      PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving();
+
+      ReflectionUtils.setField(packet.getClass(), packet, entityId, "a");
+      ReflectionUtils.setField(packet.getClass(), packet, (byte) type.getTypeId(), "b");
+      ReflectionUtils.setField(
+          packet.getClass(), packet, MathHelper.floor(location.getX() * 32.0D), "c");
+      ReflectionUtils.setField(
+          packet.getClass(), packet, MathHelper.floor(location.getY() * 32.0D), "d");
+      ReflectionUtils.setField(
+          packet.getClass(), packet, MathHelper.floor(location.getZ() * 32.0D), "e");
+      ReflectionUtils.setField(
+          packet.getClass(),
+          packet,
+          (byte) ((int) (((byte) location.getYaw()) * 256.0F / 360.0F)),
+          "i");
+      ReflectionUtils.setField(
+          packet.getClass(),
+          packet,
+          (byte) ((int) (((byte) location.getPitch()) * 256.0F / 360.0F)),
+          "j");
+      ReflectionUtils.setField(
+          packet.getClass(),
+          packet,
+          (byte) ((int) (((byte) location.getPitch()) * 256.0F / 360.0F)),
+          "k");
+      ReflectionUtils.setField(packet.getClass(), packet, metadata.dataWatcher, "l");
+
+      return packet;
+    }
   }
 
   static void spawnEntity(Player player, int type, int entityId, Location location) {
@@ -304,18 +445,43 @@ public interface NMSHacks {
   }
 
   static Packet spawnEntityPacket(int type, int entityId, Location location) {
-    return new PacketPlayOutSpawnEntity(
-        entityId,
-        location.getX(),
-        location.getY(),
-        location.getZ(),
-        0,
-        0,
-        0,
-        (int) location.getPitch(),
-        (int) location.getYaw(),
-        type,
-        0);
+    if (BukkitUtils.isSportPaper()) {
+      return new PacketPlayOutSpawnEntity(
+          entityId,
+          location.getX(),
+          location.getY(),
+          location.getZ(),
+          0,
+          0,
+          0,
+          (int) location.getPitch(),
+          (int) location.getYaw(),
+          type,
+          0);
+    } else {
+      PacketPlayOutSpawnEntity packet = new PacketPlayOutSpawnEntity();
+
+      ReflectionUtils.setField(packet.getClass(), packet, entityId, "a");
+      ReflectionUtils.setField(
+          packet.getClass(), packet, MathHelper.floor(location.getX() * 32.0D), "b");
+      ReflectionUtils.setField(
+          packet.getClass(), packet, MathHelper.floor(location.getY() * 32.0D), "c");
+      ReflectionUtils.setField(
+          packet.getClass(), packet, MathHelper.floor(location.getZ() * 32.0D), "d");
+      ReflectionUtils.setField(
+          packet.getClass(),
+          packet,
+          (byte) ((int) (((byte) location.getYaw()) * 256.0F / 360.0F)),
+          "h");
+      ReflectionUtils.setField(
+          packet.getClass(),
+          packet,
+          (byte) ((int) (((byte) location.getPitch()) * 256.0F / 360.0F)),
+          "i");
+      ReflectionUtils.setField(packet.getClass(), packet, type, "j");
+
+      return packet;
+    }
   }
 
   static void spawnFreezeEntity(Player player, int entityId, boolean legacy) {
@@ -338,7 +504,17 @@ public interface NMSHacks {
   }
 
   static void entityAttach(Player player, int entityID, int vehicleID, boolean leash) {
-    sendPacket(player, new PacketPlayOutAttachEntity(entityID, vehicleID, leash));
+    if (BukkitUtils.isSportPaper()) {
+      sendPacket(player, new PacketPlayOutAttachEntity(entityID, vehicleID, leash));
+    } else {
+      PacketPlayOutAttachEntity packet = new PacketPlayOutAttachEntity();
+
+      ReflectionUtils.setField(packet.getClass(), packet, (byte) (leash ? 1 : 0), "a");
+      ReflectionUtils.setField(packet.getClass(), packet, entityID, "b");
+      ReflectionUtils.setField(packet.getClass(), packet, vehicleID, "c");
+
+      sendPacket(player, packet);
+    }
   }
 
   static Packet teleportEntityPacket(int entityId, Location location) {
@@ -445,19 +621,23 @@ public interface NMSHacks {
     DataWatcher.WatchableObject zeroHealth =
         new DataWatcher.WatchableObject(3, 6, 0f); // type 3 (float), index 6 (health)
 
-    if (metadata.b != null) {
-      for (int i = 0; i < metadata.b.size(); i++) {
-        DataWatcher.WatchableObject wo = metadata.b.get(i);
+    List<DataWatcher.WatchableObject> b =
+        ReflectionUtils.readField(metadata.getClass(), metadata, List.class, "b");
+    if (b != null) {
+      for (int i = 0; i < b.size(); i++) {
+        DataWatcher.WatchableObject wo = b.get(i);
         if (wo.a() == 6) {
-          metadata.b.set(i, zeroHealth);
+          b.set(i, zeroHealth);
           replaced = true;
         }
       }
     }
 
     if (!replaced) {
-      if (metadata.b != null) metadata.b.add(zeroHealth);
-      else metadata.b = Collections.singletonList(zeroHealth);
+      if (b != null) b.add(zeroHealth);
+      else
+        ReflectionUtils.setField(
+            metadata.getClass(), metadata, Collections.singletonList(zeroHealth), "b");
     }
 
     Location location = player.getLocation();
@@ -506,7 +686,11 @@ public interface NMSHacks {
   }
 
   static int getProtocolVersion(Player player) {
-    return ((CraftPlayer) player).getHandle().playerConnection.networkManager.protocolVersion;
+    if (BukkitUtils.isSportPaper()) {
+      return ((CraftPlayer) player).getHandle().playerConnection.networkManager.protocolVersion;
+    } else {
+      return 47; // Assume 1.8 if not sportpaper.
+    }
   }
 
   static int getPing(Player player) {
@@ -520,6 +704,57 @@ public interface NMSHacks {
   static Packet entityEquipmentPacket(
       int entityId, int slot, org.bukkit.inventory.ItemStack armor) {
     return new PacketPlayOutEntityEquipment(entityId, slot, CraftItemStack.asNMSCopy(armor));
+  }
+
+  static Skin getPlayerSkin(Player player) {
+    CraftPlayer craftPlayer = (CraftPlayer) player;
+    return Skins.fromProperties(craftPlayer.getProfile().getProperties());
+  }
+
+  static void setSkullMetaOwner(SkullMeta meta, String name, UUID uuid, Skin skin) {
+    meta.setOwner(name, uuid, new org.bukkit.Skin(skin.getData(), skin.getSignature()));
+  }
+
+  static Set<org.bukkit.block.Block> getBlocks(Chunk bukkitChunk, Material material) {
+    if (BukkitUtils.isSportPaper()) {
+      return bukkitChunk.getBlocks(material);
+    }
+
+    CraftChunk craftChunk = (CraftChunk) bukkitChunk;
+    Set<org.bukkit.block.Block> blocks = new HashSet<>();
+
+    net.minecraft.server.v1_8_R3.Block nmsBlock = CraftMagicNumbers.getBlock(material);
+    net.minecraft.server.v1_8_R3.Chunk chunk = craftChunk.getHandle();
+
+    for (ChunkSection section : chunk.getSections()) {
+      if (section == null || section.a()) continue; // ChunkSection.a() -> true if section is empty
+
+      char[] blockIds = section.getIdArray();
+      for (int i = 0; i < blockIds.length; i++) {
+        // This does a lookup in the block registry, but does not create any objects, so should be
+        // pretty efficient
+        IBlockData blockData = (IBlockData) net.minecraft.server.v1_8_R3.Block.d.a(blockIds[i]);
+        if (blockData != null && blockData.getBlock() == nmsBlock) {
+          blocks.add(
+              bukkitChunk.getBlock(i & 0xf, section.getYPosition() | (i >> 8), (i >> 4) & 0xf));
+        }
+      }
+    }
+
+    return blocks;
+  }
+
+  static WorldCreator detectWorld(String worldName) {
+    IDataManager sdm =
+        new ServerNBTManager(Bukkit.getServer().getWorldContainer(), worldName, true);
+    WorldData worldData = sdm.getWorldData();
+    if (worldData == null) return null;
+
+    return new WorldCreator(worldName)
+        .generateStructures(worldData.shouldGenerateMapFeatures())
+        .generatorSettings(worldData.getGeneratorOptions())
+        .seed(worldData.getSeed())
+        .type(org.bukkit.WorldType.getByName(worldData.getType().name()));
   }
 
   interface FakeEntity {

@@ -45,6 +45,7 @@
                     <artifactSet>
                         <includes>
                             <include>tc.oc.pgm:*:*</include>
+                            <include>it.unimi.dsi:fastutil:*</include>
                             <include>org.jdom:jdom2:*</include>
                             <include>net.kyori:*:*</include>
                             <include>app.ashcon.intake:intake-*:*</include>
@@ -73,6 +74,10 @@
                         <relocation>
                             <pattern>fr.mrmicky</pattern>
                             <shadedPattern>tc.oc.pgm.lib.fr.mrmicky</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>it.unimi.dsi</pattern>
+                            <shadedPattern>tc.oc.pgm.lib.it.unimi.dsi</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>org.jdom2</pattern>

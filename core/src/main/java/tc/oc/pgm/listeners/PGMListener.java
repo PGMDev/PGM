@@ -33,10 +33,8 @@ import org.bukkit.event.player.PlayerLoginEvent.Result;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.vehicle.VehicleUpdateEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.util.Vector;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
@@ -53,6 +51,7 @@ import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.WorldTimeModule;
 import tc.oc.pgm.util.UsernameFormatUtils;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -92,7 +91,7 @@ public class PGMListener implements Listener {
     if (lock.writeLock().tryLock()) {
       // If the server is suspended, need to release so match can be created
       final Server server = parent.getServer();
-      if (server.isSuspended()) {
+      if (BukkitUtils.isSportPaper() && server.isSuspended()) {
         server.setSuspended(false);
       }
 
@@ -135,7 +134,7 @@ public class PGMListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW)
   public void addPlayerOnJoin(final PlayerJoinEvent event) {
-    Match match = this.mm.getMatch(event.getWorld());
+    Match match = this.mm.getMatch(event.getPlayer().getWorld());
     if (match == null) {
       event
           .getPlayer()
@@ -156,7 +155,7 @@ public class PGMListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void broadcastJoinMessage(final PlayerJoinEvent event) {
     // Handle join message and send it to all players except the one joining
-    Match match = this.mm.getMatch(event.getWorld());
+    Match match = this.mm.getMatch(event.getPlayer().getWorld());
     if (match == null) return;
 
     if (event.getJoinMessage() != null) {
@@ -228,6 +227,7 @@ public class PGMListener implements Listener {
   // sometimes arrows stuck in players persist through deaths
   @EventHandler
   public void fixStuckArrows(final PlayerRespawnEvent event) {
+    if (!BukkitUtils.isSportPaper()) return;
     event.getPlayer().setArrowsStuck(0);
   }
 
@@ -309,13 +309,13 @@ public class PGMListener implements Listener {
     if (match == null || match.isFinished()) event.setCancelled(true);
   }
 
-  @EventHandler
-  public void freezeVehicle(final VehicleUpdateEvent event) {
-    Match match = this.mm.getMatch(event.getWorld());
-    if (match == null || match.isFinished()) {
-      event.getVehicle().setVelocity(new Vector());
-    }
-  }
+  //  @EventHandler
+  //  public void freezeVehicle(final VehicleUpdateEvent event) {
+  //    Match match = this.mm.getMatch(event.getWorld());
+  //    if (match == null || match.isFinished()) {
+  //      event.getVehicle().setVelocity(new Vector());
+  //    }
+  //  }
 
   @EventHandler
   public void nerfFishing(PlayerFishEvent event) {
