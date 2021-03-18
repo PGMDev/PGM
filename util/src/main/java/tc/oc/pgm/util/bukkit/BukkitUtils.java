@@ -22,8 +22,10 @@ public interface BukkitUtils {
     return PLUGIN.get();
   }
 
+  Boolean isSportPaper = Bukkit.getServer().getVersion().contains("SportPaper");
+
   static boolean isSportPaper() {
-    return Bukkit.getServer().getVersion().contains("SportPaper");
+    return isSportPaper;
   }
 
   /** Makes strings have pretty colors */
