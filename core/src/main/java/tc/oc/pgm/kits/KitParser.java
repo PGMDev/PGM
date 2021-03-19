@@ -127,6 +127,7 @@ public abstract class KitParser {
       kits.add(this.parse(child));
     }
 
+    // TODO: Use reflection for attributes on non sportpaper 1.8
     if (BukkitUtils.isSportPaper()) {
       kits.add(this.parseAttributeKit(el));
     }
@@ -448,6 +449,7 @@ public abstract class KitParser {
       }
     }
 
+    // TODO: Use reflection for attributes on non sportpaper 1.8
     if (BukkitUtils.isSportPaper()) {
       for (Map.Entry<String, AttributeModifier> entry : parseAttributeModifiers(el).entries()) {
         meta.addAttributeModifier(entry.getKey(), entry.getValue());
@@ -490,6 +492,7 @@ public abstract class KitParser {
       meta.spigot().setUnbreakable(true);
     }
 
+    // TODO: Reflection alternative for non sportpaper
     if (BukkitUtils.isSportPaper()) {
       Element elCanDestroy = el.getChild("can-destroy");
       if (elCanDestroy != null) {

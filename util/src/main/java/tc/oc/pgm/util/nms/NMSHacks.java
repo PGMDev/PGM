@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -69,6 +70,28 @@ public interface NMSHacks {
     }
   }
 
+  Field field = ReflectionUtils.getField(PacketPlayOutPlayerInfo.class, "a");
+
+  Constructor<PacketPlayOutPlayerInfo.PlayerInfoData> playerInfoDataConstructor =
+      getPlayerInfoDataConstructor();
+
+  static Constructor<PacketPlayOutPlayerInfo.PlayerInfoData> getPlayerInfoDataConstructor() {
+    try {
+      Constructor<PacketPlayOutPlayerInfo.PlayerInfoData> constructor =
+          PacketPlayOutPlayerInfo.PlayerInfoData.class.getConstructor(
+              PacketPlayOutPlayerInfo.class,
+              GameProfile.class,
+              int.class,
+              WorldSettings.EnumGamemode.class,
+              IChatBaseComponent.class);
+
+      constructor.setAccessible(true);
+      return constructor;
+    } catch (NoSuchMethodException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   static PacketPlayOutPlayerInfo.PlayerInfoData playerListPacketData(
       PacketPlayOutPlayerInfo packet,
       UUID uuid,
@@ -96,17 +119,6 @@ public interface NMSHacks {
       return data;
     } else {
       try {
-
-        Constructor<PacketPlayOutPlayerInfo.PlayerInfoData> constructor =
-            PacketPlayOutPlayerInfo.PlayerInfoData.class.getConstructor(
-                PacketPlayOutPlayerInfo.class,
-                GameProfile.class,
-                int.class,
-                WorldSettings.EnumGamemode.class,
-                IChatBaseComponent.class);
-
-        constructor.setAccessible(true);
-
         WorldSettings.EnumGamemode enumGamemode =
             gamemode == null ? null : WorldSettings.EnumGamemode.getById(gamemode.getValue());
         IChatBaseComponent iChatBaseComponent =
@@ -115,14 +127,23 @@ public interface NMSHacks {
                 : IChatBaseComponent.ChatSerializer.a(
                     net.md_5.bungee.chat.ComponentSerializer.toString(displayName));
 
-        return constructor.newInstance(packet, profile, ping, enumGamemode, iChatBaseComponent);
-      } catch (NoSuchMethodException
-          | InstantiationException
-          | IllegalAccessException
-          | InvocationTargetException e) {
+        return playerInfoDataConstructor.newInstance(
+            packet, profile, ping, enumGamemode, iChatBaseComponent);
+      } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
         throw new RuntimeException(e);
       }
     }
+  }
+
+  static PacketPlayOutPlayerInfo createPlayerInfoPacket(
+      PacketPlayOutPlayerInfo.EnumPlayerInfoAction action) {
+    PacketPlayOutPlayerInfo packet = new PacketPlayOutPlayerInfo();
+    if (BukkitUtils.isSportPaper()) {
+      packet.a = action;
+    } else {
+      ReflectionUtils.setField(packet.getClass(), packet, action, "a");
+    }
+    return packet;
   }
 
   static PacketPlayOutPlayerInfo.PlayerInfoData playerListPacketData(
@@ -570,6 +591,14 @@ public interface NMSHacks {
     if (arms) flags |= 0x04;
     if (baseplate) flags |= 0x08;
     metadata.dataWatcher.a(10, (byte) flags);
+  }
+
+  static void clearArrowsInPlayer(Player player) {
+    if (BukkitUtils.isSportPaper()) {
+      player.setArrowsStuck(0);
+    } else {
+      ((CraftPlayer) player).getHandle().o(0);
+    }
   }
 
   /**

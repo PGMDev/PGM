@@ -53,6 +53,7 @@ public class TrackerMatchModule implements MatchModule {
     entityTracker = new EntityTracker(match);
     blockTracker = new BlockTracker(match);
 
+    // These rely on Events that are only in SportPaper
     if (BukkitUtils.isSportPaper()) {
       fallTracker = new FallTracker(this, match);
       fireTracker = new FireTracker(this, match);
@@ -74,6 +75,7 @@ public class TrackerMatchModule implements MatchModule {
 
   @Override
   public void load() {
+    // These rely on Events that are only in SportPaper
     if (BukkitUtils.isSportPaper()) {
       match.addListener(fallTracker, MatchScope.RUNNING);
       match.addListener(fireTracker, MatchScope.RUNNING);

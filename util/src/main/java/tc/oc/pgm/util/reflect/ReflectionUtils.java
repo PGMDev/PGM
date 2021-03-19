@@ -6,6 +6,16 @@ import javax.annotation.Nullable;
 public final class ReflectionUtils {
   private ReflectionUtils() {}
 
+  public static Field getField(Class<?> parent, String name) {
+    try {
+      Field field = parent.getDeclaredField(name);
+      field.setAccessible(true);
+      return field;
+    } catch (NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   public static <T> T readField(Class<?> parent, @Nullable Object obj, Class<T> type, String name) {
     try {
       return type.cast(readField(obj, parent.getDeclaredField(name)));

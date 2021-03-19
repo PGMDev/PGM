@@ -30,8 +30,12 @@ public class KitNode extends AbstractKit {
         kit.apply(player, this.force != null ? this.force : force, displacedItems);
       }
 
-      if (BukkitUtils.isSportPaper() && this.potionParticles != null) {
-        player.getBukkit().setPotionParticles(this.potionParticles);
+      if (this.potionParticles != null) {
+        if (BukkitUtils.isSportPaper()) {
+          player.getBukkit().setPotionParticles(this.potionParticles);
+        } else {
+          // TODO: Send the equivalent packet
+        }
       }
     }
   }

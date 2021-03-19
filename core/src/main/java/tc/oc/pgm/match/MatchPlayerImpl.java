@@ -209,6 +209,8 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     boolean interact = canInteract();
 
     if (!interact) player.leaveVehicle();
+
+    // This is only possible in sportpaper
     if (BukkitUtils.isSportPaper()) {
       player.spigot().setAffectsSpawning(interact);
     }
@@ -226,6 +228,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     final Player bukkit = getBukkit();
     if (bukkit == null) return;
 
+    // Not relevant and not a method outside of SportPaper
     if (BukkitUtils.isSportPaper()) {
       bukkit.showInvisibles(isObserving());
     }
@@ -266,9 +269,10 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     bukkit.setSprinting(false);
     bukkit.setFlySpeed(0.1f);
     bukkit.setWalkSpeed(WalkSpeedKit.BUKKIT_DEFAULT);
+    NMSHacks.clearArrowsInPlayer(bukkit);
 
+    // Not possible outside of SportPaper
     if (BukkitUtils.isSportPaper()) {
-      bukkit.setArrowsStuck(0);
       bukkit.setKnockbackReduction(0);
     }
 

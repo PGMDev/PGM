@@ -67,10 +67,9 @@ public class TabDisplay {
     this.teamRemovePackets = new Packet[this.slots];
 
     this.listAddPacket =
-        TabRender.createPlayerInfoPacket(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER);
+        NMSHacks.createPlayerInfoPacket(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER);
     this.listRemovePacket =
-        TabRender.createPlayerInfoPacket(
-            PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER);
+        NMSHacks.createPlayerInfoPacket(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER);
 
     for (int slot = 0; slot < this.slots; ++slot) {
       BaseComponent[] playerName = this.slotName(slot);

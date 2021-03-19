@@ -1,5 +1,6 @@
 package tc.oc.pgm.util.tablist;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,24 +29,29 @@ public class TabRender {
     this.view = view;
 
     this.removePacket =
-        this.createPlayerInfoPacket(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER);
+        NMSHacks.createPlayerInfoPacket(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER);
     this.addPacket =
-        this.createPlayerInfoPacket(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER);
+        NMSHacks.createPlayerInfoPacket(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER);
     this.updatePacket =
-        this.createPlayerInfoPacket(
+        NMSHacks.createPlayerInfoPacket(
             PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME);
     this.updatePingPacket =
-        this.createPlayerInfoPacket(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY);
+        NMSHacks.createPlayerInfoPacket(
+            PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY);
     this.deferredPackets = new ArrayList<>();
   }
 
+  private static Field bField = ReflectionUtils.getField(PacketPlayOutPlayerInfo.class, "b");
+
   protected static List<PacketPlayOutPlayerInfo.PlayerInfoData> getBField(
       PacketPlayOutPlayerInfo packet) {
+
+    // SportPaper makes this field public
     if (BukkitUtils.isSportPaper()) {
       return packet.b;
     } else {
       return (List<PacketPlayOutPlayerInfo.PlayerInfoData>)
-          ReflectionUtils.readField(packet.getClass(), packet, List.class, "b");
+          ReflectionUtils.readField(packet, bField);
     }
   }
 
@@ -55,17 +61,6 @@ public class TabRender {
 
   private void send(Packet packet) {
     NMSHacks.sendPacket(this.view.getViewer(), packet);
-  }
-
-  protected static PacketPlayOutPlayerInfo createPlayerInfoPacket(
-      PacketPlayOutPlayerInfo.EnumPlayerInfoAction action) {
-    PacketPlayOutPlayerInfo packet = new PacketPlayOutPlayerInfo();
-    if (BukkitUtils.isSportPaper()) {
-      packet.a = action;
-    } else {
-      ReflectionUtils.setField(packet.getClass(), packet, action, "a");
-    }
-    return packet;
   }
 
   private BaseComponent[] getContent(TabEntry entry, int index) {
@@ -178,6 +173,7 @@ public class TabRender {
   }
 
   public void setHeaderFooter(BaseComponent[] header, BaseComponent[] footer) {
+    // Call SportPaper version if available
     if (BukkitUtils.isSportPaper()) {
       view.getViewer().setPlayerListHeaderFooter(header, footer);
     } else {

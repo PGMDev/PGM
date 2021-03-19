@@ -61,6 +61,7 @@ public final class PlayerComponent {
 
     NameDecorationProvider provider = NameDecorationProvider.DEFAULT;
     if (player != null) {
+      // Get metadata by plugin if possible
       if (BukkitUtils.isSportPaper()) {
         MetadataValue metadata =
             player.getMetadata(NameDecorationProvider.METADATA_KEY, BukkitUtils.getPlugin());

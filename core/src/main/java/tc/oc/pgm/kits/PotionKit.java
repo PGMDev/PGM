@@ -27,6 +27,8 @@ public class PotionKit extends AbstractKit {
     if (BukkitUtils.isSportPaper()) {
       // No swirls by default, KitNode can re-enable them if it so desires
       player.getBukkit().setPotionParticles(false);
+    } else {
+      // TODO: send the equivalent packet
     }
   }
 

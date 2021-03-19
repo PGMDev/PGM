@@ -53,6 +53,7 @@ import tc.oc.pgm.modules.WorldTimeModule;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -91,6 +92,7 @@ public class PGMListener implements Listener {
     if (lock.writeLock().tryLock()) {
       // If the server is suspended, need to release so match can be created
       final Server server = parent.getServer();
+      // Non Sport servers cannot be suspended
       if (BukkitUtils.isSportPaper() && server.isSuspended()) {
         server.setSuspended(false);
       }
@@ -227,8 +229,7 @@ public class PGMListener implements Listener {
   // sometimes arrows stuck in players persist through deaths
   @EventHandler
   public void fixStuckArrows(final PlayerRespawnEvent event) {
-    if (!BukkitUtils.isSportPaper()) return;
-    event.getPlayer().setArrowsStuck(0);
+    NMSHacks.clearArrowsInPlayer(event.getPlayer());
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

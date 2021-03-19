@@ -239,7 +239,7 @@ public class ProjectileMatchModule implements MatchModule, Listener {
   }
 
   public static @Nullable ProjectileDefinition getProjectileDefinition(Entity entity) {
-    if (BukkitUtils.isSportPaper()) {
+    if (BukkitUtils.isSportPaper()) { // SportPaper allows for getting metadata by plugin
       MetadataValue metadataValue = entity.getMetadata("projectileDefinition", PGM.get());
 
       if (metadataValue != null) {

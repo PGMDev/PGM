@@ -51,6 +51,8 @@ public class ItemRule {
         }
         meta.setCanDestroy(unionMaterials(meta.getCanDestroy(), this.meta.getCanDestroy()));
         meta.setCanPlaceOn(unionMaterials(meta.getCanPlaceOn(), this.meta.getCanPlaceOn()));
+      } else {
+        // TODO: Do this with reflection
       }
 
       if (this.meta.spigot().isUnbreakable()) meta.spigot().setUnbreakable(true);
