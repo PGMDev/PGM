@@ -19,7 +19,7 @@ public class DiscardPotionBottlesMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   public void onDrinkPotion(final PlayerItemConsumeEvent event) {
-    if (!BukkitUtils.isSportPaper()) return;//TODO: implement this
+    if (!BukkitUtils.isSportPaper()) return; // TODO: implement this
     if (event.getItem().getType() == Material.POTION) {
       event.setReplacement(new ItemStack(Material.AIR));
     }
