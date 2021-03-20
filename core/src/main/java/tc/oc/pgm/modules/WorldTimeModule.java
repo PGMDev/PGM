@@ -39,7 +39,7 @@ public class WorldTimeModule implements MapModule, MatchModule {
     @Override
     public WorldTimeModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      boolean lock = false;
+      boolean lock = true;
       Element worldEl = doc.getRootElement().getChild("world");
       // legacy
       Element timelockEl = doc.getRootElement().getChild("timelock");
