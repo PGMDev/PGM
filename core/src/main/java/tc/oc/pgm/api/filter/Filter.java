@@ -1,7 +1,23 @@
 package tc.oc.pgm.api.filter;
 
+import tc.oc.pgm.api.feature.Feature;
+import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.query.Query;
+import tc.oc.pgm.filters.FilterParser;
 
+/**
+ * Something that can answers "yes", "no" or "i don't care" to the imagined question: "Can X
+ * happen?". To be able to answer the question context is needed though, which is provided initially
+ * by a {@link Query} and then processed by the filter itself before a response is given.
+ *
+ * <p>If a filter is connected to a specific {@link Feature} a {@link FeatureReference} should be
+ * passed at xml parse time(when the filter is created) and {@link FeatureReference#get() fetched}
+ * at match time
+ *
+ * <p>For examples on how to create filters see {@link FilterParser}
+ *
+ * @see Query
+ */
 public interface Filter {
 
   /** Least-derived query type that this filter might not abstain from */
