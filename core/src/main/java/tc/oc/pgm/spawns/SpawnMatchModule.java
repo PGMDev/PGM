@@ -268,13 +268,6 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
     }
   }
 
-  //  // TODO: this should only be for initial spawn
-  //  @EventHandler(priority = EventPriority.MONITOR)
-  //  public void onInitialSpawn(final PlayerInitialSpawnEvent event) {
-  //    // Ensure the player spawns in the match world
-  //    event.setSpawnLocation(match.getWorld().getSpawnLocation());
-  //  }
-
   @EventHandler(priority = EventPriority.MONITOR)
   public void onInitialSpawn(final PlayerSpawnLocationEvent event) {
     // Ensure the player spawns in the match world

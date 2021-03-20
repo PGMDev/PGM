@@ -5,7 +5,6 @@ import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.event.ClickEvent.runCommand;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 
-import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
@@ -61,17 +60,10 @@ public final class PlayerComponent {
 
     NameDecorationProvider provider = NameDecorationProvider.DEFAULT;
     if (player != null) {
-      // Get metadata by plugin if possible
-      if (BukkitUtils.isSportPaper()) {
-        MetadataValue metadata =
-            player.getMetadata(NameDecorationProvider.METADATA_KEY, BukkitUtils.getPlugin());
-
-        if (metadata != null) provider = (NameDecorationProvider) metadata.value();
-      } else {
-        List<MetadataValue> metadata = player.getMetadata(NameDecorationProvider.METADATA_KEY);
-
-        // Assume there is only one in the list
-        if (!metadata.isEmpty()) provider = (NameDecorationProvider) metadata.get(0).value();
+      for (MetadataValue mv : player.getMetadata(NameDecorationProvider.METADATA_KEY)) {
+        if (mv.getOwningPlugin().equals(BukkitUtils.getPlugin())) {
+          provider = (NameDecorationProvider) mv.value();
+        }
       }
     }
 

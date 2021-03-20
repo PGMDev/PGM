@@ -70,8 +70,6 @@ public interface NMSHacks {
     }
   }
 
-  Field field = ReflectionUtils.getField(PacketPlayOutPlayerInfo.class, "a");
-
   Constructor<PacketPlayOutPlayerInfo.PlayerInfoData> playerInfoDataConstructor =
       getPlayerInfoDataConstructor();
 
@@ -135,13 +133,15 @@ public interface NMSHacks {
     }
   }
 
+  Field playerInfoActionField = ReflectionUtils.getField(PacketPlayOutPlayerInfo.class, "a");
+
   static PacketPlayOutPlayerInfo createPlayerInfoPacket(
       PacketPlayOutPlayerInfo.EnumPlayerInfoAction action) {
     PacketPlayOutPlayerInfo packet = new PacketPlayOutPlayerInfo();
     if (BukkitUtils.isSportPaper()) {
       packet.a = action;
     } else {
-      ReflectionUtils.setField(packet.getClass(), packet, action, "a");
+      ReflectionUtils.setField(packet, action, playerInfoActionField);
     }
     return packet;
   }
@@ -184,6 +184,27 @@ public interface NMSHacks {
             PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, players));
   }
 
+  enum TeamPacketFields {
+    a,
+    b,
+    c,
+    d,
+    e,
+    g,
+    h,
+    i;
+
+    Field field;
+
+    TeamPacketFields() {
+      field = ReflectionUtils.getField(PacketPlayOutScoreboardTeam.class, name());
+    }
+
+    public Field getField() {
+      return field;
+    }
+  }
+
   static Packet teamPacket(
       int operation,
       String name,
@@ -213,10 +234,10 @@ public interface NMSHacks {
         packet.i |= 2;
       }
     } else {
-      ReflectionUtils.setField(packet.getClass(), packet, name, "a");
-      ReflectionUtils.setField(packet.getClass(), packet, displayName, "b");
-      ReflectionUtils.setField(packet.getClass(), packet, prefix, "c");
-      ReflectionUtils.setField(packet.getClass(), packet, suffix, "d");
+      ReflectionUtils.setField(packet, name, TeamPacketFields.a.getField());
+      ReflectionUtils.setField(packet, displayName, TeamPacketFields.b.getField());
+      ReflectionUtils.setField(packet, prefix, TeamPacketFields.c.getField());
+      ReflectionUtils.setField(packet, suffix, TeamPacketFields.d.getField());
 
       String e = null;
       if (nameTagVisibility != null) {
@@ -236,11 +257,11 @@ public interface NMSHacks {
         }
       }
 
-      ReflectionUtils.setField(packet.getClass(), packet, e, "e");
-      ReflectionUtils.setField(packet.getClass(), packet, players, "g");
-      ReflectionUtils.setField(packet.getClass(), packet, operation, "h");
+      ReflectionUtils.setField(packet, e, TeamPacketFields.e.getField());
+      ReflectionUtils.setField(packet, players, TeamPacketFields.g.getField());
+      ReflectionUtils.setField(packet, operation, TeamPacketFields.h.getField());
 
-      int i = ReflectionUtils.readField(packet.getClass(), packet, Integer.class, "i");
+      int i = (int) ReflectionUtils.readField(packet, TeamPacketFields.i.getField());
       if (friendlyFire) {
         i |= 1;
       }
@@ -248,7 +269,7 @@ public interface NMSHacks {
         i |= 2;
       }
 
-      ReflectionUtils.setField(packet.getClass(), packet, i, "i");
+      ReflectionUtils.setField(packet, i, TeamPacketFields.i.getField());
     }
     return packet;
   }
@@ -357,6 +378,29 @@ public interface NMSHacks {
     return spawnPlayerPacket(entityId, uuid, location, null, EntityMetadata.clone(player));
   }
 
+  enum NamedEntitySpawnFields {
+    a,
+    b,
+    c,
+    d,
+    e,
+    f,
+    g,
+    h,
+    i,
+    j;
+
+    Field field;
+
+    NamedEntitySpawnFields() {
+      field = ReflectionUtils.getField(PacketPlayOutNamedEntitySpawn.class, name());
+    }
+
+    public Field getField() {
+      return field;
+    }
+  }
+
   static Packet spawnPlayerPacket(
       int entityId,
       UUID uuid,
@@ -377,31 +421,29 @@ public interface NMSHacks {
     } else {
       PacketPlayOutNamedEntitySpawn packet = new PacketPlayOutNamedEntitySpawn();
 
-      ReflectionUtils.setField(packet.getClass(), packet, entityId, "a");
-      ReflectionUtils.setField(packet.getClass(), packet, uuid, "b");
+      ReflectionUtils.setField(packet, entityId, NamedEntitySpawnFields.a.getField());
+      ReflectionUtils.setField(packet, uuid, NamedEntitySpawnFields.b.getField());
       ReflectionUtils.setField(
-          packet.getClass(), packet, MathHelper.floor(location.getX() * 32.0D), "c");
+          packet, MathHelper.floor(location.getX() * 32.0D), NamedEntitySpawnFields.c.getField());
       ReflectionUtils.setField(
-          packet.getClass(), packet, MathHelper.floor(location.getY() * 32.0D), "d");
+          packet, MathHelper.floor(location.getY() * 32.0D), NamedEntitySpawnFields.d.getField());
       ReflectionUtils.setField(
-          packet.getClass(), packet, MathHelper.floor(location.getZ() * 32.0D), "e");
+          packet, MathHelper.floor(location.getZ() * 32.0D), NamedEntitySpawnFields.e.getField());
       ReflectionUtils.setField(
-          packet.getClass(),
           packet,
           (byte) ((int) (((byte) location.getYaw()) * 256.0F / 360.0F)),
-          "f");
+          NamedEntitySpawnFields.f.getField());
       ReflectionUtils.setField(
-          packet.getClass(),
           packet,
           (byte) ((int) (((byte) location.getPitch()) * 256.0F / 360.0F)),
-          "g");
+          NamedEntitySpawnFields.g.getField());
       ReflectionUtils.setField(
-          packet.getClass(),
           packet,
           heldItem == null ? 0 : Item.getId(CraftItemStack.asNMSCopy(heldItem).getItem()),
-          "h");
-      ReflectionUtils.setField(packet.getClass(), packet, metadata.dataWatcher, "i");
-      ReflectionUtils.setField(packet.getClass(), packet, metadata.dataWatcher.b(), "j");
+          NamedEntitySpawnFields.h.getField());
+      ReflectionUtils.setField(packet, metadata.dataWatcher, NamedEntitySpawnFields.i.getField());
+      ReflectionUtils.setField(
+          packet, metadata.dataWatcher.b(), NamedEntitySpawnFields.j.getField());
 
       return packet;
     }
@@ -410,6 +452,28 @@ public interface NMSHacks {
   static void spawnLivingEntity(
       Player player, EntityType type, int entityId, Location location, EntityMetadata metadata) {
     sendPacket(player, spawnLivingEntityPacket(type, entityId, location, metadata));
+  }
+
+  enum LivingEntitySpawnFields {
+    a,
+    b,
+    c,
+    d,
+    e,
+    i,
+    j,
+    k,
+    l;
+
+    Field field;
+
+    LivingEntitySpawnFields() {
+      field = ReflectionUtils.getField(PacketPlayOutSpawnEntityLiving.class, name());
+    }
+
+    public Field getField() {
+      return field;
+    }
   }
 
   @SuppressWarnings("deprecation")
@@ -432,30 +496,28 @@ public interface NMSHacks {
     } else {
       PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving();
 
-      ReflectionUtils.setField(packet.getClass(), packet, entityId, "a");
-      ReflectionUtils.setField(packet.getClass(), packet, (byte) type.getTypeId(), "b");
+      ReflectionUtils.setField(packet, entityId, LivingEntitySpawnFields.a.getField());
       ReflectionUtils.setField(
-          packet.getClass(), packet, MathHelper.floor(location.getX() * 32.0D), "c");
+          packet, (byte) type.getTypeId(), LivingEntitySpawnFields.b.getField());
       ReflectionUtils.setField(
-          packet.getClass(), packet, MathHelper.floor(location.getY() * 32.0D), "d");
+          packet, MathHelper.floor(location.getX() * 32.0D), LivingEntitySpawnFields.c.getField());
       ReflectionUtils.setField(
-          packet.getClass(), packet, MathHelper.floor(location.getZ() * 32.0D), "e");
+          packet, MathHelper.floor(location.getY() * 32.0D), LivingEntitySpawnFields.d.getField());
       ReflectionUtils.setField(
-          packet.getClass(),
+          packet, MathHelper.floor(location.getZ() * 32.0D), LivingEntitySpawnFields.e.getField());
+      ReflectionUtils.setField(
           packet,
           (byte) ((int) (((byte) location.getYaw()) * 256.0F / 360.0F)),
-          "i");
+          LivingEntitySpawnFields.i.getField());
       ReflectionUtils.setField(
-          packet.getClass(),
           packet,
           (byte) ((int) (((byte) location.getPitch()) * 256.0F / 360.0F)),
-          "j");
+          LivingEntitySpawnFields.j.getField());
       ReflectionUtils.setField(
-          packet.getClass(),
           packet,
           (byte) ((int) (((byte) location.getPitch()) * 256.0F / 360.0F)),
-          "k");
-      ReflectionUtils.setField(packet.getClass(), packet, metadata.dataWatcher, "l");
+          LivingEntitySpawnFields.k.getField());
+      ReflectionUtils.setField(packet, metadata.dataWatcher, LivingEntitySpawnFields.l.getField());
 
       return packet;
     }
@@ -463,6 +525,26 @@ public interface NMSHacks {
 
   static void spawnEntity(Player player, int type, int entityId, Location location) {
     sendPacket(player, spawnEntityPacket(type, entityId, location));
+  }
+
+  enum EntitySpawnFields {
+    a,
+    b,
+    c,
+    d,
+    h,
+    i,
+    j;
+
+    Field field;
+
+    EntitySpawnFields() {
+      field = ReflectionUtils.getField(PacketPlayOutSpawnEntity.class, name());
+    }
+
+    public Field getField() {
+      return field;
+    }
   }
 
   static Packet spawnEntityPacket(int type, int entityId, Location location) {
@@ -482,24 +564,22 @@ public interface NMSHacks {
     } else {
       PacketPlayOutSpawnEntity packet = new PacketPlayOutSpawnEntity();
 
-      ReflectionUtils.setField(packet.getClass(), packet, entityId, "a");
+      ReflectionUtils.setField(packet, entityId, EntitySpawnFields.a.getField());
       ReflectionUtils.setField(
-          packet.getClass(), packet, MathHelper.floor(location.getX() * 32.0D), "b");
+          packet, MathHelper.floor(location.getX() * 32.0D), EntitySpawnFields.b.getField());
       ReflectionUtils.setField(
-          packet.getClass(), packet, MathHelper.floor(location.getY() * 32.0D), "c");
+          packet, MathHelper.floor(location.getY() * 32.0D), EntitySpawnFields.c.getField());
       ReflectionUtils.setField(
-          packet.getClass(), packet, MathHelper.floor(location.getZ() * 32.0D), "d");
+          packet, MathHelper.floor(location.getZ() * 32.0D), EntitySpawnFields.d.getField());
       ReflectionUtils.setField(
-          packet.getClass(),
           packet,
           (byte) ((int) (((byte) location.getYaw()) * 256.0F / 360.0F)),
-          "h");
+          EntitySpawnFields.h.getField());
       ReflectionUtils.setField(
-          packet.getClass(),
           packet,
           (byte) ((int) (((byte) location.getPitch()) * 256.0F / 360.0F)),
-          "i");
-      ReflectionUtils.setField(packet.getClass(), packet, type, "j");
+          EntitySpawnFields.i.getField());
+      ReflectionUtils.setField(packet, type, EntitySpawnFields.j.getField());
 
       return packet;
     }
@@ -524,15 +604,31 @@ public interface NMSHacks {
     }
   }
 
+  enum EntityAttachFields {
+    a,
+    b,
+    c;
+
+    Field field;
+
+    EntityAttachFields() {
+      field = ReflectionUtils.getField(PacketPlayOutAttachEntity.class, name());
+    }
+
+    public Field getField() {
+      return field;
+    }
+  }
+
   static void entityAttach(Player player, int entityID, int vehicleID, boolean leash) {
     if (BukkitUtils.isSportPaper()) {
       sendPacket(player, new PacketPlayOutAttachEntity(entityID, vehicleID, leash));
     } else {
       PacketPlayOutAttachEntity packet = new PacketPlayOutAttachEntity();
 
-      ReflectionUtils.setField(packet.getClass(), packet, (byte) (leash ? 1 : 0), "a");
-      ReflectionUtils.setField(packet.getClass(), packet, entityID, "b");
-      ReflectionUtils.setField(packet.getClass(), packet, vehicleID, "c");
+      ReflectionUtils.setField(packet, (byte) (leash ? 1 : 0), EntityAttachFields.a.getField());
+      ReflectionUtils.setField(packet, entityID, EntityAttachFields.b.getField());
+      ReflectionUtils.setField(packet, vehicleID, EntityAttachFields.c.getField());
 
       sendPacket(player, packet);
     }
@@ -640,6 +736,9 @@ public interface NMSHacks {
             border, PacketPlayOutWorldBorder.EnumWorldBorderAction.SET_WARNING_BLOCKS));
   }
 
+  Field entityMetadataWatchableField =
+      ReflectionUtils.getField(PacketPlayOutEntityMetadata.class, "b");
+
   static void playDeathAnimation(Player player) {
     EntityPlayer handle = ((CraftPlayer) player).getHandle();
     PacketPlayOutEntityMetadata metadata =
@@ -651,7 +750,8 @@ public interface NMSHacks {
         new DataWatcher.WatchableObject(3, 6, 0f); // type 3 (float), index 6 (health)
 
     List<DataWatcher.WatchableObject> b =
-        ReflectionUtils.readField(metadata.getClass(), metadata, List.class, "b");
+        (List<DataWatcher.WatchableObject>)
+            ReflectionUtils.readField(metadata, entityMetadataWatchableField);
     if (b != null) {
       for (int i = 0; i < b.size(); i++) {
         DataWatcher.WatchableObject wo = b.get(i);
@@ -666,7 +766,7 @@ public interface NMSHacks {
       if (b != null) b.add(zeroHealth);
       else
         ReflectionUtils.setField(
-            metadata.getClass(), metadata, Collections.singletonList(zeroHealth), "b");
+            metadata, Collections.singletonList(zeroHealth), entityMetadataWatchableField);
     }
 
     Location location = player.getLocation();
@@ -718,7 +818,7 @@ public interface NMSHacks {
     if (BukkitUtils.isSportPaper()) {
       return ((CraftPlayer) player).getHandle().playerConnection.networkManager.protocolVersion;
     } else {
-      return 47; // Assume 1.8 if not sportpaper.
+      return ViaUtils.VERSION_1_8; // Assume 1.8 if not sportpaper.
     }
   }
 

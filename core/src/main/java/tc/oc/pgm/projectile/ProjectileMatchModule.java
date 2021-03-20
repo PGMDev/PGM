@@ -3,7 +3,6 @@ package tc.oc.pgm.projectile;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
 import org.bukkit.Material;
@@ -41,7 +40,6 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.filters.query.PlayerBlockQuery;
 import tc.oc.pgm.kits.tag.ItemTags;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ProjectileMatchModule implements MatchModule, Listener {
@@ -239,17 +237,9 @@ public class ProjectileMatchModule implements MatchModule, Listener {
   }
 
   public static @Nullable ProjectileDefinition getProjectileDefinition(Entity entity) {
-    if (BukkitUtils.isSportPaper()) { // SportPaper allows for getting metadata by plugin
-      MetadataValue metadataValue = entity.getMetadata("projectileDefinition", PGM.get());
-
-      if (metadataValue != null) {
-        return (ProjectileDefinition) metadataValue.value();
-      }
-    } else {
-      List<MetadataValue> metadataValue = entity.getMetadata("projectileDefinition");
-
-      if (!metadataValue.isEmpty()) {
-        return (ProjectileDefinition) metadataValue.get(0).value();
+    for (MetadataValue mv : entity.getMetadata("projectileDefinition")) {
+      if (mv.getOwningPlugin().equals(PGM.get())) {
+        return (ProjectileDefinition) mv.value();
       }
     }
     return launchingDefinition.get();

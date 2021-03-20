@@ -11,6 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -19,7 +20,6 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ProjectileTrailMatchModule implements MatchModule, Listener {
@@ -44,12 +44,12 @@ public class ProjectileTrailMatchModule implements MatchModule, Listener {
               if (projectile.isDead() || projectile.isOnGround()) {
                 projectile.removeMetadata(TRAIL_META, PGM.get());
               } else {
-                final Color color =
-                    (Color)
-                        (BukkitUtils
-                                .isSportPaper() // SportPaper allows for getting metadata by plugin
-                            ? projectile.getMetadata(TRAIL_META, PGM.get()).value()
-                            : projectile.getMetadata(TRAIL_META).get(0));
+                Color color = null;
+                for (MetadataValue mv : projectile.getMetadata(TRAIL_META)) {
+                  if (mv.getOwningPlugin().equals(PGM.get())) {
+                    color = (Color) mv.value();
+                  }
+                }
 
                 for (MatchPlayer player : match.getPlayers()) {
                   boolean colors =
@@ -96,10 +96,10 @@ public class ProjectileTrailMatchModule implements MatchModule, Listener {
     if (projectile instanceof Arrow) {
       final Arrow arrow = (Arrow) projectile;
       if (arrow.hasMetadata(CRITICAL_META)) {
-        if (BukkitUtils.isSportPaper()) { // SportPaper allows for getting metadata by plugin
-          return arrow.getMetadata(CRITICAL_META, PGM.get()).asBoolean();
-        } else {
-          return arrow.getMetadata(CRITICAL_META).get(0).asBoolean();
+        for (MetadataValue mv : arrow.getMetadata(CRITICAL_META)) {
+          if (mv.getOwningPlugin().equals(PGM.get())) {
+            return mv.asBoolean();
+          }
         }
       }
     }
@@ -133,10 +133,10 @@ public class ProjectileTrailMatchModule implements MatchModule, Listener {
       if (projectile instanceof Arrow) {
         final Arrow arrow = (Arrow) projectile;
         if (arrow.hasMetadata(CRITICAL_META)) {
-          if (BukkitUtils.isSportPaper()) { // SportPaper allows for getting metadata by plugin
-            arrow.setCritical(arrow.getMetadata(CRITICAL_META, PGM.get()).asBoolean());
-          } else {
-            arrow.setCritical(arrow.getMetadata(CRITICAL_META).get(0).asBoolean());
+          for (MetadataValue mv : arrow.getMetadata(CRITICAL_META)) {
+            if (mv.getOwningPlugin().equals(PGM.get())) {
+              arrow.setCritical(mv.asBoolean());
+            }
           }
         }
       }

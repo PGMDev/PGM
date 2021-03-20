@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent;
 import net.minecraft.server.v1_8_R3.Packet;
 import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
-import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerListHeaderFooter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
@@ -173,25 +173,10 @@ public class TabRender {
   }
 
   public void setHeaderFooter(BaseComponent[] header, BaseComponent[] footer) {
-    // Call SportPaper version if available
-    if (BukkitUtils.isSportPaper()) {
-      view.getViewer().setPlayerListHeaderFooter(header, footer);
-    } else {
-      PacketPlayOutPlayerListHeaderFooter packet = new PacketPlayOutPlayerListHeaderFooter();
-      ReflectionUtils.setField(
-          packet.getClass(),
-          packet,
-          IChatBaseComponent.ChatSerializer.a(
-              net.md_5.bungee.chat.ComponentSerializer.toString(header)),
-          "a");
-      ReflectionUtils.setField(
-          packet.getClass(),
-          packet,
-          IChatBaseComponent.ChatSerializer.a(
-              net.md_5.bungee.chat.ComponentSerializer.toString(footer)),
-          "b");
-      send(packet);
-    }
+    BungeeComponentSerializer serializer = BungeeComponentSerializer.get();
+    Audience.get(view.getViewer())
+        .sendPlayerListHeaderAndFooter(
+            serializer.deserialize(header), serializer.deserialize(footer));
   }
 
   public void updateFakeEntity(TabEntry entry, boolean create) {

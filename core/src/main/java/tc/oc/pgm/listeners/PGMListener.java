@@ -33,8 +33,10 @@ import org.bukkit.event.player.PlayerLoginEvent.Result;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.vehicle.VehicleUpdateEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.util.Vector;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
@@ -310,13 +312,13 @@ public class PGMListener implements Listener {
     if (match == null || match.isFinished()) event.setCancelled(true);
   }
 
-  //  @EventHandler
-  //  public void freezeVehicle(final VehicleUpdateEvent event) {
-  //    Match match = this.mm.getMatch(event.getWorld());
-  //    if (match == null || match.isFinished()) {
-  //      event.getVehicle().setVelocity(new Vector());
-  //    }
-  //  }
+  @EventHandler
+  public void freezeVehicle(final VehicleUpdateEvent event) {
+    Match match = this.mm.getMatch(event.getWorld());
+    if (match == null || match.isFinished()) {
+      event.getVehicle().setVelocity(new Vector());
+    }
+  }
 
   @EventHandler
   public void nerfFishing(PlayerFishEvent event) {
