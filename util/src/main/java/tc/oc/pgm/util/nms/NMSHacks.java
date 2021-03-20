@@ -7,6 +7,7 @@ import com.mojang.authlib.properties.Property;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
@@ -687,6 +688,24 @@ public interface NMSHacks {
     if (arms) flags |= 0x04;
     if (baseplate) flags |= 0x08;
     metadata.dataWatcher.a(10, (byte) flags);
+  }
+
+  Method enablePotionParticlesMethod = ReflectionUtils.getMethod(EntityLiving.class, "B");
+  Method disablePotionParticlesMethod = ReflectionUtils.getMethod(EntityLiving.class, "bj");
+
+  static void setPotionParticles(Player player, boolean enabled) {
+    if (BukkitUtils.isSportPaper()) {
+      player.setPotionParticles(enabled);
+    } else {
+      CraftPlayer craftPlayer = (CraftPlayer) player;
+      EntityPlayer handle = craftPlayer.getHandle();
+
+      if (enabled) {
+        ReflectionUtils.callMethod(enablePotionParticlesMethod, handle);
+      } else {
+        ReflectionUtils.callMethod(disablePotionParticlesMethod, handle);
+      }
+    }
   }
 
   static void clearArrowsInPlayer(Player player) {

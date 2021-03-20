@@ -314,7 +314,7 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void freezeVehicle(final VehicleUpdateEvent event) {
-    Match match = this.mm.getMatch(event.getWorld());
+    Match match = this.mm.getMatch(event.getVehicle().getWorld());
     if (match == null || match.isFinished()) {
       event.getVehicle().setVelocity(new Vector());
     }
@@ -337,12 +337,12 @@ public class PGMListener implements Listener {
 
     for (ItemStack item : quitter.getInventory().getContents()) {
       if (item == null || item.getType() == Material.AIR) continue;
-      quitter.getWorld().dropItemNaturally(quitter.getBukkit().getLocation(), item);
+      quitter.getBukkit().getWorld().dropItemNaturally(quitter.getBukkit().getLocation(), item);
     }
 
     for (ItemStack armor : quitter.getInventory().getArmorContents()) {
       if (armor == null || armor.getType() == Material.AIR) continue;
-      quitter.getWorld().dropItemNaturally(quitter.getBukkit().getLocation(), armor);
+      quitter.getBukkit().getWorld().dropItemNaturally(quitter.getBukkit().getLocation(), armor);
     }
   }
 

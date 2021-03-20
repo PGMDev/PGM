@@ -70,7 +70,6 @@ public class PlayerTabEntry extends DynamicTabEntry {
   @Override
   public @Nullable Skin getSkin(TabView view) {
     return NMSHacks.getPlayerSkin(this.player);
-    //    return this.player.getSkin();
   }
 
   @Override

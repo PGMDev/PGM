@@ -10,6 +10,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DiscardPotionBottlesMatchModule implements MatchModule, Listener {
@@ -18,6 +19,7 @@ public class DiscardPotionBottlesMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   public void onDrinkPotion(final PlayerItemConsumeEvent event) {
+    if (!BukkitUtils.isSportPaper()) return;//TODO: implement this
     if (event.getItem().getType() == Material.POTION) {
       event.setReplacement(new ItemStack(Material.AIR));
     }
