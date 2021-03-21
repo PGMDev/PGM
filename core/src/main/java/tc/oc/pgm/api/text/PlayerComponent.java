@@ -77,11 +77,11 @@ public final class PlayerComponent {
     boolean isOffline =
         player == null
             || !player.isOnline()
-            || ((isDisguised(player) || Integration.hasNick(player))
+            || ((isDisguised(player) || Integration.getNick(player) != null)
                 && style.has(NameStyle.Flag.DISGUISE_OFFLINE));
 
     UUID uuid = !isOffline ? player.getUniqueId() : null;
-    boolean isNicked = uuid != null && Integration.hasNick(player);
+    boolean isNicked = uuid != null && Integration.getNick(player) != null;
     String nicked = !isOffline && player != null ? Integration.getNick(player) : defName;
 
     TextComponent.Builder builder = text();

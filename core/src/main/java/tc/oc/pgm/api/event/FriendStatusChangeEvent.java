@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.friends;
+package tc.oc.pgm.api.event;
 
 import java.util.UUID;
 import org.bukkit.event.Event;

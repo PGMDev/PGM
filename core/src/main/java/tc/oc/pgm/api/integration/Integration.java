@@ -1,18 +1,21 @@
 package tc.oc.pgm.api.integration;
 
-import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.integration.FriendIntegrationImpl;
+import tc.oc.pgm.integration.NickIntegrationImpl;
+import tc.oc.pgm.integration.VanishIntegrationImpl;
 
 public interface Integration {
 
   static final AtomicReference<FriendIntegration> FRIENDS =
-      new AtomicReference<FriendIntegration>(new FriendIntegration.FriendIntegrationImpl());
+      new AtomicReference<FriendIntegration>(new FriendIntegrationImpl());
   static final AtomicReference<NickIntegration> NICKS =
-      new AtomicReference<NickIntegration>(new NickIntegration.NickIntegrationImpl());
+      new AtomicReference<NickIntegration>(new NickIntegrationImpl());
   static final AtomicReference<VanishIntegration> VANISH =
-      new AtomicReference<VanishIntegration>(new VanishIntegration.VanishIntegrationImpl());
+      new AtomicReference<VanishIntegration>(new VanishIntegrationImpl());
 
   public static void setFriendIntegration(FriendIntegration integration) {
     FRIENDS.set(integration);
@@ -32,21 +35,14 @@ public interface Integration {
   }
 
   // NICKS
+  @Nullable
   public static String getNick(Player player) {
     return NICKS.get().getNick(player);
-  }
-
-  public static boolean hasNick(Player player) {
-    return NICKS.get().hasNick(player);
   }
 
   // VANISH
   public static boolean isVanished(Player player) {
     return VANISH.get().isVanished(player);
-  }
-
-  public static Collection<Player> getVanished() {
-    return VANISH.get().getVanished();
   }
 
   public static boolean setVanished(MatchPlayer player, boolean vanish, boolean quiet) {
