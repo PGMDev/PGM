@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.title.Title.title;
+import static tc.oc.pgm.util.TimeUtils.fromTicks;
 import static tc.oc.pgm.util.text.TemporalComponent.clock;
 import static tc.oc.pgm.util.text.TemporalComponent.seconds;
 
@@ -97,7 +98,7 @@ public abstract class MatchCountdown extends Countdown {
               title(
                   text(remaining.getSeconds(), NamedTextColor.YELLOW),
                   empty(),
-                  Title.Times.of(Duration.ZERO, Duration.ofMillis(5), Duration.ofMillis(15))));
+                  Title.Times.of(Duration.ZERO, fromTicks(5), fromTicks(15))));
     }
 
     super.onTick(remaining, total);

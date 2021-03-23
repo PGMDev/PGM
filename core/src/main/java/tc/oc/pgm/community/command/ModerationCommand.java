@@ -10,6 +10,7 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static net.kyori.adventure.title.Title.title;
+import static tc.oc.pgm.util.TimeUtils.fromTicks;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
@@ -809,29 +810,24 @@ public class ModerationCommand implements Listener {
     Component subtitle = formatPunishmentReason(reason).color(NamedTextColor.GOLD);
 
     // Legacy support - Displays a chat message instead of title
-    if (target.isLegacy()) {
-      target.sendMessage(
-          TextFormatter.horizontalLineHeading(
-              target.getBukkit(), warningTitle, NamedTextColor.GRAY));
-      target.sendMessage(empty());
-      target.sendMessage(
-          TextFormatter.horizontalLineHeading(
-              target.getBukkit(),
-              subtitle,
-              NamedTextColor.YELLOW,
-              TextDecoration.OBFUSCATED,
-              LegacyFormatUtils.MAX_CHAT_WIDTH));
-      target.sendMessage(empty());
-      target.sendMessage(
-          TextFormatter.horizontalLineHeading(
-              target.getBukkit(), warningTitle, NamedTextColor.GRAY));
+    target.sendMessage(
+        TextFormatter.horizontalLineHeading(target.getBukkit(), warningTitle, NamedTextColor.GRAY));
+    target.sendMessage(empty());
+    target.sendMessage(
+        TextFormatter.horizontalLineHeading(
+            target.getBukkit(),
+            subtitle,
+            NamedTextColor.YELLOW,
+            TextDecoration.OBFUSCATED,
+            LegacyFormatUtils.MAX_CHAT_WIDTH));
+    target.sendMessage(empty());
+    target.sendMessage(
+        TextFormatter.horizontalLineHeading(target.getBukkit(), warningTitle, NamedTextColor.GRAY));
 
-    } else {
+    if (!target.isLegacy()) {
       target.showTitle(
           title(
-              warningTitle,
-              subtitle,
-              Title.Times.of(Duration.ofMillis(5), Duration.ofMillis(200), Duration.ofMillis(10))));
+              warningTitle, subtitle, Title.Times.of(fromTicks(5), fromTicks(200), fromTicks(10))));
     }
     target.playSound(WARN_SOUND);
   }
