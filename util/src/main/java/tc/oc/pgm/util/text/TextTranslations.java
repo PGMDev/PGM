@@ -242,7 +242,7 @@ public final class TextTranslations {
   }
 
   public static Locale getLocale(@Nullable CommandSender sender) {
-    if (sender == null || sender instanceof CraftPlayer) {
+    if (sender == null || !(sender instanceof CraftPlayer)) {
       return SOURCE_LOCALE;
     }
     // SportPaper has a faster locale lookup

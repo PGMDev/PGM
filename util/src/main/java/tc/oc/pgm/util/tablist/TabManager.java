@@ -14,6 +14,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
+import tc.oc.pgm.util.event.sport.player.PlayerSkinPartsChangeEvent;
 
 /**
  * Custom player list display (for 1.8 and later)
@@ -140,12 +141,11 @@ public class TabManager implements Listener {
     if (view != null) view.onWorldChange(event);
   }
 
-  // TODO: This is not in spigot
-  //  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  //  public void onSkinPartsChange(PlayerSkinPartsChangeEvent event) {
-  //    TabEntry entry = this.getPlayerEntryOrNull(event.getPlayer());
-  //    if (entry instanceof PlayerTabEntry) {
-  //      ((PlayerTabEntry) entry).onSkinPartsChange(event);
-  //    }
-  //  }
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onSkinPartsChange(PlayerSkinPartsChangeEvent event) {
+    TabEntry entry = this.getPlayerEntryOrNull(event.getPlayer());
+    if (entry instanceof PlayerTabEntry) {
+      ((PlayerTabEntry) entry).onSkinPartsChange(event);
+    }
+  }
 }

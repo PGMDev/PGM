@@ -6,7 +6,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerSkinPartsChangeEvent;
+import tc.oc.pgm.util.event.sport.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.skin.Skin;

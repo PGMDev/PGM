@@ -66,6 +66,7 @@ import tc.oc.pgm.tracker.Trackers;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.bukkit.Events;
+import tc.oc.pgm.util.event.sport.block.BlockFallEvent;
 import tc.oc.pgm.util.material.Materials;
 
 public class BlockTransformListener implements Listener {
@@ -528,14 +529,12 @@ public class BlockTransformListener implements Listener {
     }
   }
 
-  // TODO: Check if this is running on SportPaper
-  //  @EventWrapper
-  //  public void onBlockFall(BlockFallEvent event) {
-  //    this.callEvent(
-  //        new BlockTransformEvent(
-  //            event, event.getBlock().getState(),
-  // BlockStates.toAir(event.getBlock().getState())));
-  //  }
+  @EventWrapper
+  public void onBlockFall(BlockFallEvent event) {
+    this.callEvent(
+        new BlockTransformEvent(
+            event, event.getBlock().getState(), BlockStates.toAir(event.getBlock().getState())));
+  }
 
   private static Material getTrampledType(Material newType) {
     switch (newType) {

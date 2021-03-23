@@ -33,6 +33,7 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.tnt.TNTMatchModule;
 import tc.oc.pgm.tracker.Trackers;
+import tc.oc.pgm.util.event.sport.player.PlayerAttackEntityEvent;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.MinecraftComponent;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -59,11 +60,10 @@ public class AntiGriefListener implements Listener {
     this.participantDefuse(event.getPlayer(), event.getRightClicked());
   }
 
-  // TODO: This is only in SportPaper
-  //  @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-  //  public void leftClickDefuse(final PlayerAttackEntityEvent event) {
-  //    this.participantDefuse(event.getPlayer(), event.getLeftClicked());
-  //  }
+  @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+  public void leftClickDefuse(final PlayerAttackEntityEvent event) {
+    this.participantDefuse(event.getPlayer(), event.getLeftClicked());
+  }
 
   private void participantDefuse(Player player, Entity entity) {
     // check tnt

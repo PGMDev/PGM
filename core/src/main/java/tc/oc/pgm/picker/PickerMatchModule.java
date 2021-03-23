@@ -62,6 +62,7 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.event.sport.player.PlayerLocaleChangeEvent;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -338,10 +339,10 @@ public class PickerMatchModule implements MatchModule, Listener {
     }
   }
 
-  //  @EventHandler
-  //  public void handleLocaleChange(final PlayerLocaleChangeEvent event) {
-  //    refreshKit(match.getPlayer(event.getPlayer()));
-  //  }
+  @EventHandler
+  public void handleLocaleChange(final PlayerLocaleChangeEvent event) {
+    refreshKit(match.getPlayer(event.getPlayer()));
+  }
 
   @EventHandler
   public void closeMonitoredInventory(final InventoryCloseEvent event) {

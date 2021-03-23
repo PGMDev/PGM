@@ -17,6 +17,7 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.util.ClassLogger;
+import tc.oc.pgm.util.event.sport.entity.PotionEffectRemoveEvent;
 
 @ListenerScope(MatchScope.LOADED)
 public class ShieldMatchModule implements MatchModule, Listener, Tickable {
@@ -67,9 +68,9 @@ public class ShieldMatchModule implements MatchModule, Listener, Tickable {
     if (shield != null) shield.onEvent(event);
   }
 
-  //  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  //  public void onPotionRemove(PotionEffectRemoveEvent event) {
-  //    ShieldPlayerModule shield = getShield(event.getEntity());
-  //    if (shield != null) shield.onEvent(event);
-  //  }
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPotionRemove(PotionEffectRemoveEvent event) {
+    ShieldPlayerModule shield = getShield(event.getEntity());
+    if (shield != null) shield.onEvent(event);
+  }
 }

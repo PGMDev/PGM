@@ -49,6 +49,7 @@ import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.ViaUtils;
+import tc.oc.pgm.util.compatability.AttributeUtils;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 
@@ -56,7 +57,6 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
 
   // TODO: Probably should be moved to a better location
   private static final int FROZEN_VEHICLE_ENTITY_ID = NMSHacks.allocateEntityId();
-  //  private static final Attribute[] ATTRIBUTES = Attribute.values();
 
   private static final String DEATH_KEY = "isDead";
   private static final MetadataValue DEATH_VALUE = new FixedMetadataValue(PGM.get(), true);
@@ -282,14 +282,9 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
       }
     }
 
-    //    for (Attribute attribute : ATTRIBUTES) {
-    //      AttributeInstance attributes = bukkit.getAttribute(attribute);
-    //      if (attributes == null) continue;
-    //
-    //      for (AttributeModifier modifier : attributes.getModifiers()) {
-    //        attributes.removeModifier(modifier);
-    //      }
-    //    }
+    if (BukkitUtils.isSportPaper()) {
+      AttributeUtils.clearAttributes(bukkit);
+    }
 
     NMSHacks.setAbsorption(bukkit, 0);
 

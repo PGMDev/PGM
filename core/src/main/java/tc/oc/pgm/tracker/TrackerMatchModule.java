@@ -35,7 +35,6 @@ import tc.oc.pgm.tracker.trackers.OwnedMobTracker;
 import tc.oc.pgm.tracker.trackers.ProjectileTracker;
 import tc.oc.pgm.tracker.trackers.SpleefTracker;
 import tc.oc.pgm.tracker.trackers.TNTTracker;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 public class TrackerMatchModule implements MatchModule {
 
@@ -49,20 +48,14 @@ public class TrackerMatchModule implements MatchModule {
 
   public TrackerMatchModule(Match match) {
     this.match = match;
-
     entityTracker = new EntityTracker(match);
     blockTracker = new BlockTracker(match);
-
-    // These rely on Events that are only in SportPaper
-    if (BukkitUtils.isSportPaper()) {
-      fallTracker = new FallTracker(this, match);
-      fireTracker = new FireTracker(this, match);
-
-      damageResolvers.add(fallTracker);
-      damageResolvers.add(fireTracker);
-    }
+    fallTracker = new FallTracker(this, match);
+    fireTracker = new FireTracker(this, match);
 
     // Damage resolvers - order is important!
+    damageResolvers.add(fallTracker);
+    damageResolvers.add(fireTracker);
     damageResolvers.add(new PotionDamageResolver());
     damageResolvers.add(new ExplosionDamageResolver());
     damageResolvers.add(new FallingBlockDamageResolver());
@@ -75,19 +68,16 @@ public class TrackerMatchModule implements MatchModule {
 
   @Override
   public void load() {
-    // These rely on Events that are only in SportPaper
-    if (BukkitUtils.isSportPaper()) {
-      match.addListener(fallTracker, MatchScope.RUNNING);
-      match.addListener(fireTracker, MatchScope.RUNNING);
-      match.addListener(new TNTTracker(this, match), MatchScope.RUNNING);
-      match.addListener(new SpleefTracker(this), MatchScope.RUNNING);
-      match.addListener(new OwnedMobTracker(this, match), MatchScope.RUNNING);
-      match.addListener(new AnvilTracker(this, match), MatchScope.RUNNING);
-    }
+    match.addListener(fallTracker, MatchScope.RUNNING);
+    match.addListener(fireTracker, MatchScope.RUNNING);
     match.addListener(entityTracker, MatchScope.RUNNING);
     match.addListener(blockTracker, MatchScope.RUNNING);
     match.addListener(new DispenserTracker(this, match), MatchScope.RUNNING);
+    match.addListener(new TNTTracker(this, match), MatchScope.RUNNING);
+    match.addListener(new SpleefTracker(this), MatchScope.RUNNING);
+    match.addListener(new OwnedMobTracker(this, match), MatchScope.RUNNING);
     match.addListener(new ProjectileTracker(this, match), MatchScope.RUNNING);
+    match.addListener(new AnvilTracker(this, match), MatchScope.RUNNING);
     match.addListener(new CombatLogTracker(this), MatchScope.RUNNING);
     match.addListener(new DeathTracker(this), MatchScope.RUNNING);
   }
