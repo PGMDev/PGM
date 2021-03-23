@@ -21,6 +21,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_8_R3.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_8_R3.entity.*;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_8_R3.scoreboard.CraftTeam;
@@ -32,6 +33,7 @@ import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.util.block.RayBlockIntersection;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
@@ -903,6 +905,34 @@ public interface NMSHacks {
         .generatorSettings(worldData.getGeneratorOptions())
         .seed(worldData.getSeed())
         .type(org.bukkit.WorldType.getByName(worldData.getType().name()));
+  }
+
+  static RayBlockIntersection getTargetedBLock(Player player) {
+    Location start = player.getEyeLocation();
+    World world = player.getWorld();
+    Vector startVector = start.toVector();
+    Vector end =
+        start
+            .toVector()
+            .add(
+                start.getDirection().multiply(player.getGameMode() == GameMode.CREATIVE ? 6 : 4.5));
+    MovingObjectPosition hit =
+        ((CraftWorld) world)
+            .getHandle()
+            .rayTrace(
+                new Vec3D(startVector.getX(), startVector.getY(), startVector.getZ()),
+                new Vec3D(end.getX(), end.getY(), end.getZ()),
+                false,
+                false,
+                false);
+    if (hit != null && hit.type == MovingObjectPosition.EnumMovingObjectType.BLOCK) {
+      return new RayBlockIntersection(
+          world.getBlockAt(hit.a().getX(), hit.a().getY(), hit.a().getZ()),
+          CraftBlock.notchToBlockFace(hit.direction),
+          new Vector(hit.pos.a, hit.pos.b, hit.pos.c));
+    } else {
+      return null;
+    }
   }
 
   interface FakeEntity {
