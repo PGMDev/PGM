@@ -28,6 +28,7 @@ import org.bukkit.craftbukkit.v1_8_R3.scoreboard.CraftTeam;
 import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers;
 import org.bukkit.entity.*;
 import org.bukkit.entity.Entity;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffectType;
@@ -933,6 +934,78 @@ public interface NMSHacks {
     } else {
       return null;
     }
+  }
+
+  String CAN_DESTROY = "CanDestroy";
+  String CAN_PLACE_ON = "CanPlaceOn";
+
+  static void setCanDestroy(ItemMeta itemMeta, Collection<Material> materials) {
+    if (BukkitUtils.isSportPaper()) {
+      itemMeta.setCanDestroy(materials);
+    }
+    setMaterialList(itemMeta, materials, CAN_DESTROY);
+  }
+
+  static Collection<Material> getCanDestroy(ItemMeta itemMeta) {
+    if (BukkitUtils.isSportPaper()) {
+      return itemMeta.getCanDestroy();
+    }
+    return getMaterialCollection(itemMeta, CAN_DESTROY);
+  }
+
+  static void setCanPlaceOn(ItemMeta itemMeta, Collection<Material> materials) {
+    if (BukkitUtils.isSportPaper()) {
+      itemMeta.setCanPlaceOn(materials);
+    }
+    setMaterialList(itemMeta, materials, CAN_PLACE_ON);
+  }
+
+  static Collection<Material> getCanPlaceOn(ItemMeta itemMeta) {
+    if (BukkitUtils.isSportPaper()) {
+      return itemMeta.getCanPlaceOn();
+    }
+    return getMaterialCollection(itemMeta, CAN_PLACE_ON);
+  }
+
+  Field unhandledTagsField =
+      ReflectionUtils.getField(
+          "org.bukkit.craftbukkit.v1_8_R3.inventory.CraftMetaItem", "unhandledTags");
+
+  static Map<String, NBTBase> getUnhandledTags(ItemMeta meta) {
+    return (Map<String, NBTBase>) ReflectionUtils.readField(meta, unhandledTagsField);
+  }
+
+  static void setMaterialList(
+      ItemMeta itemMeta, Collection<Material> materials, String canPlaceOn) {
+    Map<String, NBTBase> unhandledTags = getUnhandledTags(itemMeta);
+    NBTTagList canDestroyList =
+        unhandledTags.containsKey(canPlaceOn)
+            ? (NBTTagList) unhandledTags.get(canPlaceOn)
+            : new NBTTagList();
+    for (Material material : materials) {
+      Block block = Block.getById(material.getId());
+      if (block != null) {
+        canDestroyList.add(new NBTTagString(Block.REGISTRY.c(block).toString()));
+      }
+    }
+    if (!canDestroyList.isEmpty()) unhandledTags.put(canPlaceOn, canDestroyList);
+  }
+
+  Field nbtListField = ReflectionUtils.getField(NBTTagList.class, "list");
+
+  static Collection<Material> getMaterialCollection(ItemMeta itemMeta, String key) {
+    Map<String, NBTBase> unhandledTags = getUnhandledTags(itemMeta);
+    if (!unhandledTags.containsKey(key)) return new HashSet<>();
+    Set<Material> materialSet = new HashSet<>();
+    NBTTagList canDestroyList = (NBTTagList) unhandledTags.get(key);
+
+    for (NBTBase item : (List<NBTBase>) ReflectionUtils.readField(canDestroyList, nbtListField)) {
+      NBTTagString nbtTagString = (NBTTagString) item;
+      String blockString = nbtTagString.a_();
+      materialSet.add(Material.getMaterial(Block.getId(Block.getByName(blockString))));
+    }
+
+    return materialSet;
   }
 
   interface FakeEntity {

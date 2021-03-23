@@ -24,7 +24,7 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.event.sport.entity.ExplosionPrimeByEntityEvent;
 
 @ListenerScope(MatchScope.RUNNING)
 public class TNTMatchModule implements MatchModule, Listener {
@@ -48,8 +48,8 @@ public class TNTMatchModule implements MatchModule, Listener {
 
   private boolean callPrimeEvent(TNTPrimed tnt, @Nullable Entity primer) {
     ExplosionPrimeEvent primeEvent;
-    if (BukkitUtils.isSportPaper() && primer != null) {
-      primeEvent = new org.bukkit.event.entity.ExplosionPrimeByEntityEvent(tnt, primer);
+    if (primer != null) {
+      primeEvent = new ExplosionPrimeByEntityEvent(tnt, primer);
     } else {
       primeEvent = new ExplosionPrimeEvent(tnt);
     }

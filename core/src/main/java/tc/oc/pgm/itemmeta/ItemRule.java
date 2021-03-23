@@ -1,16 +1,17 @@
 package tc.oc.pgm.itemmeta;
 
-import com.google.common.collect.Sets;
+import java.util.Collection;
 import java.util.Set;
+import org.bukkit.Material;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.util.ImmutableMaterialSet;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.material.MaterialMatcher;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public class ItemRule {
   final MaterialMatcher items;
@@ -49,22 +50,20 @@ public class ItemRule {
             meta.addAttributeModifier(attribute, modifier);
           }
         }
-        meta.setCanDestroy(unionMaterials(meta.getCanDestroy(), this.meta.getCanDestroy()));
-        meta.setCanPlaceOn(unionMaterials(meta.getCanPlaceOn(), this.meta.getCanPlaceOn()));
       } else {
         // TODO: Do this with reflection
       }
+      Collection<Material> canDestroy = NMSHacks.getCanDestroy(meta);
+      canDestroy.addAll(NMSHacks.getCanDestroy(this.meta));
+      NMSHacks.setCanDestroy(meta, canDestroy);
+
+      Collection<Material> canPlaceOn = NMSHacks.getCanPlaceOn(meta);
+      canPlaceOn.addAll(NMSHacks.getCanPlaceOn(this.meta));
+      NMSHacks.setCanPlaceOn(meta, canPlaceOn);
 
       if (this.meta.spigot().isUnbreakable()) meta.spigot().setUnbreakable(true);
 
       stack.setItemMeta(meta);
     }
-  }
-
-  private static ImmutableMaterialSet unionMaterials(
-      ImmutableMaterialSet a, ImmutableMaterialSet b) {
-    if (a.containsAll(b)) return a;
-    if (b.containsAll(a)) return b;
-    return ImmutableMaterialSet.of(Sets.union(a, b));
   }
 }

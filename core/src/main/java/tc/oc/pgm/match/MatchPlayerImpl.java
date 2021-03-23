@@ -49,7 +49,7 @@ import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.ViaUtils;
-import tc.oc.pgm.util.compatability.AttributeUtils;
+import tc.oc.pgm.util.compatability.SportAttributeUtils;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 
@@ -283,7 +283,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     }
 
     if (BukkitUtils.isSportPaper()) {
-      AttributeUtils.clearAttributes(bukkit);
+      SportAttributeUtils.clearAttributes(bukkit);
     }
 
     NMSHacks.setAbsorption(bukkit, 0);

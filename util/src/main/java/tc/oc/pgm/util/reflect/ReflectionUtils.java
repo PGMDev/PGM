@@ -8,6 +8,15 @@ import javax.annotation.Nullable;
 public final class ReflectionUtils {
   private ReflectionUtils() {}
 
+  public static Class<?> getClassFromName(String className) {
+    try {
+      Class<?> clazz = ReflectionUtils.class.getClassLoader().loadClass(className);
+      return clazz;
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   public static Method getMethod(Class<?> parent, String name) {
     try {
       Method method = parent.getDeclaredMethod(name);
@@ -33,6 +42,10 @@ public final class ReflectionUtils {
     } catch (IllegalAccessException | InvocationTargetException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  public static Field getField(String className, String fieldName) {
+    return getField(getClassFromName(className), fieldName);
   }
 
   public static Field getField(Class<?> parent, String name) {

@@ -10,6 +10,7 @@ import org.bukkit.event.Listener;
 import tc.oc.pgm.util.event.sport.block.BlockDispenseEntityEvent;
 import tc.oc.pgm.util.event.sport.block.BlockFallEvent;
 import tc.oc.pgm.util.event.sport.entity.EntityExtinguishEvent;
+import tc.oc.pgm.util.event.sport.entity.ExplosionPrimeByEntityEvent;
 import tc.oc.pgm.util.event.sport.entity.PotionEffectRemoveEvent;
 import tc.oc.pgm.util.event.sport.player.PlayerAttackEntityEvent;
 import tc.oc.pgm.util.event.sport.player.PlayerLocaleChangeEvent;
@@ -102,6 +103,18 @@ public class SportPaperListener implements Listener {
             sportEvent.getEntity(),
             sportEvent.getLocation(),
             sportEvent.getItem());
+    handleCall(pgmEvent, sportEvent);
+  }
+
+  @EventHandler(ignoreCancelled = true)
+  public void onExplosionPrimeByEntity(
+      org.bukkit.event.entity.ExplosionPrimeByEntityEvent sportEvent) {
+    ExplosionPrimeByEntityEvent pgmEvent =
+        new ExplosionPrimeByEntityEvent(
+            sportEvent.getEntity(),
+            sportEvent.getRadius(),
+            sportEvent.getFire(),
+            sportEvent.getPrimer());
     handleCall(pgmEvent, sportEvent);
   }
 }

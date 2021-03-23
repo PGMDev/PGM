@@ -492,17 +492,14 @@ public abstract class KitParser {
       meta.spigot().setUnbreakable(true);
     }
 
-    // TODO: Reflection alternative for non sportpaper
-    if (BukkitUtils.isSportPaper()) {
-      Element elCanDestroy = el.getChild("can-destroy");
-      if (elCanDestroy != null) {
-        meta.setCanDestroy(XMLUtils.parseMaterialMatcher(elCanDestroy).getMaterials());
-      }
+    Element elCanDestroy = el.getChild("can-destroy");
+    if (elCanDestroy != null) {
+      NMSHacks.setCanDestroy(meta, XMLUtils.parseMaterialMatcher(elCanDestroy).getMaterials());
+    }
 
-      Element elCanPlaceOn = el.getChild("can-place-on");
-      if (elCanPlaceOn != null) {
-        meta.setCanPlaceOn(XMLUtils.parseMaterialMatcher(elCanPlaceOn).getMaterials());
-      }
+    Element elCanPlaceOn = el.getChild("can-place-on");
+    if (elCanPlaceOn != null) {
+      NMSHacks.setCanPlaceOn(meta, XMLUtils.parseMaterialMatcher(elCanPlaceOn).getMaterials());
     }
   }
 

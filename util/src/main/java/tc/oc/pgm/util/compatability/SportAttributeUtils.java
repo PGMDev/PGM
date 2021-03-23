@@ -5,7 +5,7 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 
-public interface AttributeUtils {
+public interface SportAttributeUtils {
   Attribute[] ATTRIBUTES = Attribute.values();
 
   static void clearAttributes(Player player) {
