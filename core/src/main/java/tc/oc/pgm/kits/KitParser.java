@@ -128,10 +128,10 @@ public abstract class KitParser {
       kits.add(this.parse(child));
     }
 
-    kits.add(this.parseAttributeKit(el));
     kits.add(this.parseArmorKit(el));
     kits.add(this.parseItemKit(el));
     kits.add(this.parsePotionKit(el));
+    kits.add(this.parseAttributeKit(el));
     kits.add(this.parseHealthKit(el));
     kits.add(this.parseHungerKit(el));
     kits.add(this.parseKnockbackReductionKit(el));

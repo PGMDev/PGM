@@ -24,6 +24,7 @@ public class PotionKit extends AbstractKit {
       player.getBukkit().addPotionEffects(this.effects);
     }
 
+    // No swirls by default, KitNode can re-enable them if it so desires
     NMSHacks.setPotionParticles(player.getBukkit(), false);
   }
 
