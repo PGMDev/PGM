@@ -39,6 +39,8 @@ public class ImmutableMaterialSet extends ForwardingSet<Material> {
   public static ImmutableMaterialSet of(Collection<Material> materials) {
     if (materials instanceof ImmutableMaterialSet) {
       return (ImmutableMaterialSet) materials;
+    } else if (materials.isEmpty()) {
+      return EMPTY;
     } else {
       return new ImmutableMaterialSet(Collections.unmodifiableSet(EnumSet.copyOf(materials)));
     }

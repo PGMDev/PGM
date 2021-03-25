@@ -24,7 +24,6 @@ import javax.annotation.Nullable;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -48,7 +47,9 @@ import tc.oc.pgm.shield.ShieldKit;
 import tc.oc.pgm.shield.ShieldParameters;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
+import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.collection.ImmutableMaterialSet;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -127,11 +128,7 @@ public abstract class KitParser {
       kits.add(this.parse(child));
     }
 
-    // TODO: Use reflection for attributes on non sportpaper 1.8
-    if (BukkitUtils.isSportPaper()) {
-      kits.add(this.parseAttributeKit(el));
-    }
-
+    kits.add(this.parseAttributeKit(el));
     kits.add(this.parseArmorKit(el));
     kits.add(this.parseItemKit(el));
     kits.add(this.parsePotionKit(el));
@@ -449,11 +446,20 @@ public abstract class KitParser {
       }
     }
 
-    // TODO: Use reflection for attributes on non sportpaper 1.8
     if (BukkitUtils.isSportPaper()) {
       for (Map.Entry<String, AttributeModifier> entry : parseAttributeModifiers(el).entries()) {
-        meta.addAttributeModifier(entry.getKey(), entry.getValue());
+        AttributeModifier attributeModifier = entry.getValue();
+        meta.addAttributeModifier(
+            entry.getKey(),
+            new org.bukkit.attribute.AttributeModifier(
+                attributeModifier.getUniqueId(),
+                attributeModifier.getName(),
+                attributeModifier.getAmount(),
+                org.bukkit.attribute.AttributeModifier.Operation.fromOpcode(
+                    attributeModifier.getOperation().ordinal())));
       }
+    } else {
+      NMSHacks.applyAttributeModifiers(parseAttributeModifiers(el), meta);
     }
 
     String customName = el.getAttributeValue("name");
@@ -494,12 +500,16 @@ public abstract class KitParser {
 
     Element elCanDestroy = el.getChild("can-destroy");
     if (elCanDestroy != null) {
-      NMSHacks.setCanDestroy(meta, XMLUtils.parseMaterialMatcher(elCanDestroy).getMaterials());
+      NMSHacks.setCanDestroy(
+          meta,
+          ImmutableMaterialSet.of(XMLUtils.parseMaterialMatcher(elCanDestroy).getMaterials()));
     }
 
     Element elCanPlaceOn = el.getChild("can-place-on");
     if (elCanPlaceOn != null) {
-      NMSHacks.setCanPlaceOn(meta, XMLUtils.parseMaterialMatcher(elCanPlaceOn).getMaterials());
+      NMSHacks.setCanPlaceOn(
+          meta,
+          ImmutableMaterialSet.of(XMLUtils.parseMaterialMatcher(elCanPlaceOn).getMaterials()));
     }
   }
 

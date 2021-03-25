@@ -1,6 +1,7 @@
 package tc.oc.pgm.itemmeta;
 
-import java.util.Collection;
+import com.google.common.collect.SetMultimap;
+import com.google.common.collect.Sets;
 import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.attribute.AttributeModifier;
@@ -9,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.collection.ImmutableMaterialSet;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.nms.NMSHacks;
@@ -44,6 +46,7 @@ public class ItemRule {
 
       InventoryUtils.addEnchantments(meta, this.meta.getEnchants());
 
+      // Since SportPaper handles attributes they don't show up in unhandledTags
       if (BukkitUtils.isSportPaper()) {
         for (String attribute : this.meta.getModifiedAttributes()) {
           for (AttributeModifier modifier : this.meta.getAttributeModifiers(attribute)) {
@@ -51,15 +54,22 @@ public class ItemRule {
           }
         }
       } else {
-        // TODO: Do this with reflection
+        SetMultimap<String, tc.oc.pgm.util.attribute.AttributeModifier> attributeModifiers =
+            NMSHacks.getAttributeModifiers(this.meta);
+        attributeModifiers.putAll(NMSHacks.getAttributeModifiers(meta));
+        NMSHacks.applyAttributeModifiers(attributeModifiers, meta);
       }
-      Collection<Material> canDestroy = NMSHacks.getCanDestroy(meta);
-      canDestroy.addAll(NMSHacks.getCanDestroy(this.meta));
-      NMSHacks.setCanDestroy(meta, canDestroy);
+      Sets.SetView<Material> canDestroy =
+          Sets.union(
+              ImmutableMaterialSet.of(NMSHacks.getCanDestroy(meta)),
+              ImmutableMaterialSet.of(NMSHacks.getCanDestroy(this.meta)));
+      Sets.SetView<Material> canPlaceOn =
+          Sets.union(
+              ImmutableMaterialSet.of(NMSHacks.getCanPlaceOn(meta)),
+              ImmutableMaterialSet.of(NMSHacks.getCanPlaceOn(this.meta)));
 
-      Collection<Material> canPlaceOn = NMSHacks.getCanPlaceOn(meta);
-      canPlaceOn.addAll(NMSHacks.getCanPlaceOn(this.meta));
-      NMSHacks.setCanPlaceOn(meta, canPlaceOn);
+      if (!canDestroy.isEmpty()) NMSHacks.setCanDestroy(meta, canDestroy);
+      if (!canPlaceOn.isEmpty()) NMSHacks.setCanPlaceOn(meta, canPlaceOn);
 
       if (this.meta.spigot().isUnbreakable()) meta.spigot().setUnbreakable(true);
 

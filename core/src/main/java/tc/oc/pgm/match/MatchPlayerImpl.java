@@ -47,9 +47,12 @@ import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.attribute.Attribute;
+import tc.oc.pgm.util.attribute.AttributeInstance;
+import tc.oc.pgm.util.attribute.AttributeMap;
+import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.ViaUtils;
-import tc.oc.pgm.util.compatability.SportAttributeUtils;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 
@@ -74,6 +77,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   private final AtomicBoolean protocolReady;
   private final AtomicInteger protocolVersion;
   private final AtomicBoolean vanished;
+  private final AttributeMap attributeMap;
 
   public MatchPlayerImpl(Match match, Player player) {
     this.logger =
@@ -91,6 +95,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     this.vanished = new AtomicBoolean(false);
     this.protocolReady = new AtomicBoolean(ViaUtils.isReady(player));
     this.protocolVersion = new AtomicInteger(ViaUtils.getProtocolVersion(player));
+    this.attributeMap = new AttributeMap(player);
   }
 
   @Override
@@ -282,8 +287,13 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
       }
     }
 
-    if (BukkitUtils.isSportPaper()) {
-      SportAttributeUtils.clearAttributes(bukkit);
+    for (Attribute attribute : Attribute.values()) {
+      AttributeInstance attributes = getAttribute(attribute);
+      if (attributes == null) continue;
+
+      for (AttributeModifier modifier : attributes.getModifiers()) {
+        attributes.removeModifier(modifier);
+      }
     }
 
     NMSHacks.setAbsorption(bukkit, 0);
@@ -414,6 +424,11 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     return PGM.get()
         .getNameDecorationRegistry()
         .getDecoratedName(getBukkit(), getParty().getColor());
+  }
+
+  @Override
+  public AttributeInstance getAttribute(Attribute attribute) {
+    return attributeMap.getAttribute(attribute);
   }
 
   @Override

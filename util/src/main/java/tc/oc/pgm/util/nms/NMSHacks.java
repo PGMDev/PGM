@@ -1,7 +1,9 @@
 package tc.oc.pgm.util.nms;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.SetMultimap;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import java.lang.reflect.Constructor;
@@ -34,6 +36,7 @@ import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.block.RayBlockIntersection;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.ViaUtils;
@@ -939,7 +942,7 @@ public interface NMSHacks {
   String CAN_DESTROY = "CanDestroy";
   String CAN_PLACE_ON = "CanPlaceOn";
 
-  static void setCanDestroy(ItemMeta itemMeta, Collection<Material> materials) {
+  static void setCanDestroy(ItemMeta itemMeta, Set<Material> materials) {
     if (BukkitUtils.isSportPaper()) {
       itemMeta.setCanDestroy(materials);
     }
@@ -953,7 +956,7 @@ public interface NMSHacks {
     return getMaterialCollection(itemMeta, CAN_DESTROY);
   }
 
-  static void setCanPlaceOn(ItemMeta itemMeta, Collection<Material> materials) {
+  static void setCanPlaceOn(ItemMeta itemMeta, Set<Material> materials) {
     if (BukkitUtils.isSportPaper()) {
       itemMeta.setCanPlaceOn(materials);
     }
@@ -975,8 +978,7 @@ public interface NMSHacks {
     return (Map<String, NBTBase>) ReflectionUtils.readField(meta, unhandledTagsField);
   }
 
-  static void setMaterialList(
-      ItemMeta itemMeta, Collection<Material> materials, String canPlaceOn) {
+  static void setMaterialList(ItemMeta itemMeta, Set<Material> materials, String canPlaceOn) {
     Map<String, NBTBase> unhandledTags = getUnhandledTags(itemMeta);
     NBTTagList canDestroyList =
         unhandledTags.containsKey(canPlaceOn)
@@ -993,7 +995,7 @@ public interface NMSHacks {
 
   Field nbtListField = ReflectionUtils.getField(NBTTagList.class, "list");
 
-  static Collection<Material> getMaterialCollection(ItemMeta itemMeta, String key) {
+  static Set<Material> getMaterialCollection(ItemMeta itemMeta, String key) {
     Map<String, NBTBase> unhandledTags = getUnhandledTags(itemMeta);
     if (!unhandledTags.containsKey(key)) return new HashSet<>();
     Set<Material> materialSet = new HashSet<>();
@@ -1006,6 +1008,46 @@ public interface NMSHacks {
     }
 
     return materialSet;
+  }
+
+  static void applyAttributeModifiers(
+      SetMultimap<String, AttributeModifier> attributeModifiers, ItemMeta meta) {
+    NBTTagList list = new NBTTagList();
+    for (Map.Entry<String, AttributeModifier> entry : attributeModifiers.entries()) {
+      AttributeModifier modifier = entry.getValue();
+      NBTTagCompound tag = new NBTTagCompound();
+      tag.setString("Name", modifier.getName());
+      tag.setDouble("Amount", modifier.getAmount());
+      tag.setInt("Operation", modifier.getOperation().ordinal());
+      tag.setLong("UUIDMost", modifier.getUniqueId().getMostSignificantBits());
+      tag.setLong("UUIDLeast", modifier.getUniqueId().getLeastSignificantBits());
+      tag.setString("AttributeName", entry.getKey());
+      list.add(tag);
+    }
+
+    Map<String, NBTBase> unhandledTags = getUnhandledTags(meta);
+    unhandledTags.put("AttributeModifiers", list);
+  }
+
+  static SetMultimap<String, AttributeModifier> getAttributeModifiers(ItemMeta meta) {
+    Map<String, NBTBase> unhandledTags = getUnhandledTags(meta);
+    if (unhandledTags.containsKey("AttributeModifiers")) {
+      final SetMultimap<String, AttributeModifier> attributeModifiers = HashMultimap.create();
+      final NBTTagList modTags = (NBTTagList) unhandledTags.get("AttributeModifiers");
+      for (int i = 0; i < modTags.size(); i++) {
+        final NBTTagCompound modTag = modTags.get(i);
+        attributeModifiers.put(
+            modTag.getString("AttributeName"),
+            new AttributeModifier(
+                new UUID(modTag.getLong("UUIDMost"), modTag.getLong("UUIDLeast")),
+                modTag.getString("Name"),
+                modTag.getDouble("Amount"),
+                AttributeModifier.Operation.fromOpcode(modTag.getInt("Operation"))));
+      }
+      return attributeModifiers;
+    } else {
+      return HashMultimap.create();
+    }
   }
 
   interface FakeEntity {
