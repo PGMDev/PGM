@@ -760,10 +760,6 @@ public interface NMSHacks {
     return ((CraftPlayer) player).getHandle().ping;
   }
 
-  static Packet setPassengerPacket(int riderId, int vehicleId) {
-    return new PacketPlayOutAttachEntity(riderId, vehicleId, false);
-  }
-
   static Packet entityEquipmentPacket(
       int entityId, int slot, org.bukkit.inventory.ItemStack armor) {
     return new PacketPlayOutEntityEquipment(entityId, slot, CraftItemStack.asNMSCopy(armor));
@@ -774,8 +770,14 @@ public interface NMSHacks {
     return Skins.fromProperties(craftPlayer.getProfile().getProperties());
   }
 
+  Field skullProfileField =
+      ReflectionUtils.getField(
+          "org.bukkit.craftbukkit.v1_8_R3.inventory.CraftMetaSkull", "profile");
+
   static void setSkullMetaOwner(SkullMeta meta, String name, UUID uuid, Skin skin) {
-    meta.setOwner(name, uuid, new org.bukkit.Skin(skin.getData(), skin.getSignature()));
+    GameProfile gameProfile = new GameProfile(uuid, name);
+    Skins.setProperties(skin, gameProfile.getProperties());
+    ReflectionUtils.setField(meta, gameProfile, skullProfileField);
   }
 
   static Set<org.bukkit.block.Block> getBlocks(Chunk bukkitChunk, Material material) {
@@ -979,11 +981,11 @@ public interface NMSHacks {
     }
 
     default void ride(Player viewer, Entity rider) {
-      sendPacket(viewer, setPassengerPacket(rider.getEntityId(), entityId()));
+      entityAttach(viewer, rider.getEntityId(), entityId(), false);
     }
 
     default void mount(Player viewer, Entity vehicle) {
-      sendPacket(viewer, setPassengerPacket(entityId(), vehicle.getEntityId()));
+      entityAttach(viewer, entityId(), vehicle.getEntityId(), false);
     }
 
     default void wear(Player viewer, int slot, org.bukkit.inventory.ItemStack item) {
