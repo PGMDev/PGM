@@ -82,7 +82,10 @@ public final class PlayerComponent {
 
     UUID uuid = !isOffline ? player.getUniqueId() : null;
     boolean isNicked = uuid != null && Integration.getNick(player) != null;
-    String nicked = !isOffline && player != null ? Integration.getNick(player) : defName;
+    String nicked =
+        !isOffline && player != null
+            ? Integration.getNick(player) != null ? Integration.getNick(player) : player.getName()
+            : defName;
 
     TextComponent.Builder builder = text();
     if (!isOffline && style.has(NameStyle.Flag.FLAIR)) {
@@ -141,7 +144,7 @@ public final class PlayerComponent {
 
   // Player state checks
   static boolean isDisguised(Player player) {
-    return player.hasMetadata("isVanished");
+    return Integration.isVanished(player);
   }
 
   static boolean isDead(Player player) {
