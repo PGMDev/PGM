@@ -12,6 +12,7 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.Audience;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
 
@@ -44,7 +45,13 @@ public class TabRender {
 
   protected static List<PacketPlayOutPlayerInfo.PlayerInfoData> getBField(
       PacketPlayOutPlayerInfo packet) {
-    return (List<PacketPlayOutPlayerInfo.PlayerInfoData>) ReflectionUtils.readField(packet, bField);
+    // SportPaper makes this field public
+    if (BukkitUtils.isSportPaper()) {
+      return packet.b;
+    } else {
+      return (List<PacketPlayOutPlayerInfo.PlayerInfoData>)
+          ReflectionUtils.readField(packet, bField);
+    }
   }
 
   private String teamName(int slot) {
