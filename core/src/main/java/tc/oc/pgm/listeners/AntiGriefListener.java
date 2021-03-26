@@ -97,7 +97,7 @@ public class AntiGriefListener implements Listener {
                 + TextTranslations.translate(
                     "moderation.defuse.player",
                     clicker.getBukkit(),
-                    owner.getBukkit().getDisplayName(clicker.getBukkit()) + ChatColor.RED));
+                    owner.getBukkit().getDisplayName() + ChatColor.RED));
 
         ChatDispatcher.broadcastAdminChatMessage(
             translatable(

@@ -437,9 +437,7 @@ public class ChatDispatcher implements Listener {
     return StringUtils.bestFuzzyMatch(
         query,
         match.getPlayers().stream()
-            .collect(
-                Collectors.toMap(
-                    player -> player.getBukkit().getName(sender), Function.identity())),
+            .collect(Collectors.toMap(player -> player.getBukkit().getName(), Function.identity())),
         0.75);
   }
 

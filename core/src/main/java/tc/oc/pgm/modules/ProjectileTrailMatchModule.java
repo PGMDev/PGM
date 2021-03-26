@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit;
 import org.bukkit.Color;
 import org.bukkit.Effect;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -12,6 +13,7 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.projectiles.ProjectileSource;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -106,9 +108,14 @@ public class ProjectileTrailMatchModule implements MatchModule, Listener {
     return false;
   }
 
+  static Player getShooter(Projectile projectile) {
+    ProjectileSource shooter = projectile.getShooter();
+    return shooter instanceof Player ? (Player) shooter : null;
+  }
+
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
   public void onProjectileLaunch(ProjectileLaunchEvent event) {
-    MatchPlayer player = match.getPlayer(event.getActor());
+    MatchPlayer player = match.getPlayer(getShooter(event.getEntity()));
     if (player != null) {
       final Projectile projectile = event.getEntity();
       projectile.setMetadata(
@@ -125,7 +132,7 @@ public class ProjectileTrailMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onProjectileHit(ProjectileHitEvent event) {
-    MatchPlayer player = match.getPlayer(event.getActor());
+    MatchPlayer player = match.getPlayer(getShooter(event.getEntity()));
     if (player != null) {
       final Projectile projectile = event.getEntity();
       projectile.removeMetadata(TRAIL_META, PGM.get());

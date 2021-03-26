@@ -17,6 +17,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public class Portal implements FeatureDefinition {
   protected final Region region;
@@ -199,8 +200,12 @@ public class Portal implements FeatureDefinition {
               if (delta == null) {
                 bukkit.teleport(destinationClone, PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
               } else {
-                bukkit.teleportRelative(
-                    delta, deltaYaw, deltaPitch, PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
+                NMSHacks.teleportRelative(
+                    bukkit,
+                    delta,
+                    deltaYaw,
+                    deltaPitch,
+                    PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
               }
 
               // Reset fall distance

@@ -30,6 +30,7 @@ import org.bukkit.craftbukkit.v1_8_R3.scoreboard.CraftTeam;
 import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers;
 import org.bukkit.entity.*;
 import org.bukkit.entity.Entity;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.MaterialData;
@@ -855,6 +856,44 @@ public interface NMSHacks {
   static Skin getPlayerSkin(Player player) {
     CraftPlayer craftPlayer = (CraftPlayer) player;
     return Skins.fromProperties(craftPlayer.getProfile().getProperties());
+  }
+
+  static void updateVelocity(Player player) {
+    EntityPlayer handle = ((CraftPlayer) player).getHandle();
+    handle.playerConnection.sendPacket(new PacketPlayOutEntityVelocity(handle));
+  }
+
+  static boolean teleportRelative(
+      Player player,
+      org.bukkit.util.Vector deltaPos,
+      float deltaYaw,
+      float deltaPitch,
+      PlayerTeleportEvent.TeleportCause cause) {
+    CraftPlayer craftPlayer = (CraftPlayer) player;
+
+    if (craftPlayer.getHandle().playerConnection == null
+        || craftPlayer.getHandle().playerConnection.isDisconnected()) {
+      return false;
+    }
+
+    // From = Players current Location
+    Location from = player.getLocation();
+    // To = Players new Location if Teleport is Successful
+    Location to = from.clone().add(deltaPos);
+    to.setYaw(to.getYaw() + deltaYaw);
+    to.setPitch(to.getPitch() + deltaPitch);
+
+    // Create & Call the Teleport Event.
+    PlayerTeleportEvent event = new PlayerTeleportEvent(player, from, to, cause);
+    Bukkit.getPluginManager().callEvent(event);
+
+    // Return False to inform the Plugin that the Teleport was unsuccessful/cancelled.
+    if (event.isCancelled()) {
+      return false;
+    }
+
+    craftPlayer.getHandle().playerConnection.teleport(to);
+    return true;
   }
 
   Field skullProfileField =

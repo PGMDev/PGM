@@ -128,13 +128,16 @@ public abstract class KitParser {
       kits.add(this.parse(child));
     }
 
+    if (BukkitUtils.isSportPaper()) {
+      // This is only possible in SportPaper
+      kits.add(this.parseKnockbackReductionKit(el));
+    }
     kits.add(this.parseArmorKit(el));
     kits.add(this.parseItemKit(el));
     kits.add(this.parsePotionKit(el));
     kits.add(this.parseAttributeKit(el));
     kits.add(this.parseHealthKit(el));
     kits.add(this.parseHungerKit(el));
-    kits.add(this.parseKnockbackReductionKit(el));
     kits.add(this.parseWalkSpeedKit(el));
     kits.add(this.parseDoubleJumpKit(el));
     kits.add(this.parseEnderPearlKit(el));

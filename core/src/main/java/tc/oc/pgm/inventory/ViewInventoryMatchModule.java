@@ -15,7 +15,6 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
@@ -52,6 +51,7 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.attribute.Attribute;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -332,7 +332,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     Player holder = (Player) inventory.getHolder();
     // Ensure that the title of the inventory is <= 32 characters long to appease Minecraft's
     // restrictions on inventory titles
-    String title = StringUtils.substring(holder.getDisplayName(viewer), 0, 32);
+    String title = StringUtils.substring(holder.getDisplayName(), 0, 32);
 
     Inventory preview = Bukkit.getServer().createInventory(viewer, 45, title);
 
@@ -371,7 +371,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
       }
 
       double knockbackResistance =
-          holder.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE).getValue();
+          matchHolder.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE).getValue();
       if (knockbackResistance > 0) {
         specialLore.add(
             ChatColor.LIGHT_PURPLE
@@ -478,14 +478,15 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     } else {
       Inventory fakeInventory;
       if (realInventory instanceof DoubleChestInventory) {
-        if (realInventory.hasCustomName()) {
+        // hasCustomName not in spigot
+        if (BukkitUtils.isSportPaper() && realInventory.hasCustomName()) {
           fakeInventory =
               Bukkit.createInventory(viewer, realInventory.getSize(), realInventory.getName());
         } else {
           fakeInventory = Bukkit.createInventory(viewer, realInventory.getSize());
         }
       } else {
-        if (realInventory.hasCustomName()) {
+        if (BukkitUtils.isSportPaper() && realInventory.hasCustomName()) {
           fakeInventory =
               Bukkit.createInventory(viewer, realInventory.getType(), realInventory.getName());
         } else {

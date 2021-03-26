@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.util.event.sport.block.BlockDispenseEntityEvent;
 import tc.oc.pgm.util.event.sport.block.BlockFallEvent;
+import tc.oc.pgm.util.event.sport.entity.EntityDespawnInVoidEvent;
 import tc.oc.pgm.util.event.sport.entity.EntityExtinguishEvent;
 import tc.oc.pgm.util.event.sport.entity.ExplosionPrimeByEntityEvent;
 import tc.oc.pgm.util.event.sport.entity.PotionEffectRemoveEvent;
@@ -115,6 +116,12 @@ public class SportPaperListener implements Listener {
             sportEvent.getRadius(),
             sportEvent.getFire(),
             sportEvent.getPrimer());
+    handleCall(pgmEvent, sportEvent);
+  }
+
+  @EventHandler(ignoreCancelled = true)
+  public void onEntityDespawn(org.bukkit.event.entity.EntityDespawnInVoidEvent sportEvent) {
+    EntityDespawnInVoidEvent pgmEvent = new EntityDespawnInVoidEvent(sportEvent.getEntity());
     handleCall(pgmEvent, sportEvent);
   }
 }
