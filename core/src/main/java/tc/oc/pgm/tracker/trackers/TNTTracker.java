@@ -11,7 +11,6 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.TNTInfo;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.event.sport.block.BlockDispenseEntityEvent;
 import tc.oc.pgm.util.event.sport.entity.ExplosionPrimeByEntityEvent;
 
@@ -39,7 +38,7 @@ public class TNTTracker extends AbstractTracker<TNTInfo> {
       TNTPrimed tnt = (TNTPrimed) event.getEntity();
       TNTInfo info = null;
 
-      if (BukkitUtils.isSportPaper() && event instanceof ExplosionPrimeByEntityEvent) {
+      if (event instanceof ExplosionPrimeByEntityEvent) {
         Entity primer = ((ExplosionPrimeByEntityEvent) event).getPrimer();
         if (primer instanceof TNTPrimed) {
           // Primed by another owned explosive, propagate the damage info (e.g. origin location)

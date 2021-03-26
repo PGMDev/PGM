@@ -27,6 +27,7 @@ public class DiscardPotionBottlesMatchModule implements MatchModule, Listener {
   public void onDrinkPotion(final PlayerItemConsumeEvent event) {
     if (event.getItem().getType() == Material.POTION) {
       if (BukkitUtils.isSportPaper()) {
+        // This method does not exist in spigot
         event.setReplacement(new ItemStack(Material.AIR));
       } else {
         int itemSlot = event.getPlayer().getInventory().getHeldItemSlot();

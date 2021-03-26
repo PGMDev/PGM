@@ -446,6 +446,7 @@ public abstract class KitParser {
       }
     }
 
+    // Since this is handled by SportPaper this can't be done through unhandled tags
     if (BukkitUtils.isSportPaper()) {
       for (Map.Entry<String, AttributeModifier> entry : parseAttributeModifiers(el).entries()) {
         AttributeModifier attributeModifier = entry.getValue();

@@ -33,7 +33,6 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 /** A singleton for accessing {@link MessageFormat} and {@link Component} translations. */
 @SuppressWarnings("UnstableApiUsage")
@@ -244,10 +243,6 @@ public final class TextTranslations {
   public static Locale getLocale(@Nullable CommandSender sender) {
     if (sender == null || !(sender instanceof CraftPlayer)) {
       return SOURCE_LOCALE;
-    }
-    // SportPaper has a faster locale lookup
-    if (BukkitUtils.isSportPaper()) {
-      return sender.getLocale();
     }
     return parseLocale(((CraftPlayer) sender).spigot().getLocale());
   }
