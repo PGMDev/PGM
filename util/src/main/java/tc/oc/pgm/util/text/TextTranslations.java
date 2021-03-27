@@ -12,6 +12,7 @@ import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.objects.Object2ObjectAVLTreeMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -20,6 +21,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -61,19 +63,37 @@ public final class TextTranslations {
           "moderation",
           "ui");
 
+  private static SortedMap<String, Map<Locale, MessageFormat>> getTreeMap() {
+    try {
+      TextTranslations.class
+          .getClassLoader()
+          .loadClass("it.unimi.dsi.fastutil.objects.Object2ObjectAVLTreeMap");
+      return new Object2ObjectAVLTreeMap<>(String::compareToIgnoreCase);
+    } catch (ClassNotFoundException e) {
+      return new TreeMap<>();
+    }
+  }
+
+  private static <T, U> Map<T, U> buildHashMap() {
+    try {
+      TextTranslations.class
+          .getClassLoader()
+          .loadClass("it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap");
+      return new Object2ObjectLinkedOpenHashMap<>(Hash.DEFAULT_INITIAL_SIZE, Hash.FAST_LOAD_FACTOR);
+    } catch (ClassNotFoundException e) {
+      return new HashMap<>();
+    }
+  }
+
   // A table of all keys mapped to their locale and message format (*not* thread safe)
   private static final SortedMap<String, Map<Locale, MessageFormat>> TRANSLATIONS_MAP =
-      new Object2ObjectAVLTreeMap<>(String::compareToIgnoreCase);
+      getTreeMap();
+
   private static final Table<String, Locale, MessageFormat> TRANSLATIONS_TABLE =
-      Tables.newCustomTable(
-          TRANSLATIONS_MAP,
-          () ->
-              new Object2ObjectLinkedOpenHashMap<>(
-                  Hash.DEFAULT_INITIAL_SIZE, Hash.FAST_LOAD_FACTOR));
+      Tables.newCustomTable(TRANSLATIONS_MAP, TextTranslations::buildHashMap);
 
   // A cache of locales that are close enough
-  private static final Map<Locale, Locale> LOCALES =
-      new Object2ObjectLinkedOpenHashMap<>(Hash.DEFAULT_INITIAL_SIZE, Hash.VERY_FAST_LOAD_FACTOR);
+  private static final Map<Locale, Locale> LOCALES = buildHashMap();
 
   static {
     // If the source locale has no text translations, consider this a fatal error
