@@ -1,7 +1,7 @@
 package tc.oc.pgm.itemmeta;
 
 import com.google.common.collect.SetMultimap;
-import com.google.common.collect.Sets;
+import java.util.HashSet;
 import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.attribute.AttributeModifier;
@@ -10,7 +10,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.collection.ImmutableMaterialSet;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.nms.NMSHacks;
@@ -59,14 +58,13 @@ public class ItemRule {
         attributeModifiers.putAll(NMSHacks.getAttributeModifiers(meta));
         NMSHacks.applyAttributeModifiers(attributeModifiers, meta);
       }
-      Sets.SetView<Material> canDestroy =
-          Sets.union(
-              ImmutableMaterialSet.of(NMSHacks.getCanDestroy(meta)),
-              ImmutableMaterialSet.of(NMSHacks.getCanDestroy(this.meta)));
-      Sets.SetView<Material> canPlaceOn =
-          Sets.union(
-              ImmutableMaterialSet.of(NMSHacks.getCanPlaceOn(meta)),
-              ImmutableMaterialSet.of(NMSHacks.getCanPlaceOn(this.meta)));
+      Set<Material> canDestroy = new HashSet<>();
+      canDestroy.addAll(NMSHacks.getCanDestroy(meta));
+      canDestroy.addAll(NMSHacks.getCanDestroy(this.meta));
+
+      Set<Material> canPlaceOn = new HashSet<>();
+      canPlaceOn.addAll(NMSHacks.getCanPlaceOn(meta));
+      canPlaceOn.addAll(NMSHacks.getCanPlaceOn(this.meta));
 
       if (!canDestroy.isEmpty()) NMSHacks.setCanDestroy(meta, canDestroy);
       if (!canPlaceOn.isEmpty()) NMSHacks.setCanPlaceOn(meta, canPlaceOn);

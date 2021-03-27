@@ -49,7 +49,6 @@ import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.collection.ImmutableMaterialSet;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -128,16 +127,13 @@ public abstract class KitParser {
       kits.add(this.parse(child));
     }
 
-    if (BukkitUtils.isSportPaper()) {
-      // This is only possible in SportPaper
-      kits.add(this.parseKnockbackReductionKit(el));
-    }
     kits.add(this.parseArmorKit(el));
     kits.add(this.parseItemKit(el));
     kits.add(this.parsePotionKit(el));
     kits.add(this.parseAttributeKit(el));
     kits.add(this.parseHealthKit(el));
     kits.add(this.parseHungerKit(el));
+    kits.add(this.parseKnockbackReductionKit(el));
     kits.add(this.parseWalkSpeedKit(el));
     kits.add(this.parseDoubleJumpKit(el));
     kits.add(this.parseEnderPearlKit(el));
@@ -154,6 +150,7 @@ public abstract class KitParser {
   }
 
   public KnockbackReductionKit parseKnockbackReductionKit(Element el) throws InvalidXMLException {
+    if (!BukkitUtils.isSportPaper()) return null;
     Element child = el.getChild("knockback-reduction");
     if (child == null) {
       return null;
@@ -504,16 +501,12 @@ public abstract class KitParser {
 
     Element elCanDestroy = el.getChild("can-destroy");
     if (elCanDestroy != null) {
-      NMSHacks.setCanDestroy(
-          meta,
-          ImmutableMaterialSet.of(XMLUtils.parseMaterialMatcher(elCanDestroy).getMaterials()));
+      NMSHacks.setCanDestroy(meta, XMLUtils.parseMaterialMatcher(elCanDestroy).getMaterials());
     }
 
     Element elCanPlaceOn = el.getChild("can-place-on");
     if (elCanPlaceOn != null) {
-      NMSHacks.setCanPlaceOn(
-          meta,
-          ImmutableMaterialSet.of(XMLUtils.parseMaterialMatcher(elCanPlaceOn).getMaterials()));
+      NMSHacks.setCanPlaceOn(meta, XMLUtils.parseMaterialMatcher(elCanPlaceOn).getMaterials());
     }
   }
 

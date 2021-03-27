@@ -975,7 +975,7 @@ public interface NMSHacks {
   String CAN_DESTROY = "CanDestroy";
   String CAN_PLACE_ON = "CanPlaceOn";
 
-  static void setCanDestroy(ItemMeta itemMeta, Set<Material> materials) {
+  static void setCanDestroy(ItemMeta itemMeta, Collection<Material> materials) {
     if (BukkitUtils.isSportPaper()) {
       // Since this is handled by SportPaper this can't be done through unhandled tags
       itemMeta.setCanDestroy(materials);
@@ -991,7 +991,7 @@ public interface NMSHacks {
     return getMaterialCollection(itemMeta, CAN_DESTROY);
   }
 
-  static void setCanPlaceOn(ItemMeta itemMeta, Set<Material> materials) {
+  static void setCanPlaceOn(ItemMeta itemMeta, Collection<Material> materials) {
     if (BukkitUtils.isSportPaper()) {
       // Since this is handled by SportPaper this can't be done through unhandled tags
       itemMeta.setCanPlaceOn(materials);
@@ -1015,7 +1015,8 @@ public interface NMSHacks {
     return (Map<String, NBTBase>) ReflectionUtils.readField(meta, unhandledTagsField);
   }
 
-  static void setMaterialList(ItemMeta itemMeta, Set<Material> materials, String canPlaceOn) {
+  static void setMaterialList(
+      ItemMeta itemMeta, Collection<Material> materials, String canPlaceOn) {
     Map<String, NBTBase> unhandledTags = getUnhandledTags(itemMeta);
     NBTTagList canDestroyList =
         unhandledTags.containsKey(canPlaceOn)
@@ -1032,7 +1033,7 @@ public interface NMSHacks {
 
   Field nbtListField = ReflectionUtils.getField(NBTTagList.class, "list");
 
-  static Set<Material> getMaterialCollection(ItemMeta itemMeta, String key) {
+  static Collection<Material> getMaterialCollection(ItemMeta itemMeta, String key) {
     Map<String, NBTBase> unhandledTags = getUnhandledTags(itemMeta);
     if (!unhandledTags.containsKey(key)) return new HashSet<>();
     Set<Material> materialSet = new HashSet<>();
