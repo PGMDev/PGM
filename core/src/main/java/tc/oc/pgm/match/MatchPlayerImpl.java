@@ -50,6 +50,7 @@ import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.attribute.Attribute;
 import tc.oc.pgm.util.attribute.AttributeInstance;
 import tc.oc.pgm.util.attribute.AttributeMap;
+import tc.oc.pgm.util.attribute.AttributeMapImpl;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.ViaUtils;
@@ -95,7 +96,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     this.vanished = new AtomicBoolean(false);
     this.protocolReady = new AtomicBoolean(ViaUtils.isReady(player));
     this.protocolVersion = new AtomicInteger(ViaUtils.getProtocolVersion(player));
-    this.attributeMap = new AttributeMap(player);
+    this.attributeMap = new AttributeMapImpl(player);
   }
 
   @Override
