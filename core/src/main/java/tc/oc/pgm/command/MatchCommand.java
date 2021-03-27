@@ -95,7 +95,7 @@ public final class MatchCommand {
                   translatable("match.info.players", NamedTextColor.YELLOW)
                       .append(text(": ", NamedTextColor.GRAY))
                       .append(text(match.getParticipants().size(), NamedTextColor.WHITE))
-                      .append(text('/' + ffamm.getMaxPlayers(), NamedTextColor.GRAY)))
+                      .append(text("/" + ffamm.getMaxPlayers(), NamedTextColor.GRAY)))
               .build());
     }
 
