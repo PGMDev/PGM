@@ -107,19 +107,22 @@ public final class PlayerComponent {
     if (!isOffline
         && style.has(NameStyle.Flag.DISGUISE)
         && (isDisguised(player) || (isNicked && canViewNick(player, viewer)))) {
-
       name.decoration(TextDecoration.STRIKETHROUGH, true);
+    }
 
-      // Reveal nickname
-      if (isNicked && style.has(Flag.REVEAL) && viewer != null && canViewNick(player, viewer)) {
-        name.append(space().decoration(TextDecoration.STRIKETHROUGH, false))
-            .append(
-                text(
-                        Integration.getNick(player),
-                        provider.getColor(player.getUniqueId()),
-                        TextDecoration.ITALIC)
-                    .decoration(TextDecoration.STRIKETHROUGH, false));
-      }
+    if (!isOffline
+        && style.has(Flag.REVEAL)
+        && isNicked
+        && viewer != null
+        && canViewNick(player, viewer)) {
+      name.decoration(TextDecoration.STRIKETHROUGH, true);
+      name.append(space().decoration(TextDecoration.STRIKETHROUGH, false))
+          .append(
+              text(
+                      Integration.getNick(player),
+                      provider.getColor(player.getUniqueId()),
+                      TextDecoration.ITALIC)
+                  .decoration(TextDecoration.STRIKETHROUGH, false));
     }
 
     if (!isOffline
