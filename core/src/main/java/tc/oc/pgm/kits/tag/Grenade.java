@@ -5,6 +5,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.Metadatable;
 import org.bukkit.plugin.Plugin;
+import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.util.bukkit.MetadataUtils;
 import tc.oc.pgm.util.inventory.tag.ItemTag;
 
 public class Grenade {
@@ -62,7 +64,7 @@ public class Grenade {
 
   public static @Nullable Grenade get(Metadatable entity) {
     return entity.hasMetadata(METADATA_KEY)
-        ? (Grenade) entity.getMetadata(METADATA_KEY).get(0).value()
+        ? (Grenade) MetadataUtils.getMetadata(entity, METADATA_KEY, PGM.get()).value()
         : null;
   }
 

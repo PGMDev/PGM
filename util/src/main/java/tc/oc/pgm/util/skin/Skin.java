@@ -2,17 +2,6 @@ package tc.oc.pgm.util.skin;
 
 /** A self-contained skin */
 public class Skin {
-  // NOTE: ordinals must match bit positions in packet data
-  public static enum Part {
-    CAPE,
-    JACKET,
-    LEFT_SLEEVE,
-    RIGHT_SLEEVE,
-    LEFT_PANTS_LEG,
-    RIGHT_PANTS_LEG,
-    HAT
-  }
-
   public static final Skin EMPTY = new Skin(null, null);
 
   private final String data;

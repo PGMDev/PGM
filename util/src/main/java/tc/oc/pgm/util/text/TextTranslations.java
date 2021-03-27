@@ -31,7 +31,7 @@ import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.Translator;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /** A singleton for accessing {@link MessageFormat} and {@link Component} translations. */
@@ -241,10 +241,10 @@ public final class TextTranslations {
   }
 
   public static Locale getLocale(@Nullable CommandSender sender) {
-    if (sender == null || !(sender instanceof CraftPlayer)) {
+    if (sender == null || !(sender instanceof Player)) {
       return SOURCE_LOCALE;
     }
-    return parseLocale(((CraftPlayer) sender).spigot().getLocale());
+    return parseLocale(((Player) sender).spigot().getLocale());
   }
 
   /**

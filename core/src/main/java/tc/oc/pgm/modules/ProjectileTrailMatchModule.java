@@ -12,7 +12,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
 import org.bukkit.projectiles.ProjectileSource;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
@@ -22,6 +21,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.util.bukkit.MetadataUtils;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ProjectileTrailMatchModule implements MatchModule, Listener {
@@ -46,12 +46,11 @@ public class ProjectileTrailMatchModule implements MatchModule, Listener {
               if (projectile.isDead() || projectile.isOnGround()) {
                 projectile.removeMetadata(TRAIL_META, PGM.get());
               } else {
-                Color color = null;
-                for (MetadataValue mv : projectile.getMetadata(TRAIL_META)) {
-                  if (mv.getOwningPlugin().equals(PGM.get())) {
-                    color = (Color) mv.value();
-                  }
-                }
+                Color color =
+                    projectile.hasMetadata(TRAIL_META)
+                        ? (Color)
+                            MetadataUtils.getMetadata(projectile, TRAIL_META, PGM.get()).value()
+                        : null;
 
                 for (MatchPlayer player : match.getPlayers()) {
                   boolean colors =
@@ -98,11 +97,7 @@ public class ProjectileTrailMatchModule implements MatchModule, Listener {
     if (projectile instanceof Arrow) {
       final Arrow arrow = (Arrow) projectile;
       if (arrow.hasMetadata(CRITICAL_META)) {
-        for (MetadataValue mv : arrow.getMetadata(CRITICAL_META)) {
-          if (mv.getOwningPlugin().equals(PGM.get())) {
-            return mv.asBoolean();
-          }
-        }
+        return MetadataUtils.getMetadata(projectile, CRITICAL_META, PGM.get()).asBoolean();
       }
     }
     return false;
@@ -140,11 +135,7 @@ public class ProjectileTrailMatchModule implements MatchModule, Listener {
       if (projectile instanceof Arrow) {
         final Arrow arrow = (Arrow) projectile;
         if (arrow.hasMetadata(CRITICAL_META)) {
-          for (MetadataValue mv : arrow.getMetadata(CRITICAL_META)) {
-            if (mv.getOwningPlugin().equals(PGM.get())) {
-              arrow.setCritical(mv.asBoolean());
-            }
-          }
+          arrow.setCritical(MetadataUtils.getMetadata(arrow, CRITICAL_META, PGM.get()).asBoolean());
         }
       }
     }

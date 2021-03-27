@@ -26,6 +26,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.projectile.EntityLaunchEvent;
+import tc.oc.pgm.util.bukkit.MetadataUtils;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
@@ -99,9 +100,9 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
 
       // If the custom projectile replaced an arrow, recreate some effects specific to arrows
       if (projectile.hasMetadata("damage")) {
-        boolean critical = projectile.getMetadata("critical").get(0).asBoolean();
-        int knockback = projectile.getMetadata("knockback").get(0).asInt();
-        double damage = projectile.getMetadata("damage").get(0).asDouble();
+        boolean critical = MetadataUtils.getMetadata(projectile, "critical", PGM.get()).asBoolean();
+        int knockback = MetadataUtils.getMetadata(projectile, "knockback", PGM.get()).asInt();
+        double damage = MetadataUtils.getMetadata(projectile, "damage", PGM.get()).asDouble();
         double speed = projectile.getVelocity().length();
 
         // Reproduce the damage calculation from nms.EntityArrow with the addition of our modifier

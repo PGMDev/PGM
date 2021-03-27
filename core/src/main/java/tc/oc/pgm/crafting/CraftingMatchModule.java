@@ -1,7 +1,7 @@
 package tc.oc.pgm.crafting;
 
 import java.util.Set;
-import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -29,14 +29,9 @@ public class CraftingMatchModule implements MatchModule, Listener {
 
   @Override
   public void enable() {
-    if (BukkitUtils.isSportPaper()) {
-      for (Recipe recipe : customRecipes) {
-        match.getWorld().addRecipe(recipe);
-      }
-    } else {
-      for (Recipe recipe : customRecipes) {
-        Bukkit.addRecipe(recipe);
-      }
+    World world = match.getWorld();
+    for (Recipe recipe : customRecipes) {
+      BukkitUtils.addRecipe(world, recipe);
     }
   }
 
@@ -45,11 +40,7 @@ public class CraftingMatchModule implements MatchModule, Listener {
     // Recipe changes affect all worlds on the server, so we make changes at match start/end
     // to avoid interfering with adjacent matches. If we wait until unload() to reset them,
     // the next match would already be loaded.
-    if (BukkitUtils.isSportPaper()) {
-      match.getWorld().resetRecipes();
-    } else {
-      Bukkit.resetRecipes();
-    }
+    BukkitUtils.resetRecipes(match.getWorld());
   }
 
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)

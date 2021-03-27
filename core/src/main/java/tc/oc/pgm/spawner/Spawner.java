@@ -9,7 +9,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.entity.ItemMergeEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
-import org.bukkit.metadata.MetadataValue;
+import org.bukkit.metadata.Metadatable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.Tickable;
@@ -17,6 +17,7 @@ import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.bukkit.MetadataUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
@@ -103,17 +104,13 @@ public class Spawner implements Listener, Tickable {
 
     int entitySpawnerID = -1;
     int targetSpawnerID = -1;
-    for (MetadataValue mv : event.getEntity().getMetadata(METADATA_KEY)) {
-      if (mv.getOwningPlugin().equals(PGM.get())) {
-        entitySpawnerID = mv.asInt();
-        break;
-      }
+    if (event.getEntity().hasMetadata(METADATA_KEY)) {
+      entitySpawnerID =
+          MetadataUtils.getMetadata(event.getEntity(), METADATA_KEY, PGM.get()).asInt();
     }
-    for (MetadataValue mv : event.getTarget().getMetadata(METADATA_KEY)) {
-      if (mv.getOwningPlugin().equals(PGM.get())) {
-        targetSpawnerID = mv.asInt();
-        break;
-      }
+    if (event.getTarget().hasMetadata(METADATA_KEY)) {
+      targetSpawnerID =
+          MetadataUtils.getMetadata(event.getTarget(), METADATA_KEY, PGM.get()).asInt();
     }
     // Cancel the merge if the items are from different PGM spawners
     if (entitySpawnerID != targetSpawnerID) {
@@ -122,44 +119,30 @@ public class Spawner implements Listener, Tickable {
     }
   }
 
-  @EventHandler(priority = EventPriority.MONITOR)
-  public void onEntityDeath(EntityDeathEvent event) {
-    if (event.getEntity().hasMetadata(METADATA_KEY)) {
-      for (MetadataValue mv : event.getEntity().getMetadata(METADATA_KEY)) {
-        if (mv.getOwningPlugin().equals(PGM.get()) && mv.asInt() == definition.numericID) {
-          spawnedEntities--;
-          spawnedEntities = Math.max(0, spawnedEntities);
-          return;
-        }
+  private void handleEntityRemoveEvent(Metadatable metadatable, int amount) {
+    if (metadatable.hasMetadata(METADATA_KEY)) {
+      if (MetadataUtils.getMetadata(metadatable, METADATA_KEY, PGM.get()).asInt()
+          == definition.numericID) {
+        spawnedEntities -= amount;
+        spawnedEntities = Math.max(0, spawnedEntities);
       }
     }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onEntityDeath(EntityDeathEvent event) {
+    handleEntityRemoveEvent(event.getEntity(), 1);
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onItemDespawn(ItemDespawnEvent event) {
-    if (event.getEntity().hasMetadata(METADATA_KEY)) {
-      for (MetadataValue mv : event.getEntity().getMetadata(METADATA_KEY)) {
-        if (mv.getOwningPlugin().equals(PGM.get()) && mv.asInt() == definition.numericID) {
-          spawnedEntities -= event.getEntity().getItemStack().getAmount();
-          spawnedEntities = Math.max(0, spawnedEntities);
-          return;
-        }
-      }
-    }
+    handleEntityRemoveEvent(event.getEntity(), event.getEntity().getItemStack().getAmount());
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerPickup(PlayerPickupItemEvent event) {
-    if (!event.isCancelled() && event.getItem().hasMetadata(METADATA_KEY)) {
-      for (MetadataValue mv : event.getItem().getMetadata(METADATA_KEY)) {
-        if (mv.getOwningPlugin().equals(PGM.get()) && mv.asInt() == definition.numericID) {
-          event.getItem().removeMetadata(METADATA_KEY, PGM.get());
-          spawnedEntities -= event.getItem().getItemStack().getAmount();
-          spawnedEntities = Math.max(0, spawnedEntities);
-          return;
-        }
-      }
-    }
+    if (event.isCancelled()) return;
+    handleEntityRemoveEvent(event.getItem(), event.getItem().getItemStack().getAmount());
   }
 
   @EventHandler(priority = EventPriority.MONITOR)

@@ -1,7 +1,5 @@
 package tc.oc.pgm.util.compatability;
 
-import java.util.EnumSet;
-import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -18,7 +16,6 @@ import tc.oc.pgm.util.event.sport.player.PlayerLocaleChangeEvent;
 import tc.oc.pgm.util.event.sport.player.PlayerOnGroundEvent;
 import tc.oc.pgm.util.event.sport.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.event.sport.player.PlayerSpawnEntityEvent;
-import tc.oc.pgm.util.skin.Skin;
 
 public class SportPaperListener implements Listener {
 
@@ -69,13 +66,7 @@ public class SportPaperListener implements Listener {
 
   @EventHandler(ignoreCancelled = true)
   public void onSkinPartsChange(org.bukkit.event.player.PlayerSkinPartsChangeEvent sportEvent) {
-    Set<org.bukkit.Skin.Part> sportParts = sportEvent.getParts();
-    Set<Skin.Part> pgmParts = EnumSet.noneOf(Skin.Part.class);
-    for (org.bukkit.Skin.Part part : sportParts) {
-      pgmParts.add(Skin.Part.values()[part.ordinal()]);
-    }
-    PlayerSkinPartsChangeEvent pgmEvent =
-        new PlayerSkinPartsChangeEvent(sportEvent.getPlayer(), pgmParts);
+    PlayerSkinPartsChangeEvent pgmEvent = new PlayerSkinPartsChangeEvent(sportEvent.getPlayer());
     handleCall(pgmEvent, sportEvent);
   }
 
