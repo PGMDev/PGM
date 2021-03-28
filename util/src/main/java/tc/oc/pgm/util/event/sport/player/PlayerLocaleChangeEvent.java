@@ -3,8 +3,10 @@ package tc.oc.pgm.util.event.sport.player;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;
+import tc.oc.pgm.util.event.SportPaper;
 
 /** Called when the locale of the player is changed. */
+@SportPaper
 public class PlayerLocaleChangeEvent extends PlayerEvent {
   private static final HandlerList handlers = new HandlerList();
   private final String oldLocale;

@@ -3,7 +3,9 @@ package tc.oc.pgm.util.event.sport.player;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;
+import tc.oc.pgm.util.event.SportPaper;
 
+@SportPaper
 public class PlayerSkinPartsChangeEvent extends PlayerEvent {
 
   public PlayerSkinPartsChangeEvent(Player who) {

@@ -3,7 +3,9 @@ package tc.oc.pgm.util.event.sport.entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.potion.PotionEffect;
+import tc.oc.pgm.util.event.SportPaper;
 
+@SportPaper
 public abstract class PotionEffectEvent extends EntityEvent {
 
   private final PotionEffect effect;

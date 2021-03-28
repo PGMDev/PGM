@@ -6,8 +6,10 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.util.event.SportPaper;
 
 /** Called when an entity is dispensed from a block. */
+@SportPaper
 public class BlockDispenseEntityEvent extends BlockDispenseEvent implements Cancellable {
   private final Entity entity;
 

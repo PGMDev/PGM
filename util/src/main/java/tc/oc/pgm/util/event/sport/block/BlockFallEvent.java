@@ -5,7 +5,9 @@ import org.bukkit.entity.FallingBlock;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.block.BlockEvent;
+import tc.oc.pgm.util.event.SportPaper;
 
+@SportPaper
 public class BlockFallEvent extends BlockEvent implements Cancellable {
   private static final HandlerList handlers = new HandlerList();
   private FallingBlock fallingBlock;

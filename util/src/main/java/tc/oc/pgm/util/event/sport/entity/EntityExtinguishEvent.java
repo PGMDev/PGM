@@ -3,8 +3,10 @@ package tc.oc.pgm.util.event.sport.entity;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.entity.EntityEvent;
+import tc.oc.pgm.util.event.SportPaper;
 
 /** Called when a burning entity is extinguished. */
+@SportPaper
 public class EntityExtinguishEvent extends EntityEvent {
 
   public EntityExtinguishEvent(Entity combustee) {

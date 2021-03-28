@@ -4,8 +4,10 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.bukkit.potion.PotionEffect;
+import tc.oc.pgm.util.event.SportPaper;
 
 /** Called when a potion effect is removed from an entity for whatever reason */
+@SportPaper
 public class PotionEffectRemoveEvent extends PotionEffectEvent implements Cancellable {
 
   private boolean cancelled;
