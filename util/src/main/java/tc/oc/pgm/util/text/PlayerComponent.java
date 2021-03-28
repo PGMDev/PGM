@@ -60,8 +60,11 @@ public final class PlayerComponent {
 
     NameDecorationProvider provider = NameDecorationProvider.DEFAULT;
     if (player != null && player.hasMetadata(NameDecorationProvider.METADATA_KEY)) {
-      MetadataUtils.getMetadata(
-          player, NameDecorationProvider.METADATA_KEY, BukkitUtils.getPlugin());
+      provider =
+          (NameDecorationProvider)
+              MetadataUtils.getMetadata(
+                      player, NameDecorationProvider.METADATA_KEY, BukkitUtils.getPlugin())
+                  .value();
     }
 
     UUID uuid = !isOffline ? player.getUniqueId() : null;
