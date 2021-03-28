@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.event.sport.entity;
+package tc.oc.pgm.util.event.entity;
 
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityEvent;

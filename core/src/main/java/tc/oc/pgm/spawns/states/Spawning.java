@@ -16,7 +16,7 @@ import tc.oc.pgm.api.player.event.ObserverInteractEvent;
 import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
-import tc.oc.pgm.util.event.sport.player.PlayerAttackEntityEvent;
+import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
 
 /** Player is waiting to spawn as a participant */
 public abstract class Spawning extends Participating {

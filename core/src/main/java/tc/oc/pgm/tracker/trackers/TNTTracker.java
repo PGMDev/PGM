@@ -11,8 +11,8 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.TNTInfo;
-import tc.oc.pgm.util.event.sport.block.BlockDispenseEntityEvent;
-import tc.oc.pgm.util.event.sport.entity.ExplosionPrimeByEntityEvent;
+import tc.oc.pgm.util.event.block.BlockDispenseEntityEvent;
+import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
 
 /** Updates the state of owned TNT blocks and entities */
 public class TNTTracker extends AbstractTracker<TNTInfo> {

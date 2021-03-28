@@ -21,7 +21,7 @@ import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.BlockInfo;
 import tc.oc.pgm.tracker.info.EntityInfo;
 import tc.oc.pgm.tracker.info.FireInfo;
-import tc.oc.pgm.util.event.sport.entity.EntityExtinguishEvent;
+import tc.oc.pgm.util.event.entity.EntityExtinguishEvent;
 import tc.oc.pgm.util.material.Materials;
 
 /**

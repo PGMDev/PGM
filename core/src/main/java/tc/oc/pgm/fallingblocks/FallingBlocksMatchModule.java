@@ -31,7 +31,7 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.util.collection.LongDeque;
-import tc.oc.pgm.util.event.sport.block.BlockFallEvent;
+import tc.oc.pgm.util.event.block.BlockFallEvent;
 import tc.oc.pgm.util.material.Materials;
 
 @ListenerScope(MatchScope.RUNNING)

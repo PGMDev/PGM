@@ -19,7 +19,7 @@ import org.bukkit.material.MaterialData;
 import tc.oc.pgm.blockdrops.BlockDrops;
 import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.event.GeneralizedEvent;
-import tc.oc.pgm.util.event.sport.entity.ExplosionPrimeByEntityEvent;
+import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
 
 /** Called when a {@link Block} transforms from one {@link BlockState} to another. */
 public class BlockTransformEvent extends GeneralizedEvent {

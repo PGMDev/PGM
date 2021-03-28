@@ -64,7 +64,7 @@ import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.events.TeamRespawnsChangeEvent;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.event.sport.player.PlayerLocaleChangeEvent;
+import tc.oc.pgm.util.event.player.PlayerLocaleChangeEvent;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;
 import tc.oc.pgm.wool.MonumentWool;

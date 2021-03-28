@@ -34,7 +34,7 @@ import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.util.block.RayBlockIntersection;
 import tc.oc.pgm.util.event.PlayerPunchBlockEvent;
 import tc.oc.pgm.util.event.PlayerTrampleBlockEvent;
-import tc.oc.pgm.util.event.sport.entity.EntityDespawnInVoidEvent;
+import tc.oc.pgm.util.event.entity.EntityDespawnInVoidEvent;
 import tc.oc.pgm.util.material.Materials;
 
 @ListenerScope(MatchScope.RUNNING)

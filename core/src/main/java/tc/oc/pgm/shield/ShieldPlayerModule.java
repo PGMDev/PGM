@@ -11,7 +11,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.event.sport.entity.PotionEffectRemoveEvent;
+import tc.oc.pgm.util.event.entity.PotionEffectRemoveEvent;
 import tc.oc.pgm.util.nms.NMSHacks;
 
 public class ShieldPlayerModule implements Tickable {

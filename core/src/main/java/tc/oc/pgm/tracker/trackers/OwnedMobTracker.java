@@ -13,8 +13,8 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.projectile.EntityLaunchEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.MobInfo;
-import tc.oc.pgm.util.event.sport.block.BlockDispenseEntityEvent;
-import tc.oc.pgm.util.event.sport.player.PlayerSpawnEntityEvent;
+import tc.oc.pgm.util.event.block.BlockDispenseEntityEvent;
+import tc.oc.pgm.util.event.player.PlayerSpawnEntityEvent;
 
 /** Updates the state of owned mobs with info about the owner. */
 public class OwnedMobTracker extends AbstractTracker<MobInfo> {

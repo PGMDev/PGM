@@ -15,7 +15,7 @@ import tc.oc.pgm.events.PlayerJoinPartyEvent;
 import tc.oc.pgm.spawns.RespawnOptions;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
-import tc.oc.pgm.util.event.sport.player.PlayerAttackEntityEvent;
+import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
 
 public abstract class State {
 

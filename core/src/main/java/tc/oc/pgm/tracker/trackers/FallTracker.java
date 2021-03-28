@@ -28,7 +28,7 @@ import tc.oc.pgm.tracker.info.FallState;
 import tc.oc.pgm.tracker.info.GenericFallInfo;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.event.sport.player.PlayerOnGroundEvent;
+import tc.oc.pgm.util.event.player.PlayerOnGroundEvent;
 import tc.oc.pgm.util.material.Materials;
 
 /** Tracks the state of falls caused by other players and resolves the damage caused by them. */

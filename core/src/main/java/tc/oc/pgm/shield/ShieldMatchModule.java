@@ -17,7 +17,7 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.util.ClassLogger;
-import tc.oc.pgm.util.event.sport.entity.PotionEffectRemoveEvent;
+import tc.oc.pgm.util.event.entity.PotionEffectRemoveEvent;
 
 @ListenerScope(MatchScope.LOADED)
 public class ShieldMatchModule implements MatchModule, Listener, Tickable {

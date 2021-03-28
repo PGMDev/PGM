@@ -5,17 +5,17 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import tc.oc.pgm.util.event.sport.block.BlockDispenseEntityEvent;
-import tc.oc.pgm.util.event.sport.block.BlockFallEvent;
-import tc.oc.pgm.util.event.sport.entity.EntityDespawnInVoidEvent;
-import tc.oc.pgm.util.event.sport.entity.EntityExtinguishEvent;
-import tc.oc.pgm.util.event.sport.entity.ExplosionPrimeByEntityEvent;
-import tc.oc.pgm.util.event.sport.entity.PotionEffectRemoveEvent;
-import tc.oc.pgm.util.event.sport.player.PlayerAttackEntityEvent;
-import tc.oc.pgm.util.event.sport.player.PlayerLocaleChangeEvent;
-import tc.oc.pgm.util.event.sport.player.PlayerOnGroundEvent;
-import tc.oc.pgm.util.event.sport.player.PlayerSkinPartsChangeEvent;
-import tc.oc.pgm.util.event.sport.player.PlayerSpawnEntityEvent;
+import tc.oc.pgm.util.event.block.BlockDispenseEntityEvent;
+import tc.oc.pgm.util.event.block.BlockFallEvent;
+import tc.oc.pgm.util.event.entity.EntityDespawnInVoidEvent;
+import tc.oc.pgm.util.event.entity.EntityExtinguishEvent;
+import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
+import tc.oc.pgm.util.event.entity.PotionEffectRemoveEvent;
+import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
+import tc.oc.pgm.util.event.player.PlayerLocaleChangeEvent;
+import tc.oc.pgm.util.event.player.PlayerOnGroundEvent;
+import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
+import tc.oc.pgm.util.event.player.PlayerSpawnEntityEvent;
 
 public class SportPaperListener implements Listener {
 

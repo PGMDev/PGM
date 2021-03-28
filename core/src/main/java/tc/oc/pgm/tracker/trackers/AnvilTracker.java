@@ -8,7 +8,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.AnvilInfo;
-import tc.oc.pgm.util.event.sport.block.BlockFallEvent;
+import tc.oc.pgm.util.event.block.BlockFallEvent;
 
 /**
  * Updates the state of owned anvil blocks and entities.

@@ -43,7 +43,7 @@ import tc.oc.pgm.spawns.states.Joining;
 import tc.oc.pgm.spawns.states.Observing;
 import tc.oc.pgm.spawns.states.State;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
-import tc.oc.pgm.util.event.sport.player.PlayerAttackEntityEvent;
+import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
 
 @ListenerScope(MatchScope.LOADED)
 public class SpawnMatchModule implements MatchModule, Listener, Tickable {

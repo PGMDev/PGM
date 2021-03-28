@@ -33,7 +33,7 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.tnt.TNTMatchModule;
 import tc.oc.pgm.tracker.Trackers;
-import tc.oc.pgm.util.event.sport.player.PlayerAttackEntityEvent;
+import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.MinecraftComponent;
 import tc.oc.pgm.util.text.TextFormatter;

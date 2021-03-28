@@ -20,7 +20,7 @@ import tc.oc.pgm.tracker.info.ExplosionInfo;
 import tc.oc.pgm.tracker.info.PlayerInfo;
 import tc.oc.pgm.tracker.info.SpleefInfo;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.event.sport.player.PlayerOnGroundEvent;
+import tc.oc.pgm.util.event.player.PlayerOnGroundEvent;
 import tc.oc.pgm.util.material.Materials;
 
 /**

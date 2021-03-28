@@ -65,8 +65,8 @@ import tc.oc.pgm.tracker.Trackers;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.bukkit.Events;
-import tc.oc.pgm.util.event.sport.block.BlockFallEvent;
-import tc.oc.pgm.util.event.sport.entity.ExplosionPrimeByEntityEvent;
+import tc.oc.pgm.util.event.block.BlockFallEvent;
+import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
 import tc.oc.pgm.util.material.Materials;
 
 public class BlockTransformListener implements Listener {

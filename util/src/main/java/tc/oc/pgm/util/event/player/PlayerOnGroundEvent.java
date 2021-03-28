@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.event.sport.player;
+package tc.oc.pgm.util.event.player;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;

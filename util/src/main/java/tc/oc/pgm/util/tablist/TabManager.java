@@ -14,7 +14,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
-import tc.oc.pgm.util.event.sport.player.PlayerSkinPartsChangeEvent;
+import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
 
 /**
  * Custom player list display (for 1.8 and later)

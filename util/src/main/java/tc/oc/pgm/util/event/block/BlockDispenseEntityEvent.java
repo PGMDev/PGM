@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.event.sport.block;
+package tc.oc.pgm.util.event.block;
 
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;

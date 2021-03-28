@@ -62,7 +62,7 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.StringUtils;
-import tc.oc.pgm.util.event.sport.player.PlayerLocaleChangeEvent;
+import tc.oc.pgm.util.event.player.PlayerLocaleChangeEvent;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.text.TextTranslations;
 
