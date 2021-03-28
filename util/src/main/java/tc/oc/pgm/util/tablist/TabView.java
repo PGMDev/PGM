@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
-import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import tc.oc.pgm.util.bukkit.ViaUtils;
+import tc.oc.pgm.util.text.TextTranslations;
 
 /**
  * A single player's tab list. When this view is enabled, it creates a scoreboard team for each slot
@@ -231,19 +231,12 @@ public class TabView {
           if (this.slots[i] == this.rendered[i] && !this.slots[i].isDirty(this)) continue;
           this.rendered[i] = this.slots[i];
 
-          this.display.set(x, y, toPlain(this.rendered[i].getContent(this)));
+          this.display.set(
+              x, y, TextTranslations.translateLegacy(this.rendered[i].getComponent(this), viewer));
         }
       }
     }
     this.markSlotsClean();
-  }
-
-  private String toPlain(BaseComponent[] components) {
-    StringBuilder bl = new StringBuilder();
-    for (BaseComponent component : components) {
-      bl.append(component.toLegacyText());
-    }
-    return bl.toString();
   }
 
   public void renderPing() {
