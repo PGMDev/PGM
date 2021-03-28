@@ -15,7 +15,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.Server;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
@@ -53,7 +52,6 @@ import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.WorldTimeModule;
 import tc.oc.pgm.util.UsernameFormatUtils;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TemporalComponent;
@@ -93,11 +91,7 @@ public class PGMListener implements Listener {
     // Create the match when the first player joins
     if (lock.writeLock().tryLock()) {
       // If the server is suspended, need to release so match can be created
-      final Server server = parent.getServer();
-      // Non Sport servers cannot be suspended
-      if (BukkitUtils.isSportPaper() && server.isSuspended()) {
-        server.setSuspended(false);
-      }
+      NMSHacks.unSuspendServer();
 
       try {
         mm.createMatch(null).get();

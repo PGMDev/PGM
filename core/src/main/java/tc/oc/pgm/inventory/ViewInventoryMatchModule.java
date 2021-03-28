@@ -30,7 +30,6 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
-import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
@@ -53,6 +52,7 @@ import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.attribute.Attribute;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.LOADED)
@@ -477,22 +477,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
       previewPlayerInventory(viewer, (PlayerInventory) realInventory);
     } else {
       Inventory fakeInventory;
-      if (realInventory instanceof DoubleChestInventory) {
-        // hasCustomName not in spigot
-        if (BukkitUtils.isSportPaper() && realInventory.hasCustomName()) {
-          fakeInventory =
-              Bukkit.createInventory(viewer, realInventory.getSize(), realInventory.getName());
-        } else {
-          fakeInventory = Bukkit.createInventory(viewer, realInventory.getSize());
-        }
-      } else {
-        if (BukkitUtils.isSportPaper() && realInventory.hasCustomName()) {
-          fakeInventory =
-              Bukkit.createInventory(viewer, realInventory.getType(), realInventory.getName());
-        } else {
-          fakeInventory = Bukkit.createInventory(viewer, realInventory.getType());
-        }
-      }
+      fakeInventory = NMSHacks.createFakeInventory(viewer, realInventory);
       fakeInventory.setContents(realInventory.getContents());
 
       this.showInventoryPreview(viewer, realInventory, fakeInventory);

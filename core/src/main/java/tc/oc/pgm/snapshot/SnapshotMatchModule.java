@@ -23,8 +23,8 @@ import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.renewable.RenewableMatchModule;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.chunk.ChunkVector;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 /**
  * Keeps a snapshot of the block state of the entire match world at build time, using a
@@ -116,12 +116,10 @@ public class SnapshotMatchModule implements MatchModule, Listener {
     if (!chunkSnapshots.containsKey(chunkVector)) {
       match.getLogger().fine("Copying chunk at " + chunkVector);
       ChunkSnapshot chunkSnapshot = chunk.getChunkSnapshot();
-      // ChunkSnapshots are immutable outside of SportPaper
-      if (BukkitUtils.isSportPaper()) {
-        // ChunkSnapshot is very likely to have the post-event state already,
-        // so we have to correct it
-        chunkSnapshot.updateBlock(event.getOldState());
-      }
+
+      // ChunkSnapshot is very likely to have the post-event state already,
+      // so we have to correct it
+      NMSHacks.updateChunkSnapshot(chunkSnapshot, event.getOldState());
       chunkSnapshots.put(chunkVector, chunkSnapshot);
     }
   }

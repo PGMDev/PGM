@@ -19,6 +19,7 @@ import net.minecraft.server.v1_8_R3.Item;
 import net.minecraft.server.v1_8_R3.WorldBorder;
 import org.bukkit.*;
 import org.bukkit.Chunk;
+import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.CraftChunk;
@@ -31,6 +32,8 @@ import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers;
 import org.bukkit.entity.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.inventory.DoubleChestInventory;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.MaterialData;
@@ -190,6 +193,19 @@ public interface NMSHacks {
         viewer,
         new PacketPlayOutPlayerInfo(
             PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, players));
+  }
+
+  Field bField = ReflectionUtils.getField(PacketPlayOutPlayerInfo.class, "b");
+
+  static List<PacketPlayOutPlayerInfo.PlayerInfoData> getPlayerInfoDataList(
+      PacketPlayOutPlayerInfo packet) {
+    // SportPaper makes this field public
+    if (BukkitUtils.isSportPaper()) {
+      return packet.b;
+    } else {
+      return (List<PacketPlayOutPlayerInfo.PlayerInfoData>)
+          ReflectionUtils.readField(packet, bField);
+    }
   }
 
   enum TeamPacketFields {
@@ -1116,6 +1132,50 @@ public interface NMSHacks {
       return attributeModifiers;
     } else {
       return HashMultimap.create();
+    }
+  }
+
+  static Inventory createFakeInventory(Player viewer, Inventory realInventory) {
+    if (BukkitUtils.isSportPaper() && realInventory.hasCustomName()) {
+      return realInventory instanceof DoubleChestInventory
+          ? Bukkit.createInventory(viewer, realInventory.getSize(), realInventory.getName())
+          : Bukkit.createInventory(viewer, realInventory.getType(), realInventory.getName());
+    } else {
+      return realInventory instanceof DoubleChestInventory
+          ? Bukkit.createInventory(viewer, realInventory.getSize())
+          : Bukkit.createInventory(viewer, realInventory.getType());
+    }
+  }
+
+  // Not relevant if not SportPaper
+  static void unSuspendServer() {
+    if (BukkitUtils.isSportPaper() && Bukkit.getServer().isSuspended())
+      Bukkit.getServer().setSuspended(false);
+  }
+
+  static void setAffectsSpawning(Player player, boolean affectsSpawning) {
+    if (BukkitUtils.isSportPaper()) {
+      player.spigot().setAffectsSpawning(affectsSpawning);
+    }
+  }
+
+  static void showInvisibles(Player player, boolean showInvisibles) {
+    if (BukkitUtils.isSportPaper()) {
+      player.showInvisibles(showInvisibles);
+    }
+  }
+
+  static void setKnockbackReduction(Player player, float amount) {
+    // Not possible outside of SportPaper
+    if (BukkitUtils.isSportPaper()) {
+      player.setKnockbackReduction(amount);
+    }
+  }
+
+  static void updateChunkSnapshot(ChunkSnapshot snapshot, org.bukkit.block.BlockState blockState) {
+    // ChunkSnapshot is immutable outside of SportPaper
+    if (BukkitUtils.isSportPaper()) {
+      snapshot.updateBlock(blockState);
     }
   }
 

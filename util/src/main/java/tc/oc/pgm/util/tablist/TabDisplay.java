@@ -82,11 +82,11 @@ public class TabDisplay {
       this.teamRemovePackets[slot] = NMSHacks.teamRemovePacket(teamName);
       UUID uuid = UUID.randomUUID();
 
-      TabRender.getBField(listAddPacket)
+      NMSHacks.getPlayerInfoDataList(listAddPacket)
           .add(
               NMSHacks.playerListPacketData(
                   listAddPacket, uuid, name, GameMode.SURVIVAL, PING, null, playerName));
-      TabRender.getBField(listRemovePacket)
+      NMSHacks.getPlayerInfoDataList(listRemovePacket)
           .add(NMSHacks.playerListPacketData(listRemovePacket, uuid, playerName));
     }
   }

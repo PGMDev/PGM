@@ -52,7 +52,6 @@ import tc.oc.pgm.util.attribute.AttributeInstance;
 import tc.oc.pgm.util.attribute.AttributeMap;
 import tc.oc.pgm.util.attribute.AttributeMapImpl;
 import tc.oc.pgm.util.attribute.AttributeModifier;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
@@ -217,9 +216,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     if (!interact) player.leaveVehicle();
 
     // This is only possible in sportpaper
-    if (BukkitUtils.isSportPaper()) {
-      player.spigot().setAffectsSpawning(interact);
-    }
+    NMSHacks.setAffectsSpawning(player, interact);
     player.spigot().setCollidesWithEntities(interact);
   }
 
@@ -234,10 +231,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     final Player bukkit = getBukkit();
     if (bukkit == null) return;
 
-    // Not relevant and not a method outside of SportPaper
-    if (BukkitUtils.isSportPaper()) {
-      bukkit.showInvisibles(isObserving());
-    }
+    NMSHacks.showInvisibles(bukkit, isObserving());
 
     for (MatchPlayer other : getMatch().getPlayers()) {
       if (canSee(other)) {
@@ -276,11 +270,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     bukkit.setFlySpeed(0.1f);
     bukkit.setWalkSpeed(WalkSpeedKit.BUKKIT_DEFAULT);
     NMSHacks.clearArrowsInPlayer(bukkit);
-
-    // Not possible outside of SportPaper
-    if (BukkitUtils.isSportPaper()) {
-      bukkit.setKnockbackReduction(0);
-    }
+    NMSHacks.setKnockbackReduction(bukkit, 0);
 
     for (PotionEffect effect : bukkit.getActivePotionEffects()) {
       if (effect.getType() != null) {
