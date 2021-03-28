@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
+import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.minecraft.server.v1_8_R3.Packet;
 import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
@@ -156,11 +156,8 @@ public class TabRender {
         .add(NMSHacks.playerListPacketData(this.updatePingPacket, entry.getId(), entry.getPing()));
   }
 
-  public void setHeaderFooter(BaseComponent[] header, BaseComponent[] footer) {
-    BungeeComponentSerializer serializer = BungeeComponentSerializer.get();
-    Audience.get(view.getViewer())
-        .sendPlayerListHeaderAndFooter(
-            serializer.deserialize(header), serializer.deserialize(footer));
+  public void setHeaderFooter(Component header, Component footer) {
+    Audience.get(view.getViewer()).sendPlayerListHeaderAndFooter(header, footer);
   }
 
   public void updateFakeEntity(TabEntry entry, boolean create) {

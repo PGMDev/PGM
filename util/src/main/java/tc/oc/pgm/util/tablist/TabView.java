@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
+import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
@@ -31,7 +32,8 @@ public class TabView {
   // True when any slots/header/footer have been changed but not rendered
   private boolean dirtyLayout, dirtyContent, dirtyHeader, dirtyFooter;
   private final TabEntry[] slots, rendered;
-  private BaseComponent[] header, footer;
+  //  private BaseComponent[] header, footer;
+  private Component header, footer;
 
   // Only used for legacy players, initialized on enable
   protected @Nullable TabDisplay display = null;
@@ -334,11 +336,11 @@ public class TabView {
     if (force || this.dirtyHeader || this.dirtyFooter) {
       if (force || this.dirtyHeader) {
         this.dirtyHeader = false;
-        header = (this.rendered[this.headerSlot] = this.slots[this.headerSlot]).getContent(this);
+        header = (this.rendered[this.headerSlot] = this.slots[this.headerSlot]).getComponent(this);
       }
       if (force || this.dirtyFooter) {
         this.dirtyFooter = false;
-        footer = (this.rendered[this.footerSlot] = this.slots[this.footerSlot]).getContent(this);
+        footer = (this.rendered[this.footerSlot] = this.slots[this.footerSlot]).getComponent(this);
       }
 
       render.setHeaderFooter(header, footer);
@@ -387,8 +389,8 @@ public class TabView {
     TabRender render = new TabRender(this);
 
     render.setHeaderFooter(
-        this.manager.getBlankEntry(this.headerSlot).getContent(this),
-        this.manager.getBlankEntry(this.footerSlot).getContent(this));
+        this.manager.getBlankEntry(this.headerSlot).getComponent(this),
+        this.manager.getBlankEntry(this.footerSlot).getComponent(this));
 
     for (int index = 0; index < this.size; index++) {
       render.destroySlot(this.rendered[index], index);

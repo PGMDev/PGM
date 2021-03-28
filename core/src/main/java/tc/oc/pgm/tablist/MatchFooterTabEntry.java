@@ -11,7 +11,6 @@ import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.md_5.bungee.api.chat.BaseComponent;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
@@ -22,7 +21,6 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.stats.StatsMatchModule;
 import tc.oc.pgm.util.tablist.DynamicTabEntry;
 import tc.oc.pgm.util.tablist.TabView;
-import tc.oc.pgm.util.text.TextTranslations;
 
 public class MatchFooterTabEntry extends DynamicTabEntry {
 
@@ -53,7 +51,7 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
   }
 
   @Override
-  public BaseComponent[] getContent(TabView view) {
+  public Component getComponent(TabView view) {
     TextComponent.Builder content = text();
 
     MatchPlayer viewer = match.getPlayer(view.getViewer());
@@ -90,7 +88,6 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
           .append(rightContent.colorIfAbsent(NamedTextColor.WHITE));
     }
 
-    return TextTranslations.toBaseComponentArray(
-        content.colorIfAbsent(NamedTextColor.DARK_GRAY).build(), view.getViewer());
+    return content.colorIfAbsent(NamedTextColor.DARK_GRAY).build();
   }
 }

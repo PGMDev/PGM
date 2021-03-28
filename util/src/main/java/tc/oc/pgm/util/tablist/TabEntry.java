@@ -1,7 +1,9 @@
 package tc.oc.pgm.util.tablist;
 
+import java.awt.*;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -53,6 +55,13 @@ public interface TabEntry {
    * @return
    */
   BaseComponent[] getContent(TabView view);
+
+  /**
+   * Content to show in the entry
+   *
+   * @return
+   */
+  Component getComponent(TabView view);
 
   /**
    * Gamemode for the entry. If the entry is linked to a real player, this will change the client's
