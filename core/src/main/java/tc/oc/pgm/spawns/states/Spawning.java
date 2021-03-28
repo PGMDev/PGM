@@ -100,11 +100,13 @@ public abstract class Spawning extends Participating {
   public void sendMessage() {}
 
   public void updateTitle() {
-    player.showTitle(
+    Title title =
         title(
             getTitle(),
             getSubtitle().color(NamedTextColor.GREEN),
-            Title.Times.of(Duration.ZERO, fromTicks(3), fromTicks(3))));
+            Title.Times.of(Duration.ZERO, fromTicks(3), fromTicks(3)));
+    player.showTitle(title);
+    player.getSpectators().forEach(p -> p.showTitle(title));
   }
 
   protected abstract Component getTitle();

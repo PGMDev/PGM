@@ -77,6 +77,7 @@ import tc.oc.pgm.modules.ModifyBowProjectileMatchModule;
 import tc.oc.pgm.modules.ModifyBowProjectileModule;
 import tc.oc.pgm.modules.MultiTradeMatchModule;
 import tc.oc.pgm.modules.SoundsMatchModule;
+import tc.oc.pgm.modules.SpectateMatchModule;
 import tc.oc.pgm.modules.ToolRepairMatchModule;
 import tc.oc.pgm.modules.ToolRepairModule;
 import tc.oc.pgm.modules.WorldTimeModule;
@@ -159,6 +160,7 @@ public interface Modules {
     register(StatsMatchModule.class, StatsMatchModule::new);
     register(MapmakerMatchModule.class, MapmakerMatchModule::new);
     register(TNTRenderMatchModule.class, TNTRenderMatchModule::new);
+    register(SpectateMatchModule.class, SpectateMatchModule::new);
 
     // FIXME: Disabled due to lag - look into future optimization
     // register(ProjectileTrailMatchModule.class, ProjectileTrailMatchModule::new);
