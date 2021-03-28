@@ -1048,23 +1048,54 @@ public interface NMSHacks {
     return materialSet;
   }
 
+  static void copyAttributeModifiers(ItemMeta destination, ItemMeta source) {
+    // Since SportPaper handles attributes they don't show up in unhandledTags
+    if (BukkitUtils.isSportPaper()) {
+      for (String attribute : source.getModifiedAttributes()) {
+        for (org.bukkit.attribute.AttributeModifier modifier :
+            source.getAttributeModifiers(attribute)) {
+          destination.addAttributeModifier(attribute, modifier);
+        }
+      }
+    } else {
+      SetMultimap<String, tc.oc.pgm.util.attribute.AttributeModifier> attributeModifiers =
+          NMSHacks.getAttributeModifiers(source);
+      attributeModifiers.putAll(NMSHacks.getAttributeModifiers(destination));
+      NMSHacks.applyAttributeModifiers(attributeModifiers, destination);
+    }
+  }
+
   static void applyAttributeModifiers(
       SetMultimap<String, AttributeModifier> attributeModifiers, ItemMeta meta) {
-    NBTTagList list = new NBTTagList();
-    for (Map.Entry<String, AttributeModifier> entry : attributeModifiers.entries()) {
-      AttributeModifier modifier = entry.getValue();
-      NBTTagCompound tag = new NBTTagCompound();
-      tag.setString("Name", modifier.getName());
-      tag.setDouble("Amount", modifier.getAmount());
-      tag.setInt("Operation", modifier.getOperation().ordinal());
-      tag.setLong("UUIDMost", modifier.getUniqueId().getMostSignificantBits());
-      tag.setLong("UUIDLeast", modifier.getUniqueId().getLeastSignificantBits());
-      tag.setString("AttributeName", entry.getKey());
-      list.add(tag);
-    }
+    if (BukkitUtils.isSportPaper()) {
+      for (Map.Entry<String, AttributeModifier> entry : attributeModifiers.entries()) {
+        AttributeModifier attributeModifier = entry.getValue();
+        meta.addAttributeModifier(
+            entry.getKey(),
+            new org.bukkit.attribute.AttributeModifier(
+                attributeModifier.getUniqueId(),
+                attributeModifier.getName(),
+                attributeModifier.getAmount(),
+                org.bukkit.attribute.AttributeModifier.Operation.fromOpcode(
+                    attributeModifier.getOperation().ordinal())));
+      }
+    } else {
+      NBTTagList list = new NBTTagList();
+      for (Map.Entry<String, AttributeModifier> entry : attributeModifiers.entries()) {
+        AttributeModifier modifier = entry.getValue();
+        NBTTagCompound tag = new NBTTagCompound();
+        tag.setString("Name", modifier.getName());
+        tag.setDouble("Amount", modifier.getAmount());
+        tag.setInt("Operation", modifier.getOperation().ordinal());
+        tag.setLong("UUIDMost", modifier.getUniqueId().getMostSignificantBits());
+        tag.setLong("UUIDLeast", modifier.getUniqueId().getLeastSignificantBits());
+        tag.setString("AttributeName", entry.getKey());
+        list.add(tag);
+      }
 
-    Map<String, NBTBase> unhandledTags = getUnhandledTags(meta);
-    unhandledTags.put("AttributeModifiers", list);
+      Map<String, NBTBase> unhandledTags = getUnhandledTags(meta);
+      unhandledTags.put("AttributeModifiers", list);
+    }
   }
 
   static SetMultimap<String, AttributeModifier> getAttributeModifiers(ItemMeta meta) {

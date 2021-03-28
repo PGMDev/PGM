@@ -70,7 +70,7 @@ public final class TextTranslations {
           .loadClass("it.unimi.dsi.fastutil.objects.Object2ObjectAVLTreeMap");
       return new Object2ObjectAVLTreeMap<>(String::compareToIgnoreCase);
     } catch (ClassNotFoundException e) {
-      return new TreeMap<>();
+      return new TreeMap<>(String::compareToIgnoreCase);
     }
   }
 

@@ -1,15 +1,12 @@
 package tc.oc.pgm.itemmeta;
 
-import com.google.common.collect.SetMultimap;
 import java.util.HashSet;
 import java.util.Set;
 import org.bukkit.Material;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.nms.NMSHacks;
@@ -45,19 +42,8 @@ public class ItemRule {
 
       InventoryUtils.addEnchantments(meta, this.meta.getEnchants());
 
-      // Since SportPaper handles attributes they don't show up in unhandledTags
-      if (BukkitUtils.isSportPaper()) {
-        for (String attribute : this.meta.getModifiedAttributes()) {
-          for (AttributeModifier modifier : this.meta.getAttributeModifiers(attribute)) {
-            meta.addAttributeModifier(attribute, modifier);
-          }
-        }
-      } else {
-        SetMultimap<String, tc.oc.pgm.util.attribute.AttributeModifier> attributeModifiers =
-            NMSHacks.getAttributeModifiers(this.meta);
-        attributeModifiers.putAll(NMSHacks.getAttributeModifiers(meta));
-        NMSHacks.applyAttributeModifiers(attributeModifiers, meta);
-      }
+      NMSHacks.copyAttributeModifiers(meta, this.meta);
+
       Set<Material> canDestroy = new HashSet<>();
       canDestroy.addAll(NMSHacks.getCanDestroy(meta));
       canDestroy.addAll(NMSHacks.getCanDestroy(this.meta));

@@ -446,22 +446,7 @@ public abstract class KitParser {
       }
     }
 
-    // Since this is handled by SportPaper this can't be done through unhandled tags
-    if (BukkitUtils.isSportPaper()) {
-      for (Map.Entry<String, AttributeModifier> entry : parseAttributeModifiers(el).entries()) {
-        AttributeModifier attributeModifier = entry.getValue();
-        meta.addAttributeModifier(
-            entry.getKey(),
-            new org.bukkit.attribute.AttributeModifier(
-                attributeModifier.getUniqueId(),
-                attributeModifier.getName(),
-                attributeModifier.getAmount(),
-                org.bukkit.attribute.AttributeModifier.Operation.fromOpcode(
-                    attributeModifier.getOperation().ordinal())));
-      }
-    } else {
-      NMSHacks.applyAttributeModifiers(parseAttributeModifiers(el), meta);
-    }
+    NMSHacks.applyAttributeModifiers(parseAttributeModifiers(el), meta);
 
     String customName = el.getAttributeValue("name");
     if (customName != null) {
