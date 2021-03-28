@@ -49,6 +49,7 @@ import tc.oc.pgm.filters.dynamic.Filterable;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.MaxHealthKit;
 import tc.oc.pgm.kits.WalkSpeedKit;
+import tc.oc.pgm.modules.SpectateMatchModule;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
@@ -447,6 +448,18 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   @Override
   public @Nonnull Audience audience() {
     return audience;
+  }
+
+  @Nullable
+  @Override
+  public MatchPlayer getSpectatorTarget() {
+    if (getBukkit() == null) return null;
+    return match.getPlayer(getBukkit().getSpectatorTarget());
+  }
+
+  @Override
+  public List<MatchPlayer> getSpectators() {
+    return match.needModule(SpectateMatchModule.class).getSpectating(this);
   }
 
   @Override
