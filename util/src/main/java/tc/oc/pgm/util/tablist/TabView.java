@@ -32,7 +32,6 @@ public class TabView {
   // True when any slots/header/footer have been changed but not rendered
   private boolean dirtyLayout, dirtyContent, dirtyHeader, dirtyFooter;
   private final TabEntry[] slots, rendered;
-  //  private BaseComponent[] header, footer;
   private Component header, footer;
 
   // Only used for legacy players, initialized on enable
