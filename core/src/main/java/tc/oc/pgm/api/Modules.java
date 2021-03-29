@@ -108,6 +108,8 @@ import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.stats.StatsMatchModule;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.teams.TeamModule;
+import tc.oc.pgm.timeadjust.TimeAdjustMatchModule;
+import tc.oc.pgm.timeadjust.TimeAdjustModule;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.pgm.timelimit.TimeLimitModule;
 import tc.oc.pgm.tnt.TNTMatchModule;
@@ -244,6 +246,7 @@ public interface Modules {
     register(
         WorldBorderModule.class, WorldBorderMatchModule.class, new WorldBorderModule.Factory());
     register(SpawnerModule.class, SpawnerMatchModule.class, new SpawnerModule.Factory());
+    register(TimeAdjustModule.class, TimeAdjustMatchModule.class, new TimeAdjustModule.Factory());
 
     // MapModules that are also MatchModules
     register(WorldTimeModule.class, WorldTimeModule.class, new WorldTimeModule.Factory());
