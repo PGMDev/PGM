@@ -12,17 +12,20 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
+import tc.oc.pgm.core.CoreMatchModule;
 import tc.oc.pgm.core.CoreModule;
+import tc.oc.pgm.destroyable.DestroyableMatchModule;
 import tc.oc.pgm.destroyable.DestroyableModule;
 import tc.oc.pgm.goals.GoalDefinition;
 import tc.oc.pgm.goals.GoalMatchModule;
-import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
+import tc.oc.pgm.wool.WoolMatchModule;
 import tc.oc.pgm.wool.WoolModule;
 
-public class TimeAdjustModule implements MapModule {
+public class TimeAdjustModule implements MapModule<TimeAdjustMatchModule> {
 
   private final Map<GoalDefinition, TimeAdjust> timeAdjusts;
 
@@ -36,8 +39,14 @@ public class TimeAdjustModule implements MapModule {
   }
 
   @Override
-  public Collection<Class> getHardDependencies() {
-    return ImmutableList.of(GoalMatchModule.class, TimeLimitMatchModule.class);
+  public Collection<Class<? extends MatchModule>> getSoftDependencies() {
+    return ImmutableList.of(GoalMatchModule.class);
+  }
+
+  @Override
+  public Collection<Class<? extends MatchModule>> getWeakDependencies() {
+    return ImmutableList.of(
+        DestroyableMatchModule.class, WoolMatchModule.class, CoreMatchModule.class);
   }
 
   public static class Factory implements MapModuleFactory<TimeAdjustModule> {

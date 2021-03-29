@@ -35,13 +35,9 @@ public class TimeAdjustMatchModule implements MatchModule, Listener {
     Map<Goal, TimeAdjust> adjusts = Maps.newHashMap();
     adjustmentDefs.forEach(
         (def, time) -> {
-          // def.getGoal(match);  <-- Not Working
-          Goal goal = match.getFeatureContext().get(def.getId(), Goal.class);
+          Goal goal = def.getGoal(match);
           if (goal != null) {
             adjusts.put(goal, time);
-          } else {
-            // TODO: DEBUG: Remove this
-            match.getLogger().info(def.getId() + " could not find a loaded goal!!!");
           }
         });
     this.adjustments = adjusts;
@@ -50,7 +46,7 @@ public class TimeAdjustMatchModule implements MatchModule, Listener {
   @EventHandler
   public void onGoalComplete(GoalCompleteEvent event) {
     TimeAdjust time = adjustments.get(event.getGoal());
-    if (time != null && time.adjustTime(match)) {
+    if (time != null && time.adjustTime(match) && match.isRunning()) {
       match.sendMessage(createBroadcast(time));
     }
   }
