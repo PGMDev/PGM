@@ -56,7 +56,7 @@ public class TimeAdjustMatchModule implements MatchModule, Listener {
     String key = "misc." + (decrease ? "decrease" : "increase");
     NamedTextColor color = decrease ? NamedTextColor.RED : NamedTextColor.GREEN;
     return translatable(
-        "match.timeLimit.increase",
+        "match.timeLimit.adjust",
         NamedTextColor.YELLOW,
         translatable(key, color),
         duration(adjust.getTime(), color));
