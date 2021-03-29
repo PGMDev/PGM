@@ -1148,7 +1148,7 @@ public interface NMSHacks {
   }
 
   // Not relevant if not SportPaper
-  static void unSuspendServer() {
+  static void resumeServer() {
     if (BukkitUtils.isSportPaper() && Bukkit.getServer().isSuspended())
       Bukkit.getServer().setSuspended(false);
   }

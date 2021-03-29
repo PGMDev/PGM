@@ -91,7 +91,7 @@ public class PGMListener implements Listener {
     // Create the match when the first player joins
     if (lock.writeLock().tryLock()) {
       // If the server is suspended, need to release so match can be created
-      NMSHacks.unSuspendServer();
+      NMSHacks.resumeServer();
 
       try {
         mm.createMatch(null).get();
