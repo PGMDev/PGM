@@ -11,9 +11,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -33,7 +36,6 @@ import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -55,8 +57,10 @@ import tc.oc.pgm.flag.event.FlagPickupEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.flag.state.Carried;
 import tc.oc.pgm.teams.Team;
+import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
+import tc.oc.pgm.util.UsernameResolver;
 import tc.oc.pgm.util.menu.InventoryMenu;
 import tc.oc.pgm.util.menu.InventoryMenuItem;
 import tc.oc.pgm.util.menu.pattern.DoubleRowMenuArranger;
@@ -70,8 +74,9 @@ public class StatsMatchModule implements MatchModule, Listener {
   private final Match match;
   private final Map<UUID, PlayerStats> allPlayerStats = new HashMap<>();
   // Since Bukkit#getOfflinePlayer reads the cached user files, and those files have an expire date
-  // + will be wiped if X amount of players join, we need a separate cache for players with stats
-  private final Map<UUID, String> cachedUsernames = new HashMap<>();
+  // + will be wiped if X amount of players join, we need a separate cache for offline players with
+  // stats
+  private final Set<UUID> cachedUserInfo = new HashSet<>();
 
   private final boolean verboseStats = PGM.get().getConfiguration().showVerboseStats();
   private final Duration showAfter = PGM.get().getConfiguration().showStatsAfter();
@@ -199,6 +204,13 @@ public class StatsMatchModule implements MatchModule, Listener {
   public void onMatchEnd(MatchFinishEvent event) {
     if (allPlayerStats.isEmpty() || showAfter.isNegative()) return;
 
+    // Try to ensure that usernames for all relevant offline players will be loaded in the cache
+    // when the inventory GUI is created. If usernames needs to be resolved using the mojang api
+    // (UsernameResolver)
+    // it can take some time, and we cant really know how long.
+    cachedUserInfo.forEach(id -> PGM.get().getDatastore().getUsername(id).getNameLegacy());
+    CompletableFuture.runAsync(UsernameResolver::resolveAll);
+
     // Schedule displaying stats after match end
     match
         .getExecutor(MatchScope.LOADED)
@@ -287,20 +299,19 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   @EventHandler
   public void onToolClick(PlayerInteractEvent event) {
-    if (!verboseStats
-        || !match.isFinished()
+    if (event.getPlayer().getItemInHand().getType() != Material.PAPER) return;
+    if (!match.isFinished()
+        || !verboseStats
         || !match.getCompetitors().stream().allMatch(c -> c instanceof Team)) return;
     Action action = event.getAction();
     if ((action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK)) {
-      ItemStack item = event.getPlayer().getItemInHand();
-
-      if (item.getType() == Material.PAPER) {
-        MatchPlayer player = match.getPlayer(event.getPlayer());
-        if (player == null) return;
-        giveVerboseStatsItem(player, true);
-      }
+      MatchPlayer player = match.getPlayer(event.getPlayer());
+      if (player == null) return;
+      giveVerboseStatsItem(player, true);
     }
   }
+
+  private List<InventoryMenuItem> teamItems = null;
 
   public void giveVerboseStatsItem(MatchPlayer player, boolean forceOpen) {
     // Find out if verbose stats is relevant for this match
@@ -309,20 +320,44 @@ public class StatsMatchModule implements MatchModule, Listener {
         verboseStats && competitors.stream().allMatch(c -> c instanceof Team);
     if (!showAllVerboseStats) return;
 
-    final List<InventoryMenuItem> items =
-        competitors.stream()
-            .map(c -> new TeamStatsInventoryMenuItem(match, c))
-            .collect(Collectors.toList());
+    if (this.teamItems == null) {
+      TeamMatchModule tmm = match.needModule(TeamMatchModule.class);
+      Collection<MatchPlayer> observers = match.getObservers();
+      List<InventoryMenuItem> items = new ArrayList<>(competitors.size());
+      for (Competitor competitor : competitors) {
+        Collection<MatchPlayer> relevantObservers =
+            observers.stream()
+                .filter(o -> tmm.getLastTeam(o.getId()) == competitor)
+                .collect(Collectors.toSet());
+        Collection<UUID> relevantOfflinePlayers =
+            cachedUserInfo.stream()
+                .filter(id -> tmm.getLastTeam(id) == competitor)
+                .collect(Collectors.toSet());
+        items.add(
+            new TeamStatsInventoryMenuItem(
+                match, competitor, relevantObservers, relevantOfflinePlayers));
+      }
+      this.teamItems = items;
+    }
+
+    List<InventoryMenuItem> items = new ArrayList<>(this.teamItems);
 
     // Add the player item in the middle
-    items.add((items.size() - 1) / 2 + 1, new PlayerStatsInventoryMenuItem(player));
+    items.add(
+        (items.size() - 1) / 2 + 1,
+        new PlayerStatsInventoryMenuItem(
+            player.getId(),
+            this.getPlayerStat(player),
+            player.getBukkit().getSkin(),
+            player.getNameLegacy(),
+            player.getParty().getName().color()));
 
     final InventoryMenu menu =
         new InventoryMenu(
             match.getWorld(),
             verboseStatsTitle,
             items,
-            competitors.size() <= 4 ? new SingleRowMenuArranger() : new DoubleRowMenuArranger());
+            competitors.size() <= 5 ? new SingleRowMenuArranger() : new DoubleRowMenuArranger());
 
     player
         .getInventory()
@@ -391,21 +426,26 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   @EventHandler
   public void onPlayerLeave(PlayerQuitEvent event) {
-    Player player = event.getPlayer();
-    if (allPlayerStats.containsKey(player.getUniqueId()))
-      cachedUsernames.put(player.getUniqueId(), player.getName());
+    UUID playerId = event.getPlayer().getUniqueId();
+    if (allPlayerStats.containsKey(playerId)) {
+      cachedUserInfo.add(playerId);
+    }
   }
 
   @EventHandler
   public void onPlayerJoin(PlayerJoinEvent event) {
     UUID playerUUID = event.getPlayer().getUniqueId();
-    cachedUsernames.remove(playerUUID);
+    cachedUserInfo.removeIf(id -> id.equals(playerUUID));
   }
 
   private Component playerName(UUID playerUUID) {
-    return player(
+    return player( // TODO: make #player take a Supplier instead of the "defName" String
         Bukkit.getPlayer(playerUUID),
-        cachedUsernames.getOrDefault(playerUUID, "Unknown"),
+        cachedUserInfo.stream()
+            .filter(id -> id.equals(playerUUID))
+            .findFirst()
+            .map(id -> PGM.get().getDatastore().getUsername(id).getNameLegacy())
+            .orElse("Unknown"),
         NameStyle.FANCY);
   }
 

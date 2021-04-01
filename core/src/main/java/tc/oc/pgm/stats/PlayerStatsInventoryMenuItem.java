@@ -8,18 +8,19 @@ import static tc.oc.pgm.stats.StatsMatchModule.numberComponent;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
+import org.bukkit.Skin;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.menu.InventoryMenu;
 import tc.oc.pgm.util.menu.InventoryMenuItem;
 import tc.oc.pgm.util.text.TemporalComponent;
@@ -27,23 +28,30 @@ import tc.oc.pgm.util.text.TextTranslations;
 
 public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
 
-  private final MatchPlayer player;
   private final TextColor RESET = NamedTextColor.GRAY;
+  private final UUID uuid;
+  private final PlayerStats stats;
+  private final Skin skin;
+  private final String name;
+  private final TextColor color;
 
-  PlayerStatsInventoryMenuItem(MatchPlayer player) {
-    this.player = player;
+  PlayerStatsInventoryMenuItem(
+      UUID uuid, PlayerStats stats, Skin skin, String name, TextColor color) {
+    this.uuid = uuid;
+    this.stats = stats;
+    this.skin = skin;
+    this.name = name;
+    this.color = color;
   }
 
   @Override
   public Component getDisplayName() {
-    return player.getName().color(NamedTextColor.GOLD);
+    return text(name == null ? "Unknown" : name, color);
   }
 
   @Override
   public List<String> getLore(Player player) {
     List<String> lore = new ArrayList<>();
-    StatsMatchModule smm = this.player.getMatch().needModule(StatsMatchModule.class);
-    PlayerStats stats = smm.getPlayerStat(this.player.getId());
 
     Component statLore =
         translatable(
@@ -125,7 +133,7 @@ public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
   public ItemMeta modifyMeta(ItemMeta meta) {
     SkullMeta skullMeta = (SkullMeta) meta;
 
-    skullMeta.setOwner(this.player.getNameLegacy());
+    skullMeta.setOwner(name, uuid, skin);
 
     return skullMeta;
   }

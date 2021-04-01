@@ -37,6 +37,7 @@ import org.bukkit.event.vehicle.VehicleUpdateEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
@@ -49,6 +50,7 @@ import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.MapPoolAdjustEvent;
+import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.WorldTimeModule;
@@ -399,5 +401,11 @@ public class PGMListener implements Listener {
 
       event.getMatch().sendMessage(broadcast);
     }
+  }
+
+  @EventHandler // We only need to store skins for the post match stats
+  public void storeSkinOnMatchJoin(PlayerJoinMatchEvent event) {
+    final MatchPlayer player = event.getPlayer();
+    PGM.get().getDatastore().setSkin(player.getId(), player.getBukkit().getSkin());
   }
 }

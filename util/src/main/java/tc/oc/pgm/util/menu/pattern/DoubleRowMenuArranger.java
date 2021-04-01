@@ -19,11 +19,11 @@ public class DoubleRowMenuArranger extends MenuArranger {
 
     SingleRowMenuArranger arranger = new SingleRowMenuArranger();
 
-    itemsWithSpaces.addAll(arranger.arrangeItems(itemsWithoutSpaces.subList(0, Math.min(size, 4))));
+    itemsWithSpaces.addAll(arranger.arrangeItems(itemsWithoutSpaces.subList(0, Math.min(size, 5))));
     itemsWithSpaces.addAll(emptyRow());
     if (size >= 6)
       itemsWithSpaces.addAll(
-          arranger.arrangeItems(itemsWithoutSpaces.subList(5, Math.min(size, 9))));
+          arranger.arrangeItems(itemsWithoutSpaces.subList(5, Math.min(size, 10))));
     else itemsWithSpaces.addAll(emptyRow());
 
     return itemsWithSpaces;

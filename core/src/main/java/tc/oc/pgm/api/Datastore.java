@@ -1,6 +1,7 @@
 package tc.oc.pgm.api;
 
 import java.util.UUID;
+import org.bukkit.Skin;
 import tc.oc.pgm.api.map.MapActivity;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.api.setting.Settings;
@@ -23,6 +24,22 @@ public interface Datastore {
    * @return A {@link Settings}.
    */
   Settings getSettings(UUID uuid);
+
+  /**
+   * Set the skin for a given player {@link UUID}.
+   *
+   * @param uuid the {@link UUID} of a player
+   * @param skin the {@link Skin} of the player
+   */
+  void setSkin(UUID uuid, Skin skin);
+
+  /**
+   * Get the skin for a given player {@link UUID}.
+   *
+   * @param uuid The {@link UUID} of a player
+   * @return A {@link Skin}
+   */
+  Skin getSkin(UUID uuid);
 
   /**
    * Get the activity related to a defined map pool.
