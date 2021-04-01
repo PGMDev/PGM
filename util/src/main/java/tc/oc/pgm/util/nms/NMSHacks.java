@@ -21,10 +21,12 @@ import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers;
 import org.bukkit.craftbukkit.v1_8_R3.util.Skins;
 import org.bukkit.entity.*;
 import org.bukkit.entity.Entity;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
 
 public interface NMSHacks {
@@ -205,6 +207,17 @@ public interface NMSHacks {
 
   static int allocateEntityId() {
     return ENTITY_IDS.decrementAndGet();
+  }
+
+  static void sendLegacyWearing(Player player, int slot, ItemStack item) {
+    Packet<?> packet =
+        new PacketPlayOutEntityEquipment(
+            player.getEntityId(), slot, CraftItemStack.asNMSCopy(item));
+    EntityTrackerEntry entry = getTrackerEntry(player);
+    for (EntityPlayer viewer : entry.trackedPlayers) {
+      if (ViaUtils.getProtocolVersion(viewer.getBukkitEntity()) <= ViaUtils.VERSION_1_7)
+        viewer.playerConnection.sendPacket(packet);
+    }
   }
 
   class EntityMetadata {
@@ -555,18 +568,6 @@ public interface NMSHacks {
     }
 
     @Override
-    public int entityId() {
-      return entity.getId();
-    }
-  }
-
-  class FakeLivingEntity<T extends EntityLiving> extends FakeEntityImpl<T> {
-
-    protected FakeLivingEntity(T entity) {
-      super(entity);
-    }
-
-    @Override
     public void spawn(Player viewer, Location location, Vector velocity) {
       entity.setPositionRotation(
           location.getX(),
@@ -580,18 +581,31 @@ public interface NMSHacks {
       sendPacket(viewer, spawnPacket());
     }
 
+    abstract Packet<?> spawnPacket();
+
+    @Override
+    public int entityId() {
+      return entity.getId();
+    }
+  }
+
+  class FakeLivingEntity<T extends EntityLiving> extends FakeEntityImpl<T> {
+
+    protected FakeLivingEntity(T entity) {
+      super(entity);
+    }
+
     protected Packet<?> spawnPacket() {
       return new PacketPlayOutSpawnEntityLiving(entity);
     }
   }
 
-  class FakeZombie extends FakeLivingEntity<EntityZombie> {
+  class FakeArmorStand extends FakeLivingEntity<EntityArmorStand> {
 
-    public FakeZombie(World world, boolean invisible, boolean baby) {
-      super(new EntityZombie(((CraftWorld) world).getHandle()));
+    public FakeArmorStand(World world) {
+      super(new EntityArmorStand(((CraftWorld) world).getHandle()));
 
-      entity.setInvisible(invisible);
-      entity.setBaby(baby);
+      entity.setInvisible(true);
       NBTTagCompound tag = entity.getNBTTag();
       if (tag == null) {
         tag = new NBTTagCompound();
@@ -603,5 +617,18 @@ public interface NMSHacks {
       tag.setBoolean("NoAI", true);
       entity.f(tag);
     }
+  }
+
+  class FakeWitherSkull extends FakeEntityImpl<EntityWitherSkull> {
+    public FakeWitherSkull(World world) {
+      super(new EntityWitherSkull(((CraftWorld) world).getHandle()));
+    }
+
+    protected Packet<?> spawnPacket() {
+      return new PacketPlayOutSpawnEntity(entity, 66);
+    }
+
+    @Override
+    public void wear(Player viewer, int slot, ItemStack item) {}
   }
 }

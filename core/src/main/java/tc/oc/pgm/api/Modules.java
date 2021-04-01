@@ -162,7 +162,7 @@ public interface Modules {
     // register(ProjectileTrailMatchModule.class, ProjectileTrailMatchModule::new);
 
     // Modules that help older player versions
-    register(LegacyFlagBeamMatchModule.class, LegacyFlagBeamMatchModule::new);
+    register(LegacyFlagBeamMatchModule.class, new LegacyFlagBeamMatchModule.Factory());
 
     // Community MatchModules
     register(FreezeMatchModule.class, FreezeMatchModule::new);

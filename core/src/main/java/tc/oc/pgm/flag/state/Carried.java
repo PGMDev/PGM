@@ -9,6 +9,7 @@ import static tc.oc.pgm.util.TimeUtils.fromTicks;
 import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -23,6 +24,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
@@ -47,6 +49,7 @@ import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 /** State of a flag when a player has picked it up and is wearing the banner on their head. */
 public class Carried extends Spawned implements Missing {
@@ -127,6 +130,12 @@ public class Carried extends Spawned implements Missing {
             .lockArmorSlot(this.carrier, ArmorType.HELMET, false);
 
     this.carrier.getBukkit().getInventory().setHelmet(this.flag.getBannerItem().clone());
+    PGM.get()
+        .getExecutor()
+        .schedule(
+            () -> NMSHacks.sendLegacyWearing(carrier.getBukkit(), 4, flag.getLegacyBannerItem()),
+            50L,
+            TimeUnit.MILLISECONDS);
 
     SidebarMatchModule smm = this.flag.getMatch().getModule(SidebarMatchModule.class);
     if (smm != null) smm.blinkGoal(this.flag, 2, null);

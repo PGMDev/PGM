@@ -61,6 +61,7 @@ import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.inventory.ItemBuilder;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -91,6 +92,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   private final Location bannerLocation;
   private final BannerMeta bannerMeta;
   private final ItemStack bannerItem;
+  private final ItemStack legacyBannerItem;
   private final AngleProvider bannerYawProvider;
   private final @Nullable Team owner;
   private final Set<Team> capturers;
@@ -164,10 +166,19 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     }
 
     this.bannerLocation = Materials.getLocationWithYaw(banner);
-    this.bannerMeta = Materials.getItemMeta(banner);
     this.bannerYawProvider = new StaticAngleProvider(this.bannerLocation.getYaw());
+
+    this.bannerMeta = Materials.getItemMeta(banner);
+    this.bannerMeta.setDisplayName(getColoredName());
     this.bannerItem = new ItemStack(Material.BANNER);
     this.bannerItem.setItemMeta(this.getBannerMeta());
+
+    this.legacyBannerItem =
+        new ItemBuilder()
+            .material(Material.WOOL)
+            .color(getDyeColor())
+            .name(getColoredName())
+            .build();
   }
 
   private static Banner toBanner(Block block) {
@@ -210,6 +221,10 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
   public ItemStack getBannerItem() {
     return bannerItem;
+  }
+
+  public ItemStack getLegacyBannerItem() {
+    return legacyBannerItem;
   }
 
   public BaseState getState() {
