@@ -1,5 +1,7 @@
 package tc.oc.pgm.kits;
 
+import com.google.common.collect.ImmutableList;
+import java.util.Collection;
 import java.util.logging.Logger;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Document;
@@ -11,6 +13,8 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.itemmeta.ItemModifyModule;
+import tc.oc.pgm.teams.TeamMatchModule;
+import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 
 public class KitModule implements MapModule {
@@ -20,7 +24,18 @@ public class KitModule implements MapModule {
     return new KitMatchModule(match);
   }
 
+  @Override
+  public Collection<Class<? extends MatchModule>> getWeakDependencies() {
+    return ImmutableList.of(TeamMatchModule.class);
+  }
+
   public static class Factory implements MapModuleFactory<KitModule> {
+
+    @Override
+    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+      return ImmutableList.of(TeamModule.class);
+    }
+
     @Override
     public KitModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
