@@ -59,6 +59,7 @@ public class MatchAnnouncer implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchBegin(final MatchStartEvent event) {
     Match match = event.getMatch();
+    if (match.isFinished()) return;
     match.sendMessage(translatable("broadcast.matchStart", NamedTextColor.GREEN));
 
     Component go = translatable("broadcast.go", NamedTextColor.GREEN);
