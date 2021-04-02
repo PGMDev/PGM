@@ -34,6 +34,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.MaterialData;
@@ -426,11 +427,7 @@ public interface NMSHacks {
   }
 
   static Packet spawnPlayerPacket(
-      int entityId,
-      UUID uuid,
-      Location location,
-      org.bukkit.inventory.ItemStack heldItem,
-      EntityMetadata metadata) {
+      int entityId, UUID uuid, Location location, ItemStack heldItem, EntityMetadata metadata) {
     if (BukkitUtils.isSportPaper()) {
       return new PacketPlayOutNamedEntitySpawn(
           entityId,
@@ -740,7 +737,7 @@ public interface NMSHacks {
    *
    * <p>Derived from CraftBlock.itemCausesDrops()
    */
-  static boolean canMineBlock(MaterialData blockMaterial, org.bukkit.inventory.ItemStack tool) {
+  static boolean canMineBlock(MaterialData blockMaterial, ItemStack tool) {
     if (!blockMaterial.getItemType().isBlock()) {
       throw new IllegalArgumentException("Material '" + blockMaterial + "' is not a block");
     }
@@ -864,8 +861,7 @@ public interface NMSHacks {
     return ((CraftPlayer) player).getHandle().ping;
   }
 
-  static Packet entityEquipmentPacket(
-      int entityId, int slot, org.bukkit.inventory.ItemStack armor) {
+  static Packet entityEquipmentPacket(int entityId, int slot, ItemStack armor) {
     return new PacketPlayOutEntityEquipment(entityId, slot, CraftItemStack.asNMSCopy(armor));
   }
 
@@ -1206,7 +1202,7 @@ public interface NMSHacks {
       entityAttach(viewer, entityId(), vehicle.getEntityId(), false);
     }
 
-    default void wear(Player viewer, int slot, org.bukkit.inventory.ItemStack item) {
+    default void wear(Player viewer, int slot, ItemStack item) {
       sendPacket(viewer, entityEquipmentPacket(entityId(), slot, item));
     }
   }
