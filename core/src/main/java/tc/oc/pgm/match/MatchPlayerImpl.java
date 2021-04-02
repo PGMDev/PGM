@@ -207,6 +207,8 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
 
   @Override
   public boolean canSee(MatchPlayer other) {
+    @Nullable MatchPlayer spectatorTarget = this.getSpectatorTarget();
+    if (spectatorTarget != null && spectatorTarget.getId().equals(other.getId())) return true;
     if (!other.isVisible()) return false;
     if (other.isParticipating()) return true;
     if (other.isVanished() && !getBukkit().hasPermission(Permissions.VANISH)) return false;
