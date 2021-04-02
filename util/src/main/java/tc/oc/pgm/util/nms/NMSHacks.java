@@ -79,6 +79,10 @@ public interface NMSHacks {
   static void sendPacketToViewers(Entity entity, Object packet) {
     EntityTrackerEntry entry = getTrackerEntry(entity);
     for (EntityPlayer viewer : ((Set<EntityPlayer>) entry.trackedPlayers)) {
+      Entity spectatorTarget = viewer.getBukkitEntity().getSpectatorTarget();
+      if (spectatorTarget != null) {
+        if (spectatorTarget.getUniqueId().equals(entity.getUniqueId())) continue;
+      }
       viewer.playerConnection.sendPacket((Packet) packet);
     }
   }
