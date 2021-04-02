@@ -453,8 +453,8 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   @Nullable
   @Override
   public MatchPlayer getSpectatorTarget() {
-    if (getBukkit() == null) return null;
-    return match.getPlayer(getBukkit().getSpectatorTarget());
+    Player bukkit = getBukkit();
+    return bukkit == null ? null : match.getPlayer(bukkit.getSpectatorTarget());
   }
 
   @Override
