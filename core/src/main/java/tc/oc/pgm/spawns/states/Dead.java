@@ -2,6 +2,7 @@ package tc.oc.pgm.spawns.states;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.util.List;
 import javax.annotation.Nullable;
@@ -21,6 +22,7 @@ import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.SpawnModule;
 import tc.oc.pgm.spawns.events.DeathKitApplyEvent;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 
 /** Player is waiting to respawn after dying in-game */
@@ -140,19 +142,25 @@ public class Dead extends Spawning {
   }
 
   @Override
-  protected Component getTitle() {
-    return translatable("deathScreen.title", NamedTextColor.RED);
+  protected Component getTitle(boolean spectator) {
+    return translatable(
+        "deathScreen.title" + (spectator ? ".spectator" : ""),
+        NamedTextColor.RED,
+        player(this.player.getId(), NameStyle.COLOR));
   }
 
   @Override
-  protected Component getSubtitle() {
+  protected Component getSubtitle(boolean spectator) {
     long ticks = ticksUntilRespawn();
     if (ticks > 0) {
       return translatable(
-          spawnRequested ? "death.respawn.confirmed.time" : "death.respawn.unconfirmed.time",
+          spawnRequested
+              ? "death.respawn.confirmed.time"
+              : "death.respawn.unconfirmed.time" + (spectator ? ".spectator" : ""),
+          NamedTextColor.GREEN,
           text(String.format("%.1f", (ticks / (float) 20)), NamedTextColor.AQUA));
     } else {
-      return super.getSubtitle();
+      return super.getSubtitle(spectator);
     }
   }
 
@@ -179,7 +187,7 @@ public class Dead extends Spawning {
                           ? "death.respawn.confirmed.time"
                           : "death.respawn.unconfirmed.time",
                       text((int) (ticks / (float) 20), NamedTextColor.AQUA))
-                  : super.getSubtitle())
+                  : super.getSubtitle(false))
               .color(NamedTextColor.GREEN));
     }
   }
