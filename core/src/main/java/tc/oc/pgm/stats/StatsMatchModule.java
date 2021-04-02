@@ -11,15 +11,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -34,8 +33,6 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -73,10 +70,6 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   private final Match match;
   private final Map<UUID, PlayerStats> allPlayerStats = new HashMap<>();
-  // Since Bukkit#getOfflinePlayer reads the cached user files, and those files have an expire date
-  // + will be wiped if X amount of players join, we need a separate cache for offline players with
-  // stats
-  private final Set<UUID> cachedUserInfo = new HashSet<>();
 
   private final boolean verboseStats = PGM.get().getConfiguration().showVerboseStats();
   private final Duration showAfter = PGM.get().getConfiguration().showStatsAfter();
@@ -208,7 +201,8 @@ public class StatsMatchModule implements MatchModule, Listener {
     // when the inventory GUI is created. If usernames needs to be resolved using the mojang api
     // (UsernameResolver)
     // it can take some time, and we cant really know how long.
-    cachedUserInfo.forEach(id -> PGM.get().getDatastore().getUsername(id).getNameLegacy());
+    this.getOfflinePlayersWithStats()
+        .forEach(id -> PGM.get().getDatastore().getUsername(id).getNameLegacy());
     CompletableFuture.runAsync(UsernameResolver::resolveAll);
 
     // Schedule displaying stats after match end
@@ -330,7 +324,7 @@ public class StatsMatchModule implements MatchModule, Listener {
                 .filter(o -> tmm.getLastTeam(o.getId()) == competitor)
                 .collect(Collectors.toSet());
         Collection<UUID> relevantOfflinePlayers =
-            cachedUserInfo.stream()
+            this.getOfflinePlayersWithStats()
                 .filter(id -> tmm.getLastTeam(id) == competitor)
                 .collect(Collectors.toSet());
         items.add(
@@ -424,29 +418,19 @@ public class StatsMatchModule implements MatchModule, Listener {
     return numberComponent(hearts, color).append(HEART_SYMBOL);
   }
 
-  @EventHandler
-  public void onPlayerLeave(PlayerQuitEvent event) {
-    UUID playerId = event.getPlayer().getUniqueId();
-    if (allPlayerStats.containsKey(playerId)) {
-      cachedUserInfo.add(playerId);
-    }
-  }
-
-  @EventHandler
-  public void onPlayerJoin(PlayerJoinEvent event) {
-    UUID playerUUID = event.getPlayer().getUniqueId();
-    cachedUserInfo.removeIf(id -> id.equals(playerUUID));
-  }
-
   private Component playerName(UUID playerUUID) {
     return player( // TODO: make #player take a Supplier instead of the "defName" String
         Bukkit.getPlayer(playerUUID),
-        cachedUserInfo.stream()
+        allPlayerStats.keySet().stream()
             .filter(id -> id.equals(playerUUID))
             .findFirst()
             .map(id -> PGM.get().getDatastore().getUsername(id).getNameLegacy())
             .orElse("Unknown"),
         NameStyle.FANCY);
+  }
+
+  private Stream<UUID> getOfflinePlayersWithStats() {
+    return allPlayerStats.keySet().stream().filter(id -> match.getPlayer(id) == null);
   }
 
   // Creates a new PlayerStat if the player does not have one yet
