@@ -6,8 +6,11 @@ import static tc.oc.pgm.stats.StatsMatchModule.damageComponent;
 import static tc.oc.pgm.stats.StatsMatchModule.numberComponent;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
@@ -15,6 +18,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import tc.oc.pgm.api.Datastore;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -32,18 +37,49 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
 
   private final NamedTextColor RESET = NamedTextColor.GRAY;
 
-  TeamStatsInventoryMenuItem(Match match, Competitor team) {
+  TeamStatsInventoryMenuItem(
+      Match match,
+      Competitor team,
+      Collection<MatchPlayer> relevantObservers,
+      Collection<UUID> relevantOfflinePlayers) {
+
     this.team = team;
+    StatsMatchModule smm = match.needModule(StatsMatchModule.class);
+    Collection<MatchPlayer> players = team.getPlayers();
+    List<InventoryMenuItem> items =
+        new ArrayList<>(players.size() + relevantObservers.size() + relevantOfflinePlayers.size());
+    items.addAll(
+        Stream.concat(players.stream(), relevantObservers.stream())
+            .map(
+                p ->
+                    new PlayerStatsInventoryMenuItem(
+                        p.getId(),
+                        smm.getPlayerStat(p),
+                        p.getBukkit().getSkin(),
+                        p.getNameLegacy(),
+                        p.getParty().getName().color()))
+            .collect(Collectors.toList()));
+
+    Datastore datastore = PGM.get().getDatastore();
+
+    items.addAll(
+        relevantOfflinePlayers.stream()
+            .map(
+                id ->
+                    new PlayerStatsInventoryMenuItem(
+                        id,
+                        smm.getPlayerStat(id),
+                        datastore.getSkin(id),
+                        datastore.getUsername(id).getNameLegacy(),
+                        NamedTextColor.DARK_AQUA))
+            .collect(Collectors.toSet()));
+
     this.teamSubGUI =
         new InventoryMenu(
             match.getWorld(),
             translatable("match.stats.title"),
-            team.getPlayers().stream()
-                .map(PlayerStatsInventoryMenuItem::new)
-                .collect(Collectors.toList()),
-            team.getPlayers().size() > 10
-                ? new IdentityMenuArranger(5)
-                : new DoubleRowMenuArranger());
+            items,
+            items.size() > 10 ? new IdentityMenuArranger(5) : new DoubleRowMenuArranger());
     this.match = match;
   }
 
