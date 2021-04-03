@@ -4,11 +4,11 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import java.util.UUID;
-import org.bukkit.Skin;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.map.MapActivity;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.api.setting.Settings;
+import tc.oc.pgm.util.skin.Skin;
 
 @SuppressWarnings({"UnstableApiUsage"})
 public class CacheDatastore implements Datastore {

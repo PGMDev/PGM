@@ -7,7 +7,6 @@ import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import javax.annotation.Nullable;
-import org.bukkit.Skin;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.map.MapActivity;
 import tc.oc.pgm.api.player.Username;
@@ -15,6 +14,7 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.util.concurrent.ThreadSafeConnection;
+import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TextParser;
 
 public class SQLDatastore extends ThreadSafeConnection implements Datastore {

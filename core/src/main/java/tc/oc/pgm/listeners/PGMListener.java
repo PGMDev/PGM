@@ -403,6 +403,6 @@ public class PGMListener implements Listener {
   @EventHandler // We only need to store skins for the post match stats
   public void storeSkinOnMatchJoin(PlayerJoinMatchEvent event) {
     final MatchPlayer player = event.getPlayer();
-    PGM.get().getDatastore().setSkin(player.getId(), player.getBukkit().getSkin());
+    PGM.get().getDatastore().setSkin(player.getId(), NMSHacks.getPlayerSkin(player.getBukkit()));
   }
 }
