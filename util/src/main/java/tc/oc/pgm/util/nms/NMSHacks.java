@@ -10,6 +10,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
@@ -954,6 +955,20 @@ public interface NMSHacks {
         .generatorSettings(worldData.getGeneratorOptions())
         .seed(worldData.getSeed())
         .type(org.bukkit.WorldType.getByName(worldData.getType().name()));
+  }
+
+  Field worldServerField = ReflectionUtils.getField(CraftWorld.class, "world");
+  Field dimensionField = ReflectionUtils.getField(WorldServer.class, "dimension");
+  Field modifiersField = ReflectionUtils.getField(Field.class, "modifiers");
+
+  static void resetDimension(World world) {
+    try {
+      modifiersField.setInt(dimensionField, dimensionField.getModifiers() & ~Modifier.FINAL);
+
+      dimensionField.set(worldServerField.get(world), 11);
+    } catch (IllegalAccessException e) {
+      // No-op, newer version of Java have disabled modifying final fields
+    }
   }
 
   static RayBlockIntersection getTargetedBLock(Player player) {
