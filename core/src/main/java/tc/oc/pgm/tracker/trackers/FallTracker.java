@@ -63,7 +63,8 @@ public class FallTracker implements Listener, DamageResolver {
           break;
 
         case FIRE_TICK:
-          if (fall.isInLava) {
+          if (fall.isInLava
+              || match.getTick().tick - fall.outLavaTick < FallState.MAX_BURNING_TICKS) {
             fall.to = FallInfo.To.LAVA;
           } else {
             return null;
@@ -255,12 +256,11 @@ public class FallTracker implements Listener, DamageResolver {
       }
 
       if (isInLava != fall.isInLava) {
-        if ((fall.isInLava = isInLava)) {
+        if (!(fall.isInLava = isInLava)) {
           fall.inLavaTick = now.tick;
         } else {
-          // Because players continue to "fall" as long as they are in lava, moving out of lava
-          // can immediately finish their fall
-          this.checkFallTimeout(fall);
+          fall.outLavaTick = now.tick;
+          this.scheduleCheckFallTimeout(fall, FallState.MAX_BURNING_TICKS + 1);
         }
       }
     }
