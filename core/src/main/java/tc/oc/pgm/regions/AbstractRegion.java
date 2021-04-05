@@ -1,19 +1,23 @@
 package tc.oc.pgm.regions;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Random;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
+import org.bukkit.event.Event;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.filter.query.LocationQuery;
 import tc.oc.pgm.api.region.RegionDefinition;
 import tc.oc.pgm.filters.TypedFilter;
 import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
 public abstract class AbstractRegion extends TypedFilter<LocationQuery>
     implements RegionDefinition {
@@ -104,6 +108,11 @@ public abstract class AbstractRegion extends TypedFilter<LocationQuery>
   public Vector getRandom(Random random) {
     throw new UnsupportedOperationException(
         "Cannot generate a random point in " + this.getClass().getSimpleName());
+  }
+
+  @Override
+  public Collection<Class<? extends Event>> getRelevantEvents() {
+    return ImmutableList.of(PlayerCoarseMoveEvent.class);
   }
 
   @Override

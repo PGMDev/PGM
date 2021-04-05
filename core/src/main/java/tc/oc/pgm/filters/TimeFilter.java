@@ -9,7 +9,7 @@ public class TimeFilter extends TypedFilter<MatchQuery> implements Comparable<Ti
 
   public TimeFilter(Duration duration) {
     this.duration = duration;
-  }
+  } // TODO, time queue
 
   @Override
   public Class<? extends MatchQuery> getQueryType() {

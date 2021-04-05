@@ -1,8 +1,12 @@
 package tc.oc.pgm.filters;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
+import java.util.Collection;
+import org.bukkit.event.Event;
 import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.party.event.CompetitorScoreChangeEvent;
 import tc.oc.pgm.score.ScoreMatchModule;
 
 /**
@@ -16,6 +20,11 @@ public class ScoreFilter extends TypedFilter<PartyQuery> {
 
   public ScoreFilter(Range<Integer> values) {
     this.values = values;
+  }
+
+  @Override
+  public Collection<Class<? extends Event>> getRelevantEvents() {
+    return ImmutableList.of(CompetitorScoreChangeEvent.class);
   }
 
   @Override

@@ -1,7 +1,11 @@
 package tc.oc.pgm.filters;
 
+import com.google.common.collect.ImmutableList;
+import java.util.Collection;
+import org.bukkit.event.Event;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
 public class PlayerMovementFilter extends ParticipantFilter {
   private final boolean sprinting;
@@ -10,6 +14,11 @@ public class PlayerMovementFilter extends ParticipantFilter {
   public PlayerMovementFilter(boolean sprinting, boolean sneaking) {
     this.sprinting = sprinting;
     this.sneaking = sneaking;
+  }
+
+  @Override
+  public Collection<Class<? extends Event>> getRelevantEvents() {
+    return ImmutableList.of(PlayerCoarseMoveEvent.class);
   }
 
   @Override

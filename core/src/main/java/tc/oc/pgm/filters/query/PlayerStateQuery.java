@@ -38,7 +38,7 @@ public class PlayerStateQuery extends Query implements PlayerQuery {
   }
 
   @Override
-  public UUID getPlayerId() {
+  public UUID getId() {
     return playerState.getId();
   }
 

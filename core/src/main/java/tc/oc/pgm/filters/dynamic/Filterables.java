@@ -1,4 +1,4 @@
-package tc.oc.pgm.filters;
+package tc.oc.pgm.filters.dynamic;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;

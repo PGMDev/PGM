@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.bukkit.GameMode;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.InventoryHolder;
@@ -15,7 +16,7 @@ import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.setting.Settings;
-import tc.oc.pgm.filters.Filterable;
+import tc.oc.pgm.filters.dynamic.Filterable;
 import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.util.Audience;
@@ -32,7 +33,7 @@ import tc.oc.pgm.util.named.Named;
  * or modify a {@link Player}, there should be a method added to {@link MatchPlayer}.
  */
 public interface MatchPlayer
-    extends Audience, Named, Tickable, InventoryHolder, Filterable<PlayerQuery> {
+    extends Audience, Named, Tickable, InventoryHolder, Filterable<PlayerQuery>, PlayerQuery {
 
   /**
    * Get the {@link Match} of the {@link MatchPlayer}.
@@ -277,5 +278,16 @@ public interface MatchPlayer
   @Override
   default Event getEvent() {
     return null;
+  }
+
+  @Override
+  default Class<? extends Entity> getEntityType() {
+    return Player.class;
+  }
+
+  @Nullable
+  @Override
+  default MatchPlayer getPlayer() {
+    return this;
   }
 }

@@ -30,7 +30,7 @@ import tc.oc.pgm.api.player.MatchPlayerResolver;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.features.MatchFeatureContext;
-import tc.oc.pgm.filters.Filterable;
+import tc.oc.pgm.filters.dynamic.Filterable;
 import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.util.Audience;
 
@@ -276,31 +276,6 @@ public interface Match
    */
   void setMaxPlayers(int players);
 
-  @Override
-  default Optional<? extends Filterable<? super MatchQuery>> filterableParent() {
-    return Optional.empty();
-  }
-
-  @Override
-  default Stream<? extends Filterable<? extends MatchQuery>> filterableChildren() {
-    return getParties().stream();
-  }
-
-  @Override
-  default <R extends Filterable<?>> Stream<? extends R> filterableDescendants(Class<R> type) {
-    Stream<R> result = Stream.of();
-    if (type.isAssignableFrom(Match.class)) {
-      result = Stream.concat(result, Stream.of((R) this));
-    }
-    if (Party.class.isAssignableFrom(type)) {
-      result = Stream.concat(result, (Stream<R>) getParties().stream().filter(type::isInstance));
-    }
-    if (type.isAssignableFrom(MatchPlayer.class)) {
-      result = Stream.concat(result, (Stream<? extends R>) getPlayers());
-    }
-    return result;
-  }
-
   /**
    * Get all the {@link MatchPlayer}s in the {@link Match}.
    *
@@ -400,7 +375,7 @@ public interface Match
    *
    * @return The filter {@link Query}.
    */
-  Query getQuery();
+  MatchQuery getQuery();
 
   /**
    * Get the {@link Duration} of the {@link Match}, or {@link Duration#ZERO} if not yet started.
@@ -437,4 +412,40 @@ public interface Match
    * @return If the {@link Match} was just ended.
    */
   boolean calculateVictory();
+
+  @Override
+  default Optional<? extends Filterable<? super MatchQuery>> filterableParent() {
+    return Optional.empty();
+  }
+
+  @Override
+  default Stream<? extends Filterable<? extends MatchQuery>> filterableChildren() {
+    return getParties().stream();
+  }
+
+  @Override
+  default <R extends Filterable<?>> Stream<? extends R> filterableDescendants(Class<R> type) {
+    Stream<R> result = Stream.of();
+    if (type.isAssignableFrom(Match.class)) {
+      result = Stream.concat(result, Stream.of((R) this));
+    }
+    if (Party.class.isAssignableFrom(type)) {
+      result = Stream.concat(result, (Stream<R>) getParties().stream().filter(type::isInstance));
+    }
+    if (type.isAssignableFrom(MatchPlayer.class)) {
+      result = Stream.concat(result, (Stream<? extends R>) getPlayers().stream());
+    }
+    return result;
+  }
+
+  @Override
+  default Match getMatch() {
+    return this;
+  }
+
+  @Nullable
+  @Override
+  default Event getEvent() {
+    return null;
+  }
 }

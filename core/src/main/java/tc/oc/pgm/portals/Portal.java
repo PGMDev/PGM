@@ -12,7 +12,8 @@ import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.filters.FilterMatchModule;
+import tc.oc.pgm.filters.dynamic.FilterMatchModule;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public class Portal implements FeatureDefinition {
 
@@ -31,8 +32,8 @@ public class Portal implements FeatureDefinition {
       boolean sound,
       boolean smooth) {
 
-    this.transform = transform;
     this.trigger = trigger;
+    this.transform = transform;
     this.participantFilter = participantFilter;
     this.observerFilter = observerFilter;
     this.sound = sound;
@@ -90,41 +91,13 @@ public class Portal implements FeatureDefinition {
       }
     }
 
-    // Defer because some things break if a player teleports during a move event
-    match
-        .getExecutor(MatchScope.LOADED)
-        .execute(
-            () -> {
-              if (!bukkit.isOnline()) return;
-
-              // Use ENDER_PEARL as the cause so that this teleport is treated
-              // as an "in-game" movement
-              if (delta == null) {
-                bukkit.teleport(destinationClone, PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
-              } else {
-                bukkit.teleportRelative(
-                    delta,
-                    deltaYaw,
-                    deltaPitch,
-                    PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
-              }
-
-              // Reset fall distance
-              bukkit.setFallDistance(0);
-
-              if (Portal.this.sound) {
-                for (MatchPlayer listener : match.getPlayers()) {
-                  if (listener.getBukkit().canSee(player.getBukkit())) {
-                    listener.playSound(
-                        sound(key("mob.endermen.portal"), Sound.Source.MASTER, 1f, 1f),
-                        destinationClone.getX(),
-                        destinationClone.getY(),
-                        destinationClone.getZ());
-                  }
-                }
-              }
-            });
-  }
+    // Use ENDER_PEARL as the cause so that this teleport is treated as an "in-game" movement
+    if (delta == null) {
+      bukkit.teleport(to, PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
+    } else {
+      NMSHacks.teleportRelative(
+          bukkit, delta, deltaYaw, deltaPitch, PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
+    }
 
     // Reset fall distance
     bukkit.setFallDistance(0);

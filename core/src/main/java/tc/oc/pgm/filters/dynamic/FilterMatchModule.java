@@ -1,22 +1,27 @@
-package tc.oc.pgm.filters;
+package tc.oc.pgm.filters.dynamic;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+import org.bukkit.entity.Entity;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryEvent;
+import org.bukkit.plugin.EventExecutor;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
@@ -24,17 +29,17 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.Tickable;
-import tc.oc.pgm.api.match.event.MatchPhaseChangeEvent;
-import tc.oc.pgm.api.party.event.CompetitorScoreChangeEvent;
+import tc.oc.pgm.api.party.event.PartyEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
+import tc.oc.pgm.api.player.event.MatchPlayerEvent;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.flag.event.FlagStateChangeEvent;
-import tc.oc.pgm.goals.events.GoalCompleteEvent;
+import tc.oc.pgm.filters.TimeFilter;
 import tc.oc.pgm.util.MapUtils;
+import tc.oc.pgm.util.event.GeneralizedEvent;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
 /**
@@ -42,7 +47,7 @@ import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
  *
  * <p>A {@link Filter} can have the possibility of being dynamic or not, but the match module
  * decides whether to use a filter dynamically or not. In this sense the docs can be a little
- * misleading when thinking about dynamic filters programatically. The docs say "the [dynamic]
+ * misleading when thinking about dynamic filters programmatically. The docs say "the [dynamic]
  * filter will notify the module when it's time to do something". In reality this {@link
  * FilterMatchModule} will "notify" the modules using registered {@link FilterListener}s to execute
  * code in the module.
@@ -56,13 +61,20 @@ import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
  * @see #onFall(Class, Filter, Consumer)
  */
 @ListenerScope(MatchScope.LOADED)
-public class FilterMatchModule implements MatchModule, Listener, FilterDispatcher, Tickable {
+public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickable {
 
   private final Match match;
+  private final List<Class<? extends Event>> listeningFor = new LinkedList<>();
   private final PriorityQueue<TimeFilter> timeFilterQueue = new PriorityQueue<>();
 
   public FilterMatchModule(Match match) {
     this.match = match;
+  }
+
+  public static void checkFilterDynamic(Filter filter) {
+    if (filter.getRelevantEvents().isEmpty())
+      throw new IllegalArgumentException(
+          "Filter " + filter + " was submitted as a dynamic filter but is not!");
   }
 
   private static class ListenerSet {
@@ -83,6 +95,11 @@ public class FilterMatchModule implements MatchModule, Listener, FilterDispatche
    * Registers a filter listener for the given scope to be notified when the response of the
    * provided filter is equal to the provided response.
    *
+   * <p>If the registered filter is NOT dynamic no specific listener will be added for that filter.
+   * It will still be given responses if other listeners invalidate {@link Filterable}s that
+   * implement the same {@link Query} that the non-dynamic filter accepts. To prevent this
+   * unpredictable behaviour {@link #checkFilterDynamic(Filter)} should be used before registering.
+   *
    * @param scope The scope of the filter listener
    * @param filter The filter to listen to
    * @param response The desired response
@@ -95,15 +112,17 @@ public class FilterMatchModule implements MatchModule, Listener, FilterDispatche
     }
 
     final ListenerSet listenerSet =
-        listeners.row(filter).computeIfAbsent(scope, s -> new ListenerSet());
+        this.listeners.row(filter).computeIfAbsent(scope, s -> new ListenerSet());
 
     (response ? listenerSet.rise : listenerSet.fall).add(listener);
+
+    this.registerListenersFor(filter.getRelevantEvents());
 
     match
         .filterableDescendants(scope)
         .forEach(
             filterable -> {
-              final boolean last = lastResponse(filter, filterable);
+              final boolean last = this.lastResponse(filter, filterable);
               if (last == response) {
                 dispatch(listener, filter, filterable, last);
               }
@@ -140,8 +159,7 @@ public class FilterMatchModule implements MatchModule, Listener, FilterDispatche
    * @param listener The listener that handles the response
    */
   @Override
-  public void onChange(
-      Filter filter, tc.oc.pgm.filters.FilterListener<? super Filterable<?>> listener) {
+  public void onChange(Filter filter, FilterListener<? super Filterable<?>> listener) {
     onChange((Class) Filterable.class, filter, listener);
   }
 
@@ -213,7 +231,7 @@ public class FilterMatchModule implements MatchModule, Listener, FilterDispatche
 
   /** Returns the last response a given filter gave to a given filterable */
   private boolean lastResponse(Filter filter, Filterable<?> filterable) {
-    return MapUtils.computeIfAbsent(lastResponses.row(filter), filterable, filter::response);
+    return MapUtils.computeIfAbsent(this.lastResponses.row(filter), filterable, filter::response);
   }
 
   /**
@@ -254,10 +272,10 @@ public class FilterMatchModule implements MatchModule, Listener, FilterDispatche
   private <F extends Filterable<?>, Q extends Query> void check(
       F filterable, Q query, List<Runnable> dispatches) {
     final Map<Filter, Boolean> beforeCache = new HashMap<>();
-    final Map<Filter, Boolean> afterCache = lastResponses.column(filterable);
+    final Map<Filter, Boolean> afterCache = this.lastResponses.column(filterable);
 
     // For each scope that the given filterable applies to
-    listeners
+    this.listeners
         .columnMap()
         .forEach(
             (scope, column) -> {
@@ -354,21 +372,53 @@ public class FilterMatchModule implements MatchModule, Listener, FilterDispatche
     invalidate(filterable);
   }
 
-  @EventHandler(priority = EventPriority.MONITOR)
+  private void registerListenersFor(Collection<Class<? extends Event>> relevantEvents) {
+    for (Class<? extends Event> event : relevantEvents) {
+      if (listeningFor.contains(event)) continue;
+
+      EventExecutor result;
+      if (event.isAssignableFrom(PlayerCoarseMoveEvent.class))
+        result = (l, e) -> this.onPlayerMove((PlayerCoarseMoveEvent) e); // TODO: move to this?
+      else if (event.isAssignableFrom(MatchPlayerDeathEvent.class))
+        result = (l, e) -> this.onPlayerDeath((MatchPlayerDeathEvent) e);
+      else if (event.isAssignableFrom(PlayerPartyChangeEvent.class))
+        result = (l, e) -> this.onPartyChange((PlayerPartyChangeEvent) e);
+      else if (event.isAssignableFrom(InventoryEvent.class))
+        result = (l, e) -> this.invalidate(this.match.getPlayer(((InventoryEvent) e).getActor()));
+      else result = (l, e) -> this.invalidate(this.extractFilterable(e));
+
+      listeningFor.add(event);
+
+      PGM.get()
+          .getServer()
+          .getPluginManager()
+          .registerEvent(event, new DummyListener(), EventPriority.MONITOR, result, PGM.get());
+    }
+  }
+
+  private Filterable<?> extractFilterable(Event event) {
+    if (event instanceof MatchPlayerEvent) return ((MatchPlayerEvent) event).getPlayer();
+    final Entity e = GeneralizedEvent.getActorIfPresent(event);
+    final MatchPlayer player = match.getPlayer(e);
+    if (player != null) return player;
+    if (event instanceof PartyEvent) return ((PartyEvent) event).getParty();
+    return match;
+  }
+
   public void onPlayerMove(PlayerCoarseMoveEvent event) {
     // On movement events, check the player immediately instead of invalidating them.
     // We can't wait until the end of the tick because the player could move several
     // more times by then (i.e. if we received multiple packets from them in the same
     // tick) which would make region checks highly unreliable.
+    PGM.get().getMatchManager().getPlayer(event.getPlayer());
     MatchPlayer player = match.getPlayer(event.getPlayer());
 
     if (player != null) {
-      invalidate(player);
+      this.invalidate(player);
       PGM.get().getServer().postToMainThread(PGM.get(), true, this::tick);
     }
   }
 
-  @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerDeath(MatchPlayerDeathEvent event) {
     invalidate(event.getVictim());
     ParticipantState killer = event.getKiller();
@@ -378,7 +428,6 @@ public class FilterMatchModule implements MatchModule, Listener, FilterDispatche
     }
   }
 
-  @EventHandler(priority = EventPriority.MONITOR)
   public void onPartyChange(PlayerPartyChangeEvent event) throws EventException {
     if (event.getNewParty() != null) {
       invalidate(event.getPlayer());
@@ -387,7 +436,7 @@ public class FilterMatchModule implements MatchModule, Listener, FilterDispatche
       // force all filters false that are not already false before the player leaves.
       // Listeners don't need to do any cleanup as long as they don't hold on to
       // players that don't match the filter.
-      listeners
+      this.listeners
           .columnMap()
           .forEach(
               (scope, column) -> {
@@ -396,7 +445,7 @@ public class FilterMatchModule implements MatchModule, Listener, FilterDispatche
                   column.forEach(
                       (filter, filterListeners) -> {
                         // If player joined very recently, they may not have a cached response yet
-                        final Boolean response = lastResponses.get(filter, event.getPlayer());
+                        final Boolean response = this.lastResponses.get(filter, event.getPlayer());
                         if (response != null && response) {
                           filterListeners.fall.forEach(
                               listener ->
@@ -413,30 +462,12 @@ public class FilterMatchModule implements MatchModule, Listener, FilterDispatche
       event.yield();
 
       // Wait until after the event to remove them, in case they get invalidated during the event.
-      dirtySet.remove(event.getPlayer().getQuery());
-      lastResponses.columnKeySet().remove(event.getPlayer().getQuery());
+      dirtySet.remove(event.getPlayer());
+      this.lastResponses.columnKeySet().remove(event.getPlayer());
     }
   }
 
-  @EventHandler(priority = EventPriority.MONITOR)
-  public void onMatchStateChange(MatchPhaseChangeEvent event) {
-    invalidate(match);
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR)
-  public void onGoalComplete(GoalCompleteEvent event) {
-    invalidate(match);
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR)
-  public void onFlagChange(FlagStateChangeEvent event) {
-    invalidate(match);
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR)
-  public void onScoreChange(CompetitorScoreChangeEvent event) {
-    invalidate(match);
-  }
+  private static class DummyListener implements Listener {}
 
   // TODO: Invalidate match on RankingsChangeEvent if/when it exists
 }

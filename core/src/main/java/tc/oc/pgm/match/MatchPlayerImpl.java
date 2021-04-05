@@ -20,6 +20,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -122,6 +123,15 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     return id;
   }
 
+  @Nullable
+  @Override
+  public Location getLocation() { // TODO: move over usages of #getBukkit#getLocation to this
+    final Player bukkit = this.getBukkit();
+    if (bukkit == null) return null;
+
+    return bukkit.getLocation();
+  }
+
   @Override
   public MatchPlayerState getState() {
     final Party party = getParty();
@@ -146,7 +156,9 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   }
 
   @Override
-  public PlayerQuery getQuery() {
+  public PlayerQuery
+      getQuery() { // TODO: delete this method, no reason to recreate the query all the time, and
+    // this now implements query instead
     return query.get();
   }
 
@@ -449,13 +461,13 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   public int compareTo(MatchPlayer o) {
     return new CompareToBuilder()
         .append(getMatch(), o.getMatch())
-        .append(getId(), o.getId())
+        .append(this.getId(), o.getId())
         .build();
   }
 
   @Override
   public int hashCode() {
-    return new HashCodeBuilder().append(getMatch()).append(getId()).build();
+    return new HashCodeBuilder().append(getMatch()).append(this.getId()).build();
   }
 
   @Override
@@ -464,14 +476,14 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     final MatchPlayer o = (MatchPlayer) obj;
     return new EqualsBuilder()
         .append(getMatch(), o.getMatch())
-        .append(getId(), o.getId())
+        .append(this.getId(), o.getId())
         .isEquals();
   }
 
   @Override
   public String toString() {
     return new ToStringBuilder(this)
-        .append("id", getId())
+        .append("id", this.getId())
         .append("bukkit", getBukkit())
         .append("match", getMatch().getId())
         .build();

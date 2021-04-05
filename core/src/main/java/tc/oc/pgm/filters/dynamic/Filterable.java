@@ -1,4 +1,4 @@
-package tc.oc.pgm.filters;
+package tc.oc.pgm.filters.dynamic;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -9,10 +9,10 @@ import tc.oc.pgm.api.filter.query.Query;
 /**
  * An object that {@link Filter}s can be applied to.
  *
- * <p>Filterables serve as {@link Query}s about themselves in their current state, and each
- * Filterable subtype should also extend the query type given for its {@link Q} parameter. Unlike
- * {@link Query}s in general, which may be ephemeral value types, Filterables have a persistent
- * identity.
+ * <p>Filterables serve as {@link Query}s about themselves in their current state, and <b>each
+ * Filterable subtype should also extend the query type given for its {@link Q} parameter.</b>
+ * Unlike {@link Query}s in general, which may be ephemeral value types, Filterables have a
+ * persistent identity.
  *
  * <p>Filterables are composed in a hiearchy that mirrors the type relationships of their {@link Q}
  * parameters. If query type B extends query type A then every Filterable<B> is contained in some

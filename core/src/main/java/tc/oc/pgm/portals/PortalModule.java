@@ -25,10 +25,10 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.region.Region;
-import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.InverseFilter;
 import tc.oc.pgm.filters.StaticFilter;
+import tc.oc.pgm.filters.dynamic.FilterMatchModule;
 import tc.oc.pgm.regions.RFAContext;
 import tc.oc.pgm.regions.RFAScope;
 import tc.oc.pgm.regions.RandomPointsValidation;
@@ -137,6 +137,13 @@ public class PortalModule implements MapModule {
 
         final Optional<Filter> reverseFinal =
             Stream.of(reverse, inverseTransit, exit).filter(Objects::nonNull).findFirst();
+
+        try {
+          if (forwardFinal != null) FilterMatchModule.checkFilterDynamic(forwardFinal);
+          reverseFinal.ifPresent(FilterMatchModule::checkFilterDynamic);
+        } catch (IllegalArgumentException e) {
+          throw new InvalidXMLException(e.getMessage(), portalEl);
+        }
 
         // Portal is always bidirectional if a reverse dynamic filter is specified,
         // otherwise it must be enabled explicitly.

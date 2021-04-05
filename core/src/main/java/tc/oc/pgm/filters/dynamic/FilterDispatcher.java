@@ -1,4 +1,4 @@
-package tc.oc.pgm.filters;
+package tc.oc.pgm.filters.dynamic;
 
 import java.util.function.Consumer;
 import tc.oc.pgm.api.filter.Filter;

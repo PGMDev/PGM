@@ -72,7 +72,6 @@ import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.features.MatchFeatureContext;
 import tc.oc.pgm.filters.query.MatchQuery;
-import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.result.CompetitorVictoryCondition;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.ClassLogger;
@@ -312,16 +311,6 @@ public class MatchImpl implements Match {
     final Collection<Audience> audiences = new ArrayList<>(getPlayers());
     audiences.add(Audience.console());
     return Audience.get(audiences);
-  }
-
-  public Match getMatch() {
-    return this;
-  }
-
-  @Nullable
-  @Override
-  public Event getEvent() {
-    return null;
   }
 
   private class EventExecutor implements org.bukkit.plugin.EventExecutor {
@@ -703,7 +692,7 @@ public class MatchImpl implements Match {
   }
 
   @Override
-  public Query getQuery() {
+  public MatchQuery getQuery() {
     return query;
   }
 
