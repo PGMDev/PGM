@@ -9,6 +9,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -129,9 +130,12 @@ public abstract class Uncarried extends Spawned {
     return true;
   }
 
-  protected boolean inPickupRange(Location playerLoc) {
+  protected boolean inPickupRange(Player player) {
+    Location playerLoc = player.getLocation();
     Location flagLoc = this.getLocation();
-    if (playerLoc.getY() < flagLoc.getY() + 2 && playerLoc.getY() >= flagLoc.getY() - 2) {
+
+    if (playerLoc.getY() < flagLoc.getY() + 2
+        && (playerLoc.getY() >= flagLoc.getY() - (player.isOnGround() ? 1 : 0.7))) {
       double dx = playerLoc.getX() - flagLoc.getX();
       double dz = playerLoc.getZ() - flagLoc.getZ();
 
@@ -159,7 +163,7 @@ public abstract class Uncarried extends Spawned {
     MatchPlayer player = this.flag.getMatch().getPlayer(event.getPlayer());
     if (player == null || !player.canInteract() || player.getBukkit().isDead()) return;
 
-    if (this.inPickupRange(player.getBukkit().getLocation()) && this.canPickup(player)) {
+    if (this.inPickupRange(player.getBukkit()) && this.canPickup(player)) {
       this.pickupFlag(player);
     }
   }
