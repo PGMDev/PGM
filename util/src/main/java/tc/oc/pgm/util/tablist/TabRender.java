@@ -12,6 +12,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class TabRender {
   private final TabView view;
@@ -47,7 +48,8 @@ public class TabRender {
   }
 
   private BaseComponent[] getContent(TabEntry entry, int index) {
-    return entry.getContent(this.view);
+    return TextTranslations.toBaseComponentArray(
+        entry.getComponent(this.view), this.view.getViewer());
   }
 
   private void appendAddition(TabEntry entry, int index) {

@@ -2,11 +2,9 @@ package tc.oc.pgm.util.tablist;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.skin.Skin;
-import tc.oc.pgm.util.text.TextTranslations;
 
 /** Implements part of {@link TabEntry} with a few generally useful properties */
 public abstract class SimpleTabEntry implements TabEntry {
@@ -35,11 +33,6 @@ public abstract class SimpleTabEntry implements TabEntry {
 
   protected SimpleTabEntry() {
     this(randomUUIDVersion2());
-  }
-
-  @Override
-  public BaseComponent[] getContent(TabView view) {
-    return TextTranslations.toBaseComponentArray(getComponent(view), view.getViewer());
   }
 
   @Override

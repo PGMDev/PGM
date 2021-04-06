@@ -4,7 +4,6 @@ import java.awt.*;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
-import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.skin.Skin;
@@ -48,13 +47,6 @@ public interface TabEntry {
 
   /** Name for the entry (not visible) */
   String getName(TabView view);
-
-  /**
-   * Content to show in the entry
-   *
-   * @return
-   */
-  BaseComponent[] getContent(TabView view);
 
   /**
    * Content to show in the entry
