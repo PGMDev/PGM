@@ -1,7 +1,6 @@
 package tc.oc.pgm.util.bukkit;
 
 import org.bukkit.entity.Player;
-import tc.oc.pgm.util.nms.NMSHacks;
 import us.myles.ViaVersion.api.Via;
 
 public class ViaUtils {
@@ -35,7 +34,7 @@ public class ViaUtils {
     if (enabled()) {
       return Via.getAPI().getPlayerVersion(player.getUniqueId());
     } else {
-      return NMSHacks.getProtocolVersion(player);
+      return VERSION_1_8;
     }
   }
 

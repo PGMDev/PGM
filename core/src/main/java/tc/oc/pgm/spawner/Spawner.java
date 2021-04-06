@@ -139,9 +139,8 @@ public class Spawner implements Listener, Tickable {
     handleEntityRemoveEvent(event.getEntity(), event.getEntity().getItemStack().getAmount());
   }
 
-  @EventHandler(priority = EventPriority.MONITOR)
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerPickup(PlayerPickupItemEvent event) {
-    if (event.isCancelled()) return;
     handleEntityRemoveEvent(event.getItem(), event.getItem().getItemStack().getAmount());
   }
 

@@ -44,13 +44,10 @@ public class ItemRule {
 
       NMSHacks.copyAttributeModifiers(meta, this.meta);
 
-      Set<Material> canDestroy = new HashSet<>();
-      canDestroy.addAll(NMSHacks.getCanDestroy(meta));
-      canDestroy.addAll(NMSHacks.getCanDestroy(this.meta));
-
-      Set<Material> canPlaceOn = new HashSet<>();
-      canPlaceOn.addAll(NMSHacks.getCanPlaceOn(meta));
-      canPlaceOn.addAll(NMSHacks.getCanPlaceOn(this.meta));
+      Set<Material> canDestroy =
+          unionMaterials(NMSHacks.getCanDestroy(meta), NMSHacks.getCanDestroy(this.meta));
+      Set<Material> canPlaceOn =
+          unionMaterials(NMSHacks.getCanPlaceOn(meta), NMSHacks.getCanPlaceOn(this.meta));
 
       if (!canDestroy.isEmpty()) NMSHacks.setCanDestroy(meta, canDestroy);
       if (!canPlaceOn.isEmpty()) NMSHacks.setCanPlaceOn(meta, canPlaceOn);
@@ -59,5 +56,15 @@ public class ItemRule {
 
       stack.setItemMeta(meta);
     }
+  }
+
+  private Set<Material> unionMaterials(Set<Material> a, Set<Material> b) {
+    if (a.containsAll(b)) return a;
+    if (b.containsAll(a)) return b;
+
+    Set<Material> union = new HashSet<>();
+    union.addAll(a);
+    union.addAll(b);
+    return union;
   }
 }

@@ -850,14 +850,6 @@ public interface NMSHacks {
     return ((CraftLivingEntity) entity).getHandle().getAbsorptionHearts();
   }
 
-  static int getProtocolVersion(Player player) {
-    if (BukkitUtils.isSportPaper()) {
-      return ((CraftPlayer) player).getHandle().playerConnection.networkManager.protocolVersion;
-    } else {
-      return ViaUtils.VERSION_1_8; // Assume 1.8 if not sportpaper.
-    }
-  }
-
   static int getPing(Player player) {
     return ((CraftPlayer) player).getHandle().ping;
   }
@@ -1010,7 +1002,7 @@ public interface NMSHacks {
     setMaterialList(itemMeta, materials, CAN_DESTROY);
   }
 
-  static Collection<Material> getCanDestroy(ItemMeta itemMeta) {
+  static Set<Material> getCanDestroy(ItemMeta itemMeta) {
     if (BukkitUtils.isSportPaper()) {
       // Since this is handled by SportPaper this can't be done through unhandled tags
       return itemMeta.getCanDestroy();
@@ -1026,7 +1018,7 @@ public interface NMSHacks {
     setMaterialList(itemMeta, materials, CAN_PLACE_ON);
   }
 
-  static Collection<Material> getCanPlaceOn(ItemMeta itemMeta) {
+  static Set<Material> getCanPlaceOn(ItemMeta itemMeta) {
     if (BukkitUtils.isSportPaper()) {
       // Since this is handled by SportPaper this can't be done through unhandled tags
       return itemMeta.getCanPlaceOn();
@@ -1060,7 +1052,7 @@ public interface NMSHacks {
 
   Field nbtListField = ReflectionUtils.getField(NBTTagList.class, "list");
 
-  static Collection<Material> getMaterialCollection(ItemMeta itemMeta, String key) {
+  static Set<Material> getMaterialCollection(ItemMeta itemMeta, String key) {
     Map<String, NBTBase> unhandledTags = getUnhandledTags(itemMeta);
     if (!unhandledTags.containsKey(key)) return new HashSet<>();
     Set<Material> materialSet = new HashSet<>();
