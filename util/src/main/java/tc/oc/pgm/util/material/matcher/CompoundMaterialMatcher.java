@@ -1,7 +1,7 @@
 package tc.oc.pgm.util.material.matcher;
 
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Set;
 import javax.annotation.Nullable;
 import org.bukkit.Material;
@@ -45,7 +45,7 @@ public class CompoundMaterialMatcher implements MaterialMatcher {
   @Override
   public Collection<Material> getMaterials() {
     if (materials == null) {
-      Set<Material> materialSet = new HashSet<>();
+      Set<Material> materialSet = EnumSet.noneOf(Material.class);
       for (MaterialMatcher child : children) {
         materialSet.addAll(child.getMaterials());
       }

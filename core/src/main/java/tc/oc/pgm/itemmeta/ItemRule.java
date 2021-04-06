@@ -1,6 +1,6 @@
 package tc.oc.pgm.itemmeta;
 
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
@@ -62,8 +62,7 @@ public class ItemRule {
     if (a.containsAll(b)) return a;
     if (b.containsAll(a)) return b;
 
-    Set<Material> union = new HashSet<>();
-    union.addAll(a);
+    Set<Material> union = EnumSet.copyOf(a);
     union.addAll(b);
     return union;
   }

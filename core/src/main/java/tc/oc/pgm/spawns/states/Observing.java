@@ -1,6 +1,6 @@
 package tc.oc.pgm.spawns.states;
 
-import com.google.common.collect.Sets;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import org.bukkit.GameMode;
@@ -32,8 +32,7 @@ public class Observing extends State {
   // A set of item types which, when used to interact with the match environment by non-playing
   // users, can potentially cause client-server de-sync
   private static final Set<Material> BAD_TYPES =
-      Sets.newHashSet(
-          Material.WATER_LILY, Material.BUCKET, Material.LAVA_BUCKET, Material.WATER_BUCKET);
+      EnumSet.of(Material.WATER_LILY, Material.BUCKET, Material.LAVA_BUCKET, Material.WATER_BUCKET);
 
   private static final double VOID_HEIGHT = -64;
 

@@ -1,8 +1,8 @@
 package tc.oc.pgm.util.material.matcher;
 
 import com.google.common.collect.Collections2;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumSet;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
@@ -15,7 +15,7 @@ public class BlockMaterialMatcher implements MaterialMatcher {
   private BlockMaterialMatcher() {}
 
   private static final Collection<Material> BLOCKS =
-      Collections2.filter(Arrays.asList(Material.values()), Material::isBlock);
+      Collections2.filter(EnumSet.allOf(Material.class), Material::isBlock);
 
   @Override
   public boolean matches(Material material) {

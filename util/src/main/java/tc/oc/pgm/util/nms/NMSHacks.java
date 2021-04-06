@@ -1054,8 +1054,8 @@ public interface NMSHacks {
 
   static Set<Material> getMaterialCollection(ItemMeta itemMeta, String key) {
     Map<String, NBTBase> unhandledTags = getUnhandledTags(itemMeta);
-    if (!unhandledTags.containsKey(key)) return new HashSet<>();
-    Set<Material> materialSet = new HashSet<>();
+    if (!unhandledTags.containsKey(key)) return EnumSet.noneOf(Material.class);
+    EnumSet<Material> materialSet = EnumSet.noneOf(Material.class);
     NBTTagList canDestroyList = (NBTTagList) unhandledTags.get(key);
 
     for (NBTBase item : (List<NBTBase>) ReflectionUtils.readField(canDestroyList, nbtListField)) {

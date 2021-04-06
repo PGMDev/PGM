@@ -1,7 +1,7 @@
 package tc.oc.pgm.modules;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+import java.util.EnumSet;
 import java.util.Set;
 import java.util.logging.Logger;
 import org.bukkit.Material;
@@ -31,7 +31,7 @@ public class ToolRepairModule implements MapModule {
     @Override
     public ToolRepairModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      Set<Material> toRepair = Sets.newHashSet();
+      Set<Material> toRepair = EnumSet.noneOf(Material.class);
       for (Node toolRepairElement :
           Node.fromChildren(doc.getRootElement(), "tool-repair", "toolrepair")) {
         for (Node toolElement : Node.fromChildren(toolRepairElement.getElement(), "tool")) {
