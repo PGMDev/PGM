@@ -53,7 +53,7 @@ public interface TabEntry {
    *
    * @return
    */
-  Component getComponent(TabView view);
+  Component getContent(TabView view);
 
   /**
    * Gamemode for the entry. If the entry is linked to a real player, this will change the client's

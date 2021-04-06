@@ -24,7 +24,7 @@ public class MapTabEntry extends DynamicTabEntry {
   }
 
   @Override
-  public Component getComponent(TabView view) {
+  public Component getContent(TabView view) {
     MatchPlayer viewer = PGM.get().getMatchManager().getPlayer(view.getViewer());
 
     if (viewer != null && viewer.isLegacy()) {

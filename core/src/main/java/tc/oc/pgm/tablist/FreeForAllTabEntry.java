@@ -20,7 +20,7 @@ public class FreeForAllTabEntry extends DynamicTabEntry {
   }
 
   @Override
-  public Component getComponent(TabView view) {
+  public Component getContent(TabView view) {
     return text()
         .append(text(match.getParticipants().size(), NamedTextColor.WHITE))
         .append(text("/", NamedTextColor.DARK_GRAY))

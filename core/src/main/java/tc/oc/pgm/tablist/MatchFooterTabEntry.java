@@ -51,7 +51,7 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
   }
 
   @Override
-  public Component getComponent(TabView view) {
+  public Component getContent(TabView view) {
     TextComponent.Builder content = text();
 
     MatchPlayer viewer = match.getPlayer(view.getViewer());

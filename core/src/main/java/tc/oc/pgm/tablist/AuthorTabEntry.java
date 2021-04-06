@@ -22,7 +22,7 @@ public class AuthorTabEntry extends DynamicTabEntry {
   }
 
   @Override
-  public Component getComponent(TabView view) {
+  public Component getContent(TabView view) {
     return map.getAuthors().stream()
         .skip(authorIdx)
         .findFirst()

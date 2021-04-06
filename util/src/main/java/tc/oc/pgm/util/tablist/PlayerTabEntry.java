@@ -51,7 +51,7 @@ public class PlayerTabEntry extends DynamicTabEntry {
   }
 
   @Override
-  public Component getComponent(TabView view) {
+  public Component getContent(TabView view) {
     return player(player, NameStyle.TAB, view.getViewer());
   }
 

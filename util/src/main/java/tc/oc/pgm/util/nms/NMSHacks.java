@@ -110,7 +110,7 @@ public interface NMSHacks {
       GameMode gamemode,
       int ping,
       @Nullable Skin skin,
-      @Nullable BaseComponent... displayName) {
+      @Nullable String renderedDisplayName) {
     GameProfile profile = new GameProfile(uuid, name);
     if (skin != null) {
       for (Map.Entry<String, Collection<Property>> entry :
@@ -126,17 +126,16 @@ public interface NMSHacks {
               ping,
               gamemode == null ? null : WorldSettings.EnumGamemode.getById(gamemode.getValue()),
               null); // ELECTROID
-      data.displayName = displayName == null || displayName.length == 0 ? null : displayName;
+      data.jsonDisplayName = renderedDisplayName;
       return data;
     } else {
       try {
         WorldSettings.EnumGamemode enumGamemode =
             gamemode == null ? null : WorldSettings.EnumGamemode.getById(gamemode.getValue());
         IChatBaseComponent iChatBaseComponent =
-            displayName == null || displayName.length == 0
+            renderedDisplayName == null
                 ? null
-                : IChatBaseComponent.ChatSerializer.a(
-                    net.md_5.bungee.chat.ComponentSerializer.toString(displayName));
+                : IChatBaseComponent.ChatSerializer.a(renderedDisplayName);
 
         return playerInfoDataConstructor.newInstance(
             packet, profile, ping, enumGamemode, iChatBaseComponent);
@@ -160,19 +159,20 @@ public interface NMSHacks {
   }
 
   static PacketPlayOutPlayerInfo.PlayerInfoData playerListPacketData(
-      PacketPlayOutPlayerInfo packet, UUID uuid, BaseComponent... displayName) {
+      PacketPlayOutPlayerInfo packet, UUID uuid, String renderedDisplayName) {
     return playerListPacketData(
-        packet, uuid, "|" + uuid.toString().substring(0, 15), null, 0, null, displayName);
+        packet, uuid, "|" + uuid.toString().substring(0, 15), null, 0, null, renderedDisplayName);
   }
 
   static PacketPlayOutPlayerInfo.PlayerInfoData playerListPacketData(
       PacketPlayOutPlayerInfo packet, UUID uuid) {
-    return playerListPacketData(packet, uuid, null, null, 0, null);
+    return playerListPacketData(packet, uuid, null, null, 0, null, null);
   }
 
   static PacketPlayOutPlayerInfo.PlayerInfoData playerListPacketData(
       PacketPlayOutPlayerInfo packet, UUID uuid, int ping) {
-    return playerListPacketData(packet, uuid, uuid.toString().substring(0, 16), null, ping, null);
+    return playerListPacketData(
+        packet, uuid, uuid.toString().substring(0, 16), null, ping, null, null);
   }
 
   /**

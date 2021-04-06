@@ -20,7 +20,7 @@ public class TeamTabEntry extends DynamicTabEntry {
   }
 
   @Override
-  public Component getComponent(TabView view) {
+  public Component getContent(TabView view) {
     return text()
         .append(text(team.getPlayers().size(), NamedTextColor.WHITE))
         .append(text("/", NamedTextColor.DARK_GRAY))

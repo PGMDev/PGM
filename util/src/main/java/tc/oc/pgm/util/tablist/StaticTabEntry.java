@@ -25,7 +25,7 @@ public class StaticTabEntry extends SimpleTabEntry {
   public void markClean(TabView view) {}
 
   @Override
-  public Component getComponent(TabView view) {
+  public Component getContent(TabView view) {
     return content;
   }
 }

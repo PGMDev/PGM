@@ -231,7 +231,7 @@ public class TabView {
           this.rendered[i] = this.slots[i];
 
           this.display.set(
-              x, y, TextTranslations.translateLegacy(this.rendered[i].getComponent(this), viewer));
+              x, y, TextTranslations.translateLegacy(this.rendered[i].getContent(this), viewer));
         }
       }
     }
@@ -328,11 +328,11 @@ public class TabView {
     if (force || this.dirtyHeader || this.dirtyFooter) {
       if (force || this.dirtyHeader) {
         this.dirtyHeader = false;
-        header = (this.rendered[this.headerSlot] = this.slots[this.headerSlot]).getComponent(this);
+        header = (this.rendered[this.headerSlot] = this.slots[this.headerSlot]).getContent(this);
       }
       if (force || this.dirtyFooter) {
         this.dirtyFooter = false;
-        footer = (this.rendered[this.footerSlot] = this.slots[this.footerSlot]).getComponent(this);
+        footer = (this.rendered[this.footerSlot] = this.slots[this.footerSlot]).getContent(this);
       }
 
       render.setHeaderFooter(header, footer);
@@ -381,8 +381,8 @@ public class TabView {
     TabRender render = new TabRender(this);
 
     render.setHeaderFooter(
-        this.manager.getBlankEntry(this.headerSlot).getComponent(this),
-        this.manager.getBlankEntry(this.footerSlot).getComponent(this));
+        this.manager.getBlankEntry(this.headerSlot).getContent(this),
+        this.manager.getBlankEntry(this.footerSlot).getContent(this));
 
     for (int index = 0; index < this.size; index++) {
       render.destroySlot(this.rendered[index], index);

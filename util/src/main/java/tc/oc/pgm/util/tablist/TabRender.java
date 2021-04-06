@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import net.kyori.adventure.text.Component;
-import net.md_5.bungee.api.chat.BaseComponent;
 import net.minecraft.server.v1_8_R3.Packet;
 import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
 import org.bukkit.Location;
@@ -47,13 +46,12 @@ public class TabRender {
     NMSHacks.sendPacket(this.view.getViewer(), packet);
   }
 
-  private BaseComponent[] getContent(TabEntry entry, int index) {
-    return TextTranslations.toBaseComponentArray(
-        entry.getComponent(this.view), this.view.getViewer());
+  private String getJson(TabEntry entry) {
+    return TextTranslations.toMinecraftGson(entry.getContent(this.view), this.view.getViewer());
   }
 
   private void appendAddition(TabEntry entry, int index) {
-    BaseComponent[] displayName = this.getContent(entry, index);
+    String renderedDisplayName = this.getJson(entry);
     NMSHacks.getPlayerInfoDataList(this.addPacket)
         .add(
             NMSHacks.playerListPacketData(
@@ -63,12 +61,12 @@ public class TabRender {
                 entry.getGamemode(),
                 entry.getPing(),
                 entry.getSkin(this.view),
-                displayName));
+                renderedDisplayName));
 
     // Due to a client bug, display name is ignored in ADD_PLAYER packets,
     // so we have to send an UPDATE_DISPLAY_NAME afterward.
     NMSHacks.getPlayerInfoDataList(this.updatePacket)
-        .add(NMSHacks.playerListPacketData(this.updatePacket, entry.getId(), displayName));
+        .add(NMSHacks.playerListPacketData(this.updatePacket, entry.getId(), renderedDisplayName));
 
     this.updateFakeEntity(entry, true);
   }
@@ -148,9 +146,7 @@ public class TabRender {
 
   public void updateEntry(TabEntry entry, int index) {
     NMSHacks.getPlayerInfoDataList(this.updatePacket)
-        .add(
-            NMSHacks.playerListPacketData(
-                this.updatePacket, entry.getId(), this.getContent(entry, index)));
+        .add(NMSHacks.playerListPacketData(this.updatePacket, entry.getId(), this.getJson(entry)));
   }
 
   public void updatePing(TabEntry entry, int index) {

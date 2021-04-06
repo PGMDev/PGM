@@ -27,11 +27,10 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.Translator;
-import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -310,9 +309,8 @@ public final class TextTranslations {
     return LegacyComponentSerializer.legacySection().serialize(translate(text, locale));
   }
 
-  public static BaseComponent[] toBaseComponentArray(
-      Component component, @Nullable CommandSender viewer) {
+  public static String toMinecraftGson(Component component, @Nullable CommandSender viewer) {
     Component translated = translate(component, viewer == null ? SOURCE_LOCALE : getLocale(viewer));
-    return BungeeComponentSerializer.get().serialize(translated);
+    return GsonComponentSerializer.gson().serialize(translated);
   }
 }
