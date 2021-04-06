@@ -30,7 +30,8 @@ public enum SettingKey {
   MESSAGE(
       Arrays.asList("message", "dm"),
       MESSAGE_ON,
-      MESSAGE_OFF), // Changes if direct messages are accepted
+      MESSAGE_OFF,
+      MESSAGE_FRIEND), // Changes if direct messages are accepted
   OBSERVERS(Arrays.asList("observers", "obs"), OBSERVERS_ON, OBSERVERS_OFF, OBSERVERS_FRIEND) {
     @Override
     public void update(MatchPlayer player) {

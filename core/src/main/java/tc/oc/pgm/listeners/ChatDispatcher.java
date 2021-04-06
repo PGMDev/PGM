@@ -217,14 +217,31 @@ public class ChatDispatcher implements Listener {
         return;
       }
 
-      SettingValue option = matchReceiver.getSettings().getValue(SettingKey.MESSAGE);
-
-      if (option.equals(SettingValue.MESSAGE_OFF)
-          && !sender.getBukkit().hasPermission(Permissions.STAFF)) {
-        Component blocked =
-            translatable("command.message.blocked", matchReceiver.getName(NameStyle.FANCY));
-        sender.sendWarning(blocked);
+      // Sender setting check
+      SettingValue senderOptions = sender.getSettings().getValue(SettingKey.MESSAGE);
+      if (senderOptions.equals(SettingValue.MESSAGE_FRIEND)
+          && !Integration.isFriend(sender.getBukkit(), receiver)) {
+        sender.sendWarning(translatable("command.message.friendsOnly", matchReceiver.getName()));
         return;
+      }
+
+      if (senderOptions.equals(SettingValue.MESSAGE_OFF)) {
+        sender.sendWarning(
+            translatable(
+                "command.message.disabled", text("/toggle message", NamedTextColor.GREEN)));
+        return;
+      }
+
+      // Reciever Setting Check
+      SettingValue option = matchReceiver.getSettings().getValue(SettingKey.MESSAGE);
+      if (!sender.getBukkit().hasPermission(Permissions.STAFF)) {
+        if ((option.equals(SettingValue.MESSAGE_FRIEND)
+                && !Integration.isFriend(sender.getBukkit(), receiver))
+            || option.equals(SettingValue.MESSAGE_OFF)) {
+          Component blocked = translatable("command.message.blocked", matchReceiver.getName());
+          sender.sendWarning(blocked);
+          return;
+        }
       }
 
       if (isMuted(matchReceiver) && !sender.getBukkit().hasPermission(Permissions.STAFF)) {
@@ -232,9 +249,8 @@ public class ChatDispatcher implements Listener {
             translatable("moderation.mute.target", matchReceiver.getName(NameStyle.CONCISE));
         sender.sendWarning(muted);
         return; // Only staff can message muted players
-      } else {
-        playSound(matchReceiver, DM_SOUND);
       }
+      playSound(matchReceiver, DM_SOUND);
     }
 
     if (sender != null) {

@@ -32,6 +32,7 @@ public enum SettingValue {
 
   MESSAGE_ON("message", "on"), // Always accept direct messages
   MESSAGE_OFF("message", "off"), // Never accept direct messages
+  MESSAGE_FRIEND("message", "friend"), // Only accept friend direct messages
 
   OBSERVERS_ON("observers", "on"), // Show observers
   OBSERVERS_OFF("observers", "off"), // Hide observers
