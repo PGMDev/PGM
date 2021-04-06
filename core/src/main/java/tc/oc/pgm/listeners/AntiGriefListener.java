@@ -4,6 +4,7 @@ import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -97,7 +98,8 @@ public class AntiGriefListener implements Listener {
                 + TextTranslations.translate(
                     "moderation.defuse.player",
                     clicker.getBukkit(),
-                    owner.getBukkit().getDisplayName() + ChatColor.RED));
+                    player(owner.getBukkit(), NameStyle.CONCISE, clicker.getBukkit())
+                        .color(NamedTextColor.RED)));
 
         ChatDispatcher.broadcastAdminChatMessage(
             translatable(

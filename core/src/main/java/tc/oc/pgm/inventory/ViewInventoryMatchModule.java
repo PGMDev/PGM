@@ -1,5 +1,7 @@
 package tc.oc.pgm.inventory;
 
+import static tc.oc.pgm.util.text.PlayerComponent.player;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.time.Duration;
@@ -52,6 +54,7 @@ import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.attribute.Attribute;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -332,7 +335,11 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     Player holder = (Player) inventory.getHolder();
     // Ensure that the title of the inventory is <= 32 characters long to appease Minecraft's
     // restrictions on inventory titles
-    String title = StringUtils.substring(holder.getDisplayName(), 0, 32);
+    String title =
+        StringUtils.substring(
+            TextTranslations.translateLegacy(player(holder, NameStyle.CONCISE, viewer), viewer),
+            0,
+            32);
 
     Inventory preview = Bukkit.getServer().createInventory(viewer, 45, title);
 
