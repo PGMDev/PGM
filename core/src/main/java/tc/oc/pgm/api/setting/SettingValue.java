@@ -30,12 +30,12 @@ public enum SettingValue {
   JOIN_OFF("join", "none"), // Never send join messages
   JOIN_FRIENDS("join", "friends"), // Only send friend join messages
 
-  MESSAGE_ON("message", "on"), // Always accept direct messages
-  MESSAGE_OFF("message", "off"), // Never accept direct messages
-  MESSAGE_FRIEND("message", "friend"), // Only accept friend direct messages
+  MESSAGE_ON("message", "all"), // Always accept direct messages
+  MESSAGE_OFF("message", "none"), // Never accept direct messages
+  MESSAGE_FRIEND("message", "friends"), // Only accept friend direct messages
 
-  OBSERVERS_ON("observers", "on"), // Show observers
-  OBSERVERS_OFF("observers", "off"), // Hide observers
+  OBSERVERS_ON("observers", "all"), // Show observers
+  OBSERVERS_OFF("observers", "none"), // Hide observers
   OBSERVERS_FRIEND("observers", "friends"), // Only show friend observers
 
   SOUNDS_ALL("sounds", "all"), // Play all sounds
