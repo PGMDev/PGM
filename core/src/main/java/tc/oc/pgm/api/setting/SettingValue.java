@@ -32,7 +32,6 @@ public enum SettingValue {
 
   MESSAGE_ON("message", "all"), // Always accept direct messages
   MESSAGE_OFF("message", "none"), // Never accept direct messages
-  MESSAGE_FRIEND("message", "friends"), // Only accept friend direct messages
 
   OBSERVERS_ON("observers", "all"), // Show observers
   OBSERVERS_OFF("observers", "none"), // Hide observers
@@ -49,7 +48,9 @@ public enum SettingValue {
   STATS_OFF("stats", "off"), // Don't track stats
 
   EFFECTS_ON("effects", "on"), // Display special particle effects
-  EFFECTS_OFF("effects", "off"); // Don't display special particle effects
+  EFFECTS_OFF("effects", "off"), // Don't display special particle effects
+
+  MESSAGE_FRIEND("message", "friends"); // Only accept friend direct messages
 
   private final String key;
   private final String name;
