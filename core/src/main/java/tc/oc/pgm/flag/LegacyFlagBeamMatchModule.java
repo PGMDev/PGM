@@ -3,18 +3,19 @@ package tc.oc.pgm.flag;
 import static java.util.stream.IntStream.range;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Future;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -25,13 +26,11 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
-import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
-import tc.oc.pgm.events.PlayerJoinPartyEvent;
 import tc.oc.pgm.events.PlayerLeaveMatchEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.flag.state.Carried;
@@ -57,171 +56,100 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
   private static final int UPDATE_DELAY = 0;
   private static final int UPDATE_FREQUENCY = 50;
 
-  private UpdateTask task;
   private final Match match;
-  private final Map<MatchPlayer, Map<Flag, Beam>> beams;
+  private final Map<Flag, Beam> beams;
 
   public LegacyFlagBeamMatchModule(Match match) {
     this.match = match;
     this.beams = new HashMap<>();
+    FlagMatchModule module = match.needModule(FlagMatchModule.class);
+    module.getFlags().forEach(f -> beams.put(f, new Beam(f)));
   }
 
-  protected Stream<Flag> flags() {
-    FlagMatchModule module = match.getModule(FlagMatchModule.class);
-    return module == null ? Stream.empty() : module.getFlags().stream();
-  }
-
-  protected void retrackFlag(Flag flag) {
-    match.getPlayers().forEach(p -> retrackFlag(flag, p));
-  }
-
-  protected void retrackFlag(Flag flag, MatchPlayer player) {
-    untrackFlag(flag, player);
-    trackFlag(flag, player);
-  }
-
-  protected void trackFlag(Flag flag) {
-    match.getPlayers().forEach(p -> trackFlag(flag, p));
-  }
-
-  protected void trackFlag(Flag flag, MatchPlayer player) {
-    Map<Flag, Beam> flags = beams.containsKey(player) ? beams.get(player) : new HashMap<>();
-    if (flags.containsKey(flag) // beam duplication check
-        || !flag.getDefinition().showBeam() // considers the flag definition's flag beam setting.
-        || (!player.isLegacy() // version greater than 1.7 &
-            && !PGM.get()
-                .getConfiguration()
-                .useLegacyFlagBeams())) { // we shouldn't show to >1.7 players
-      return;
-    }
-
-    flags.put(flag, new Beam(flag, player));
-
-    beams.put(player, flags);
-  }
-
-  protected void untrackFlag(Flag flag) {
-    match.getPlayers().forEach(p -> untrackFlag(flag, p));
-  }
-
-  protected void untrackFlag(Flag flag, MatchPlayer player) {
-    if (beams.containsKey(player)) {
-      Beam beam = beams.get(player).get(flag);
-      if (beam != null) {
-        beams.get(player).remove(flag).hide();
-      }
-    }
+  private Stream<Beam> beams() {
+    return beams.values().stream();
   }
 
   @Override
   public void enable() {
-    flags().filter(flag -> flag.getState() instanceof Spawned).forEach(this::trackFlag);
-    this.task = new UpdateTask();
+    match
+        .getExecutor(MatchScope.RUNNING)
+        .scheduleAtFixedRate(
+            () -> beams.values().forEach(Beam::update),
+            UPDATE_DELAY,
+            UPDATE_FREQUENCY,
+            TimeUnit.MILLISECONDS);
   }
 
   @Override
   public void unload() {
-    flags().forEach(this::untrackFlag);
+    beams.values().forEach(Beam::hide);
     beams.clear();
-    this.task.stop();
   }
 
-  // retrackFlags when players join a party so players are able to see the wool beams
-  // player join match event doesn't work at times.
-  @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-  public void onPlayerJoinParty(PlayerJoinPartyEvent event) {
-    flags()
-        .filter(flag -> flag.getState() instanceof Spawned)
-        .forEach(flag -> retrackFlag(flag, event.getPlayer()));
-  }
-
-  // retrackFlags when players switch worlds
-  // player join match event doesn't work at times.
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
   public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
-    try {
-      flags()
-          .filter(flag -> flag.getState() instanceof Spawned)
-          .forEach(flag -> retrackFlag(flag, match.getParticipant(event.getPlayer())));
-    } catch (NullPointerException e) {
-      /* ignore */
-    }
-  }
+    MatchPlayer player = match.getPlayer(event.getPlayer());
+    if (player == null) return;
 
-  // retrackFlags when match starts to ensure all players can see flag beams
-  // player join match event doesn't work at times.
-  @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-  public void onMatchStart(MatchStartEvent event) {
-    flags().filter(flag -> flag.getState() instanceof Spawned).forEach(flag -> retrackFlag(flag));
+    if (event.getWorld() == match.getWorld()) beams().forEach(beam -> beam.show(player));
+    else beams().forEach(beam -> beam.hide(player));
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-  public void onPlayerJoinMatch(PlayerJoinMatchEvent event) {
-    flags()
-        .filter(flag -> flag.getState() instanceof Spawned)
-        .forEach(flag -> trackFlag(flag, event.getPlayer()));
+  public void onPlayerJoin(PlayerJoinMatchEvent event) {
+    beams().forEach(beam -> beam.show(event.getPlayer()));
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
   public void onPlayerLeaveMatch(PlayerLeaveMatchEvent event) {
-    flags()
-        .filter(flag -> flag.getState() instanceof Spawned)
-        .forEach(flag -> untrackFlag(flag, event.getPlayer()));
+    beams().forEach(beam -> beam.hide(event.getPlayer()));
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
   public void onFlagStateChange(FlagStateChangeEvent event) {
-    Flag flag = event.getFlag();
-    untrackFlag(flag);
-    if (event.getNewState() instanceof Spawned) {
-      trackFlag(flag);
-    }
-  }
+    Beam beam = beams.get(event.getFlag());
 
-  private class UpdateTask implements Runnable {
+    boolean wasSpawned = event.getOldState() instanceof Spawned,
+        isSpawned = event.getNewState() instanceof Spawned;
 
-    private final Future<?> task;
+    if (wasSpawned && !isSpawned) beam.hide();
+    else if (!wasSpawned && isSpawned) beam.show();
 
-    private UpdateTask() {
-      this.task =
-          match
-              .getExecutor(MatchScope.RUNNING)
-              .scheduleAtFixedRate(this, UPDATE_DELAY, UPDATE_FREQUENCY, TimeUnit.MILLISECONDS);
-    }
+    // Hide beam for carrier
+    if (event.getNewState() instanceof Carried)
+      beam.hide(((Carried) event.getNewState()).getCarrier());
 
-    public void stop() {
-      this.task.cancel(true);
-    }
-
-    @Override
-    public void run() {
-      ImmutableList.copyOf(beams.values()).forEach(flags -> flags.forEach((f, b) -> b.update()));
-    }
+    // Show beam to old carrier
+    if (event.getOldState() instanceof Carried)
+      beam.show(((Carried) event.getOldState()).getCarrier());
   }
 
   class Beam {
-    final Flag flag;
-    final Player bukkit;
-    final List<NMSHacks.FakeEntity> segments;
+    private final Flag flag;
+    private final NMSHacks.FakeEntity base, legacyBase;
+    private final List<NMSHacks.FakeEntity> segments;
 
-    Beam(Flag flag, MatchPlayer player) {
+    private final Set<MatchPlayer> viewers = new HashSet<>();
+
+    Beam(Flag flag) {
       this.flag = flag;
-      this.bukkit = player.getBukkit();
+
+      ItemStack wool = new ItemBuilder().material(Material.WOOL).color(flag.getDyeColor()).build();
+      this.base = new NMSHacks.FakeArmorStand(match.getWorld(), wool);
+      this.legacyBase = new NMSHacks.FakeWitherSkull(match.getWorld());
       this.segments =
           range(0, 64) // ~100 blocks is the height which the particles appear to be reasonably
               // visible (similar amount to amount closest to the flag), we limit this to 64 blocks
               // to reduce load on the client
-              .mapToObj(i -> new NMSHacks.FakeArmorStand(match.getWorld()))
+              .mapToObj(i -> new NMSHacks.FakeArmorStand(match.getWorld(), wool))
               .collect(Collectors.toList());
-      if (player.isLegacy()) segments.set(0, new NMSHacks.FakeWitherSkull(match.getWorld()));
-      show();
     }
 
-    Optional<Player> carrier() {
-      return Optional.ofNullable(
-          flag.getState() instanceof Carried
-              ? ((Carried) flag.getState()).getCarrier().getBukkit()
-              : null);
+    Optional<MatchPlayer> carrier() {
+      return flag.getState() instanceof Carried
+          ? Optional.of(((Carried) flag.getState()).getCarrier())
+          : Optional.empty();
     }
 
     Optional<Location> location() {
@@ -235,36 +163,59 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
       return Optional.of(location);
     }
 
-    ItemStack wool() {
-      return new ItemBuilder().material(Material.WOOL).color(flag.getDyeColor()).build();
+    private NMSHacks.FakeEntity base(MatchPlayer player) {
+      return player.isLegacy() ? legacyBase : base;
     }
 
-    void show() {
-      if (carrier().map(carrier -> carrier.equals(bukkit)).orElse(false)) return;
-      segments.forEach(
-          segment -> {
-            location().ifPresent(l -> segment.spawn(bukkit, l.clone()));
-            segment.wear(bukkit, 4, wool()); // Head slot
-          });
+    public void show() {
+      match.getPlayers().forEach(this::show);
+    }
+
+    public void show(MatchPlayer player) {
+      if (!flag.getDefinition().showBeam()) return;
+      if (!player.isLegacy() && !PGM.get().getConfiguration().useLegacyFlagBeams()) return;
+      if (!(flag.getState() instanceof Spawned)) return;
+
+      if (carrier().map(player::equals).orElse(false) || !viewers.add(player)) return;
+
+      Player bukkit = player.getBukkit();
+      spawn(bukkit, base(player));
+      segments.forEach(segment -> spawn(bukkit, segment));
       range(1, segments.size())
           .forEachOrdered(i -> segments.get(i - 1).ride(bukkit, segments.get(i).entity()));
-      update();
+      base(player).ride(bukkit, segments.get(0).entity());
+
+      update(player);
     }
 
-    void update() {
-      Location loc = carrier().map(Entity::getLocation).orElseGet(() -> location().orElse(null));
-      if (loc != null) {
-        loc = loc.clone().add(0, 2.75, 0);
-        loc.setPitch(0f);
-        loc.setYaw(0f);
-        segments.get(0).teleport(bukkit, loc);
-      }
+    private void spawn(Player player, NMSHacks.FakeEntity entity) {
+      location().ifPresent(l -> entity.spawn(player, l));
     }
 
-    void hide() {
-      for (int i = segments.size() - 1; i >= 0; i--) {
-        segments.get(i).destroy(bukkit);
-      }
+    public void update() {
+      viewers.forEach(this::update);
+    }
+
+    public void update(MatchPlayer player) {
+      Location loc =
+          carrier().map(c -> c.getBukkit().getLocation()).orElseGet(() -> location().orElse(null));
+      if (loc == null) return;
+      loc = loc.clone().add(0, 2.75, 0);
+      loc.setPitch(0f);
+      loc.setYaw(0f);
+      base(player).teleport(player.getBukkit(), loc);
+    }
+
+    public void hide() {
+      ImmutableSet.copyOf(viewers).forEach(this::hide);
+      viewers.clear();
+    }
+
+    private void hide(MatchPlayer player) {
+      if (!viewers.remove(player)) return;
+      Player bukkit = player.getBukkit();
+      for (int i = segments.size() - 1; i >= 0; i--) segments.get(i).destroy(bukkit);
+      base(player).destroy(bukkit);
     }
   }
 }
