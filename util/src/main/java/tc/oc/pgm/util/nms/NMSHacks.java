@@ -1262,8 +1262,11 @@ public interface NMSHacks {
 
   class FakeArmorStand extends FakeLivingEntity<EntityArmorStand> {
 
-    public FakeArmorStand(World world) {
+    private final ItemStack head;
+
+    public FakeArmorStand(World world, ItemStack head) {
       super(new EntityArmorStand(((CraftWorld) world).getHandle()));
+      this.head = head;
 
       entity.setInvisible(true);
       NBTTagCompound tag = entity.getNBTTag();
@@ -1276,6 +1279,12 @@ public interface NMSHacks {
       tag.setBoolean("NoGravity", true);
       tag.setBoolean("NoAI", true);
       entity.f(tag);
+    }
+
+    @Override
+    public void spawn(Player viewer, Location location, Vector velocity) {
+      super.spawn(viewer, location, velocity);
+      if (head != null) wear(viewer, 4, head);
     }
   }
 
