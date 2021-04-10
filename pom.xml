@@ -67,7 +67,7 @@
 
     <dependencies>
         <!-- Fork of Spigot and SportBukkit running Minecraft 1.8 -->
-        <!-- TODO: support non-1.8 and non-SportPaper Bukkit servers -->
+        <!-- TODO: support non-1.8 Bukkit servers -->
         <dependency>
             <groupId>app.ashcon</groupId>
             <artifactId>sportpaper</artifactId>
