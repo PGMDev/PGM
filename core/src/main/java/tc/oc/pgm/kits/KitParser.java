@@ -24,7 +24,6 @@ import javax.annotation.Nullable;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -404,7 +403,7 @@ public abstract class KitParser {
     int amount = XMLUtils.parseNumber(el.getAttribute("amount"), Integer.class, 1);
 
     // must be CraftItemStack to keep track of NBT data
-    ItemStack itemStack = CraftItemStack.asCraftCopy(new ItemStack(type, amount, damage));
+    ItemStack itemStack = NMSHacks.craftItemCopy(new ItemStack(type, amount, damage));
 
     if (itemStack.getType() != type) {
       throw new InvalidXMLException("Invalid item/block", el);

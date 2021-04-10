@@ -991,6 +991,10 @@ public interface NMSHacks {
     }
   }
 
+  static ItemStack craftItemCopy(ItemStack item) {
+    return CraftItemStack.asCraftCopy(item);
+  }
+
   String CAN_DESTROY = "CanDestroy";
   String CAN_PLACE_ON = "CanPlaceOn";
 
