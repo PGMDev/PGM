@@ -311,6 +311,6 @@ public final class TextTranslations {
 
   public static String toMinecraftGson(Component component, @Nullable CommandSender viewer) {
     Component translated = translate(component, viewer == null ? SOURCE_LOCALE : getLocale(viewer));
-    return GsonComponentSerializer.gson().serialize(translated);
+    return GsonComponentSerializer.colorDownsamplingGson().serialize(translated);
   }
 }
