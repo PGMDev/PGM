@@ -87,18 +87,24 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
     beams.clear();
   }
 
+  private void showLater(MatchPlayer player) {
+    match
+        .getExecutor(MatchScope.LOADED)
+        .schedule(() -> beams().forEach(b -> b.show(player)), 50, TimeUnit.MILLISECONDS);
+  }
+
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
   public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
     MatchPlayer player = match.getPlayer(event.getPlayer());
     if (player == null) return;
 
-    if (event.getWorld() == match.getWorld()) beams().forEach(beam -> beam.show(player));
+    if (event.getWorld() == match.getWorld()) showLater(player);
     else beams().forEach(beam -> beam.hide(player));
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
   public void onPlayerJoin(PlayerJoinMatchEvent event) {
-    beams().forEach(beam -> beam.show(event.getPlayer()));
+    showLater(event.getPlayer());
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
@@ -201,6 +207,7 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
           carrier().map(c -> c.getBukkit().getLocation()).orElseGet(() -> location().orElse(null));
       if (loc == null) return;
       loc = loc.clone().add(0, 2.75, 0);
+      if (loc.getY() < -64) loc.setY(-64);
       loc.setPitch(0f);
       loc.setYaw(0f);
       base(player).teleport(player.getBukkit(), loc);
