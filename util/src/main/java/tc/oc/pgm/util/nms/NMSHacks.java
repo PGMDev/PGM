@@ -120,28 +120,31 @@ public interface NMSHacks {
     }
 
     if (BukkitUtils.isSportPaper()) {
-      PacketPlayOutPlayerInfo.PlayerInfoData data =
-          packet.constructData(
-              profile,
-              ping,
-              gamemode == null ? null : WorldSettings.EnumGamemode.getById(gamemode.getValue()),
-              null); // ELECTROID
-      data.jsonDisplayName = renderedDisplayName;
-      return data;
-    } else {
       try {
-        WorldSettings.EnumGamemode enumGamemode =
-            gamemode == null ? null : WorldSettings.EnumGamemode.getById(gamemode.getValue());
-        IChatBaseComponent iChatBaseComponent =
-            renderedDisplayName == null
-                ? null
-                : IChatBaseComponent.ChatSerializer.a(renderedDisplayName);
+        PacketPlayOutPlayerInfo.PlayerInfoData data =
+            packet.constructData(
+                profile,
+                ping,
+                gamemode == null ? null : WorldSettings.EnumGamemode.getById(gamemode.getValue()),
+                null); // ELECTROID
+        data.jsonDisplayName = renderedDisplayName;
+        return data;
+      } catch (NoSuchFieldError ignored) {
+      } // Using an old SportPaper version, fallback to spigot reflection
+    }
 
-        return playerInfoDataConstructor.newInstance(
-            packet, profile, ping, enumGamemode, iChatBaseComponent);
-      } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-        throw new RuntimeException(e);
-      }
+    try {
+      WorldSettings.EnumGamemode enumGamemode =
+          gamemode == null ? null : WorldSettings.EnumGamemode.getById(gamemode.getValue());
+      IChatBaseComponent iChatBaseComponent =
+          renderedDisplayName == null
+              ? null
+              : IChatBaseComponent.ChatSerializer.a(renderedDisplayName);
+
+      return playerInfoDataConstructor.newInstance(
+          packet, profile, ping, enumGamemode, iChatBaseComponent);
+    } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+      throw new RuntimeException(e);
     }
   }
 
