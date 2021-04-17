@@ -23,16 +23,15 @@ public class AuthorTabEntry extends DynamicTabEntry {
 
   @Override
   public Component getContent(TabView view) {
-    return 
-        map.getAuthors().stream()
-            .skip(authorIdx)
-            .findFirst()
-            .<Component>map(
-                author ->
-                    translatable(
-                        authorIdx == 0 ? "misc.by" : "misc.and",
-                        NamedTextColor.GRAY,
-                        author.getName(NameStyle.CONCISE, view.getViewer())))
-            .orElse(empty());
+    return map.getAuthors().stream()
+        .skip(authorIdx)
+        .findFirst()
+        .<Component>map(
+            author ->
+                translatable(
+                    authorIdx == 0 ? "misc.by" : "misc.and",
+                    NamedTextColor.GRAY,
+                    author.getName(NameStyle.CONCISE, view.getViewer())))
+        .orElse(empty());
   }
 }

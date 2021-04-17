@@ -14,7 +14,6 @@ import tc.oc.pgm.util.tablist.DynamicTabEntry;
 import tc.oc.pgm.util.tablist.SimpleTabEntry;
 import tc.oc.pgm.util.tablist.TabEntry;
 import tc.oc.pgm.util.tablist.TabView;
-import tc.oc.pgm.util.text.TextTranslations;
 
 /**
  * {@link TabEntry} showing a {@link Player}'s name and skin.
@@ -72,10 +71,12 @@ public class PlayerTabEntry extends DynamicTabEntry {
 
   @Override
   public @Nullable Skin getSkin(TabView view) {
-      //TODO: UH fix this to re-support 1.8 spigot
-	  //return NMSHacks.getPlayerSkin(this.player);
+    // TODO: UH fix this to re-support 1.8 spigot
+    // return NMSHacks.getPlayerSkin(this.player);
     return view.getViewer() != null && this.player.hasFakeSkin(view.getViewer())
-        ? new Skin(this.player.getFakeSkin(view.getViewer()).getData(), this.player.getFakeSkin(view.getViewer()).getSignature())
+        ? new Skin(
+            this.player.getFakeSkin(view.getViewer()).getData(),
+            this.player.getFakeSkin(view.getViewer()).getSignature())
         : NMSHacks.getPlayerSkin(this.player);
   }
 
