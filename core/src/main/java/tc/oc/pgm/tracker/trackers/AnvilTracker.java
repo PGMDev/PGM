@@ -3,12 +3,12 @@ package tc.oc.pgm.tracker.trackers;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.block.BlockFallEvent;
 import org.bukkit.event.block.EntityBlockFormEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.AnvilInfo;
+import tc.oc.pgm.util.event.block.BlockFallEvent;
 
 /**
  * Updates the state of owned anvil blocks and entities.
@@ -23,7 +23,7 @@ public class AnvilTracker extends AbstractTracker<AnvilInfo> {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlace(ParticipantBlockTransformEvent event) {
-    if (event.getNewState().getMaterial() == Material.ANVIL) {
+    if (event.getNewState().getType() == Material.ANVIL) {
       blocks().trackBlockState(event.getNewState(), new AnvilInfo(event.getPlayerState()));
     }
   }

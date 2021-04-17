@@ -27,6 +27,7 @@ import tc.oc.pgm.util.menu.InventoryMenu;
 import tc.oc.pgm.util.menu.InventoryMenuItem;
 import tc.oc.pgm.util.menu.pattern.DoubleRowMenuArranger;
 import tc.oc.pgm.util.menu.pattern.IdentityMenuArranger;
+import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
@@ -55,7 +56,7 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
                     new PlayerStatsInventoryMenuItem(
                         p.getId(),
                         smm.getPlayerStat(p),
-                        p.getBukkit().getSkin(),
+                        NMSHacks.getPlayerSkin(p.getBukkit()),
                         p.getNameLegacy(),
                         p.getParty().getName().color()))
             .collect(Collectors.toList()));

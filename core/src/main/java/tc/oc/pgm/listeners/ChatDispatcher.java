@@ -428,7 +428,8 @@ public class ChatDispatcher implements Listener {
                         String.format(
                             format,
                             translate(
-                                UsernameFormatUtils.CONSOLE_NAME, player.getBukkit().getLocale()),
+                                UsernameFormatUtils.CONSOLE_NAME,
+                                TextTranslations.getLocale(player.getBukkit())),
                             message))));
   }
 
@@ -436,9 +437,7 @@ public class ChatDispatcher implements Listener {
     return StringUtils.bestFuzzyMatch(
         query,
         match.getPlayers().stream()
-            .collect(
-                Collectors.toMap(
-                    player -> player.getBukkit().getName(sender), Function.identity())),
+            .collect(Collectors.toMap(player -> player.getBukkit().getName(), Function.identity())),
         0.75);
   }
 

@@ -5,6 +5,7 @@ import java.util.Set;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public class PotionKit extends AbstractKit {
   protected final Set<PotionEffect> effects;
@@ -24,7 +25,7 @@ public class PotionKit extends AbstractKit {
     }
 
     // No swirls by default, KitNode can re-enable them if it so desires
-    player.getBukkit().setPotionParticles(false);
+    NMSHacks.setPotionParticles(player.getBukkit(), false);
   }
 
   @Override

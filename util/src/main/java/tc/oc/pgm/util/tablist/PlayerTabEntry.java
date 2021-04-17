@@ -4,13 +4,12 @@ import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.chat.BaseComponent;
-import org.bukkit.Skin;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerSkinPartsChangeEvent;
+import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
-import tc.oc.pgm.util.text.TextTranslations;
+import tc.oc.pgm.util.skin.Skin;
 
 /**
  * {@link TabEntry} showing a {@link Player}'s name and skin.
@@ -52,9 +51,8 @@ public class PlayerTabEntry extends DynamicTabEntry {
   }
 
   @Override
-  public BaseComponent[] getContent(TabView view) {
-    return TextTranslations.toBaseComponentArray(
-        player(player, NameStyle.TAB, view.getViewer()), view.getViewer());
+  public Component getContent(TabView view) {
+    return player(player, NameStyle.TAB, view.getViewer());
   }
 
   @Override
@@ -69,7 +67,7 @@ public class PlayerTabEntry extends DynamicTabEntry {
 
   @Override
   public @Nullable Skin getSkin(TabView view) {
-    return this.player.getSkin();
+    return NMSHacks.getPlayerSkin(this.player);
   }
 
   @Override

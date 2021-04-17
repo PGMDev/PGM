@@ -28,7 +28,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockFadeEvent;
-import org.bukkit.event.block.BlockFallEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockGrowEvent;
@@ -41,7 +40,6 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.ExplosionPrimeByEntityEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
@@ -67,6 +65,8 @@ import tc.oc.pgm.tracker.Trackers;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.bukkit.Events;
+import tc.oc.pgm.util.event.block.BlockFallEvent;
+import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
 import tc.oc.pgm.util.material.Materials;
 
 public class BlockTransformListener implements Listener {
@@ -191,8 +191,8 @@ public class BlockTransformListener implements Listener {
 
   private void callEvent(final BlockTransformEvent event, boolean checked) {
     if (!checked) {
-      MaterialData oldData = event.getOldState().getMaterialData();
-      MaterialData newData = event.getNewState().getMaterialData();
+      MaterialData oldData = event.getOldState().getData();
+      MaterialData newData = event.getNewState().getData();
       if (oldData instanceof Door) {
         handleDoor(event, (Door) oldData);
       }
@@ -298,10 +298,10 @@ public class BlockTransformListener implements Listener {
       newState.setType(event.getBlock().getType());
       newState.setRawData(event.getBlock().getData());
 
+      // TODO: getType is deprecated getMaterial and setMaterial are SportPaper only
       // When lava flows into water, it creates stone or cobblestone
-      if (isWater(oldState.getMaterial()) && isLava(newState.getMaterial())) {
-        newState.setMaterial(
-            event.getFace() == BlockFace.DOWN ? Material.STONE : Material.COBBLESTONE);
+      if (isWater(oldState.getType()) && isLava(newState.getType())) {
+        newState.setType(event.getFace() == BlockFace.DOWN ? Material.STONE : Material.COBBLESTONE);
         newState.setRawData((byte) 0);
       }
 

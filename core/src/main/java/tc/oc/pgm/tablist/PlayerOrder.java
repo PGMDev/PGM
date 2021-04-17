@@ -61,6 +61,6 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
     }
 
     // All else equal, order the players alphabetically
-    return a.getName(viewer).compareToIgnoreCase(b.getName(viewer));
+    return a.getName().compareToIgnoreCase(b.getName());
   }
 }

@@ -220,14 +220,13 @@ public class InventoryMenu implements Listener {
     if (inventoryMenuItems == null
         || event.getInventory() == null
         || event.getInventory().getHolder() == null
-        || this.world != event.getWorld()
         || event.getCurrentItem() == null
         || event.getCurrentItem().getItemMeta() == null
         || event.getCurrentItem().getItemMeta().getDisplayName() == null) return;
 
     if (event.getWhoClicked() instanceof Player) {
       Player player = ((Player) event.getWhoClicked());
-      if (isViewing(player)) {
+      if (player.getWorld() == this.world && isViewing(player)) {
         ItemStack clicked = event.getCurrentItem();
         for (InventoryMenuItem item : this.inventoryMenuItems) {
           if (item == null) continue;

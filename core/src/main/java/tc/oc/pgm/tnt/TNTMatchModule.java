@@ -15,7 +15,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.ExplosionPrimeByEntityEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
@@ -25,6 +24,7 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
 
 @ListenerScope(MatchScope.RUNNING)
 public class TNTMatchModule implements MatchModule, Listener {
@@ -47,10 +47,12 @@ public class TNTMatchModule implements MatchModule, Listener {
   }
 
   private boolean callPrimeEvent(TNTPrimed tnt, @Nullable Entity primer) {
-    ExplosionPrimeEvent primeEvent =
-        primer != null
-            ? new ExplosionPrimeByEntityEvent(tnt, primer)
-            : new ExplosionPrimeEvent(tnt);
+    ExplosionPrimeEvent primeEvent;
+    if (primer != null) {
+      primeEvent = new ExplosionPrimeByEntityEvent(tnt, primer);
+    } else {
+      primeEvent = new ExplosionPrimeEvent(tnt);
+    }
     match.callEvent(primeEvent);
     if (primeEvent.isCancelled()) {
       tnt.remove();

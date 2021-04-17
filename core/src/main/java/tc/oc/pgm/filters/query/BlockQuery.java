@@ -75,7 +75,7 @@ public class BlockQuery extends Query implements tc.oc.pgm.api.filter.query.Bloc
   @Override
   public MaterialData getMaterial() {
     if (material == null) {
-      material = getBlock().getMaterialData();
+      material = getBlock().getData();
     }
     return material;
   }

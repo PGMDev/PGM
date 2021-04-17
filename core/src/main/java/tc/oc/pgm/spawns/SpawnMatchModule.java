@@ -19,8 +19,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerAttackEntityEvent;
-import org.bukkit.event.player.PlayerInitialSpawnEvent;
+import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
@@ -44,6 +43,7 @@ import tc.oc.pgm.spawns.states.Joining;
 import tc.oc.pgm.spawns.states.Observing;
 import tc.oc.pgm.spawns.states.State;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
+import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
 
 @ListenerScope(MatchScope.LOADED)
 public class SpawnMatchModule implements MatchModule, Listener, Tickable {
@@ -270,7 +270,7 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
-  public void onInitialSpawn(final PlayerInitialSpawnEvent event) {
+  public void onInitialSpawn(final PlayerSpawnLocationEvent event) {
     // Ensure the player spawns in the match world
     event.setSpawnLocation(match.getWorld().getSpawnLocation());
   }

@@ -15,7 +15,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.Server;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
@@ -56,6 +55,7 @@ import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.WorldTimeModule;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -93,10 +93,7 @@ public class PGMListener implements Listener {
     // Create the match when the first player joins
     if (lock.writeLock().tryLock()) {
       // If the server is suspended, need to release so match can be created
-      final Server server = parent.getServer();
-      if (server.isSuspended()) {
-        server.setSuspended(false);
-      }
+      NMSHacks.resumeServer();
 
       try {
         mm.createMatch(null).get();
@@ -137,7 +134,7 @@ public class PGMListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW)
   public void addPlayerOnJoin(final PlayerJoinEvent event) {
-    Match match = this.mm.getMatch(event.getWorld());
+    Match match = this.mm.getMatch(event.getPlayer().getWorld());
     if (match == null) {
       event
           .getPlayer()
@@ -158,7 +155,7 @@ public class PGMListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void broadcastJoinMessage(final PlayerJoinEvent event) {
     // Handle join message and send it to all players except the one joining
-    Match match = this.mm.getMatch(event.getWorld());
+    Match match = this.mm.getMatch(event.getPlayer().getWorld());
     if (match == null) return;
 
     if (event.getJoinMessage() != null) {
@@ -230,7 +227,7 @@ public class PGMListener implements Listener {
   // sometimes arrows stuck in players persist through deaths
   @EventHandler
   public void fixStuckArrows(final PlayerRespawnEvent event) {
-    event.getPlayer().setArrowsStuck(0);
+    NMSHacks.clearArrowsInPlayer(event.getPlayer());
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -313,7 +310,7 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void freezeVehicle(final VehicleUpdateEvent event) {
-    Match match = this.mm.getMatch(event.getWorld());
+    Match match = this.mm.getMatch(event.getVehicle().getWorld());
     if (match == null || match.isFinished()) {
       event.getVehicle().setVelocity(new Vector());
     }
@@ -336,12 +333,12 @@ public class PGMListener implements Listener {
 
     for (ItemStack item : quitter.getInventory().getContents()) {
       if (item == null || item.getType() == Material.AIR) continue;
-      quitter.getWorld().dropItemNaturally(quitter.getBukkit().getLocation(), item);
+      quitter.getBukkit().getWorld().dropItemNaturally(quitter.getBukkit().getLocation(), item);
     }
 
     for (ItemStack armor : quitter.getInventory().getArmorContents()) {
       if (armor == null || armor.getType() == Material.AIR) continue;
-      quitter.getWorld().dropItemNaturally(quitter.getBukkit().getLocation(), armor);
+      quitter.getBukkit().getWorld().dropItemNaturally(quitter.getBukkit().getLocation(), armor);
     }
   }
 
@@ -406,6 +403,6 @@ public class PGMListener implements Listener {
   @EventHandler // We only need to store skins for the post match stats
   public void storeSkinOnMatchJoin(PlayerJoinMatchEvent event) {
     final MatchPlayer player = event.getPlayer();
-    PGM.get().getDatastore().setSkin(player.getId(), player.getBukkit().getSkin());
+    PGM.get().getDatastore().setSkin(player.getId(), NMSHacks.getPlayerSkin(player.getBukkit()));
   }
 }

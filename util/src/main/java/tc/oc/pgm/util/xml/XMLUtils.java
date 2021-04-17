@@ -15,7 +15,6 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.material.MaterialData;
@@ -28,6 +27,7 @@ import org.jdom2.Attribute;
 import org.jdom2.Element;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.Version;
+import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.material.Materials;
@@ -36,6 +36,7 @@ import tc.oc.pgm.util.material.matcher.BlockMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
 
@@ -1007,18 +1008,18 @@ public final class XMLUtils {
     return enchantment;
   }
 
-  public static org.bukkit.attribute.Attribute parseAttribute(Node node, String text)
+  public static tc.oc.pgm.util.attribute.Attribute parseAttribute(Node node, String text)
       throws InvalidXMLException {
-    org.bukkit.attribute.Attribute attribute = org.bukkit.attribute.Attribute.byName(text);
+    tc.oc.pgm.util.attribute.Attribute attribute = tc.oc.pgm.util.attribute.Attribute.byName(text);
     if (attribute != null) return attribute;
 
-    attribute = org.bukkit.attribute.Attribute.byName("generic." + text);
+    attribute = tc.oc.pgm.util.attribute.Attribute.byName("generic." + text);
     if (attribute != null) return attribute;
 
     throw new InvalidXMLException("Unknown attribute '" + text + "'", node);
   }
 
-  public static org.bukkit.attribute.Attribute parseAttribute(Node node)
+  public static tc.oc.pgm.util.attribute.Attribute parseAttribute(Node node)
       throws InvalidXMLException {
     return parseAttribute(node, node.getValueNormalize());
   }
@@ -1054,7 +1055,7 @@ public final class XMLUtils {
       throw new InvalidXMLException("Bad attribute modifier format", node);
     }
 
-    org.bukkit.attribute.Attribute attribute = parseAttribute(node, parts[0]);
+    tc.oc.pgm.util.attribute.Attribute attribute = parseAttribute(node, parts[0]);
     AttributeModifier.Operation operation = parseAttributeOperation(node, parts[1]);
     double amount = parseNumber(node, parts[2], Double.class);
 

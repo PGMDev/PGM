@@ -1,7 +1,7 @@
 package tc.oc.pgm.util.material.matcher;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumSet;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
@@ -31,6 +31,6 @@ public class AllMaterialMatcher implements MaterialMatcher {
 
   @Override
   public Collection<Material> getMaterials() {
-    return Arrays.asList(Material.values());
+    return EnumSet.allOf(Material.class);
   }
 }

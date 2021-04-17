@@ -1,8 +1,6 @@
 package tc.oc.pgm.util.tablist;
 
 import net.kyori.adventure.text.Component;
-import net.md_5.bungee.api.chat.BaseComponent;
-import tc.oc.pgm.util.text.TextTranslations;
 
 public class StaticTabEntry extends SimpleTabEntry {
 
@@ -27,7 +25,7 @@ public class StaticTabEntry extends SimpleTabEntry {
   public void markClean(TabView view) {}
 
   @Override
-  public BaseComponent[] getContent(TabView view) {
-    return TextTranslations.toBaseComponentArray(content, view.getViewer());
+  public Component getContent(TabView view) {
+    return content;
   }
 }

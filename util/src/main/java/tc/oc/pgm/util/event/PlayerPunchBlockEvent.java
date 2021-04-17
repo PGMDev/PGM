@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.bukkit.util.RayBlockIntersection;
+import tc.oc.pgm.util.block.RayBlockIntersection;
 
 /** An event when a {@link Player} punches a block. */
 public class PlayerPunchBlockEvent extends PlayerBlockEvent implements Cancellable {

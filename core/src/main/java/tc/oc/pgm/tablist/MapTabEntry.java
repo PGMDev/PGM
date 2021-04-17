@@ -6,7 +6,6 @@ import static net.kyori.adventure.text.Component.translatable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.md_5.bungee.api.chat.BaseComponent;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
@@ -15,7 +14,6 @@ import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.tablist.DynamicTabEntry;
 import tc.oc.pgm.util.tablist.TabView;
 import tc.oc.pgm.util.text.TextFormatter;
-import tc.oc.pgm.util.text.TextTranslations;
 
 public class MapTabEntry extends DynamicTabEntry {
 
@@ -26,23 +24,19 @@ public class MapTabEntry extends DynamicTabEntry {
   }
 
   @Override
-  public BaseComponent[] getContent(TabView view) {
+  public Component getContent(TabView view) {
     MatchPlayer viewer = PGM.get().getMatchManager().getPlayer(view.getViewer());
 
     if (viewer != null && viewer.isLegacy()) {
       String mapName = map.getName();
       if (mapName.length() > 15) mapName = mapName.substring(0, 13) + "...";
-      return TextTranslations.toBaseComponentArray(
-          text(mapName, NamedTextColor.AQUA), view.getViewer());
+      return text(mapName, NamedTextColor.AQUA);
     }
 
-    final Component text =
-        translatable(
-            "misc.authorship",
-            NamedTextColor.GRAY,
-            text(map.getName(), NamedTextColor.AQUA, TextDecoration.BOLD),
-            TextFormatter.nameList(map.getAuthors(), NameStyle.FANCY, NamedTextColor.GRAY));
-
-    return TextTranslations.toBaseComponentArray(text, view.getViewer());
+    return translatable(
+        "misc.authorship",
+        NamedTextColor.GRAY,
+        text(map.getName(), NamedTextColor.AQUA, TextDecoration.BOLD),
+        TextFormatter.nameList(map.getAuthors(), NameStyle.FANCY, NamedTextColor.GRAY));
   }
 }

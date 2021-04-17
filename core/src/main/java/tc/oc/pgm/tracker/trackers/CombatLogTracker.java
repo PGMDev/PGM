@@ -144,7 +144,7 @@ public class CombatLogTracker implements Listener {
   // This must be called BEFORE the listener that removes the player from the match
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onQuit(PlayerQuitEvent event) {
-    Match match = PGM.get().getMatchManager().getMatch(event.getWorld());
+    Match match = PGM.get().getMatchManager().getMatch(event.getPlayer().getWorld());
     if (match == null || !match.isRunning()) return;
 
     MatchPlayer player = match.getPlayer(event.getPlayer());

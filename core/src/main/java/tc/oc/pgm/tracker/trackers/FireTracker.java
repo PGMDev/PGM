@@ -10,7 +10,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityCombustByBlockEvent;
 import org.bukkit.event.entity.EntityCombustByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityExtinguishEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -21,6 +21,7 @@ import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.BlockInfo;
 import tc.oc.pgm.tracker.info.EntityInfo;
 import tc.oc.pgm.tracker.info.FireInfo;
+import tc.oc.pgm.util.event.entity.EntityExtinguishEvent;
 import tc.oc.pgm.util.material.Materials;
 
 /**
@@ -103,6 +104,12 @@ public class FireTracker extends AbstractTracker<FireInfo> implements DamageReso
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onEntityExtinguish(EntityExtinguishEvent event) {
+    this.burningEntities.remove(event.getEntity());
+  }
+
+  // NOTE: This must be called after anything that tries to resolve the death
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onDeath(PlayerDeathEvent event) {
     this.burningEntities.remove(event.getEntity());
   }
 }

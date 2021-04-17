@@ -1,10 +1,10 @@
 package tc.oc.pgm.api;
 
 import java.util.UUID;
-import org.bukkit.Skin;
 import tc.oc.pgm.api.map.MapActivity;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.api.setting.Settings;
+import tc.oc.pgm.util.skin.Skin;
 
 /** A fast, persistent datastore that provides synchronous responses. */
 public interface Datastore {

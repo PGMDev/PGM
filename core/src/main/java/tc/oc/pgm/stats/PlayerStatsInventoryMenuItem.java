@@ -14,7 +14,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
-import org.bukkit.Skin;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
@@ -23,6 +22,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import tc.oc.pgm.util.menu.InventoryMenu;
 import tc.oc.pgm.util.menu.InventoryMenuItem;
+import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -133,7 +134,7 @@ public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
   public ItemMeta modifyMeta(ItemMeta meta) {
     SkullMeta skullMeta = (SkullMeta) meta;
 
-    skullMeta.setOwner(name, uuid, skin);
+    NMSHacks.setSkullMetaOwner(skullMeta, name, uuid, skin);
 
     return skullMeta;
   }

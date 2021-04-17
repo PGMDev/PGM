@@ -4,6 +4,7 @@ import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,7 +23,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.player.PlayerAttackEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -34,6 +34,7 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.tnt.TNTMatchModule;
 import tc.oc.pgm.tracker.Trackers;
+import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.MinecraftComponent;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -97,7 +98,8 @@ public class AntiGriefListener implements Listener {
                 + TextTranslations.translate(
                     "moderation.defuse.player",
                     clicker.getBukkit(),
-                    owner.getBukkit().getDisplayName(clicker.getBukkit()) + ChatColor.RED));
+                    player(owner.getBukkit(), NameStyle.CONCISE, clicker.getBukkit())
+                        .color(NamedTextColor.RED)));
 
         ChatDispatcher.broadcastAdminChatMessage(
             translatable(

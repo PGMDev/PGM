@@ -32,8 +32,8 @@ public class RenewableDefinition {
     BlockQuery originalQuery = new BlockQuery(original);
     if (!renewableBlocks.query(originalQuery).isAllowed()) return false;
 
-    MaterialData originalMaterial = original.getMaterialData();
-    MaterialData currentMaterial = current.getMaterialData();
+    MaterialData originalMaterial = original.getData();
+    MaterialData currentMaterial = current.getData();
 
     // If current world matches the original, block is already renewed
     if (originalMaterial.equals(currentMaterial)) return false;

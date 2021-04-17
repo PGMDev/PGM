@@ -1,33 +1,54 @@
 package tc.oc.pgm.util.nms;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.SetMultimap;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.minecraft.server.v1_8_R3.*;
+import net.minecraft.server.v1_8_R3.Item;
 import net.minecraft.server.v1_8_R3.WorldBorder;
 import org.bukkit.*;
+import org.bukkit.Chunk;
+import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_8_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_8_R3.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_8_R3.entity.*;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_8_R3.scoreboard.CraftTeam;
 import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers;
-import org.bukkit.craftbukkit.v1_8_R3.util.Skins;
 import org.bukkit.entity.*;
 import org.bukkit.entity.Entity;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.inventory.DoubleChestInventory;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.util.attribute.AttributeModifier;
+import tc.oc.pgm.util.block.RayBlockIntersection;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
+import tc.oc.pgm.util.skin.Skin;
+import tc.oc.pgm.util.skin.Skins;
 
 public interface NMSHacks {
 
@@ -62,6 +83,26 @@ public interface NMSHacks {
     }
   }
 
+  Constructor<PacketPlayOutPlayerInfo.PlayerInfoData> playerInfoDataConstructor =
+      getPlayerInfoDataConstructor();
+
+  static Constructor<PacketPlayOutPlayerInfo.PlayerInfoData> getPlayerInfoDataConstructor() {
+    try {
+      Constructor<PacketPlayOutPlayerInfo.PlayerInfoData> constructor =
+          PacketPlayOutPlayerInfo.PlayerInfoData.class.getConstructor(
+              PacketPlayOutPlayerInfo.class,
+              GameProfile.class,
+              int.class,
+              WorldSettings.EnumGamemode.class,
+              IChatBaseComponent.class);
+
+      constructor.setAccessible(true);
+      return constructor;
+    } catch (NoSuchMethodException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   static PacketPlayOutPlayerInfo.PlayerInfoData playerListPacketData(
       PacketPlayOutPlayerInfo packet,
       UUID uuid,
@@ -69,7 +110,7 @@ public interface NMSHacks {
       GameMode gamemode,
       int ping,
       @Nullable Skin skin,
-      @Nullable BaseComponent... displayName) {
+      @Nullable String renderedDisplayName) {
     GameProfile profile = new GameProfile(uuid, name);
     if (skin != null) {
       for (Map.Entry<String, Collection<Property>> entry :
@@ -77,30 +118,64 @@ public interface NMSHacks {
         profile.getProperties().putAll(entry.getKey(), entry.getValue());
       }
     }
-    PacketPlayOutPlayerInfo.PlayerInfoData data =
-        packet.constructData(
-            profile,
-            ping,
-            gamemode == null ? null : WorldSettings.EnumGamemode.getById(gamemode.getValue()),
-            null); // ELECTROID
-    data.displayName = displayName == null || displayName.length == 0 ? null : displayName;
-    return data;
+
+    if (BukkitUtils.isSportPaper()) {
+      try {
+        PacketPlayOutPlayerInfo.PlayerInfoData data =
+            packet.constructData(
+                profile,
+                ping,
+                gamemode == null ? null : WorldSettings.EnumGamemode.getById(gamemode.getValue()),
+                null); // ELECTROID
+        data.jsonDisplayName = renderedDisplayName;
+        return data;
+      } catch (NoSuchFieldError ignored) {
+      } // Using an old SportPaper version, fallback to spigot reflection
+    }
+
+    try {
+      WorldSettings.EnumGamemode enumGamemode =
+          gamemode == null ? null : WorldSettings.EnumGamemode.getById(gamemode.getValue());
+      IChatBaseComponent iChatBaseComponent =
+          renderedDisplayName == null
+              ? null
+              : IChatBaseComponent.ChatSerializer.a(renderedDisplayName);
+
+      return playerInfoDataConstructor.newInstance(
+          packet, profile, ping, enumGamemode, iChatBaseComponent);
+    } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  Field playerInfoActionField = ReflectionUtils.getField(PacketPlayOutPlayerInfo.class, "a");
+
+  static PacketPlayOutPlayerInfo createPlayerInfoPacket(
+      PacketPlayOutPlayerInfo.EnumPlayerInfoAction action) {
+    PacketPlayOutPlayerInfo packet = new PacketPlayOutPlayerInfo();
+    if (BukkitUtils.isSportPaper()) {
+      packet.a = action;
+    } else {
+      ReflectionUtils.setField(packet, action, playerInfoActionField);
+    }
+    return packet;
   }
 
   static PacketPlayOutPlayerInfo.PlayerInfoData playerListPacketData(
-      PacketPlayOutPlayerInfo packet, UUID uuid, BaseComponent... displayName) {
+      PacketPlayOutPlayerInfo packet, UUID uuid, String renderedDisplayName) {
     return playerListPacketData(
-        packet, uuid, "|" + uuid.toString().substring(0, 15), null, 0, null, displayName);
+        packet, uuid, "|" + uuid.toString().substring(0, 15), null, 0, null, renderedDisplayName);
   }
 
   static PacketPlayOutPlayerInfo.PlayerInfoData playerListPacketData(
       PacketPlayOutPlayerInfo packet, UUID uuid) {
-    return playerListPacketData(packet, uuid, null, null, 0, null);
+    return playerListPacketData(packet, uuid, null, null, 0, null, null);
   }
 
   static PacketPlayOutPlayerInfo.PlayerInfoData playerListPacketData(
       PacketPlayOutPlayerInfo packet, UUID uuid, int ping) {
-    return playerListPacketData(packet, uuid, uuid.toString().substring(0, 16), null, ping, null);
+    return playerListPacketData(
+        packet, uuid, uuid.toString().substring(0, 16), null, ping, null, null);
   }
 
   /**
@@ -125,6 +200,40 @@ public interface NMSHacks {
             PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, players));
   }
 
+  Field bField = ReflectionUtils.getField(PacketPlayOutPlayerInfo.class, "b");
+
+  static List<PacketPlayOutPlayerInfo.PlayerInfoData> getPlayerInfoDataList(
+      PacketPlayOutPlayerInfo packet) {
+    // SportPaper makes this field public
+    if (BukkitUtils.isSportPaper()) {
+      return packet.b;
+    } else {
+      return (List<PacketPlayOutPlayerInfo.PlayerInfoData>)
+          ReflectionUtils.readField(packet, bField);
+    }
+  }
+
+  enum TeamPacketFields {
+    a,
+    b,
+    c,
+    d,
+    e,
+    g,
+    h,
+    i;
+
+    Field field;
+
+    TeamPacketFields() {
+      field = ReflectionUtils.getField(PacketPlayOutScoreboardTeam.class, name());
+    }
+
+    public Field getField() {
+      return field;
+    }
+  }
+
   static Packet teamPacket(
       int operation,
       String name,
@@ -137,19 +246,59 @@ public interface NMSHacks {
       Collection<String> players) {
 
     PacketPlayOutScoreboardTeam packet = new PacketPlayOutScoreboardTeam();
-    packet.a = name;
-    packet.b = displayName;
-    packet.c = prefix;
-    packet.d = suffix;
-    packet.e = nameTagVisibility == null ? null : CraftTeam.bukkitToNotch(nameTagVisibility).e;
-    // packet.f = color
-    packet.g = players;
-    packet.h = operation;
-    if (friendlyFire) {
-      packet.i |= 1;
-    }
-    if (seeFriendlyInvisibles) {
-      packet.i |= 2;
+
+    if (BukkitUtils.isSportPaper()) {
+      packet.a = name;
+      packet.b = displayName;
+      packet.c = prefix;
+      packet.d = suffix;
+      packet.e = nameTagVisibility == null ? null : CraftTeam.bukkitToNotch(nameTagVisibility).e;
+      // packet.f = color
+      packet.g = players;
+      packet.h = operation;
+      if (friendlyFire) {
+        packet.i |= 1;
+      }
+      if (seeFriendlyInvisibles) {
+        packet.i |= 2;
+      }
+    } else {
+      ReflectionUtils.setField(packet, name, TeamPacketFields.a.getField());
+      ReflectionUtils.setField(packet, displayName, TeamPacketFields.b.getField());
+      ReflectionUtils.setField(packet, prefix, TeamPacketFields.c.getField());
+      ReflectionUtils.setField(packet, suffix, TeamPacketFields.d.getField());
+
+      String e = null;
+      if (nameTagVisibility != null) {
+        switch (nameTagVisibility) {
+          case ALWAYS:
+            e = "always";
+            break;
+          case NEVER:
+            e = "never";
+            break;
+          case HIDE_FOR_OTHER_TEAMS:
+            e = "hideForOtherTeams";
+            break;
+          case HIDE_FOR_OWN_TEAM:
+            e = "hideForOwnTeam";
+            break;
+        }
+      }
+
+      ReflectionUtils.setField(packet, e, TeamPacketFields.e.getField());
+      ReflectionUtils.setField(packet, players, TeamPacketFields.g.getField());
+      ReflectionUtils.setField(packet, operation, TeamPacketFields.h.getField());
+
+      int i = (int) ReflectionUtils.readField(packet, TeamPacketFields.i.getField());
+      if (friendlyFire) {
+        i |= 1;
+      }
+      if (seeFriendlyInvisibles) {
+        i |= 2;
+      }
+
+      ReflectionUtils.setField(packet, i, TeamPacketFields.i.getField());
     }
     return packet;
   }
@@ -258,22 +407,71 @@ public interface NMSHacks {
     return spawnPlayerPacket(entityId, uuid, location, null, EntityMetadata.clone(player));
   }
 
+  enum NamedEntitySpawnFields {
+    a,
+    b,
+    c,
+    d,
+    e,
+    f,
+    g,
+    h,
+    i,
+    j;
+
+    Field field;
+
+    NamedEntitySpawnFields() {
+      field = ReflectionUtils.getField(PacketPlayOutNamedEntitySpawn.class, name());
+    }
+
+    public Field getField() {
+      return field;
+    }
+  }
+
   static Packet spawnPlayerPacket(
-      int entityId,
-      UUID uuid,
-      Location location,
-      org.bukkit.inventory.ItemStack heldItem,
-      EntityMetadata metadata) {
-    return new PacketPlayOutNamedEntitySpawn(
-        entityId,
-        uuid,
-        location.getX(),
-        location.getY(),
-        location.getZ(),
-        (byte) location.getYaw(),
-        (byte) location.getPitch(),
-        CraftItemStack.asNMSCopy(heldItem),
-        metadata.dataWatcher);
+      int entityId, UUID uuid, Location location, ItemStack heldItem, EntityMetadata metadata) {
+    if (BukkitUtils.isSportPaper()) {
+      return new PacketPlayOutNamedEntitySpawn(
+          entityId,
+          uuid,
+          location.getX(),
+          location.getY(),
+          location.getZ(),
+          (byte) location.getYaw(),
+          (byte) location.getPitch(),
+          CraftItemStack.asNMSCopy(heldItem),
+          metadata.dataWatcher);
+    } else {
+      PacketPlayOutNamedEntitySpawn packet = new PacketPlayOutNamedEntitySpawn();
+
+      ReflectionUtils.setField(packet, entityId, NamedEntitySpawnFields.a.getField());
+      ReflectionUtils.setField(packet, uuid, NamedEntitySpawnFields.b.getField());
+      ReflectionUtils.setField(
+          packet, MathHelper.floor(location.getX() * 32.0D), NamedEntitySpawnFields.c.getField());
+      ReflectionUtils.setField(
+          packet, MathHelper.floor(location.getY() * 32.0D), NamedEntitySpawnFields.d.getField());
+      ReflectionUtils.setField(
+          packet, MathHelper.floor(location.getZ() * 32.0D), NamedEntitySpawnFields.e.getField());
+      ReflectionUtils.setField(
+          packet,
+          (byte) ((int) (((byte) location.getYaw()) * 256.0F / 360.0F)),
+          NamedEntitySpawnFields.f.getField());
+      ReflectionUtils.setField(
+          packet,
+          (byte) ((int) (((byte) location.getPitch()) * 256.0F / 360.0F)),
+          NamedEntitySpawnFields.g.getField());
+      ReflectionUtils.setField(
+          packet,
+          heldItem == null ? 0 : Item.getId(CraftItemStack.asNMSCopy(heldItem).getItem()),
+          NamedEntitySpawnFields.h.getField());
+      ReflectionUtils.setField(packet, metadata.dataWatcher, NamedEntitySpawnFields.i.getField());
+      ReflectionUtils.setField(
+          packet, metadata.dataWatcher.b(), NamedEntitySpawnFields.j.getField());
+
+      return packet;
+    }
   }
 
   static void spawnLivingEntity(
@@ -281,41 +479,135 @@ public interface NMSHacks {
     sendPacket(player, spawnLivingEntityPacket(type, entityId, location, metadata));
   }
 
+  enum LivingEntitySpawnFields {
+    a,
+    b,
+    c,
+    d,
+    e,
+    i,
+    j,
+    k,
+    l;
+
+    Field field;
+
+    LivingEntitySpawnFields() {
+      field = ReflectionUtils.getField(PacketPlayOutSpawnEntityLiving.class, name());
+    }
+
+    public Field getField() {
+      return field;
+    }
+  }
+
   @SuppressWarnings("deprecation")
   static Packet spawnLivingEntityPacket(
       EntityType type, int entityId, Location location, EntityMetadata metadata) {
-    return new PacketPlayOutSpawnEntityLiving(
-        entityId,
-        (byte) type.getTypeId(),
-        location.getX(),
-        location.getY(),
-        location.getZ(),
-        location.getYaw(),
-        location.getPitch(),
-        location.getPitch(),
-        0,
-        0,
-        0,
-        metadata.dataWatcher);
+    if (BukkitUtils.isSportPaper()) {
+      return new PacketPlayOutSpawnEntityLiving(
+          entityId,
+          (byte) type.getTypeId(),
+          location.getX(),
+          location.getY(),
+          location.getZ(),
+          location.getYaw(),
+          location.getPitch(),
+          location.getPitch(),
+          0,
+          0,
+          0,
+          metadata.dataWatcher);
+    } else {
+      PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving();
+
+      ReflectionUtils.setField(packet, entityId, LivingEntitySpawnFields.a.getField());
+      ReflectionUtils.setField(
+          packet, (byte) type.getTypeId(), LivingEntitySpawnFields.b.getField());
+      ReflectionUtils.setField(
+          packet, MathHelper.floor(location.getX() * 32.0D), LivingEntitySpawnFields.c.getField());
+      ReflectionUtils.setField(
+          packet, MathHelper.floor(location.getY() * 32.0D), LivingEntitySpawnFields.d.getField());
+      ReflectionUtils.setField(
+          packet, MathHelper.floor(location.getZ() * 32.0D), LivingEntitySpawnFields.e.getField());
+      ReflectionUtils.setField(
+          packet,
+          (byte) ((int) (((byte) location.getYaw()) * 256.0F / 360.0F)),
+          LivingEntitySpawnFields.i.getField());
+      ReflectionUtils.setField(
+          packet,
+          (byte) ((int) (((byte) location.getPitch()) * 256.0F / 360.0F)),
+          LivingEntitySpawnFields.j.getField());
+      ReflectionUtils.setField(
+          packet,
+          (byte) ((int) (((byte) location.getPitch()) * 256.0F / 360.0F)),
+          LivingEntitySpawnFields.k.getField());
+      ReflectionUtils.setField(packet, metadata.dataWatcher, LivingEntitySpawnFields.l.getField());
+
+      return packet;
+    }
   }
 
   static void spawnEntity(Player player, int type, int entityId, Location location) {
     sendPacket(player, spawnEntityPacket(type, entityId, location));
   }
 
+  enum EntitySpawnFields {
+    a,
+    b,
+    c,
+    d,
+    h,
+    i,
+    j;
+
+    Field field;
+
+    EntitySpawnFields() {
+      field = ReflectionUtils.getField(PacketPlayOutSpawnEntity.class, name());
+    }
+
+    public Field getField() {
+      return field;
+    }
+  }
+
   static Packet spawnEntityPacket(int type, int entityId, Location location) {
-    return new PacketPlayOutSpawnEntity(
-        entityId,
-        location.getX(),
-        location.getY(),
-        location.getZ(),
-        0,
-        0,
-        0,
-        (int) location.getPitch(),
-        (int) location.getYaw(),
-        type,
-        0);
+    if (BukkitUtils.isSportPaper()) {
+      return new PacketPlayOutSpawnEntity(
+          entityId,
+          location.getX(),
+          location.getY(),
+          location.getZ(),
+          0,
+          0,
+          0,
+          (int) location.getPitch(),
+          (int) location.getYaw(),
+          type,
+          0);
+    } else {
+      PacketPlayOutSpawnEntity packet = new PacketPlayOutSpawnEntity();
+
+      ReflectionUtils.setField(packet, entityId, EntitySpawnFields.a.getField());
+      ReflectionUtils.setField(
+          packet, MathHelper.floor(location.getX() * 32.0D), EntitySpawnFields.b.getField());
+      ReflectionUtils.setField(
+          packet, MathHelper.floor(location.getY() * 32.0D), EntitySpawnFields.c.getField());
+      ReflectionUtils.setField(
+          packet, MathHelper.floor(location.getZ() * 32.0D), EntitySpawnFields.d.getField());
+      ReflectionUtils.setField(
+          packet,
+          (byte) ((int) (((byte) location.getYaw()) * 256.0F / 360.0F)),
+          EntitySpawnFields.h.getField());
+      ReflectionUtils.setField(
+          packet,
+          (byte) ((int) (((byte) location.getPitch()) * 256.0F / 360.0F)),
+          EntitySpawnFields.i.getField());
+      ReflectionUtils.setField(packet, type, EntitySpawnFields.j.getField());
+
+      return packet;
+    }
   }
 
   static void spawnFreezeEntity(Player player, int entityId, boolean legacy) {
@@ -337,8 +629,34 @@ public interface NMSHacks {
     }
   }
 
+  enum EntityAttachFields {
+    a,
+    b,
+    c;
+
+    Field field;
+
+    EntityAttachFields() {
+      field = ReflectionUtils.getField(PacketPlayOutAttachEntity.class, name());
+    }
+
+    public Field getField() {
+      return field;
+    }
+  }
+
   static void entityAttach(Player player, int entityID, int vehicleID, boolean leash) {
-    sendPacket(player, new PacketPlayOutAttachEntity(entityID, vehicleID, leash));
+    if (BukkitUtils.isSportPaper()) {
+      sendPacket(player, new PacketPlayOutAttachEntity(entityID, vehicleID, leash));
+    } else {
+      PacketPlayOutAttachEntity packet = new PacketPlayOutAttachEntity();
+
+      ReflectionUtils.setField(packet, (byte) (leash ? 1 : 0), EntityAttachFields.a.getField());
+      ReflectionUtils.setField(packet, entityID, EntityAttachFields.b.getField());
+      ReflectionUtils.setField(packet, vehicleID, EntityAttachFields.c.getField());
+
+      sendPacket(player, packet);
+    }
   }
 
   static Packet teleportEntityPacket(int entityId, Location location) {
@@ -396,12 +714,34 @@ public interface NMSHacks {
     metadata.dataWatcher.a(10, (byte) flags);
   }
 
+  Method enablePotionParticlesMethod = ReflectionUtils.getMethod(EntityLiving.class, "B");
+  Method disablePotionParticlesMethod = ReflectionUtils.getMethod(EntityLiving.class, "bj");
+
+  static void setPotionParticles(Player player, boolean enabled) {
+    if (BukkitUtils.isSportPaper()) {
+      player.setPotionParticles(enabled);
+    } else {
+      CraftPlayer craftPlayer = (CraftPlayer) player;
+      EntityPlayer handle = craftPlayer.getHandle();
+
+      if (enabled) {
+        ReflectionUtils.callMethod(enablePotionParticlesMethod, handle);
+      } else {
+        ReflectionUtils.callMethod(disablePotionParticlesMethod, handle);
+      }
+    }
+  }
+
+  static void clearArrowsInPlayer(Player player) {
+    ((CraftPlayer) player).getHandle().o(0);
+  }
+
   /**
    * Test if the given tool is capable of "efficiently" mining the given block.
    *
    * <p>Derived from CraftBlock.itemCausesDrops()
    */
-  static boolean canMineBlock(MaterialData blockMaterial, org.bukkit.inventory.ItemStack tool) {
+  static boolean canMineBlock(MaterialData blockMaterial, ItemStack tool) {
     if (!blockMaterial.getItemType().isBlock()) {
       throw new IllegalArgumentException("Material '" + blockMaterial + "' is not a block");
     }
@@ -435,6 +775,9 @@ public interface NMSHacks {
             border, PacketPlayOutWorldBorder.EnumWorldBorderAction.SET_WARNING_BLOCKS));
   }
 
+  Field entityMetadataWatchableField =
+      ReflectionUtils.getField(PacketPlayOutEntityMetadata.class, "b");
+
   static void playDeathAnimation(Player player) {
     EntityPlayer handle = ((CraftPlayer) player).getHandle();
     PacketPlayOutEntityMetadata metadata =
@@ -445,19 +788,24 @@ public interface NMSHacks {
     DataWatcher.WatchableObject zeroHealth =
         new DataWatcher.WatchableObject(3, 6, 0f); // type 3 (float), index 6 (health)
 
-    if (metadata.b != null) {
-      for (int i = 0; i < metadata.b.size(); i++) {
-        DataWatcher.WatchableObject wo = metadata.b.get(i);
+    List<DataWatcher.WatchableObject> b =
+        (List<DataWatcher.WatchableObject>)
+            ReflectionUtils.readField(metadata, entityMetadataWatchableField);
+    if (b != null) {
+      for (int i = 0; i < b.size(); i++) {
+        DataWatcher.WatchableObject wo = b.get(i);
         if (wo.a() == 6) {
-          metadata.b.set(i, zeroHealth);
+          b.set(i, zeroHealth);
           replaced = true;
         }
       }
     }
 
     if (!replaced) {
-      if (metadata.b != null) metadata.b.add(zeroHealth);
-      else metadata.b = Collections.singletonList(zeroHealth);
+      if (b != null) b.add(zeroHealth);
+      else
+        ReflectionUtils.setField(
+            metadata, Collections.singletonList(zeroHealth), entityMetadataWatchableField);
     }
 
     Location location = player.getLocation();
@@ -505,21 +853,340 @@ public interface NMSHacks {
     return ((CraftLivingEntity) entity).getHandle().getAbsorptionHearts();
   }
 
-  static int getProtocolVersion(Player player) {
-    return ((CraftPlayer) player).getHandle().playerConnection.networkManager.protocolVersion;
-  }
-
   static int getPing(Player player) {
     return ((CraftPlayer) player).getHandle().ping;
   }
 
-  static Packet setPassengerPacket(int riderId, int vehicleId) {
-    return new PacketPlayOutAttachEntity(riderId, vehicleId, false);
+  static Packet entityEquipmentPacket(int entityId, int slot, ItemStack armor) {
+    return new PacketPlayOutEntityEquipment(entityId, slot, CraftItemStack.asNMSCopy(armor));
   }
 
-  static Packet entityEquipmentPacket(
-      int entityId, int slot, org.bukkit.inventory.ItemStack armor) {
-    return new PacketPlayOutEntityEquipment(entityId, slot, CraftItemStack.asNMSCopy(armor));
+  static Skin getPlayerSkin(Player player) {
+    CraftPlayer craftPlayer = (CraftPlayer) player;
+    return Skins.fromProperties(craftPlayer.getProfile().getProperties());
+  }
+
+  static void updateVelocity(Player player) {
+    EntityPlayer handle = ((CraftPlayer) player).getHandle();
+    handle.playerConnection.sendPacket(new PacketPlayOutEntityVelocity(handle));
+  }
+
+  static boolean teleportRelative(
+      Player player,
+      org.bukkit.util.Vector deltaPos,
+      float deltaYaw,
+      float deltaPitch,
+      PlayerTeleportEvent.TeleportCause cause) {
+    CraftPlayer craftPlayer = (CraftPlayer) player;
+
+    if (craftPlayer.getHandle().playerConnection == null
+        || craftPlayer.getHandle().playerConnection.isDisconnected()) {
+      return false;
+    }
+
+    // From = Players current Location
+    Location from = player.getLocation();
+    // To = Players new Location if Teleport is Successful
+    Location to = from.clone().add(deltaPos);
+    to.setYaw(to.getYaw() + deltaYaw);
+    to.setPitch(to.getPitch() + deltaPitch);
+
+    // Create & Call the Teleport Event.
+    PlayerTeleportEvent event = new PlayerTeleportEvent(player, from, to, cause);
+    Bukkit.getPluginManager().callEvent(event);
+
+    // Return False to inform the Plugin that the Teleport was unsuccessful/cancelled.
+    if (event.isCancelled()) {
+      return false;
+    }
+
+    craftPlayer.getHandle().playerConnection.teleport(to);
+    return true;
+  }
+
+  Field skullProfileField =
+      ReflectionUtils.getField(
+          "org.bukkit.craftbukkit.v1_8_R3.inventory.CraftMetaSkull", "profile");
+
+  static void setSkullMetaOwner(SkullMeta meta, String name, UUID uuid, Skin skin) {
+    GameProfile gameProfile = new GameProfile(uuid, name);
+    Skins.setProperties(skin, gameProfile.getProperties());
+    ReflectionUtils.setField(meta, gameProfile, skullProfileField);
+  }
+
+  static Set<org.bukkit.block.Block> getBlocks(Chunk bukkitChunk, Material material) {
+    CraftChunk craftChunk = (CraftChunk) bukkitChunk;
+    Set<org.bukkit.block.Block> blocks = new HashSet<>();
+
+    net.minecraft.server.v1_8_R3.Block nmsBlock = CraftMagicNumbers.getBlock(material);
+    net.minecraft.server.v1_8_R3.Chunk chunk = craftChunk.getHandle();
+
+    for (ChunkSection section : chunk.getSections()) {
+      if (section == null || section.a()) continue; // ChunkSection.a() -> true if section is empty
+
+      char[] blockIds = section.getIdArray();
+      for (int i = 0; i < blockIds.length; i++) {
+        // This does a lookup in the block registry, but does not create any objects, so should be
+        // pretty efficient
+        IBlockData blockData = (IBlockData) net.minecraft.server.v1_8_R3.Block.d.a(blockIds[i]);
+        if (blockData != null && blockData.getBlock() == nmsBlock) {
+          blocks.add(
+              bukkitChunk.getBlock(i & 0xf, section.getYPosition() | (i >> 8), (i >> 4) & 0xf));
+        }
+      }
+    }
+
+    return blocks;
+  }
+
+  static WorldCreator detectWorld(String worldName) {
+    IDataManager sdm =
+        new ServerNBTManager(Bukkit.getServer().getWorldContainer(), worldName, true);
+    WorldData worldData = sdm.getWorldData();
+    if (worldData == null) return null;
+
+    return new WorldCreator(worldName)
+        .generateStructures(worldData.shouldGenerateMapFeatures())
+        .generatorSettings(worldData.getGeneratorOptions())
+        .seed(worldData.getSeed())
+        .type(org.bukkit.WorldType.getByName(worldData.getType().name()));
+  }
+
+  Field worldServerField = ReflectionUtils.getField(CraftWorld.class, "world");
+  Field dimensionField = ReflectionUtils.getField(WorldServer.class, "dimension");
+  Field modifiersField = ReflectionUtils.getField(Field.class, "modifiers");
+
+  static void resetDimension(World world) {
+    try {
+      modifiersField.setInt(dimensionField, dimensionField.getModifiers() & ~Modifier.FINAL);
+
+      dimensionField.set(worldServerField.get(world), 11);
+    } catch (IllegalAccessException e) {
+      // No-op, newer version of Java have disabled modifying final fields
+    }
+  }
+
+  static RayBlockIntersection getTargetedBLock(Player player) {
+    Location start = player.getEyeLocation();
+    World world = player.getWorld();
+    Vector startVector = start.toVector();
+    Vector end =
+        start
+            .toVector()
+            .add(
+                start.getDirection().multiply(player.getGameMode() == GameMode.CREATIVE ? 6 : 4.5));
+    MovingObjectPosition hit =
+        ((CraftWorld) world)
+            .getHandle()
+            .rayTrace(
+                new Vec3D(startVector.getX(), startVector.getY(), startVector.getZ()),
+                new Vec3D(end.getX(), end.getY(), end.getZ()),
+                false,
+                false,
+                false);
+    if (hit != null && hit.type == MovingObjectPosition.EnumMovingObjectType.BLOCK) {
+      return new RayBlockIntersection(
+          world.getBlockAt(hit.a().getX(), hit.a().getY(), hit.a().getZ()),
+          CraftBlock.notchToBlockFace(hit.direction),
+          new Vector(hit.pos.a, hit.pos.b, hit.pos.c));
+    } else {
+      return null;
+    }
+  }
+
+  static ItemStack craftItemCopy(ItemStack item) {
+    return CraftItemStack.asCraftCopy(item);
+  }
+
+  String CAN_DESTROY = "CanDestroy";
+  String CAN_PLACE_ON = "CanPlaceOn";
+
+  static void setCanDestroy(ItemMeta itemMeta, Collection<Material> materials) {
+    if (BukkitUtils.isSportPaper()) {
+      // Since this is handled by SportPaper this can't be done through unhandled tags
+      itemMeta.setCanDestroy(materials);
+    }
+    setMaterialList(itemMeta, materials, CAN_DESTROY);
+  }
+
+  static Set<Material> getCanDestroy(ItemMeta itemMeta) {
+    if (BukkitUtils.isSportPaper()) {
+      // Since this is handled by SportPaper this can't be done through unhandled tags
+      return itemMeta.getCanDestroy();
+    }
+    return getMaterialCollection(itemMeta, CAN_DESTROY);
+  }
+
+  static void setCanPlaceOn(ItemMeta itemMeta, Collection<Material> materials) {
+    if (BukkitUtils.isSportPaper()) {
+      // Since this is handled by SportPaper this can't be done through unhandled tags
+      itemMeta.setCanPlaceOn(materials);
+    }
+    setMaterialList(itemMeta, materials, CAN_PLACE_ON);
+  }
+
+  static Set<Material> getCanPlaceOn(ItemMeta itemMeta) {
+    if (BukkitUtils.isSportPaper()) {
+      // Since this is handled by SportPaper this can't be done through unhandled tags
+      return itemMeta.getCanPlaceOn();
+    }
+    return getMaterialCollection(itemMeta, CAN_PLACE_ON);
+  }
+
+  Field unhandledTagsField =
+      ReflectionUtils.getField(
+          "org.bukkit.craftbukkit.v1_8_R3.inventory.CraftMetaItem", "unhandledTags");
+
+  static Map<String, NBTBase> getUnhandledTags(ItemMeta meta) {
+    return (Map<String, NBTBase>) ReflectionUtils.readField(meta, unhandledTagsField);
+  }
+
+  static void setMaterialList(
+      ItemMeta itemMeta, Collection<Material> materials, String canPlaceOn) {
+    Map<String, NBTBase> unhandledTags = getUnhandledTags(itemMeta);
+    NBTTagList canDestroyList =
+        unhandledTags.containsKey(canPlaceOn)
+            ? (NBTTagList) unhandledTags.get(canPlaceOn)
+            : new NBTTagList();
+    for (Material material : materials) {
+      Block block = Block.getById(material.getId());
+      if (block != null) {
+        canDestroyList.add(new NBTTagString(Block.REGISTRY.c(block).toString()));
+      }
+    }
+    if (!canDestroyList.isEmpty()) unhandledTags.put(canPlaceOn, canDestroyList);
+  }
+
+  Field nbtListField = ReflectionUtils.getField(NBTTagList.class, "list");
+
+  static Set<Material> getMaterialCollection(ItemMeta itemMeta, String key) {
+    Map<String, NBTBase> unhandledTags = getUnhandledTags(itemMeta);
+    if (!unhandledTags.containsKey(key)) return EnumSet.noneOf(Material.class);
+    EnumSet<Material> materialSet = EnumSet.noneOf(Material.class);
+    NBTTagList canDestroyList = (NBTTagList) unhandledTags.get(key);
+
+    for (NBTBase item : (List<NBTBase>) ReflectionUtils.readField(canDestroyList, nbtListField)) {
+      NBTTagString nbtTagString = (NBTTagString) item;
+      String blockString = nbtTagString.a_();
+      materialSet.add(Material.getMaterial(Block.getId(Block.getByName(blockString))));
+    }
+
+    return materialSet;
+  }
+
+  static void copyAttributeModifiers(ItemMeta destination, ItemMeta source) {
+    // Since SportPaper handles attributes they don't show up in unhandledTags
+    if (BukkitUtils.isSportPaper()) {
+      for (String attribute : source.getModifiedAttributes()) {
+        for (org.bukkit.attribute.AttributeModifier modifier :
+            source.getAttributeModifiers(attribute)) {
+          destination.addAttributeModifier(attribute, modifier);
+        }
+      }
+    } else {
+      SetMultimap<String, tc.oc.pgm.util.attribute.AttributeModifier> attributeModifiers =
+          NMSHacks.getAttributeModifiers(source);
+      attributeModifiers.putAll(NMSHacks.getAttributeModifiers(destination));
+      NMSHacks.applyAttributeModifiers(attributeModifiers, destination);
+    }
+  }
+
+  static void applyAttributeModifiers(
+      SetMultimap<String, AttributeModifier> attributeModifiers, ItemMeta meta) {
+    if (BukkitUtils.isSportPaper()) {
+      for (Map.Entry<String, AttributeModifier> entry : attributeModifiers.entries()) {
+        AttributeModifier attributeModifier = entry.getValue();
+        meta.addAttributeModifier(
+            entry.getKey(),
+            new org.bukkit.attribute.AttributeModifier(
+                attributeModifier.getUniqueId(),
+                attributeModifier.getName(),
+                attributeModifier.getAmount(),
+                org.bukkit.attribute.AttributeModifier.Operation.fromOpcode(
+                    attributeModifier.getOperation().ordinal())));
+      }
+    } else {
+      NBTTagList list = new NBTTagList();
+      for (Map.Entry<String, AttributeModifier> entry : attributeModifiers.entries()) {
+        AttributeModifier modifier = entry.getValue();
+        NBTTagCompound tag = new NBTTagCompound();
+        tag.setString("Name", modifier.getName());
+        tag.setDouble("Amount", modifier.getAmount());
+        tag.setInt("Operation", modifier.getOperation().ordinal());
+        tag.setLong("UUIDMost", modifier.getUniqueId().getMostSignificantBits());
+        tag.setLong("UUIDLeast", modifier.getUniqueId().getLeastSignificantBits());
+        tag.setString("AttributeName", entry.getKey());
+        list.add(tag);
+      }
+
+      Map<String, NBTBase> unhandledTags = getUnhandledTags(meta);
+      unhandledTags.put("AttributeModifiers", list);
+    }
+  }
+
+  static SetMultimap<String, AttributeModifier> getAttributeModifiers(ItemMeta meta) {
+    Map<String, NBTBase> unhandledTags = getUnhandledTags(meta);
+    if (unhandledTags.containsKey("AttributeModifiers")) {
+      final SetMultimap<String, AttributeModifier> attributeModifiers = HashMultimap.create();
+      final NBTTagList modTags = (NBTTagList) unhandledTags.get("AttributeModifiers");
+      for (int i = 0; i < modTags.size(); i++) {
+        final NBTTagCompound modTag = modTags.get(i);
+        attributeModifiers.put(
+            modTag.getString("AttributeName"),
+            new AttributeModifier(
+                new UUID(modTag.getLong("UUIDMost"), modTag.getLong("UUIDLeast")),
+                modTag.getString("Name"),
+                modTag.getDouble("Amount"),
+                AttributeModifier.Operation.fromOpcode(modTag.getInt("Operation"))));
+      }
+      return attributeModifiers;
+    } else {
+      return HashMultimap.create();
+    }
+  }
+
+  static Inventory createFakeInventory(Player viewer, Inventory realInventory) {
+    if (BukkitUtils.isSportPaper() && realInventory.hasCustomName()) {
+      return realInventory instanceof DoubleChestInventory
+          ? Bukkit.createInventory(viewer, realInventory.getSize(), realInventory.getName())
+          : Bukkit.createInventory(viewer, realInventory.getType(), realInventory.getName());
+    } else {
+      return realInventory instanceof DoubleChestInventory
+          ? Bukkit.createInventory(viewer, realInventory.getSize())
+          : Bukkit.createInventory(viewer, realInventory.getType());
+    }
+  }
+
+  // Not relevant if not SportPaper
+  static void resumeServer() {
+    if (BukkitUtils.isSportPaper() && Bukkit.getServer().isSuspended())
+      Bukkit.getServer().setSuspended(false);
+  }
+
+  static void setAffectsSpawning(Player player, boolean affectsSpawning) {
+    if (BukkitUtils.isSportPaper()) {
+      player.spigot().setAffectsSpawning(affectsSpawning);
+    }
+  }
+
+  static void showInvisibles(Player player, boolean showInvisibles) {
+    if (BukkitUtils.isSportPaper()) {
+      player.showInvisibles(showInvisibles);
+    }
+  }
+
+  static void setKnockbackReduction(Player player, float amount) {
+    // Not possible outside of SportPaper
+    if (BukkitUtils.isSportPaper()) {
+      player.setKnockbackReduction(amount);
+    }
+  }
+
+  static void updateChunkSnapshot(ChunkSnapshot snapshot, org.bukkit.block.BlockState blockState) {
+    // ChunkSnapshot is immutable outside of SportPaper
+    if (BukkitUtils.isSportPaper()) {
+      snapshot.updateBlock(blockState);
+    }
   }
 
   interface FakeEntity {
@@ -542,14 +1209,14 @@ public interface NMSHacks {
     }
 
     default void ride(Player viewer, Entity rider) {
-      sendPacket(viewer, setPassengerPacket(rider.getEntityId(), entityId()));
+      entityAttach(viewer, rider.getEntityId(), entityId(), false);
     }
 
     default void mount(Player viewer, Entity vehicle) {
-      sendPacket(viewer, setPassengerPacket(entityId(), vehicle.getEntityId()));
+      entityAttach(viewer, entityId(), vehicle.getEntityId(), false);
     }
 
-    default void wear(Player viewer, int slot, org.bukkit.inventory.ItemStack item) {
+    default void wear(Player viewer, int slot, ItemStack item) {
       sendPacket(viewer, entityEquipmentPacket(entityId(), slot, item));
     }
   }

@@ -63,6 +63,7 @@ import tc.oc.pgm.util.menu.InventoryMenuItem;
 import tc.oc.pgm.util.menu.pattern.DoubleRowMenuArranger;
 import tc.oc.pgm.util.menu.pattern.SingleRowMenuArranger;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextFormatter;
 
 @ListenerScope(MatchScope.LOADED)
@@ -342,7 +343,7 @@ public class StatsMatchModule implements MatchModule, Listener {
         new PlayerStatsInventoryMenuItem(
             player.getId(),
             this.getPlayerStat(player),
-            player.getBukkit().getSkin(),
+            NMSHacks.getPlayerSkin(player.getBukkit()),
             player.getNameLegacy(),
             player.getParty().getName().color()));
 

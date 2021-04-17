@@ -1,11 +1,12 @@
 package tc.oc.pgm.util.tablist;
 
+import java.awt.*;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.chat.BaseComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
-import org.bukkit.Skin;
 import org.bukkit.entity.Player;
+import tc.oc.pgm.util.skin.Skin;
 
 /** Content for a slot in a {@link TabView} */
 public interface TabEntry {
@@ -52,7 +53,7 @@ public interface TabEntry {
    *
    * @return
    */
-  BaseComponent[] getContent(TabView view);
+  Component getContent(TabView view);
 
   /**
    * Gamemode for the entry. If the entry is linked to a real player, this will change the client's
@@ -63,7 +64,11 @@ public interface TabEntry {
   /** Ping value for the entry */
   int getPing();
 
-  /** Skin for the entry's icon */
+  /**
+   * Skin for the entry's icon
+   *
+   * @return
+   */
   @Nullable
   Skin getSkin(TabView view);
 }

@@ -15,8 +15,8 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.metadata.MetadataValue;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.bukkit.MetadataUtils;
 import tc.oc.pgm.util.named.NameDecorationProvider;
 import tc.oc.pgm.util.named.NameStyle;
 
@@ -59,10 +59,12 @@ public final class PlayerComponent {
             || (isDisguised(player) && style.has(NameStyle.Flag.DISGUISE_OFFLINE));
 
     NameDecorationProvider provider = NameDecorationProvider.DEFAULT;
-    if (player != null) {
-      MetadataValue metadata =
-          player.getMetadata(NameDecorationProvider.METADATA_KEY, BukkitUtils.getPlugin());
-      if (metadata != null) provider = (NameDecorationProvider) metadata.value();
+    if (player != null && player.hasMetadata(NameDecorationProvider.METADATA_KEY)) {
+      provider =
+          (NameDecorationProvider)
+              MetadataUtils.getMetadata(
+                      player, NameDecorationProvider.METADATA_KEY, BukkitUtils.getPlugin())
+                  .value();
     }
 
     UUID uuid = !isOffline ? player.getUniqueId() : null;

@@ -8,9 +8,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.md_5.bungee.api.chat.BaseComponent;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.server.v1_8_R3.Packet;
 import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
 import org.bukkit.GameMode;
@@ -66,15 +67,15 @@ public class TabDisplay {
     this.teamCreatePackets = new Packet[this.slots];
     this.teamRemovePackets = new Packet[this.slots];
 
-    this.listAddPacket = new PacketPlayOutPlayerInfo();
-    this.listAddPacket.a = PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER;
-
-    this.listRemovePacket = new PacketPlayOutPlayerInfo();
-    this.listRemovePacket.a = PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER;
+    this.listAddPacket =
+        NMSHacks.createPlayerInfoPacket(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER);
+    this.listRemovePacket =
+        NMSHacks.createPlayerInfoPacket(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER);
 
     for (int slot = 0; slot < this.slots; ++slot) {
-      BaseComponent[] playerName = this.slotName(slot);
-      String name = playerName[0].toLegacyText();
+      Component playerName = this.slotName(slot);
+      String name = LegacyComponentSerializer.legacySection().serialize(playerName);
+      String renderedPlayerName = TextTranslations.toMinecraftGson(playerName, null);
 
       String teamName = this.slotTeamName(slot);
       this.teamCreatePackets[slot] =
@@ -83,10 +84,12 @@ public class TabDisplay {
       this.teamRemovePackets[slot] = NMSHacks.teamRemovePacket(teamName);
       UUID uuid = UUID.randomUUID();
 
-      listAddPacket.b.add(
-          NMSHacks.playerListPacketData(
-              listAddPacket, uuid, name, GameMode.SURVIVAL, PING, null, playerName));
-      listRemovePacket.b.add(NMSHacks.playerListPacketData(listRemovePacket, uuid, playerName));
+      NMSHacks.getPlayerInfoDataList(listAddPacket)
+          .add(
+              NMSHacks.playerListPacketData(
+                  listAddPacket, uuid, name, GameMode.SURVIVAL, PING, null, renderedPlayerName));
+      NMSHacks.getPlayerInfoDataList(listRemovePacket)
+          .add(NMSHacks.playerListPacketData(listRemovePacket, uuid, renderedPlayerName));
     }
   }
 
@@ -109,9 +112,7 @@ public class TabDisplay {
    * @param slot The slot to create a unique player name for
    * @return The base component array of invisible characters
    */
-  private BaseComponent[] slotName(int slot) {
-    // This needs to avoid collision with the sidebar, which uses chars 0-15. Eventually we will add
-    // a scoreboard API to Commons and this class can cooperate with it in a less hacky way.
+  private Component slotName(int slot) {
     TextComponent.Builder builder = text();
     builder.append(text(NO_SPACE, NamedTextColor.BLACK)); // Avoid collision by adding a §0 on front
 
@@ -119,7 +120,7 @@ public class TabDisplay {
       builder.append(text(NO_SPACE, COLORS.get(slot % COLORS.size())));
       slot /= COLORS.size();
     } while (slot > 0);
-    return TextTranslations.toBaseComponentArray(builder.build(), null);
+    return builder.build();
   }
 
   private String slotTeamName(int slot) {

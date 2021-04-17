@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit;
 import org.bukkit.Color;
 import org.bukkit.Effect;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -11,6 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.projectiles.ProjectileSource;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -19,6 +21,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.util.bukkit.MetadataUtils;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ProjectileTrailMatchModule implements MatchModule, Listener {
@@ -43,7 +46,11 @@ public class ProjectileTrailMatchModule implements MatchModule, Listener {
               if (projectile.isDead() || projectile.isOnGround()) {
                 projectile.removeMetadata(TRAIL_META, PGM.get());
               } else {
-                final Color color = (Color) projectile.getMetadata(TRAIL_META, PGM.get()).value();
+                Color color =
+                    projectile.hasMetadata(TRAIL_META)
+                        ? (Color)
+                            MetadataUtils.getMetadata(projectile, TRAIL_META, PGM.get()).value()
+                        : null;
 
                 for (MatchPlayer player : match.getPlayers()) {
                   boolean colors =
@@ -90,15 +97,20 @@ public class ProjectileTrailMatchModule implements MatchModule, Listener {
     if (projectile instanceof Arrow) {
       final Arrow arrow = (Arrow) projectile;
       if (arrow.hasMetadata(CRITICAL_META)) {
-        return arrow.getMetadata(CRITICAL_META, PGM.get()).asBoolean();
+        return MetadataUtils.getMetadata(projectile, CRITICAL_META, PGM.get()).asBoolean();
       }
     }
     return false;
   }
 
+  static Player getShooter(Projectile projectile) {
+    ProjectileSource shooter = projectile.getShooter();
+    return shooter instanceof Player ? (Player) shooter : null;
+  }
+
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
   public void onProjectileLaunch(ProjectileLaunchEvent event) {
-    MatchPlayer player = match.getPlayer(event.getActor());
+    MatchPlayer player = match.getPlayer(getShooter(event.getEntity()));
     if (player != null) {
       final Projectile projectile = event.getEntity();
       projectile.setMetadata(
@@ -115,7 +127,7 @@ public class ProjectileTrailMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onProjectileHit(ProjectileHitEvent event) {
-    MatchPlayer player = match.getPlayer(event.getActor());
+    MatchPlayer player = match.getPlayer(getShooter(event.getEntity()));
     if (player != null) {
       final Projectile projectile = event.getEntity();
       projectile.removeMetadata(TRAIL_META, PGM.get());
@@ -123,7 +135,7 @@ public class ProjectileTrailMatchModule implements MatchModule, Listener {
       if (projectile instanceof Arrow) {
         final Arrow arrow = (Arrow) projectile;
         if (arrow.hasMetadata(CRITICAL_META)) {
-          arrow.setCritical(arrow.getMetadata(CRITICAL_META, PGM.get()).asBoolean());
+          arrow.setCritical(MetadataUtils.getMetadata(arrow, CRITICAL_META, PGM.get()).asBoolean());
         }
       }
     }

@@ -1,15 +1,15 @@
 package tc.oc.pgm.itemmeta;
 
-import com.google.common.collect.Sets;
+import java.util.EnumSet;
 import java.util.Set;
-import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.util.ImmutableMaterialSet;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.material.MaterialMatcher;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public class ItemRule {
   final MaterialMatcher items;
@@ -42,24 +42,28 @@ public class ItemRule {
 
       InventoryUtils.addEnchantments(meta, this.meta.getEnchants());
 
-      for (String attribute : this.meta.getModifiedAttributes()) {
-        for (AttributeModifier modifier : this.meta.getAttributeModifiers(attribute)) {
-          meta.addAttributeModifier(attribute, modifier);
-        }
-      }
+      NMSHacks.copyAttributeModifiers(meta, this.meta);
+
+      Set<Material> canDestroy =
+          unionMaterials(NMSHacks.getCanDestroy(meta), NMSHacks.getCanDestroy(this.meta));
+      Set<Material> canPlaceOn =
+          unionMaterials(NMSHacks.getCanPlaceOn(meta), NMSHacks.getCanPlaceOn(this.meta));
+
+      if (!canDestroy.isEmpty()) NMSHacks.setCanDestroy(meta, canDestroy);
+      if (!canPlaceOn.isEmpty()) NMSHacks.setCanPlaceOn(meta, canPlaceOn);
 
       if (this.meta.spigot().isUnbreakable()) meta.spigot().setUnbreakable(true);
-      meta.setCanDestroy(unionMaterials(meta.getCanDestroy(), this.meta.getCanDestroy()));
-      meta.setCanPlaceOn(unionMaterials(meta.getCanPlaceOn(), this.meta.getCanPlaceOn()));
 
       stack.setItemMeta(meta);
     }
   }
 
-  private static ImmutableMaterialSet unionMaterials(
-      ImmutableMaterialSet a, ImmutableMaterialSet b) {
+  private Set<Material> unionMaterials(Set<Material> a, Set<Material> b) {
     if (a.containsAll(b)) return a;
     if (b.containsAll(a)) return b;
-    return ImmutableMaterialSet.of(Sets.union(a, b));
+
+    Set<Material> union = EnumSet.copyOf(a);
+    union.addAll(b);
+    return union;
   }
 }

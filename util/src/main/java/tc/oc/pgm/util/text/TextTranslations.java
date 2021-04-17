@@ -12,6 +12,7 @@ import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.objects.Object2ObjectAVLTreeMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -20,17 +21,18 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.Translator;
-import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /** A singleton for accessing {@link MessageFormat} and {@link Component} translations. */
@@ -60,19 +62,37 @@ public final class TextTranslations {
           "moderation",
           "ui");
 
+  private static SortedMap<String, Map<Locale, MessageFormat>> getTreeMap() {
+    try {
+      TextTranslations.class
+          .getClassLoader()
+          .loadClass("it.unimi.dsi.fastutil.objects.Object2ObjectAVLTreeMap");
+      return new Object2ObjectAVLTreeMap<>(String::compareToIgnoreCase);
+    } catch (ClassNotFoundException e) {
+      return new TreeMap<>(String::compareToIgnoreCase);
+    }
+  }
+
+  private static <T, U> Map<T, U> buildHashMap() {
+    try {
+      TextTranslations.class
+          .getClassLoader()
+          .loadClass("it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap");
+      return new Object2ObjectLinkedOpenHashMap<>(Hash.DEFAULT_INITIAL_SIZE, Hash.FAST_LOAD_FACTOR);
+    } catch (ClassNotFoundException e) {
+      return new HashMap<>();
+    }
+  }
+
   // A table of all keys mapped to their locale and message format (*not* thread safe)
   private static final SortedMap<String, Map<Locale, MessageFormat>> TRANSLATIONS_MAP =
-      new Object2ObjectAVLTreeMap<>(String::compareToIgnoreCase);
+      getTreeMap();
+
   private static final Table<String, Locale, MessageFormat> TRANSLATIONS_TABLE =
-      Tables.newCustomTable(
-          TRANSLATIONS_MAP,
-          () ->
-              new Object2ObjectLinkedOpenHashMap<>(
-                  Hash.DEFAULT_INITIAL_SIZE, Hash.FAST_LOAD_FACTOR));
+      Tables.newCustomTable(TRANSLATIONS_MAP, TextTranslations::buildHashMap);
 
   // A cache of locales that are close enough
-  private static final Map<Locale, Locale> LOCALES =
-      new Object2ObjectLinkedOpenHashMap<>(Hash.DEFAULT_INITIAL_SIZE, Hash.VERY_FAST_LOAD_FACTOR);
+  private static final Map<Locale, Locale> LOCALES = buildHashMap();
 
   static {
     // If the source locale has no text translations, consider this a fatal error
@@ -220,6 +240,32 @@ public final class TextTranslations {
     return keysFound;
   }
 
+  private static java.util.Locale parseLocale(String locale) {
+    try {
+      final String[] split = locale.split("[-_]");
+      switch (split.length) {
+        case 1: // language
+          return new java.util.Locale(split[0]);
+        case 2: // language and country
+          return new java.util.Locale(split[0], split[1]);
+        case 3: // language, country, and variant
+          return new java.util.Locale(split[0], split[1], split[2]);
+      }
+    } catch (IllegalArgumentException e) {
+      // ignore
+    }
+
+    // bad locale sent?
+    return java.util.Locale.US;
+  }
+
+  public static Locale getLocale(@Nullable CommandSender sender) {
+    if (sender == null || !(sender instanceof Player)) {
+      return SOURCE_LOCALE;
+    }
+    return parseLocale(((Player) sender).spigot().getLocale());
+  }
+
   /**
    * Gets a translated text component.
    *
@@ -240,8 +286,7 @@ public final class TextTranslations {
    */
   @Deprecated
   public static String translateLegacy(Component text, @Nullable CommandSender sender) {
-    return LegacyComponentSerializer.legacySection()
-        .serialize(translate(text, sender == null ? SOURCE_LOCALE : sender.getLocale()));
+    return LegacyComponentSerializer.legacySection().serialize(translate(text, getLocale(sender)));
   }
 
   /**
@@ -255,7 +300,7 @@ public final class TextTranslations {
    */
   @Deprecated
   public static String translate(String key, @Nullable CommandSender sender, Object... args) {
-    final Locale locale = sender == null ? SOURCE_LOCALE : sender.getLocale();
+    final Locale locale = getLocale(sender);
     final Component text =
         translatable(
             key,
@@ -264,10 +309,8 @@ public final class TextTranslations {
     return LegacyComponentSerializer.legacySection().serialize(translate(text, locale));
   }
 
-  public static BaseComponent[] toBaseComponentArray(
-      Component component, @Nullable CommandSender viewer) {
-    Component translated =
-        translate(component, viewer == null ? SOURCE_LOCALE : viewer.getLocale());
-    return BungeeComponentSerializer.get().serialize(translated);
+  public static String toMinecraftGson(Component component, @Nullable CommandSender viewer) {
+    Component translated = translate(component, viewer == null ? SOURCE_LOCALE : getLocale(viewer));
+    return GsonComponentSerializer.colorDownsamplingGson().serialize(translated);
   }
 }

@@ -480,8 +480,8 @@ public class ItemTransferListener implements Listener {
     }
   }
 
-  @EventHandler
-  public void onPlayerInventoryClicked(InventoryClickedEvent event) {
+  @EventHandler(priority = EventPriority.HIGHEST)
+  public void onPlayerInventoryClick(InventoryClickEvent event) {
     // Control-double-click on a stack, all similar stacks are moved to the cursor, up to the max
     // stack size
     // We cancel all of these and redo them ourselves. We have to do it from a InventoryClickedEvent

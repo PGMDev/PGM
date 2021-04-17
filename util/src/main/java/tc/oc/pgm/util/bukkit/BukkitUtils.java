@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import org.bukkit.*;
+import org.bukkit.inventory.Recipe;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
 
@@ -20,6 +21,28 @@ public interface BukkitUtils {
       PLUGIN.set(Bukkit.getPluginManager().getPlugin("PGM"));
     }
     return PLUGIN.get();
+  }
+
+  Boolean isSportPaper = Bukkit.getServer().getVersion().contains("SportPaper");
+
+  static boolean isSportPaper() {
+    return isSportPaper;
+  }
+
+  static void addRecipe(World world, Recipe recipe) {
+    if (BukkitUtils.isSportPaper()) {
+      world.addRecipe(recipe);
+    } else {
+      Bukkit.addRecipe(recipe);
+    }
+  }
+
+  static void resetRecipes(World world) {
+    if (BukkitUtils.isSportPaper()) {
+      world.resetRecipes();
+    } else {
+      Bukkit.resetRecipes();
+    }
   }
 
   /** Makes strings have pretty colors */

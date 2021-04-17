@@ -1,5 +1,7 @@
 package tc.oc.pgm.inventory;
 
+import static tc.oc.pgm.util.text.PlayerComponent.player;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.time.Duration;
@@ -15,7 +17,6 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
@@ -26,13 +27,11 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryClickedEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
-import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
@@ -53,7 +52,10 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.attribute.Attribute;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.LOADED)
@@ -170,7 +172,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
-  public void updateMonitoredClick(final InventoryClickedEvent event) {
+  public void updateMonitoredClick(final InventoryClickEvent event) {
     if (event.getWhoClicked() instanceof Player) {
       Player player = (Player) event.getWhoClicked();
 
@@ -333,7 +335,11 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     Player holder = (Player) inventory.getHolder();
     // Ensure that the title of the inventory is <= 32 characters long to appease Minecraft's
     // restrictions on inventory titles
-    String title = StringUtils.substring(holder.getDisplayName(viewer), 0, 32);
+    String title =
+        StringUtils.substring(
+            TextTranslations.translateLegacy(player(holder, NameStyle.CONCISE, viewer), viewer),
+            0,
+            32);
 
     Inventory preview = Bukkit.getServer().createInventory(viewer, 45, title);
 
@@ -372,7 +378,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
       }
 
       double knockbackResistance =
-          holder.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE).getValue();
+          matchHolder.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE).getValue();
       if (knockbackResistance > 0) {
         specialLore.add(
             ChatColor.LIGHT_PURPLE
@@ -478,21 +484,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
       previewPlayerInventory(viewer, (PlayerInventory) realInventory);
     } else {
       Inventory fakeInventory;
-      if (realInventory instanceof DoubleChestInventory) {
-        if (realInventory.hasCustomName()) {
-          fakeInventory =
-              Bukkit.createInventory(viewer, realInventory.getSize(), realInventory.getName());
-        } else {
-          fakeInventory = Bukkit.createInventory(viewer, realInventory.getSize());
-        }
-      } else {
-        if (realInventory.hasCustomName()) {
-          fakeInventory =
-              Bukkit.createInventory(viewer, realInventory.getType(), realInventory.getName());
-        } else {
-          fakeInventory = Bukkit.createInventory(viewer, realInventory.getType());
-        }
-      }
+      fakeInventory = NMSHacks.createFakeInventory(viewer, realInventory);
       fakeInventory.setContents(realInventory.getContents());
 
       this.showInventoryPreview(viewer, realInventory, fakeInventory);

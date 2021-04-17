@@ -24,7 +24,6 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
@@ -40,6 +39,7 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.filters.query.PlayerBlockQuery;
 import tc.oc.pgm.kits.tag.ItemTags;
+import tc.oc.pgm.util.bukkit.MetadataUtils;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ProjectileMatchModule implements MatchModule, Listener {
@@ -54,6 +54,8 @@ public class ProjectileMatchModule implements MatchModule, Listener {
   private final Match match;
   private final Set<ProjectileDefinition> projectileDefinitions;
   private Set<ProjectileCooldown> projectileCooldowns = new HashSet<>();
+
+  private static final String DEFINITION_KEY = "projectileDefinition";
 
   public ProjectileMatchModule(Match match, Set<ProjectileDefinition> projectileDefinitions) {
     this.match = match;
@@ -237,15 +239,11 @@ public class ProjectileMatchModule implements MatchModule, Listener {
   }
 
   public static @Nullable ProjectileDefinition getProjectileDefinition(Entity entity) {
-    MetadataValue metadataValue = entity.getMetadata("projectileDefinition", PGM.get());
-
-    if (metadataValue != null) {
-      return (ProjectileDefinition) metadataValue.value();
-    } else if (launchingDefinition.get() != null) {
-      return launchingDefinition.get();
-    } else {
-      return null;
+    if (entity.hasMetadata(DEFINITION_KEY)) {
+      return (ProjectileDefinition)
+          MetadataUtils.getMetadata(entity, DEFINITION_KEY, PGM.get()).value();
     }
+    return launchingDefinition.get();
   }
 
   private static boolean isValidProjectileAction(Action action, ClickAction clickAction) {

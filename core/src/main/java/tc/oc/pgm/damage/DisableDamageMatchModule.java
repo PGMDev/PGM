@@ -31,6 +31,9 @@ public class DisableDamageMatchModule implements MatchModule, Listener {
   }
 
   private static DamageCause getBlockDamageCause(Block block) {
+    if (block == null) {
+      return DamageCause.CONTACT;
+    }
     switch (block.getType()) {
       case LAVA:
       case STATIONARY_LAVA:
