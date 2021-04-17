@@ -129,7 +129,13 @@ public class AntiGriefListener implements Listener {
 
   private void notifyDefuse(MatchPlayer clicker, Entity entity, String message) {
     clicker.sendMessage(text(message));
-    clicker.getMatch().playSound(DEFUSE_SOUND);
+    clicker
+        .getMatch()
+        .playSound(
+            DEFUSE_SOUND,
+            entity.getLocation().getX(),
+            entity.getLocation().getY(),
+            entity.getLocation().getZ());
   }
 
   @EventHandler(priority = EventPriority.HIGHEST)
