@@ -37,6 +37,7 @@ public interface BlockStates {
 
   static BlockState create(World world, BlockVector pos, MaterialData materialData) {
     BlockState state = pos.toLocation(world).getBlock().getState();
+    state.setType(materialData.getItemType());
     state.setData(materialData);
     return state;
   }

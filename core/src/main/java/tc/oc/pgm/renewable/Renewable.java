@@ -266,6 +266,7 @@ public class Renewable implements Listener, Tickable {
     Location location = pos.toLocation(match.getWorld());
     Block block = location.getBlock();
     BlockState newState = location.getBlock().getState();
+    newState.setType(material.getItemType());
     newState.setData(material);
 
     BlockRenewEvent event = new BlockRenewEvent(block, newState, this);
