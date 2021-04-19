@@ -112,6 +112,7 @@ import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.pgm.timelimit.TimeLimitModule;
 import tc.oc.pgm.tnt.TNTMatchModule;
 import tc.oc.pgm.tnt.TNTModule;
+import tc.oc.pgm.tntrender.TNTRenderMatchModule;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.wool.WoolMatchModule;
 import tc.oc.pgm.wool.WoolModule;
@@ -157,6 +158,7 @@ public interface Modules {
     register(FireworkMatchModule.class, FireworkMatchModule::new);
     register(StatsMatchModule.class, StatsMatchModule::new);
     register(MapmakerMatchModule.class, MapmakerMatchModule::new);
+    register(TNTRenderMatchModule.class, TNTRenderMatchModule::new);
 
     // FIXME: Disabled due to lag - look into future optimization
     // register(ProjectileTrailMatchModule.class, ProjectileTrailMatchModule::new);
