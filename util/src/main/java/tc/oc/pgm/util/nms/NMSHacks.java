@@ -1189,6 +1189,11 @@ public interface NMSHacks {
     }
   }
 
+  static void sendBlockChange(Location loc, Player player, @Nullable Material material) {
+    if (material != null) player.sendBlockChange(loc, material, (byte) 0);
+    else player.sendBlockChange(loc, loc.getBlock().getType(), loc.getBlock().getData());
+  }
+
   interface FakeEntity {
     int entityId();
 
