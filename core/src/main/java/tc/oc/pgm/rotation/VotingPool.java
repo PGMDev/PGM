@@ -27,8 +27,8 @@ public class VotingPool extends MapPool {
 
   private MapPoll currentPoll;
 
-  public VotingPool(MapPoolManager manager, ConfigurationSection section, String name) {
-    this(manager, section, name, null);
+  public VotingPool(MapPoolManager manager, ConfigurationSection section, String id) {
+    this(manager, section, id, null);
   }
 
   public VotingPool(

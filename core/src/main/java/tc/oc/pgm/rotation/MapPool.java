@@ -21,6 +21,7 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
   protected final MapPoolManager manager;
   protected final ConfigurationSection configSection;
 
+  protected final String identifier;
   protected final String name;
   protected final boolean enabled;
   protected final List<MapInfo> maps;
@@ -45,10 +46,11 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
     }
   }
 
-  MapPool(MapPoolManager manager, ConfigurationSection section, String name) {
+  MapPool(MapPoolManager manager, ConfigurationSection section, String identifier) {
     this.manager = manager;
     this.configSection = section;
-    this.name = name;
+    this.identifier = identifier;
+    this.name = section.getString("display-name", identifier);
     this.enabled = section.getBoolean("enabled");
     this.players = section.getInt("players");
     this.dynamic = section.getBoolean("dynamic", true);
@@ -70,6 +72,10 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
         .getLogger()
         .warning("[MapPool] [" + name + "] " + mapName + " not found in map repo. Ignoring...");
     return null;
+  }
+
+  public String getIdentifier() {
+    return identifier;
   }
 
   public String getName() {
