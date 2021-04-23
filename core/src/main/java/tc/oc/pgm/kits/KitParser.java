@@ -204,10 +204,7 @@ public abstract class KitParser {
     ItemStack stack = parseItem(el, true);
     boolean locked = XMLUtils.parseBoolean(el.getAttribute("locked"), false);
     ArmorKit.ArmorItem armorItem = new ArmorKit.ArmorItem(stack, locked);
-    if (stack.getType() == Material.LEATHER_HELMET
-        || stack.getType() == Material.LEATHER_CHESTPLATE
-        || stack.getType() == Material.LEATHER_LEGGINGS
-        || stack.getType() == Material.LEATHER_BOOTS) {
+    if (stack.getItemMeta() instanceof LeatherArmorMeta) {
       armorItem.teamColor = XMLUtils.parseBoolean(el.getAttribute("team-color"), false);
     }
     return armorItem;
@@ -462,14 +459,17 @@ public abstract class KitParser {
     }
 
     if (meta instanceof LeatherArmorMeta) {
-      LeatherArmorMeta armorMeta = (LeatherArmorMeta) meta;
-      org.jdom2.Attribute attrColor = el.getAttribute("color");
-      if (attrColor != null) {
-        String raw = attrColor.getValue();
-        if (!raw.matches("[a-fA-F0-9]{6}")) {
-          throw new InvalidXMLException("Invalid color format", attrColor);
+      org.jdom2.Attribute teamColor = el.getAttribute("team-color");
+      if (teamColor == null) {
+        LeatherArmorMeta armorMeta = (LeatherArmorMeta) meta;
+        org.jdom2.Attribute attrColor = el.getAttribute("color");
+        if (attrColor != null) {
+          String raw = attrColor.getValue();
+          if (!raw.matches("[a-fA-F0-9]{6}")) {
+            throw new InvalidXMLException("Invalid color format", attrColor);
+          }
+          armorMeta.setColor(Color.fromRGB(Integer.parseInt(attrColor.getValue(), 16)));
         }
-        armorMeta.setColor(Color.fromRGB(Integer.parseInt(attrColor.getValue(), 16)));
       }
     }
 
