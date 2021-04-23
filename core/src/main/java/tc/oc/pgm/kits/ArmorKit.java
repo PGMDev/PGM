@@ -40,12 +40,13 @@ public class ArmorKit extends AbstractKit {
     for (Map.Entry<ArmorType, ArmorItem> entry : this.armor.entrySet()) {
       int slot = entry.getKey().ordinal();
       if (force || wearing[slot] == null || wearing[slot].getType() == Material.AIR) {
-        if (entry.getValue().teamColor) {
-          LeatherArmorMeta meta = (LeatherArmorMeta) entry.getValue().stack.getItemMeta();
-          meta.setColor(player.getParty().getFullColor());
-          entry.getValue().stack.setItemMeta(meta);
-        }
         wearing[slot] = entry.getValue().stack.clone();
+
+        if (entry.getValue().teamColor) {
+          LeatherArmorMeta meta = (LeatherArmorMeta) wearing[slot].getItemMeta();
+          meta.setColor(player.getParty().getFullColor());
+          wearing[slot].setItemMeta(meta);
+        }
 
         KitMatchModule kitMatchModule = player.getMatch().getModule(KitMatchModule.class);
         if (kitMatchModule != null) {
