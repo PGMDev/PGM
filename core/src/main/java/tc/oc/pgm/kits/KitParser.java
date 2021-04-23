@@ -203,7 +203,10 @@ public abstract class KitParser {
     }
     ItemStack stack = parseItem(el, true);
     boolean locked = XMLUtils.parseBoolean(el.getAttribute("locked"), false);
-    boolean teamColor = XMLUtils.parseBoolean(el.getAttribute("team-color"), false);
+
+    boolean teamColor =
+        stack.getItemMeta() instanceof LeatherArmorMeta
+            && XMLUtils.parseBoolean(el.getAttribute("team-color"), false);
     return new ArmorKit.ArmorItem(stack, locked, teamColor);
   }
 
