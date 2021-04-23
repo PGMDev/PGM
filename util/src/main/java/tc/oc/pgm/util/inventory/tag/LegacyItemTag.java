@@ -43,6 +43,7 @@ final class LegacyItemTag implements ItemTag<String> {
   @Nullable
   @Override
   public String get(ItemStack item) {
+    if (!item.hasItemMeta()) return null;
     final List<String> lore = item.getItemMeta().getLore();
     if (lore == null || lore.isEmpty()) return null;
 
@@ -52,6 +53,7 @@ final class LegacyItemTag implements ItemTag<String> {
 
   @Override
   public void set(ItemStack item, String value) {
+    if (!item.hasItemMeta()) return;
     ItemMeta itemMeta = item.getItemMeta();
     List<String> lore = itemMeta.getLore();
 
@@ -68,6 +70,7 @@ final class LegacyItemTag implements ItemTag<String> {
 
   @Override
   public void clear(ItemStack item) {
+    if (!item.hasItemMeta()) return;
     ItemMeta itemMeta = item.getItemMeta();
     final List<String> lore = itemMeta.getLore();
     if (lore == null || lore.isEmpty()) return;
