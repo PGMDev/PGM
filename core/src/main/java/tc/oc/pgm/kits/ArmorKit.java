@@ -4,12 +4,14 @@ import java.util.List;
 import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 import tc.oc.pgm.api.player.MatchPlayer;
 
 public class ArmorKit extends AbstractKit {
   public static class ArmorItem {
     public final ItemStack stack;
     public final boolean locked;
+    public boolean teamColor = false;
 
     public ArmorItem(ItemStack stack, boolean locked) {
       this.stack = stack;
@@ -37,6 +39,11 @@ public class ArmorKit extends AbstractKit {
     for (Map.Entry<ArmorType, ArmorItem> entry : this.armor.entrySet()) {
       int slot = entry.getKey().ordinal();
       if (force || wearing[slot] == null || wearing[slot].getType() == Material.AIR) {
+        if (entry.getValue().teamColor) {
+          LeatherArmorMeta meta = (LeatherArmorMeta) entry.getValue().stack.getItemMeta();
+          meta.setColor(player.getParty().getFullColor());
+          entry.getValue().stack.setItemMeta(meta);
+        }
         wearing[slot] = entry.getValue().stack.clone();
 
         KitMatchModule kitMatchModule = player.getMatch().getModule(KitMatchModule.class);
