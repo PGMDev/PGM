@@ -459,17 +459,14 @@ public abstract class KitParser {
     }
 
     if (meta instanceof LeatherArmorMeta) {
-      org.jdom2.Attribute teamColor = el.getAttribute("team-color");
-      if (teamColor == null) {
-        LeatherArmorMeta armorMeta = (LeatherArmorMeta) meta;
-        org.jdom2.Attribute attrColor = el.getAttribute("color");
-        if (attrColor != null) {
-          String raw = attrColor.getValue();
-          if (!raw.matches("[a-fA-F0-9]{6}")) {
-            throw new InvalidXMLException("Invalid color format", attrColor);
-          }
-          armorMeta.setColor(Color.fromRGB(Integer.parseInt(attrColor.getValue(), 16)));
+      LeatherArmorMeta armorMeta = (LeatherArmorMeta) meta;
+      org.jdom2.Attribute attrColor = el.getAttribute("color");
+      if (attrColor != null) {
+        String raw = attrColor.getValue();
+        if (!raw.matches("[a-fA-F0-9]{6}")) {
+          throw new InvalidXMLException("Invalid color format", attrColor);
         }
+        armorMeta.setColor(Color.fromRGB(Integer.parseInt(attrColor.getValue(), 16)));
       }
     }
 
