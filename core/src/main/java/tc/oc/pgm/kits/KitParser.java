@@ -203,11 +203,8 @@ public abstract class KitParser {
     }
     ItemStack stack = parseItem(el, true);
     boolean locked = XMLUtils.parseBoolean(el.getAttribute("locked"), false);
-    ArmorKit.ArmorItem armorItem = new ArmorKit.ArmorItem(stack, locked);
-    if (stack.getItemMeta() instanceof LeatherArmorMeta) {
-      armorItem.teamColor = XMLUtils.parseBoolean(el.getAttribute("team-color"), false);
-    }
-    return armorItem;
+    boolean teamColor = XMLUtils.parseBoolean(el.getAttribute("team-color"), false);
+    return new ArmorKit.ArmorItem(stack, locked, teamColor);
   }
 
   public ArmorKit parseArmorKit(Element el) throws InvalidXMLException {

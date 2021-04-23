@@ -11,11 +11,12 @@ public class ArmorKit extends AbstractKit {
   public static class ArmorItem {
     public final ItemStack stack;
     public final boolean locked;
-    public boolean teamColor = false;
+    public final boolean teamColor;
 
-    public ArmorItem(ItemStack stack, boolean locked) {
+    public ArmorItem(ItemStack stack, boolean locked, boolean teamColor) {
       this.stack = stack;
       this.locked = locked;
+      this.teamColor = teamColor;
     }
   }
 
