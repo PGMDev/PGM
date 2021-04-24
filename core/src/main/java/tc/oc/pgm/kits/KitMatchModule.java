@@ -145,6 +145,7 @@ public class KitMatchModule implements MatchModule, Listener {
       Grenade grenade = Grenade.get(event.getEntity());
       if (grenade != null) {
         event
+            .getEntity()
             .getWorld()
             .createExplosion(
                 event.getEntity(),
