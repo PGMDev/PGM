@@ -40,6 +40,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.MatchPlayerChatEvent;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.text.PlayerComponent;
@@ -122,7 +123,15 @@ public class ChatDispatcher implements Listener {
     }
 
     if (checkMute(sender)) {
-      send(match, sender, message, GLOBAL_FORMAT, null, viewer -> true, SettingValue.CHAT_GLOBAL);
+      send(
+          match,
+          sender,
+          message,
+          GLOBAL_FORMAT,
+          null,
+          viewer -> true,
+          SettingValue.CHAT_GLOBAL,
+          Channel.GLOBAL);
     }
   }
 
@@ -155,7 +164,8 @@ public class ChatDispatcher implements Listener {
               party.equals(viewer.getParty())
                   || (viewer.isObserving()
                       && viewer.getBukkit().hasPermission(Permissions.ADMINCHAT)),
-          SettingValue.CHAT_TEAM);
+          SettingValue.CHAT_TEAM,
+          Channel.TEAM);
     }
   }
 
@@ -180,7 +190,8 @@ public class ChatDispatcher implements Listener {
         AC_FORMAT,
         ADMIN_CHAT_PREFIX,
         AC_FILTER,
-        SettingValue.CHAT_ADMIN);
+        SettingValue.CHAT_ADMIN,
+        Channel.ADMIN);
 
     // Play sounds for admin chat
     if (message != null) {
@@ -268,7 +279,8 @@ public class ChatDispatcher implements Listener {
             .append(space())
             .build(),
         viewer -> viewer.getBukkit().equals(receiver),
-        null);
+        null,
+        Channel.PRIVATE);
 
     // Send message to the sender
     send(
@@ -281,7 +293,8 @@ public class ChatDispatcher implements Listener {
             .append(space())
             .build(),
         viewer -> viewer.getBukkit().equals(sender.getBukkit()),
-        null);
+        null,
+        Channel.PRIVATE);
   }
 
   private String formatPrivateMessage(String key, CommandSender viewer) {
@@ -375,7 +388,8 @@ public class ChatDispatcher implements Listener {
       String format,
       @Nullable Component prefix,
       Predicate<MatchPlayer> filter,
-      @Nullable SettingValue type) {
+      @Nullable SettingValue type,
+      Channel channel) {
     // When a message is empty, this indicates the player wants to change their default chat channel
     if ((text == null || text.isEmpty()) && sender != null) {
       // FIXME: there should be a better way to do this
@@ -410,6 +424,7 @@ public class ChatDispatcher implements Listener {
                 event.setFormat(format);
                 CHAT_EVENT_CACHE.put(event, true);
                 match.callEvent(event);
+                match.callEvent(new MatchPlayerChatEvent(sender, text(message), channel));
 
                 if (event.isCancelled()) {
                   return;
@@ -511,5 +526,12 @@ public class ChatDispatcher implements Listener {
         .append(text(": ", NamedTextColor.WHITE))
         .append(msg)
         .build();
+  }
+
+  public static enum Channel {
+    GLOBAL,
+    TEAM,
+    PRIVATE,
+    ADMIN;
   }
 }
