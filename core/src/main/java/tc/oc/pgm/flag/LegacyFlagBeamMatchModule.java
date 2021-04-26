@@ -98,7 +98,7 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
     MatchPlayer player = match.getPlayer(event.getPlayer());
     if (player == null) return;
 
-    if (event.getWorld() == match.getWorld()) showLater(player);
+    if (event.getPlayer().getWorld() == match.getWorld()) showLater(player);
     else beams().forEach(beam -> beam.hide(player));
   }
 
