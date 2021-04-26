@@ -868,6 +868,7 @@ public interface NMSHacks {
 
   static void updateVelocity(Player player) {
     EntityPlayer handle = ((CraftPlayer) player).getHandle();
+    handle.velocityChanged = false;
     handle.playerConnection.sendPacket(new PacketPlayOutEntityVelocity(handle));
   }
 
