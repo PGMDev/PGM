@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -53,8 +54,11 @@ final class LegacyItemTag implements ItemTag<String> {
 
   @Override
   public void set(ItemStack item, String value) {
-    if (!item.hasItemMeta()) return;
     ItemMeta itemMeta = item.getItemMeta();
+    if (!item.hasItemMeta()) {
+      // Create missing item meta if none is found
+      itemMeta = Bukkit.getItemFactory().getItemMeta(item.getType());
+    }
     List<String> lore = itemMeta.getLore();
 
     // If the item has no lore, ensure there is at least 1 line.
