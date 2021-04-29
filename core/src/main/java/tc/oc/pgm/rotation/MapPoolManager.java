@@ -154,41 +154,43 @@ public class MapPoolManager implements MapOrder {
   }
 
   public void updateActiveMapPool(
-      MapPool mapPool,
-      Match match,
-      boolean force,
-      @Nullable CommandSender sender,
-      @Nullable Duration timeLimit,
-      int matchLimit) {
-    saveMapPools();
+	      MapPool mapPool,
+	      Match match,
+	      boolean force,
+	      @Nullable CommandSender sender,
+	      @Nullable Duration timeLimit,
+	      int matchLimit) {
+	    saveMapPools();
 
-    if (mapPool == activeMapPool) return;
+	    if (mapPool == activeMapPool) return;
 
-    if (activeMapPool != null) {
-      activeMapPool.unloadPool(match);
-    }
+	    if (activeMapPool != null && match != null) {
+	      activeMapPool.unloadPool(match);
+	    }
 
-    // Set new active pool
-    activeMapPool = mapPool;
-    matchCount = 0;
+	    // Set new active pool
+	    activeMapPool = mapPool;
+	    matchCount = 0;
 
-    if (!activeMapPool.isDynamic()) {
-      poolStartTime = Instant.now();
-      if (timeLimit != null) {
-        poolTimeLimit = timeLimit;
-      }
-      matchCountLimit = Math.max(0, matchLimit);
-    } else {
-      poolStartTime = null;
-      poolTimeLimit = null;
-      matchCountLimit = 0;
-    }
+	    if (!activeMapPool.isDynamic()) {
+	      poolStartTime = Instant.now();
+	      if (timeLimit != null) {
+	        poolTimeLimit = timeLimit;
+	      }
+	      matchCountLimit = Math.max(0, matchLimit);
+	    } else {
+	      poolStartTime = null;
+	      poolTimeLimit = null;
+	      matchCountLimit = 0;
+	    }
 
-    // Call a MapPoolAdjustEvent so plugins can listen when map pool has changed
-    match.callEvent(
-        new MapPoolAdjustEvent(
-            activeMapPool, mapPool, match, force, sender, poolTimeLimit, matchCountLimit));
-  }
+	    // Call a MapPoolAdjustEvent so plugins can listen when map pool has changed
+	    if (match != null) {
+	      match.callEvent(
+	          new MapPoolAdjustEvent(
+	              activeMapPool, mapPool, match, force, sender, poolTimeLimit, matchCountLimit));
+	    }
+	  }
 
   /**
    * Method to be kept for the future, as it's very useful and could be used for a variety of
