@@ -224,7 +224,7 @@ public final class TextTranslations {
         String format = resource.getString(key);
 
         // Single quotes are a special keyword that need to be escaped in MessageFormat
-        // Templates are not escaped, where as translations are escaped
+        // Templates are not escaped, whereas translations are escaped
         if (locale == SOURCE_LOCALE) format = format.replaceAll("'", "''");
 
         TRANSLATIONS_TABLE.put(key, locale, new MessageFormat(format, locale));
