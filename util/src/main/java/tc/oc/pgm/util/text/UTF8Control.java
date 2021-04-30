@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
@@ -48,5 +50,10 @@ final class UTF8Control extends ResourceBundle.Control {
       }
     }
     return bundle;
+  }
+
+  @Override
+  public List<Locale> getCandidateLocales(String name, Locale locale) {
+    return Arrays.asList(Locale.ROOT);
   }
 }
