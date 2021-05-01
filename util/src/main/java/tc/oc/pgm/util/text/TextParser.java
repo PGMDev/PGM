@@ -379,7 +379,7 @@ public final class TextParser {
   public static Component parseComponent(String text) throws TextException {
     checkNotNull(text, "cannot parse component from null");
 
-    if (text.startsWith("{") && text.endsWith("}")) {
+    if (text.startsWith("{\"") && text.endsWith("\"}")) {
       try {
         return GsonComponentSerializer.gson().deserialize(text);
       } catch (JsonSyntaxException e) {

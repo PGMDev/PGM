@@ -249,4 +249,16 @@ public final class TextParserTest {
         "error.invalidFormat",
         assertThrows(TextException.class, () -> parseSqlConnection(text)).getMessage());
   }
+
+  @ParameterizedTest
+  @CsvSource(
+      value = {
+        "&aHello;§aHello",
+        "{\"text\":\"World\",\"color\":\"gold\"};§6World",
+        "{0}\\n &b&l{2}> {1};{0}\\n §b§l{2}> {1}"
+      },
+      delimiter = ';')
+  void testParseComponentLegacy(String text, String legacyText) {
+    assertEquals(legacyText, parseComponentLegacy(text));
+  }
 }
