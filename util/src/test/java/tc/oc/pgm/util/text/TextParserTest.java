@@ -9,6 +9,8 @@ import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.util.Vector;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -240,6 +242,7 @@ public final class TextParserTest {
     assertFalse(connection.isClosed());
 
     connection.close();
+    assertTrue(connection.isClosed());
   }
 
   @ParameterizedTest
@@ -260,5 +263,37 @@ public final class TextParserTest {
       delimiter = ';')
   void testParseComponentLegacy(String text, String legacyText) {
     assertEquals(legacyText, parseComponentLegacy(text));
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "dad8b95c-cf6a-44df-982e-8c8dd70201e0",
+    "211fa6b9-5614-340a-a0f0-2a6691b56065",
+    "00000000-0000-0000-0000-000000000000"
+  })
+  void testParseUuid(String text) throws TextException {
+    assertEquals(UUID.fromString(text), parseUuid(text));
+  }
+
+  @ParameterizedTest
+  @CsvSource({"-", "notauuid", "dad8b95ccf6a44df982e8c8dd70201e0"})
+  void testParseUuidInvalid(String text) {
+    assertEquals(
+        "error.invalidFormat",
+        assertThrows(TextException.class, () -> parseUuid(text)).getMessage());
+  }
+
+  @ParameterizedTest
+  @CsvSource({"2000-01-01", "1984-11-11", "2009-09-09"})
+  void testParseDate(String text) throws TextException {
+    assertEquals(LocalDate.parse(text), parseDate(text));
+  }
+
+  @ParameterizedTest
+  @CsvSource({"01-01-01", "date", "2021-05"})
+  void testParseDateInvalid(String text) {
+    assertEquals(
+        "error.invalidFormat",
+        assertThrows(TextException.class, () -> parseDate(text)).getMessage());
   }
 }

@@ -383,31 +383,39 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
         return record.getMessage();
       }
 
-      final TextException textErr = tryException(TextException.class, thrown);
-      if (textErr != null) {
-        return format(null, textErr.getLocalizedMessage(), textErr.getCause());
-      }
-
       final InvalidXMLException xmlErr = tryException(InvalidXMLException.class, thrown);
-      if (xmlErr != null) {
-        return format(xmlErr.getFullLocation(), xmlErr.getMessage(), xmlErr.getCause());
-      }
-
       final MapException mapErr = tryException(MapException.class, thrown);
-      if (mapErr != null) {
-        return format(mapErr.getLocation(), mapErr.getMessage(), mapErr.getCause());
-      }
-
       final ModuleLoadException moduleErr = tryException(ModuleLoadException.class, thrown);
-      if (moduleErr != null) {
+
+      String location = null;
+      if (xmlErr != null) {
+        location = xmlErr.getFullLocation();
+      } else if (mapErr != null) {
+        location = mapErr.getLocation();
+      } else if (moduleErr != null) {
         final Class<? extends Module> module = moduleErr.getModule();
-        return format(
-            (module == null ? ModuleLoadException.class : module).getSimpleName(),
-            moduleErr.getMessage(),
-            moduleErr.getCause());
+        location = (module == null ? ModuleLoadException.class : module).getSimpleName();
       }
 
-      return null;
+      final TextException textErr = tryException(TextException.class, thrown);
+
+      Throwable cause = thrown.getCause();
+      String message = thrown.getMessage();
+      if (textErr != null) {
+        cause = null;
+        message = textErr.getLocalizedMessage();
+      } else if (xmlErr != null) {
+        cause = xmlErr.getCause();
+        message = xmlErr.getMessage();
+      } else if (mapErr != null) {
+        cause = mapErr.getCause();
+        message = mapErr.getMessage();
+      } else if (moduleErr != null) {
+        cause = moduleErr.getCause();
+        message = moduleErr.getMessage();
+      }
+
+      return format(location, message, cause);
     }
 
     private String format(

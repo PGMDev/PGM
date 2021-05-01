@@ -37,6 +37,10 @@ public class InvalidXMLException extends Exception {
     this.column = column > 0 ? column : this.node != null ? this.node.getColumn() : 0;
   }
 
+  public InvalidXMLException(@Nullable Node node, Throwable cause) {
+    this("", node, cause);
+  }
+
   public InvalidXMLException(String message, @Nullable Node node, Throwable cause) {
     this(message, node, null, null, 0, 0, 0, cause);
   }

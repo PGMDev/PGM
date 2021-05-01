@@ -1,14 +1,10 @@
 package tc.oc.pgm.util.xml;
 
-import static net.kyori.adventure.text.Component.text;
-
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.*;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -183,17 +179,11 @@ public final class XMLUtils {
   }
 
   private static Boolean parseBoolean(Node node, String value) throws InvalidXMLException {
-    if ("true".equalsIgnoreCase(value)
-        || "yes".equalsIgnoreCase(value)
-        || "on".equalsIgnoreCase(value)) {
-      return true;
+    try {
+      return TextParser.parseBoolean(value);
+    } catch (TextException e) {
+      throw new InvalidXMLException(node, e);
     }
-    if ("false".equalsIgnoreCase(value)
-        || "no".equalsIgnoreCase(value)
-        || "off".equalsIgnoreCase(value)) {
-      return false;
-    }
-    throw new InvalidXMLException("invalid boolean value", node);
   }
 
   public static Boolean parseBoolean(Node node) throws InvalidXMLException {
@@ -440,58 +430,6 @@ public final class XMLUtils {
     }
   }
 
-  /**
-   * Parse a numeric range from attributes on the given element specifying the bounds of the range,
-   * specifically:
-   *
-   * <p>gt gte lt lte
-   */
-  public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
-      Element el, Class<T> type) throws InvalidXMLException {
-    Attribute lt = el.getAttribute("lt");
-    Attribute lte = el.getAttribute("lte");
-    Attribute gt = el.getAttribute("gt");
-    Attribute gte = el.getAttribute("gte");
-
-    if (lt != null && lte != null)
-      throw new InvalidXMLException("Conflicting upper bound for numeric range", el);
-    if (gt != null && gte != null)
-      throw new InvalidXMLException("Conflicting lower bound for numeric range", el);
-
-    BoundType lowerBoundType, upperBoundType;
-    T lowerBound, upperBound;
-
-    if (gt != null) {
-      lowerBound = parseNumber(gt, type, (T) null);
-      lowerBoundType = BoundType.OPEN;
-    } else {
-      lowerBound = parseNumber(gte, type, (T) null);
-      lowerBoundType = BoundType.CLOSED;
-    }
-
-    if (lt != null) {
-      upperBound = parseNumber(lt, type, (T) null);
-      upperBoundType = BoundType.OPEN;
-    } else {
-      upperBound = parseNumber(lte, type, (T) null);
-      upperBoundType = BoundType.CLOSED;
-    }
-
-    if (lowerBound == null) {
-      if (upperBound == null) {
-        return Range.all();
-      } else {
-        return Range.upTo(upperBound, upperBoundType);
-      }
-    } else {
-      if (upperBound == null) {
-        return Range.downTo(lowerBound, lowerBoundType);
-      } else {
-        return Range.range(lowerBound, lowerBoundType, upperBound, upperBoundType);
-      }
-    }
-  }
-
   public static Duration parseDuration(Node node, Duration def) throws InvalidXMLException {
     if (node == null) {
       return def;
@@ -499,7 +437,7 @@ public final class XMLUtils {
     try {
       return TextParser.parseDuration(node.getValueNormalize());
     } catch (TextException e) {
-      throw new InvalidXMLException("invalid time format", node, e);
+      throw new InvalidXMLException(node, e);
     }
   }
 
@@ -529,7 +467,6 @@ public final class XMLUtils {
   }
 
   public static Duration parseSecondDuration(Node node, String text) throws InvalidXMLException {
-    if ("oo".equals(text)) return TimeUtils.INFINITE_DURATION;
     try {
       return Duration.ofSeconds(Integer.parseInt(text));
     } catch (NumberFormatException e) {
@@ -829,9 +766,9 @@ public final class XMLUtils {
   public static <T extends Enum<T>> T parseEnum(
       Node node, String text, Class<T> type, String readableType) throws InvalidXMLException {
     try {
-      return Enum.valueOf(type, text.trim().toUpperCase().replace(' ', '_'));
-    } catch (IllegalArgumentException ex) {
-      throw new InvalidXMLException("Unknown " + readableType + " '" + text + "'", node);
+      return TextParser.parseEnum(text, type);
+    } catch (TextException e) {
+      throw new InvalidXMLException(node, e);
     }
   }
 
@@ -891,11 +828,10 @@ public final class XMLUtils {
 
   public static UUID parseUuid(@Nullable Node node) throws InvalidXMLException {
     if (node == null) return null;
-    String raw = node.getValue();
     try {
-      return UUID.fromString(raw);
-    } catch (IllegalArgumentException e) {
-      throw new InvalidXMLException("Invalid UUID format (must be 8-4-4-4-12)", node, e);
+      return TextParser.parseUuid(node.getValueNormalize());
+    } catch (TextException e) {
+      throw new InvalidXMLException(node, e);
     }
   }
 
@@ -919,12 +855,6 @@ public final class XMLUtils {
       throw new InvalidXMLException("Skin data is not valid base64", node);
     }
     return new Skin(data, null);
-  }
-
-  /** Guess if the given text is a JSON object by looking for the curly braces at either finish */
-  public static boolean looksLikeJson(String text) {
-    text = text.trim();
-    return text.startsWith("{") && text.endsWith("}");
   }
 
   /**
@@ -1076,11 +1006,10 @@ public final class XMLUtils {
   }
 
   public static GameMode parseGameMode(Node node, String text) throws InvalidXMLException {
-    text = text.trim();
     try {
-      return GameMode.valueOf(text.toUpperCase());
-    } catch (IllegalArgumentException e) {
-      throw new InvalidXMLException("Unknown game-mode '" + text + "'", node);
+      return TextParser.parseEnum(text, GameMode.class);
+    } catch (TextException e) {
+      throw new InvalidXMLException(node, e);
     }
   }
 
@@ -1095,29 +1024,20 @@ public final class XMLUtils {
   public static Version parseSemanticVersion(Node node) throws InvalidXMLException {
     if (node == null) return null;
 
-    String[] parts = node.getValueNormalize().split("\\.", 3);
-    if (parts.length < 1 || parts.length > 3) {
-      throw new InvalidXMLException(
-          "Version must be 1 to 3 whole numbers, separated by periods", node);
+    try {
+      return TextParser.parseVersion(node.getValueNormalize());
+    } catch (TextException e) {
+      throw new InvalidXMLException(node, e);
     }
-
-    int major = parseNumber(node, parts[0], Integer.class);
-    int minor = parts.length < 2 ? 0 : parseNumber(node, parts[1], Integer.class);
-    int patch = parts.length < 3 ? 0 : parseNumber(node, parts[2], Integer.class);
-
-    return new Version(major, minor, patch);
   }
 
   public static LocalDate parseDate(Node node) throws InvalidXMLException {
     if (node == null) return null;
 
-    DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
-
     try {
-      return LocalDate.parse(node.getValueNormalize(), formatter);
-    } catch (DateTimeParseException exception) {
-      throw new InvalidXMLException(
-          "Invalid date '" + node.getValueNormalize() + "', expected format 'YYYY-MM-DD'", node);
+      return TextParser.parseDate(node.getValueNormalize());
+    } catch (TextException e) {
+      throw new InvalidXMLException(node, e);
     }
   }
 }

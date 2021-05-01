@@ -56,6 +56,10 @@ public class TextException extends RuntimeException implements ComponentMessageT
     return new TextException(cause, null, "error.unknown");
   }
 
+  public static TextException invalidFormat(String text, Class<?> type) {
+    return invalidFormat(text, type, null);
+  }
+
   public static TextException invalidFormat(String text, Class<?> type, @Nullable Throwable cause) {
     return invalidFormat(text, type, null, cause);
   }

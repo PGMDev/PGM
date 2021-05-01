@@ -1,7 +1,6 @@
 package tc.oc.pgm.util.text;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static net.kyori.adventure.text.Component.text;
 import static tc.oc.pgm.util.text.TextException.invalidFormat;
 import static tc.oc.pgm.util.text.TextException.outOfRange;
 import static tc.oc.pgm.util.text.TextException.unknown;
@@ -17,8 +16,11 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import net.kyori.adventure.text.Component;
@@ -56,7 +58,7 @@ public final class TextParser {
     if (YES.matcher(text).matches()) return true;
     if (NO.matcher(text).matches()) return false;
 
-    throw invalidFormat(text, boolean.class, null);
+    throw invalidFormat(text, boolean.class);
   }
 
   /**
@@ -225,7 +227,7 @@ public final class TextParser {
     final String[] components = COMMA.split(text, 3);
 
     if (components.length != (twod ? 2 : 3)) {
-      throw invalidFormat(text, type, null);
+      throw invalidFormat(text, type);
     }
 
     return new Vector(
@@ -285,7 +287,7 @@ public final class TextParser {
     final int size = components.length;
 
     if (size < 1 || size > 3) {
-      throw invalidFormat(text, Version.class, null);
+      throw invalidFormat(text, Version.class);
     }
 
     final int major = parseInteger(components[0], NONNEG);
@@ -366,6 +368,40 @@ public final class TextParser {
   }
 
   /**
+   * Parses text into a UUID.
+   *
+   * @param text The text.
+   * @return A UUID.
+   * @throws TextException If the text is invalid.
+   */
+  public static UUID parseUuid(String text) throws TextException {
+    checkNotNull(text, "cannot parse uuid from null");
+
+    try {
+      return UUID.fromString(text);
+    } catch (IllegalArgumentException e) {
+      throw invalidFormat(text, UUID.class, e);
+    }
+  }
+
+  /**
+   * Parses text into a date.
+   *
+   * @param text The text.
+   * @return A date.
+   * @throws TextException If the text is invalid.
+   */
+  public static LocalDate parseDate(String text) throws TextException {
+    checkNotNull(text, "cannot parse date from null");
+
+    try {
+      return LocalDate.parse(text, DateTimeFormatter.ISO_LOCAL_DATE);
+    } catch (DateTimeParseException e) {
+      throw invalidFormat(text, LocalDate.class, e);
+    }
+  }
+
+  /**
    * Parses text into a text component.
    *
    * <p>Accepts legacy formatting with "&" as the color character.
@@ -431,7 +467,7 @@ public final class TextParser {
     checkNotNull(text, "cannot parse uri from null");
 
     if (text.trim().isEmpty()) {
-      throw invalidFormat(text, URI.class, null);
+      throw invalidFormat(text, URI.class);
     }
 
     try {
@@ -463,7 +499,7 @@ public final class TextParser {
     final String scheme = uri.getScheme();
     try {
       if (scheme == null || scheme.isEmpty()) {
-        throw invalidFormat(text, URI.class, null);
+        throw invalidFormat(text, URI.class);
       } else if (scheme.startsWith("sqlite")) {
         Class.forName("org.sqlite.JDBC");
       } else if (scheme.startsWith("mysql")) {
