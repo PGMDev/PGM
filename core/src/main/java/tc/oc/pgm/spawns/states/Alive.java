@@ -25,7 +25,6 @@ import tc.oc.pgm.modules.ItemKeepMatchModule;
 import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
-import tc.oc.pgm.spawns.events.ParticipantPostSpawnEvent;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 
 /** Player is alive and participating */
@@ -91,8 +90,6 @@ public class Alive extends Participating {
     }
 
     player.getBukkit().updateInventory();
-
-    player.getMatch().callEvent(new ParticipantPostSpawnEvent(player, spawnEvent.getLocation()));
   }
 
   @Override
