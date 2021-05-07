@@ -693,10 +693,8 @@ public class PickerMatchModule implements MatchModule, Listener {
           if (cmm.getCanChangeClass(player.getId())) {
             cmm.setPlayerClass(player.getId(), cls);
             player.sendMessage(
-                text()
-                    .append(translatable("match.class.ok", NamedTextColor.GOLD))
-                    .append(text(name, NamedTextColor.GREEN))
-                    .build());
+                translatable(
+                    "match.class.ok", NamedTextColor.GOLD, text(name, NamedTextColor.GREEN)));
             scheduleRefresh(player);
           } else {
             player.sendMessage(translatable("match.class.sticky", NamedTextColor.RED));
