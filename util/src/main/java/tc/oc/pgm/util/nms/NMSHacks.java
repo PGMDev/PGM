@@ -76,12 +76,14 @@ public interface NMSHacks {
   }
 
   @SuppressWarnings("unchecked")
-  static void sendPacketToViewers(Entity entity, Object packet) {
+  static void sendPacketToViewers(
+      Entity entity, Object packet, boolean excludeIfViewerIsSpectator) {
     EntityTrackerEntry entry = getTrackerEntry(entity);
     for (EntityPlayer viewer : ((Set<EntityPlayer>) entry.trackedPlayers)) {
-      Entity spectatorTarget = viewer.getBukkitEntity().getSpectatorTarget();
-      if (spectatorTarget != null) {
-        if (spectatorTarget.getUniqueId().equals(entity.getUniqueId())) continue;
+      if (excludeIfViewerIsSpectator) {
+        Entity spectatorTarget = viewer.getBukkitEntity().getSpectatorTarget();
+        if (spectatorTarget != null && spectatorTarget.getUniqueId().equals(entity.getUniqueId()))
+          continue;
       }
       viewer.playerConnection.sendPacket((Packet) packet);
     }
@@ -825,9 +827,9 @@ public interface NMSHacks {
 
     Packet<?> teleport = teleportEntityPacket(player.getEntityId(), location);
 
-    sendPacketToViewers(player, metadata);
-    sendPacketToViewers(player, useBed);
-    sendPacketToViewers(player, teleport);
+    sendPacketToViewers(player, metadata, true);
+    sendPacketToViewers(player, useBed, true);
+    sendPacketToViewers(player, teleport, true);
   }
 
   static org.bukkit.enchantments.Enchantment getEnchantment(String key) {
