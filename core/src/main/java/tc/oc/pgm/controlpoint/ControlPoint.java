@@ -49,6 +49,11 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
 
   protected final Vector centerPoint;
 
+  // time values to increment by for decay, recovery, and owned-decay
+  protected final float decayIncrement;
+  protected final float recoveryIncrement;
+  protected final float ownedDecayIncrement;
+
   // This is set false after the first state change if definition.permanent == true
   protected boolean capturable = true;
 
@@ -80,6 +85,24 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
     this.playerTracker = new ControlPointPlayerTracker(match, this.getCaptureRegion());
 
     this.blockDisplay = new ControlPointBlockDisplay(match, this);
+
+    this.decayIncrement =
+        definition.getDecayTime().equals(Duration.ZERO)
+            ? 0
+            : (float) definition.getTimeToCapture().toMillis()
+                / (float) definition.getDecayTime().toMillis();
+
+    this.recoveryIncrement =
+        definition.getRecoveryTime().equals(Duration.ZERO)
+            ? 0
+            : (float) definition.getTimeToCapture().toMillis()
+                / (float) definition.getRecoveryTime().toMillis();
+
+    this.ownedDecayIncrement =
+        definition.getOwnedDecayTime().equals(Duration.ZERO)
+            ? 0
+            : (float) definition.getTimeToCapture().toMillis()
+                / (float) definition.getOwnedDecayTime().toMillis();
   }
 
   public void registerEvents() {
@@ -413,7 +436,6 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
     }
 
     ControlPointDefinition definition = this.getDefinition();
-
     if (this.controllingTeam != null && definition.hasNeutralState()) {
       // Point is owned and must go through the neutral state before another team can capture it
       if (dominantTeam == this.controllingTeam) {
@@ -423,6 +445,16 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
       } else if (!definition.isIncrementalCapture()) {
         // No team is dominant and point is not incremental, so reset the time
         this.capturingTime = Duration.ZERO;
+      } else if (TimeUtils.isLongerThan(definition.getOwnedDecayTime(), Duration.ZERO)) {
+        // Decay a team's capture
+        this.progressUncapture(
+            null, Duration.ofMillis((long) (ownedDecayIncrement * dominantTime.toMillis())));
+      } else if (TimeUtils.isLongerThan(definition.getRecoveryTime(), Duration.ZERO)
+          && TimeUtils.isLongerThan(this.capturingTime, Duration.ZERO)) {
+        // recover a team's capture -- mutually exclusive with owned decay
+        this.regressCapture(
+            this.controllingTeam,
+            Duration.ofMillis((long) (recoveryIncrement * dominantTime.toMillis())));
       }
     } else if (this.capturingTeam != null) {
       // Point is being captured by a specific team
@@ -434,6 +466,11 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
         // No team is dominant and point is not incremental, so reset time and clear capturing team
         this.capturingTime = Duration.ZERO;
         this.capturingTeam = null;
+      } else if (TimeUtils.isLongerThan(definition.getDecayTime(), Duration.ZERO)
+          && TimeUtils.isLongerThan(this.capturingTime, Duration.ZERO)) {
+        // No team is dominating, point is incremental, and there is a defined decay time
+        this.regressCapture(
+            null, Duration.ofMillis((long) (decayIncrement * dominantTime.toMillis())));
       }
     } else if (dominantTeam != null
         && dominantTeam != this.controllingTeam

@@ -38,6 +38,15 @@ public class ControlPointDefinition extends GoalDefinition {
   // Base time for the point to transition between states
   private final Duration timeToCapture;
 
+  // Time it takes for a point to decay while unowned. (Time is accurate when near 100% capture)
+  private final Duration decayTime;
+
+  // Time it takes for a point to recover to captured state. (Accurate when almost uncaptured)
+  private final Duration recoveryTime;
+
+  // Time it takes for a point to transition to neutral state.
+  private final Duration ownedDecayTime;
+
   // Capture time multiplier for increasing or decreasing capture time based on the number of
   // players on the point
   private final float timeMultiplier;
@@ -92,6 +101,9 @@ public class ControlPointDefinition extends GoalDefinition {
       Filter visualMaterials,
       BlockVector capturableDisplayBeacon,
       Duration timeToCapture,
+      Duration decayTime,
+      Duration recoveryTime,
+      Duration ownedDecayTime,
       float timeMultiplier,
       @Nullable TeamFactory initialOwner,
       CaptureCondition captureCondition,
@@ -112,6 +124,9 @@ public class ControlPointDefinition extends GoalDefinition {
     this.visualMaterials = visualMaterials;
     this.capturableDisplayBeacon = capturableDisplayBeacon;
     this.timeToCapture = timeToCapture;
+    this.decayTime = decayTime;
+    this.recoveryTime = recoveryTime;
+    this.ownedDecayTime = ownedDecayTime;
     this.timeMultiplier = timeMultiplier;
     this.initialOwner = initialOwner;
     this.captureCondition = captureCondition;
@@ -132,6 +147,12 @@ public class ControlPointDefinition extends GoalDefinition {
         + this.getId()
         + " timeToCapture="
         + this.getTimeToCapture()
+        + " decayTime="
+        + this.getDecayTime()
+        + " recoveryTime="
+        + this.getRecoveryTime()
+        + " ownedDecayTime="
+        + this.getOwnedDecayTime()
         + " timeMultiplier="
         + this.getTimeMultiplier()
         + " initialOwner="
@@ -190,6 +211,18 @@ public class ControlPointDefinition extends GoalDefinition {
 
   public Duration getTimeToCapture() {
     return this.timeToCapture;
+  }
+
+  public Duration getDecayTime() {
+    return this.decayTime;
+  }
+
+  public Duration getRecoveryTime() {
+    return this.recoveryTime;
+  }
+
+  public Duration getOwnedDecayTime() {
+    return this.ownedDecayTime;
   }
 
   public float getTimeMultiplier() {

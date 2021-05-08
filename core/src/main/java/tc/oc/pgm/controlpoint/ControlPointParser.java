@@ -77,6 +77,13 @@ public abstract class ControlPointParser {
     Duration timeToCapture =
         XMLUtils.parseDuration(elControlPoint.getAttribute("capture-time"), Duration.ofSeconds(30));
 
+    Duration decayTime =
+        XMLUtils.parseDuration(elControlPoint.getAttribute("decay-time"), Duration.ZERO);
+    Duration recoveryTime =
+        XMLUtils.parseDuration(elControlPoint.getAttribute("recovery-time"), Duration.ZERO);
+    Duration ownedDecayTime =
+        XMLUtils.parseDuration(elControlPoint.getAttribute("owned-decay-time"), Duration.ZERO);
+
     float timeMultiplier =
         XMLUtils.parseNumber(
             elControlPoint.getAttribute("time-multiplier"), Float.class, koth ? 0.1f : 0f);
@@ -117,6 +124,9 @@ public abstract class ControlPointParser {
         visualMaterials,
         capturableDisplayBeacon == null ? null : capturableDisplayBeacon.toBlockVector(),
         timeToCapture,
+        decayTime,
+        recoveryTime,
+        ownedDecayTime,
         timeMultiplier,
         initialOwner,
         captureCondition,
