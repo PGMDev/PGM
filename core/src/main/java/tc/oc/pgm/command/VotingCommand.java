@@ -4,6 +4,7 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.event.ClickEvent.runCommand;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
+import static tc.oc.pgm.api.text.PlayerComponent.player;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
@@ -25,8 +26,8 @@ import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.VotingPool;
 import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.MapNameStyle;
+import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -50,7 +51,7 @@ public class VotingCommand {
         translatable(
             "vote.add",
             NamedTextColor.GRAY,
-            UsernameFormatUtils.formatStaffName(sender, match, sender),
+            player(sender, NameStyle.FANCY),
             map.getStyledName(MapNameStyle.COLOR));
 
     if (vote.getOptions().isAdded(map)) {
@@ -83,7 +84,7 @@ public class VotingCommand {
           translatable(
               "vote.remove",
               NamedTextColor.GRAY,
-              UsernameFormatUtils.formatStaffName(sender, match, sender),
+              player(sender, NameStyle.FANCY),
               map.getStyledName(MapNameStyle.COLOR)),
           match);
     } else {
@@ -104,10 +105,7 @@ public class VotingCommand {
             NamedTextColor.LIGHT_PURPLE);
     ChatDispatcher.broadcastAdminChatMessage(
         translatable(
-            "vote.toggle",
-            NamedTextColor.GRAY,
-            UsernameFormatUtils.formatStaffName(sender, match, sender),
-            voteModeName),
+            "vote.toggle", NamedTextColor.GRAY, player(sender, NameStyle.FANCY), voteModeName),
         match);
   }
 
@@ -127,7 +125,7 @@ public class VotingCommand {
         translatable(
             "vote.remove",
             NamedTextColor.GRAY,
-            UsernameFormatUtils.formatStaffName(sender, match, sender),
+            player(sender, NameStyle.FANCY),
             TextFormatter.list(maps, NamedTextColor.GRAY));
 
     vote.getOptions().clear();

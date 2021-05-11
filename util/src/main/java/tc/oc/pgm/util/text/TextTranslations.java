@@ -2,7 +2,6 @@ package tc.oc.pgm.util.text;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
@@ -26,14 +25,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.platform.bukkit.BukkitIdentity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.Translator;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import tc.oc.pgm.util.Audience;
 
 /** A singleton for accessing {@link MessageFormat} and {@link Component} translations. */
 @SuppressWarnings("UnstableApiUsage")
@@ -274,7 +276,8 @@ public final class TextTranslations {
    * @return The translated text.
    */
   public static Component translate(Component text, Locale locale) {
-    return GlobalTranslator.render(text, locale);
+    return GlobalTranslator.render(
+        Audience.RENDERER.render(text, new BukkitIdentity(Bukkit.getConsoleSender())), locale);
   }
 
   /**
@@ -305,12 +308,13 @@ public final class TextTranslations {
         translatable(
             key,
             Stream.of(args).map(String::valueOf).map(Component::text).collect(Collectors.toList()));
-
     return LegacyComponentSerializer.legacySection().serialize(translate(text, locale));
   }
 
   public static String toMinecraftGson(Component component, @Nullable CommandSender viewer) {
-    Component translated = translate(component, viewer == null ? SOURCE_LOCALE : getLocale(viewer));
-    return GsonComponentSerializer.colorDownsamplingGson().serialize(translated);
+    component =
+        Audience.RENDERER.render(
+            component, new BukkitIdentity(viewer == null ? Bukkit.getConsoleSender() : viewer));
+    return GsonComponentSerializer.colorDownsamplingGson().serialize(component);
   }
 }

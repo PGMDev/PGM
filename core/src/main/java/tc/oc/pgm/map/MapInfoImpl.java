@@ -234,7 +234,7 @@ public class MapInfoImpl implements MapInfo {
           name.build(),
           TextFormatter.list(
               getAuthors().stream()
-                  .map(c -> c.getName(NameStyle.PLAIN).color(NamedTextColor.RED))
+                  .map(c -> c.getName(NameStyle.COLOR))
                   .collect(Collectors.toList()),
               NamedTextColor.DARK_PURPLE));
     }

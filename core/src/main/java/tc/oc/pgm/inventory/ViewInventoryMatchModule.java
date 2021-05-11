@@ -337,9 +337,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     // restrictions on inventory titles
     String title =
         StringUtils.substring(
-            TextTranslations.translateLegacy(player(holder, NameStyle.CONCISE, viewer), viewer),
-            0,
-            32);
+            TextTranslations.translateLegacy(player(holder, NameStyle.CONCISE), viewer), 0, 32);
 
     Inventory preview = Bukkit.getServer().createInventory(viewer, 45, title);
 

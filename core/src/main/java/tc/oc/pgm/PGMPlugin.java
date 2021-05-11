@@ -39,6 +39,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.module.Module;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
+import tc.oc.pgm.api.text.PlayerComponent;
 import tc.oc.pgm.command.graph.CommandExecutor;
 import tc.oc.pgm.command.graph.CommandGraph;
 import tc.oc.pgm.db.CacheDatastore;
@@ -73,6 +74,7 @@ import tc.oc.pgm.util.concurrent.BukkitExecutorService;
 import tc.oc.pgm.util.listener.ItemTransferListener;
 import tc.oc.pgm.util.listener.PlayerBlockListener;
 import tc.oc.pgm.util.listener.PlayerMoveListener;
+import tc.oc.pgm.util.text.PlayerComponentProvider;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextTranslations;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -211,6 +213,9 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     if (!config.getUptimeLimit().isNegative()) {
       asyncExecutorService.scheduleAtFixedRate(new ShouldRestartTask(), 0, 1, TimeUnit.MINUTES);
     }
+
+    // Set name provider
+    PlayerComponentProvider.PROVIDER.set(new PlayerComponent.NameComponentProviderImpl());
 
     registerListeners();
     registerCommands();

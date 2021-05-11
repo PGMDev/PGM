@@ -13,7 +13,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
-import org.bukkit.entity.Player;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.party.event.PartyRenameEvent;
@@ -122,7 +121,7 @@ public class PartyImpl implements Party, Audience {
   }
 
   @Override
-  public Component getName(final NameStyle style, Player viewer) {
+  public Component getName(final NameStyle style) {
     return this.name;
   }
 

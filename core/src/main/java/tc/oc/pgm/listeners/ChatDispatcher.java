@@ -6,6 +6,7 @@ import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.api.text.PlayerComponent.player;
 import static tc.oc.pgm.util.text.TextTranslations.translate;
 
 import app.ashcon.intake.Command;
@@ -13,6 +14,7 @@ import app.ashcon.intake.parametric.annotation.Text;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -43,14 +45,13 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerChatEvent;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
-import tc.oc.pgm.api.text.PlayerComponent;
 import tc.oc.pgm.ffa.Tribute;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.StringUtils;
-import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.PlayerComponentProvider;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class ChatDispatcher implements Listener {
@@ -117,7 +118,7 @@ public class ChatDispatcher implements Listener {
       desc = "Send a message to everyone",
       usage = "[message]")
   public void sendGlobal(Match match, MatchPlayer sender, @Nullable @Text String message) {
-    if (sender != null && sender.isVanished()) {
+    if (sender != null && Integration.isVanished(sender.getBukkit())) {
       sendAdmin(match, sender, message);
       return;
     }
@@ -140,7 +141,7 @@ public class ChatDispatcher implements Listener {
       desc = "Send a message to your team",
       usage = "[message]")
   public void sendTeam(Match match, MatchPlayer sender, @Nullable @Text String message) {
-    if (sender != null && sender.isVanished()) {
+    if (sender != null && Integration.isVanished(sender.getBukkit())) {
       sendAdmin(match, sender, message);
       return;
     }
@@ -437,10 +438,7 @@ public class ChatDispatcher implements Listener {
                           audience.sendMessage(
                               identity(sender.getId()),
                               getChatFormat(
-                                  prefix,
-                                  PlayerComponent.player(
-                                      sender.getBukkit(), NameStyle.VERBOSE, player),
-                                  message));
+                                  prefix, player(sender.getBukkit(), NameStyle.VERBOSE), message));
                         });
               });
       return;
@@ -454,7 +452,7 @@ public class ChatDispatcher implements Listener {
                         String.format(
                             format,
                             translate(
-                                UsernameFormatUtils.CONSOLE_NAME,
+                                PlayerComponentProvider.CONSOLE,
                                 TextTranslations.getLocale(player.getBukkit())),
                             message))));
   }
@@ -490,20 +488,17 @@ public class ChatDispatcher implements Listener {
 
   public static void broadcastAdminChatMessage(
       Component message, Match match, Optional<Sound> sound) {
-    TextComponent formatted = ADMIN_CHAT_PREFIX.append(message);
-    match.getPlayers().stream()
-        .filter(AC_FILTER)
-        .forEach(
-            mp -> {
-              // If provided a sound, play if setting allows
-              sound.ifPresent(
-                  s -> {
-                    if (canPlaySound(mp)) {
-                      mp.playSound(s);
-                    }
-                  });
-              mp.sendMessage(formatted);
-            });
+    TextComponent.Builder formatted = text().append(ADMIN_CHAT_PREFIX).append(message);
+    List<MatchPlayer> staffPlayers =
+        match.getPlayers().stream().filter(AC_FILTER).collect(Collectors.toList());
+    Audience staffAudience = Audience.get(staffPlayers);
+    staffAudience.sendMessage(formatted);
+    sound.ifPresent(
+        alertSound -> {
+          staffPlayers.stream()
+              .filter(ChatDispatcher::canPlaySound)
+              .forEach(mp -> mp.playSound(alertSound));
+        });
     Audience.console().sendMessage(formatted);
   }
 

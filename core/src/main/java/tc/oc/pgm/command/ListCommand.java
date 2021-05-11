@@ -3,6 +3,7 @@ package tc.oc.pgm.command;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.api.text.PlayerComponent.player;
 
 import app.ashcon.intake.Command;
 import java.util.Collection;
@@ -86,7 +87,7 @@ public final class ListCommand {
     List<Component> names =
         players.stream()
             .filter(mp -> sender.hasPermission(Permissions.STAFF) || !isVanished(mp))
-            .map(mp -> mp.getName(NameStyle.VERBOSE, sender))
+            .map(mp -> mp.getName(NameStyle.VERBOSE))
             .collect(Collectors.toList());
 
     return TextFormatter.list(names, NamedTextColor.GRAY);

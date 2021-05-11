@@ -2,6 +2,7 @@ package tc.oc.pgm.command;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.api.text.PlayerComponent.player;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
@@ -19,8 +20,8 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.restart.RestartManager;
 import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.MapNameStyle;
+import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public final class MapOrderCommand {
@@ -70,7 +71,7 @@ public final class MapOrderCommand {
             translatable(
                 "map.setNext.revert",
                 NamedTextColor.GRAY,
-                UsernameFormatUtils.formatStaffName(sender, match, sender),
+                player(sender, NameStyle.FANCY),
                 mapName),
             match);
       } else {
@@ -88,11 +89,7 @@ public final class MapOrderCommand {
 
     Component mapName = text(map.getName(), NamedTextColor.GOLD);
     Component successful =
-        translatable(
-            "map.setNext",
-            NamedTextColor.GRAY,
-            UsernameFormatUtils.formatStaffName(sender, match, sender),
-            mapName);
+        translatable("map.setNext", NamedTextColor.GRAY, player(sender, NameStyle.FANCY), mapName);
     ChatDispatcher.broadcastAdminChatMessage(successful, match);
   }
 }

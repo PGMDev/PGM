@@ -8,7 +8,10 @@ import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
 import com.google.common.collect.Range;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -21,7 +24,6 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextParser;
 
 public final class TeamCommand {
@@ -49,7 +51,7 @@ public final class TeamCommand {
         translatable(
             "join.ok.force",
             NamedTextColor.GRAY,
-            joiner.getName(NameStyle.FANCY, sender.getBukkit()),
+            joiner.getName(),
             joiner.getParty().getName(),
             oldParty.getName()));
   }

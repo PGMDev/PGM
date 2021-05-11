@@ -11,7 +11,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
@@ -64,9 +63,8 @@ public class MatchPlayerStateImpl implements MatchPlayerState {
   }
 
   @Override
-  public Component getName(NameStyle style, Player viewer) {
-    MatchPlayer player = match.getPlayer(uuid);
-    return player(player != null ? player.getBukkit() : null, username, style, viewer);
+  public Component getName(NameStyle style) {
+    return player(uuid, username, style);
   }
 
   @Override

@@ -12,7 +12,6 @@ import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
-import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import tc.oc.pgm.api.match.Match;
@@ -93,8 +92,8 @@ public class Tribute implements Competitor {
   }
 
   @Override
-  public Component getName(final NameStyle style, Player viewer) {
-    return player(player != null ? player.getBukkit() : null, style, viewer);
+  public Component getName(final NameStyle style) {
+    return player(player != null ? player.getBukkit() : null, style);
   }
 
   @Override

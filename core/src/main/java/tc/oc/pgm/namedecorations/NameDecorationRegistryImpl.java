@@ -26,10 +26,10 @@ import tc.oc.pgm.api.event.NameDecorationChangeEvent;
 import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.text.PlayerComponent;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.util.named.NameDecorationProvider;
+import tc.oc.pgm.util.text.PlayerComponentProvider;
 import tc.oc.pgm.util.text.TextFormatter;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -127,7 +127,7 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
 
   public TextColor getColor(UUID uuid) {
     MatchPlayer player = PGM.get().getMatchManager().getPlayer(uuid);
-    if (player == null) return PlayerComponent.OFFLINE_COLOR;
+    if (player == null) return PlayerComponentProvider.OFFLINE_COLOR;
     return TextFormatter.convert(player.getParty().getColor());
   }
 

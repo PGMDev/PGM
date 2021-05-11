@@ -3,6 +3,7 @@ package tc.oc.pgm.listeners;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.api.text.PlayerComponent.player;
 
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -47,7 +48,7 @@ import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.WorldTimeModule;
-import tc.oc.pgm.util.UsernameFormatUtils;
+import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -282,8 +283,7 @@ public class PGMListener implements Listener {
     // Send feedback to staff, alerting them that the map pool has changed by force
     if (event.isForced()) {
       Component poolName = text(event.getNewPool().getName(), NamedTextColor.LIGHT_PURPLE);
-      Component staffName =
-          UsernameFormatUtils.formatStaffName(event.getSender(), event.getMatch());
+      Component staffName = player(event.getSender(), NameStyle.FANCY);
       Component matchLimit =
           text()
               .append(text(event.getMatchLimit(), NamedTextColor.GREEN))

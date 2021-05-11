@@ -78,7 +78,6 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   private final AtomicBoolean visible;
   private final AtomicBoolean protocolReady;
   private final AtomicInteger protocolVersion;
-  private final AtomicBoolean vanished;
   private final AttributeMap attributeMap;
 
   public MatchPlayerImpl(Match match, Player player) {
@@ -94,7 +93,6 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     this.frozen = new AtomicBoolean(false);
     this.dead = new AtomicBoolean(false);
     this.visible = new AtomicBoolean(false);
-    this.vanished = new AtomicBoolean(false);
     this.protocolReady = new AtomicBoolean(ViaUtils.isReady(player));
     this.protocolVersion = new AtomicInteger(ViaUtils.getProtocolVersion(player));
     this.attributeMap = new AttributeMapImpl(player);
@@ -190,11 +188,6 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   }
 
   @Override
-  public boolean isVanished() {
-    return vanished.get();
-  }
-
-  @Override
   public boolean canInteract() {
     return isAlive() && !isFrozen();
   }
@@ -203,7 +196,8 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   public boolean canSee(MatchPlayer other) {
     if (!other.isVisible()) return false;
     if (other.isParticipating()) return true;
-    if (other.isVanished() && !getBukkit().hasPermission(Permissions.VANISH)) return false;
+    if (Integration.isVanished(other.getBukkit()) && !getBukkit().hasPermission(Permissions.VANISH))
+      return false;
     return isObserving()
         && (getSettings().getValue(SettingKey.OBSERVERS) == SettingValue.OBSERVERS_ON
             || getSettings().getValue(SettingKey.OBSERVERS) == SettingValue.OBSERVERS_FRIEND
@@ -337,11 +331,6 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     getBukkit().setGameMode(gameMode);
   }
 
-  @Override
-  public void setVanished(boolean yes) {
-    vanished.set(yes);
-  }
-
   /**
    * When max health is lowered by an item attribute or potion effect, the client can go into an
    * inconsistent state that has strange effects, like the death animation playing when the player
@@ -406,8 +395,8 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   }
 
   @Override
-  public Component getName(NameStyle style, Player viewer) {
-    return player(getBukkit(), style, viewer);
+  public Component getName(NameStyle style) {
+    return player(getBukkit(), style);
   }
 
   @Override

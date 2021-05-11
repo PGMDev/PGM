@@ -18,7 +18,6 @@ import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
-import tc.oc.pgm.util.named.NameStyle;
 
 public class JoinLeaveAnnouncer implements Listener {
 
@@ -68,10 +67,7 @@ public class JoinLeaveAnnouncer implements Listener {
       if (canView(viewer, player, visibility)) { // Check if viewer setting allows join/leaves
 
         Component component =
-            translatable(
-                key + (staff ? ".quiet" : ""),
-                NamedTextColor.YELLOW,
-                player.getName(NameStyle.FANCY, viewer.getBukkit()));
+            translatable(key + (staff ? ".quiet" : ""), NamedTextColor.YELLOW, player.getName());
 
         if (staff) {
           component = text().append(ChatDispatcher.ADMIN_CHAT_PREFIX).append(component).build();
@@ -111,7 +107,7 @@ public class JoinLeaveAnnouncer implements Listener {
     NONSTAFF; // When player toggles vanish, show non-staff (fake broadcast)
 
     public static JoinVisibility get(MatchPlayer player) {
-      return player.isVanished() ? STAFF : ALL;
+      return Integration.isVanished(player.getBukkit()) ? STAFF : ALL;
     }
   }
 }

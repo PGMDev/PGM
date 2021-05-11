@@ -19,9 +19,6 @@ public class VanishListener implements Listener {
     // Ensure player is an observer
     event.getMatch().setParty(player, event.getMatch().getDefaultParty());
 
-    // Set vanished
-    event.getPlayer().setVanished(event.isVanished());
-
     // Reset visibility to hide/show player
     player.resetVisibility();
   }
@@ -47,7 +44,5 @@ public class VanishListener implements Listener {
     if (event.getInitialParty() instanceof Competitor) {
       Integration.setVanished(player, false, false);
     }
-
-    player.setVanished(Integration.isVanished(player.getBukkit()));
   }
 }
