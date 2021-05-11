@@ -39,13 +39,13 @@ public class ControlPointDefinition extends GoalDefinition {
   private final Duration timeToCapture;
 
   // Time it takes for a point to decay while unowned. (Time is accurate when near 100% capture)
-  private final Duration decayTime;
+  private final double decayRate;
 
   // Time it takes for a point to recover to captured state. (Accurate when almost uncaptured)
-  private final Duration recoveryTime;
+  private final double recoveryRate;
 
   // Time it takes for a point to transition to neutral state.
-  private final Duration ownedDecayTime;
+  private final double ownedDecayRate;
 
   // Capture time multiplier for increasing or decreasing capture time based on the number of
   // players on the point
@@ -62,10 +62,6 @@ public class ControlPointDefinition extends GoalDefinition {
   }
 
   private final CaptureCondition captureCondition;
-
-  // true: progress is retained if capturing is interrupted
-  // false: progress resets to zero if capturing is interrupted
-  private final boolean incrementalCapture;
 
   // true: point must transition through unowned state to change owners
   // false: point transitions directly from one owner to the next
@@ -101,13 +97,12 @@ public class ControlPointDefinition extends GoalDefinition {
       Filter visualMaterials,
       BlockVector capturableDisplayBeacon,
       Duration timeToCapture,
-      Duration decayTime,
-      Duration recoveryTime,
-      Duration ownedDecayTime,
+      double decayRate,
+      double recoveryRate,
+      double ownedDecayRate,
       float timeMultiplier,
       @Nullable TeamFactory initialOwner,
       CaptureCondition captureCondition,
-      boolean incrementalCapture,
       boolean neutralState,
       boolean permanent,
       float pointsPerSecond,
@@ -124,13 +119,12 @@ public class ControlPointDefinition extends GoalDefinition {
     this.visualMaterials = visualMaterials;
     this.capturableDisplayBeacon = capturableDisplayBeacon;
     this.timeToCapture = timeToCapture;
-    this.decayTime = decayTime;
-    this.recoveryTime = recoveryTime;
-    this.ownedDecayTime = ownedDecayTime;
+    this.decayRate = decayRate;
+    this.recoveryRate = recoveryRate;
+    this.ownedDecayRate = ownedDecayRate;
     this.timeMultiplier = timeMultiplier;
     this.initialOwner = initialOwner;
     this.captureCondition = captureCondition;
-    this.incrementalCapture = incrementalCapture;
     this.neutralState = neutralState;
     this.permanent = permanent;
     this.pointsPerSecond = pointsPerSecond;
@@ -147,20 +141,18 @@ public class ControlPointDefinition extends GoalDefinition {
         + this.getId()
         + " timeToCapture="
         + this.getTimeToCapture()
-        + " decayTime="
-        + this.getDecayTime()
-        + " recoveryTime="
-        + this.getRecoveryTime()
-        + " ownedDecayTime="
-        + this.getOwnedDecayTime()
+        + " decayRate="
+        + this.getDecayRate()
+        + " recoveryRate="
+        + this.getRecoveryRate()
+        + " ownedDecayRate="
+        + this.getOwnedDecayRate()
         + " timeMultiplier="
         + this.getTimeMultiplier()
         + " initialOwner="
         + this.getInitialOwner()
         + " captureCondition="
         + this.getCaptureCondition()
-        + " incrementalCapture="
-        + this.isIncrementalCapture()
         + " neutralState="
         + this.hasNeutralState()
         + " permanent="
@@ -213,16 +205,16 @@ public class ControlPointDefinition extends GoalDefinition {
     return this.timeToCapture;
   }
 
-  public Duration getDecayTime() {
-    return this.decayTime;
+  public double getDecayRate() {
+    return this.decayRate;
   }
 
-  public Duration getRecoveryTime() {
-    return this.recoveryTime;
+  public double getRecoveryRate() {
+    return this.recoveryRate;
   }
 
-  public Duration getOwnedDecayTime() {
-    return this.ownedDecayTime;
+  public double getOwnedDecayRate() {
+    return this.ownedDecayRate;
   }
 
   public float getTimeMultiplier() {
@@ -236,10 +228,6 @@ public class ControlPointDefinition extends GoalDefinition {
 
   public CaptureCondition getCaptureCondition() {
     return this.captureCondition;
-  }
-
-  public boolean isIncrementalCapture() {
-    return this.incrementalCapture;
   }
 
   public boolean hasNeutralState() {
