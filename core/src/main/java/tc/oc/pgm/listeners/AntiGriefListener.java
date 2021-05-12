@@ -2,7 +2,6 @@ package tc.oc.pgm.listeners;
 
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
-import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.api.text.PlayerComponent.player;
 
@@ -10,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -94,11 +94,8 @@ public class AntiGriefListener implements Listener {
         this.notifyDefuse(
             clicker,
             entity,
-            ChatColor.RED
-                + TextTranslations.translate(
-                    "moderation.defuse.player",
-                    clicker.getBukkit(),
-                    player(owner.getBukkit(), NameStyle.CONCISE).color(NamedTextColor.RED)));
+            translatable("moderation.defuse.player", owner.getName(NameStyle.CONCISE))
+                .color(NamedTextColor.RED));
 
         ChatDispatcher.broadcastAdminChatMessage(
             translatable(
@@ -109,11 +106,7 @@ public class AntiGriefListener implements Listener {
                 MinecraftComponent.entity(entity.getType()).color(NamedTextColor.DARK_RED)),
             clicker.getMatch());
       } else {
-        this.notifyDefuse(
-            clicker,
-            entity,
-            ChatColor.RED
-                + TextTranslations.translate("moderation.defuse.world", clicker.getBukkit()));
+        this.notifyDefuse(clicker, entity, translatable("moderation.defuse.world"));
 
         ChatDispatcher.broadcastAdminChatMessage(
             translatable(
@@ -126,8 +119,8 @@ public class AntiGriefListener implements Listener {
     }
   }
 
-  private void notifyDefuse(MatchPlayer clicker, Entity entity, String message) {
-    clicker.sendMessage(text(message));
+  private void notifyDefuse(MatchPlayer clicker, Entity entity, Component message) {
+    clicker.sendMessage(message);
     clicker
         .getMatch()
         .playSound(
