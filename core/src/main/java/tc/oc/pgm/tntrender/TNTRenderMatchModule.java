@@ -89,6 +89,8 @@ public class TNTRenderMatchModule implements MatchModule, Listener {
     }
 
     private void updatePlayer(MatchPlayer player) {
+      if (player.getBukkit().getWorld() != currentLocation.getWorld()) return;
+
       if (currentLocation.distanceSquared(player.getBukkit().getLocation()) >= MAX_DISTANCE) {
         if (viewers.add(player)) {
           NMSHacks.sendBlockChange(currentLocation, player.getBukkit(), Material.TNT);

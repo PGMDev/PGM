@@ -289,7 +289,10 @@ public final class TextTranslations {
    */
   @Deprecated
   public static String translateLegacy(Component text, @Nullable CommandSender sender) {
-    return LegacyComponentSerializer.legacySection().serialize(translate(text, getLocale(sender)));
+    text =
+        Audience.RENDERER.render(
+            text, new BukkitIdentity(sender == null ? Bukkit.getConsoleSender() : sender));
+    return LegacyComponentSerializer.legacySection().serialize(text);
   }
 
   /**
