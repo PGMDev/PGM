@@ -33,6 +33,7 @@ import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.api.tracker.info.FallInfo;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.tracker.TrackerMatchModule;
+import tc.oc.pgm.tracker.info.BlockInfo;
 import tc.oc.pgm.tracker.info.EntityInfo;
 import tc.oc.pgm.tracker.info.ExplosionInfo;
 import tc.oc.pgm.tracker.info.FireInfo;
@@ -78,6 +79,7 @@ public class DamageMatchModule implements MatchModule, Listener {
     return damageInfo instanceof ExplosionInfo
         || damageInfo instanceof FireInfo
         || damageInfo instanceof FallInfo
+        || damageInfo instanceof BlockInfo
         || damageInfo
             instanceof
             GenericDamageInfo; // This should never have an attacker anyway, but just in case

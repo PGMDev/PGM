@@ -353,9 +353,19 @@ public class DeathMessageBuilder {
     ranged(projectile, distanceReference);
   }
 
-  void squash(FallingBlockInfo fallingBlock) throws NoMessage {
+  void squash(PhysicalInfo fallingBlock) throws NoMessage {
     require("squash");
     attack(null, fallingBlock);
+  }
+
+  void suffocate(PhysicalInfo fallenBlock) throws NoMessage {
+    require("suffocate");
+    attack(null, fallenBlock);
+  }
+
+  void cactus(PhysicalInfo fallenBlock) throws NoMessage {
+    require("cactus");
+    attack(null, fallenBlock);
   }
 
   void explosion(ExplosionInfo explosion, Location distanceReference) throws NoMessage {
@@ -424,6 +434,15 @@ public class DeathMessageBuilder {
       magic((PotionInfo) info, null);
     } else if (info instanceof FallingBlockInfo) {
       squash((FallingBlockInfo) info);
+    } else if (info instanceof BlockInfo) {
+      final Material material = ((BlockInfo) info).getMaterial().getItemType();
+      if (material == Material.ANVIL) {
+        squash((BlockInfo) info);
+      } else if (material == Material.CACTUS) {
+        cactus((BlockInfo) info);
+      } else {
+        suffocate((BlockInfo) info);
+      }
     } else if (info instanceof FallInfo) {
       fall((FallInfo) info);
     } else if (info instanceof GenericDamageInfo) {

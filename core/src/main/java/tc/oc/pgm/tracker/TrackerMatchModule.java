@@ -20,16 +20,16 @@ import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.api.tracker.info.TrackerInfo;
 import tc.oc.pgm.tracker.info.NullDamageInfo;
 import tc.oc.pgm.tracker.resolvers.ExplosionDamageResolver;
-import tc.oc.pgm.tracker.resolvers.FallingBlockDamageResolver;
 import tc.oc.pgm.tracker.resolvers.GenericDamageResolver;
 import tc.oc.pgm.tracker.resolvers.PotionDamageResolver;
-import tc.oc.pgm.tracker.trackers.AnvilTracker;
 import tc.oc.pgm.tracker.trackers.BlockTracker;
+import tc.oc.pgm.tracker.trackers.CactiTracker;
 import tc.oc.pgm.tracker.trackers.CombatLogTracker;
 import tc.oc.pgm.tracker.trackers.DeathTracker;
 import tc.oc.pgm.tracker.trackers.DispenserTracker;
 import tc.oc.pgm.tracker.trackers.EntityTracker;
 import tc.oc.pgm.tracker.trackers.FallTracker;
+import tc.oc.pgm.tracker.trackers.FallingBlockTracker;
 import tc.oc.pgm.tracker.trackers.FireTracker;
 import tc.oc.pgm.tracker.trackers.OwnedMobTracker;
 import tc.oc.pgm.tracker.trackers.ProjectileTracker;
@@ -42,6 +42,8 @@ public class TrackerMatchModule implements MatchModule {
   private BlockTracker blockTracker;
   private FallTracker fallTracker;
   private FireTracker fireTracker;
+  private FallingBlockTracker fallingBlockTracker;
+  private CactiTracker cactiTracker;
 
   private final Set<DamageResolver> damageResolvers = new LinkedHashSet<>();
   private final Match match;
@@ -52,13 +54,16 @@ public class TrackerMatchModule implements MatchModule {
     blockTracker = new BlockTracker(match);
     fallTracker = new FallTracker(this, match);
     fireTracker = new FireTracker(this, match);
+    fallingBlockTracker = new FallingBlockTracker(this, match);
+    cactiTracker = new CactiTracker(this, match);
 
     // Damage resolvers - order is important!
     damageResolvers.add(fallTracker);
     damageResolvers.add(fireTracker);
+    damageResolvers.add(fallingBlockTracker);
+    damageResolvers.add(cactiTracker);
     damageResolvers.add(new PotionDamageResolver());
     damageResolvers.add(new ExplosionDamageResolver());
-    damageResolvers.add(new FallingBlockDamageResolver());
     damageResolvers.add(new GenericDamageResolver());
   }
 
@@ -72,12 +77,13 @@ public class TrackerMatchModule implements MatchModule {
     match.addListener(fireTracker, MatchScope.RUNNING);
     match.addListener(entityTracker, MatchScope.RUNNING);
     match.addListener(blockTracker, MatchScope.RUNNING);
+    match.addListener(fallingBlockTracker, MatchScope.RUNNING);
+    match.addListener(cactiTracker, MatchScope.RUNNING);
     match.addListener(new DispenserTracker(this, match), MatchScope.RUNNING);
     match.addListener(new TNTTracker(this, match), MatchScope.RUNNING);
     match.addListener(new SpleefTracker(this), MatchScope.RUNNING);
     match.addListener(new OwnedMobTracker(this, match), MatchScope.RUNNING);
     match.addListener(new ProjectileTracker(this, match), MatchScope.RUNNING);
-    match.addListener(new AnvilTracker(this, match), MatchScope.RUNNING);
     match.addListener(new CombatLogTracker(this), MatchScope.RUNNING);
     match.addListener(new DeathTracker(this), MatchScope.RUNNING);
   }

@@ -5,10 +5,11 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.block.BlockState;
 import org.bukkit.material.MaterialData;
 import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.util.text.MinecraftComponent;
 
-public class BlockInfo extends OwnerInfoBase implements PhysicalInfo {
+public class BlockInfo extends OwnerInfoBase implements PhysicalInfo, DamageInfo {
 
   private final MaterialData material;
 
@@ -46,5 +47,11 @@ public class BlockInfo extends OwnerInfoBase implements PhysicalInfo {
   @Override
   public String toString() {
     return getClass().getSimpleName() + "{world=" + getMaterial() + " owner=" + getOwner() + "}";
+  }
+
+  @Nullable
+  @Override
+  public ParticipantState getAttacker() {
+    return getOwner();
   }
 }
