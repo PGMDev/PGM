@@ -140,6 +140,7 @@ public abstract class KitParser {
     kits.add(this.parseGameModeKit(el));
     kits.add(this.parseShieldKit(el));
     kits.add(this.parseTeamSwitchKit(el));
+    kits.add(this.parseMaxHealthKit(el));
     kits.addAll(this.parseRemoveKits(el));
 
     kits.removeAll(Collections.singleton((Kit) null)); // Remove any nulls returned above
@@ -685,5 +686,19 @@ public abstract class KitParser {
           el.getAttributeValue("team") + " is not a valid team name!", el);
     }
     return new TeamSwitchKit(team, showTitle);
+  }
+
+  public MaxHealthKit parseMaxHealthKit(Element parent) throws InvalidXMLException {
+    Element el = XMLUtils.getUniqueChild(parent, "max-health");
+    if (el == null) return null;
+
+    double maxHealth = XMLUtils.parseNumber(el, Double.class);
+
+    if (maxHealth < 1) {
+      throw new InvalidXMLException(
+          maxHealth + " is not a valid max-health value, must be greater than 0", el);
+    }
+
+    return new MaxHealthKit(maxHealth);
   }
 }
