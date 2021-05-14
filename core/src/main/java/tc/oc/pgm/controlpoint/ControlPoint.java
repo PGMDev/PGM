@@ -418,7 +418,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
       } else if (dominantTeam != null) {
         // non-owner is uncapturing the point
         uncapture(dominantTeam, dominantTime);
-      } else if (definition.getOwnedDecayRate() > 0.0) {
+      } else if (definition.getOwnedDecayRate() > 0) {
         // nobody on point so decay to neutral state
         ownedDecay(dominantTime);
       } else {

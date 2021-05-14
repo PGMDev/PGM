@@ -89,19 +89,15 @@ public abstract class ControlPointParser {
           XMLUtils.parseNumber(attrDecay, Double.class, koth ? 0.0 : Double.POSITIVE_INFINITY);
       ownedDecayRate = XMLUtils.parseNumber(attrOwnedDecay, Double.class, 0.0);
     } else {
-      if (attrDecay != null)
-        throw new InvalidXMLException("Cannot combine this attribute with incremental", attrDecay);
-      if (attrRecovery != null)
+      if (attrDecay != null || attrRecovery != null || attrOwnedDecay != null)
         throw new InvalidXMLException(
-            "Cannot combine this attribute with incremental", attrRecovery);
-      if (attrOwnedDecay != null)
-        throw new InvalidXMLException(
-            "Cannot combine this attribute with incremental", attrOwnedDecay);
+            "Cannot combine this attribute with incremental",
+            attrDecay != null ? attrDecay : attrRecovery != null ? attrRecovery : attrOwnedDecay);
 
       final boolean incremental = XMLUtils.parseBoolean(attrIncremental, koth);
       recoveryRate = incremental ? 1.0 : Double.POSITIVE_INFINITY;
-      ownedDecayRate = 0.0;
       decayRate = incremental ? 0.0 : Double.POSITIVE_INFINITY;
+      ownedDecayRate = 0.0;
     }
 
     float timeMultiplier =
@@ -109,6 +105,10 @@ public abstract class ControlPointParser {
             elControlPoint.getAttribute("time-multiplier"), Float.class, koth ? 0.1f : 0f);
     boolean neutralState =
         XMLUtils.parseBoolean(elControlPoint.getAttribute("neutral-state"), koth);
+
+    if (neutralState == false && ownedDecayRate > 0) {
+      throw new InvalidXMLException("This attribute requires a neutral state.", attrOwnedDecay);
+    }
     boolean permanent = XMLUtils.parseBoolean(elControlPoint.getAttribute("permanent"), false);
     float pointsPerSecond =
         XMLUtils.parseNumber(elControlPoint.getAttribute("points"), Float.class, 1f);
