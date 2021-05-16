@@ -40,7 +40,7 @@ public class Returned extends Uncarried implements Runnable {
     super.tickRunning();
 
     ScoreMatchModule smm = this.flag.getMatch().getModule(ScoreMatchModule.class);
-    if (smm != null && this.post.getOwner() != null && this.post.getPointsPerSecond() != 0) {
+    if (smm != null && this.post.getOwner() != null && this.post.getPointsPerSecond() > 0) {
       smm.incrementScore(
           this.flag.getMatch().needModule(TeamMatchModule.class).getTeam(this.post.getOwner()),
           this.post.getPointsPerSecond() / 20D);
