@@ -267,7 +267,7 @@ public class Carried extends Spawned implements Missing {
         smm.incrementScore(this.getBeneficiary(net.getOwner()), net.getPointsPerCapture());
       }
 
-      if (this.flag.getDefinition().getPointsPerCapture() != 0) {
+      if (this.flag.getDefinition().getPointsPerCapture() > 0) {
         smm.incrementScore(
             this.getBeneficiary(this.flag.getDefinition().getOwner()),
             this.flag.getDefinition().getPointsPerCapture());
