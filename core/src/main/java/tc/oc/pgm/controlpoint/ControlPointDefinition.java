@@ -218,7 +218,7 @@ public class ControlPointDefinition extends GoalDefinition {
   }
 
   public boolean affectsScore() {
-    return this.pointsPerSecond > 0;
+    return this.pointsPerSecond != 0;
   }
 
   public float getPointsPerSecond() {
