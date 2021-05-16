@@ -68,7 +68,7 @@ public final class PlayerComponent {
 
   // Player state checks
   static boolean isDisguised(Player player) {
-    return Integration.isVanished(player);
+    return Integration.isVanished(player) || Integration.isHidden(player);
   }
 
   static boolean isDead(Player player) {

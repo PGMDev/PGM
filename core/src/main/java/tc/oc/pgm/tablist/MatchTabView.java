@@ -323,7 +323,7 @@ public class MatchTabView extends TabView implements Listener {
 
   private boolean shouldHide(MatchPlayer other) {
     return other != matchPlayer
-        && Integration.isVanished(other.getBukkit())
+        && (Integration.isVanished(other.getBukkit()) || Integration.isHidden(other.getBukkit()))
         && !matchPlayer.getBukkit().hasPermission(Permissions.STAFF);
   }
 

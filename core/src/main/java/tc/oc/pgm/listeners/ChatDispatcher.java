@@ -13,11 +13,8 @@ import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Text;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Maps;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -66,8 +63,6 @@ public class ChatDispatcher implements Listener {
   private final MatchManager manager;
   private final OnlinePlayerMapAdapter<UUID> lastMessagedBy;
 
-  private final Map<UUID, String> muted;
-
   public static final TextComponent ADMIN_CHAT_PREFIX =
       text()
           .append(text("[", NamedTextColor.WHITE))
@@ -93,24 +88,7 @@ public class ChatDispatcher implements Listener {
   public ChatDispatcher() {
     this.manager = PGM.get().getMatchManager();
     this.lastMessagedBy = new OnlinePlayerMapAdapter<>(PGM.get());
-    this.muted = Maps.newHashMap();
     PGM.get().getServer().getPluginManager().registerEvents(this, PGM.get());
-  }
-
-  public void addMuted(MatchPlayer player, String reason) {
-    this.muted.put(player.getId(), reason);
-  }
-
-  public void removeMuted(MatchPlayer player) {
-    this.muted.remove(player.getId());
-  }
-
-  public boolean isMuted(MatchPlayer player) {
-    return player != null ? muted.containsKey(player.getId()) : false;
-  }
-
-  public Set<UUID> getMutedUUIDs() {
-    return muted.keySet();
   }
 
   @Command(
@@ -123,17 +101,15 @@ public class ChatDispatcher implements Listener {
       return;
     }
 
-    if (checkMute(sender)) {
-      send(
-          match,
-          sender,
-          message,
-          GLOBAL_FORMAT,
-          null,
-          viewer -> true,
-          SettingValue.CHAT_GLOBAL,
-          Channel.GLOBAL);
-    }
+    send(
+        match,
+        sender,
+        message,
+        GLOBAL_FORMAT,
+        null,
+        viewer -> true,
+        SettingValue.CHAT_GLOBAL,
+        Channel.GLOBAL);
   }
 
   @Command(
@@ -154,20 +130,18 @@ public class ChatDispatcher implements Listener {
       return;
     }
 
-    if (checkMute(sender)) {
-      send(
-          match,
-          sender,
-          message,
-          TextTranslations.translateLegacy(party.getChatPrefix(), null) + PREFIX_FORMAT,
-          party.getChatPrefix(),
-          viewer ->
-              party.equals(viewer.getParty())
-                  || (viewer.isObserving()
-                      && viewer.getBukkit().hasPermission(Permissions.ADMINCHAT)),
-          SettingValue.CHAT_TEAM,
-          Channel.TEAM);
-    }
+    send(
+        match,
+        sender,
+        message,
+        TextTranslations.translateLegacy(party.getChatPrefix(), null) + PREFIX_FORMAT,
+        party.getChatPrefix(),
+        viewer ->
+            party.equals(viewer.getParty())
+                || (viewer.isObserving()
+                    && viewer.getBukkit().hasPermission(Permissions.ADMINCHAT)),
+        SettingValue.CHAT_TEAM,
+        Channel.TEAM);
   }
 
   @Command(
@@ -215,9 +189,14 @@ public class ChatDispatcher implements Listener {
       return;
     }
 
-    if (isMuted(sender) && !receiver.hasPermission(Permissions.STAFF)) {
-      sendMutedMessage(sender);
-      return; // Muted players may only message staff
+    // Sender muted, don't allow messages unless to staff
+    if (Integration.isMuted(sender.getBukkit()) && !receiver.hasPermission(Permissions.STAFF)) {
+      sender.sendWarning(
+          translatable(
+              "moderation.mute.message",
+              NamedTextColor.GRAY,
+              text(Integration.getMuteReason(sender.getBukkit()), NamedTextColor.RED)));
+      return;
     }
 
     MatchPlayer matchReceiver = manager.getPlayer(receiver);
@@ -256,12 +235,14 @@ public class ChatDispatcher implements Listener {
         }
       }
 
-      if (isMuted(matchReceiver) && !sender.getBukkit().hasPermission(Permissions.STAFF)) {
+      if (Integration.isMuted(matchReceiver.getBukkit())
+          && !sender.getBukkit().hasPermission(Permissions.STAFF)) {
         Component muted =
             translatable("moderation.mute.target", matchReceiver.getName(NameStyle.CONCISE));
         sender.sendWarning(muted);
         return; // Only staff can message muted players
       }
+
       playSound(matchReceiver, DM_SOUND);
     }
 
@@ -463,23 +444,6 @@ public class ChatDispatcher implements Listener {
         match.getPlayers().stream()
             .collect(Collectors.toMap(player -> player.getBukkit().getName(), Function.identity())),
         0.75);
-  }
-
-  private void sendMutedMessage(MatchPlayer player) {
-    Component warning =
-        translatable(
-            "moderation.mute.message",
-            text(muted.getOrDefault(player.getId(), ""), NamedTextColor.AQUA));
-    player.sendWarning(warning);
-  }
-
-  private boolean checkMute(MatchPlayer player) {
-    if (isMuted(player)) {
-      sendMutedMessage(player);
-      return false;
-    }
-
-    return true;
   }
 
   public static void broadcastAdminChatMessage(Component message, Match match) {

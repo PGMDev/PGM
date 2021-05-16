@@ -196,6 +196,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   public boolean canSee(MatchPlayer other) {
     if (!other.isVisible()) return false;
     if (other.isParticipating()) return true;
+    if (Integration.isHidden(other.getBukkit())) return false;
     if (Integration.isVanished(other.getBukkit()) && !getBukkit().hasPermission(Permissions.VANISH))
       return false;
     return isObserving()

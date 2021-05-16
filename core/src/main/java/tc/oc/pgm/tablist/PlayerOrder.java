@@ -46,6 +46,9 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
     boolean aFriend = Integration.isFriend(viewer, a);
     boolean bFriend = Integration.isFriend(viewer, b);
 
+    boolean aHidden = Integration.isHidden(a);
+    boolean bHidden = Integration.isHidden(b);
+
     // Friends are always first :)
     if (aFriend && !bFriend) {
       return -1;
@@ -64,6 +67,13 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
       return -1;
     } else if (bStaff && !aStaff) {
       return 1;
+    }
+
+    // Hidden players sorted last
+    if (aHidden && !bHidden) {
+      return 1;
+    } else if (bHidden && !aHidden) {
+      return -1;
     }
 
     // If players have different permissions, the player with the highest ranked perm

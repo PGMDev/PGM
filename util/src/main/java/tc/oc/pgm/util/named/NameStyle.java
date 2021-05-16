@@ -35,8 +35,8 @@ public enum NameStyle {
     COLOR, // Color
     FLAIR, // Show flair (prefix & suffix)
     SELF, // Bold if self
-    DISGUISE, // Strikethrough if disguised (vanish/nick)
-    DISGUISE_OFFLINE, // Appear offline if disguised (vanish/nick)
+    DISGUISE, // Strikethrough if disguised (vanish/nick/hidden)
+    DISGUISE_OFFLINE, // Appear offline if disguised (vanish/nick/hidden)
     REVEAL,
     DEATH, // Grey out name if dead
     TELEPORT, // Click name to teleport
