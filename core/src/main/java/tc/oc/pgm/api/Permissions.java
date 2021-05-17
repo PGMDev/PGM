@@ -32,6 +32,7 @@ public interface Permissions {
   String STAFF = ROOT + ".staff"; // Considered apart of the staff team
   String RELOAD = ROOT + ".reload"; // Reload the PGM configuration
   String VANISH = ROOT + ".vanish"; // Access to /vanish command
+  String SKIN = ROOT + ".skin"; // Access to /skin command
 
   String MAPMAKER = GROUP + ".mapmaker"; // Permission group for mapmakers, defined in config.yml
 

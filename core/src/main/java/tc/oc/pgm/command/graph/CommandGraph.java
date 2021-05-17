@@ -42,6 +42,7 @@ import tc.oc.pgm.command.ModeCommand;
 import tc.oc.pgm.command.ProximityCommand;
 import tc.oc.pgm.command.RestartCommand;
 import tc.oc.pgm.command.SettingCommand;
+import tc.oc.pgm.command.SkinCommand;
 import tc.oc.pgm.command.StartCommand;
 import tc.oc.pgm.command.StatsCommand;
 import tc.oc.pgm.command.TeamCommand;
@@ -81,6 +82,7 @@ public class CommandGraph extends BasicBukkitCommandGraph {
     register(new ProximityCommand());
     register(new RestartCommand());
     register(new SettingCommand());
+    register(new SkinCommand(), "skin");
     register(new StartCommand());
     register(new StatsCommand());
     register(new TeamCommand(), "team");
