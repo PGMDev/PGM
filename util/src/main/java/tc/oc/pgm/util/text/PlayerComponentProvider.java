@@ -6,6 +6,7 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 import net.kyori.adventure.platform.AudienceIdentity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -14,9 +15,10 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.xml.XMLUtils;
 
 public interface PlayerComponentProvider {
+
+  public static final Pattern USERNAME_REGEX = Pattern.compile("[a-zA-Z0-9_]{1,16}");
 
   public static final TextColor OFFLINE_COLOR = NamedTextColor.DARK_AQUA;
   public static final Component UNKNOWN =
@@ -30,7 +32,7 @@ public interface PlayerComponentProvider {
   static Component render(String id, NameStyle nameStyle, AudienceIdentity context) {
     if (id == null) return CONSOLE;
 
-    if (XMLUtils.USERNAME_REGEX.matcher(id).matches()) {
+    if (USERNAME_REGEX.matcher(id).matches()) {
       String name = id.equalsIgnoreCase("null") ? null : id;
       return PROVIDER.get().renderName(null, name, nameStyle, context);
     } else {
@@ -50,7 +52,8 @@ public interface PlayerComponentProvider {
     @Override
     public Component renderName(
         Player player, String defName, NameStyle style, AudienceIdentity context) {
-      return text(player != null ? player.getName() : defName);
+      if (player == null && defName == null) return UNKNOWN;
+      return text(player != null ? player.getDisplayName() : defName);
     }
   }
 }

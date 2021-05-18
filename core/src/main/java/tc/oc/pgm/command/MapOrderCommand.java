@@ -2,7 +2,7 @@ package tc.oc.pgm.command;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
-import static tc.oc.pgm.api.text.PlayerComponent.player;
+import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;

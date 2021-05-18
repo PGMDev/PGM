@@ -1,7 +1,7 @@
 package tc.oc.pgm.db;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static tc.oc.pgm.api.text.PlayerComponent.player;
+import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.util.UUID;
 import javax.annotation.Nullable;

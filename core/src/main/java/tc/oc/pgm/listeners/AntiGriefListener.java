@@ -3,7 +3,7 @@ package tc.oc.pgm.listeners;
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.translatable;
-import static tc.oc.pgm.api.text.PlayerComponent.player;
+import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.util.ArrayList;
 import java.util.Collections;

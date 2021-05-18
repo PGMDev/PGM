@@ -1,6 +1,6 @@
 package tc.oc.pgm.inventory;
 
-import static tc.oc.pgm.api.text.PlayerComponent.player;
+import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
