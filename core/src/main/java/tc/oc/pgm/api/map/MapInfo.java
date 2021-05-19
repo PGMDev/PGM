@@ -109,6 +109,13 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
   Collection<MapTag> getTags();
 
   /**
+   * Get a {@link Component} that represents this map's custom game title.
+   *
+   * @return A component of the gamemode name if defined or null.
+   */
+  Component getGame();
+
+  /**
    * Get a {@link Component} that represents this map's gamemode name.
    *
    * @return A component of the gamemode name if defined or null.
