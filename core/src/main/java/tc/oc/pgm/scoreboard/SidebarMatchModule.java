@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableSet;
 import fr.mrmicky.fastboard.FastBoard;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -88,6 +89,37 @@ public class SidebarMatchModule implements MatchModule, Listener {
   public static final int MAX_ROWS = 16; // Max rows on the scoreboard
   public static final int MAX_LENGTH = 30; // Max characters per line allowed
   public static final int MAX_TITLE = 32; // Max characters allowed in title
+  /*
+  ad: Attack & Defend
+  arcade: Arcade
+  blitz: Blitz
+  ctf: Capture the Flag
+  ctw: Capture the Wool
+  dtc: Destroy the Core
+  dtm: Destroy the Monument
+  ffa: Free-for-all
+  koth: King of the Hill
+  mixed: Mixed Gamemodes
+  rage: Rage
+  scorebox: Scorebox
+  tdm: Deathmatch
+   */
+  protected static final List<String> GAMEMODE_IDS =
+      Collections.unmodifiableList(
+          Arrays.asList(
+              "ad",
+              "arcade",
+              "blitz",
+              "ctf",
+              "ctw",
+              "dtc",
+              "dtm",
+              "ffa",
+              "koth",
+              "mixed",
+              "rage",
+              "scorebox",
+              "tdm"));
 
   protected final Map<UUID, FastBoard> sidebars = new HashMap<>();
   protected final Map<Goal, BlinkTask> blinkingGoals = new HashMap<>();
@@ -258,9 +290,20 @@ public class SidebarMatchModule implements MatchModule, Listener {
       return header.colorIfAbsent(NamedTextColor.AQUA);
     }
 
-    final Component game = map.getGamemode();
+    final Component game = map.getGame();
     if (game != null) {
       return game.colorIfAbsent(NamedTextColor.AQUA);
+    }
+
+    final Component gamemode = map.getGamemode();
+    if (gamemode != null) {
+      String gamemodeCompoment = gamemode.toString();
+      for (String listItem : GAMEMODE_IDS) {
+        if (gamemodeCompoment.contains(listItem)) {
+          Component gamemodeName = translatable("gamemode." + listItem + ".name");
+          return gamemodeName.colorIfAbsent(NamedTextColor.AQUA);
+        }
+      }
     }
 
     final List<Component> games = new LinkedList<>();
