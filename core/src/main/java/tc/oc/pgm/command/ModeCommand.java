@@ -127,6 +127,6 @@ public final class ModeCommand {
   }
 
   private static void throwNoResults() {
-    throw exception("command.noResults");
+    throw exception("command.emptyResult");
   }
 }
