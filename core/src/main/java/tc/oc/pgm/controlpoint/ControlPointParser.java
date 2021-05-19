@@ -77,13 +77,38 @@ public abstract class ControlPointParser {
     Duration timeToCapture =
         XMLUtils.parseDuration(elControlPoint.getAttribute("capture-time"), Duration.ofSeconds(30));
 
+    final double decayRate, recoveryRate, ownedDecayRate;
+    final Node attrIncremental = Node.fromAttr(elControlPoint, "incremental");
+    final Node attrDecay = Node.fromAttr(elControlPoint, "decay-rate");
+    final Node attrRecovery = Node.fromAttr(elControlPoint, "recovery-rate");
+    final Node attrOwnedDecay = Node.fromAttr(elControlPoint, "owned-decay-rate");
+    if (attrIncremental == null) {
+      recoveryRate =
+          XMLUtils.parseNumber(attrRecovery, Double.class, koth ? 1D : Double.POSITIVE_INFINITY);
+      decayRate =
+          XMLUtils.parseNumber(attrDecay, Double.class, koth ? 0.0 : Double.POSITIVE_INFINITY);
+      ownedDecayRate = XMLUtils.parseNumber(attrOwnedDecay, Double.class, 0.0);
+    } else {
+      if (attrDecay != null || attrRecovery != null || attrOwnedDecay != null)
+        throw new InvalidXMLException(
+            "Cannot combine this attribute with incremental",
+            attrDecay != null ? attrDecay : attrRecovery != null ? attrRecovery : attrOwnedDecay);
+
+      final boolean incremental = XMLUtils.parseBoolean(attrIncremental, koth);
+      recoveryRate = incremental ? 1.0 : Double.POSITIVE_INFINITY;
+      decayRate = incremental ? 0.0 : Double.POSITIVE_INFINITY;
+      ownedDecayRate = 0.0;
+    }
+
     float timeMultiplier =
         XMLUtils.parseNumber(
             elControlPoint.getAttribute("time-multiplier"), Float.class, koth ? 0.1f : 0f);
-    boolean incrementalCapture =
-        XMLUtils.parseBoolean(elControlPoint.getAttribute("incremental"), koth);
     boolean neutralState =
         XMLUtils.parseBoolean(elControlPoint.getAttribute("neutral-state"), koth);
+
+    if (neutralState == false && ownedDecayRate > 0) {
+      throw new InvalidXMLException("This attribute requires a neutral state.", attrOwnedDecay);
+    }
     boolean permanent = XMLUtils.parseBoolean(elControlPoint.getAttribute("permanent"), false);
     float pointsPerSecond =
         XMLUtils.parseNumber(elControlPoint.getAttribute("points"), Float.class, 1f);
@@ -117,10 +142,12 @@ public abstract class ControlPointParser {
         visualMaterials,
         capturableDisplayBeacon == null ? null : capturableDisplayBeacon.toBlockVector(),
         timeToCapture,
+        decayRate,
+        recoveryRate,
+        ownedDecayRate,
         timeMultiplier,
         initialOwner,
         captureCondition,
-        incrementalCapture,
         neutralState,
         permanent,
         pointsPerSecond,

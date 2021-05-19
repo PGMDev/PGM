@@ -174,12 +174,17 @@ public class PickerMatchModule implements MatchModule, Listener {
     return teams;
   }
 
+  /** Get if the player participated in blitz match and was eliminated * */
+  private boolean hasParticipated(MatchPlayer player) {
+    return isBlitz && match.getModule(BlitzMatchModule.class).isPlayerEliminated(player.getId());
+  }
+
   /** Does the player have any use for the picker? */
   private boolean canUse(MatchPlayer player) {
     if (player == null) return false;
 
     // Player is eliminated from Blitz
-    if (isBlitz && match.isRunning()) return false;
+    if (isBlitz && match.isRunning() && hasParticipated(player)) return false;
 
     // Player is not observing or dead
     if (!(player.isObserving() || player.isDead())) return false;
