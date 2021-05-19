@@ -105,21 +105,21 @@ public class SidebarMatchModule implements MatchModule, Listener {
   tdm: Deathmatch
    */
   protected static final List<String> GAMEMODE_IDS =
-          Collections.unmodifiableList(
-                  Arrays.asList(
-                          "ad",
-                          "arcade",
-                          "blitz",
-                          "ctf",
-                          "ctw",
-                          "dtc",
-                          "dtm",
-                          "ffa",
-                          "koth",
-                          "mixed",
-                          "rage",
-                          "scorebox",
-                          "tdm"));
+      Collections.unmodifiableList(
+          Arrays.asList(
+              "ad",
+              "arcade",
+              "blitz",
+              "ctf",
+              "ctw",
+              "dtc",
+              "dtm",
+              "ffa",
+              "koth",
+              "mixed",
+              "rage",
+              "scorebox",
+              "tdm"));
 
   protected final Map<UUID, FastBoard> sidebars = new HashMap<>();
   protected final Map<Goal, BlinkTask> blinkingGoals = new HashMap<>();
