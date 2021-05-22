@@ -93,14 +93,19 @@ public class SidebarMatchModule implements MatchModule, Listener {
   ad: Attack & Defend
   arcade: Arcade
   blitz: Blitz
+  br: Blitz: Rage
   ctf: Capture the Flag
+  cp: Control the Point
   ctw: Capture the Wool
   dtc: Destroy the Core
   dtm: Destroy the Monument
   ffa: Free-for-all
+  ffb: Flag Football
+  kotf: King of the Flag
   koth: King of the Hill
   mixed: Mixed Gamemodes
   rage: Rage
+  rfw: Race for Wool
   scorebox: Scorebox
   tdm: Deathmatch
    */
@@ -110,14 +115,19 @@ public class SidebarMatchModule implements MatchModule, Listener {
               "ad",
               "arcade",
               "blitz",
+              "br",
               "ctf",
+              "cp",
               "ctw",
               "dtc",
               "dtm",
               "ffa",
+              "ffb",
+              "kotf",
               "koth",
               "mixed",
               "rage",
+              "rfw",
               "scorebox",
               "tdm"));
 
