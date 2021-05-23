@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
+import com.google.common.collect.ImmutableList;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -40,12 +41,54 @@ public class MapInfoImpl implements MapInfo {
   private final Collection<Contributor> contributors;
   private final Collection<String> rules;
   private final Component game;
-  private final Component gamemode;
+  private final String gamemode;
   private final int difficulty;
   private final WorldInfo world;
 
   protected final Collection<MapTag> tags;
   protected final Collection<Integer> players;
+  protected static final List<String> GAMEMODE_IDS =
+      Collections.unmodifiableList(
+          Arrays.asList(
+              "ad",
+              "arcade",
+              "blitz",
+              "br",
+              "ctf",
+              "cp",
+              "ctw",
+              "dtc",
+              "dtm",
+              "ffa",
+              "ffb",
+              "kotf",
+              "koth",
+              "mixed",
+              "rage",
+              "rfw",
+              "scorebox",
+              "tdm"));
+  protected static final List<String> GAMEMODE_NAMES =
+      Collections.unmodifiableList(
+          Arrays.asList(
+              "Attack/Defend",
+              "Arcade",
+              "Blitz",
+              "Blitz: Rage",
+              "Capture the Flag",
+              "Control the Point",
+              "Capture the Wool",
+              "Destroy the Core",
+              "Destroy the Monument",
+              "Free For All",
+              "Flag Football",
+              "King of the Flag",
+              "King of the Hill",
+              "Mixed",
+              "Rage",
+              "Race for Wool",
+              "Scorebox",
+              "Deathmatch"));
 
   public MapInfoImpl(
       @Nullable String id,
@@ -62,7 +105,7 @@ public class MapInfoImpl implements MapInfo {
       @Nullable Collection<Integer> players,
       @Nullable WorldInfo world,
       @Nullable Component game,
-      @Nullable Component gamemode) {
+      @Nullable String gamemode) {
     this.name = checkNotNull(name);
     this.id = checkNotNull(MapInfo.normalizeName(id == null ? name : id));
     this.proto = checkNotNull(proto);
@@ -120,7 +163,7 @@ public class MapInfoImpl implements MapInfo {
         null,
         parseWorld(root),
         XMLUtils.parseFormattedText(root, "game"),
-        XMLUtils.parseFormattedText(root, "gamemode"));
+        parseGamemode(root));
   }
 
   @Override
@@ -189,7 +232,7 @@ public class MapInfoImpl implements MapInfo {
   }
 
   @Override
-  public Component getGamemode() {
+  public String getGamemode() {
     return gamemode;
   }
 
@@ -251,6 +294,36 @@ public class MapInfoImpl implements MapInfo {
       }
     }
     return rules;
+  }
+
+  private static String parseGamemode(Element root) throws InvalidXMLException {
+    Element gamemodeEl = root.getChild("gamemode");
+    if (gamemodeEl != null) {
+      for (String internalId : GAMEMODE_IDS) {
+        if (gamemodeEl.getText().contains(internalId)) {
+          return internalId;
+        }
+      }
+    }
+    return null;
+  }
+
+  private static Collection<MapTag> parseMapTags(Element root) throws InvalidXMLException {
+    Element gamemodeEl = root.getChild("gamemode");
+    if (gamemodeEl != null) {
+      String gamemodeId = null;
+      int i = 0;
+      for (String internalId : GAMEMODE_IDS) {
+        if (gamemodeEl.getText().contains(internalId)) {
+          gamemodeId = internalId;
+          i = GAMEMODE_IDS.indexOf(internalId);
+        }
+      }
+      if (gamemodeId != null) {
+        return ImmutableList.of(new MapTag(gamemodeId, GAMEMODE_NAMES.get(i), true, false));
+      }
+    }
+    return null;
   }
 
   private static List<Contributor> parseContributors(Element root, String tag)

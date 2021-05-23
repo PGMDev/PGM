@@ -116,11 +116,11 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
   Component getGame();
 
   /**
-   * Get a {@link Component} that represents this map's gamemode name.
+   * Get a {@link String} that represents this map's gamemode name.
    *
    * @return A component of the gamemode name if defined or null.
    */
-  Component getGamemode();
+  String getGamemode();
 
   /**
    * Get the maximum number of players that can participate on each team.
