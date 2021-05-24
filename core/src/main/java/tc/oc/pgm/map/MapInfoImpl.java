@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
-import com.google.common.collect.ImmutableList;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,6 +16,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Difficulty;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.Contributor;
+import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.WorldInfo;
@@ -40,55 +40,13 @@ public class MapInfoImpl implements MapInfo {
   private final Collection<Contributor> authors;
   private final Collection<Contributor> contributors;
   private final Collection<String> rules;
-  private final Component game;
-  private final String gamemode;
+  private final Component gamemode;
   private final int difficulty;
   private final WorldInfo world;
 
   protected final Collection<MapTag> tags;
   protected final Collection<Integer> players;
-  protected static final List<String> GAMEMODE_IDS =
-      Collections.unmodifiableList(
-          Arrays.asList(
-              "ad",
-              "arcade",
-              "blitz",
-              "br",
-              "ctf",
-              "cp",
-              "ctw",
-              "dtc",
-              "dtm",
-              "ffa",
-              "ffb",
-              "kotf",
-              "koth",
-              "mixed",
-              "rage",
-              "rfw",
-              "scorebox",
-              "tdm"));
-  protected static final List<String> GAMEMODE_NAMES =
-      Collections.unmodifiableList(
-          Arrays.asList(
-              "Attack/Defend",
-              "Arcade",
-              "Blitz",
-              "Blitz: Rage",
-              "Capture the Flag",
-              "Control the Point",
-              "Capture the Wool",
-              "Destroy the Core",
-              "Destroy the Monument",
-              "Free For All",
-              "Flag Football",
-              "King of the Flag",
-              "King of the Hill",
-              "Mixed",
-              "Rage",
-              "Race for Wool",
-              "Scorebox",
-              "Deathmatch"));
+  protected final Collection<Gamemode> gamemodes;
 
   public MapInfoImpl(
       @Nullable String id,
@@ -104,8 +62,8 @@ public class MapInfoImpl implements MapInfo {
       @Nullable Collection<MapTag> tags,
       @Nullable Collection<Integer> players,
       @Nullable WorldInfo world,
-      @Nullable Component game,
-      @Nullable String gamemode) {
+      @Nullable Component gamemode,
+      @Nullable Collection<Gamemode> gamemodes) {
     this.name = checkNotNull(name);
     this.id = checkNotNull(MapInfo.normalizeName(id == null ? name : id));
     this.proto = checkNotNull(proto);
@@ -119,8 +77,8 @@ public class MapInfoImpl implements MapInfo {
     this.tags = tags == null ? new TreeSet<>() : tags;
     this.players = players == null ? new LinkedList<>() : players;
     this.world = world == null ? new WorldInfoImpl() : world;
-    this.game = game;
     this.gamemode = gamemode;
+    this.gamemodes = gamemodes;
   }
 
   public MapInfoImpl(MapInfo info) {
@@ -138,8 +96,8 @@ public class MapInfoImpl implements MapInfo {
         info.getTags(),
         info.getMaxPlayers(),
         info.getWorld(),
-        info.getGame(),
-        info.getGamemode());
+        info.getGamemode(),
+        info.getGamemodes());
   }
 
   public MapInfoImpl(Element root) throws InvalidXMLException {
@@ -163,7 +121,7 @@ public class MapInfoImpl implements MapInfo {
         null,
         parseWorld(root),
         XMLUtils.parseFormattedText(root, "game"),
-        parseGamemode(root));
+        parseGamemodes(root));
   }
 
   @Override
@@ -227,13 +185,13 @@ public class MapInfoImpl implements MapInfo {
   }
 
   @Override
-  public Component getGame() {
-    return game;
+  public Component getGamemode() {
+    return gamemode;
   }
 
   @Override
-  public String getGamemode() {
-    return gamemode;
+  public Collection<Gamemode> getGamemodes() {
+    return gamemodes;
   }
 
   @Override
@@ -296,34 +254,16 @@ public class MapInfoImpl implements MapInfo {
     return rules;
   }
 
-  private static String parseGamemode(Element root) throws InvalidXMLException {
-    Element gamemodeEl = root.getChild("gamemode");
-    if (gamemodeEl != null) {
-      for (String internalId : GAMEMODE_IDS) {
-        if (gamemodeEl.getText().contains(internalId)) {
-          return internalId;
+  private static List<Gamemode> parseGamemodes(Element root) throws InvalidXMLException {
+    List<Gamemode> gamemodes = new ArrayList<>();
+    for (Element gamemodeEl : root.getChildren("gamemode")) {
+      for (Gamemode gamemode : Gamemode.values()) {
+        if (gamemode.getId().equals(gamemodeEl.getText())) {
+          gamemodes.add(gamemode);
         }
       }
     }
-    return null;
-  }
-
-  private static Collection<MapTag> parseMapTags(Element root) throws InvalidXMLException {
-    Element gamemodeEl = root.getChild("gamemode");
-    if (gamemodeEl != null) {
-      String gamemodeId = null;
-      int i = 0;
-      for (String internalId : GAMEMODE_IDS) {
-        if (gamemodeEl.getText().contains(internalId)) {
-          gamemodeId = internalId;
-          i = GAMEMODE_IDS.indexOf(internalId);
-        }
-      }
-      if (gamemodeId != null) {
-        return ImmutableList.of(new MapTag(gamemodeId, GAMEMODE_NAMES.get(i), true, false));
-      }
-    }
-    return null;
+    return gamemodes;
   }
 
   private static List<Contributor> parseContributors(Element root, String tag)

@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
@@ -258,15 +260,29 @@ public class SidebarMatchModule implements MatchModule, Listener {
       return header.colorIfAbsent(NamedTextColor.AQUA);
     }
 
-    final Component game = map.getGame();
-    if (game != null) {
-      return game.colorIfAbsent(NamedTextColor.AQUA);
+    final Component gamemode = map.getGamemode();
+    if (gamemode != null) {
+      return gamemode.colorIfAbsent(NamedTextColor.AQUA);
     }
 
-    final String gamemode = map.getGamemode();
-    if (gamemode != null) {
-      Component gamemodeName = translatable("gamemode." + gamemode + ".name");
-      return gamemodeName.colorIfAbsent(NamedTextColor.AQUA);
+    final Collection<Gamemode> gamemodes = map.getGamemodes();
+    if (!gamemodes.isEmpty()) {
+      Iterator<Gamemode> gamemodeIterator = gamemodes.iterator();
+      String firstgamemodeId = gamemodeIterator.next().getId();
+      if (gamemodeIterator.hasNext()) {
+        String secondgamemodeId = gamemodeIterator.next().getId();
+        Component firstComponent =
+            Component.translatable("gamemode." + firstgamemodeId + ".acronym");
+        Component secondComponent =
+            Component.translatable("gamemode." + secondgamemodeId + ".acronym");
+        return firstComponent
+            .append(Component.text(" & "))
+            .append(secondComponent)
+            .colorIfAbsent(NamedTextColor.AQUA);
+      } else {
+        return Component.translatable("gamemode." + firstgamemodeId + ".name")
+            .colorIfAbsent(NamedTextColor.AQUA);
+      }
     }
 
     final List<Component> games = new LinkedList<>();
