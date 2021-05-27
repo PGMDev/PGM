@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -60,6 +61,7 @@ import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class PGMListener implements Listener {
+  private static final String DO_FIRE_TICK = "doFireTick";
   private static final String DO_DAYLIGHT_CYCLE = "doDaylightCycle";
   /*
   1000  /time set day
@@ -256,6 +258,21 @@ public class PGMListener implements Listener {
     }
 
     if (nearestPlayer != event.getPlayer()) event.setCancelled(true);
+  }
+
+  @EventHandler
+  public void lockFireTick(final MatchLoadEvent event) {
+    event.getMatch().getWorld().setGameRuleValue(DO_FIRE_TICK, Boolean.toString(false));
+  }
+
+  // unlock firespread if not disabled by <gamerule>
+  @EventHandler
+  public void unlockFireTick(final MatchStartEvent event) {
+    ImmutableMap<String, String> lockFireTick =
+        event.getMatch().getModule(GameRulesMatchModule.class).getGameRules();
+    if (lockFireTick.isEmpty() || Boolean.parseBoolean(lockFireTick.get(DO_FIRE_TICK))) {
+      event.getMatch().getWorld().setGameRuleValue(DO_FIRE_TICK, Boolean.toString(true));
+    }
   }
 
   //
