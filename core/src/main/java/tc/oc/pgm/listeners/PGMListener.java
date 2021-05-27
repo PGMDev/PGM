@@ -79,6 +79,7 @@ public class PGMListener implements Listener {
 
   // Single-write, multi-read lock used to create the first match
   private final ReentrantReadWriteLock lock;
+  private boolean oldFireTick = true;
 
   public PGMListener(Plugin parent, MatchManager mm, VanishManager vm) {
     this.parent = parent;
@@ -262,16 +263,19 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void lockFireTick(final MatchLoadEvent event) {
+    oldFireTick = Boolean.parseBoolean(event.getMatch().getWorld().getGameRuleValue(DO_FIRE_TICK));
     event.getMatch().getWorld().setGameRuleValue(DO_FIRE_TICK, Boolean.toString(false));
   }
 
-  // unlock firespread if not disabled by <gamerule>
+  // if no doFireTick <gamerule> is found, then use doFireTick setting saved in world
   @EventHandler
   public void unlockFireTick(final MatchStartEvent event) {
-    ImmutableMap<String, String> lockFireTick =
-        event.getMatch().getModule(GameRulesMatchModule.class).getGameRules();
-    if (lockFireTick.isEmpty() || Boolean.parseBoolean(lockFireTick.get(DO_FIRE_TICK))) {
-      event.getMatch().getWorld().setGameRuleValue(DO_FIRE_TICK, Boolean.toString(true));
+    ImmutableMap<String, String> gameRules = event.getMatch().getModule(GameRulesMatchModule.class).getGameRules();
+    if (!gameRules.isEmpty()) {
+      event.getMatch().getWorld().setGameRuleValue(DO_FIRE_TICK, gameRules.get(DO_FIRE_TICK));
+    }
+    else {
+      event.getMatch().getWorld().setGameRuleValue(DO_FIRE_TICK, Boolean.toString(oldFireTick));
     }
   }
 
