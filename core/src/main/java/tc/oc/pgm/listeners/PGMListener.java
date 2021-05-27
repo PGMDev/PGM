@@ -275,6 +275,11 @@ public class PGMListener implements Listener {
     }
   }
 
+  @EventHandler
+  public void lockFireTick(final MatchFinishEvent event) {
+    event.getMatch().getWorld().setGameRuleValue(DO_FIRE_TICK, Boolean.toString(false));
+  }
+
   //
   // Time Lock
   // lock time before, during (if time lock enabled), and after the match
