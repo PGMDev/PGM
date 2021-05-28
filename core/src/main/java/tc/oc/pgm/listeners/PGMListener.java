@@ -270,11 +270,12 @@ public class PGMListener implements Listener {
   // if no doFireTick <gamerule> is found, then use doFireTick setting saved in world
   @EventHandler
   public void unlockFireTick(final MatchStartEvent event) {
-    ImmutableMap<String, String> gameRules = event.getMatch().getModule(GameRulesMatchModule.class).getGameRules();
-    if (!gameRules.isEmpty()) {
-      event.getMatch().getWorld().setGameRuleValue(DO_FIRE_TICK, gameRules.get(DO_FIRE_TICK));
-    }
-    else {
+    ImmutableMap<String, String> gameRules =
+        event.getMatch().getModule(GameRulesMatchModule.class).getGameRules();
+    String newFireTick = gameRules.get(DO_FIRE_TICK);
+    if (!gameRules.isEmpty() && newFireTick != null) {
+      event.getMatch().getWorld().setGameRuleValue(DO_FIRE_TICK, newFireTick);
+    } else {
       event.getMatch().getWorld().setGameRuleValue(DO_FIRE_TICK, Boolean.toString(oldFireTick));
     }
   }
