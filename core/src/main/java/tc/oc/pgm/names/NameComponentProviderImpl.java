@@ -34,9 +34,15 @@ public class NameComponentProviderImpl implements PlayerComponentProvider {
 
   public String getVisibleName(Player viewer, Player player, String username) {
     if (viewer == null || player == null) return username;
+    if (viewer != null && player != null && player.hasPermission(Permissions.ADMIN)) {
+      if (viewer.hasPermission(Permissions.ADMIN)) {
+        return player.getName();
+      }
+      return username;
+    }
+
     boolean canViewRealName =
         viewer.hasPermission(Permissions.STAFF) || Integration.isFriend(player, viewer);
-
     return canViewRealName ? player.getName() : username;
   }
 
@@ -109,6 +115,7 @@ public class NameComponentProviderImpl implements PlayerComponentProvider {
     if (!isOffline
         && style.has(NameStyle.Flag.FRIEND)
         && viewer != null
+        && (!isNicked || canViewNick(player, viewer))
         && Integration.isFriend(viewer, player)) {
       name.decoration(TextDecoration.ITALIC, true);
     }
@@ -146,6 +153,7 @@ public class NameComponentProviderImpl implements PlayerComponentProvider {
   static boolean canViewNick(Player player, @Nullable Player viewer) {
     if (viewer == null) return false;
     if (viewer == player) return true;
+    if (player.hasPermission(Permissions.ADMIN)) return viewer.hasPermission(Permissions.ADMIN);
     return viewer.hasPermission(Permissions.STAFF) || Integration.isFriend(player, viewer);
   }
 }

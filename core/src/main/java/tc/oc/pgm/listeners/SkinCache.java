@@ -90,8 +90,11 @@ public class SkinCache implements Listener {
   // TODO: Figure out how to use without SPORTPAPER API
   public void refreshFakeName(Player player, Player viewer) {
     boolean nicked = Integration.getNick(player) != null;
+    boolean isViewerStaff = viewer.hasPermission(Permissions.STAFF);
+    boolean isViewerAdmin = viewer.hasPermission(Permissions.ADMIN);
+    boolean override = player.hasPermission(Permissions.ADMIN);
 
-    if (nicked && !viewer.hasPermission(Permissions.STAFF)) {
+    if (nicked && (!isViewerStaff || (override && !isViewerAdmin))) {
       String nick = Integration.getNick(player);
       MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(player.getUniqueId());
       String displayName =
