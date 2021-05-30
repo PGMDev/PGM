@@ -25,6 +25,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import tc.oc.pgm.api.Permissions;
@@ -185,12 +186,7 @@ public class AntiGriefListener implements Listener {
     return uniqueOwners;
   }
 
-  @EventHandler
-  public void giveKit(final ObserverKitApplyEvent event) {
-    if (event.getPlayer().getParty() == null) return;
-    if (!event.getPlayer().getParty().isObserving()
-        || !event.getPlayer().getBukkit().hasPermission(Permissions.DEFUSE)) return;
-
+  public static ItemStack getDefuseItem(Player viewer) {
     ItemStack shears = new ItemStack(DEFUSE_ITEM);
 
     // TODO: Update information if locale changes
@@ -198,16 +194,27 @@ public class AntiGriefListener implements Listener {
     meta.setDisplayName(
         ChatColor.RED
             + ChatColor.BOLD.toString()
-            + TextTranslations.translate(
-                "moderation.defuse.displayName", event.getPlayer().getBukkit()));
+            + TextTranslations.translate("moderation.defuse.displayName", viewer));
     meta.setLore(
         Collections.singletonList(
-            ChatColor.GRAY
-                + TextTranslations.translate(
-                    "moderation.defuse.tooltip", event.getPlayer().getBukkit())));
+            ChatColor.GRAY + TextTranslations.translate("moderation.defuse.tooltip", viewer)));
+    meta.addItemFlags(ItemFlag.values());
     shears.setItemMeta(meta);
 
-    event.getPlayer().getBukkit().getInventory().setItem(DEFUSE_SLOT, shears);
+    return shears;
+  }
+
+  @EventHandler
+  public void giveKit(final ObserverKitApplyEvent event) {
+    if (event.getPlayer().getParty() == null) return;
+    if (!event.getPlayer().getParty().isObserving()
+        || !event.getPlayer().getBukkit().hasPermission(Permissions.DEFUSE)) return;
+
+    event
+        .getPlayer()
+        .getBukkit()
+        .getInventory()
+        .setItem(DEFUSE_SLOT, getDefuseItem(event.getPlayer().getBukkit()));
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
