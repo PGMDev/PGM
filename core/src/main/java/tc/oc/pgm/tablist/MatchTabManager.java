@@ -33,6 +33,7 @@ import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
+import tc.oc.pgm.util.event.player.PlayerSkinChangeEvent;
 import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.tablist.DynamicTabEntry;
 import tc.oc.pgm.util.tablist.TabEntry;
@@ -313,6 +314,14 @@ public class MatchTabManager extends TabManager implements Listener {
     TabEntry entry = this.getPlayerEntryOrNull(event.getPlayer());
     if (entry instanceof PlayerTabEntry) {
       ((PlayerTabEntry) entry).onSkinPartsChange(event);
+    }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onSkinChange(PlayerSkinChangeEvent event) {
+    TabEntry entry = this.getPlayerEntryOrNull(event.getPlayer());
+    if (entry instanceof PlayerTabEntry) {
+      ((PlayerTabEntry) entry).onSkinChange(event);
     }
   }
 }

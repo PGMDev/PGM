@@ -6,6 +6,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
+import tc.oc.pgm.util.event.player.PlayerSkinChangeEvent;
 import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
@@ -90,6 +91,12 @@ public class PlayerTabEntry extends DynamicTabEntry {
   protected void onSkinPartsChange(PlayerSkinPartsChangeEvent event) {
     if (this.player == event.getPlayer()) {
       this.updateFakeEntity();
+    }
+  }
+
+  protected void onSkinChange(PlayerSkinChangeEvent event) {
+    if (this.player == event.getPlayer()) {
+      this.refresh();
     }
   }
 

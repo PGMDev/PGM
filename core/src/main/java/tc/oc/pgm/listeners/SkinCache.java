@@ -2,7 +2,9 @@ package tc.oc.pgm.listeners;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Maps;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -19,12 +21,15 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.util.event.player.PlayerSkinChangeEvent;
 
 public class SkinCache implements Listener {
 
   private final Cache<UUID, Skin> offlineSkins =
       CacheBuilder.newBuilder().maximumSize(300).expireAfterWrite(3, TimeUnit.HOURS).build();
   private final Random random = new Random();
+
+  private final Map<UUID, Skin> customSkins = Maps.newHashMap();
 
   // TODO: NEEDS WORK! Backup skins when 0 are online, prevent duplicates, etc
   private Skin getRandomSkin() {
@@ -33,6 +38,13 @@ public class SkinCache implements Listener {
     }
     List<Skin> skins = offlineSkins.asMap().values().stream().collect(Collectors.toList());
     return skins.get(random.nextInt(skins.size()));
+  }
+
+  private Skin getSkin(Player player) {
+    if (customSkins.containsKey(player.getUniqueId())) {
+      return customSkins.get(player.getUniqueId());
+    }
+    return getRandomSkin();
   }
 
   private boolean canUseSkin(Player player) {
@@ -56,7 +68,6 @@ public class SkinCache implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void refreshNamesOnLogin(PlayerJoinEvent event) {
     refreshPlayer(event.getPlayer());
-    refreshSelfView(event.getPlayer());
   }
 
   // SPORTPAPER STUFF - TODO: Add alternative method and check if server is running SportPaper to
@@ -81,6 +92,9 @@ public class SkinCache implements Listener {
 
     // Refresh the view of the player
     refreshSelfView(player);
+
+    // Reset visibility
+    matchPlayer.resetVisibility();
   }
 
   public void refreshSelfView(Player viewer) {
@@ -96,16 +110,33 @@ public class SkinCache implements Listener {
 
     if (nicked && (!isViewerStaff || (override && !isViewerAdmin))) {
       String nick = Integration.getNick(player);
-      MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(player.getUniqueId());
+      MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(player);
       String displayName =
           PGM.get()
               .getNameDecorationRegistry()
               .getDecoratedName(player, matchPlayer.getParty().getColor());
       player.setFakeDisplayName(viewer, displayName);
-      player.setFakeNameAndSkin(viewer, nick, getRandomSkin());
+      player.setFakeNameAndSkin(viewer, nick, getSkin(player));
     } else {
       player.setFakeDisplayName(viewer, null);
       player.setFakeNameAndSkin(viewer, null, null);
+    }
+  }
+
+  @EventHandler
+  public void onSkinRefresh(PlayerSkinChangeEvent event) {
+    if (event.getSkin() == null) {
+      customSkins.remove(event.getPlayer().getUniqueId());
+    }
+
+    if (Integration.getNick(event.getPlayer()) != null) {
+      if (event.getSkin() != null) {
+        // Store custom skin for persistence
+        customSkins.put(event.getPlayer().getUniqueId(), event.getSkin());
+      }
+
+      // Refresh skin for everyone online
+      refreshPlayer(event.getPlayer());
     }
   }
 }
