@@ -89,6 +89,14 @@ public class ScoreMatchModule implements MatchModule, Listener {
     return this.config.scoreLimit;
   }
 
+  public void setScoreLimit(int scoreLimit) {
+    if (hasMercyRule()) {
+      mercyRule.setScoreLimit(scoreLimit);
+      return;
+    }
+    this.config.scoreLimit = scoreLimit;
+  }
+
   public Map<Competitor, Double> getScores() {
     return this.scores;
   }

@@ -25,28 +25,7 @@ import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
-import tc.oc.pgm.command.AdminCommand;
-import tc.oc.pgm.command.CancelCommand;
-import tc.oc.pgm.command.ClassCommand;
-import tc.oc.pgm.command.CycleCommand;
-import tc.oc.pgm.command.FinishCommand;
-import tc.oc.pgm.command.FreeForAllCommand;
-import tc.oc.pgm.command.InventoryCommand;
-import tc.oc.pgm.command.JoinCommand;
-import tc.oc.pgm.command.ListCommand;
-import tc.oc.pgm.command.MapCommand;
-import tc.oc.pgm.command.MapOrderCommand;
-import tc.oc.pgm.command.MapPoolCommand;
-import tc.oc.pgm.command.MatchCommand;
-import tc.oc.pgm.command.ModeCommand;
-import tc.oc.pgm.command.ProximityCommand;
-import tc.oc.pgm.command.RestartCommand;
-import tc.oc.pgm.command.SettingCommand;
-import tc.oc.pgm.command.StartCommand;
-import tc.oc.pgm.command.StatsCommand;
-import tc.oc.pgm.command.TeamCommand;
-import tc.oc.pgm.command.TimeLimitCommand;
-import tc.oc.pgm.command.VotingCommand;
+import tc.oc.pgm.command.*;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.Audience;
 
@@ -84,6 +63,7 @@ public class CommandGraph extends BasicBukkitCommandGraph {
     register(new StatsCommand());
     register(new TeamCommand(), "team");
     register(new TimeLimitCommand());
+    register(new ScoreLimitCommand());
     register(new VotingCommand(), "vote", "votes");
   }
 
