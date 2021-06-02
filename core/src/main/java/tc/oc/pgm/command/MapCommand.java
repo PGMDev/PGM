@@ -81,6 +81,8 @@ public final class MapCommand {
       search = search.filter(map -> matchesName(map, name));
     }
 
+    search = search.filter(map -> isVisible(map, sender));
+
     Set<MapInfo> maps = search.collect(Collectors.toCollection(TreeSet::new));
     int resultsPerPage = 8;
     int pages = (maps.size() + resultsPerPage - 1) / resultsPerPage;
@@ -145,6 +147,11 @@ public final class MapCommand {
     checkNotNull(map);
     query = checkNotNull(query).toLowerCase();
     return map.getName().toLowerCase().contains(query);
+  }
+
+  private static boolean isVisible(MapInfo map, CommandSender viewer) {
+    return viewer.hasPermission(Permissions.STAFF)
+        || !PGM.get().getDatastore().getMapVisibility(map).isHidden();
   }
 
   @Command(

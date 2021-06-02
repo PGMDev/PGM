@@ -37,6 +37,7 @@ public interface Permissions {
   String BAN = ROOT + ".ban"; // Access to the /ban command
   String FREEZE = ROOT + ".freeze"; // Access to the /freeze command
   String VANISH = ROOT + ".vanish"; // Access to /vanish command
+  String MAPDEV = ROOT + ".mapdev"; // Access to mapdev related commands (/mapvisibility)
 
   String MAPMAKER = GROUP + ".mapmaker"; // Permission group for mapmakers, defined in config.yml
 

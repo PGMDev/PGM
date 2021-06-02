@@ -1,14 +1,18 @@
 package tc.oc.pgm.db;
 
+import com.google.common.collect.Lists;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import javax.annotation.Nullable;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.map.MapActivity;
+import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.api.map.MapVisibility;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
@@ -29,6 +33,7 @@ public class SQLDatastore extends ThreadSafeConnection implements Datastore {
     submitQuery(
         () ->
             "CREATE TABLE IF NOT EXISTS pools (name VARCHAR(255) PRIMARY KEY, next_map VARCHAR(255), last_active BOOLEAN)");
+    submitQuery(() -> "CREATE TABLE IF NOT EXISTS visibility (name VARCHAR(255), hidden BOOLEAN)");
   }
 
   private class SQLUsername extends UsernameImpl {
@@ -265,6 +270,86 @@ public class SQLDatastore extends ThreadSafeConnection implements Datastore {
         statement.setString(2, getMapName());
         statement.setBoolean(3, isActive());
 
+        statement.executeUpdate();
+      }
+    }
+  }
+
+  @Override
+  public MapVisibility getMapVisibility(MapInfo map) {
+    return new SQLMapVisibility(map);
+  }
+
+  @Override
+  public List<MapVisibility> getHiddenMaps() {
+    return Lists.newArrayList();
+  }
+
+  private class SQLMapVisibility extends MapVisibilityImpl {
+
+    SQLMapVisibility(MapInfo map) {
+      super(map, false);
+      try {
+        submitQuery(new SelectQuery()).get();
+      } catch (InterruptedException | ExecutionException e) {
+        e.printStackTrace();
+      }
+    }
+
+    @Override
+    public void setHidden(boolean hidden) {
+      boolean oldValue = isHidden();
+      super.setHidden(hidden);
+
+      if (hidden != oldValue) {
+        submitQuery(new UpdateQuery());
+      }
+    }
+
+    private class SelectQuery implements Query {
+      @Override
+      public String getFormat() {
+        return "SELECT * FROM visibility WHERE name = ? LIMIT 1";
+      }
+
+      @Override
+      public void query(PreparedStatement statement) throws SQLException {
+        statement.setString(1, getMap().getId());
+        try (final ResultSet result = statement.executeQuery()) {
+          if (result.next()) {
+            setHidden(result.getBoolean(2));
+          } else {
+            submitQuery(new InsertQuery());
+          }
+        }
+      }
+    }
+
+    private class InsertQuery implements Query {
+      @Override
+      public String getFormat() {
+        return "REPLACE INTO visibility VALUES (?, ?)";
+      }
+
+      @Override
+      public void query(PreparedStatement statement) throws SQLException {
+        statement.setString(1, getMap().getId());
+        statement.setBoolean(2, isHidden());
+
+        statement.executeUpdate();
+      }
+    }
+
+    private class UpdateQuery implements Query {
+      @Override
+      public String getFormat() {
+        return "UPDATE visibility SET hidden = ? WHERE name = ?";
+      }
+
+      @Override
+      public void query(PreparedStatement statement) throws SQLException {
+        statement.setBoolean(1, isHidden());
+        statement.setString(2, getMap().getId());
         statement.executeUpdate();
       }
     }

@@ -37,6 +37,7 @@ import tc.oc.pgm.command.ListCommand;
 import tc.oc.pgm.command.MapCommand;
 import tc.oc.pgm.command.MapOrderCommand;
 import tc.oc.pgm.command.MapPoolCommand;
+import tc.oc.pgm.command.MapVisibilityCommand;
 import tc.oc.pgm.command.MatchCommand;
 import tc.oc.pgm.command.ModeCommand;
 import tc.oc.pgm.command.ProximityCommand;
@@ -75,6 +76,7 @@ public class CommandGraph extends BasicBukkitCommandGraph {
     register(new MapCommand());
     register(new MapOrderCommand());
     register(new MapPoolCommand());
+    register(new MapVisibilityCommand());
     register(new MatchCommand());
     register(new ModeCommand(), "mode", "modes");
     register(new ProximityCommand());

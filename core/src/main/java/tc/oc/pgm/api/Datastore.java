@@ -1,7 +1,10 @@
 package tc.oc.pgm.api;
 
+import java.util.List;
 import java.util.UUID;
 import tc.oc.pgm.api.map.MapActivity;
+import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.api.map.MapVisibility;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.util.skin.Skin;
@@ -48,6 +51,21 @@ public interface Datastore {
    * @return A {@link MapActivity}.
    */
   MapActivity getMapActivity(String poolName);
+
+  /**
+   * Get the visibility data for a given {@link MapInfo}.
+   *
+   * @param map A {@link MapInfo}
+   * @return A {@link MapVisibility}
+   */
+  MapVisibility getMapVisibility(MapInfo map);
+
+  /**
+   * Get a list of {@link MapVisibility} which are hidden
+   *
+   * @return A list of {@link MapVisibility}
+   */
+  List<MapVisibility> getHiddenMaps();
 
   /** Cleans up any resources or connections. */
   void close();

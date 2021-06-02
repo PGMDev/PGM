@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
@@ -208,6 +209,9 @@ public class MapLibraryImpl implements MapLibrary {
         new MapEntry(source, context.clone(), context),
         (m1, m2) -> m1.info.getVersion().isOlderThan(m2.info.getVersion()) ? m2 : m1);
     failed.remove(source);
+
+    // Pre-fetch the map visibility
+    PGM.get().getDatastore().getMapVisibility(context);
 
     return context;
   }
