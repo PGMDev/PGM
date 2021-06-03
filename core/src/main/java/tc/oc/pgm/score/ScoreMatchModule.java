@@ -63,8 +63,6 @@ public class ScoreMatchModule implements MatchModule, Listener {
     this.match.getCompetitors().forEach(competitor -> this.scores.put(competitor, 0.0));
     if (this.config.mercyLimit > 0) {
       this.mercyRule = new MercyRule(this, config.scoreLimit, config.mercyLimit);
-    }
-    if (hasMercyRule()) {
       scoreLimit = mercyRule.getScoreLimit();
     } else {
       scoreLimit = config.scoreLimit;
