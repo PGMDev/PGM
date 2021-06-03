@@ -8,7 +8,7 @@ import tc.oc.pgm.api.party.event.CompetitorScoreChangeEvent;
 public class MercyRule {
 
   private final ScoreMatchModule scoreMatchModule;
-  private int scoreLimit;
+  private final int scoreLimit;
   private final int mercyLimit;
 
   private Map.Entry<Competitor, Double> leader;
@@ -20,10 +20,6 @@ public class MercyRule {
     this.mercyLimit = mercyLimit;
 
     calculateLeaders();
-  }
-
-  public void setScoreLimit(int scoreLimit) {
-    this.scoreLimit = scoreLimit;
   }
 
   private double getLeaderScore() {

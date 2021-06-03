@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 import net.kyori.adventure.text.format.NamedTextColor;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.timelimit.TimeLimit;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
@@ -32,9 +31,9 @@ public final class TimeLimitCommand {
       @Nullable Duration overtime,
       @Nullable Duration maxOvertime,
       @Nullable Duration endOvertime) {
-    try {
-      final TimeLimitMatchModule time = match.needModule(TimeLimitMatchModule.class);
+    final TimeLimitMatchModule time = match.getModule(TimeLimitMatchModule.class);
 
+    if (time != null) {
       time.cancel();
       time.setTimeLimit(
           new TimeLimit(
@@ -53,8 +52,8 @@ public final class TimeLimitCommand {
               NamedTextColor.YELLOW,
               clock(duration).color(NamedTextColor.AQUA),
               result != null ? result.getDescription(match) : translatable("misc.unknown")));
-    } catch (ModuleLoadException e) {
-      audience.sendWarning(translatable("match.timeLimit.notEnabled"));
+      return;
     }
+    audience.sendWarning(translatable("match.timeLimit.notEnabled"));
   }
 }

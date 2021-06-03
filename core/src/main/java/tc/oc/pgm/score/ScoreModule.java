@@ -94,25 +94,24 @@ public class ScoreModule implements MapModule {
       }
 
       RegionParser regionParser = factory.getRegions();
-      ScoreConfig config = new ScoreConfig();
       ImmutableSet.Builder<ScoreBoxFactory> scoreBoxFactories = ImmutableSet.builder();
-
+      ScoreConfig config = null;
       for (Element scoreEl : scoreElements) {
-        config.scoreLimit = XMLUtils.parseNumber(scoreEl.getChild("limit"), Integer.class, -1);
-        config.mercyLimit = XMLUtils.parseNumber(scoreEl.getChild("mercy"), Integer.class, -1);
+        int scoreLimit = XMLUtils.parseNumber(scoreEl.getChild("limit"), Integer.class, -1);
+        int mercyLimit = XMLUtils.parseNumber(scoreEl.getChild("mercy"), Integer.class, -1);
 
         // For backwards compatibility, default kill/death points to 1 if proto is old and <king/>
         // tag
         // is not present
         boolean scoreKillsByDefault =
             proto.isOlderThan(MapProtos.DEFAULT_SCORES_TO_ZERO) && scoreEl.getChild("king") == null;
-        config.deathScore =
+        int deathScore =
             XMLUtils.parseNumber(
                 scoreEl.getChild("deaths"), Integer.class, scoreKillsByDefault ? 1 : 0);
-        config.killScore =
+        int killScore =
             XMLUtils.parseNumber(
                 scoreEl.getChild("kills"), Integer.class, scoreKillsByDefault ? 1 : 0);
-
+        config = new ScoreConfig(scoreLimit, deathScore, killScore, mercyLimit);
         for (Element scoreBoxEl : scoreEl.getChildren("box")) {
           int points =
               XMLUtils.parseNumber(

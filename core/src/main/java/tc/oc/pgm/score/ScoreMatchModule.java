@@ -3,8 +3,7 @@ package tc.oc.pgm.score;
 import static com.google.common.base.Preconditions.checkState;
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.Component.*;
 
 import com.google.common.collect.Lists;
 import java.time.Instant;
@@ -50,6 +49,8 @@ public class ScoreMatchModule implements MatchModule, Listener {
 
   private final Match match;
   private final ScoreConfig config;
+  private final int defaultScore;
+  private int scoreLimit;
   private final Set<ScoreBox> scoreBoxes;
   private final Map<UUID, Double> contributions = new DefaultMapAdapter<>(new HashMap<>(), 0d);
   private final Map<Competitor, Double> scores = new DefaultMapAdapter<>(new HashMap<>(), 0d);
@@ -60,10 +61,15 @@ public class ScoreMatchModule implements MatchModule, Listener {
     this.config = config;
     this.scoreBoxes = scoreBoxes;
     this.match.getCompetitors().forEach(competitor -> this.scores.put(competitor, 0.0));
-
     if (this.config.mercyLimit > 0) {
       this.mercyRule = new MercyRule(this, config.scoreLimit, config.mercyLimit);
     }
+    if (hasMercyRule()) {
+      scoreLimit = mercyRule.getScoreLimit();
+    } else {
+      scoreLimit = config.scoreLimit;
+    }
+    defaultScore = scoreLimit;
   }
 
   @Override
@@ -72,7 +78,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
   }
 
   public boolean hasScoreLimit() {
-    return this.config.scoreLimit > 0 || hasMercyRule();
+    return scoreLimit > 0 || hasMercyRule();
   }
 
   public boolean hasMercyRule() {
@@ -80,21 +86,16 @@ public class ScoreMatchModule implements MatchModule, Listener {
   }
 
   public int getScoreLimit() {
-    checkState(hasScoreLimit());
+    // checkState(hasScoreLimit());
+    return scoreLimit;
+  }
 
-    if (hasMercyRule()) {
-      return this.mercyRule.getScoreLimit();
-    }
-
-    return this.config.scoreLimit;
+  public void resetScoreLimit() {
+    scoreLimit = defaultScore;
   }
 
   public void setScoreLimit(int scoreLimit) {
-    if (hasMercyRule()) {
-      mercyRule.setScoreLimit(scoreLimit);
-      return;
-    }
-    this.config.scoreLimit = scoreLimit;
+    this.scoreLimit = scoreLimit;
   }
 
   public Map<Competitor, Double> getScores() {
@@ -103,6 +104,10 @@ public class ScoreMatchModule implements MatchModule, Listener {
 
   public double getScore(Competitor competitor) {
     return this.scores.get(competitor);
+  }
+
+  public int getDefaultScoreLimit() {
+    return defaultScore;
   }
 
   /** Gets the score message for the match. */
