@@ -8,7 +8,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 
 public class MaxHealthKit extends AbstractKit {
 
-  public static final double DEFAULT_MAX_HEALTH = 20.0;
+  public static final double BUKKIT_DEFAULT = 20.0;
 
   private final double maxHealth;
 
@@ -29,6 +29,6 @@ public class MaxHealthKit extends AbstractKit {
 
   @Override
   public void remove(MatchPlayer player) {
-    player.getBukkit().setMaxHealth(DEFAULT_MAX_HEALTH);
+    player.getBukkit().setMaxHealth(BUKKIT_DEFAULT);
   }
 }
