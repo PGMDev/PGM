@@ -43,6 +43,7 @@ import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.PlayerResetEvent;
 import tc.oc.pgm.kits.Kit;
+import tc.oc.pgm.kits.MaxHealthKit;
 import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.ClassLogger;
@@ -259,6 +260,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     bukkit.setFallDistance(0);
     bukkit.setFireTicks(0);
     bukkit.setFoodLevel(20); // full
+    bukkit.setMaxHealth(MaxHealthKit.BUKKIT_DEFAULT);
     bukkit.setHealth(bukkit.getMaxHealth());
     bukkit.setLevel(0);
     bukkit.setExp(0); // clear xp
