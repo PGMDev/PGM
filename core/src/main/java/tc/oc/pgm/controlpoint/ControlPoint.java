@@ -463,11 +463,12 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
       return null;
     } else {
       final Duration remainder = duration.minus(this.capturingTime);
-      this.capturingTime = duration.ZERO;
+      this.capturingTime = Duration.ZERO;
       return remainder;
     }
   }
-  // Progress to a new owner
+
+  /** Progress to a new owner */
   private void capture(Duration dominantTime) {
     dominantTime = addCaptureTime(dominantTime);
     if (dominantTime != null) { // Point is captured
@@ -479,7 +480,8 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
       }
     }
   }
-  // Progress towards the neutral state
+
+  /** Progress towards the neutral state */
   private void uncapture(Competitor dominantTeam, Duration dominantTime) {
     dominantTime = addCaptureTime(dominantTime);
     if (dominantTime != null) {
@@ -487,12 +489,13 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
       this.dominate(dominantTeam, dominantTime);
     }
   }
-  // Point being pulled back to current state (There is a lead on the point)
+
+  /** Point being pulled back to current state (There is a lead on the point) */
   private void recover(Competitor dominantTeam, Duration dominantTime) {
     dominantTime =
         subtractCaptureTime(
             Duration.ofMillis((long) (definition.getRecoveryRate() * dominantTime.toMillis())));
-    if (dominantTeam != null) {
+    if (dominantTime != null) {
       this.capturingTeam = null;
       if (dominantTeam != this.controllingTeam) {
         // If the dominant team is not the controller, recurse with the remaining time
@@ -503,7 +506,8 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
       }
     }
   }
-  // Point is being decayed back to its current state (No lead on point)
+
+  /** Point is being decayed back to its current state (No lead on point) */
   private void decay(Duration dominantTime) {
     dominantTime =
         subtractCaptureTime(
@@ -513,7 +517,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
     }
   }
 
-  // Point is being decayed back to neutral (No lead on point)
+  /** Point is being decayed back to neutral (No lead on point) */
   private void ownedDecay(Duration dominantTime) {
     dominantTime =
         addCaptureTime(
