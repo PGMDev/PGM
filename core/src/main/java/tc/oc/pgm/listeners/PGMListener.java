@@ -267,9 +267,14 @@ public class PGMListener implements Listener {
   // if no doFireTick <gamerule> is found, then use doFireTick setting saved in world
   @EventHandler
   public void unlockFireTick(final MatchStartEvent event) {
-    String farts = event.getMatch().getModule(GameRulesMatchModule.class).getMapGameRules().get(DO_FIRE_TICK);
-    String newFireTick = event.getMatch().getModule(GameRulesMatchModule.class).getGameRules().get(DO_FIRE_TICK);
-    event.getMatch().getWorld().setGameRuleValue(DO_FIRE_TICK, newFireTick != null ? newFireTick : farts);
+    String farts =
+        event.getMatch().getModule(GameRulesMatchModule.class).getMapGameRules().get(DO_FIRE_TICK);
+    String newFireTick =
+        event.getMatch().getModule(GameRulesMatchModule.class).getGameRules().get(DO_FIRE_TICK);
+    event
+        .getMatch()
+        .getWorld()
+        .setGameRuleValue(DO_FIRE_TICK, newFireTick != null ? newFireTick : farts);
   }
 
   @EventHandler

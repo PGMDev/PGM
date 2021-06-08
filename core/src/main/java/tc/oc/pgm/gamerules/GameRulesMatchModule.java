@@ -2,7 +2,6 @@ package tc.oc.pgm.gamerules;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-
 import java.util.HashMap;
 import java.util.Map;
 import tc.oc.pgm.api.match.Match;
@@ -33,6 +32,7 @@ public class GameRulesMatchModule implements MatchModule {
   public ImmutableMap<String, String> getGameRules() {
     return ImmutableMap.copyOf(gameRules);
   }
+
   public ImmutableMap<String, String> getMapGameRules() {
     return ImmutableMap.copyOf(mapGameRules);
   }
