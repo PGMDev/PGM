@@ -5,7 +5,6 @@ import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -79,7 +78,6 @@ public class PGMListener implements Listener {
 
   // Single-write, multi-read lock used to create the first match
   private final ReentrantReadWriteLock lock;
-  private boolean oldFireTick = true;
 
   public PGMListener(Plugin parent, MatchManager mm, VanishManager vm) {
     this.parent = parent;
@@ -263,21 +261,15 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void lockFireTick(final MatchLoadEvent event) {
-    oldFireTick = Boolean.parseBoolean(event.getMatch().getWorld().getGameRuleValue(DO_FIRE_TICK));
     event.getMatch().getWorld().setGameRuleValue(DO_FIRE_TICK, Boolean.toString(false));
   }
 
   // if no doFireTick <gamerule> is found, then use doFireTick setting saved in world
   @EventHandler
   public void unlockFireTick(final MatchStartEvent event) {
-    ImmutableMap<String, String> gameRules =
-        event.getMatch().getModule(GameRulesMatchModule.class).getGameRules();
-    String newFireTick = gameRules.get(DO_FIRE_TICK);
-    if (!gameRules.isEmpty() && newFireTick != null) {
-      event.getMatch().getWorld().setGameRuleValue(DO_FIRE_TICK, newFireTick);
-    } else {
-      event.getMatch().getWorld().setGameRuleValue(DO_FIRE_TICK, Boolean.toString(oldFireTick));
-    }
+    String farts = event.getMatch().getModule(GameRulesMatchModule.class).getMapGameRules().get(DO_FIRE_TICK);
+    String newFireTick = event.getMatch().getModule(GameRulesMatchModule.class).getGameRules().get(DO_FIRE_TICK);
+    event.getMatch().getWorld().setGameRuleValue(DO_FIRE_TICK, newFireTick != null ? newFireTick : farts);
   }
 
   @EventHandler
