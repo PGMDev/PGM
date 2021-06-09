@@ -20,6 +20,7 @@ public class GameRulesMatchModule implements MatchModule {
 
   @Override
   public void load() {
+    // gets values stored in world's level.dat file
     for (String gameRule : this.match.getWorld().getGameRules()) {
       mapGameRules.put(gameRule, this.match.getWorld().getGameRuleValue(gameRule));
     }
@@ -33,7 +34,7 @@ public class GameRulesMatchModule implements MatchModule {
     return ImmutableMap.copyOf(gameRules);
   }
 
-  public ImmutableMap<String, String> getMapGameRules() {
-    return ImmutableMap.copyOf(mapGameRules);
+  public String getMapGameRule(String gameRule) {
+    return mapGameRules.get(gameRule);
   }
 }

@@ -268,9 +268,9 @@ public class PGMListener implements Listener {
   @EventHandler
   public void unlockFireTick(final MatchStartEvent event) {
     String oldFireTick =
-        event.getMatch().getModule(GameRulesMatchModule.class).getMapGameRules().get(DO_FIRE_TICK);
+        event.getMatch().needModule(GameRulesMatchModule.class).getMapGameRule(DO_FIRE_TICK);
     String newFireTick =
-        event.getMatch().getModule(GameRulesMatchModule.class).getGameRules().get(DO_FIRE_TICK);
+        event.getMatch().needModule(GameRulesMatchModule.class).getGameRules().get(DO_FIRE_TICK);
     event
         .getMatch()
         .getWorld()
