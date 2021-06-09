@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
@@ -95,23 +96,29 @@ public class ScoreModule implements MapModule {
 
       RegionParser regionParser = factory.getRegions();
       ImmutableSet.Builder<ScoreBoxFactory> scoreBoxFactories = ImmutableSet.builder();
-      ScoreConfig config = null;
+      Optional<Integer> scoreLimit = Optional.empty();
+      Optional<Integer> mercyLimit = Optional.empty();
+      Optional<Integer> deathScore = Optional.empty();
+      Optional<Integer> killScore = Optional.empty();
       for (Element scoreEl : scoreElements) {
-        int scoreLimit = XMLUtils.parseNumber(scoreEl.getChild("limit"), Integer.class, -1);
-        int mercyLimit = XMLUtils.parseNumber(scoreEl.getChild("mercy"), Integer.class, -1);
+        scoreLimit =
+            Optional.of(XMLUtils.parseNumber(scoreEl.getChild("limit"), Integer.class, -1));
+        mercyLimit =
+            Optional.of(XMLUtils.parseNumber(scoreEl.getChild("mercy"), Integer.class, -1));
 
         // For backwards compatibility, default kill/death points to 1 if proto is old and <king/>
         // tag
         // is not present
         boolean scoreKillsByDefault =
             proto.isOlderThan(MapProtos.DEFAULT_SCORES_TO_ZERO) && scoreEl.getChild("king") == null;
-        int deathScore =
-            XMLUtils.parseNumber(
-                scoreEl.getChild("deaths"), Integer.class, scoreKillsByDefault ? 1 : 0);
-        int killScore =
-            XMLUtils.parseNumber(
-                scoreEl.getChild("kills"), Integer.class, scoreKillsByDefault ? 1 : 0);
-        config = new ScoreConfig(scoreLimit, deathScore, killScore, mercyLimit);
+        deathScore =
+            Optional.of(
+                XMLUtils.parseNumber(
+                    scoreEl.getChild("deaths"), Integer.class, scoreKillsByDefault ? 1 : 0));
+        killScore =
+            Optional.of(
+                XMLUtils.parseNumber(
+                    scoreEl.getChild("kills"), Integer.class, scoreKillsByDefault ? 1 : 0));
         for (Element scoreBoxEl : scoreEl.getChildren("box")) {
           int points =
               XMLUtils.parseNumber(
@@ -145,7 +152,13 @@ public class ScoreModule implements MapModule {
                   region, points, filter, ImmutableMap.copyOf(redeemables), silent));
         }
       }
-      return new ScoreModule(config, scoreBoxFactories.build());
+      return new ScoreModule(
+          new ScoreConfig(
+              scoreLimit.orElse(-1),
+              deathScore.orElse(proto.isOlderThan(MapProtos.DEFAULT_SCORES_TO_ZERO) ? 1 : 0),
+              killScore.orElse(proto.isOlderThan(MapProtos.DEFAULT_SCORES_TO_ZERO) ? 1 : 0),
+              mercyLimit.orElse(-1)),
+          scoreBoxFactories.build());
     }
   }
 }

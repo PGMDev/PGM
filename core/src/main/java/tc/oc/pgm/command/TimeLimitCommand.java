@@ -31,29 +31,25 @@ public final class TimeLimitCommand {
       @Nullable Duration overtime,
       @Nullable Duration maxOvertime,
       @Nullable Duration endOvertime) {
-    final TimeLimitMatchModule time = match.getModule(TimeLimitMatchModule.class);
+    final TimeLimitMatchModule time = match.needModule(TimeLimitMatchModule.class);
 
-    if (time != null) {
-      time.cancel();
-      time.setTimeLimit(
-          new TimeLimit(
-              null,
-              duration.isNegative() ? Duration.ZERO : duration,
-              overtime,
-              maxOvertime,
-              endOvertime,
-              result,
-              true));
-      time.start();
+    time.cancel();
+    time.setTimeLimit(
+        new TimeLimit(
+            null,
+            duration.isNegative() ? Duration.ZERO : duration,
+            overtime,
+            maxOvertime,
+            endOvertime,
+            result,
+            true));
+    time.start();
 
-      audience.sendMessage(
-          translatable(
-              "match.timeLimit.commandOutput",
-              NamedTextColor.YELLOW,
-              clock(duration).color(NamedTextColor.AQUA),
-              result != null ? result.getDescription(match) : translatable("misc.unknown")));
-      return;
-    }
-    audience.sendWarning(translatable("match.timeLimit.notEnabled"));
+    audience.sendMessage(
+        translatable(
+            "match.timeLimit.commandOutput",
+            NamedTextColor.YELLOW,
+            clock(duration).color(NamedTextColor.AQUA),
+            result != null ? result.getDescription(match) : translatable("misc.unknown")));
   }
 }
