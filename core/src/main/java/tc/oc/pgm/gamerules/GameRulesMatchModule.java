@@ -20,10 +20,9 @@ public class GameRulesMatchModule implements MatchModule {
   @Override
   public void load() {
     for (Map.Entry<String, String> gameRule : this.gameRules.entrySet()) {
+      this.match.getWorld().setGameRuleValue(gameRule.getKey(), gameRule.getValue());
       if (gameRule.getKey().equals("doDaylightCycle")) {
         doDaylightCycle = Boolean.parseBoolean(gameRule.getValue());
-      } else {
-        this.match.getWorld().setGameRuleValue(gameRule.getKey(), gameRule.getValue());
       }
     }
 
