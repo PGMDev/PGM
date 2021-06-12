@@ -264,17 +264,14 @@ public class PGMListener implements Listener {
     event.getMatch().getWorld().setGameRuleValue(DO_FIRE_TICK, Boolean.toString(false));
   }
 
-  // if no doFireTick <gamerule> is found, then use doFireTick setting saved in world
   @EventHandler
   public void unlockFireTick(final MatchStartEvent event) {
-    String oldFireTick =
-        event.getMatch().needModule(GameRulesMatchModule.class).getMapGameRule(DO_FIRE_TICK);
-    String newFireTick =
-        event.getMatch().needModule(GameRulesMatchModule.class).getGameRules().get(DO_FIRE_TICK);
     event
         .getMatch()
         .getWorld()
-        .setGameRuleValue(DO_FIRE_TICK, newFireTick != null ? newFireTick : oldFireTick);
+        .setGameRuleValue(
+            DO_FIRE_TICK,
+            event.getMatch().needModule(GameRulesMatchModule.class).getGameRule(DO_FIRE_TICK));
   }
 
   @EventHandler
@@ -296,11 +293,11 @@ public class PGMListener implements Listener {
     // if there is a timelock module and it is off, unlock time
     boolean unlockTime = !event.getMatch().getModule(WorldTimeModule.class).isTimeLocked();
 
-    GameRulesMatchModule gameRulesModule = event.getMatch().getModule(GameRulesMatchModule.class);
-    if (gameRulesModule != null && gameRulesModule.getGameRules().containsKey(DO_DAYLIGHT_CYCLE)) {
-      unlockTime = Boolean.parseBoolean(gameRulesModule.getGameRules().get(DO_DAYLIGHT_CYCLE));
+    GameRulesMatchModule gameRulesMatchModule =
+        event.getMatch().getModule(GameRulesMatchModule.class);
+    if (gameRulesMatchModule != null && gameRulesMatchModule.getDoDaylightCycle()) {
+      unlockTime = gameRulesMatchModule.getDoDaylightCycle();
     }
-
     event.getMatch().getWorld().setGameRuleValue(DO_DAYLIGHT_CYCLE, Boolean.toString(unlockTime));
   }
 

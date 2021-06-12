@@ -2,7 +2,6 @@ package tc.oc.pgm.gamerules;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import java.util.HashMap;
 import java.util.Map;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -11,7 +10,7 @@ public class GameRulesMatchModule implements MatchModule {
 
   private final Match match;
   private final Map<String, String> gameRules;
-  private Map<String, String> mapGameRules = new HashMap<>();
+  private boolean doDaylightCycle = false;
 
   public GameRulesMatchModule(Match match, Map<String, String> gameRules) {
     this.match = match;
@@ -20,13 +19,20 @@ public class GameRulesMatchModule implements MatchModule {
 
   @Override
   public void load() {
-    // gets values stored in world's level.dat file
-    for (String gameRule : this.match.getWorld().getGameRules()) {
-      mapGameRules.put(gameRule, this.match.getWorld().getGameRuleValue(gameRule));
+    for (Map.Entry<String, String> gameRule : this.gameRules.entrySet()) {
+      if (gameRule.getKey().equals("doDaylightCycle")) {
+        doDaylightCycle = Boolean.parseBoolean(gameRule.getValue());
+      } else {
+        this.match.getWorld().setGameRuleValue(gameRule.getKey(), gameRule.getValue());
+      }
     }
 
-    for (Map.Entry<String, String> gameRule : this.gameRules.entrySet()) {
-      this.match.getWorld().setGameRuleValue(gameRule.getKey(), gameRule.getValue());
+    // gets gamerule values from level.dat after being set
+    // does not save doDaylightCycle to gamerules
+    for (String gameRule : this.match.getWorld().getGameRules()) {
+      if (!gameRule.equals("doDaylightCycle")) {
+        gameRules.put(gameRule, this.match.getWorld().getGameRuleValue(gameRule));
+      }
     }
   }
 
@@ -34,7 +40,11 @@ public class GameRulesMatchModule implements MatchModule {
     return ImmutableMap.copyOf(gameRules);
   }
 
-  public String getMapGameRule(String gameRule) {
-    return mapGameRules.get(gameRule);
+  public String getGameRule(String gameRule) {
+    return gameRules.get(gameRule);
+  }
+
+  public boolean getDoDaylightCycle() {
+    return doDaylightCycle;
   }
 }
