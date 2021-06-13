@@ -295,8 +295,9 @@ public class PGMListener implements Listener {
 
     GameRulesMatchModule gameRulesMatchModule =
         event.getMatch().getModule(GameRulesMatchModule.class);
-    if (gameRulesMatchModule != null && gameRulesMatchModule.getDoDaylightCycle()) {
-      unlockTime = gameRulesMatchModule.getDoDaylightCycle();
+    if (gameRulesMatchModule != null
+        && Boolean.parseBoolean(gameRulesMatchModule.getGameRule(DO_DAYLIGHT_CYCLE))) {
+      unlockTime = true;
     }
     event.getMatch().getWorld().setGameRuleValue(DO_DAYLIGHT_CYCLE, Boolean.toString(unlockTime));
   }

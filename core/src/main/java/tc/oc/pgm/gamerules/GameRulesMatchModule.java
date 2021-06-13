@@ -10,7 +10,6 @@ public class GameRulesMatchModule implements MatchModule {
 
   private final Match match;
   private final Map<String, String> gameRules;
-  private boolean doDaylightCycle = false;
 
   public GameRulesMatchModule(Match match, Map<String, String> gameRules) {
     this.match = match;
@@ -21,9 +20,6 @@ public class GameRulesMatchModule implements MatchModule {
   public void load() {
     for (Map.Entry<String, String> gameRule : this.gameRules.entrySet()) {
       this.match.getWorld().setGameRuleValue(gameRule.getKey(), gameRule.getValue());
-      if (gameRule.getKey().equals("doDaylightCycle")) {
-        doDaylightCycle = Boolean.parseBoolean(gameRule.getValue());
-      }
     }
 
     // gets gamerule values from level.dat after being set
@@ -41,9 +37,5 @@ public class GameRulesMatchModule implements MatchModule {
 
   public String getGameRule(String gameRule) {
     return gameRules.get(gameRule);
-  }
-
-  public boolean getDoDaylightCycle() {
-    return doDaylightCycle;
   }
 }
