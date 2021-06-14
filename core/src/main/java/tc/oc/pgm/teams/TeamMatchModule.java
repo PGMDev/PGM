@@ -36,6 +36,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.MatchPlayerFullJoinEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinPartyEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
@@ -500,7 +501,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
           } else {
             joining.sendWarning(translatable("join.err.full"));
           }
-
+          match.callEvent(new MatchPlayerFullJoinEvent(joining));
           return true;
 
         case REDUNDANT:
