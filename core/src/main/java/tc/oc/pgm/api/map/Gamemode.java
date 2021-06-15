@@ -26,6 +26,16 @@ public enum Gamemode {
     this.id = id;
   }
 
+  public static Gamemode byId(String gamemodeId) {
+    Gamemode gm = null;
+    for (Gamemode gamemode : Gamemode.values()) {
+      if (gamemode.getId().equals(gamemodeId)) {
+        gm = gamemode;
+      }
+    }
+    return gm;
+  }
+
   public String getId() {
     return id;
   }

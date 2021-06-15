@@ -257,10 +257,11 @@ public class MapInfoImpl implements MapInfo {
   private static List<Gamemode> parseGamemodes(Element root) throws InvalidXMLException {
     List<Gamemode> gamemodes = new ArrayList<>();
     for (Element gamemodeEl : root.getChildren("gamemode")) {
-      for (Gamemode gamemode : Gamemode.values()) {
-        if (gamemode.getId().equals(gamemodeEl.getText())) {
-          gamemodes.add(gamemode);
-        }
+      Gamemode gm = Gamemode.byId(gamemodeEl.getText());
+      if (gm == null) {
+        throw new InvalidXMLException("Unknown gamemode", gamemodeEl);
+      } else {
+        gamemodes.add(gm);
       }
     }
     return gamemodes;
