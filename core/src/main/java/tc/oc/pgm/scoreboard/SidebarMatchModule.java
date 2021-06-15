@@ -1,5 +1,6 @@
 package tc.oc.pgm.scoreboard;
 
+import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
@@ -11,7 +12,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -267,22 +267,48 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
     final Collection<Gamemode> gamemodes = map.getGamemodes();
     if (!gamemodes.isEmpty()) {
-      Iterator<Gamemode> gamemodeIterator = gamemodes.iterator();
-      String firstgamemodeId = gamemodeIterator.next().getId();
-      if (gamemodeIterator.hasNext()) {
-        String secondgamemodeId = gamemodeIterator.next().getId();
-        Component firstComponent =
-            Component.translatable("gamemode." + firstgamemodeId + ".acronym");
-        Component secondComponent =
-            Component.translatable("gamemode." + secondgamemodeId + ".acronym");
-        return firstComponent
-            .append(Component.text(" & "))
-            .append(secondComponent)
-            .colorIfAbsent(NamedTextColor.AQUA);
-      } else {
-        return Component.translatable("gamemode." + firstgamemodeId + ".name")
-            .colorIfAbsent(NamedTextColor.AQUA);
+      Component gamemodeTitle = null;
+      List<Component> gamemodeComponents = new ArrayList<>();
+      for (Gamemode value : gamemodes) {
+        Component gmComponent;
+        // Make this smarter using MAX_LENGTH
+        if (gamemodes.size() <= 1) {
+          gmComponent = Component.translatable("gamemode." + value.getId() + ".name");
+        } else {
+          gmComponent = Component.translatable("gamemode." + value.getId() + ".acronym");
+        }
+        gamemodeComponents.add(gmComponent);
       }
+      switch (gamemodes.size()) {
+        case 1:
+          gamemodeTitle = gamemodeComponents.get(0).colorIfAbsent(NamedTextColor.AQUA);
+          break;
+        case 2:
+          gamemodeTitle =
+              Component.translatable(
+                      "misc.list.pair", gamemodeComponents.get(0), gamemodeComponents.get(1))
+                  .colorIfAbsent(NamedTextColor.AQUA);
+          break;
+        case 3:
+          gamemodeTitle =
+              Component.translatable(
+                      "misc.list.start", gamemodeComponents.get(0), gamemodeComponents.get(1))
+                  .append(
+                      Component.translatable(
+                          "misc.list.end", TextColor.fromHexString(""), gamemodeComponents.get(2)))
+                  .colorIfAbsent(NamedTextColor.AQUA);
+          break;
+        case 4:
+          gamemodeTitle =
+              Component.translatable(
+                      "misc.list.start", gamemodeComponents.get(0), gamemodeComponents.get(1))
+                  .append(
+                      Component.translatable(
+                          "misc.list.end", gamemodeComponents.get(2), gamemodeComponents.get(3)))
+                  .colorIfAbsent(NamedTextColor.AQUA);
+          break;
+      }
+      return gamemodeTitle;
     }
 
     final List<Component> games = new LinkedList<>();
