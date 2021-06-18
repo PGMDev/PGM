@@ -1,5 +1,8 @@
 package tc.oc.pgm.rotation;
 
+import static tc.oc.pgm.util.text.TextParser.parseDuration;
+
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -22,6 +25,7 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
   protected final boolean enabled;
   protected final List<MapInfo> maps;
   protected final int players;
+  protected final Duration cycleTime;
 
   protected final boolean dynamic;
 
@@ -48,6 +52,7 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
     this.enabled = section.getBoolean("enabled");
     this.players = section.getInt("players");
     this.dynamic = section.getBoolean("dynamic", true);
+    this.cycleTime = parseDuration(section.getString("cycle-time", "-1s"));
 
     MapLibrary library = PGM.get().getMapLibrary();
     List<MapInfo> mapList =
@@ -77,6 +82,10 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
 
   public boolean isDynamic() {
     return dynamic;
+  }
+
+  public Duration getCycleTime() {
+    return cycleTime;
   }
 
   public List<MapInfo> getMaps() {
