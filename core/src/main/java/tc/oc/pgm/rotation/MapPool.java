@@ -84,10 +84,6 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
     return dynamic;
   }
 
-  public Duration getCycleTime() {
-    return cycleTime;
-  }
-
   public List<MapInfo> getMaps() {
     return maps;
   }
@@ -98,6 +94,11 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
 
   protected MapInfo getRandom() {
     return maps.get((int) (Math.random() * maps.size()));
+  }
+
+  @Override
+  public Duration getCycleTime() {
+    return cycleTime;
   }
 
   /**

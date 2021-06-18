@@ -16,7 +16,6 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerLeaveMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.restart.RestartManager;
-import tc.oc.pgm.rotation.MapPoolManager;
 
 @ListenerScope(MatchScope.LOADED)
 public class CycleMatchModule implements MatchModule, Listener {
@@ -61,7 +60,7 @@ public class CycleMatchModule implements MatchModule, Listener {
     mapOrder.matchEnded(match);
 
     if (!RestartManager.isQueued()) {
-      Duration duration = getCycleTime(mapOrder);
+      Duration duration = mapOrder.getCycleTime();
 
       if (!duration.isNegative()) {
         startCountdown(duration);
@@ -72,24 +71,5 @@ public class CycleMatchModule implements MatchModule, Listener {
   @EventHandler
   public void onLeave(PlayerLeaveMatchEvent event) {
     if (bossbar != null) event.getPlayer().hideBossBar(bossbar);
-  }
-
-  private Duration getCycleTime(MapOrder order) {
-    Duration cycleTime = null;
-
-    // Check if pool has custom cycle time
-    if (order instanceof MapPoolManager) {
-      MapPoolManager manager = (MapPoolManager) order;
-      if (manager != null && manager.getActiveMapPool() != null) {
-        cycleTime = manager.getActiveMapPool().getCycleTime();
-      }
-    }
-
-    // Default to the main cycle time when not found
-    if (cycleTime == null || cycleTime.isNegative()) {
-      cycleTime = PGM.get().getConfiguration().getCycleTime();
-    }
-
-    return cycleTime;
   }
 }
