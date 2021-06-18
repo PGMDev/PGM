@@ -266,8 +266,9 @@ public class MapPoolManager implements MapOrder {
 
   @Override
   public Duration getCycleTime() {
-    if (activeMapPool != null && !activeMapPool.getCycleTime().isNegative()) {
-      return activeMapPool.getCycleTime();
+    Duration cycleTime;
+    if (activeMapPool != null && !(cycleTime = activeMapPool.getCycleTime()).isNegative()) {
+      return cycleTime;
     }
     return PGM.get().getConfiguration().getCycleTime();
   }
