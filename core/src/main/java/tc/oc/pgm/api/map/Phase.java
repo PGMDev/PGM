@@ -13,6 +13,11 @@ public enum Phase {
   }
 
   public static Phase of(String query) {
-    return query.startsWith("dev") ? DEVELOPMENT : PRODUCTION;
+    for (Phase phase : Phase.values()) {
+      if (phase.toString().toLowerCase().startsWith(query.toLowerCase())) {
+        return phase;
+      }
+    }
+    return null;
   }
 }

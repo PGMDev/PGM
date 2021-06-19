@@ -7,6 +7,7 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.event.ClickEvent.runCommand;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
+import static tc.oc.pgm.util.text.TextException.invalidFormat;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
@@ -58,7 +59,7 @@ public final class MapCommand {
       @Fallback(Type.NULL) @Switch('t') String tags,
       @Fallback(Type.NULL) @Switch('a') String author,
       @Fallback(Type.NULL) @Switch('n') String name,
-      @Fallback(Type.NULL) @Switch('p') String phase)
+      @Fallback(Type.NULL) @Switch('p') String phaseType)
       throws CommandException {
     Stream<MapInfo> search = Sets.newHashSet(library.getMaps()).stream();
     if (tags != null) {
@@ -83,11 +84,10 @@ public final class MapCommand {
       search = search.filter(map -> matchesName(map, name));
     }
 
-    if (phase != null) {
-      search = search.filter(map -> matchesPhase(map, phase));
-    } else {
-      search = search.filter(map -> map.getPhase() == Phase.PRODUCTION);
-    }
+    Phase phase = phaseType == null ? Phase.PRODUCTION : Phase.of(phaseType);
+    if (phase == null) throw invalidFormat(phaseType, Phase.class, null);
+
+    search = search.filter(map -> map.getPhase() == phase);
 
     Set<MapInfo> maps = search.collect(Collectors.toCollection(TreeSet::new));
     int resultsPerPage = 8;
