@@ -18,6 +18,7 @@ import org.jdom2.Element;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
+import tc.oc.pgm.api.map.Phase;
 import tc.oc.pgm.api.map.WorldInfo;
 import tc.oc.pgm.map.contrib.PlayerContributor;
 import tc.oc.pgm.map.contrib.PseudonymContributor;
@@ -33,6 +34,7 @@ public class MapInfoImpl implements MapInfo {
   private final String id;
   private final Version proto;
   private final Version version;
+  private final Phase phase;
   private final String name;
   private final String description;
   private final LocalDate created;
@@ -60,7 +62,8 @@ public class MapInfoImpl implements MapInfo {
       @Nullable Collection<MapTag> tags,
       @Nullable Collection<Integer> players,
       @Nullable WorldInfo world,
-      @Nullable Component gamemode) {
+      @Nullable Component gamemode,
+      Phase phase) {
     this.name = checkNotNull(name);
     this.id = checkNotNull(MapInfo.normalizeName(id == null ? name : id));
     this.proto = checkNotNull(proto);
@@ -75,6 +78,7 @@ public class MapInfoImpl implements MapInfo {
     this.players = players == null ? new LinkedList<>() : players;
     this.world = world == null ? new WorldInfoImpl() : world;
     this.gamemode = gamemode;
+    this.phase = phase;
   }
 
   public MapInfoImpl(MapInfo info) {
@@ -92,7 +96,8 @@ public class MapInfoImpl implements MapInfo {
         info.getTags(),
         info.getMaxPlayers(),
         info.getWorld(),
-        info.getGamemode());
+        info.getGamemode(),
+        info.getPhase());
   }
 
   public MapInfoImpl(Element root) throws InvalidXMLException {
@@ -115,7 +120,9 @@ public class MapInfoImpl implements MapInfo {
         null,
         null,
         parseWorld(root),
-        XMLUtils.parseFormattedText(root, "game"));
+        XMLUtils.parseFormattedText(root, "game"),
+        XMLUtils.parseEnum(
+            Node.fromLastChildOrAttr(root, "phase"), Phase.class, "phase", Phase.PRODUCTION));
   }
 
   @Override
@@ -186,6 +193,11 @@ public class MapInfoImpl implements MapInfo {
   @Override
   public WorldInfo getWorld() {
     return world;
+  }
+
+  @Override
+  public Phase getPhase() {
+    return phase;
   }
 
   @Override

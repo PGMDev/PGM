@@ -130,6 +130,13 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
   WorldInfo getWorld();
 
   /**
+   * Get the {@link Phase} for the map.
+   *
+   * @return The {@link Phase}.
+   */
+  Phase getPhase();
+
+  /**
    * Create an immutable copy of this info.
    *
    * @return A cloned {@link MapInfo}.
