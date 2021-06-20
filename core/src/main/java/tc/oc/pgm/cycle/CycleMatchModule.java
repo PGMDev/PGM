@@ -60,7 +60,8 @@ public class CycleMatchModule implements MatchModule, Listener {
     mapOrder.matchEnded(match);
 
     if (!RestartManager.isQueued()) {
-      Duration duration = PGM.get().getConfiguration().getCycleTime();
+      Duration duration = mapOrder.getCycleTime();
+
       if (!duration.isNegative()) {
         startCountdown(duration);
       }

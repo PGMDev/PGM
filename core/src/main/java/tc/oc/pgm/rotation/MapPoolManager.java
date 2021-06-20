@@ -264,6 +264,15 @@ public class MapPoolManager implements MapOrder {
     activeMapPool.matchEnded(match);
   }
 
+  @Override
+  public Duration getCycleTime() {
+    Duration cycleTime;
+    if (activeMapPool != null && !(cycleTime = activeMapPool.getCycleTime()).isNegative()) {
+      return cycleTime;
+    }
+    return PGM.get().getConfiguration().getCycleTime();
+  }
+
   private boolean shouldRevert(Match match) {
     return match.getPlayers().stream()
             .noneMatch(mp -> mp.getBukkit().hasPermission(Permissions.STAFF))
