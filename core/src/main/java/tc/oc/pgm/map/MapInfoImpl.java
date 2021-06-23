@@ -65,7 +65,7 @@ public class MapInfoImpl implements MapInfo {
       @Nullable Collection<Integer> players,
       @Nullable WorldInfo world,
       @Nullable Component gamemode,
-      @Nullable Collection<Gamemode> gamemodes) {
+      @Nullable Collection<Gamemode> gamemodes,
       Phase phase) {
     this.name = checkNotNull(name);
     this.id = checkNotNull(MapInfo.normalizeName(id == null ? name : id));
@@ -101,7 +101,7 @@ public class MapInfoImpl implements MapInfo {
         info.getMaxPlayers(),
         info.getWorld(),
         info.getGamemode(),
-        info.getGamemodes());
+        info.getGamemodes(),
         info.getPhase());
   }
 
@@ -126,7 +126,7 @@ public class MapInfoImpl implements MapInfo {
         null,
         parseWorld(root),
         XMLUtils.parseFormattedText(root, "game"),
-        parseGamemodes(root));
+        parseGamemodes(root),
         XMLUtils.parseEnum(
             Node.fromLastChildOrAttr(root, "phase"), Phase.class, "phase", Phase.PRODUCTION));
   }
