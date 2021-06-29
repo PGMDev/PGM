@@ -1,12 +1,16 @@
 package tc.oc.pgm.api.integration;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
+import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.integration.FriendIntegrationImpl;
 import tc.oc.pgm.integration.NickIntegrationImpl;
 import tc.oc.pgm.integration.PunishmentIntegrationImpl;
+import tc.oc.pgm.integration.RequestIntegrationImpl;
 import tc.oc.pgm.integration.VanishIntegrationImpl;
 
 public interface Integration {
@@ -19,6 +23,8 @@ public interface Integration {
       new AtomicReference<VanishIntegration>(new VanishIntegrationImpl());
   static final AtomicReference<PunishmentIntegration> PUNISHMENTS =
       new AtomicReference<PunishmentIntegration>(new PunishmentIntegrationImpl());
+  static final AtomicReference<RequestIntegration> REQUESTS =
+      new AtomicReference<RequestIntegration>(new RequestIntegrationImpl());
 
   public static void setFriendIntegration(FriendIntegration integration) {
     FRIENDS.set(integration);
@@ -34,6 +40,10 @@ public interface Integration {
 
   public static void setPunishmentIntegration(PunishmentIntegration integration) {
     PUNISHMENTS.set(integration);
+  }
+
+  public static void setRequestIntegration(RequestIntegration integration) {
+    REQUESTS.set(integration);
   }
 
   // FRIENDS
@@ -66,5 +76,16 @@ public interface Integration {
 
   public static boolean isHidden(Player player) {
     return PUNISHMENTS.get().isHidden(player);
+  }
+
+  // ETC
+
+  // MATCH INFO
+  public static List<Component> getExtraMatchInfoLines(MapInfo map) {
+    return REQUESTS.get().getExtraMatchInfoLines(map);
+  }
+
+  public static boolean isSponsor(MapInfo map) {
+    return REQUESTS.get().isSponsor(map);
   }
 }

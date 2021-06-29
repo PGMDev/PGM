@@ -22,6 +22,7 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.VotingPool;
@@ -40,18 +41,18 @@ public class VotingCommand {
       perms = Permissions.SETNEXT)
   public void addMap(
       Audience viewer,
-      CommandSender sender,
+      MatchPlayer sender,
       @Fallback(Type.NULL) @Text MapInfo map,
       MapOrder mapOrder,
       Match match)
       throws CommandException {
-    VotingPool vote = getVotingPool(sender, mapOrder);
+    VotingPool vote = getVotingPool(sender.getBukkit(), mapOrder);
 
     Component addMessage =
         translatable(
             "vote.add",
             NamedTextColor.GRAY,
-            player(sender, NameStyle.FANCY),
+            player(sender.getBukkit(), NameStyle.FANCY),
             map.getStyledName(MapNameStyle.COLOR));
 
     if (vote.getOptions().isAdded(map)) {
@@ -59,7 +60,7 @@ public class VotingCommand {
       return;
     }
 
-    if (vote.getOptions().addVote(map)) {
+    if (vote.getOptions().addVote(map, sender.getId(), true)) {
       ChatDispatcher.broadcastAdminChatMessage(addMessage, match);
     } else {
       viewer.sendWarning(translatable("vote.limit", NamedTextColor.RED));

@@ -1,15 +1,18 @@
 package tc.oc.pgm.rotation;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import tc.oc.pgm.api.map.MapInfo;
 
 public class CustomVotingPoolOptions {
 
   // Set of maps to be used in custom vote selection
-  private Set<MapInfo> customVoteMaps;
+  private Set<CustomVoteEntry> customVoteMaps;
 
   // Whether custom map selection should replace existing entries
   private boolean replace;
@@ -32,24 +35,43 @@ public class CustomVotingPoolOptions {
     return replace;
   }
 
-  public boolean addVote(MapInfo map) {
+  public boolean addVote(MapInfo map, UUID playerId, boolean identify) {
     if (customVoteMaps.size() < VotingPool.MAX_VOTE_OPTIONS) {
-      this.customVoteMaps.add(map);
+      this.customVoteMaps.add(new CustomVoteEntry(map, identify, playerId));
       return true;
     }
     return false;
   }
 
   public boolean removeMap(MapInfo map) {
-    return this.customVoteMaps.remove(map);
+    Optional<CustomVoteEntry> entry =
+        getCustomVotes().stream().filter(s -> s.getMap().equals(map)).findFirst();
+    if (entry.isPresent()) {
+      return customVoteMaps.remove(entry.get());
+    }
+    return false;
   }
 
-  public Set<MapInfo> getCustomVoteMaps() {
+  public Set<CustomVoteEntry> getCustomVotes() {
     return customVoteMaps;
   }
 
+  public Map<MapInfo, UUID> getOverrideMaps() {
+    Map<MapInfo, UUID> overrides = Maps.newHashMap();
+    customVoteMaps.stream()
+        .forEach(
+            entry -> {
+              overrides.put(entry.getMap(), entry.isIdentified() ? entry.getPlayerId() : null);
+            });
+    return overrides;
+  }
+
+  public Set<MapInfo> getCustomVoteMaps() {
+    return customVoteMaps.stream().map(CustomVoteEntry::getMap).collect(Collectors.toSet());
+  }
+
   public boolean isAdded(MapInfo info) {
-    return customVoteMaps.stream().anyMatch(s -> s.getName().equalsIgnoreCase(info.getName()));
+    return getCustomVoteMaps().stream().anyMatch(s -> s.getName().equalsIgnoreCase(info.getName()));
   }
 
   public void clear() {
@@ -57,7 +79,7 @@ public class CustomVotingPoolOptions {
   }
 
   public Map<MapInfo, Double> getCustomVoteMapWeighted() {
-    return customVoteMaps.stream()
+    return getCustomVoteMaps().stream()
         .collect(Collectors.toMap(map -> map, x -> VotingPool.DEFAULT_WEIGHT));
   }
 }
