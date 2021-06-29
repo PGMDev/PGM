@@ -34,9 +34,11 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
@@ -171,8 +173,9 @@ public class MapPoll {
   private Component getOverridePlayer(MapInfo map) {
     UUID playerId = overrides.get(map);
     Component playerName = null;
+    Player bukkit = Bukkit.getPlayer(playerId);
 
-    if (playerId != null && Bukkit.getPlayer(playerId) != null) {
+    if (playerId != null && bukkit != null && !Integration.isVanished(bukkit)) {
       playerName = player(playerId, NameStyle.FANCY);
     }
 
@@ -241,7 +244,7 @@ public class MapPoll {
           .append(
               text()
                   .append(newline())
-                  .append(text("+", NamedTextColor.GREEN, TextDecoration.BOLD))
+                  .append(text("+ ", NamedTextColor.GREEN, TextDecoration.BOLD))
                   .append(text("Sponsored by ", NamedTextColor.GRAY)))
           .append(identified);
     } // TODO: ^ hard coded text value, in the future make translatable or passed in so custom
