@@ -294,11 +294,21 @@ public class MapPoll {
    * @return The number of votes counted
    */
   private int countVotes(Set<UUID> uuids) {
-    return uuids.stream()
-        .map(Bukkit::getPlayer)
-        // Count disconnected players as 1, can't test for their perms
-        .mapToInt(p -> p == null || !p.hasPermission(Permissions.EXTRA_VOTE) ? 1 : 2)
-        .sum();
+    return uuids.stream().map(Bukkit::getPlayer).mapToInt(this::calcVoteMultiplier).sum();
+  }
+
+  private int calcVoteMultiplier(Player player) {
+    // Count disconnected players as 1, can't test for their perms
+    if (player != null) {
+      for (int i = 5; i > 1; i--) {
+        if (player.hasPermission(Permissions.VOTE_MULTIPLIER + "." + i)) {
+          return i;
+        }
+      }
+      // Legacy extra vote permission node support
+      return player.hasPermission(Permissions.EXTRA_VOTE) ? 2 : 1;
+    }
+    return 1;
   }
 
   /**

@@ -34,6 +34,7 @@ public interface Permissions {
   String VANISH = ROOT + ".vanish"; // Access to /vanish command
   String SKIN = ROOT + ".skin"; // Access to /skin command
   String ADMIN = ROOT + ".admin"; // Access to admin features
+  String VOTE_MULTIPLIER = JOIN + ".votecount"; // Extra map voting multiplier
 
   String MAPMAKER = GROUP + ".mapmaker"; // Permission group for mapmakers, defined in config.yml
 
