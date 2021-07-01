@@ -60,7 +60,7 @@ public class VotingCommand {
       return;
     }
 
-    if (vote.getOptions().addVote(map, sender.getId(), true)) {
+    if (vote.getOptions().addVote(map, sender.getId(), false)) {
       ChatDispatcher.broadcastAdminChatMessage(addMessage, match);
     } else {
       viewer.sendWarning(translatable("vote.limit", NamedTextColor.RED));

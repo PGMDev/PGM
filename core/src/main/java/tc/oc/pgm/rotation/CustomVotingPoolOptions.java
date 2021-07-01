@@ -35,8 +35,12 @@ public class CustomVotingPoolOptions {
     return replace;
   }
 
+  public boolean canAddVote() {
+    return customVoteMaps.size() < VotingPool.MAX_VOTE_OPTIONS;
+  }
+
   public boolean addVote(MapInfo map, UUID playerId, boolean identify) {
-    if (customVoteMaps.size() < VotingPool.MAX_VOTE_OPTIONS) {
+    if (canAddVote()) {
       this.customVoteMaps.add(new CustomVoteEntry(map, identify, playerId));
       return true;
     }
