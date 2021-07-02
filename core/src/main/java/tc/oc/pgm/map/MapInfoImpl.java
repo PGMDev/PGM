@@ -270,11 +270,8 @@ public class MapInfoImpl implements MapInfo {
     List<Gamemode> gamemodes = new ArrayList<>();
     for (Element gamemodeEl : root.getChildren("gamemode")) {
       Gamemode gm = Gamemode.byId(gamemodeEl.getText());
-      if (gm == null) {
-        throw new InvalidXMLException("Unknown gamemode", gamemodeEl);
-      } else {
-        gamemodes.add(gm);
-      }
+      if (gm == null) throw new InvalidXMLException("Unknown gamemode", gamemodeEl);
+      gamemodes.add(gm);
     }
     return gamemodes;
   }

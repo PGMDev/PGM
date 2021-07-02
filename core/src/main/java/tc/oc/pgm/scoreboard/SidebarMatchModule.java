@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -267,44 +268,36 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
     final Collection<Gamemode> gamemodes = map.getGamemodes();
     if (!gamemodes.isEmpty()) {
+      String suffix = gamemodes.size() <= 1 ? ".name" : ".acronym";
+      List<Component> gmComponents =
+          gamemodes.stream()
+              .map(gm -> translatable("gamemode." + gm.getId() + suffix))
+              .collect(Collectors.toList());
       Component gamemodeTitle = null;
-      List<Component> gamemodeComponents = new ArrayList<>();
-      for (Gamemode value : gamemodes) {
-        Component gmComponent;
-        // Make this smarter using MAX_LENGTH
-        if (gamemodes.size() <= 1) {
-          gmComponent = Component.translatable("gamemode." + value.getId() + ".name");
-        } else {
-          gmComponent = Component.translatable("gamemode." + value.getId() + ".acronym");
-        }
-        gamemodeComponents.add(gmComponent);
-      }
+
       switch (gamemodes.size()) {
         case 1:
-          gamemodeTitle = gamemodeComponents.get(0).colorIfAbsent(NamedTextColor.AQUA);
+          gamemodeTitle = gmComponents.get(0).colorIfAbsent(NamedTextColor.AQUA);
           break;
         case 2:
           gamemodeTitle =
-              Component.translatable(
-                      "misc.list.pair", gamemodeComponents.get(0), gamemodeComponents.get(1))
+              Component.translatable("misc.list.pair", gmComponents.get(0), gmComponents.get(1))
                   .colorIfAbsent(NamedTextColor.AQUA);
           break;
         case 3:
           gamemodeTitle =
-              Component.translatable(
-                      "misc.list.start", gamemodeComponents.get(0), gamemodeComponents.get(1))
+              Component.translatable("misc.list.start", gmComponents.get(0), gmComponents.get(1))
                   .append(
                       Component.translatable(
-                          "misc.list.end", TextColor.fromHexString(""), gamemodeComponents.get(2)))
+                          "misc.list.end", TextColor.fromHexString(""), gmComponents.get(2)))
                   .colorIfAbsent(NamedTextColor.AQUA);
           break;
         case 4:
           gamemodeTitle =
-              Component.translatable(
-                      "misc.list.start", gamemodeComponents.get(0), gamemodeComponents.get(1))
+              Component.translatable("misc.list.start", gmComponents.get(0), gmComponents.get(1))
                   .append(
                       Component.translatable(
-                          "misc.list.end", gamemodeComponents.get(2), gamemodeComponents.get(3)))
+                          "misc.list.end", gmComponents.get(2), gmComponents.get(3)))
                   .colorIfAbsent(NamedTextColor.AQUA);
           break;
       }

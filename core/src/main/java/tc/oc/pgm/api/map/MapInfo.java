@@ -111,7 +111,7 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
   /**
    * Get a {@link Component} that represents this map's custom game title.
    *
-   * @return The list of defined gamemodes, empty list if none are defined.
+   * @return Returns the defined gamemode title, empty if not defined.
    */
   Component getGamemode();
 

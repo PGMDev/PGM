@@ -27,13 +27,12 @@ public enum Gamemode {
   }
 
   public static Gamemode byId(String gamemodeId) {
-    Gamemode gm = null;
     for (Gamemode gamemode : Gamemode.values()) {
       if (gamemode.getId().equals(gamemodeId)) {
-        gm = gamemode;
+        return gamemode;
       }
     }
-    return gm;
+    return null;
   }
 
   public String getId() {
