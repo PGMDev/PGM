@@ -166,7 +166,7 @@ public interface BukkitUtils {
           .put(PotionEffectType.SLOW, "Slowness")
           .put(PotionEffectType.SLOW_DIGGING, "Mining Fatigue")
           .put(PotionEffectType.SPEED, "Speed")
-          .put(PotionEffectType.WATER_BREATHING, "Water Breating")
+          .put(PotionEffectType.WATER_BREATHING, "Water Breathing")
           .put(PotionEffectType.WEAKNESS, "Weakness")
           .put(PotionEffectType.WITHER, "Wither")
           .put(PotionEffectType.HEALTH_BOOST, "Health Boost")
