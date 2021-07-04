@@ -31,7 +31,6 @@ public final class TimeLimitCommand {
       @Nullable Duration overtime,
       @Nullable Duration maxOvertime,
       @Nullable Duration endOvertime) {
-
     final TimeLimitMatchModule time = match.needModule(TimeLimitMatchModule.class);
 
     time.cancel();

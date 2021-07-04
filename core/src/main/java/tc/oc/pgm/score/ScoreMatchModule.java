@@ -54,16 +54,17 @@ public class ScoreMatchModule implements MatchModule, Listener {
   private final Map<UUID, Double> contributions = new DefaultMapAdapter<>(new HashMap<>(), 0d);
   private final Map<Competitor, Double> scores = new DefaultMapAdapter<>(new HashMap<>(), 0d);
   private MercyRule mercyRule;
+  private Integer scoreLimitOverride;
 
   public ScoreMatchModule(Match match, ScoreConfig config, Set<ScoreBox> scoreBoxes) {
     this.match = match;
     this.config = config;
     this.scoreBoxes = scoreBoxes;
     this.match.getCompetitors().forEach(competitor -> this.scores.put(competitor, 0.0));
-
     if (this.config.mercyLimit > 0) {
       this.mercyRule = new MercyRule(this, config.scoreLimit, config.mercyLimit);
     }
+    this.scoreLimitOverride = null;
   }
 
   @Override
@@ -72,7 +73,11 @@ public class ScoreMatchModule implements MatchModule, Listener {
   }
 
   public boolean hasScoreLimit() {
-    return this.config.scoreLimit > 0 || hasMercyRule();
+    return this.config.scoreLimit >= 0 || hasMercyRule() || hasScoreLimitOverride();
+  }
+
+  public boolean hasScoreLimitOverride() {
+    return this.scoreLimitOverride != null;
   }
 
   public boolean hasMercyRule() {
@@ -81,12 +86,17 @@ public class ScoreMatchModule implements MatchModule, Listener {
 
   public int getScoreLimit() {
     checkState(hasScoreLimit());
-
     if (hasMercyRule()) {
       return this.mercyRule.getScoreLimit();
     }
-
+    if (hasScoreLimitOverride()) {
+      return this.scoreLimitOverride;
+    }
     return this.config.scoreLimit;
+  }
+
+  public void setScoreLimitOverride(Integer scoreLimit) {
+    this.scoreLimitOverride = scoreLimit;
   }
 
   public Map<Competitor, Double> getScores() {

@@ -41,6 +41,7 @@ import tc.oc.pgm.command.MatchCommand;
 import tc.oc.pgm.command.ModeCommand;
 import tc.oc.pgm.command.ProximityCommand;
 import tc.oc.pgm.command.RestartCommand;
+import tc.oc.pgm.command.ScoreLimitCommand;
 import tc.oc.pgm.command.SettingCommand;
 import tc.oc.pgm.command.StartCommand;
 import tc.oc.pgm.command.StatsCommand;
@@ -84,6 +85,7 @@ public class CommandGraph extends BasicBukkitCommandGraph {
     register(new StatsCommand());
     register(new TeamCommand(), "team");
     register(new TimeLimitCommand());
+    register(new ScoreLimitCommand());
     register(new VotingCommand(), "vote", "votes");
   }
 
