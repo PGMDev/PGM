@@ -61,7 +61,8 @@ public class FlagParser {
     boolean permanent = XMLUtils.parseBoolean(el.getAttribute("permanent"), false);
     double pointsPerSecond = XMLUtils.parseNumber(el.getAttribute("points-rate"), Double.class, 0D);
     Filter pickupFilter = filterParser.parseFilterProperty(el, "pickup-filter", StaticFilter.ALLOW);
-
+    Filter respawnFilter =
+        filterParser.parseFilterProperty(el, "respawn-filter", StaticFilter.ALLOW);
     Duration recoverTime =
         XMLUtils.parseDuration(
             Node.fromAttr(el, "recover-time", "return-time"), Post.DEFAULT_RETURN_TIME);
@@ -95,7 +96,8 @@ public class FlagParser {
             sequential,
             permanent,
             pointsPerSecond,
-            pickupFilter);
+            pickupFilter,
+            respawnFilter);
     posts.add(post);
     factory.getFeatures().addFeature(el, post);
 
