@@ -273,35 +273,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
           gamemodes.stream()
               .map(gm -> translatable("gamemode." + gm.getId() + suffix))
               .collect(Collectors.toList());
-      Component gamemodeTitle = null;
-
-      switch (gamemodes.size()) {
-        case 1:
-          gamemodeTitle = gmComponents.get(0).colorIfAbsent(NamedTextColor.AQUA);
-          break;
-        case 2:
-          gamemodeTitle =
-              Component.translatable("misc.list.pair", gmComponents.get(0), gmComponents.get(1))
-                  .colorIfAbsent(NamedTextColor.AQUA);
-          break;
-        case 3:
-          gamemodeTitle =
-              Component.translatable("misc.list.start", gmComponents.get(0), gmComponents.get(1))
-                  .append(
-                      Component.translatable(
-                          "misc.list.end", TextColor.fromHexString(""), gmComponents.get(2)))
-                  .colorIfAbsent(NamedTextColor.AQUA);
-          break;
-        case 4:
-          gamemodeTitle =
-              Component.translatable("misc.list.start", gmComponents.get(0), gmComponents.get(1))
-                  .append(
-                      Component.translatable(
-                          "misc.list.end", gmComponents.get(2), gmComponents.get(3)))
-                  .colorIfAbsent(NamedTextColor.AQUA);
-          break;
-      }
-      return gamemodeTitle;
+      return TextFormatter.list(gmComponents, NamedTextColor.AQUA);
     }
 
     final List<Component> games = new LinkedList<>();
