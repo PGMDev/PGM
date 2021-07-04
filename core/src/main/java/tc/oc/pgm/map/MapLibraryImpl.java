@@ -180,6 +180,7 @@ public class MapLibraryImpl implements MapLibrary {
             throw new RuntimeException(e);
           }
 
+          logger.info(ChatColor.GREEN + "XML changes detected, reloading");
           return loadMapSafe(entry.source, entry.info.getId());
         });
   }
