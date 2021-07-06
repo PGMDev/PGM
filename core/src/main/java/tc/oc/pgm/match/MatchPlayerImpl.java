@@ -45,6 +45,7 @@ import tc.oc.pgm.events.PlayerResetEvent;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.MaxHealthKit;
 import tc.oc.pgm.kits.WalkSpeedKit;
+import tc.oc.pgm.modules.SpectateMatchModule;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
@@ -200,6 +201,8 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
 
   @Override
   public boolean canSee(MatchPlayer other) {
+    @Nullable MatchPlayer spectatorTarget = this.getSpectatorTarget();
+    if (spectatorTarget != null && spectatorTarget.getId().equals(other.getId())) return true;
     if (!other.isVisible()) return false;
     if (other.isParticipating()) return true;
     if (other.isVanished() && !getBukkit().hasPermission(Permissions.VANISH)) return false;
@@ -443,6 +446,18 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   @Override
   public @Nonnull Audience audience() {
     return audience;
+  }
+
+  @Nullable
+  @Override
+  public MatchPlayer getSpectatorTarget() {
+    Player bukkit = getBukkit();
+    return bukkit == null ? null : match.getPlayer(bukkit.getSpectatorTarget());
+  }
+
+  @Override
+  public List<MatchPlayer> getSpectators() {
+    return match.needModule(SpectateMatchModule.class).getSpectating(this);
   }
 
   @Override

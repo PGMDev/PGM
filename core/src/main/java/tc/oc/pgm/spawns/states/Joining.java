@@ -24,7 +24,7 @@ public class Joining extends Spawning {
   }
 
   @Override
-  protected Component getTitle() {
+  protected Component getTitle(boolean spectator) {
     return empty();
   }
 
