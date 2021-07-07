@@ -17,8 +17,10 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.util.nms.NMSHacks;
 
+@ListenerScope(MatchScope.RUNNING)
 public class TNTRenderMatchModule implements MatchModule, Listener {
 
   private static final double MAX_DISTANCE = Math.pow(64d, 2);
@@ -87,6 +89,8 @@ public class TNTRenderMatchModule implements MatchModule, Listener {
     }
 
     private void updatePlayer(MatchPlayer player) {
+      if (player.getBukkit().getWorld() != currentLocation.getWorld()) return;
+
       if (currentLocation.distanceSquared(player.getBukkit().getLocation()) >= MAX_DISTANCE) {
         if (viewers.add(player)) {
           NMSHacks.sendBlockChange(currentLocation, player.getBukkit(), Material.TNT);

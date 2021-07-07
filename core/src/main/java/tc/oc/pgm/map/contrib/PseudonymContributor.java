@@ -6,12 +6,12 @@ import static net.kyori.adventure.text.Component.text;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.PlayerComponentProvider;
 
 public class PseudonymContributor implements Contributor {
 
@@ -35,7 +35,7 @@ public class PseudonymContributor implements Contributor {
 
   @Override
   public Component getName(NameStyle style) {
-    return text(getNameLegacy(), NamedTextColor.DARK_AQUA);
+    return text(getNameLegacy(), PlayerComponentProvider.OFFLINE_COLOR);
   }
 
   @Override

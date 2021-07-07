@@ -39,28 +39,28 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.module.Module;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
-import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.command.graph.CommandExecutor;
 import tc.oc.pgm.command.graph.CommandGraph;
-import tc.oc.pgm.community.command.CommunityCommandGraph;
-import tc.oc.pgm.community.features.VanishManagerImpl;
 import tc.oc.pgm.db.CacheDatastore;
 import tc.oc.pgm.db.SQLDatastore;
 import tc.oc.pgm.listeners.AntiGriefListener;
 import tc.oc.pgm.listeners.BlockTransformListener;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.listeners.FormattingListener;
+import tc.oc.pgm.listeners.JoinLeaveAnnouncer;
 import tc.oc.pgm.listeners.MatchAnnouncer;
 import tc.oc.pgm.listeners.MotdListener;
 import tc.oc.pgm.listeners.PGMListener;
 import tc.oc.pgm.listeners.ServerPingDataListener;
+import tc.oc.pgm.listeners.SkinCache;
+import tc.oc.pgm.listeners.VanishListener;
 import tc.oc.pgm.listeners.WorldProblemListener;
 import tc.oc.pgm.map.MapLibraryImpl;
 import tc.oc.pgm.match.MatchManagerImpl;
-import tc.oc.pgm.match.NoopVanishManager;
 import tc.oc.pgm.namedecorations.ConfigDecorationProvider;
 import tc.oc.pgm.namedecorations.NameDecorationRegistry;
 import tc.oc.pgm.namedecorations.NameDecorationRegistryImpl;
+import tc.oc.pgm.names.NameComponentProviderImpl;
 import tc.oc.pgm.restart.RestartListener;
 import tc.oc.pgm.restart.ShouldRestartTask;
 import tc.oc.pgm.rotation.MapPoolManager;
@@ -74,6 +74,7 @@ import tc.oc.pgm.util.concurrent.BukkitExecutorService;
 import tc.oc.pgm.util.listener.ItemTransferListener;
 import tc.oc.pgm.util.listener.PlayerBlockListener;
 import tc.oc.pgm.util.listener.PlayerMoveListener;
+import tc.oc.pgm.util.text.PlayerComponentProvider;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextTranslations;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -91,7 +92,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   private NameDecorationRegistry nameDecorationRegistry;
   private ScheduledExecutorService executorService;
   private ScheduledExecutorService asyncExecutorService;
-  private VanishManager vanishManager;
 
   public PGMPlugin() {
     super();
@@ -206,11 +206,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
     matchManager = new MatchManagerImpl(logger);
 
-    vanishManager =
-        config.isCommunityMode()
-            ? new VanishManagerImpl(matchManager, executorService)
-            : new NoopVanishManager();
-
     if (config.showTabList()) {
       matchTabManager = new MatchTabManager(this);
     }
@@ -218,6 +213,9 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     if (!config.getUptimeLimit().isNegative()) {
       asyncExecutorService.scheduleAtFixedRate(new ShouldRestartTask(), 0, 1, TimeUnit.MINUTES);
     }
+
+    // Set name provider
+    PlayerComponentProvider.PROVIDER.set(new NameComponentProviderImpl());
 
     registerListeners();
     registerCommands();
@@ -227,7 +225,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   public void onDisable() {
     if (matchTabManager != null) matchTabManager.disable();
     if (matchManager != null) matchManager.getMatches().forEachRemaining(Match::unload);
-    if (vanishManager != null) vanishManager.disable();
     if (executorService != null) executorService.shutdown();
     if (asyncExecutorService != null) asyncExecutorService.shutdown();
     if (datastore != null) datastore.close();
@@ -317,16 +314,9 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     return asyncExecutorService;
   }
 
-  @Override
-  public VanishManager getVanishManager() {
-    return vanishManager;
-  }
-
   private void registerCommands() {
-    final CommandGraph graph =
-        config.isCommunityMode() ? new CommunityCommandGraph() : new CommandGraph();
+    final CommandGraph graph = new CommandGraph();
 
-    graph.register(vanishManager);
     graph.register(ChatDispatcher.get());
 
     new CommandExecutor(this, graph).register();
@@ -348,16 +338,18 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     new BlockTransformListener(this).registerEvents();
     registerEvents(matchManager);
     if (matchTabManager != null) registerEvents(matchTabManager);
-    registerEvents(vanishManager);
     registerEvents(nameDecorationRegistry);
-    registerEvents(new PGMListener(this, matchManager, vanishManager));
+    registerEvents(new PGMListener(this, matchManager));
     registerEvents(new FormattingListener());
     registerEvents(new AntiGriefListener(matchManager));
     registerEvents(new RestartListener(this, matchManager));
     registerEvents(new WorldProblemListener(this));
     registerEvents(new MatchAnnouncer());
     registerEvents(new MotdListener());
-    registerEvents(new ServerPingDataListener(matchManager, mapOrder, getLogger(), vanishManager));
+    registerEvents(new ServerPingDataListener(matchManager, mapOrder, getLogger()));
+    registerEvents(new SkinCache());
+    registerEvents(new JoinLeaveAnnouncer(matchManager));
+    registerEvents(new VanishListener());
   }
 
   private class InGameHandler extends Handler {

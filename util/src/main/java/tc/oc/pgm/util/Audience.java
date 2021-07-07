@@ -8,12 +8,18 @@ import java.util.Collection;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.kyori.adventure.audience.ForwardingAudience;
+import net.kyori.adventure.platform.AudienceIdentity;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.renderer.ComponentRenderer;
+import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.PlayerComponentProvider;
 
 /** Receiver of chat messages, sounds, titles, and other media. */
 @FunctionalInterface
@@ -27,7 +33,36 @@ public interface Audience extends ForwardingAudience.Single {
     playSound(WARNING_SOUND);
   }
 
-  BukkitAudiences PROVIDER = BukkitAudiences.create(BukkitUtils.getPlugin());
+  static final String PATTERN = "\\<[@!].*?:[0-5]\\>";
+
+  ComponentRenderer<AudienceIdentity> RENDERER =
+      new ComponentRenderer<AudienceIdentity>() {
+        @Override
+        public Component render(Component component, final AudienceIdentity context) {
+          component =
+              component.replaceText(
+                  TextReplacementConfig.builder()
+                      .match(PATTERN)
+                      .replacement(
+                          (match, b) -> {
+                            String input = match.group();
+                            String[] parts = input.split(":");
+                            if (parts.length == 2) {
+                              String id = parts[0].substring(2, parts[0].length());
+                              String style = parts[1].substring(0, parts[1].length() - 1);
+                              NameStyle ns = NameStyle.values()[Integer.parseInt(style)];
+                              return PlayerComponentProvider.render(id, ns, context);
+                            }
+                            return text("");
+                          })
+                      .build());
+
+          return GlobalTranslator.render(component, context.locale());
+        }
+      };
+
+  BukkitAudiences PROVIDER =
+      BukkitAudiences.builder(BukkitUtils.getPlugin()).componentRenderer(RENDERER).build();
 
   static Audience console() {
     return PROVIDER::console;

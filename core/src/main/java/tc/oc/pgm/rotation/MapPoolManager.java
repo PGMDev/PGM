@@ -77,12 +77,12 @@ public class MapPoolManager implements MapOrder {
     reload();
   }
 
-  public @Nullable String getNextMapForPool(String poolName) {
-    String mapName = database.getMapActivity(poolName).getMapName();
+  public @Nullable String getNextMapForPool(String poolId) {
+    String mapName = database.getMapActivity(poolId).getMapName();
     if (mapName != null) {
       logger.log(
           Level.INFO,
-          String.format("%s was found in map activity as the next map (%s).", mapName, poolName));
+          String.format("%s was found in map activity as the next map (%s).", mapName, poolId));
     }
     return mapName;
   }
@@ -101,7 +101,7 @@ public class MapPoolManager implements MapOrder {
       pools.getKeys(false).stream()
           .map(key -> MapPool.of(this, mapPoolFileConfig, key))
           .filter(MapPool::isEnabled)
-          .forEach(pool -> mapPools.put(pool, database.getMapActivity(pool.getName())));
+          .forEach(pool -> mapPools.put(pool, database.getMapActivity(pool.getIdentifier())));
 
       activeMapPool =
           mapPools.entrySet().stream()
@@ -135,7 +135,7 @@ public class MapPoolManager implements MapOrder {
 
           boolean active =
               getActiveMapPool() != null
-                  && getActiveMapPool().getName().equalsIgnoreCase(key.getName())
+                  && getActiveMapPool().getIdentifier().equalsIgnoreCase(key.getIdentifier())
                   && key.isDynamic();
           value.update(nextMap, active);
         });
@@ -164,7 +164,7 @@ public class MapPoolManager implements MapOrder {
 
     if (mapPool == activeMapPool) return;
 
-    if (activeMapPool != null) {
+    if (activeMapPool != null && match != null) {
       activeMapPool.unloadPool(match);
     }
 
@@ -185,9 +185,11 @@ public class MapPoolManager implements MapOrder {
     }
 
     // Call a MapPoolAdjustEvent so plugins can listen when map pool has changed
-    match.callEvent(
-        new MapPoolAdjustEvent(
-            activeMapPool, mapPool, match, force, sender, poolTimeLimit, matchCountLimit));
+    if (match != null) {
+      match.callEvent(
+          new MapPoolAdjustEvent(
+              activeMapPool, mapPool, match, force, sender, poolTimeLimit, matchCountLimit));
+    }
   }
 
   /**

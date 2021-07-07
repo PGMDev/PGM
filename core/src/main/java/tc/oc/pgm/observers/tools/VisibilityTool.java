@@ -29,8 +29,7 @@ public class VisibilityTool implements InventoryMenuItem {
   public List<String> getLore(Player player) {
     Component status =
         translatable(
-            isVisible(player) ? "setting.visibility.shown" : "setting.visibility.hidden",
-            isVisible(player) ? NamedTextColor.GREEN : NamedTextColor.RED);
+            getStatusKey(player), isVisible(player) ? NamedTextColor.GREEN : NamedTextColor.RED);
     Component lore = translatable("setting.visibility.lore", NamedTextColor.GRAY, status);
     return Lists.newArrayList(TextTranslations.translateLegacy(lore, player));
   }
@@ -52,7 +51,20 @@ public class VisibilityTool implements InventoryMenuItem {
             .getPlayer(player)
             .getSettings()
             .getValue(SettingKey.OBSERVERS)
-        == SettingValue.OBSERVERS_ON;
+        != SettingValue.OBSERVERS_OFF;
+  }
+
+  private String getStatusKey(Player player) {
+    MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(player);
+    SettingValue value = matchPlayer.getSettings().getValue(SettingKey.OBSERVERS);
+    switch (value) {
+      case OBSERVERS_FRIEND:
+        return "misc.friends";
+      case OBSERVERS_ON:
+        return "misc.all";
+      default:
+        return "misc.none";
+    }
   }
 
   public void toggleObserverVisibility(Player player) {

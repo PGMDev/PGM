@@ -8,9 +8,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -18,6 +16,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.ObserverInteractEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.observers.tools.FlySpeedTool;
 import tc.oc.pgm.observers.tools.GamemodeTool;
@@ -70,14 +69,13 @@ public class ObserverToolsMatchModule implements MatchModule, Listener {
     refreshKit(event.getPlayer());
   }
 
-  @EventHandler
-  public void onToolClick(PlayerInteractEvent event) {
-    if (isRightClick(event.getAction())) {
-      ItemStack item = event.getPlayer().getItemInHand();
-      MatchPlayer player = match.getPlayer(event.getPlayer());
-
-      if (item.getType().equals(TOOL_MATERIAL) && player != null && canUse(player)) {
-        this.toolItem.onInventoryClick(null, event.getPlayer(), ClickType.RIGHT);
+  @EventHandler(ignoreCancelled = true)
+  public void onToolClick(ObserverInteractEvent event) {
+    MatchPlayer player = event.getPlayer();
+    if (player != null) {
+      ItemStack item = event.getPlayer().getBukkit().getItemInHand();
+      if (item != null && item.getType().equals(TOOL_MATERIAL) && canUse(player)) {
+        this.toolItem.onInventoryClick(null, player.getBukkit(), ClickType.RIGHT);
       }
     }
   }
@@ -96,9 +94,5 @@ public class ObserverToolsMatchModule implements MatchModule, Listener {
     if (canUse(player)) {
       player.getInventory().setItem(TOOL_BUTTON_SLOT, toolItem.createItem(player.getBukkit()));
     }
-  }
-
-  private boolean isRightClick(Action action) {
-    return action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK;
   }
 }

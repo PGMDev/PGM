@@ -330,7 +330,7 @@ public final class MapCommand {
   }
 
   private Component formatContribution(Contributor contributor) {
-    Component componentName = contributor.getName(NameStyle.FANCY);
+    Component componentName = contributor.getName(NameStyle.CONCISE);
     if (contributor.getContribution() == null) return componentName;
     return text()
         .append(componentName)

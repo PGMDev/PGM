@@ -24,7 +24,7 @@ import tc.oc.pgm.map.contrib.PlayerContributor;
 import tc.oc.pgm.map.contrib.PseudonymContributor;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.named.MapNameStyle;
-import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.PlayerComponentProvider;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -233,13 +233,17 @@ public class MapInfoImpl implements MapInfo {
           NamedTextColor.DARK_PURPLE,
           name.build(),
           TextFormatter.list(
-              getAuthors().stream()
-                  .map(c -> c.getName(NameStyle.PLAIN).color(NamedTextColor.RED))
-                  .collect(Collectors.toList()),
+              getAuthors().stream().map(this::getAuthorName).collect(Collectors.toList()),
               NamedTextColor.DARK_PURPLE));
     }
 
     return name.build();
+  }
+
+  private Component getAuthorName(Contributor contributor) {
+    if (contributor.getNameLegacy() == null)
+      return PlayerComponentProvider.UNKNOWN.color(NamedTextColor.RED);
+    return text(contributor.getNameLegacy()).color(NamedTextColor.RED);
   }
 
   private static List<String> parseRules(Element root) {

@@ -6,6 +6,7 @@ import org.bukkit.permissions.Permission;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.player.MatchPlayer;
 
 /**
@@ -36,14 +37,43 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
     Player b = mb.getBukkit();
     Player viewer = this.viewer.getBukkit();
 
-    boolean aStaff = a.hasPermission(Permissions.STAFF);
-    boolean bStaff = b.hasPermission(Permissions.STAFF);
+    boolean aNicked = Integration.getNick(a) != null;
+    boolean bNicked = Integration.getNick(b) != null;
 
-    // Staff take priority
+    boolean aStaff = a.hasPermission(Permissions.STAFF) && !aNicked;
+    boolean bStaff = b.hasPermission(Permissions.STAFF) && !bNicked;
+
+    boolean aFriend = Integration.isFriend(viewer, a);
+    boolean bFriend = Integration.isFriend(viewer, b);
+
+    boolean aHidden = Integration.isHidden(a);
+    boolean bHidden = Integration.isHidden(b);
+
+    // Friends are always first :)
+    if (aFriend && !bFriend) {
+      return -1;
+    } else if (bFriend && !aFriend) {
+      return 1;
+    }
+
+    if (aNicked && !bNicked) {
+      return Integration.getNick(a).compareToIgnoreCase(b.getName(viewer));
+    } else if (bNicked && !aNicked) {
+      return a.getName(viewer).compareToIgnoreCase(Integration.getNick(b));
+    }
+
+    // Staff take priority, unless they are nicked
     if (aStaff && !bStaff) {
       return -1;
     } else if (bStaff && !aStaff) {
       return 1;
+    }
+
+    // Hidden players sorted last
+    if (aHidden && !bHidden) {
+      return 1;
+    } else if (bHidden && !aHidden) {
+      return -1;
     }
 
     // If players have different permissions, the player with the highest ranked perm

@@ -31,12 +31,10 @@ public interface Permissions {
   String DEBUG = ROOT + ".debug"; // Errors from map loading and debug commands
   String STAFF = ROOT + ".staff"; // Considered apart of the staff team
   String RELOAD = ROOT + ".reload"; // Reload the PGM configuration
-  String KICK = ROOT + ".kick"; // Access to the /kick command
-  String WARN = ROOT + ".warn"; // Access to the /warn command
-  String MUTE = ROOT + ".mute"; // Access to the /mute command
-  String BAN = ROOT + ".ban"; // Access to the /ban command
-  String FREEZE = ROOT + ".freeze"; // Access to the /freeze command
   String VANISH = ROOT + ".vanish"; // Access to /vanish command
+  String SKIN = ROOT + ".skin"; // Access to /skin command
+  String ADMIN = ROOT + ".admin"; // Access to admin features
+  String VOTE_MULTIPLIER = JOIN + ".votecount"; // Extra map voting multiplier
 
   String MAPMAKER = GROUP + ".mapmaker"; // Permission group for mapmakers, defined in config.yml
 
@@ -74,11 +72,6 @@ public interface Permissions {
               .put(JOIN_FORCE, true)
               .put(DEFUSE, true)
               .put(STAFF, true)
-              .put(KICK, true)
-              .put(WARN, true)
-              .put(MUTE, true)
-              .put(BAN, true)
-              .put(FREEZE, true)
               .put(VANISH, true)
               .build());
 

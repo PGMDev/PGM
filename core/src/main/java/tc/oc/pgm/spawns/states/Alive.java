@@ -25,6 +25,7 @@ import tc.oc.pgm.modules.ItemKeepMatchModule;
 import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
+import tc.oc.pgm.spawns.events.ParticipantKitApplyEvent;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 
 /** Player is alive and participating */
@@ -88,6 +89,10 @@ public class Alive extends Participating {
     if (kwmm != null) {
       kwmm.giveDeadPlayerRewards(player);
     }
+
+    // Call when it is safe to apply extra kits
+    ParticipantKitApplyEvent kitEvent = new ParticipantKitApplyEvent(player);
+    player.getMatch().callEvent(kitEvent);
 
     player.getBukkit().updateInventory();
   }

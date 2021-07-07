@@ -54,8 +54,8 @@ public class CacheDatastore implements Datastore {
             .build(
                 new CacheLoader<String, MapActivity>() {
                   @Override
-                  public MapActivity load(String name) {
-                    return datastore.getMapActivity(name);
+                  public MapActivity load(String id) {
+                    return datastore.getMapActivity(id);
                   }
                 });
   }
@@ -81,8 +81,8 @@ public class CacheDatastore implements Datastore {
   }
 
   @Override
-  public MapActivity getMapActivity(String poolName) {
-    return activities.getUnchecked(poolName);
+  public MapActivity getMapActivity(String id) {
+    return activities.getUnchecked(id);
   }
 
   @Override

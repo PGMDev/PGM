@@ -1,18 +1,17 @@
-package tc.oc.pgm.community.events;
+package tc.oc.pgm.spawns.events;
 
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerEvent;
 
-/** PlayerVanishEvent - Called when a player's vanish status changes * */
-public class PlayerVanishEvent extends MatchPlayerEvent {
+/**
+ * Called when it is safe to apply post-spawn kits to a player. Can be used by other plugins to
+ * apply kits upon spawning
+ */
+public class ParticipantKitApplyEvent extends MatchPlayerEvent {
 
-  public PlayerVanishEvent(MatchPlayer vanisher, boolean vanished) {
-    super(vanisher);
-  }
-
-  public boolean isVanished() {
-    return getPlayer().isVanished();
+  public ParticipantKitApplyEvent(MatchPlayer player) {
+    super(player);
   }
 
   private static final HandlerList handlers = new HandlerList();

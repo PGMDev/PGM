@@ -2,7 +2,6 @@ package tc.oc.pgm.listeners;
 
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
-import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.PlayerComponent.player;
 
@@ -10,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -25,6 +25,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import tc.oc.pgm.api.Permissions;
@@ -94,12 +95,8 @@ public class AntiGriefListener implements Listener {
         this.notifyDefuse(
             clicker,
             entity,
-            ChatColor.RED
-                + TextTranslations.translate(
-                    "moderation.defuse.player",
-                    clicker.getBukkit(),
-                    player(owner.getBukkit(), NameStyle.CONCISE, clicker.getBukkit())
-                        .color(NamedTextColor.RED)));
+            translatable("moderation.defuse.player", owner.getName(NameStyle.CONCISE))
+                .color(NamedTextColor.RED));
 
         ChatDispatcher.broadcastAdminChatMessage(
             translatable(
@@ -110,11 +107,7 @@ public class AntiGriefListener implements Listener {
                 MinecraftComponent.entity(entity.getType()).color(NamedTextColor.DARK_RED)),
             clicker.getMatch());
       } else {
-        this.notifyDefuse(
-            clicker,
-            entity,
-            ChatColor.RED
-                + TextTranslations.translate("moderation.defuse.world", clicker.getBukkit()));
+        this.notifyDefuse(clicker, entity, translatable("moderation.defuse.world"));
 
         ChatDispatcher.broadcastAdminChatMessage(
             translatable(
@@ -127,8 +120,8 @@ public class AntiGriefListener implements Listener {
     }
   }
 
-  private void notifyDefuse(MatchPlayer clicker, Entity entity, String message) {
-    clicker.sendMessage(text(message));
+  private void notifyDefuse(MatchPlayer clicker, Entity entity, Component message) {
+    clicker.sendMessage(message);
     clicker
         .getMatch()
         .playSound(
@@ -193,12 +186,7 @@ public class AntiGriefListener implements Listener {
     return uniqueOwners;
   }
 
-  @EventHandler
-  public void giveKit(final ObserverKitApplyEvent event) {
-    if (event.getPlayer().getParty() == null) return;
-    if (!event.getPlayer().getParty().isObserving()
-        || !event.getPlayer().getBukkit().hasPermission(Permissions.DEFUSE)) return;
-
+  public static ItemStack getDefuseItem(Player viewer) {
     ItemStack shears = new ItemStack(DEFUSE_ITEM);
 
     // TODO: Update information if locale changes
@@ -206,16 +194,27 @@ public class AntiGriefListener implements Listener {
     meta.setDisplayName(
         ChatColor.RED
             + ChatColor.BOLD.toString()
-            + TextTranslations.translate(
-                "moderation.defuse.displayName", event.getPlayer().getBukkit()));
+            + TextTranslations.translate("moderation.defuse.displayName", viewer));
     meta.setLore(
         Collections.singletonList(
-            ChatColor.GRAY
-                + TextTranslations.translate(
-                    "moderation.defuse.tooltip", event.getPlayer().getBukkit())));
+            ChatColor.GRAY + TextTranslations.translate("moderation.defuse.tooltip", viewer)));
+    meta.addItemFlags(ItemFlag.values());
     shears.setItemMeta(meta);
 
-    event.getPlayer().getBukkit().getInventory().setItem(DEFUSE_SLOT, shears);
+    return shears;
+  }
+
+  @EventHandler
+  public void giveKit(final ObserverKitApplyEvent event) {
+    if (event.getPlayer().getParty() == null) return;
+    if (!event.getPlayer().getParty().isObserving()
+        || !event.getPlayer().getBukkit().hasPermission(Permissions.DEFUSE)) return;
+
+    event
+        .getPlayer()
+        .getBukkit()
+        .getInventory()
+        .setItem(DEFUSE_SLOT, getDefuseItem(event.getPlayer().getBukkit()));
   }
 
   @EventHandler(priority = EventPriority.MONITOR)

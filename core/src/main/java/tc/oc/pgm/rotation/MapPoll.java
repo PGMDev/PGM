@@ -8,6 +8,7 @@ import static net.kyori.adventure.text.event.ClickEvent.runCommand;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static net.kyori.adventure.title.Title.title;
 import static tc.oc.pgm.util.TimeUtils.fromTicks;
+import static tc.oc.pgm.util.text.PlayerComponent.player;
 import static tc.oc.pgm.util.text.TextTranslations.translate;
 
 import app.ashcon.intake.CommandException;
@@ -24,6 +25,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -32,9 +34,11 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
@@ -43,6 +47,7 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.util.inventory.tag.ItemTag;
 import tc.oc.pgm.util.named.MapNameStyle;
+import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
 
 /** Represents a polling process, with a set of options. */
@@ -64,12 +69,12 @@ public class MapPoll {
 
   private final WeakReference<Match> match;
   private final Map<MapInfo, Double> mapScores;
-  private final Set<MapInfo> overrides;
+  private final Map<MapInfo, UUID> overrides;
   private final int voteSize;
 
   private final Map<MapInfo, Set<UUID>> votes = new HashMap<>();
 
-  MapPoll(Match match, Map<MapInfo, Double> mapScores, Set<MapInfo> overrides, int voteSize) {
+  MapPoll(Match match, Map<MapInfo, Double> mapScores, Map<MapInfo, UUID> overrides, int voteSize) {
     this.match = new WeakReference<>(match);
     this.mapScores = mapScores;
     this.overrides = overrides;
@@ -90,7 +95,7 @@ public class MapPoll {
     double maxWeight = cummulativeMap(0, sortedDist, cumulativeScores);
 
     // Add all override maps before selecting random
-    overrides.forEach(map -> votes.put(map, new HashSet<>()));
+    overrides.keySet().forEach(map -> votes.put(map, new HashSet<>()));
 
     for (int i = overrides.size(); i < voteSize; i++) {
       NavigableMap<Double, MapInfo> subMap =
@@ -165,11 +170,24 @@ public class MapPoll {
         .build();
   }
 
+  private Component getOverridePlayer(MapInfo map) {
+    UUID playerId = overrides.get(map);
+    Component playerName = null;
+    Player bukkit = Bukkit.getPlayer(playerId);
+
+    if (playerId != null && bukkit != null && !Integration.isVanished(bukkit)) {
+      playerName = player(playerId, NameStyle.FANCY);
+    }
+
+    return playerName;
+  }
+
   public void sendBook(MatchPlayer viewer, boolean forceOpen) {
     if (viewer.isLegacy()) {
       // Must use separate sendMessages, since 1.7 clients do not like the newline character
       viewer.sendMessage(VOTE_HEADER);
-      for (MapInfo pgmMap : votes.keySet()) viewer.sendMessage(getMapBookComponent(viewer, pgmMap));
+      for (MapInfo pgmMap : votes.keySet())
+        viewer.sendMessage(getMapBookComponent(viewer, pgmMap, getOverridePlayer(pgmMap)));
       return;
     }
 
@@ -178,7 +196,9 @@ public class MapPoll {
     content.append(newline());
 
     for (MapInfo pgmMap : votes.keySet())
-      content.append(newline()).append(getMapBookComponent(viewer, pgmMap));
+      content
+          .append(newline())
+          .append(getMapBookComponent(viewer, pgmMap, getOverridePlayer(pgmMap)));
 
     Book book = Book.builder().author(VOTE_BOOK_AUTHOR).pages(content.build()).build();
 
@@ -208,21 +228,35 @@ public class MapPoll {
     return personalDummyVoteBook;
   }
 
-  private Component getMapBookComponent(MatchPlayer viewer, MapInfo map) {
+  private Component getMapBookComponent(
+      MatchPlayer viewer, MapInfo map, @Nullable Component identified) {
     boolean voted = votes.get(map).contains(viewer.getId());
 
     TextComponent.Builder text = text();
+    TextComponent.Builder hover = text();
+
+    hover.append(
+        text(
+            map.getTags().stream().map(MapTag::toString).collect(Collectors.joining(" ")),
+            NamedTextColor.YELLOW));
+    if (identified != null) {
+      hover
+          .append(
+              text()
+                  .append(newline())
+                  .append(text("+ ", NamedTextColor.GREEN, TextDecoration.BOLD))
+                  .append(text("Sponsored by ", NamedTextColor.GRAY)))
+          .append(identified);
+    } // TODO: ^ hard coded text value, in the future make translatable or passed in so custom
+    // messages can be set
+
     text.append(
         text(
             voted ? SYMBOL_VOTED : SYMBOL_IGNORE,
             voted ? NamedTextColor.DARK_GREEN : NamedTextColor.DARK_RED));
     text.append(text(" ").decoration(TextDecoration.BOLD, !voted));
     text.append(text(map.getName(), NamedTextColor.GOLD, TextDecoration.BOLD));
-    text.hoverEvent(
-        showText(
-            text(
-                map.getTags().stream().map(MapTag::toString).collect(Collectors.joining(" ")),
-                NamedTextColor.YELLOW)));
+    text.hoverEvent(showText(hover.build()));
     text.clickEvent(runCommand("/votenext -o " + map.getName())); // Fix 1px symbol diff
     return text.build();
   }
@@ -260,11 +294,21 @@ public class MapPoll {
    * @return The number of votes counted
    */
   private int countVotes(Set<UUID> uuids) {
-    return uuids.stream()
-        .map(Bukkit::getPlayer)
-        // Count disconnected players as 1, can't test for their perms
-        .mapToInt(p -> p == null || !p.hasPermission(Permissions.EXTRA_VOTE) ? 1 : 2)
-        .sum();
+    return uuids.stream().map(Bukkit::getPlayer).mapToInt(this::calcVoteMultiplier).sum();
+  }
+
+  private int calcVoteMultiplier(Player player) {
+    // Count disconnected players as 1, can't test for their perms
+    if (player != null) {
+      for (int i = 5; i > 1; i--) {
+        if (player.hasPermission(Permissions.VOTE_MULTIPLIER + "." + i)) {
+          return i;
+        }
+      }
+      // Legacy extra vote permission node support
+      return player.hasPermission(Permissions.EXTRA_VOTE) ? 2 : 1;
+    }
+    return 1;
   }
 
   /**
@@ -286,6 +330,12 @@ public class MapPoll {
   private void updateScores() {
     double voters = votes.values().stream().flatMap(Collection::stream).distinct().count();
     if (voters == 0) return;
-    votes.forEach((m, v) -> mapScores.put(m, Math.max(v.size() / voters, Double.MIN_VALUE)));
+    votes.forEach(
+        (m, v) -> {
+          // Don't track override maps
+          if (!overrides.containsKey(m)) {
+            mapScores.put(m, Math.max(v.size() / voters, Double.MIN_VALUE));
+          }
+        });
   }
 }

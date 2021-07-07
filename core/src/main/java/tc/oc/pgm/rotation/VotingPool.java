@@ -1,6 +1,6 @@
 package tc.oc.pgm.rotation;
 
-import java.util.Collections;
+import com.google.common.collect.Maps;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -27,8 +27,8 @@ public class VotingPool extends MapPool {
 
   private MapPoll currentPoll;
 
-  public VotingPool(MapPoolManager manager, ConfigurationSection section, String name) {
-    this(manager, section, name, null);
+  public VotingPool(MapPoolManager manager, ConfigurationSection section, String id) {
+    this(manager, section, id, null);
   }
 
   public VotingPool(
@@ -107,9 +107,9 @@ public class VotingPool extends MapPool {
                       ? new MapPoll(
                           match,
                           getOptions().getCustomVoteMapWeighted(),
-                          Collections.emptySet(),
+                          Maps.newHashMap(),
                           Math.min(MAX_VOTE_OPTIONS, getOptions().getCustomVoteMaps().size()))
-                      : new MapPoll(match, mapScores, getOptions().getCustomVoteMaps(), VOTE_SIZE);
+                      : new MapPoll(match, mapScores, getOptions().getOverrideMaps(), VOTE_SIZE);
 
               match.addListener(new VotingBookListener(this, match), MatchScope.LOADED);
               match.getPlayers().forEach(viewer -> currentPoll.sendBook(viewer, false));

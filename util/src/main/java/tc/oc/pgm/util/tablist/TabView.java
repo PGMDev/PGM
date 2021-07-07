@@ -246,7 +246,7 @@ public class TabView {
     // Build the update packet from entries with updated ping that are not being added or removed
     for (int i = 0; i < this.size; i++) {
       TabEntry slot = this.slots[i];
-      if (slot instanceof PlayerTabEntry) render.updatePing(slot, i);
+      if (slot.getFakePlayer(this) != null) render.updatePing(slot, i);
     }
 
     render.finish();

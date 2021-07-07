@@ -20,6 +20,7 @@ public enum SettingValue {
 
   DEATH_OWN("death", "own"), // Only send death messages involving self
   DEATH_ALL("death", "all"), // Send all death messages, highlight your own
+  DEATH_FRIENDS("death", "friends"), // Only send death messages involving yourself or friends
 
   PICKER_AUTO("picker", "auto"), // Display after cycle, or with permissions.
   PICKER_ON("picker", "on"), // Display the picker GUI always
@@ -27,12 +28,14 @@ public enum SettingValue {
 
   JOIN_ON("join", "all"), // Send all join messages
   JOIN_OFF("join", "none"), // Never send join messages
+  JOIN_FRIENDS("join", "friends"), // Only send friend join messages
 
-  MESSAGE_ON("message", "on"), // Always accept direct messages
-  MESSAGE_OFF("message", "off"), // Never accept direct messages
+  MESSAGE_ON("message", "all"), // Always accept direct messages
+  MESSAGE_OFF("message", "none"), // Never accept direct messages
 
-  OBSERVERS_ON("observers", "on"), // Show observers
-  OBSERVERS_OFF("observers", "off"), // Hide observers
+  OBSERVERS_ON("observers", "all"), // Show observers
+  OBSERVERS_OFF("observers", "none"), // Hide observers
+  OBSERVERS_FRIEND("observers", "friends"), // Only show friend observers
 
   SOUNDS_ALL("sounds", "all"), // Play all sounds
   SOUNDS_DM("sounds", "messages"), // Only play DM sounds
@@ -45,8 +48,9 @@ public enum SettingValue {
   STATS_OFF("stats", "off"), // Don't track stats
 
   EFFECTS_ON("effects", "on"), // Display special particle effects
-  EFFECTS_OFF("effects", "off"); // Don't display special particle effects
-  ;
+  EFFECTS_OFF("effects", "off"), // Don't display special particle effects
+
+  MESSAGE_FRIEND("message", "friends"); // Only accept friend direct messages
 
   private final String key;
   private final String name;
