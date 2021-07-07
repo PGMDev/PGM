@@ -118,7 +118,7 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
   /**
    * Get a {@link Collection<Gamemode>} that represents this map's gamemodes.
    *
-   * @return A component of gamemodes if defined or null.
+   * @return A Collection of gamemodes if defined or null.
    */
   Collection<Gamemode> getGamemodes();
 
