@@ -16,6 +16,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Difficulty;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.Contributor;
+import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.Phase;
@@ -47,6 +48,7 @@ public class MapInfoImpl implements MapInfo {
 
   protected final Collection<MapTag> tags;
   protected final Collection<Integer> players;
+  protected final Collection<Gamemode> gamemodes;
 
   public MapInfoImpl(
       @Nullable String id,
@@ -63,6 +65,7 @@ public class MapInfoImpl implements MapInfo {
       @Nullable Collection<Integer> players,
       @Nullable WorldInfo world,
       @Nullable Component gamemode,
+      @Nullable Collection<Gamemode> gamemodes,
       Phase phase) {
     this.name = checkNotNull(name);
     this.id = checkNotNull(MapInfo.normalizeName(id == null ? name : id));
@@ -78,6 +81,7 @@ public class MapInfoImpl implements MapInfo {
     this.players = players == null ? new LinkedList<>() : players;
     this.world = world == null ? new WorldInfoImpl() : world;
     this.gamemode = gamemode;
+    this.gamemodes = gamemodes;
     this.phase = phase;
   }
 
@@ -97,6 +101,7 @@ public class MapInfoImpl implements MapInfo {
         info.getMaxPlayers(),
         info.getWorld(),
         info.getGamemode(),
+        info.getGamemodes(),
         info.getPhase());
   }
 
@@ -121,6 +126,7 @@ public class MapInfoImpl implements MapInfo {
         null,
         parseWorld(root),
         XMLUtils.parseFormattedText(root, "game"),
+        parseGamemodes(root),
         XMLUtils.parseEnum(
             Node.fromLastChildOrAttr(root, "phase"), Phase.class, "phase", Phase.PRODUCTION));
   }
@@ -191,6 +197,11 @@ public class MapInfoImpl implements MapInfo {
   }
 
   @Override
+  public Collection<Gamemode> getGamemodes() {
+    return gamemodes;
+  }
+
+  @Override
   public WorldInfo getWorld() {
     return world;
   }
@@ -253,6 +264,16 @@ public class MapInfoImpl implements MapInfo {
       }
     }
     return rules;
+  }
+
+  private static List<Gamemode> parseGamemodes(Element root) throws InvalidXMLException {
+    List<Gamemode> gamemodes = new ArrayList<>();
+    for (Element gamemodeEl : root.getChildren("gamemode")) {
+      Gamemode gm = Gamemode.byId(gamemodeEl.getText());
+      if (gm == null) throw new InvalidXMLException("Unknown gamemode", gamemodeEl);
+      gamemodes.add(gm);
+    }
+    return gamemodes;
   }
 
   private static List<Contributor> parseContributors(Element root, String tag)

@@ -1,5 +1,6 @@
 package tc.oc.pgm.scoreboard;
 
+import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
@@ -18,6 +19,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -30,6 +32,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
@@ -258,9 +261,19 @@ public class SidebarMatchModule implements MatchModule, Listener {
       return header.colorIfAbsent(NamedTextColor.AQUA);
     }
 
-    final Component game = map.getGamemode();
-    if (game != null) {
-      return game.colorIfAbsent(NamedTextColor.AQUA);
+    final Component gamemode = map.getGamemode();
+    if (gamemode != null) {
+      return gamemode.colorIfAbsent(NamedTextColor.AQUA);
+    }
+
+    final Collection<Gamemode> gamemodes = map.getGamemodes();
+    if (!gamemodes.isEmpty()) {
+      String suffix = gamemodes.size() <= 1 ? ".name" : ".acronym";
+      List<Component> gmComponents =
+          gamemodes.stream()
+              .map(gm -> translatable("gamemode." + gm.getId() + suffix))
+              .collect(Collectors.toList());
+      return TextFormatter.list(gmComponents, NamedTextColor.AQUA);
     }
 
     final List<Component> games = new LinkedList<>();
