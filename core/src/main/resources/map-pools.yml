@@ -22,6 +22,9 @@ pools:
     # on the server reaches the "players" threshold.
     dynamic: true
     players: 1
+    
+    # How long should should a map cycle last?
+    cycle-time: "15s"
 
     # A list of map names in this pool.
     # Uses map name given in map.xml, do not use folder name.
