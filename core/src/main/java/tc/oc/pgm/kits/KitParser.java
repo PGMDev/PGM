@@ -169,14 +169,13 @@ public abstract class KitParser {
 
   public ClearItemsKit parseClearItemsKit(Element el) throws InvalidXMLException {
     Element applyClear = el.getChild("clear");
-    if (applyClear != null && applyClear.hasAttributes()) {
-      boolean items = XMLUtils.parseBoolean(applyClear.getAttribute("items"), false);
-      boolean armor = XMLUtils.parseBoolean(applyClear.getAttribute("armor"), false);
+    if (applyClear != null) {
+      boolean items = XMLUtils.parseBoolean(applyClear.getAttribute("items"), true);
+      boolean armor = XMLUtils.parseBoolean(applyClear.getAttribute("armor"), true);
       boolean effects = XMLUtils.parseBoolean(applyClear.getAttribute("effects"), false);
       return new ClearItemsKit(items, armor, effects);
     } else {
       // legacy
-      if ("".equals(el.getChildText("clear"))) return new ClearItemsKit(true, true, false);
       if ("".equals(el.getChildText("clear-items"))) return new ClearItemsKit(true, false, false);
     }
     return null;
