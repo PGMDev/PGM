@@ -5,7 +5,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import tc.oc.pgm.api.player.MatchPlayer;
 
-/** Clears the player's inventory, including anything they may be holding on the cursor */
+/**
+ * Clears the player's inventory and status effects, including anything they may be holding on the
+ * cursor
+ */
 public class ClearItemsKit extends AbstractKit {
   private final boolean items;
   private final boolean armor;
