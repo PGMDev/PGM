@@ -22,7 +22,7 @@ public class GameRulesMatchModule implements MatchModule {
     }
 
     /* Gets gamerule values from level.dat after being set
-     Maps have doDaylightCycle set in XML to be turned on, so doDayLightCycle from level.dat is not saved
+     Maps need doDaylightCycle set in XML for it to be turned on, so doDayLightCycle from level.dat is not saved
     */
     for (String gameRule : this.match.getWorld().getGameRules()) {
       if (!gameRule.equals("doDaylightCycle")) {
