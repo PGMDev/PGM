@@ -39,6 +39,7 @@ import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.event.BlockTransformEvent;
+import tc.oc.pgm.api.map.GameRule;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
@@ -60,8 +61,6 @@ import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class PGMListener implements Listener {
-  private static final String DO_FIRE_TICK = "doFireTick";
-  private static final String DO_DAYLIGHT_CYCLE = "doDaylightCycle";
   /*
   1000  /time set day
   6000  noon, sun is at its peak
@@ -261,7 +260,10 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void lockFireTick(final MatchLoadEvent event) {
-    event.getMatch().getWorld().setGameRuleValue(DO_FIRE_TICK, Boolean.toString(false));
+    event
+        .getMatch()
+        .getWorld()
+        .setGameRuleValue(GameRule.DO_FIRE_TICK.getId(), Boolean.toString(false));
   }
 
   @EventHandler
@@ -270,13 +272,19 @@ public class PGMListener implements Listener {
         .getMatch()
         .getWorld()
         .setGameRuleValue(
-            DO_FIRE_TICK,
-            event.getMatch().needModule(GameRulesMatchModule.class).getGameRule(DO_FIRE_TICK));
+            GameRule.DO_FIRE_TICK.getId(),
+            event
+                .getMatch()
+                .needModule(GameRulesMatchModule.class)
+                .getGameRule(GameRule.DO_FIRE_TICK.getId()));
   }
 
   @EventHandler
   public void lockFireTick(final MatchFinishEvent event) {
-    event.getMatch().getWorld().setGameRuleValue(DO_FIRE_TICK, Boolean.toString(false));
+    event
+        .getMatch()
+        .getWorld()
+        .setGameRuleValue(GameRule.DO_FIRE_TICK.getId(), Boolean.toString(false));
   }
 
   //
@@ -285,7 +293,10 @@ public class PGMListener implements Listener {
   //
   @EventHandler
   public void lockTime(final MatchLoadEvent event) {
-    event.getMatch().getWorld().setGameRuleValue(DO_DAYLIGHT_CYCLE, Boolean.toString(false));
+    event
+        .getMatch()
+        .getWorld()
+        .setGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE.getId(), Boolean.toString(false));
   }
 
   @EventHandler
@@ -296,15 +307,22 @@ public class PGMListener implements Listener {
     GameRulesMatchModule gameRulesMatchModule =
         event.getMatch().getModule(GameRulesMatchModule.class);
     if (gameRulesMatchModule != null
-        && Boolean.parseBoolean(gameRulesMatchModule.getGameRule(DO_DAYLIGHT_CYCLE))) {
+        && Boolean.parseBoolean(
+            gameRulesMatchModule.getGameRule(GameRule.DO_DAYLIGHT_CYCLE.getId()))) {
       unlockTime = true;
     }
-    event.getMatch().getWorld().setGameRuleValue(DO_DAYLIGHT_CYCLE, Boolean.toString(unlockTime));
+    event
+        .getMatch()
+        .getWorld()
+        .setGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE.getId(), Boolean.toString(unlockTime));
   }
 
   @EventHandler
   public void lockTime(final MatchFinishEvent event) {
-    event.getMatch().getWorld().setGameRuleValue(DO_DAYLIGHT_CYCLE, Boolean.toString(false));
+    event
+        .getMatch()
+        .getWorld()
+        .setGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE.getId(), Boolean.toString(false));
   }
 
   @EventHandler
