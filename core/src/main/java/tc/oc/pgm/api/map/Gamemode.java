@@ -28,7 +28,7 @@ public enum Gamemode {
 
   public static Gamemode byId(String gamemodeId) {
     for (Gamemode gamemode : Gamemode.values()) {
-      if (gamemode.getId().equals(gamemodeId)) {
+      if (gamemode.getId().equalsIgnoreCase(gamemodeId)) {
         return gamemode;
       }
     }
