@@ -45,7 +45,7 @@ public final class TextFormatter {
       case 0:
         return empty();
       case 1:
-        return textList.get(0);
+        return textList.get(0).colorIfAbsent(color);
       case 2:
         return translatable("misc.list.pair", color, textList);
       default:
