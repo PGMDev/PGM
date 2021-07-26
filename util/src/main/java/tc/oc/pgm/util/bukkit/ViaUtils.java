@@ -1,7 +1,7 @@
 package tc.oc.pgm.util.bukkit;
 
+import com.viaversion.viaversion.api.Via;
 import org.bukkit.entity.Player;
-import us.myles.ViaVersion.api.Via;
 
 public class ViaUtils {
   /** Minecraft 1.7.6 &ndash; 1.7.10 */
@@ -16,7 +16,7 @@ public class ViaUtils {
   static {
     boolean viaLoaded = false;
     try {
-      viaLoaded = Class.forName("us.myles.ViaVersion.api.Via") != null;
+      viaLoaded = Class.forName("com.viaversion.viaversion.api.Via") != null;
     } catch (ClassNotFoundException ignored) {
     }
     ENABLED = viaLoaded;
