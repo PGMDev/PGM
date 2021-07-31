@@ -77,9 +77,9 @@
 
         <!-- Multi-protocol library for future Minecraft versions -->
         <dependency>
-            <groupId>us.myles</groupId>
+            <groupId>com.viaversion</groupId>
             <artifactId>viaversion</artifactId>
-            <version>3.0.2-SNAPSHOT</version>
+            <version>4.0.1</version>
             <scope>provided</scope>
             <optional>true</optional>
             <!-- Fix transitive dependency breaking builds -->

@@ -88,7 +88,7 @@ public class PlayerStats {
 
   protected void setLongestBowKill(double distance) {
     if (distance > longestBowKill) {
-      longestBowKill = (int) Math.ceil(distance);
+      longestBowKill = (int) Math.round(distance);
     }
   }
 
