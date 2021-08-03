@@ -25,9 +25,9 @@ public enum GameRule {
     this.id = id;
   }
 
-  public static GameRule byId(String gameRuleID) {
+  public static GameRule byId(String gameRuleId) {
     for (GameRule gameRule : GameRule.values()) {
-      if (gameRule.getId().equals(gameRuleID)) {
+      if (gameRule.getId().equals(gameRuleId)) {
         return gameRule;
       }
     }
