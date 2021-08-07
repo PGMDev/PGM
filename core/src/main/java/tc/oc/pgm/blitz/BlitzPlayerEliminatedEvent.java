@@ -4,10 +4,9 @@ import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
 import org.bukkit.Location;
 import org.bukkit.event.HandlerList;
-import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.event.MatchEvent;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.MatchPlayerEvent;
 
 /**
  * Called when a player is eliminated in the blitz game mode.
@@ -15,13 +14,12 @@ import tc.oc.pgm.api.player.MatchPlayer;
  * <p>Implementation note: This method will be called shortly after the player dies and before the
  * player is transferred to an observing team.
  */
-public class BlitzPlayerEliminatedEvent extends MatchEvent {
+public class BlitzPlayerEliminatedEvent extends MatchPlayerEvent {
   public BlitzPlayerEliminatedEvent(
-      @Nonnull Match match,
       @Nonnull MatchPlayer player,
       @Nonnull Competitor competitor,
       @Nonnull Location deathLocation) {
-    super(match);
+    super(player);
 
     Preconditions.checkNotNull(player, "match player");
     Preconditions.checkNotNull(competitor, "competitor");

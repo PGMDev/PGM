@@ -174,8 +174,7 @@ public class ClassMatchModule implements MatchModule, Listener {
 
     MatchPlayer matchPlayer = this.match.getPlayer(userId);
     if (matchPlayer != null) {
-      this.match.callEvent(
-          new PlayerClassChangeEvent(this.match, matchPlayer, this.family, oldClass, cls));
+      this.match.callEvent(new PlayerClassChangeEvent(matchPlayer, this.family, oldClass, cls));
     }
 
     return oldClass;

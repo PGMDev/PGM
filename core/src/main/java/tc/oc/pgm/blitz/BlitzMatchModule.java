@@ -143,8 +143,7 @@ public class BlitzMatchModule implements MatchModule, Listener {
 
   private void handleElimination(final MatchPlayer player, Competitor competitor) {
     final BlitzPlayerEliminatedEvent eliminatedEvent =
-        new BlitzPlayerEliminatedEvent(
-            this.match, player, competitor, player.getBukkit().getLocation());
+        new BlitzPlayerEliminatedEvent(player, competitor, player.getBukkit().getLocation());
 
     // wait until the next tick to do this so stat recording and other stuff works
     match
