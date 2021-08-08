@@ -83,6 +83,11 @@ public interface NMSHacks {
     }
   }
 
+  /** Immediately send the given entity's metadata to all viewers in range */
+  static void sendEntityMetadataToViewers(Entity entity, boolean complete) {
+    sendPacketToViewers(entity, entityMetadataPacket(entity.getEntityId(), entity, complete));
+  }
+
   Constructor<PacketPlayOutPlayerInfo.PlayerInfoData> playerInfoDataConstructor =
       getPlayerInfoDataConstructor();
 
@@ -1312,5 +1317,20 @@ public interface NMSHacks {
 
     @Override
     public void wear(Player viewer, int slot, ItemStack item) {}
+  }
+
+  static void setFireworksExpectedLifespan(Firework firework, int ticks) {
+    ((CraftFirework) firework).getHandle().expectedLifespan = ticks;
+  }
+
+  static void setFireworksTicksFlown(Firework firework, int ticks) {
+    EntityFireworks entityFirework = ((CraftFirework) firework).getHandle();
+    entityFirework.ticksFlown = ticks;
+  }
+
+  static void skipFireworksLaunch(Firework firework) {
+    setFireworksExpectedLifespan(firework, 2);
+    setFireworksTicksFlown(firework, 2);
+    sendEntityMetadataToViewers(firework, false);
   }
 }

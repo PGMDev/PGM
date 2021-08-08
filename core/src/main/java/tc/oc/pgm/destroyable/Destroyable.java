@@ -1,5 +1,7 @@
 package tc.oc.pgm.destroyable;
 
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
@@ -17,13 +19,15 @@ import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
+import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.entity.Firework;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 import tc.oc.pgm.api.PGM;
@@ -37,6 +41,7 @@ import tc.oc.pgm.blockdrops.BlockDrops;
 import tc.oc.pgm.blockdrops.BlockDropsMatchModule;
 import tc.oc.pgm.blockdrops.BlockDropsRuleSet;
 import tc.oc.pgm.events.FeatureChangeEvent;
+import tc.oc.pgm.fireworks.FireworkMatchModule;
 import tc.oc.pgm.goals.IncrementalGoal;
 import tc.oc.pgm.goals.ModeChangeGoal;
 import tc.oc.pgm.goals.TouchableGoal;
@@ -352,17 +357,26 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
         if (this.match.getRandom().nextFloat() < chance) {
           this.lastSparkTime = now;
 
+          // Spawn a firework where the block was
+          Firework firework =
+              FireworkMatchModule.spawnFirework(
+                  blockLocation,
+                  FireworkEffect.builder()
+                      .with(FireworkEffect.Type.BURST)
+                      .withFlicker()
+                      .withColor(this.getOwner().getFullColor())
+                      .build(),
+                  0);
+
+          NMSHacks.skipFireworksLaunch(firework);
+
           // Players more than 64m away will not see or hear the fireworks, so just play the sound
           // for them
           for (MatchPlayer listener : this.getOwner().getMatch().getPlayers()) {
             if (listener.getBukkit().getLocation().distance(blockLocation) > 64) {
-              listener
-                  .getBukkit()
-                  .playSound(listener.getBukkit().getLocation(), Sound.FIREWORK_BLAST2, 0.75f, 1f);
-              listener
-                  .getBukkit()
-                  .playSound(
-                      listener.getBukkit().getLocation(), Sound.FIREWORK_TWINKLE2, 0.75f, 1f);
+              listener.playSound(sound(key("fireworks.blast_far"), Sound.Source.MASTER, 0.75f, 1f));
+              listener.playSound(
+                  sound(key("fireworks.twinkle_far"), Sound.Source.MASTER, 0.75f, 1f));
             }
           }
         }
