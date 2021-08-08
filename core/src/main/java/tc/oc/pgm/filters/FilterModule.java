@@ -22,11 +22,7 @@ public class FilterModule implements MapModule {
 
   @Override
   public MatchModule createMatchModule(Match match) {
-    if (match.getMap().getProto().isOlderThan(MapProtos.FILTER_FEATURES)) {
-      return null;
-    } else {
-      return new FilterMatchModule(match);
-    }
+    return new FilterMatchModule(match);
   }
 
   public static class Factory implements MapModuleFactory<FilterModule> {

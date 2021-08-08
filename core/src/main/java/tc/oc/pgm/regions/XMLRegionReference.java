@@ -1,12 +1,16 @@
 package tc.oc.pgm.regions;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Random;
 import javax.annotation.Nullable;
+
+import com.google.common.collect.ImmutableList;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
+import org.bukkit.event.Event;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.filter.query.Query;
@@ -14,6 +18,7 @@ import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.api.region.RegionDefinition;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
+import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 import tc.oc.pgm.util.xml.Node;
 
 public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> implements Region {
@@ -114,6 +119,11 @@ public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> im
   @Override
   public Iterable<BlockVector> getBlockVectors() {
     return get().getBlockVectors();
+  }
+
+  @Override
+  public Collection<Class<? extends Event>> getRelevantEvents() {
+    return ImmutableList.of(PlayerCoarseMoveEvent.class);
   }
 
   @Override

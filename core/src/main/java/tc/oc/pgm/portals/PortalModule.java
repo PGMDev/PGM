@@ -62,7 +62,7 @@ public class PortalModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<PortalModule> {
     @Override
-    public Collection<Class<? extends MapModule>> getSoftDependencies() {
+    public Collection<Class<? extends MapModule>> getHardDependencies() {
       return ImmutableList.of(RegionModule.class, FilterModule.class);
     }
 
@@ -137,13 +137,6 @@ public class PortalModule implements MapModule {
 
         final Optional<Filter> reverseFinal =
             Stream.of(reverse, inverseTransit, exit).filter(Objects::nonNull).findFirst();
-
-        try {
-          if (forwardFinal != null) FilterMatchModule.checkFilterDynamic(forwardFinal);
-          reverseFinal.ifPresent(FilterMatchModule::checkFilterDynamic);
-        } catch (IllegalArgumentException e) {
-          throw new InvalidXMLException(e.getMessage(), portalEl);
-        }
 
         // Portal is always bidirectional if a reverse dynamic filter is specified,
         // otherwise it must be enabled explicitly.

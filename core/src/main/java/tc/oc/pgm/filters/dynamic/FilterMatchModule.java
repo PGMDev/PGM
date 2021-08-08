@@ -29,6 +29,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.Tickable;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.party.event.PartyEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -91,6 +92,11 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   // Filterables that need a check in the next tick (cleared every tick)
   private final Set<Filterable<?>> dirtySet = new HashSet<>();
 
+  @Override
+  public void load() throws ModuleLoadException {
+    this.listeners.rowKeySet().forEach(filter -> this.registerListenersFor(filter.getRelevantEvents()));
+  }
+
   /**
    * Registers a filter listener for the given scope to be notified when the response of the
    * provided filter is equal to the provided response.
@@ -115,8 +121,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
         this.listeners.row(filter).computeIfAbsent(scope, s -> new ListenerSet());
 
     (response ? listenerSet.rise : listenerSet.fall).add(listener);
-
-    this.registerListenersFor(filter.getRelevantEvents());
 
     match
         .filterableDescendants(scope)

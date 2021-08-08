@@ -20,11 +20,11 @@ public interface PortalTransform extends InvertibleOperator<PortalTransform> {
       DoubleProvider z,
       DoubleProvider yaw,
       DoubleProvider pitch) {
-    if (x instanceof StaticDoubleProvider
-        && y instanceof StaticDoubleProvider
-        && z instanceof StaticDoubleProvider
-        && yaw instanceof StaticDoubleProvider
-        && pitch instanceof StaticDoubleProvider) {
+    if (x == RelativeDoubleProvider.ZERO
+        && y == RelativeDoubleProvider.ZERO
+        && z == RelativeDoubleProvider.ZERO
+        && yaw == RelativeDoubleProvider.ZERO
+        && pitch == RelativeDoubleProvider.ZERO) {
       return IDENTITY;
     } else {
       return new Piecewise(x, y, z, yaw, pitch);
