@@ -90,7 +90,16 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   public void load() throws ModuleLoadException {
     this.listeners
         .rowKeySet()
-        .forEach(filter -> this.registerListenersFor(filter.getRelevantEvents()));
+        .forEach(
+            filter -> {
+              if (filter.getRelevantEvents().isEmpty()) {
+                match
+                    .getLogger()
+                    .warning("Filter " + filter + " was submitted as a dynamic filter but is not!");
+                return;
+              }
+              this.registerListenersFor(filter.getRelevantEvents());
+            });
   }
 
   /**
@@ -102,17 +111,11 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    * @param response The desired response
    * @param listener The listener that handles the response
    * @throws IllegalStateException if the match is loaded at register time
-   * @throws IllegalArgumentException if the submitted filter is NOT a dynamic filter
    */
   private <F extends Filterable<?>> void register(
       Class<F> scope, Filter filter, boolean response, FilterListener<? super F> listener) {
     if (match.isLoaded()) {
       throw new IllegalStateException("Cannot register filter listener after match is loaded");
-    }
-
-    if (filter.getRelevantEvents().isEmpty()) {
-      throw new IllegalArgumentException(
-          "Filter " + filter + " was submitted as a dynamic filter but is not!");
     }
 
     final ListenerSet listenerSet =
@@ -138,7 +141,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
    * @throws IllegalStateException if the match is loaded at register time
-   * @throws IllegalArgumentException if the submitted filter is NOT a dynamic filter
    */
   @Override
   public <F extends Filterable<?>> void onChange(
@@ -162,7 +164,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
    * @throws IllegalStateException if the match is loaded at register time
-   * @throws IllegalArgumentException if the submitted filter is NOT a dynamic filter
    */
   @Override
   public void onChange(Filter filter, FilterListener<? super Filterable<?>> listener) {
@@ -199,7 +200,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
    * @throws IllegalStateException if the match is loaded at register time
-   * @throws IllegalArgumentException if the submitted filter is NOT a dynamic filter
    */
   @Override
   public void onRise(Filter filter, Consumer<? super Filterable<?>> listener) {
@@ -213,7 +213,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
    * @throws IllegalStateException if the match is loaded at register time
-   * @throws IllegalArgumentException if the submitted filter is NOT a dynamic filter
    */
   @Override
   public <F extends Filterable<?>> void onFall(
@@ -236,7 +235,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
    * @throws IllegalStateException if the match is loaded at register time
-   * @throws IllegalArgumentException if the submitted filter is NOT a dynamic filter
    */
   @Override
   public void onFall(Filter filter, Consumer<? super Filterable<?>> listener) {
