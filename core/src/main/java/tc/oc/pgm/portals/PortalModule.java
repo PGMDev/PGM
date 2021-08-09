@@ -130,7 +130,14 @@ public class PortalModule implements MapModule {
 
         // Figure out the forward trigger, from the dynamic filters or entrance region
         Filter forwardFinal =
-            Stream.of(forward, transit, entrance).filter(Objects::nonNull).findFirst().orElse(null);
+            Stream.of(forward, transit, entrance)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElseThrow(
+                    () ->
+                        new InvalidXMLException(
+                            "Portal must have an entrance region, or one of 'forward' or 'transit' properties",
+                            portalEl));
 
         // Figure out the (optional) reverse trigger, from dynamic filters or exit region
         Filter inverseTransit = transit != null ? new InverseFilter(transit) : null;

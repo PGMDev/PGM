@@ -94,7 +94,9 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
 
   @Override
   public void load() throws ModuleLoadException {
-    this.listeners.rowKeySet().forEach(filter -> this.registerListenersFor(filter.getRelevantEvents()));
+    this.listeners
+        .rowKeySet()
+        .forEach(filter -> this.registerListenersFor(filter.getRelevantEvents()));
   }
 
   /**
