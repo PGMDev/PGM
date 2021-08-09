@@ -72,7 +72,6 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   private final WeakReference<Player> bukkit;
   private final Audience audience;
   private final AtomicReference<Party> party;
-  private final AtomicReference<PlayerQuery> query;
   private final AtomicBoolean frozen;
   private final AtomicBoolean dead;
   private final AtomicBoolean visible;
@@ -90,7 +89,6 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     this.bukkit = new WeakReference<>(player);
     this.audience = Audience.get(player);
     this.party = new AtomicReference<>(null);
-    this.query = new AtomicReference<>(null);
     this.frozen = new AtomicBoolean(false);
     this.dead = new AtomicBoolean(false);
     this.visible = new AtomicBoolean(false);
@@ -153,13 +151,6 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     } else {
       return new ParticipantStateImpl(this);
     }
-  }
-
-  @Override
-  public PlayerQuery
-      getQuery() { // TODO: delete this method, no reason to recreate the query all the time, and
-    // this now implements query instead
-    return query.get();
   }
 
   @Nullable
@@ -399,9 +390,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
 
   @Override
   public void internalSetParty(Party newParty) {
-    if (party.compareAndSet(getParty(), newParty)) {
-      query.set(new tc.oc.pgm.filters.query.PlayerQuery(null, this));
-    }
+
   }
 
   @Override

@@ -17,7 +17,7 @@ public class PlayerBlockQueryModifier extends QueryModifier<PlayerQuery> {
     // Abstain when no player can be found, eg: they disconnected
     if (query.getPlayer() == null) return null;
 
-    return query.getPlayer().getQuery();
+    return query.getPlayer();
   }
 
   @Override

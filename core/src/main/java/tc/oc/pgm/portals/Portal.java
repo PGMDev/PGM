@@ -55,7 +55,7 @@ public class Portal implements FeatureDefinition {
 
   protected boolean canUse(MatchPlayer player) {
     return (player.isParticipating() ? participantFilter : observerFilter)
-        .query(player.getQuery())
+        .query(player)
         .isAllowed();
   }
 

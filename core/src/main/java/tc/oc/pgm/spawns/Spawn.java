@@ -21,7 +21,7 @@ public class Spawn implements FeatureDefinition {
   }
 
   public boolean allows(MatchPlayer player) {
-    return this.attributes.filter.query(player.getQuery()).isAllowed();
+    return this.attributes.filter.query(player).isAllowed();
   }
 
   // assume the caller has already called .matches()

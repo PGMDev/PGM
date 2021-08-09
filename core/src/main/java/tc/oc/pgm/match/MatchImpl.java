@@ -102,7 +102,6 @@ public class MatchImpl implements Match {
   private final EnumMap<MatchScope, Collection<Tickable>> tickables;
   private final AtomicReference<Tick> tick;
   private final CountdownContext countdown;
-  private final MatchQuery query;
   private final Map<UUID, MatchPlayer> players;
   private final Map<MatchPlayer, Party> partyChanges;
   private final Set<Party> parties;
@@ -137,7 +136,6 @@ public class MatchImpl implements Match {
     }
     this.tick = new AtomicReference<>(null);
     this.countdown = new SingleCountdownContext(this, logger);
-    this.query = new MatchQuery(null, this);
     this.players = new ConcurrentHashMap<>();
     this.partyChanges = new WeakHashMap<>();
     this.parties = new LinkedHashSet<>();
@@ -689,11 +687,6 @@ public class MatchImpl implements Match {
     }
     if (party instanceof QueuedParty) queuedParticipants.set(null);
     parties.remove(party);
-  }
-
-  @Override
-  public MatchQuery getQuery() {
-    return query;
   }
 
   @Override

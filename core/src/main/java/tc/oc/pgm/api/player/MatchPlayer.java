@@ -80,13 +80,6 @@ public interface MatchPlayer
   ParticipantState getParticipantState();
 
   /**
-   * Get the filter {@link Query} that exclusively matches the {@link MatchPlayer}.
-   *
-   * @return The {@link Query} to match the {@link MatchPlayer}.
-   */
-  PlayerQuery getQuery();
-
-  /**
    * Get the underlying {@link Player} that is associated with the {@link MatchPlayer}.
    *
    * <p>This method has been kept since a significant portion of the codebase depends on it. Going
@@ -261,7 +254,7 @@ public interface MatchPlayer
   @Override
   PlayerInventory getInventory();
 
-  @Deprecated
+  @Deprecated //TODO: remove after dynamic filter commit
   void internalSetParty(Party party);
 
   @Override
@@ -274,12 +267,6 @@ public interface MatchPlayer
     return Stream.of();
   }
 
-  @Nullable
-  @Override
-  default Event getEvent() {
-    return null;
-  }
-
   @Override
   default Class<? extends Entity> getEntityType() {
     return Player.class;
@@ -289,5 +276,11 @@ public interface MatchPlayer
   @Override
   default MatchPlayer getPlayer() {
     return this;
+  }
+
+  @Nullable
+  @Override
+  default Event getEvent() {
+    return null;
   }
 }

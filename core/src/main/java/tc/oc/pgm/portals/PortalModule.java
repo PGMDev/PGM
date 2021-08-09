@@ -62,7 +62,7 @@ public class PortalModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<PortalModule> {
     @Override
-    public Collection<Class<? extends MapModule>> getHardDependencies() {
+    public Collection<Class<? extends MapModule>> getSoftDependencies() {
       return ImmutableList.of(RegionModule.class, FilterModule.class);
     }
 

@@ -43,7 +43,7 @@ import tc.oc.pgm.util.Audience;
  * org.bukkit.Server}, as long as resources are cleaned up after {@link #unload()}.
  */
 public interface Match
-    extends MatchPlayerResolver, Audience, ModuleContext<MatchModule>, Filterable<MatchQuery> {
+    extends MatchPlayerResolver, Audience, ModuleContext<MatchModule>, Filterable<MatchQuery>, MatchQuery {
 
   /**
    * Get the global {@link Logger} for the {@link Match}.
@@ -369,13 +369,6 @@ public interface Match
    * @param party The {@link Party} to remove.
    */
   void removeParty(Party party);
-
-  /**
-   * Get the {@link Query} associated with the {@link Match}.
-   *
-   * @return The filter {@link Query}.
-   */
-  MatchQuery getQuery();
 
   /**
    * Get the {@link Duration} of the {@link Match}, or {@link Duration#ZERO} if not yet started.

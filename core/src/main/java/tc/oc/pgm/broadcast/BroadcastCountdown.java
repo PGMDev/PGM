@@ -36,7 +36,7 @@ public class BroadcastCountdown extends MatchCountdown {
     super.onEnd(total);
     for (MatchPlayer player : this.getMatch().getPlayers()) {
       if (this.broadcast.filter == null
-          || this.broadcast.filter.query(player.getQuery()).isAllowed()) {
+          || this.broadcast.filter.query(player).isAllowed()) {
         player.sendMessage(this.broadcast.getFormattedMessage());
         player.playSound(this.broadcast.getSound());
       }

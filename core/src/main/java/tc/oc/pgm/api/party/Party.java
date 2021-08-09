@@ -149,14 +149,14 @@ public interface Party extends Audience, Named, Filterable<PartyQuery>, PartyQue
     return getPlayers().stream();
   }
 
+  @Override
+  default Party getParty() {
+    return this;
+  }
+
   @Nullable
   @Override
   default Event getEvent() {
     return null;
-  }
-
-  @Override
-  default Party getParty() {
-    return this;
   }
 }

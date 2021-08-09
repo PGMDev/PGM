@@ -7,8 +7,7 @@ import org.bukkit.potion.PotionEffect;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.player.MatchPlayer;
 
-public class EffectFilter extends ParticipantFilter { // TODO: make dynamic? requires sportpaper
-  // events(potioneffectadd/remove/expire/extend)
+public class EffectFilter extends ParticipantFilter {
   protected final PotionEffect base;
   // duration is stored in ticks
   protected final Range<Integer> duration;

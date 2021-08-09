@@ -243,7 +243,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
 
   private boolean canDominate(MatchPlayer player) {
     return this.definition.getPlayerFilter() == null
-        || this.definition.getPlayerFilter().query(player.getQuery()).isAllowed();
+        || this.definition.getPlayerFilter().query(player).isAllowed();
   }
 
   public float getEffectivePointsPerSecond() {
