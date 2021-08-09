@@ -72,12 +72,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
     this.match = match;
   }
 
-  public static void checkFilterDynamic(Filter filter) {
-    if (filter.getRelevantEvents().isEmpty())
-      throw new IllegalArgumentException(
-          "Filter " + filter + " was submitted as a dynamic filter but is not!");
-  }
-
   private static class ListenerSet {
     final Set<FilterListener<?>> rise = new HashSet<>();
     final Set<FilterListener<?>> fall = new HashSet<>();
@@ -103,20 +97,22 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    * Registers a filter listener for the given scope to be notified when the response of the
    * provided filter is equal to the provided response.
    *
-   * <p>If the registered filter is NOT dynamic no specific listener will be added for that filter.
-   * It will still be given responses if other listeners invalidate {@link Filterable}s that
-   * implement the same {@link Query} that the non-dynamic filter accepts. To prevent this
-   * unpredictable behaviour {@link #checkFilterDynamic(Filter)} should be used before registering.
-   *
    * @param scope The scope of the filter listener
    * @param filter The filter to listen to
    * @param response The desired response
    * @param listener The listener that handles the response
+   * @throws IllegalStateException if the match is loaded at register time
+   * @throws IllegalArgumentException if the submitted filter is NOT a dynamic filter
    */
   private <F extends Filterable<?>> void register(
       Class<F> scope, Filter filter, boolean response, FilterListener<? super F> listener) {
     if (match.isLoaded()) {
       throw new IllegalStateException("Cannot register filter listener after match is loaded");
+    }
+
+    if (filter.getRelevantEvents().isEmpty()) {
+      throw new IllegalArgumentException(
+          "Filter " + filter + " was submitted as a dynamic filter but is not!");
     }
 
     final ListenerSet listenerSet =
@@ -141,6 +137,8 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    * @param scope The scope of the filter listener
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
+   * @throws IllegalStateException if the match is loaded at register time
+   * @throws IllegalArgumentException if the submitted filter is NOT a dynamic filter
    */
   @Override
   public <F extends Filterable<?>> void onChange(
@@ -163,6 +161,8 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    *
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
+   * @throws IllegalStateException if the match is loaded at register time
+   * @throws IllegalArgumentException if the submitted filter is NOT a dynamic filter
    */
   @Override
   public void onChange(Filter filter, FilterListener<? super Filterable<?>> listener) {
@@ -175,6 +175,8 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    * @param scope The scope of the filter listener
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
+   * @throws IllegalStateException if the match is loaded at register time
+   * @throws IllegalArgumentException if the submitted filter is NOT a dynamic filter
    */
   @Override
   public <F extends Filterable<?>> void onRise(
@@ -196,6 +198,8 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    *
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
+   * @throws IllegalStateException if the match is loaded at register time
+   * @throws IllegalArgumentException if the submitted filter is NOT a dynamic filter
    */
   @Override
   public void onRise(Filter filter, Consumer<? super Filterable<?>> listener) {
@@ -208,6 +212,8 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    * @param scope The scope of the filter listener
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
+   * @throws IllegalStateException if the match is loaded at register time
+   * @throws IllegalArgumentException if the submitted filter is NOT a dynamic filter
    */
   @Override
   public <F extends Filterable<?>> void onFall(
@@ -229,6 +235,8 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    *
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
+   * @throws IllegalStateException if the match is loaded at register time
+   * @throws IllegalArgumentException if the submitted filter is NOT a dynamic filter
    */
   @Override
   public void onFall(Filter filter, Consumer<? super Filterable<?>> listener) {
