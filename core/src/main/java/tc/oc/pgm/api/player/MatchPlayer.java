@@ -252,7 +252,7 @@ public interface MatchPlayer
   @Override
   PlayerInventory getInventory();
 
-  @Deprecated // TODO: remove after dynamic filter commit
+  @Deprecated
   void internalSetParty(Party party);
 
   @Override

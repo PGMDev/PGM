@@ -388,7 +388,9 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   }
 
   @Override
-  public void internalSetParty(Party newParty) {}
+  public void internalSetParty(Party newParty) {
+    party.set(newParty);
+  }
 
   @Override
   public PlayerInventory getInventory() {
