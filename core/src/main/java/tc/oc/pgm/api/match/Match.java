@@ -31,7 +31,6 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.features.MatchFeatureContext;
 import tc.oc.pgm.filters.dynamic.Filterable;
-import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.util.Audience;
 
 /**
@@ -43,7 +42,11 @@ import tc.oc.pgm.util.Audience;
  * org.bukkit.Server}, as long as resources are cleaned up after {@link #unload()}.
  */
 public interface Match
-    extends MatchPlayerResolver, Audience, ModuleContext<MatchModule>, Filterable<MatchQuery>, MatchQuery {
+    extends MatchPlayerResolver,
+        Audience,
+        ModuleContext<MatchModule>,
+        Filterable<MatchQuery>,
+        MatchQuery {
 
   /**
    * Get the global {@link Logger} for the {@link Match}.
@@ -434,11 +437,5 @@ public interface Match
   @Override
   default Match getMatch() {
     return this;
-  }
-
-  @Nullable
-  @Override
-  default Event getEvent() {
-    return null;
   }
 }

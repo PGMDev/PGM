@@ -27,5 +27,7 @@ import tc.oc.pgm.goals.Goal;
 public interface Query {
   /** The event providing the query information, if any */
   @Nullable
-  Event getEvent();
+  default Event getEvent() {
+    return null;
+  }
 }

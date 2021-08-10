@@ -162,9 +162,9 @@ public class Tribute implements Competitor {
   }
 
   /**
-   * If the player is online and participating, this delegates to that player.
-   * Otherwise it returns a PlayerQuery, which knows about the player's identity, but has no
-   * properties related to physical presence in the match.
+   * If the player is online and participating, this delegates to that player. Otherwise it returns
+   * a PlayerQuery, which knows about the player's identity, but has no properties related to
+   * physical presence in the match.
    */
   @Override
   public tc.oc.pgm.api.filter.query.PartyQuery getQuery() {

@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.PlayerInventory;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
@@ -17,7 +16,6 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.filters.dynamic.Filterable;
-import tc.oc.pgm.filters.query.Query;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.attribute.Attribute;
@@ -254,7 +252,7 @@ public interface MatchPlayer
   @Override
   PlayerInventory getInventory();
 
-  @Deprecated //TODO: remove after dynamic filter commit
+  @Deprecated // TODO: remove after dynamic filter commit
   void internalSetParty(Party party);
 
   @Override
@@ -276,11 +274,5 @@ public interface MatchPlayer
   @Override
   default MatchPlayer getPlayer() {
     return this;
-  }
-
-  @Nullable
-  @Override
-  default Event getEvent() {
-    return null;
   }
 }

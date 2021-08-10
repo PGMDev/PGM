@@ -8,7 +8,6 @@ import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
-import org.bukkit.event.Event;
 import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
@@ -152,11 +151,5 @@ public interface Party extends Audience, Named, Filterable<PartyQuery>, PartyQue
   @Override
   default Party getParty() {
     return this;
-  }
-
-  @Nullable
-  @Override
-  default Event getEvent() {
-    return null;
   }
 }
