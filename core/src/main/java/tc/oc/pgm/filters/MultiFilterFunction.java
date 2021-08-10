@@ -12,7 +12,6 @@ import tc.oc.pgm.api.filter.query.Query;
 
 public abstract class MultiFilterFunction implements FilterDefinition {
   protected final List<Filter> filters;
-  private final Collection<Class<? extends Event>> dynamicEvents;
   protected Class<? extends Query> upperBound;
 
   @Override
@@ -35,15 +34,13 @@ public abstract class MultiFilterFunction implements FilterDefinition {
 
   public MultiFilterFunction(Iterable<? extends Filter> filters) {
     this.filters = ImmutableList.copyOf(filters);
-
-    final List<Class<? extends Event>> allEvents = new ArrayList<>();
-    this.filters.forEach(filter -> allEvents.addAll(filter.getRelevantEvents()));
-    this.dynamicEvents = ImmutableList.copyOf(allEvents);
   }
 
   @Override
   public Collection<Class<? extends Event>> getRelevantEvents() {
-    return this.dynamicEvents;
+    List<Class<? extends Event>> allEvents = new ArrayList<>();
+    this.filters.forEach(f -> allEvents.addAll(f.getRelevantEvents()));
+    return ImmutableList.copyOf(allEvents);
   }
 
   @Override
