@@ -29,6 +29,7 @@ public interface Filterable<Q extends MatchQuery> extends MatchQuery {
    *
    * <p>This object is returned if it extends the given type.
    */
+  @SuppressWarnings("unchecked")
   default <R extends Filterable<?>> Optional<R> filterableAncestor(Class<R> type) {
     return type.isInstance(this)
         ? Optional.of((R) this)
@@ -50,6 +51,7 @@ public interface Filterable<Q extends MatchQuery> extends MatchQuery {
    * <p>This method simply tests this object's type, and recurses on all {@link
    * #filterableChildren()}. Subclasses should provide a more efficient implementation, if possible.
    */
+  @SuppressWarnings("unchecked")
   default <R extends Filterable<?>> Stream<? extends R> filterableDescendants(Class<R> type) {
     Stream<? extends R> result =
         filterableChildren().flatMap(child -> child.filterableDescendants(type));

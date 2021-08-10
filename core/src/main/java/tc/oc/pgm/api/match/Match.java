@@ -420,6 +420,7 @@ public interface Match
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   default <R extends Filterable<?>> Stream<? extends R> filterableDescendants(Class<R> type) {
     Stream<R> result = Stream.of();
     if (type.isAssignableFrom(Match.class)) {
