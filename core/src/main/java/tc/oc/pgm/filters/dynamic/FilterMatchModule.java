@@ -18,6 +18,7 @@ import java.util.logging.Level;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryEvent;
@@ -29,7 +30,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.Tickable;
-import tc.oc.pgm.api.module.exception.ModuleLoadException;
+import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.party.event.PartyEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -62,7 +63,7 @@ import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
  * @see #onFall(Class, Filter, Consumer)
  */
 @ListenerScope(MatchScope.LOADED)
-public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickable {
+public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickable, Listener {
 
   private final Match match;
   private final List<Class<? extends Event>> listeningFor = new LinkedList<>();
@@ -86,8 +87,10 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   // Filterables that need a check in the next tick (cleared every tick)
   private final Set<Filterable<?>> dirtySet = new HashSet<>();
 
-  @Override
-  public void load() throws ModuleLoadException {
+  // We have to listen to this event to guarantee that all other modules have been loaded
+  // and that there is no unresolved xml filter references.
+  @EventHandler
+  public void onMatchLoad(MatchLoadEvent event) {
     this.listeners
         .rowKeySet()
         .forEach(
