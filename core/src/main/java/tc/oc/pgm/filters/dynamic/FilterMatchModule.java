@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import javax.annotation.Nullable;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
@@ -70,7 +71,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   private final PriorityQueue<TimeFilter> timeFilterQueue = new PriorityQueue<>();
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
   private final MethodType filterableMethodType = MethodType.methodType(Filterable.class);
-  private final MethodType playerMethodType = MethodType.methodType(Player.class);
+  private final MethodType entityMethodType = MethodType.methodType(Entity.class);
   private final Map<Class<? extends Event>, MethodHandle> cachedHandles = new HashMap<>();
 
   public FilterMatchModule(Match match) {
@@ -446,31 +447,30 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
 
     // #getActor is mostly for SportPaper (PlayerAction).
     // #getPlayer covers events which does not provide Entity
-    // as the lower boundary(which is a mess we dont need to cover atm)
-    final String[] playerGetterNames = new String[] {"getActor", "getPlayer"};
+    // as the lower boundary
+    final String[] entityGetterNames = new String[] {"getActor", "getPlayer"};
 
     MethodHandle result = null;
 
     for (int i = 0; result == null && i < filterableGetterNames.length; i++) {
-      result = this.findMethod(event, filterableGetterNames[i], true);
+      result = this.findMethod(event, filterableGetterNames[i], this.filterableMethodType);
     }
 
-    for (int i = 0; result == null && i < playerGetterNames.length; i++) {
-      result = this.findMethod(event, playerGetterNames[i], false);
+    for (int i = 0; result == null && i < entityGetterNames.length; i++) {
+      result = this.findMethod(event, entityGetterNames[i], this.entityMethodType);
     }
 
     if (result == null)
       throw new NoSuchMethodException(
-          "No method to extract a Filterable or Player found on " + event);
+          "No method to extract a Filterable or Entity(Player) found on " + event);
 
     return result;
   }
 
-  private @Nullable MethodHandle findMethod(Class<?> clazz, String name, boolean filterable)
+  private @Nullable MethodHandle findMethod(Class<?> clazz, String name, MethodType type)
       throws IllegalAccessException {
     try {
-      return this.lookup.findVirtual(
-          clazz, name, filterable ? this.filterableMethodType : this.playerMethodType);
+      return this.lookup.findVirtual(clazz, name, type);
     } catch (NoSuchMethodException e) {
       // No-Op
     }
