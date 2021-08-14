@@ -4,6 +4,9 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,13 +18,13 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
-import org.bukkit.entity.Entity;
+import javax.annotation.Nullable;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryEvent;
 import org.bukkit.plugin.EventExecutor;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.Filter;
@@ -31,17 +34,14 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
-import tc.oc.pgm.api.party.event.PartyEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
-import tc.oc.pgm.api.player.event.MatchPlayerEvent;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.filters.TimeFilter;
 import tc.oc.pgm.util.MapUtils;
-import tc.oc.pgm.util.event.GeneralizedEvent;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
 /**
@@ -68,6 +68,10 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   private final Match match;
   private final List<Class<? extends Event>> listeningFor = new LinkedList<>();
   private final PriorityQueue<TimeFilter> timeFilterQueue = new PriorityQueue<>();
+  private final MethodHandles.Lookup lookup = MethodHandles.lookup();
+  private final MethodType filterableMethodType = MethodType.methodType(Filterable.class);
+  private final MethodType playerMethodType = MethodType.methodType(Player.class);
+  private final Map<Class<? extends Event>, MethodHandle> cachedHandles = new HashMap<>();
 
   public FilterMatchModule(Match match) {
     this.match = match;
@@ -392,15 +396,40 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
       if (listeningFor.contains(event)) continue;
 
       EventExecutor result;
-      if (event.isAssignableFrom(PlayerCoarseMoveEvent.class))
-        result = (l, e) -> this.onPlayerMove((PlayerCoarseMoveEvent) e); // TODO: move to this?
-      else if (event.isAssignableFrom(MatchPlayerDeathEvent.class))
+      if (PlayerCoarseMoveEvent.class.isAssignableFrom(event))
+        result = (l, e) -> this.onPlayerMove((PlayerCoarseMoveEvent) e);
+      else if (MatchPlayerDeathEvent.class.isAssignableFrom(event))
         result = (l, e) -> this.onPlayerDeath((MatchPlayerDeathEvent) e);
-      else if (event.isAssignableFrom(PlayerPartyChangeEvent.class))
+      else if (PlayerPartyChangeEvent.class.isAssignableFrom(event))
         result = (l, e) -> this.onPartyChange((PlayerPartyChangeEvent) e);
-      else if (event.isAssignableFrom(InventoryEvent.class))
-        result = (l, e) -> this.invalidate(this.match.getPlayer(((InventoryEvent) e).getActor()));
-      else result = (l, e) -> this.invalidate(this.extractFilterable(e));
+      else {
+        try {
+          this.cachedHandles.put(event, this.createExtractingMethodHandle(event));
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+          this.cachedHandles.remove(event);
+          match
+              .getLogger()
+              .severe("Unable to create MethodHandle extracting Filterable or Player for " + event);
+          e.printStackTrace();
+          continue;
+        }
+        result =
+            (l, e) -> {
+              try {
+                final Object o = this.cachedHandles.get(e.getClass()).invoke(e);
+                if (o instanceof Filterable) this.invalidate((Filterable<?>) o);
+                else if (o instanceof Player) this.invalidate(this.match.getPlayer((Player) o));
+                else
+                  throw new IllegalStateException(
+                      "A cached MethodHandle returned a non-expected type. Was: " + o.getClass());
+              } catch (Throwable t) {
+                match
+                    .getLogger()
+                    .severe("Unable to invoke cached MethodHandle extracting Filterable for " + e);
+                t.printStackTrace();
+              }
+            };
+      }
 
       listeningFor.add(event);
 
@@ -411,13 +440,41 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
     }
   }
 
-  private Filterable<?> extractFilterable(Event event) {
-    if (event instanceof MatchPlayerEvent) return ((MatchPlayerEvent) event).getPlayer();
-    final Entity e = GeneralizedEvent.getActorIfPresent(event);
-    final MatchPlayer player = match.getPlayer(e);
-    if (player != null) return player;
-    if (event instanceof PartyEvent) return ((PartyEvent) event).getParty();
-    return match;
+  private MethodHandle createExtractingMethodHandle(Class<? extends Event> event)
+      throws NoSuchMethodException, IllegalAccessException {
+    final String[] filterableGetterNames = new String[] {"getPlayer", "getParty", "getMatch"};
+
+    // #getActor is mostly for SportPaper (PlayerAction).
+    // #getPlayer covers events which does not provide Entity
+    // as the lower boundary(which is a mess we dont need to cover atm)
+    final String[] playerGetterNames = new String[] {"getActor", "getPlayer"};
+
+    MethodHandle result = null;
+
+    for (int i = 0; result == null && i < filterableGetterNames.length; i++) {
+      result = this.findMethod(event, filterableGetterNames[i], true);
+    }
+
+    for (int i = 0; result == null && i < playerGetterNames.length; i++) {
+      result = this.findMethod(event, playerGetterNames[i], false);
+    }
+
+    if (result == null)
+      throw new NoSuchMethodException(
+          "No method to extract a Filterable or Player found on " + event);
+
+    return result;
+  }
+
+  private @Nullable MethodHandle findMethod(Class<?> clazz, String name, boolean filterable)
+      throws IllegalAccessException {
+    try {
+      return this.lookup.findVirtual(
+          clazz, name, filterable ? this.filterableMethodType : this.playerMethodType);
+    } catch (NoSuchMethodException e) {
+      // No-Op
+    }
+    return null;
   }
 
   public void onPlayerMove(PlayerCoarseMoveEvent event) {
