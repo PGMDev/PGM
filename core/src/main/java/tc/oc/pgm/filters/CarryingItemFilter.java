@@ -3,8 +3,10 @@ package tc.oc.pgm.filters;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import org.bukkit.event.Event;
-import org.bukkit.event.inventory.InventoryInteractEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerItemBreakEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -21,7 +23,9 @@ public class CarryingItemFilter extends ParticipantItemFilter {
         PlayerPickupItemEvent.class,
         PlayerDropItemEvent.class,
         ApplyKitEvent.class,
-        InventoryInteractEvent.class);
+        InventoryClickEvent.class,
+        InventoryDragEvent.class,
+        PlayerItemBreakEvent.class);
   }
 
   @Override

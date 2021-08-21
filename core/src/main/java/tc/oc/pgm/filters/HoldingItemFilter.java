@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.bukkit.event.Event;
 import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerItemBreakEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
@@ -23,7 +24,8 @@ public class HoldingItemFilter extends ParticipantItemFilter {
         PlayerPickupItemEvent.class,
         PlayerDropItemEvent.class,
         ApplyKitEvent.class,
-        InventoryInteractEvent.class);
+        InventoryInteractEvent.class,
+        PlayerItemBreakEvent.class);
   }
 
   @Override

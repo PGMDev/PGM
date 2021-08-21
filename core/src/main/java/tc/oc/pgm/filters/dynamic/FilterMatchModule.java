@@ -42,6 +42,7 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.filters.TimeFilter;
+import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.util.MapUtils;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
@@ -70,7 +71,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   private final List<Class<? extends Event>> listeningFor = new LinkedList<>();
   private final PriorityQueue<TimeFilter> timeFilterQueue = new PriorityQueue<>();
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
-  private final MethodType filterableMethodType = MethodType.methodType(Filterable.class);
+  private final MethodType filterableMethodType = MethodType.methodType(MatchPlayer.class);
   private final MethodType entityMethodType = MethodType.methodType(Entity.class);
   private final Map<Class<? extends Event>, MethodHandle> cachedHandles = new HashMap<>();
 
@@ -403,6 +404,8 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
         result = (l, e) -> this.onPlayerDeath((MatchPlayerDeathEvent) e);
       else if (PlayerPartyChangeEvent.class.isAssignableFrom(event))
         result = (l, e) -> this.onPartyChange((PlayerPartyChangeEvent) e);
+      else if (FlagStateChangeEvent.class.isAssignableFrom(event))
+        result = (l, e) -> this.onFlagStateChange((FlagStateChangeEvent) e);
       else {
         try {
           this.cachedHandles.put(event, this.createExtractingMethodHandle(event));
@@ -417,7 +420,9 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
         result =
             (l, e) -> {
               try {
-                final Object o = this.cachedHandles.get(e.getClass()).invoke(e);
+                MethodHandle handle = this.getHandle(e.getClass());
+
+                final Object o = handle.invoke(e);
                 if (o instanceof Filterable) this.invalidate((Filterable<?>) o);
                 else if (o instanceof Player) this.invalidate(this.match.getPlayer((Player) o));
                 else
@@ -439,6 +444,27 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
           .getPluginManager()
           .registerEvent(event, new DummyListener(), EventPriority.MONITOR, result, PGM.get());
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  private MethodHandle getHandle(Class<? extends Event> event) {
+    MethodHandle handle = this.cachedHandles.get(event);
+    boolean cacheResult = false;
+
+    if (handle == null) {
+      cacheResult = true;
+      if (event.isAssignableFrom(Event.class)) {
+        throw new IllegalStateException("No cached handle for event " + event + " or any parents.");
+      }
+
+      handle = getHandle((Class<? extends Event>) event.getSuperclass());
+    }
+
+    if (cacheResult) {
+      this.cachedHandles.put(event, handle);
+    }
+
+    return handle;
   }
 
   private MethodHandle createExtractingMethodHandle(Class<? extends Event> event)
@@ -539,7 +565,9 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
     }
   }
 
-  private static class DummyListener implements Listener {}
+  public void onFlagStateChange(FlagStateChangeEvent event) {
+    this.invalidate(match);
+  }
 
-  // TODO: Invalidate match on RankingsChangeEvent if/when it exists
+  private static class DummyListener implements Listener {}
 }

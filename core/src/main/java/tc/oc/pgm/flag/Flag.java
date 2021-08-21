@@ -402,10 +402,6 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     return canPickup(query, state.getPost());
   }
 
-  public boolean canPickup(MatchPlayer player, Post post) {
-    return canPickup(player, post);
-  }
-
   public boolean canCapture(Query query, Net net) {
     return getDefinition().getCaptureFilter().query(query).isAllowed()
         && net.getCaptureFilter().query(query).isAllowed();
