@@ -11,8 +11,6 @@ import tc.oc.pgm.goals.TouchableGoal;
 
 /** Raised when a player touches a goal. */
 public class GoalTouchEvent extends GoalEvent {
-  private static final HandlerList handlers = new HandlerList();
-
   private final TouchableGoal goal;
   private final @Nullable Competitor competitor;
   private final boolean firstForCompetitor;
@@ -94,6 +92,8 @@ public class GoalTouchEvent extends GoalEvent {
   public void setCancelToucherMessage(boolean cancelToucherMessage) {
     this.cancelToucherMessage = cancelToucherMessage;
   }
+
+  private static final HandlerList handlers = new HandlerList();
 
   public static HandlerList getHandlerList() {
     return handlers;
