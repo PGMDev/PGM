@@ -25,6 +25,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.EventExecutor;
 import tc.oc.pgm.api.PGM;
@@ -35,6 +36,7 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
+import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
@@ -70,9 +72,30 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   private final Match match;
   private final List<Class<? extends Event>> listeningFor = new LinkedList<>();
   private final PriorityQueue<TimeFilter> timeFilterQueue = new PriorityQueue<>();
+
+  // MethodHandle shinanigans
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
-  private final MethodType filterableMethodType = MethodType.methodType(MatchPlayer.class);
-  private final MethodType entityMethodType = MethodType.methodType(Entity.class);
+
+  private final String[] filterableGetterNames = new String[] {"getPlayer", "getParty", "getMatch"};
+  private final MethodType[] filterableMethodTypes =
+      new MethodType[] {
+        MethodType.methodType(MatchPlayer.class),
+        MethodType.methodType(Party.class),
+        MethodType.methodType(Match.class)
+      };
+
+  // #getActor is mostly for SportPaper (PlayerAction).
+  // #getPlayer covers events which does not provide Entity
+  // as the lower boundary
+  private final String[] entityGetterNames = new String[] {"getPlayer", "getActor", "getActor"};
+  private final MethodType playerMethodType = MethodType.methodType(Player.class);
+  private final MethodType[] entityMethodTypes =
+      new MethodType[] {
+        this.playerMethodType, this.playerMethodType, MethodType.methodType(Entity.class)
+      };
+
+  private final DummyListener dummyListener = new DummyListener();
+
   private final Map<Class<? extends Event>, MethodHandle> cachedHandles = new HashMap<>();
 
   public FilterMatchModule(Match match) {
@@ -109,6 +132,11 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
               }
               this.registerListenersFor(filter.getRelevantEvents());
             });
+  }
+
+  @Override
+  public void unload() {
+    HandlerList.unregisterAll(this.dummyListener);
   }
 
   /**
@@ -442,7 +470,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
       PGM.get()
           .getServer()
           .getPluginManager()
-          .registerEvent(event, new DummyListener(), EventPriority.MONITOR, result, PGM.get());
+          .registerEvent(event, this.dummyListener, EventPriority.MONITOR, result, PGM.get());
     }
   }
 
@@ -469,21 +497,14 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
 
   private MethodHandle createExtractingMethodHandle(Class<? extends Event> event)
       throws NoSuchMethodException, IllegalAccessException {
-    final String[] filterableGetterNames = new String[] {"getPlayer", "getParty", "getMatch"};
-
-    // #getActor is mostly for SportPaper (PlayerAction).
-    // #getPlayer covers events which does not provide Entity
-    // as the lower boundary
-    final String[] entityGetterNames = new String[] {"getActor", "getPlayer"};
-
     MethodHandle result = null;
 
-    for (int i = 0; result == null && i < filterableGetterNames.length; i++) {
-      result = this.findMethod(event, filterableGetterNames[i], this.filterableMethodType);
+    for (int i = 0; result == null && i < this.filterableGetterNames.length; i++) {
+      result = this.findMethod(event, this.filterableGetterNames[i], this.filterableMethodTypes[i]);
     }
 
     for (int i = 0; result == null && i < entityGetterNames.length; i++) {
-      result = this.findMethod(event, entityGetterNames[i], this.entityMethodType);
+      result = this.findMethod(event, this.entityGetterNames[i], this.entityMethodTypes[i]);
     }
 
     if (result == null)
