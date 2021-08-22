@@ -479,13 +479,24 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
     MethodHandle handle = this.cachedHandles.get(event);
     boolean cacheResult = false;
 
+    // If a handle is not found, try to see if any superclasses have handles registered
+    // e.g. if a filter is listening for ApplyKitEvent, but ApplyItemKitEvent is called
+    // If no handle is found for any parents (ApplyKitEvent) an exception is thrown and
+    // caught by each level of recursion to ensure that the final exception thrown to
+    // the caller of this method contains a message with the initially given event
+    // (ApplyItemKitEvent)
     if (handle == null) {
       cacheResult = true;
+
       if (event.isAssignableFrom(Event.class)) {
-        throw new IllegalStateException("No cached handle for event " + event + " or any parents.");
+        throw new IllegalStateException();
       }
 
-      handle = getHandle((Class<? extends Event>) event.getSuperclass());
+      try {
+        handle = getHandle((Class<? extends Event>) event.getSuperclass());
+      } catch (IllegalStateException e) {
+        throw new IllegalStateException("No cached handle for event " + event + " or any parents.");
+      }
     }
 
     if (cacheResult) {
