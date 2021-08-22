@@ -24,6 +24,9 @@ import tc.oc.pgm.filters.modifier.PlayerBlockQueryModifier;
 import tc.oc.pgm.filters.modifier.location.LocalLocationQueryModifier;
 import tc.oc.pgm.filters.modifier.location.LocationQueryModifier;
 import tc.oc.pgm.filters.modifier.location.WorldLocationQueryModifier;
+import tc.oc.pgm.filters.modifier.relation.AttackerQueryModifier;
+import tc.oc.pgm.filters.modifier.relation.SameTeamQueryModifier;
+import tc.oc.pgm.filters.modifier.relation.VictimQueryModifier;
 import tc.oc.pgm.flag.FlagDefinition;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.state.Captured;
@@ -210,8 +213,8 @@ public abstract class FilterParser {
   }
 
   @MethodParser("same-team")
-  public SameTeamFilter parseSameTeam(Element el) throws InvalidXMLException {
-    return new SameTeamFilter(parseChild(el));
+  public SameTeamQueryModifier parseSameTeam(Element el) throws InvalidXMLException {
+    return new SameTeamQueryModifier(parseChild(el));
   }
 
   @MethodParser("participating")
@@ -225,13 +228,13 @@ public abstract class FilterParser {
   }
 
   @MethodParser("attacker")
-  public AttackerFilter parseAttacker(Element el) throws InvalidXMLException {
-    return new AttackerFilter(parseChild(el));
+  public AttackerQueryModifier parseAttacker(Element el) throws InvalidXMLException {
+    return new AttackerQueryModifier(parseChild(el));
   }
 
   @MethodParser("victim")
-  public VictimFilter parseVictim(Element el) throws InvalidXMLException {
-    return new VictimFilter(parseChild(el));
+  public VictimQueryModifier parseVictim(Element el) throws InvalidXMLException {
+    return new VictimQueryModifier(parseChild(el));
   }
 
   @MethodParser("class")
