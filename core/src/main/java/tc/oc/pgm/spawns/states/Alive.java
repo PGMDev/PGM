@@ -121,6 +121,7 @@ public class Alive extends Participating {
     if (!event.isPredicted()) {
       die(event.getKiller());
     }
+    playDeathSound(event.getKiller());
   }
 
   public void die(@Nullable ParticipantState killer) {
@@ -139,8 +140,6 @@ public class Alive extends Participating {
   }
 
   private void playDeathEffect(@Nullable ParticipantState killer) {
-    playDeathSound(killer);
-
     // negative health boost potions sometimes change max health
     for (PotionEffect effect : bukkit.getActivePotionEffects()) {
       // Keep speed and NV for visual continuity
