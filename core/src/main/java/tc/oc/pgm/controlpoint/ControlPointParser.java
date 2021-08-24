@@ -79,9 +79,9 @@ public abstract class ControlPointParser {
 
     final double decayRate, recoveryRate, ownedDecayRate;
     final Node attrIncremental = Node.fromAttr(elControlPoint, "incremental");
-    final Node attrDecay = Node.fromAttr(elControlPoint, "decay-rate");
-    final Node attrRecovery = Node.fromAttr(elControlPoint, "recovery-rate");
-    final Node attrOwnedDecay = Node.fromAttr(elControlPoint, "owned-decay-rate");
+    final Node attrDecay = Node.fromAttr(elControlPoint, "decay", "decay-rate");
+    final Node attrRecovery = Node.fromAttr(elControlPoint, "recovery", "recovery-rate");
+    final Node attrOwnedDecay = Node.fromAttr(elControlPoint, "owned-decay", "owned-decay-rate");
     if (attrIncremental == null) {
       recoveryRate =
           XMLUtils.parseNumber(attrRecovery, Double.class, koth ? 1D : Double.POSITIVE_INFINITY);
