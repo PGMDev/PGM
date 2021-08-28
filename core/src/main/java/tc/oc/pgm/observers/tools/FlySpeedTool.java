@@ -10,11 +10,10 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import tc.oc.pgm.util.menu.InventoryMenu;
-import tc.oc.pgm.util.menu.InventoryMenuItem;
+import tc.oc.pgm.menu.MenuItem;
 import tc.oc.pgm.util.text.TextTranslations;
 
-public class FlySpeedTool implements InventoryMenuItem {
+public class FlySpeedTool implements MenuItem {
 
   private static final String TRANSLATION_KEY = "setting.flyspeed.";
 
@@ -36,14 +35,13 @@ public class FlySpeedTool implements InventoryMenuItem {
   }
 
   @Override
-  public void onInventoryClick(InventoryMenu menu, Player player, ClickType clickType) {
+  public void onClick(Player player, ClickType click) {
     FlySpeed speed = FlySpeed.of(player.getFlySpeed());
-    if (clickType.isRightClick()) {
+    if (click.isRightClick()) {
       player.setFlySpeed(speed.getPrev().getValue());
     } else {
       player.setFlySpeed(speed.getNext().getValue());
     }
-    menu.refreshWindow(player);
   }
 
   public enum FlySpeed {

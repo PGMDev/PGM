@@ -1,6 +1,7 @@
 package tc.oc.pgm;
 
 import com.google.common.collect.Lists;
+import fr.minuskube.inv.InventoryManager;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -92,6 +93,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   private ScheduledExecutorService executorService;
   private ScheduledExecutorService asyncExecutorService;
   private VanishManager vanishManager;
+  private InventoryManager inventoryManager;
 
   public PGMPlugin() {
     super();
@@ -211,6 +213,9 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
             ? new VanishManagerImpl(matchManager, executorService)
             : new NoopVanishManager();
 
+    inventoryManager = new InventoryManager(this);
+    inventoryManager.init();
+
     if (config.showTabList()) {
       matchTabManager = new MatchTabManager(this);
     }
@@ -320,6 +325,11 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   @Override
   public VanishManager getVanishManager() {
     return vanishManager;
+  }
+
+  @Override
+  public InventoryManager getInventoryManager() {
+    return inventoryManager;
   }
 
   private void registerCommands() {

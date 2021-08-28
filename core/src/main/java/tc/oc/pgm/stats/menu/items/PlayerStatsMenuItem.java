@@ -1,4 +1,4 @@
-package tc.oc.pgm.stats;
+package tc.oc.pgm.stats.menu.items;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
@@ -20,14 +20,15 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import tc.oc.pgm.util.menu.InventoryMenu;
-import tc.oc.pgm.util.menu.InventoryMenuItem;
+import tc.oc.pgm.menu.MenuItem;
+import tc.oc.pgm.stats.PlayerStats;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
 
-public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
+/** Represents a player's stats via player head & lore * */
+public class PlayerStatsMenuItem implements MenuItem {
 
   private final TextColor RESET = NamedTextColor.GRAY;
   private final UUID uuid;
@@ -36,7 +37,7 @@ public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
   private final String name;
   private final TextColor color;
 
-  PlayerStatsInventoryMenuItem(
+  public PlayerStatsMenuItem(
       UUID uuid, PlayerStats stats, Skin skin, String name, TextColor color) {
     this.uuid = uuid;
     this.stats = stats;
@@ -128,7 +129,7 @@ public class PlayerStatsInventoryMenuItem implements InventoryMenuItem {
   }
 
   @Override
-  public void onInventoryClick(InventoryMenu menu, Player player, ClickType clickType) {}
+  public void onClick(Player player, ClickType clickType) {}
 
   @Override
   public ItemMeta modifyMeta(ItemMeta meta) {

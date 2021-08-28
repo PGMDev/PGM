@@ -51,6 +51,7 @@
                             <include>fr.mrmicky:*:*</include>
                             <include>org.eclipse.jgit:org.eclipse.jgit:*</include>
                             <include>org.slf4j:slf4j-api:*</include>
+                            <include>fr.minuskube.inv:smart-invs</include>
                         </includes>
                     </artifactSet>
                     <filters>

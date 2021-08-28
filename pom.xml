@@ -142,6 +142,14 @@
             <version>1.1.0</version>
             <scope>compile</scope>
         </dependency>
+        
+        <!--Framework for creating interactive GUIs - https://github.com/MinusKube/SmartInvs -->
+		<dependency>
+			<groupId>fr.minuskube.inv</groupId>
+			<artifactId>smart-invs</artifactId>
+			<version>1.2.7</version>
+			<scope>compile</scope>
+		</dependency>	
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
