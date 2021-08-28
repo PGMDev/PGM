@@ -19,15 +19,15 @@ public class GameRulesMatchModule implements MatchModule {
 
   @Override
   public void load() {
-    // saves gamerules from world (level.dat) as fallback
-    for (String gameRule : this.match.getWorld().getGameRules()) {
-      gameRules.put(gameRule, this.match.getWorld().getGameRuleValue(gameRule));
-    }
-
     // saves and sets gamerules from XML
     for (Map.Entry<String, String> gameRule : this.gameRules.entrySet()) {
-      gameRules.put(gameRule.getKey(), this.match.getWorld().getGameRuleValue(gameRule.getValue()));
+      gameRules.put(gameRule.getKey(), gameRule.getValue());
       this.match.getWorld().setGameRuleValue(gameRule.getKey(), gameRule.getValue());
+    }
+
+    // saves gamerules from world (level.dat) as fallback
+    for (String gameRule : this.match.getWorld().getGameRules()) {
+      gameRules.putIfAbsent(gameRule, this.match.getWorld().getGameRuleValue(gameRule));
     }
 
     // if timelock is off, save doDayLightCycle as true
