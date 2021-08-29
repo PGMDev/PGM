@@ -260,10 +260,7 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void lockFireTick(final MatchLoadEvent event) {
-    event
-        .getMatch()
-        .getWorld()
-        .setGameRuleValue(GameRule.DO_FIRE_TICK.getId(), Boolean.toString(false));
+    setGameRule(event, GameRule.DO_FIRE_TICK.getId(), false);
   }
 
   @EventHandler
@@ -281,10 +278,7 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void lockFireTick(final MatchFinishEvent event) {
-    event
-        .getMatch()
-        .getWorld()
-        .setGameRuleValue(GameRule.DO_FIRE_TICK.getId(), Boolean.toString(false));
+    setGameRule(event, GameRule.DO_DAYLIGHT_CYCLE.getId(), false);
   }
 
   //
@@ -293,10 +287,7 @@ public class PGMListener implements Listener {
   //
   @EventHandler
   public void lockTime(final MatchLoadEvent event) {
-    event
-        .getMatch()
-        .getWorld()
-        .setGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE.getId(), Boolean.toString(false));
+    setGameRule(event, GameRule.DO_DAYLIGHT_CYCLE.getId(), false);
   }
 
   @EventHandler
@@ -319,10 +310,7 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void lockTime(final MatchFinishEvent event) {
-    event
-        .getMatch()
-        .getWorld()
-        .setGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE.getId(), Boolean.toString(false));
+    setGameRule(event, GameRule.DO_DAYLIGHT_CYCLE.getId(), false);
   }
 
   @EventHandler
@@ -444,5 +432,13 @@ public class PGMListener implements Listener {
   public void storeSkinOnMatchJoin(PlayerJoinMatchEvent event) {
     final MatchPlayer player = event.getPlayer();
     PGM.get().getDatastore().setSkin(player.getId(), NMSHacks.getPlayerSkin(player.getBukkit()));
+  }
+
+  public void setGameRule(MatchLoadEvent event, String gameRule, boolean gameRuleValue) {
+    event.getMatch().getWorld().setGameRuleValue(gameRule, Boolean.toString(gameRuleValue));
+  }
+
+  public void setGameRule(MatchFinishEvent event, String gameRule, boolean gameRuleValue) {
+    event.getMatch().getWorld().setGameRuleValue(gameRule, Boolean.toString(gameRuleValue));
   }
 }
