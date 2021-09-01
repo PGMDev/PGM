@@ -49,7 +49,7 @@ import tc.oc.pgm.util.MapUtils;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
 /**
- * Handler of dynamic filter magic &#x1F52E;.
+ * Handler of dynamic filter magic.
  *
  * <p>A {@link Filter} can have the possibility of being dynamic or not, but the match module
  * decides whether to use a filter dynamically or not. In this sense the docs can be a little
@@ -172,8 +172,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   }
 
   /**
-   * {@inheritDoc}
-   *
    * @param scope The scope of the filter listener
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
@@ -196,8 +194,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   }
 
   /**
-   * {@inheritDoc}
-   *
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
    * @throws IllegalStateException if the match is loaded at register time
@@ -208,8 +204,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   }
 
   /**
-   * {@inheritDoc}
-   *
    * @param scope The scope of the filter listener
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
@@ -232,8 +226,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   }
 
   /**
-   * {@inheritDoc}
-   *
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
    * @throws IllegalStateException if the match is loaded at register time
@@ -244,8 +236,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   }
 
   /**
-   * {@inheritDoc}
-   *
    * @param scope The scope of the filter listener
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
@@ -267,8 +257,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   }
 
   /**
-   * {@inheritDoc}
-   *
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
    * @throws IllegalStateException if the match is loaded at register time
