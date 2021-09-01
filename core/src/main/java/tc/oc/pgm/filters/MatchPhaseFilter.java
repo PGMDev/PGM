@@ -1,7 +1,7 @@
 package tc.oc.pgm.filters;
 
-import com.google.common.collect.ImmutableList;
 import java.util.Collection;
+import java.util.Collections;
 import org.bukkit.event.Event;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.MatchQuery;
@@ -26,7 +26,7 @@ public class MatchPhaseFilter extends TypedFilter<MatchQuery> {
 
   @Override
   public Collection<Class<? extends Event>> getRelevantEvents() {
-    return ImmutableList.of(MatchPhaseChangeEvent.class);
+    return Collections.singleton(MatchPhaseChangeEvent.class);
   }
 
   @Override

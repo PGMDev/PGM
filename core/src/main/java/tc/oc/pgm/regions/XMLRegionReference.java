@@ -1,7 +1,7 @@
 package tc.oc.pgm.regions;
 
-import com.google.common.collect.ImmutableList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Random;
 import javax.annotation.Nullable;
@@ -122,7 +122,7 @@ public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> im
 
   @Override
   public Collection<Class<? extends Event>> getRelevantEvents() {
-    return ImmutableList.of(PlayerCoarseMoveEvent.class);
+    return Collections.singleton(PlayerCoarseMoveEvent.class);
   }
 
   @Override

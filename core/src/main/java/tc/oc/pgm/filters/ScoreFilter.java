@@ -1,8 +1,8 @@
 package tc.oc.pgm.filters;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
 import java.util.Collection;
+import java.util.Collections;
 import org.bukkit.event.Event;
 import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.party.Competitor;
@@ -24,7 +24,7 @@ public class ScoreFilter extends TypedFilter<PartyQuery> {
 
   @Override
   public Collection<Class<? extends Event>> getRelevantEvents() {
-    return ImmutableList.of(CompetitorScoreChangeEvent.class);
+    return Collections.singleton(CompetitorScoreChangeEvent.class);
   }
 
   @Override

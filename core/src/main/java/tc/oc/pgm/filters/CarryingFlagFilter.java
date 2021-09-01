@@ -1,7 +1,7 @@
 package tc.oc.pgm.filters;
 
-import com.google.common.collect.ImmutableList;
 import java.util.Collection;
+import java.util.Collections;
 import org.bukkit.event.Event;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.query.PartyQuery;
@@ -24,7 +24,7 @@ public class CarryingFlagFilter extends TypedFilter<PartyQuery> {
 
   @Override
   public Collection<Class<? extends Event>> getRelevantEvents() {
-    return ImmutableList.of(FlagStateChangeEvent.class);
+    return Collections.singleton(FlagStateChangeEvent.class);
   }
 
   @Override

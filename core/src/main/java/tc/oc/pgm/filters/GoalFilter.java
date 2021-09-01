@@ -1,8 +1,8 @@
 package tc.oc.pgm.filters;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import java.util.Collection;
+import java.util.Collections;
 import javax.annotation.Nullable;
 import org.bukkit.event.Event;
 import tc.oc.pgm.api.feature.FeatureReference;
@@ -44,7 +44,7 @@ public class GoalFilter extends TypedFilter<MatchQuery> {
 
   @Override
   public Collection<Class<? extends Event>> getRelevantEvents() {
-    return ImmutableList.of(GoalCompleteEvent.class);
+    return Collections.singleton(GoalCompleteEvent.class);
   }
 
   @Override

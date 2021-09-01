@@ -1,7 +1,7 @@
 package tc.oc.pgm.filters;
 
-import com.google.common.collect.ImmutableList;
 import java.util.Collection;
+import java.util.Collections;
 import org.bukkit.event.Event;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -18,7 +18,7 @@ public class PlayerMovementFilter extends ParticipantFilter {
 
   @Override
   public Collection<Class<? extends Event>> getRelevantEvents() {
-    return ImmutableList.of(PlayerCoarseMoveEvent.class);
+    return Collections.singleton(PlayerCoarseMoveEvent.class);
   }
 
   @Override
