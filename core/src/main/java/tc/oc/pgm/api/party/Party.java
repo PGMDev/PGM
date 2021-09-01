@@ -1,9 +1,7 @@
 package tc.oc.pgm.api.party;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
@@ -139,13 +137,14 @@ public interface Party extends Audience, Named, Filterable<PartyQuery>, PartyQue
   }
 
   @Override
-  default Optional<? extends Filterable<? super PartyQuery>> filterableParent() {
-    return Optional.of(getMatch());
+  @Nullable
+  default Match filterableParent() {
+    return this.getMatch();
   }
 
   @Override
-  default Stream<? extends Filterable<? extends PlayerQuery>> filterableChildren() {
-    return getPlayers().stream();
+  default Collection<? extends Filterable<? extends PlayerQuery>> filterableChildren() {
+    return this.getPlayers();
   }
 
   @Override

@@ -5,6 +5,8 @@ import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +32,7 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffect;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
@@ -42,6 +45,7 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.PlayerResetEvent;
+import tc.oc.pgm.filters.dynamic.Filterable;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.MaxHealthKit;
 import tc.oc.pgm.kits.WalkSpeedKit;
@@ -443,6 +447,17 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   @Override
   public @Nonnull Audience audience() {
     return audience;
+  }
+
+  @Override
+  @Nullable
+  public Party filterableParent() {
+    return this.getParty();
+  }
+
+  @Override
+  public Collection<? extends Filterable<? extends PlayerQuery>> filterableChildren() {
+    return Collections.emptyList();
   }
 
   @Override

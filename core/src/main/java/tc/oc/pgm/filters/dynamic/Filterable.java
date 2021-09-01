@@ -1,7 +1,8 @@
 package tc.oc.pgm.filters.dynamic;
 
-import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.Collection;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.api.filter.query.Query;
@@ -22,7 +23,8 @@ import tc.oc.pgm.api.filter.query.Query;
 public interface Filterable<Q extends MatchQuery> extends MatchQuery {
 
   /** The (single) Filterable that contains this one, or empty if this is a top-level object. */
-  Optional<? extends Filterable<? super Q>> filterableParent();
+  @Nullable
+  Filterable<? super Q> filterableParent();
 
   /**
    * Return the enclosing Filterable of the given subtype, if any.
@@ -30,10 +32,14 @@ public interface Filterable<Q extends MatchQuery> extends MatchQuery {
    * <p>This object is returned if it extends the given type.
    */
   @SuppressWarnings("unchecked")
-  default <R extends Filterable<?>> Optional<R> filterableAncestor(Class<R> type) {
-    return type.isInstance(this)
-        ? Optional.of((R) this)
-        : filterableParent().flatMap(parent -> parent.filterableAncestor(type));
+  @Nullable
+  default <F extends Filterable<?>> F filterableAncestor(Class<F> type) {
+    if (type.isInstance(this)) {
+      return (F) this;
+    } else {
+      @Nullable Filterable<? super Q> parent = filterableParent();
+      return parent == null ? null : (F) parent;
+    }
   }
 
   /**
@@ -42,7 +48,7 @@ public interface Filterable<Q extends MatchQuery> extends MatchQuery {
    * <p>This object is NOT included in the result, nor are indirect components i.e. grandchildren,
    * etc.
    */
-  Stream<? extends Filterable<? extends Q>> filterableChildren();
+  Collection<? extends Filterable<? extends Q>> filterableChildren();
 
   /**
    * Return all individual objects of the given Filterable subtype that this object is composed of,
@@ -52,11 +58,13 @@ public interface Filterable<Q extends MatchQuery> extends MatchQuery {
    * #filterableChildren()}. Subclasses should provide a more efficient implementation, if possible.
    */
   @SuppressWarnings("unchecked")
-  default <R extends Filterable<?>> Stream<? extends R> filterableDescendants(Class<R> type) {
-    Stream<? extends R> result =
-        filterableChildren().flatMap(child -> child.filterableDescendants(type));
+  default <R extends Filterable<?>> Collection<? extends R> filterableDescendants(Class<R> type) {
+    final Collection<R> result =
+        filterableChildren().stream()
+            .flatMap(child -> child.filterableDescendants(type).stream())
+            .collect(Collectors.toList());
     if (type.isInstance(this)) {
-      result = Stream.concat(Stream.of((R) this), result);
+      result.add((R) this);
     }
     return result;
   }

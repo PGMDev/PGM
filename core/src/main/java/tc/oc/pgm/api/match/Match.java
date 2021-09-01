@@ -2,11 +2,9 @@ package tc.oc.pgm.api.match;
 
 import java.time.Duration;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -408,32 +406,6 @@ public interface Match
    * @return If the {@link Match} was just ended.
    */
   boolean calculateVictory();
-
-  @Override
-  default Optional<? extends Filterable<? super MatchQuery>> filterableParent() {
-    return Optional.empty();
-  }
-
-  @Override
-  default Stream<? extends Filterable<? extends MatchQuery>> filterableChildren() {
-    return getParties().stream();
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  default <R extends Filterable<?>> Stream<? extends R> filterableDescendants(Class<R> type) {
-    Stream<R> result = Stream.of();
-    if (type.isAssignableFrom(Match.class)) {
-      result = Stream.concat(result, Stream.of((R) this));
-    }
-    if (Party.class.isAssignableFrom(type)) {
-      result = Stream.concat(result, (Stream<R>) getParties().stream().filter(type::isInstance));
-    }
-    if (type.isAssignableFrom(MatchPlayer.class)) {
-      result = Stream.concat(result, (Stream<? extends R>) getPlayers().stream());
-    }
-    return result;
-  }
 
   @Override
   default Match getMatch() {

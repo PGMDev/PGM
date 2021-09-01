@@ -1,8 +1,6 @@
 package tc.oc.pgm.api.player;
 
-import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Entity;
@@ -254,16 +252,6 @@ public interface MatchPlayer
 
   @Deprecated
   void internalSetParty(Party party);
-
-  @Override
-  default Optional<? extends Filterable<? super PlayerQuery>> filterableParent() {
-    return Optional.of(getParty());
-  }
-
-  @Override
-  default Stream<? extends Filterable<? extends PlayerQuery>> filterableChildren() {
-    return Stream.of();
-  }
 
   @Override
   default Class<? extends Entity> getEntityType() {
