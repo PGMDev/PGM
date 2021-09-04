@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static tc.oc.pgm.util.text.PlayerComponent.player;
 
+import com.google.common.collect.Lists;
 import java.text.DecimalFormat;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -53,15 +54,14 @@ import tc.oc.pgm.flag.event.FlagCaptureEvent;
 import tc.oc.pgm.flag.event.FlagPickupEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.flag.state.Carried;
+import tc.oc.pgm.stats.menu.StatsMainMenu;
+import tc.oc.pgm.stats.menu.items.PlayerStatsMenuItem;
+import tc.oc.pgm.stats.menu.items.TeamStatsMenuItem;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.util.UsernameResolver;
-import tc.oc.pgm.util.menu.InventoryMenu;
-import tc.oc.pgm.util.menu.InventoryMenuItem;
-import tc.oc.pgm.util.menu.pattern.DoubleRowMenuArranger;
-import tc.oc.pgm.util.menu.pattern.SingleRowMenuArranger;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -76,7 +76,6 @@ public class StatsMatchModule implements MatchModule, Listener {
   private final Duration showAfter = PGM.get().getConfiguration().showStatsAfter();
   private final boolean bestStats = PGM.get().getConfiguration().showBestStats();
   private final boolean ownStats = PGM.get().getConfiguration().showOwnStats();
-  private final Component verboseStatsTitle = translatable("match.stats.title");
 
   /** Common formats used by stats with decimals */
   public static final DecimalFormat TWO_DECIMALS = new DecimalFormat("#.##");
@@ -306,58 +305,49 @@ public class StatsMatchModule implements MatchModule, Listener {
     }
   }
 
-  private List<InventoryMenuItem> teamItems = null;
+  public PlayerStatsMenuItem getPlayerStatsItem(MatchPlayer player) {
+    return new PlayerStatsMenuItem(
+        player.getId(),
+        this.getPlayerStat(player),
+        NMSHacks.getPlayerSkin(player.getBukkit()),
+        player.getNameLegacy(),
+        player.getParty().getName().color());
+  }
+
+  private List<TeamStatsMenuItem> teams;
 
   public void giveVerboseStatsItem(MatchPlayer player, boolean forceOpen) {
-    // Find out if verbose stats is relevant for this match
     final Collection<Competitor> competitors = match.getSortedCompetitors();
     boolean showAllVerboseStats =
         verboseStats && competitors.stream().allMatch(c -> c instanceof Team);
     if (!showAllVerboseStats) return;
 
-    if (this.teamItems == null) {
+    if (teams == null) {
+      teams = Lists.newArrayList();
       TeamMatchModule tmm = match.needModule(TeamMatchModule.class);
       Collection<MatchPlayer> observers = match.getObservers();
-      List<InventoryMenuItem> items = new ArrayList<>(competitors.size());
+
       for (Competitor competitor : competitors) {
         Collection<MatchPlayer> relevantObservers =
             observers.stream()
                 .filter(o -> tmm.getLastTeam(o.getId()) == competitor)
                 .collect(Collectors.toSet());
+
         Collection<UUID> relevantOfflinePlayers =
             this.getOfflinePlayersWithStats()
                 .filter(id -> tmm.getLastTeam(id) == competitor)
                 .collect(Collectors.toSet());
-        items.add(
-            new TeamStatsInventoryMenuItem(
-                match, competitor, relevantObservers, relevantOfflinePlayers));
+        teams.add(
+            new TeamStatsMenuItem(match, competitor, relevantObservers, relevantOfflinePlayers));
       }
-      this.teamItems = items;
     }
 
-    List<InventoryMenuItem> items = new ArrayList<>(this.teamItems);
+    StatsMainMenu menu = new StatsMainMenu(player, teams, this);
+    player.getInventory().setItem(7, menu.getItem());
 
-    // Add the player item in the middle
-    items.add(
-        (items.size() - 1) / 2 + 1,
-        new PlayerStatsInventoryMenuItem(
-            player.getId(),
-            this.getPlayerStat(player),
-            NMSHacks.getPlayerSkin(player.getBukkit()),
-            player.getNameLegacy(),
-            player.getParty().getName().color()));
-
-    final InventoryMenu menu =
-        new InventoryMenu(
-            match.getWorld(),
-            verboseStatsTitle,
-            items,
-            competitors.size() <= 5 ? new SingleRowMenuArranger() : new DoubleRowMenuArranger());
-
-    player
-        .getInventory()
-        .setItem(7, new VerboseStatsInventoryMenuItem(menu).createItem(player.getBukkit()));
-    if (forceOpen) menu.display(player.getBukkit());
+    if (forceOpen) {
+      menu.open();
+    }
   }
 
   private Map.Entry<UUID, Integer> sortStats(Map<UUID, Integer> map) {

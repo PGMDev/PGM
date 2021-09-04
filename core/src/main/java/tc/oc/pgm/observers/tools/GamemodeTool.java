@@ -14,12 +14,11 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
+import tc.oc.pgm.menu.MenuItem;
 import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.menu.InventoryMenu;
-import tc.oc.pgm.util.menu.InventoryMenuItem;
 import tc.oc.pgm.util.text.TextTranslations;
 
-public class GamemodeTool implements InventoryMenuItem {
+public class GamemodeTool implements MenuItem {
 
   @Override
   public Component getDisplayName() {
@@ -29,7 +28,7 @@ public class GamemodeTool implements InventoryMenuItem {
   @Override
   public List<String> getLore(Player player) {
     Component gamemode =
-        translatable("gameMode." + player.getGameMode().name().toLowerCase(), NamedTextColor.AQUA);
+        translatable("misc." + player.getGameMode().name().toLowerCase(), NamedTextColor.AQUA);
     Component lore = translatable("setting.gamemode.lore", NamedTextColor.GRAY, gamemode);
     return Lists.newArrayList(TextTranslations.translateLegacy(lore, player));
   }
@@ -40,12 +39,7 @@ public class GamemodeTool implements InventoryMenuItem {
   }
 
   @Override
-  public void onInventoryClick(InventoryMenu menu, Player player, ClickType clickType) {
-    toggleObserverGameMode(player);
-    menu.refreshWindow(player);
-  }
-
-  public void toggleObserverGameMode(Player player) {
+  public void onClick(Player player, ClickType click) {
     player.setGameMode(getOppositeMode(player.getGameMode()));
     if (player.getGameMode() == GameMode.SPECTATOR) {
       Audience.get(player).sendWarning(getToggleMessage());

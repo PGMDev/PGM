@@ -7,7 +7,9 @@ import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.bukkit.Material;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.modules.PlayerTimeMatchModule;
 
 /**
  * A toggleable setting with various possible {@link SettingValue}s.
@@ -15,37 +17,76 @@ import tc.oc.pgm.api.player.MatchPlayer;
  * @see SettingValue
  */
 public enum SettingKey {
-  CHAT("chat", CHAT_TEAM, CHAT_GLOBAL, CHAT_ADMIN), // Changes the default chat channel
+  CHAT(
+      "chat",
+      Material.SIGN,
+      CHAT_TEAM,
+      CHAT_GLOBAL,
+      CHAT_ADMIN), // Changes the default chat channel
   DEATH(
-      Arrays.asList("death", "dms"), DEATH_ALL, DEATH_OWN), // Changes which death messages are seen
-  PICKER("picker", PICKER_AUTO, PICKER_ON, PICKER_OFF), // Changes when the picker is displayed
-  JOIN(Arrays.asList("join", "jms"), JOIN_ON, JOIN_OFF), // Changes if join messages are seen
+      Arrays.asList("death", "dms"),
+      Material.SKULL_ITEM,
+      DEATH_ALL,
+      DEATH_OWN), // Changes which death messages are seen
+  PICKER(
+      "picker",
+      Material.LEATHER_HELMET,
+      PICKER_AUTO,
+      PICKER_ON,
+      PICKER_OFF), // Changes when the picker is displayed
+  JOIN(
+      Arrays.asList("join", "jms"),
+      Material.WOOD_DOOR,
+      JOIN_ON,
+      JOIN_OFF), // Changes if join messages are seen
   MESSAGE(
       Arrays.asList("message", "dm"),
+      Material.BOOK_AND_QUILL,
       MESSAGE_ON,
       MESSAGE_OFF), // Changes if direct messages are accepted
-  OBSERVERS(Arrays.asList("observers", "obs"), OBSERVERS_ON, OBSERVERS_OFF) {
+  OBSERVERS(Arrays.asList("observers", "obs"), Material.EYE_OF_ENDER, OBSERVERS_ON, OBSERVERS_OFF) {
     @Override
     public void update(MatchPlayer player) {
       player.resetVisibility();
     }
   }, // Changes if observers are visible
-  SOUNDS("sounds", SOUNDS_ALL, SOUNDS_DM, SOUNDS_NONE), // Changes when sounds are played
-  VOTE("vote", VOTE_ON, VOTE_OFF), // Changes if the vote book is shown on cycle
-  STATS("stats", STATS_ON, STATS_OFF), // Changes if stats are tracked
-  EFFECTS("effects", EFFECTS_ON, EFFECTS_OFF) // Changes if special particle effects are shown
-;
+  SOUNDS(
+      "sounds",
+      Material.NOTE_BLOCK,
+      SOUNDS_ALL,
+      SOUNDS_DM,
+      SOUNDS_NONE), // Changes when sounds are played
+  VOTE(
+      "vote",
+      Material.ENCHANTED_BOOK,
+      VOTE_ON,
+      VOTE_OFF), // Changes if the vote book is shown on cycle
+  STATS("stats", Material.PAPER, STATS_ON, STATS_OFF), // Changes if stats are tracked
+  EFFECTS(
+      "effects",
+      Material.FIREWORK,
+      EFFECTS_ON,
+      EFFECTS_OFF), // Changes if special particle effects are shown
+  TIME(Arrays.asList("time", "theme"), Material.WATCH, TIME_AUTO, TIME_DARK, TIME_LIGHT) {
+    @Override
+    public void update(MatchPlayer player) {
+      PlayerTimeMatchModule.updatePlayerTime(player);
+    }
+  }; // Changes player preference for time of day
+  ;
 
   private final List<String> aliases;
   private final SettingValue[] values;
+  private final Material icon;
 
-  SettingKey(String name, SettingValue... values) {
-    this(Collections.singletonList(name), values);
+  SettingKey(String name, Material icon, SettingValue... values) {
+    this(Collections.singletonList(name), icon, values);
   }
 
-  SettingKey(List<String> aliases, SettingValue... values) {
+  SettingKey(List<String> aliases, Material icon, SettingValue... values) {
     checkArgument(!aliases.isEmpty(), "aliases is empty");
     this.aliases = ImmutableList.copyOf(aliases);
+    this.icon = icon;
     this.values = values;
   }
 
@@ -83,6 +124,15 @@ public enum SettingKey {
    */
   public SettingValue getDefaultValue() {
     return getPossibleValues()[0];
+  }
+
+  /**
+   * Get the {@link Material} used to visually represent this setting in GUI menus.
+   *
+   * @return {@link Material} to visually represent setting.
+   */
+  public Material getIconMaterial() {
+    return icon;
   }
 
   @Override

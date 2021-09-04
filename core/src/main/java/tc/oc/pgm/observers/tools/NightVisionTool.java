@@ -11,11 +11,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import tc.oc.pgm.util.menu.InventoryMenu;
-import tc.oc.pgm.util.menu.InventoryMenuItem;
+import tc.oc.pgm.menu.MenuItem;
 import tc.oc.pgm.util.text.TextTranslations;
 
-public class NightVisionTool implements InventoryMenuItem {
+public class NightVisionTool implements MenuItem {
 
   @Override
   public Component getDisplayName() {
@@ -38,21 +37,16 @@ public class NightVisionTool implements InventoryMenuItem {
   }
 
   @Override
-  public void onInventoryClick(InventoryMenu menu, Player player, ClickType clickType) {
-    toggleNightVision(player);
-    menu.refreshWindow(player);
-  }
-
-  private boolean hasNightVision(Player player) {
-    return player.hasPotionEffect(PotionEffectType.NIGHT_VISION);
-  }
-
-  public void toggleNightVision(Player player) {
+  public void onClick(Player player, ClickType click) {
     if (hasNightVision(player)) {
       player.removePotionEffect(PotionEffectType.NIGHT_VISION);
     } else {
       player.addPotionEffect(
           new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, true, false));
     }
+  }
+
+  private boolean hasNightVision(Player player) {
+    return player.hasPotionEffect(PotionEffectType.NIGHT_VISION);
   }
 }

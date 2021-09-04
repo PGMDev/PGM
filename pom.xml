@@ -51,10 +51,14 @@
         <repository>
             <id>ashcon.app</id>
             <url>https://repo.ashcon.app/content/repositories/snapshots</url>
-        </repository>
+        </repository>        
         <repository>
             <id>sonatype-oss</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </repository>
+        <repository>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
     </repositories>
 
@@ -142,6 +146,14 @@
             <version>1.1.0</version>
             <scope>compile</scope>
         </dependency>
+        
+        <!--Framework for creating interactive GUIs - https://github.com/MinusKube/SmartInvs -->
+	    <dependency>
+            <groupId>fr.minuskube.inv</groupId>
+            <artifactId>smart-invs</artifactId>
+            <version>1.2.7</version>
+            <scope>compile</scope>
+        </dependency>	
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>

@@ -15,20 +15,28 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.observers.ObserverToolsMatchModule;
+import tc.oc.pgm.settings.SettingsMenu;
 import tc.oc.pgm.util.text.TextFormatter;
 
 // TODO: remove some of these when settings UI is released
 public final class SettingCommand {
 
   @Command(
-      aliases = {"settings", "tools", "observertools", "ot"},
+      aliases = {"settings"},
       desc = "Open the settings menu")
   public void settings(MatchPlayer player) {
+    new SettingsMenu(player);
+  }
+
+  @Command(
+      aliases = {"tools", "observertools", "ot"},
+      desc = "Open the observer tools menu")
+  public void observerTools(MatchPlayer player) {
     if (player.isObserving()) {
       final ObserverToolsMatchModule tools =
           player.getMatch().getModule(ObserverToolsMatchModule.class);
       if (tools != null) {
-        tools.openMenuManual(player);
+        tools.openMenu(player);
       }
     } else {
       // TODO: reconsider when observer tools become settings

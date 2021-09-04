@@ -1,11 +1,11 @@
-package tc.oc.pgm.stats;
+package tc.oc.pgm.stats.menu.items;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.stats.StatsMatchModule.damageComponent;
 import static tc.oc.pgm.stats.StatsMatchModule.numberComponent;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -23,37 +23,41 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.util.menu.InventoryMenu;
-import tc.oc.pgm.util.menu.InventoryMenuItem;
-import tc.oc.pgm.util.menu.pattern.DoubleRowMenuArranger;
-import tc.oc.pgm.util.menu.pattern.IdentityMenuArranger;
+import tc.oc.pgm.menu.MenuItem;
+import tc.oc.pgm.stats.StatsMatchModule;
+import tc.oc.pgm.stats.TeamStats;
+import tc.oc.pgm.stats.menu.TeamStatsMenu;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextTranslations;
 
-public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
+/** Represents a team with same color & lore. Clicking will open {@link TeamStatsMenu} * */
+public class TeamStatsMenuItem implements MenuItem {
 
   private final Competitor team;
-  private final InventoryMenu teamSubGUI;
   private final Match match;
+  private final TeamStats stats;
+  private List<PlayerStatsMenuItem> members;
 
   private final NamedTextColor RESET = NamedTextColor.GRAY;
 
-  TeamStatsInventoryMenuItem(
+  public TeamStatsMenuItem(
       Match match,
       Competitor team,
       Collection<MatchPlayer> relevantObservers,
       Collection<UUID> relevantOfflinePlayers) {
+    StatsMatchModule smm = match.needModule(StatsMatchModule.class);
 
     this.team = team;
-    StatsMatchModule smm = match.needModule(StatsMatchModule.class);
+    this.members = Lists.newArrayList();
+    this.stats = new TeamStats(team, smm);
+
     Collection<MatchPlayer> players = team.getPlayers();
-    List<InventoryMenuItem> items =
-        new ArrayList<>(players.size() + relevantObservers.size() + relevantOfflinePlayers.size());
-    items.addAll(
+
+    members.addAll(
         Stream.concat(players.stream(), relevantObservers.stream())
             .map(
                 p ->
-                    new PlayerStatsInventoryMenuItem(
+                    new PlayerStatsMenuItem(
                         p.getId(),
                         smm.getPlayerStat(p),
                         NMSHacks.getPlayerSkin(p.getBukkit()),
@@ -62,12 +66,11 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
             .collect(Collectors.toList()));
 
     Datastore datastore = PGM.get().getDatastore();
-
-    items.addAll(
+    members.addAll(
         relevantOfflinePlayers.stream()
             .map(
                 id ->
-                    new PlayerStatsInventoryMenuItem(
+                    new PlayerStatsMenuItem(
                         id,
                         smm.getPlayerStat(id),
                         datastore.getSkin(id),
@@ -75,12 +78,6 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
                         NamedTextColor.DARK_AQUA))
             .collect(Collectors.toSet()));
 
-    this.teamSubGUI =
-        new InventoryMenu(
-            match.getWorld(),
-            translatable("match.stats.title"),
-            items,
-            items.size() > 10 ? new IdentityMenuArranger(5) : new DoubleRowMenuArranger());
     this.match = match;
   }
 
@@ -91,54 +88,34 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
 
   @Override
   public List<String> getLore(Player player) {
-
-    StatsMatchModule smm = match.needModule(StatsMatchModule.class);
-    List<String> lore = new ArrayList<>();
-    int teamKills = 0;
-    int teamDeaths = 0;
-    double damageDone = 0;
-    double damageTaken = 0;
-    double bowDamage = 0;
-    int shotsTaken = 0;
-    int shotsHit = 0;
-    for (MatchPlayer teamPlayer : team.getPlayers()) {
-      PlayerStats stats = smm.getPlayerStat(teamPlayer.getId());
-      teamKills += stats.getKills();
-      teamDeaths += stats.getDeaths();
-      damageDone += stats.getDamageDone();
-      damageTaken += stats.getDamageTaken();
-      bowDamage += stats.getBowDamage();
-      shotsTaken += stats.getShotsTaken();
-      shotsHit += stats.getShotsHit();
-    }
-
-    double teamKD = teamDeaths == 0 ? teamKills : teamKills / (double) teamDeaths;
-    double teamBowAcc = shotsTaken == 0 ? Double.NaN : shotsHit / (shotsTaken / (double) 100);
+    List<String> lore = Lists.newArrayList();
 
     Component statLore =
         translatable(
             "match.stats.concise",
             RESET,
-            numberComponent(teamKills, NamedTextColor.GREEN),
-            numberComponent(teamDeaths, NamedTextColor.RED),
-            numberComponent(teamKD, NamedTextColor.GREEN));
+            numberComponent(stats.getTeamKills(), NamedTextColor.GREEN),
+            numberComponent(stats.getTeamDeaths(), NamedTextColor.RED),
+            numberComponent(stats.getTeamKD(), NamedTextColor.GREEN));
 
     Component damageDealtLore =
         translatable(
             "match.stats.damage.dealt",
             RESET,
-            damageComponent(damageDone, NamedTextColor.GREEN),
-            damageComponent(bowDamage, NamedTextColor.YELLOW));
+            damageComponent(stats.getDamageDone(), NamedTextColor.GREEN),
+            damageComponent(stats.getBowDamage(), NamedTextColor.YELLOW));
     Component damageReceivedLore =
         translatable(
-            "match.stats.damage.received", RESET, damageComponent(damageTaken, NamedTextColor.RED));
+            "match.stats.damage.received",
+            RESET,
+            damageComponent(stats.getDamageTaken(), NamedTextColor.RED));
     Component bowLore =
         translatable(
             "match.stats.bow",
             RESET,
-            numberComponent(shotsHit, NamedTextColor.YELLOW),
-            numberComponent(shotsTaken, NamedTextColor.YELLOW),
-            numberComponent(teamBowAcc, NamedTextColor.YELLOW).append(text('%')));
+            numberComponent(stats.getShotsHit(), NamedTextColor.YELLOW),
+            numberComponent(stats.getShotsTaken(), NamedTextColor.YELLOW),
+            numberComponent(stats.getTeamBowAcc(), NamedTextColor.YELLOW).append(text('%')));
 
     lore.add(TextTranslations.translateLegacy(statLore, player));
     lore.add(TextTranslations.translateLegacy(damageDealtLore, player));
@@ -154,8 +131,14 @@ public class TeamStatsInventoryMenuItem implements InventoryMenuItem {
   }
 
   @Override
-  public void onInventoryClick(InventoryMenu menu, Player player, ClickType clickType) {
-    teamSubGUI.display(player);
+  public void onClick(Player player, ClickType clickType) {
+    new TeamStatsMenu(
+        team,
+        stats,
+        members,
+        match.getPlayer(player),
+        createItem(player),
+        PGM.get().getInventoryManager().getInventory(player).orElse(null));
   }
 
   @Override

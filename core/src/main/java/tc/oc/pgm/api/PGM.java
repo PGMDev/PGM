@@ -2,6 +2,7 @@ package tc.oc.pgm.api;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import fr.minuskube.inv.InventoryManager;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
@@ -39,6 +40,8 @@ public interface PGM extends Plugin {
   ScheduledExecutorService getAsyncExecutor();
 
   VanishManager getVanishManager();
+
+  InventoryManager getInventoryManager();
 
   AtomicReference<PGM> GLOBAL = new AtomicReference<>(null);
 

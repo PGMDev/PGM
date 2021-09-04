@@ -1,4 +1,4 @@
-package tc.oc.pgm.observers;
+package tc.oc.pgm.stats.menu.items;
 
 import static net.kyori.adventure.text.Component.translatable;
 
@@ -6,24 +6,19 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import tc.oc.pgm.util.menu.InventoryMenu;
-import tc.oc.pgm.util.menu.InventoryMenuItem;
+import tc.oc.pgm.menu.MenuItem;
 import tc.oc.pgm.util.text.TextTranslations;
 
-public class ObserverToolsInventoryMenuItem implements InventoryMenuItem {
-
-  private final InventoryMenu observerToolsMenu;
-
-  public ObserverToolsInventoryMenuItem(InventoryMenu observerToolsMenu) {
-    this.observerToolsMenu = observerToolsMenu;
-  }
+/** The verbose stats menu item shown in the hotbar * */
+public class VerboseStatsMenuItem implements MenuItem {
 
   @Override
   public Component getDisplayName() {
-    return translatable("setting.displayName", NamedTextColor.AQUA);
+    return translatable("match.stats.title", NamedTextColor.GOLD, TextDecoration.BOLD);
   }
 
   @Override
@@ -35,11 +30,9 @@ public class ObserverToolsInventoryMenuItem implements InventoryMenuItem {
 
   @Override
   public Material getMaterial(Player player) {
-    return ObserverToolsMatchModule.TOOL_MATERIAL;
+    return Material.PAPER;
   }
 
   @Override
-  public void onInventoryClick(InventoryMenu menu, Player player, ClickType clickType) {
-    observerToolsMenu.display(player);
-  }
+  public void onClick(Player player, ClickType type) {}
 }
