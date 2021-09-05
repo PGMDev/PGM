@@ -161,7 +161,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
     (response ? listenerSet.rise : listenerSet.fall).add(listener);
 
     match
-        .filterableDescendants(scope)
+        .getFilterableDescendants(scope)
         .forEach(
             filterable -> {
               final boolean last = this.lastResponse(filter, filterable);
@@ -400,7 +400,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
 
   public void invalidate(Filterable<?> filterable) {
     if (dirtySet.add(filterable)) {
-      filterable.filterableChildren().forEach(this::invalidate);
+      filterable.getFilterableChildren().forEach(this::invalidate);
     }
   }
 

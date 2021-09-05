@@ -138,12 +138,12 @@ public interface Party extends Audience, Named, Filterable<PartyQuery>, PartyQue
 
   @Override
   @Nullable
-  default Match filterableParent() {
+  default Match getFilterableParent() {
     return this.getMatch();
   }
 
   @Override
-  default Collection<? extends Filterable<? extends PlayerQuery>> filterableChildren() {
+  default Collection<? extends Filterable<? extends PlayerQuery>> getFilterableChildren() {
     return this.getPlayers();
   }
 

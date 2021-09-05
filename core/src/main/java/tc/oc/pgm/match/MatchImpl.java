@@ -888,18 +888,18 @@ public class MatchImpl implements Match {
 
   @Override
   @Nullable
-  public Filterable<? super MatchQuery> filterableParent() {
+  public Filterable<? super MatchQuery> getFilterableParent() {
     return null;
   }
 
   @Override
-  public Collection<? extends Filterable<? extends MatchQuery>> filterableChildren() {
+  public Collection<? extends Filterable<? extends MatchQuery>> getFilterableChildren() {
     return this.getParties();
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  public <R extends Filterable<?>> Collection<? extends R> filterableDescendants(Class<R> type) {
+  public <R extends Filterable<?>> Collection<? extends R> getFilterableDescendants(Class<R> type) {
     final Collection<R> result = new LinkedList<>();
     if (type.isAssignableFrom(Match.class)) {
       result.add((R) this);

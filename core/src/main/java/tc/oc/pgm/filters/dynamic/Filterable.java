@@ -24,7 +24,7 @@ public interface Filterable<Q extends MatchQuery> extends MatchQuery {
 
   /** The (single) Filterable that contains this one, or empty if this is a top-level object. */
   @Nullable
-  Filterable<? super Q> filterableParent();
+  Filterable<? super Q> getFilterableParent();
 
   /**
    * Return the enclosing Filterable of the given subtype, if any.
@@ -33,11 +33,11 @@ public interface Filterable<Q extends MatchQuery> extends MatchQuery {
    */
   @SuppressWarnings("unchecked")
   @Nullable
-  default <F extends Filterable<?>> F filterableAncestor(Class<F> type) {
+  default <F extends Filterable<?>> F getFilterableAncestor(Class<F> type) {
     if (type.isInstance(this)) {
       return (F) this;
     } else {
-      @Nullable Filterable<? super Q> parent = filterableParent();
+      @Nullable Filterable<? super Q> parent = getFilterableParent();
       return parent == null ? null : (F) parent;
     }
   }
@@ -48,20 +48,22 @@ public interface Filterable<Q extends MatchQuery> extends MatchQuery {
    * <p>This object is NOT included in the result, nor are indirect components i.e. grandchildren,
    * etc.
    */
-  Collection<? extends Filterable<? extends Q>> filterableChildren();
+  Collection<? extends Filterable<? extends Q>> getFilterableChildren();
 
   /**
    * Return all individual objects of the given Filterable subtype that this object is composed of,
    * directly or indirectly, possibly including this object itself.
    *
    * <p>This method simply tests this object's type, and recurses on all {@link
-   * #filterableChildren()}. Subclasses should provide a more efficient implementation, if possible.
+   * #getFilterableChildren()}. Subclasses should provide a more efficient implementation, if
+   * possible.
    */
   @SuppressWarnings("unchecked")
-  default <R extends Filterable<?>> Collection<? extends R> filterableDescendants(Class<R> type) {
+  default <R extends Filterable<?>> Collection<? extends R> getFilterableDescendants(
+      Class<R> type) {
     final Collection<R> result =
-        filterableChildren().stream()
-            .flatMap(child -> child.filterableDescendants(type).stream())
+        getFilterableChildren().stream()
+            .flatMap(child -> child.getFilterableDescendants(type).stream())
             .collect(Collectors.toList());
     if (type.isInstance(this)) {
       result.add((R) this);

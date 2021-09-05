@@ -451,12 +451,12 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
 
   @Override
   @Nullable
-  public Party filterableParent() {
+  public Party getFilterableParent() {
     return this.getParty();
   }
 
   @Override
-  public Collection<? extends Filterable<? extends PlayerQuery>> filterableChildren() {
+  public Collection<? extends Filterable<? extends PlayerQuery>> getFilterableChildren() {
     return Collections.emptyList();
   }
 
