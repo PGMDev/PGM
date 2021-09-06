@@ -278,7 +278,7 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void lockFireTick(final MatchFinishEvent event) {
-    setGameRule(event, GameRule.DO_DAYLIGHT_CYCLE.getId(), false);
+    setGameRule(event, GameRule.DO_FIRE_TICK.getId(), false);
   }
 
   //
