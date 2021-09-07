@@ -32,9 +32,8 @@ public class GameRulesMatchModule implements MatchModule {
 
     // if timelock is off, save doDayLightCycle as true
     WorldTimeModule wtm = this.match.getModule(WorldTimeModule.class);
-    if (wtm != null && !wtm.isTimeLocked()) {
-      gameRules.put(GameRule.DO_DAYLIGHT_CYCLE.getId(), Boolean.toString(true));
-    }
+    gameRules.put(
+        GameRule.DO_DAYLIGHT_CYCLE.getId(), Boolean.toString(wtm != null && !wtm.isTimeLocked()));
   }
 
   public String getGameRule(String gameRule) {
