@@ -1,6 +1,8 @@
 package tc.oc.pgm.gamerules;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -11,6 +13,7 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.modules.WorldTimeModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 
 public class GameRulesModule implements MapModule {
@@ -26,6 +29,11 @@ public class GameRulesModule implements MapModule {
   }
 
   public static class Factory implements MapModuleFactory<GameRulesModule> {
+    @Override
+    public Collection<Class<? extends MapModule>> getSoftDependencies() {
+      return ImmutableList.of(WorldTimeModule.class);
+    }
+
     @Override
     public GameRulesModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
