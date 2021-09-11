@@ -24,7 +24,8 @@ public class GameRulesMatchModule implements MatchModule {
     this.match
         .getWorld()
         .setGameRuleValue(
-            GameRule.DO_DAYLIGHT_CYCLE.getId(), Boolean.toString(!wtm.isTimeLocked()));
+            GameRule.DO_DAYLIGHT_CYCLE.getId(),
+            Boolean.toString(wtm != null && !wtm.isTimeLocked()));
 
     // second, set any gamerules defined in the map's XML
     // doDaylightCycle set in XML's gamerules module will take precedence over timelock
