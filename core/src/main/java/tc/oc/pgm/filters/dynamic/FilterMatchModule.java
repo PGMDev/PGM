@@ -5,8 +5,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,8 +16,6 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
-import javax.annotation.Nullable;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
@@ -36,7 +32,6 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
-import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
@@ -46,6 +41,7 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.filters.TimeFilter;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.util.MapUtils;
+import tc.oc.pgm.util.MethodHandleUtils;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
 /**
@@ -73,30 +69,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   private final List<Class<? extends Event>> listeningFor = new LinkedList<>();
   private final PriorityQueue<TimeFilter> timeFilterQueue = new PriorityQueue<>();
 
-  // MethodHandle shinanigans
-  private final MethodHandles.Lookup lookup = MethodHandles.lookup();
-
-  private final String[] filterableGetterNames = new String[] {"getPlayer", "getParty", "getMatch"};
-  private final MethodType[] filterableMethodTypes =
-      new MethodType[] {
-        MethodType.methodType(MatchPlayer.class),
-        MethodType.methodType(Party.class),
-        MethodType.methodType(Match.class)
-      };
-
-  // #getActor is mostly for SportPaper (PlayerAction).
-  // #getPlayer covers events which does not provide Entity
-  // as the lower boundary
-  private final String[] entityGetterNames = new String[] {"getPlayer", "getActor", "getActor"};
-  private final MethodType playerMethodType = MethodType.methodType(Player.class);
-  private final MethodType[] entityMethodTypes =
-      new MethodType[] {
-        this.playerMethodType, this.playerMethodType, MethodType.methodType(Entity.class)
-      };
-
   private final DummyListener dummyListener = new DummyListener();
-
-  private final Map<Class<? extends Event>, MethodHandle> cachedHandles = new HashMap<>();
 
   public FilterMatchModule(Match match) {
     this.match = match;
@@ -375,11 +348,9 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
 
   public void tick() {
     final Set<Filterable<?>> checked = new HashSet<>();
-    for (; ; ) {
-      // Collect Filterables that are dirty, and have not already been checked in this tick
-      final Set<Filterable<?>> checking = ImmutableSet.copyOf(Sets.difference(dirtySet, checked));
-      if (checking.isEmpty()) break;
-
+    Set<Filterable<?>> checking;
+    // Collect Filterables that are dirty, and have not already been checked in this tick
+    while (!(checking = ImmutableSet.copyOf(Sets.difference(dirtySet, checked))).isEmpty()) {
       // Remove what we are about to check from the dirty set, and add them to the checked set
       dirtySet.removeAll(checking);
       checked.addAll(checking);
@@ -424,9 +395,9 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
         result = (l, e) -> this.onFlagStateChange((FlagStateChangeEvent) e);
       else {
         try {
-          this.cachedHandles.put(event, this.createExtractingMethodHandle(event));
+          MethodHandleUtils.createExtractingMethodHandle(event);
         } catch (NoSuchMethodException | IllegalAccessException e) {
-          this.cachedHandles.remove(event);
+          MethodHandleUtils.removeCachedHandle(event);
           match
               .getLogger()
               .severe("Unable to create MethodHandle extracting Filterable or Player for " + event);
@@ -436,7 +407,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
         result =
             (l, e) -> {
               try {
-                MethodHandle handle = this.getHandle(e.getClass());
+                MethodHandle handle = MethodHandleUtils.getHandle(e.getClass());
 
                 final Object o = handle.invoke(e);
                 if (o instanceof Filterable) this.invalidate((Filterable<?>) o);
@@ -460,67 +431,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
           .getPluginManager()
           .registerEvent(event, this.dummyListener, EventPriority.MONITOR, result, PGM.get());
     }
-  }
-
-  @SuppressWarnings("unchecked")
-  private MethodHandle getHandle(Class<? extends Event> event) {
-    MethodHandle handle = this.cachedHandles.get(event);
-    boolean cacheResult = false;
-
-    // If a handle is not found, try to see if any superclasses have handles registered
-    // e.g. if a filter is listening for ApplyKitEvent, but ApplyItemKitEvent is called
-    // If no handle is found for any parents (ApplyKitEvent) an exception is thrown and
-    // caught by each level of recursion to ensure that the final exception thrown to
-    // the caller of this method contains a message with the initially given event
-    // (ApplyItemKitEvent)
-    if (handle == null) {
-      cacheResult = true;
-
-      if (event.isAssignableFrom(Event.class)) {
-        throw new IllegalStateException();
-      }
-
-      try {
-        handle = getHandle((Class<? extends Event>) event.getSuperclass());
-      } catch (IllegalStateException e) {
-        throw new IllegalStateException("No cached handle for event " + event + " or any parents.");
-      }
-    }
-
-    if (cacheResult) {
-      this.cachedHandles.put(event, handle);
-    }
-
-    return handle;
-  }
-
-  private MethodHandle createExtractingMethodHandle(Class<? extends Event> event)
-      throws NoSuchMethodException, IllegalAccessException {
-    MethodHandle result = null;
-
-    for (int i = 0; result == null && i < this.filterableGetterNames.length; i++) {
-      result = this.findMethod(event, this.filterableGetterNames[i], this.filterableMethodTypes[i]);
-    }
-
-    for (int i = 0; result == null && i < entityGetterNames.length; i++) {
-      result = this.findMethod(event, this.entityGetterNames[i], this.entityMethodTypes[i]);
-    }
-
-    if (result == null)
-      throw new NoSuchMethodException(
-          "No method to extract a Filterable or Entity(Player) found on " + event);
-
-    return result;
-  }
-
-  private @Nullable MethodHandle findMethod(Class<?> clazz, String name, MethodType type)
-      throws IllegalAccessException {
-    try {
-      return this.lookup.findVirtual(clazz, name, type);
-    } catch (NoSuchMethodException e) {
-      // No-Op
-    }
-    return null;
   }
 
   public void onPlayerMove(PlayerCoarseMoveEvent event) {
