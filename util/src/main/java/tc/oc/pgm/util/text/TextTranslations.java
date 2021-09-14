@@ -33,7 +33,7 @@ import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.Translator;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 /** A singleton for accessing {@link MessageFormat} and {@link Component} translations. */
 @SuppressWarnings("UnstableApiUsage")
@@ -107,13 +107,13 @@ public final class TextTranslations {
         .addSource(
             new Translator() {
               @Override
-              public @NonNull Key name() {
+              public @NotNull Key name() {
                 return NAMESPACE;
               }
 
               @Override
               public @Nullable MessageFormat translate(
-                  final @NonNull String key, final @NonNull Locale locale) {
+                  final @NotNull String key, final @NotNull Locale locale) {
                 return TextTranslations.getNearestKey(locale, key);
               }
             });

@@ -29,7 +29,7 @@ import org.bukkit.event.EventException;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredListener;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.feature.Feature;
@@ -308,7 +308,7 @@ public class MatchImpl implements Match {
   }
 
   @Override
-  public @NonNull Audience audience() {
+  public @NotNull Audience audience() {
     final Collection<Audience> audiences = new ArrayList<>(getPlayers());
     audiences.add(Audience.console());
     return Audience.get(audiences);
