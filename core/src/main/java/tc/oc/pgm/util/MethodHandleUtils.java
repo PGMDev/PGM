@@ -36,7 +36,22 @@ public final class MethodHandleUtils {
   private static final MethodType[] entityMethodTypes =
       new MethodType[] {playerMethodType, playerMethodType, MethodType.methodType(Entity.class)};
 
-  public static void createExtractingMethodHandle(Class<? extends Event> event)
+  public static MethodHandle getHandle(Class<? extends Event> event)
+      throws NoSuchMethodException, IllegalAccessException {
+    MethodHandle handle = cachedHandles.get(event);
+
+    if (handle == null) {
+      createExtractingMethodHandle(event);
+
+      handle = cachedHandles.get(event);
+      if (handle == null)
+        throw new IllegalStateException(
+            "Newly created MethodHandle for " + event + "not found in the cache");
+    }
+    return handle;
+  }
+
+  private static void createExtractingMethodHandle(Class<? extends Event> event)
       throws NoSuchMethodException, IllegalAccessException {
     MethodHandle result = null;
 
@@ -63,41 +78,5 @@ public final class MethodHandleUtils {
       // No-Op
     }
     return null;
-  }
-
-  public static void removeCachedHandle(Class<? extends Event> event) {
-    cachedHandles.remove(event);
-  }
-
-  @SuppressWarnings("unchecked")
-  public static MethodHandle getHandle(Class<? extends Event> event) {
-    MethodHandle handle = cachedHandles.get(event);
-    boolean cacheResult = false;
-
-    // If a handle is not found, try to see if any superclasses have handles registered
-    // e.g. if a filter is listening for ApplyKitEvent, but ApplyItemKitEvent is called
-    // If no handle is found for any parents (ApplyKitEvent) an exception is thrown and
-    // caught by each level of recursion to ensure that the final exception thrown to
-    // the caller of this method contains a message with the initially given event
-    // (ApplyItemKitEvent)
-    if (handle == null) {
-      cacheResult = true;
-
-      if (event.isAssignableFrom(Event.class)) {
-        throw new IllegalStateException();
-      }
-
-      try {
-        handle = getHandle((Class<? extends Event>) event.getSuperclass());
-      } catch (IllegalStateException e) {
-        throw new IllegalStateException("No cached handle for event " + event + " or any parents.");
-      }
-    }
-
-    if (cacheResult) {
-      cachedHandles.put(event, handle);
-    }
-
-    return handle;
   }
 }

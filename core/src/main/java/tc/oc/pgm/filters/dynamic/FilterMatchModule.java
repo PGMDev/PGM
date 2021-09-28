@@ -394,21 +394,19 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
       else if (FlagStateChangeEvent.class.isAssignableFrom(event))
         result = (l, e) -> this.onFlagStateChange((FlagStateChangeEvent) e);
       else {
+        final MethodHandle handle;
         try {
-          MethodHandleUtils.createExtractingMethodHandle(event);
-        } catch (NoSuchMethodException | IllegalAccessException e) {
-          MethodHandleUtils.removeCachedHandle(event);
+          handle = MethodHandleUtils.getHandle(event);
+        } catch (Exception e) {
           match
               .getLogger()
-              .severe("Unable to create MethodHandle extracting Filterable or Player for " + event);
+              .severe("Unable to get MethodHandle extracting Filterable or Player for " + event);
           e.printStackTrace();
           continue;
         }
         result =
             (l, e) -> {
               try {
-                MethodHandle handle = MethodHandleUtils.getHandle(e.getClass());
-
                 final Object o = handle.invoke(e);
                 if (o instanceof Filterable) this.invalidate((Filterable<?>) o);
                 else if (o instanceof Player) this.invalidate(this.match.getPlayer((Player) o));
