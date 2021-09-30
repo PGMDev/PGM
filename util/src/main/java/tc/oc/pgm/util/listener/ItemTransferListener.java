@@ -93,7 +93,6 @@ public class ItemTransferListener implements Listener {
     // Ignored actions
     switch (event.getAction()) {
       case CLONE_STACK: // Out of scope
-      case COLLECT_TO_CURSOR: // Handled by InventoryClickedEvent
       case NOTHING:
       case UNKNOWN:
         return;
@@ -484,9 +483,7 @@ public class ItemTransferListener implements Listener {
   public void onPlayerInventoryClick(InventoryClickEvent event) {
     // Control-double-click on a stack, all similar stacks are moved to the cursor, up to the max
     // stack size
-    // We cancel all of these and redo them ourselves. We have to do it from a InventoryClickedEvent
-    // because
-    // we can't make the necessary changes from inside a InventoryClickEvent.
+    // We cancel all of these and redo them ourselves.
     if (this.collectToCursor) {
       this.collectToCursor = false;
 
