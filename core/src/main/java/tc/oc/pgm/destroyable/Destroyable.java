@@ -420,14 +420,14 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     if (deltaHealth < 0) {
       // Damage
       if (player != null && player.getParty() == this.getOwner()) {
-        return "destroyable.damageOwn";
+        return "objective.damageOwn";
       }
     } else if (deltaHealth > 0) {
       // Repair
       if (player != null && player.getParty() != this.getOwner()) {
-        return "destroyable.repairOther";
+        return "objective.repairOther";
       } else if (!this.definition.isRepairable()) {
-        return "destroyable.repairDisabled";
+        return "objective.repairDisabled";
       }
     }
 
