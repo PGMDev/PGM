@@ -3,6 +3,7 @@ package tc.oc.pgm.destroyable;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
+import java.awt.*;
 import java.util.Collection;
 import org.bukkit.block.Block;
 import org.bukkit.entity.minecart.ExplosiveMinecart;
@@ -75,7 +76,7 @@ public class DestroyableMatchModule implements MatchModule, Listener {
               event.getNewState(),
               ParticipantBlockTransformEvent.getPlayerState(event));
       if (reasonKey != null) {
-        event.setCancelled(translatable(reasonKey));
+        event.setCancelled(translatable(reasonKey, destroyable.getComponentName()));
         return;
       }
     }
@@ -115,8 +116,7 @@ public class DestroyableMatchModule implements MatchModule, Listener {
           && destroyable.hasMaterial(material)) {
 
         event.setCancelled(true);
-        // TODO: translate this
-        player.sendWarning(text("You may not damage your own objective."));
+        player.sendWarning(translatable("objective.damageOwn", destroyable.getComponentName()));
       }
     }
   }
