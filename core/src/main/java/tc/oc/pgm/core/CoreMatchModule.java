@@ -1,6 +1,5 @@
 package tc.oc.pgm.core;
 
-import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.api.map.MapProtos.MODES_IMPLEMENTATION_VERSION;
 
@@ -27,7 +26,6 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
-import tc.oc.pgm.goals.GoalDefinition;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
@@ -95,7 +93,7 @@ public class CoreMatchModule implements MatchModule, Listener {
             Competitor team = player.getParty();
 
             if (team == core.getOwner()) {
-              event.setCancelled(translatable("objective.damageOwn", text(core.getName())));
+              event.setCancelled(translatable("objective.damageOwn", core.getComponentName()));
             } else if (event.getOldState().getData().equals(core.getMaterial())) {
               this.match.callEvent(new CoreBlockBreakEvent(core, player, event.getOldState()));
               core.touch(player);
@@ -136,7 +134,7 @@ public class CoreMatchModule implements MatchModule, Listener {
           && core.getCasingRegion().contains(center)
           && player.getParty() == core.getOwner()) {
         event.setCancelled(true);
-        player.sendWarning(translatable("objective.damageOwn", core.getDefinition().getComponentName()));
+        player.sendWarning(translatable("objective.damageOwn", core.getComponentName()));
       }
     }
   }

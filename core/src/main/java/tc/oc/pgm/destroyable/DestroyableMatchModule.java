@@ -1,9 +1,7 @@
 package tc.oc.pgm.destroyable;
 
-import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
-import java.awt.*;
 import java.util.Collection;
 import org.bukkit.block.Block;
 import org.bukkit.entity.minecart.ExplosiveMinecart;
