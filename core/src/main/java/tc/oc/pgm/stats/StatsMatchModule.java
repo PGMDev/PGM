@@ -76,6 +76,7 @@ public class StatsMatchModule implements MatchModule, Listener {
   private final Duration showAfter = PGM.get().getConfiguration().showStatsAfter();
   private final boolean bestStats = PGM.get().getConfiguration().showBestStats();
   private final boolean ownStats = PGM.get().getConfiguration().showOwnStats();
+  private final int verboseItemSlot = PGM.get().getConfiguration().getVerboseItemSlot();
 
   /** Common formats used by stats with decimals */
   public static final DecimalFormat TWO_DECIMALS = new DecimalFormat("#.##");
@@ -343,7 +344,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     }
 
     StatsMainMenu menu = new StatsMainMenu(player, teams, this);
-    player.getInventory().setItem(7, menu.getItem());
+    player.getInventory().setItem(verboseItemSlot, menu.getItem());
 
     if (forceOpen) {
       menu.open();

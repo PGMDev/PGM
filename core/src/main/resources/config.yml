@@ -83,6 +83,7 @@ stats:
   show-after: 6s  # How long to wait after the match ends to show stats?
   show-best: true # Should show best players stats?
   show-own: true  # Should show each players own stats?
+  item-slot: 7    # In what slot should we place the verbose stats item?
 
 # Overrides the header and footer of the side bar.
 sidebar:

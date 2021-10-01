@@ -91,6 +91,7 @@ public final class PGMConfig implements Config {
   private final Duration statsShowAfter;
   private final boolean statsShowBest;
   private final boolean statsShowOwn;
+  private final int verboseItemSlot;
 
   // sidebar.*
   private final Component header;
@@ -189,6 +190,7 @@ public final class PGMConfig implements Config {
     this.statsShowAfter = parseDuration(config.getString("stats.show-after", "6s"));
     this.statsShowBest = parseBoolean(config.getString("stats.show-best", "true"));
     this.statsShowOwn = parseBoolean(config.getString("stats.show-own", "true"));
+    this.verboseItemSlot = parseInteger(config.getString("stats.item-slot", "7"));
 
     final String header = config.getString("sidebar.header");
     this.header = header == null || header.isEmpty() ? null : parseComponent(header);
@@ -604,6 +606,11 @@ public final class PGMConfig implements Config {
   @Override
   public boolean showOwnStats() {
     return statsShowOwn;
+  }
+
+  @Override
+  public int getVerboseItemSlot() {
+    return verboseItemSlot;
   }
 
   @Override

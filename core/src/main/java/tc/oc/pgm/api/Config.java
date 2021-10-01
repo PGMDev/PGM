@@ -244,6 +244,9 @@ public interface Config {
   /** @return If stats on match end should show your own stats */
   boolean showOwnStats();
 
+  /** @return The slot where the verbose item will be placed */
+  int getVerboseItemSlot();
+
   /**
    * Gets a format to override the server's "message of the day."
    *
