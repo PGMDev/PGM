@@ -65,11 +65,12 @@ public abstract class GoalDefinition extends SelfIdentifyingFeatureDefinition {
   // See "objective.name.monument" for examples
   private static final Pattern OBJECTIVE_PATTERN =
       Pattern.compile(
-          "Monument|Core|Wool|Flag|Antenna|Base|Ship|Orb|Tower|Inhibitor|Reactor|Engine");
+          "Monument|Core|Wool|Flag|Antenna|Base|Ship|Orb|Tower|Pillar|Inhibitor|Reactor|Engine");
 
   // See "misc.top" for examples
   private static final Pattern DESCRIPTOR_PATTERN =
-      Pattern.compile("Top|Bottom|Front|Back|Rear|Left|Right|Center|Mid|North|South|East|West");
+      Pattern.compile(
+          "Top|Bottom|Front|Back|Rear|Left|Right|Center|Mid|North|South|East|West|White|Orange|Magenta|Yellow|Lime|Pink|Gray|Cyan|Purple|Blue|Brown|Green|Red|Black|Light");
 
   // TODO: Support languages where words are ordered right-to-left
   private static Component translateName(final String name) {
