@@ -59,7 +59,7 @@ public class ProximityAlarm implements Listener {
   private void updatePlayer(MatchPlayer player, Location location) {
     if (player != null
         && player.canInteract()
-        && this.definition.detectFilter.query(player.getQuery()).isAllowed()) {
+        && this.definition.detectFilter.query(player).isAllowed()) {
       if (!player.isDead() && this.definition.detectRegion.contains(location.toVector())) {
         this.playersInside.add(player);
       } else {
@@ -104,7 +104,7 @@ public class ProximityAlarm implements Listener {
       this.lastMessageTime = now;
 
       for (MatchPlayer player : this.match.getPlayers()) {
-        if (this.definition.alertFilter.query(player.getQuery()).isAllowed()) {
+        if (this.definition.alertFilter.query(player).isAllowed()) {
           player.sendMessage(text(this.definition.alertMessage, NamedTextColor.RED));
           player.playSound(SOUND);
         }

@@ -25,7 +25,7 @@ public class KitNode extends AbstractKit {
 
   @Override
   public void applyPostEvent(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {
-    if (this.filter.query(player.getQuery()).isAllowed()) {
+    if (this.filter.query(player).isAllowed()) {
       for (Kit kit : this.kits) {
         kit.apply(player, this.force != null ? this.force : force, displacedItems);
       }

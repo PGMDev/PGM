@@ -1,14 +1,17 @@
 package tc.oc.pgm.portals;
 
-import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
@@ -23,8 +26,9 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.FilterModule;
+import tc.oc.pgm.filters.InverseFilter;
 import tc.oc.pgm.filters.StaticFilter;
-import tc.oc.pgm.regions.CuboidRegion;
+import tc.oc.pgm.filters.dynamic.FilterMatchModule;
 import tc.oc.pgm.regions.RFAContext;
 import tc.oc.pgm.regions.RFAScope;
 import tc.oc.pgm.regions.RandomPointsValidation;
@@ -45,8 +49,14 @@ public class PortalModule implements MapModule {
     this.portals = ImmutableSet.copyOf(portals);
   }
 
+  @Nullable
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public Collection<Class<? extends MatchModule>> getHardDependencies() {
+    return ImmutableList.of(FilterMatchModule.class);
+  }
+
+  @Override
+  public PortalMatchModule createMatchModule(Match match) {
     return new PortalMatchModule(match, this.portals);
   }
 
@@ -62,134 +72,147 @@ public class PortalModule implements MapModule {
       Set<Portal> portals = Sets.newHashSet();
       RegionParser regionParser = factory.getRegions();
       RFAContext rfaContext = factory.getModule(RegionModule.class).getRFAContext();
-      Filter protectionFilter = StaticFilter.DENY;
 
       for (Element portalEl : XMLUtils.flattenElements(doc.getRootElement(), "portals", "portal")) {
-        DoubleProvider dx = parseDoubleProvider(portalEl, "x", RelativeDoubleProvider.ZERO);
-        DoubleProvider dy = parseDoubleProvider(portalEl, "y", RelativeDoubleProvider.ZERO);
-        DoubleProvider dz = parseDoubleProvider(portalEl, "z", RelativeDoubleProvider.ZERO);
-        DoubleProvider dYaw = parseDoubleProvider(portalEl, "yaw", RelativeDoubleProvider.ZERO);
-        DoubleProvider dPitch = parseDoubleProvider(portalEl, "pitch", RelativeDoubleProvider.ZERO);
 
-        Region region;
+        PortalTransform transform =
+            PortalTransform.piecewise(
+                parseDoubleProvider(portalEl, "x", RelativeDoubleProvider.ZERO),
+                parseDoubleProvider(portalEl, "y", RelativeDoubleProvider.ZERO),
+                parseDoubleProvider(portalEl, "z", RelativeDoubleProvider.ZERO),
+                parseDoubleProvider(portalEl, "yaw", RelativeDoubleProvider.ZERO),
+                parseDoubleProvider(portalEl, "pitch", RelativeDoubleProvider.ZERO));
+
+        Region entrance;
         if (factory.getProto().isOlderThan(MapProtos.MODULE_SUBELEMENT_VERSION)) {
-          region = regionParser.parseChildren(portalEl);
+          entrance = regionParser.parseChildren(portalEl);
         } else {
-          region = regionParser.parseRequiredRegionProperty(portalEl, "region");
+          entrance = regionParser.parseRegionProperty(portalEl, "region");
         }
 
-        Region destinationRegion =
+        Region exit =
             regionParser.parseRegionProperty(
                 portalEl, RandomPointsValidation.INSTANCE, "destination");
 
-        Filter filter =
-            factory.getFilters().parseFilterProperty(portalEl, "filter", StaticFilter.ALLOW);
-
-        boolean sound = XMLUtils.parseBoolean(portalEl.getAttribute("sound"), true);
-        boolean protect = XMLUtils.parseBoolean(portalEl.getAttribute("protect"), false);
-        boolean bidirectional =
-            XMLUtils.parseBoolean(portalEl.getAttribute("bidirectional"), false);
-        boolean smooth = XMLUtils.parseBoolean(portalEl.getAttribute("smooth"), false);
-
-        Portal portal;
-        try {
-          portal =
-              new Portal(
-                  region,
-                  dx,
-                  dy,
-                  dz,
-                  dYaw,
-                  dPitch,
-                  destinationRegion,
-                  filter,
-                  sound,
-                  protect,
-                  bidirectional,
-                  smooth);
-        } catch (IllegalArgumentException e) {
-          throw new InvalidXMLException(
-              e.getMessage(), portalEl); // Probably non-relative bidirectional
+        if (exit != null) {
+          // If there is an explicit exit region, create a transform for it and combine
+          // it with the piecewise transform (so angle transforms are still applied).
+          transform =
+              PortalTransform.concatenate(
+                  transform, PortalTransform.regional(Optional.ofNullable(entrance), exit));
+        } else if (entrance != null && transform.invertible()) {
+          // If no exit region is specified, but there is an entrance region, and the
+          // piecewise transform is invertible, infer the exit region from the entrance region.
+          exit = new PortalExitRegion(entrance, transform);
         }
 
+        // Dynamic filters
+        Filter forward = factory.getFilters().parseFilterProperty(portalEl, "forward");
+        Filter reverse = factory.getFilters().parseFilterProperty(portalEl, "reverse");
+        Filter transit = factory.getFilters().parseFilterProperty(portalEl, "transit");
+
+        // Check for conflicting dynamic filters
+        if (transit != null && (forward != null || reverse != null)) {
+          throw new InvalidXMLException(
+              "Cannot combine 'transit' property with 'forward' or 'transit' properties", portalEl);
+        }
+
+        // Check for conflicting region and dynamic filter at each end of the portal
+        if (entrance != null && (forward != null || transit != null)) {
+          throw new InvalidXMLException(
+              "Cannot combine an entrance region with 'forward' or 'transit' properties", portalEl);
+        }
+
+        if (exit != null && (reverse != null || transit != null)) {
+          throw new InvalidXMLException(
+              "Cannot combine an exit region with 'reverse' or 'transit' properties", portalEl);
+        }
+
+        // Figure out the forward trigger, from the dynamic filters or entrance region
+        Filter forwardFinal =
+            Stream.of(forward, transit, entrance)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElseThrow(
+                    () ->
+                        new InvalidXMLException(
+                            "Portal must have an entrance region, or one of 'forward' or 'transit' properties",
+                            portalEl));
+
+        // Figure out the (optional) reverse trigger, from dynamic filters or exit region
+        Filter inverseTransit = transit != null ? new InverseFilter(transit) : null;
+
+        final Optional<Filter> reverseFinal =
+            Stream.of(reverse, inverseTransit, exit).filter(Objects::nonNull).findFirst();
+
+        // Portal is always bidirectional if a reverse dynamic filter is specified,
+        // otherwise it must be enabled explicitly.
+        final boolean bidirectional =
+            reverse != null
+                || transit != null
+                || XMLUtils.parseBoolean(portalEl.getAttribute("bidirectional"), false);
+        if (bidirectional && !transform.invertible()) {
+          throw new InvalidXMLException(
+              "Bidirectional portal must have an invertible transform", portalEl);
+        }
+
+        // Passive filters
+        Filter participantFilter =
+            factory.getFilters().parseFilterProperty(portalEl, "filter", StaticFilter.ALLOW);
+
+        Filter observerFilter =
+            factory.getFilters().parseFilterProperty(portalEl, "observers", StaticFilter.ALLOW);
+
+        boolean sound = XMLUtils.parseBoolean(portalEl.getAttribute("sound"), true);
+        boolean smooth = XMLUtils.parseBoolean(portalEl.getAttribute("smooth"), false);
+
+        boolean protect = XMLUtils.parseBoolean(portalEl.getAttribute("protect"), false);
+
+        // Protect the entrance/exit
+        if (protect) {
+          protectRegion(rfaContext, entrance);
+          if (exit != null) {
+            protectRegion(rfaContext, exit);
+          }
+        }
+
+        Portal portal =
+            new Portal(forwardFinal, transform, participantFilter, observerFilter, sound, smooth);
         portals.add(portal);
         factory.getFeatures().addFeature(portalEl, portal);
 
-        if (portal.isProtected()) {
-          // Protect the entrance
-          RegionFilterApplication rfa =
-              new RegionFilterApplication(
-                  RFAScope.BLOCK_PLACE,
-                  Union.of(
-                      portal.getRegion(),
-                      TranslatedRegion.translate(portal.getRegion(), new Vector(0, 1, 0)),
-                      TranslatedRegion.translate(portal.getRegion(), new Vector(0, 2, 0))),
-                  protectionFilter,
-                  PROTECT_MESSAGE,
-                  false);
-
-          rfaContext.prepend(rfa);
-
-          // Protect the exit, but only if the destination coords are all relative or all absolute
-          if (dx instanceof RelativeDoubleProvider
-              && dy instanceof RelativeDoubleProvider
-              && dz instanceof RelativeDoubleProvider) {
-
-            rfa =
-                new RegionFilterApplication(
-                    RFAScope.BLOCK_PLACE,
-                    Union.of(
-                        TranslatedRegion.translate(
-                            portal.getRegion(), new Vector(dx.get(0), dy.get(0), dz.get(0))),
-                        TranslatedRegion.translate(
-                            portal.getRegion(), new Vector(dx.get(0), dy.get(1), dz.get(0))),
-                        TranslatedRegion.translate(
-                            portal.getRegion(), new Vector(dx.get(0), dy.get(2), dz.get(0)))),
-                    protectionFilter,
-                    PROTECT_MESSAGE,
-                    false);
-
-            rfaContext.prepend(rfa);
-
-          } else if (dx instanceof StaticDoubleProvider
-              && dy instanceof StaticDoubleProvider
-              && dz instanceof StaticDoubleProvider) {
-            /**
-             * Protect a region roughly the size of the player at the portal exit, expanded by half
-             * a block in all directions. If the destination is the center of a block surface, only
-             * the two blocks above that point will be protected.
-             */
-            Vector destination = new Vector(dx.get(0), dy.get(0), dz.get(0));
-            rfa =
-                new RegionFilterApplication(
-                    RFAScope.BLOCK_PLACE,
-                    new CuboidRegion(
-                        destination.clone().subtract(new Vector(0.9, 0.5, 0.9)),
-                        destination.clone().add(new Vector(0.9, 2.4, 0.9))),
-                    protectionFilter,
-                    PROTECT_MESSAGE,
-                    false);
-
-            rfaContext.prepend(rfa);
-          } else if (destinationRegion != null) {
-            rfa =
-                new RegionFilterApplication(
-                    RFAScope.BLOCK_PLACE,
-                    destinationRegion,
-                    protectionFilter,
-                    PROTECT_MESSAGE,
-                    false);
-
-            rfaContext.prepend(rfa);
-          }
+        if (bidirectional) {
+          Portal inversePortal =
+              new Portal(
+                  reverseFinal.orElse(null),
+                  transform.inverse(),
+                  participantFilter,
+                  observerFilter,
+                  sound,
+                  smooth);
+          portals.add(inversePortal);
+          factory.getFeatures().addFeature(portalEl, inversePortal);
         }
       }
 
-      if (portals.size() == 0) {
-        return null;
-      } else {
-        return new PortalModule(portals);
-      }
+      return (portals.size() == 0) ? null : new PortalModule(portals);
+    }
+
+    /**
+     * Use an {@link RegionFilterApplication} to protect the given entrance/exit {@link Region}.
+     *
+     * <p>The region is extended up by 2m to allow for the height of the player.
+     */
+    private static void protectRegion(RFAContext rfaContext, Region region) {
+      region =
+          Union.of(
+              region,
+              TranslatedRegion.translate(region, new Vector(0, 1, 0)),
+              TranslatedRegion.translate(region, new Vector(0, 2, 0)));
+
+      rfaContext.prepend(
+          new RegionFilterApplication(
+              RFAScope.BLOCK_PLACE, region, StaticFilter.DENY, PROTECT_MESSAGE, false));
     }
 
     private static DoubleProvider parseDoubleProvider(

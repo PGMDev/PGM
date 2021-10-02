@@ -1,6 +1,8 @@
 package tc.oc.pgm.filters;
 
+import java.util.Collection;
 import javax.annotation.Nullable;
+import org.bukkit.event.Event;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.filter.query.Query;
@@ -22,6 +24,11 @@ public class XMLFilterReference extends XMLFeatureReference<FilterDefinition> im
       @Nullable String id,
       Class<FilterDefinition> type) {
     super(context, node, id, type);
+  }
+
+  @Override
+  public Collection<Class<? extends Event>> getRelevantEvents() {
+    return this.get().getRelevantEvents();
   }
 
   @Override

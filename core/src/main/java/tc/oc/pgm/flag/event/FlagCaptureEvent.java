@@ -2,6 +2,7 @@ package tc.oc.pgm.flag.event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.flag.Flag;
@@ -47,5 +48,16 @@ public class FlagCaptureEvent extends GoalCompleteEvent {
    */
   public boolean areAllFlagsCaptured() {
     return allFlagsCaptured;
+  }
+
+  private static final HandlerList handlers = new HandlerList();
+
+  public static HandlerList getHandlerList() {
+    return handlers;
+  }
+
+  @Override
+  public HandlerList getHandlers() {
+    return handlers;
   }
 }

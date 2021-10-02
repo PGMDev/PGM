@@ -12,6 +12,7 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.classes.ClassModule;
+import tc.oc.pgm.filters.dynamic.FilterMatchModule;
 import tc.oc.pgm.regions.EmptyRegion;
 import tc.oc.pgm.regions.EverywhereRegion;
 import tc.oc.pgm.teams.TeamModule;
@@ -21,11 +22,7 @@ public class FilterModule implements MapModule {
 
   @Override
   public MatchModule createMatchModule(Match match) {
-    if (match.getMap().getProto().isOlderThan(MapProtos.FILTER_FEATURES)) {
-      return null;
-    } else {
-      return new FilterMatchModule(match);
-    }
+    return new FilterMatchModule(match);
   }
 
   public static class Factory implements MapModuleFactory<FilterModule> {

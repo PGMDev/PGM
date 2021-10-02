@@ -2,7 +2,10 @@ package tc.oc.pgm.filters;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.bukkit.event.Event;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.filter.query.Query;
@@ -31,6 +34,13 @@ public abstract class MultiFilterFunction implements FilterDefinition {
 
   public MultiFilterFunction(Iterable<? extends Filter> filters) {
     this.filters = ImmutableList.copyOf(filters);
+  }
+
+  @Override
+  public Collection<Class<? extends Event>> getRelevantEvents() {
+    return this.filters.stream()
+        .flatMap(f -> f.getRelevantEvents().stream())
+        .collect(Collectors.collectingAndThen(Collectors.toList(), ImmutableList::copyOf));
   }
 
   @Override

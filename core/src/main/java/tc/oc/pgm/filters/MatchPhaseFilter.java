@@ -1,8 +1,12 @@
 package tc.oc.pgm.filters;
 
+import java.util.Collection;
+import java.util.Collections;
+import org.bukkit.event.Event;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.api.match.MatchPhase;
+import tc.oc.pgm.api.match.event.MatchPhaseChangeEvent;
 
 public class MatchPhaseFilter extends TypedFilter<MatchQuery> {
 
@@ -18,6 +22,11 @@ public class MatchPhaseFilter extends TypedFilter<MatchQuery> {
 
   public MatchPhaseFilter(MatchPhase matchPhase) {
     this.matchPhase = matchPhase;
+  }
+
+  @Override
+  public Collection<Class<? extends Event>> getRelevantEvents() {
+    return Collections.singleton(MatchPhaseChangeEvent.class);
   }
 
   @Override

@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Bukkit;
@@ -33,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.feature.Feature;
+import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -71,8 +73,7 @@ import tc.oc.pgm.events.PlayerParticipationStartEvent;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.features.MatchFeatureContext;
-import tc.oc.pgm.filters.query.MatchQuery;
-import tc.oc.pgm.filters.query.Query;
+import tc.oc.pgm.filters.dynamic.Filterable;
 import tc.oc.pgm.result.CompetitorVictoryCondition;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.ClassLogger;
@@ -103,7 +104,6 @@ public class MatchImpl implements Match {
   private final EnumMap<MatchScope, Collection<Tickable>> tickables;
   private final AtomicReference<Tick> tick;
   private final CountdownContext countdown;
-  private final MatchQuery query;
   private final Map<UUID, MatchPlayer> players;
   private final Map<MatchPlayer, Party> partyChanges;
   private final Set<Party> parties;
@@ -138,7 +138,6 @@ public class MatchImpl implements Match {
     }
     this.tick = new AtomicReference<>(null);
     this.countdown = new SingleCountdownContext(this, logger);
-    this.query = new MatchQuery(null, this);
     this.players = new ConcurrentHashMap<>();
     this.partyChanges = new WeakHashMap<>();
     this.parties = new LinkedHashSet<>();
@@ -693,11 +692,6 @@ public class MatchImpl implements Match {
   }
 
   @Override
-  public Query getQuery() {
-    return query;
-  }
-
-  @Override
   public Duration getDuration() {
     long start = this.start.get();
     if (start <= 0) {
@@ -890,6 +884,35 @@ public class MatchImpl implements Match {
     if (oldMatchFolder.exists()) {
       FileUtils.delete(oldMatchFolder);
     }
+  }
+
+  @Override
+  @Nullable
+  public Filterable<? super MatchQuery> getFilterableParent() {
+    return null;
+  }
+
+  @Override
+  public Collection<? extends Filterable<? extends MatchQuery>> getFilterableChildren() {
+    return this.getParties();
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <R extends Filterable<?>> Collection<? extends R> getFilterableDescendants(Class<R> type) {
+    final Collection<R> result = new LinkedList<>();
+    if (type.isAssignableFrom(Match.class)) {
+      result.add((R) this);
+    }
+    if (Party.class.isAssignableFrom(type)) {
+      result.addAll(
+          (List<R>)
+              this.getParties().stream().filter(type::isInstance).collect(Collectors.toList()));
+    }
+    if (type.isAssignableFrom(MatchPlayer.class)) {
+      result.addAll((List<R>) this.getPlayers());
+    }
+    return result;
   }
 
   @Override

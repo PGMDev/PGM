@@ -7,8 +7,10 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import tc.oc.pgm.api.filter.query.PartyQuery;
+import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.filters.dynamic.Filterable;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.named.Named;
 
@@ -17,7 +19,8 @@ import tc.oc.pgm.util.named.Named;
  *
  * @see Competitor
  */
-public interface Party extends Audience, Named {
+public interface Party extends Audience, Named, Filterable<PartyQuery>, PartyQuery {
+
   /**
    * Gets the match.
    *
@@ -131,5 +134,21 @@ public interface Party extends Audience, Named {
   @Deprecated
   default boolean isObserving() {
     return !this.isParticipating();
+  }
+
+  @Override
+  @Nullable
+  default Match getFilterableParent() {
+    return this.getMatch();
+  }
+
+  @Override
+  default Collection<? extends Filterable<? extends PlayerQuery>> getFilterableChildren() {
+    return this.getPlayers();
+  }
+
+  @Override
+  default Party getParty() {
+    return this;
   }
 }

@@ -23,7 +23,7 @@ public abstract class ParticipantFilter extends TypedFilter<PlayerQuery> {
 
   @Override
   protected final QueryResponse queryTyped(PlayerQuery query) {
-    MatchPlayer player = query.getMatch().getPlayer(query.getPlayerId());
+    MatchPlayer player = query.getMatch().getPlayer(query.getId());
     if (player != null && player.getParty() instanceof Competitor) {
       return queryPlayer(query, player);
     } else {

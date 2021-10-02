@@ -2,8 +2,12 @@ package tc.oc.pgm.filters;
 
 import com.google.common.collect.BoundType;
 import com.google.common.collect.Range;
+import java.util.Collection;
+import java.util.Collections;
+import org.bukkit.event.Event;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.killreward.KillRewardMatchModule;
 
 public class KillStreakFilter extends ParticipantFilter {
@@ -13,6 +17,11 @@ public class KillStreakFilter extends ParticipantFilter {
   public KillStreakFilter(Range<Integer> range, boolean repeat) {
     this.range = range;
     this.repeat = repeat;
+  }
+
+  @Override
+  public Collection<Class<? extends Event>> getRelevantEvents() {
+    return Collections.singleton(MatchPlayerDeathEvent.class);
   }
 
   @Override

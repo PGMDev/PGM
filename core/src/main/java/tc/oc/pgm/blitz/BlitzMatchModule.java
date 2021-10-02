@@ -69,7 +69,7 @@ public class BlitzMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   public void handleDeath(final MatchPlayerDeathEvent event) {
     MatchPlayer victim = event.getVictim();
-    if (config.getFilter().query(victim.getQuery()).isDenied()) return;
+    if (config.getFilter().query(victim).isDenied()) return;
     if (victim.getParty() instanceof Competitor) {
       Competitor competitor = (Competitor) victim.getParty();
 

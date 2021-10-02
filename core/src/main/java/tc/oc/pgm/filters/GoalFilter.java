@@ -1,7 +1,10 @@
 package tc.oc.pgm.filters;
 
 import com.google.common.base.Preconditions;
+import java.util.Collection;
+import java.util.Collections;
 import javax.annotation.Nullable;
+import org.bukkit.event.Event;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.api.filter.query.PartyQuery;
@@ -9,6 +12,7 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.goals.Goal;
 import tc.oc.pgm.goals.GoalDefinition;
+import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamMatchModule;
 
@@ -36,6 +40,11 @@ public class GoalFilter extends TypedFilter<MatchQuery> {
     this.goal = goal;
     this.team = team;
     this.anyTeam = anyTeam;
+  }
+
+  @Override
+  public Collection<Class<? extends Event>> getRelevantEvents() {
+    return Collections.singleton(GoalCompleteEvent.class);
   }
 
   @Override

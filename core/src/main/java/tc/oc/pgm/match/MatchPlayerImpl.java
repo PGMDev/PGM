@@ -5,6 +5,8 @@ import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -20,6 +22,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -42,6 +45,7 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.PlayerResetEvent;
+import tc.oc.pgm.filters.dynamic.Filterable;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.MaxHealthKit;
 import tc.oc.pgm.kits.WalkSpeedKit;
@@ -71,7 +75,6 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   private final WeakReference<Player> bukkit;
   private final Audience audience;
   private final AtomicReference<Party> party;
-  private final AtomicReference<PlayerQuery> query;
   private final AtomicBoolean frozen;
   private final AtomicBoolean dead;
   private final AtomicBoolean visible;
@@ -89,7 +92,6 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     this.bukkit = new WeakReference<>(player);
     this.audience = Audience.get(player);
     this.party = new AtomicReference<>(null);
-    this.query = new AtomicReference<>(null);
     this.frozen = new AtomicBoolean(false);
     this.dead = new AtomicBoolean(false);
     this.visible = new AtomicBoolean(false);
@@ -122,6 +124,15 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     return id;
   }
 
+  @Nullable
+  @Override
+  public Location getLocation() { // TODO: move over usages of #getBukkit#getLocation to this
+    final Player bukkit = this.getBukkit();
+    if (bukkit == null) return null;
+
+    return bukkit.getLocation();
+  }
+
   @Override
   public MatchPlayerState getState() {
     final Party party = getParty();
@@ -143,11 +154,6 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     } else {
       return new ParticipantStateImpl(this);
     }
-  }
-
-  @Override
-  public PlayerQuery getQuery() {
-    return query.get();
   }
 
   @Nullable
@@ -387,9 +393,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
 
   @Override
   public void internalSetParty(Party newParty) {
-    if (party.compareAndSet(getParty(), newParty)) {
-      query.set(new tc.oc.pgm.filters.query.PlayerQuery(null, this));
-    }
+    party.set(newParty);
   }
 
   @Override
@@ -446,16 +450,27 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   }
 
   @Override
+  @Nullable
+  public Party getFilterableParent() {
+    return this.getParty();
+  }
+
+  @Override
+  public Collection<? extends Filterable<? extends PlayerQuery>> getFilterableChildren() {
+    return Collections.emptyList();
+  }
+
+  @Override
   public int compareTo(MatchPlayer o) {
     return new CompareToBuilder()
         .append(getMatch(), o.getMatch())
-        .append(getId(), o.getId())
+        .append(this.getId(), o.getId())
         .build();
   }
 
   @Override
   public int hashCode() {
-    return new HashCodeBuilder().append(getMatch()).append(getId()).build();
+    return new HashCodeBuilder().append(getMatch()).append(this.getId()).build();
   }
 
   @Override
@@ -464,14 +479,14 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     final MatchPlayer o = (MatchPlayer) obj;
     return new EqualsBuilder()
         .append(getMatch(), o.getMatch())
-        .append(getId(), o.getId())
+        .append(this.getId(), o.getId())
         .isEquals();
   }
 
   @Override
   public String toString() {
     return new ToStringBuilder(this)
-        .append("id", getId())
+        .append("id", this.getId())
         .append("bukkit", getBukkit())
         .append("match", getMatch().getId())
         .build();

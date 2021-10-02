@@ -19,6 +19,8 @@ public class PlayerQuery extends Query implements tc.oc.pgm.api.filter.query.Pla
   private final MatchPlayer player;
   private final Optional<Location> location;
 
+  // TODO: remove this implementation? only needed usage if for a query where the location is not
+  // the location of the player
   public PlayerQuery(@Nullable Event event, MatchPlayer player, @Nullable Location location) {
     super(event);
     this.player = checkNotNull(player);
@@ -40,7 +42,7 @@ public class PlayerQuery extends Query implements tc.oc.pgm.api.filter.query.Pla
   }
 
   @Override
-  public UUID getPlayerId() {
+  public UUID getId() {
     return player.getId();
   }
 

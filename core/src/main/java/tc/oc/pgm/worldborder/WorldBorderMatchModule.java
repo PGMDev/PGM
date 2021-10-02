@@ -103,7 +103,7 @@ public class WorldBorderMatchModule implements MatchModule, Listener {
    * @param event to use for the filter query
    */
   private boolean update(@Nullable Event event) {
-    Query query = event == null ? match.getQuery() : new MatchQuery(event, match);
+    Query query = event == null ? match : new MatchQuery(event, match);
     WorldBorder lastMatched = null;
     boolean applied = false;
 

@@ -75,7 +75,7 @@ public class Spawner implements Listener, Tickable {
   private boolean canSpawn() {
     if (spawnedEntities >= definition.maxEntities || players.isEmpty()) return false;
     for (MatchPlayer player : players.values()) {
-      if (definition.playerFilter.query(player.getQuery()).isAllowed()) return true;
+      if (definition.playerFilter.query(player).isAllowed()) return true;
     }
     return false;
   }

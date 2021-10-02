@@ -2,6 +2,7 @@ package tc.oc.pgm.goals.events;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
+import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.goals.Contribution;
@@ -34,5 +35,16 @@ public class GoalCompleteEvent extends GoalEvent {
   /** @return true if the event was beneficial to the affected team, false if it was detrimental */
   public boolean isGood() {
     return isGood;
+  }
+
+  private static final HandlerList handlers = new HandlerList();
+
+  public static HandlerList getHandlerList() {
+    return handlers;
+  }
+
+  @Override
+  public HandlerList getHandlers() {
+    return handlers;
   }
 }

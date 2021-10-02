@@ -88,7 +88,7 @@ public class PlayerMoveListener implements Listener {
   }
 
   /**
-   * Fire a CoarsePlayerMoveEvent that wraps the given event, only if it crosses a block boundary
+   * Fire a PlayerCoarseMoveEvent that wraps the given event, only if it crosses a block boundary
    *
    * @param event The movement event to potentially wrap
    * @return True if the original event was not cancelled, and a coarse event was fired, and that

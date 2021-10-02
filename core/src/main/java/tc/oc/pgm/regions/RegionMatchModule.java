@@ -372,7 +372,7 @@ public class RegionMatchModule implements MatchModule, Listener {
         && ((Cancellable) query.getEvent()).isCancelled()
         && query instanceof PlayerQuery) {
 
-      MatchPlayer player = match.getPlayer(((PlayerQuery) query).getPlayerId());
+      MatchPlayer player = match.getPlayer(((PlayerQuery) query).getId());
       if (player != null) player.sendWarning(rfa.message);
     }
   }

@@ -21,6 +21,6 @@ public class PlayerClassFilter extends TypedFilter<PlayerQuery> {
   public QueryResponse queryTyped(PlayerQuery query) {
     ClassMatchModule classes = query.getMatch().getModule(ClassMatchModule.class);
     return QueryResponse.fromBoolean(
-        classes != null && this.playerClass.equals(classes.getPlayingClass(query.getPlayerId())));
+        classes != null && this.playerClass.equals(classes.getPlayingClass(query.getId())));
   }
 }

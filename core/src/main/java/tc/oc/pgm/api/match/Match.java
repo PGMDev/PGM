@@ -11,6 +11,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
+import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
@@ -27,7 +28,7 @@ import tc.oc.pgm.api.player.MatchPlayerResolver;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.features.MatchFeatureContext;
-import tc.oc.pgm.filters.query.Query;
+import tc.oc.pgm.filters.dynamic.Filterable;
 import tc.oc.pgm.util.Audience;
 
 /**
@@ -38,7 +39,12 @@ import tc.oc.pgm.util.Audience;
  * {@link Match}. This should allow multiple {@link Match}es to run concurrently on the same {@link
  * org.bukkit.Server}, as long as resources are cleaned up after {@link #unload()}.
  */
-public interface Match extends MatchPlayerResolver, Audience, ModuleContext<MatchModule> {
+public interface Match
+    extends MatchPlayerResolver,
+        Audience,
+        ModuleContext<MatchModule>,
+        Filterable<MatchQuery>,
+        MatchQuery {
 
   /**
    * Get the global {@link Logger} for the {@link Match}.
@@ -366,13 +372,6 @@ public interface Match extends MatchPlayerResolver, Audience, ModuleContext<Matc
   void removeParty(Party party);
 
   /**
-   * Get the {@link Query} associated with the {@link Match}.
-   *
-   * @return The filter {@link Query}.
-   */
-  Query getQuery();
-
-  /**
    * Get the {@link Duration} of the {@link Match}, or {@link Duration#ZERO} if not yet started.
    *
    * @return The {@link Duration} of the {@link Match}.
@@ -407,4 +406,9 @@ public interface Match extends MatchPlayerResolver, Audience, ModuleContext<Matc
    * @return If the {@link Match} was just ended.
    */
   boolean calculateVictory();
+
+  @Override
+  default Match getMatch() {
+    return this;
+  }
 }

@@ -1,5 +1,9 @@
 package tc.oc.pgm.portals;
 
-public interface DoubleProvider {
-  double get(double old);
+public interface DoubleProvider extends InvertibleOperator<DoubleProvider> {
+  double apply(double old);
+
+  boolean invertible();
+
+  DoubleProvider inverse();
 }

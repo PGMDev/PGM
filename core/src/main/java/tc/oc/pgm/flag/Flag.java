@@ -402,10 +402,6 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     return canPickup(query, state.getPost());
   }
 
-  public boolean canPickup(MatchPlayer player, Post post) {
-    return canPickup(player.getQuery(), post);
-  }
-
   public boolean canCapture(Query query, Net net) {
     return getDefinition().getCaptureFilter().query(query).isAllowed()
         && net.getCaptureFilter().query(query).isAllowed();
@@ -413,10 +409,6 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
   public boolean canCapture(Query query) {
     return getDefinition().canCapture(query, getNets());
-  }
-
-  public boolean canCapture(MatchPlayer player, Net net) {
-    return canCapture(player.getQuery(), net);
   }
 
   public boolean isCurrent(Class<? extends State> state) {

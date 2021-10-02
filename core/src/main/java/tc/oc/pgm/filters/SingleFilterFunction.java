@@ -2,6 +2,8 @@ package tc.oc.pgm.filters;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Collection;
+import org.bukkit.event.Event;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.filter.query.Query;
@@ -13,6 +15,11 @@ public abstract class SingleFilterFunction implements FilterDefinition {
 
   public SingleFilterFunction(Filter filter) {
     this.filter = checkNotNull(filter, "filter may not be null");
+  }
+
+  @Override
+  public Collection<Class<? extends Event>> getRelevantEvents() {
+    return this.filter.getRelevantEvents();
   }
 
   @Override

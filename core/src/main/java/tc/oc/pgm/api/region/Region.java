@@ -1,11 +1,13 @@
 package tc.oc.pgm.api.region;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Random;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
+import org.bukkit.event.Event;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.filter.Filter;
@@ -75,4 +77,6 @@ public interface Region extends Filter {
   public Iterator<BlockVector> getBlockVectorIterator();
 
   public Iterable<BlockVector> getBlockVectors();
+
+  public Collection<Class<? extends Event>> getRelevantEvents();
 }

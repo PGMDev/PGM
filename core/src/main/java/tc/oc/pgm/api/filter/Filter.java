@@ -1,13 +1,52 @@
 package tc.oc.pgm.api.filter;
 
+import com.google.common.collect.ImmutableList;
+import java.util.Collection;
+import org.bukkit.event.Event;
+import tc.oc.pgm.api.feature.Feature;
+import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.query.Query;
+import tc.oc.pgm.filters.FilterParser;
 
+/**
+ * Something that can answer "yes", "no" or "i don't care" to the imagined question: "Can X
+ * happen?". To be able to answer the question context is provided initially through a {@link Query}
+ * and then processed by the filter itself before a response is given.
+ *
+ * <p>If a filter is connected to a specific {@link Feature} a {@link FeatureReference} should be
+ * passed at xml parse time (when the filter is created) and {@link FeatureReference#get() fetched}
+ * at match time
+ *
+ * <p>For examples on how to create filters see {@link FilterParser}
+ *
+ * @see Query
+ */
 public interface Filter {
+
+  /**
+   * Filters with children are responsible for returning the events of their children.
+   *
+   * <p>Empty list tells us that the filter is not dynamic
+   */
+  default Collection<Class<? extends Event>> getRelevantEvents() {
+    return ImmutableList.of();
+  }
 
   /** Least-derived query type that this filter might not abstain from */
   Class<? extends Query> getQueryType();
 
   QueryResponse query(Query query);
+
+  default boolean response(Query query) {
+    switch (query(query)) {
+      case ALLOW:
+        return true;
+      case DENY:
+        return false;
+      default:
+        throw new UnsupportedOperationException("Filter did not respond to the query");
+    }
+  }
 
   enum QueryResponse {
     ALLOW,

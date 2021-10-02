@@ -37,4 +37,7 @@ public interface MapProtos {
 
   // Option on objectives to determine if they are required to win the match
   Version GOAL_REQUIRED_OPTION = new Version(1, 4, 0);
+
+  // Various changes to support dynamic filters
+  Version DYNAMIC_FILTERS = new Version(1, 4, 2);
 }
