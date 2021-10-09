@@ -17,8 +17,7 @@ public class Mode extends SelfIdentifyingFeatureDefinition {
   private final MaterialData material;
   private final Duration after;
   private final Filter filter;
-  private final @Nullable
-  String name;
+  private final @Nullable String name;
   private final Component componentName;
   private final Duration showBefore;
   private boolean modeComplete = false;
@@ -28,32 +27,36 @@ public class Mode extends SelfIdentifyingFeatureDefinition {
   }
 
   public Mode(
-          final @Nullable String id,
-          final MaterialData material,
-          final Duration after,
-          final Filter filter,
-          final @Nullable String name,
-          Duration showBefore
-  ) {
+      final @Nullable String id,
+      final MaterialData material,
+      final Duration after,
+      final Filter filter,
+      final @Nullable String name,
+      Duration showBefore) {
     super(id);
     this.material = material;
     this.after = after;
     this.filter = filter;
     this.name = name;
     this.componentName =
-            text(name != null ? name : getPreformattedMaterialName(), NamedTextColor.RED);
+        text(name != null ? name : getPreformattedMaterialName(), NamedTextColor.RED);
     this.showBefore = showBefore;
   }
 
-  public void load(FilterMatchModule fmm, ModeChangeCountdown countdown, CountdownContext countdownContext, Match match) {
+  public void load(
+      FilterMatchModule fmm,
+      ModeChangeCountdown countdown,
+      CountdownContext countdownContext,
+      Match match) {
     // if filter returns ALLOW at any time in the match, start countdown for mode change
-    fmm.onRise(filter, FilterListener -> {
-      if (match.isRunning() && !modeComplete) {
-        countdownContext.start(countdown, countdown.getMode().getAfter());
-        modeComplete = true;
-      }
-    }
-    );
+    fmm.onRise(
+        filter,
+        FilterListener -> {
+          if (match.isRunning() && !modeComplete) {
+            countdownContext.start(countdown, countdown.getMode().getAfter());
+            modeComplete = true;
+          }
+        });
   }
 
   public MaterialData getMaterialData() {
@@ -84,8 +87,7 @@ public class Mode extends SelfIdentifyingFeatureDefinition {
     return this.modeComplete;
   }
 
-  public @Nullable
-  String getName() {
+  public @Nullable String getName() {
     return this.name;
   }
 

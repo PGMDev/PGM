@@ -7,7 +7,6 @@ import static net.kyori.adventure.text.Component.text;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,7 +59,8 @@ public class ObjectiveModesMatchModule implements MatchModule, Listener {
   public void enable() {
     for (ModeChangeCountdown countdown : this.countdowns) {
       Query query = new MatchQuery(match.getEvent(), match);
-      if (countdown.getMode().getFilter().query(query).isAllowed() || countdown.getMode().getFilter() == null) {
+      if (countdown.getMode().getFilter().query(query).isAllowed()
+          || countdown.getMode().getFilter() == null) {
         if (!countdown.getMode().isModeComplete()) {
           this.countdownContext.start(countdown, countdown.getMode().getAfter());
           countdown.getMode().setModeComplete();
