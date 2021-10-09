@@ -12,16 +12,23 @@ import org.bukkit.ChatColor;
 import org.bukkit.material.MaterialData;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.filters.QueryTypeFilter;
+import tc.oc.pgm.filters.StaticFilter;
+import tc.oc.pgm.filters.dynamic.FilterMatchModule;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.util.text.TextParser;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
+
+import javax.annotation.Nullable;
 
 public class ObjectiveModesModule implements MapModule {
 
@@ -30,6 +37,12 @@ public class ObjectiveModesModule implements MapModule {
 
   private ObjectiveModesModule(List<Mode> modes) {
     this.modes = modes;
+  }
+
+  @Nullable
+  @Override
+  public Collection<Class<? extends MatchModule>> getHardDependencies() {
+    return ImmutableList.of(FilterMatchModule.class);
   }
 
   @Override
@@ -65,6 +78,7 @@ public class ObjectiveModesModule implements MapModule {
         MaterialData material =
             XMLUtils.parseBlockMaterialData(Node.fromRequiredAttr(modeEl, "material"));
         Duration after = TextParser.parseDuration(modeEl.getAttributeValue("after"));
+        Filter filter = factory.getFilters().parseFilterProperty(modeEl, "filter", StaticFilter.ALLOW);
         String name = modeEl.getAttributeValue("name");
         if (name != null) {
           name = ChatColor.translateAlternateColorCodes('`', name);
@@ -79,7 +93,7 @@ public class ObjectiveModesModule implements MapModule {
         if (!legacyShowBossBar) {
           showBefore = Duration.ZERO;
         }
-        Mode mode = new Mode(id, material, after, name, showBefore);
+        Mode mode = new Mode(id, material, after, filter, name, showBefore);
         parsedModes.add(mode);
         factory.getFeatures().addFeature(modeEl, mode);
       }
