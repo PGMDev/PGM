@@ -69,7 +69,7 @@ public final class ModeCommand {
 
   @Command(
       aliases = {"list", "page"},
-      desc = "List all objectivs modes",
+      desc = "List all objective modes",
       usage = "[page]")
   public void list(Audience audience, Match match, @Default("1") int page) throws CommandException {
     showList(page, audience, getModes(match));

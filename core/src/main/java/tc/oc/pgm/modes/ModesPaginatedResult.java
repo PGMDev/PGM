@@ -1,6 +1,7 @@
 package tc.oc.pgm.modes;
 
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TemporalComponent.clock;
 
 import com.google.common.base.Preconditions;
@@ -17,6 +18,7 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
   private final ObjectiveModesMatchModule modes;
 
   public ModesPaginatedResult(ObjectiveModesMatchModule modes) {
+    // TODO translate this
     super("Monument Modes");
     this.modes = Preconditions.checkNotNull(modes);
   }
@@ -25,16 +27,28 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
   public Component format(ModeChangeCountdown countdown, int index) {
     String materialName = countdown.getMode().getPreformattedMaterialName();
     Duration timeFromStart = countdown.getMode().getAfter();
+    Duration remainingTime = countdown.getRemaining();
 
     TextComponent.Builder builder = text();
 
     builder.append(text((index + 1) + ". ", NamedTextColor.GOLD));
     builder.append(text(materialName + " - ", NamedTextColor.LIGHT_PURPLE));
     builder.append(clock(timeFromStart).color(NamedTextColor.AQUA));
+    if (!countdown.getMatch().isRunning() && countdown.getMode().getFilter() != null) {
+      builder.append(text(" ").append(translatable("misc.crossmark", NamedTextColor.DARK_RED)));
+    }
 
-    if (countdown.getMatch().isRunning()) {
+    if (countdown.getMatch().isRunning() && remainingTime != null) {
+      if (countdown.getMode().getFilter() != null) {
+        builder.append(text(" ").append(translatable("misc.checkmark", NamedTextColor.GREEN)));
+      }
       builder.append(text(" (", NamedTextColor.DARK_AQUA));
       builder.append(this.formatSingleCountdown(countdown).color(NamedTextColor.DARK_AQUA));
+      builder.append(text(")", NamedTextColor.DARK_AQUA));
+    } else if (countdown.getMatch().isRunning() && remainingTime == null) {
+      builder.append(text(" ").append(translatable("misc.crossmark", NamedTextColor.DARK_RED)));
+      builder.append(text(" (", NamedTextColor.DARK_AQUA));
+      builder.append(translatable("command.conditionUnmet", NamedTextColor.DARK_AQUA));
       builder.append(text(")", NamedTextColor.DARK_AQUA));
     }
 
@@ -51,7 +65,7 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
   public TextComponent.Builder formatSingleCountdown(ModeChangeCountdown countdown) {
     Duration currentTimeLeft = modes.getCountdown().getTimeLeft(countdown);
 
-    if (countdown.getMatch().isRunning()) {
+    if (countdown.getMatch().isRunning() && currentTimeLeft != null) {
       return clock(currentTimeLeft).append(text(" left"));
     }
 

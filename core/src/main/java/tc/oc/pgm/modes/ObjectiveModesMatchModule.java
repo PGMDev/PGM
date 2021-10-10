@@ -83,7 +83,16 @@ public class ObjectiveModesMatchModule implements MatchModule, Listener {
 
   public List<ModeChangeCountdown> getSortedCountdowns() {
     List<ModeChangeCountdown> listClone = new ArrayList<>(this.countdowns);
+    List<ModeChangeCountdown> unstartedCountdowns = new ArrayList<>();
+    // places countdowns triggered by filter at the bottom of list
+    for (ModeChangeCountdown listCloneItem : listClone) {
+      if (listCloneItem.getRemaining() == null) {
+        unstartedCountdowns.add(listCloneItem);
+        listClone.remove(listCloneItem);
+      }
+    }
     Collections.sort(listClone);
+    listClone.addAll(unstartedCountdowns);
 
     return listClone;
   }
