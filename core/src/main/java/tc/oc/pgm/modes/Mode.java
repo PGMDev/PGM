@@ -8,7 +8,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.material.MaterialData;
 import tc.oc.pgm.api.filter.Filter;
-import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.filters.dynamic.FilterMatchModule;
@@ -20,7 +19,6 @@ public class Mode extends SelfIdentifyingFeatureDefinition {
   private final @Nullable String name;
   private final Component componentName;
   private final Duration showBefore;
-  private boolean modeComplete = false;
 
   public Mode(final MaterialData material, final Duration after, Duration showBefore) {
     this(null, material, after, null, null, showBefore);
@@ -44,18 +42,12 @@ public class Mode extends SelfIdentifyingFeatureDefinition {
   }
 
   public void load(
-      FilterMatchModule fmm,
-      ModeChangeCountdown countdown,
-      CountdownContext countdownContext,
-      Match match) {
+      FilterMatchModule fmm, ModeChangeCountdown countdown, CountdownContext countdownContext) {
     // if filter returns ALLOW at any time in the match, start countdown for mode change
     fmm.onRise(
         filter,
         FilterListener -> {
-          if (match.isRunning() && !modeComplete) {
-            countdownContext.start(countdown, countdown.getMode().getAfter());
-            modeComplete = true;
-          }
+          countdownContext.start(countdown, countdown.getMode().getAfter());
         });
   }
 
@@ -83,15 +75,7 @@ public class Mode extends SelfIdentifyingFeatureDefinition {
     return this.filter;
   }
 
-  public boolean isModeComplete() {
-    return this.modeComplete;
-  }
-
   public @Nullable String getName() {
     return this.name;
-  }
-
-  public void setModeComplete() {
-    this.modeComplete = true;
   }
 }

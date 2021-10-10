@@ -17,7 +17,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -25,7 +24,6 @@ import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.filters.dynamic.FilterMatchModule;
-import tc.oc.pgm.filters.query.MatchQuery;
 
 @ListenerScope(MatchScope.LOADED)
 public class ObjectiveModesMatchModule implements MatchModule, Listener {
@@ -51,20 +49,17 @@ public class ObjectiveModesMatchModule implements MatchModule, Listener {
     for (Mode mode : this.modes) {
       ModeChangeCountdown countdown = new ModeChangeCountdown(match, this, mode);
       this.countdowns.add(countdown);
-      mode.load(fmm, countdown, this.countdownContext, match);
+      if (mode.getFilter() != null) {
+        mode.load(fmm, countdown, this.countdownContext);
+      }
     }
   }
 
   @Override
   public void enable() {
     for (ModeChangeCountdown countdown : this.countdowns) {
-      Query query = new MatchQuery(match.getEvent(), match);
-      if (countdown.getMode().getFilter().query(query).isAllowed()
-          || countdown.getMode().getFilter() == null) {
-        if (!countdown.getMode().isModeComplete()) {
-          this.countdownContext.start(countdown, countdown.getMode().getAfter());
-          countdown.getMode().setModeComplete();
-        }
+      if (countdown.getMode().getFilter() == null) {
+        this.countdownContext.start(countdown, countdown.getMode().getAfter());
       }
     }
   }
