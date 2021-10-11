@@ -1,5 +1,6 @@
 package tc.oc.pgm.modes;
 
+import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TemporalComponent.clock;
@@ -28,25 +29,26 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
     String materialName = countdown.getMode().getPreformattedMaterialName();
     Duration timeFromStart = countdown.getMode().getAfter();
     Duration remainingTime = countdown.getRemaining();
+    boolean isRunning = countdown.getMatch().isRunning();
 
     TextComponent.Builder builder = text();
 
     builder.append(text((index + 1) + ". ", NamedTextColor.GOLD));
     builder.append(text(materialName + " - ", NamedTextColor.LIGHT_PURPLE));
     builder.append(clock(timeFromStart).color(NamedTextColor.AQUA));
-    if (!countdown.getMatch().isRunning() && countdown.getMode().getFilter() != null) {
-      builder.append(text(" ").append(translatable("misc.crossmark", NamedTextColor.DARK_RED)));
+    if (!isRunning && countdown.getMode().getFilter() != null) {
+      builder.append(space()).append(translatable("misc.crossmark", NamedTextColor.DARK_RED));
     }
 
-    if (countdown.getMatch().isRunning() && remainingTime != null) {
+    if (isRunning && remainingTime != null) {
       if (countdown.getMode().getFilter() != null) {
-        builder.append(text(" ").append(translatable("misc.checkmark", NamedTextColor.GREEN)));
+        builder.append(space()).append(translatable("misc.checkmark", NamedTextColor.GREEN));
       }
       builder.append(text(" (", NamedTextColor.DARK_AQUA));
       builder.append(this.formatSingleCountdown(countdown).color(NamedTextColor.DARK_AQUA));
       builder.append(text(")", NamedTextColor.DARK_AQUA));
-    } else if (countdown.getMatch().isRunning() && remainingTime == null) {
-      builder.append(text(" ").append(translatable("misc.crossmark", NamedTextColor.DARK_RED)));
+    } else if (isRunning) {
+      builder.append(space()).append(translatable("misc.crossmark", NamedTextColor.DARK_RED));
       builder.append(text(" (", NamedTextColor.DARK_AQUA));
       builder.append(translatable("command.conditionUnmet", NamedTextColor.DARK_AQUA));
       builder.append(text(")", NamedTextColor.DARK_AQUA));

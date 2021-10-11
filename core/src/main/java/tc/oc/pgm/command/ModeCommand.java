@@ -2,6 +2,7 @@ package tc.oc.pgm.command;
 
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TemporalComponent.clock;
 import static tc.oc.pgm.util.text.TextException.exception;
 
@@ -77,20 +78,25 @@ public final class ModeCommand {
 
   @Command(
       aliases = {"push"},
-      desc = "Reschedule an objective mode",
+      desc = "Reschedule all unconditional objective modes",
       perms = Permissions.GAMEPLAY)
   public void push(Audience audience, Match match, Duration duration) {
     ObjectiveModesMatchModule modes = getModes(match);
+
+    if (!match.isRunning()) {
+      throw exception("command.matchNotStarted");
+    }
 
     if (modes == null) {
       throwNoResults();
     }
 
     CountdownContext countdowns = modes.getCountdown();
-    List<ModeChangeCountdown> sortedCountdowns = modes.getSortedCountdowns();
+    List<ModeChangeCountdown> sortedCountdowns = modes.getSortedCountdowns(false);
 
     for (ModeChangeCountdown countdown : sortedCountdowns) {
-      if (countdowns.getTimeLeft(countdown).getSeconds() > 0) {
+      if (countdowns.getTimeLeft(countdown).getSeconds() > 0
+          && countdown.getMode().getFilter() == null) {
         Duration oldDelay = countdowns.getTimeLeft(countdown);
         Duration newDelay = oldDelay.plus(duration);
 
@@ -100,14 +106,14 @@ public final class ModeCommand {
     }
 
     TextComponent.Builder builder =
-        text().append(text("All modes have been pushed ", NamedTextColor.GOLD));
+        text().append(translatable("command.modesPushed", NamedTextColor.GOLD).append(space()));
     if (duration.isNegative()) {
-      builder.append(text("backwards ", NamedTextColor.GOLD));
+      builder.append(translatable("command.backwards", NamedTextColor.GOLD).append(space()));
     } else {
-      builder.append(text("forwards ", NamedTextColor.GOLD));
+      builder.append(translatable("command.forwards", NamedTextColor.GOLD).append(space()));
     }
 
-    builder.append(text("by ", NamedTextColor.GOLD));
+    builder.append(translatable("command.by", NamedTextColor.GOLD).append(space()));
     builder.append(clock(Math.abs(duration.getSeconds())).color(NamedTextColor.AQUA));
 
     audience.sendMessage(builder);
@@ -118,7 +124,7 @@ public final class ModeCommand {
     if (modes == null) {
       throwNoResults();
     } else {
-      new ModesPaginatedResult(modes).display(audience, modes.getSortedCountdowns(), page);
+      new ModesPaginatedResult(modes).display(audience, modes.getSortedCountdowns(true), page);
     }
   }
 
