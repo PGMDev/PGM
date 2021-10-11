@@ -46,9 +46,7 @@ public class Mode extends SelfIdentifyingFeatureDefinition {
     // if filter returns ALLOW at any time in the match, start countdown for mode change
     fmm.onRise(
         filter,
-        FilterListener -> {
-          countdownContext.start(countdown, countdown.getMode().getAfter());
-        });
+        listener -> countdownContext.start(countdown, countdown.getMode().getAfter()));
   }
 
   public MaterialData getMaterialData() {
