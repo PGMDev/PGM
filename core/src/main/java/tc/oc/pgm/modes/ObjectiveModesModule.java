@@ -74,7 +74,6 @@ public class ObjectiveModesModule implements MapModule {
         MaterialData material =
             XMLUtils.parseBlockMaterialData(Node.fromRequiredAttr(modeEl, "material"));
         Duration after = TextParser.parseDuration(modeEl.getAttributeValue("after"));
-        // default is not a dynamic filter so this causes issues
         Filter filter = factory.getFilters().parseFilterProperty(modeEl, "filter", null);
         String name = modeEl.getAttributeValue("name");
         if (name != null) {

@@ -14,7 +14,6 @@ import java.util.List;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.commons.lang.WordUtils;
-import org.bouncycastle.math.raw.Mod;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.CountdownContext;
@@ -22,7 +21,6 @@ import tc.oc.pgm.modes.ModeChangeCountdown;
 import tc.oc.pgm.modes.ModesPaginatedResult;
 import tc.oc.pgm.modes.ObjectiveModesMatchModule;
 import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.text.TextException;
 
 // TODO: make the output nicer
 public final class ModeCommand {
@@ -42,7 +40,9 @@ public final class ModeCommand {
         throwNoResults();
       } else {
         TextComponent.Builder builder =
-            text().append(translatable("command.nextMode", NamedTextColor.DARK_PURPLE).append(space()));
+            text()
+                .append(
+                    translatable("command.nextMode", NamedTextColor.DARK_PURPLE).append(space()));
 
         ModeChangeCountdown next = countdowns.get(0);
         Duration timeLeft = modes.getCountdown().getTimeLeft(next);
@@ -122,10 +122,11 @@ public final class ModeCommand {
   }
 
   @Command(
-          aliases = {"start"},
-          desc = "Starts an objective mode",
-          perms = Permissions.GAMEPLAY)
-  public void start(Audience audience, Match match, int modeNumber, Duration duration) throws CommandException {
+      aliases = {"start"},
+      desc = "Starts an objective mode",
+      perms = Permissions.GAMEPLAY)
+  public void start(Audience audience, Match match, int modeNumber, Duration duration)
+      throws CommandException {
     ObjectiveModesMatchModule modes = getModes(match);
 
     if (!match.isRunning()) {
@@ -150,7 +151,9 @@ public final class ModeCommand {
     countdowns.start(selectedMode, duration);
 
     TextComponent.Builder builder =
-            text().append(translatable("command.selectedModePushed", NamedTextColor.GOLD).append(space()));
+        text()
+            .append(
+                translatable("command.selectedModePushed", NamedTextColor.GOLD).append(space()));
     builder.append(clock(Math.abs(duration.getSeconds())).color(NamedTextColor.AQUA));
     audience.sendMessage(builder);
   }
@@ -175,6 +178,7 @@ public final class ModeCommand {
   private static void throwMatchNotStarted() {
     throw exception("command.matchNotStarted");
   }
+
   private static void throwInvalidNumber(String invalidNumber) {
     throw exception("command.invalidNumber", text(invalidNumber));
   }
