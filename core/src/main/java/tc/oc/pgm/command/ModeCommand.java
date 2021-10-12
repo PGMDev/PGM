@@ -80,7 +80,7 @@ public final class ModeCommand {
 
   @Command(
       aliases = {"push"},
-      desc = "Reschedule all unconditional objective modes",
+      desc = "Reschedule all objective modes with active countdowns",
       perms = Permissions.GAMEPLAY)
   public void push(Audience audience, Match match, Duration duration) {
     ObjectiveModesMatchModule modes = getModes(match);
@@ -150,10 +150,19 @@ public final class ModeCommand {
     countdowns.cancel(selectedMode);
     countdowns.start(selectedMode, duration);
 
+    String modeName;
+    if (selectedMode.getMode().getName() != null) {
+      modeName = selectedMode.getMode().getName();
+    } else {
+      modeName = selectedMode.getMode().getPreformattedMaterialName();
+    }
+
     TextComponent.Builder builder =
         text()
             .append(
-                translatable("command.selectedModePushed", NamedTextColor.GOLD).append(space()));
+                translatable("command.selectedModePushed", text(modeName))
+                    .color(NamedTextColor.GOLD)
+                    .append(space()));
     builder.append(clock(Math.abs(duration.getSeconds())).color(NamedTextColor.AQUA));
     audience.sendMessage(builder);
   }
