@@ -1333,4 +1333,18 @@ public interface NMSHacks {
     setFireworksTicksFlown(firework, 2);
     sendEntityMetadataToViewers(firework, false);
   }
+
+  static boolean isCraftItemArrowEntity(org.bukkit.entity.Item item) {
+    return ((CraftItem) item).getHandle() instanceof EntityArrow;
+  }
+
+  static void fakePlayerItemPickup(Player player, org.bukkit.entity.Item item) {
+    float pitch = (((float) (Math.random() - Math.random()) * 0.7F + 1.0F) * 2.0F);
+    item.getWorld().playSound(item.getLocation(), org.bukkit.Sound.ITEM_PICKUP, 0.2F, pitch);
+
+    NMSHacks.sendPacketToViewers(
+        item, new PacketPlayOutCollect(item.getEntityId(), player.getEntityId()));
+
+    item.remove();
+  }
 }

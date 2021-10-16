@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Logger;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
@@ -44,7 +45,8 @@ public class BlockDropsModule implements MapModule {
   public static class Factory implements MapModuleFactory<BlockDropsModule> {
     @Override
     public Collection<Class<? extends MapModule>> getWeakDependencies() {
-      return ImmutableList.of(KitModule.class, RegionModule.class, FilterModule.class);
+      return ImmutableList.of(
+          KitModule.class, RegionModule.class, FilterModule.class, ItemModifyModule.class);
     }
 
     @Override
@@ -53,6 +55,8 @@ public class BlockDropsModule implements MapModule {
       List<BlockDropsRule> rules = new ArrayList<>();
       FilterParser filterParser = factory.getFilters();
       RegionParser regionParser = factory.getRegions();
+      final Optional<ItemModifyModule> itemModifier =
+          Optional.ofNullable(factory.getModule(ItemModifyModule.class));
 
       for (Element elRule :
           XMLUtils.flattenElements(
@@ -85,9 +89,10 @@ public class BlockDropsModule implements MapModule {
         Map<ItemStack, Double> items = new LinkedHashMap<>();
         for (Element elDrops : elRule.getChildren("drops")) {
           for (Element elItem : elDrops.getChildren("item")) {
+            final ItemStack itemStack = factory.getKits().parseItem(elItem, false);
+            itemModifier.ifPresent(imm -> imm.applyRules(itemStack));
             items.put(
-                factory.getKits().parseItem(elItem, false),
-                XMLUtils.parseNumber(elItem.getAttribute("chance"), Double.class, 1d));
+                itemStack, XMLUtils.parseNumber(elItem.getAttribute("chance"), Double.class, 1d));
           }
         }
 
