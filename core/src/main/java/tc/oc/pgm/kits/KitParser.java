@@ -422,6 +422,11 @@ public abstract class KitParser {
       throw new InvalidXMLException("Invalid item/block", el);
     }
 
+    if (XMLUtils.parseBoolean(el.getAttribute("infinite"), false)
+        && !itemStack.getType().isBlock()) {
+      throw new InvalidXMLException("infinite attribute must use a block material", el);
+    }
+
     ItemMeta meta = itemStack.getItemMeta();
     if (meta != null) { // This happens if the item is "air"
       parseItemMeta(el, meta);
