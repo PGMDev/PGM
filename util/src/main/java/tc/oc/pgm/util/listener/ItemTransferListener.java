@@ -22,7 +22,7 @@ public class ItemTransferListener implements Listener {
   private boolean ignoreNextDropEvent;
   private boolean collectToCursor;
 
-  @EventHandler
+  @EventHandler(ignoreCancelled = true)
   public void onPlayerPickupItem(final PlayerPickupItemEvent event) {
     // When this event is fired, the ItemStack in the Item being picked up is temporarily
     // set to the amount that will actually be picked up, while the difference from the
@@ -47,7 +47,7 @@ public class ItemTransferListener implements Listener {
 
     int quantity = Math.min(transferEvent.getQuantity(), initialQuantity);
 
-    if (!event.isCancelled() && quantity < initialQuantity) {
+    if (quantity < initialQuantity) {
       event.setCancelled(true);
       if (quantity > 0) {
         ItemStack stack = event.getItem().getItemStack().clone();

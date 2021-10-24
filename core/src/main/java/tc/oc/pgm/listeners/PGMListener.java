@@ -240,7 +240,7 @@ public class PGMListener implements Listener {
   }
 
   // fix item pickup to work the way it should
-  @EventHandler(priority = EventPriority.HIGHEST)
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void handleItemPickup(final PlayerPickupItemEvent event) {
     Player nearestPlayer = event.getPlayer();
     double closestDistance =

@@ -48,7 +48,7 @@ public class FireworkMatchModule implements MatchModule, Listener {
   private static final int ROCKET_COUNT = 5; // Maximum rockets to launch at once, one per player
   private static final int INITIAL_DELAY = 2; // Seconds before starting to launch rockets
   private static final int FREQUENCY = 2; // Seconds between rocket launches
-  private static final int ITERATION_COUNT = 15; // Amount of times rockets are launched
+  private static final int ITERATION_COUNT = 5; // Amount of times rockets are launched
   private static final int ROCKET_POWER =
       2; // Power applied to rockets (how high they go), 1 = low, 2 = medium, 3 = high
 
