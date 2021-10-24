@@ -496,6 +496,13 @@ public abstract class KitParser {
       meta.spigot().setUnbreakable(true);
     }
 
+    if (XMLUtils.parseBoolean(el.getAttribute("infinite"), false)) {
+      // infinity character ∞ does not display nicely in game
+      List<String> lore =
+          ImmutableList.copyOf(Splitter.on("|").split(BukkitUtils.colorize("Infinite ∞")));
+      meta.setLore(lore);
+    }
+
     Element elCanDestroy = el.getChild("can-destroy");
     if (elCanDestroy != null) {
       NMSHacks.setCanDestroy(meta, XMLUtils.parseMaterialMatcher(elCanDestroy).getMaterials());

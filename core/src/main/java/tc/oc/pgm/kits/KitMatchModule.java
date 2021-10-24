@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -170,6 +171,13 @@ public class KitMatchModule implements MatchModule, Listener {
     if (event.getReason() == ItemTransferEvent.Reason.PLACE
         && ItemTags.PREVENT_SHARING.has(event.getItem())) {
       event.setCancelled(true);
+    }
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void checkInfiniteBlocks(BlockPlaceEvent event) {
+    if (event.getPlayer().getItemInHand().getLore().contains("Infinite ∞")) {
+      event.getPlayer().setItemInHand(event.getPlayer().getItemInHand());
     }
   }
 }
