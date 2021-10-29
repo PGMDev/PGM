@@ -50,7 +50,14 @@ public class ObjectiveModesMatchModule implements MatchModule, Listener {
       ModeChangeCountdown countdown = new ModeChangeCountdown(match, this, mode);
       this.countdowns.add(countdown);
       if (mode.getFilter() != null) {
-        mode.load(fmm, countdown, this.countdownContext);
+        // if filter returns ALLOW at any time in the match, start countdown for mode change
+        fmm.onRise(
+            mode.getFilter(),
+            listener -> {
+              if (!this.countdownContext.isRunning(countdown) && match.isRunning()) {
+                this.countdownContext.start(countdown, countdown.getMode().getAfter());
+              }
+            });
       }
     }
   }

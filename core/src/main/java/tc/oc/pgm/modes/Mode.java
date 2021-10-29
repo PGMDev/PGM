@@ -8,9 +8,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.material.MaterialData;
 import tc.oc.pgm.api.filter.Filter;
-import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
-import tc.oc.pgm.filters.dynamic.FilterMatchModule;
 
 public class Mode extends SelfIdentifyingFeatureDefinition {
   private final MaterialData material;
@@ -39,18 +37,6 @@ public class Mode extends SelfIdentifyingFeatureDefinition {
     this.componentName =
         text(name != null ? name : getPreformattedMaterialName(), NamedTextColor.RED);
     this.showBefore = showBefore;
-  }
-
-  public void load(
-      FilterMatchModule fmm, ModeChangeCountdown countdown, CountdownContext countdownContext) {
-    // if filter returns ALLOW at any time in the match, start countdown for mode change
-    fmm.onRise(
-        filter,
-        listener -> {
-          if (!countdownContext.isRunning(countdown)) {
-            countdownContext.start(countdown, countdown.getMode().getAfter());
-          }
-        });
   }
 
   public MaterialData getMaterialData() {
