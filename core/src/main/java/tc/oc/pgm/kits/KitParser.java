@@ -33,7 +33,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.metadata.Metadatable;
 import org.bukkit.potion.PotionEffect;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
@@ -41,7 +40,6 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.doublejump.DoubleJumpKit;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.kits.tag.Grenade;
-import tc.oc.pgm.kits.tag.Infinite;
 import tc.oc.pgm.kits.tag.ItemTags;
 import tc.oc.pgm.projectile.ProjectileDefinition;
 import tc.oc.pgm.shield.ShieldKit;
@@ -50,7 +48,6 @@ import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.inventory.tag.ItemTag;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -551,7 +548,6 @@ public abstract class KitParser {
     }
 
     if (XMLUtils.parseBoolean(el.getAttribute("prevent-sharing"), false)) {
-      //something based
       ItemTags.PREVENT_SHARING.set(itemStack, true);
     }
 
