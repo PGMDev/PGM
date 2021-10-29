@@ -417,7 +417,7 @@ public abstract class KitParser {
     String amountString = el.getAttributeValue("amount");
     if (amountString != null && amountString.equals("oo")) {
       // blocks with -1 items cannot be dropped, stacked or dragged/split
-      amount = 100;
+      amount = -1;
     } else {
       amount = XMLUtils.parseNumber(el.getAttribute("amount"), Integer.class, 1);
     }

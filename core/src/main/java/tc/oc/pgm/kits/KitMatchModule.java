@@ -178,6 +178,8 @@ public class KitMatchModule implements MatchModule, Listener {
   public void checkInfiniteBlocks(BlockPlaceEvent event) {
     if (ItemTags.INFINITE.get(event.getPlayer().getItemInHand()) != null) {
       ItemStack blockPlacedItem = new ItemStack(event.getBlockPlaced().getType());
+      // infinite block contains -1 items, giving -1 items sets the amount back to -1
+      blockPlacedItem.setAmount(-1);
       ItemTags.INFINITE.set(blockPlacedItem, true);
       event.getPlayer().setItemInHand(blockPlacedItem);
     }
