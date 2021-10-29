@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.text;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -26,8 +27,10 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerResetEvent;
 import tc.oc.pgm.kits.tag.Grenade;
+import tc.oc.pgm.kits.tag.Infinite;
 import tc.oc.pgm.kits.tag.ItemTags;
 import tc.oc.pgm.util.event.ItemTransferEvent;
+import tc.oc.pgm.util.inventory.tag.ItemTag;
 
 @ListenerScope(MatchScope.RUNNING)
 public class KitMatchModule implements MatchModule, Listener {
@@ -176,8 +179,10 @@ public class KitMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void checkInfiniteBlocks(BlockPlaceEvent event) {
-    if (event.getPlayer().getItemInHand().getLore().contains("Infinite ∞")) {
-      event.getPlayer().setItemInHand(event.getPlayer().getItemInHand());
+    if (ItemTags.INFINITE.get(event.getPlayer().getItemInHand()) != null) {
+      ItemStack blockPlacedItem = new ItemStack(event.getBlockPlaced().getType());
+      ItemTags.INFINITE.set(blockPlacedItem, true);
+      event.getPlayer().setItemInHand(blockPlacedItem);
     }
   }
 }

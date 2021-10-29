@@ -33,6 +33,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.metadata.Metadatable;
 import org.bukkit.potion.PotionEffect;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
@@ -40,6 +41,7 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.doublejump.DoubleJumpKit;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.kits.tag.Grenade;
+import tc.oc.pgm.kits.tag.Infinite;
 import tc.oc.pgm.kits.tag.ItemTags;
 import tc.oc.pgm.projectile.ProjectileDefinition;
 import tc.oc.pgm.shield.ShieldKit;
@@ -48,6 +50,7 @@ import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.inventory.tag.ItemTag;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -413,7 +416,14 @@ public abstract class KitParser {
   }
 
   public ItemStack parseItem(Element el, Material type, short damage) throws InvalidXMLException {
-    int amount = XMLUtils.parseNumber(el.getAttribute("amount"), Integer.class, 1);
+    int amount;
+    String amountString = el.getAttributeValue("amount");
+    if (amountString != null && amountString.equals("oo")) {
+      // blocks with -1 items cannot be dropped, stacked or dragged/split
+      amount = 100;
+    } else {
+      amount = XMLUtils.parseNumber(el.getAttribute("amount"), Integer.class, 1);
+    }
 
     // must be CraftItemStack to keep track of NBT data
     ItemStack itemStack = NMSHacks.craftItemCopy(new ItemStack(type, amount, damage));
@@ -422,12 +432,12 @@ public abstract class KitParser {
       throw new InvalidXMLException("Invalid item/block", el);
     }
 
-    if (XMLUtils.parseBoolean(el.getAttribute("infinite"), false)
-        && !itemStack.getType().isBlock()) {
-      throw new InvalidXMLException("infinite attribute must use a block material", el);
+    if (amountString != null && amountString.equals("oo") && !itemStack.getType().isBlock()) {
+      throw new InvalidXMLException("infinity can only be applied to a block material", el);
     }
 
     ItemMeta meta = itemStack.getItemMeta();
+
     if (meta != null) { // This happens if the item is "air"
       parseItemMeta(el, meta);
       itemStack.setItemMeta(meta);
@@ -501,13 +511,6 @@ public abstract class KitParser {
       meta.spigot().setUnbreakable(true);
     }
 
-    if (XMLUtils.parseBoolean(el.getAttribute("infinite"), false)) {
-      // infinity character ∞ does not display nicely in game
-      List<String> lore =
-          ImmutableList.copyOf(Splitter.on("|").split(BukkitUtils.colorize("Infinite ∞")));
-      meta.setLore(lore);
-    }
-
     Element elCanDestroy = el.getChild("can-destroy");
     if (elCanDestroy != null) {
       NMSHacks.setCanDestroy(meta, XMLUtils.parseMaterialMatcher(elCanDestroy).getMaterials());
@@ -548,7 +551,12 @@ public abstract class KitParser {
     }
 
     if (XMLUtils.parseBoolean(el.getAttribute("prevent-sharing"), false)) {
+      //something based
       ItemTags.PREVENT_SHARING.set(itemStack, true);
+    }
+
+    if (el.getAttributeValue("amount") != null && el.getAttributeValue("amount").equals("oo")) {
+      ItemTags.INFINITE.set(itemStack, true);
     }
 
     Node projectileNode = Node.fromAttr(el, "projectile");
