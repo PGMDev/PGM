@@ -429,7 +429,7 @@ public abstract class KitParser {
       throw new InvalidXMLException("Invalid item/block", el);
     }
 
-    if (amountString != null && amountString.equals("oo") && !itemStack.getType().isBlock()) {
+    if (amount == -1 && !itemStack.getType().isBlock()) {
       throw new InvalidXMLException("infinity can only be applied to a block material", el);
     }
 
@@ -551,7 +551,7 @@ public abstract class KitParser {
       ItemTags.PREVENT_SHARING.set(itemStack, true);
     }
 
-    if (el.getAttributeValue("amount") != null && el.getAttributeValue("amount").equals("oo")) {
+    if (itemStack.getAmount() == -1) {
       ItemTags.INFINITE.set(itemStack, true);
     }
 
