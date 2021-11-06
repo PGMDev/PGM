@@ -413,14 +413,10 @@ public abstract class KitParser {
   }
 
   public ItemStack parseItem(Element el, Material type, short damage) throws InvalidXMLException {
-    int amount;
-    String amountString = el.getAttributeValue("amount");
-    if (amountString != null && amountString.equals("oo")) {
-      // blocks with -1 items cannot be dropped, stacked or dragged/split
-      amount = -1;
-    } else {
-      amount = XMLUtils.parseNumber(el.getAttribute("amount"), Integer.class, 1);
-    }
+    int amount = XMLUtils.parseNumber(Node.fromAttr(el, "amount"), Integer.class, true, 1);
+
+    // amount returns max value of integer if "oo" is given as amount
+    if (amount == Integer.MAX_VALUE) amount = -1;
 
     // must be CraftItemStack to keep track of NBT data
     ItemStack itemStack = NMSHacks.craftItemCopy(new ItemStack(type, amount, damage));
