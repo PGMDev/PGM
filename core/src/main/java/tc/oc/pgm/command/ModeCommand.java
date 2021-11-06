@@ -110,12 +110,13 @@ public final class ModeCommand {
     TextComponent.Builder builder =
         text().append(translatable("command.modesPushed", NamedTextColor.GOLD).append(space()));
     if (duration.isNegative()) {
-      builder.append(translatable("command.backwards", NamedTextColor.GOLD).append(space()));
+      builder.append(translatable("command.modesPushedBack", NamedTextColor.GOLD).append(space()));
     } else {
-      builder.append(translatable("command.forwards", NamedTextColor.GOLD).append(space()));
+      builder.append(
+          translatable("command.modesPushedForwards", NamedTextColor.GOLD).append(space()));
     }
 
-    builder.append(translatable("command.by", NamedTextColor.GOLD).append(space()));
+    builder.append(translatable("command.modesPushedBy", NamedTextColor.GOLD).append(space()));
     builder.append(clock(Math.abs(duration.getSeconds())).color(NamedTextColor.AQUA));
 
     audience.sendMessage(builder);
