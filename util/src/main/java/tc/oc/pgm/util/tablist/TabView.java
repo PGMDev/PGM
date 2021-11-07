@@ -74,7 +74,7 @@ public class TabView {
     if (this.manager != null) disable();
     this.manager = manager;
 
-    if (ViaUtils.getProtocolVersion(viewer) < ViaUtils.VERSION_1_8)
+    if (ViaUtils.getProtocolVersion(viewer) <= ViaUtils.VERSION_1_7)
       this.display = new TabDisplay(viewer, WIDTH);
 
     this.setup();
