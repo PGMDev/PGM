@@ -17,6 +17,9 @@ import tc.oc.pgm.util.PrettyPaginatedResult;
 public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountdown> {
 
   private final ObjectiveModesMatchModule modes;
+  public static final TextComponent SYMBOL_INCOMPLETE =
+      text("\u2715", NamedTextColor.DARK_RED); // ✕
+  public static final TextComponent SYMBOL_COMPLETE = text("\u2714", NamedTextColor.GREEN); // ✔
 
   public ModesPaginatedResult(ObjectiveModesMatchModule modes) {
     // TODO translate this
@@ -37,18 +40,18 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
     builder.append(text(materialName + " - ", NamedTextColor.LIGHT_PURPLE));
     builder.append(clock(timeFromStart).color(NamedTextColor.AQUA));
     if (!isRunning && countdown.getMode().getFilter() != null) {
-      builder.append(space()).append(translatable("misc.crossmark", NamedTextColor.DARK_RED));
+      builder.append(space()).append(SYMBOL_INCOMPLETE);
     }
 
     if (isRunning && remainingTime != null) {
       if (countdown.getMode().getFilter() != null) {
-        builder.append(space()).append(translatable("misc.checkmark", NamedTextColor.GREEN));
+        builder.append(space()).append(SYMBOL_COMPLETE);
       }
       builder.append(text(" (", NamedTextColor.DARK_AQUA));
       builder.append(this.formatSingleCountdown(countdown).color(NamedTextColor.DARK_AQUA));
       builder.append(text(")", NamedTextColor.DARK_AQUA));
     } else if (isRunning) {
-      builder.append(space()).append(translatable("misc.crossmark", NamedTextColor.DARK_RED));
+      builder.append(space()).append(SYMBOL_INCOMPLETE);
       builder.append(text(" (", NamedTextColor.DARK_AQUA));
       builder.append(translatable("command.conditionUnmet", NamedTextColor.DARK_AQUA));
       builder.append(text(")", NamedTextColor.DARK_AQUA));
