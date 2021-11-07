@@ -62,7 +62,7 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
 
   /**
    * Formats a {@link tc.oc.pgm.modes.ModeChangeCountdown} to the following format 'm:ss' and
-   * appends 'left' to the text //TODO make translatable
+   * appends 'left' to the text
    *
    * @param countdown to format
    * @return Formatted text
@@ -71,7 +71,7 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
     Duration currentTimeLeft = modes.getCountdown().getTimeLeft(countdown);
 
     if (countdown.getMatch().isRunning() && currentTimeLeft != null) {
-      return clock(currentTimeLeft).append(text(" left"));
+      return clock(currentTimeLeft).append(space().append(translatable("command.timeLeft")));
     }
 
     return text();
