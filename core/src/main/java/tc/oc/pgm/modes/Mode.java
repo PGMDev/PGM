@@ -13,7 +13,7 @@ import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 public class Mode extends SelfIdentifyingFeatureDefinition {
   private final MaterialData material;
   private final Duration after;
-  private final Filter filter;
+  private final @Nullable Filter filter;
   private final @Nullable String name;
   private final Component componentName;
   private final Duration showBefore;
@@ -26,7 +26,7 @@ public class Mode extends SelfIdentifyingFeatureDefinition {
       final @Nullable String id,
       final MaterialData material,
       final Duration after,
-      final Filter filter,
+      final @Nullable Filter filter,
       final @Nullable String name,
       Duration showBefore) {
     super(id);
@@ -59,7 +59,7 @@ public class Mode extends SelfIdentifyingFeatureDefinition {
     return this.showBefore;
   }
 
-  public Filter getFilter() {
+  public @Nullable Filter getFilter() {
     return this.filter;
   }
 
