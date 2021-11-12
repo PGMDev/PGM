@@ -75,12 +75,14 @@ public interface NMSHacks {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  static void sendPacketToViewers(
-      Entity entity, Object packet, boolean excludeIfViewerIsSpectator) {
+  static void sendPacketToViewers(Entity entity, Object packet) {
+    sendPacketToViewers(entity, packet, false);
+  }
+
+  static void sendPacketToViewers(Entity entity, Object packet, boolean excludeSpectators) {
     EntityTrackerEntry entry = getTrackerEntry(entity);
     for (EntityPlayer viewer : ((Set<EntityPlayer>) entry.trackedPlayers)) {
-      if (excludeIfViewerIsSpectator) {
+      if (excludeSpectators) {
         Entity spectatorTarget = viewer.getBukkitEntity().getSpectatorTarget();
         if (spectatorTarget != null && spectatorTarget.getUniqueId().equals(entity.getUniqueId()))
           continue;
