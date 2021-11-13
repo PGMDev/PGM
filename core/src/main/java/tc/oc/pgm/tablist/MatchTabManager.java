@@ -17,6 +17,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.NameDecorationChangeEvent;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.match.event.MatchResizeEvent;
 import tc.oc.pgm.api.match.event.MatchUnloadEvent;
 import tc.oc.pgm.api.party.event.PartyRenameEvent;
@@ -39,8 +40,14 @@ import tc.oc.pgm.util.tablist.TabManager;
 
 public class MatchTabManager extends TabManager implements Listener {
 
-  // Min and max delay to trigger an update after tablist is invalidated
-  private static final int MIN_DELAY = 100, MAX_DELAY = 2000, TIME_RATIO = 40;
+  // Min and max delay for an update after tab-list is invalidated
+  private static final int MIN_DELAY = 100, MAX_DELAY = 5000;
+  // How many MS must be waited for each MS spent rendering
+  private static final int TIME_RATIO = 40;
+  // How many MS must be waited for each TPS under 20 (last minute average)
+  private static final int TPS_RATIO = 1000;
+  // On match load, throttle tab-list until another match unloads, or this many MS pass.
+  private static final int MATCH_LOAD_TIMEOUT = 15_000;
 
   private final Map<Team, TeamTabEntry> teamEntries;
   private final Map<Match, MapTabEntry> mapEntries;
@@ -50,7 +57,7 @@ public class MatchTabManager extends TabManager implements Listener {
 
   private Future<?> pingUpdateTask;
   private Future<?> renderTask;
-  private long lastUpdate = 0, renderTime = 0;
+  private long lastUpdate = 0, renderTime = 0, loadingUntil = 0;
 
   public MatchTabManager(Plugin plugin) {
     this(
@@ -144,7 +151,13 @@ public class MatchTabManager extends TabManager implements Listener {
             renderTime = lastUpdate - start;
           };
 
-      long nextUpdate = lastUpdate - System.currentTimeMillis() + (renderTime * TIME_RATIO);
+      long now = System.currentTimeMillis();
+
+      long nextUpdate =
+          (lastUpdate - now)
+              + (renderTime * TIME_RATIO)
+              + (long) Math.max(0, (20 - Bukkit.getServer().spigot().getTPS()[0]) * TPS_RATIO)
+              + (loadingUntil > now ? MAX_DELAY : 0);
       nextUpdate = Math.min(Math.max(MIN_DELAY, nextUpdate), MAX_DELAY);
       this.renderTask = PGM.get().getExecutor().schedule(render, nextUpdate, TimeUnit.MILLISECONDS);
     }
@@ -203,7 +216,7 @@ public class MatchTabManager extends TabManager implements Listener {
   public void onJoin(PlayerJoinEvent event) {
     if (ViaUtils.isReady(event.getPlayer())) tryEnable(event.getPlayer());
     else {
-      // Player connection hasn't been setup yet, try next tick
+      // Player connection hasn't been set up yet, try next tick
       PGM.get()
           .getExecutor()
           .schedule(() -> tryEnable(event.getPlayer()), 50, TimeUnit.MILLISECONDS);
@@ -224,7 +237,13 @@ public class MatchTabManager extends TabManager implements Listener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onMatchLoad(MatchLoadEvent event) {
+    loadingUntil = System.currentTimeMillis() + MATCH_LOAD_TIMEOUT;
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onMatchUnload(MatchUnloadEvent event) {
+    loadingUntil = 0;
     TeamMatchModule tmm = event.getMatch().getModule(TeamMatchModule.class);
     if (tmm != null) {
       for (Team team : tmm.getTeams()) {
