@@ -1,5 +1,6 @@
 package tc.oc.pgm.api.player;
 
+import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import org.bukkit.GameMode;
@@ -249,6 +250,21 @@ public interface MatchPlayer
 
   @Override
   PlayerInventory getInventory();
+
+  /**
+   * Get the current spectator target of the {@link MatchPlayer} if any
+   *
+   * @return the current spectator target if any
+   */
+  @Nullable
+  MatchPlayer getSpectatorTarget();
+
+  /**
+   * Get the players currently spectating the {@link MatchPlayer}, if any
+   *
+   * @return the players currently spectating, if any
+   */
+  List<MatchPlayer> getSpectators();
 
   @Deprecated
   void internalSetParty(Party party);

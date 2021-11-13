@@ -23,7 +23,7 @@ public class DeathMessageMatchModule implements MatchModule, Listener {
   private final Logger logger;
 
   public DeathMessageMatchModule(Match match) {
-    logger = match.getLogger();
+    this.logger = match.getLogger();
   }
 
   @EventHandler(priority = EventPriority.LOWEST)
@@ -41,14 +41,14 @@ public class DeathMessageMatchModule implements MatchModule, Listener {
     for (MatchPlayer viewer : event.getMatch().getPlayers()) {
       switch (viewer.getSettings().getValue(SettingKey.DEATH)) {
         case DEATH_OWN:
-          if (event.isInvolved(viewer)) {
+          if (event.isInvolved(viewer) || event.isInvolved(viewer.getSpectatorTarget())) {
             viewer.sendMessage(message);
           } else if (event.isTeamKill() && viewer.getBukkit().hasPermission(Permissions.STAFF)) {
             viewer.sendMessage(message.decoration(TextDecoration.ITALIC, true));
           }
           break;
         case DEATH_ALL:
-          if (event.isInvolved(viewer)) {
+          if (event.isInvolved(viewer) || event.isInvolved(viewer.getSpectatorTarget())) {
             viewer.sendMessage(message.decoration(TextDecoration.BOLD, true));
           } else {
             viewer.sendMessage(message);

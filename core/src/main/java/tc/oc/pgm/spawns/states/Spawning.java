@@ -100,22 +100,26 @@ public abstract class Spawning extends Participating {
   public void sendMessage() {}
 
   public void updateTitle() {
-    player.showTitle(
-        title(
-            getTitle(),
-            getSubtitle().color(NamedTextColor.GREEN),
-            Title.Times.of(Duration.ZERO, fromTicks(3), fromTicks(3))));
+    Title.Times times = Title.Times.of(Duration.ZERO, fromTicks(3), fromTicks(3));
+
+    player.showTitle(title(getTitle(false), getSubtitle(false), times));
+
+    Title spectatorTitle = title(getTitle(true), getSubtitle(true), times);
+    player.getSpectators().forEach(p -> p.showTitle(spectatorTitle));
   }
 
-  protected abstract Component getTitle();
+  protected abstract Component getTitle(boolean spectator);
 
-  protected Component getSubtitle() {
+  protected Component getSubtitle(boolean spectator) {
     if (!spawnRequested) {
-      return translatable("death.respawn.unconfirmed");
+      return translatable(
+          "death.respawn.unconfirmed" + (spectator ? ".spectator" : ""), NamedTextColor.GREEN);
     } else if (options.message != null) {
       return options.message;
     } else {
-      return translatable("death.respawn.confirmed.waiting");
+      return translatable(
+          "death.respawn.confirmed.waiting" + (spectator ? ".spectator" : ""),
+          NamedTextColor.GREEN);
     }
   }
 }

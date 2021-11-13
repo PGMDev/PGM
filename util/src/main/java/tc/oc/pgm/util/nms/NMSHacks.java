@@ -75,10 +75,18 @@ public interface NMSHacks {
     }
   }
 
-  @SuppressWarnings("unchecked")
   static void sendPacketToViewers(Entity entity, Object packet) {
+    sendPacketToViewers(entity, packet, false);
+  }
+
+  static void sendPacketToViewers(Entity entity, Object packet, boolean excludeSpectators) {
     EntityTrackerEntry entry = getTrackerEntry(entity);
     for (EntityPlayer viewer : ((Set<EntityPlayer>) entry.trackedPlayers)) {
+      if (excludeSpectators) {
+        Entity spectatorTarget = viewer.getBukkitEntity().getSpectatorTarget();
+        if (spectatorTarget != null && spectatorTarget.getUniqueId().equals(entity.getUniqueId()))
+          continue;
+      }
       viewer.playerConnection.sendPacket((Packet) packet);
     }
   }
@@ -821,9 +829,9 @@ public interface NMSHacks {
 
     Packet<?> teleport = teleportEntityPacket(player.getEntityId(), location);
 
-    sendPacketToViewers(player, metadata);
-    sendPacketToViewers(player, useBed);
-    sendPacketToViewers(player, teleport);
+    sendPacketToViewers(player, metadata, true);
+    sendPacketToViewers(player, useBed, true);
+    sendPacketToViewers(player, teleport, true);
   }
 
   static org.bukkit.enchantments.Enchantment getEnchantment(String key) {
