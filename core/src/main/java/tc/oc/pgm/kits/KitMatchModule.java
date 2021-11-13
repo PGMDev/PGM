@@ -4,6 +4,7 @@ import static net.kyori.adventure.text.Component.text;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
+import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -21,9 +22,11 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerResetEvent;
+import tc.oc.pgm.filters.dynamic.FilterMatchModule;
 import tc.oc.pgm.kits.tag.Grenade;
 import tc.oc.pgm.kits.tag.ItemTags;
 import tc.oc.pgm.util.event.ItemTransferEvent;
@@ -32,10 +35,43 @@ import tc.oc.pgm.util.event.ItemTransferEvent;
 public class KitMatchModule implements MatchModule, Listener {
 
   private final Match match;
+  private final Set<KitRule> kitRules;
   private final SetMultimap<MatchPlayer, ArmorType> lockedArmorSlots = HashMultimap.create();
 
-  public KitMatchModule(Match match) {
+  public KitMatchModule(Match match, Set<KitRule> kitRules) {
     this.match = match;
+    this.kitRules = kitRules;
+  }
+
+  @Override
+  public void load() throws ModuleLoadException {
+    FilterMatchModule fmm = match.needModule(FilterMatchModule.class);
+
+    for (KitRule kitRule : kitRules) {
+      switch (kitRule.getAction()) {
+        case GIVE:
+          fmm.onRise(
+              MatchPlayer.class,
+              kitRule.getFilter(),
+              player -> player.applyKit(kitRule.getKit(), true));
+          break;
+        case TAKE:
+          fmm.onRise(MatchPlayer.class, kitRule.getFilter(), kitRule.getKit()::remove);
+          break;
+        case LEND:
+          fmm.onChange(
+              MatchPlayer.class,
+              kitRule.getFilter(),
+              (player, response) -> {
+                if (response) {
+                  player.applyKit(kitRule.getKit(), true);
+                } else {
+                  kitRule.getKit().remove(player);
+                }
+              });
+          break;
+      }
+    }
   }
 
   @Override
