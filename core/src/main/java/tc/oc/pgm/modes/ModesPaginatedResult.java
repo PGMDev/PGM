@@ -1,6 +1,8 @@
 package tc.oc.pgm.modes;
 
+import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TemporalComponent.clock;
 
 import com.google.common.base.Preconditions;
@@ -15,8 +17,12 @@ import tc.oc.pgm.util.PrettyPaginatedResult;
 public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountdown> {
 
   private final ObjectiveModesMatchModule modes;
+  public static final TextComponent SYMBOL_INCOMPLETE =
+      text("\u2715", NamedTextColor.DARK_RED); // ✕
+  public static final TextComponent SYMBOL_COMPLETE = text("\u2714", NamedTextColor.GREEN); // ✔
 
   public ModesPaginatedResult(ObjectiveModesMatchModule modes) {
+    // TODO translate this
     super("Monument Modes");
     this.modes = Preconditions.checkNotNull(modes);
   }
@@ -25,16 +31,29 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
   public Component format(ModeChangeCountdown countdown, int index) {
     String materialName = countdown.getMode().getPreformattedMaterialName();
     Duration timeFromStart = countdown.getMode().getAfter();
+    Duration remainingTime = countdown.getRemaining();
+    boolean isRunning = countdown.getMatch().isRunning();
 
     TextComponent.Builder builder = text();
 
     builder.append(text((index + 1) + ". ", NamedTextColor.GOLD));
     builder.append(text(materialName + " - ", NamedTextColor.LIGHT_PURPLE));
     builder.append(clock(timeFromStart).color(NamedTextColor.AQUA));
+    if (!isRunning && countdown.getMode().getFilter() != null) {
+      builder.append(space()).append(SYMBOL_INCOMPLETE);
+    }
 
-    if (countdown.getMatch().isRunning()) {
+    if (isRunning && remainingTime != null) {
+      if (countdown.getMode().getFilter() != null) {
+        builder.append(space()).append(SYMBOL_COMPLETE);
+      }
       builder.append(text(" (", NamedTextColor.DARK_AQUA));
       builder.append(this.formatSingleCountdown(countdown).color(NamedTextColor.DARK_AQUA));
+      builder.append(text(")", NamedTextColor.DARK_AQUA));
+    } else if (isRunning) {
+      builder.append(space()).append(SYMBOL_INCOMPLETE);
+      builder.append(text(" (", NamedTextColor.DARK_AQUA));
+      builder.append(translatable("command.conditionUnmet", NamedTextColor.DARK_AQUA));
       builder.append(text(")", NamedTextColor.DARK_AQUA));
     }
 
@@ -43,7 +62,7 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
 
   /**
    * Formats a {@link tc.oc.pgm.modes.ModeChangeCountdown} to the following format 'm:ss' and
-   * appends 'left' to the text //TODO make translatable
+   * appends 'left' to the text
    *
    * @param countdown to format
    * @return Formatted text
@@ -51,8 +70,8 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
   public TextComponent.Builder formatSingleCountdown(ModeChangeCountdown countdown) {
     Duration currentTimeLeft = modes.getCountdown().getTimeLeft(countdown);
 
-    if (countdown.getMatch().isRunning()) {
-      return clock(currentTimeLeft).append(text(" left"));
+    if (countdown.getMatch().isRunning() && currentTimeLeft != null) {
+      return clock(currentTimeLeft).append(space().append(translatable("command.timeLeft")));
     }
 
     return text();

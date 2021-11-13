@@ -16,11 +16,17 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.countdowns.CountdownContext;
+import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.filters.dynamic.FilterMatchModule;
 
-public class ObjectiveModesMatchModule implements MatchModule {
+@ListenerScope(MatchScope.LOADED)
+public class ObjectiveModesMatchModule implements MatchModule, Listener {
 
   private static final Sound SOUND =
       sound(key("mob.zombie.remedy"), Sound.Source.MASTER, 0.15f, 1.2f);
@@ -38,17 +44,30 @@ public class ObjectiveModesMatchModule implements MatchModule {
   }
 
   @Override
-  public void load() {
+  public void load() throws ModuleLoadException {
+    FilterMatchModule fmm = match.needModule(FilterMatchModule.class);
     for (Mode mode : this.modes) {
       ModeChangeCountdown countdown = new ModeChangeCountdown(match, this, mode);
       this.countdowns.add(countdown);
+      if (mode.getFilter() != null) {
+        // if filter returns ALLOW at any time in the match, start countdown for mode change
+        fmm.onRise(
+            mode.getFilter(),
+            listener -> {
+              if (!this.countdownContext.isRunning(countdown) && match.isRunning()) {
+                this.countdownContext.start(countdown, countdown.getMode().getAfter());
+              }
+            });
+      }
     }
   }
 
   @Override
   public void enable() {
     for (ModeChangeCountdown countdown : this.countdowns) {
-      this.countdownContext.start(countdown, countdown.getMode().getAfter());
+      if (countdown.getMode().getFilter() == null) {
+        this.countdownContext.start(countdown, countdown.getMode().getAfter());
+      }
     }
   }
 
@@ -69,9 +88,20 @@ public class ObjectiveModesMatchModule implements MatchModule {
         .build();
   }
 
-  public List<ModeChangeCountdown> getSortedCountdowns() {
+  public List<ModeChangeCountdown> getSortedCountdowns(boolean includeUnstarted) {
     List<ModeChangeCountdown> listClone = new ArrayList<>(this.countdowns);
+    List<ModeChangeCountdown> unstartedCountdowns = new ArrayList<>();
+    // places countdowns triggered by filter at the bottom of list
+    for (ModeChangeCountdown listCloneItem : listClone) {
+      if (listCloneItem.getRemaining() == null) {
+        unstartedCountdowns.add(listCloneItem);
+        listClone.remove(listCloneItem);
+      }
+    }
     Collections.sort(listClone);
+    if (includeUnstarted) {
+      listClone.addAll(unstartedCountdowns);
+    }
 
     return listClone;
   }

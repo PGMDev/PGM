@@ -2,6 +2,7 @@ package tc.oc.pgm.command;
 
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TemporalComponent.clock;
 import static tc.oc.pgm.util.text.TextException.exception;
 
@@ -21,7 +22,7 @@ import tc.oc.pgm.modes.ModesPaginatedResult;
 import tc.oc.pgm.modes.ObjectiveModesMatchModule;
 import tc.oc.pgm.util.Audience;
 
-// TODO: make the output nicer and translate
+// TODO: make the output nicer
 public final class ModeCommand {
 
   @Command(
@@ -39,7 +40,9 @@ public final class ModeCommand {
         throwNoResults();
       } else {
         TextComponent.Builder builder =
-            text().append(text("Next Mode: ", NamedTextColor.DARK_PURPLE));
+            text()
+                .append(
+                    translatable("command.nextMode", NamedTextColor.DARK_PURPLE).append(space()));
 
         ModeChangeCountdown next = countdowns.get(0);
         Duration timeLeft = modes.getCountdown().getTimeLeft(next);
@@ -69,7 +72,7 @@ public final class ModeCommand {
 
   @Command(
       aliases = {"list", "page"},
-      desc = "List all objectivs modes",
+      desc = "List all objective modes",
       usage = "[page]")
   public void list(Audience audience, Match match, @Default("1") int page) throws CommandException {
     showList(page, audience, getModes(match));
@@ -77,20 +80,25 @@ public final class ModeCommand {
 
   @Command(
       aliases = {"push"},
-      desc = "Reschedule an objective mode",
+      desc = "Reschedule all objective modes with active countdowns",
       perms = Permissions.GAMEPLAY)
   public void push(Audience audience, Match match, Duration duration) {
     ObjectiveModesMatchModule modes = getModes(match);
+
+    if (!match.isRunning()) {
+      throwMatchNotStarted();
+    }
 
     if (modes == null) {
       throwNoResults();
     }
 
     CountdownContext countdowns = modes.getCountdown();
-    List<ModeChangeCountdown> sortedCountdowns = modes.getSortedCountdowns();
+    List<ModeChangeCountdown> sortedCountdowns = modes.getSortedCountdowns(false);
 
     for (ModeChangeCountdown countdown : sortedCountdowns) {
-      if (countdowns.getTimeLeft(countdown).getSeconds() > 0) {
+      if (countdowns.getTimeLeft(countdown).getSeconds() > 0
+          && countdown.getMode().getFilter() == null) {
         Duration oldDelay = countdowns.getTimeLeft(countdown);
         Duration newDelay = oldDelay.plus(duration);
 
@@ -100,16 +108,63 @@ public final class ModeCommand {
     }
 
     TextComponent.Builder builder =
-        text().append(text("All modes have been pushed ", NamedTextColor.GOLD));
+        text().append(translatable("command.modesPushed", NamedTextColor.GOLD).append(space()));
     if (duration.isNegative()) {
-      builder.append(text("backwards ", NamedTextColor.GOLD));
+      builder.append(translatable("command.modesPushedBack", NamedTextColor.GOLD).append(space()));
     } else {
-      builder.append(text("forwards ", NamedTextColor.GOLD));
+      builder.append(
+          translatable("command.modesPushedForwards", NamedTextColor.GOLD).append(space()));
     }
 
-    builder.append(text("by ", NamedTextColor.GOLD));
+    builder.append(translatable("command.modesPushedBy", NamedTextColor.GOLD).append(space()));
     builder.append(clock(Math.abs(duration.getSeconds())).color(NamedTextColor.AQUA));
 
+    audience.sendMessage(builder);
+  }
+
+  @Command(
+      aliases = {"start"},
+      desc = "Starts an objective mode",
+      perms = Permissions.GAMEPLAY)
+  public void start(Audience audience, Match match, int modeNumber, Duration duration)
+      throws CommandException {
+    ObjectiveModesMatchModule modes = getModes(match);
+
+    if (!match.isRunning()) {
+      throwMatchNotStarted();
+    }
+    if (modes == null) {
+      throwNoResults();
+    }
+    modeNumber--;
+    CountdownContext countdowns = modes.getCountdown();
+    List<ModeChangeCountdown> sortedCountdowns = modes.getSortedCountdowns(true);
+    ModeChangeCountdown selectedMode;
+
+    if (sortedCountdowns.toArray().length < modeNumber) {
+      throwInvalidNumber(Integer.toString(modeNumber));
+    }
+    if (duration.isNegative()) {
+      throwInvalidNumber(duration.toString());
+    }
+    selectedMode = sortedCountdowns.get(modeNumber);
+    countdowns.cancel(selectedMode);
+    countdowns.start(selectedMode, duration);
+
+    String modeName;
+    if (selectedMode.getMode().getName() != null) {
+      modeName = selectedMode.getMode().getName();
+    } else {
+      modeName = selectedMode.getMode().getPreformattedMaterialName();
+    }
+
+    TextComponent.Builder builder =
+        text()
+            .append(
+                translatable("command.selectedModePushed", text(modeName))
+                    .color(NamedTextColor.GOLD)
+                    .append(space()));
+    builder.append(clock(Math.abs(duration.getSeconds())).color(NamedTextColor.AQUA));
     audience.sendMessage(builder);
   }
 
@@ -118,7 +173,7 @@ public final class ModeCommand {
     if (modes == null) {
       throwNoResults();
     } else {
-      new ModesPaginatedResult(modes).display(audience, modes.getSortedCountdowns(), page);
+      new ModesPaginatedResult(modes).display(audience, modes.getSortedCountdowns(true), page);
     }
   }
 
@@ -128,5 +183,13 @@ public final class ModeCommand {
 
   private static void throwNoResults() {
     throw exception("command.emptyResult");
+  }
+
+  private static void throwMatchNotStarted() {
+    throw exception("command.matchNotStarted");
+  }
+
+  private static void throwInvalidNumber(String invalidNumber) {
+    throw exception("command.invalidNumber", text(invalidNumber));
   }
 }
