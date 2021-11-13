@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Document;
@@ -40,7 +41,7 @@ public class KillRewardModule implements MapModule {
   public static class Factory implements MapModuleFactory<KillRewardModule> {
     @Override
     public Collection<Class<? extends MapModule>> getWeakDependencies() {
-      return ImmutableList.of(RegionModule.class, FilterModule.class);
+      return ImmutableList.of(RegionModule.class, FilterModule.class, ItemModifyModule.class);
     }
 
     @Override
@@ -52,6 +53,8 @@ public class KillRewardModule implements MapModule {
     public KillRewardModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       ImmutableList.Builder<KillReward> rewards = ImmutableList.builder();
+      final Optional<ItemModifyModule> itemModifier =
+          Optional.ofNullable(factory.getModule(ItemModifyModule.class));
 
       // Must allow top-level children for legacy support
       for (Element elKillReward :
@@ -62,7 +65,9 @@ public class KillRewardModule implements MapModule {
               0)) {
         ImmutableList.Builder<ItemStack> items = ImmutableList.builder();
         for (Element itemEl : elKillReward.getChildren("item")) {
-          items.add(factory.getKits().parseItem(itemEl, false));
+          final ItemStack itemStack = factory.getKits().parseItem(itemEl, false);
+          itemModifier.ifPresent(imm -> imm.applyRules(itemStack));
+          items.add(itemStack);
         }
 
         Filter filter =

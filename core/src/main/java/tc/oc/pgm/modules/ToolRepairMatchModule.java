@@ -4,7 +4,7 @@ import com.google.common.collect.Iterables;
 import java.util.Arrays;
 import java.util.Set;
 import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -15,6 +15,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ToolRepairMatchModule implements MatchModule, Listener {
@@ -31,14 +32,14 @@ public class ToolRepairMatchModule implements MatchModule, Listener {
   }
 
   private void doRepair(PlayerPickupItemEvent event, ItemStack stack) {
-    ItemStack pickup = event.getItem().getItemStack();
+    Item item = event.getItem();
+    ItemStack pickup = item.getItemStack();
+
+    event.setCancelled(true);
+    NMSHacks.fakePlayerItemPickup(event.getPlayer(), item);
 
     int hitsLeft = pickup.getType().getMaxDurability() - pickup.getDurability() + 1;
     stack.setDurability((short) Math.max(stack.getDurability() - hitsLeft, 0));
-
-    event.setCancelled(true);
-    event.getItem().remove();
-    event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.ITEM_PICKUP, 0.5f, 1f);
   }
 
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

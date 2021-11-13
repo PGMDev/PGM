@@ -1,5 +1,6 @@
 package tc.oc.pgm.itemmeta;
 
+import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseEvent;
@@ -7,11 +8,13 @@ import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 @ListenerScope(MatchScope.LOADED)
 public class ItemModifyMatchModule implements MatchModule, Listener {
@@ -67,6 +70,21 @@ public class ItemModifyMatchModule implements MatchModule, Listener {
     ItemStack stack = event.getItem();
     if (applyRules(stack)) {
       event.setItem(stack);
+    }
+  }
+
+  @EventHandler(ignoreCancelled = true)
+  public void onItemPickup(PlayerPickupItemEvent event) {
+    // Needed for players picking up arrows stuck in blocks
+    if (!NMSHacks.isCraftItemArrowEntity(event.getItem())) return;
+
+    final Item item = event.getItem();
+    final ItemStack itemStack = item.getItemStack();
+
+    if (applyRules(itemStack)) {
+      event.setCancelled(true);
+      NMSHacks.fakePlayerItemPickup(event.getPlayer(), item);
+      event.getPlayer().getInventory().addItem(itemStack);
     }
   }
 }
