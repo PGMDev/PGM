@@ -413,7 +413,10 @@ public abstract class KitParser {
   }
 
   public ItemStack parseItem(Element el, Material type, short damage) throws InvalidXMLException {
-    int amount = XMLUtils.parseNumber(el.getAttribute("amount"), Integer.class, 1);
+    int amount = XMLUtils.parseNumber(Node.fromAttr(el, "amount"), Integer.class, true, 1);
+
+    // amount returns max value of integer if "oo" is given as amount
+    if (amount == Integer.MAX_VALUE) amount = -1;
 
     // must be CraftItemStack to keep track of NBT data
     ItemStack itemStack = NMSHacks.craftItemCopy(new ItemStack(type, amount, damage));
@@ -422,7 +425,12 @@ public abstract class KitParser {
       throw new InvalidXMLException("Invalid item/block", el);
     }
 
+    if (amount == -1 && !itemStack.getType().isBlock()) {
+      throw new InvalidXMLException("infinity can only be applied to a block material", el);
+    }
+
     ItemMeta meta = itemStack.getItemMeta();
+
     if (meta != null) { // This happens if the item is "air"
       parseItemMeta(el, meta);
       itemStack.setItemMeta(meta);
@@ -537,6 +545,10 @@ public abstract class KitParser {
 
     if (XMLUtils.parseBoolean(el.getAttribute("prevent-sharing"), false)) {
       ItemTags.PREVENT_SHARING.set(itemStack, true);
+    }
+
+    if (itemStack.getAmount() == -1) {
+      ItemTags.INFINITE.set(itemStack, true);
     }
 
     Node projectileNode = Node.fromAttr(el, "projectile");
