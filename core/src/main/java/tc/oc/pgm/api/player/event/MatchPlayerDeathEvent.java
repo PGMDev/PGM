@@ -98,6 +98,7 @@ public class MatchPlayerDeathEvent extends MatchPlayerEvent {
    * @return Whether the {@link MatchPlayer} is involved.
    */
   public final boolean isInvolved(MatchPlayer player) {
+    if (player == null) return false;
     return isVictim(player) || isKiller(player);
   }
 
