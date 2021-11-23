@@ -193,5 +193,8 @@ community:
 # Please do *not* edit this option unless you know what you're doing.
 database-uri: ""
 
+# Maximum connections a database will establish
+database-max-connections: 5
+
 # Experimental features that are not yet stable.
 experiments: {}
