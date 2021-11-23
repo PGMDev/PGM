@@ -42,6 +42,10 @@ public class CoreMatchModule implements MatchModule, Listener {
     this.cores = cores;
   }
 
+  public List<Core> getCores() {
+    return this.cores;
+  }
+
   @Override
   public void enable() {
     if (this.match.getMap().getProto().isOlderThan(MODES_IMPLEMENTATION_VERSION)) {
