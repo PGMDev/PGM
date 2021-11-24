@@ -21,11 +21,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
-import tc.oc.pgm.core.Core;
-import tc.oc.pgm.core.CoreMatchModule;
 import tc.oc.pgm.countdowns.CountdownContext;
-import tc.oc.pgm.destroyable.Destroyable;
-import tc.oc.pgm.destroyable.DestroyableMatchModule;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.filters.dynamic.FilterMatchModule;
 
@@ -132,35 +128,11 @@ public class ObjectiveModesMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onObjectiveModeChange(ObjectiveModeChangeEvent event) {
-    DestroyableMatchModule dmm = match.getModule(DestroyableMatchModule.class);
-    CoreMatchModule cmm = match.getModule(CoreMatchModule.class);
-    boolean modeChangeDisplayed = false;
-    if (dmm != null) {
-      for (Destroyable destroyable : dmm.getDestroyables()) {
-        if (destroyable.getModes().contains(event.getMode())) {
-          // only display message once
-          displayModeChangeMessage(event.getName(), destroyable.isVisible());
-          modeChangeDisplayed = true;
-          break;
-        }
-      }
-    }
-    if (cmm != null && !modeChangeDisplayed) {
-      for (Core core : cmm.getCores()) {
-        if (core.getModes().contains(event.getMode())) {
-          displayModeChangeMessage(event.getName(), core.isVisible());
-          break;
-        }
-      }
-    }
-  }
-
-  public void displayModeChangeMessage(String modeName, boolean visible) {
-    if (visible) {
+    if (event.isVisible()) {
       Component broadcast =
           text()
               .append(text("> > > > ", NamedTextColor.DARK_AQUA))
-              .append(text(modeName, NamedTextColor.DARK_RED))
+              .append(text(event.getName(), NamedTextColor.DARK_RED))
               .append(text(" < < < <", NamedTextColor.DARK_AQUA))
               .build();
       match.sendMessage(broadcast);
