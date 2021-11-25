@@ -127,7 +127,9 @@ public final class PGMConfig implements Config {
     this.databaseMaxConnections =
         this.databaseUri.startsWith("sqlite:")
             ? 1 // SQLite is single threaded by nature
-            : Math.min(5, Runtime.getRuntime().availableProcessors());
+            : Math.min(
+                config.getInt("database-max-connections", 5),
+                Runtime.getRuntime().availableProcessors());
 
     final String motd = config.getString("motd");
     this.motd = motd == null || motd.isEmpty() ? null : parseComponentLegacy(motd);
