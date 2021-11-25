@@ -7,21 +7,20 @@ import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.event.MatchEvent;
 import tc.oc.pgm.core.Core;
-import tc.oc.pgm.core.CoreMatchModule;
 import tc.oc.pgm.destroyable.Destroyable;
-import tc.oc.pgm.destroyable.DestroyableMatchModule;
 import tc.oc.pgm.goals.GoalMatchModule;
 
 public class ObjectiveModeChangeEvent extends MatchEvent {
 
   private final Mode mode;
   private String name;
-  private final boolean visible;
+  private boolean visible;
   private static final HandlerList handlers = new HandlerList();
 
   public ObjectiveModeChangeEvent(Match match, final Mode mode) {
     super(match);
     this.mode = mode;
+    this.visible = false;
 
     if (this.mode.getName() != null) {
       this.name = this.mode.getName();
@@ -43,37 +42,18 @@ public class ObjectiveModeChangeEvent extends MatchEvent {
         this.name = "Unknown Mode";
       }
     }
-
-    DestroyableMatchModule dmm = match.getModule(DestroyableMatchModule.class);
-    CoreMatchModule cmm = match.getModule(CoreMatchModule.class);
-    boolean displayModeChange = false;
-    if (dmm != null) {
-      for (Destroyable destroyable : dmm.getDestroyables()) {
-        // if one objective is visible (ie. show=true), then display mode change in chat and exit
-        // loop.
-        if (destroyable.getModes().contains(this.mode) && destroyable.isVisible()) {
-          displayModeChange = true;
-          break;
-        }
-      }
-    }
-    if (cmm != null && !displayModeChange) {
-      for (Core core : cmm.getCores()) {
-        if (core.getModes().contains(this.mode) && core.isVisible()) {
-          displayModeChange = true;
-          break;
-        }
-      }
-    }
-    this.visible = displayModeChange;
   }
 
-  public final boolean isVisible() {
+  public boolean isVisible() {
     return this.visible;
   }
 
   public final Mode getMode() {
     return this.mode;
+  }
+
+  public void setVisible(boolean visible) {
+    this.visible = visible;
   }
 
   public void setName(@Nonnull String name) {

@@ -155,11 +155,12 @@ public class CoreMatchModule implements MatchModule, Listener {
     }
   }
 
-  @EventHandler(priority = EventPriority.MONITOR)
+  @EventHandler(priority = EventPriority.HIGHEST)
   public void onObjectiveModeSwitch(final ObjectiveModeChangeEvent event) {
     for (Core core : this.cores) {
       if (core.getModes() == null || core.getModes().contains(event.getMode())) {
         core.replaceBlocks(event.getMode().getMaterialData());
+        event.setVisible(core.isVisible());
       }
     }
   }
