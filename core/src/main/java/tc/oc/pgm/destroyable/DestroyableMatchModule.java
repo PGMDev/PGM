@@ -125,7 +125,10 @@ public class DestroyableMatchModule implements MatchModule, Listener {
       if (destroyable.getModes() == null || destroyable.getModes().contains(event.getMode())) {
         double oldCompletion = destroyable.getCompletion();
         destroyable.replaceBlocks(event.getMode().getMaterialData());
-        event.setVisible(destroyable.isVisible());
+        // if at least one of the destroyables are visible, the mode change message will be sent
+        if (destroyable.isVisible()) {
+          event.setVisible(true);
+        }
         if (oldCompletion != destroyable.getCompletion()) {
           // Multi-stage destroyables can have their total completion changed by this
           this.match.callEvent(new DestroyableHealthChangeEvent(this.match, destroyable, null));

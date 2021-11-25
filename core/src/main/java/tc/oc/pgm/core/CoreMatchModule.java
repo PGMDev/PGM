@@ -160,7 +160,10 @@ public class CoreMatchModule implements MatchModule, Listener {
     for (Core core : this.cores) {
       if (core.getModes() == null || core.getModes().contains(event.getMode())) {
         core.replaceBlocks(event.getMode().getMaterialData());
-        event.setVisible(core.isVisible());
+        // if at least one of the cores are visible, the mode change message will be sent
+        if (core.isVisible()) {
+          event.setVisible(true);
+        }
       }
     }
   }
