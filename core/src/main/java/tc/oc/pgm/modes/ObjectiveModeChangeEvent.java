@@ -14,11 +14,13 @@ public class ObjectiveModeChangeEvent extends MatchEvent {
 
   private final Mode mode;
   private String name;
+  private boolean visible;
   private static final HandlerList handlers = new HandlerList();
 
   public ObjectiveModeChangeEvent(Match match, final Mode mode) {
     super(match);
     this.mode = mode;
+    this.visible = false;
 
     if (this.mode.getName() != null) {
       this.name = this.mode.getName();
@@ -42,8 +44,16 @@ public class ObjectiveModeChangeEvent extends MatchEvent {
     }
   }
 
+  public boolean isVisible() {
+    return this.visible;
+  }
+
   public final Mode getMode() {
     return this.mode;
+  }
+
+  public void setVisible(boolean visible) {
+    this.visible = visible;
   }
 
   public void setName(@Nonnull String name) {

@@ -42,6 +42,10 @@ public class CoreMatchModule implements MatchModule, Listener {
     this.cores = cores;
   }
 
+  public List<Core> getCores() {
+    return this.cores;
+  }
+
   @Override
   public void enable() {
     if (this.match.getMap().getProto().isOlderThan(MODES_IMPLEMENTATION_VERSION)) {
@@ -151,11 +155,15 @@ public class CoreMatchModule implements MatchModule, Listener {
     }
   }
 
-  @EventHandler(priority = EventPriority.MONITOR)
+  @EventHandler(priority = EventPriority.HIGHEST)
   public void onObjectiveModeSwitch(final ObjectiveModeChangeEvent event) {
     for (Core core : this.cores) {
       if (core.getModes() == null || core.getModes().contains(event.getMode())) {
         core.replaceBlocks(event.getMode().getMaterialData());
+        // if at least one of the cores are visible, the mode change message will be sent
+        if (core.isVisible()) {
+          event.setVisible(true);
+        }
       }
     }
   }
