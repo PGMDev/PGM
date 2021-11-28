@@ -33,9 +33,4 @@ public class BroadcastMatchModule implements MatchModule {
   public void disable() {
     this.countdowns.cancelAll();
   }
-
-  @Override
-  public void unload() {
-    this.broadcasts.clear();
-  }
 }
