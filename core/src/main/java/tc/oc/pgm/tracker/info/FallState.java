@@ -141,6 +141,19 @@ public class FallState implements FallInfo {
             || (isClimbing && now.tick - climbingTick > MAX_CLIMBING_TICKS));
   }
 
+  /**
+   * A new fall can't be initiated if the victim is already falling, unless:
+   * <li>The fall never started (i.e. they were never knocked into the air)
+   * <li>The player touched the ground at least once since the previous hit (they landed)
+   * <li>The player is not burning from this fall
+   *
+   *     <p>This function indicates if the fall is still ongoing and may not be replaced
+   */
+  public boolean isOngoing(Tick now) {
+    return (isStarted && groundTouchCount == 0)
+        || (isInLava || now.tick - outLavaTick <= MAX_BURNING_TICKS);
+  }
+
   @Override
   public String toString() {
     return getClass().getSimpleName()
