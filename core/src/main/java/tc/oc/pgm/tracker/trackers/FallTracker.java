@@ -170,9 +170,10 @@ public class FallTracker implements Listener, DamageResolver {
     MatchPlayer victim = match.getParticipant(event.getEntity());
     if (victim == null) return;
 
-    if (this.falls.containsKey(victim)) {
-      // A new fall can't be initiated if the victim is already falling
-      return;
+    FallState previousFall = this.falls.get(victim);
+    if (previousFall != null) {
+      if (previousFall.isOngoing(match.getTick())) return;
+      else endFall(previousFall);
     }
 
     Location loc = victim.getBukkit().getLocation();
