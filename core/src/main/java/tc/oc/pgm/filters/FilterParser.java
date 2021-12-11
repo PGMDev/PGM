@@ -418,6 +418,31 @@ public abstract class FilterParser {
     return new GoalFilter(goal, team, anyTeam);
   }
 
+  @MethodParser("completed")
+  public GoalFilter parseCompleted(Element el) throws InvalidXMLException {
+    XMLFeatureReference<? extends GoalDefinition> goal =
+        this.factory.getFeatures().createReference(new Node(el), GoalDefinition.class);
+
+    return new GoalFilter(goal, null, true);
+  }
+
+  @MethodParser("captured")
+  public GoalFilter parseCaptured(Element el) throws InvalidXMLException {
+    XMLFeatureReference<? extends GoalDefinition> goal =
+        this.factory.getFeatures().createReference(new Node(el), GoalDefinition.class);
+
+    Attribute attrTeam = el.getAttribute("team");
+    XMLFeatureReference<TeamFactory> team;
+    if (attrTeam != null) {
+      team = this.factory.getFeatures().createReference(new Node(attrTeam), TeamFactory.class);
+
+    } else {
+      team = null;
+    }
+
+    return new GoalFilter(goal, team, false);
+  }
+
   protected FlagStateFilter parseFlagState(Element el, Class<? extends State> state)
       throws InvalidXMLException {
     Node postAttr = Node.fromAttr(el, "post");
