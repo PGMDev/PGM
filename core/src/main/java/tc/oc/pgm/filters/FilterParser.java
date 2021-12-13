@@ -432,13 +432,7 @@ public abstract class FilterParser {
         this.factory.getFeatures().createReference(new Node(el), GoalDefinition.class);
 
     Attribute attrTeam = el.getAttribute("team");
-    XMLFeatureReference<TeamFactory> team;
-    if (attrTeam != null) {
-      team = this.factory.getFeatures().createReference(new Node(attrTeam), TeamFactory.class);
-
-    } else {
-      team = null;
-    }
+    XMLFeatureReference<TeamFactory> team = attrTeam != null ? this.factory.getFeatures().createReference(new Node(attrTeam), TeamFactory.class) : null;
 
     return new GoalFilter(goal, team, false);
   }
