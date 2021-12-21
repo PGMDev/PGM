@@ -865,7 +865,7 @@ public final class XMLUtils {
       throws InvalidXMLException {
     return node == null
         ? def
-        : TextParser.parseComponent(BukkitUtils.colorize(node.getValueNormalize()));
+        : TextParser.parseComponentSection(BukkitUtils.colorize(node.getValueNormalize()));
   }
 
   /**
