@@ -44,13 +44,20 @@ public class SpawnParser {
 
     if (factory.getProto().isOlderThan(MapProtos.MODULE_SUBELEMENT_VERSION)) {
       providers = this.pointParser.parse(el, attributes.providerAttributes);
-    } else {
+    }
+    // Must have <regions>, <region> or region attribute in proto 1.3.6 and above
+    else if (el.getChild("regions") != null
+        || el.getChild("region") != null
+        || el.getAttribute("region") != null) {
       providers =
           new ArrayList<>(
               pointParser.parseMultiProperty(el, attributes.providerAttributes, "region"));
       for (Element elRegions : XMLUtils.getChildren(el, "regions")) {
         providers.addAll(this.pointParser.parseChildren(elRegions, attributes.providerAttributes));
       }
+    } else {
+      throw new InvalidXMLException(
+          "all spawn regions must be enclosed inside <regions>, or use region attribute", el);
     }
 
     PointProvider provider;
