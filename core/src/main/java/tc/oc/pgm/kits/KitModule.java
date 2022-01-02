@@ -3,7 +3,9 @@ package tc.oc.pgm.kits;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
@@ -28,9 +30,19 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public class KitModule implements MapModule {
 
   protected final Set<KitRule> kitRules;
+  protected final List<Kit> kits;
 
-  public KitModule(Set<KitRule> kitRules) {
+  public KitModule(Set<KitRule> kitRules, List<Kit> kits) {
     this.kitRules = ImmutableSet.copyOf(kitRules);
+    this.kits = kits;
+  }
+
+  public Set<KitRule> getKitRules() {
+    return kitRules;
+  }
+
+  public List<Kit> getKits() {
+    return kits;
   }
 
   @Nullable
@@ -41,7 +53,7 @@ public class KitModule implements MapModule {
 
   @Override
   public MatchModule createMatchModule(Match match) {
-    return new KitMatchModule(match, kitRules);
+    return new KitMatchModule(match, this);
   }
 
   @Override
@@ -60,9 +72,11 @@ public class KitModule implements MapModule {
     public KitModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       Set<KitRule> kitRules = Sets.newHashSet();
+      List<Kit> kits = new ArrayList<Kit>();
+
       for (Element kitsElement : doc.getRootElement().getChildren("kits")) {
         for (Element kitElement : kitsElement.getChildren("kit")) {
-          factory.getKits().parse(kitElement);
+          kits.add(factory.getKits().parse(kitElement));
         }
         for (Element kitElement : XMLUtils.getChildren(kitsElement, "give", "take", "lend")) {
           KitRule kitRule = parseRule(factory, kitElement);
@@ -71,7 +85,7 @@ public class KitModule implements MapModule {
         }
       }
 
-      return new KitModule(kitRules);
+      return new KitModule(kitRules, kits);
     }
 
     private KitRule parseRule(MapFactory factory, Element el) throws InvalidXMLException {

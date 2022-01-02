@@ -4,7 +4,6 @@ import static net.kyori.adventure.text.Component.text;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
-import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -36,19 +35,19 @@ import tc.oc.pgm.util.event.ItemTransferEvent;
 public class KitMatchModule implements MatchModule, Listener {
 
   private final Match match;
-  private final Set<KitRule> kitRules;
+  private final KitModule module;
   private final SetMultimap<MatchPlayer, ArmorType> lockedArmorSlots = HashMultimap.create();
 
-  public KitMatchModule(Match match, Set<KitRule> kitRules) {
+  public KitMatchModule(Match match, KitModule module) {
     this.match = match;
-    this.kitRules = kitRules;
+    this.module = module;
   }
 
   @Override
   public void load() throws ModuleLoadException {
     FilterMatchModule fmm = match.needModule(FilterMatchModule.class);
 
-    for (KitRule kitRule : kitRules) {
+    for (KitRule kitRule : module.getKitRules()) {
       switch (kitRule.getAction()) {
         case GIVE:
           fmm.onRise(
@@ -217,5 +216,9 @@ public class KitMatchModule implements MatchModule, Listener {
       // infinite block contains -1 items, giving -1 items sets the amount back to -1
       item.setAmount(-1);
     }
+  }
+
+  public KitModule getModule() {
+    return module;
   }
 }
