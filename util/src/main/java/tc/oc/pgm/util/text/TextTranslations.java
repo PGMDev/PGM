@@ -5,6 +5,9 @@ import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Table;
 import com.google.common.collect.Tables;
@@ -44,6 +47,16 @@ public final class TextTranslations {
 
   // Locale of the source code .properties files
   private static final Locale SOURCE_LOCALE = Locale.US;
+  // Cache locales to avoid allocating many locales per player & message
+  private static final LoadingCache<String, Locale> LOCALE_CACHE =
+      CacheBuilder.newBuilder()
+          .build(
+              new CacheLoader<String, Locale>() {
+                @Override
+                public Locale load(@NotNull String str) {
+                  return parseLocale(str);
+                }
+              });
 
   // A control to ensure that .properties are loaded in UTF-8 format
   private static final UTF8Control SOURCE_CONTROL = new UTF8Control();
@@ -260,10 +273,8 @@ public final class TextTranslations {
   }
 
   public static Locale getLocale(@Nullable CommandSender sender) {
-    if (sender == null || !(sender instanceof Player)) {
-      return SOURCE_LOCALE;
-    }
-    return parseLocale(((Player) sender).spigot().getLocale());
+    if (!(sender instanceof Player)) return SOURCE_LOCALE;
+    return LOCALE_CACHE.getUnchecked(((Player) sender).spigot().getLocale());
   }
 
   /**
