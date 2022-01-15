@@ -434,6 +434,8 @@ public final class TextParser {
    *
    * <p>Accepts legacy formatting with "§" as the color character.
    *
+   * <p>Accepts full qualified json strings as components.
+   *
    * <p>This method is mainly for backwards compatability for {@link
    * XMLUtils#parseFormattedText(Node, Component)}. Previously using {@link #parseComponent(String)}
    * with the result from {@code parseFormattedText} would bug out when sent to older clients, since
@@ -442,9 +444,18 @@ public final class TextParser {
    *
    * @param text The text.
    * @return a Component.
+   * @throws TextException If there is json present and it is invalid.
    */
   public static Component parseComponentSection(String text) {
     checkNotNull(text, "cannot parse component from null");
+
+    if (text.startsWith("{\"") && text.endsWith("\"}")) {
+      try {
+        return GsonComponentSerializer.gson().deserialize(text);
+      } catch (JsonSyntaxException e) {
+        throw invalidFormat(text, Component.class, e);
+      }
+    }
 
     return LegacyComponentSerializer.legacySection().deserialize(text);
   }
