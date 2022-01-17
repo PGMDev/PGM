@@ -28,6 +28,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -89,7 +90,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     this.match = match;
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onDamage(EntityDamageByEntityEvent event) {
     ParticipantState damager =
         match.needModule(TrackerMatchModule.class).getOwner(event.getDamager());
@@ -109,7 +110,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     getPlayerStat(damaged).onDamaged(realFinalDamage);
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onShoot(EntityShootBowEvent event) {
     if (event.getEntity() instanceof Player) {
       MatchPlayer player = match.getPlayer(event.getEntity());
@@ -117,7 +118,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     }
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.MONITOR)
   public void onDestroyableBreak(DestroyableHealthChangeEvent event) {
     DestroyableHealthChange change = event.getChange();
     if (change != null && change.getHealthChange() < 0 && change.getPlayerCause() != null)
@@ -125,23 +126,23 @@ public class StatsMatchModule implements MatchModule, Listener {
       getPlayerStat(change.getPlayerCause()).onDestroyablePieceBroken(-change.getHealthChange());
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.MONITOR)
   public void onFlagCapture(FlagCaptureEvent event) {
     getPlayerStat(event.getCarrier()).onFlagCapture();
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.MONITOR)
   public void onFlagHold(FlagPickupEvent event) {
     getPlayerStat(event.getCarrier()).onFlagPickup();
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.MONITOR)
   public void onFlagDrop(FlagStateChangeEvent event) {
     if (event.getOldState() instanceof Carried)
       getPlayerStat(((Carried) event.getOldState()).getCarrier()).onFlagDrop();
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerDeath(MatchPlayerDeathEvent event) {
     MatchPlayer victim = event.getVictim();
     MatchPlayer murderer = null;
@@ -194,7 +195,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     return task;
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchEnd(MatchFinishEvent event) {
     if (allPlayerStats.isEmpty() || showAfter.isNegative()) return;
 
