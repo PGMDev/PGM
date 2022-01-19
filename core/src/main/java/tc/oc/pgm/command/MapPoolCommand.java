@@ -43,7 +43,7 @@ public final class MapPoolCommand {
   private static final DecimalFormat SCORE_FORMAT = new DecimalFormat("00.00%");
 
   @Command(
-      aliases = {"pool"},
+      aliases = {"pool", "rotation", "rot"},
       desc = "List the maps in the map pool",
       usage = "[page] [-p pool] [-s scores] [-c chance of vote]")
   public static void pool(
@@ -127,7 +127,7 @@ public final class MapPoolCommand {
   }
 
   @Command(
-      aliases = {"pools"},
+      aliases = {"pools", "rotations", "rots"},
       desc = "List all the map pools",
       flags = "d")
   public static void pools(
