@@ -20,6 +20,7 @@ public class PlayerStats {
   // Bow
   private int longestBowKill;
   private double bowDamage;
+  private double bowDamageTaken;
   private int shotsTaken;
   private int shotsHit;
 
@@ -59,8 +60,11 @@ public class PlayerStats {
     }
   }
 
-  protected void onDamaged(double damage) {
+  protected void onDamaged(double damage, boolean bow) {
     damageTaken += damage;
+    if (bow) {
+      bowDamageTaken += damage;
+    }
   }
 
   protected void onDestroyablePieceBroken(int change) {
@@ -142,6 +146,10 @@ public class PlayerStats {
 
   public double getBowDamage() {
     return bowDamage;
+  }
+
+  public double getBowDamageTaken() {
+    return bowDamageTaken;
   }
 
   public int getShotsTaken() {
