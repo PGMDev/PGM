@@ -95,7 +95,7 @@ public class BlitzMatchModule implements MatchModule, Listener {
   public void handleJoin(final PlayerParticipationStartEvent event) {
     MatchPlayer player = event.getPlayer();
     TeamMatchModule tmm = player.getMatch().getModule(TeamMatchModule.class);
-    if (match.isRunning() && (tmm != null && !tmm.isForced(player))) {
+    if (match.isRunning() && (tmm == null || !tmm.isForced(player))) {
       event.cancel(
           translatable(
               "blitz.joinDenied", translatable("gamemode.blitz.name", NamedTextColor.AQUA)));
