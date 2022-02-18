@@ -14,8 +14,8 @@ public class ApplyItemKitEvent extends ApplyKitEvent {
   private final Map<Slot, ItemStack> slotItems;
   private final List<ItemStack> freeItems;
 
-  public ApplyItemKitEvent(MatchPlayer player, ItemKit kit) {
-    super(player, kit);
+  public ApplyItemKitEvent(MatchPlayer player, ItemKit kit, boolean force) {
+    super(player, kit, force);
 
     this.slotItems = new HashMap<>(kit.getSlotItems().size());
     for (Map.Entry<Slot, ItemStack> entry : kit.getSlotItems().entrySet()) {

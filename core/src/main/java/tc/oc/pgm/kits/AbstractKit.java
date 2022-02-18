@@ -11,10 +11,10 @@ import tc.oc.pgm.api.player.MatchPlayer;
 public abstract class AbstractKit implements KitDefinition {
   @Override
   public void apply(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {
-    ApplyKitEvent event = new ApplyKitEvent(player, this);
+    ApplyKitEvent event = new ApplyKitEvent(player, this, force);
     player.getMatch().callEvent(event);
     if (!event.isCancelled()) {
-      this.applyPostEvent(player, force, displacedItems);
+      this.applyPostEvent(player, event.isForce(), displacedItems);
     }
   }
 
