@@ -13,11 +13,13 @@ public class ApplyKitEvent extends MatchEvent implements Cancellable {
   private boolean cancelled;
   private final MatchPlayer player;
   private final Kit kit;
+  private boolean force;
 
-  public ApplyKitEvent(MatchPlayer player, Kit kit) {
+  public ApplyKitEvent(MatchPlayer player, Kit kit, boolean force) {
     super(player.getMatch());
     this.player = player;
     this.kit = kit;
+    this.force = force;
   }
 
   @Override
@@ -36,6 +38,14 @@ public class ApplyKitEvent extends MatchEvent implements Cancellable {
 
   public Kit getKit() {
     return kit;
+  }
+
+  public boolean isForce() {
+    return force;
+  }
+
+  public void setForce(boolean force) {
+    this.force = force;
   }
 
   /* Handler junk */

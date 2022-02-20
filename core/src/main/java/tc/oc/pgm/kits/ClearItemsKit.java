@@ -20,6 +20,18 @@ public class ClearItemsKit extends AbstractKit {
     this.effects = effects;
   }
 
+  public boolean clearsItems() {
+    return items;
+  }
+
+  public boolean clearsArmor() {
+    return armor;
+  }
+
+  public boolean clearsEffects() {
+    return effects;
+  }
+
   @Override
   public void applyPostEvent(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {
     if (this.armor) {
