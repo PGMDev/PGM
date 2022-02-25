@@ -146,7 +146,7 @@ public class Dead extends Spawning {
     return translatable(
         "deathScreen.title" + (spectator ? ".spectator" : ""),
         NamedTextColor.RED,
-        player(this.player.getId(), NameStyle.COLOR));
+        player(this.player.getId(), NameStyle.SIMPLE_COLOR));
   }
 
   @Override

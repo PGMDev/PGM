@@ -10,6 +10,8 @@ import java.util.Set;
 public enum NameStyle {
   // No formatting
   PLAIN(EnumSet.noneOf(Flag.class)),
+  // Simple formatting, just team color. Used for non-clickable places
+  SIMPLE_COLOR(EnumSet.of(Flag.COLOR)),
   // Simple formatting, just team color & teleport
   COLOR(EnumSet.of(Flag.COLOR, Flag.TELEPORT)),
   // Fancy formatting, flairs, color and click to teleport
