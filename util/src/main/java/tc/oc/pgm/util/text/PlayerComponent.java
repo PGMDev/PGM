@@ -97,6 +97,8 @@ public final class PlayerComponent {
     if (style.has(NameStyle.Flag.FLAIR) && !isOffline) {
       builder.append(provider.getSuffixComponent(uuid));
     }
+
+    if (builder.children().size() == 1) return name.build();
     return builder.build();
   }
 
