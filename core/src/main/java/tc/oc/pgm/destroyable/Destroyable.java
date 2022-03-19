@@ -358,17 +358,19 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
           this.lastSparkTime = now;
 
           // Spawn a firework where the block was
-          Firework firework =
-              FireworkMatchModule.spawnFirework(
-                  blockLocation,
-                  FireworkEffect.builder()
-                      .with(FireworkEffect.Type.BURST)
-                      .withFlicker()
-                      .withColor(this.getOwner().getFullColor())
-                      .build(),
-                  0);
+          if (PGM.get().getConfiguration().showFireworks()) {
+            Firework firework =
+                FireworkMatchModule.spawnFirework(
+                    blockLocation,
+                    FireworkEffect.builder()
+                        .with(FireworkEffect.Type.BURST)
+                        .withFlicker()
+                        .withColor(this.getOwner().getFullColor())
+                        .build(),
+                    0);
 
-          NMSHacks.skipFireworksLaunch(firework);
+            NMSHacks.skipFireworksLaunch(firework);
+          }
 
           // Players more than 64m away will not see or hear the fireworks, so just play the sound
           // for them
