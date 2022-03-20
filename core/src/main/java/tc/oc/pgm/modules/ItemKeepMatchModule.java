@@ -20,7 +20,6 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.filters.matcher.block.BlockFilter;
 import tc.oc.pgm.kits.ArmorType;
-import tc.oc.pgm.kits.KitMatchModule;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ItemKeepMatchModule implements MatchModule, Listener {
@@ -81,7 +80,6 @@ public class ItemKeepMatchModule implements MatchModule, Listener {
       this.keptInv.put(player, keptItems);
     }
 
-    KitMatchModule kitMatchModule = this.match.getModule(KitMatchModule.class);
     ItemStack[] wearing = event.getEntity().getInventory().getArmorContents();
     Map<ArmorType, ItemStack> keptArmor = new HashMap<>();
     for (int slot = 0; slot < wearing.length; slot++) {
@@ -90,12 +88,6 @@ public class ItemKeepMatchModule implements MatchModule, Listener {
         if (this.canKeepArmor(stack)) {
           event.getDrops().remove(stack);
           keptArmor.put(ArmorType.byArmorSlot(slot), stack);
-        } else if (kitMatchModule != null
-            && !"true".equalsIgnoreCase(this.match.getWorld().getGameRuleValue("keepInventory"))) {
-          // TODO: When we have an improved player drops module, the drops will
-          // be available on the PGMPlayerDeathEvent. KitMatchModule can listen
-          // for that and deal with the locked armor itself.
-          kitMatchModule.lockArmorSlot(player, ArmorType.byArmorSlot(slot), false);
         }
       }
     }

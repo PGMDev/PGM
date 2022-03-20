@@ -1,23 +1,21 @@
 package tc.oc.pgm.kits;
 
-import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.SetMultimap;
 import java.util.Set;
 import org.bukkit.Material;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCreativeEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerItemBreakEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
@@ -26,7 +24,6 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.events.PlayerResetEvent;
 import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.kits.tag.Grenade;
 import tc.oc.pgm.kits.tag.ItemTags;
@@ -37,7 +34,6 @@ public class KitMatchModule implements MatchModule, Listener {
 
   private final Match match;
   private final Set<KitRule> kitRules;
-  private final SetMultimap<MatchPlayer, ArmorType> lockedArmorSlots = HashMultimap.create();
 
   public KitMatchModule(Match match, Set<KitRule> kitRules) {
     this.match = match;
@@ -75,43 +71,37 @@ public class KitMatchModule implements MatchModule, Listener {
     }
   }
 
-  @Override
-  public void disable() {
-    this.lockedArmorSlots.clear();
+  private boolean isLocked(ItemStack item) {
+    return item != null && ItemTags.LOCKED.has(item);
   }
 
-  public boolean lockArmorSlot(MatchPlayer player, ArmorType armorType, boolean locked) {
-    if (locked) {
-      return this.lockedArmorSlots.put(player, armorType);
-    } else {
-      return this.lockedArmorSlots.remove(player, armorType);
-    }
+  private boolean isUnshareable(ItemStack item) {
+    return item != null && (isLocked(item) || ItemTags.PREVENT_SHARING.has(item));
   }
 
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onPlayerQuit(final PlayerQuitEvent event) {
-    MatchPlayer player = this.match.getPlayer(event.getPlayer());
-    if (player != null) {
-      this.lockedArmorSlots.removeAll(player);
+  private void sendLockWarning(HumanEntity player) {
+    MatchPlayer matchPlayer = this.match.getPlayer(player);
+    if (matchPlayer != null) {
+      matchPlayer.sendWarning(translatable("match.item.locked"));
     }
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onInventoryClick(final InventoryClickEvent event) {
     if (event instanceof InventoryCreativeEvent
-        || event.getWhoClicked() != event.getInventory().getHolder()
-        || !ArmorType.isArmorSlot(event.getSlot())) {
+        || event.getWhoClicked() != event.getInventory().getHolder()) {
       return;
     }
 
-    MatchPlayer player = this.match.getPlayer((Player) event.getWhoClicked());
-    if (player == null
-        || !this.lockedArmorSlots.containsEntry(
-            player, ArmorType.byInventorySlot(event.getSlot()))) {
-      return;
-    }
-
+    // Break out of the switch if the action will move a locked item, otherwise return
     switch (event.getAction()) {
+      case HOTBAR_SWAP:
+      case HOTBAR_MOVE_AND_READD:
+        Slot slot = Slot.Hotbar.forIndex(event.getHotbarButton());
+        if (slot == null) return;
+        ItemStack item = event.getWhoClicked().getInventory().getItem(slot.getIndex());
+        if (item != null && ItemTags.LOCKED.has(item)) break;
+
       case PICKUP_ALL:
       case PICKUP_HALF:
       case PICKUP_SOME:
@@ -120,38 +110,14 @@ public class KitMatchModule implements MatchModule, Listener {
       case MOVE_TO_OTHER_INVENTORY:
       case DROP_ONE_SLOT:
       case DROP_ALL_SLOT:
-      case HOTBAR_SWAP:
-      case HOTBAR_MOVE_AND_READD:
       case COLLECT_TO_CURSOR:
-        event.setCancelled(true);
-        player.sendWarning(text("This piece of armor cannot be removed"));
-        break;
-    }
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onArmorBreak(final PlayerItemBreakEvent event) {
-    MatchPlayer player = this.match.getPlayer(event.getPlayer());
-    if (player == null) {
-      return;
+        if (ItemTags.LOCKED.has(event.getCurrentItem())) break;
+      default:
+        return;
     }
 
-    ItemStack[] armor = event.getPlayer().getInventory().getArmorContents();
-    for (ArmorType armorType : ArmorType.values()) {
-      int slot = armorType.ordinal();
-      // Bukkit specifies the amount will be zero
-      if (armor[slot] != null
-          && armor[slot].getAmount() == 0
-          && armor[slot].isSimilar(event.getBrokenItem())) {
-        this.lockedArmorSlots.remove(player, armorType);
-        break;
-      }
-    }
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onPlayerReset(final PlayerResetEvent event) {
-    this.lockedArmorSlots.removeAll(event.getPlayer());
+    event.setCancelled(true);
+    sendLockWarning(event.getWhoClicked());
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -197,17 +163,24 @@ public class KitMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void playerDropItem(PlayerDropItemEvent event) {
-    if (ItemTags.PREVENT_SHARING.has(event.getItemDrop().getItemStack())) {
+    if (isLocked(event.getItemDrop().getItemStack())) {
+      event.setCancelled(true);
+      sendLockWarning(event.getPlayer());
+    } else if (isUnshareable(event.getItemDrop().getItemStack())) {
       event.getItemDrop().remove();
     }
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void checkItemTransfer(ItemTransferEvent event) {
-    if (event.getReason() == ItemTransferEvent.Reason.PLACE
-        && ItemTags.PREVENT_SHARING.has(event.getItem())) {
+    if (event.getReason() == ItemTransferEvent.Reason.PLACE && isUnshareable(event.getItem())) {
       event.setCancelled(true);
     }
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onDeath(PlayerDeathEvent event) {
+    event.getDrops().removeIf(this::isUnshareable);
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
