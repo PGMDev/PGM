@@ -67,9 +67,11 @@ public class RandomMapOrder implements MapOrder {
     return getNextMap();
   }
 
-  // Setting a map requires no special actions from the RandomMapOrder
   @Override
-  public void setNextMap(MapInfo map) {}
+  public void setNextMap(MapInfo map) {
+    // Set next maps are sent to the front of the deque
+    deque.addFirst(new WeakReference<>(map));
+  }
 
   @Override
   public void resetNextMap() {
