@@ -2,7 +2,7 @@ package tc.oc.pgm.core;
 
 import com.google.common.collect.ImmutableSet;
 import javax.annotation.Nullable;
-import org.bukkit.material.MaterialData;
+import org.bukkit.Material;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.goals.ProximityGoalDefinition;
@@ -13,7 +13,7 @@ import tc.oc.pgm.teams.TeamFactory;
 @FeatureInfo(name = "core")
 public class CoreFactory extends ProximityGoalDefinition {
   protected final Region region;
-  protected final MaterialData material;
+  protected final Material material;
   protected final int leakLevel;
   protected final ImmutableSet<Mode> modeList;
   protected final boolean showProgress;
@@ -26,7 +26,7 @@ public class CoreFactory extends ProximityGoalDefinition {
       TeamFactory owner,
       @Nullable ProximityMetric proximityMetric,
       Region region,
-      MaterialData material,
+      Material material,
       int leakLevel,
       @Nullable ImmutableSet<Mode> modeList,
       boolean showProgress) {
@@ -47,7 +47,7 @@ public class CoreFactory extends ProximityGoalDefinition {
     return this.modeList;
   }
 
-  public MaterialData getMaterial() {
+  public Material getMaterial() {
     return this.material;
   }
 

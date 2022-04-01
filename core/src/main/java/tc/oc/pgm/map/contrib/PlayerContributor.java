@@ -5,9 +5,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.player.Username;
@@ -56,12 +56,12 @@ public class PlayerContributor implements Contributor {
     return new EqualsBuilder()
         .append(getId(), o.getId())
         .append(getContribution(), o.getContribution())
-        .build();
+        .isEquals();
   }
 
   @Override
   public int hashCode() {
-    return new HashCodeBuilder().append(getId()).append(getContribution()).build();
+    return new HashCodeBuilder().append(getId()).append(getContribution()).hashCode();
   }
 
   @Override
@@ -70,6 +70,6 @@ public class PlayerContributor implements Contributor {
         .append("id", getId())
         .append("name", username.getNameLegacy())
         .append("desc", getContribution())
-        .build();
+        .toString();
   }
 }

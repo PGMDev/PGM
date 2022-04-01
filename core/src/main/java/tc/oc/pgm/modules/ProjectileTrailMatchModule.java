@@ -1,8 +1,12 @@
 package tc.oc.pgm.modules;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.bukkit.Color;
-import org.bukkit.Effect;
+import org.bukkit.Particle;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -52,39 +56,47 @@ public class ProjectileTrailMatchModule implements MatchModule, Listener {
                             MetadataUtils.getMetadata(projectile, TRAIL_META, PGM.get()).value()
                         : null;
 
-                for (MatchPlayer player : match.getPlayers()) {
-                  boolean colors =
-                      player
-                          .getSettings()
-                          .getValue(SettingKey.EFFECTS)
-                          .equals(SettingValue.EFFECTS_ON);
-                  if (colors) {
-                    player
-                        .getBukkit()
-                        .spigot()
-                        .playEffect(
-                            projectile.getLocation(),
-                            Effect.COLOURED_DUST,
-                            0,
-                            0,
-                            rgbToParticle(color.getRed()),
-                            rgbToParticle(color.getGreen()),
-                            rgbToParticle(color.getBlue()),
-                            1,
-                            0,
-                            50);
-                  } else {
-                    // Play the critical effect to those who have effects off, to replicate original
-                    // arrow behavior
-                    if (isCriticalArrow(projectile)) {
-                      player
-                          .getBukkit()
-                          .spigot()
-                          .playEffect(
-                              projectile.getLocation(), Effect.CRIT, 0, 0, 0, 0, 0, 1, 0, 50);
-                    }
-                  }
-                }
+                final Collection<MatchPlayer> matchPlayers = match.getPlayers();
+
+                // ParticleBuilder.spawn is thread safe, is everything else?
+                PGM.get()
+                    .getAsyncExecutor()
+                    .execute(
+                        () -> {
+                          Set<MatchPlayer> playerSet = new HashSet<>(matchPlayers);
+                          Set<MatchPlayer> filtered =
+                              playerSet.stream()
+                                  .filter(
+                                      matchPlayer ->
+                                          matchPlayer
+                                              .getSettings()
+                                              .getValue(SettingKey.EFFECTS)
+                                              .equals(SettingValue.EFFECTS_ON))
+                                  .collect(Collectors.toSet());
+                          playerSet.removeAll(filtered);
+
+                          Set<Player> colored =
+                              filtered.stream()
+                                  .map(MatchPlayer::getBukkit)
+                                  .collect(Collectors.toSet());
+                          Set<Player> crit =
+                              playerSet.stream()
+                                  .map(MatchPlayer::getBukkit)
+                                  .collect(Collectors.toSet());
+
+                          Particle.REDSTONE
+                              .builder()
+                              .color(color)
+                              .location(projectile.getLocation())
+                              .receivers(colored)
+                              .spawn();
+
+                          Particle.CRIT
+                              .builder()
+                              .location(projectile.getLocation())
+                              .receivers(crit)
+                              .spawn();
+                        });
               }
             });
   }

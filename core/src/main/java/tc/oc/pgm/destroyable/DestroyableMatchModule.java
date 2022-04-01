@@ -3,6 +3,7 @@ package tc.oc.pgm.destroyable;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.util.Collection;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.minecart.ExplosiveMinecart;
 import org.bukkit.event.EventHandler;
@@ -12,7 +13,6 @@ import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.material.MaterialData;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -103,7 +103,7 @@ public class DestroyableMatchModule implements MatchModule, Listener {
     if (this.match.getWorld() != event.getBlock().getWorld()) return;
 
     Block block = event.getBlock();
-    MaterialData material = block.getState().getData();
+    Material material = block.getState().getType();
     MatchPlayer player = this.match.getPlayer(event.getPlayer());
 
     for (Destroyable destroyable : this.destroyables) {
@@ -124,7 +124,7 @@ public class DestroyableMatchModule implements MatchModule, Listener {
     for (Destroyable destroyable : this.destroyables) {
       if (destroyable.getModes() == null || destroyable.getModes().contains(event.getMode())) {
         double oldCompletion = destroyable.getCompletion();
-        destroyable.replaceBlocks(event.getMode().getMaterialData());
+        destroyable.replaceBlocks(event.getMode().getMaterial());
         // if at least one of the destroyables are visible, the mode change message will be sent
         if (destroyable.isVisible()) {
           event.setVisible(true);

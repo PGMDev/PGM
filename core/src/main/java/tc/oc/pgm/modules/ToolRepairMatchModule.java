@@ -15,7 +15,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ToolRepairMatchModule implements MatchModule, Listener {
@@ -36,7 +35,7 @@ public class ToolRepairMatchModule implements MatchModule, Listener {
     ItemStack pickup = item.getItemStack();
 
     event.setCancelled(true);
-    NMSHacks.fakePlayerItemPickup(event.getPlayer(), item);
+    //    NMSHacks.fakePlayerItemPickup(event.getPlayer(), item);
 
     int hitsLeft = pickup.getType().getMaxDurability() - pickup.getDurability() + 1;
     stack.setDurability((short) Math.max(stack.getDurability() - hitsLeft, 0));

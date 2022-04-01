@@ -82,8 +82,7 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
         newProjectile.setMetadata("critical", new FixedMetadataValue(plugin, arrow.isCritical()));
         newProjectile.setMetadata(
             "knockback", new FixedMetadataValue(plugin, arrow.getKnockbackStrength()));
-        newProjectile.setMetadata(
-            "damage", new FixedMetadataValue(plugin, arrow.spigot().getDamage()));
+        newProjectile.setMetadata("damage", new FixedMetadataValue(plugin, arrow.getDamage()));
       }
     }
 

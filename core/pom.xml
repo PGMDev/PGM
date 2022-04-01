@@ -46,12 +46,15 @@
                         <includes>
                             <include>tc.oc.pgm:*:*</include>
                             <include>org.jdom:jdom2:*</include>
-                            <include>net.kyori:*:*</include>
+<!--                            <include>net.kyori:*:*</include>-->
                             <include>app.ashcon.intake:intake-*:*</include>
                             <include>fr.mrmicky:*:*</include>
                             <include>org.eclipse.jgit:org.eclipse.jgit:*</include>
                             <include>org.slf4j:slf4j-api:*</include>
                             <include>fr.minuskube.inv:smart-invs</include>
+                            <include>net.sf.trove4j:trove4j</include>
+                            <include>com.github.cryptomorin:XSeries</include>
+                            <include>commons-io:commons-io</include>
                         </includes>
                     </artifactSet>
                     <filters>
@@ -67,10 +70,10 @@
                             <pattern>app.ashcon.intake</pattern>
                             <shadedPattern>tc.oc.pgm.lib.app.ashcon.intake</shadedPattern>
                         </relocation>
-                        <relocation>
-                            <pattern>net.kyori</pattern>
-                            <shadedPattern>tc.oc.pgm.lib.net.kyori</shadedPattern>
-                        </relocation>
+<!--                        <relocation>-->
+<!--                            <pattern>net.kyori</pattern>-->
+<!--                            <shadedPattern>tc.oc.pgm.lib.net.kyori</shadedPattern>-->
+<!--                        </relocation>-->
                         <relocation>
                             <pattern>fr.mrmicky</pattern>
                             <shadedPattern>tc.oc.pgm.lib.fr.mrmicky</shadedPattern>
@@ -86,6 +89,18 @@
                         <relocation>
                             <pattern>org.slf4j</pattern>
                             <shadedPattern>tc.oc.pgm.lib.org.slf4j</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.cryptomorin.xseries</pattern>
+                            <shadedPattern>tc.oc.pgm.lib.com.cryptomorin.xseries</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>commons-io</pattern>
+                            <shadedPattern>tc.oc.pgm.lib.commons-io</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>net.sf.trove4j</pattern>
+                            <shadedPattern>tc.oc.pgm.lib.net.sf.trove4j</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>

@@ -3,12 +3,13 @@ package tc.oc.pgm.map.source;
 import static tc.oc.pgm.util.text.TextException.invalidFormat;
 import static tc.oc.pgm.util.text.TextException.unknown;
 
-import com.google.common.collect.Iterators;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import javax.annotation.Nullable;
 import org.eclipse.jgit.api.CloneCommand;
@@ -89,7 +90,8 @@ public class GitMapSourceFactory implements MapSourceFactory {
           git.getRepository().getDirectory().getPath(), e.getMessage(), e.getCause());
     }
 
-    return Iterators.emptyIterator();
+    List<? extends MapSource> thingy = new ArrayList<>();
+    return thingy.iterator();
   }
 
   @Override

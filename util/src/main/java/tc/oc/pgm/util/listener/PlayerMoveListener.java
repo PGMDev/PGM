@@ -140,16 +140,16 @@ public class PlayerMoveListener implements Listener {
       newLoc = event.getFrom();
     } else {
       newLoc = BlockVectors.center(event.getFrom()).subtract(new Vector(0, 0.5, 0));
-      if (newLoc.getBlock() != null) {
-        switch (newLoc.getBlock().getType()) {
-          case STEP:
-          case WOOD_STEP:
-            newLoc.add(new Vector(0, 0.5, 0));
-            break;
-          default:
-            break;
-        }
-      }
+      //      if (newLoc.getBlock() != null) {
+      //        switch (newLoc.getBlock().getType()) {
+      //          case LEGACY_STEP:
+      //          case LEGACY_WOOD_STEP:
+      //            newLoc.add(new Vector(0, 0.5, 0));
+      //            break;
+      //          default:
+      //            break;
+      //        }
+      //      }
     }
 
     newLoc.setPitch(event.getTo().getPitch());

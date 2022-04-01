@@ -9,7 +9,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.material.MaterialMatcher;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class ItemRule {
   final MaterialMatcher items;
@@ -42,17 +41,15 @@ public class ItemRule {
 
       InventoryUtils.addEnchantments(meta, this.meta.getEnchants());
 
-      NMSHacks.copyAttributeModifiers(meta, this.meta);
+      meta.setAttributeModifiers(this.meta.getAttributeModifiers());
 
-      Set<Material> canDestroy =
-          unionMaterials(NMSHacks.getCanDestroy(meta), NMSHacks.getCanDestroy(this.meta));
-      Set<Material> canPlaceOn =
-          unionMaterials(NMSHacks.getCanPlaceOn(meta), NMSHacks.getCanPlaceOn(this.meta));
+      Set<Material> canDestroy = unionMaterials(meta.getCanDestroy(), this.meta.getCanDestroy());
+      Set<Material> canPlaceOn = unionMaterials(meta.getCanPlaceOn(), this.meta.getCanPlaceOn());
 
-      if (!canDestroy.isEmpty()) NMSHacks.setCanDestroy(meta, canDestroy);
-      if (!canPlaceOn.isEmpty()) NMSHacks.setCanPlaceOn(meta, canPlaceOn);
+      if (!canDestroy.isEmpty()) meta.setCanDestroy(canDestroy);
+      if (!canPlaceOn.isEmpty()) meta.setCanPlaceOn(canPlaceOn);
 
-      if (this.meta.spigot().isUnbreakable()) meta.spigot().setUnbreakable(true);
+      if (this.meta.isUnbreakable()) meta.setUnbreakable(true);
 
       stack.setItemMeta(meta);
     }

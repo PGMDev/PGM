@@ -2,6 +2,7 @@ package tc.oc.pgm.goals;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static org.bukkit.ChatColor.YELLOW;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.HashSet;
@@ -32,7 +33,7 @@ import tc.oc.pgm.util.Audience;
 public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends ProximityGoal<T>
     implements Listener {
 
-  public static final ChatColor COLOR_TOUCHED = ChatColor.YELLOW;
+  public static final ChatColor COLOR_TOUCHED = YELLOW;
   public static final String SYMBOL_TOUCHED = "\u2733"; // ✳
 
   protected boolean touched;
@@ -59,10 +60,8 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
   public abstract Component getTouchMessage(@Nullable ParticipantState toucher, boolean self);
 
   @Override
-  public net.md_5.bungee.api.ChatColor renderProximityColor(Competitor team, Party viewer) {
-    return hasTouched(team)
-        ? net.md_5.bungee.api.ChatColor.YELLOW
-        : super.renderProximityColor(team, viewer);
+  public ChatColor renderProximityColor(Competitor team, Party viewer) {
+    return hasTouched(team) ? YELLOW : super.renderProximityColor(team, viewer);
   }
 
   @Override

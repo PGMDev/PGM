@@ -23,6 +23,7 @@ import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.BlockTransformEvent;
@@ -78,7 +79,7 @@ public class WoolMatchModule implements MatchModule, Listener {
   }
 
   private boolean isObjectiveWool(ItemStack stack) {
-    if (stack.getType() == Material.WOOL) {
+    if (stack.getType().name().contains("WOOL")) {
       for (MonumentWool wool : this.wools.values()) {
         if (wool.getDefinition().isObjectiveWool(stack)) return true;
       }
@@ -205,19 +206,22 @@ public class WoolMatchModule implements MatchModule, Listener {
 
   @EventHandler
   public void handleWoolCrafting(PrepareItemCraftEvent event) {
-    ItemStack result = event.getRecipe().getResult();
-    InventoryHolder holder = event.getInventory().getHolder();
+    Recipe recipe = event.getRecipe();
+    if (recipe != null) {
+      ItemStack result = recipe.getResult();
+      InventoryHolder holder = event.getInventory().getHolder();
 
-    if (holder instanceof Player) {
-      MatchPlayer playerHolder = this.match.getPlayer((Player) holder);
+      if (holder instanceof Player) {
+        MatchPlayer playerHolder = this.match.getPlayer((Player) holder);
 
-      if (playerHolder != null && result != null && result.getType() == Material.WOOL) {
-        for (MonumentWool wool : this.wools.values()) {
-          if (wool.getDefinition().isObjectiveWool(result)) {
-            if (!wool.getDefinition().isCraftable()) {
-              playerHolder.sendWarning(
-                  translatable("wool.craftingDisabled", wool.getComponentName()));
-              event.getInventory().setResult(null);
+        if (playerHolder != null && result.getType().name().contains("WOOL")) {
+          for (MonumentWool wool : this.wools.values()) {
+            if (wool.getDefinition().isObjectiveWool(result)) {
+              if (!wool.getDefinition().isCraftable()) {
+                playerHolder.sendWarning(
+                    translatable("wool.craftingDisabled", wool.getComponentName()));
+                event.getInventory().setResult(null);
+              }
             }
           }
         }
@@ -236,6 +240,7 @@ public class WoolMatchModule implements MatchModule, Listener {
 
   @SuppressWarnings("deprecation")
   private static boolean isValidWool(DyeColor expectedColor, BlockState state) {
-    return state.getType() == Material.WOOL && expectedColor.getWoolData() == state.getRawData();
+    return state.getType().name().contains("WOOL")
+        && expectedColor.getWoolData() == state.getRawData();
   }
 }

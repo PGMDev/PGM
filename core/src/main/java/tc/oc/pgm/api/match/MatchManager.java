@@ -61,7 +61,7 @@ public interface MatchManager extends MatchPlayerResolver {
   @Nullable
   default Match getMatch(@Nullable CommandSender sender) {
     if (sender instanceof Entity) return getMatch((Entity) sender);
-    if (sender instanceof ConsoleCommandSender) return Iterators.getNext(getMatches(), null);
+    if (sender instanceof ConsoleCommandSender) return Iterators.getLast(getMatches(), null);
     return null;
   }
 }

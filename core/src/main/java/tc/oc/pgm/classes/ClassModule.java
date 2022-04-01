@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import org.bukkit.material.MaterialData;
+import org.bukkit.Material;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.MapModule;
@@ -178,7 +178,7 @@ public class ClassModule implements MapModule {
         kits.add(kit);
       }
 
-      MaterialData icon = XMLUtils.parseMaterialData(Node.fromAttr(classEl, "icon"));
+      Material icon = XMLUtils.parseMaterial(Node.fromAttr(classEl, "icon"));
 
       boolean restrict = XMLUtils.parseBoolean(classEl.getAttribute("restrict"), false);
 

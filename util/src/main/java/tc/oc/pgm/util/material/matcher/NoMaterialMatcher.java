@@ -1,10 +1,10 @@
 package tc.oc.pgm.util.material.matcher;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 import org.bukkit.Material;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
 public class NoMaterialMatcher implements MaterialMatcher {
@@ -19,7 +19,7 @@ public class NoMaterialMatcher implements MaterialMatcher {
   }
 
   @Override
-  public boolean matches(MaterialData materialData) {
+  public boolean matches(BlockData blockData) {
     return false;
   }
 
@@ -29,7 +29,7 @@ public class NoMaterialMatcher implements MaterialMatcher {
   }
 
   @Override
-  public Collection<Material> getMaterials() {
+  public Set<Material> getMaterials() {
     return Collections.emptySet();
   }
 }

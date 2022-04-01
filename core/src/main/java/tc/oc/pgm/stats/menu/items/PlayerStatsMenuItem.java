@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.stats.StatsMatchModule.damageComponent;
 import static tc.oc.pgm.stats.StatsMatchModule.numberComponent;
 
+import com.cryptomorin.xseries.SkullUtils;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +23,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import tc.oc.pgm.menu.MenuItem;
 import tc.oc.pgm.stats.PlayerStats;
-import tc.oc.pgm.util.nms.NMSHacks;
-import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -33,15 +32,12 @@ public class PlayerStatsMenuItem implements MenuItem {
   private final TextColor RESET = NamedTextColor.GRAY;
   private final UUID uuid;
   private final PlayerStats stats;
-  private final Skin skin;
   private final String name;
   private final TextColor color;
 
-  public PlayerStatsMenuItem(
-      UUID uuid, PlayerStats stats, Skin skin, String name, TextColor color) {
+  public PlayerStatsMenuItem(UUID uuid, PlayerStats stats, String name, TextColor color) {
     this.uuid = uuid;
     this.stats = stats;
-    this.skin = skin;
     this.name = name;
     this.color = color;
   }
@@ -126,7 +122,7 @@ public class PlayerStatsMenuItem implements MenuItem {
 
   @Override
   public Material getMaterial(Player player) {
-    return Material.SKULL_ITEM;
+    return Material.PLAYER_HEAD;
   }
 
   @Override
@@ -136,7 +132,7 @@ public class PlayerStatsMenuItem implements MenuItem {
   public ItemMeta modifyMeta(ItemMeta meta) {
     SkullMeta skullMeta = (SkullMeta) meta;
 
-    NMSHacks.setSkullMetaOwner(skullMeta, name, uuid, skin);
+    SkullUtils.applySkin(meta, uuid);
 
     return skullMeta;
   }

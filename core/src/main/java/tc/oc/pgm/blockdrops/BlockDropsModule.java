@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
@@ -77,10 +77,9 @@ public class BlockDropsModule implements MapModule {
         Double fallSpeed =
             XMLUtils.parseNumber(Node.fromChildOrAttr(elRule, "fall-speed"), Double.class, null);
 
-        MaterialData replacement = null;
+        Material replacement = null;
         if (elRule.getChild("replacement") != null) {
-          replacement =
-              XMLUtils.parseBlockMaterialData(Node.fromChildOrAttr(elRule, "replacement"));
+          replacement = XMLUtils.parseBlockMaterial(Node.fromChildOrAttr(elRule, "replacement"));
         }
 
         int experience =

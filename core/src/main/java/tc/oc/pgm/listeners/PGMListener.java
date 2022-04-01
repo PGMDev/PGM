@@ -1,8 +1,6 @@
 package tc.oc.pgm.listeners;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static net.kyori.adventure.text.Component.space;
-import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.util.Collection;
@@ -13,7 +11,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.md_5.bungee.api.ChatColor;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
@@ -36,7 +34,6 @@ import org.bukkit.event.vehicle.VehicleUpdateEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.map.GameRule;
@@ -49,15 +46,10 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
-import tc.oc.pgm.events.MapPoolAdjustEvent;
-import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.WorldTimeModule;
-import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.NMSHacks;
-import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class PGMListener implements Listener {
@@ -93,7 +85,7 @@ public class PGMListener implements Listener {
     // Create the match when the first player joins
     if (lock.writeLock().tryLock()) {
       // If the server is suspended, need to release so match can be created
-      NMSHacks.resumeServer();
+      //      NMSHacks.resumeServer();
 
       try {
         mm.createMatch(null).get();
@@ -218,7 +210,7 @@ public class PGMListener implements Listener {
   @EventHandler(ignoreCancelled = true)
   public void protect36(final PlayerInteractEvent event) {
     if (event.getClickedBlock() != null) {
-      if (event.getClickedBlock().getType() == Material.PISTON_MOVING_PIECE) {
+      if (event.getClickedBlock().getType() == Material.MOVING_PISTON) {
         event.setCancelled(true);
       }
     }
@@ -227,7 +219,7 @@ public class PGMListener implements Listener {
   // sometimes arrows stuck in players persist through deaths
   @EventHandler
   public void fixStuckArrows(final PlayerRespawnEvent event) {
-    NMSHacks.clearArrowsInPlayer(event.getPlayer());
+    event.getPlayer().setArrowsStuck(0);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -348,8 +340,8 @@ public class PGMListener implements Listener {
   public void nerfFishing(PlayerFishEvent event) {
     if (event.getCaught() instanceof Item) {
       Item caught = (Item) event.getCaught();
-      if (caught.getItemStack().getType() != Material.RAW_FISH) {
-        caught.setItemStack(new ItemStack(Material.RAW_FISH));
+      if (caught.getItemStack().getType() != Material.TROPICAL_FISH) {
+        caught.setItemStack(new ItemStack(Material.TROPICAL_FISH));
       }
     }
   }
@@ -370,69 +362,72 @@ public class PGMListener implements Listener {
     }
   }
 
-  @EventHandler
-  public void announceDynamicMapPoolChange(MapPoolAdjustEvent event) {
-    // Send feedback to staff, alerting them that the map pool has changed by force
-    if (event.isForced()) {
-      Component poolName = text(event.getNewPool().getName(), NamedTextColor.LIGHT_PURPLE);
-      Component staffName =
-          UsernameFormatUtils.formatStaffName(event.getSender(), event.getMatch());
-      Component matchLimit =
-          text()
-              .append(text(event.getMatchLimit(), NamedTextColor.GREEN))
-              .append(space())
-              .append(
-                  translatable(
-                      "match.name" + (event.getMatchLimit() != 1 ? ".plural" : ""),
-                      NamedTextColor.GRAY))
-              .build();
+  //  @EventHandler
+  //  public void announceDynamicMapPoolChange(MapPoolAdjustEvent event) {
+  //    // Send feedback to staff, alerting them that the map pool has changed by force
+  //    if (event.isForced()) {
+  //      Component poolName = text(event.getNewPool().getName(), NamedTextColor.LIGHT_PURPLE);
+  //      Component staffName =
+  //          UsernameFormatUtils.formatStaffName(event.getSender(), event.getMatch());
+  //      Component matchLimit =
+  //          text()
+  //              .append(text(event.getMatchLimit(), NamedTextColor.GREEN))
+  //              .append(space())
+  //              .append(
+  //                  translatable(
+  //                      "match.name" + (event.getMatchLimit() != 1 ? ".plural" : ""),
+  //                      NamedTextColor.GRAY))
+  //              .build();
+  //
+  //      // No limit
+  //      Component forced = translatable("pool.change.force", poolName, staffName);
+  //      if (event.getTimeLimit() != null) {
+  //        Component time =
+  //            TemporalComponent.briefNaturalApproximate(event.getTimeLimit())
+  //                .color(NamedTextColor.GREEN);
+  //
+  //        // If time & match limit are present, display both
+  //        if (event.getMatchLimit() != 0) {
+  //          Component timeAndLimit = translatable("misc.or", NamedTextColor.GRAY, time,
+  // matchLimit);
+  //          forced = translatable("pool.change.forceTimed", poolName, timeAndLimit, staffName);
+  //        } else {
+  //          // Just time limit
+  //          forced = translatable("pool.change.forceTimed", poolName, time, staffName);
+  //        }
+  //      } else if (event.getMatchLimit() != 0) {
+  //        // Just match limit
+  //        forced = translatable("pool.change.forceTimed", poolName, matchLimit, staffName);
+  //      }
+  //
+  //      ChatDispatcher.broadcastAdminChatMessage(forced.color(NamedTextColor.GRAY),
+  // event.getMatch());
+  //    }
+  //
+  //    // Broadcast map pool changes due to size
+  //    if (event.getNewPool().isDynamic()) {
+  //      Component broadcast =
+  //          text()
+  //              .append(text("[", NamedTextColor.WHITE))
+  //              .append(translatable("pool.name", NamedTextColor.GOLD))
+  //              .append(text("] ", NamedTextColor.WHITE))
+  //              .append(
+  //                  translatable(
+  //                      "pool.change",
+  //                      NamedTextColor.GREEN,
+  //                      text(event.getNewPool().getName(), NamedTextColor.AQUA)))
+  //              .build();
+  //
+  //      event.getMatch().sendMessage(broadcast);
+  //    }
+  //  }
 
-      // No limit
-      Component forced = translatable("pool.change.force", poolName, staffName);
-      if (event.getTimeLimit() != null) {
-        Component time =
-            TemporalComponent.briefNaturalApproximate(event.getTimeLimit())
-                .color(NamedTextColor.GREEN);
-
-        // If time & match limit are present, display both
-        if (event.getMatchLimit() != 0) {
-          Component timeAndLimit = translatable("misc.or", NamedTextColor.GRAY, time, matchLimit);
-          forced = translatable("pool.change.forceTimed", poolName, timeAndLimit, staffName);
-        } else {
-          // Just time limit
-          forced = translatable("pool.change.forceTimed", poolName, time, staffName);
-        }
-      } else if (event.getMatchLimit() != 0) {
-        // Just match limit
-        forced = translatable("pool.change.forceTimed", poolName, matchLimit, staffName);
-      }
-
-      ChatDispatcher.broadcastAdminChatMessage(forced.color(NamedTextColor.GRAY), event.getMatch());
-    }
-
-    // Broadcast map pool changes due to size
-    if (event.getNewPool().isDynamic()) {
-      Component broadcast =
-          text()
-              .append(text("[", NamedTextColor.WHITE))
-              .append(translatable("pool.name", NamedTextColor.GOLD))
-              .append(text("] ", NamedTextColor.WHITE))
-              .append(
-                  translatable(
-                      "pool.change",
-                      NamedTextColor.GREEN,
-                      text(event.getNewPool().getName(), NamedTextColor.AQUA)))
-              .build();
-
-      event.getMatch().sendMessage(broadcast);
-    }
-  }
-
-  @EventHandler // We only need to store skins for the post match stats
-  public void storeSkinOnMatchJoin(PlayerJoinMatchEvent event) {
-    final MatchPlayer player = event.getPlayer();
-    PGM.get().getDatastore().setSkin(player.getId(), NMSHacks.getPlayerSkin(player.getBukkit()));
-  }
+  //  @EventHandler // We only need to store skins for the post match stats
+  //  public void storeSkinOnMatchJoin(PlayerJoinMatchEvent event) {
+  //    final MatchPlayer player = event.getPlayer();
+  //    PGM.get().getDatastore().setSkin(player.getId(),
+  // NMSHacks.getPlayerSkin(player.getBukkit()));
+  //  }
 
   public void setGameRule(MatchLoadEvent event, String gameRule, boolean gameRuleValue) {
     event.getMatch().getWorld().setGameRuleValue(gameRule, Boolean.toString(gameRuleValue));

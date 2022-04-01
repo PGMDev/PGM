@@ -195,13 +195,13 @@ public class FallingBlocksMatchModule implements MatchModule, Listener, Tickable
     BlockState state = null;
     if (block.getType() != Material.AIR) {
       state = block.getState();
-      block.setTypeIdAndData(0, (byte) 0, false);
+      block.setType(Material.AIR, false);
     }
 
     int count = countUnsupportedNeighbors(encodePos(block), limit);
 
     if (state != null) {
-      block.setTypeIdAndData(state.getTypeId(), state.getRawData(), false);
+      block.setType(state.getType(), false);
     }
 
     return count;

@@ -32,7 +32,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.material.MaterialData;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
@@ -106,8 +105,8 @@ public class PickerMatchModule implements MatchModule, Listener {
       this.material = material;
     }
 
-    public boolean matches(MaterialData material) {
-      return this.material.equals(material.getItemType());
+    public boolean matches(Material material) {
+      return this.material.equals(material);
     }
   }
 
@@ -339,7 +338,7 @@ public class PickerMatchModule implements MatchModule, Listener {
       this.handleInventoryClick(
           player,
           ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()),
-          event.getCurrentItem().getData());
+          event.getCurrentItem().getType());
       event.setCancelled(true);
     }
   }
@@ -580,7 +579,7 @@ public class PickerMatchModule implements MatchModule, Listener {
   }
 
   private ItemStack createClassButton(MatchPlayer viewer, PlayerClass cls) {
-    ItemStack item = cls.getIcon().toItemStack(1);
+    ItemStack item = new ItemStack(cls.getIcon());
     ItemMeta meta = item.getItemMeta();
 
     meta.setDisplayName(
@@ -684,7 +683,7 @@ public class PickerMatchModule implements MatchModule, Listener {
   }
 
   private void handleInventoryClick(
-      final MatchPlayer player, final String name, final MaterialData material) {
+      final MatchPlayer player, final String name, final Material material) {
     player.playSound(sound(key("random.click"), Sound.Source.MASTER, 1, 2));
 
     if (hasClasses) {

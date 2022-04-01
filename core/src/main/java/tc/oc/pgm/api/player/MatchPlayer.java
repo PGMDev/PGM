@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import org.bukkit.GameMode;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
@@ -17,8 +19,6 @@ import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.filters.dynamic.Filterable;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.attribute.Attribute;
-import tc.oc.pgm.util.attribute.AttributeInstance;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.named.Named;
 

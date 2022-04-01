@@ -5,9 +5,6 @@ import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Table;
 import com.google.common.collect.Tables;
@@ -27,7 +24,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
@@ -37,6 +33,7 @@ import net.kyori.adventure.translation.Translator;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /** A singleton for accessing {@link MessageFormat} and {@link Component} translations. */
 @SuppressWarnings("UnstableApiUsage")
@@ -48,15 +45,6 @@ public final class TextTranslations {
   // Locale of the source code .properties files
   private static final Locale SOURCE_LOCALE = Locale.US;
   // Cache locales to avoid allocating many locales per player & message
-  private static final LoadingCache<String, Locale> LOCALE_CACHE =
-      CacheBuilder.newBuilder()
-          .build(
-              new CacheLoader<String, Locale>() {
-                @Override
-                public Locale load(@NotNull String str) {
-                  return parseLocale(str);
-                }
-              });
 
   // A control to ensure that .properties are loaded in UTF-8 format
   private static final UTF8Control SOURCE_CONTROL = new UTF8Control();
@@ -116,7 +104,7 @@ public final class TextTranslations {
     loadKeys(Locale.getDefault());
     // Add this translator to the global registry (so components are auto-translated by the
     // platform)
-    GlobalTranslator.get()
+    GlobalTranslator.translator()
         .addSource(
             new Translator() {
               @Override
@@ -253,28 +241,9 @@ public final class TextTranslations {
     return keysFound;
   }
 
-  private static java.util.Locale parseLocale(String locale) {
-    try {
-      final String[] split = locale.split("[-_]");
-      switch (split.length) {
-        case 1: // language
-          return new java.util.Locale(split[0]);
-        case 2: // language and country
-          return new java.util.Locale(split[0], split[1]);
-        case 3: // language, country, and variant
-          return new java.util.Locale(split[0], split[1], split[2]);
-      }
-    } catch (IllegalArgumentException e) {
-      // ignore
-    }
-
-    // bad locale sent?
-    return java.util.Locale.US;
-  }
-
   public static Locale getLocale(@Nullable CommandSender sender) {
     if (!(sender instanceof Player)) return SOURCE_LOCALE;
-    return LOCALE_CACHE.getUnchecked(((Player) sender).spigot().getLocale());
+    return ((Player) sender).locale();
   }
 
   /**
@@ -286,6 +255,10 @@ public final class TextTranslations {
    */
   public static Component translate(Component text, Locale locale) {
     return GlobalTranslator.render(text, locale);
+  }
+
+  public static Component translate(Component text, CommandSender sender) {
+    return GlobalTranslator.render(text, getLocale(sender));
   }
 
   /**

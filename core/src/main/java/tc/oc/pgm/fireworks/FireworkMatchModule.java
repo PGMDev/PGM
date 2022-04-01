@@ -236,7 +236,8 @@ public class FireworkMatchModule implements MatchModule, Listener {
     Preconditions.checkNotNull(effect, "firework effect");
     Preconditions.checkArgument(power >= 0, "power must be positive");
 
-    FireworkMeta meta = (FireworkMeta) Bukkit.getItemFactory().getItemMeta(Material.FIREWORK);
+    FireworkMeta meta =
+        (FireworkMeta) Bukkit.getItemFactory().getItemMeta(Material.FIREWORK_ROCKET);
     meta.setPower(power);
     meta.addEffect(effect);
 

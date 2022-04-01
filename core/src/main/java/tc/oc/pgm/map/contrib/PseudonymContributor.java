@@ -7,9 +7,9 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.util.named.NameStyle;
 
@@ -50,12 +50,12 @@ public class PseudonymContributor implements Contributor {
     return new EqualsBuilder()
         .append(getName(), o.getName())
         .append(getContribution(), o.getContribution())
-        .build();
+        .isEquals();
   }
 
   @Override
   public int hashCode() {
-    return new HashCodeBuilder().append(getName()).append(getContribution()).build();
+    return new HashCodeBuilder().append(getName()).append(getContribution()).hashCode();
   }
 
   @Override
@@ -63,6 +63,6 @@ public class PseudonymContributor implements Contributor {
     return new ToStringBuilder(this)
         .append("name", getName())
         .append("desc", getContribution())
-        .build();
+        .toString();
   }
 }

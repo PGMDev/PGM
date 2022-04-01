@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -21,7 +21,6 @@ import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.event.PlayerPunchBlockEvent;
 import tc.oc.pgm.util.event.PlayerTrampleBlockEvent;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class BlockDropsRuleSet {
   private final ImmutableList<BlockDropsRule> rules;
@@ -54,10 +53,10 @@ public class BlockDropsRuleSet {
   }
 
   /** Return the subset of rules that may act on any of the given world */
-  public BlockDropsRuleSet subsetAffecting(Set<MaterialData> materials) {
+  public BlockDropsRuleSet subsetAffecting(Set<Material> materials) {
     ImmutableList.Builder<BlockDropsRule> subset = ImmutableList.builder();
     for (BlockDropsRule rule : this.rules) {
-      for (MaterialData material : materials) {
+      for (Material material : materials) {
         if (rule.filter == null
             || rule.filter.query(MaterialQuery.get(material)) != Filter.QueryResponse.DENY) {
           subset.add(rule);
@@ -69,21 +68,21 @@ public class BlockDropsRuleSet {
     return new BlockDropsRuleSet(subset.build());
   }
 
-  public BlockDrops getDrops(BlockState block, MaterialData material) {
+  public BlockDrops getDrops(BlockState block, Material material) {
     return this.getDrops(null, block, material, null);
   }
 
   public BlockDrops getDrops(@Nullable Event event, BlockState block, ParticipantState player) {
-    return this.getDrops(event, block, block.getData(), player);
+    return this.getDrops(event, block, block.getType(), player);
   }
 
   public BlockDrops getDrops(
       @Nullable Event event,
       BlockState block,
-      MaterialData material,
+      Material material,
       @Nullable ParticipantState playerState) {
     Map<ItemStack, Double> items = new LinkedHashMap<>();
-    MaterialData replacement = null;
+    Material replacement = null;
     Float fallChance = null;
     Float landChance = null;
     double fallSpeed = 1;
@@ -93,9 +92,9 @@ public class BlockDropsRuleSet {
 
     boolean rightToolUsed;
     if (event instanceof BlockBreakEvent) {
-      rightToolUsed =
-          NMSHacks.canMineBlock(material, ((BlockBreakEvent) event).getPlayer().getItemInHand());
-      ;
+      rightToolUsed = true;
+      //          NMSHacks.canMineBlock(material, ((BlockBreakEvent)
+      // event).getPlayer().getItemInHand());
     } else {
       rightToolUsed = true;
     }

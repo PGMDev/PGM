@@ -2,6 +2,7 @@ package tc.oc.pgm.controlpoint;
 
 import com.google.common.collect.Lists;
 import java.util.List;
+import org.bukkit.DyeColor;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -18,6 +19,7 @@ import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.regions.SectorRegion;
 import tc.oc.pgm.renewable.BlockImage;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.material.Materials;
 
 /** Displays the status of a ControlPoint by coloring blocks in specified regions */
 public class ControlPointBlockDisplay implements Listener {
@@ -87,9 +89,9 @@ public class ControlPointBlockDisplay implements Listener {
           this.controllerDisplayImage.restore(block);
         }
       } else {
-        byte blockData = BukkitUtils.chatColorToDyeColor(controllingTeam.getColor()).getWoolData();
+        DyeColor dyeColor = BukkitUtils.chatColorToDyeColor(controllingTeam.getColor());
         for (Block block : this.controllerDisplayRegion.getBlocks()) {
-          block.setData(blockData);
+          Materials.colorBlock(block, dyeColor);
         }
       }
       this.controllingTeam = controllingTeam;
@@ -104,7 +106,7 @@ public class ControlPointBlockDisplay implements Listener {
         .query(new BlockQuery(block))
         .isAllowed()) {
       if (team != null) {
-        block.setData(BukkitUtils.chatColorToDyeColor(team.getColor()).getWoolData());
+        Materials.colorBlock(block, BukkitUtils.chatColorToDyeColor(team.getColor()));
       } else {
         this.progressDisplayImage.restore(block);
       }

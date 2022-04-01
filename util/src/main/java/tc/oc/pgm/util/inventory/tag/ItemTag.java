@@ -1,6 +1,7 @@
 package tc.oc.pgm.util.inventory.tag;
 
 import javax.annotation.Nullable;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 
 /** A persistent data holder for {@link ItemStack}s. */
@@ -47,8 +48,7 @@ public interface ItemTag<T> {
    * @return An item tag.
    */
   static ItemTag<String> newString(String key) {
-    // TODO: Add an implementation that uses the 1.14+ org.bukkit.persistence API
-    return new LegacyItemTag();
+    return new StringItemTag(new NamespacedKey("pgm", key));
   }
 
   /**

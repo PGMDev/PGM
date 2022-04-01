@@ -1,37 +1,37 @@
 package tc.oc.pgm.util.inventory.tag;
 
-import com.cryptomorin.xseries.XItemStack;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
-public class ModernItemTag<T> implements ItemTag<T> {
+public class StringItemTag implements ItemTag<String> {
 
   NamespacedKey key;
 
-  public ModernItemTag(NamespacedKey key) {
+  public StringItemTag(NamespacedKey key) {
     this.key = key;
   }
 
   @Override
-  public T get(ItemStack item) {
-    return item.getItemMeta()
-        .getPersistentDataContainer()
-        .get(key, new PersistentDataType.PrimitivePersistentDataType(Class<T>.getClass()));
+  public String get(ItemStack item) {
+    return item.getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING);
   }
 
   @Override
   public boolean has(ItemStack item) {
-    return ItemTag.super.has(item);
+    return item.getItemMeta().getPersistentDataContainer().has(key, PersistentDataType.STRING);
   }
 
   @Override
-  public void set(ItemStack item, Object value) {
-
+  public void set(ItemStack item, String value) {
+    ItemMeta itemMeta = item.getItemMeta();
+    itemMeta.getPersistentDataContainer().set(key, PersistentDataType.STRING, value);
+    item.setItemMeta(itemMeta);
   }
 
   @Override
   public void clear(ItemStack item) {
-
+    item.getItemMeta().getPersistentDataContainer().remove(key);
   }
 }

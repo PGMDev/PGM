@@ -522,17 +522,14 @@ public final class LegacyFormatUtils {
   }
 
   public static boolean isFormat(ChatColor color) {
-    switch (color) {
-      case BOLD:
-      case ITALIC:
-      case UNDERLINE:
-      case STRIKETHROUGH:
-      case MAGIC:
-        return true;
-
-      default:
-        return false;
+    if (ChatColor.BOLD.equals(color)
+        || ChatColor.ITALIC.equals(color)
+        || ChatColor.UNDERLINE.equals(color)
+        || ChatColor.STRIKETHROUGH.equals(color)
+        || ChatColor.MAGIC.equals(color)) {
+      return true;
     }
+    return false;
   }
 
   /**

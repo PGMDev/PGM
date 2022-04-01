@@ -23,7 +23,6 @@ import tc.oc.pgm.spawns.SpawnModule;
 import tc.oc.pgm.spawns.events.DeathKitApplyEvent;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 /** Player is waiting to respawn after dying in-game */
 public class Dead extends Spawning {
@@ -54,12 +53,13 @@ public class Dead extends Spawning {
 
     player.resetInventory();
 
-    if (player.isVisible()) NMSHacks.playDeathAnimation(player.getBukkit());
+    //    if (player.isVisible()) NMSHacks.playDeathAnimation(player.getBukkit());
+    //    player.getBukkit().dama
 
     if (!options.spectate) player.setFrozen(true);
 
     // Show red vignette
-    NMSHacks.showBorderWarning(player.getBukkit(), true);
+    //    NMSHacks.showBorderWarning(player.getBukkit(), true);
 
     // Flash/wobble the screen. If we don't delay this then the client glitches out
     // when the player dies from a potion effect. I have no idea why it happens,
@@ -80,7 +80,7 @@ public class Dead extends Spawning {
     player.setFrozen(false);
     player.setDead(false);
 
-    NMSHacks.showBorderWarning(bukkit, false);
+    //    NMSHacks.showBorderWarning(bukkit, false);
 
     bukkit.removePotionEffect(PotionEffectType.BLINDNESS);
     bukkit.removePotionEffect(PotionEffectType.CONFUSION);

@@ -21,7 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -82,7 +82,6 @@ import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.Events;
 import tc.oc.pgm.util.collection.RankedSet;
 import tc.oc.pgm.util.concurrent.BukkitExecutorService;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class MatchImpl implements Match {
 
@@ -243,7 +242,7 @@ public class MatchImpl implements Match {
 
   @Override
   public Tick getTick() {
-    long now = NMSHacks.getMonotonicTime(getWorld());
+    long now = getWorld().getGameTime();
     Tick old = tick.get();
     if (old == null || old.tick != now) {
       tick.set(new Tick(now, Instant.now()));
@@ -933,6 +932,6 @@ public class MatchImpl implements Match {
         .append("world", getWorld())
         .append("scope", getScope())
         .append("state", getPhase())
-        .build();
+        .toString();
   }
 }

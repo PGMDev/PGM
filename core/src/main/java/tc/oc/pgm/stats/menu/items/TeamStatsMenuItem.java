@@ -27,7 +27,6 @@ import tc.oc.pgm.menu.MenuItem;
 import tc.oc.pgm.stats.StatsMatchModule;
 import tc.oc.pgm.stats.TeamStats;
 import tc.oc.pgm.stats.menu.TeamStatsMenu;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextTranslations;
 
 /** Represents a team with same color & lore. Clicking will open {@link TeamStatsMenu} * */
@@ -60,7 +59,6 @@ public class TeamStatsMenuItem implements MenuItem {
                     new PlayerStatsMenuItem(
                         p.getId(),
                         smm.getPlayerStat(p),
-                        NMSHacks.getPlayerSkin(p.getBukkit()),
                         p.getNameLegacy(),
                         p.getParty().getName().color()))
             .collect(Collectors.toList()));
@@ -73,7 +71,6 @@ public class TeamStatsMenuItem implements MenuItem {
                     new PlayerStatsMenuItem(
                         id,
                         smm.getPlayerStat(id),
-                        datastore.getSkin(id),
                         datastore.getUsername(id).getNameLegacy(),
                         NamedTextColor.DARK_AQUA))
             .collect(Collectors.toSet()));

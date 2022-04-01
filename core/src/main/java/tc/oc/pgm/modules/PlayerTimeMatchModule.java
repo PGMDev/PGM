@@ -41,7 +41,7 @@ public class PlayerTimeMatchModule implements MatchModule, Listener {
       case TIME_LIGHT:
         return 6000; // Midday
       default:
-        return player.getWorld().getFullTime();
+        return player.getBukkit().getWorld().getFullTime();
     }
   }
 }

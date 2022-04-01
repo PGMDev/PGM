@@ -1,11 +1,11 @@
 package tc.oc.pgm.util.material.matcher;
 
-import com.google.common.collect.Collections2;
-import java.util.Collection;
+import com.google.common.collect.Sets;
 import java.util.EnumSet;
+import java.util.Set;
 import org.bukkit.Material;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
 public class BlockMaterialMatcher implements MaterialMatcher {
@@ -14,8 +14,9 @@ public class BlockMaterialMatcher implements MaterialMatcher {
 
   private BlockMaterialMatcher() {}
 
-  private static final Collection<Material> BLOCKS =
-      Collections2.filter(EnumSet.allOf(Material.class), Material::isBlock);
+  private static final Set<Material> BLOCKS =
+      Sets.filter(
+          EnumSet.allOf(Material.class), material -> material.isBlock() && !material.isLegacy());
 
   @Override
   public boolean matches(Material material) {
@@ -23,8 +24,8 @@ public class BlockMaterialMatcher implements MaterialMatcher {
   }
 
   @Override
-  public boolean matches(MaterialData materialData) {
-    return materialData.getItemType().isBlock();
+  public boolean matches(BlockData blockData) {
+    return true;
   }
 
   @Override
@@ -33,7 +34,7 @@ public class BlockMaterialMatcher implements MaterialMatcher {
   }
 
   @Override
-  public Collection<Material> getMaterials() {
+  public Set<Material> getMaterials() {
     return BLOCKS;
   }
 }

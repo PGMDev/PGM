@@ -7,14 +7,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.logging.Logger;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.filter.Filter;
@@ -160,7 +161,7 @@ public class Renewable implements Listener, Tickable {
     if (!isOriginalRenewable(pos)) return true;
 
     // If original and current world are both shuffleable, block is new
-    MaterialData currentMaterial = currentState.getData();
+    Material currentMaterial = currentState.getType();
     if (isOriginalShuffleable(pos)
         && definition.shuffleableBlocks.query(new BlockQuery(currentState)).isAllowed())
       return true;
@@ -206,7 +207,7 @@ public class Renewable implements Listener, Tickable {
     return true;
   }
 
-  MaterialData sampleShuffledMaterial(BlockVector pos) {
+  Material sampleShuffledMaterial(BlockVector pos) {
     Random random = match.getRandom();
     int range = SHUFFLE_SAMPLE_RANGE;
     int diameter = range * 2 + 1;
@@ -218,27 +219,27 @@ public class Renewable implements Listener, Tickable {
                   pos.getBlockY() + random.nextInt(diameter) - range,
                   pos.getBlockZ() + random.nextInt(diameter) - range);
       if (definition.shuffleableBlocks.query(new BlockQuery(block)).isAllowed())
-        return block.getData();
+        return block.getType();
     }
     return null;
   }
 
-  MaterialData chooseShuffledMaterial() {
-    ImmutableRangeMap.Builder<Double, MaterialData> weightsBuilder = ImmutableRangeMap.builder();
+  Material chooseShuffledMaterial() {
+    ImmutableRangeMap.Builder<Double, Material> weightsBuilder = ImmutableRangeMap.builder();
     double sum = 0d;
-    for (MaterialData material : shuffleableMaterialDeficit.materials()) {
+    for (Material material : shuffleableMaterialDeficit.materials()) {
       double weight = shuffleableMaterialDeficit.get(material);
       if (weight > 0) {
         weightsBuilder.put(Range.closedOpen(sum, sum + weight), material);
         sum += weight;
       }
     }
-    RangeMap<Double, MaterialData> weights = weightsBuilder.build();
+    RangeMap<Double, Material> weights = weightsBuilder.build();
     return weights.get(match.getRandom().nextDouble() * sum);
   }
 
   boolean renew(BlockVector pos) {
-    MaterialData material;
+    Material material;
     if (isOriginalShuffleable(pos)) {
       // If position is shuffled, first try to find a nearby shuffleable block to swap with.
       // This helps to make shuffling less predictable when the world deficit is small or
@@ -258,7 +259,7 @@ public class Renewable implements Listener, Tickable {
     return false;
   }
 
-  boolean renew(BlockVector pos, MaterialData material) {
+  boolean renew(BlockVector pos, Material material) {
     // We need to do the entity check here rather than canRenew, because we are not
     // notified when entities move in our out of the way.
     if (!isClearOfEntities(pos)) return false;
@@ -266,8 +267,7 @@ public class Renewable implements Listener, Tickable {
     Location location = pos.toLocation(match.getWorld());
     Block block = location.getBlock();
     BlockState newState = location.getBlock().getState();
-    newState.setType(material.getItemType());
-    newState.setData(material);
+    newState.setType(material);
 
     BlockRenewEvent event = new BlockRenewEvent(block, newState, this);
     match.callEvent(event); // Our own handler will get this and remove the block from the pool
@@ -276,7 +276,7 @@ public class Renewable implements Listener, Tickable {
     newState.update(true, true);
 
     if (definition.particles || definition.sound) {
-      Materials.playBreakEffect(location, material);
+      Materials.playBreakEffect(location, Bukkit.createBlockData(material));
     }
 
     return true;

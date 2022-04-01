@@ -8,12 +8,11 @@ import java.util.Collection;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.kyori.adventure.audience.ForwardingAudience;
-import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.audience.ConsoleAudience;
 
 /** Receiver of chat messages, sounds, titles, and other media. */
 @FunctionalInterface
@@ -27,18 +26,16 @@ public interface Audience extends ForwardingAudience.Single {
     playSound(WARNING_SOUND);
   }
 
-  BukkitAudiences PROVIDER = BukkitAudiences.create(BukkitUtils.getPlugin());
-
   static Audience console() {
-    return PROVIDER::console;
+    return ConsoleAudience::new;
   }
 
   static Audience get(CommandSender sender) {
-    return () -> PROVIDER.sender(sender);
+    return () -> sender;
   }
 
   static Audience get(Collection<? extends CommandSender> senders) {
-    return () -> PROVIDER.filter(senders::contains);
+    return () -> net.kyori.adventure.audience.Audience.audience(senders);
   }
 
   /** Makes a single audience from a group of audiences */

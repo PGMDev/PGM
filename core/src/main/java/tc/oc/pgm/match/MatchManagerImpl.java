@@ -26,7 +26,6 @@ import tc.oc.pgm.api.match.event.MatchUnloadEvent;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.ClassLogger;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
 
@@ -90,7 +89,7 @@ public class MatchManagerImpl implements MatchManager, Listener {
     matchByWorld.remove(checkNotNull(match.getWorld()).getName());
 
     PGM.get()
-        .getAsyncExecutor()
+        .getExecutor()
         .schedule(
             () -> {
               match.destroy();
@@ -104,7 +103,7 @@ public class MatchManagerImpl implements MatchManager, Listener {
     final String name = world.getName();
     if (name.startsWith("match")) return;
 
-    NMSHacks.resetDimension(world);
+    //    NMSHacks.resetDimension(world);
 
     if (PGM.get().getServer().unloadWorld(name, false)) {
       logger.info("Unloaded non-match " + name);

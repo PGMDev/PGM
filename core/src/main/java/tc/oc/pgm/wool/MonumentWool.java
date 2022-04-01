@@ -99,7 +99,7 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
   @Override
   protected boolean canBlockUpdateProximity(BlockState oldState, BlockState newState) {
     // If monument proximity metric is closest block, make it only the wool
-    return !hasTouched(getOwner()) || this.getDefinition().isObjectiveWool(newState.getData());
+    return !hasTouched(getOwner()) || this.getDefinition().isObjectiveWool(newState.getType());
   }
 
   public void handleWoolAcquisition(Player player, ItemStack item) {

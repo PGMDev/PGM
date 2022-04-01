@@ -5,11 +5,11 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
 import java.time.Instant;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.TextColor;
+import org.jetbrains.annotations.Nullable;
 
 public final class TemporalComponent {
   private TemporalComponent() {}

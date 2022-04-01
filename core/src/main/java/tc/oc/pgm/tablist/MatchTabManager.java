@@ -156,7 +156,7 @@ public class MatchTabManager extends TabManager implements Listener {
       long nextUpdate =
           (lastUpdate - now)
               + (renderTime * TIME_RATIO)
-              + (long) Math.max(0, (20 - Bukkit.getServer().spigot().getTPS()[0]) * TPS_RATIO)
+              + (long) Math.max(0, (20 - Bukkit.getServer().getTPS()[0]) * TPS_RATIO)
               + (loadingUntil > now ? MAX_DELAY : 0);
       nextUpdate = Math.min(Math.max(MIN_DELAY, nextUpdate), MAX_DELAY);
       this.renderTask = PGM.get().getExecutor().schedule(render, nextUpdate, TimeUnit.MILLISECONDS);

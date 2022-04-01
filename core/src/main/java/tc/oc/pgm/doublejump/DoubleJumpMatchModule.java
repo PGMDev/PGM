@@ -107,7 +107,7 @@ public class DoubleJumpMatchModule implements MatchModule, Listener, Tickable {
       impulse.multiply(jumper.kit.power / 3f);
       event.getPlayer().setVelocity(impulse);
 
-      player.getWorld().playSound(player.getLocation(), Sound.ZOMBIE_INFECT, 0.5f, 1.8f);
+      player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ZOMBIE_INFECT, 0.5f, 1.8f);
     }
   }
 

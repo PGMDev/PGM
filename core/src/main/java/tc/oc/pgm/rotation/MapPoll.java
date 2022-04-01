@@ -201,7 +201,7 @@ public class MapPoll {
     ItemMeta meta = personalDummyVoteBook.getItemMeta();
 
     Component dummyTitle = translate(VOTE_BOOK_TITLE, locale);
-    meta.setDisplayName(TextTranslations.translateLegacy(dummyTitle, viewer.getBukkit()));
+    meta.displayName(TextTranslations.translate(dummyTitle, viewer.getBukkit()));
 
     personalDummyVoteBook.setItemMeta(meta);
 
