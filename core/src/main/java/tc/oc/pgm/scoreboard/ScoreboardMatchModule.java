@@ -79,7 +79,7 @@ public class ScoreboardMatchModule implements MatchModule, Listener {
     team.setSuffix(ChatColor.WHITE.toString());
 
     team.setCanSeeFriendlyInvisibles(true);
-    team.setAllowFriendlyFire(false);
+    team.setAllowFriendlyFire(match.getMap().getFriendlyFire());
 
     if (!forObservers && party instanceof Competitor) {
       NameTagVisibility nameTags = ((Competitor) party).getNameTagVisibility();

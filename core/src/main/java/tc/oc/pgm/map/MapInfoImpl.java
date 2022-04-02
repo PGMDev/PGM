@@ -45,6 +45,7 @@ public class MapInfoImpl implements MapInfo {
   private final Component gamemode;
   private final int difficulty;
   private final WorldInfo world;
+  private final boolean friendlyFire;
 
   protected final Collection<MapTag> tags;
   protected final Collection<Integer> players;
@@ -66,7 +67,8 @@ public class MapInfoImpl implements MapInfo {
       @Nullable WorldInfo world,
       @Nullable Component gamemode,
       @Nullable Collection<Gamemode> gamemodes,
-      Phase phase) {
+      Phase phase,
+      @Nullable boolean friendlyFire) {
     this.name = checkNotNull(name);
     this.id = checkNotNull(MapInfo.normalizeName(id == null ? name : id));
     this.proto = checkNotNull(proto);
@@ -83,6 +85,7 @@ public class MapInfoImpl implements MapInfo {
     this.gamemode = gamemode;
     this.gamemodes = gamemodes;
     this.phase = phase;
+    this.friendlyFire = friendlyFire;
   }
 
   public MapInfoImpl(MapInfo info) {
@@ -102,7 +105,8 @@ public class MapInfoImpl implements MapInfo {
         info.getWorld(),
         info.getGamemode(),
         info.getGamemodes(),
-        info.getPhase());
+        info.getPhase(),
+        info.getFriendlyFire());
   }
 
   public MapInfoImpl(Element root) throws InvalidXMLException {
@@ -128,7 +132,9 @@ public class MapInfoImpl implements MapInfo {
         XMLUtils.parseFormattedText(root, "game"),
         parseGamemodes(root),
         XMLUtils.parseEnum(
-            Node.fromLastChildOrAttr(root, "phase"), Phase.class, "phase", Phase.PRODUCTION));
+            Node.fromLastChildOrAttr(root, "phase"), Phase.class, "phase", Phase.PRODUCTION),
+        XMLUtils.parseBoolean(
+            Node.fromLastChildOrAttr(root, "friendlyfire", "friendly-fire"), false));
   }
 
   @Override
@@ -209,6 +215,11 @@ public class MapInfoImpl implements MapInfo {
   @Override
   public Phase getPhase() {
     return phase;
+  }
+
+  @Override
+  public boolean getFriendlyFire() {
+    return friendlyFire;
   }
 
   @Override

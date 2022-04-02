@@ -144,6 +144,13 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
   Phase getPhase();
 
   /**
+   * Get whether friendly fire should be on or off.
+   *
+   * @return True if friendly fire is on.
+   */
+  boolean getFriendlyFire();
+
+  /**
    * Create an immutable copy of this info.
    *
    * @return A cloned {@link MapInfo}.
