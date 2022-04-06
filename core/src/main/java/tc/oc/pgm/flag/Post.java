@@ -8,11 +8,11 @@ import org.bukkit.Location;
 import tc.oc.pgm.api.feature.Feature;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.points.PointProvider;
 import tc.oc.pgm.flag.post.PostDefinition;
 import tc.oc.pgm.flag.post.PostResolver;
 import tc.oc.pgm.flag.post.SinglePost;
 import tc.oc.pgm.points.AngleProvider;
-import tc.oc.pgm.points.PointProvider;
 import tc.oc.pgm.teams.TeamFactory;
 
 public class Post implements Feature<PostDefinition> {

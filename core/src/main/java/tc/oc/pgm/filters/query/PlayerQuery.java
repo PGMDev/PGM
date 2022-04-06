@@ -17,13 +17,11 @@ public class PlayerQuery extends Query implements tc.oc.pgm.api.filter.query.Pla
 
   private final MatchPlayer player;
   private final Location location;
-  private final Location blockCenter;
 
   public PlayerQuery(@Nullable Event event, MatchPlayer player, @Nullable Location location) {
     super(event);
     this.player = checkNotNull(player);
     this.location = location != null ? location : player.getBukkit().getLocation();
-    this.blockCenter = this.location.getBlock().getLocation();
   }
 
   public PlayerQuery(@Nullable Event event, MatchPlayer player) {
@@ -58,11 +56,6 @@ public class PlayerQuery extends Query implements tc.oc.pgm.api.filter.query.Pla
   @Override
   public Location getLocation() {
     return location;
-  }
-
-  @Override
-  public Location getBlockCenter() {
-    return blockCenter;
   }
 
   @Override

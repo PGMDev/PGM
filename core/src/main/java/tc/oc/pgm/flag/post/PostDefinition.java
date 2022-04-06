@@ -4,8 +4,8 @@ import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
+import tc.oc.pgm.api.feature.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 
 @FeatureInfo(name = "post")
 public abstract class PostDefinition extends SelfIdentifyingFeatureDefinition {

@@ -8,12 +8,12 @@ import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
+import tc.oc.pgm.api.kits.Kit;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.flag.post.PostDefinition;
 import tc.oc.pgm.goals.ProximityGoalDefinition;
 import tc.oc.pgm.goals.ProximityMetric;
-import tc.oc.pgm.goals.ShowOptions;
-import tc.oc.pgm.kits.Kit;
+import tc.oc.pgm.goals.ShowOptionsImpl;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 
@@ -53,7 +53,7 @@ public class FlagDefinition extends ProximityGoalDefinition {
       @Nullable String id,
       @Nullable String name,
       @Nullable Boolean required,
-      ShowOptions showOptions,
+      ShowOptionsImpl showOptions,
       @Nullable DyeColor color,
       PostDefinition defaultPost,
       @Nullable FeatureReference<TeamFactory> owner,

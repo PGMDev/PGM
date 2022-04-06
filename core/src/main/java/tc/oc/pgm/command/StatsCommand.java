@@ -6,6 +6,7 @@ import static tc.oc.pgm.util.text.TextException.exception;
 import app.ashcon.intake.Command;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
+import tc.oc.pgm.api.Audience;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -13,7 +14,6 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.ffa.Tribute;
 import tc.oc.pgm.stats.StatsMatchModule;
-import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.text.TextFormatter;
 
 public final class StatsCommand {

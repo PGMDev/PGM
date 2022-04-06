@@ -11,7 +11,7 @@ public abstract class ProximityGoalDefinition extends OwnedGoalDefinition {
       @Nullable String id,
       String name,
       @Nullable Boolean required,
-      ShowOptions showOptions,
+      ShowOptionsImpl showOptions,
       TeamFactory owner,
       @Nullable ProximityMetric preTouchMetric,
       @Nullable ProximityMetric postTouchMetric) {
@@ -24,7 +24,7 @@ public abstract class ProximityGoalDefinition extends OwnedGoalDefinition {
       @Nullable String id,
       String name,
       @Nullable Boolean required,
-      ShowOptions showOptions,
+      ShowOptionsImpl showOptions,
       TeamFactory owner,
       @Nullable ProximityMetric preTouchMetric) {
     this(id, name, required, showOptions, owner, preTouchMetric, null);

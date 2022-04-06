@@ -25,6 +25,8 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.api.region.RegionParser;
+import tc.oc.pgm.api.xml.InvalidXMLException;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.InverseFilter;
 import tc.oc.pgm.filters.StaticFilter;
@@ -34,10 +36,8 @@ import tc.oc.pgm.regions.RFAScope;
 import tc.oc.pgm.regions.RandomPointsValidation;
 import tc.oc.pgm.regions.RegionFilterApplication;
 import tc.oc.pgm.regions.RegionModule;
-import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.regions.TranslatedRegion;
 import tc.oc.pgm.regions.Union;
-import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class PortalModule implements MapModule {

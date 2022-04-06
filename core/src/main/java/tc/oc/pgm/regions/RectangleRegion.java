@@ -1,6 +1,7 @@
 package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.Bounds;
 
 public class RectangleRegion extends AbstractRegion {
   protected final double minX;
@@ -23,7 +24,7 @@ public class RectangleRegion extends AbstractRegion {
 
   @Override
   public Bounds getBounds() {
-    return new Bounds(
+    return new BoundsImpl(
         new Vector(this.minX, Double.NEGATIVE_INFINITY, this.minZ),
         new Vector(this.maxX, Double.POSITIVE_INFINITY, this.maxZ));
   }

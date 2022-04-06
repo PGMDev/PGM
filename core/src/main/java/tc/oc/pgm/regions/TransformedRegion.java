@@ -3,6 +3,7 @@ package tc.oc.pgm.regions;
 import java.util.Random;
 import javax.annotation.Nullable;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.Bounds;
 import tc.oc.pgm.api.region.Region;
 
 public abstract class TransformedRegion extends AbstractRegion {
@@ -35,6 +36,8 @@ public abstract class TransformedRegion extends AbstractRegion {
   /**
    * Generic bounding box transform - transform all 8 vertices and find the minimum bounding box
    * containing them.
+   *
+   * @return
    */
   protected Bounds getTransformedBounds() {
     Vector[] oldVertices = this.region.getBounds().getVertices();
@@ -42,7 +45,7 @@ public abstract class TransformedRegion extends AbstractRegion {
     for (int i = 0; i < oldVertices.length; i++) {
       newVertices[i] = this.transform(oldVertices[i]);
     }
-    return new Bounds(newVertices);
+    return new BoundsImpl(newVertices);
   }
 
   @Override

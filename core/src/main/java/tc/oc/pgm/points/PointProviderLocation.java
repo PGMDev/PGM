@@ -2,6 +2,7 @@ package tc.oc.pgm.points;
 
 import org.bukkit.Location;
 import org.bukkit.World;
+import tc.oc.pgm.api.points.PointProvider;
 
 /**
  * The only purpose of this class is to allow callers of {@link PointProvider#getPoint} to detect if

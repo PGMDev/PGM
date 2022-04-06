@@ -3,6 +3,7 @@ package tc.oc.pgm.regions;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.Bounds;
 
 public class SphereRegion extends AbstractRegion {
   protected final Vector origin;
@@ -38,7 +39,8 @@ public class SphereRegion extends AbstractRegion {
   @Override
   public Bounds getBounds() {
     Vector diagonal = new Vector(this.radius, this.radius, this.radius);
-    return new Bounds(this.origin.clone().subtract(diagonal), this.origin.clone().add(diagonal));
+    return new BoundsImpl(
+        this.origin.clone().subtract(diagonal), this.origin.clone().add(diagonal));
   }
 
   @Override

@@ -2,6 +2,7 @@ package tc.oc.pgm.kits;
 
 import java.util.List;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.api.kits.Kit;
 import tc.oc.pgm.api.player.MatchPlayer;
 
 public class RemoveKit extends AbstractKit {

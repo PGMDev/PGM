@@ -11,9 +11,9 @@ import org.bukkit.Location;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.points.PointProvider;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.points.AngleProvider;
-import tc.oc.pgm.points.PointProvider;
 import tc.oc.pgm.points.PointProviderLocation;
 import tc.oc.pgm.teams.TeamFactory;
 

@@ -6,10 +6,10 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
+import tc.oc.pgm.api.named.NameStyle;
+import tc.oc.pgm.api.skin.Skin;
 import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
-import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
-import tc.oc.pgm.util.skin.Skin;
 
 /**
  * {@link TabEntry} showing a {@link Player}'s name and skin.

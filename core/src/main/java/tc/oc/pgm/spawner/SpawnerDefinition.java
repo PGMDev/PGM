@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
+import tc.oc.pgm.api.feature.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;
-import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 
 @FeatureInfo(name = "spawner")
 public class SpawnerDefinition extends SelfIdentifyingFeatureDefinition {

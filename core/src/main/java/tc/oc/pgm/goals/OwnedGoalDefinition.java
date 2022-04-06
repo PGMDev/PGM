@@ -1,6 +1,7 @@
 package tc.oc.pgm.goals;
 
 import javax.annotation.Nullable;
+import tc.oc.pgm.api.goal.GoalDefinition;
 import tc.oc.pgm.teams.TeamFactory;
 
 /**
@@ -16,7 +17,7 @@ public abstract class OwnedGoalDefinition extends GoalDefinition {
       @Nullable String id,
       String name,
       @Nullable Boolean required,
-      ShowOptions showOptions,
+      ShowOptionsImpl showOptions,
       @Nullable TeamFactory owner) {
     super(id, name, required, showOptions);
     this.owner = owner;

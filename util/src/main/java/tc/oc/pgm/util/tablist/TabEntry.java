@@ -1,12 +1,11 @@
 package tc.oc.pgm.util.tablist;
 
-import java.awt.*;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
-import tc.oc.pgm.util.skin.Skin;
+import tc.oc.pgm.api.skin.Skin;
 
 /** Content for a slot in a {@link TabView} */
 public interface TabEntry {

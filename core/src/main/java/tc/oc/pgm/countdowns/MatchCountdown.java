@@ -17,6 +17,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.title.Title;
+import tc.oc.pgm.api.countdowns.Countdown;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.events.CountdownCancelEvent;
 import tc.oc.pgm.events.CountdownEndEvent;

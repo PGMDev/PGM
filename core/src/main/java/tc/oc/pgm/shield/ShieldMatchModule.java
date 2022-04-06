@@ -8,6 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
+import tc.oc.pgm.api.event.entity.PotionEffectRemoveEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -17,7 +18,6 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.util.ClassLogger;
-import tc.oc.pgm.util.event.entity.PotionEffectRemoveEvent;
 
 @ListenerScope(MatchScope.LOADED)
 public class ShieldMatchModule implements MatchModule, Listener, Tickable {

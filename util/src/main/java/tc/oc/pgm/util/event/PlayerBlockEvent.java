@@ -4,6 +4,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import tc.oc.pgm.api.event.GeneralizedEvent;
 
 /** An event when a {@link Player} interacts with a {@link Block}. */
 public abstract class PlayerBlockEvent extends GeneralizedEvent {

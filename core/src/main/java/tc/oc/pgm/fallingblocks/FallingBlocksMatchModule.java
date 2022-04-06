@@ -1,5 +1,6 @@
 package tc.oc.pgm.fallingblocks;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static tc.oc.pgm.util.block.BlockVectors.blockAt;
 import static tc.oc.pgm.util.block.BlockVectors.encodePos;
 import static tc.oc.pgm.util.block.BlockVectors.neighborPos;
@@ -30,6 +31,7 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
+import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.collection.LongDeque;
 import tc.oc.pgm.util.event.block.BlockFallEvent;
 import tc.oc.pgm.util.material.Materials;
@@ -264,7 +266,11 @@ public class FallingBlocksMatchModule implements MatchModule, Listener, Tickable
     BlockFallEvent event = new BlockFallEvent(block, fallingBlock);
     match.callEvent(
         breaker == null
-            ? new BlockTransformEvent(event, block, Material.AIR)
+            ? new BlockTransformEvent(
+                event,
+                block,
+                checkNotNull(block).getState(),
+                BlockStates.cloneWithMaterial(block, Material.AIR))
             : new ParticipantBlockTransformEvent(event, block, Material.AIR, breaker));
 
     if (event.isCancelled()) {

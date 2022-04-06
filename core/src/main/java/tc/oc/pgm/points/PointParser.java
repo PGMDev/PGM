@@ -8,13 +8,14 @@ import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.points.PointProvider;
 import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.api.region.RegionParser;
+import tc.oc.pgm.api.xml.InvalidXMLException;
+import tc.oc.pgm.api.xml.Node;
 import tc.oc.pgm.regions.PointRegion;
 import tc.oc.pgm.regions.RandomPointsValidation;
-import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.regions.Union;
-import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 /**

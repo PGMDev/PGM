@@ -4,12 +4,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
+import tc.oc.pgm.api.named.NameStyle;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.MeleeInfo;
 import tc.oc.pgm.api.tracker.info.OwnerInfo;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
-import tc.oc.pgm.util.named.NameStyle;
 
 public class PlayerInfo implements OwnerInfo, MeleeInfo, PhysicalInfo {
 

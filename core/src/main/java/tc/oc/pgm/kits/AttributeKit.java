@@ -4,10 +4,10 @@ import com.google.common.collect.SetMultimap;
 import java.util.List;
 import java.util.Map;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.api.attribute.Attribute;
+import tc.oc.pgm.api.attribute.AttributeInstance;
+import tc.oc.pgm.api.attribute.AttributeModifier;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.util.attribute.Attribute;
-import tc.oc.pgm.util.attribute.AttributeInstance;
-import tc.oc.pgm.util.attribute.AttributeModifier;
 
 public class AttributeKit extends AbstractKit {
   private final SetMultimap<String, AttributeModifier> modifiers;

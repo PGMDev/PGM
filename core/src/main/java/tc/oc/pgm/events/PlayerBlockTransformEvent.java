@@ -11,6 +11,7 @@ import org.bukkit.event.Event;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
+import tc.oc.pgm.util.block.BlockStates;
 
 /**
  * A version of BlockTransformEvent where the block transformation can be attributed to a player.
@@ -26,7 +27,11 @@ public class PlayerBlockTransformEvent extends BlockTransformEvent {
 
   public PlayerBlockTransformEvent(
       Event cause, Block oldBlock, Material newMaterial, MatchPlayerState player) {
-    super(cause, oldBlock, newMaterial);
+    super(
+        cause,
+        oldBlock,
+        checkNotNull(oldBlock).getState(),
+        BlockStates.cloneWithMaterial(oldBlock, newMaterial));
     this.player = checkNotNull(player);
   }
 

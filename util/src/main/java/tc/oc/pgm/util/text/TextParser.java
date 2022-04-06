@@ -28,11 +28,11 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Chunk;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.util.LiquidMetal;
+import tc.oc.pgm.api.LiquidMetal;
+import tc.oc.pgm.api.Version;
+import tc.oc.pgm.api.xml.Node;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 /** A string parser that generates user-friendly error messages. */

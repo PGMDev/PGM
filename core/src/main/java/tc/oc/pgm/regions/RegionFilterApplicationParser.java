@@ -11,20 +11,21 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
+import tc.oc.pgm.api.Version;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.FilterParser;
+import tc.oc.pgm.api.kits.Kit;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.api.region.RegionParser;
+import tc.oc.pgm.api.xml.InvalidXMLException;
+import tc.oc.pgm.api.xml.Node;
 import tc.oc.pgm.filters.DenyFilter;
 import tc.oc.pgm.filters.FilterNode;
-import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.filters.TeamFilter;
-import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.teams.Teams;
-import tc.oc.pgm.util.Version;
-import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class RegionFilterApplicationParser {

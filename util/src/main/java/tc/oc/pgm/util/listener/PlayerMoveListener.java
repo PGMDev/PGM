@@ -12,7 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.util.Audience;
+import tc.oc.pgm.api.Audience;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 

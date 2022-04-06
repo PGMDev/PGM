@@ -17,18 +17,18 @@ import javax.annotation.Nullable;
 import org.bukkit.material.MaterialData;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.kits.Kit;
+import tc.oc.pgm.api.kits.KitParser;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
-import tc.oc.pgm.kits.Kit;
+import tc.oc.pgm.api.xml.InvalidXMLException;
+import tc.oc.pgm.api.xml.Node;
 import tc.oc.pgm.kits.KitModule;
-import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ClassModule implements MapModule {

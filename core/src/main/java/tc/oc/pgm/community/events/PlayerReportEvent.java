@@ -3,8 +3,8 @@ package tc.oc.pgm.community.events;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.bukkit.event.HandlerList;
+import tc.oc.pgm.api.event.PreemptiveEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.util.event.PreemptiveEvent;
 
 /** Called immediately AFTER a player runs the report command. */
 public class PlayerReportEvent extends PreemptiveEvent {

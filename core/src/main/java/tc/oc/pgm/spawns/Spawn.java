@@ -3,9 +3,9 @@ package tc.oc.pgm.spawns;
 import com.google.common.base.Optional;
 import org.bukkit.Location;
 import tc.oc.pgm.api.feature.FeatureDefinition;
+import tc.oc.pgm.api.kits.Kit;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.kits.Kit;
-import tc.oc.pgm.points.PointProvider;
+import tc.oc.pgm.api.points.PointProvider;
 
 public class Spawn implements FeatureDefinition {
   protected final SpawnAttributes attributes;

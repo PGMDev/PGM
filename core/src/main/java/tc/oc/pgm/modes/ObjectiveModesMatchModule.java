@@ -17,11 +17,12 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import tc.oc.pgm.api.countdowns.CountdownContext;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
-import tc.oc.pgm.countdowns.CountdownContext;
+import tc.oc.pgm.countdowns.CountdownContextImpl;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.filters.dynamic.FilterMatchModule;
 
@@ -40,7 +41,7 @@ public class ObjectiveModesMatchModule implements MatchModule, Listener {
     this.match = match;
     this.modes = modes;
     this.countdowns = new ArrayList<>(this.modes.size());
-    this.countdownContext = new CountdownContext(match, match.getLogger());
+    this.countdownContext = new CountdownContextImpl(match, match.getLogger());
   }
 
   @Override

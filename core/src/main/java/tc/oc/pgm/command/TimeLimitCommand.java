@@ -7,12 +7,12 @@ import app.ashcon.intake.Command;
 import java.time.Duration;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.format.NamedTextColor;
+import tc.oc.pgm.api.Audience;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.timelimit.TimeLimit;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
-import tc.oc.pgm.util.Audience;
 
 public final class TimeLimitCommand {
 

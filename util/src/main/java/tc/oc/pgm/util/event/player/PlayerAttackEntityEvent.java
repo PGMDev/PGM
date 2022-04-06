@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;
-import tc.oc.pgm.util.event.SportPaper;
+import tc.oc.pgm.api.event.SportPaper;
 
 /**
  * Called when a player left-clicks on any entity. This is called before any other event, and

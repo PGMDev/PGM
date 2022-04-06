@@ -15,20 +15,20 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Difficulty;
 import org.jdom2.Element;
+import tc.oc.pgm.api.Version;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.Phase;
 import tc.oc.pgm.api.map.WorldInfo;
+import tc.oc.pgm.api.named.MapNameStyle;
+import tc.oc.pgm.api.named.NameStyle;
+import tc.oc.pgm.api.xml.InvalidXMLException;
+import tc.oc.pgm.api.xml.Node;
 import tc.oc.pgm.map.contrib.PlayerContributor;
 import tc.oc.pgm.map.contrib.PseudonymContributor;
-import tc.oc.pgm.util.Version;
-import tc.oc.pgm.util.named.MapNameStyle;
-import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
-import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class MapInfoImpl implements MapInfo {

@@ -16,7 +16,7 @@ import net.minecraft.server.v1_8_R3.Packet;
 import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
-import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.api.StringUtils;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextTranslations;
 

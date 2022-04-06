@@ -1,6 +1,7 @@
 package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.Bounds;
 import tc.oc.pgm.api.region.Region;
 
 public class Intersect extends AbstractRegion {
@@ -42,9 +43,9 @@ public class Intersect extends AbstractRegion {
 
   @Override
   public Bounds getBounds() {
-    Bounds bounds = Bounds.unbounded();
+    Bounds bounds = BoundsImpl.unbounded();
     for (Region region : this.regions) {
-      bounds = Bounds.intersection(bounds, region.getBounds());
+      bounds = BoundsImpl.intersection(bounds, region.getBounds());
     }
     return bounds;
   }

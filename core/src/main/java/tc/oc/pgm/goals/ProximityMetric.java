@@ -2,8 +2,8 @@ package tc.oc.pgm.goals;
 
 import javax.annotation.Nullable;
 import org.jdom2.Element;
-import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.api.xml.InvalidXMLException;
+import tc.oc.pgm.api.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ProximityMetric {

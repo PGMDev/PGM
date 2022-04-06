@@ -2,6 +2,7 @@ package tc.oc.pgm.regions;
 
 import java.util.Random;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.Bounds;
 
 public class BlockRegion extends AbstractRegion {
   protected final Vector location;
@@ -29,7 +30,7 @@ public class BlockRegion extends AbstractRegion {
 
   @Override
   public Bounds getBounds() {
-    return new Bounds(this.location, this.location.clone().add(new Vector(1, 1, 1)));
+    return new BoundsImpl(this.location, this.location.clone().add(new Vector(1, 1, 1)));
   }
 
   @Override

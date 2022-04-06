@@ -8,18 +8,18 @@ import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.FilterParser;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.api.region.RegionParser;
+import tc.oc.pgm.api.xml.InvalidXMLException;
+import tc.oc.pgm.api.xml.Node;
 import tc.oc.pgm.filters.AnyFilter;
 import tc.oc.pgm.filters.BlockFilter;
-import tc.oc.pgm.filters.FilterParser;
-import tc.oc.pgm.goals.ShowOptions;
+import tc.oc.pgm.goals.ShowOptionsImpl;
 import tc.oc.pgm.regions.BlockBoundedValidation;
-import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamModule;
-import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public abstract class ControlPointParser {
@@ -120,7 +120,7 @@ public abstract class ControlPointParser {
             elControlPoint.getAttribute("points-growth"), Float.class, Float.POSITIVE_INFINITY);
     boolean showProgress =
         XMLUtils.parseBoolean(elControlPoint.getAttribute("show-progress"), koth);
-    ShowOptions options = ShowOptions.parse(elControlPoint);
+    ShowOptionsImpl options = ShowOptionsImpl.parse(elControlPoint);
     Boolean required = XMLUtils.parseBoolean(elControlPoint.getAttribute("required"), null);
 
     ControlPointDefinition.CaptureCondition captureCondition =

@@ -3,6 +3,7 @@ package tc.oc.pgm.kits;
 import com.google.common.collect.Iterables;
 import java.util.*;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.api.kits.Slot;
 import tc.oc.pgm.api.player.MatchPlayer;
 
 /**

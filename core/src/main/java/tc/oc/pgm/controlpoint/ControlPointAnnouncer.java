@@ -6,9 +6,9 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import tc.oc.pgm.api.goal.ShowOption;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.controlpoint.events.ControllerChangeEvent;
-import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.util.text.TextFormatter;
 
 public class ControlPointAnnouncer implements Listener {

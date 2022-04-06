@@ -49,7 +49,7 @@ public abstract class AbstractRegion extends TypedFilter<LocationQuery>
 
   @Override
   public boolean contains(LocationQuery query) {
-    return this.contains(query.getBlockCenter());
+    return this.contains(BlockVectors.center(query.getLocation()));
   }
 
   @Override

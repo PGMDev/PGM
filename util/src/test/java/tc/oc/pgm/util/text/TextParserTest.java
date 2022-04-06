@@ -16,8 +16,8 @@ import org.bukkit.util.Vector;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import tc.oc.pgm.api.Version;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.Version;
 
 public final class TextParserTest {
 

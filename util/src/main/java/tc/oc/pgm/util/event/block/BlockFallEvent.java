@@ -5,7 +5,7 @@ import org.bukkit.entity.FallingBlock;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.block.BlockEvent;
-import tc.oc.pgm.util.event.SportPaper;
+import tc.oc.pgm.api.event.SportPaper;
 
 @SportPaper
 public class BlockFallEvent extends BlockEvent implements Cancellable {

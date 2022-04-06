@@ -3,10 +3,10 @@ package tc.oc.pgm.goals.events;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.bukkit.event.HandlerList;
+import tc.oc.pgm.api.goal.Goal;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.goals.Contribution;
-import tc.oc.pgm.goals.Goal;
 
 public class GoalCompleteEvent extends GoalEvent {
 

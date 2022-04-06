@@ -2,17 +2,18 @@ package tc.oc.pgm.util.skin;
 
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import tc.oc.pgm.api.skin.Skin;
 
 public abstract class Skins {
-  public static Skin fromProperties(PropertyMap profile) {
+  public static SkinImpl fromProperties(PropertyMap profile) {
     for (Property property : profile.get("textures")) {
       if (property.hasSignature()) {
-        return new Skin(property.getValue(), property.getSignature());
+        return new SkinImpl(property.getValue(), property.getSignature());
       } else {
-        return new Skin(property.getValue(), null);
+        return new SkinImpl(property.getValue(), null);
       }
     }
-    return Skin.EMPTY;
+    return SkinImpl.EMPTY;
   }
 
   public static Property toProperty(Skin skin) {

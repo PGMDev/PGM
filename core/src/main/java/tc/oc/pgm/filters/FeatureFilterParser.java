@@ -1,14 +1,14 @@
 package tc.oc.pgm.filters;
 
 import org.jdom2.Element;
+import tc.oc.pgm.api.MethodParser;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.map.factory.MapFactory;
-import tc.oc.pgm.util.MethodParser;
-import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.api.xml.InvalidXMLException;
+import tc.oc.pgm.api.xml.Node;
 
-public class FeatureFilterParser extends FilterParser {
+public class FeatureFilterParser extends FilterParserImpl {
 
   public FeatureFilterParser(MapFactory factory) {
     super(factory);

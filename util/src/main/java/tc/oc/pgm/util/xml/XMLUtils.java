@@ -21,9 +21,14 @@ import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
+import tc.oc.pgm.api.Version;
+import tc.oc.pgm.api.attribute.AttributeModifier;
+import tc.oc.pgm.api.skin.Skin;
+import tc.oc.pgm.api.xml.InheritingElement;
+import tc.oc.pgm.api.xml.InvalidXMLException;
+import tc.oc.pgm.api.xml.Node;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.Version;
-import tc.oc.pgm.util.attribute.AttributeModifier;
+import tc.oc.pgm.util.attribute.AttributeModifierImpl;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.material.Materials;
@@ -32,7 +37,7 @@ import tc.oc.pgm.util.material.matcher.BlockMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.nms.NMSHacks;
-import tc.oc.pgm.util.skin.Skin;
+import tc.oc.pgm.util.skin.SkinImpl;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
 
@@ -854,7 +859,7 @@ public final class XMLUtils {
     } catch (IllegalArgumentException e) {
       throw new InvalidXMLException("Skin data is not valid base64", node);
     }
-    return new Skin(data, null);
+    return new SkinImpl(data, null);
   }
 
   /**
@@ -938,42 +943,42 @@ public final class XMLUtils {
     return enchantment;
   }
 
-  public static tc.oc.pgm.util.attribute.Attribute parseAttribute(Node node, String text)
+  public static tc.oc.pgm.api.attribute.Attribute parseAttribute(Node node, String text)
       throws InvalidXMLException {
-    tc.oc.pgm.util.attribute.Attribute attribute = tc.oc.pgm.util.attribute.Attribute.byName(text);
+    tc.oc.pgm.api.attribute.Attribute attribute = tc.oc.pgm.api.attribute.Attribute.byName(text);
     if (attribute != null) return attribute;
 
-    attribute = tc.oc.pgm.util.attribute.Attribute.byName("generic." + text);
+    attribute = tc.oc.pgm.api.attribute.Attribute.byName("generic." + text);
     if (attribute != null) return attribute;
 
     throw new InvalidXMLException("Unknown attribute '" + text + "'", node);
   }
 
-  public static tc.oc.pgm.util.attribute.Attribute parseAttribute(Node node)
+  public static tc.oc.pgm.api.attribute.Attribute parseAttribute(Node node)
       throws InvalidXMLException {
     return parseAttribute(node, node.getValueNormalize());
   }
 
-  public static AttributeModifier.Operation parseAttributeOperation(Node node, String text)
+  public static AttributeModifierImpl.Operation parseAttributeOperation(Node node, String text)
       throws InvalidXMLException {
     switch (text.toLowerCase()) {
       case "add":
-        return AttributeModifier.Operation.ADD_NUMBER;
+        return AttributeModifierImpl.Operation.ADD_NUMBER;
       case "base":
-        return AttributeModifier.Operation.ADD_SCALAR;
+        return AttributeModifierImpl.Operation.ADD_SCALAR;
       case "multiply":
-        return AttributeModifier.Operation.MULTIPLY_SCALAR_1;
+        return AttributeModifierImpl.Operation.MULTIPLY_SCALAR_1;
     }
     throw new InvalidXMLException("Unknown attribute modifier operation '" + text + "'", node);
   }
 
-  public static AttributeModifier.Operation parseAttributeOperation(Node node)
+  public static AttributeModifierImpl.Operation parseAttributeOperation(Node node)
       throws InvalidXMLException {
     return parseAttributeOperation(node, node.getValueNormalize());
   }
 
-  public static AttributeModifier.Operation parseAttributeOperation(
-      Node node, AttributeModifier.Operation def) throws InvalidXMLException {
+  public static AttributeModifierImpl.Operation parseAttributeOperation(
+      Node node, AttributeModifierImpl.Operation def) throws InvalidXMLException {
     return node == null ? def : parseAttributeOperation(node);
   }
 
@@ -985,24 +990,24 @@ public final class XMLUtils {
       throw new InvalidXMLException("Bad attribute modifier format", node);
     }
 
-    tc.oc.pgm.util.attribute.Attribute attribute = parseAttribute(node, parts[0]);
-    AttributeModifier.Operation operation = parseAttributeOperation(node, parts[1]);
+    tc.oc.pgm.api.attribute.Attribute attribute = parseAttribute(node, parts[0]);
+    AttributeModifierImpl.Operation operation = parseAttributeOperation(node, parts[1]);
     double amount = parseNumber(node, parts[2], Double.class);
 
     return new AbstractMap.SimpleImmutableEntry<>(
-        attribute.getName(), new AttributeModifier("FromXML", amount, operation));
+        attribute.getName(), new AttributeModifierImpl("FromXML", amount, operation));
   }
 
   public static Map.Entry<String, AttributeModifier> parseAttributeModifier(Element el)
       throws InvalidXMLException {
     String attribute = parseAttribute(new Node(el)).getName();
     double amount = parseNumber(Node.fromRequiredAttr(el, "amount"), Double.class);
-    AttributeModifier.Operation operation =
+    AttributeModifierImpl.Operation operation =
         parseAttributeOperation(
-            Node.fromAttr(el, "operation"), AttributeModifier.Operation.ADD_NUMBER);
+            Node.fromAttr(el, "operation"), AttributeModifierImpl.Operation.ADD_NUMBER);
 
     return new AbstractMap.SimpleImmutableEntry<>(
-        attribute, new AttributeModifier("FromXML", amount, operation));
+        attribute, new AttributeModifierImpl("FromXML", amount, operation));
   }
 
   public static GameMode parseGameMode(Node node, String text) throws InvalidXMLException {

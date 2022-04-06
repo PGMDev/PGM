@@ -2,10 +2,10 @@ package tc.oc.pgm.goals.events;
 
 import javax.annotation.Nullable;
 import org.bukkit.event.HandlerList;
+import tc.oc.pgm.api.goal.Goal;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.event.MatchEvent;
 import tc.oc.pgm.api.party.Competitor;
-import tc.oc.pgm.goals.Goal;
 
 public abstract class GoalEvent extends MatchEvent {
   private final Goal goal;

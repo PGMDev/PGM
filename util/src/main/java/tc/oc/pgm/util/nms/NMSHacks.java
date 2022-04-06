@@ -42,12 +42,14 @@ import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.util.attribute.AttributeModifier;
+import tc.oc.pgm.api.attribute.AttributeModifier;
+import tc.oc.pgm.api.skin.Skin;
+import tc.oc.pgm.util.attribute.AttributeModifierImpl;
 import tc.oc.pgm.util.block.RayBlockIntersection;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
-import tc.oc.pgm.util.skin.Skin;
+import tc.oc.pgm.util.skin.SkinImpl;
 import tc.oc.pgm.util.skin.Skins;
 
 public interface NMSHacks {
@@ -874,7 +876,7 @@ public interface NMSHacks {
     return new PacketPlayOutEntityEquipment(entityId, slot, CraftItemStack.asNMSCopy(armor));
   }
 
-  static Skin getPlayerSkin(Player player) {
+  static SkinImpl getPlayerSkin(Player player) {
     CraftPlayer craftPlayer = (CraftPlayer) player;
     return Skins.fromProperties(craftPlayer.getProfile().getProperties());
   }
@@ -968,14 +970,14 @@ public interface NMSHacks {
 
   Field worldServerField = ReflectionUtils.getField(CraftWorld.class, "world");
   Field dimensionField = ReflectionUtils.getField(WorldServer.class, "dimension");
-  Field modifiersField = ReflectionUtils.getField(Field.class, "modifiers");
 
   static void resetDimension(World world) {
     try {
-      modifiersField.setInt(dimensionField, dimensionField.getModifiers() & ~Modifier.FINAL);
+      ReflectionUtils.getField(Field.class, "modifiers")
+          .setInt(dimensionField, dimensionField.getModifiers() & ~Modifier.FINAL);
 
       dimensionField.set(worldServerField.get(world), 11);
-    } catch (IllegalAccessException e) {
+    } catch (Exception e) {
       // No-op, newer version of Java have disabled modifying final fields
     }
   }
@@ -1098,7 +1100,7 @@ public interface NMSHacks {
         }
       }
     } else {
-      SetMultimap<String, tc.oc.pgm.util.attribute.AttributeModifier> attributeModifiers =
+      SetMultimap<String, AttributeModifier> attributeModifiers =
           NMSHacks.getAttributeModifiers(source);
       attributeModifiers.putAll(NMSHacks.getAttributeModifiers(destination));
       NMSHacks.applyAttributeModifiers(attributeModifiers, destination);
@@ -1106,7 +1108,8 @@ public interface NMSHacks {
   }
 
   static void applyAttributeModifiers(
-      SetMultimap<String, AttributeModifier> attributeModifiers, ItemMeta meta) {
+      SetMultimap<String, tc.oc.pgm.api.attribute.AttributeModifier> attributeModifiers,
+      ItemMeta meta) {
     if (BukkitUtils.isSportPaper()) {
       for (Map.Entry<String, AttributeModifier> entry : attributeModifiers.entries()) {
         AttributeModifier attributeModifier = entry.getValue();
@@ -1147,11 +1150,11 @@ public interface NMSHacks {
         final NBTTagCompound modTag = modTags.get(i);
         attributeModifiers.put(
             modTag.getString("AttributeName"),
-            new AttributeModifier(
+            new AttributeModifierImpl(
                 new UUID(modTag.getLong("UUIDMost"), modTag.getLong("UUIDLeast")),
                 modTag.getString("Name"),
                 modTag.getDouble("Amount"),
-                AttributeModifier.Operation.fromOpcode(modTag.getInt("Operation"))));
+                AttributeModifierImpl.Operation.fromOpcode(modTag.getInt("Operation"))));
       }
       return attributeModifiers;
     } else {

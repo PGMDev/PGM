@@ -1,6 +1,7 @@
 package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.Bounds;
 import tc.oc.pgm.api.region.Region;
 
 public class Complement extends AbstractRegion {
@@ -29,7 +30,7 @@ public class Complement extends AbstractRegion {
 
   @Override
   public Bounds getBounds() {
-    return Bounds.complement(this.original.getBounds(), this.subtracted.getBounds());
+    return BoundsImpl.complement(this.original.getBounds(), this.subtracted.getBounds());
   }
 
   @Override

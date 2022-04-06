@@ -1,6 +1,7 @@
 package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.Bounds;
 import tc.oc.pgm.api.region.Region;
 
 public class Union extends AbstractRegion {
@@ -52,9 +53,9 @@ public class Union extends AbstractRegion {
 
   @Override
   public Bounds getBounds() {
-    Bounds bounds = Bounds.empty();
+    Bounds bounds = BoundsImpl.empty();
     for (Region region : this.regions) {
-      bounds = Bounds.union(bounds, region.getBounds());
+      bounds = BoundsImpl.union(bounds, region.getBounds());
     }
     return bounds;
   }

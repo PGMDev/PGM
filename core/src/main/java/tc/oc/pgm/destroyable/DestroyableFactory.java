@@ -7,7 +7,7 @@ import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.goals.ProximityGoalDefinition;
 import tc.oc.pgm.goals.ProximityMetric;
-import tc.oc.pgm.goals.ShowOptions;
+import tc.oc.pgm.goals.ShowOptionsImpl;
 import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
@@ -26,7 +26,7 @@ public class DestroyableFactory extends ProximityGoalDefinition {
       @Nullable String id,
       String name,
       @Nullable Boolean required,
-      ShowOptions showOptions,
+      ShowOptionsImpl showOptions,
       TeamFactory owner,
       ProximityMetric proximityMetric,
       Region region,

@@ -14,8 +14,8 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
+import tc.oc.pgm.api.Audience;
 import tc.oc.pgm.menu.MenuItem;
-import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class GamemodeTool implements MenuItem {

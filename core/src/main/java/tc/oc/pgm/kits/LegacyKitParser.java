@@ -2,11 +2,12 @@ package tc.oc.pgm.kits;
 
 import org.jdom2.Attribute;
 import org.jdom2.Element;
+import tc.oc.pgm.api.kits.Kit;
 import tc.oc.pgm.api.map.factory.MapFactory;
-import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.api.xml.InvalidXMLException;
+import tc.oc.pgm.api.xml.Node;
 
-public class LegacyKitParser extends KitParser {
+public class LegacyKitParser extends KitParserImpl {
 
   private final KitContext kitContext = new KitContext();
 

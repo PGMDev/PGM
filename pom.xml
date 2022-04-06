@@ -36,6 +36,7 @@
         <module>util</module>
         <module>core</module>
         <module>server</module>
+        <module>api</module>
     </modules>
 
     <repositories>

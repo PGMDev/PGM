@@ -1,5 +1,6 @@
 package tc.oc.pgm.projectile;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.util.HashSet;
@@ -39,6 +40,7 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.filters.query.PlayerBlockQuery;
 import tc.oc.pgm.kits.tag.ItemTags;
+import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.bukkit.MetadataUtils;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -185,7 +187,12 @@ public class ProjectileMatchModule implements MatchModule, Listener {
               : new BlockQuery(event, hitBlock);
 
       if (filter.query(query).isAllowed()) {
-        BlockTransformEvent bte = new BlockTransformEvent(event, hitBlock, Material.AIR);
+        BlockTransformEvent bte =
+            new BlockTransformEvent(
+                event,
+                hitBlock,
+                checkNotNull(hitBlock).getState(),
+                BlockStates.cloneWithMaterial(hitBlock, Material.AIR));
         match.callEvent(bte);
         if (!bte.isCancelled()) {
           hitBlock.setType(Material.AIR);

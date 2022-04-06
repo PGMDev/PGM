@@ -27,7 +27,6 @@ import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.Datastore;
-import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.Contributor;
@@ -40,7 +39,9 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.module.Module;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
+import tc.oc.pgm.api.named.NameDecorationRegistry;
 import tc.oc.pgm.api.player.VanishManager;
+import tc.oc.pgm.api.xml.InvalidXMLException;
 import tc.oc.pgm.command.graph.CommandExecutor;
 import tc.oc.pgm.command.graph.CommandGraph;
 import tc.oc.pgm.community.command.CommunityCommandGraph;
@@ -59,8 +60,8 @@ import tc.oc.pgm.listeners.WorldProblemListener;
 import tc.oc.pgm.map.MapLibraryImpl;
 import tc.oc.pgm.match.MatchManagerImpl;
 import tc.oc.pgm.match.NoopVanishManager;
+import tc.oc.pgm.modules.Modules;
 import tc.oc.pgm.namedecorations.ConfigDecorationProvider;
-import tc.oc.pgm.namedecorations.NameDecorationRegistry;
 import tc.oc.pgm.namedecorations.NameDecorationRegistryImpl;
 import tc.oc.pgm.restart.RestartListener;
 import tc.oc.pgm.restart.ShouldRestartTask;
@@ -77,7 +78,6 @@ import tc.oc.pgm.util.listener.PlayerBlockListener;
 import tc.oc.pgm.util.listener.PlayerMoveListener;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextTranslations;
-import tc.oc.pgm.util.xml.InvalidXMLException;
 
 public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
@@ -300,11 +300,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   @Override
   public MatchManager getMatchManager() {
     return matchManager;
-  }
-
-  @Override
-  public MatchTabManager getMatchTabManager() {
-    return matchTabManager;
   }
 
   @Override

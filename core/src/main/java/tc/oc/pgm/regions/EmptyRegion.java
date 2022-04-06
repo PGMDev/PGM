@@ -1,6 +1,7 @@
 package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.Bounds;
 
 public class EmptyRegion extends AbstractRegion {
   public static final EmptyRegion INSTANCE = new EmptyRegion();
@@ -24,6 +25,6 @@ public class EmptyRegion extends AbstractRegion {
 
   @Override
   public Bounds getBounds() {
-    return Bounds.empty();
+    return BoundsImpl.empty();
   }
 }

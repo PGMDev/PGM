@@ -13,6 +13,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import tc.oc.pgm.api.Audience;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
@@ -48,7 +49,6 @@ import tc.oc.pgm.command.TeamCommand;
 import tc.oc.pgm.command.TimeLimitCommand;
 import tc.oc.pgm.command.VotingCommand;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.pgm.util.Audience;
 
 public class CommandGraph extends BasicBukkitCommandGraph {
 

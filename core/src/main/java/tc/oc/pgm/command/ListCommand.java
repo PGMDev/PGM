@@ -12,13 +12,13 @@ import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
+import tc.oc.pgm.api.Audience;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.named.NameStyle;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 
 // TODO: clean up format and use new components

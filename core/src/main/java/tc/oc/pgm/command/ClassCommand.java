@@ -12,12 +12,12 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.ChatColor;
+import tc.oc.pgm.api.StringUtils;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.PlayerClass;
 import tc.oc.pgm.util.LegacyFormatUtils;
-import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public final class ClassCommand {
