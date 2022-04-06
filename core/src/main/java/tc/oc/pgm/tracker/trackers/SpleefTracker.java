@@ -13,12 +13,14 @@ import tc.oc.pgm.api.event.PlayerSpleefEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.tracker.info.*;
+import tc.oc.pgm.api.tracker.info.DamageInfo;
+import tc.oc.pgm.api.tracker.info.PhysicalInfo;
+import tc.oc.pgm.api.tracker.info.SpleefInfo;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ExplosionInfo;
 import tc.oc.pgm.tracker.info.PlayerInfo;
-import tc.oc.pgm.tracker.info.SpleefInfo;
+import tc.oc.pgm.tracker.info.SpleefInfoImpl;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.event.player.PlayerOnGroundEvent;
 import tc.oc.pgm.util.material.Materials;
@@ -67,7 +69,7 @@ public class SpleefTracker implements Listener {
       breaker = new PlayerInfo(event.getPlayerState());
     }
 
-    final SpleefInfo info = new SpleefInfo(breaker, match.getTick());
+    final SpleefInfo info = new SpleefInfoImpl(breaker, match.getTick());
     brokenBlocks.put(block, info);
 
     match

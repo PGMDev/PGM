@@ -7,8 +7,8 @@ import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.material.MaterialData;
+import tc.oc.pgm.api.feature.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
-import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 
 public class Mode extends SelfIdentifyingFeatureDefinition {
   private final MaterialData material;

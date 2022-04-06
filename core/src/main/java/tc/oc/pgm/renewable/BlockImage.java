@@ -7,7 +7,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
-import tc.oc.pgm.regions.Bounds;
+import tc.oc.pgm.api.region.Bounds;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 
 /**

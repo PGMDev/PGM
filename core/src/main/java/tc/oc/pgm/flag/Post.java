@@ -10,10 +10,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.feature.FeatureReference;
+import tc.oc.pgm.api.feature.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
-import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
+import tc.oc.pgm.api.points.PointProvider;
 import tc.oc.pgm.points.AngleProvider;
-import tc.oc.pgm.points.PointProvider;
 import tc.oc.pgm.points.PointProviderLocation;
 import tc.oc.pgm.teams.TeamFactory;
 

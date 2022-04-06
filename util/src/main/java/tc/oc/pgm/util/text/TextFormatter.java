@@ -19,9 +19,9 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.format.TextFormat;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import tc.oc.pgm.api.named.NameStyle;
+import tc.oc.pgm.api.named.Named;
 import tc.oc.pgm.util.LegacyFormatUtils;
-import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.named.Named;
 
 /** A helper for formatting {@link Component}s. */
 public final class TextFormatter {

@@ -12,7 +12,7 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
-import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.api.xml.InvalidXMLException;
 
 public class DamageModule implements MapModule {
 

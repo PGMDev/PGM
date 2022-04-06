@@ -14,13 +14,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.jetbrains.annotations.NotNull;
+import tc.oc.pgm.api.Audience;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.named.NameStyle;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.query.PartyQuery;
-import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.named.NameStyle;
 
 /**
  * Wraps a single {@link MatchPlayer} in a free-for-all match.

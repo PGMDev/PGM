@@ -4,8 +4,8 @@ import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.scoreboard.NameTagVisibility;
 import tc.oc.pgm.api.feature.FeatureInfo;
+import tc.oc.pgm.api.feature.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 
 /** Immutable class to represent a team in a map that is not tied to any specific match. */
 @FeatureInfo(name = "team")

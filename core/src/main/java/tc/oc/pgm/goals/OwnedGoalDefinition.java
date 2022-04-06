@@ -1,6 +1,7 @@
 package tc.oc.pgm.goals;
 
 import javax.annotation.Nullable;
+import tc.oc.pgm.api.goal.GoalDefinition;
 import tc.oc.pgm.teams.TeamFactory;
 
 /**

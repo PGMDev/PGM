@@ -6,9 +6,9 @@ import tc.oc.pgm.api.filter.query.BlockQuery;
 import tc.oc.pgm.api.filter.query.EntitySpawnQuery;
 import tc.oc.pgm.api.filter.query.EntityTypeQuery;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
-import tc.oc.pgm.util.collection.ContextStore;
+import tc.oc.pgm.util.collection.ContextStoreImpl;
 
-public class FilterContext extends ContextStore<Filter> {
+public class FilterContext extends ContextStoreImpl<Filter> {
   public FilterContext() {
     this.add("allow-all", StaticFilter.ALLOW);
     this.add("deny-all", StaticFilter.DENY);

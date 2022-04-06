@@ -3,6 +3,7 @@ package tc.oc.pgm.filters.dynamic;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.dynamic.Filterable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;

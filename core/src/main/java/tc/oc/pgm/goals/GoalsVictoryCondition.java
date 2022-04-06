@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.translatable;
 import java.util.Collection;
 import java.util.Map;
 import net.kyori.adventure.text.Component;
+import tc.oc.pgm.api.goal.Goal;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.VictoryCondition;

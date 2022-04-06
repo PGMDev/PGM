@@ -10,8 +10,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.Contributor;
+import tc.oc.pgm.api.named.NameStyle;
 import tc.oc.pgm.api.player.Username;
-import tc.oc.pgm.util.named.NameStyle;
 
 public class PlayerContributor implements Contributor {
 

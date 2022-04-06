@@ -30,11 +30,19 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffect;
+import tc.oc.pgm.api.Audience;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.attribute.Attribute;
+import tc.oc.pgm.api.attribute.AttributeInstance;
+import tc.oc.pgm.api.attribute.AttributeMap;
+import tc.oc.pgm.api.attribute.AttributeModifier;
+import tc.oc.pgm.api.filter.dynamic.Filterable;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
+import tc.oc.pgm.api.kits.Kit;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.named.NameStyle;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -45,21 +53,14 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.PlayerResetEvent;
-import tc.oc.pgm.filters.dynamic.Filterable;
-import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.MaxHealthKit;
 import tc.oc.pgm.kits.WalkSpeedKit;
+import tc.oc.pgm.modules.PlayerTimeMatchModule;
 import tc.oc.pgm.modules.SpectateMatchModule;
-import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.attribute.Attribute;
-import tc.oc.pgm.util.attribute.AttributeInstance;
-import tc.oc.pgm.util.attribute.AttributeMap;
 import tc.oc.pgm.util.attribute.AttributeMapImpl;
-import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.ViaUtils;
-import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 
 public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
@@ -198,6 +199,11 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   @Override
   public boolean isVanished() {
     return vanished.get();
+  }
+
+  @Override
+  public boolean isLegacy() {
+    return getProtocolVersion() <= ViaUtils.VERSION_1_7;
   }
 
   @Override
@@ -463,6 +469,11 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   @Override
   public List<MatchPlayer> getSpectators() {
     return match.needModule(SpectateMatchModule.class).getSpectating(this);
+  }
+
+  @Override
+  public void updatePlayerTime() {
+    PlayerTimeMatchModule.updatePlayerTime(this);
   }
 
   @Override

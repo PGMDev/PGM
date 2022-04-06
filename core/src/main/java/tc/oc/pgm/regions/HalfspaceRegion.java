@@ -1,6 +1,7 @@
 package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.Bounds;
 
 public class HalfspaceRegion extends AbstractRegion {
   private final Vector normal; // unit normal
@@ -18,6 +19,6 @@ public class HalfspaceRegion extends AbstractRegion {
 
   @Override
   public Bounds getBounds() {
-    return Bounds.unbounded();
+    return BoundsImpl.unbounded();
   }
 }

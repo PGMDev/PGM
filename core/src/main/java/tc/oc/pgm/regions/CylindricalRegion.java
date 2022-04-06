@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.Random;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.Bounds;
 
 public class CylindricalRegion extends AbstractRegion {
   private final Vector base;
@@ -41,7 +42,7 @@ public class CylindricalRegion extends AbstractRegion {
 
   @Override
   public Bounds getBounds() {
-    return new Bounds(
+    return new BoundsImpl(
         new Vector(
             this.base.getX() - this.radius, this.base.getY(), this.base.getZ() - this.radius),
         new Vector(

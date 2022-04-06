@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.bukkit.scheduler.BukkitRunnable;
+import tc.oc.pgm.api.countdowns.Countdown;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.util.ClassLogger;

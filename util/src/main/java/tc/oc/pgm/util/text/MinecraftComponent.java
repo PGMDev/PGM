@@ -10,7 +10,7 @@ import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.potion.PotionEffectType;
-import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.api.StringUtils;
 
 /** A singleton for accessing {@link Component} translations for Minecraft clients. */
 public final class MinecraftComponent {

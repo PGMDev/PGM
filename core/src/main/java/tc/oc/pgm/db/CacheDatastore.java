@@ -8,7 +8,7 @@ import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.map.MapActivity;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.api.setting.Settings;
-import tc.oc.pgm.util.skin.Skin;
+import tc.oc.pgm.api.skin.Skin;
 
 @SuppressWarnings({"UnstableApiUsage"})
 public class CacheDatastore implements Datastore {

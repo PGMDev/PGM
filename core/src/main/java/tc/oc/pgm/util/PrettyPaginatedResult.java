@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import tc.oc.pgm.api.Audience;
 
 /**
  * Class used to display a paginated list of items that are formatted

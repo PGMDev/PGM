@@ -5,9 +5,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.time.Duration;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
+import tc.oc.pgm.api.event.PreemptiveEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.community.command.ModerationCommand.PunishmentType;
-import tc.oc.pgm.util.event.PreemptiveEvent;
 
 /** Called when a punishment command is run * */
 public class PlayerPunishmentEvent extends PreemptiveEvent {

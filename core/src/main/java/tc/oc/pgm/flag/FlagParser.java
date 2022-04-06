@@ -13,18 +13,18 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.FilterParser;
+import tc.oc.pgm.api.kits.Kit;
 import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.points.PointProvider;
 import tc.oc.pgm.api.region.Region;
-import tc.oc.pgm.filters.FilterParser;
+import tc.oc.pgm.api.xml.InvalidXMLException;
+import tc.oc.pgm.api.xml.Node;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.goals.ProximityMetric;
-import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.points.PointParser;
-import tc.oc.pgm.points.PointProvider;
 import tc.oc.pgm.points.PointProviderAttributes;
 import tc.oc.pgm.teams.TeamFactory;
-import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class FlagParser {

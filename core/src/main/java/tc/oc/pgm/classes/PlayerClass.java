@@ -7,7 +7,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
-import tc.oc.pgm.kits.Kit;
+import tc.oc.pgm.api.kits.Kit;
 
 public class PlayerClass {
   public PlayerClass(

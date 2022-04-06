@@ -31,9 +31,12 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredListener;
 import org.jetbrains.annotations.NotNull;
-import tc.oc.pgm.api.Modules;
+import tc.oc.pgm.api.Audience;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.countdowns.CountdownContext;
 import tc.oc.pgm.api.feature.Feature;
+import tc.oc.pgm.api.feature.MatchFeatureContext;
+import tc.oc.pgm.api.filter.dynamic.Filterable;
 import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.match.Match;
@@ -61,7 +64,6 @@ import tc.oc.pgm.api.party.event.PartyRemoveEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerAddEvent;
 import tc.oc.pgm.api.time.Tick;
-import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.countdowns.SingleCountdownContext;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
@@ -72,10 +74,9 @@ import tc.oc.pgm.events.PlayerParticipationEvent;
 import tc.oc.pgm.events.PlayerParticipationStartEvent;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.features.MatchFeatureContext;
-import tc.oc.pgm.filters.dynamic.Filterable;
+import tc.oc.pgm.features.MatchFeatureContextImpl;
+import tc.oc.pgm.modules.Modules;
 import tc.oc.pgm.result.CompetitorVictoryCondition;
-import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.FileUtils;
 import tc.oc.pgm.util.TimeUtils;
@@ -112,7 +113,7 @@ public class MatchImpl implements Match {
   private final RankedSet<Competitor> winners;
   private final AtomicReference<Party> queuedParticipants;
   private final ObserverParty observers;
-  private final MatchFeatureContext features;
+  private final MatchFeatureContextImpl features;
 
   protected MatchImpl(String id, MapContext map, World world) {
     this.id = checkNotNull(id);
@@ -158,7 +159,7 @@ public class MatchImpl implements Match {
             });
     this.queuedParticipants = new AtomicReference<>();
     this.observers = new ObserverParty(this);
-    this.features = new MatchFeatureContext();
+    this.features = new MatchFeatureContextImpl();
   }
 
   @Override

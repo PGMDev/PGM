@@ -2,6 +2,7 @@ package tc.oc.pgm.kits;
 
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
+import tc.oc.pgm.api.kits.Kit;
 import tc.oc.pgm.api.match.event.MatchEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 

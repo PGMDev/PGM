@@ -13,12 +13,13 @@ import org.bukkit.event.Event;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.filter.query.Query;
+import tc.oc.pgm.api.region.Bounds;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.api.region.RegionDefinition;
-import tc.oc.pgm.features.FeatureDefinitionContext;
-import tc.oc.pgm.features.XMLFeatureReference;
+import tc.oc.pgm.api.xml.FeatureDefinitionContext;
+import tc.oc.pgm.api.xml.Node;
+import tc.oc.pgm.api.xml.XMLFeatureReference;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
-import tc.oc.pgm.util.xml.Node;
 
 public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> implements Region {
 

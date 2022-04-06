@@ -2,12 +2,13 @@ package tc.oc.pgm.regions;
 
 import java.util.Random;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.Bounds;
 
 public class CuboidRegion extends AbstractRegion {
-  private final Bounds bounds;
+  private final BoundsImpl bounds;
 
   public CuboidRegion(Vector pos1, Vector pos2) {
-    this.bounds = new Bounds(Vector.getMinimum(pos1, pos2), Vector.getMaximum(pos1, pos2));
+    this.bounds = new BoundsImpl(Vector.getMinimum(pos1, pos2), Vector.getMaximum(pos1, pos2));
   }
 
   @Override

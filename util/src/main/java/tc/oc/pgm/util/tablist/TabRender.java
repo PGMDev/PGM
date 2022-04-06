@@ -9,7 +9,7 @@ import net.minecraft.server.v1_8_R3.Packet;
 import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import tc.oc.pgm.util.Audience;
+import tc.oc.pgm.api.Audience;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextTranslations;
 

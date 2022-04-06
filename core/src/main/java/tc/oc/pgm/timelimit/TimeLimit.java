@@ -9,10 +9,10 @@ import java.util.Collection;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import tc.oc.pgm.api.feature.FeatureInfo;
+import tc.oc.pgm.api.feature.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.VictoryCondition;
-import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.util.collection.RankedSet;
 
 @FeatureInfo(name = "time-limit")

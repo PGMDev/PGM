@@ -1,6 +1,7 @@
 package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.Bounds;
 
 public class SectorRegion extends AbstractRegion {
   protected final double x, z;
@@ -29,6 +30,6 @@ public class SectorRegion extends AbstractRegion {
 
   @Override
   public Bounds getBounds() {
-    return Bounds.unbounded();
+    return BoundsImpl.unbounded();
   }
 }

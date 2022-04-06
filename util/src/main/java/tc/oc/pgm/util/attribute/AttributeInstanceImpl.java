@@ -4,6 +4,9 @@ import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import tc.oc.pgm.api.attribute.Attribute;
+import tc.oc.pgm.api.attribute.AttributeInstance;
+import tc.oc.pgm.api.attribute.AttributeModifier;
 
 public class AttributeInstanceImpl implements AttributeInstance {
 
@@ -33,7 +36,7 @@ public class AttributeInstanceImpl implements AttributeInstance {
 
   @Override
   public Collection<AttributeModifier> getModifiers() {
-    List<AttributeModifier> result = new ArrayList<AttributeModifier>();
+    List<AttributeModifier> result = new ArrayList<>();
     for (net.minecraft.server.v1_8_R3.AttributeModifier nms : handle.c()) {
       result.add(convert(nms));
     }
@@ -71,8 +74,8 @@ public class AttributeInstanceImpl implements AttributeInstance {
         bukkit.getOperation().ordinal());
   }
 
-  public static AttributeModifier convert(net.minecraft.server.v1_8_R3.AttributeModifier nms) {
-    return new AttributeModifier(
-        nms.a(), nms.b(), nms.d(), AttributeModifier.Operation.values()[nms.c()]);
+  public static AttributeModifierImpl convert(net.minecraft.server.v1_8_R3.AttributeModifier nms) {
+    return new AttributeModifierImpl(
+        nms.a(), nms.b(), nms.d(), AttributeModifierImpl.Operation.values()[nms.c()]);
   }
 }

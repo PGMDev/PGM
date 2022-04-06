@@ -3,10 +3,12 @@ package tc.oc.pgm.kits;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.api.kits.Kit;
+import tc.oc.pgm.api.kits.KitDefinition;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.features.FeatureDefinitionContext;
-import tc.oc.pgm.features.XMLFeatureReference;
-import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.api.xml.FeatureDefinitionContext;
+import tc.oc.pgm.api.xml.Node;
+import tc.oc.pgm.api.xml.XMLFeatureReference;
 
 public class XMLKitReference extends XMLFeatureReference<KitDefinition> implements Kit {
 

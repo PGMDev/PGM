@@ -1,6 +1,6 @@
 package tc.oc.pgm.filters.query;
 
-import tc.oc.pgm.goals.Goal;
+import tc.oc.pgm.api.goal.Goal;
 
 /**
  * Currently, the only thing this class does is derive the Match from a Goal. In the future, we may

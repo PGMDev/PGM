@@ -9,7 +9,9 @@ import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import org.jdom2.input.JDOMParseException;
 import org.jdom2.input.SAXBuilder;
-import tc.oc.pgm.api.Modules;
+import tc.oc.pgm.api.Version;
+import tc.oc.pgm.api.filter.FilterParser;
+import tc.oc.pgm.api.kits.KitParser;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapModule;
@@ -21,20 +23,19 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.module.ModuleGraph;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
-import tc.oc.pgm.features.FeatureDefinitionContext;
+import tc.oc.pgm.api.region.RegionParser;
+import tc.oc.pgm.api.xml.FeatureDefinitionContext;
+import tc.oc.pgm.api.xml.InvalidXMLException;
+import tc.oc.pgm.api.xml.SAXHandler;
+import tc.oc.pgm.features.FeatureDefinitionContextImpl;
 import tc.oc.pgm.filters.FeatureFilterParser;
-import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.filters.LegacyFilterParser;
 import tc.oc.pgm.kits.FeatureKitParser;
-import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.kits.LegacyKitParser;
+import tc.oc.pgm.modules.Modules;
 import tc.oc.pgm.regions.FeatureRegionParser;
 import tc.oc.pgm.regions.LegacyRegionParser;
-import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.ClassLogger;
-import tc.oc.pgm.util.Version;
-import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.SAXHandler;
 
 public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? extends MapModule>>
     implements MapFactory {
@@ -163,7 +164,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
   @Override
   public FeatureDefinitionContext getFeatures() {
     if (features == null) {
-      features = new FeatureDefinitionContext();
+      features = new FeatureDefinitionContextImpl();
     }
     return features;
   }

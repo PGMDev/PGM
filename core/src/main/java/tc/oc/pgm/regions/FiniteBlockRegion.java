@@ -20,12 +20,13 @@ import org.bukkit.block.BlockState;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.Version;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.region.Bounds;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.AnyFilter;
 import tc.oc.pgm.filters.BlockFilter;
 import tc.oc.pgm.filters.query.BlockQuery;
-import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 
@@ -35,7 +36,7 @@ import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
  */
 public class FiniteBlockRegion extends AbstractRegion {
   private final List<Block> blocks;
-  private final Bounds bounds;
+  private final BoundsImpl bounds;
   private final Set<MaterialData> materials;
 
   public FiniteBlockRegion(Block... blocks) {
@@ -60,7 +61,7 @@ public class FiniteBlockRegion extends AbstractRegion {
       materialsBuilder.add(block.getState().getData());
     }
 
-    this.bounds = new Bounds(min, max);
+    this.bounds = new BoundsImpl(min, max);
     this.materials = materialsBuilder.build();
   }
 

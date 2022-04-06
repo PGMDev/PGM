@@ -1,6 +1,7 @@
 package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.Bounds;
 
 /** Wherever you go, here you are */
 public class EverywhereRegion extends AbstractRegion {
@@ -15,6 +16,6 @@ public class EverywhereRegion extends AbstractRegion {
 
   @Override
   public Bounds getBounds() {
-    return Bounds.unbounded();
+    return BoundsImpl.unbounded();
   }
 }

@@ -3,9 +3,10 @@ package tc.oc.pgm.countdowns;
 import java.time.Duration;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
+import tc.oc.pgm.api.countdowns.Countdown;
 import tc.oc.pgm.api.match.Match;
 
-public class SingleCountdownContext extends CountdownContext {
+public class SingleCountdownContext extends CountdownContextImpl {
 
   public SingleCountdownContext(Match match, Logger parentLogger) {
     super(match, parentLogger);

@@ -9,6 +9,8 @@ import java.util.Map.Entry;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import tc.oc.pgm.api.kits.KitDefinition;
+import tc.oc.pgm.api.kits.Slot;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 
@@ -38,8 +40,8 @@ public class ItemKit implements KitDefinition {
    * If force is true, the kit will replace any items in the player's inventory that conflict with
    * the kit, otherwise a smart algorithm is used to fill existing stacks and repair tools.
    *
-   * <p>TODO: Ender chest support - {@link Slot} already supports it, but the stack merging code in
-   * this method does not.
+   * <p>TODO: Ender chest support - {@link SlotImpl} already supports it, but the stack merging code
+   * in this method does not.
    */
   @Override
   public void apply(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {

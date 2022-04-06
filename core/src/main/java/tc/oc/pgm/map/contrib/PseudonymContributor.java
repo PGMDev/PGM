@@ -11,7 +11,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import tc.oc.pgm.api.map.Contributor;
-import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.api.named.NameStyle;
 
 public class PseudonymContributor implements Contributor {
 

@@ -4,6 +4,9 @@ import com.google.common.base.Preconditions;
 import net.minecraft.server.v1_8_R3.AttributeMapBase;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import tc.oc.pgm.api.attribute.Attribute;
+import tc.oc.pgm.api.attribute.AttributeInstance;
+import tc.oc.pgm.api.attribute.AttributeMap;
 
 public class AttributeMapImpl implements AttributeMap {
 

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import java.lang.reflect.Method;
 import java.util.Map;
+import tc.oc.pgm.api.MethodParser;
 
 public class MethodParsers {
   public static Map<String, Method> getMethodParsersForClass(Class<?> cls) {

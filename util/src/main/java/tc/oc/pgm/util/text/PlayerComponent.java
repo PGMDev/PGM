@@ -15,10 +15,10 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import tc.oc.pgm.api.named.NameDecorationProvider;
+import tc.oc.pgm.api.named.NameStyle;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.MetadataUtils;
-import tc.oc.pgm.util.named.NameDecorationProvider;
-import tc.oc.pgm.util.named.NameStyle;
 
 /** PlayerComponent is used to format player names in a consistent manner with optional styling */
 public final class PlayerComponent {

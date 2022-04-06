@@ -16,7 +16,7 @@ import net.kyori.adventure.util.ComponentMessageThrowable;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
-import tc.oc.pgm.util.Audience;
+import tc.oc.pgm.api.Audience;
 
 public final class CommandExecutor extends BukkitIntake {
 

@@ -6,9 +6,9 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.feature.FeatureReference;
+import tc.oc.pgm.api.feature.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;
-import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.teams.TeamFactory;
 
 @FeatureInfo(name = "net")

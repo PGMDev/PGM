@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 import net.md_5.bungee.api.ChatColor;
+import tc.oc.pgm.api.StringUtils;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
@@ -28,7 +29,6 @@ import tc.oc.pgm.api.map.exception.MapException;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
-import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.UsernameResolver;
 
 public class MapLibraryImpl implements MapLibrary {

@@ -18,14 +18,16 @@ import org.bukkit.block.Block;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.StringUtils;
+import tc.oc.pgm.api.goal.IncrementalGoal;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.named.NameStyle;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.goals.Contribution;
-import tc.oc.pgm.goals.IncrementalGoal;
 import tc.oc.pgm.goals.ModeChangeGoal;
 import tc.oc.pgm.goals.TouchableGoal;
 import tc.oc.pgm.modes.Mode;
@@ -33,9 +35,7 @@ import tc.oc.pgm.modes.ModeUtils;
 import tc.oc.pgm.regions.CuboidRegion;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.teams.Team;
-import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
-import tc.oc.pgm.util.named.NameStyle;
 
 // TODO: Consider making Core extend Destroyable
 public class Core extends TouchableGoal<CoreFactory>

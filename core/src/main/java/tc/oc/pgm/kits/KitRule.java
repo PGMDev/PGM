@@ -2,6 +2,7 @@ package tc.oc.pgm.kits;
 
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.kits.Kit;
 
 public class KitRule implements FeatureDefinition {
 

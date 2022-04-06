@@ -24,6 +24,11 @@
             <artifactId>util</artifactId>
             <version>0.13-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>tc.oc.pgm</groupId>
+            <artifactId>api</artifactId>
+            <version>0.13-SNAPSHOT</version>
+        </dependency>
     </dependencies>
     <build>
         <finalName>PGM-${project.version}-${git.commit.id.abbrev}</finalName>

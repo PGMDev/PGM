@@ -7,7 +7,7 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.inventory.ItemStack;
-import tc.oc.pgm.util.event.SportPaper;
+import tc.oc.pgm.api.event.SportPaper;
 
 @SportPaper
 public class PlayerSpawnEntityEvent extends PlayerEvent implements Cancellable {

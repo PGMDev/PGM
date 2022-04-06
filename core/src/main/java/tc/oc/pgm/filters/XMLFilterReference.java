@@ -6,9 +6,9 @@ import org.bukkit.event.Event;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.filter.query.Query;
-import tc.oc.pgm.features.FeatureDefinitionContext;
-import tc.oc.pgm.features.XMLFeatureReference;
-import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.api.xml.FeatureDefinitionContext;
+import tc.oc.pgm.api.xml.Node;
+import tc.oc.pgm.api.xml.XMLFeatureReference;
 
 /** A {@link Filter} that delegates all methods to an XML reference */
 public class XMLFilterReference extends XMLFeatureReference<FilterDefinition> implements Filter {

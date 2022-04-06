@@ -12,15 +12,15 @@ import app.ashcon.intake.parametric.annotation.Text;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
+import tc.oc.pgm.api.Audience;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.named.MapNameStyle;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.restart.RestartManager;
-import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.UsernameFormatUtils;
-import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public final class MapOrderCommand {

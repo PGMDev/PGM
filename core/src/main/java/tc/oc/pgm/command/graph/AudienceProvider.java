@@ -5,7 +5,7 @@ import app.ashcon.intake.bukkit.parametric.provider.BukkitProvider;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import org.bukkit.command.CommandSender;
-import tc.oc.pgm.util.Audience;
+import tc.oc.pgm.api.Audience;
 
 final class AudienceProvider implements BukkitProvider<Audience> {
 

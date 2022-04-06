@@ -8,10 +8,10 @@ import app.ashcon.intake.Command;
 import com.google.common.collect.Range;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.format.NamedTextColor;
+import tc.oc.pgm.api.Audience;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
-import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.text.TextParser;
 
 public final class FreeForAllCommand {

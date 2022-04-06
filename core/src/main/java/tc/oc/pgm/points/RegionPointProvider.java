@@ -9,6 +9,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.points.PointProvider;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.bukkit.WorldBorders;

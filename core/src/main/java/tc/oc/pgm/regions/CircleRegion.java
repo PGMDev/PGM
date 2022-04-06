@@ -1,6 +1,7 @@
 package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.Bounds;
 
 public class CircleRegion extends AbstractRegion {
   protected final double x;
@@ -24,7 +25,7 @@ public class CircleRegion extends AbstractRegion {
 
   @Override
   public Bounds getBounds() {
-    return new Bounds(
+    return new BoundsImpl(
         new Vector(this.x - this.radius, Double.NEGATIVE_INFINITY, this.z - this.radius),
         new Vector(this.x + this.radius, Double.POSITIVE_INFINITY, this.z + this.radius));
   }

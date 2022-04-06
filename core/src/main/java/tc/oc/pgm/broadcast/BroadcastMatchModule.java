@@ -2,9 +2,10 @@ package tc.oc.pgm.broadcast;
 
 import com.google.common.collect.Multimap;
 import java.time.Duration;
+import tc.oc.pgm.api.countdowns.CountdownContext;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
-import tc.oc.pgm.countdowns.CountdownContext;
+import tc.oc.pgm.countdowns.CountdownContextImpl;
 
 public class BroadcastMatchModule implements MatchModule {
 
@@ -15,7 +16,7 @@ public class BroadcastMatchModule implements MatchModule {
   public BroadcastMatchModule(Match match, Multimap<Duration, Broadcast> broadcasts) {
     this.match = match;
     this.broadcasts = broadcasts;
-    this.countdowns = new CountdownContext(match, match.getLogger());
+    this.countdowns = new CountdownContextImpl(match, match.getLogger());
   }
 
   @Override

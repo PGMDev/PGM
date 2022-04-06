@@ -6,22 +6,22 @@ import java.util.List;
 import javax.annotation.Nullable;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.kits.Kit;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.points.PointProvider;
+import tc.oc.pgm.api.xml.InvalidXMLException;
+import tc.oc.pgm.api.xml.Node;
 import tc.oc.pgm.filters.AllFilter;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.filters.TeamFilter;
-import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.points.PointParser;
-import tc.oc.pgm.points.PointProvider;
 import tc.oc.pgm.points.PointProviderAttributes;
 import tc.oc.pgm.points.RandomPointProvider;
 import tc.oc.pgm.points.SequentialPointProvider;
 import tc.oc.pgm.points.SpreadPointProvider;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.teams.Teams;
-import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class SpawnParser {

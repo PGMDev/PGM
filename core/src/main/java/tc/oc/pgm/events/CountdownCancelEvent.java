@@ -1,9 +1,9 @@
 package tc.oc.pgm.events;
 
 import org.bukkit.event.HandlerList;
+import tc.oc.pgm.api.countdowns.Countdown;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.event.MatchEvent;
-import tc.oc.pgm.countdowns.Countdown;
 
 public class CountdownCancelEvent extends MatchEvent {
 

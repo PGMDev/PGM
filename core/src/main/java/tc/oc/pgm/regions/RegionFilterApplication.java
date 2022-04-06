@@ -5,8 +5,8 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.kits.Kit;
 import tc.oc.pgm.api.region.Region;
-import tc.oc.pgm.kits.Kit;
 
 public class RegionFilterApplication implements FeatureDefinition {
   public final RFAScope scope;

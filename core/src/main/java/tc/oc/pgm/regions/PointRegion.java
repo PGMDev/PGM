@@ -2,6 +2,7 @@ package tc.oc.pgm.regions;
 
 import java.util.Random;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.Bounds;
 
 public class PointRegion extends AbstractRegion {
 
@@ -22,7 +23,7 @@ public class PointRegion extends AbstractRegion {
 
   @Override
   public Bounds getBounds() {
-    return new Bounds(position, position);
+    return new BoundsImpl(position, position);
   }
 
   @Override

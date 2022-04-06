@@ -14,9 +14,9 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.xml.InvalidXMLException;
 import tc.oc.pgm.util.inventory.tag.ItemTag;
 import tc.oc.pgm.util.material.MaterialMatcher;
-import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ItemModifyModule implements MapModule<ItemModifyMatchModule> {

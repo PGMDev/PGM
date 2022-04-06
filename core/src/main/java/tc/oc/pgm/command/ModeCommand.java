@@ -14,13 +14,13 @@ import java.util.List;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.commons.lang.WordUtils;
+import tc.oc.pgm.api.Audience;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.countdowns.CountdownContext;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.modes.ModeChangeCountdown;
 import tc.oc.pgm.modes.ModesPaginatedResult;
 import tc.oc.pgm.modes.ObjectiveModesMatchModule;
-import tc.oc.pgm.util.Audience;
 
 // TODO: make the output nicer
 public final class ModeCommand {

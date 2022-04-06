@@ -2,16 +2,16 @@ package tc.oc.pgm.regions;
 
 import org.jdom2.Attribute;
 import org.jdom2.Element;
+import tc.oc.pgm.api.MethodParser;
 import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.api.region.RegionDefinition;
-import tc.oc.pgm.util.MethodParser;
-import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.api.xml.InvalidXMLException;
+import tc.oc.pgm.api.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class FeatureRegionParser extends RegionParser {
+public class FeatureRegionParser extends RegionParserImpl {
 
   public FeatureRegionParser(MapFactory factory) {
     super(factory);

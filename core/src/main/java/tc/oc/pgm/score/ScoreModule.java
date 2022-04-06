@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.Version;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
@@ -22,15 +23,14 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.api.region.RegionParser;
+import tc.oc.pgm.api.xml.InvalidXMLException;
+import tc.oc.pgm.api.xml.Node;
 import tc.oc.pgm.blitz.BlitzModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.regions.RegionModule;
-import tc.oc.pgm.regions.RegionParser;
-import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
-import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ScoreModule implements MapModule {

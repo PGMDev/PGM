@@ -5,18 +5,19 @@ import java.util.Collection;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.filter.FilterParser;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.api.xml.InvalidXMLException;
 import tc.oc.pgm.classes.ClassModule;
 import tc.oc.pgm.filters.dynamic.FilterMatchModule;
 import tc.oc.pgm.regions.EmptyRegion;
 import tc.oc.pgm.regions.EverywhereRegion;
 import tc.oc.pgm.teams.TeamModule;
-import tc.oc.pgm.util.xml.InvalidXMLException;
 
 public class FilterModule implements MapModule {
 

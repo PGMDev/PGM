@@ -10,6 +10,8 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
+import tc.oc.pgm.api.goal.Goal;
+import tc.oc.pgm.api.goal.GoalDefinition;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;

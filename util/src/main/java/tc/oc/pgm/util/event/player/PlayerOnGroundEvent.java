@@ -3,7 +3,7 @@ package tc.oc.pgm.util.event.player;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;
-import tc.oc.pgm.util.event.SportPaper;
+import tc.oc.pgm.api.event.SportPaper;
 
 @SportPaper
 public class PlayerOnGroundEvent extends PlayerEvent {
