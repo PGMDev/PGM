@@ -128,12 +128,12 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     ImmutableSet.Builder<Team> controllersBuilder = ImmutableSet.builder();
     ImmutableSet.Builder<Team> completersBuilder = ImmutableSet.builder();
     for (Net net : nets) {
-      Post netPost = getPost(net.getReturnPost());
-      if (netPost != null && netPost.getOwner() != null && tmm != null) {
-        Team controller = tmm.getTeam(netPost.getOwner());
+      PostDefinition netPost = net.getReturnPost();
+      if (netPost != null && netPost.getFallback().getOwner() != null && tmm != null) {
+        Team controller = tmm.getTeam(netPost.getFallback().getOwner());
         controllersBuilder.add(controller);
 
-        if (getPost(net.getReturnPost()).isPermanent()) {
+        if (net.getReturnPost().getFallback().isPermanent()) {
           completersBuilder.add(controller);
         }
       }
@@ -143,7 +143,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
     Banner banner = null;
     pointLoop:
-    for (PointProvider returnPoint : getPost(definition.getDefaultPost()).getReturnPoints()) {
+    for (PointProvider returnPoint : definition.getDefaultPost().getFallback().getReturnPoints()) {
       Region region = returnPoint.getRegion();
       if (region instanceof PointRegion) {
         // Do not require PointRegions to be at the exact center of the block.
