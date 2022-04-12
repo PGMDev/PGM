@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.DyeColor;
@@ -36,6 +37,7 @@ public class FlagParser {
   private final FilterParser filterParser;
   private final PointParser pointParser;
 
+  private final AtomicInteger postIdSerial = new AtomicInteger(1);
   private final List<PostDefinition> posts = new ArrayList<>();
   private final List<Net> nets = new ArrayList<>();
   private final List<FlagDefinition> flags = new ArrayList<>();
@@ -68,6 +70,8 @@ public class FlagParser {
 
   private CompositePost parseCompositePost(Element el) throws InvalidXMLException {
     String id = el.getAttributeValue("id");
+    if (id == null) id = PostDefinition.makeDefaultId(null, postIdSerial);
+
     boolean sequential = XMLUtils.parseBoolean(el.getAttribute("sequential"), false);
 
     ImmutableList.Builder<SinglePost> chBuilder = ImmutableList.builder();
@@ -97,6 +101,7 @@ public class FlagParser {
   private SinglePost parseSinglePost(Element el) throws InvalidXMLException {
     String id = el.getAttributeValue("id");
     @Nullable String name = el.getAttributeValue("name");
+    if (id == null) id = PostDefinition.makeDefaultId(name, postIdSerial);
 
     FeatureReference<TeamFactory> owner =
         factory.getFeatures().createReference(Node.fromAttr(el, "owner"), TeamFactory.class, null);

@@ -26,7 +26,7 @@ public class FlagMatchModule implements MatchModule {
     for (PostDefinition definition : postDefinitions) {
       Post post = new Post(match, definition);
       posts.put(definition, post);
-      match.getFeatureContext().add(post);
+      if (definition.getId() != null) match.getFeatureContext().add(post);
     }
     this.posts = posts.build();
 
