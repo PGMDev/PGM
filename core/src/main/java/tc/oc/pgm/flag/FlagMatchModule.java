@@ -50,7 +50,7 @@ public class FlagMatchModule implements MatchModule {
   @Override
   public void load() {
     for (Flag flag : this.flags.values()) {
-      flag.load();
+      flag.load(this);
     }
   }
 

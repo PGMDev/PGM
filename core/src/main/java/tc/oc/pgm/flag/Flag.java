@@ -322,9 +322,9 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
   // Misc
 
-  public void load() {
+  public void load(FlagMatchModule fmm) {
     this.state =
-        new Returned(this, getPost(this.getDefinition().getDefaultPost()), this.bannerLocation);
+        new Returned(this, fmm.getPost(this.getDefinition().getDefaultPost()), this.bannerLocation);
     this.state.enterState();
   }
 

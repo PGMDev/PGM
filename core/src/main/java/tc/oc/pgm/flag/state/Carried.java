@@ -276,7 +276,7 @@ public class Carried extends Spawned implements Missing {
     }
 
     Post post = this.post;
-    if (net.getReturnPost() != null) post = this.flag.getPost(net.getReturnPost());
+    if (net.getReturnPost() != null) post = flag.getPost(net.getReturnPost());
 
     if (post.isPermanent()) {
       this.flag.transition(new Completed(this.flag, post));
