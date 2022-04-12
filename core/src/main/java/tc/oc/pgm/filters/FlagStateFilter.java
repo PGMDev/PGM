@@ -8,19 +8,19 @@ import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.FlagDefinition;
-import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
+import tc.oc.pgm.flag.post.PostDefinition;
 import tc.oc.pgm.flag.state.State;
 
 public class FlagStateFilter extends TypedFilter<MatchQuery> {
 
   private final FeatureReference<? extends FlagDefinition> flag;
-  private final @Nullable FeatureReference<? extends Post> post;
+  private final @Nullable FeatureReference<? extends PostDefinition> post;
   private final Class<? extends State> state;
 
   public FlagStateFilter(
       FeatureReference<? extends FlagDefinition> flag,
-      @Nullable FeatureReference<? extends Post> post,
+      @Nullable FeatureReference<? extends PostDefinition> post,
       Class<? extends State> state) {
     this.flag = flag;
     this.post = post;

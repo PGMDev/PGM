@@ -9,6 +9,7 @@ import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
+import tc.oc.pgm.flag.post.PostDefinition;
 import tc.oc.pgm.teams.TeamFactory;
 
 @FeatureInfo(name = "net")
@@ -26,7 +27,7 @@ public class Net extends SelfIdentifyingFeatureDefinition {
       denyMessage; // Message to show carrier when capture is prevented by filter
   private final @Nullable Component
       respawnMessage; // Message to broadcast when respawn is prevented by filter or respawnTogether
-  private final @Nullable Post
+  private final @Nullable PostDefinition
       returnPost; // Post to send flags after capture, null to send to their current post
   private final ImmutableSet<FlagDefinition>
       capturableFlags; // Flags that can be captured in this net
@@ -46,7 +47,7 @@ public class Net extends SelfIdentifyingFeatureDefinition {
       boolean sticky,
       @Nullable Component denyMessage,
       @Nullable Component respawnMessage,
-      @Nullable Post returnPost,
+      @Nullable PostDefinition returnPost,
       ImmutableSet<FlagDefinition> capturableFlags,
       ImmutableSet<FlagDefinition> recoverableFlags,
       boolean respawnTogether,
@@ -100,7 +101,7 @@ public class Net extends SelfIdentifyingFeatureDefinition {
     return denyMessage;
   }
 
-  public @Nullable Post getReturnPost() {
+  public @Nullable PostDefinition getReturnPost() {
     return this.returnPost;
   }
 

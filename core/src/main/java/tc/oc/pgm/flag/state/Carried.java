@@ -69,18 +69,6 @@ public class Carried extends Spawned implements Missing {
     this.carrier = carrier;
     this.dropLocations.add(
         dropLocation); // Need an initial dropLocation in case the carrier never generates ones
-    if (this.flag.getDefinition().willShowRespawnOnPickup()) {
-      String postName = this.flag.predeterminePost(this.post);
-      if (postName != null) { // The post needs a name in order to display the message.
-        this.flag
-            .getMatch()
-            .sendMessage(
-                translatable(
-                    "flag.willRespawn.next",
-                    this.flag.getComponentName(),
-                    text(postName, NamedTextColor.AQUA)));
-      }
-    }
   }
 
   @Override
@@ -139,6 +127,19 @@ public class Carried extends Spawned implements Missing {
 
     SidebarMatchModule smm = this.flag.getMatch().getModule(SidebarMatchModule.class);
     if (smm != null) smm.blinkGoal(this.flag, 2, null);
+
+    if (this.flag.getDefinition().willShowRespawnOnPickup()) {
+      String postName = post.peekNext(flag).getPostName();
+      if (postName != null) { // The post needs a name in order to display the message.
+        this.flag
+            .getMatch()
+            .sendMessage(
+                translatable(
+                    "flag.willRespawn.next",
+                    this.flag.getComponentName(),
+                    text(postName, NamedTextColor.AQUA)));
+      }
+    }
   }
 
   @Override
@@ -274,7 +275,9 @@ public class Carried extends Spawned implements Missing {
       }
     }
 
-    Post post = net.getReturnPost() != null ? net.getReturnPost() : this.post;
+    Post post = this.post;
+    if (net.getReturnPost() != null) post = this.flag.getPost(net.getReturnPost());
+
     if (post.isPermanent()) {
       this.flag.transition(new Completed(this.flag, post));
     } else {

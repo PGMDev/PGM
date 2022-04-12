@@ -7,7 +7,6 @@ import static net.kyori.adventure.text.Component.translatable;
 import com.google.common.collect.ImmutableSet;
 import java.util.Iterator;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.kyori.adventure.sound.Sound;
@@ -43,6 +42,7 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
+import tc.oc.pgm.flag.post.PostDefinition;
 import tc.oc.pgm.flag.state.BaseState;
 import tc.oc.pgm.flag.state.Captured;
 import tc.oc.pgm.flag.state.Completed;
@@ -100,7 +100,6 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   private final Set<Team> completers;
   private BaseState state;
   private boolean transitioning;
-  private @Nullable Post predeterminedPost;
 
   protected Flag(Match match, FlagDefinition definition, ImmutableSet<Net> nets)
       throws ModuleLoadException {
@@ -109,7 +108,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
     TeamMatchModule tmm = match.getModule(TeamMatchModule.class);
 
-    if (definition.getOwner() != null) {
+    if (definition.getOwner() != null && tmm != null) {
       this.owner = tmm.getTeam(definition.getOwner());
     } else {
       this.owner = null;
@@ -129,11 +128,12 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     ImmutableSet.Builder<Team> controllersBuilder = ImmutableSet.builder();
     ImmutableSet.Builder<Team> completersBuilder = ImmutableSet.builder();
     for (Net net : nets) {
-      if (net.getReturnPost() != null && net.getReturnPost().getOwner() != null) {
-        Team controller = tmm.getTeam(net.getReturnPost().getOwner());
+      Post netPost = getPost(net.getReturnPost());
+      if (netPost != null && netPost.getOwner() != null && tmm != null) {
+        Team controller = tmm.getTeam(netPost.getOwner());
         controllersBuilder.add(controller);
 
-        if (net.getReturnPost().isPermanent()) {
+        if (getPost(net.getReturnPost()).isPermanent()) {
           completersBuilder.add(controller);
         }
       }
@@ -143,7 +143,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
     Banner banner = null;
     pointLoop:
-    for (PointProvider returnPoint : definition.getDefaultPost().getReturnPoints()) {
+    for (PointProvider returnPoint : getPost(definition.getDefaultPost()).getReturnPoints()) {
       Region region = returnPoint.getRegion();
       if (region instanceof PointRegion) {
         // Do not require PointRegions to be at the exact center of the block.
@@ -276,37 +276,12 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     }
   }
 
-  private int sequentialPostCounter = 1;
-
-  public Post getReturnPost(Post post) {
-    if (post.isSpecifiedPost()) {
-      return post;
-    }
-    if (predeterminedPost != null) {
-      Post returnPost = predeterminedPost;
-      predeterminedPost = null;
-      return returnPost;
-    }
-    if (definition.isSequential()) {
-      sequentialPostCounter %= definition.getPosts().size();
-      return definition.getPosts().get(sequentialPostCounter++);
-    }
-    Random random = match.getRandom();
-    return definition.getPosts().get(random.nextInt(definition.getPosts().size()));
+  public Post getPost(PostDefinition post) {
+    return post == null ? null : match.needModule(FlagMatchModule.class).getPost(post);
   }
 
   public Location getReturnPoint(Post post) {
-    Post returnPost = getReturnPost(post);
-    return returnPost.getReturnPoint(this, this.bannerYawProvider).clone();
-  }
-
-  public String predeterminePost(Post post) {
-    predeterminedPost = getReturnPost(post);
-    return predeterminedPost.getPostName();
-  }
-
-  public AngleProvider getBannerYawProvider() {
-    return bannerYawProvider;
+    return post.getReturnPoint(this, this.bannerYawProvider).clone();
   }
 
   // Touchable
@@ -348,7 +323,8 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   // Misc
 
   public void load() {
-    this.state = new Returned(this, this.getDefinition().getDefaultPost(), this.bannerLocation);
+    this.state =
+        new Returned(this, getPost(this.getDefinition().getDefaultPost()), this.bannerLocation);
     this.state.enterState();
   }
 
@@ -432,8 +408,9 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     return this.state.isCarrying(party);
   }
 
-  public boolean isAtPost(Post post) {
-    return this.state.isAtPost(post);
+  public boolean isAtPost(PostDefinition post) {
+    return this.state.getPost().getDefinition() == post
+        || this.state.getPost().getCurrent() == post;
   }
 
   public boolean isCompletable() {
