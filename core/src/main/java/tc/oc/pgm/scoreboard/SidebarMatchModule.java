@@ -59,6 +59,7 @@ import tc.oc.pgm.ffa.Tribute;
 import tc.oc.pgm.goals.Goal;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.ProximityGoal;
+import tc.oc.pgm.goals.ShowOptions.ShowFlag;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalProximityChangeEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
@@ -382,7 +383,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
     // Count the rows used for goals
     for (Goal<?> goal : gmm.getGoals()) {
-      if (goal.isVisible()) {
+      if (goal.hasShowFlag(ShowFlag.SHOW_SIDEBAR)) {
         if (goal.isShared()) {
           sharedGoals.add(goal);
         } else {
@@ -471,7 +472,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
           }
 
           for (Goal<?> goal : sortedWools) {
-            if (goal instanceof MonumentWool && goal.isVisible()) {
+            if (goal instanceof MonumentWool && goal.hasShowFlag(ShowFlag.SHOW_SIDEBAR)) {
               MonumentWool wool = (MonumentWool) goal;
               woolText += " ";
               if (!firstWool && !horizontalCompact) woolText += "  ";
@@ -486,7 +487,9 @@ public class SidebarMatchModule implements MatchModule, Listener {
         } else {
           // Not compact; add a row for each of this team's goals
           for (Goal goal : gmm.getGoals()) {
-            if (!goal.isShared() && goal.canComplete(competitor) && goal.isVisible()) {
+            if (!goal.isShared()
+                && goal.canComplete(competitor)
+                && goal.hasShowFlag(ShowFlag.SHOW_SIDEBAR)) {
               rows.add(this.renderGoal(goal, competitor, party, viewer));
             }
           }

@@ -28,6 +28,7 @@ import tc.oc.pgm.ffa.FreeForAllMatchModule;
 import tc.oc.pgm.goals.Goal;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.ProximityGoal;
+import tc.oc.pgm.goals.ShowOptions.ShowFlag;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
@@ -123,7 +124,7 @@ public final class MatchCommand {
 
         for (Team team : tmm.getParticipatingTeams()) {
           for (Goal<?> goal : gmm.getGoals(team)) {
-            if (goal.isVisible()) {
+            if (goal.hasShowFlag(ShowFlag.SHOW_INFO)) {
               if (player != null) {
                 teamGoalTexts.put(
                     team, renderGoal(goal, player.getCompetitor(), player.getParty()));

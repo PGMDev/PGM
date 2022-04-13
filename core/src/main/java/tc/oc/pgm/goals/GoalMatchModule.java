@@ -27,6 +27,7 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
+import tc.oc.pgm.goals.ShowOptions.ShowFlag;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalProximityChangeEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
@@ -81,7 +82,7 @@ public class GoalMatchModule implements MatchModule, Listener {
   public void addGoal(Goal<?> goal) {
     match.getLogger().fine("Adding goal " + goal);
 
-    if (!goal.isVisible()) return;
+    if (!goal.hasShowFlag(ShowFlag.STATS)) return; // TODO: Look into if this is correct or not
 
     if (goals.isEmpty()) {
       match
@@ -158,7 +159,7 @@ public class GoalMatchModule implements MatchModule, Listener {
 
     // Don't play the objective sound if the match is over, because the win/lose sound will play
     // instead
-    if (!match.calculateVictory() && event.getGoal().isVisible()) {
+    if (!match.calculateVictory() && event.getGoal().hasShowFlag(ShowFlag.SHOW_EFFECTS)) {
       Sound goodSound = event.getGoal().getCompletionSound(true);
       Sound badSound = event.getGoal().getCompletionSound(false);
 

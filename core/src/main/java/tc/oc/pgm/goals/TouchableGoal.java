@@ -20,6 +20,7 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.party.event.CompetitorRemoveEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.goals.ShowOptions.ShowFlag;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
@@ -188,7 +189,7 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
   }
 
   protected void sendTouchMessage(@Nullable ParticipantState toucher, boolean includeToucher) {
-    if (!isVisible()) return;
+    if (!hasShowFlag(ShowFlag.SHOW_MESSAGES)) return;
 
     Component message = getTouchMessage(toucher, false);
     Audience.console().sendMessage(message);
@@ -216,7 +217,7 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
   }
 
   protected void playTouchEffects(@Nullable ParticipantState toucher) {
-    if (toucher == null || !isVisible()) return;
+    if (toucher == null || !hasShowFlag(ShowFlag.SHOW_EFFECTS)) return;
 
     MatchPlayer onlineToucher = toucher.getPlayer().orElse(null);
     if (onlineToucher == null) return;

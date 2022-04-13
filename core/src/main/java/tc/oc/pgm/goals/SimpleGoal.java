@@ -87,8 +87,8 @@ public abstract class SimpleGoal<T extends GoalDefinition> implements Goal<T> {
   }
 
   @Override
-  public boolean isVisible() {
-    return this.definition.isVisible();
+  public boolean hasShowFlag(ShowOptions.ShowFlag flag) {
+    return this.definition.hasShowFlag(flag);
   }
 
   @Override
