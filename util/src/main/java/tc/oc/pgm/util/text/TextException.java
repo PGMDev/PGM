@@ -11,7 +11,7 @@ import java.util.Locale;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.util.ComponentMessageThrowable;
 
 /** An exception with a localized error message. */
@@ -41,7 +41,7 @@ public class TextException extends RuntimeException implements ComponentMessageT
   @Override
   public String getLocalizedMessage() {
     final Component localized = translate(message, Locale.getDefault());
-    return PlainComponentSerializer.plain().serialize(localized);
+    return PlainTextComponentSerializer.plainText().serialize(localized);
   }
 
   public static TextException exception(String key, Component... args) {

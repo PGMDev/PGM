@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Locale;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -36,6 +36,6 @@ public final class TextFormatterTest {
     }
     final Component actual = translate(list(text, NamedTextColor.WHITE), Locale.US);
 
-    assertEquals(expected, PlainComponentSerializer.plain().serialize(actual));
+    assertEquals(expected, PlainTextComponentSerializer.plainText().serialize(actual));
   }
 }
