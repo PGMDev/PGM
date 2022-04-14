@@ -13,7 +13,7 @@ import tc.oc.pgm.flag.post.PostDefinition;
 import tc.oc.pgm.teams.TeamFactory;
 
 @FeatureInfo(name = "net")
-public class Net extends SelfIdentifyingFeatureDefinition {
+public class NetDefinition extends SelfIdentifyingFeatureDefinition {
 
   private final Region region; // Region flag carrier must enter to capture
   private final Filter captureFilter; // Carrier must pass this filter to capture
@@ -37,7 +37,7 @@ public class Net extends SelfIdentifyingFeatureDefinition {
   private final boolean respawnTogether; // Delay respawn until all capturableFlags are captured
   private @Nullable Vector proximityLocation;
 
-  public Net(
+  public NetDefinition(
       @Nullable String id,
       Region region,
       Filter captureFilter,

@@ -21,23 +21,28 @@ public class SinglePost extends PostDefinition {
 
   private static final int MAX_SPAWN_ATTEMPTS = 100;
 
-  private final @Nullable FeatureReference<TeamFactory>
-      owner; // Team that owns the post, affects various things
-  private final Duration
-      recoverTime; // Time between a flag dropping and being recovered, can be infinite
-  private final @Nullable Duration
-      respawnTime; // Fixed time between a flag being recovered and respawning at the post
-  private final @Nullable Double
-      respawnSpeed; // Makes respawn time proportional to distance, flag "moves" back at this m/s
-  private final ImmutableList<PointProvider> returnPoints; // Spawn points for the flag
-  private final boolean
-      sequential; // Search for spawn points sequentially, see equivalent field in SpawnInfo
-  private final boolean permanent; // Flag enters Completed state when at this post
-  private final double pointsPerSecond; // Points awarded while any flag is at this post
-  private final Filter pickupFilter; // Filter players who can pickup a flag at this post
-  private final Filter respawnFilter; // Filter if a flag can respawn to this post
-  private final @Nullable String
-      postName; // The post's name, shown in chat when the flag is respawning
+  // The post's name, shown in chat when the flag is respawning
+  private final @Nullable String postName;
+  // Team that owns the post, affects various things
+  private final @Nullable FeatureReference<TeamFactory> owner;
+  // Time between a flag dropping and being recovered, can be infinite
+  private final Duration recoverTime;
+  // Fixed time between a flag being recovered and respawning at the post
+  private final @Nullable Duration respawnTime;
+  // Makes respawn time proportional to distance, flag "moves" back at this m/s
+  private final @Nullable Double respawnSpeed;
+  // Spawn points for the flag
+  private final ImmutableList<PointProvider> returnPoints;
+  // Search for spawn points sequentially, see equivalent field in SpawnInfo
+  private final boolean sequential;
+  // Flag enters Completed state when at this post
+  private final boolean permanent;
+  // Points awarded while any flag is at this post
+  private final double pointsPerSecond;
+  // Filter players who can pick up a flag at this post
+  private final Filter pickupFilter;
+  // Filter if a flag can respawn to this post
+  private final Filter respawnFilter;
 
   public SinglePost(
       @Nullable String id,

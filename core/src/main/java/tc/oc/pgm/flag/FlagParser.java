@@ -39,7 +39,7 @@ public class FlagParser {
 
   private final AtomicInteger postIdSerial = new AtomicInteger(1);
   private final List<PostDefinition> posts = new ArrayList<>();
-  private final List<Net> nets = new ArrayList<>();
+  private final List<NetDefinition> nets = new ArrayList<>();
   private final List<FlagDefinition> flags = new ArrayList<>();
 
   public FlagParser(MapFactory factory) {
@@ -54,6 +54,14 @@ public class FlagParser {
       throw new InvalidXMLException(
           "'filter' is no longer supported, be more specific e.g. 'pickup-filter'", node);
     }
+  }
+
+  private void checkDeprecatedMultiPost(Element el) throws InvalidXMLException {
+    if (el.getChildren("post").size() <= 1) return;
+    throw new InvalidXMLException(
+        "Multiple 'post' elements inside 'flag' are no longer supported, use a single 'post' with multiple inner 'post' elements instead.\n"
+            + "Check the docs at https://pgm.dev or PR #984 on github for more details.",
+        el);
   }
 
   public PostDefinition parsePost(Element el) throws InvalidXMLException {
@@ -160,7 +168,8 @@ public class FlagParser {
     return flags.build();
   }
 
-  public Net parseNet(Element el, @Nullable FlagDefinition parentFlag) throws InvalidXMLException {
+  public NetDefinition parseNet(Element el, @Nullable FlagDefinition parentFlag)
+      throws InvalidXMLException {
     checkDeprecatedFilter(el);
 
     String id = el.getAttributeValue("id");
@@ -210,8 +219,8 @@ public class FlagParser {
       returnableFlags = ImmutableSet.of();
     }
 
-    Net net =
-        new Net(
+    NetDefinition net =
+        new NetDefinition(
             id,
             region,
             captureFilter,
@@ -234,6 +243,7 @@ public class FlagParser {
 
   public FlagDefinition parseFlag(Element el) throws InvalidXMLException {
     checkDeprecatedFilter(el);
+    checkDeprecatedMultiPost(el);
 
     String id = el.getAttributeValue("id");
     String name = el.getAttributeValue("name");

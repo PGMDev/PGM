@@ -24,10 +24,11 @@ public class FlagModule implements MapModule {
   private static final Collection<MapTag> TAGS =
       ImmutableList.of(new MapTag("ctf", "flag", "Capture the Flag", true, false));
   private final ImmutableList<PostDefinition> posts;
-  private final ImmutableList<Net> nets;
+  private final ImmutableList<NetDefinition> nets;
   private final ImmutableList<FlagDefinition> flags;
 
-  public FlagModule(List<PostDefinition> posts, List<Net> nets, List<FlagDefinition> flags) {
+  public FlagModule(
+      List<PostDefinition> posts, List<NetDefinition> nets, List<FlagDefinition> flags) {
     this.posts = ImmutableList.copyOf(posts);
     this.nets = ImmutableList.copyOf(nets);
     this.flags = ImmutableList.copyOf(flags);

@@ -192,9 +192,9 @@ public class FlagDefinition extends ProximityGoalDefinition {
         && getDefaultPost().getFallback().getPickupFilter().query(query).isAllowed();
   }
 
-  public boolean canCapture(Query query, Collection<Net> nets) {
+  public boolean canCapture(Query query, Collection<NetDefinition> nets) {
     if (getCaptureFilter().query(query).isDenied()) return false;
-    for (Net net : nets) {
+    for (NetDefinition net : nets) {
       if (net.getCaptureFilter().query(query).isAllowed()) return true;
     }
     return false;

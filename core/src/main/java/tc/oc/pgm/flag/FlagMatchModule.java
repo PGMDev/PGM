@@ -18,7 +18,7 @@ public class FlagMatchModule implements MatchModule {
   public FlagMatchModule(
       Match match,
       ImmutableList<PostDefinition> postDefinitions,
-      ImmutableList<Net> nets,
+      ImmutableList<NetDefinition> nets,
       ImmutableList<FlagDefinition> flagDefinitions)
       throws ModuleLoadException {
 
@@ -32,8 +32,8 @@ public class FlagMatchModule implements MatchModule {
 
     ImmutableMap.Builder<FlagDefinition, Flag> flags = ImmutableMap.builder();
     for (FlagDefinition definition : flagDefinitions) {
-      ImmutableSet.Builder<Net> netsBuilder = ImmutableSet.builder();
-      for (Net net : nets) {
+      ImmutableSet.Builder<NetDefinition> netsBuilder = ImmutableSet.builder();
+      for (NetDefinition net : nets) {
         if (net.getCapturableFlags().contains(definition)) {
           netsBuilder.add(net);
         }

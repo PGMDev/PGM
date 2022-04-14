@@ -88,7 +88,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   public static final Sound RETURN_SOUND =
       sound(key("entity.firework_rocket.twinkle_far"), Sound.Source.MASTER, 1f, 1f);
 
-  private final ImmutableSet<Net> nets;
+  private final ImmutableSet<NetDefinition> nets;
   private final Location bannerLocation;
   private final BannerMeta bannerMeta;
   private final ItemStack bannerItem;
@@ -101,7 +101,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   private BaseState state;
   private boolean transitioning;
 
-  protected Flag(Match match, FlagDefinition definition, ImmutableSet<Net> nets)
+  protected Flag(Match match, FlagDefinition definition, ImmutableSet<NetDefinition> nets)
       throws ModuleLoadException {
     super(definition, match);
     this.nets = nets;
@@ -127,7 +127,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
     ImmutableSet.Builder<Team> controllersBuilder = ImmutableSet.builder();
     ImmutableSet.Builder<Team> completersBuilder = ImmutableSet.builder();
-    for (Net net : nets) {
+    for (NetDefinition net : nets) {
       PostDefinition netPost = net.getReturnPost();
       if (netPost != null && netPost.getFallback().getOwner() != null && tmm != null) {
         Team controller = tmm.getTeam(netPost.getFallback().getOwner());
@@ -211,7 +211,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     return TextTranslations.translateLegacy(getComponentName(), null);
   }
 
-  public ImmutableSet<Net> getNets() {
+  public ImmutableSet<NetDefinition> getNets() {
     return nets;
   }
 
@@ -378,7 +378,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     return canPickup(query, state.getPost());
   }
 
-  public boolean canCapture(Query query, Net net) {
+  public boolean canCapture(Query query, NetDefinition net) {
     return getDefinition().getCaptureFilter().query(query).isAllowed()
         && net.getCaptureFilter().query(query).isAllowed();
   }
