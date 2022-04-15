@@ -24,8 +24,8 @@ public class SequentialPostResolver implements PostResolver {
   @Override
   public SinglePost peekNext(Flag flag) {
     for (int offset = 1; offset < posts.size(); offset++) {
-      SinglePost p = posts.get((currentIdx + offset) % posts.size());
-      if (p.getRespawnFilter().query(new GoalQuery(flag)).isAllowed()) return p;
+      final SinglePost post = posts.get((currentIdx + offset) % posts.size());
+      if (post.getRespawnFilter().query(new GoalQuery(flag)).isAllowed()) return post;
     }
     return fallback;
   }
@@ -33,10 +33,10 @@ public class SequentialPostResolver implements PostResolver {
   @Override
   public SinglePost getNext(Flag flag) {
     for (int offset = 1; offset < posts.size(); offset++) {
-      SinglePost p = posts.get((currentIdx + offset) % posts.size());
-      if (p.getRespawnFilter().query(new GoalQuery(flag)).isAllowed()) {
+      final SinglePost post = posts.get((currentIdx + offset) % posts.size());
+      if (post.getRespawnFilter().query(new GoalQuery(flag)).isAllowed()) {
         this.currentIdx = (currentIdx + offset) % posts.size();
-        return p;
+        return post;
       }
     }
     return fallback;

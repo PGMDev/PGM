@@ -44,8 +44,8 @@ public class RandomOrderPostResolver implements PostResolver {
     if (next != null && next.getRespawnFilter().query(new GoalQuery(flag)).isAllowed()) return next;
 
     Collections.shuffle(posts);
-    for (SinglePost p : posts) {
-      if (p.getRespawnFilter().query(query).isAllowed()) return p;
+    for (SinglePost post : posts) {
+      if (post.getRespawnFilter().query(query).isAllowed()) return post;
     }
     return null;
   }
