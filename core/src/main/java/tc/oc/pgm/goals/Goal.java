@@ -38,10 +38,11 @@ public interface Goal<T extends GoalDefinition> extends Feature<T> {
   boolean isShared();
 
   /**
-   * Returns true if the goal has the provided show flag enabled. Show flags define the goal
-   * behavior, making it visible only via certain mediums such as the scoreboard and chat.
+   * Returns true if the goal has the provided {@link tc.oc.pgm.goals.ObjectiveOption}. Objective
+   * options define the goal behavior, making it visible only via certain mediums such as the
+   * scoreboard and chat.
    */
-  boolean hasShowFlag(ShowOptions.ShowFlag flag);
+  boolean hasOption(ObjectiveOption option);
 
   boolean isRequired();
 

@@ -21,8 +21,8 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.goals.GoalMatchModule;
+import tc.oc.pgm.goals.ObjectiveOptions;
 import tc.oc.pgm.goals.ProximityMetric;
-import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.modes.ObjectiveModesModule;
 import tc.oc.pgm.regions.BlockBoundedValidation;
@@ -141,7 +141,7 @@ public class CoreModule implements MapModule {
         }
 
         boolean showProgress = XMLUtils.parseBoolean(coreEl.getAttribute("show-progress"), false);
-        ShowOptions showOptions = ShowOptions.parse(coreEl);
+        ObjectiveOptions options = ObjectiveOptions.parse(coreEl);
         Boolean required = XMLUtils.parseBoolean(coreEl.getAttribute("required"), null);
         ProximityMetric proximityMetric =
             ProximityMetric.parse(
@@ -152,7 +152,7 @@ public class CoreModule implements MapModule {
                 id,
                 name,
                 required,
-                showOptions,
+                options,
                 owner,
                 proximityMetric,
                 region,

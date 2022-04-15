@@ -20,17 +20,17 @@ import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
  */
 public abstract class GoalDefinition extends SelfIdentifyingFeatureDefinition {
   private final @Nullable Boolean required;
-  private final ShowOptions showOptions;
+  private final ObjectiveOptions options;
   private final String name;
   private final Component component;
 
   public GoalDefinition(
-      @Nullable String id, String name, @Nullable Boolean required, ShowOptions showOptions) {
+      @Nullable String id, String name, @Nullable Boolean required, ObjectiveOptions options) {
     super(id);
     this.name = name;
     this.component = translateName(name);
     this.required = required;
-    this.showOptions = showOptions;
+    this.options = options;
   }
 
   @Override
@@ -54,12 +54,12 @@ public abstract class GoalDefinition extends SelfIdentifyingFeatureDefinition {
     return this.required;
   }
 
-  public boolean hasShowFlag(ShowOptions.ShowFlag flag) {
-    return this.showOptions.hasFlag(flag);
+  public boolean hasOption(ObjectiveOption option) {
+    return this.options.hasOption(option);
   }
 
-  protected ShowOptions getShowOptions() {
-    return this.showOptions;
+  protected ObjectiveOptions getOptions() {
+    return this.options;
   }
 
   public Goal<? extends GoalDefinition> getGoal(Match match) {

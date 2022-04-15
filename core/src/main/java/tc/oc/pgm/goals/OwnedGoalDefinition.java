@@ -16,9 +16,9 @@ public abstract class OwnedGoalDefinition extends GoalDefinition {
       @Nullable String id,
       String name,
       @Nullable Boolean required,
-      ShowOptions showOptions,
+      ObjectiveOptions options,
       @Nullable TeamFactory owner) {
-    super(id, name, required, showOptions);
+    super(id, name, required, options);
     this.owner = owner;
   }
 

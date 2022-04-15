@@ -8,7 +8,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.controlpoint.events.ControllerChangeEvent;
-import tc.oc.pgm.goals.ShowOptions.ShowFlag;
+import tc.oc.pgm.goals.ObjectiveOption;
 import tc.oc.pgm.util.text.TextFormatter;
 
 public class ControlPointAnnouncer implements Listener {
@@ -20,7 +20,7 @@ public class ControlPointAnnouncer implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onOwnerChange(ControllerChangeEvent event) {
-    if (event.getControlPoint().hasShowFlag(ShowFlag.SHOW_MESSAGES)) {
+    if (event.getControlPoint().hasOption(ObjectiveOption.SHOW_MESSAGES)) {
 
       if (event.getOldController() != null && event.getNewController() == null) {
         this.match.sendMessage(

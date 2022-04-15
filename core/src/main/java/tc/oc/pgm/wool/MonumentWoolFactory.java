@@ -14,9 +14,9 @@ import org.bukkit.material.Wool;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.goals.ObjectiveOptions;
 import tc.oc.pgm.goals.ProximityGoalDefinition;
 import tc.oc.pgm.goals.ProximityMetric;
-import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -48,7 +48,7 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
   public MonumentWoolFactory(
       @Nullable String id,
       @Nullable Boolean required,
-      ShowOptions showOptions,
+      ObjectiveOptions options,
       TeamFactory owner,
       @Nullable ProximityMetric woolProximityMetric,
       @Nullable ProximityMetric monumentProximityMetric,
@@ -61,7 +61,7 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
         id,
         makeName(color),
         required,
-        showOptions,
+        options,
         owner,
         woolProximityMetric,
         monumentProximityMetric);
@@ -85,7 +85,7 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
         + ", craftable="
         + this.craftable
         + ", visible="
-        + this.getShowOptions()
+        + this.getOptions()
         + "}";
   }
 
