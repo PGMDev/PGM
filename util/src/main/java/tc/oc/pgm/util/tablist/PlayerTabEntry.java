@@ -8,7 +8,6 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.skin.Skin;
 
 /**
@@ -42,12 +41,12 @@ public class PlayerTabEntry extends DynamicTabEntry {
   }
 
   protected final Player player;
-  private final int spareEntityId;
+  //  private final int spareEntityId;
 
   public PlayerTabEntry(Player player) {
     super(randomUUIDVersion2SameDefaultSkin(player.getUniqueId()));
     this.player = player;
-    this.spareEntityId = NMSHacks.allocateEntityId();
+    //    this.spareEntityId = NMSHacks.allocateEntityId();
   }
 
   @Override
@@ -57,7 +56,8 @@ public class PlayerTabEntry extends DynamicTabEntry {
 
   @Override
   public int getFakeEntityId(TabView view) {
-    return this.spareEntityId;
+    //    return this.spareEntityId;
+    return 0;
   }
 
   @Override
@@ -67,12 +67,13 @@ public class PlayerTabEntry extends DynamicTabEntry {
 
   @Override
   public @Nullable Skin getSkin(TabView view) {
-    return NMSHacks.getPlayerSkin(this.player);
+    //    return NMSHacks.getPlayerSkin(this.player);
+    return null;
   }
 
   @Override
   public int getPing() {
-    if (showPing) return NMSHacks.getPing(this.player);
+    if (showPing) return this.player.getPing();
     return super.getPing();
   }
 

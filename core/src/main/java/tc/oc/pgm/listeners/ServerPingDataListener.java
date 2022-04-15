@@ -9,16 +9,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import java.util.Iterator;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerListPingEvent;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
@@ -84,23 +81,24 @@ public class ServerPingDataListener implements Listener {
       }
     }
 
-    try {
-      JsonObject root = event.getOrCreateExtra(PGM.get());
-      this.matchManager
-          .getMatches()
-          .forEachRemaining(
-              match -> {
-                String matchId = match.getId();
-                try {
-                  root.add(matchId, this.matchCache.get(match));
-                } catch (ExecutionException e) {
-                  this.logger.log(
-                      Level.SEVERE, "Could not load server ping data for match: " + matchId, e);
-                }
-              });
-    } catch (NoSuchMethodError ex) {
-      legacySportPaper.compareAndSet(false, true);
-    }
+    //    try {
+    //      JsonObject root = event.getOrCreateExtra(PGM.get());
+    //      this.matchManager
+    //          .getMatches()
+    //          .forEachRemaining(
+    //              match -> {
+    //                String matchId = match.getId();
+    //                try {
+    //                  root.add(matchId, this.matchCache.get(match));
+    //                } catch (ExecutionException e) {
+    //                  this.logger.log(
+    //                      Level.SEVERE, "Could not load server ping data for match: " + matchId,
+    // e);
+    //                }
+    //              });
+    //    } catch (NoSuchMethodError ex) {
+    //      legacySportPaper.compareAndSet(false, true);
+    //    }
   }
 
   private void serializeMatch(Match match, JsonObject jsonObject) {

@@ -57,7 +57,9 @@ public class ItemTransferListener implements Listener {
         stack = stack.clone();
         stack.setAmount(quantity);
         event.getPlayer().getInventory().addItem(stack);
-        event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.ITEM_PICKUP, 1, 1);
+        event
+            .getPlayer()
+            .playSound(event.getPlayer().getLocation(), Sound.ENTITY_ITEM_PICKUP, 1, 1);
       }
     }
   }

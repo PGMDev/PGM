@@ -1,5 +1,6 @@
 package tc.oc.pgm.kits;
 
+import com.destroystokyo.paper.profile.PlayerProfile;
 import com.google.common.base.Splitter;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
@@ -21,9 +22,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -46,10 +50,9 @@ import tc.oc.pgm.shield.ShieldKit;
 import tc.oc.pgm.shield.ShieldParameters;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
-import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.inventory.OldPotionBuilder;
 import tc.oc.pgm.util.material.Materials;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -150,12 +153,13 @@ public abstract class KitParser {
   }
 
   public KnockbackReductionKit parseKnockbackReductionKit(Element el) throws InvalidXMLException {
-    if (!BukkitUtils.isSportPaper()) return null;
-    Element child = el.getChild("knockback-reduction");
-    if (child == null) {
-      return null;
-    }
-    return new KnockbackReductionKit(XMLUtils.parseNumber(child, Float.class));
+    return null;
+    //    if (!BukkitUtils.isSportPaper()) return null;
+    //    Element child = el.getChild("knockback-reduction");
+    //    if (child == null) {
+    //      return null;
+    //    }
+    //    return new KnockbackReductionKit(XMLUtils.parseNumber(child, Float.class));
   }
 
   public WalkSpeedKit parseWalkSpeedKit(Element el) throws InvalidXMLException {
@@ -319,26 +323,26 @@ public abstract class KitParser {
   }
 
   public AttributeKit parseAttributeKit(Element el) throws InvalidXMLException {
-    SetMultimap<String, AttributeModifier> modifiers = parseAttributeModifiers(el);
+    SetMultimap<Attribute, AttributeModifier> modifiers = parseAttributeModifiers(el);
     attributeModifiers.addAll(modifiers.values());
     return modifiers.isEmpty() ? null : new AttributeKit(modifiers);
   }
 
-  public SetMultimap<String, AttributeModifier> parseAttributeModifiers(Element el)
+  public SetMultimap<Attribute, AttributeModifier> parseAttributeModifiers(Element el)
       throws InvalidXMLException {
-    SetMultimap<String, AttributeModifier> modifiers = HashMultimap.create();
+    SetMultimap<Attribute, AttributeModifier> modifiers = HashMultimap.create();
 
     Node attr = Node.fromAttr(el, "attribute", "attributes");
     if (attr != null) {
       for (String modifierText : Splitter.on(";").split(attr.getValue())) {
-        Map.Entry<String, AttributeModifier> mod =
+        Map.Entry<Attribute, AttributeModifier> mod =
             XMLUtils.parseCompactAttributeModifier(attr, modifierText);
         modifiers.put(mod.getKey(), mod.getValue());
       }
     }
 
     for (Element elAttribute : el.getChildren("attribute")) {
-      Map.Entry<String, AttributeModifier> mod = XMLUtils.parseAttributeModifier(elAttribute);
+      Map.Entry<Attribute, AttributeModifier> mod = XMLUtils.parseAttributeModifier(elAttribute);
       modifiers.put(mod.getKey(), mod.getValue());
     }
 
@@ -375,13 +379,14 @@ public abstract class KitParser {
   }
 
   public ItemStack parseHead(Element el) throws InvalidXMLException {
-    ItemStack itemStack = parseItem(el, Material.SKULL_ITEM, (short) 3);
+    ItemStack itemStack = parseItem(el, Material.PLAYER_HEAD, (short) 3);
     SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
-    NMSHacks.setSkullMetaOwner(
-        meta,
-        XMLUtils.parseUsername(Node.fromChildOrAttr(el, "name")),
-        XMLUtils.parseUuid(Node.fromRequiredChildOrAttr(el, "uuid")),
-        XMLUtils.parseUnsignedSkin(Node.fromRequiredChildOrAttr(el, "skin")));
+    PlayerProfile profile =
+        Bukkit.createProfile(
+            XMLUtils.parseUuid(Node.fromRequiredChildOrAttr(el, "uuid")),
+            XMLUtils.parseUsername(Node.fromChildOrAttr(el, "name")));
+    // TODO: reimplement specifiying skins
+    meta.setPlayerProfile(profile);
     itemStack.setItemMeta(meta);
     return itemStack;
   }
@@ -418,12 +423,18 @@ public abstract class KitParser {
     // amount returns max value of integer if "oo" is given as amount
     if (amount == Integer.MAX_VALUE) amount = -1;
 
-    // must be CraftItemStack to keep track of NBT data
-    ItemStack itemStack = NMSHacks.craftItemCopy(new ItemStack(type, amount, damage));
-
-    if (itemStack.getType() != type) {
-      throw new InvalidXMLException("Invalid item/block", el);
+    ItemStack itemStack;
+    if (Material.POTION.equals(type) && damage > 0) {
+      itemStack = OldPotionBuilder.buildLegacyPotion(damage, amount);
+    } else {
+      itemStack = new ItemStack(type, amount, damage);
     }
+
+    itemStack = itemStack.ensureServerConversions();
+
+    //    if (itemStack.getType() != type) {
+    //      throw new InvalidXMLException("Invalid item/block", el);
+    //    }
 
     if (amount == -1 && !itemStack.getType().isBlock()) {
       throw new InvalidXMLException("infinity can only be applied to a block material", el);
@@ -466,7 +477,8 @@ public abstract class KitParser {
       }
     }
 
-    NMSHacks.applyAttributeModifiers(parseAttributeModifiers(el), meta);
+    //    NMSHacks.applyAttributeModifiers(parseAttributeModifiers(el), meta);
+    meta.setAttributeModifiers(parseAttributeModifiers(el));
 
     String customName = el.getAttributeValue("name");
     if (customName != null) {
@@ -501,17 +513,19 @@ public abstract class KitParser {
     }
 
     if (XMLUtils.parseBoolean(el.getAttribute("unbreakable"), false)) {
-      meta.spigot().setUnbreakable(true);
+      meta.setUnbreakable(true);
     }
 
     Element elCanDestroy = el.getChild("can-destroy");
     if (elCanDestroy != null) {
-      NMSHacks.setCanDestroy(meta, XMLUtils.parseMaterialMatcher(elCanDestroy).getMaterials());
+      // TODO: use setDestroyableKeys
+      meta.setCanDestroy(XMLUtils.parseMaterialMatcher(elCanDestroy).getMaterials());
     }
 
     Element elCanPlaceOn = el.getChild("can-place-on");
     if (elCanPlaceOn != null) {
-      NMSHacks.setCanPlaceOn(meta, XMLUtils.parseMaterialMatcher(elCanPlaceOn).getMaterials());
+      // TODO: use setPlaceableKeys
+      meta.setCanPlaceOn(XMLUtils.parseMaterialMatcher(elCanPlaceOn).getMaterials());
     }
   }
 
@@ -528,6 +542,7 @@ public abstract class KitParser {
       case HIDE_PLACED_ON:
         return "can-place-on";
       case HIDE_POTION_EFFECTS:
+      case HIDE_DYE:
         return "other";
     }
     throw new IllegalStateException("Unknown item flag " + flag);

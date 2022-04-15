@@ -4,7 +4,6 @@ import fr.minuskube.inv.ClickableItem;
 import java.util.List;
 import java.util.function.Consumer;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -75,9 +74,7 @@ public interface MenuItem {
     ItemStack stack = new ItemStack(getMaterial(player));
     ItemMeta meta = stack.getItemMeta();
 
-    meta.setDisplayName(
-        TextTranslations.translateLegacy(
-            getDisplayName().decoration(TextDecoration.BOLD, true), player));
+    meta.displayName(TextTranslations.translate(getDisplayName(), player));
     meta.setLore(getLore(player));
     meta.addItemFlags(ItemFlag.values());
 

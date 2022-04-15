@@ -30,19 +30,11 @@ public interface BukkitUtils {
   }
 
   static void addRecipe(World world, Recipe recipe) {
-    if (BukkitUtils.isSportPaper()) {
-      world.addRecipe(recipe);
-    } else {
-      Bukkit.addRecipe(recipe);
-    }
+    Bukkit.addRecipe(recipe);
   }
 
   static void resetRecipes(World world) {
-    if (BukkitUtils.isSportPaper()) {
-      world.resetRecipes();
-    } else {
-      Bukkit.resetRecipes();
-    }
+    Bukkit.resetRecipes();
   }
 
   /** Makes strings have pretty colors */
@@ -78,7 +70,7 @@ public interface BukkitUtils {
           .put(DyeColor.RED, ChatColor.DARK_RED)
           .put(DyeColor.PURPLE, ChatColor.DARK_PURPLE)
           .put(DyeColor.ORANGE, ChatColor.GOLD)
-          .put(DyeColor.SILVER, ChatColor.GRAY)
+          .put(DyeColor.LIGHT_GRAY, ChatColor.GRAY)
           .put(DyeColor.GRAY, ChatColor.DARK_GRAY)
           .put(DyeColor.LIGHT_BLUE, ChatColor.BLUE)
           .put(DyeColor.LIME, ChatColor.GREEN)
@@ -101,7 +93,7 @@ public interface BukkitUtils {
           .put(ChatColor.DARK_PURPLE, DyeColor.PURPLE)
           .put(ChatColor.DARK_RED, DyeColor.RED)
           .put(ChatColor.GOLD, DyeColor.ORANGE)
-          .put(ChatColor.GRAY, DyeColor.SILVER)
+          .put(ChatColor.GRAY, DyeColor.LIGHT_GRAY)
           .put(ChatColor.GREEN, DyeColor.LIME)
           .put(ChatColor.LIGHT_PURPLE, DyeColor.MAGENTA)
           .put(ChatColor.RED, DyeColor.RED)
@@ -174,7 +166,7 @@ public interface BukkitUtils {
           .put(PotionEffectType.SATURATION, "Saturation")
           .build();
 
-  static ChatColor convertColor(net.md_5.bungee.api.ChatColor color) {
+  static ChatColor convertColor(ChatColor color) {
     return ChatColor.getByChar(color.toString().charAt(1));
   }
 }

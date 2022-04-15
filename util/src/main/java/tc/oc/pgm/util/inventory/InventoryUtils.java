@@ -9,12 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Merchant;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.Potion;
@@ -148,6 +150,9 @@ public final class InventoryUtils {
     // An exception can be thrown if the Villager's NBT is invalid
     // or if the server does not support for this patch.
     // TODO: Newer versions of Bukkit can use HumanEntity#openMerchant(Merchant, boolean)
-    viewer.openMerchantCopy(villager);
+    viewer.openMerchant(villager, true);
+    Merchant merchant = Bukkit.createMerchant(villager.getName());
+    merchant.setRecipes(villager.getRecipes());
+    viewer.openMerchant(merchant, true);
   }
 }

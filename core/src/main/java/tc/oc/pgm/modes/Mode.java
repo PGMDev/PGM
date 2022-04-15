@@ -6,25 +6,25 @@ import java.time.Duration;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.material.MaterialData;
+import org.bukkit.Material;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 
 public class Mode extends SelfIdentifyingFeatureDefinition {
-  private final MaterialData material;
+  private final Material material;
   private final Duration after;
   private final @Nullable Filter filter;
   private final @Nullable String name;
   private final Component componentName;
   private final Duration showBefore;
 
-  public Mode(final MaterialData material, final Duration after, Duration showBefore) {
+  public Mode(final Material material, final Duration after, Duration showBefore) {
     this(null, material, after, null, null, showBefore);
   }
 
   public Mode(
       final @Nullable String id,
-      final MaterialData material,
+      final Material material,
       final Duration after,
       final @Nullable Filter filter,
       final @Nullable String name,
@@ -39,7 +39,7 @@ public class Mode extends SelfIdentifyingFeatureDefinition {
     this.showBefore = showBefore;
   }
 
-  public MaterialData getMaterialData() {
+  public Material getMaterial() {
     return this.material;
   }
 

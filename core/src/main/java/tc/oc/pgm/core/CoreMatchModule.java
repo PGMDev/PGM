@@ -60,7 +60,7 @@ public class CoreMatchModule implements MatchModule, Listener {
   public void leakCheck(final BlockTransformEvent event) {
     if (event.getWorld() != this.match.getWorld()) return;
 
-    if (event.getNewState().getType() == Material.STATIONARY_LAVA) {
+    if (event.getNewState().getType() == Material.LAVA) {
       Vector blockVector = BlockVectors.center(event.getNewState()).toVector();
       // Vector ensuring it's inside leak region if it's above
       Vector minVector = blockVector.clone().setY(0.5);
@@ -98,7 +98,7 @@ public class CoreMatchModule implements MatchModule, Listener {
 
             if (team == core.getOwner()) {
               event.setCancelled(translatable("objective.damageOwn", core.getComponentName()));
-            } else if (event.getOldState().getData().equals(core.getMaterial())) {
+            } else if (event.getOldState().getType().equals(core.getMaterial())) {
               this.match.callEvent(new CoreBlockBreakEvent(core, player, event.getOldState()));
               core.touch(player);
 
@@ -159,7 +159,7 @@ public class CoreMatchModule implements MatchModule, Listener {
   public void onObjectiveModeSwitch(final ObjectiveModeChangeEvent event) {
     for (Core core : this.cores) {
       if (core.getModes() == null || core.getModes().contains(event.getMode())) {
-        core.replaceBlocks(event.getMode().getMaterialData());
+        core.replaceBlocks(event.getMode().getMaterial());
         // if at least one of the cores are visible, the mode change message will be sent
         if (core.isVisible()) {
           event.setVisible(true);

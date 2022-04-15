@@ -7,7 +7,6 @@ import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.StaticFilter;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class KitNode extends AbstractKit {
   private final List<Kit> kits;
@@ -31,7 +30,7 @@ public class KitNode extends AbstractKit {
       }
 
       if (this.potionParticles != null) {
-        NMSHacks.setPotionParticles(player.getBukkit(), this.potionParticles);
+        //        NMSHacks.setPotionParticles(player.getBukkit(), this.potionParticles);
       }
     }
   }

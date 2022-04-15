@@ -2,7 +2,7 @@ package tc.oc.pgm.goals;
 
 import java.util.Map;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.ChatColor;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.EventHandler;

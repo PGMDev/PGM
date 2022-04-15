@@ -7,9 +7,9 @@ import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import net.kyori.adventure.text.Component;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.match.Match;
@@ -81,7 +81,7 @@ public class MatchPlayerStateImpl implements MatchPlayerState {
 
   @Override
   public int hashCode() {
-    return new HashCodeBuilder().append(getMatch()).append(getParty()).append(getId()).build();
+    return new HashCodeBuilder().append(getMatch()).append(getParty()).append(getId()).hashCode();
   }
 
   @Override
@@ -102,6 +102,6 @@ public class MatchPlayerStateImpl implements MatchPlayerState {
         .append("party", getParty().getDefaultName())
         .append("match", getMatch().getId())
         .append("location", location)
-        .build();
+        .toString();
   }
 }

@@ -12,7 +12,6 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.event.entity.PotionEffectRemoveEvent;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class ShieldPlayerModule implements Tickable {
 
@@ -37,11 +36,11 @@ public class ShieldPlayerModule implements Tickable {
   }
 
   double getAbsorption() {
-    return NMSHacks.getAbsorption(bukkit);
+    return bukkit.getAbsorptionAmount();
   }
 
   void setAbsorption(double absorption) {
-    NMSHacks.setAbsorption(bukkit, absorption);
+    bukkit.setAbsorptionAmount(absorption);
   }
 
   void addAbsorption(double delta) {
@@ -66,7 +65,7 @@ public class ShieldPlayerModule implements Tickable {
       logger.fine("Recharging shield: shield=" + shieldHealth + " delta=" + delta);
       shieldHealth = parameters.maxHealth;
       addAbsorption(delta);
-      bukkit.playSound(bukkit.getLocation(), Sound.ORB_PICKUP, 1, 2);
+      bukkit.playSound(bukkit.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 2);
     }
   }
 

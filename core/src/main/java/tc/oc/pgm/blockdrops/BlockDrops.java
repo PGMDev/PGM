@@ -3,14 +3,14 @@ package tc.oc.pgm.blockdrops;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import javax.annotation.Nullable;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 /** The result of breaking a block */
 public class BlockDrops {
   public final ImmutableMap<ItemStack, Double> items; // probability -> item
   public final int experience;
-  public final @Nullable MaterialData replacement;
+  public final @Nullable Material replacement;
   public final @Nullable Float fallChance;
   public final @Nullable Float landChance;
   public final @Nullable Double fallSpeed;
@@ -18,7 +18,7 @@ public class BlockDrops {
   public BlockDrops(
       Map<ItemStack, Double> items,
       int experience,
-      @Nullable MaterialData replacement,
+      @Nullable Material replacement,
       @Nullable Float fallChance,
       @Nullable Float landChance,
       @Nullable Double fallSpeed) {

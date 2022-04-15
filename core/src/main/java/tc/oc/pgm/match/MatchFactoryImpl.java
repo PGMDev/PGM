@@ -19,7 +19,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Difficulty;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -33,7 +32,6 @@ import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.FileUtils;
 import tc.oc.pgm.util.chunk.NullChunkGenerator;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
 
@@ -260,10 +258,8 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
     private Stage advanceSync() throws IllegalStateException {
       final WorldInfo info = map.getWorld();
-      WorldCreator creator = NMSHacks.detectWorld(worldName);
-      if (creator == null) {
-        creator = new WorldCreator(worldName);
-      }
+      WorldCreator creator = new WorldCreator(worldName);
+
       final World world =
           PGM.get()
               .getServer()
@@ -353,10 +349,11 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
         for (Player player : Bukkit.getOnlinePlayers()) {
           if (viewer.canSee(player) && viewer != player) players.add(player.getName());
         }
-        NMSHacks.sendPacket(
-            viewer,
-            NMSHacks.teamCreatePacket(
-                "dummy", "dummy", ChatColor.AQUA.toString(), "", false, false, players));
+
+        //        NMSHacks.sendPacket(
+        //            viewer,
+        //            NMSHacks.teamCreatePacket(
+        //                "dummy", "dummy", ChatColor.AQUA.toString(), "", false, false, players));
       }
 
       Duration delay = Duration.ZERO;
@@ -395,7 +392,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
       }
 
       // After all players have been teleported, remove the dummy team
-      NMSHacks.sendPacket(NMSHacks.teamRemovePacket("dummy"));
+      //      NMSHacks.sendPacket(NMSHacks.teamRemovePacket("dummy"));
 
       return null;
     }

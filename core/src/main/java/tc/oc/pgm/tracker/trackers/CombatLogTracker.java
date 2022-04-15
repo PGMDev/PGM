@@ -262,7 +262,7 @@ public class CombatLogTracker implements Listener {
                 || Materials.isLava(landingBlock.getType())) {
               // Break if the player hits a solid block or lava
               break;
-            } else if (landingBlock.getType() == Material.WEB) {
+            } else if (landingBlock.getType() == Material.COBWEB) {
               // If they hit web, reset their fall distance, but assume they keep falling
               fallDistance = -1;
             }

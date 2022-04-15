@@ -15,7 +15,6 @@ import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
-import org.bukkit.material.MaterialData;
 import tc.oc.pgm.blockdrops.BlockDrops;
 import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.event.GeneralizedEvent;
@@ -42,14 +41,6 @@ public class BlockTransformEvent extends GeneralizedEvent {
 
   public BlockTransformEvent(Event cause, BlockState oldState, BlockState newState) {
     this(cause, checkNotNull(oldState).getBlock(), oldState, newState);
-  }
-
-  public BlockTransformEvent(Event cause, Block block, MaterialData newMaterial) {
-    this(
-        cause,
-        block,
-        checkNotNull(block).getState(),
-        BlockStates.cloneWithMaterial(block, newMaterial));
   }
 
   public BlockTransformEvent(Event cause, Block block, Material newMaterial) {
@@ -97,8 +88,7 @@ public class BlockTransformEvent extends GeneralizedEvent {
       return newState;
     } else {
       final BlockState state = newState.getBlock().getState();
-      state.setType(drops.replacement.getItemType());
-      state.setData(drops.replacement);
+      state.setType(drops.replacement);
       return state;
     }
   }

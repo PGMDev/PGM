@@ -51,7 +51,6 @@ import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.event.GeneralizedEvent;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 @ListenerScope(MatchScope.LOADED)
 public class RegionMatchModule implements MatchModule, Listener {
@@ -143,7 +142,7 @@ public class RegionMatchModule implements MatchModule, Listener {
         // Note: works on observers
         if (enters && rfa.velocity != null) {
           event.getPlayer().setVelocity(rfa.velocity);
-          NMSHacks.updateVelocity(event.getPlayer());
+          //          NMSHacks.updateVelocity(event.getPlayer());
         }
 
         if (rfa.kit != null && player.canInteract()) {
@@ -304,7 +303,7 @@ public class RegionMatchModule implements MatchModule, Listener {
         // which is handled as a "place" event, with the placed item as the block world
         BlockState blockState =
             BlockStates.cloneWithMaterial(
-                itemFrame.getLocation().getBlock(), event.getPlayer().getItemInHand().getData());
+                itemFrame.getLocation().getBlock(), event.getPlayer().getItemInHand().getType());
         this.handleHangingPlace(event, blockState, event.getPlayer());
       }
     }
@@ -407,7 +406,7 @@ public class RegionMatchModule implements MatchModule, Listener {
     } else if (hanging instanceof ItemFrame) {
       return Material.ITEM_FRAME;
     } else if (hanging instanceof LeashHitch) {
-      return Material.LEASH;
+      return Material.LEAD;
     } else {
       return null;
     }

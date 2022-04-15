@@ -176,7 +176,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
     if (stack == null) return 0;
     double points = 0;
     for (Entry<SingleMaterialMatcher, Double> entry : box.getRedeemables().entrySet()) {
-      if (entry.getKey().matches(stack.getData())) {
+      if (entry.getKey().matches(stack.getType())) {
         points += entry.getValue() * stack.getAmount();
         stack.setAmount(0);
       }

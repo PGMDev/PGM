@@ -15,7 +15,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
@@ -46,7 +45,7 @@ public class Core extends TouchableGoal<CoreFactory>
   protected final Region leakRegion;
   protected final int leakRequired;
 
-  protected MaterialData material;
+  protected Material material;
   protected int leak = 0;
   protected boolean leaked = false;
   protected Iterable<Location> proximityLocations;
@@ -75,8 +74,7 @@ public class Core extends TouchableGoal<CoreFactory>
             region,
             match.getWorld(),
             match.getMap().getProto(),
-            new SingleMaterialMatcher(Material.LAVA, (byte) 0),
-            new SingleMaterialMatcher(Material.STATIONARY_LAVA, (byte) 0));
+            new SingleMaterialMatcher(Material.LAVA));
     if (this.lavaRegion.getBlocks().isEmpty()) {
       match.getLogger().warning("No lava found in core " + this.getName());
     }
@@ -137,7 +135,7 @@ public class Core extends TouchableGoal<CoreFactory>
     return this.definition.getModes();
   }
 
-  public MaterialData getMaterial() {
+  public Material getMaterial() {
     return this.material;
   }
 
@@ -229,20 +227,18 @@ public class Core extends TouchableGoal<CoreFactory>
 
   @Override
   @SuppressWarnings("deprecation")
-  public void replaceBlocks(MaterialData newMaterial) {
+  public void replaceBlocks(Material newMaterial) {
     for (Block block : this.getCasingRegion().getBlocks()) {
       if (this.isObjectiveMaterial(block)) {
-        block.setTypeIdAndData(newMaterial.getItemTypeId(), newMaterial.getData(), true);
+        block.setType(newMaterial, true);
       }
     }
     this.material = newMaterial;
   }
 
   @Override
-  @SuppressWarnings("deprecation")
   public boolean isObjectiveMaterial(Block block) {
-    return block.getType() == this.material.getItemType()
-        && block.getData() == this.material.getData();
+    return block.getType() == this.material;
   }
 
   public String getModeChangeMessage(Material material) {

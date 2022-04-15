@@ -16,6 +16,7 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
@@ -441,7 +442,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
 
     if (player != null) {
       this.invalidate(player);
-      PGM.get().getServer().postToMainThread(PGM.get(), true, this::tick);
+      Bukkit.getServer().getScheduler().runTask(PGM.get(), this::tick);
     }
   }
 
@@ -485,7 +486,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
                 }
               });
 
-      event.yield();
+      //      event.yield();
 
       // Wait until after the event to remove them, in case they get invalidated during the event.
       dirtySet.remove(event.getPlayer());

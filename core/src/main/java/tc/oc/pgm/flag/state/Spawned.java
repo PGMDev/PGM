@@ -1,8 +1,13 @@
 package tc.oc.pgm.flag.state;
 
-import org.bukkit.Effect;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.flag.Flag;
@@ -54,23 +59,25 @@ public abstract class Spawned extends BaseState {
     this.particleClock++;
 
     if (this.flag.getDefinition().showBeam()) {
-      for (MatchPlayer player : flag.getMatch().getPlayers()) {
-        if (this.canSeeParticles(player.getBukkit())) {
-          player
-              .getBukkit()
-              .spigot()
-              .playEffect(
-                  this.getLocation().clone().add(0, 56, 0),
-                  Effect.TILE_DUST,
-                  Material.WOOL.getId(),
-                  flag.getDyeColor().getWoolData(),
-                  0.15f, // radius on each axis of the particle ball
-                  24f,
-                  0.15f,
-                  0f, // initial horizontal velocity
-                  40, // number of particles
-                  200); // radius in blocks to show particles
-        }
+      List<Player> players =
+          flag.getMatch().getPlayers().stream()
+              .map(MatchPlayer::getBukkit)
+              .filter(this::canSeeParticles)
+              .collect(Collectors.toList());
+      Color color = flag.getColor();
+
+      Material material = Material.getMaterial(flag.getDyeColor().name() + "_WOOL");
+      if (material != null) {
+        BlockData blockData = Bukkit.createBlockData(material);
+        Particle.BLOCK_DUST
+            .builder()
+            .data(blockData)
+            .count(40)
+            .receivers(players)
+            .location(this.getLocation().clone().add(0, 0, 2))
+            .offset(0, 56, 0)
+            .force(true)
+            .spawn();
       }
     }
   }

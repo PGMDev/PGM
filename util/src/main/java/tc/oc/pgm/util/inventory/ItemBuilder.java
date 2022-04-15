@@ -7,9 +7,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.Dye;
-import org.bukkit.material.MaterialData;
-import org.bukkit.material.Wool;
 
 /** A nice way to build {@link ItemStack}s. */
 public class ItemBuilder {
@@ -44,12 +41,6 @@ public class ItemBuilder {
     return this;
   }
 
-  public ItemBuilder material(MaterialData material) {
-    item.setType(material.getItemType());
-    item.setData(material);
-    return this;
-  }
-
   public ItemBuilder amount(int amount) {
     item.setAmount(amount);
     return this;
@@ -76,7 +67,7 @@ public class ItemBuilder {
   }
 
   public ItemBuilder unbreakable(boolean unbreakable) {
-    meta().spigot().setUnbreakable(unbreakable);
+    meta.setUnbreakable(unbreakable);
     return this;
   }
 
@@ -86,22 +77,20 @@ public class ItemBuilder {
   }
 
   public ItemBuilder color(DyeColor color) {
-    final Material type = item.getType();
-    switch (type) {
-      case INK_SACK:
-        item.setData(new Dye(color));
-        break;
+    if (color == null) return this;
+    final Material oldMaterial = item.getType();
 
-      case WOOL:
-        item.setData(new Wool(color));
-        break;
+    String type = oldMaterial.name();
+    int index = type.indexOf('_');
+    if (index != -1) {
 
-      default:
-        // banners/other colored blocks
-        item.setData(new MaterialData(type, color.getWoolData()));
-        break;
+      String realType = type.substring(index);
+      Material newMaterial = Material.getMaterial(color.name() + realType);
+      if (newMaterial != null) {
+        item.setType(newMaterial);
+      }
     }
-    item.setDurability(item.getData().getData());
+
     return this;
   }
 }

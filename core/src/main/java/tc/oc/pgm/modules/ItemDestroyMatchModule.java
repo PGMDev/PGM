@@ -25,7 +25,7 @@ public class ItemDestroyMatchModule implements MatchModule, Listener {
   public void processItemRemoval(ItemSpawnEvent event) {
     ItemStack item = event.getEntity().getItemStack();
     for (BlockFilter filter : this.itemsToRemove) {
-      if (filter.matches(item.getType(), item.getData().getData())) {
+      if (filter.matches(item.getType())) {
         event.setCancelled(true);
       }
     }

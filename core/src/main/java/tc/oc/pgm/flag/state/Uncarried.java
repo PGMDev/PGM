@@ -46,7 +46,7 @@ public abstract class Uncarried extends Spawned {
             location.getPitch());
 
     Block block = this.location.getBlock();
-    if (block.getType() == Material.STANDING_BANNER) {
+    if (block.getType().toString().contains("BANNER")) {
       // Banner may already be here at match start
       this.oldBlock = BlockStates.cloneWithMaterial(block, Material.AIR);
     } else {
@@ -67,7 +67,7 @@ public abstract class Uncarried extends Spawned {
       oldBase.getBlock().setType(Material.ICE, false);
     }
 
-    Materials.placeStanding(this.location, this.flag.getBannerMeta());
+    Materials.placeStanding(this.location, this.flag.getBannerMeta(), this.flag.getBannerType());
 
     this.labelEntity =
         this.location.getWorld().spawn(this.location.clone().add(0, 1.7, 0), ArmorStand.class);
@@ -117,7 +117,9 @@ public abstract class Uncarried extends Spawned {
       this.pickingUp = carrier;
       FlagPickupEvent event = new FlagPickupEvent(this.flag, carrier, this.location);
       this.flag.getMatch().callEvent(event);
-      if (event.isCancelled()) return false;
+      if (event.isCancelled()) {
+        return false;
+      }
     } finally {
       this.pickingUp = null;
     }

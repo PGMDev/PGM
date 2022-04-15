@@ -12,7 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.util.FileUtils;
@@ -137,7 +137,7 @@ public class SystemMapSourceFactory extends PathMapSourceFactory {
       return new ToStringBuilder(this)
           .append("dir", dir)
           .append("modified", modified.get())
-          .build();
+          .toString();
     }
   }
 }

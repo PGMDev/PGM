@@ -125,46 +125,6 @@ public interface BlockVectors {
 
   /** Block world that a player can stand on */
   static boolean isSupportive(Material type) {
-    if (type.isOccluding()) {
-      return true;
-    }
-
-    // blocks that aren't listed as occluding but can support a player
-    if (type.isBlock()) {
-      if (type.name().endsWith("STAIRS")) return true;
-      if (type.name().endsWith("STEP")) return true;
-
-      switch (type) {
-        case CHEST:
-        case ENDER_CHEST:
-        case TRAPPED_CHEST:
-        case HOPPER:
-        case ANVIL:
-        case BEACON:
-        case ENCHANTMENT_TABLE:
-        case CAULDRON:
-        case DAYLIGHT_DETECTOR:
-        case DAYLIGHT_DETECTOR_INVERTED:
-        case GLASS:
-        case STAINED_GLASS:
-        case GLOWSTONE:
-        case ICE:
-        case LEAVES:
-        case LEAVES_2:
-        case PISTON_BASE:
-        case PISTON_STICKY_BASE:
-        case REDSTONE_BLOCK:
-        case SOIL:
-        case TNT:
-        case BARRIER:
-        case CARPET:
-        case WATER_LILY:
-        case CAKE_BLOCK:
-        case SLIME_BLOCK:
-          return true;
-      }
-    }
-
-    return false;
+    return type.isSolid();
   }
 }

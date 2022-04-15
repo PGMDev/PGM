@@ -31,7 +31,7 @@ public class RageMatchModule implements MatchModule, Listener {
       return player.getItemInHand().containsEnchantment(Enchantment.DAMAGE_ALL);
     } else if (damager instanceof Arrow) {
       Arrow arrow = (Arrow) damager; // Arrows with damage > 2 are from power bows.
-      return arrow.getShooter() instanceof Player && arrow.spigot().getDamage() > 2.0D;
+      return arrow.getShooter() instanceof Player && arrow.getDamage() > 2.0D;
     }
     return false;
   }

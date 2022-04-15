@@ -17,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
@@ -32,10 +33,12 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Merchant;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
@@ -51,10 +54,8 @@ import tc.oc.pgm.events.PlayerBlockTransformEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
-import tc.oc.pgm.util.attribute.Attribute;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.LOADED)
@@ -129,7 +130,10 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
       event.setCancelled(true);
 
       if (event.getClickedEntity() instanceof Villager) {
-        event.getPlayer().getBukkit().openMerchantCopy((Villager) event.getClickedEntity());
+        Villager villager = (Villager) event.getClickedEntity();
+        Merchant merchant = Bukkit.createMerchant(villager.getName());
+        merchant.setRecipes(villager.getRecipes());
+        event.getPlayer().getBukkit().openMerchant(merchant, true);
         return;
       }
 
@@ -351,15 +355,15 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
                     (int) Math.ceil(knockbackResistance * 100)));
       }
 
-      double knockbackReduction = holder.getKnockbackReduction();
-      if (knockbackReduction > 0) {
-        specialLore.add(
-            ChatColor.LIGHT_PURPLE
-                + TextTranslations.translate(
-                    "preview.knockbackReduction",
-                    viewer,
-                    (int) Math.ceil(knockbackReduction * 100)));
-      }
+      //      double knockbackReduction = holder.getKnockbackReduction();
+      //      if (knockbackReduction > 0) {
+      //        specialLore.add(
+      //            ChatColor.LIGHT_PURPLE
+      //                + TextTranslations.translate(
+      //                    "preview.knockbackReduction",
+      //                    viewer,
+      //                    (int) Math.ceil(knockbackReduction * 100)));
+      //      }
 
       double walkSpeed = holder.getWalkSpeed();
       if (walkSpeed != WalkSpeedKit.BUKKIT_DEFAULT) {
@@ -446,8 +450,10 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     if (realInventory instanceof PlayerInventory) {
       previewPlayerInventory(viewer, (PlayerInventory) realInventory);
     } else {
-      Inventory fakeInventory;
-      fakeInventory = NMSHacks.createFakeInventory(viewer, realInventory);
+      Inventory fakeInventory =
+          realInventory instanceof DoubleChestInventory
+              ? Bukkit.createInventory(viewer, realInventory.getSize())
+              : Bukkit.createInventory(viewer, realInventory.getType());
       fakeInventory.setContents(realInventory.getContents());
 
       this.showInventoryPreview(viewer, realInventory, fakeInventory);

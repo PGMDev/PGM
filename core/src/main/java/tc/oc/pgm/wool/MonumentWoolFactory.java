@@ -6,11 +6,10 @@ import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.DyeColor;
+import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
-import org.bukkit.material.Wool;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.region.Region;
@@ -28,6 +27,7 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
   protected final boolean craftable;
   protected final boolean visible;
   protected final Component componentName;
+  protected final Material woolMaterial;
 
   public static String makeColorName(DyeColor color) {
     String[] name = StringUtils.split(color.toString(), '_');
@@ -71,6 +71,7 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
     this.craftable = craftable;
     this.visible = visible;
     this.componentName = makeComponentName(color);
+    this.woolMaterial = Material.getMaterial(this.color.name() + "_WOOL");
   }
 
   @Override
@@ -121,11 +122,11 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
   }
 
   public boolean isObjectiveWool(ItemStack stack) {
-    return stack != null && this.isObjectiveWool(stack.getData());
+    return stack != null && this.isObjectiveWool(stack.getType());
   }
 
-  public boolean isObjectiveWool(MaterialData material) {
-    return material instanceof Wool && ((Wool) material).getColor() == this.color;
+  public boolean isObjectiveWool(Material material) {
+    return this.woolMaterial.equals(material);
   }
 
   public boolean isHolding(InventoryHolder holder) {

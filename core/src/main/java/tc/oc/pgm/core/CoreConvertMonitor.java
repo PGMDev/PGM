@@ -11,7 +11,7 @@ public class CoreConvertMonitor implements Runnable {
 
   public CoreConvertMonitor(CoreMatchModule parent) {
     this.parent = parent;
-    this.nextMaterial = getNext(parent.cores.iterator().next().getMaterial().getItemType());
+    this.nextMaterial = getNext(parent.cores.iterator().next().getMaterial());
   }
 
   @Override
@@ -19,7 +19,7 @@ public class CoreConvertMonitor implements Runnable {
   public void run() {
     if (this.nextMaterial != null) {
       for (Core core : this.parent.cores) {
-        core.replaceBlocks(this.nextMaterial.getNewData((byte) 0));
+        core.replaceBlocks(this.nextMaterial);
       }
       String name = getName(this.nextMaterial);
       if (name == null) {

@@ -2,8 +2,8 @@ package tc.oc.pgm.tracker.info;
 
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.block.BlockState;
-import org.bukkit.material.MaterialData;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
@@ -11,37 +11,33 @@ import tc.oc.pgm.util.text.MinecraftComponent;
 
 public class BlockInfo extends OwnerInfoBase implements PhysicalInfo, DamageInfo {
 
-  private final MaterialData material;
+  private final Material material;
 
-  public BlockInfo(MaterialData material, @Nullable ParticipantState owner) {
+  public BlockInfo(Material material, @Nullable ParticipantState owner) {
     super(owner);
     this.material = material;
   }
 
-  public BlockInfo(MaterialData material) {
-    this(material, null);
-  }
-
   public BlockInfo(BlockState block, @Nullable ParticipantState owner) {
-    this(block.getData(), owner);
+    this(block.getType(), owner);
   }
 
   public BlockInfo(BlockState block) {
     this(block, null);
   }
 
-  public MaterialData getMaterial() {
+  public Material getMaterial() {
     return material;
   }
 
   @Override
   public String getIdentifier() {
-    return getMaterial().getItemType().name();
+    return getMaterial().name();
   }
 
   @Override
   public Component getName() {
-    return MinecraftComponent.material(getMaterial().getItemType());
+    return MinecraftComponent.material(getMaterial());
   }
 
   @Override

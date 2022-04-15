@@ -5,11 +5,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.Event;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
@@ -25,7 +25,7 @@ public class BlockQuery extends Query implements tc.oc.pgm.api.filter.query.Bloc
   private final int x, y, z;
   private @Nullable BlockState block;
   private @Nullable Location location;
-  private @Nullable MaterialData material;
+  private @Nullable Material material;
 
   public BlockQuery(@Nullable Event event, World world, int x, int y, int z) {
     super(event);
@@ -73,9 +73,9 @@ public class BlockQuery extends Query implements tc.oc.pgm.api.filter.query.Bloc
   }
 
   @Override
-  public MaterialData getMaterial() {
+  public Material getMaterial() {
     if (material == null) {
-      material = getBlock().getData();
+      material = getBlock().getType();
     }
     return material;
   }

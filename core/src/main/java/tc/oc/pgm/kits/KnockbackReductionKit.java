@@ -13,7 +13,7 @@ public class KnockbackReductionKit extends AbstractKit {
 
   @Override
   public void applyPostEvent(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {
-    player.getBukkit().setKnockbackReduction(this.knockbackReduction);
+    //    player.getBukkit().setKnockbackReduction(this.knockbackReduction);
   }
 
   @Override
@@ -23,6 +23,6 @@ public class KnockbackReductionKit extends AbstractKit {
 
   @Override
   public void remove(MatchPlayer player) {
-    player.getBukkit().setKnockbackReduction(0);
+    //    player.getBukkit().setKnockbackReduction(0);
   }
 }

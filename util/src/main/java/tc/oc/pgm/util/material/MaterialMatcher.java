@@ -1,16 +1,16 @@
 package tc.oc.pgm.util.material;
 
-import java.util.Collection;
+import java.util.Set;
 import org.bukkit.Material;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 /** A predicate on world */
 public interface MaterialMatcher {
 
   boolean matches(Material material);
 
-  boolean matches(MaterialData materialData);
+  boolean matches(BlockData blockData);
 
   boolean matches(ItemStack stack);
 
@@ -18,5 +18,5 @@ public interface MaterialMatcher {
    * Iterates over ALL matching {@link Material}s. This can be a long list if the matching criteria
    * is very broad.
    */
-  Collection<Material> getMaterials();
+  Set<Material> getMaterials();
 }

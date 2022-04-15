@@ -19,13 +19,13 @@ import tc.oc.pgm.modules.PlayerTimeMatchModule;
 public enum SettingKey {
   CHAT(
       "chat",
-      Material.SIGN,
+      Material.OAK_SIGN,
       CHAT_TEAM,
       CHAT_GLOBAL,
       CHAT_ADMIN), // Changes the default chat channel
   DEATH(
       Arrays.asList("death", "dms"),
-      Material.SKULL_ITEM,
+      Material.SKELETON_SKULL,
       DEATH_ALL,
       DEATH_OWN), // Changes which death messages are seen
   PICKER(
@@ -36,15 +36,15 @@ public enum SettingKey {
       PICKER_OFF), // Changes when the picker is displayed
   JOIN(
       Arrays.asList("join", "jms"),
-      Material.WOOD_DOOR,
+      Material.OAK_DOOR,
       JOIN_ON,
       JOIN_OFF), // Changes if join messages are seen
   MESSAGE(
       Arrays.asList("message", "dm"),
-      Material.BOOK_AND_QUILL,
+      Material.WRITABLE_BOOK,
       MESSAGE_ON,
       MESSAGE_OFF), // Changes if direct messages are accepted
-  OBSERVERS(Arrays.asList("observers", "obs"), Material.EYE_OF_ENDER, OBSERVERS_ON, OBSERVERS_OFF) {
+  OBSERVERS(Arrays.asList("observers", "obs"), Material.ENDER_EYE, OBSERVERS_ON, OBSERVERS_OFF) {
     @Override
     public void update(MatchPlayer player) {
       player.resetVisibility();
@@ -64,10 +64,10 @@ public enum SettingKey {
   STATS("stats", Material.PAPER, STATS_ON, STATS_OFF), // Changes if stats are tracked
   EFFECTS(
       "effects",
-      Material.FIREWORK,
+      Material.FIREWORK_ROCKET,
       EFFECTS_ON,
       EFFECTS_OFF), // Changes if special particle effects are shown
-  TIME(Arrays.asList("time", "theme"), Material.WATCH, TIME_AUTO, TIME_DARK, TIME_LIGHT) {
+  TIME(Arrays.asList("time", "theme"), Material.CLOCK, TIME_AUTO, TIME_DARK, TIME_LIGHT) {
     @Override
     public void update(MatchPlayer player) {
       PlayerTimeMatchModule.updatePlayerTime(player);

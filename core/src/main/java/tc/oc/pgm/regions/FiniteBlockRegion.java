@@ -14,10 +14,10 @@ import java.util.Random;
 import java.util.Set;
 import javax.annotation.Nullable;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.filter.Filter;
@@ -36,7 +36,7 @@ import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 public class FiniteBlockRegion extends AbstractRegion {
   private final List<Block> blocks;
   private final Bounds bounds;
-  private final Set<MaterialData> materials;
+  private final Set<Material> materials;
 
   public FiniteBlockRegion(Block... blocks) {
     this(ImmutableList.copyOf(blocks));
@@ -50,14 +50,14 @@ public class FiniteBlockRegion extends AbstractRegion {
     Vector max = new Vector(-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
     Vector half = new Vector(0.5, 0.5, 0.5);
 
-    ImmutableSet.Builder<MaterialData> materialsBuilder = ImmutableSet.builder();
+    ImmutableSet.Builder<Material> materialsBuilder = ImmutableSet.builder();
 
     for (Block block : this.blocks) {
       Vector center = BlockVectors.center(block).toVector();
       min = Vector.getMinimum(min, center.clone().subtract(half));
       max = Vector.getMaximum(max, center.add(half)); // mutates, but disposed
 
-      materialsBuilder.add(block.getState().getData());
+      materialsBuilder.add(block.getState().getType());
     }
 
     this.bounds = new Bounds(min, max);
@@ -120,7 +120,7 @@ public class FiniteBlockRegion extends AbstractRegion {
     return this.blocks;
   }
 
-  public Set<MaterialData> getMaterials() {
+  public Set<Material> getMaterials() {
     return materials;
   }
 

@@ -5,8 +5,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 import javax.annotation.Nullable;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.material.MaterialData;
 import tc.oc.pgm.kits.Kit;
 
 public class PlayerClass {
@@ -17,7 +17,7 @@ public class PlayerClass {
       @Nullable String longdescription,
       boolean sticky,
       Set<Kit> kits,
-      MaterialData icon,
+      Material icon,
       boolean restrict) {
     this.name = checkNotNull(name, "name");
     this.familyName = checkNotNull(familyName, "family name");
@@ -53,7 +53,7 @@ public class PlayerClass {
     return this.kits;
   }
 
-  public MaterialData getIcon() {
+  public Material getIcon() {
     return this.icon;
   }
 
@@ -109,6 +109,6 @@ public class PlayerClass {
   final @Nullable String longdescription;
   final boolean sticky;
   final Set<Kit> kits;
-  final MaterialData icon;
+  final Material icon;
   final boolean restrict;
 }

@@ -1,71 +1,68 @@
 package tc.oc.pgm.util.material;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Effect;
+import com.cryptomorin.xseries.XMaterial;
+import com.cryptomorin.xseries.particles.ParticleDisplay;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Rotatable;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
-import org.bukkit.material.MaterialData;
 import tc.oc.pgm.util.block.BlockFaces;
 
 public interface Materials {
 
+  Map<String, Material> MATERIAL_CACHE = new HashMap<>();
+
   static Material parseMaterial(String text) {
-    // Since Bukkit changed SNOW_BALL to SNOWBALL, support both
-    if (text.matches("(?)snow_?ball")) {
-      text = text.contains("_") ? "snowball" : "snow_ball";
+    Material cachedMaterial = MATERIAL_CACHE.get(text);
+    if (cachedMaterial != null) {
+      return cachedMaterial;
     }
 
-    return Material.matchMaterial(text);
+    Optional<XMaterial> xMaterial = XMaterial.matchXMaterial(text);
+
+    if (!xMaterial.isPresent()) {
+      Material type = LegacyMaterials.parseLegacyMaterial(text);
+      if (type != null) {
+        MATERIAL_CACHE.put(text, type);
+        return type;
+      }
+    }
+
+    Material result = null;
+
+    if (xMaterial.isPresent()) {
+      result = xMaterial.get().parseMaterial();
+
+      MATERIAL_CACHE.put(text, result);
+    }
+
+    return result;
   }
 
-  static boolean isWeapon(Material material) {
-    if (material == null) return false;
-
-    switch (material) {
-        // Sword
-      case WOOD_SWORD:
-      case STONE_SWORD:
-      case GOLD_SWORD:
-      case IRON_SWORD:
-      case DIAMOND_SWORD:
-        // Axe
-      case WOOD_AXE:
-      case STONE_AXE:
-      case GOLD_AXE:
-      case IRON_AXE:
-      case DIAMOND_AXE:
-        // Pickaxe
-      case WOOD_PICKAXE:
-      case STONE_PICKAXE:
-      case GOLD_PICKAXE:
-      case IRON_PICKAXE:
-      case DIAMOND_PICKAXE:
-        // Spade
-      case WOOD_SPADE:
-      case STONE_SPADE:
-      case GOLD_SPADE:
-      case IRON_SPADE:
-      case DIAMOND_SPADE:
-        // Hoe
-      case WOOD_HOE:
-      case STONE_HOE:
-      case GOLD_HOE:
-      case IRON_HOE:
-      case DIAMOND_HOE:
-        // Others
-      case BOW:
-      case FLINT_AND_STEEL:
-      case SHEARS:
-      case STICK:
-        return true;
-      default:
-        return false;
+  static void colorBlock(Block block, DyeColor color) {
+    Material material = colorMaterial(block.getType(), color);
+    if (material != null) {
+      block.setType(material);
     }
+  }
+
+  static Material colorMaterial(Material material, DyeColor dyeColor) {
+    String type = material.name();
+    int index = type.indexOf('_');
+    if (index == -1) return null;
+
+    String realType = type.substring(index);
+    return Material.getMaterial(dyeColor.name() + realType);
   }
 
   static boolean isSolid(Material material) {
@@ -73,23 +70,7 @@ public interface Materials {
       return false;
     }
 
-    switch (material) {
-        // Bukkit considers these "solid" for some reason
-      case SIGN_POST:
-      case WALL_SIGN:
-      case WOOD_PLATE:
-      case STONE_PLATE:
-      case IRON_PLATE:
-      case GOLD_PLATE:
-        return false;
-
-      default:
-        return material.isSolid();
-    }
-  }
-
-  static boolean isSolid(MaterialData material) {
-    return isSolid(material.getItemType());
+    return material.isSolid();
   }
 
   static boolean isSolid(BlockState block) {
@@ -97,27 +78,15 @@ public interface Materials {
   }
 
   static boolean isWater(Material material) {
-    return material == Material.WATER || material == Material.STATIONARY_WATER;
-  }
-
-  static boolean isWater(MaterialData material) {
-    return isWater(material.getItemType());
+    return material == Material.WATER;
   }
 
   static boolean isWater(Location location) {
     return isWater(location.getBlock().getType());
   }
 
-  static boolean isWater(BlockState block) {
-    return isWater(block.getType());
-  }
-
   static boolean isLava(Material material) {
-    return material == Material.LAVA || material == Material.STATIONARY_LAVA;
-  }
-
-  static boolean isLava(MaterialData material) {
-    return isLava(material.getItemType());
+    return material == Material.LAVA;
   }
 
   static boolean isLava(Location location) {
@@ -133,7 +102,7 @@ public interface Materials {
   }
 
   static boolean isClimbable(Material material) {
-    return material == Material.LADDER || material == Material.VINE;
+    return material == Material.LADDER || material == Material.VINE || material == Material.CHAIN;
   }
 
   static boolean isClimbable(Location location) {
@@ -171,47 +140,20 @@ public interface Materials {
     }
   }
 
-  static Material materialAt(Location location) {
+  static void placeStanding(Location location, BannerMeta meta, Material bannerType) {
     Block block = location.getBlock();
-    return block == null ? Material.AIR : block.getType();
-  }
-
-  static BannerMeta getItemMeta(Banner block) {
-    BannerMeta meta = (BannerMeta) Bukkit.getItemFactory().getItemMeta(Material.BANNER);
-    meta.setBaseColor(block.getBaseColor());
-    meta.setPatterns(block.getPatterns());
-    return meta;
-  }
-
-  static void applyToBlock(Banner block, BannerMeta meta) {
-    block.setBaseColor(meta.getBaseColor());
-    block.setPatterns(meta.getPatterns());
-  }
-
-  static void placeStanding(Location location, BannerMeta meta) {
-    Block block = location.getBlock();
-    block.setType(Material.STANDING_BANNER);
+    block.setType(bannerType);
 
     Banner banner = (Banner) block.getState();
-    applyToBlock(banner, meta);
+    banner.setPatterns(meta.getPatterns());
 
-    org.bukkit.material.Banner material = (org.bukkit.material.Banner) banner.getData();
-    material.setFacingDirection(BlockFaces.yawToFace(location.getYaw()));
-    banner.setData(material);
+    Rotatable blockData = (Rotatable) banner.getBlockData();
+    blockData.setRotation(BlockFaces.yawToFace(location.getYaw()));
+    banner.setBlockData(blockData);
     banner.update(true);
   }
 
-  static Location getLocationWithYaw(Banner block) {
-    Location location = block.getLocation();
-    location.setYaw(
-        BlockFaces.faceToYaw(((org.bukkit.material.Banner) block.getData()).getFacing()));
-    return location;
-  }
-
-  static void playBreakEffect(Location location, MaterialData material) {
-    location
-        .getWorld()
-        .playEffect(
-            location, Effect.STEP_SOUND, material.getItemTypeId() + (material.getData() << 12));
+  static void playBreakEffect(Location location, BlockData blockData) {
+    ParticleDisplay.of(Particle.BLOCK_CRACK).withBlock(blockData).spawn(location);
   }
 }

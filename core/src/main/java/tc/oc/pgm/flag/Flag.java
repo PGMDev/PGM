@@ -5,13 +5,13 @@ import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableSet;
-import java.util.Iterator;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
@@ -20,6 +20,7 @@ import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -62,6 +63,7 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.inventory.ItemBuilder;
+import tc.oc.pgm.util.inventory.tag.ItemTag;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -88,6 +90,8 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   public static final Sound RETURN_SOUND =
       sound(key("entity.firework_rocket.twinkle_far"), Sound.Source.MASTER, 1f, 1f);
 
+  public static final ItemTag<Boolean> FLAG_TAG = ItemTag.newBoolean("is_flag");
+
   private final ImmutableSet<Net> nets;
   private final Location bannerLocation;
   private final BannerMeta bannerMeta;
@@ -101,6 +105,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   private BaseState state;
   private boolean transitioning;
   private @Nullable Post predeterminedPost;
+  private DyeColor dyeColor;
 
   protected Flag(Match match, FlagDefinition definition, ImmutableSet<Net> nets)
       throws ModuleLoadException {
@@ -165,17 +170,23 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
           "Flag '" + getName() + "' must have a banner at its default post");
     }
 
-    this.bannerLocation = Materials.getLocationWithYaw(banner);
+    this.dyeColor = definition.getColor();
+    if (this.dyeColor == null) {
+      this.dyeColor = banner.getBaseColor();
+    }
+    this.bannerLocation = banner.getLocation();
     this.bannerYawProvider = new StaticAngleProvider(this.bannerLocation.getYaw());
 
-    this.bannerMeta = Materials.getItemMeta(banner);
-    this.bannerMeta.setDisplayName(getColoredName());
-    this.bannerItem = new ItemStack(Material.BANNER);
+    BannerMeta meta = (BannerMeta) Bukkit.getItemFactory().getItemMeta(banner.getType());
+    meta.setPatterns(banner.getPatterns());
+    this.bannerMeta = meta;
+    this.bannerItem = new ItemStack(banner.getType());
     this.bannerItem.setItemMeta(this.getBannerMeta());
+    FLAG_TAG.set(this.bannerItem, true);
 
     this.legacyBannerItem =
         new ItemBuilder()
-            .material(Material.WOOL)
+            .material(Material.WHITE_WOOL)
             .color(getDyeColor())
             .name(getColoredName())
             .build();
@@ -193,9 +204,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   }
 
   public DyeColor getDyeColor() {
-    DyeColor color = this.getDefinition().getColor();
-    if (color == null) color = this.bannerMeta.getBaseColor();
-    return color;
+    return this.dyeColor;
   }
 
   public ChatColor getBukkitColor() {
@@ -219,7 +228,16 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     return bannerMeta;
   }
 
-  public ItemStack getBannerItem() {
+  public Material getBannerType() {
+    return this.bannerItem.getType();
+  }
+
+  public ItemStack getBannerItemForPlayer(Player player) {
+    ItemStack bannerItem = new ItemStack(this.getBannerType());
+    BannerMeta bannerMeta = this.getBannerMeta();
+    bannerMeta.displayName(TextTranslations.translate(getComponentName(), player));
+    bannerItem.setItemMeta(bannerMeta);
+    FLAG_TAG.set(bannerItem, true);
     return bannerItem;
   }
 
@@ -269,7 +287,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
     switch (block.getType()) {
       case AIR:
-      case LONG_GRASS:
+      case TALL_GRASS:
         return true;
       default:
         return false;
@@ -498,9 +516,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerDeath(PlayerDeathEvent event) {
-    for (Iterator<ItemStack> iterator = event.getDrops().iterator(); iterator.hasNext(); ) {
-      if (iterator.next().isSimilar(this.getBannerItem())) iterator.remove();
-    }
+    event.getDrops().removeIf(itemStack -> Boolean.TRUE.equals(FLAG_TAG.get(itemStack)));
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

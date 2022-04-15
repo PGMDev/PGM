@@ -42,7 +42,6 @@ import tc.oc.pgm.filters.dynamic.FilterMatchModule;
 import tc.oc.pgm.fireworks.FireworkMatchModule;
 import tc.oc.pgm.flag.FlagMatchModule;
 import tc.oc.pgm.flag.FlagModule;
-import tc.oc.pgm.flag.LegacyFlagBeamMatchModule;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.gamerules.GameRulesModule;
 import tc.oc.pgm.goals.GoalMatchModule;
@@ -77,6 +76,7 @@ import tc.oc.pgm.modules.ModifyBowProjectileMatchModule;
 import tc.oc.pgm.modules.ModifyBowProjectileModule;
 import tc.oc.pgm.modules.MultiTradeMatchModule;
 import tc.oc.pgm.modules.PlayerTimeMatchModule;
+import tc.oc.pgm.modules.ProjectileTrailMatchModule;
 import tc.oc.pgm.modules.SoundsMatchModule;
 import tc.oc.pgm.modules.SpectateMatchModule;
 import tc.oc.pgm.modules.ToolRepairMatchModule;
@@ -114,7 +114,6 @@ import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.pgm.timelimit.TimeLimitModule;
 import tc.oc.pgm.tnt.TNTMatchModule;
 import tc.oc.pgm.tnt.TNTModule;
-import tc.oc.pgm.tntrender.TNTRenderMatchModule;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.wool.WoolMatchModule;
 import tc.oc.pgm.wool.WoolModule;
@@ -160,15 +159,15 @@ public interface Modules {
     register(FireworkMatchModule.class, FireworkMatchModule::new);
     register(StatsMatchModule.class, StatsMatchModule::new);
     register(MapmakerMatchModule.class, MapmakerMatchModule::new);
-    register(TNTRenderMatchModule.class, TNTRenderMatchModule::new);
+    //    register(TNTRenderMatchModule.class, TNTRenderMatchModule::new);
     register(PlayerTimeMatchModule.class, PlayerTimeMatchModule::new);
     register(SpectateMatchModule.class, SpectateMatchModule::new);
 
     // FIXME: Disabled due to lag - look into future optimization
-    // register(ProjectileTrailMatchModule.class, ProjectileTrailMatchModule::new);
+    register(ProjectileTrailMatchModule.class, ProjectileTrailMatchModule::new);
 
     // Modules that help older player versions
-    register(LegacyFlagBeamMatchModule.class, new LegacyFlagBeamMatchModule.Factory());
+    //    register(LegacyFlagBeamMatchModule.class, new LegacyFlagBeamMatchModule.Factory());
 
     // Community MatchModules
     register(FreezeMatchModule.class, FreezeMatchModule::new);

@@ -16,14 +16,11 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
-import org.bukkit.Server;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Listener;
 import org.bukkit.generator.ChunkGenerator;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.Datastore;
@@ -95,19 +92,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   private VanishManager vanishManager;
   private InventoryManager inventoryManager;
 
-  public PGMPlugin() {
-    super();
-  }
-
-  public PGMPlugin(
-      PluginLoader loader,
-      Server server,
-      PluginDescriptionFile description,
-      File dataFolder,
-      File file) {
-    super(loader, server, description, dataFolder, file);
-  }
-
   @Override
   public void onEnable() {
     try {
@@ -155,7 +139,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     datastore = new CacheDatastore(datastore);
 
     try {
-      mapLibrary.loadNewMaps(false).get(30, TimeUnit.SECONDS);
+      mapLibrary.loadNewMaps(false).get(45, TimeUnit.SECONDS);
     } catch (ExecutionException | InterruptedException | TimeoutException e) {
       e.printStackTrace();
     }
@@ -163,7 +147,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     if (!mapLibrary.getMaps().hasNext()) {
       PGMConfig.registerRemoteMapSource(mapSourceFactories, PGMConfig.DEFAULT_REMOTE_REPO);
       try {
-        mapLibrary.loadNewMaps(false).get(30, TimeUnit.SECONDS);
+        mapLibrary.loadNewMaps(false).get(45, TimeUnit.SECONDS);
       } catch (ExecutionException | InterruptedException | TimeoutException e) {
         e.printStackTrace();
       } finally {

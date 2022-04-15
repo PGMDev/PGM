@@ -13,7 +13,6 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.dynamic.FilterMatchModule;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class Portal implements FeatureDefinition {
 
@@ -95,8 +94,9 @@ public class Portal implements FeatureDefinition {
     if (delta == null) {
       bukkit.teleport(to, PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
     } else {
-      NMSHacks.teleportRelative(
-          bukkit, delta, deltaYaw, deltaPitch, PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
+      //      NMSHacks.teleportRelative(
+      //          bukkit, delta, deltaYaw, deltaPitch,
+      // PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
     }
 
     // Reset fall distance

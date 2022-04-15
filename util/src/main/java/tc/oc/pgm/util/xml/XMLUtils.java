@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.xml;
 
+import com.cryptomorin.xseries.XEnchantment;
+import com.cryptomorin.xseries.XPotion;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.*;
@@ -8,12 +10,11 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
-import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
@@ -21,9 +22,10 @@ import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.Version;
-import tc.oc.pgm.util.attribute.AttributeModifier;
+import tc.oc.pgm.util.attribute.AttributeParser;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.material.Materials;
@@ -31,7 +33,6 @@ import tc.oc.pgm.util.material.matcher.AllMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.BlockMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
@@ -584,7 +585,7 @@ public final class XMLUtils {
   }
 
   public static DyeColor parseDyeColor(Attribute attr) throws InvalidXMLException {
-    String name = attr.getValue().replace(" ", "_").toUpperCase();
+    String name = attr.getValue().replace(" ", "_").toUpperCase().replace("SILVER", "LIGHT_GRAY");
     try {
       return DyeColor.valueOf(name);
     } catch (IllegalArgumentException e) {
@@ -608,45 +609,13 @@ public final class XMLUtils {
     return parseMaterial(node, node.getValueNormalize());
   }
 
-  public static MaterialData parseMaterialData(Node node, String text) throws InvalidXMLException {
-    String[] pieces = text.split(":");
-    Material material = parseMaterial(node, pieces[0]);
-    byte data;
-    if (pieces.length > 1) {
-      data = parseNumber(node, pieces[1], Byte.class);
-    } else {
-      data = 0;
-    }
-    return material.getNewData(data);
-  }
-
-  public static MaterialData parseMaterialData(Node node, MaterialData def)
-      throws InvalidXMLException {
-    return node == null ? def : parseMaterialData(node, node.getValueNormalize());
-  }
-
-  public static MaterialData parseMaterialData(Node node) throws InvalidXMLException {
-    return parseMaterialData(node, (MaterialData) null);
-  }
-
-  public static MaterialData parseBlockMaterialData(Node node, String text)
-      throws InvalidXMLException {
+  public static Material parseBlockMaterial(Node node) throws InvalidXMLException {
     if (node == null) return null;
-    MaterialData material = parseMaterialData(node, text);
-    if (!material.getItemType().isBlock()) {
-      throw new InvalidXMLException(
-          "Material " + material.getItemType().name() + " is not a block", node);
+    Material material = parseMaterial(node);
+    if (!material.isBlock()) {
+      throw new InvalidXMLException("Material " + material.name() + " is not a block", node);
     }
     return material;
-  }
-
-  public static MaterialData parseBlockMaterialData(Node node, MaterialData def)
-      throws InvalidXMLException {
-    return node == null ? def : parseBlockMaterialData(node, node.getValueNormalize());
-  }
-
-  public static MaterialData parseBlockMaterialData(Node node) throws InvalidXMLException {
-    return parseBlockMaterialData(node, (MaterialData) null);
   }
 
   public static SingleMaterialMatcher parseMaterialPattern(Node node, String value)
@@ -669,11 +638,6 @@ public final class XMLUtils {
 
   public static SingleMaterialMatcher parseMaterialPattern(Element el) throws InvalidXMLException {
     return parseMaterialPattern(new Node(el));
-  }
-
-  public static SingleMaterialMatcher parseMaterialPattern(Attribute attr)
-      throws InvalidXMLException {
-    return parseMaterialPattern(new Node(attr));
   }
 
   public static ImmutableSet<SingleMaterialMatcher> parseMaterialPatternSet(Node node)
@@ -718,7 +682,13 @@ public final class XMLUtils {
   public static PotionEffectType parsePotionEffectType(Node node, String text)
       throws InvalidXMLException {
     PotionEffectType type = PotionEffectType.getByName(text.toUpperCase().replace(" ", "_"));
-    if (type == null) type = NMSHacks.getPotionEffectType(text);
+    if (type == null) type = PotionEffectType.getByKey(NamespacedKey.fromString(text));
+    if (type == null) {
+      Optional<XPotion> xPotion = XPotion.matchXPotion(text);
+      if (xPotion.isPresent()) {
+        type = xPotion.get().getPotionEffectType();
+      }
+    }
     if (type == null) {
       throw new InvalidXMLException("Unknown potion type '" + node.getValue() + "'", node);
     }
@@ -929,7 +899,13 @@ public final class XMLUtils {
 
   public static Enchantment parseEnchantment(Node node, String text) throws InvalidXMLException {
     Enchantment enchantment = Enchantment.getByName(text.toUpperCase().replace(" ", "_"));
-    if (enchantment == null) enchantment = NMSHacks.getEnchantment(text);
+    if (enchantment == null) enchantment = Enchantment.getByKey(NamespacedKey.fromString(text));
+    if (enchantment == null) {
+      Optional<XEnchantment> xEnchantment = XEnchantment.matchXEnchantment(text);
+      if (xEnchantment.isPresent()) {
+        return xEnchantment.get().getEnchant();
+      }
+    }
 
     if (enchantment == null) {
       throw new InvalidXMLException("Unknown enchantment '" + text + "'", node);
@@ -938,18 +914,15 @@ public final class XMLUtils {
     return enchantment;
   }
 
-  public static tc.oc.pgm.util.attribute.Attribute parseAttribute(Node node, String text)
+  public static org.bukkit.attribute.Attribute parseAttribute(Node node, String text)
       throws InvalidXMLException {
-    tc.oc.pgm.util.attribute.Attribute attribute = tc.oc.pgm.util.attribute.Attribute.byName(text);
-    if (attribute != null) return attribute;
-
-    attribute = tc.oc.pgm.util.attribute.Attribute.byName("generic." + text);
+    org.bukkit.attribute.Attribute attribute = AttributeParser.matchAttribute(text);
     if (attribute != null) return attribute;
 
     throw new InvalidXMLException("Unknown attribute '" + text + "'", node);
   }
 
-  public static tc.oc.pgm.util.attribute.Attribute parseAttribute(Node node)
+  public static org.bukkit.attribute.Attribute parseAttribute(Node node)
       throws InvalidXMLException {
     return parseAttribute(node, node.getValueNormalize());
   }
@@ -977,25 +950,25 @@ public final class XMLUtils {
     return node == null ? def : parseAttributeOperation(node);
   }
 
-  public static Map.Entry<String, AttributeModifier> parseCompactAttributeModifier(
-      Node node, String text) throws InvalidXMLException {
+  public static Map.Entry<org.bukkit.attribute.Attribute, AttributeModifier>
+      parseCompactAttributeModifier(Node node, String text) throws InvalidXMLException {
     String[] parts = text.split(":");
 
     if (parts.length != 3) {
       throw new InvalidXMLException("Bad attribute modifier format", node);
     }
 
-    tc.oc.pgm.util.attribute.Attribute attribute = parseAttribute(node, parts[0]);
+    org.bukkit.attribute.Attribute attribute = parseAttribute(node, parts[0]);
     AttributeModifier.Operation operation = parseAttributeOperation(node, parts[1]);
     double amount = parseNumber(node, parts[2], Double.class);
 
     return new AbstractMap.SimpleImmutableEntry<>(
-        attribute.getName(), new AttributeModifier("FromXML", amount, operation));
+        attribute, new AttributeModifier("FromXML", amount, operation));
   }
 
-  public static Map.Entry<String, AttributeModifier> parseAttributeModifier(Element el)
-      throws InvalidXMLException {
-    String attribute = parseAttribute(new Node(el)).getName();
+  public static Map.Entry<org.bukkit.attribute.Attribute, AttributeModifier> parseAttributeModifier(
+      Element el) throws InvalidXMLException {
+    org.bukkit.attribute.Attribute attribute = parseAttribute(new Node(el));
     double amount = parseNumber(Node.fromRequiredAttr(el, "amount"), Double.class);
     AttributeModifier.Operation operation =
         parseAttributeOperation(

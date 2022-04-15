@@ -1,7 +1,7 @@
 package tc.oc.pgm.api.filter.query;
 
-import org.bukkit.material.MaterialData;
+import org.bukkit.Material;
 
 public interface MaterialQuery extends Query {
-  MaterialData getMaterial();
+  Material getMaterial();
 }

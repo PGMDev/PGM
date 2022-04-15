@@ -17,18 +17,22 @@ import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
-import org.apache.commons.lang3.builder.CompareToBuilder;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.CompareToBuilder;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
@@ -53,19 +57,13 @@ import tc.oc.pgm.modules.SpectateMatchModule;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.attribute.Attribute;
-import tc.oc.pgm.util.attribute.AttributeInstance;
-import tc.oc.pgm.util.attribute.AttributeMap;
-import tc.oc.pgm.util.attribute.AttributeMapImpl;
-import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
 
   // TODO: Probably should be moved to a better location
-  private static final int FROZEN_VEHICLE_ENTITY_ID = NMSHacks.allocateEntityId();
+  //  private static final int FROZEN_VEHICLE_ENTITY_ID = NMSHacks.allocateEntityId();
 
   private static final String DEATH_KEY = "isDead";
   private static final MetadataValue DEATH_VALUE = new FixedMetadataValue(PGM.get(), true);
@@ -82,7 +80,6 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   private final AtomicBoolean protocolReady;
   private final AtomicInteger protocolVersion;
   private final AtomicBoolean vanished;
-  private final AttributeMap attributeMap;
 
   public MatchPlayerImpl(Match match, Player player) {
     this.logger =
@@ -99,7 +96,6 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     this.vanished = new AtomicBoolean(false);
     this.protocolReady = new AtomicBoolean(ViaUtils.isReady(player));
     this.protocolVersion = new AtomicInteger(ViaUtils.getProtocolVersion(player));
-    this.attributeMap = new AttributeMapImpl(player);
   }
 
   @Override
@@ -226,9 +222,8 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
 
     if (!interact) player.leaveVehicle();
 
-    // This is only possible in sportpaper
-    NMSHacks.setAffectsSpawning(player, interact);
-    player.spigot().setCollidesWithEntities(interact);
+    player.setAffectsSpawning(interact);
+    player.setCollidable(interact);
   }
 
   @Override
@@ -242,19 +237,19 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     final Player bukkit = getBukkit();
     if (bukkit == null) return;
 
-    NMSHacks.showInvisibles(bukkit, isObserving());
+    Plugin plugin = PGM.get();
 
     for (MatchPlayer other : getMatch().getPlayers()) {
       if (canSee(other)) {
-        bukkit.showPlayer(other.getBukkit());
+        bukkit.showPlayer(plugin, other.getBukkit());
       } else {
-        bukkit.hidePlayer(other.getBukkit());
+        bukkit.hidePlayer(plugin, other.getBukkit());
       }
 
       if (other.canSee(this)) {
-        other.getBukkit().showPlayer(getBukkit());
+        other.getBukkit().showPlayer(plugin, getBukkit());
       } else {
-        other.getBukkit().hidePlayer(getBukkit());
+        other.getBukkit().hidePlayer(plugin, getBukkit());
       }
     }
   }
@@ -281,13 +276,10 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     bukkit.setSprinting(false);
     bukkit.setFlySpeed(0.1f);
     bukkit.setWalkSpeed(WalkSpeedKit.BUKKIT_DEFAULT);
-    NMSHacks.clearArrowsInPlayer(bukkit);
-    NMSHacks.setKnockbackReduction(bukkit, 0);
+    bukkit.setArrowsStuck(0);
 
     for (PotionEffect effect : bukkit.getActivePotionEffects()) {
-      if (effect.getType() != null) {
-        bukkit.removePotionEffect(effect.getType());
-      }
+      bukkit.removePotionEffect(effect.getType());
     }
 
     for (Attribute attribute : Attribute.values()) {
@@ -299,7 +291,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
       }
     }
 
-    NMSHacks.setAbsorption(bukkit, 0);
+    bukkit.setAbsorptionAmount(0);
 
     // we only reset bed spawn here so people don't have to see annoying messages when they respawn
     bukkit.setBedSpawnLocation(null);
@@ -330,10 +322,11 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
       if (bukkit == null) return;
 
       if (yes) {
-        NMSHacks.spawnFreezeEntity(bukkit, FROZEN_VEHICLE_ENTITY_ID, isLegacy());
-        NMSHacks.entityAttach(bukkit, bukkit.getEntityId(), FROZEN_VEHICLE_ENTITY_ID, false);
+        //        NMSHacks.spawnFreezeEntity(bukkit, FROZEN_VEHICLE_ENTITY_ID, isLegacy());
+        //        NMSHacks.entityAttach(bukkit, bukkit.getEntityId(), FROZEN_VEHICLE_ENTITY_ID,
+        // false);
       } else {
-        NMSHacks.destroyEntities(bukkit, FROZEN_VEHICLE_ENTITY_ID);
+        //        NMSHacks.destroyEntities(bukkit, FROZEN_VEHICLE_ENTITY_ID);
       }
       resetInteraction();
     }
@@ -405,7 +398,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     return getBukkit().getInventory();
   }
 
-  @Override
+  //  @Override
   public World getWorld() {
     return getMatch().getWorld();
   }
@@ -427,9 +420,8 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
         .getDecoratedName(getBukkit(), getParty().getColor());
   }
 
-  @Override
   public AttributeInstance getAttribute(Attribute attribute) {
-    return attributeMap.getAttribute(attribute);
+    return getBukkit().getAttribute(attribute);
   }
 
   @Override
@@ -444,7 +436,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
       // If the player right-clicks on another vehicle while frozen, the client will
       // eject them from the freeze entity unconditionally, so we have to spam them
       // with these packets to keep them on it.
-      NMSHacks.entityAttach(bukkit, bukkit.getEntityId(), FROZEN_VEHICLE_ENTITY_ID, false);
+      //      NMSHacks.entityAttach(bukkit, bukkit.getEntityId(), FROZEN_VEHICLE_ENTITY_ID, false);
     }
   }
 
@@ -481,12 +473,12 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     return new CompareToBuilder()
         .append(getMatch(), o.getMatch())
         .append(this.getId(), o.getId())
-        .build();
+        .toComparison();
   }
 
   @Override
   public int hashCode() {
-    return new HashCodeBuilder().append(getMatch()).append(this.getId()).build();
+    return new HashCodeBuilder().append(getMatch()).append(this.getId()).hashCode();
   }
 
   @Override
@@ -505,6 +497,6 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
         .append("id", this.getId())
         .append("bukkit", getBukkit())
         .append("match", getMatch().getId())
-        .build();
+        .toString();
   }
 }

@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.logging.Logger;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -18,7 +17,6 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.block.BlockVectorSet;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class WorldProblemListener implements Listener {
 
@@ -62,22 +60,18 @@ public class WorldProblemListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void repairChunk(ChunkLoadEvent event) {
     if (this.repairedChunks.put(event.getWorld(), event.getChunk())) {
-      // Replace formerly invisible half-iron-door blocks with barriers
-      for (Block ironDoor : NMSHacks.getBlocks(event.getChunk(), Material.IRON_DOOR_BLOCK)) {
-        BlockFace half = (ironDoor.getData() & 8) == 0 ? BlockFace.DOWN : BlockFace.UP;
-        if (ironDoor.getRelative(half.getOppositeFace()).getType() != Material.IRON_DOOR_BLOCK) {
-          ironDoor.setType(Material.BARRIER, false);
-        }
-      }
+      // Remove all block 36 at y = 0 and remember them so VoidFilter can check them
+      ChunkSnapshot chunkSnapshot = event.getChunk().getChunkSnapshot();
 
-      // Remove all block 36 and remember the ones at y=0 so VoidFilter can check them
-      for (Block block36 : NMSHacks.getBlocks(event.getChunk(), Material.PISTON_MOVING_PIECE)) {
-        if (block36.getY() == 0) {
-          block36Locations
-              .get(event.getWorld())
-              .add(block36.getX(), block36.getY(), block36.getZ());
+      for (int x = 0; x < 16; x++) {
+        for (int z = 0; z < 16; z++) {
+          Material blockType = chunkSnapshot.getBlockType(x, 0, z);
+          if (blockType == Material.MOVING_PISTON) {
+            Block block = event.getChunk().getBlock(x, 0, z);
+            block.setType(Material.AIR);
+            block36Locations.get(event.getWorld()).add(block.getX(), block.getY(), block.getZ());
+          }
         }
-        block36.setType(Material.AIR, false);
       }
     }
   }

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
-import org.bukkit.material.MaterialData;
+import org.bukkit.Material;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
@@ -71,8 +71,7 @@ public class ObjectiveModesModule implements MapModule {
           throw new InvalidXMLException("No period has been specified", modeEl);
         }
 
-        MaterialData material =
-            XMLUtils.parseBlockMaterialData(Node.fromRequiredAttr(modeEl, "material"));
+        Material material = XMLUtils.parseBlockMaterial(Node.fromRequiredAttr(modeEl, "material"));
         Duration after = TextParser.parseDuration(modeEl.getAttributeValue("after"));
         Filter filter = factory.getFilters().parseFilterProperty(modeEl, "filter", null);
         String name = modeEl.getAttributeValue("name");

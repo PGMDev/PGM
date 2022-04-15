@@ -27,7 +27,6 @@ import tc.oc.pgm.tracker.info.ItemInfo;
 import tc.oc.pgm.tracker.info.MobInfo;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.tracker.info.SpleefInfo;
-import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -192,8 +191,7 @@ public class DeathMessageBuilder {
   }
 
   boolean item(ItemInfo itemInfo) {
-    // TODO: Bukkit 1.13+ should be able to handle more than just weapons
-    if (Materials.isWeapon(itemInfo.getItem().getType()) && option("item")) {
+    if (option("item")) {
       weapon = itemInfo.getName();
       return true;
     }
@@ -212,7 +210,6 @@ public class DeathMessageBuilder {
     // Skip for entities that are weird and have no translations
     switch (entityInfo.getEntityType()) {
       case UNKNOWN:
-      case COMPLEX_PART:
       case ENDER_CRYSTAL:
         return false;
     }
@@ -371,6 +368,7 @@ public class DeathMessageBuilder {
   void explosion(ExplosionInfo explosion, Location distanceReference) throws NoMessage {
     require("explosive");
     player();
+
     physical(explosion.getExplosive());
     ranged(explosion, distanceReference);
   }
@@ -379,7 +377,7 @@ public class DeathMessageBuilder {
     require("fire");
     player();
     if (!(fire.getIgniter() instanceof BlockInfo
-        && ((BlockInfo) fire.getIgniter()).getMaterial().getItemType() == Material.FIRE)) {
+        && ((BlockInfo) fire.getIgniter()).getMaterial() == Material.FIRE)) {
       // "burned by fire" is redundant
       physical(fire.getIgniter());
     }
@@ -435,7 +433,7 @@ public class DeathMessageBuilder {
     } else if (info instanceof FallingBlockInfo) {
       squash((FallingBlockInfo) info);
     } else if (info instanceof BlockInfo) {
-      final Material material = ((BlockInfo) info).getMaterial().getItemType();
+      final Material material = ((BlockInfo) info).getMaterial();
       if (material == Material.ANVIL) {
         squash((BlockInfo) info);
       } else if (material == Material.CACTUS) {

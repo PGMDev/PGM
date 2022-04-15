@@ -36,7 +36,6 @@ public class DisableDamageMatchModule implements MatchModule, Listener {
     }
     switch (block.getType()) {
       case LAVA:
-      case STATIONARY_LAVA:
         return DamageCause.LAVA;
 
       case FIRE:

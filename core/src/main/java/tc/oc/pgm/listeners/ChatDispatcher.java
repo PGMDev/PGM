@@ -393,7 +393,7 @@ public class ChatDispatcher implements Listener {
 
     if (sender != null) {
       PGM.get()
-          .getAsyncExecutor()
+          .getExecutor()
           .execute(
               () -> {
                 final AsyncPlayerChatEvent event =

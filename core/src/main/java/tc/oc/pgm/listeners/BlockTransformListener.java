@@ -119,9 +119,9 @@ public class BlockTransformListener implements Listener {
                               try {
                                 method.invoke(listener, event);
                               } catch (InvocationTargetException ex) {
-                                throw new EventException(ex.getCause(), event);
+                                throw new EventException(ex.getCause(), event.toString());
                               } catch (Throwable t) {
-                                throw new EventException(t, event);
+                                throw new EventException(t, event.toString());
                               }
                             }
                           }
@@ -296,11 +296,10 @@ public class BlockTransformListener implements Listener {
       BlockState oldState = event.getToBlock().getState();
       BlockState newState = event.getToBlock().getState();
       newState.setType(event.getBlock().getType());
-      newState.setRawData(event.getBlock().getData());
 
       // TODO: getType is deprecated getMaterial and setMaterial are SportPaper only
       // When lava flows into water, it creates stone or cobblestone
-      if (isWater(oldState.getType()) && isLava(newState.getType())) {
+      if (Materials.isWater(oldState.getType()) && Materials.isLava(newState.getType())) {
         newState.setType(event.getFace() == BlockFace.DOWN ? Material.STONE : Material.COBBLESTONE);
         newState.setRawData((byte) 0);
       }
@@ -308,14 +307,6 @@ public class BlockTransformListener implements Listener {
       // Check for lava ownership
       this.callEvent(event, oldState, newState, Trackers.getOwner(event.getBlock()));
     }
-  }
-
-  private boolean isWater(Material material) {
-    return material == Material.WATER || material == Material.STATIONARY_WATER;
-  }
-
-  private boolean isLava(Material material) {
-    return material == Material.LAVA || material == Material.STATIONARY_LAVA;
   }
 
   @EventWrapper
@@ -434,7 +425,7 @@ public class BlockTransformListener implements Listener {
     // Add the pushed blocks at their destination
     for (Block block : blocks) {
       Block dest = block.getRelative(event.getDirection());
-      newStates.put(dest, BlockStates.cloneWithMaterial(dest, block.getState().getData()));
+      newStates.put(dest, BlockStates.cloneWithMaterial(dest, block.getState().getType()));
     }
 
     // Add air blocks where a block is leaving, and no other block is replacing it
@@ -467,8 +458,7 @@ public class BlockTransformListener implements Listener {
     Map<Block, BlockState> newStates = new HashMap<>();
 
     // Add the arm of the piston, which will extend into the adjacent block.
-    PistonExtensionMaterial pistonExtension =
-        new PistonExtensionMaterial(Material.PISTON_EXTENSION);
+    PistonExtensionMaterial pistonExtension = new PistonExtensionMaterial(Material.MOVING_PISTON);
     pistonExtension.setFacingDirection(event.getDirection());
     BlockState pistonExtensionState = event.getBlock().getRelative(event.getDirection()).getState();
     pistonExtensionState.setType(pistonExtension.getItemType());
@@ -491,7 +481,7 @@ public class BlockTransformListener implements Listener {
     callEvent(
         event,
         event.getBlock().getState(),
-        BlockStates.cloneWithMaterial(event.getBlock(), event.getTo(), event.getData()),
+        BlockStates.cloneWithMaterial(event.getBlock(), event.getTo()),
         Trackers.getOwner(event.getEntity()));
   }
 
@@ -538,7 +528,7 @@ public class BlockTransformListener implements Listener {
 
   private static Material getTrampledType(Material newType) {
     switch (newType) {
-      case SOIL:
+      case FARMLAND:
         return Material.DIRT;
       default:
         return null;

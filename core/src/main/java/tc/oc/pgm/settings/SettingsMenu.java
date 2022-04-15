@@ -98,8 +98,7 @@ public class SettingsMenu extends InventoryMenu {
     Component toggle = translatable("settings.menu.toggle", NamedTextColor.GRAY);
 
     return new ItemBuilder()
-        .material(Material.INK_SACK)
-        .color(value.getColor())
+        .material(Material.YELLOW_DYE)
         .name(ChatColor.YELLOW + ChatColor.BOLD.toString() + WordUtils.capitalize(key.getName()))
         .lore(
             translateLegacy(current, getBukkit()),

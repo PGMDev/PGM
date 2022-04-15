@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
@@ -15,6 +17,7 @@ import org.bukkit.inventory.ShapelessRecipe;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
@@ -73,7 +76,7 @@ public class CraftingModule implements MapModule {
           customRecipes.add(recipe);
           if (XMLUtils.parseBoolean(elRecipe.getAttribute("override"), false)) {
             // Disable specific world + data
-            disabledRecipes.add(new SingleMaterialMatcher(recipe.getResult().getData()));
+            disabledRecipes.add(new SingleMaterialMatcher(recipe.getResult().getType()));
           } else if (XMLUtils.parseBoolean(elRecipe.getAttribute("override-all"), false)) {
             // Disable all of this world
             disabledRecipes.add(new SingleMaterialMatcher(recipe.getResult().getType()));
@@ -95,16 +98,15 @@ public class CraftingModule implements MapModule {
 
     public Recipe parseShapelessRecipe(MapFactory factory, Element elRecipe)
         throws InvalidXMLException {
-      ShapelessRecipe recipe = new ShapelessRecipe(parseRecipeResult(factory, elRecipe));
+      ShapelessRecipe recipe =
+          new ShapelessRecipe(
+              new NamespacedKey(PGM.get(), UUID.randomUUID().toString()),
+              parseRecipeResult(factory, elRecipe));
 
       for (Element elIngredient : XMLUtils.getChildren(elRecipe, "ingredient", "i")) {
         SingleMaterialMatcher item = XMLUtils.parseMaterialPattern(elIngredient);
         int count = XMLUtils.parseNumber(elIngredient.getAttribute("amount"), Integer.class, 1);
-        if (item.dataMatters()) {
-          recipe.addIngredient(count, item.getMaterialData());
-        } else {
-          recipe.addIngredient(count, item.getMaterial());
-        }
+        recipe.addIngredient(count, item.getMaterial());
       }
 
       if (recipe.getIngredientList().isEmpty()) {
@@ -117,7 +119,10 @@ public class CraftingModule implements MapModule {
 
     public Recipe parseShapedRecipe(MapFactory factory, Element elRecipe)
         throws InvalidXMLException {
-      ShapedRecipe recipe = new ShapedRecipe(parseRecipeResult(factory, elRecipe));
+      ShapedRecipe recipe =
+          new ShapedRecipe(
+              new NamespacedKey(PGM.get(), UUID.randomUUID().toString()),
+              parseRecipeResult(factory, elRecipe));
 
       Element elShape = XMLUtils.getRequiredUniqueChild(elRecipe, "shape");
       List<String> rows = new ArrayList<>(3);
@@ -168,11 +173,7 @@ public class CraftingModule implements MapModule {
               "Ingredient key '" + key + "' does not appear in the recipe shape", attrSymbol);
         }
 
-        if (item.dataMatters()) {
-          recipe.setIngredient(key, item.getMaterialData());
-        } else {
-          recipe.setIngredient(key, item.getMaterial());
-        }
+        recipe.setIngredient(key, item.getMaterial());
       }
 
       if (recipe.getIngredientMap().isEmpty()) {
@@ -189,11 +190,12 @@ public class CraftingModule implements MapModule {
           XMLUtils.parseMaterialPattern(
               XMLUtils.getRequiredUniqueChild(elRecipe, "ingredient", "i"));
       ItemStack result = parseRecipeResult(factory, elRecipe);
-      if (ingredient.dataMatters()) {
-        return new FurnaceRecipe(result, ingredient.getMaterialData());
-      } else {
-        return new FurnaceRecipe(result, ingredient.getMaterial());
-      }
+      return new FurnaceRecipe(
+          new NamespacedKey(PGM.get(), UUID.randomUUID().toString()),
+          result,
+          ingredient.getMaterial(),
+          0,
+          200);
     }
   }
 }

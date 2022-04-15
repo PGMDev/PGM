@@ -22,10 +22,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.function.Consumer;
 import java.util.logging.Level;
-import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Utility to resolve Minecraft usernames from an external API.
@@ -39,18 +37,7 @@ public final class UsernameResolver {
   private static final Semaphore LOCK = new Semaphore(1);
   private static final Map<UUID, Consumer<String>> QUEUE = new ConcurrentHashMap<>();
   private static final double MAX_SEQUENTIAL_FAILURES = 5;
-  private static String userAgent = "PGM";
-
-  static {
-    try {
-      final Plugin plugin = BukkitUtils.getPlugin();
-      if (plugin != null) {
-        userAgent = plugin.getDescription().getFullName();
-      }
-    } catch (Throwable t) {
-      // No-op, just to be safe in-case agent cannot be found
-    }
-  }
+  private static final String userAgent = "PGM";
 
   /**
    * Queue all remaining username resolves on an asynchronous thread.

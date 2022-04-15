@@ -3,12 +3,11 @@ package tc.oc.pgm.util.tablist;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import tc.oc.pgm.util.bukkit.ViaUtils;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.text.TextTranslations;
 
 /**
@@ -74,8 +73,8 @@ public class TabView {
     if (this.manager != null) disable();
     this.manager = manager;
 
-    if (ViaUtils.getProtocolVersion(viewer) <= ViaUtils.VERSION_1_7)
-      this.display = new TabDisplay(viewer, WIDTH);
+    //    if (ViaUtils.getProtocolVersion(viewer) <= ViaUtils.VERSION_1_7)
+    //      this.display = new TabDisplay(viewer, WIDTH);
 
     this.setup();
 

@@ -78,8 +78,7 @@ public class AntiGriefListener implements Listener {
 
     // check water
     Block block = entity.getLocation().getBlock();
-    if (block != null
-        && (block.getType() == Material.WATER || block.getType() == Material.STATIONARY_WATER)) {
+    if (block != null && (block.getType() == Material.WATER)) {
       clicker.sendMessage(translatable("moderation.defuse.water", NamedTextColor.RED));
       return;
     }
@@ -226,7 +225,7 @@ public class AntiGriefListener implements Listener {
             == InventoryType.CRAFTING /* nothing open */) {
       Block block = event.getClickedBlock();
       if (block != null
-          && block.getType() == Material.WORKBENCH
+          && block.getType() == Material.CRAFTING_TABLE
           && !event.getPlayer().isSneaking()) {
         // create the window ourself
         event.setCancelled(true);
