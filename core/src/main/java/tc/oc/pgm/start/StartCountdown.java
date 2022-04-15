@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
@@ -73,7 +74,9 @@ public class StartCountdown extends PreMatchCountdown {
       for (Team team : this.tmm.getParticipatingTeams()) {
         if (team.isStacked()) {
           this.balanceWarningSent = true;
-          getMatch().sendWarning(translatable("match.balanceTeams", team.getName()));
+          if (isBalanceBroadcasted()) {
+            getMatch().sendWarning(translatable("match.balanceTeams", team.getName()));
+          }
         }
       }
 
@@ -98,5 +101,9 @@ public class StartCountdown extends PreMatchCountdown {
 
   public boolean isForced() {
     return forced;
+  }
+
+  private boolean isBalanceBroadcasted() {
+    return PGM.get().getConfiguration().shouldBalanceJoin();
   }
 }
