@@ -28,7 +28,7 @@ import tc.oc.pgm.filters.modifier.relation.AttackerQueryModifier;
 import tc.oc.pgm.filters.modifier.relation.SameTeamQueryModifier;
 import tc.oc.pgm.filters.modifier.relation.VictimQueryModifier;
 import tc.oc.pgm.flag.FlagDefinition;
-import tc.oc.pgm.flag.Post;
+import tc.oc.pgm.flag.post.PostDefinition;
 import tc.oc.pgm.flag.state.Captured;
 import tc.oc.pgm.flag.state.Carried;
 import tc.oc.pgm.flag.state.Dropped;
@@ -445,7 +445,9 @@ public abstract class FilterParser {
     Node postAttr = Node.fromAttr(el, "post");
     return new FlagStateFilter(
         this.factory.getFeatures().createReference(new Node(el), FlagDefinition.class),
-        postAttr == null ? null : this.factory.getFeatures().createReference(postAttr, Post.class),
+        postAttr == null
+            ? null
+            : this.factory.getFeatures().createReference(postAttr, PostDefinition.class),
         state);
   }
 

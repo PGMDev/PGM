@@ -7,8 +7,14 @@ import tc.oc.pgm.goals.Goal;
  * have filters that respond specifically to goal queries, but currently we do not.
  */
 public class GoalQuery extends MatchQuery {
+  private final Goal<?> goal;
 
-  public GoalQuery(Goal goal) {
+  public GoalQuery(Goal<?> goal) {
     super(null, goal.getMatch());
+    this.goal = goal;
+  }
+
+  public Goal<?> getGoal() {
+    return goal;
   }
 }

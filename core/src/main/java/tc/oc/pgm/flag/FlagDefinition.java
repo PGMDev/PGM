@@ -1,6 +1,5 @@
 package tc.oc.pgm.flag;
 
-import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
@@ -10,6 +9,7 @@ import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.flag.post.PostDefinition;
 import tc.oc.pgm.goals.ProximityGoalDefinition;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.kits.Kit;
@@ -28,8 +28,7 @@ public class FlagDefinition extends ProximityGoalDefinition {
 
   private final @Nullable DyeColor
       color; // Flag color, null detects color from the banner at match load time
-  private final Post defaultPost; // Flag starts the match at this post
-  private final ImmutableList<Post> posts;
+  private final PostDefinition defaultPost; // Flag starts the match at this post
   private final @Nullable FeatureReference<TeamFactory>
       owner; // Team that owns the flag, affects various things
   private final double
@@ -46,10 +45,8 @@ public class FlagDefinition extends ProximityGoalDefinition {
   private final @Nullable Component carryMessage; // Custom message to show flag carrier
   private final boolean dropOnWater; // Flag can freeze water to drop on it
   private final boolean showBeam;
-  private final boolean sequential;
-  private boolean
-      showRespawnOnPickup; // When a flag is picked up, if true, it will display where it will
-  // respawn. Will be set to false if a net defines a different respawn post.
+  private final boolean
+      showRespawnOnPickup; // Display where the flag will respawn when it is picked up.
 
   public FlagDefinition(
       @Nullable String id,
@@ -57,8 +54,7 @@ public class FlagDefinition extends ProximityGoalDefinition {
       @Nullable Boolean required,
       boolean visible,
       @Nullable DyeColor color,
-      Post defaultPost,
-      ImmutableList<Post> posts,
+      PostDefinition defaultPost,
       @Nullable FeatureReference<TeamFactory> owner,
       double pointsPerCapture,
       double pointsPerSecond,
@@ -74,7 +70,6 @@ public class FlagDefinition extends ProximityGoalDefinition {
       boolean showBeam,
       @Nullable ProximityMetric flagProximityMetric,
       @Nullable ProximityMetric netProximityMetric,
-      boolean sequential,
       boolean showRespawnOnPickup) {
 
     // We can't use the owner field in OwnedGoal because our owner
@@ -90,7 +85,6 @@ public class FlagDefinition extends ProximityGoalDefinition {
 
     this.color = color;
     this.defaultPost = defaultPost;
-    this.posts = posts;
     this.owner = owner;
     this.pointsPerCapture = pointsPerCapture;
     this.pointsPerSecond = pointsPerSecond;
@@ -104,7 +98,6 @@ public class FlagDefinition extends ProximityGoalDefinition {
     this.carryMessage = carryMessage;
     this.dropOnWater = dropOnWater;
     this.showBeam = showBeam;
-    this.sequential = sequential;
     this.showRespawnOnPickup = showRespawnOnPickup;
   }
 
@@ -121,12 +114,8 @@ public class FlagDefinition extends ProximityGoalDefinition {
     }
   }
 
-  public Post getDefaultPost() {
+  public PostDefinition getDefaultPost() {
     return this.defaultPost;
-  }
-
-  public ImmutableList<Post> getPosts() {
-    return this.posts;
   }
 
   @Override
@@ -189,19 +178,10 @@ public class FlagDefinition extends ProximityGoalDefinition {
     return showBeam;
   }
 
-  public boolean isSequential() {
-    return sequential;
-  }
-
   public boolean willShowRespawnOnPickup() {
     return showRespawnOnPickup;
   }
 
-  public void setShowRespawnOnPickup(boolean value) {
-    this.showRespawnOnPickup = value;
-  }
-
-  @SuppressWarnings("unchecked")
   @Override
   public Flag getGoal(Match match) {
     return (Flag) super.getGoal(match);
@@ -209,12 +189,12 @@ public class FlagDefinition extends ProximityGoalDefinition {
 
   public boolean canPickup(Query query) {
     return getPickupFilter().query(query).isAllowed()
-        && getDefaultPost().getPickupFilter().query(query).isAllowed();
+        && getDefaultPost().getFallback().getPickupFilter().query(query).isAllowed();
   }
 
-  public boolean canCapture(Query query, Collection<Net> nets) {
+  public boolean canCapture(Query query, Collection<NetDefinition> nets) {
     if (getCaptureFilter().query(query).isDenied()) return false;
-    for (Net net : nets) {
+    for (NetDefinition net : nets) {
       if (net.getCaptureFilter().query(query).isAllowed()) return true;
     }
     return false;

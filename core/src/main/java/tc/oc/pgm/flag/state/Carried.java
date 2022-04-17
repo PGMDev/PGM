@@ -35,7 +35,7 @@ import tc.oc.pgm.filters.query.PlayerQuery;
 import tc.oc.pgm.filters.query.PlayerStateQuery;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.FlagDefinition;
-import tc.oc.pgm.flag.Net;
+import tc.oc.pgm.flag.NetDefinition;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
@@ -57,7 +57,7 @@ public class Carried extends Spawned implements Missing {
   protected final MatchPlayer carrier;
   protected ItemStack helmetItem;
   protected boolean helmetLocked;
-  protected @Nullable Net deniedByNet;
+  protected @Nullable NetDefinition deniedByNet;
   protected @Nullable Flag deniedByFlag;
   protected @Nullable Component lastMessage;
 
@@ -69,18 +69,6 @@ public class Carried extends Spawned implements Missing {
     this.carrier = carrier;
     this.dropLocations.add(
         dropLocation); // Need an initial dropLocation in case the carrier never generates ones
-    if (this.flag.getDefinition().willShowRespawnOnPickup()) {
-      String postName = this.flag.predeterminePost(this.post);
-      if (postName != null) { // The post needs a name in order to display the message.
-        this.flag
-            .getMatch()
-            .sendMessage(
-                translatable(
-                    "flag.willRespawn.next",
-                    this.flag.getComponentName(),
-                    text(postName, NamedTextColor.AQUA)));
-      }
-    }
   }
 
   @Override
@@ -139,6 +127,19 @@ public class Carried extends Spawned implements Missing {
 
     SidebarMatchModule smm = this.flag.getMatch().getModule(SidebarMatchModule.class);
     if (smm != null) smm.blinkGoal(this.flag, 2, null);
+
+    if (this.flag.getDefinition().willShowRespawnOnPickup()) {
+      String postName = post.peekNext(flag).getPostName();
+      if (postName != null) { // The post needs a name in order to display the message.
+        this.flag
+            .getMatch()
+            .sendMessage(
+                translatable(
+                    "flag.willRespawn.next",
+                    this.flag.getComponentName(),
+                    text(postName, NamedTextColor.AQUA)));
+      }
+    }
   }
 
   @Override
@@ -247,7 +248,7 @@ public class Carried extends Spawned implements Missing {
     this.recover();
   }
 
-  protected void captureFlag(Net net) {
+  protected void captureFlag(NetDefinition net) {
     this.carrier.sendMessage(translatable("flag.capture.you", this.flag.getComponentName()));
 
     this.flag
@@ -274,7 +275,9 @@ public class Carried extends Spawned implements Missing {
       }
     }
 
-    Post post = net.getReturnPost() != null ? net.getReturnPost() : this.post;
+    Post post = this.post;
+    if (net.getReturnPost() != null) post = flag.getPost(net.getReturnPost());
+
     if (post.isPermanent()) {
       this.flag.transition(new Completed(this.flag, post));
     } else {
@@ -375,7 +378,7 @@ public class Carried extends Spawned implements Missing {
       this.deniedByNet = null;
     }
 
-    for (Net net : this.flag.getNets()) {
+    for (NetDefinition net : this.flag.getNets()) {
       if (net.getRegion().contains(to)) {
         if (tryCapture(net)) {
           return;
@@ -390,7 +393,7 @@ public class Carried extends Spawned implements Missing {
     }
   }
 
-  protected boolean tryCapture(Net net) {
+  protected boolean tryCapture(NetDefinition net) {
     for (FlagDefinition returnableDef : net.getRecoverableFlags()) {
       Flag returnable = returnableDef.getGoal(this.flag.getMatch());
       if (returnable.isCurrent(Carried.class)) {

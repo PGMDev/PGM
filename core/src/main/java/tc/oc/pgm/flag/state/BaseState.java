@@ -156,11 +156,6 @@ public abstract class BaseState implements Runnable, State {
   }
 
   @Override
-  public boolean isAtPost(Post post) {
-    return post == this.post;
-  }
-
-  @Override
   public @Nullable Team getController() {
     if (this.post.getOwner() != null) {
       return this.flag.getMatch().needModule(TeamMatchModule.class).getTeam(this.post.getOwner());

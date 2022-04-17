@@ -13,6 +13,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.filters.FilterModule;
+import tc.oc.pgm.flag.post.PostDefinition;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.teams.TeamModule;
@@ -22,11 +23,12 @@ public class FlagModule implements MapModule {
 
   private static final Collection<MapTag> TAGS =
       ImmutableList.of(new MapTag("ctf", "flag", "Capture the Flag", true, false));
-  private final ImmutableList<Post> posts;
-  private final ImmutableList<Net> nets;
+  private final ImmutableList<PostDefinition> posts;
+  private final ImmutableList<NetDefinition> nets;
   private final ImmutableList<FlagDefinition> flags;
 
-  public FlagModule(List<Post> posts, List<Net> nets, List<FlagDefinition> flags) {
+  public FlagModule(
+      List<PostDefinition> posts, List<NetDefinition> nets, List<FlagDefinition> flags) {
     this.posts = ImmutableList.copyOf(posts);
     this.nets = ImmutableList.copyOf(nets);
     this.flags = ImmutableList.copyOf(flags);
@@ -39,7 +41,7 @@ public class FlagModule implements MapModule {
 
   @Override
   public MatchModule createMatchModule(Match match) throws ModuleLoadException {
-    return new FlagMatchModule(match, this.nets, this.flags);
+    return new FlagMatchModule(match, this.posts, this.nets, this.flags);
   }
 
   @Override

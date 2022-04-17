@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.DyeColor;
@@ -17,12 +18,16 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.filters.StaticFilter;
+import tc.oc.pgm.flag.post.CompositePost;
+import tc.oc.pgm.flag.post.PostDefinition;
+import tc.oc.pgm.flag.post.SinglePost;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.points.PointParser;
 import tc.oc.pgm.points.PointProvider;
 import tc.oc.pgm.points.PointProviderAttributes;
 import tc.oc.pgm.teams.TeamFactory;
+import tc.oc.pgm.util.xml.InheritingElement;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -32,8 +37,9 @@ public class FlagParser {
   private final FilterParser filterParser;
   private final PointParser pointParser;
 
-  private final List<Post> posts = new ArrayList<>();
-  private final List<Net> nets = new ArrayList<>();
+  private final AtomicInteger postIdSerial = new AtomicInteger(1);
+  private final List<PostDefinition> posts = new ArrayList<>();
+  private final List<NetDefinition> nets = new ArrayList<>();
   private final List<FlagDefinition> flags = new ArrayList<>();
 
   public FlagParser(MapFactory factory) {
@@ -50,21 +56,73 @@ public class FlagParser {
     }
   }
 
-  public Post parsePost(Element el) throws InvalidXMLException {
+  private void checkDeprecatedMultiPost(Element el) throws InvalidXMLException {
+    if (el.getChildren("post").size() <= 1) return;
+    throw new InvalidXMLException(
+        "Multiple 'post' elements inside 'flag' are no longer supported, use a single 'post' with multiple inner 'post' elements instead.\n"
+            + "Check the docs at https://pgm.dev or PR #984 on github for more details.",
+        el);
+  }
+
+  public PostDefinition parsePost(Element el) throws InvalidXMLException {
     checkDeprecatedFilter(el);
 
-    @Nullable String name = el.getAttributeValue("name");
+    PostDefinition post =
+        el.getChildren("post").isEmpty() ? parseSinglePost(el) : parseCompositePost(el);
+
+    posts.add(post);
+    factory.getFeatures().addFeature(el, post);
+
+    return post;
+  }
+
+  private CompositePost parseCompositePost(Element el) throws InvalidXMLException {
     String id = el.getAttributeValue("id");
+    if (id == null) id = PostDefinition.makeDefaultId(null, postIdSerial);
+
+    boolean sequential = XMLUtils.parseBoolean(el.getAttribute("sequential"), false);
+
+    ImmutableList.Builder<SinglePost> chBuilder = ImmutableList.builder();
+    for (Element child : el.getChildren("post")) {
+      chBuilder.add(parseSinglePost(new InheritingElement(child)));
+    }
+    ImmutableList<SinglePost> children = chBuilder.build();
+    // This should never happen, since it should've parsed single post instead.
+    if (children.isEmpty())
+      throw new InvalidXMLException("Expected children posts, but found none", el);
+
+    SinglePost fallback = null;
+    Node fallbackAttr = Node.fromAttr(el, "fallback");
+    if (fallbackAttr != null) {
+      fallback = factory.getFeatures().get(fallbackAttr.getValue(), SinglePost.class);
+      if (fallback == null) {
+        throw new InvalidXMLException(
+            "No post with ID '" + fallbackAttr.getValue() + "'", fallbackAttr);
+      }
+    }
+
+    // Even it had a single child, we still require composite for filtering and id referencing (if
+    // any)
+    return new CompositePost(id, sequential, children, fallback);
+  }
+
+  private SinglePost parseSinglePost(Element el) throws InvalidXMLException {
+    String id = el.getAttributeValue("id");
+    @Nullable String name = el.getAttributeValue("name");
+    if (id == null) id = PostDefinition.makeDefaultId(name, postIdSerial);
+
     FeatureReference<TeamFactory> owner =
         factory.getFeatures().createReference(Node.fromAttr(el, "owner"), TeamFactory.class, null);
     boolean sequential = XMLUtils.parseBoolean(el.getAttribute("sequential"), false);
     boolean permanent = XMLUtils.parseBoolean(el.getAttribute("permanent"), false);
     double pointsPerSecond = XMLUtils.parseNumber(el.getAttribute("points-rate"), Double.class, 0D);
     Filter pickupFilter = filterParser.parseFilterProperty(el, "pickup-filter", StaticFilter.ALLOW);
+    Filter respawnFilter =
+        filterParser.parseFilterProperty(el, "respawn-filter", StaticFilter.ALLOW);
 
     Duration recoverTime =
         XMLUtils.parseDuration(
-            Node.fromAttr(el, "recover-time", "return-time"), Post.DEFAULT_RETURN_TIME);
+            Node.fromAttr(el, "recover-time", "return-time"), PostDefinition.DEFAULT_RETURN_TIME);
     Duration respawnTime = XMLUtils.parseDuration(el.getAttribute("respawn-time"), null);
     Double respawnSpeed =
         XMLUtils.parseNumber(el.getAttribute("respawn-speed"), Double.class, (Double) null);
@@ -72,7 +130,7 @@ public class FlagParser {
         ImmutableList.copyOf(pointParser.parse(el, new PointProviderAttributes()));
 
     if (respawnTime == null && respawnSpeed == null) {
-      respawnSpeed = Post.DEFAULT_RESPAWN_SPEED;
+      respawnSpeed = PostDefinition.DEFAULT_RESPAWN_SPEED;
     }
 
     if (respawnTime != null && respawnSpeed != null) {
@@ -83,23 +141,19 @@ public class FlagParser {
       throw new InvalidXMLException("post must have at least one point provider", el);
     }
 
-    Post post =
-        new Post(
-            id,
-            name, // Can be null
-            owner,
-            recoverTime,
-            respawnTime,
-            respawnSpeed,
-            returnPoints,
-            sequential,
-            permanent,
-            pointsPerSecond,
-            pickupFilter);
-    posts.add(post);
-    factory.getFeatures().addFeature(el, post);
-
-    return post;
+    return new SinglePost(
+        id,
+        name,
+        owner,
+        recoverTime,
+        respawnTime,
+        respawnSpeed,
+        returnPoints,
+        sequential,
+        permanent,
+        pointsPerSecond,
+        pickupFilter,
+        respawnFilter);
   }
 
   public ImmutableSet<FlagDefinition> parseFlagSet(Node node) throws InvalidXMLException {
@@ -114,7 +168,8 @@ public class FlagParser {
     return flags.build();
   }
 
-  public Net parseNet(Element el, @Nullable FlagDefinition parentFlag) throws InvalidXMLException {
+  public NetDefinition parseNet(Element el, @Nullable FlagDefinition parentFlag)
+      throws InvalidXMLException {
     checkDeprecatedFilter(el);
 
     String id = el.getAttributeValue("id");
@@ -132,15 +187,13 @@ public class FlagParser {
     Component denyMessage = XMLUtils.parseFormattedText(el, "deny-message");
     Vector proximityLocation = XMLUtils.parseVector(el.getAttribute("location"), (Vector) null);
 
-    Post returnPost = null;
+    PostDefinition returnPost = null;
     Node postAttr = Node.fromAttr(el, "post");
     if (postAttr != null) {
       // Posts are all parsed at this point, so we can do an immediate lookup
-      returnPost = factory.getFeatures().get(postAttr.getValue(), Post.class);
+      returnPost = factory.getFeatures().get(postAttr.getValue(), PostDefinition.class);
       if (returnPost == null) {
         throw new InvalidXMLException("No post with ID '" + postAttr.getValue() + "'", postAttr);
-      } else {
-        returnPost.setSpecifiedPost(true);
       }
     }
 
@@ -158,14 +211,6 @@ public class FlagParser {
       capturableFlags = ImmutableSet.copyOf(this.flags);
     }
 
-    if (capturableFlags.size() != 0 && returnPost != null) {
-      for (FlagDefinition flagDef : flags) {
-        if (capturableFlags.contains(flagDef)) {
-          flagDef.setShowRespawnOnPickup(false);
-        }
-      }
-    }
-
     ImmutableSet<FlagDefinition> returnableFlags;
     Node returnableNode = Node.fromAttr(el, "rescue", "return");
     if (returnableNode != null) {
@@ -174,8 +219,8 @@ public class FlagParser {
       returnableFlags = ImmutableSet.of();
     }
 
-    Net net =
-        new Net(
+    NetDefinition net =
+        new NetDefinition(
             id,
             region,
             captureFilter,
@@ -198,6 +243,7 @@ public class FlagParser {
 
   public FlagDefinition parseFlag(Element el) throws InvalidXMLException {
     checkDeprecatedFilter(el);
+    checkDeprecatedMultiPost(el);
 
     String id = el.getAttributeValue("id");
     String name = el.getAttributeValue("name");
@@ -218,10 +264,9 @@ public class FlagParser {
     Kit dropKit = factory.getKits().parseKitProperty(el, "drop-kit", null);
     Kit carryKit = factory.getKits().parseKitProperty(el, "carry-kit", null);
     boolean multiCarrier = XMLUtils.parseBoolean(el.getAttribute("shared"), false);
-    boolean sequential = XMLUtils.parseBoolean(el.getAttribute("sequential"), false);
     Component carryMessage = XMLUtils.parseFormattedText(el, "carry-message");
     boolean showRespawnOnPickup =
-        XMLUtils.parseBoolean(el.getAttribute("show-respawn-on-pickup"), true);
+        XMLUtils.parseBoolean(el.getAttribute("show-respawn-on-pickup"), false);
     boolean dropOnWater = XMLUtils.parseBoolean(el.getAttribute("drop-on-water"), true);
     boolean showBeam = XMLUtils.parseBoolean(el.getAttribute("beam"), true);
     ProximityMetric flagProximityMetric =
@@ -230,19 +275,14 @@ public class FlagParser {
     ProximityMetric netProximityMetric =
         ProximityMetric.parse(
             el, "net", new ProximityMetric(ProximityMetric.Type.CLOSEST_PLAYER, false));
-    Post defaultPost;
-    List<Post> flagPosts = new ArrayList<>();
-    for (Element elPost : el.getChildren("post")) {
-      flagPosts.add(this.parsePost(elPost));
-    }
 
-    if (!flagPosts.isEmpty()) {
-      // Parse nested <post>
-      defaultPost = flagPosts.get(0);
+    PostDefinition defaultPost;
+    Element elPost = XMLUtils.getUniqueChild(el, "post", "posts");
+    if (elPost != null) {
+      defaultPost = this.parsePost(elPost);
     } else {
       Node postAttr = Node.fromRequiredAttr(el, "post");
-      defaultPost = factory.getFeatures().get(postAttr.getValue(), Post.class);
-      flagPosts.add(defaultPost);
+      defaultPost = factory.getFeatures().get(postAttr.getValue(), PostDefinition.class);
       if (defaultPost == null) {
         throw new InvalidXMLException("No post with ID '" + postAttr.getValue() + "'", postAttr);
       }
@@ -256,7 +296,6 @@ public class FlagParser {
             visible,
             color,
             defaultPost,
-            ImmutableList.copyOf(flagPosts),
             owner,
             pointsPerCapture,
             pointsPerSecond,
@@ -272,7 +311,6 @@ public class FlagParser {
             showBeam,
             flagProximityMetric,
             netProximityMetric,
-            sequential,
             showRespawnOnPickup);
     flags.add(flag);
     factory.getFeatures().addFeature(el, flag);

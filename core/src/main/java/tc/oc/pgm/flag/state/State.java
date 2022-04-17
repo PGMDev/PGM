@@ -18,8 +18,6 @@ public interface State {
 
   boolean isCarrying(Party team);
 
-  boolean isAtPost(Post post);
-
   Post getPost();
 
   @Nullable
