@@ -44,7 +44,8 @@ public interface Filter {
       case DENY:
         return false;
       default:
-        throw new UnsupportedOperationException("Filter did not respond to the query");
+        throw new UnsupportedOperationException(
+            "Filter " + this + " did not respond to the query " + query);
     }
   }
 
