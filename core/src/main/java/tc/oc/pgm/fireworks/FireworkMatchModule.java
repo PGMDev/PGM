@@ -35,7 +35,7 @@ import tc.oc.pgm.core.CoreLeakEvent;
 import tc.oc.pgm.destroyable.DestroyableDestroyedEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
-import tc.oc.pgm.goals.ObjectiveOption;
+import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.regions.Bounds;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
@@ -126,7 +126,7 @@ public class FireworkMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onWoolPlace(final PlayerWoolPlaceEvent event) {
     if (PGM.get().getConfiguration().showFireworks()
-        && event.getWool().hasOption(ObjectiveOption.SHOW_EFFECTS)) {
+        && event.getWool().hasShowOption(ShowOption.SHOW_EFFECTS)) {
       this.spawnFireworkDisplay(
           BlockVectors.center(event.getBlock()),
           event.getWool().getDyeColor().getColor(),
@@ -142,7 +142,7 @@ public class FireworkMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onCoreLeak(final CoreLeakEvent event) {
     if (PGM.get().getConfiguration().showFireworks()
-        && event.getCore().hasOption(ObjectiveOption.SHOW_EFFECTS)) {
+        && event.getCore().hasShowOption(ShowOption.SHOW_EFFECTS)) {
       this.spawnFireworkDisplay(
           event.getMatch().getWorld(),
           event.getCore().getCasingRegion(),
@@ -159,7 +159,7 @@ public class FireworkMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onDestroyableBreak(final DestroyableDestroyedEvent event) {
     if (PGM.get().getConfiguration().showFireworks()
-        && event.getDestroyable().hasOption(ObjectiveOption.SHOW_EFFECTS)) {
+        && event.getDestroyable().hasShowOption(ShowOption.SHOW_EFFECTS)) {
       this.spawnFireworkDisplay(
           event.getMatch().getWorld(),
           event.getDestroyable().getBlockRegion(),
@@ -176,7 +176,7 @@ public class FireworkMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onHillCapture(final ControllerChangeEvent event) {
     if (PGM.get().getConfiguration().showFireworks()
-        && event.getControlPoint().hasOption(ObjectiveOption.SHOW_EFFECTS)
+        && event.getControlPoint().hasShowOption(ShowOption.SHOW_EFFECTS)
         && event.getNewController() != null) {
       this.spawnFireworkDisplay(
           event.getMatch().getWorld(),
@@ -194,7 +194,7 @@ public class FireworkMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onFlagCapture(final FlagCaptureEvent event) {
     if (PGM.get().getConfiguration().showFireworks()
-        && event.getGoal().hasOption(ObjectiveOption.SHOW_EFFECTS)) {
+        && event.getGoal().hasShowOption(ShowOption.SHOW_EFFECTS)) {
       this.spawnFireworkDisplay(
           event.getMatch().getWorld(),
           event.getNet().getRegion(),

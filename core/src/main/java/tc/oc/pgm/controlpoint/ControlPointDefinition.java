@@ -7,7 +7,7 @@ import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.goals.GoalDefinition;
-import tc.oc.pgm.goals.ObjectiveOptions;
+import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.teams.TeamFactory;
 
 /**
@@ -89,7 +89,7 @@ public class ControlPointDefinition extends GoalDefinition {
       @Nullable String id,
       String name,
       @Nullable Boolean required,
-      ObjectiveOptions options,
+      ShowOptions showOptions,
       Region captureRegion,
       Filter captureFilter,
       Filter playerFilter,
@@ -111,7 +111,7 @@ public class ControlPointDefinition extends GoalDefinition {
       float pointsGrowth,
       boolean progress) {
 
-    super(id, name, required, options);
+    super(id, name, required, showOptions);
     this.captureRegion = captureRegion;
     this.captureFilter = captureFilter;
     this.playerFilter = playerFilter;
@@ -171,7 +171,7 @@ public class ControlPointDefinition extends GoalDefinition {
         + " beacon="
         + this.getCapturableDisplayBeacon()
         + " options="
-        + this.getOptions();
+        + this.getShowOptions();
   }
 
   public Region getCaptureRegion() {

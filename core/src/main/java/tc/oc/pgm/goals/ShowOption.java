@@ -1,6 +1,6 @@
 package tc.oc.pgm.goals;
 
-public enum ObjectiveOption {
+public enum ShowOption {
   SHOW_MESSAGES("show-messages"),
   SHOW_EFFECTS("show-effects"),
   SHOW_INFO("show-info"),
@@ -9,7 +9,7 @@ public enum ObjectiveOption {
 
   private final String name;
 
-  ObjectiveOption(String name) {
+  ShowOption(String name) {
     this.name = name;
   }
 

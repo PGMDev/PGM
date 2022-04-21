@@ -12,9 +12,9 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.goals.Goal;
 import tc.oc.pgm.goals.GoalMatchModule;
-import tc.oc.pgm.goals.ObjectiveOption;
 import tc.oc.pgm.goals.ProximityGoal;
 import tc.oc.pgm.goals.ProximityMetric;
+import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.goals.TouchableGoal;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
@@ -39,7 +39,7 @@ public final class ProximityCommand {
       final GoalMatchModule gmm = match.needModule(GoalMatchModule.class);
 
       for (Goal<?> goal : gmm.getGoals(team)) {
-        if (goal instanceof TouchableGoal && goal.hasOption(ObjectiveOption.SHOW_INFO)) {
+        if (goal instanceof TouchableGoal && goal.hasShowOption(ShowOption.SHOW_INFO)) {
           TouchableGoal touchable = (TouchableGoal) goal;
           ProximityGoal proximity = (ProximityGoal) goal;
 

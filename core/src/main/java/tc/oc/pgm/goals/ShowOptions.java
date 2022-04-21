@@ -6,26 +6,26 @@ import org.jdom2.Element;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class ObjectiveOptions {
+public class ShowOptions {
 
-  private final Set<ObjectiveOption> options;
+  private final Set<ShowOption> options;
 
-  private ObjectiveOptions(Set<ObjectiveOption> options) {
+  private ShowOptions(Set<ShowOption> options) {
     this.options = options;
   }
 
-  public static ObjectiveOptions parse(Element el) throws InvalidXMLException {
-    Set<ObjectiveOption> options = EnumSet.noneOf(ObjectiveOption.class);
+  public static ShowOptions parse(Element el) throws InvalidXMLException {
+    Set<ShowOption> options = EnumSet.noneOf(ShowOption.class);
     boolean show = XMLUtils.parseBoolean(el.getAttribute("show"), true);
-    for (ObjectiveOption option : ObjectiveOption.values()) {
+    for (ShowOption option : ShowOption.values()) {
       if (XMLUtils.parseBoolean(el.getAttribute(option.getName()), show)) {
         options.add(option);
       }
     }
-    return new ObjectiveOptions(options);
+    return new ShowOptions(options);
   }
 
-  public boolean hasOption(ObjectiveOption option) {
+  public boolean hasOption(ShowOption option) {
     return options.contains(option);
   }
 
