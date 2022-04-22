@@ -14,6 +14,7 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -67,7 +68,9 @@ public abstract class Uncarried extends Spawned {
       oldBase.getBlock().setType(Material.ICE, false);
     }
 
-    Materials.placeStanding(this.location, this.flag.getBannerMeta());
+    if (!Materials.placeStanding(this.location, this.flag.getBannerMeta())) {
+      PGM.get().getGameLogger().severe("Failed to place banner at " + this.location);
+    }
 
     this.labelEntity =
         this.location.getWorld().spawn(this.location.clone().add(0, 1.7, 0), ArmorStand.class);
