@@ -188,17 +188,22 @@ public interface Materials {
     block.setPatterns(meta.getPatterns());
   }
 
-  static void placeStanding(Location location, BannerMeta meta) {
+  static boolean placeStanding(Location location, BannerMeta meta) {
     Block block = location.getBlock();
-    block.setType(Material.STANDING_BANNER);
+    block.setType(Material.STANDING_BANNER, false);
 
-    Banner banner = (Banner) block.getState();
-    applyToBlock(banner, meta);
+    final BlockState state = block.getState();
+    if (state instanceof Banner) {
+      Banner banner = (Banner) block.getState();
+      applyToBlock(banner, meta);
 
-    org.bukkit.material.Banner material = (org.bukkit.material.Banner) banner.getData();
-    material.setFacingDirection(BlockFaces.yawToFace(location.getYaw()));
-    banner.setData(material);
-    banner.update(true);
+      org.bukkit.material.Banner material = (org.bukkit.material.Banner) banner.getData();
+      material.setFacingDirection(BlockFaces.yawToFace(location.getYaw()));
+      banner.setData(material);
+      banner.update(true, false);
+      return true;
+    }
+    return false;
   }
 
   static Location getLocationWithYaw(Banner block) {
