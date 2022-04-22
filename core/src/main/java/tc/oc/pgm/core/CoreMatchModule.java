@@ -26,6 +26,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
+import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
@@ -161,7 +162,7 @@ public class CoreMatchModule implements MatchModule, Listener {
       if (core.getModes() == null || core.getModes().contains(event.getMode())) {
         core.replaceBlocks(event.getMode().getMaterialData());
         // if at least one of the cores are visible, the mode change message will be sent
-        if (core.isVisible()) {
+        if (core.hasShowOption(ShowOption.SHOW_MESSAGES)) {
           event.setVisible(true);
         }
       }

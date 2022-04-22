@@ -20,6 +20,7 @@ import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.blockdrops.BlockDropsModule;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.ProximityMetric;
+import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.modes.ObjectiveModesModule;
 import tc.oc.pgm.regions.BlockBoundedValidation;
@@ -134,7 +135,7 @@ public class DestroyableModule implements MapModule {
             XMLUtils.parseBoolean(destroyableEl.getAttribute("show-progress"), false);
         boolean sparks = XMLUtils.parseBoolean(destroyableEl.getAttribute("sparks"), false);
         boolean repairable = XMLUtils.parseBoolean(destroyableEl.getAttribute("repairable"), true);
-        boolean visible = XMLUtils.parseBoolean(destroyableEl.getAttribute("show"), true);
+        ShowOptions options = ShowOptions.parse(destroyableEl);
         Boolean required = XMLUtils.parseBoolean(destroyableEl.getAttribute("required"), null);
         ProximityMetric proximityMetric =
             ProximityMetric.parse(
@@ -145,7 +146,7 @@ public class DestroyableModule implements MapModule {
                 id,
                 name,
                 required,
-                visible,
+                options,
                 owner,
                 proximityMetric,
                 region,

@@ -20,6 +20,7 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.ProximityMetric;
+import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.teams.Team;
@@ -94,7 +95,7 @@ public class WoolModule implements MapModule {
         } else {
           placement = parser.parseRequiredRegionProperty(woolEl, "monument");
         }
-        boolean visible = XMLUtils.parseBoolean(woolEl.getAttribute("show"), true);
+        ShowOptions options = ShowOptions.parse(woolEl);
         Boolean required = XMLUtils.parseBoolean(woolEl.getAttribute("required"), null);
 
         ProximityMetric woolProximityMetric =
@@ -119,7 +120,7 @@ public class WoolModule implements MapModule {
             new MonumentWoolFactory(
                 id,
                 required,
-                visible,
+                options,
                 team,
                 woolProximityMetric,
                 monumentProximityMetric,

@@ -38,13 +38,11 @@ public interface Goal<T extends GoalDefinition> extends Feature<T> {
   boolean isShared();
 
   /**
-   * Returns true if the goal acts "normally". Normal behavior is defined when the goal is visible
-   * via mediums such as a {@link net.kyori.adventure.bossbar.BossBar}, the Scoreboard, and chat. If
-   * a call to this method returns false, this goal will not show up anywhere.
-   *
-   * <p>In most cases, this should simply delegate to {@link GoalDefinition#isVisible()}
+   * Returns true if the goal has the provided {@link tc.oc.pgm.goals.ShowOption}. Objective options
+   * define the goal behavior, making it visible only via certain mediums such as the scoreboard and
+   * chat.
    */
-  boolean isVisible();
+  boolean hasShowOption(ShowOption option);
 
   boolean isRequired();
 

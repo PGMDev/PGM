@@ -13,6 +13,7 @@ import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.AnyFilter;
 import tc.oc.pgm.filters.BlockFilter;
 import tc.oc.pgm.filters.FilterParser;
+import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.teams.TeamFactory;
@@ -119,7 +120,7 @@ public abstract class ControlPointParser {
             elControlPoint.getAttribute("points-growth"), Float.class, Float.POSITIVE_INFINITY);
     boolean showProgress =
         XMLUtils.parseBoolean(elControlPoint.getAttribute("show-progress"), koth);
-    boolean visible = XMLUtils.parseBoolean(elControlPoint.getAttribute("show"), true);
+    ShowOptions options = ShowOptions.parse(elControlPoint);
     Boolean required = XMLUtils.parseBoolean(elControlPoint.getAttribute("required"), null);
 
     ControlPointDefinition.CaptureCondition captureCondition =
@@ -133,7 +134,7 @@ public abstract class ControlPointParser {
         id,
         name,
         required,
-        visible,
+        options,
         captureRegion,
         captureFilter,
         playerFilter,

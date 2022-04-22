@@ -188,7 +188,7 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
   }
 
   protected void sendTouchMessage(@Nullable ParticipantState toucher, boolean includeToucher) {
-    if (!isVisible()) return;
+    if (!hasShowOption(ShowOption.SHOW_MESSAGES)) return;
 
     Component message = getTouchMessage(toucher, false);
     Audience.console().sendMessage(message);
@@ -216,7 +216,7 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
   }
 
   protected void playTouchEffects(@Nullable ParticipantState toucher) {
-    if (toucher == null || !isVisible()) return;
+    if (toucher == null || !hasShowOption(ShowOption.SHOW_EFFECTS)) return;
 
     MatchPlayer onlineToucher = toucher.getPlayer().orElse(null);
     if (onlineToucher == null) return;

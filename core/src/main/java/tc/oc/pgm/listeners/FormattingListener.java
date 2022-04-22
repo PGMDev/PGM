@@ -16,6 +16,7 @@ import tc.oc.pgm.core.CoreLeakEvent;
 import tc.oc.pgm.destroyable.Destroyable;
 import tc.oc.pgm.destroyable.DestroyableDestroyedEvent;
 import tc.oc.pgm.goals.Contribution;
+import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.wool.PlayerWoolPlaceEvent;
@@ -23,7 +24,7 @@ import tc.oc.pgm.wool.PlayerWoolPlaceEvent;
 public class FormattingListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void playerWoolPlace(final PlayerWoolPlaceEvent event) {
-    if (!event.getWool().isVisible()) return;
+    if (!event.getWool().hasShowOption(ShowOption.SHOW_MESSAGES)) return;
 
     event
         .getMatch()
@@ -38,7 +39,7 @@ public class FormattingListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void coreLeak(final CoreLeakEvent event) {
     final Core core = event.getCore();
-    if (!core.isVisible()) return;
+    if (!core.hasShowOption(ShowOption.SHOW_MESSAGES)) return;
 
     event
         .getMatch()
@@ -53,7 +54,7 @@ public class FormattingListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void destroyableDestroyed(final DestroyableDestroyedEvent event) {
     Destroyable destroyable = event.getDestroyable();
-    if (!destroyable.isVisible()) return;
+    if (!destroyable.hasShowOption(ShowOption.SHOW_MESSAGES)) return;
 
     event
         .getMatch()

@@ -7,6 +7,7 @@ import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.goals.ProximityGoalDefinition;
 import tc.oc.pgm.goals.ProximityMetric;
+import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
@@ -20,13 +21,12 @@ public class DestroyableFactory extends ProximityGoalDefinition {
   protected final boolean showProgress;
   protected final boolean sparks;
   protected final boolean repairable;
-  protected final boolean visible;
 
   public DestroyableFactory(
       @Nullable String id,
       String name,
       @Nullable Boolean required,
-      boolean visible,
+      ShowOptions showOptions,
       TeamFactory owner,
       ProximityMetric proximityMetric,
       Region region,
@@ -36,7 +36,7 @@ public class DestroyableFactory extends ProximityGoalDefinition {
       boolean showProgress,
       boolean sparks,
       boolean repairable) {
-    super(id, name, required, visible, owner, proximityMetric);
+    super(id, name, required, showOptions, owner, proximityMetric);
     this.region = region;
     this.materials = materials;
     this.destructionRequired = destructionRequired;
@@ -44,7 +44,6 @@ public class DestroyableFactory extends ProximityGoalDefinition {
     this.showProgress = showProgress;
     this.sparks = sparks;
     this.repairable = repairable;
-    this.visible = visible;
   }
 
   public Region getRegion() {

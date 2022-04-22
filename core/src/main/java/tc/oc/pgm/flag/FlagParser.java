@@ -22,6 +22,7 @@ import tc.oc.pgm.flag.post.CompositePost;
 import tc.oc.pgm.flag.post.PostDefinition;
 import tc.oc.pgm.flag.post.SinglePost;
 import tc.oc.pgm.goals.ProximityMetric;
+import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.points.PointParser;
 import tc.oc.pgm.points.PointProvider;
@@ -247,7 +248,7 @@ public class FlagParser {
 
     String id = el.getAttributeValue("id");
     String name = el.getAttributeValue("name");
-    boolean visible = XMLUtils.parseBoolean(el.getAttribute("show"), true);
+    ShowOptions options = ShowOptions.parse(el);
     Boolean required = XMLUtils.parseBoolean(el.getAttribute("required"), null);
     DyeColor color = XMLUtils.parseDyeColor(el.getAttribute("color"), null);
     FeatureReference<TeamFactory> owner =
@@ -293,7 +294,7 @@ public class FlagParser {
             id,
             name,
             required,
-            visible,
+            options,
             color,
             defaultPost,
             owner,

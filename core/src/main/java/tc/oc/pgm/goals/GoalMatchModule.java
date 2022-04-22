@@ -81,7 +81,7 @@ public class GoalMatchModule implements MatchModule, Listener {
   public void addGoal(Goal<?> goal) {
     match.getLogger().fine("Adding goal " + goal);
 
-    if (!goal.isVisible()) return;
+    if (!goal.hasShowOption(ShowOption.STATS)) return;
 
     if (goals.isEmpty()) {
       match
@@ -158,7 +158,7 @@ public class GoalMatchModule implements MatchModule, Listener {
 
     // Don't play the objective sound if the match is over, because the win/lose sound will play
     // instead
-    if (!match.calculateVictory() && event.getGoal().isVisible()) {
+    if (!match.calculateVictory() && event.getGoal().hasShowOption(ShowOption.SHOW_EFFECTS)) {
       Sound goodSound = event.getGoal().getCompletionSound(true);
       Sound badSound = event.getGoal().getCompletionSound(false);
 
