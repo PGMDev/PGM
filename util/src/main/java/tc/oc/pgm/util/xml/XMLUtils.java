@@ -123,6 +123,14 @@ public final class XMLUtils {
         });
   }
 
+  public static @Nullable Attribute getAttribute(Element parent, String... names) {
+    for (String name : names) {
+      final Attribute attr = parent.getAttribute(name);
+      if (attr != null) return attr;
+    }
+    return null;
+  }
+
   public static Element getUniqueChild(Element parent, String... aliases)
       throws InvalidXMLException {
     List<Element> children = new ArrayList<>();
@@ -426,6 +434,63 @@ public final class XMLUtils {
         return Range.downTo(lower, lowerType);
       } else {
         return Range.range(lower, lowerType, upper, upperType);
+      }
+    }
+  }
+
+  /**
+   * Parse a numeric range from attributes on the given element specifying the bounds of the range,
+   * specifically:
+   *
+   * <p>gt gte lt lte
+   */
+  public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
+      Element el, Class<T> type) throws InvalidXMLException {
+    return parseNumericRange(el, type, Range.all());
+  }
+
+  public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
+      Element el, Class<T> type, Range<T> def) throws InvalidXMLException {
+    Attribute lt = el.getAttribute("lt");
+    Attribute lte = getAttribute(el, "lte", "max");
+    Attribute gt = el.getAttribute("gt");
+    Attribute gte = getAttribute(el, "gte", "min");
+
+    if (lt != null && lte != null)
+      throw new InvalidXMLException("Conflicting upper bound for numeric range", el);
+    if (gt != null && gte != null)
+      throw new InvalidXMLException("Conflicting lower bound for numeric range", el);
+
+    BoundType lowerBoundType, upperBoundType;
+    T lowerBound, upperBound;
+
+    if (gt != null) {
+      lowerBound = parseNumber(gt, type, (T) null);
+      lowerBoundType = BoundType.OPEN;
+    } else {
+      lowerBound = parseNumber(gte, type, (T) null);
+      lowerBoundType = BoundType.CLOSED;
+    }
+
+    if (lt != null) {
+      upperBound = parseNumber(lt, type, (T) null);
+      upperBoundType = BoundType.OPEN;
+    } else {
+      upperBound = parseNumber(lte, type, (T) null);
+      upperBoundType = BoundType.CLOSED;
+    }
+
+    if (lowerBound == null) {
+      if (upperBound == null) {
+        return def;
+      } else {
+        return Range.upTo(upperBound, upperBoundType);
+      }
+    } else {
+      if (upperBound == null) {
+        return Range.downTo(lowerBound, lowerBoundType);
+      } else {
+        return Range.range(lowerBound, lowerBoundType, upperBound, upperBoundType);
       }
     }
   }

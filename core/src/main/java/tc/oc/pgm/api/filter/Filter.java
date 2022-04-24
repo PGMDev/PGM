@@ -41,6 +41,10 @@ public interface Filter {
     return ImmutableList.of();
   }
 
+  default boolean isDynamic() {
+    return !getRelevantEvents().isEmpty();
+  }
+
   /** Least-derived query type that this filter might not abstain from */
   Class<? extends Query> getQueryType();
 
