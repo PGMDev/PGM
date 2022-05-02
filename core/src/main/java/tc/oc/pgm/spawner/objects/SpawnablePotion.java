@@ -22,10 +22,8 @@ public class SpawnablePotion implements Spawnable {
     ItemStack potionItem = new ItemStack(Material.POTION);
     PotionMeta potionMeta = (PotionMeta) potionItem.getItemMeta();
     for (PotionEffect effect : potion) {
-      int level = effect.getAmplifier();
-      int duration = effect.getDuration();
-      // type, level, overwrite
-      potionMeta.addCustomEffect(new PotionEffect((effect.getType()), 20 * duration, level), false);
+      potionMeta.addCustomEffect(
+          new PotionEffect((effect.getType()), effect.getDuration(), effect.getAmplifier()), false);
     }
     potionItem.setItemMeta(potionMeta);
     this.potionItem = potionItem;
@@ -35,13 +33,12 @@ public class SpawnablePotion implements Spawnable {
   public void spawn(Location location, Match match) {
     ThrownPotion thrownPotion = location.getWorld().spawn(location, ThrownPotion.class);
     thrownPotion.setItem(potionItem);
-    thrownPotion.getEffects();
     thrownPotion.setMetadata(
         Spawner.METADATA_KEY, new FixedMetadataValue(PGM.get(), METADATA_VALUE));
   }
 
   @Override
   public int getSpawnCount() {
-    return 0;
+    return potionItem.getAmount();
   }
 }

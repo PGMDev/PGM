@@ -89,11 +89,14 @@ public class SpawnerModule implements MapModule {
           objects.add(item);
         }
 
+        List<PotionEffect> thrownPotion = new ArrayList<>();
+        // All listed effects for a spawner will be included in one splash potion
         for (Element spawnable :
             XMLUtils.getChildren(element, "potion", "potions", "effect", "effects")) {
           PotionEffect potionEffect = XMLUtils.parsePotionEffect(spawnable);
-          List<PotionEffect> thrownPotion = new ArrayList<>();
           thrownPotion.add(potionEffect);
+        }
+        if (!thrownPotion.isEmpty()) {
           SpawnablePotion potion = new SpawnablePotion(thrownPotion, numericID);
           objects.add(potion);
         }
