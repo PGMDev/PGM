@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -24,6 +25,7 @@ import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.spawner.objects.SpawnableItem;
+import tc.oc.pgm.spawner.objects.SpawnablePotion;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
@@ -85,6 +87,15 @@ public class SpawnerModule implements MapModule {
           ItemStack stack = kitParser.parseItem(spawnable, false);
           SpawnableItem item = new SpawnableItem(stack, numericID);
           objects.add(item);
+        }
+
+        for (Element spawnable :
+            XMLUtils.getChildren(element, "potion", "potions", "effect", "effects")) {
+          PotionEffect potionEffect = XMLUtils.parsePotionEffect(spawnable);
+          List<PotionEffect> thrownPotion = new ArrayList<>();
+          thrownPotion.add(potionEffect);
+          SpawnablePotion potion = new SpawnablePotion(thrownPotion, numericID);
+          objects.add(potion);
         }
 
         SpawnerDefinition spawnerDefinition =
