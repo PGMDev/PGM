@@ -17,8 +17,8 @@ public class SpawnablePotion implements Spawnable {
   private ItemStack potionItem;
   private String METADATA_VALUE;
 
-  public SpawnablePotion(List<PotionEffect> potion, int spawnerID) {
-    this.METADATA_VALUE = Integer.toString(spawnerID);
+  public SpawnablePotion(List<PotionEffect> potion, int spawnerId) {
+    this.METADATA_VALUE = Integer.toString(spawnerId);
     ItemStack potionItem = new ItemStack(Material.POTION);
     PotionMeta potionMeta = (PotionMeta) potionItem.getItemMeta();
     for (PotionEffect effect : potion) {

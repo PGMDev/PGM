@@ -14,9 +14,9 @@ public class SpawnableItem implements Spawnable {
   private ItemStack stack;
   private String METADATA_VALUE;
 
-  public SpawnableItem(ItemStack stack, int spawnerID) {
+  public SpawnableItem(ItemStack stack, int spawnerId) {
     this.stack = stack;
-    this.METADATA_VALUE = Integer.toString(spawnerID);
+    this.METADATA_VALUE = Integer.toString(spawnerId);
   }
 
   @Override
