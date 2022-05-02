@@ -26,7 +26,9 @@ import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.spawner.objects.SpawnableItem;
 import tc.oc.pgm.spawner.objects.SpawnablePotion;
+import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class SpawnerModule implements MapModule {
@@ -90,11 +92,39 @@ public class SpawnerModule implements MapModule {
         }
 
         List<PotionEffect> thrownPotion = new ArrayList<>();
-        // All listed effects for a spawner will be included in one splash potion
         for (Element spawnable : XMLUtils.getChildren(element, "potion")) {
-          thrownPotion.add(XMLUtils.parsePotionEffect(spawnable));
-        }
-        if (!thrownPotion.isEmpty()) {
+          // if <potion> mentions amplifier or duration attribute, merge it with lower <effect>
+          Duration duration = null;
+          Integer amplifier = null;
+          if (spawnable.getAttribute("duration") != null) {
+            duration = XMLUtils.parseSecondDuration(Node.fromAttr(spawnable));
+          }
+          if (spawnable.getAttribute("amplifier") != null) {
+            amplifier = XMLUtils.parseNumber(spawnable, Integer.class);
+          }
+          for (Element effectEl : XMLUtils.getChildren(element.getChild("effect"))) {
+            Attribute presetAttribute = effectEl.getAttribute("duration");
+            Attribute presetAmplifier = effectEl.getAttribute("amplifier");
+            PotionEffect presetPotion = XMLUtils.parsePotionEffect(effectEl);
+            if (duration == null && amplifier == null) {
+              thrownPotion.add(XMLUtils.parsePotionEffect(effectEl));
+            }
+            // if duration is mentioned and amplifier is not mentioned in <potion>
+            else if (duration != null && amplifier == null) {
+              PotionEffect potionEffect =
+                  new PotionEffect(
+                      presetPotion.getType(),
+                      (int) TimeUtils.toTicks(duration),
+                      presetPotion.getAmplifier());
+              thrownPotion.add(potionEffect);
+            }
+            // if duration is not mentioned and amplifier is mentioned in <potion>
+            else if (duration == null) {
+              PotionEffect potionEffect =
+                  new PotionEffect(presetPotion.getType(), presetPotion.getDuration(), amplifier);
+              thrownPotion.add(potionEffect);
+            }
+          }
           objects.add(new SpawnablePotion(thrownPotion, numericId));
         }
 
