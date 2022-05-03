@@ -92,17 +92,18 @@ public class SpawnerModule implements MapModule {
         }
 
         List<PotionEffect> thrownPotion = new ArrayList<>();
-        for (Element spawnable : XMLUtils.getChildren(element, "potion")) {
-          // if <potion> mentions amplifier or duration attribute, merge it with lower <effect>
+        for (Element potionEl : XMLUtils.getChildren(element, "potion")) {
+          // if <potion> mentions amplifier or duration attribute, merge it with lower <effect> if
+          // not present
           Duration duration = null;
           Integer amplifier = null;
-          if (spawnable.getAttribute("duration") != null) {
-            duration = XMLUtils.parseSecondDuration(Node.fromAttr(spawnable, "duration"));
+          if (potionEl.getAttribute("duration") != null) {
+            duration = XMLUtils.parseSecondDuration(Node.fromAttr(potionEl, "duration"));
           }
-          if (spawnable.getAttribute("amplifier") != null) {
-            amplifier = XMLUtils.parseNumber(spawnable.getAttribute("amplifier"), Integer.class) - 1;
+          if (potionEl.getAttribute("amplifier") != null) {
+            amplifier = XMLUtils.parseNumber(potionEl.getAttribute("amplifier"), Integer.class);
           }
-          for (Element effectEl : XMLUtils.getChildren(spawnable, "effect")) {
+          for (Element effectEl : XMLUtils.getChildren(potionEl, "effect")) {
             Attribute presetDuration = effectEl.getAttribute("duration");
             Attribute presetAmplifier = effectEl.getAttribute("amplifier");
             PotionEffect presetPotion = XMLUtils.parsePotionEffect(effectEl);
@@ -111,28 +112,20 @@ public class SpawnerModule implements MapModule {
             } else if (duration != null) {
               // if <effect> mentions duration and does not mention amplifier
               if (presetDuration != null && presetAmplifier == null) {
-                PotionEffect potionEffect =
-                    new PotionEffect(
-                        presetPotion.getType(),
-                        (int) TimeUtils.toTicks(XMLUtils.parseSecondDuration(Node.fromAttr(effectEl, "duration"))),
-                        presetPotion.getAmplifier());
-                thrownPotion.add(potionEffect);
+                addPotionEffect(
+                    thrownPotion,
+                    presetPotion,
+                    XMLUtils.parseSecondDuration(Node.fromAttr(effectEl, "duration")),
+                    potionEl.getAttribute("amplifier"));
               }
               // if <effect> does not have duration and has amplifier
               else if (presetDuration == null && presetAmplifier != null) {
-                PotionEffect potionEffect =
-                    new PotionEffect(
-                        presetPotion.getType(),
-                        (int) TimeUtils.toTicks(duration),
-                        XMLUtils.parseNumber(presetAmplifier, Integer.class));
-                thrownPotion.add(potionEffect);
+                addPotionEffect(thrownPotion, presetPotion, duration, presetAmplifier);
               }
               // if <effect> has neither attributes
               else if (presetDuration == null && amplifier != null) {
-                PotionEffect potionEffect =
-                    new PotionEffect(
-                        presetPotion.getType(), (int) TimeUtils.toTicks(duration), amplifier);
-                thrownPotion.add(potionEffect);
+                addPotionEffect(
+                    thrownPotion, presetPotion, duration, potionEl.getAttribute("amplifier"));
               }
             } else {
               throw new InvalidXMLException(
@@ -160,6 +153,20 @@ public class SpawnerModule implements MapModule {
       }
 
       return spawnerModule.spawnerDefinitions.isEmpty() ? null : spawnerModule;
+    }
+
+    public void addPotionEffect(
+        List<PotionEffect> thrownPotion,
+        PotionEffect potion,
+        Duration duration,
+        Attribute amplifier)
+        throws InvalidXMLException {
+      PotionEffect potionEffect =
+          new PotionEffect(
+              potion.getType(),
+              (int) TimeUtils.toTicks(duration),
+              XMLUtils.parseNumber(amplifier, Integer.class) - 1);
+      thrownPotion.add(potionEffect);
     }
   }
 }
