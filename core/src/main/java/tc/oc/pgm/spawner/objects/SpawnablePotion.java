@@ -14,11 +14,11 @@ import tc.oc.pgm.spawner.Spawnable;
 import tc.oc.pgm.spawner.Spawner;
 
 public class SpawnablePotion implements Spawnable {
-  private ItemStack potionItem;
-  private String METADATA_VALUE;
+  private final ItemStack potionItem;
+  private final String metadataValue;
 
   public SpawnablePotion(List<PotionEffect> potion, int spawnerId) {
-    this.METADATA_VALUE = Integer.toString(spawnerId);
+    this.metadataValue = Integer.toString(spawnerId);
     ItemStack potionItem = new ItemStack(Material.POTION);
     PotionMeta potionMeta = (PotionMeta) potionItem.getItemMeta();
     for (PotionEffect effect : potion) {
@@ -34,7 +34,7 @@ public class SpawnablePotion implements Spawnable {
     ThrownPotion thrownPotion = location.getWorld().spawn(location, ThrownPotion.class);
     thrownPotion.setItem(potionItem);
     thrownPotion.setMetadata(
-        Spawner.METADATA_KEY, new FixedMetadataValue(PGM.get(), METADATA_VALUE));
+        Spawner.METADATA_KEY, new FixedMetadataValue(PGM.get(), metadataValue));
   }
 
   @Override
