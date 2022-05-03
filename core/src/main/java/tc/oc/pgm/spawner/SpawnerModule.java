@@ -97,10 +97,10 @@ public class SpawnerModule implements MapModule {
           Duration duration = null;
           Integer amplifier = null;
           if (spawnable.getAttribute("duration") != null) {
-            duration = XMLUtils.parseSecondDuration(Node.fromAttr(spawnable), "duration");
+            duration = XMLUtils.parseSecondDuration(Node.fromAttr(spawnable, "duration"));
           }
           if (spawnable.getAttribute("amplifier") != null) {
-            amplifier = XMLUtils.parseNumber(spawnable, Integer.class);
+            amplifier = XMLUtils.parseNumber(spawnable.getAttribute("amplifier"), Integer.class) - 1;
           }
           for (Element effectEl : XMLUtils.getChildren(spawnable, "effect")) {
             Attribute presetDuration = effectEl.getAttribute("duration");
@@ -110,16 +110,16 @@ public class SpawnerModule implements MapModule {
               thrownPotion.add(XMLUtils.parsePotionEffect(effectEl));
             } else if (duration != null) {
               // if <effect> mentions duration and does not mention amplifier
-              if (presetAmplifier == null) {
+              if (presetDuration != null && presetAmplifier == null) {
                 PotionEffect potionEffect =
                     new PotionEffect(
                         presetPotion.getType(),
-                        (int) TimeUtils.toTicks(duration),
+                        (int) TimeUtils.toTicks(XMLUtils.parseSecondDuration(Node.fromAttr(effectEl, "duration"))),
                         presetPotion.getAmplifier());
                 thrownPotion.add(potionEffect);
               }
               // if <effect> does not have duration and has amplifier
-              else if (presetDuration == null) {
+              else if (presetDuration == null && presetAmplifier != null) {
                 PotionEffect potionEffect =
                     new PotionEffect(
                         presetPotion.getType(),
@@ -128,7 +128,7 @@ public class SpawnerModule implements MapModule {
                 thrownPotion.add(potionEffect);
               }
               // if <effect> has neither attributes
-              else if (amplifier != null) {
+              else if (presetDuration == null && amplifier != null) {
                 PotionEffect potionEffect =
                     new PotionEffect(
                         presetPotion.getType(), (int) TimeUtils.toTicks(duration), amplifier);
