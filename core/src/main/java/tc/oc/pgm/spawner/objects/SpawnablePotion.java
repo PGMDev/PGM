@@ -15,15 +15,14 @@ import tc.oc.pgm.spawner.Spawner;
 
 public class SpawnablePotion implements Spawnable {
   private final ItemStack potionItem;
-  private final String metadataValue;
+  private final String spawnerId;
 
-  public SpawnablePotion(List<PotionEffect> potion, int spawnerId) {
-    this.metadataValue = Integer.toString(spawnerId);
+  public SpawnablePotion(List<PotionEffect> potion, String spawnerId) {
+    this.spawnerId = spawnerId;
     ItemStack potionItem = new ItemStack(Material.POTION);
     PotionMeta potionMeta = (PotionMeta) potionItem.getItemMeta();
     for (PotionEffect effect : potion) {
-      potionMeta.addCustomEffect(
-          new PotionEffect((effect.getType()), effect.getDuration(), effect.getAmplifier()), false);
+      potionMeta.addCustomEffect(effect, false);
     }
     potionItem.setItemMeta(potionMeta);
     this.potionItem = potionItem;
@@ -33,8 +32,7 @@ public class SpawnablePotion implements Spawnable {
   public void spawn(Location location, Match match) {
     ThrownPotion thrownPotion = location.getWorld().spawn(location, ThrownPotion.class);
     thrownPotion.setItem(potionItem);
-    thrownPotion.setMetadata(
-        Spawner.METADATA_KEY, new FixedMetadataValue(PGM.get(), metadataValue));
+    thrownPotion.setMetadata(Spawner.METADATA_KEY, new FixedMetadataValue(PGM.get(), spawnerId));
   }
 
   @Override

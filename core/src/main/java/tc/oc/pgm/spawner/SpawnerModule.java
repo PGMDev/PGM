@@ -83,11 +83,9 @@ public class SpawnerModule implements MapModule {
             filterParser.parseFilterProperty(element, "filter", StaticFilter.ALLOW);
 
         List<Spawnable> objects = new ArrayList<>();
-        for (Element spawnable :
-            XMLUtils.getChildren(
-                element, "item")) { // TODO Add more types of spawnables once entity parser is built
+        for (Element spawnable : XMLUtils.getChildren(element, "item")) {
           ItemStack stack = kitParser.parseItem(spawnable, false);
-          SpawnableItem item = new SpawnableItem(stack, numericId);
+          SpawnableItem item = new SpawnableItem(stack, "spawner-" + numericId);
           objects.add(item);
         }
 
@@ -133,7 +131,7 @@ public class SpawnerModule implements MapModule {
                   effectEl);
             }
           }
-          objects.add(new SpawnablePotion(thrownPotion, numericId));
+          objects.add(new SpawnablePotion(thrownPotion, "spawner-" + numericId));
         }
 
         SpawnerDefinition spawnerDefinition =

@@ -12,17 +12,17 @@ import tc.oc.pgm.spawner.Spawner;
 public class SpawnableItem implements Spawnable {
 
   private final ItemStack stack;
-  private final String metadataValue;
+  private final String spawnerId;
 
-  public SpawnableItem(ItemStack stack, int spawnerId) {
+  public SpawnableItem(ItemStack stack, String spawnerId) {
     this.stack = stack;
-    this.metadataValue = Integer.toString(spawnerId);
+    this.spawnerId = spawnerId;
   }
 
   @Override
   public void spawn(Location location, Match match) {
     Item item = location.getWorld().dropItem(location, stack);
-    item.setMetadata(Spawner.METADATA_KEY, new FixedMetadataValue(PGM.get(), metadataValue));
+    item.setMetadata(Spawner.METADATA_KEY, new FixedMetadataValue(PGM.get(), spawnerId));
   }
 
   @Override
