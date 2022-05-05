@@ -58,17 +58,17 @@ public class SpawnerModule implements MapModule {
       FilterParser filterParser = factory.getFilters();
       AtomicInteger numericId = new AtomicInteger(0);
 
-      for (Element element :
+      for (Element spawnerEl :
           XMLUtils.flattenElements(doc.getRootElement(), "spawners", "spawner")) {
-        Region spawnRegion = regionParser.parseRequiredRegionProperty(element, "spawn-region");
-        Region playerRegion = regionParser.parseRequiredRegionProperty(element, "player-region");
-        Attribute delayAttr = element.getAttribute("delay");
-        Attribute minDelayAttr = element.getAttribute("min-delay");
-        Attribute maxDelayAttr = element.getAttribute("max-delay");
+        Region spawnRegion = regionParser.parseRequiredRegionProperty(spawnerEl, "spawn-region");
+        Region playerRegion = regionParser.parseRequiredRegionProperty(spawnerEl, "player-region");
+        Attribute delayAttr = spawnerEl.getAttribute("delay");
+        Attribute minDelayAttr = spawnerEl.getAttribute("min-delay");
+        Attribute maxDelayAttr = spawnerEl.getAttribute("max-delay");
 
         if ((minDelayAttr != null || maxDelayAttr != null) && delayAttr != null) {
           throw new InvalidXMLException(
-              "Attribute 'minDelay' and 'maxDelay' cannot be combined with 'delay'", element);
+              "Attribute 'minDelay' and 'maxDelay' cannot be combined with 'delay'", spawnerEl);
         }
 
         Duration delay = XMLUtils.parseDuration(delayAttr, Duration.ofSeconds(10));
@@ -76,31 +76,30 @@ public class SpawnerModule implements MapModule {
         Duration maxDelay = XMLUtils.parseDuration(maxDelayAttr, delay);
 
         if (maxDelay.compareTo(minDelay) <= 0 && minDelayAttr != null && maxDelayAttr != null) {
-          throw new InvalidXMLException("Max-delay must be longer than min-delay", element);
+          throw new InvalidXMLException("Max-delay must be longer than min-delay", spawnerEl);
         }
 
         int maxEntities =
             XMLUtils.parseNumber(
-                element.getAttribute("max-entities"), Integer.class, Integer.MAX_VALUE);
+                spawnerEl.getAttribute("max-entities"), Integer.class, Integer.MAX_VALUE);
         Filter playerFilter =
-            filterParser.parseFilterProperty(element, "filter", StaticFilter.ALLOW);
+            filterParser.parseFilterProperty(spawnerEl, "filter", StaticFilter.ALLOW);
 
         List<Spawnable> objects = new ArrayList<>();
-        for (Element spawnable : XMLUtils.getChildren(element, "item")) {
-          ItemStack stack = kitParser.parseItem(spawnable, false);
+        for (Element itemEl : XMLUtils.getChildren(spawnerEl, "item")) {
+          ItemStack stack = kitParser.parseItem(itemEl, false);
           SpawnableItem item = new SpawnableItem(stack, "spawner-" + numericId.get());
           objects.add(item);
         }
 
         ImmutableList.Builder<PotionEffect> chBuilder = ImmutableList.builder();
-        for (Element potionEl : XMLUtils.getChildren(element, "potion")) {
+        for (Element potionEl : XMLUtils.getChildren(spawnerEl, "potion")) {
           for (Element potionChild : potionEl.getChildren("effect")) {
             chBuilder.add(XMLUtils.parsePotionEffect(new InheritingElement(potionChild)));
           }
           ImmutableList<PotionEffect> potionChildren = chBuilder.build();
-          // This should never happen because of default values set by parsePotionEffect
           if (potionChildren.isEmpty()) {
-            throw new InvalidXMLException("Expected child effects, but found none", element);
+            throw new InvalidXMLException("Expected child effects, but found none", spawnerEl);
           }
           objects.add(new SpawnablePotion(potionChildren, "spawner-" + numericId.get()));
         }
@@ -116,7 +115,7 @@ public class SpawnerModule implements MapModule {
                 minDelay,
                 maxDelay,
                 maxEntities);
-        factory.getFeatures().addFeature(element, spawnerDefinition);
+        factory.getFeatures().addFeature(spawnerEl, spawnerDefinition);
         spawnerModule.spawnerDefinitions.add(spawnerDefinition);
       }
 
