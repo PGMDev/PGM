@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionType;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -98,7 +99,22 @@ public class SpawnerModule implements MapModule {
           if (potionChildren.isEmpty()) {
             throw new InvalidXMLException("Expected child effects, but found none", spawnerEl);
           }
-          objects.add(new SpawnablePotion(potionChildren, "spawner-" + numericId.get()));
+          int potionName = 0;
+          if (potionEl.getAttribute("damage") != null) {
+            potionName = XMLUtils.parseNumber(potionEl.getAttribute("damage"), Integer.class, 0);
+          } else {
+            for (PotionEffect potionEffect : potionChildren) {
+              // PotionType lists "true" potions, PotionEffectType lists all possible status effects
+              // (ie wither)
+              // Use the first listed PotionType for potion color
+              if (PotionType.getByEffect(potionEffect.getType()) != null) {
+                potionName = PotionType.getByEffect(potionEffect.getType()).getDamageValue();
+                break;
+              }
+            }
+          }
+          objects.add(
+              new SpawnablePotion(potionChildren, potionName, "spawner-" + numericId.get()));
         }
 
         SpawnerDefinition spawnerDefinition =
