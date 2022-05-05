@@ -22,12 +22,14 @@ import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.filters.StaticFilter;
+import tc.oc.pgm.flag.post.SinglePost;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.spawner.objects.SpawnableItem;
 import tc.oc.pgm.spawner.objects.SpawnablePotion;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.xml.InheritingElement;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -90,49 +92,17 @@ public class SpawnerModule implements MapModule {
           objects.add(item);
         }
 
-        List<PotionEffect> thrownPotion = new ArrayList<>();
+        ImmutableList.Builder<PotionEffect> chBuilder = ImmutableList.builder();
         for (Element potionEl : XMLUtils.getChildren(element, "potion")) {
-          // if <potion> mentions amplifier or duration attribute, merge it with lower <effect> if
-          // not present
-          Duration duration = null;
-          Integer amplifier = null;
-          if (potionEl.getAttribute("duration") != null) {
-            duration = XMLUtils.parseSecondDuration(Node.fromAttr(potionEl, "duration"));
+          for (Element potionChild : potionEl.getChildren("effect")) {
+            chBuilder.add(XMLUtils.parsePotionEffect(new InheritingElement(potionChild)));
           }
-          if (potionEl.getAttribute("amplifier") != null) {
-            amplifier = XMLUtils.parseNumber(potionEl.getAttribute("amplifier"), Integer.class);
+          ImmutableList<PotionEffect> potionChildren = chBuilder.build();
+          // This should never happen because of default values set by parsePotionEffect
+          if (potionChildren.isEmpty()) {
+            throw new InvalidXMLException("Expected child effects, but found none", element);
           }
-          for (Element effectEl : XMLUtils.getChildren(potionEl, "effect")) {
-            Attribute presetDuration = effectEl.getAttribute("duration");
-            Attribute presetAmplifier = effectEl.getAttribute("amplifier");
-            PotionEffect presetPotion = XMLUtils.parsePotionEffect(effectEl);
-            if (duration == null && amplifier == null && presetDuration != null) {
-              thrownPotion.add(XMLUtils.parsePotionEffect(effectEl));
-            } else if (duration != null) {
-              // if <effect> mentions duration and does not mention amplifier
-              if (presetDuration != null && presetAmplifier == null) {
-                addPotionEffect(
-                    thrownPotion,
-                    presetPotion,
-                    XMLUtils.parseSecondDuration(Node.fromAttr(effectEl, "duration")),
-                    potionEl.getAttribute("amplifier"));
-              }
-              // if <effect> does not have duration and has amplifier
-              else if (presetDuration == null && presetAmplifier != null) {
-                addPotionEffect(thrownPotion, presetPotion, duration, presetAmplifier);
-              }
-              // if <effect> has neither attributes
-              else if (presetDuration == null && amplifier != null) {
-                addPotionEffect(
-                    thrownPotion, presetPotion, duration, potionEl.getAttribute("amplifier"));
-              }
-            } else {
-              throw new InvalidXMLException(
-                  "<effect> must have a duration assigned to it by a duration attribute or <potion>",
-                  effectEl);
-            }
-          }
-          objects.add(new SpawnablePotion(thrownPotion, "spawner-" + numericId.get()));
+          objects.add(new SpawnablePotion(potionChildren, "spawner-" + numericId.get()));
         }
 
         SpawnerDefinition spawnerDefinition =
@@ -151,20 +121,6 @@ public class SpawnerModule implements MapModule {
       }
 
       return spawnerModule.spawnerDefinitions.isEmpty() ? null : spawnerModule;
-    }
-
-    public void addPotionEffect(
-        List<PotionEffect> thrownPotion,
-        PotionEffect potion,
-        Duration duration,
-        Attribute amplifier)
-        throws InvalidXMLException {
-      PotionEffect potionEffect =
-          new PotionEffect(
-              potion.getType(),
-              (int) TimeUtils.toTicks(duration),
-              XMLUtils.parseNumber(amplifier, Integer.class) - 1);
-      thrownPotion.add(potionEffect);
     }
   }
 }
