@@ -31,7 +31,7 @@ public class SpawnablePotion implements Spawnable {
   @Override
   public void spawn(Location location, Match match) {
     ThrownPotion thrownPotion = location.getWorld().spawn(location, ThrownPotion.class);
-    thrownPotion.setItem(potionItem);
+    thrownPotion.setItem(potionItem.clone());
     thrownPotion.setMetadata(Spawner.METADATA_KEY, new FixedMetadataValue(PGM.get(), spawnerId));
   }
 
