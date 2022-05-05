@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -53,8 +54,8 @@ public class SpawnerModule implements MapModule {
       RegionParser regionParser = factory.getRegions();
       KitParser kitParser = factory.getKits();
       FilterParser filterParser = factory.getFilters();
+      AtomicInteger numericId = new AtomicInteger(0);
 
-      int numericId = 0;
       for (Element element :
           XMLUtils.flattenElements(doc.getRootElement(), "spawners", "spawner")) {
         Region spawnRegion = regionParser.parseRequiredRegionProperty(element, "spawn-region");
@@ -85,7 +86,7 @@ public class SpawnerModule implements MapModule {
         List<Spawnable> objects = new ArrayList<>();
         for (Element spawnable : XMLUtils.getChildren(element, "item")) {
           ItemStack stack = kitParser.parseItem(spawnable, false);
-          SpawnableItem item = new SpawnableItem(stack, "spawner-" + numericId);
+          SpawnableItem item = new SpawnableItem(stack, "spawner-" + numericId.get());
           objects.add(item);
         }
 
@@ -131,11 +132,12 @@ public class SpawnerModule implements MapModule {
                   effectEl);
             }
           }
-          objects.add(new SpawnablePotion(thrownPotion, "spawner-" + numericId));
+          objects.add(new SpawnablePotion(thrownPotion, "spawner-" + numericId.get()));
         }
 
         SpawnerDefinition spawnerDefinition =
             new SpawnerDefinition(
+                numericId.getAndIncrement(),
                 objects,
                 spawnRegion,
                 playerRegion,
@@ -143,11 +145,9 @@ public class SpawnerModule implements MapModule {
                 delay,
                 minDelay,
                 maxDelay,
-                maxEntities,
-                numericId);
+                maxEntities);
         factory.getFeatures().addFeature(element, spawnerDefinition);
         spawnerModule.spawnerDefinitions.add(spawnerDefinition);
-        numericId++;
       }
 
       return spawnerModule.spawnerDefinitions.isEmpty() ? null : spawnerModule;
