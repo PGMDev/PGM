@@ -22,16 +22,13 @@ import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.filters.StaticFilter;
-import tc.oc.pgm.flag.post.SinglePost;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.spawner.objects.SpawnableItem;
 import tc.oc.pgm.spawner.objects.SpawnablePotion;
-import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.xml.InheritingElement;
 import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class SpawnerModule implements MapModule {
