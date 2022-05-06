@@ -17,10 +17,10 @@ public class SpawnablePotion implements Spawnable {
   private final ItemStack potionItem;
   private final String spawnerId;
 
-  public SpawnablePotion(List<PotionEffect> potion, int potionName, String spawnerId) {
+  public SpawnablePotion(List<PotionEffect> potion, int damageValue, String spawnerId) {
     this.spawnerId = spawnerId;
     // Potion "name" determines potion color
-    ItemStack potionItem = new ItemStack(new Potion(potionName).splash().toItemStack(1));
+    ItemStack potionItem = new Potion(damageValue).splash().toItemStack(1);
     PotionMeta potionMeta = (PotionMeta) potionItem.getItemMeta();
     for (PotionEffect effect : potion) {
       potionMeta.addCustomEffect(effect, false);

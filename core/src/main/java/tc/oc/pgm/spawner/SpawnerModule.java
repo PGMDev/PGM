@@ -104,8 +104,8 @@ public class SpawnerModule implements MapModule {
             potionName = XMLUtils.parseNumber(potionEl.getAttribute("damage"), Integer.class, 0);
           } else {
             for (PotionEffect potionEffect : potionChildren) {
-              // PotionType lists "true" potions, PotionEffectType lists all possible status effects
-              // (ie wither)
+              // PotionType lists "true" potions, PotionEffectType "potionEffect.getType()" lists
+              // all possible status effects (ie wither, blindness, etc)
               // Use the first listed PotionType for potion color
               if (PotionType.getByEffect(potionEffect.getType()) != null) {
                 potionName = PotionType.getByEffect(potionEffect.getType()).getDamageValue();
@@ -119,7 +119,7 @@ public class SpawnerModule implements MapModule {
 
         SpawnerDefinition spawnerDefinition =
             new SpawnerDefinition(
-                numericId.getAndIncrement(),
+                "spawner-" + numericId.getAndIncrement(),
                 objects,
                 spawnRegion,
                 playerRegion,

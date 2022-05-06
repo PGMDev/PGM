@@ -10,16 +10,16 @@ import tc.oc.pgm.api.region.Region;
 @FeatureInfo(name = "spawner")
 public class SpawnerDefinition implements FeatureDefinition {
 
+  public final String numericId;
   public final Region spawnRegion;
   public final Region playerRegion;
   public final int maxEntities;
   public final Duration minDelay, maxDelay, delay;
   public final List<Spawnable> objects;
   public final Filter playerFilter;
-  public final int numericID;
 
   public SpawnerDefinition(
-      int numericID,
+      String numericId,
       List<Spawnable> objects,
       Region spawnRegion,
       Region playerRegion,
@@ -28,7 +28,7 @@ public class SpawnerDefinition implements FeatureDefinition {
       Duration minDelay,
       Duration maxDelay,
       int maxEntities) {
-    this.numericID = numericID;
+    this.numericId = numericId;
     this.spawnRegion = spawnRegion;
     this.playerRegion = playerRegion;
     this.maxEntities = maxEntities;

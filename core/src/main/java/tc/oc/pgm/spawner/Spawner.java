@@ -1,5 +1,6 @@
 package tc.oc.pgm.spawner;
 
+import java.util.Objects;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
@@ -36,7 +37,6 @@ public class Spawner implements Listener, Tickable {
   public Spawner(SpawnerDefinition definition, Match match) {
     this.definition = definition;
     this.match = match;
-
     this.lastTick = match.getTick().tick;
     this.players = new OnlinePlayerMapAdapter<>(PGM.get());
     calculateDelay();
@@ -51,7 +51,6 @@ public class Spawner implements Listener, Tickable {
             definition.spawnRegion.getRandom(match.getRandom()).toLocation(match.getWorld());
         spawnable.spawn(location, match);
         match.getWorld().spigot().playEffect(location, Effect.FLAME, 0, 0, 0, 0.15f, 0, 0, 40, 64);
-
         spawnedEntities = spawnedEntities + spawnable.getSpawnCount();
       }
       calculateDelay();
@@ -102,18 +101,18 @@ public class Spawner implements Listener, Tickable {
       return;
     }
 
-    int entitySpawnerID = -1;
-    int targetSpawnerID = -1;
+    String entitySpawnerId = "";
+    String targetSpawnerId = "";
     if (event.getEntity().hasMetadata(METADATA_KEY)) {
-      entitySpawnerID =
-          MetadataUtils.getMetadata(event.getEntity(), METADATA_KEY, PGM.get()).asInt();
+      entitySpawnerId =
+          MetadataUtils.getMetadata(event.getEntity(), METADATA_KEY, PGM.get()).toString();
     }
     if (event.getTarget().hasMetadata(METADATA_KEY)) {
-      targetSpawnerID =
-          MetadataUtils.getMetadata(event.getTarget(), METADATA_KEY, PGM.get()).asInt();
+      targetSpawnerId =
+          MetadataUtils.getMetadata(event.getTarget(), METADATA_KEY, PGM.get()).toString();
     }
     // Cancel the merge if the items are from different PGM spawners
-    if (entitySpawnerID != targetSpawnerID) {
+    if (!entitySpawnerId.equals(targetSpawnerId)) {
       event.setCancelled(true);
       return;
     }
@@ -121,8 +120,8 @@ public class Spawner implements Listener, Tickable {
 
   private void handleEntityRemoveEvent(Metadatable metadatable, int amount) {
     if (metadatable.hasMetadata(METADATA_KEY)) {
-      if (MetadataUtils.getMetadata(metadatable, METADATA_KEY, PGM.get()).asInt()
-          == definition.numericID) {
+      if (Objects.equals(
+          MetadataUtils.getMetadata(metadatable, METADATA_KEY, PGM.get()), definition.numericId)) {
         spawnedEntities -= amount;
         spawnedEntities = Math.max(0, spawnedEntities);
       }
