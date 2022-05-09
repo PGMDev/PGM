@@ -99,22 +99,22 @@ public class SpawnerModule implements MapModule {
           if (potionChildren.isEmpty()) {
             throw new InvalidXMLException("Expected child effects, but found none", spawnerEl);
           }
-          int potionName = 0;
+          int damageValue = 0;
           if (potionEl.getAttribute("damage") != null) {
-            potionName = XMLUtils.parseNumber(potionEl.getAttribute("damage"), Integer.class, 0);
+            damageValue = XMLUtils.parseNumber(potionEl.getAttribute("damage"), Integer.class, 0);
           } else {
             for (PotionEffect potionEffect : potionChildren) {
               // PotionType lists "true" potions, PotionEffectType "potionEffect.getType()" lists
               // all possible status effects (ie wither, blindness, etc)
               // Use the first listed PotionType for potion color
               if (PotionType.getByEffect(potionEffect.getType()) != null) {
-                potionName = PotionType.getByEffect(potionEffect.getType()).getDamageValue();
+                damageValue = PotionType.getByEffect(potionEffect.getType()).getDamageValue();
                 break;
               }
             }
           }
           objects.add(
-              new SpawnablePotion(potionChildren, potionName, "spawner-" + numericId.get()));
+              new SpawnablePotion(potionChildren, damageValue, "spawner-" + numericId.get()));
         }
 
         SpawnerDefinition spawnerDefinition =
