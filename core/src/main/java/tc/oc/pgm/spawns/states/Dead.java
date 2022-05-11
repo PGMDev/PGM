@@ -1,11 +1,9 @@
 package tc.oc.pgm.spawns.states;
 
-import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.util.List;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.Event;
@@ -17,7 +15,6 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinPartyEvent;
-import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.SpawnModule;
 import tc.oc.pgm.spawns.events.DeathKitApplyEvent;
@@ -36,7 +33,6 @@ public class Dead extends Spawning {
   private static final PotionEffect BLINDNESS_LONG =
       new PotionEffect(PotionEffectType.BLINDNESS, Integer.MAX_VALUE, 0, true, false);
 
-  private final long deathTick;
   private boolean kitted, rotted;
 
   public Dead(SpawnMatchModule smm, MatchPlayer player) {
@@ -44,8 +40,7 @@ public class Dead extends Spawning {
   }
 
   public Dead(SpawnMatchModule smm, MatchPlayer player, long deathTick) {
-    super(smm, player);
-    this.deathTick = deathTick;
+    super(smm, player, deathTick);
   }
 
   @Override
@@ -88,10 +83,6 @@ public class Dead extends Spawning {
     super.leaveState(events);
   }
 
-  protected long age() {
-    return player.getMatch().getTick().tick - deathTick;
-  }
-
   @Override
   public void tick() {
     long age = age();
@@ -121,22 +112,8 @@ public class Dead extends Spawning {
     }
   }
 
-  protected long ticksUntilRespawn() {
-    return Math.max(0, options.delayTicks - age());
-  }
-
-  @Override
-  public @Nullable Spawn chooseSpawn() {
-    if (ticksUntilRespawn() > 0) {
-      return null;
-    } else {
-      return super.chooseSpawn();
-    }
-  }
-
   public void requestSpawn() {
-    if (player.getMatch().getTick().tick - deathTick
-        >= TimeUtils.toTicks(SpawnModule.IGNORE_CLICKS_DELAY)) {
+    if (age() >= TimeUtils.toTicks(SpawnModule.IGNORE_CLICKS_DELAY)) {
       super.requestSpawn();
     }
   }
@@ -150,21 +127,6 @@ public class Dead extends Spawning {
   }
 
   @Override
-  protected Component getSubtitle(boolean spectator) {
-    long ticks = ticksUntilRespawn();
-    if (ticks > 0) {
-      return translatable(
-          spawnRequested
-              ? "death.respawn.confirmed.time"
-              : "death.respawn.unconfirmed.time" + (spectator ? ".spectator" : ""),
-          NamedTextColor.GREEN,
-          text(String.format("%.1f", (ticks / (float) 20)), NamedTextColor.AQUA));
-    } else {
-      return super.getSubtitle(spectator);
-    }
-  }
-
-  @Override
   public void onEvent(InventoryClickEvent event) {
     super.onEvent(event);
     event.setCancelled(true); // don't allow inventory changes when dead
@@ -174,21 +136,5 @@ public class Dead extends Spawning {
   public void onEvent(EntityDamageEvent event) {
     super.onEvent(event);
     event.setCancelled(true);
-  }
-
-  @Override
-  public void sendMessage() {
-    long ticks = options.delayTicks - age();
-    if (ticks % (ticks > 0 ? 20 : 100) == 0) {
-      player.sendMessage(
-          (ticks > 0
-                  ? translatable(
-                      spawnRequested
-                          ? "death.respawn.confirmed.time"
-                          : "death.respawn.unconfirmed.time",
-                      text((int) (ticks / (float) 20), NamedTextColor.AQUA))
-                  : super.getSubtitle(false))
-              .color(NamedTextColor.GREEN));
-    }
   }
 }

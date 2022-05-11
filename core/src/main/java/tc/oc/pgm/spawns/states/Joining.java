@@ -12,7 +12,11 @@ import tc.oc.pgm.spawns.SpawnMatchModule;
 public class Joining extends Spawning {
 
   public Joining(SpawnMatchModule smm, MatchPlayer player) {
-    super(smm, player);
+    this(smm, player, 0);
+  }
+
+  public Joining(SpawnMatchModule smm, MatchPlayer player, long deathTick) {
+    super(smm, player, deathTick);
     this.spawnRequested = true;
   }
 
