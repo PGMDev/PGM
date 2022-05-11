@@ -58,11 +58,16 @@ public class SpawnerModule implements MapModule {
 
       for (Element spawnerEl :
           XMLUtils.flattenElements(doc.getRootElement(), "spawners", "spawner")) {
+        String id = spawnerEl.getAttributeValue("id");
         Region spawnRegion = regionParser.parseRequiredRegionProperty(spawnerEl, "spawn-region");
         Region playerRegion = regionParser.parseRequiredRegionProperty(spawnerEl, "player-region");
         Attribute delayAttr = spawnerEl.getAttribute("delay");
         Attribute minDelayAttr = spawnerEl.getAttribute("min-delay");
         Attribute maxDelayAttr = spawnerEl.getAttribute("max-delay");
+
+        if (spawnerEl.getAttributeValue("id") == null) {
+          id = "spawner-" + numericId.getAndIncrement();
+        }
 
         if ((minDelayAttr != null || maxDelayAttr != null) && delayAttr != null) {
           throw new InvalidXMLException(
@@ -86,12 +91,12 @@ public class SpawnerModule implements MapModule {
         List<Spawnable> objects = new ArrayList<>();
         for (Element itemEl : XMLUtils.getChildren(spawnerEl, "item")) {
           ItemStack stack = kitParser.parseItem(itemEl, false);
-          SpawnableItem item = new SpawnableItem(stack, "spawner-" + numericId.get());
+          SpawnableItem item = new SpawnableItem(stack, id);
           objects.add(item);
         }
 
-        ImmutableList.Builder<PotionEffect> chBuilder = ImmutableList.builder();
         for (Element potionEl : XMLUtils.getChildren(spawnerEl, "potion")) {
+          ImmutableList.Builder<PotionEffect> chBuilder = ImmutableList.builder();
           for (Element potionChild : potionEl.getChildren("effect")) {
             chBuilder.add(XMLUtils.parsePotionEffect(new InheritingElement(potionChild)));
           }
@@ -113,13 +118,12 @@ public class SpawnerModule implements MapModule {
               }
             }
           }
-          objects.add(
-              new SpawnablePotion(potionChildren, damageValue, "spawner-" + numericId.get()));
+          objects.add(new SpawnablePotion(potionChildren, damageValue, id));
         }
 
         SpawnerDefinition spawnerDefinition =
             new SpawnerDefinition(
-                "spawner-" + numericId.getAndIncrement(),
+                id,
                 objects,
                 spawnRegion,
                 playerRegion,

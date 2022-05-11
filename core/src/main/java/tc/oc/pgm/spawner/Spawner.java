@@ -81,47 +81,23 @@ public class Spawner implements Listener, Tickable {
 
   @EventHandler(priority = EventPriority.HIGHEST)
   public void onItemMerge(ItemMergeEvent event) {
-    boolean entityTracked = false;
-    boolean targetTracked = false;
-    if (event.getEntity().hasMetadata(METADATA_KEY)) {
-      entityTracked = true;
-    }
-    if (event.getTarget().hasMetadata(METADATA_KEY)) {
-      targetTracked = true;
-    }
-
-    // Do nothing if neither item is from a PGM Spawner
-    if (!entityTracked && !targetTracked) {
-      return;
-    }
-
-    // Cancel the merge if only 1 of the items is from a PGM Spawner
-    if ((entityTracked && !targetTracked) || (!entityTracked && targetTracked)) {
-      event.setCancelled(true);
-      return;
-    }
-
-    String entitySpawnerId = "";
-    String targetSpawnerId = "";
-    if (event.getEntity().hasMetadata(METADATA_KEY)) {
-      entitySpawnerId =
+    boolean entityTracked = event.getEntity().hasMetadata(METADATA_KEY);
+    boolean targetTracked = event.getTarget().hasMetadata(METADATA_KEY);
+    if (!entityTracked && !targetTracked) return; // None affected
+    if (entityTracked && targetTracked) {
+      String entitySpawnerId =
           MetadataUtils.getMetadata(event.getEntity(), METADATA_KEY, PGM.get()).toString();
-    }
-    if (event.getTarget().hasMetadata(METADATA_KEY)) {
-      targetSpawnerId =
+      String targetSpawnerId =
           MetadataUtils.getMetadata(event.getTarget(), METADATA_KEY, PGM.get()).toString();
+      if (entitySpawnerId.equals(targetSpawnerId)) return; // Same spawner, allow merge
     }
-    // Cancel the merge if the items are from different PGM spawners
-    if (!entitySpawnerId.equals(targetSpawnerId)) {
-      event.setCancelled(true);
-      return;
-    }
+    event.setCancelled(true);
   }
 
   private void handleEntityRemoveEvent(Metadatable metadatable, int amount) {
     if (metadatable.hasMetadata(METADATA_KEY)) {
       if (Objects.equals(
-          MetadataUtils.getMetadata(metadatable, METADATA_KEY, PGM.get()), definition.numericId)) {
+          MetadataUtils.getMetadata(metadatable, METADATA_KEY, PGM.get()), definition.getId())) {
         spawnedEntities -= amount;
         spawnedEntities = Math.max(0, spawnedEntities);
       }
