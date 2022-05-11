@@ -5,6 +5,7 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.util.MethodParser;
+import tc.oc.pgm.util.collection.ContextStore;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 
@@ -12,6 +13,11 @@ public class FeatureFilterParser extends FilterParser {
 
   public FeatureFilterParser(MapFactory factory) {
     super(factory);
+  }
+
+  @Override
+  public ContextStore<?> getUsedContext() {
+    return factory.getFeatures();
   }
 
   @Override

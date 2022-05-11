@@ -3,6 +3,9 @@ package tc.oc.pgm.filters.dynamic;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.query.MatchQuery;
+import tc.oc.pgm.api.filter.query.PartyQuery;
+import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -27,5 +30,13 @@ public final class Filterables {
         "Filter type "
             + filter.getQueryType().getSimpleName()
             + " does not have a filterable scope");
+  }
+
+  /** Extract the most specific filterable possible from the given query */
+  public static Filterable<?> extractFilterable(MatchQuery query) {
+    if (query instanceof PlayerQuery)
+      return query.getMatch().getPlayer(((PlayerQuery) query).getId());
+    if (query instanceof PartyQuery) return ((PartyQuery) query).getParty();
+    return query.getMatch();
   }
 }

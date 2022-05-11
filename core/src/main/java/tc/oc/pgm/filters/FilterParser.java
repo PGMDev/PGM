@@ -14,6 +14,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
+import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.player.PlayerRelation;
@@ -41,6 +42,7 @@ import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.collection.ContextStore;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -57,6 +59,15 @@ public abstract class FilterParser {
 
     this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
   }
+
+  /**
+   * Gets the context used by this parser to store filters/filter references. Must use {@code
+   * ?}(wildcard) since {@link Filter} does not extend {@link FeatureDefinition}.
+   * (ContextStore&lt;Filter&gt; vs ContextStore&lt;FeatureDefinition&gt;)
+   *
+   * @return the context where this parser puts its parsed filters
+   */
+  public abstract ContextStore<?> getUsedContext();
 
   /**
    * The top-level method for parsing an individual filter element. This method should call {@link
@@ -529,8 +540,8 @@ public abstract class FilterParser {
   }
 
   @MethodParser("time")
-  public TimeFilter parseTimeFilter(Element el) throws InvalidXMLException {
-    return new TimeFilter(XMLUtils.parseDuration(el, null));
+  public Filter parseTimeFilter(Element el) throws InvalidXMLException {
+    return MonostableFilter.afterMatchStart(XMLUtils.parseDuration(el, null));
   }
 
   @MethodParser("score")

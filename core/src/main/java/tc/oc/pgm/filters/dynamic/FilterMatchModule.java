@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.PriorityQueue;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -24,8 +24,10 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.EventExecutor;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.ReactorFactory;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -38,10 +40,13 @@ import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.filters.TimeFilter;
+import tc.oc.pgm.filters.Filters;
+import tc.oc.pgm.filters.ParentFilter;
+import tc.oc.pgm.filters.XMLFilterReference;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.util.MapUtils;
 import tc.oc.pgm.util.MethodHandleUtils;
+import tc.oc.pgm.util.collection.ContextStore;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
 /**
@@ -66,13 +71,24 @@ import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickable, Listener {
 
   private final Match match;
+  private final ContextStore<?> filterContext;
   private final List<Class<? extends Event>> listeningFor = new LinkedList<>();
-  private final PriorityQueue<TimeFilter> timeFilterQueue = new PriorityQueue<>();
+
+  private final Map<ReactorFactory<? extends ReactorFactory.Reactor>, ReactorFactory.Reactor>
+      activeReactors = new HashMap<>();
 
   private final DummyListener dummyListener = new DummyListener();
 
-  public FilterMatchModule(Match match) {
+  /**
+   * Create the FilterMatchModule
+   *
+   * @param match the match this module exists in
+   * @param filterContext the context where all {@link Filters} for the relevant match can be found.
+   *     Important to find {@link ReactorFactory}s
+   */
+  public FilterMatchModule(Match match, ContextStore<?> filterContext) {
     this.match = match;
+    this.filterContext = filterContext;
   }
 
   private static class ListenerSet {
@@ -89,10 +105,17 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   // Filterables that need a check in the next tick (cleared every tick)
   private final Set<Filterable<?>> dirtySet = new HashSet<>();
 
-  // We have to listen to this event to guarantee that all other modules have been loaded
-  // and that there is no unresolved xml filter references.
   @EventHandler
   public void onMatchLoad(MatchLoadEvent event) {
+
+    // These two have to be on separate passes, in case a reactor wants to register a child filter
+    // for dynamic listening. This could potentially result in a need to register a specific event
+    // listener.
+    this.filterContext // Check for any factories hidden in filter trees
+        .getAllUnchecked(Filter.class)
+        .forEach(this::findAndCreateReactorFactories);
+
+    // Then register all event listeners
     this.listeners
         .rowKeySet()
         .forEach(
@@ -135,9 +158,25 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
     }
   }
 
+  private void findAndCreateReactorFactories(Filter filter) {
+    if (filter instanceof XMLFilterReference) {
+      this.findAndCreateReactorFactories(((XMLFilterReference) filter).get());
+      return;
+    }
+    if (filter instanceof ParentFilter) {
+      ((ParentFilter) filter).getChildren().forEach(this::findAndCreateReactorFactories);
+    }
+    if (filter instanceof ReactorFactory) {
+      ReactorFactory<? extends ReactorFactory.Reactor> factory =
+          (ReactorFactory<? extends ReactorFactory.Reactor>) filter;
+      activeReactors.computeIfAbsent(factory, f -> f.createReactor(match, this));
+    }
+  }
+
   @Override
   public void unload() {
     HandlerList.unregisterAll(this.dummyListener);
+    this.activeReactors.values().forEach(ReactorFactory.Reactor::unload);
   }
 
   /**
@@ -148,12 +187,12 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    * @param filter The filter to listen to
    * @param response The desired response
    * @param listener The listener that handles the response
-   * @throws IllegalStateException if the match is loaded at register time
+   * @throws IllegalStateException if the match is running at register time
    */
   private <F extends Filterable<?>> void register(
       Class<F> scope, Filter filter, boolean response, FilterListener<? super F> listener) {
-    if (match.isLoaded()) {
-      throw new IllegalStateException("Cannot register filter listener after match is loaded");
+    if (match.isRunning()) {
+      throw new IllegalStateException("Cannot register filter listener after match has started");
     }
 
     final ListenerSet listenerSet =
@@ -166,7 +205,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    * @param scope The scope of the filter listener
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
-   * @throws IllegalStateException if the match is loaded at register time
+   * @throws IllegalStateException if the match is running at register time
    */
   @Override
   public <F extends Filterable<?>> void onChange(
@@ -187,7 +226,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   /**
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
-   * @throws IllegalStateException if the match is loaded at register time
+   * @throws IllegalStateException if the match is running at register time
    */
   @Override
   public void onChange(Filter filter, FilterListener<? super Filterable<?>> listener) {
@@ -198,8 +237,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    * @param scope The scope of the filter listener
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
-   * @throws IllegalStateException if the match is loaded at register time
-   * @throws IllegalArgumentException if the submitted filter is NOT a dynamic filter
+   * @throws IllegalStateException if the match is running at register time
    */
   @Override
   public <F extends Filterable<?>> void onRise(
@@ -219,7 +257,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   /**
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
-   * @throws IllegalStateException if the match is loaded at register time
+   * @throws IllegalStateException if the match is running at register time
    */
   @Override
   public void onRise(Filter filter, Consumer<? super Filterable<?>> listener) {
@@ -230,7 +268,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    * @param scope The scope of the filter listener
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
-   * @throws IllegalStateException if the match is loaded at register time
+   * @throws IllegalStateException if the match is running at register time
    */
   @Override
   public <F extends Filterable<?>> void onFall(
@@ -250,7 +288,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   /**
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
-   * @throws IllegalStateException if the match is loaded at register time
+   * @throws IllegalStateException if the match is running at register time
    */
   @Override
   public void onFall(Filter filter, Consumer<? super Filterable<?>> listener) {
@@ -344,8 +382,8 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   }
 
   /**
-   * Checks the response for a query for all filters that fits a scope, if the response is different
-   * than the last cached response and the filters cares about the change the responses are
+   * Checks the response for a query for all filters that fits a scope. If the response is different
+   * from the last cached response and the filters cares about the change the responses are
    * dispatched to all the filters after the check is done.
    *
    * @param filterable the scope for this check
@@ -403,6 +441,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
       if (listeningFor.contains(event)) continue;
 
       EventExecutor result;
+      // Some special cases for a few events...
       if (PlayerCoarseMoveEvent.class.isAssignableFrom(event))
         result = (l, e) -> this.onPlayerMove((PlayerCoarseMoveEvent) e);
       else if (MatchPlayerDeathEvent.class.isAssignableFrom(event))
@@ -411,6 +450,8 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
         result = (l, e) -> this.onPartyChange((PlayerPartyChangeEvent) e);
       else if (FlagStateChangeEvent.class.isAssignableFrom(event))
         result = (l, e) -> this.onFlagStateChange((FlagStateChangeEvent) e);
+
+      // The rest of the events
       else {
         final MethodHandle handle;
         try {
@@ -512,6 +553,18 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
 
   public void onFlagStateChange(FlagStateChangeEvent event) {
     this.invalidate(match);
+  }
+
+  /**
+   * Gets the active {@link ReactorFactory.Reactor} created by the given factory for this match.
+   *
+   * @param factory a factory which was used to create a reactor for this match
+   * @return an active reactor
+   * @throws NullPointerException if no active reactor is found for the given factory
+   */
+  @SuppressWarnings("unchecked")
+  public <T extends ReactorFactory.Reactor> @NotNull T getReactor(ReactorFactory<T> factory) {
+    return (T) Objects.requireNonNull(this.activeReactors.get(factory), "reactor");
   }
 
   private static class DummyListener implements Listener {}

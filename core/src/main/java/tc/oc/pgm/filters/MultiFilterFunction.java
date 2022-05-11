@@ -10,7 +10,7 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.filter.query.Query;
 
-public abstract class MultiFilterFunction implements FilterDefinition {
+public abstract class MultiFilterFunction implements FilterDefinition, ParentFilter {
   protected final List<Filter> filters;
   protected Class<? extends Query> upperBound;
 
@@ -41,6 +41,11 @@ public abstract class MultiFilterFunction implements FilterDefinition {
     return this.filters.stream()
         .flatMap(f -> f.getRelevantEvents().stream())
         .collect(Collectors.collectingAndThen(Collectors.toList(), ImmutableList::copyOf));
+  }
+
+  @Override
+  public List<Filter> getChildren() {
+    return this.filters;
   }
 
   @Override

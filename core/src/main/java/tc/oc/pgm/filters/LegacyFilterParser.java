@@ -8,6 +8,7 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.util.MethodParser;
+import tc.oc.pgm.util.collection.ContextStore;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -20,6 +21,11 @@ public class LegacyFilterParser extends FilterParser {
 
   public LegacyFilterParser(MapFactory factory) {
     super(factory);
+  }
+
+  @Override
+  public ContextStore<?> getUsedContext() {
+    return this.filterContext;
   }
 
   @Override

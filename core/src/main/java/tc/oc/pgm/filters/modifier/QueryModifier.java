@@ -2,11 +2,14 @@ package tc.oc.pgm.filters.modifier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableList;
 import java.util.Collection;
+import java.util.List;
 import javax.annotation.Nullable;
 import org.bukkit.event.Event;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
+import tc.oc.pgm.filters.ParentFilter;
 import tc.oc.pgm.filters.TypedFilter;
 
 /**
@@ -18,7 +21,8 @@ import tc.oc.pgm.filters.TypedFilter;
  *
  * @param <Q> is the type of query this filter can modify before passing it on to its child filter
  */
-public abstract class QueryModifier<Q extends Query> extends TypedFilter<Q> {
+public abstract class QueryModifier<Q extends Query> extends TypedFilter<Q>
+    implements ParentFilter {
 
   private final Filter filter;
 
@@ -41,5 +45,10 @@ public abstract class QueryModifier<Q extends Query> extends TypedFilter<Q> {
     Query modifiedQuery = modifyQuery(query);
 
     return modifiedQuery == null ? QueryResponse.ABSTAIN : filter.query(modifiedQuery);
+  }
+
+  @Override
+  public List<Filter> getChildren() {
+    return ImmutableList.of(this.filter);
   }
 }
