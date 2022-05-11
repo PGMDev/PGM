@@ -2,7 +2,6 @@ package tc.oc.pgm.spawner.objects;
 
 import java.util.List;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.Potion;
@@ -32,7 +31,7 @@ public class SpawnablePotion implements Spawnable {
   public void spawn(Location location, Match match) {
     NMSHacks.EntityPotion entityPotion = new NMSHacks.EntityPotion(location, potionItem);
     // TODO set metadata when necessary
-    ((CraftWorld) location.getWorld()).getHandle().addEntity(entityPotion);
+    entityPotion.spawn();
   }
 
   @Override

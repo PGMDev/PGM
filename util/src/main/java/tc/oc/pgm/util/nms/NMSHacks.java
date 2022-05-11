@@ -1336,6 +1336,10 @@ public interface NMSHacks {
           location.getZ(),
           CraftItemStack.asNMSCopy(potionItem));
     }
+
+    public void spawn() {
+      world.addEntity(this);
+    }
   }
 
   static void setFireworksExpectedLifespan(Firework firework, int ticks) {
