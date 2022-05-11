@@ -12,6 +12,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.filter.query.LocationQuery;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.api.region.RegionDefinition;
@@ -63,6 +64,11 @@ public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> im
   @Override
   public boolean contains(Entity entity) {
     return get().contains(entity);
+  }
+
+  @Override
+  public boolean contains(LocationQuery query) {
+    return get().contains(query);
   }
 
   @Override

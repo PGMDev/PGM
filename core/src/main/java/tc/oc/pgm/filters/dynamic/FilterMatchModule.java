@@ -436,7 +436,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
     // We can't wait until the end of the tick because the player could move several
     // more times by then (i.e. if we received multiple packets from them in the same
     // tick) which would make region checks highly unreliable.
-    PGM.get().getMatchManager().getPlayer(event.getPlayer());
     MatchPlayer player = match.getPlayer(event.getPlayer());
 
     if (player != null) {
