@@ -137,4 +137,9 @@ public class FeatureDefinitionContext extends ContextStore<FeatureDefinition> {
     }
     return errors;
   }
+
+  @Override
+  public Collection<FeatureDefinition> getAll() {
+    return this.definitions;
+  }
 }
