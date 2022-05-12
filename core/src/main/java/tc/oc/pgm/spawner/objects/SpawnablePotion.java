@@ -29,9 +29,8 @@ public class SpawnablePotion implements Spawnable {
 
   @Override
   public void spawn(Location location, Match match) {
-    NMSHacks.EntityPotion entityPotion = new NMSHacks.EntityPotion(location, potionItem);
+    new NMSHacks.EntityPotion(location, potionItem).spawn();
     // TODO set metadata when necessary
-    entityPotion.spawn();
   }
 
   @Override
