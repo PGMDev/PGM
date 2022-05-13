@@ -292,20 +292,15 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void unlockTime(final MatchStartEvent event) {
-    // if there is a timelock module and it is off, unlock time
-    boolean unlockTime = !event.getMatch().getModule(WorldTimeModule.class).isTimeLocked();
-
-    GameRulesMatchModule gameRulesMatchModule =
-        event.getMatch().getModule(GameRulesMatchModule.class);
-    if (gameRulesMatchModule != null
-        && Boolean.parseBoolean(
-            gameRulesMatchModule.getGameRule(GameRule.DO_DAYLIGHT_CYCLE.getId()))) {
-      unlockTime = true;
-    }
     event
         .getMatch()
         .getWorld()
-        .setGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE.getId(), Boolean.toString(unlockTime));
+        .setGameRuleValue(
+            GameRule.DO_DAYLIGHT_CYCLE.getId(),
+            event
+                .getMatch()
+                .needModule(GameRulesMatchModule.class)
+                .getGameRule(GameRule.DO_DAYLIGHT_CYCLE.getId()));
   }
 
   @EventHandler
