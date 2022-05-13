@@ -105,6 +105,34 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
               }
               this.registerListenersFor(filter.getRelevantEvents());
             });
+
+    // Lastly dispatch initial states of all dynamic filters for the relevant scopes
+    // Has to be last since many filters depend on objects loaded in a non-consequent way during
+    // match load e.g. the goals
+    for (Filter filter : this.listeners.rowKeySet()) {
+      Map<Class<? extends Filterable<?>>, ListenerSet> row = this.listeners.row(filter);
+      for (Class<? extends Filterable<?>> scope : Filterables.SCOPES) {
+        ListenerSet set = row.get(scope);
+        if (set == null) continue;
+        match
+            .getFilterableDescendants(scope)
+            .forEach(
+                filterable -> {
+                  final boolean last = this.lastResponse(filter, filterable);
+                  if (!last) {
+                    for (FilterListener<?> filterListener : set.fall) {
+                      dispatch(
+                          (FilterListener<Filterable<?>>) filterListener, filter, filterable, last);
+                    }
+                  } else {
+                    for (FilterListener<?> filterListener : set.rise) {
+                      dispatch(
+                          (FilterListener<Filterable<?>>) filterListener, filter, filterable, last);
+                    }
+                  }
+                });
+      }
+    }
   }
 
   @Override
@@ -132,16 +160,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
         this.listeners.row(filter).computeIfAbsent(scope, s -> new ListenerSet());
 
     (response ? listenerSet.rise : listenerSet.fall).add(listener);
-
-    match
-        .getFilterableDescendants(scope)
-        .forEach(
-            filterable -> {
-              final boolean last = this.lastResponse(filter, filterable);
-              if (last == response) {
-                dispatch(listener, filter, filterable, last);
-              }
-            });
   }
 
   /**
