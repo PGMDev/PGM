@@ -2,6 +2,8 @@ package tc.oc.pgm.spawner;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;
@@ -35,5 +37,17 @@ public class SpawnerDefinition extends SelfIdentifyingFeatureDefinition {
     this.delay = delay;
     this.objects = objects;
     this.playerFilter = playerFilter;
+  }
+
+  @Override
+  protected String getDefaultId() {
+    return super.makeDefaultId();
+  }
+
+  public static String makeDefaultId(@Nullable String name, AtomicInteger serial) {
+    return "--"
+        + makeTypeName(SpawnerDefinition.class)
+        + "-"
+        + (name != null ? makeId(name) : serial.getAndIncrement());
   }
 }

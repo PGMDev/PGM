@@ -54,7 +54,7 @@ public class SpawnerModule implements MapModule {
       RegionParser regionParser = factory.getRegions();
       KitParser kitParser = factory.getKits();
       FilterParser filterParser = factory.getFilters();
-      AtomicInteger numericId = new AtomicInteger(0);
+      AtomicInteger postIdSerial = new AtomicInteger(1);
 
       for (Element spawnerEl :
           XMLUtils.flattenElements(doc.getRootElement(), "spawners", "spawner")) {
@@ -65,9 +65,7 @@ public class SpawnerModule implements MapModule {
         Attribute minDelayAttr = spawnerEl.getAttribute("min-delay");
         Attribute maxDelayAttr = spawnerEl.getAttribute("max-delay");
 
-        if (spawnerEl.getAttributeValue("id") == null) {
-          id = "spawner-" + numericId.getAndIncrement();
-        }
+        if (id == null) id = SpawnerDefinition.makeDefaultId("spawner", postIdSerial);
 
         if ((minDelayAttr != null || maxDelayAttr != null) && delayAttr != null) {
           throw new InvalidXMLException(
@@ -96,19 +94,19 @@ public class SpawnerModule implements MapModule {
         }
 
         for (Element potionEl : XMLUtils.getChildren(spawnerEl, "potion")) {
-          ImmutableList.Builder<PotionEffect> chBuilder = ImmutableList.builder();
+          ImmutableList.Builder<PotionEffect> effectsBuilder = ImmutableList.builder();
           for (Element potionChild : potionEl.getChildren("effect")) {
-            chBuilder.add(XMLUtils.parsePotionEffect(new InheritingElement(potionChild)));
+            effectsBuilder.add(XMLUtils.parsePotionEffect(new InheritingElement(potionChild)));
           }
-          ImmutableList<PotionEffect> potionChildren = chBuilder.build();
-          if (potionChildren.isEmpty()) {
+          ImmutableList<PotionEffect> effects = effectsBuilder.build();
+          if (effects.isEmpty()) {
             throw new InvalidXMLException("Expected child effects, but found none", spawnerEl);
           }
           int damageValue = 0;
           if (potionEl.getAttribute("damage") != null) {
             damageValue = XMLUtils.parseNumber(potionEl.getAttribute("damage"), Integer.class, 0);
           } else {
-            for (PotionEffect potionEffect : potionChildren) {
+            for (PotionEffect potionEffect : effects) {
               // PotionType lists "true" potions, PotionEffectType "potionEffect.getType()" lists
               // all possible status effects (ie wither, blindness, etc)
               // Use the first listed PotionType for potion color
@@ -118,7 +116,7 @@ public class SpawnerModule implements MapModule {
               }
             }
           }
-          objects.add(new SpawnablePotion(potionChildren, damageValue, id));
+          objects.add(new SpawnablePotion(effects, damageValue, id));
         }
 
         SpawnerDefinition spawnerDefinition =
