@@ -48,6 +48,11 @@ public abstract class AbstractRegion extends TypedFilter<LocationQuery>
   }
 
   @Override
+  public boolean contains(LocationQuery query) {
+    return this.contains(query.getBlockCenter());
+  }
+
+  @Override
   public boolean enters(Location from, Location to) {
     return !this.contains(from) && this.contains(to);
   }
@@ -122,6 +127,6 @@ public abstract class AbstractRegion extends TypedFilter<LocationQuery>
 
   @Override
   protected QueryResponse queryTyped(LocationQuery query) {
-    return QueryResponse.fromBoolean(contains(query.getLocation()));
+    return QueryResponse.fromBoolean(contains(query));
   }
 }

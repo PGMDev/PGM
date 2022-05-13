@@ -11,6 +11,7 @@ import org.bukkit.event.Event;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.query.LocationQuery;
 import tc.oc.pgm.regions.Bounds;
 
 /** Represents an arbitrary region in a Bukkit world. */
@@ -32,6 +33,9 @@ public interface Region extends Filter {
 
   /** Test if the region contains the given entity */
   boolean contains(Entity entity);
+
+  /** Test if the region contains the queried location */
+  boolean contains(LocationQuery query);
 
   /** Test if moving from the first point to the second crosses into the region */
   boolean enters(Location from, Location to);
