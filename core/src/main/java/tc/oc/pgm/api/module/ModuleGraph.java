@@ -117,7 +117,7 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
           throw new ModuleLoadException(
               key,
               hardDependency.getSimpleName() + " is a hard dependency that failed to load",
-              errors.lastElement());
+              errors.empty() ? null : errors.lastElement());
         }
       }
     }

@@ -114,6 +114,8 @@ import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.SpawnModule;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.stats.StatsMatchModule;
+import tc.oc.pgm.structure.StructureMatchModule;
+import tc.oc.pgm.structure.StructureModule;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
@@ -262,6 +264,7 @@ public interface Modules {
     register(SpawnerModule.class, SpawnerMatchModule.class, new SpawnerModule.Factory());
     register(ShopModule.class, ShopMatchModule.class, new ShopModule.Factory());
     register(EnderChestModule.class, EnderChestMatchModule.class, new EnderChestModule.Factory());
+    register(StructureModule.class, StructureMatchModule.class, new StructureModule.Factory());
 
     // MapModules that are also MatchModules
     register(WorldTimeModule.class, WorldTimeModule.class, new WorldTimeModule.Factory());

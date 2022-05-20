@@ -3,10 +3,13 @@ package tc.oc.pgm.snapshot;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -21,8 +24,10 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.renewable.RenewableMatchModule;
+import tc.oc.pgm.structure.StructureMatchModule;
 import tc.oc.pgm.util.chunk.ChunkVector;
 import tc.oc.pgm.util.nms.NMSHacks;
 
@@ -38,15 +43,13 @@ import tc.oc.pgm.util.nms.NMSHacks;
 public class SnapshotMatchModule implements MatchModule, Listener {
 
   public static class Factory implements MatchModuleFactory<SnapshotMatchModule> {
-    @Override
-    public Collection<Class<? extends MatchModule>> getSoftDependencies() {
-      return ImmutableList.of(
-          RenewableMatchModule.class); // Only needs to load if Renewables are loaded
-    }
 
     @Override
     public SnapshotMatchModule createMatchModule(Match match) throws ModuleLoadException {
-      return new SnapshotMatchModule(match);
+      //if(match.getModule(RenewableMatchModule.class) != null || match.getModule(StructureMatchModule.class) != null){
+        return new SnapshotMatchModule(match);
+      //}
+      //return null; //Don't need this if neither renewables nor structures have been loaded
     }
   }
 
@@ -73,6 +76,26 @@ public class SnapshotMatchModule implements MatchModule, Listener {
     } else {
       return match.getWorld().getBlockAt(x, y, z).getState().getData();
     }
+  }
+
+  public List<BlockState> getOriginalMaterials(Region region) {
+    List<BlockState> blockStates = new LinkedList<>();
+    ChunkVector chunkVector = null;
+    ChunkSnapshot snapshot = null;
+    for (BlockVector blockVector : region.getBlockVectors()) {
+      int x = blockVector.getBlockX();
+      int y = blockVector.getBlockY();
+      int z = blockVector.getBlockZ();
+      if(chunkVector == null || x >> 4 != chunkVector.getChunkX() || z >> 4 != chunkVector.getChunkZ()){
+        chunkVector = ChunkVector.ofBlock(blockVector);
+        snapshot = chunkSnapshots.get(chunkVector);
+      }
+      BlockState state = match.getWorld().getBlockAt(x, y, z).getState();
+      BlockVector chunkPos = chunkVector.worldToChunk(x, y, z);
+      state.setMaterialData(snapshot.getMaterialData(chunkPos));
+      blockStates.add(state);
+    }
+    return blockStates;
   }
 
   public MaterialData getOriginalMaterial(Vector pos) {
@@ -120,6 +143,22 @@ public class SnapshotMatchModule implements MatchModule, Listener {
       // ChunkSnapshot is very likely to have the post-event state already,
       // so we have to correct it
       NMSHacks.updateChunkSnapshot(chunkSnapshot, event.getOldState());
+      chunkSnapshots.put(chunkVector, chunkSnapshot);
+    }
+  }
+
+  /**
+   * Manually save the initial state of a block to the snapshot.
+   *
+   * @param block the block to save
+   */
+  public void saveSnapshot(Block block) {
+    Chunk chunk = block.getState().getChunk();
+    ChunkVector chunkVector = ChunkVector.of(chunk);
+    if (!chunkSnapshots.containsKey(chunkVector)) {
+      this.match.getLogger().fine("Copying chunk at " + chunkVector);
+      ChunkSnapshot chunkSnapshot = chunk.getChunkSnapshot();
+
       chunkSnapshots.put(chunkVector, chunkSnapshot);
     }
   }

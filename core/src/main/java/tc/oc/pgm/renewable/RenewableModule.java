@@ -23,16 +23,22 @@ import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.regions.EverywhereRegion;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
+import tc.oc.pgm.snapshot.SnapshotMatchModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class RenewableModule implements MapModule {
+public class RenewableModule implements MapModule<RenewableMatchModule> {
   private static final double DEFAULT_AVOID_PLAYERS_RANGE = 2d;
 
   private final List<RenewableDefinition> renewableDefinitions = new ArrayList<>();
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public Collection<Class<? extends MatchModule>> getHardDependencies() {
+    return ImmutableList.of(SnapshotMatchModule.class);
+  }
+
+  @Override
+  public RenewableMatchModule createMatchModule(Match match) {
     return new RenewableMatchModule(match, this.renewableDefinitions);
   }
 
