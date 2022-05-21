@@ -127,14 +127,23 @@ public class FeatureDefinitionContext extends ContextStore<FeatureDefinition> {
     List<InvalidXMLException> errors = new ArrayList<>();
     for (XMLFeatureReference<?> reference : references) {
       try {
-        reference.resolve();
-        for (FeatureValidation validation : validations.get(reference)) {
-          validation.validate(reference.get(), reference.getNode());
-        }
+        resolveReference(reference);
       } catch (InvalidXMLException e) {
         errors.add(e);
       }
     }
     return errors;
+  }
+
+  private <T extends FeatureDefinition> void resolveReference(XMLFeatureReference<T> reference)
+      throws InvalidXMLException {
+    Node node = reference.getNode(); // Get node prior to resolving
+    reference.resolve();
+
+    T value = reference.get();
+    for (FeatureValidation<?> validation : validations.get(reference)) {
+      //noinspection unchecked
+      ((FeatureValidation<T>) validation).validate(value, node);
+    }
   }
 }

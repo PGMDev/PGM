@@ -1,6 +1,5 @@
 package tc.oc.pgm.features;
 
-import java.lang.ref.WeakReference;
 import javax.annotation.Nullable;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.feature.FeatureReference;
@@ -14,10 +13,12 @@ import tc.oc.pgm.util.xml.Node;
  */
 public class XMLFeatureReference<T extends FeatureDefinition> implements FeatureReference<T> {
   private final FeatureDefinitionContext context;
-  private final WeakReference<Node> node;
   private final String id;
   private final Class<T> type;
 
+  // Will only be available prior to resolving and validating.
+  // Afterwards it will be cleared to allow node, and the underlying DOM to GC
+  private @Nullable Node node;
   private @Nullable T referent;
 
   public XMLFeatureReference(FeatureDefinitionContext context, Node node, Class<T> type) {
@@ -27,7 +28,7 @@ public class XMLFeatureReference<T extends FeatureDefinition> implements Feature
   public XMLFeatureReference(
       FeatureDefinitionContext context, Node node, @Nullable String id, Class<T> type) {
     this.context = context;
-    this.node = new WeakReference<>(node);
+    this.node = node;
     this.id = id != null ? id : node.getValueNormalize();
     this.type = type;
   }
@@ -45,7 +46,7 @@ public class XMLFeatureReference<T extends FeatureDefinition> implements Feature
   /** Get the XML node that references the feature */
   @Override
   public Node getNode() {
-    final Node node = this.node.get();
+    final Node node = this.node;
     if (node == null)
       throw new IllegalStateException(
           "Unknown " + this.getTypeName() + " ID '" + id + "' (garbage collected)");
@@ -81,6 +82,7 @@ public class XMLFeatureReference<T extends FeatureDefinition> implements Feature
           getNode());
     }
     this.referent = this.type.cast(feature);
+    this.node = null; // Resolved successfully, no longer need reference to the node
   }
 
   @Override
