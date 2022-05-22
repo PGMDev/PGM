@@ -1,5 +1,6 @@
 package tc.oc.pgm.spawner;
 
+import java.util.Objects;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
@@ -36,7 +37,6 @@ public class Spawner implements Listener, Tickable {
   public Spawner(SpawnerDefinition definition, Match match) {
     this.definition = definition;
     this.match = match;
-
     this.lastTick = match.getTick().tick;
     this.players = new OnlinePlayerMapAdapter<>(PGM.get());
     calculateDelay();
@@ -51,7 +51,6 @@ public class Spawner implements Listener, Tickable {
             definition.spawnRegion.getRandom(match.getRandom()).toLocation(match.getWorld());
         spawnable.spawn(location, match);
         match.getWorld().spigot().playEffect(location, Effect.FLAME, 0, 0, 0, 0.15f, 0, 0, 40, 64);
-
         spawnedEntities = spawnedEntities + spawnable.getSpawnCount();
       }
       calculateDelay();
@@ -82,47 +81,23 @@ public class Spawner implements Listener, Tickable {
 
   @EventHandler(priority = EventPriority.HIGHEST)
   public void onItemMerge(ItemMergeEvent event) {
-    boolean entityTracked = false;
-    boolean targetTracked = false;
-    if (event.getEntity().hasMetadata(METADATA_KEY)) {
-      entityTracked = true;
+    boolean entityTracked = event.getEntity().hasMetadata(METADATA_KEY);
+    boolean targetTracked = event.getTarget().hasMetadata(METADATA_KEY);
+    if (!entityTracked && !targetTracked) return; // None affected
+    if (entityTracked && targetTracked) {
+      String entitySpawnerId =
+          MetadataUtils.getMetadata(event.getEntity(), METADATA_KEY, PGM.get()).toString();
+      String targetSpawnerId =
+          MetadataUtils.getMetadata(event.getTarget(), METADATA_KEY, PGM.get()).toString();
+      if (entitySpawnerId.equals(targetSpawnerId)) return; // Same spawner, allow merge
     }
-    if (event.getTarget().hasMetadata(METADATA_KEY)) {
-      targetTracked = true;
-    }
-
-    // Do nothing if neither item is from a PGM Spawner
-    if (!entityTracked && !targetTracked) {
-      return;
-    }
-
-    // Cancel the merge if only 1 of the items is from a PGM Spawner
-    if ((entityTracked && !targetTracked) || (!entityTracked && targetTracked)) {
-      event.setCancelled(true);
-      return;
-    }
-
-    int entitySpawnerID = -1;
-    int targetSpawnerID = -1;
-    if (event.getEntity().hasMetadata(METADATA_KEY)) {
-      entitySpawnerID =
-          MetadataUtils.getMetadata(event.getEntity(), METADATA_KEY, PGM.get()).asInt();
-    }
-    if (event.getTarget().hasMetadata(METADATA_KEY)) {
-      targetSpawnerID =
-          MetadataUtils.getMetadata(event.getTarget(), METADATA_KEY, PGM.get()).asInt();
-    }
-    // Cancel the merge if the items are from different PGM spawners
-    if (entitySpawnerID != targetSpawnerID) {
-      event.setCancelled(true);
-      return;
-    }
+    event.setCancelled(true);
   }
 
   private void handleEntityRemoveEvent(Metadatable metadatable, int amount) {
     if (metadatable.hasMetadata(METADATA_KEY)) {
-      if (MetadataUtils.getMetadata(metadatable, METADATA_KEY, PGM.get()).asInt()
-          == definition.numericID) {
+      if (Objects.equals(
+          MetadataUtils.getMetadata(metadatable, METADATA_KEY, PGM.get()), definition.getId())) {
         spawnedEntities -= amount;
         spawnedEntities = Math.max(0, spawnedEntities);
       }
