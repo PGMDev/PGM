@@ -2,24 +2,23 @@ package tc.oc.pgm.spawner;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.Nullable;
+import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;
-import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 
 @FeatureInfo(name = "spawner")
-public class SpawnerDefinition extends SelfIdentifyingFeatureDefinition {
+public class SpawnerDefinition implements FeatureDefinition {
+
   public final Region spawnRegion;
   public final Region playerRegion;
   public final int maxEntities;
   public final Duration minDelay, maxDelay, delay;
   public final List<Spawnable> objects;
   public final Filter playerFilter;
+  public final int numericID;
 
   public SpawnerDefinition(
-      String id,
       List<Spawnable> objects,
       Region spawnRegion,
       Region playerRegion,
@@ -27,8 +26,8 @@ public class SpawnerDefinition extends SelfIdentifyingFeatureDefinition {
       Duration delay,
       Duration minDelay,
       Duration maxDelay,
-      int maxEntities) {
-    super(id);
+      int maxEntities,
+      int numericID) {
     this.spawnRegion = spawnRegion;
     this.playerRegion = playerRegion;
     this.maxEntities = maxEntities;
@@ -37,17 +36,6 @@ public class SpawnerDefinition extends SelfIdentifyingFeatureDefinition {
     this.delay = delay;
     this.objects = objects;
     this.playerFilter = playerFilter;
-  }
-
-  @Override
-  protected String getDefaultId() {
-    return super.makeDefaultId();
-  }
-
-  public static String makeDefaultId(@Nullable String name, AtomicInteger serial) {
-    return "--"
-        + makeTypeName(SpawnerDefinition.class)
-        + "-"
-        + (name != null ? makeId(name) : serial.getAndIncrement());
+    this.numericID = numericID;
   }
 }
