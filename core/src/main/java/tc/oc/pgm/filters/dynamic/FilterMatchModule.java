@@ -97,7 +97,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
         .rowKeySet()
         .forEach(
             filter -> {
-              if (!filter.isDynamic()) {
+              if (filter.getRelevantEvents().isEmpty()) {
                 match
                     .getLogger()
                     .warning("Filter " + filter + " was submitted as a dynamic filter but is not!");

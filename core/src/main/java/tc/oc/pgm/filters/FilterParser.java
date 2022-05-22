@@ -616,18 +616,4 @@ public abstract class FilterParser {
   public PlayerBlockQueryModifier parsePlayerFilter(Element el) throws InvalidXMLException {
     return new PlayerBlockQueryModifier(parseChild(el));
   }
-
-  @MethodParser("players")
-  public PlayerCountFilter parsePlayerCountFilter(Element el) throws InvalidXMLException {
-    Filter child =
-        el.getChildren().isEmpty()
-            ? parseFilterProperty(el, "filter", StaticFilter.ALLOW)
-            : parseChild(el);
-
-    return new PlayerCountFilter(
-        child,
-        XMLUtils.parseNumericRange(el, Integer.class, Range.atLeast(1)),
-        XMLUtils.parseBoolean(el.getAttribute("participants"), true),
-        XMLUtils.parseBoolean(el.getAttribute("observers"), false));
-  }
 }
