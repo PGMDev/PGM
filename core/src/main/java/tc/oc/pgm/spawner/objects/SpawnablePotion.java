@@ -34,8 +34,8 @@ public class SpawnablePotion implements Spawnable {
     NMSHacks.EntityPotion entityPotion = new NMSHacks.EntityPotion(location, potionItem);
     entityPotion.spawn();
     entityPotion
-            .getBukkitEntity()
-            .setMetadata(Spawner.METADATA_KEY, new FixedMetadataValue(PGM.get(), spawnerId));
+        .getBukkitEntity()
+        .setMetadata(Spawner.METADATA_KEY, new FixedMetadataValue(PGM.get(), spawnerId));
   }
 
   @Override
