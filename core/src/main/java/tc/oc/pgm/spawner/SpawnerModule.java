@@ -54,7 +54,7 @@ public class SpawnerModule implements MapModule {
       RegionParser regionParser = factory.getRegions();
       KitParser kitParser = factory.getKits();
       FilterParser filterParser = factory.getFilters();
-      AtomicInteger postIdSerial = new AtomicInteger(1);
+      AtomicInteger spawnerIdSerial = new AtomicInteger(1);
 
       for (Element spawnerEl :
           XMLUtils.flattenElements(doc.getRootElement(), "spawners", "spawner")) {
@@ -65,7 +65,7 @@ public class SpawnerModule implements MapModule {
         Attribute minDelayAttr = spawnerEl.getAttribute("min-delay");
         Attribute maxDelayAttr = spawnerEl.getAttribute("max-delay");
 
-        if (id == null) id = SpawnerDefinition.makeDefaultId("spawner", postIdSerial);
+        if (id == null) id = SpawnerDefinition.makeDefaultId(null, spawnerIdSerial);
 
         if ((minDelayAttr != null || maxDelayAttr != null) && delayAttr != null) {
           throw new InvalidXMLException(
