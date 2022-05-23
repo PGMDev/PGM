@@ -11,18 +11,18 @@ import tc.oc.pgm.spawner.Spawner;
 
 public class SpawnableItem implements Spawnable {
 
-  private ItemStack stack;
-  private String METADATA_VALUE;
+  private final ItemStack stack;
+  private final String spawnerId;
 
-  public SpawnableItem(ItemStack stack, int spawnerID) {
+  public SpawnableItem(ItemStack stack, String spawnerId) {
     this.stack = stack;
-    this.METADATA_VALUE = Integer.toString(spawnerID);
+    this.spawnerId = spawnerId;
   }
 
   @Override
   public void spawn(Location location, Match match) {
     Item item = location.getWorld().dropItem(location, stack);
-    item.setMetadata(Spawner.METADATA_KEY, new FixedMetadataValue(PGM.get(), METADATA_VALUE));
+    item.setMetadata(Spawner.METADATA_KEY, new FixedMetadataValue(PGM.get(), spawnerId));
   }
 
   @Override

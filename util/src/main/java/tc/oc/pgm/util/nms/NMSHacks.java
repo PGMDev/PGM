@@ -1327,6 +1327,21 @@ public interface NMSHacks {
     public void wear(Player viewer, int slot, ItemStack item) {}
   }
 
+  class EntityPotion extends net.minecraft.server.v1_8_R3.EntityPotion {
+    public EntityPotion(Location location, ItemStack potionItem) {
+      super(
+          ((CraftWorld) location.getWorld()).getHandle(),
+          location.getX(),
+          location.getY(),
+          location.getZ(),
+          CraftItemStack.asNMSCopy(potionItem));
+    }
+
+    public void spawn() {
+      world.addEntity(this);
+    }
+  }
+
   static void setFireworksExpectedLifespan(Firework firework, int ticks) {
     ((CraftFirework) firework).getHandle().expectedLifespan = ticks;
   }
