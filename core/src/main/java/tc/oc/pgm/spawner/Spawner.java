@@ -9,6 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.entity.ItemMergeEvent;
+import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.metadata.Metadatable;
 import tc.oc.pgm.api.PGM;
@@ -86,9 +87,9 @@ public class Spawner implements Listener, Tickable {
     if (!entityTracked && !targetTracked) return; // None affected
     if (entityTracked && targetTracked) {
       String entitySpawnerId =
-          MetadataUtils.getMetadata(event.getEntity(), METADATA_KEY, PGM.get()).toString();
+          MetadataUtils.getMetadata(event.getEntity(), METADATA_KEY, PGM.get()).asString();
       String targetSpawnerId =
-          MetadataUtils.getMetadata(event.getTarget(), METADATA_KEY, PGM.get()).toString();
+          MetadataUtils.getMetadata(event.getTarget(), METADATA_KEY, PGM.get()).asString();
       if (entitySpawnerId.equals(targetSpawnerId)) return; // Same spawner, allow merge
     }
     event.setCancelled(true);
@@ -97,7 +98,8 @@ public class Spawner implements Listener, Tickable {
   private void handleEntityRemoveEvent(Metadatable metadatable, int amount) {
     if (metadatable.hasMetadata(METADATA_KEY)) {
       if (Objects.equals(
-          MetadataUtils.getMetadata(metadatable, METADATA_KEY, PGM.get()), definition.getId())) {
+          MetadataUtils.getMetadata(metadatable, METADATA_KEY, PGM.get()).asString(),
+          definition.getId())) {
         spawnedEntities -= amount;
         spawnedEntities = Math.max(0, spawnedEntities);
       }
@@ -112,6 +114,11 @@ public class Spawner implements Listener, Tickable {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onItemDespawn(ItemDespawnEvent event) {
     handleEntityRemoveEvent(event.getEntity(), event.getEntity().getItemStack().getAmount());
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onPotionSplash(PotionSplashEvent event) {
+    handleEntityRemoveEvent(event.getEntity(), 1);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

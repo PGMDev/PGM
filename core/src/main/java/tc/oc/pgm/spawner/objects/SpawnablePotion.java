@@ -40,6 +40,6 @@ public class SpawnablePotion implements Spawnable {
 
   @Override
   public int getSpawnCount() {
-    return potionItem.getAmount();
+    return 1;
   }
 }
