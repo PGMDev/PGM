@@ -827,7 +827,9 @@ public class ModerationCommand implements Listener {
     if (!target.isLegacy()) {
       target.showTitle(
           title(
-              warningTitle, subtitle, Title.Times.of(fromTicks(5), fromTicks(200), fromTicks(10))));
+              warningTitle,
+              subtitle,
+              Title.Times.times(fromTicks(5), fromTicks(200), fromTicks(10))));
     }
     target.playSound(WARN_SOUND);
   }

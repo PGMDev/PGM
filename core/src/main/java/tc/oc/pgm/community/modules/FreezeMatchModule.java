@@ -358,7 +358,10 @@ public class FreezeMatchModule implements MatchModule, Listener {
         freezee.sendWarning(title);
       } else {
         freezee.showTitle(
-            title(empty(), title, Title.Times.of(fromTicks(5), fromTicks(MAX_TICK), fromTicks(5))));
+            title(
+                empty(),
+                title,
+                Title.Times.times(fromTicks(5), fromTicks(MAX_TICK), fromTicks(5))));
       }
       freezee.playSound(FREEZE_SOUND);
 

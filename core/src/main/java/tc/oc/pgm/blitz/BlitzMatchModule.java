@@ -123,7 +123,7 @@ public class BlitzMatchModule implements MatchModule, Listener {
                           lives == 1 ? "misc.life" : "misc.lives",
                           NamedTextColor.AQUA,
                           text(lives))),
-                  Title.Times.of(Duration.ZERO, fromTicks(60), fromTicks(20))));
+                  Title.Times.times(Duration.ZERO, fromTicks(60), fromTicks(20))));
     }
   }
 

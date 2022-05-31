@@ -116,7 +116,7 @@ public final class TextTranslations {
     loadKeys(Locale.getDefault());
     // Add this translator to the global registry (so components are auto-translated by the
     // platform)
-    GlobalTranslator.get()
+    GlobalTranslator.translator()
         .addSource(
             new Translator() {
               @Override

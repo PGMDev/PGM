@@ -144,7 +144,7 @@ public class MapPoll {
         title(
             top ? mapName : empty(),
             top ? empty() : mapName,
-            Title.Times.of(fromTicks(5), fromTicks(60), fromTicks(5))));
+            Title.Times.times(fromTicks(5), fromTicks(60), fromTicks(5))));
   }
 
   private Component getMapChatComponent(MatchPlayer viewer, MapInfo map, boolean winner) {

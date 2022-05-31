@@ -98,7 +98,7 @@ public abstract class MatchCountdown extends Countdown {
               title(
                   text(remaining.getSeconds(), NamedTextColor.YELLOW),
                   empty(),
-                  Title.Times.of(Duration.ZERO, fromTicks(5), fromTicks(15))));
+                  Title.Times.times(Duration.ZERO, fromTicks(5), fromTicks(15))));
     }
 
     super.onTick(remaining, total);
