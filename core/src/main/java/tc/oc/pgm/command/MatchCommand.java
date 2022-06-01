@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.ChatColor;
@@ -115,7 +116,8 @@ public final class MatchCommand {
                     NamedTextColor.WHITE))
             .build());
 
-    viewer.sendMessage(join(text(" | ", NamedTextColor.DARK_GRAY), teamCountParts));
+    viewer.sendMessage(
+        join(JoinConfiguration.separator(text(" | ", NamedTextColor.DARK_GRAY)), teamCountParts));
 
     if (!haveGameInfo) return;
 
@@ -156,11 +158,11 @@ public final class MatchCommand {
                   .append(space())
                   .append(team.getName())
                   .append(text(": ", NamedTextColor.GRAY))
-                  .append(join(text("  "), goalTexts))
+                  .append(join(JoinConfiguration.separator(text("  ")), goalTexts))
                   .build());
         }
         // Shared goals
-        viewer.sendMessage(join(text("  "), sharedGoalTexts.values()));
+        viewer.sendMessage(join(JoinConfiguration.separator(text("  ")), sharedGoalTexts.values()));
       }
     }
 
