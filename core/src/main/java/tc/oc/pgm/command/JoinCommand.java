@@ -34,7 +34,7 @@ public final class JoinCommand {
   }
 
   @Command(
-      aliases = {"leave", "obs"},
+      aliases = {"leave", "obs", "spectator", "spec"},
       desc = "Leave the match",
       perms = Permissions.LEAVE)
   public void leave(MatchPlayer player, Match match) {
