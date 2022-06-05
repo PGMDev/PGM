@@ -1,48 +1,42 @@
-package tc.oc.pgm.rotation;
+package tc.oc.pgm.rotation.pools;
 
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
 import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.restart.RestartManager;
+import tc.oc.pgm.rotation.MapPoolManager;
+import tc.oc.pgm.rotation.vote.MapPoll;
+import tc.oc.pgm.rotation.vote.MapVotePicker;
 
 public class VotingPool extends MapPool {
 
-  // Number of maps in the vote, unless not enough maps in pool
-  public static final int MAX_VOTE_OPTIONS = 5;
-  // Number of maps required for a custom vote (/vote)
-  public static final int MIN_CUSTOM_VOTE_OPTIONS = 2;
-  // If maps were single voted, it would avg to this default
-  public static final double DEFAULT_WEIGHT = 1d / MAX_VOTE_OPTIONS;
+  // Arbitrary default of 1 in 5 players liking each map
+  public static final double DEFAULT_SCORE = 0.2;
+  // How much score to add/remove on a map every cycle
+  public final double ADJUST_FACTOR;
 
-  // Amount of maps to display on vote
-  private final int VOTE_SIZE;
-  private final double ADJUST_FACTOR;
+  // The algorithm used to pick the maps for next vote.
+  public final MapVotePicker mapPicker;
+
+  // The current rating of maps. Eventually should be persisted elsewhere.
   private final Map<MapInfo, Double> mapScores = new HashMap<>();
 
   private MapPoll currentPoll;
 
   public VotingPool(MapPoolManager manager, ConfigurationSection section, String name) {
-    this(manager, section, name, null);
-  }
-
-  public VotingPool(
-      MapPoolManager manager,
-      ConfigurationSection section,
-      String name,
-      @Nullable CustomVotingPoolOptions existingOptions) {
     super(manager, section, name);
-    VOTE_SIZE = Math.min(MAX_VOTE_OPTIONS, maps.size() - 1);
-    ADJUST_FACTOR = 1d / (maps.size() * MAX_VOTE_OPTIONS);
 
-    for (MapInfo map : maps) {
-      mapScores.put(map, DEFAULT_WEIGHT);
-    }
+    this.ADJUST_FACTOR = DEFAULT_SCORE / maps.size();
+
+    this.mapPicker = new MapVotePicker(section.getConfigurationSection("picker"));
+    for (MapInfo map : maps) mapScores.put(map, DEFAULT_SCORE);
   }
 
   public MapPoll getCurrentPoll() {
@@ -59,10 +53,16 @@ public class VotingPool extends MapPool {
     if (!mapScores.containsKey(currentMap)) return;
     mapScores.replaceAll(
         (mapScores, value) ->
-            value > DEFAULT_WEIGHT
-                ? Math.max(value - ADJUST_FACTOR, DEFAULT_WEIGHT)
-                : Math.min(value + ADJUST_FACTOR, DEFAULT_WEIGHT));
+            value > DEFAULT_SCORE
+                ? Math.max(value - ADJUST_FACTOR, DEFAULT_SCORE)
+                : Math.min(value + ADJUST_FACTOR, DEFAULT_SCORE));
     mapScores.put(currentMap, 0d);
+  }
+
+  private void updateScores(Map<MapInfo, Set<UUID>> votes) {
+    double voters = votes.values().stream().flatMap(Collection::stream).distinct().count();
+    if (voters == 0) return; // Literally no one voted
+    votes.forEach((m, v) -> mapScores.put(m, Math.max(v.size() / voters, Double.MIN_VALUE)));
   }
 
   @Override
@@ -70,7 +70,7 @@ public class VotingPool extends MapPool {
     if (currentPoll == null) return getRandom();
 
     MapInfo map = currentPoll.finishVote();
-    manager.getCustomVoteOptions().clear();
+    manager.getVoteOptions().clear();
     currentPoll = null;
     return map != null ? map : getRandom();
   }
@@ -82,7 +82,10 @@ public class VotingPool extends MapPool {
 
   @Override
   public void setNextMap(MapInfo map) {
-    currentPoll = null;
+    if (map != null && currentPoll != null) {
+      currentPoll.cancel();
+      currentPoll = null;
+    }
   }
 
   @Override
@@ -103,22 +106,9 @@ public class VotingPool extends MapPool {
               if (RestartManager.isQueued()) return;
 
               currentPoll =
-                  getOptions().shouldOverride()
-                      ? new MapPoll(
-                          match,
-                          getOptions().getCustomVoteMapWeighted(),
-                          Collections.emptySet(),
-                          Math.min(MAX_VOTE_OPTIONS, getOptions().getCustomVoteMaps().size()))
-                      : new MapPoll(match, mapScores, getOptions().getCustomVoteMaps(), VOTE_SIZE);
-
-              match.addListener(new VotingBookListener(this, match), MatchScope.LOADED);
-              match.getPlayers().forEach(viewer -> currentPoll.sendBook(viewer, false));
+                  new MapPoll(match, mapPicker.getMaps(manager.getVoteOptions(), mapScores));
             },
             5,
             TimeUnit.SECONDS);
-  }
-
-  public CustomVotingPoolOptions getOptions() {
-    return manager.getCustomVoteOptions();
   }
 }

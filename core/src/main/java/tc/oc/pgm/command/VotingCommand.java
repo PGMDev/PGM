@@ -23,7 +23,9 @@ import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.rotation.MapPoolManager;
-import tc.oc.pgm.rotation.VotingPool;
+import tc.oc.pgm.rotation.pools.VotingPool;
+import tc.oc.pgm.rotation.vote.MapVotePicker;
+import tc.oc.pgm.rotation.vote.VotePoolOptions;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.MapNameStyle;
@@ -44,7 +46,7 @@ public class VotingCommand {
       MapOrder mapOrder,
       Match match)
       throws CommandException {
-    VotingPool vote = getVotingPool(sender, mapOrder);
+    VotePoolOptions vote = getVoteOptions(sender, mapOrder);
 
     Component addMessage =
         translatable(
@@ -53,12 +55,12 @@ public class VotingCommand {
             UsernameFormatUtils.formatStaffName(sender, match),
             map.getStyledName(MapNameStyle.COLOR));
 
-    if (vote.getOptions().isAdded(map)) {
+    if (vote.isAdded(map)) {
       viewer.sendWarning(addMessage);
       return;
     }
 
-    if (vote.getOptions().addVote(map)) {
+    if (vote.addVote(map)) {
       ChatDispatcher.broadcastAdminChatMessage(addMessage, match);
     } else {
       viewer.sendWarning(translatable("vote.limit", NamedTextColor.RED));
@@ -77,8 +79,8 @@ public class VotingCommand {
       MapOrder mapOrder,
       Match match)
       throws CommandException {
-    VotingPool vote = getVotingPool(sender, mapOrder);
-    if (vote.getOptions().removeMap(map)) {
+    VotePoolOptions vote = getVoteOptions(sender, mapOrder);
+    if (vote.removeMap(map)) {
       ChatDispatcher.broadcastAdminChatMessage(
           translatable(
               "vote.remove",
@@ -97,10 +99,10 @@ public class VotingCommand {
       perms = Permissions.SETNEXT)
   public void mode(Audience viewer, CommandSender sender, MapOrder mapOrder, Match match)
       throws CommandException {
-    VotingPool vote = getVotingPool(sender, mapOrder);
+    VotePoolOptions vote = getVoteOptions(sender, mapOrder);
     Component voteModeName =
         translatable(
-            vote.getOptions().toggleMode() ? "vote.mode.replace" : "vote.mode.create",
+            vote.toggleMode() ? "vote.mode.replace" : "vote.mode.create",
             NamedTextColor.LIGHT_PURPLE);
     ChatDispatcher.broadcastAdminChatMessage(
         translatable(
@@ -117,10 +119,10 @@ public class VotingCommand {
       perms = Permissions.SETNEXT)
   public void clearMaps(Audience viewer, CommandSender sender, Match match, MapOrder mapOrder)
       throws CommandException {
-    VotingPool vote = getVotingPool(sender, mapOrder);
+    VotePoolOptions vote = getVoteOptions(sender, mapOrder);
 
     List<Component> maps =
-        vote.getOptions().getCustomVoteMaps().stream()
+        vote.getCustomVoteMaps().stream()
             .map(mi -> mi.getStyledName(MapNameStyle.COLOR))
             .collect(Collectors.toList());
     Component clearedMsg =
@@ -130,7 +132,7 @@ public class VotingCommand {
             UsernameFormatUtils.formatStaffName(sender, match),
             TextFormatter.list(maps, NamedTextColor.GRAY));
 
-    vote.getOptions().clear();
+    vote.clear();
 
     if (maps.isEmpty()) {
       viewer.sendWarning(translatable("vote.noMapsFound"));
@@ -144,17 +146,17 @@ public class VotingCommand {
       desc = "View a list of maps that have been selected for the next vote")
   public void listMaps(CommandSender sender, Audience viewer, MapOrder mapOrder)
       throws CommandException {
-    VotingPool vote = getVotingPool(sender, mapOrder);
+    VotePoolOptions vote = getVoteOptions(sender, mapOrder);
 
-    int currentMaps = vote.getOptions().getCustomVoteMaps().size();
+    int currentMaps = vote.getCustomVoteMaps().size();
     TextColor listNumColor =
-        currentMaps >= VotingPool.MIN_CUSTOM_VOTE_OPTIONS
-            ? currentMaps < VotingPool.MAX_VOTE_OPTIONS
+        currentMaps >= MapVotePicker.MIN_CUSTOM_VOTE_OPTIONS
+            ? currentMaps < MapVotePicker.MAX_VOTE_OPTIONS
                 ? NamedTextColor.GREEN
                 : NamedTextColor.YELLOW
             : NamedTextColor.RED;
 
-    String modeKey = vote.getOptions().isReplace() ? "replace" : "create";
+    String modeKey = vote.isReplace() ? "replace" : "create";
     Component mode =
         translatable(String.format("vote.mode.%s", modeKey), NamedTextColor.LIGHT_PURPLE)
             .hoverEvent(showText(translatable("vote.mode.hover", NamedTextColor.AQUA)))
@@ -166,7 +168,7 @@ public class VotingCommand {
             .append(text(": ("))
             .append(text(currentMaps, listNumColor))
             .append(text("/"))
-            .append(text(VotingPool.MAX_VOTE_OPTIONS, NamedTextColor.RED))
+            .append(text(MapVotePicker.MAX_VOTE_OPTIONS, NamedTextColor.RED))
             .append(text(") "))
             .append(text("\u00BB", NamedTextColor.GOLD))
             .append(text(" ["))
@@ -177,7 +179,7 @@ public class VotingCommand {
     viewer.sendMessage(listMsg);
 
     int index = 1;
-    for (MapInfo mi : vote.getOptions().getCustomVoteMaps()) {
+    for (MapInfo mi : vote.getCustomVoteMaps()) {
       Component indexedName =
           text()
               .append(text(index, NamedTextColor.YELLOW))
@@ -189,7 +191,7 @@ public class VotingCommand {
     }
   }
 
-  public static VotingPool getVotingPool(CommandSender sender, MapOrder mapOrder)
+  public static VotePoolOptions getVoteOptions(CommandSender sender, MapOrder mapOrder)
       throws CommandException {
     if (mapOrder instanceof MapPoolManager) {
       MapPoolManager manager = (MapPoolManager) mapOrder;
@@ -199,7 +201,7 @@ public class VotingCommand {
           throw new CommandException(
               ChatColor.RED + TextTranslations.translate("vote.modify.disallow", sender));
         }
-        return votePool;
+        return manager.getVoteOptions();
       }
       throw new CommandException(
           ChatColor.RED + TextTranslations.translate("vote.disabled", sender));

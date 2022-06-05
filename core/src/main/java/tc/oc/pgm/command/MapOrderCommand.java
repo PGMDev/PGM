@@ -65,7 +65,7 @@ public final class MapOrderCommand {
     if (reset) {
       if (mapOrder.getNextMap() != null) {
         Component mapName = mapOrder.getNextMap().getStyledName(MapNameStyle.COLOR);
-        mapOrder.resetNextMap();
+        mapOrder.setNextMap(null);
         ChatDispatcher.broadcastAdminChatMessage(
             translatable(
                 "map.setNext.revert",

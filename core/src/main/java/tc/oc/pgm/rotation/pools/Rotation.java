@@ -1,10 +1,11 @@
-package tc.oc.pgm.rotation;
+package tc.oc.pgm.rotation.pools;
 
 import java.util.logging.Level;
 import javax.annotation.Nullable;
 import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.rotation.MapPoolManager;
 
 public class Rotation extends MapPool {
 

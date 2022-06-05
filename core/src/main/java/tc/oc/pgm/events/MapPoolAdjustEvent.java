@@ -6,7 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.rotation.MapPool;
+import tc.oc.pgm.rotation.pools.MapPool;
 
 /** MapPoolAdjustEvent is called when the active {@link MapPool} is set to another * */
 public class MapPoolAdjustEvent extends Event {
