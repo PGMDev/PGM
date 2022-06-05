@@ -68,10 +68,6 @@
                             <shadedPattern>tc.oc.pgm.lib.app.ashcon.intake</shadedPattern>
                         </relocation>
                         <relocation>
-                            <pattern>net.kyori</pattern>
-                            <shadedPattern>tc.oc.pgm.lib.net.kyori</shadedPattern>
-                        </relocation>
-                        <relocation>
                             <pattern>fr.mrmicky</pattern>
                             <shadedPattern>tc.oc.pgm.lib.fr.mrmicky</shadedPattern>
                         </relocation>
