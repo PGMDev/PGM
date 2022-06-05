@@ -29,7 +29,7 @@
 
     <groupId>tc.oc.pgm</groupId>
     <artifactId>PGM</artifactId>
-    <version>0.13-SNAPSHOT</version>
+    <version>0.14-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
