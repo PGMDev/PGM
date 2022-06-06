@@ -6,12 +6,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemoryConfiguration;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
+import tc.oc.pgm.rotation.MapPoolManager;
 
 /**
  * Responsible for picking the set of maps that will be on the vote. It's able to apply any
@@ -23,16 +28,28 @@ public class MapVotePicker {
   public static final int MAX_VOTE_OPTIONS = 5;
   public static final int MIN_CUSTOM_VOTE_OPTIONS = 2;
 
-  private final double gamemodeMultiplier;
-  private final double weightPower;
+  private static final Formula DEFAULT_MODIFIER = Formula.pow(c -> c.score, Formula.constant(2));
 
-  public MapVotePicker(ConfigurationSection config) {
+  private final MapPoolManager manager;
+  private final Formula modifier;
+
+  public static MapVotePicker of(MapPoolManager manager, ConfigurationSection config) {
     // Create dummy config to read defaults off of.
     if (config == null) config = new MemoryConfiguration();
 
-    this.gamemodeMultiplier = config.getDouble("repeated-gamemode-multiplier", 1.0d);
-    this.weightPower = config.getDouble("weight-power", 2.0d);
-    // TODO: define format for online-playercount bias
+    Formula formula = DEFAULT_MODIFIER;
+    try {
+      formula = Formula.of(config, "modifier", DEFAULT_MODIFIER);
+    } catch (InvalidConfigurationException e) {
+      PGM.get().getLogger().log(Level.SEVERE, "Failed to load vote picker formula", e);
+    }
+
+    return new MapVotePicker(manager, formula);
+  }
+
+  public MapVotePicker(MapPoolManager manager, Formula modifier) {
+    this.manager = manager;
+    this.modifier = modifier;
   }
 
   /**
@@ -84,28 +101,26 @@ public class MapVotePicker {
    * @param score The score of the map, from player votes
    * @return random weight for the map
    */
-  public double getWeight(@Nullable List<MapInfo> selected, @Nullable MapInfo map, double score) {
-    if (selected == null || map == null || selected.contains(map) || score <= 0) return 0;
+  public double getWeight(@Nullable List<MapInfo> selected, @NotNull MapInfo map, double score) {
+    if ((selected != null && selected.contains(map)) || score <= 0) return 0;
 
-    double weight = score;
-
-    // Remove score if same gamemode is already in the vote
-    if (gamemodeMultiplier != 1.0 && !selected.isEmpty()) {
-      List<MapTag> gamemodes =
-          map.getTags().stream().filter(MapTag::isGamemode).collect(Collectors.toList());
-
-      for (MapInfo otherMap : selected) {
-        if (!Collections.disjoint(gamemodes, otherMap.getTags())) weight *= gamemodeMultiplier;
-      }
-    }
-
-    // TODO: apply weight based on playercount
-
-    // Apply curve to bump up high weights and kill lower weights
-    weight = Math.pow(weight, weightPower);
+    Formula.Context context =
+        new Formula.Context(
+            score,
+            getRepeatedGamemodes(selected, map),
+            map.getMaxPlayers().stream().mapToInt(i -> i).sum(),
+            manager.getActivePlayers(null));
 
     // Use MIN_VALUE so that weight isn't exactly 0.
     // That allows for the map to be used if nothing else exists.
-    return Math.max(weight, Double.MIN_VALUE);
+    return Math.max(modifier.applyAsDouble(context), Double.MIN_VALUE);
+  }
+
+  private double getRepeatedGamemodes(List<MapInfo> selected, MapInfo map) {
+    if (selected == null || selected.isEmpty()) return 0;
+    List<MapTag> gamemodes =
+        map.getTags().stream().filter(MapTag::isGamemode).collect(Collectors.toList());
+
+    return selected.stream().filter(s -> Collections.disjoint(gamemodes, s.getTags())).count();
   }
 }

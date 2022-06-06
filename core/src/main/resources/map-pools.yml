@@ -26,6 +26,112 @@ pools:
     # How long should should a map cycle last?
     cycle-time: "15s"
 
+
+    # Voted pools support modifiers which come in the form of formulas (does not affect any other type of pool).
+    #
+    # The parameters for all formulas can be either:
+    #   - a constant, eg: 1.5
+    #   - a variable, eg: score
+    #   - a formula, eg:
+    #                  type: bound
+    #                  min: 5 ...
+    #
+    # Available formulas and their params, if ended in ?, they're optional:
+    #  - sum: a, b, c?, d? -> a + b + c + d
+    #  - sub: a, b -> a - b
+    #  - mul: a, b, c?, d? -> a * b * c * d
+    #  - pow: a, b -> a ^ b
+    #  - bound: value, min, max -> value, but limited to be between min and max
+    #  - linear: value, slope? offset? -> slope * value + offset
+    #  - quadratic: value, arc?, slope? offset? -> arc * value ^ 2 + slope * value + offset
+    #  - tanh: value -> applies tanh
+    #
+    # Available variables:
+    #  - score: the maps' score, determined by percentage of players who voted for it, or a default
+    #  - same_gamemode: amount of other maps of the same gamemode already picked for the vote
+    #  - mapsize: the size for this map in total players (sum of all team counts)
+    #  - players: amount of active players online (eg: obs count as half)
+    modifier:
+      # weight = weighted_score ^ 2
+      type: pow
+      exponent: 2
+      value:
+        # weighted_score = score * gamemode_bias * playercount_bias
+        type: mul
+        a: score # The maps score itself
+        b:
+          # gamemode_bias = 1 - (0.2 * same_gamemode)
+          type: bound
+          min: 0.2
+          max: 1
+          value:
+            type: sub
+            a: 1.0
+            b:
+              type: mul
+              a: 0.2
+              b: same_gamemode
+        c:
+          # playercount_bias = bound(min=0, max=1, (lower_bound - upper_bound) * 0.5)
+          type: "bound"
+          min: 0.0
+          max: 1
+          value:
+            type: mul
+            a: 0.5
+            b:
+              type: sub
+              a: # lower_bound = tanh(lower_steep(players) * (mapsize - lower_value(players))
+                type: tanh
+                value:
+                  type: mul
+                  a: # lower_steep(players) = bound(0.2, 1, -0.0025 * players + 0.5)
+                    type: bound
+                    min: 0.2
+                    max: 1
+                    value:
+                      type: linear
+                      value: players
+                      slope: -0.0025
+                      offset: 0.5
+                  b: # mapsize - lower_value(players)
+                    type: sub
+                    a: mapsize
+                    b: # lower_value(players) = bound(0, 100, players * 1.05)
+                      type: bound
+                      min: 0
+                      max: 100
+                      value:
+                        type: linear
+                        value: players
+                        slope: 1.05
+              b: # upper_bound = tanh(upper_steep(players) * (mapsize - upper_value(players))
+                type: tanh
+                value:
+                  type: mul
+                  a: # upper_steep(players) = bound(0.2, 1, -0.0025 * players + 0.5)
+                    type: bound
+                    min: 0.2
+                    max: 1
+                    value:
+                      type: linear
+                      value: players
+                      slope: -0.0025
+                      offset: 0.5
+                  b:
+                    type: sub
+                    a: mapsize
+                    b: # upper_value(players) = bound(10, 150, 0.005 * players ^ 2 + 0.95 * players + 5)
+                      type: bound
+                      min: 10
+                      max: 150
+                      value:
+                        type: quadratic
+                        value: players
+                        arc: 0.005
+                        slope: 0.95
+                        offset: 5
+
     # A list of map names in this pool.
     # Uses map name given in map.xml, do not use folder name.
     # Names are case-sensitive.

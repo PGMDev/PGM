@@ -35,7 +35,7 @@ public class VotingPool extends MapPool {
 
     this.ADJUST_FACTOR = DEFAULT_SCORE / maps.size();
 
-    this.mapPicker = new MapVotePicker(section.getConfigurationSection("picker"));
+    this.mapPicker = MapVotePicker.of(manager, section);
     for (MapInfo map : maps) mapScores.put(map, DEFAULT_SCORE);
   }
 

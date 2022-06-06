@@ -96,8 +96,7 @@ public final class MapPoolCommand {
     if (chance && votes != null) {
       double maxWeight = 0, currWeight;
       for (MapInfo map : votes.getMaps()) {
-        chances.put(
-            map, currWeight = votes.mapPicker.getWeight(null, null, votes.getMapScore(map)));
+        chances.put(map, currWeight = votes.mapPicker.getWeight(null, map, votes.getMapScore(map)));
         maxWeight += currWeight;
       }
       double finalMaxWeight = maxWeight;

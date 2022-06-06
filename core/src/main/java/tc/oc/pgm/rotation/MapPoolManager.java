@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -14,6 +15,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -250,9 +252,19 @@ public class MapPoolManager implements MapOrder {
     getOrder().setNextMap(map);
   }
 
-  public Optional<MapPool> getAppropriateDynamicPool(Match match) {
+  public double getActivePlayers(Match match) {
+    if (match == null) {
+      Iterator<Match> matches = PGM.get().getMatchManager().getMatches();
+      // Fallback to just raw online playercount
+      if (!matches.hasNext()) return Bukkit.getOnlinePlayers().size();
+      match = matches.next();
+    }
     double obsBias = match.getModule(BlitzMatchModule.class) != null ? 0.85 : 0.5;
-    double activePlayers = match.getParticipants().size() + match.getObservers().size() * obsBias;
+    return match.getParticipants().size() + match.getObservers().size() * obsBias;
+  }
+
+  public Optional<MapPool> getAppropriateDynamicPool(Match match) {
+    double activePlayers = getActivePlayers(match);
     return mapPools.keySet().stream()
         .filter(MapPool::isDynamic)
         .filter(pool -> activePlayers >= pool.getPlayers())
