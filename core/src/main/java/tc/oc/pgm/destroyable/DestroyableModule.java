@@ -67,7 +67,6 @@ public class DestroyableModule implements MapModule {
   }
 
   public static class Factory implements MapModuleFactory<DestroyableModule> {
-    private MapFactory factory;
 
     @Override
     public Collection<Class<? extends MapModule>> getWeakDependencies() {
@@ -82,9 +81,7 @@ public class DestroyableModule implements MapModule {
     @Override
     public DestroyableModule parse(MapFactory context, Logger logger, Document doc)
         throws InvalidXMLException {
-      this.factory = context;
       List<DestroyableFactory> destroyables = Lists.newArrayList();
-      TeamModule teamModule = context.getModule(TeamModule.class);
       RegionParser regionParser = context.getRegions();
 
       for (Element destroyableEl :
@@ -124,7 +121,7 @@ public class DestroyableModule implements MapModule {
           if (destroyableEl.getAttribute("mode-changes") != null) {
             throw new InvalidXMLException("Cannot combine modes and mode-changes", destroyableEl);
           }
-          modeSet = parseModeSet(modes); // Specific set of modes
+          modeSet = parseModeSet(context, modes); // Specific set of modes
         } else if (XMLUtils.parseBoolean(destroyableEl.getAttribute("mode-changes"), false)) {
           modeSet = null; // All modes
         } else {
@@ -168,7 +165,8 @@ public class DestroyableModule implements MapModule {
       }
     }
 
-    public ImmutableSet<Mode> parseModeSet(Node node) throws InvalidXMLException {
+    public ImmutableSet<Mode> parseModeSet(MapFactory factory, Node node)
+        throws InvalidXMLException {
       ImmutableSet.Builder<Mode> modes = ImmutableSet.builder();
       for (String modeId : node.getValue().split("\\s")) {
         Mode mode = factory.getFeatures().get(modeId, Mode.class);
