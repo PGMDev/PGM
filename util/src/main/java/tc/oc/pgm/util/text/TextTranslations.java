@@ -2,7 +2,6 @@ package tc.oc.pgm.util.text;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.cache.CacheBuilder;
