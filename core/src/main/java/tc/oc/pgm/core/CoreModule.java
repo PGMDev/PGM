@@ -70,7 +70,6 @@ public class CoreModule implements MapModule {
   }
 
   public static class Factory implements MapModuleFactory<CoreModule> {
-    private MapFactory factory;
 
     @Override
     public Collection<Class<? extends MapModule>> getWeakDependencies() {
@@ -85,7 +84,6 @@ public class CoreModule implements MapModule {
     @Override
     public CoreModule parse(MapFactory context, Logger logger, Document doc)
         throws InvalidXMLException {
-      this.factory = context;
       List<CoreFactory> coreFactories = Lists.newArrayList();
       HashMap<TeamFactory, Integer> serialNumbers = new HashMap<>();
 
@@ -133,7 +131,7 @@ public class CoreModule implements MapModule {
           if (coreEl.getAttribute("mode-changes") != null) {
             throw new InvalidXMLException("Cannot combine modes and mode-changes", coreEl);
           }
-          modeSet = parseModeSet(modes); // Specific set of modes
+          modeSet = parseModeSet(context, modes); // Specific set of modes
         } else if (XMLUtils.parseBoolean(coreEl.getAttribute("mode-changes"), false)) {
           modeSet = null; // All modes
         } else {
@@ -172,7 +170,8 @@ public class CoreModule implements MapModule {
       }
     }
 
-    public ImmutableSet<Mode> parseModeSet(Node node) throws InvalidXMLException {
+    public ImmutableSet<Mode> parseModeSet(MapFactory factory, Node node)
+        throws InvalidXMLException {
       ImmutableSet.Builder<Mode> modes = ImmutableSet.builder();
       for (String modeId : node.getValue().split("\\s")) {
         Mode mode = factory.getFeatures().get(modeId, Mode.class);
