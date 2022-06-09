@@ -630,7 +630,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
             title(
                 space(),
                 joinMsg,
-                Times.of(Ticks.duration(5), Ticks.duration(20), Ticks.duration(5))));
+                Times.times(Ticks.duration(5), Ticks.duration(20), Ticks.duration(5))));
       } else {
         player.sendMessage(joinMsg);
       }

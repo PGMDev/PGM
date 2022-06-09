@@ -4,7 +4,6 @@ import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.join;
-import static net.kyori.adventure.text.Component.newline;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
@@ -31,6 +30,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
@@ -154,7 +154,7 @@ public class ModerationCommand implements Listener {
     if (!fmm.getFrozenPlayers().isEmpty()) {
       Component names =
           join(
-              text(", ", NamedTextColor.GRAY),
+              JoinConfiguration.separator(text(", ", NamedTextColor.GRAY)),
               fmm.getFrozenPlayers().stream()
                   .map(m -> m.getName(NameStyle.FANCY))
                   .collect(Collectors.toList()));
@@ -235,7 +235,8 @@ public class ModerationCommand implements Listener {
               translatable("moderation.mute.none", NamedTextColor.RED), sender));
     }
 
-    Component names = join(text(", ", NamedTextColor.GRAY), onlineMutes);
+    Component names =
+        join(JoinConfiguration.separator(text(", ", NamedTextColor.GRAY)), onlineMutes);
     Component message =
         text()
             .append(translatable("moderation.mute.list", NamedTextColor.GOLD))
@@ -653,7 +654,7 @@ public class ModerationCommand implements Listener {
   private Component formatAltAccountList(MatchPlayer target, List<MatchPlayer> alts) {
     Component names =
         join(
-            text(", ", NamedTextColor.GRAY),
+            JoinConfiguration.separator(text(", ", NamedTextColor.GRAY)),
             alts.stream().map(mp -> mp.getName(NameStyle.CONCISE)).collect(Collectors.toList()));
     Component size = text(alts.size(), NamedTextColor.YELLOW);
 
@@ -797,7 +798,8 @@ public class ModerationCommand implements Listener {
     lines.add(empty());
     lines.add(footer); // Footer line - END
 
-    return TextTranslations.translateLegacy(join(newline(), lines), null); // TODO add viewer
+    return TextTranslations.translateLegacy(
+        join(JoinConfiguration.newlines(), lines), null); // TODO add viewer
   }
 
   /*
@@ -827,7 +829,9 @@ public class ModerationCommand implements Listener {
     if (!target.isLegacy()) {
       target.showTitle(
           title(
-              warningTitle, subtitle, Title.Times.of(fromTicks(5), fromTicks(200), fromTicks(10))));
+              warningTitle,
+              subtitle,
+              Title.Times.times(fromTicks(5), fromTicks(200), fromTicks(10))));
     }
     target.playSound(WARN_SOUND);
   }

@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
@@ -313,7 +314,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
 
     private Component getOfflineFrozenNames() {
       return join(
-          text(", ", NamedTextColor.GRAY),
+          JoinConfiguration.separator(text(", ", NamedTextColor.GRAY)),
           offlineFrozenCache.asMap().values().stream()
               .map(name -> text(name, NamedTextColor.DARK_AQUA))
               .collect(Collectors.toList()));
@@ -358,7 +359,10 @@ public class FreezeMatchModule implements MatchModule, Listener {
         freezee.sendWarning(title);
       } else {
         freezee.showTitle(
-            title(empty(), title, Title.Times.of(fromTicks(5), fromTicks(MAX_TICK), fromTicks(5))));
+            title(
+                empty(),
+                title,
+                Title.Times.times(fromTicks(5), fromTicks(MAX_TICK), fromTicks(5))));
       }
       freezee.playSound(FREEZE_SOUND);
 
