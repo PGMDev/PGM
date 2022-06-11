@@ -187,9 +187,9 @@ public abstract class KitParser {
    ~ <fly allowFlight="false"/>  {FlyKit: allowFlight = false, flying = null  }
    ~ <fly flying="true"/>        {FlyKit: allowFlight = true,  flying = true  }
   */
-  public FlyKit parseFlyKit(Element el) throws InvalidXMLException {
-    Element child = el.getChild("fly");
-    if (child == null) {
+  public FlyKit parseFlyKit(Element parent) throws InvalidXMLException {
+    Element el = parent.getChild("fly");
+    if (el == null) {
       return null;
     }
 
