@@ -28,6 +28,10 @@ public class MapVotePicker {
   public static final int MAX_VOTE_OPTIONS = 5;
   public static final int MIN_CUSTOM_VOTE_OPTIONS = 2;
 
+  // A 0 that prevents arbitrarily low values with tons of precision, which cause issues when mixed
+  // with larger numbers.
+  private static final double MINIMUM_WEIGHT = 0.00000001;
+
   private static final Formula DEFAULT_MODIFIER = Formula.pow(c -> c.score, Formula.constant(2));
 
   private final MapPoolManager manager;
@@ -86,7 +90,7 @@ public class MapVotePicker {
     double maxWeight = 0;
     for (Map.Entry<MapInfo, Double> map : mapScores.entrySet()) {
       double weight = getWeight(selected, map.getKey(), map.getValue());
-      if (weight > 0) cumulativeScores.put(maxWeight += weight, map.getKey());
+      if (weight > MINIMUM_WEIGHT) cumulativeScores.put(maxWeight += weight, map.getKey());
     }
     Map.Entry<Double, MapInfo> selectedMap =
         cumulativeScores.higherEntry(Math.random() * maxWeight);
@@ -111,9 +115,7 @@ public class MapVotePicker {
             map.getMaxPlayers().stream().mapToInt(i -> i).sum(),
             manager.getActivePlayers(null));
 
-    // Use MIN_VALUE so that weight isn't exactly 0.
-    // That allows for the map to be used if nothing else exists.
-    return Math.max(modifier.applyAsDouble(context), Double.MIN_VALUE);
+    return Math.max(modifier.applyAsDouble(context), 0);
   }
 
   private double getRepeatedGamemodes(List<MapInfo> selected, MapInfo map) {

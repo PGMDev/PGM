@@ -28,7 +28,7 @@ final class VotingBookListener implements Listener {
   public void openVote(PlayerInteractEvent event) {
     MatchPlayer player = match.getPlayer(event.getPlayer());
     if (player != null
-        && !poll.isRunning()
+        && poll.isRunning()
         && isRightClick(event.getAction())
         && event.getMaterial() == Material.ENCHANTED_BOOK) {
       String validator = VOTE_BOOK_TAG.get(event.getItem());
