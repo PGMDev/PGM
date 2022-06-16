@@ -116,6 +116,8 @@ import tc.oc.pgm.tnt.TNTMatchModule;
 import tc.oc.pgm.tnt.TNTModule;
 import tc.oc.pgm.tntrender.TNTRenderMatchModule;
 import tc.oc.pgm.tracker.TrackerMatchModule;
+import tc.oc.pgm.trigger.TriggerMatchModule;
+import tc.oc.pgm.trigger.TriggerModule;
 import tc.oc.pgm.wool.WoolMatchModule;
 import tc.oc.pgm.wool.WoolModule;
 import tc.oc.pgm.worldborder.WorldBorderMatchModule;
@@ -192,6 +194,7 @@ public interface Modules {
     register(WoolModule.class, WoolMatchModule.class, new WoolModule.Factory());
     register(ScoreModule.class, ScoreMatchModule.class, new ScoreModule.Factory());
     register(KitModule.class, KitMatchModule.class, new KitModule.Factory());
+    register(TriggerModule.class, TriggerMatchModule.class, new TriggerModule.Factory());
     register(
         ItemDestroyModule.class, ItemDestroyMatchModule.class, new ItemDestroyModule.Factory());
     register(ToolRepairModule.class, ToolRepairMatchModule.class, new ToolRepairModule.Factory());

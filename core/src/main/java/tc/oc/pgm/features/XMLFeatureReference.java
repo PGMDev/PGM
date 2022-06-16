@@ -12,14 +12,14 @@ import tc.oc.pgm.util.xml.Node;
  * InvalidXMLException is thrown if it's not found there.
  */
 public class XMLFeatureReference<T extends FeatureDefinition> implements FeatureReference<T> {
-  private final FeatureDefinitionContext context;
-  private final String id;
-  private final Class<T> type;
+  protected final FeatureDefinitionContext context;
+  protected final String id;
+  protected final Class<T> type;
 
   // Will only be available prior to resolving and validating.
   // Afterwards it will be cleared to allow node, and the underlying DOM to GC
-  private @Nullable Node node;
-  private @Nullable T referent;
+  protected @Nullable Node node;
+  protected @Nullable T referent;
 
   public XMLFeatureReference(FeatureDefinitionContext context, Node node, Class<T> type) {
     this(context, node, null, type);

@@ -37,6 +37,7 @@ import org.bukkit.potion.PotionEffect;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.doublejump.DoubleJumpKit;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.kits.tag.Grenade;
@@ -46,6 +47,8 @@ import tc.oc.pgm.shield.ShieldKit;
 import tc.oc.pgm.shield.ShieldParameters;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
+import tc.oc.pgm.trigger.Trigger;
+import tc.oc.pgm.trigger.TriggerParser;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.material.Materials;
@@ -141,6 +144,7 @@ public abstract class KitParser {
     kits.add(this.parseShieldKit(el));
     kits.add(this.parseTeamSwitchKit(el));
     kits.add(this.parseMaxHealthKit(el));
+    kits.add(this.parseTriggerKit(el));
     kits.addAll(this.parseRemoveKits(el));
 
     kits.removeAll(Collections.singleton((Kit) null)); // Remove any nulls returned above
@@ -724,5 +728,17 @@ public abstract class KitParser {
     }
 
     return new MaxHealthKit(maxHealth);
+  }
+
+  public TriggerKit parseTriggerKit(Element parent) throws InvalidXMLException {
+    if (parent.getChildren("trigger").isEmpty()) return null;
+
+    TriggerParser parser = new TriggerParser(factory);
+    ImmutableList.Builder<Trigger<? super MatchPlayer>> builder = ImmutableList.builder();
+    for (Element trigger : parent.getChildren("trigger")) {
+      builder.add(parser.parse(trigger, MatchPlayer.class));
+    }
+
+    return new TriggerKit(builder.build());
   }
 }
