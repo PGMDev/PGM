@@ -14,7 +14,6 @@ import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.filters.dynamic.FilterMatchModule;
 import tc.oc.pgm.filters.dynamic.Filterable;
-import tc.oc.pgm.filters.dynamic.Filterables;
 
 public class MonostableFilter extends SingleFilterFunction
     implements ReactorFactory<MonostableFilter.Reactor> {
@@ -39,7 +38,7 @@ public class MonostableFilter extends SingleFilterFunction
   public MonostableFilter(Filter filter, Duration duration) {
     super(filter);
     this.duration = duration;
-    this.scope = Filterables.scope(filter);
+    this.scope = filter.getScope();
   }
 
   @Override
@@ -48,7 +47,7 @@ public class MonostableFilter extends SingleFilterFunction
     if (!(query instanceof MatchQuery)) return QueryResponse.ABSTAIN; // TypedFilter<MatchQuery>
     final MatchQuery matchQuery = ((MatchQuery) query);
     final Filterable<?> filterable =
-        Filterables.extractFilterable(matchQuery).getFilterableAncestor(this.scope);
+        matchQuery.extractFilterable().getFilterableAncestor(this.scope);
     if (filterable == null)
       throw new IllegalArgumentException(
           "The scope of this filter does not match the query it received");
@@ -73,7 +72,7 @@ public class MonostableFilter extends SingleFilterFunction
     public Reactor(Match match, FilterMatchModule fmm) {
       super(match, fmm);
       match.addTickable(this, MatchScope.LOADED);
-      fmm.onChange(Filterables.scope(filter), filter, this::matches);
+      fmm.onChange(filter.getScope(), filter, this::matches);
     }
 
     boolean matches(Filterable<?> filterable, boolean response) {

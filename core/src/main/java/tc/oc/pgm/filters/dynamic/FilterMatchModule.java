@@ -74,8 +74,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   private final ContextStore<?> filterContext;
   private final List<Class<? extends Event>> listeningFor = new LinkedList<>();
 
-  private final Map<ReactorFactory<? extends ReactorFactory.Reactor>, ReactorFactory.Reactor>
-      activeReactors = new HashMap<>();
+  private final Map<ReactorFactory<?>, ReactorFactory.Reactor> activeReactors = new HashMap<>();
 
   private final DummyListener dummyListener = new DummyListener();
 
@@ -134,7 +133,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
     // match load e.g. the goals
     for (Filter filter : this.listeners.rowKeySet()) {
       Map<Class<? extends Filterable<?>>, ListenerSet> row = this.listeners.row(filter);
-      for (Class<? extends Filterable<?>> scope : Filterables.SCOPES) {
+      for (Class<? extends Filterable<?>> scope : Filter.SCOPES) {
         ListenerSet set = row.get(scope);
         if (set == null) continue;
         match

@@ -2,11 +2,16 @@ package tc.oc.pgm.api.filter;
 
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
+import java.util.List;
 import org.bukkit.event.Event;
 import tc.oc.pgm.api.feature.Feature;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.query.Query;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.FilterParser;
+import tc.oc.pgm.filters.dynamic.Filterable;
 
 /**
  * Something that can answer "yes", "no" or "i don't care" to the imagined question: "Can X
@@ -22,6 +27,10 @@ import tc.oc.pgm.filters.FilterParser;
  * @see Query
  */
 public interface Filter {
+
+  /** {@link Filterable}s ordered from general to specific */
+  List<Class<? extends Filterable<?>>> SCOPES =
+      ImmutableList.of(Match.class, Party.class, MatchPlayer.class);
 
   /**
    * Filters with children are responsible for returning the events of their children.
@@ -100,5 +109,18 @@ public interface Filter {
     public static QueryResponse fromBoolean(boolean allow) {
       return allow ? ALLOW : DENY;
     }
+  }
+
+  /**
+   * Return the "scope" of this filter, which is the most general {@link Filterable} type that it
+   * responds to.
+   */
+  default Class<? extends Filterable<?>> getScope() {
+    for (Class<? extends Filterable<?>> scope : SCOPES) {
+      if (this.getQueryType().isAssignableFrom(scope)) return scope;
+    }
+
+    throw new IllegalStateException(
+        "Filter type " + this.getQueryType().getSimpleName() + " does not have a filterable scope");
   }
 }
