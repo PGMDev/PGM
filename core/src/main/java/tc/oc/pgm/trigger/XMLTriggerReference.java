@@ -7,15 +7,15 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class XMLTriggerReference<T> extends XMLFeatureReference<TriggerDefinition>
-    implements Trigger<T> {
+public class XMLTriggerReference<S> extends XMLFeatureReference<TriggerDefinition>
+    implements Trigger<S> {
 
-  private final Class<? super T> bound;
+  private final Class<? super S> scope;
 
   public XMLTriggerReference(
-      FeatureDefinitionContext context, Node node, @Nullable String id, Class<T> bound) {
+      FeatureDefinitionContext context, Node node, @Nullable String id, Class<S> scope) {
     super(context, node, id, TriggerDefinition.class);
-    this.bound = bound;
+    this.scope = scope;
   }
 
   @Override
@@ -26,13 +26,13 @@ public class XMLTriggerReference<T> extends XMLFeatureReference<TriggerDefinitio
 
     if (super.referent == null) return;
 
-    Class<?> ref = super.referent.getTriggerType();
-    if (!ref.isAssignableFrom(this.bound)) {
+    Class<?> ref = super.referent.getScope();
+    if (!ref.isAssignableFrom(this.scope)) {
       throw new InvalidXMLException(
           "Wrong trigger target for ID '"
               + id
               + "': expected "
-              + bound.getSimpleName()
+              + scope.getSimpleName()
               + " rather than "
               + ref.getSimpleName(),
           node);
@@ -40,12 +40,17 @@ public class XMLTriggerReference<T> extends XMLFeatureReference<TriggerDefinitio
   }
 
   @Override
-  public Class<T> getTriggerType() {
-    return (Class<T>) get().getTriggerType();
+  public Class<S> getScope() {
+    return (Class<S>) get().getScope();
   }
 
   @Override
-  public void trigger(T t) {
-    ((Trigger<? super T>) get()).trigger(t);
+  public void trigger(S s) {
+    ((Trigger<? super S>) get()).trigger(s);
+  }
+
+  @Override
+  public void untrigger(S s) {
+    ((Trigger<? super S>) get()).untrigger(s);
   }
 }

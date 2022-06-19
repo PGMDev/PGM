@@ -3,8 +3,9 @@ package tc.oc.pgm.kits;
 import java.util.List;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.trigger.Trigger;
 
-public interface Kit {
+public interface Kit extends Trigger<MatchPlayer> {
 
   /**
    * Apply this kit to the given player. If force is true, the player's state is made to match the
@@ -22,4 +23,19 @@ public interface Kit {
   void remove(MatchPlayer player);
 
   boolean isRemovable();
+
+  @Override
+  default Class<MatchPlayer> getScope() {
+    return MatchPlayer.class;
+  }
+
+  @Override
+  default void trigger(MatchPlayer player) {
+    player.applyKit(this, false);
+  }
+
+  @Override
+  default void untrigger(MatchPlayer player) {
+    remove(player);
+  }
 }

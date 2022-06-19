@@ -26,6 +26,12 @@ public class TriggerMatchModule implements MatchModule {
   }
 
   private <T extends Filterable<?>> void setupTrigger(TriggerRule<T> rule, FilterMatchModule fmm) {
-    fmm.onRise(rule.getScope(), rule.getFilter(), t -> rule.getTrigger().trigger(t));
+    fmm.onChange(
+        rule.getScope(),
+        rule.getFilter(),
+        (t, val) -> {
+          if (val) rule.getTrigger().trigger(t);
+          else rule.getTrigger().untrigger(t);
+        });
   }
 }

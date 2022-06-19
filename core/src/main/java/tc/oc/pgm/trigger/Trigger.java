@@ -1,33 +1,17 @@
 package tc.oc.pgm.trigger;
 
-import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.party.Party;
-import tc.oc.pgm.api.player.MatchPlayer;
+/**
+ * A trigger is a generic action that can occur on an object. The object is commonly referred to as
+ * the scope of the trigger. The most common and intuitive type of trigger is a kit, a kit is a
+ * trigger scoped to a player, in other words, you can give the player a kit.
+ *
+ * @param <S> Scope of the trigger
+ */
+public interface Trigger<S> {
 
-public interface Trigger<T> {
+  Class<S> getScope();
 
-  Class<T> getTriggerType();
+  void trigger(S s);
 
-  void trigger(T t);
-
-  interface TPlayer extends TriggerDefinition<MatchPlayer> {
-    @Override
-    default Class<MatchPlayer> getTriggerType() {
-      return MatchPlayer.class;
-    }
-  }
-
-  interface TParty extends TriggerDefinition<Party> {
-    @Override
-    default Class<Party> getTriggerType() {
-      return Party.class;
-    }
-  }
-
-  interface TMatch extends TriggerDefinition<Match> {
-    @Override
-    default Class<Match> getTriggerType() {
-      return Match.class;
-    }
-  }
+  void untrigger(S s);
 }
