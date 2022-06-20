@@ -3,9 +3,9 @@ package tc.oc.pgm.kits;
 import java.util.List;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.trigger.Trigger;
+import tc.oc.pgm.action.Action;
 
-public interface Kit extends Trigger<MatchPlayer> {
+public interface Kit extends Action<MatchPlayer> {
 
   /**
    * Apply this kit to the given player. If force is true, the player's state is made to match the

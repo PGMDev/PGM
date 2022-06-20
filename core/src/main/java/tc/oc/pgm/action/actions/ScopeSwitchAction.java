@@ -1,4 +1,4 @@
-package tc.oc.pgm.trigger.triggers;
+package tc.oc.pgm.action.actions;
 
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
@@ -6,20 +6,20 @@ import java.util.function.Function;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.trigger.Trigger;
+import tc.oc.pgm.action.Action;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 
-public class ScopeSwitchTrigger<O, I> extends AbstractTrigger<O> {
+public class ScopeSwitchAction<O, I> extends AbstractAction<O> {
 
   private final Function<O, I> single;
   private final Function<O, Iterable<I>> multi;
-  private final Trigger<? super I> child;
+  private final Action<? super I> child;
 
-  public ScopeSwitchTrigger(
+  public ScopeSwitchAction(
       Class<O> outer,
       Function<O, I> single,
       Function<O, Iterable<I>> multi,
-      Trigger<? super I> child) {
+      Action<? super I> child) {
     super(outer);
     if ((single == null) == (multi == null))
       throw new IllegalArgumentException("One and only one of single or multi must be nonnull");
@@ -28,15 +28,15 @@ public class ScopeSwitchTrigger<O, I> extends AbstractTrigger<O> {
     this.child = child;
   }
 
-  public static <O, I> Trigger<? super O> of(
-      Trigger<? super I> child, Class<O> outer, Class<I> inner) throws InvalidXMLException {
+  public static <O, I> Action<? super O> of(
+      Action<? super I> child, Class<O> outer, Class<I> inner) throws InvalidXMLException {
     Function<O, I> single = TriggerModifiers.getSingleConversion(outer, inner);
     Function<O, Iterable<I>> multi = TriggerModifiers.getMultiConversion(outer, inner);
 
     // Either no conversion, or two conversions found!
     if ((single == null) == (multi == null)) return null;
 
-    return new ScopeSwitchTrigger<>(outer, single, multi, child);
+    return new ScopeSwitchAction<>(outer, single, multi, child);
   }
 
   @Override

@@ -1,4 +1,4 @@
-package tc.oc.pgm.trigger;
+package tc.oc.pgm.action;
 
 import com.google.common.collect.ImmutableList;
 import java.lang.reflect.Method;
@@ -13,28 +13,28 @@ import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.filters.dynamic.Filterable;
 import tc.oc.pgm.kits.Kit;
-import tc.oc.pgm.trigger.triggers.ChatMessageTrigger;
-import tc.oc.pgm.trigger.triggers.ScopeSwitchTrigger;
-import tc.oc.pgm.trigger.triggers.TriggerNode;
+import tc.oc.pgm.action.actions.ActionNode;
+import tc.oc.pgm.action.actions.ChatMessageAction;
+import tc.oc.pgm.action.actions.ScopeSwitchAction;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class TriggerParser {
+public class ActionParser {
 
   private final MapFactory factory;
   private final FilterParser filters;
   private final Map<String, Method> methodParsers;
 
-  public TriggerParser(MapFactory factory) {
+  public ActionParser(MapFactory factory) {
     this.factory = factory;
     this.filters = factory.getFilters();
     this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
   }
 
-  public <B extends Filterable<?>> Trigger<? super B> parse(Element el, @Nullable Class<B> bound)
+  public <B extends Filterable<?>> Action<? super B> parse(Element el, @Nullable Class<B> bound)
       throws InvalidXMLException {
     String id = FeatureDefinitionContext.parseId(el);
 
@@ -42,7 +42,7 @@ public class TriggerParser {
       return parseReference(new Node(el), id, bound);
     }
 
-    Trigger<? super B> result = parseDynamic(el, bound);
+    Action<? super B> result = parseDynamic(el, bound);
 
     Class<?> childBound = result.getScope();
     if (bound != null && !childBound.isAssignableFrom(bound)) {
@@ -55,13 +55,13 @@ public class TriggerParser {
     }
 
     // We don't need to add references, they should already be added by whoever created them.
-    if (result instanceof TriggerDefinition)
+    if (result instanceof ActionDefinition)
       //noinspection unchecked
-      factory.getFeatures().addFeature(el, (TriggerDefinition<? super B>) result);
+      factory.getFeatures().addFeature(el, (ActionDefinition<? super B>) result);
     return result;
   }
 
-  public boolean isTrigger(Element el) {
+  public boolean isAction(Element el) {
     return getParserFor(el) != null;
   }
 
@@ -69,16 +69,16 @@ public class TriggerParser {
     return "trigger".equals(el.getName()) && el.getChildren().isEmpty();
   }
 
-  public <B> Trigger<? super B> parseReference(Node node, Class<B> bound)
+  public <B> Action<? super B> parseReference(Node node, Class<B> bound)
       throws InvalidXMLException {
     return parseReference(node, node.getValue(), bound);
   }
 
-  public <B> Trigger<? super B> parseReference(Node node, String id, Class<B> bound)
+  public <B> Action<? super B> parseReference(Node node, String id, Class<B> bound)
       throws InvalidXMLException {
     return factory
         .getFeatures()
-        .addReference(new XMLTriggerReference<>(factory.getFeatures(), node, id, bound));
+        .addReference(new XMLActionReference<>(factory.getFeatures(), node, id, bound));
   }
 
   protected Method getParserFor(Element el) {
@@ -86,12 +86,12 @@ public class TriggerParser {
   }
 
   @SuppressWarnings("unchecked")
-  private <T, B extends Filterable<?>> Trigger<T> parseDynamic(Element el, Class<B> bound)
+  private <T, B extends Filterable<?>> Action<T> parseDynamic(Element el, Class<B> bound)
       throws InvalidXMLException {
     Method parser = getParserFor(el);
     if (parser != null) {
       try {
-        return (Trigger<T>) parser.invoke(this, el, bound);
+        return (Action<T>) parser.invoke(this, el, bound);
       } catch (Exception e) {
         throw InvalidXMLException.coerce(e, new Node(el));
       }
@@ -100,9 +100,9 @@ public class TriggerParser {
     }
   }
 
-  public <T extends Filterable<?>> TriggerRule<T> parseRule(Element el) throws InvalidXMLException {
+  public <T extends Filterable<?>> Trigger<T> parseTrigger(Element el) throws InvalidXMLException {
     Class<T> cls = parseFilterable(Node.fromRequiredAttr(el, "scope"));
-    return new TriggerRule<>(
+    return new Trigger<>(
         cls,
         filters.parseReference(Node.fromRequiredAttr(el, "filter")),
         parseReference(Node.fromRequiredAttr(el, "trigger"), cls));
@@ -123,27 +123,27 @@ public class TriggerParser {
   }
 
   @MethodParser("trigger")
-  public <B extends Filterable<?>> TriggerDefinition<? super B> parseDefinition(
+  public <B extends Filterable<?>> ActionDefinition<? super B> parseDefinition(
       Element el, Class<B> bound) throws InvalidXMLException {
     if (bound == null) bound = parseFilterable(Node.fromRequiredAttr(el, "scope"));
 
-    ImmutableList.Builder<Trigger<? super B>> builder = ImmutableList.builder();
+    ImmutableList.Builder<Action<? super B>> builder = ImmutableList.builder();
     for (Element child : el.getChildren()) {
       builder.add(parse(child, bound));
     }
 
-    return new TriggerNode<>(builder.build(), bound);
+    return new ActionNode<>(builder.build(), bound);
   }
 
   @MethodParser("switch-scope")
-  public <O extends Filterable<?>, I extends Filterable<?>> Trigger<? super O> parseSwitchScope(
+  public <O extends Filterable<?>, I extends Filterable<?>> Action<? super O> parseSwitchScope(
       Element el, Class<O> outer) throws InvalidXMLException {
     if (outer == null) outer = parseFilterable(Node.fromRequiredAttr(el, "outer"));
     Class<I> inner = parseFilterable(Node.fromRequiredAttr(el, "inner"));
 
-    TriggerDefinition<? super I> child = parseDefinition(el, inner);
+    ActionDefinition<? super I> child = parseDefinition(el, inner);
 
-    Trigger<? super O> result = ScopeSwitchTrigger.of(child, outer, inner);
+    Action<? super O> result = ScopeSwitchAction.of(child, outer, inner);
     if (result == null) {
       throw new InvalidXMLException(
           "Could not convert from " + outer.getSimpleName() + " to " + inner.getSimpleName(), el);
@@ -157,8 +157,8 @@ public class TriggerParser {
   }
 
   @MethodParser("message")
-  public ChatMessageTrigger parseChatMessage(Element el, Class<?> scope)
+  public ChatMessageAction parseChatMessage(Element el, Class<?> scope)
       throws InvalidXMLException {
-    return new ChatMessageTrigger(XMLUtils.parseFormattedText(Node.fromRequiredAttr(el, "text")));
+    return new ChatMessageAction(XMLUtils.parseFormattedText(Node.fromRequiredAttr(el, "text")));
   }
 }

@@ -47,8 +47,8 @@ import tc.oc.pgm.shield.ShieldKit;
 import tc.oc.pgm.shield.ShieldParameters;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
-import tc.oc.pgm.trigger.Trigger;
-import tc.oc.pgm.trigger.TriggerParser;
+import tc.oc.pgm.action.Action;
+import tc.oc.pgm.action.ActionParser;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.material.Materials;
@@ -730,15 +730,15 @@ public abstract class KitParser {
     return new MaxHealthKit(maxHealth);
   }
 
-  public TriggerKit parseTriggerKit(Element parent) throws InvalidXMLException {
-    if (parent.getChildren("trigger").isEmpty()) return null;
+  public ActionKit parseTriggerKit(Element parent) throws InvalidXMLException {
+    if (parent.getChildren("action").isEmpty()) return null;
 
-    TriggerParser parser = new TriggerParser(factory);
-    ImmutableList.Builder<Trigger<? super MatchPlayer>> builder = ImmutableList.builder();
-    for (Element trigger : parent.getChildren("trigger")) {
-      builder.add(parser.parse(trigger, MatchPlayer.class));
+    ActionParser parser = new ActionParser(factory);
+    ImmutableList.Builder<Action<? super MatchPlayer>> builder = ImmutableList.builder();
+    for (Element action : parent.getChildren("action")) {
+      builder.add(parser.parse(action, MatchPlayer.class));
     }
 
-    return new TriggerKit(builder.build());
+    return new ActionKit(builder.build());
   }
 }

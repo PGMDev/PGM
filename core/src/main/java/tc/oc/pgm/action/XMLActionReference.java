@@ -1,4 +1,4 @@
-package tc.oc.pgm.trigger;
+package tc.oc.pgm.action;
 
 import javax.annotation.Nullable;
 import tc.oc.pgm.features.FeatureDefinitionContext;
@@ -7,14 +7,14 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class XMLTriggerReference<S> extends XMLFeatureReference<TriggerDefinition>
-    implements Trigger<S> {
+public class XMLActionReference<S> extends XMLFeatureReference<ActionDefinition>
+    implements Action<S> {
 
   private final Class<? super S> scope;
 
-  public XMLTriggerReference(
+  public XMLActionReference(
       FeatureDefinitionContext context, Node node, @Nullable String id, Class<S> scope) {
-    super(context, node, id, TriggerDefinition.class);
+    super(context, node, id, ActionDefinition.class);
     this.scope = scope;
   }
 
@@ -46,11 +46,11 @@ public class XMLTriggerReference<S> extends XMLFeatureReference<TriggerDefinitio
 
   @Override
   public void trigger(S s) {
-    ((Trigger<? super S>) get()).trigger(s);
+    ((Action<? super S>) get()).trigger(s);
   }
 
   @Override
   public void untrigger(S s) {
-    ((Trigger<? super S>) get()).untrigger(s);
+    ((Action<? super S>) get()).untrigger(s);
   }
 }

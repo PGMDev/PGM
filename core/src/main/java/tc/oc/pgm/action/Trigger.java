@@ -1,17 +1,17 @@
-package tc.oc.pgm.trigger;
+package tc.oc.pgm.action;
 
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.filters.dynamic.Filterable;
 
-public class TriggerRule<T extends Filterable<?>> {
+public class Trigger<T extends Filterable<?>> {
   private final Class<T> scope;
   private final Filter filter;
-  private final Trigger<? super T> trigger;
+  private final Action<? super T> action;
 
-  public TriggerRule(Class<T> scope, Filter filter, Trigger<? super T> trigger) {
+  public Trigger(Class<T> scope, Filter filter, Action<? super T> action) {
     this.scope = scope;
     this.filter = filter;
-    this.trigger = trigger;
+    this.action = action;
   }
 
   public Class<T> getScope() {
@@ -22,7 +22,7 @@ public class TriggerRule<T extends Filterable<?>> {
     return filter;
   }
 
-  public Trigger<? super T> getTrigger() {
-    return trigger;
+  public Action<? super T> getTrigger() {
+    return action;
   }
 }
