@@ -5,6 +5,9 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.action.actions.ActionNode;
+import tc.oc.pgm.action.actions.ChatMessageAction;
+import tc.oc.pgm.action.actions.ScopeSwitchAction;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
@@ -13,9 +16,6 @@ import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.filters.dynamic.Filterable;
 import tc.oc.pgm.kits.Kit;
-import tc.oc.pgm.action.actions.ActionNode;
-import tc.oc.pgm.action.actions.ChatMessageAction;
-import tc.oc.pgm.action.actions.ScopeSwitchAction;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -157,8 +157,7 @@ public class ActionParser {
   }
 
   @MethodParser("message")
-  public ChatMessageAction parseChatMessage(Element el, Class<?> scope)
-      throws InvalidXMLException {
+  public ChatMessageAction parseChatMessage(Element el, Class<?> scope) throws InvalidXMLException {
     return new ChatMessageAction(XMLUtils.parseFormattedText(Node.fromRequiredAttr(el, "text")));
   }
 }

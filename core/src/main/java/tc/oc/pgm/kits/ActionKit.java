@@ -3,8 +3,8 @@ package tc.oc.pgm.kits;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.bukkit.inventory.ItemStack;
-import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.action.Action;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 public class ActionKit extends AbstractKit {
 

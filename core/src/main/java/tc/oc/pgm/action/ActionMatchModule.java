@@ -30,8 +30,8 @@ public class ActionMatchModule implements MatchModule {
         rule.getScope(),
         rule.getFilter(),
         (filterable, response) -> {
-          if (response) rule.getTrigger().trigger(filterable);
-          else rule.getTrigger().untrigger(filterable);
+          if (response) rule.getAction().trigger(filterable);
+          else rule.getAction().untrigger(filterable);
         });
   }
 }

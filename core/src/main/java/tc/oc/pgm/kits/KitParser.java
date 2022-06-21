@@ -35,6 +35,8 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.jdom2.Element;
+import tc.oc.pgm.action.Action;
+import tc.oc.pgm.action.ActionParser;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -47,8 +49,6 @@ import tc.oc.pgm.shield.ShieldKit;
 import tc.oc.pgm.shield.ShieldParameters;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
-import tc.oc.pgm.action.Action;
-import tc.oc.pgm.action.ActionParser;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.material.Materials;
@@ -144,7 +144,7 @@ public abstract class KitParser {
     kits.add(this.parseShieldKit(el));
     kits.add(this.parseTeamSwitchKit(el));
     kits.add(this.parseMaxHealthKit(el));
-    kits.add(this.parseTriggerKit(el));
+    kits.add(this.parseActionKit(el));
     kits.addAll(this.parseRemoveKits(el));
 
     kits.removeAll(Collections.singleton((Kit) null)); // Remove any nulls returned above
@@ -730,7 +730,7 @@ public abstract class KitParser {
     return new MaxHealthKit(maxHealth);
   }
 
-  public ActionKit parseTriggerKit(Element parent) throws InvalidXMLException {
+  public ActionKit parseActionKit(Element parent) throws InvalidXMLException {
     if (parent.getChildren("action").isEmpty()) return null;
 
     ActionParser parser = new ActionParser(factory);

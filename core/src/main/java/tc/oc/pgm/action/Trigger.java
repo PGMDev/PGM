@@ -22,7 +22,7 @@ public class Trigger<T extends Filterable<?>> {
     return filter;
   }
 
-  public Action<? super T> getTrigger() {
+  public Action<? super T> getAction() {
     return action;
   }
 }

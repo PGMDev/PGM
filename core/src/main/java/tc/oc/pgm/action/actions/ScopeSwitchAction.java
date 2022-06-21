@@ -3,10 +3,10 @@ package tc.oc.pgm.action.actions;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import java.util.function.Function;
+import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.action.Action;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 
 public class ScopeSwitchAction<O, I> extends AbstractAction<O> {
@@ -28,8 +28,8 @@ public class ScopeSwitchAction<O, I> extends AbstractAction<O> {
     this.child = child;
   }
 
-  public static <O, I> Action<? super O> of(
-      Action<? super I> child, Class<O> outer, Class<I> inner) throws InvalidXMLException {
+  public static <O, I> Action<? super O> of(Action<? super I> child, Class<O> outer, Class<I> inner)
+      throws InvalidXMLException {
     Function<O, I> single = TriggerModifiers.getSingleConversion(outer, inner);
     Function<O, Iterable<I>> multi = TriggerModifiers.getMultiConversion(outer, inner);
 
