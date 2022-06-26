@@ -13,7 +13,7 @@ public interface BlockStates {
   static BlockState toAir(Block block) {
     BlockState newState = block.getState(); // this creates a new copy of the state
     newState.setType(Material.AIR);
-    newState.setRawData((byte) 0);
+    //    newState.setRawData((byte) 0);
     return newState;
   }
 

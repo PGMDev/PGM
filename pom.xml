@@ -83,7 +83,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.18.2-R0.1-SNAPSHOT</version>
+            <version>1.19-R0.1-SNAPSHOT</version>
             <scope>compile</scope> <!-- Remember to exclude in shading -->
         </dependency>
 
@@ -179,7 +179,7 @@
         <dependency>
             <groupId>com.github.cryptomorin</groupId>
             <artifactId>XSeries</artifactId>
-            <version>8.7.0</version>
+            <version>8.8.0</version>
         </dependency>
 
         <dependency>

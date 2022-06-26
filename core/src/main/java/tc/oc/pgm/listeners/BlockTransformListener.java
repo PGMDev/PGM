@@ -46,7 +46,6 @@ import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.material.Door;
-import org.bukkit.material.MaterialData;
 import org.bukkit.material.PistonExtensionMaterial;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
@@ -191,14 +190,14 @@ public class BlockTransformListener implements Listener {
 
   private void callEvent(final BlockTransformEvent event, boolean checked) {
     if (!checked) {
-      MaterialData oldData = event.getOldState().getData();
-      MaterialData newData = event.getNewState().getData();
-      if (oldData instanceof Door) {
-        handleDoor(event, (Door) oldData);
-      }
-      if (newData instanceof Door) {
-        handleDoor(event, (Door) newData);
-      }
+      //      MaterialData oldData = event.getOldState().getData();
+      //      MaterialData newData = event.getNewState().getData();
+      //      if (oldData instanceof Door) {
+      //        handleDoor(event, (Door) oldData);
+      //      }
+      //      if (newData instanceof Door) {
+      //        handleDoor(event, (Door) newData);
+      //      }
     }
     logger.fine("Generated event " + event);
     currentEvents.put(event.getCause(), event);

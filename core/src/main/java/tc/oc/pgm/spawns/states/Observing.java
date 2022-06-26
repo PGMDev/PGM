@@ -11,6 +11,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.material.Door;
@@ -71,7 +72,8 @@ public class Observing extends State {
         PlayerRespawnEvent event = new PlayerRespawnEvent(player.getBukkit(), location, false);
         player.getMatch().callEvent(event);
 
-        player.getBukkit().teleport(event.getRespawnLocation());
+        // TODO: fix this failing on cycling to race for victory
+        bukkit.teleport(location, PlayerTeleportEvent.TeleportCause.PLUGIN);
       }
     }
 
