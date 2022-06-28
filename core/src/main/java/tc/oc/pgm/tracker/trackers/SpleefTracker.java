@@ -9,7 +9,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import tc.oc.pgm.api.event.PlayerSpleefEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -22,6 +21,7 @@ import tc.oc.pgm.tracker.info.ExplosionInfo;
 import tc.oc.pgm.tracker.info.PlayerInfo;
 import tc.oc.pgm.tracker.info.SpleefInfoImpl;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.event.PlayerSpleefEvent;
 import tc.oc.pgm.util.event.player.PlayerOnGroundEvent;
 import tc.oc.pgm.util.material.Materials;
 

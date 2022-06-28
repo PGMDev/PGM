@@ -1,4 +1,4 @@
-package tc.oc.pgm.api.event;
+package tc.oc.pgm.util.event;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -15,8 +15,8 @@ import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
-import tc.oc.pgm.api.blockdrops.BlockDrops;
-import tc.oc.pgm.api.event.entity.ExplosionPrimeByEntityEvent;
+import tc.oc.pgm.util.blockdrops.BlockDrops;
+import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
 
 /** Called when a {@link Block} transforms from one {@link BlockState} to another. */
 public class BlockTransformEvent extends GeneralizedEvent {

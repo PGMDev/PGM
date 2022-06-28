@@ -4,7 +4,6 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerMoveEvent;
-import tc.oc.pgm.api.event.GeneralizedEvent;
 import tc.oc.pgm.util.block.BlockVectors;
 
 /**

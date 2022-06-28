@@ -1,4 +1,4 @@
-package tc.oc.pgm.api.blockdrops;
+package tc.oc.pgm.util.blockdrops;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;

@@ -30,8 +30,6 @@ import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.api.event.BlockTransformEvent;
-import tc.oc.pgm.api.event.GeneralizedEvent;
 import tc.oc.pgm.api.filter.Filter.QueryResponse;
 import tc.oc.pgm.api.filter.query.BlockQuery;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
@@ -50,6 +48,8 @@ import tc.oc.pgm.flag.event.FlagPickupEvent;
 import tc.oc.pgm.util.MatchPlayers;
 import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.event.BlockTransformEvent;
+import tc.oc.pgm.util.event.GeneralizedEvent;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 import tc.oc.pgm.util.nms.NMSHacks;
 

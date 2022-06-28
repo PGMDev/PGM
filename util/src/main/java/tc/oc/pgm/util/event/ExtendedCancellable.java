@@ -1,4 +1,4 @@
-package tc.oc.pgm.api.event;
+package tc.oc.pgm.util.event;
 
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;

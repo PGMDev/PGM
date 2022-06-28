@@ -15,7 +15,6 @@ import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -24,6 +23,7 @@ import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.renewable.RenewableMatchModule;
 import tc.oc.pgm.util.chunk.ChunkVector;
+import tc.oc.pgm.util.event.BlockTransformEvent;
 import tc.oc.pgm.util.nms.NMSHacks;
 
 /**

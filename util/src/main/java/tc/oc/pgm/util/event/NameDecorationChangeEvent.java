@@ -1,4 +1,4 @@
-package tc.oc.pgm.api.event;
+package tc.oc.pgm.util.event;
 
 import java.util.UUID;
 import org.bukkit.event.Event;

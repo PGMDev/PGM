@@ -1,9 +1,9 @@
-package tc.oc.pgm.api.event.entity;
+package tc.oc.pgm.util.event.entity;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.entity.EntityEvent;
-import tc.oc.pgm.api.event.SportPaper;
+import tc.oc.pgm.util.event.SportPaper;
 
 /**
  * This event is called when an {@link Entity} is removed from the world because it has fallen 64

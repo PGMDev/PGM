@@ -15,7 +15,6 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.flag.Flag;
@@ -23,6 +22,7 @@ import tc.oc.pgm.flag.FlagMatchModule;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.event.FlagPickupEvent;
 import tc.oc.pgm.util.block.BlockStates;
+import tc.oc.pgm.util.event.BlockTransformEvent;
 import tc.oc.pgm.util.material.Materials;
 
 /** Base class for flag states in which the banner is placed on the ground somewhere as a block */

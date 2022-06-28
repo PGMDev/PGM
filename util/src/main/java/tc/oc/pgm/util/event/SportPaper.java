@@ -1,4 +1,4 @@
-package tc.oc.pgm.api.event;
+package tc.oc.pgm.util.event;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

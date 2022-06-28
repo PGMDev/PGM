@@ -8,10 +8,10 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.util.block.BlockStates;
+import tc.oc.pgm.util.event.BlockTransformEvent;
 
 /**
  * A version of BlockTransformEvent where the block transformation can be attributed to a player.

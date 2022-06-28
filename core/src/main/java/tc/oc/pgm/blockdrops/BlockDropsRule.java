@@ -1,8 +1,8 @@
 package tc.oc.pgm.blockdrops;
 
-import tc.oc.pgm.api.blockdrops.BlockDrops;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.util.blockdrops.BlockDrops;
 
 public class BlockDropsRule {
   public final Filter filter;

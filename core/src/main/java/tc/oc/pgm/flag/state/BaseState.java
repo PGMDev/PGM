@@ -12,7 +12,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
-import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -26,6 +25,7 @@ import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.event.BlockTransformEvent;
 
 /** Base class for all {@link Flag} states */
 public abstract class BaseState implements Runnable, State {

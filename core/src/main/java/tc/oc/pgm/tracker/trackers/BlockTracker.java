@@ -19,7 +19,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPistonEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
-import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.OwnerInfo;
@@ -27,6 +26,7 @@ import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.api.tracker.info.TrackerInfo;
 import tc.oc.pgm.tracker.info.BlockInfo;
 import tc.oc.pgm.util.ClassLogger;
+import tc.oc.pgm.util.event.BlockTransformEvent;
 
 /** Tracks the ownership of {@link Block}s and resolves damage caused by them */
 public class BlockTracker implements Listener {

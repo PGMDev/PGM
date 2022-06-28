@@ -16,7 +16,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
-import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.Tickable;
@@ -28,6 +27,7 @@ import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.block.BlockFaces;
 import tc.oc.pgm.util.block.BlockVectorSet;
 import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.event.BlockTransformEvent;
 import tc.oc.pgm.util.material.MaterialCounter;
 import tc.oc.pgm.util.material.Materials;
 

@@ -28,7 +28,6 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
@@ -42,6 +41,7 @@ import tc.oc.pgm.filters.query.PlayerBlockQuery;
 import tc.oc.pgm.kits.tag.ItemTags;
 import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.bukkit.MetadataUtils;
+import tc.oc.pgm.util.event.BlockTransformEvent;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ProjectileMatchModule implements MatchModule, Listener {

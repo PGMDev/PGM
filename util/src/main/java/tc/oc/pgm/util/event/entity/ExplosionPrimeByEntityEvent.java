@@ -1,11 +1,11 @@
-package tc.oc.pgm.api.event.entity;
+package tc.oc.pgm.util.event.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Explosive;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
-import tc.oc.pgm.api.event.SportPaper;
+import tc.oc.pgm.util.event.SportPaper;
 
 /**
  * Called when an entity has made another entity decide to explode, specifically when: - a player

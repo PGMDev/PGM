@@ -17,7 +17,6 @@ import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.goal.ShowOption;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -31,6 +30,7 @@ import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
 import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.event.BlockTransformEvent;
 
 @ListenerScope(MatchScope.RUNNING)
 public class CoreMatchModule implements MatchModule, Listener {
