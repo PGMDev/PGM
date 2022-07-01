@@ -1,6 +1,5 @@
 package tc.oc.pgm.loot;
 
-
 import java.util.List;
 
 public class Any {

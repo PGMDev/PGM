@@ -37,19 +37,14 @@ public class LootModule implements MapModule {
       FilterParser filterParser = factory.getFilters();
       KitParser kitParser = factory.getKits();
       AtomicInteger lootableIdSerial = new AtomicInteger(1);
-      // XMLUTils flatten elements
       Element lootablesElement = doc.getRootElement().getChild("lootables");
       for (Element lootElement : lootablesElement.getChildren("loot")) {
         String id = lootElement.getAttributeValue("id");
         if (id == null) {
           id = LootableDefinition.makeDefaultId(null, lootableIdSerial);
         }
-        List<Loot> objects = new ArrayList<>();
-        for (Element itemEl : XMLUtils.getChildren(lootElement, "item")) {
-          ItemStack stack = kitParser.parseItem(itemEl, false);
-          Loot item = new Loot(stack, id);
-          objects.add(item);
-        }
+        List<Loot> lootables = new ArrayList<>();
+        parseAndAddItems(lootElement, lootables, kitParser, id);
         List<Any> anyLootables = new ArrayList<>();
         for (Element anyElement : lootElement.getChildren("any")) {
           int count =
@@ -57,11 +52,7 @@ public class LootModule implements MapModule {
                   Node.fromAttr(anyElement, "count"), Integer.class, Range.atLeast(1), 1);
           boolean unique = XMLUtils.parseBoolean(anyElement, true);
           List<Loot> anyItems = new ArrayList<>();
-          for (Element itemEl : XMLUtils.getChildren(lootElement, "item")) {
-            ItemStack stack = kitParser.parseItem(itemEl, false);
-            Loot item = new Loot(stack, id);
-            anyItems.add(item);
-          }
+          parseAndAddItems(anyElement, anyItems, kitParser, id);
           anyLootables.add(new Any(anyItems, count, unique));
           // TODO readd <option>
         }
@@ -69,11 +60,7 @@ public class LootModule implements MapModule {
         for (Element maybeElement : lootElement.getChildren("maybe")) {
           Filter filter = filterParser.parseRequiredFilterProperty(maybeElement, "filter");
           List<Loot> maybeItems = new ArrayList<>();
-          for (Element itemEl : XMLUtils.getChildren(lootElement, "item")) {
-            ItemStack stack = kitParser.parseItem(itemEl, false);
-            Loot item = new Loot(stack, id);
-            maybeItems.add(item);
-          }
+          parseAndAddItems(maybeElement, maybeItems, kitParser, id);
           maybeLootables.add(new Maybe(maybeItems, filter));
         }
         Element fillElement = lootElement.getChild("fill");
@@ -91,10 +78,19 @@ public class LootModule implements MapModule {
 
           LootableDefinition lootableDefinition =
               new LootableDefinition(
-                  id, objects, anyLootables, maybeLootables, filter, duration, refillClear);
+                  id, lootables, anyLootables, maybeLootables, filter, duration, refillClear);
         }
       }
       return null;
+    }
+
+    public void parseAndAddItems(Element el, List<Loot> lootList, KitParser kitParser, String id)
+        throws InvalidXMLException {
+      for (Element itemEl : XMLUtils.getChildren(el, "item")) {
+        ItemStack stack = kitParser.parseItem(itemEl, false);
+        Loot item = new Loot(stack, id);
+        lootList.add(item);
+      }
     }
 
     public void parseLegacyFill(Element lootablesElement, Element lootElement)
