@@ -34,6 +34,7 @@ public class LootModule implements MapModule {
     @Override
     public LootModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
+      LootModule lootModule = new LootModule();
       FilterParser filterParser = factory.getFilters();
       KitParser kitParser = factory.getKits();
       AtomicInteger lootableIdSerial = new AtomicInteger(1);
@@ -63,23 +64,41 @@ public class LootModule implements MapModule {
           parseAndAddItems(maybeElement, maybeItems, kitParser, id);
           maybeLootables.add(new Maybe(maybeItems, filter));
         }
+        Filter filter = null;
+        Duration refillInterval = null;
+        boolean refillClear = true;
         Element fillElement = lootElement.getChild("fill");
+        // <fill> outside <loot>, legacy
         if (fillElement == null) {
-          parseLegacyFill(lootablesElement, lootElement);
+          List<Element> fillListEl = lootablesElement.getChildren("fill");
+          if (fillListEl != null) {
+            for (Element listEl : fillListEl) {
+              if (listEl.getAttributeValue("id").equals(id)) {
+                filter = filterParser.parseFilterProperty(listEl, "filter", StaticFilter.ALLOW);
+                // TODO add dynamic filter refill-trigger
+                // default to infinite duration
+                refillInterval =
+                    XMLUtils.parseDuration(listEl.getAttribute("refill-interval"), null);
+                refillClear = XMLUtils.parseBoolean(listEl.getAttribute("refill-clear"), true);
+              }
+            }
+          } else {
+            throw new InvalidXMLException("<loot> requires child <fill> element", lootElement);
+          }
+          // <fill> inside <loot>
         } else {
-          Filter filter =
-              filterParser.parseFilterProperty(fillElement, "filter", StaticFilter.ALLOW);
+          filter = filterParser.parseFilterProperty(fillElement, "filter", StaticFilter.ALLOW);
           // TODO add dynamic filter refill-trigger
           // default to infinite duration
-          Duration duration =
+          refillInterval =
               XMLUtils.parseDuration(fillElement.getAttribute("refill-interval"), null);
-          boolean refillClear =
-              XMLUtils.parseBoolean(fillElement.getAttribute("refill-clear"), true);
-
-          LootableDefinition lootableDefinition =
-              new LootableDefinition(
-                  id, lootables, anyLootables, maybeLootables, filter, duration, refillClear);
+          refillClear = XMLUtils.parseBoolean(fillElement.getAttribute("refill-clear"), true);
         }
+        LootableDefinition lootableDefinition =
+            new LootableDefinition(
+                id, lootables, anyLootables, maybeLootables, filter, refillInterval, refillClear);
+        factory.getFeatures().addFeature(lootElement, lootableDefinition);
+        lootModule.lootableDefinitions.add(lootableDefinition);
       }
       return null;
     }
@@ -90,20 +109,6 @@ public class LootModule implements MapModule {
         ItemStack stack = kitParser.parseItem(itemEl, false);
         Loot item = new Loot(stack, id);
         lootList.add(item);
-      }
-    }
-
-    public void parseLegacyFill(Element lootablesElement, Element lootElement)
-        throws InvalidXMLException {
-      if (lootablesElement.getChildren("fill") != null) {
-        for (Element fillElement : lootablesElement.getChildren("fill")) {
-          if (fillElement.getAttribute("id").equals(lootElement.getAttribute("id"))) {
-            // LootableDefinition lootableDefinition = new LootableDefinition();
-            String placeholder;
-          }
-        }
-      } else {
-        throw new InvalidXMLException("<loot> requires child <fill> element", lootElement);
       }
     }
   }
