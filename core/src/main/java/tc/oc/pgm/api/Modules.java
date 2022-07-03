@@ -56,6 +56,8 @@ import tc.oc.pgm.killreward.KillRewardMatchModule;
 import tc.oc.pgm.killreward.KillRewardModule;
 import tc.oc.pgm.kits.KitMatchModule;
 import tc.oc.pgm.kits.KitModule;
+import tc.oc.pgm.loot.LootMatchModule;
+import tc.oc.pgm.loot.LootModule;
 import tc.oc.pgm.modes.ObjectiveModesMatchModule;
 import tc.oc.pgm.modes.ObjectiveModesModule;
 import tc.oc.pgm.modules.ArrowRemovalMatchModule;
@@ -250,6 +252,7 @@ public interface Modules {
     register(
         WorldBorderModule.class, WorldBorderMatchModule.class, new WorldBorderModule.Factory());
     register(SpawnerModule.class, SpawnerMatchModule.class, new SpawnerModule.Factory());
+    register(LootModule.class, LootMatchModule.class, new LootModule.Factory());
 
     // MapModules that are also MatchModules
     register(WorldTimeModule.class, WorldTimeModule.class, new WorldTimeModule.Factory());
