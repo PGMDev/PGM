@@ -4,11 +4,13 @@ import java.util.List;
 
 public class Any {
   private final List<Loot> anyItems;
+  private final List<Option> options;
   private final int count;
   private final boolean unique;
 
-  public Any(List<Loot> anyItems, int count, boolean unique) {
+  public Any(List<Loot> anyItems, List<Option> options, int count, boolean unique) {
     this.anyItems = anyItems;
+    this.options = options;
     this.count = count;
     this.unique = unique;
   }
@@ -19,6 +21,10 @@ public class Any {
 
   public int getCount() {
     return count;
+  }
+
+  public List<Option> getOptions() {
+    return options;
   }
 
   public boolean isUnique() {
