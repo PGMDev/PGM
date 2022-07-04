@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
-import tc.oc.pgm.spawner.SpawnerDefinition;
 
 @FeatureInfo(name = "lootable")
 public class LootableDefinition extends SelfIdentifyingFeatureDefinition {
@@ -43,7 +42,7 @@ public class LootableDefinition extends SelfIdentifyingFeatureDefinition {
 
   public static String makeDefaultId(@Nullable String name, AtomicInteger serial) {
     return "--"
-        + makeTypeName(SpawnerDefinition.class)
+        + makeTypeName(LootableDefinition.class)
         + "-"
         + (name != null ? makeId(name) : serial.getAndIncrement());
   }

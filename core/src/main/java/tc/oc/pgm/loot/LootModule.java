@@ -40,23 +40,25 @@ public class LootModule implements MapModule {
       AtomicInteger lootableIdSerial = new AtomicInteger(1);
       Element lootablesElement = doc.getRootElement().getChild("lootables");
       if (lootablesElement != null) {
-        for (Element lootElement : lootablesElement.getChildren("loot")) {
-          String id = lootElement.getAttributeValue("id");
+        for (Element lootEl : lootablesElement.getChildren("loot")) {
+          String id = lootEl.getAttributeValue("id");
           if (id == null) {
-            id = LootableDefinition.makeDefaultId(null, lootableIdSerial);
+            id = LootableDefinition.makeDefaultId("lootable", lootableIdSerial);
           }
           List<Loot> lootables = new ArrayList<>();
-          parseAndAddItems(lootElement, lootables, kitParser, id);
+          parseAndAddItems(lootEl, lootables, kitParser, id);
 
           List<Any> anyLootables = new ArrayList<>();
-          for (Element anyElement : lootElement.getChildren("any")) {
+          for (Element anyEl : lootEl.getChildren("any")) {
             int count =
                 XMLUtils.parseNumberInRange(
-                    Node.fromAttr(anyElement, "count"), Integer.class, Range.atLeast(1), 1);
-            boolean unique = XMLUtils.parseBoolean(anyElement.getAttribute("unique"), true);
+                    Node.fromAttr(anyEl, "count"), Integer.class, Range.atLeast(1), 1);
+            boolean unique = XMLUtils.parseBoolean(anyEl.getAttribute("unique"), true);
             List<Loot> anyItems = new ArrayList<>();
-            parseAndAddItems(anyElement, anyItems, kitParser, id);
-            List<Element> optionsEl = anyElement.getChildren("option");
+            parseAndAddItems(anyEl, anyItems, kitParser, id);
+
+            // items inside <option>
+            List<Element> optionsEl = anyEl.getChildren("option");
             List<Option> options = new ArrayList<>();
             for (Element optionEl : optionsEl) {
               int weight = XMLUtils.parseNumber(optionEl, int.class, 1);
@@ -66,25 +68,25 @@ public class LootModule implements MapModule {
               options.add(new Option(weight, filter, item));
             }
             if (!options.isEmpty() && !anyItems.isEmpty()) {
-              throw new InvalidXMLException("all <any> children must contain <option>", anyElement);
+              throw new InvalidXMLException("all <any> children must contain <option>", anyEl);
             }
             anyLootables.add(new Any(anyItems, options, count, unique));
           }
 
           List<Maybe> maybeLootables = new ArrayList<>();
-          for (Element maybeElement : lootElement.getChildren("maybe")) {
-            Filter filter = filterParser.parseRequiredFilterProperty(maybeElement, "filter");
+          for (Element maybeEl : lootEl.getChildren("maybe")) {
+            Filter filter = filterParser.parseRequiredFilterProperty(maybeEl, "filter");
             List<Loot> maybeItems = new ArrayList<>();
-            parseAndAddItems(maybeElement, maybeItems, kitParser, id);
+            parseAndAddItems(maybeEl, maybeItems, kitParser, id);
             maybeLootables.add(new Maybe(maybeItems, filter));
           }
 
           Filter filter = null;
           Duration refillInterval = null;
           boolean refillClear = true;
-          Element fillElement = lootElement.getChild("fill");
+          Element fillEl = lootEl.getChild("fill");
           // <fill> outside <loot>, legacy
-          if (fillElement == null) {
+          if (fillEl == null) {
             List<Element> fillListEl = lootablesElement.getChildren("fill");
             if (fillListEl != null) {
               for (Element listEl : fillListEl) {
@@ -98,21 +100,20 @@ public class LootModule implements MapModule {
                 }
               }
             } else {
-              throw new InvalidXMLException("<loot> requires child <fill> element", lootElement);
+              throw new InvalidXMLException("<loot> requires child <fill> element", lootEl);
             }
             // <fill> inside <loot>
           } else {
-            filter = filterParser.parseFilterProperty(fillElement, "filter", StaticFilter.ALLOW);
+            filter = filterParser.parseFilterProperty(fillEl, "filter", StaticFilter.ALLOW);
             // TODO add dynamic filter refill-trigger
             // default to infinite duration
-            refillInterval =
-                XMLUtils.parseDuration(fillElement.getAttribute("refill-interval"), null);
-            refillClear = XMLUtils.parseBoolean(fillElement.getAttribute("refill-clear"), true);
+            refillInterval = XMLUtils.parseDuration(fillEl.getAttribute("refill-interval"), null);
+            refillClear = XMLUtils.parseBoolean(fillEl.getAttribute("refill-clear"), true);
           }
           LootableDefinition lootableDefinition =
               new LootableDefinition(
                   id, lootables, anyLootables, maybeLootables, filter, refillInterval, refillClear);
-          factory.getFeatures().addFeature(lootElement, lootableDefinition);
+          factory.getFeatures().addFeature(lootEl, lootableDefinition);
           lootModule.lootableDefinitions.add(lootableDefinition);
         }
       }

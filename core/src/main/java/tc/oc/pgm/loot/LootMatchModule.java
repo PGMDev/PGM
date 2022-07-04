@@ -1,14 +1,10 @@
 package tc.oc.pgm.loot;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import javax.annotation.Nullable;
 import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -153,22 +149,5 @@ public class LootMatchModule implements MatchModule, Listener {
     return new ImmutableList.Builder<LootCountdown>()
         .addAll(this.countdownContext.getAll(LootCountdown.class))
         .build();
-  }
-
-  public List<LootCountdown> getInctiveCountdowns() {
-    List<LootCountdown> inactiveCountdowns =
-        new ArrayList<>(
-            Collections2.filter(
-                this.getAllCountdowns(),
-                new Predicate<LootCountdown>() {
-                  @Override
-                  public boolean apply(@Nullable LootCountdown countdown) {
-                    return LootMatchModule.this.getCountdown().getTimeLeft(countdown).getSeconds()
-                        < 0;
-                  }
-                }));
-    Collections.sort(inactiveCountdowns);
-
-    return inactiveCountdowns;
   }
 }
