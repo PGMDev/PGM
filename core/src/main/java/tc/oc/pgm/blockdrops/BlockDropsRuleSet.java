@@ -1,6 +1,7 @@
 package tc.oc.pgm.blockdrops;
 
 import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +16,11 @@ import org.bukkit.material.MaterialData;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.filters.query.MaterialQuery;
 import tc.oc.pgm.filters.query.Queries;
+import tc.oc.pgm.kits.Kit;
+import tc.oc.pgm.kits.KitNode;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.event.PlayerPunchBlockEvent;
@@ -83,6 +87,7 @@ public class BlockDropsRuleSet {
       MaterialData material,
       @Nullable ParticipantState playerState) {
     Map<ItemStack, Double> items = new LinkedHashMap<>();
+    List<Kit> kits = new ArrayList<>();
     MaterialData replacement = null;
     Float fallChance = null;
     Float landChance = null;
@@ -112,6 +117,10 @@ public class BlockDropsRuleSet {
 
       custom = true;
 
+      if (rule.drops.kit != null) {
+        kits.add(rule.drops.kit);
+      }
+
       if (rule.drops.replacement != null) {
         replacement = rule.drops.replacement;
       }
@@ -135,7 +144,14 @@ public class BlockDropsRuleSet {
     }
 
     return custom
-        ? new BlockDrops(items, experience, replacement, fallChance, landChance, fallSpeed)
+        ? new BlockDrops(
+            items,
+            new KitNode(kits, StaticFilter.ALLOW, null, null),
+            experience,
+            replacement,
+            fallChance,
+            landChance,
+            fallSpeed)
         : null;
   }
 }
