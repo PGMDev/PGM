@@ -30,6 +30,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.event.CompetitorScoreChangeEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -38,6 +39,7 @@ import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerParticipationStartEvent;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
+import tc.oc.pgm.filters.dynamic.FilterMatchModule;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
@@ -51,14 +53,20 @@ public class ScoreMatchModule implements MatchModule, Listener {
   private final Match match;
   private final ScoreConfig config;
   private final Set<ScoreBox> scoreBoxes;
+  private final Set<ScoreOnFilter> scoreOnFilters;
   private final Map<UUID, Double> contributions = new DefaultMapAdapter<>(new HashMap<>(), 0d);
   private final Map<Competitor, Double> scores = new DefaultMapAdapter<>(new HashMap<>(), 0d);
   private MercyRule mercyRule;
 
-  public ScoreMatchModule(Match match, ScoreConfig config, Set<ScoreBox> scoreBoxes) {
+  public ScoreMatchModule(
+      Match match,
+      ScoreConfig config,
+      Set<ScoreBox> scoreBoxes,
+      Set<ScoreOnFilter> scoreOnFilters) {
     this.match = match;
     this.config = config;
     this.scoreBoxes = scoreBoxes;
+    this.scoreOnFilters = scoreOnFilters;
     this.match.getCompetitors().forEach(competitor -> this.scores.put(competitor, 0.0));
 
     if (this.config.mercyLimit > 0) {
@@ -67,8 +75,16 @@ public class ScoreMatchModule implements MatchModule, Listener {
   }
 
   @Override
-  public void load() {
+  public void load() throws ModuleLoadException {
     match.addVictoryCondition(new ScoreVictoryCondition());
+
+    if (!scoreOnFilters.isEmpty()) {
+      FilterMatchModule fmm = match.needModule(FilterMatchModule.class);
+      scoreOnFilters.forEach(
+          scoreOnFilter -> {
+            scoreOnFilter.load(this, fmm);
+          });
+    }
   }
 
   public boolean hasScoreLimit() {

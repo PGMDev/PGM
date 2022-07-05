@@ -8,8 +8,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -38,12 +40,17 @@ public class ScoreModule implements MapModule {
       new MapTag("tdm", "deathmatch", "Deathmatch", true, false);
   private static final MapTag BOX_TAG = new MapTag("scorebox", "Scorebox", false, true);
 
-  public ScoreModule(@Nonnull ScoreConfig config, @Nonnull Set<ScoreBoxFactory> scoreBoxFactories) {
+  public ScoreModule(
+      @Nonnull ScoreConfig config,
+      @Nonnull Set<ScoreBoxFactory> scoreBoxFactories,
+      @Nonnull Set<ScoreOnFilterFactory> scoreOnFilterFactories) {
     Preconditions.checkNotNull(config, "score config");
     Preconditions.checkNotNull(scoreBoxFactories, "score box factories");
+    Preconditions.checkNotNull(scoreOnFilterFactories, "score on filter factories");
 
     this.config = config;
     this.scoreBoxFactories = scoreBoxFactories;
+    this.scoreOnFilterFactories = scoreOnFilterFactories;
   }
 
   @Override
@@ -61,11 +68,17 @@ public class ScoreModule implements MapModule {
       scoreBoxes.add(factory.createScoreBox(match));
     }
 
-    return new ScoreMatchModule(match, this.config, scoreBoxes.build());
+    ImmutableSet.Builder<ScoreOnFilter> scoreOnFilters = ImmutableSet.builder();
+    for (ScoreOnFilterFactory factory : this.scoreOnFilterFactories) {
+      scoreOnFilters.add(factory.createScoreOnFilter(match));
+    }
+
+    return new ScoreMatchModule(match, this.config, scoreBoxes.build(), scoreOnFilters.build());
   }
 
   private final @Nonnull ScoreConfig config;
   private final @Nonnull Set<ScoreBoxFactory> scoreBoxFactories;
+  private final @Nonnull Set<ScoreOnFilterFactory> scoreOnFilterFactories;
 
   @Nonnull
   public ScoreConfig getConfig() {
@@ -74,8 +87,13 @@ public class ScoreModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<ScoreModule> {
     @Override
+    public Collection<Class<? extends MapModule>> getHardDependencies() {
+      return ImmutableList.of(FilterModule.class);
+    }
+
+    @Override
     public Collection<Class<? extends MapModule>> getSoftDependencies() {
-      return ImmutableList.of(RegionModule.class, FilterModule.class);
+      return ImmutableList.of(RegionModule.class);
     }
 
     @Override
@@ -96,6 +114,7 @@ public class ScoreModule implements MapModule {
       RegionParser regionParser = factory.getRegions();
       ScoreConfig config = new ScoreConfig();
       ImmutableSet.Builder<ScoreBoxFactory> scoreBoxFactories = ImmutableSet.builder();
+      ImmutableSet.Builder<ScoreOnFilterFactory> scoreOnFilterFactories = ImmutableSet.builder();
 
       for (Element scoreEl : scoreElements) {
         config.scoreLimit = XMLUtils.parseNumber(scoreEl.getChild("limit"), Integer.class, -1);
@@ -112,6 +131,36 @@ public class ScoreModule implements MapModule {
         config.killScore =
             XMLUtils.parseNumber(
                 scoreEl.getChild("kills"), Integer.class, scoreKillsByDefault ? 1 : 0);
+
+        for (Element filterEl : scoreEl.getChildren("on")) {
+          Filter teamFilter = factory.getFilters().parseFilterProperty(filterEl, "team");
+          Filter playerFilter = factory.getFilters().parseFilterProperty(filterEl, "player");
+
+          if (teamFilter != null && playerFilter != null) {
+            throw new InvalidXMLException(
+                "Cannot combine 'team' and 'player' properties", filterEl);
+          }
+
+          Filter finalFilter =
+              Stream.of(playerFilter, teamFilter)
+                  .filter(Objects::nonNull)
+                  .findFirst()
+                  .orElseThrow(
+                      () ->
+                          new InvalidXMLException(
+                              "Score on filter must have a 'team' or a 'player' property",
+                              filterEl));
+
+          ScoreOnFilterType type;
+          if (teamFilter != null) {
+            type = ScoreOnFilterType.TEAM;
+          } else {
+            type = ScoreOnFilterType.PLAYER;
+          }
+
+          double score = XMLUtils.parseNumber(filterEl.getAttribute("score"), Integer.class, 1);
+          scoreOnFilterFactories.add(new ScoreOnFilterFactory(finalFilter, score, type));
+        }
 
         for (Element scoreBoxEl : scoreEl.getChildren("box")) {
           int points =
@@ -146,7 +195,7 @@ public class ScoreModule implements MapModule {
                   region, points, filter, ImmutableMap.copyOf(redeemables), silent));
         }
       }
-      return new ScoreModule(config, scoreBoxFactories.build());
+      return new ScoreModule(config, scoreBoxFactories.build(), scoreOnFilterFactories.build());
     }
   }
 }
