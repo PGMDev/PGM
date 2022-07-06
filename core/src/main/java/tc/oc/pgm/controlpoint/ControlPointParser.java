@@ -83,6 +83,7 @@ public abstract class ControlPointParser {
     final Node attrDecay = Node.fromAttr(elControlPoint, "decay", "decay-rate");
     final Node attrRecovery = Node.fromAttr(elControlPoint, "recovery", "recovery-rate");
     final Node attrOwnedDecay = Node.fromAttr(elControlPoint, "owned-decay", "owned-decay-rate");
+    final Node attrContested = Node.fromAttr(elControlPoint, "contested", "contested-rate");
     if (attrIncremental == null) {
       recoveryRate =
           XMLUtils.parseNumber(attrRecovery, Double.class, koth ? 1D : Double.POSITIVE_INFINITY);
@@ -100,10 +101,7 @@ public abstract class ControlPointParser {
       decayRate = incremental ? 0.0 : Double.POSITIVE_INFINITY;
       ownedDecayRate = 0.0;
     }
-
-    contestedRate =
-        XMLUtils.parseNumber(
-            Node.fromAttr(elControlPoint, "contested", "contested-rate"), Double.class, decayRate);
+    contestedRate = XMLUtils.parseNumber(attrContested, Double.class, decayRate);
 
     float timeMultiplier =
         XMLUtils.parseNumber(
@@ -111,7 +109,7 @@ public abstract class ControlPointParser {
     boolean neutralState =
         XMLUtils.parseBoolean(elControlPoint.getAttribute("neutral-state"), koth);
 
-    if (neutralState == false && ownedDecayRate > 0) {
+    if (!neutralState && ownedDecayRate > 0) {
       throw new InvalidXMLException("This attribute requires a neutral state.", attrOwnedDecay);
     }
     boolean permanent = XMLUtils.parseBoolean(elControlPoint.getAttribute("permanent"), false);
@@ -133,6 +131,12 @@ public abstract class ControlPointParser {
             ControlPointDefinition.CaptureCondition.class,
             "capture rule",
             ControlPointDefinition.CaptureCondition.EXCLUSIVE);
+
+    if (attrContested != null
+        && captureCondition != ControlPointDefinition.CaptureCondition.EXCLUSIVE) {
+      throw new InvalidXMLException(
+          "Contested rate may only apply to exclusive capture rule.", attrContested);
+    }
 
     return new ControlPointDefinition(
         id,
