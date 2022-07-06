@@ -311,6 +311,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
       }
     }
 
+    boolean contested = false;
     int lead = 0;
     if (leader != null) {
       lead = playerCounts.get(leader);
@@ -319,6 +320,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
       switch (this.definition.getCaptureCondition()) {
         case EXCLUSIVE:
           if (defenderCount > 0) {
+            contested = true;
             lead = 0;
           }
           break;
@@ -336,9 +338,9 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
     }
 
     if (lead > 0) {
-      this.dominateAndFireEvents(leader, calculateDominateTime(lead, duration));
+      this.dominateAndFireEvents(leader, calculateDominateTime(lead, duration), contested);
     } else {
-      this.dominateAndFireEvents(null, duration);
+      this.dominateAndFireEvents(null, duration, contested);
     }
   }
 
@@ -347,12 +349,13 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
    * team can be null, which means no team is dominating the point, which can cause the state to
    * change in some configurations.
    */
-  private void dominateAndFireEvents(@Nullable Competitor dominantTeam, Duration dominantTime) {
+  private void dominateAndFireEvents(
+      @Nullable Competitor dominantTeam, Duration dominantTime, boolean contested) {
     Duration oldCapturingTime = this.capturingTime;
     Competitor oldCapturingTeam = this.capturingTeam;
     Competitor oldControllingTeam = this.controllingTeam;
 
-    this.dominate(dominantTeam, dominantTime);
+    this.dominate(dominantTeam, dominantTime, contested);
 
     if (oldCapturingTeam != this.capturingTeam || !oldCapturingTime.equals(this.capturingTime)) {
       this.match.callEvent(new CapturingTimeChangeEvent(this.match, this));
@@ -404,7 +407,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
    * <p>If there is no neutral state, then the point is always either being captured by a specific
    * team, or not being captured at all.
    */
-  private void dominate(Competitor dominantTeam, Duration dominantTime) {
+  private void dominate(Competitor dominantTeam, Duration dominantTime, boolean contested) {
     if (!this.capturable || !TimeUtils.isLongerThan(dominantTime, Duration.ZERO)) {
       return;
     }
@@ -414,10 +417,13 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
       // Point is owned and must go through the neutral state before another team can capture it
       if (dominantTeam == this.controllingTeam) {
         // owner is recovering the point
-        recover(dominantTeam, dominantTime);
+        recover(dominantTeam, dominantTime, contested);
       } else if (dominantTeam != null) {
         // non-owner is uncapturing the point
-        uncapture(dominantTeam, dominantTime);
+        uncapture(dominantTeam, dominantTime, contested);
+      } else if (contested) {
+        // the point is contested, so use contested decay
+        contestedDecay(dominantTime);
       } else if (definition.getOwnedDecayRate() > 0) {
         // nobody on point so decay to neutral state
         ownedDecay(dominantTime);
@@ -432,7 +438,10 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
         capture(dominantTime);
       } else if (dominantTeam != null) {
         // non-capturing team is dominate, so regress capturing team's progress
-        recover(dominantTeam, dominantTime);
+        recover(dominantTeam, dominantTime, contested);
+      } else if (contested) {
+        // the point is contested, so use contested decay
+        contestedDecay(dominantTime);
       } else {
         // No team is dominating so decay
         decay(dominantTime);
@@ -443,7 +452,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
       // Point is not being captured and there is a dominant team that is not the owner, so they
       // start capturing
       this.capturingTeam = dominantTeam;
-      this.dominate(dominantTeam, dominantTime);
+      this.dominate(dominantTeam, dominantTime, contested);
     }
   }
 
@@ -482,16 +491,16 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
   }
 
   /** Progress towards the neutral state */
-  private void uncapture(Competitor dominantTeam, Duration dominantTime) {
+  private void uncapture(Competitor dominantTeam, Duration dominantTime, boolean contested) {
     dominantTime = addCaptureTime(dominantTime);
     if (dominantTime != null) {
       this.controllingTeam = null;
-      this.dominate(dominantTeam, dominantTime);
+      this.dominate(dominantTeam, dominantTime, contested);
     }
   }
 
   /** Point being pulled back to current state (There is a lead on the point) */
-  private void recover(Competitor dominantTeam, Duration dominantTime) {
+  private void recover(Competitor dominantTeam, Duration dominantTime, boolean contested) {
     dominantTime =
         subtractCaptureTime(
             Duration.ofMillis((long) (definition.getRecoveryRate() * dominantTime.toMillis())));
@@ -502,8 +511,19 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
         this.dominate(
             dominantTeam,
             Duration.ofMillis(
-                (long) ((1.0 / definition.getRecoveryRate()) * dominantTime.toMillis())));
+                (long) ((1.0 / definition.getRecoveryRate()) * dominantTime.toMillis())),
+            contested);
       }
+    }
+  }
+
+  /** Point is being decayed back to its current state (Point is contested) */
+  private void contestedDecay(Duration dominantTime) {
+    dominantTime =
+        subtractCaptureTime(
+            Duration.ofMillis((long) (definition.getContestedRate() * dominantTime.toMillis())));
+    if (dominantTime != null) {
+      this.capturingTeam = null;
     }
   }
 

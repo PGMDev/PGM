@@ -78,7 +78,7 @@ public abstract class ControlPointParser {
     Duration timeToCapture =
         XMLUtils.parseDuration(elControlPoint.getAttribute("capture-time"), Duration.ofSeconds(30));
 
-    final double decayRate, recoveryRate, ownedDecayRate;
+    final double decayRate, recoveryRate, ownedDecayRate, contestedRate;
     final Node attrIncremental = Node.fromAttr(elControlPoint, "incremental");
     final Node attrDecay = Node.fromAttr(elControlPoint, "decay", "decay-rate");
     final Node attrRecovery = Node.fromAttr(elControlPoint, "recovery", "recovery-rate");
@@ -100,6 +100,10 @@ public abstract class ControlPointParser {
       decayRate = incremental ? 0.0 : Double.POSITIVE_INFINITY;
       ownedDecayRate = 0.0;
     }
+
+    contestedRate =
+        XMLUtils.parseNumber(
+            Node.fromAttr(elControlPoint, "contested", "contested-rate"), Double.class, decayRate);
 
     float timeMultiplier =
         XMLUtils.parseNumber(
@@ -146,6 +150,7 @@ public abstract class ControlPointParser {
         decayRate,
         recoveryRate,
         ownedDecayRate,
+        contestedRate,
         timeMultiplier,
         initialOwner,
         captureCondition,
