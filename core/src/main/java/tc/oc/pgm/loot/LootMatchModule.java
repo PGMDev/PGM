@@ -20,6 +20,7 @@ import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.filters.dynamic.FilterMatchModule;
 import tc.oc.pgm.filters.query.BlockQuery;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -56,6 +57,7 @@ public class LootMatchModule implements MatchModule, Listener {
 
   @Override
   public void load() throws ModuleLoadException {
+    FilterMatchModule fmm = match.needModule(FilterMatchModule.class);
     for (LootableDefinition definition : this.definitions) {
       LootCountdown countdown = new LootCountdown(match, this, definition);
       this.lootCountdowns.add(countdown);
@@ -65,6 +67,14 @@ public class LootMatchModule implements MatchModule, Listener {
       // passes the filter the inventory of it will be cached then when that chest is set to refill
       // it will populate it using what items were in there from the start rather than rolling a
       // loot table
+      if (definition.getRefillTrigger() != null) {
+        fmm.onRise(
+            MatchPlayer.class,
+            definition.getRefillTrigger(),
+            listener -> {
+              // TODO figure this out
+            });
+      }
     }
   }
 
@@ -86,7 +96,6 @@ public class LootMatchModule implements MatchModule, Listener {
           if (countdown.getLootableDefinition().equals(definition)) {
             BlockQuery query = new BlockQuery(event, clickedMaterial);
             // filter defined in <fill>
-            // TODO add dynamic filter refill-trigger
             if (definition.filter.query(query).isAllowed()) {
               if (definition.refillClear) {
                 containerInventory.clear();

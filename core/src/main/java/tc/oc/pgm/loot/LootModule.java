@@ -87,6 +87,7 @@ public class LootModule implements MapModule {
           }
 
           Filter filter = null;
+          Filter refillTrigger = null;
           Duration refillInterval = null;
           boolean refillClear = true;
           Element fillEl = lootEl.getChild("fill");
@@ -97,7 +98,7 @@ public class LootModule implements MapModule {
               for (Element listEl : fillListEl) {
                 if (listEl.getAttributeValue("loot").equals(id)) {
                   filter = filterParser.parseFilterProperty(listEl, "filter", StaticFilter.ALLOW);
-                  // TODO add dynamic filter refill-trigger
+                  refillTrigger = filterParser.parseFilterProperty(listEl, "refill-trigger", null);
                   // default to infinite duration
                   refillInterval =
                       XMLUtils.parseDuration(listEl.getAttribute("refill-interval"), null);
@@ -110,7 +111,7 @@ public class LootModule implements MapModule {
             // <fill> inside <loot>
           } else {
             filter = filterParser.parseFilterProperty(fillEl, "filter", StaticFilter.ALLOW);
-            // TODO add dynamic filter refill-trigger
+            refillTrigger = filterParser.parseFilterProperty(fillEl, "refill-trigger", null);
             // default to infinite duration
             refillInterval = XMLUtils.parseDuration(fillEl.getAttribute("refill-interval"), null);
             refillClear = XMLUtils.parseBoolean(fillEl.getAttribute("refill-clear"), true);
@@ -123,6 +124,7 @@ public class LootModule implements MapModule {
                   maybeLootables,
                   null,
                   filter,
+                  refillTrigger,
                   refillInterval,
                   refillClear);
           factory.getFeatures().addFeature(lootEl, lootableDefinition);
@@ -138,7 +140,7 @@ public class LootModule implements MapModule {
         for (Cache cache : caches) {
           String id = LootableDefinition.makeDefaultId("lootable-cache", cacheIdSerial);
           LootableDefinition lootableDefinition =
-              new LootableDefinition(id, null, null, null, cache, null, null, false);
+              new LootableDefinition(id, null, null, null, cache, null, null, null, false);
           factory.getFeatures().addFeature(lootablesElement, lootableDefinition);
           lootModule.lootableDefinitions.add(lootableDefinition);
         }
