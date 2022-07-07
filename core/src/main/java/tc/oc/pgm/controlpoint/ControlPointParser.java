@@ -132,12 +132,6 @@ public abstract class ControlPointParser {
             "capture rule",
             ControlPointDefinition.CaptureCondition.EXCLUSIVE);
 
-    if (attrContested != null
-        && captureCondition != ControlPointDefinition.CaptureCondition.EXCLUSIVE) {
-      throw new InvalidXMLException(
-          "Contested rate may only apply to exclusive capture rule.", attrContested);
-    }
-
     return new ControlPointDefinition(
         id,
         name,
