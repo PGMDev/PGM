@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import javax.annotation.Nullable;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -81,11 +82,36 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
     }
   }
 
-  private void dropItems(BlockDrops drops, Location location, double yield) {
-    Random random = match.getRandom();
-    for (Map.Entry<ItemStack, Double> entry : drops.items.entrySet()) {
-      if (random.nextFloat() < yield * entry.getValue()) {
-        location.getWorld().dropItemNaturally(location, entry.getKey());
+  private void dropObjects(
+      BlockDrops drops,
+      @Nullable MatchPlayer player,
+      Location location,
+      double yield,
+      boolean explosion) {
+    giveKit(drops, player);
+    if (explosion) {
+      match
+          .getExecutor(MatchScope.RUNNING)
+          .execute(() -> dropItems(drops, player, location, yield));
+    } else {
+      dropItems(drops, player, location, yield);
+      dropExperience(drops, location);
+    }
+  }
+
+  private void giveKit(BlockDrops drops, MatchPlayer player) {
+    if (player != null && player.isParticipating() && player.canInteract() && drops.kit != null) {
+      player.applyKit(drops.kit, false);
+    }
+  }
+
+  private void dropItems(BlockDrops drops, MatchPlayer player, Location location, double yield) {
+    if (player == null || player.getBukkit().getGameMode() != GameMode.CREATIVE) {
+      Random random = match.getRandom();
+      for (Map.Entry<ItemStack, Double> entry : drops.items.entrySet()) {
+        if (random.nextFloat() < yield * entry.getValue()) {
+          location.getWorld().dropItemNaturally(location, entry.getKey());
+        }
       }
     }
   }
@@ -140,9 +166,14 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
 
       block.setTypeIdAndData(newTypeId, newData, true);
 
+      float yield = 1f;
+      boolean explosion = false;
+      MatchPlayer player = ParticipantBlockTransformEvent.getParticipant(event);
+
       if (event.getCause() instanceof EntityExplodeEvent) {
         EntityExplodeEvent explodeEvent = (EntityExplodeEvent) event.getCause();
-        final float yield = explodeEvent.getYield();
+        explosion = true;
+        yield = explodeEvent.getYield();
 
         if (drops.fallChance != null
             && oldState.getType().isBlock()
@@ -192,20 +223,9 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
 
           fallingBlock.setVelocity(v);
         }
-
-        // Defer item drops so the explosion doesn't destroy them
-        match
-            .getExecutor(MatchScope.RUNNING)
-            .execute(() -> dropItems(drops, newState.getLocation(), yield));
-      } else {
-        MatchPlayer player = ParticipantBlockTransformEvent.getParticipant(event);
-        if (player == null
-            || player.getBukkit().getGameMode()
-                != GameMode.CREATIVE) { // Don't drop items in creative mode
-          dropItems(drops, newState.getLocation(), 1d);
-          dropExperience(drops, newState.getLocation());
-        }
       }
+
+      dropObjects(drops, player, newState.getLocation(), yield, explosion);
     }
   }
 
@@ -242,8 +262,7 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
     Location location = hit.getPosition().toLocation(hit.getBlock().getWorld());
 
     Materials.playBreakEffect(location, oldMaterial);
-    dropItems(drops, location, 1d);
-    dropExperience(drops, location);
+    dropObjects(drops, player, location, 1d, false);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -258,7 +277,6 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
     replaceBlock(drops, event.getBlock(), player);
 
     Location location = player.getBukkit().getLocation();
-    dropItems(drops, location, 1d);
-    dropExperience(drops, location);
+    dropObjects(drops, player, location, 1d, false);
   }
 }

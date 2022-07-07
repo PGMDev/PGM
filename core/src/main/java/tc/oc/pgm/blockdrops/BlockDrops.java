@@ -5,10 +5,12 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
+import tc.oc.pgm.kits.Kit;
 
 /** The result of breaking a block */
 public class BlockDrops {
   public final ImmutableMap<ItemStack, Double> items; // probability -> item
+  public final Kit kit;
   public final int experience;
   public final @Nullable MaterialData replacement;
   public final @Nullable Float fallChance;
@@ -17,12 +19,14 @@ public class BlockDrops {
 
   public BlockDrops(
       Map<ItemStack, Double> items,
+      Kit kit,
       int experience,
       @Nullable MaterialData replacement,
       @Nullable Float fallChance,
       @Nullable Float landChance,
       @Nullable Double fallSpeed) {
     this.items = ImmutableMap.copyOf(items);
+    this.kit = kit;
     this.experience = experience;
     this.replacement = replacement;
     this.fallChance = fallChance;
@@ -37,6 +41,8 @@ public class BlockDrops {
         + this.replacement
         + " items.size="
         + this.items.size()
+        + " kit="
+        + this.kit
         + " experience="
         + this.experience
         + " fallChance="
