@@ -42,12 +42,14 @@ public class LootMatchModule implements MatchModule, Listener {
   };
   private final Match match;
   private final List<LootableDefinition> definitions;
+  private final List<FillableCache> fillableCaches;
   private final List<LootCountdown> lootCountdowns;
   private final CountdownContext countdownContext;
 
   public LootMatchModule(Match match, List<LootableDefinition> definitions) {
     this.match = match;
     this.definitions = definitions;
+    this.fillableCaches = new ArrayList<>(this.definitions.size());
     this.lootCountdowns = new ArrayList<>(this.definitions.size());
     this.countdownContext = new CountdownContext(match, match.getLogger());
   }
@@ -58,6 +60,11 @@ public class LootMatchModule implements MatchModule, Listener {
       LootCountdown countdown = new LootCountdown(match, this, definition);
       this.lootCountdowns.add(countdown);
       // dynamic filter refill-trigger (example in ObjectiveModesMatchModule)
+
+      // looking at the code it seems like if a chest is opened that's in the defined region and
+      // passes the filter the inventory of it will be cached then when that chest is set to refill
+      // it will populate it using what items were in there from the start rather than rolling a
+      // loot table
     }
   }
 
@@ -128,6 +135,20 @@ public class LootMatchModule implements MatchModule, Listener {
                   }
                 }
               }
+            }
+          }
+        }
+        // Find all Caches that the opened inventory is part of
+        if (definition.getCache() != null) {
+          // if chest is in region and passes filter, fix this
+          if (definition.getCache().getFilter().query(matchPlayer).isAllowed()) {
+            FillableCache fillableCache =
+                new FillableCache(containerInventory, definition.getId(), definition.getCache());
+            if (fillableCaches.contains(fillableCache)) {
+              containerInventory = fillableCache.getInventory();
+            } else {
+              this.fillableCaches.add(
+                  new FillableCache(containerInventory, definition.getId(), definition.getCache()));
             }
           }
         }

@@ -13,6 +13,7 @@ public class LootableDefinition extends SelfIdentifyingFeatureDefinition {
   public final List<Loot> lootableItems;
   public final List<Any> anyLootables;
   public final List<Maybe> maybeLootables;
+  public final Cache cache;
   public final Filter filter;
   public final Duration refillInterval;
   public final boolean refillClear;
@@ -22,6 +23,7 @@ public class LootableDefinition extends SelfIdentifyingFeatureDefinition {
       List<Loot> lootableItems,
       List<Any> anyLootables,
       List<Maybe> maybeLootables,
+      Cache cache,
       Filter filter,
       // refill-trigger
       Duration refillInterval,
@@ -30,6 +32,7 @@ public class LootableDefinition extends SelfIdentifyingFeatureDefinition {
     this.lootableItems = lootableItems;
     this.anyLootables = anyLootables;
     this.maybeLootables = maybeLootables;
+    this.cache = cache;
     this.filter = filter;
     this.refillInterval = refillInterval;
     this.refillClear = refillClear;
@@ -38,6 +41,10 @@ public class LootableDefinition extends SelfIdentifyingFeatureDefinition {
   @Override
   protected String getDefaultId() {
     return super.makeDefaultId();
+  }
+
+  public Cache getCache() {
+    return cache;
   }
 
   public static String makeDefaultId(@Nullable String name, AtomicInteger serial) {

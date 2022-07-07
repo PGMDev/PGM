@@ -15,9 +15,11 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.kits.KitParser;
+import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -37,7 +39,10 @@ public class LootModule implements MapModule {
       LootModule lootModule = new LootModule();
       FilterParser filterParser = factory.getFilters();
       KitParser kitParser = factory.getKits();
+      RegionParser regionParser = factory.getRegions();
       AtomicInteger lootableIdSerial = new AtomicInteger(1);
+      AtomicInteger cacheIdSerial = new AtomicInteger(1);
+
       Element lootablesElement = doc.getRootElement().getChild("lootables");
       if (lootablesElement != null) {
         for (Element lootEl : lootablesElement.getChildren("loot")) {
@@ -112,8 +117,29 @@ public class LootModule implements MapModule {
           }
           LootableDefinition lootableDefinition =
               new LootableDefinition(
-                  id, lootables, anyLootables, maybeLootables, filter, refillInterval, refillClear);
+                  id,
+                  lootables,
+                  anyLootables,
+                  maybeLootables,
+                  null,
+                  filter,
+                  refillInterval,
+                  refillClear);
           factory.getFeatures().addFeature(lootEl, lootableDefinition);
+          lootModule.lootableDefinitions.add(lootableDefinition);
+        }
+        List<Cache> caches = new ArrayList<>();
+        for (Element cacheEl : lootablesElement.getChildren("cache")) {
+          Filter cacheFilter =
+              filterParser.parseFilterProperty(cacheEl, "filter", StaticFilter.ALLOW);
+          Region region = regionParser.parseRegionProperty(cacheEl, "region");
+          caches.add(new Cache(cacheFilter, region));
+        }
+        for (Cache cache : caches) {
+          String id = LootableDefinition.makeDefaultId("lootable-cache", cacheIdSerial);
+          LootableDefinition lootableDefinition =
+              new LootableDefinition(id, null, null, null, cache, null, null, false);
+          factory.getFeatures().addFeature(lootablesElement, lootableDefinition);
           lootModule.lootableDefinitions.add(lootableDefinition);
         }
       }
