@@ -23,7 +23,9 @@ import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.itemmeta.ItemModifyModule;
+import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitModule;
+import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -55,6 +57,7 @@ public class BlockDropsModule implements MapModule {
       List<BlockDropsRule> rules = new ArrayList<>();
       FilterParser filterParser = factory.getFilters();
       RegionParser regionParser = factory.getRegions();
+      KitParser kitParser = factory.getKits();
       final Optional<ItemModifyModule> itemModifier =
           Optional.ofNullable(factory.getModule(ItemModifyModule.class));
 
@@ -65,6 +68,7 @@ public class BlockDropsModule implements MapModule {
               ImmutableSet.of("rule"))) {
         Filter filter = filterParser.parseFilterProperty(elRule, "filter");
         Region region = regionParser.parseRegionProperty(elRule, "region");
+        Kit kit = kitParser.parseKitProperty(elRule, "kit", null);
 
         boolean dropOnWrongTool =
             XMLUtils.parseBoolean(Node.fromChildOrAttr(elRule, "wrong-tool", "wrongtool"), false);
@@ -103,7 +107,8 @@ public class BlockDropsModule implements MapModule {
                 dropOnWrongTool,
                 punchable,
                 trample,
-                new BlockDrops(items, experience, replacement, fallChance, landChance, fallSpeed)));
+                new BlockDrops(
+                    items, kit, experience, replacement, fallChance, landChance, fallSpeed)));
       }
 
       return rules.isEmpty() ? null : new BlockDropsModule(new BlockDropsRuleSet(rules));
