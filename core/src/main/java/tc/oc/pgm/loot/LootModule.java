@@ -66,9 +66,11 @@ public class LootModule implements MapModule {
             List<Element> optionsEl = anyEl.getChildren("option");
             List<Option> options = new ArrayList<>();
             for (Element optionEl : optionsEl) {
-              int weight = XMLUtils.parseNumber(optionEl, int.class, 1);
-              Filter filter = filterParser.parseFilterProperty(optionEl, "filter");
-              ItemStack stack = kitParser.parseItem(optionEl, false);
+              double weight =
+                  XMLUtils.parseNumber(optionEl.getAttribute("weight"), Double.class, 1.0);
+              Filter filter =
+                  filterParser.parseFilterProperty(optionEl, "filter", StaticFilter.ALLOW);
+              ItemStack stack = kitParser.parseItem(optionEl.getChild("item"), false);
               Loot item = new Loot(stack, id);
               options.add(new Option(weight, filter, item));
             }

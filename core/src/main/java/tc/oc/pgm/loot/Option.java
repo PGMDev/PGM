@@ -3,17 +3,17 @@ package tc.oc.pgm.loot;
 import tc.oc.pgm.api.filter.Filter;
 
 public class Option {
-  private final int weight;
+  private final double weight;
   private final Filter filter;
   private final Loot item;
 
-  public Option(int weight, Filter filter, Loot item) {
+  public Option(double weight, Filter filter, Loot item) {
     this.weight = weight;
     this.filter = filter;
     this.item = item;
   }
 
-  public int getWeight() {
+  public double getWeight() {
     return weight;
   }
 

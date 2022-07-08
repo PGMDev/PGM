@@ -128,15 +128,25 @@ public class LootMatchModule implements MatchModule, Listener {
                 if (!any.getOptions().isEmpty()) {
                   List<Option> options = new ArrayList<>(any.getOptions());
                   // TODO implement weight probability
+                  double accumulatedWeight = 0;
+                  for (Option option : options) {
+                    accumulatedWeight += option.getWeight();
+                  }
+
                   for (int i = 0; i < any.getCount(); ) {
-                    Option chosenOption = options.get(rand.nextInt(any.getOptions().size()));
-                    if (chosenOption.getFilter().query(matchPlayer).isAllowed()) {
-                      containerInventory.addItem(chosenOption.getItem().getStack());
-                      if (any.isUnique()) {
-                        options.remove(chosenOption);
+                    double random = rand.nextDouble() * accumulatedWeight;
+                    if (options.get(i).getWeight() >= random) {
+                      Option chosenOption = options.get(i);
+                      if (chosenOption.getFilter().query(matchPlayer).isAllowed()) {
+                        containerInventory.addItem(chosenOption.getItem().getStack());
+                        if (any.isUnique()) {
+                          options.remove(chosenOption);
+                          // remove weight too?
+                          accumulatedWeight -= chosenOption.getWeight();
+                        }
+                        i++;
+                        // do we still count the option if it is ineligible by the filter?
                       }
-                      // do we still count the option if it is ineligible by the filter?
-                      i++;
                     }
                   }
                 }
