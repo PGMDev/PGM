@@ -20,7 +20,6 @@ import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.filters.dynamic.FilterMatchModule;
 import tc.oc.pgm.filters.query.BlockQuery;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -57,16 +56,15 @@ public class LootMatchModule implements MatchModule, Listener {
 
   @Override
   public void load() throws ModuleLoadException {
-    FilterMatchModule fmm = match.needModule(FilterMatchModule.class);
+    // FilterMatchModule fmm = match.needModule(FilterMatchModule.class);
     for (LootableDefinition definition : this.definitions) {
       LootCountdown countdown = new LootCountdown(match, this, definition);
       this.lootCountdowns.add(countdown);
-      // dynamic filter refill-trigger (example in ObjectiveModesMatchModule)
-
       // looking at the code it seems like if a chest is opened that's in the defined region and
       // passes the filter the inventory of it will be cached then when that chest is set to refill
       // it will populate it using what items were in there from the start rather than rolling a
       // loot table
+      /*
       if (definition.getRefillTrigger() != null) {
         fmm.onRise(
             MatchPlayer.class,
@@ -74,7 +72,7 @@ public class LootMatchModule implements MatchModule, Listener {
             listener -> {
               // TODO figure this out
             });
-      }
+       */
     }
   }
 
@@ -116,7 +114,7 @@ public class LootMatchModule implements MatchModule, Listener {
               for (Any any : definition.anyLootables) {
                 Random rand = match.getRandom();
                 if (!any.getAnyItems().isEmpty()) {
-                  List<Loot> anyItems = any.getAnyItems();
+                  List<Loot> anyItems = new ArrayList<>(any.getAnyItems());
                   // TODO make count range work
                   for (int i = 0; i < any.getCount(); ) {
                     Loot chosenItem = anyItems.get(rand.nextInt(anyItems.size()));
@@ -128,15 +126,14 @@ public class LootMatchModule implements MatchModule, Listener {
                   }
                 }
                 if (!any.getOptions().isEmpty()) {
-                  List<Loot> anyItems = any.getAnyItems();
+                  List<Option> options = new ArrayList<>(any.getOptions());
                   // TODO implement weight probability
                   for (int i = 0; i < any.getCount(); ) {
-                    Option chosenOption =
-                        any.getOptions().get(rand.nextInt(any.getOptions().size()));
+                    Option chosenOption = options.get(rand.nextInt(any.getOptions().size()));
                     if (chosenOption.getFilter().query(matchPlayer).isAllowed()) {
                       containerInventory.addItem(chosenOption.getItem().getStack());
                       if (any.isUnique()) {
-                        anyItems.remove(chosenOption.getItem());
+                        options.remove(chosenOption);
                       }
                       // do we still count the option if it is ineligible by the filter?
                       i++;
