@@ -146,4 +146,9 @@ public class FeatureDefinitionContext extends ContextStore<FeatureDefinition> {
       ((FeatureValidation<T>) validation).validate(value, node);
     }
   }
+
+  @Override
+  public Collection<FeatureDefinition> getAll() {
+    return this.definitions;
+  }
 }
