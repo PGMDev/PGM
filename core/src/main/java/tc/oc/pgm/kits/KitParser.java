@@ -35,8 +35,11 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.jdom2.Element;
+import tc.oc.pgm.action.Action;
+import tc.oc.pgm.action.ActionParser;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.doublejump.DoubleJumpKit;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.kits.tag.Grenade;
@@ -141,6 +144,7 @@ public abstract class KitParser {
     kits.add(this.parseShieldKit(el));
     kits.add(this.parseTeamSwitchKit(el));
     kits.add(this.parseMaxHealthKit(el));
+    kits.add(this.parseActionKit(el));
     kits.addAll(this.parseRemoveKits(el));
 
     kits.removeAll(Collections.singleton((Kit) null)); // Remove any nulls returned above
@@ -724,5 +728,17 @@ public abstract class KitParser {
     }
 
     return new MaxHealthKit(maxHealth);
+  }
+
+  public ActionKit parseActionKit(Element parent) throws InvalidXMLException {
+    if (parent.getChildren("action").isEmpty()) return null;
+
+    ActionParser parser = new ActionParser(factory);
+    ImmutableList.Builder<Action<? super MatchPlayer>> builder = ImmutableList.builder();
+    for (Element action : parent.getChildren("action")) {
+      builder.add(parser.parse(action, MatchPlayer.class));
+    }
+
+    return new ActionKit(builder.build());
   }
 }
