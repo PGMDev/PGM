@@ -87,12 +87,15 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
       document.setBaseURI(source.getId());
     }
 
+    // Add global include file to the document if present
+    if (includes.getGlobalInclude() != null) {
+      document.getRootElement().addContent(0, includes.getGlobalInclude().getContent());
+    }
+
     // Check for any included map sources, appending them to the document if present
     Collection<MapInclude> mapIncludes = includes.getMapIncludes(document);
-    if (!mapIncludes.isEmpty()) {
-      for (MapInclude include : mapIncludes) {
-        document.getRootElement().addContent(0, include.getContent());
-      }
+    for (MapInclude include : mapIncludes) {
+      document.getRootElement().addContent(0, include.getContent());
     }
 
     info = new MapInfoImpl(document.getRootElement());

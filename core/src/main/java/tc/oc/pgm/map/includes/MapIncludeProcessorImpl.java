@@ -47,6 +47,11 @@ public class MapIncludeProcessorImpl implements MapIncludeProcessor {
   }
 
   @Override
+  public MapInclude getGlobalInclude() {
+    return getIncludeById("global");
+  }
+
+  @Override
   public Collection<MapInclude> getMapIncludes(Document document) throws InvalidXMLException {
     Set<MapInclude> mapIncludes = Sets.newHashSet();
     List<Element> elements = document.getRootElement().getChildren("include");
