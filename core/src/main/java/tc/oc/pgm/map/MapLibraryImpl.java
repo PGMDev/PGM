@@ -28,6 +28,7 @@ import tc.oc.pgm.api.map.exception.MapException;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
+import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.UsernameResolver;
 
@@ -37,6 +38,7 @@ public class MapLibraryImpl implements MapLibrary {
   private final List<MapSourceFactory> factories;
   private final SortedMap<String, MapEntry> maps;
   private final Set<MapSource> failed;
+  private final MapIncludeProcessor includes;
 
   private static class MapEntry {
     private final MapSource source;
@@ -50,11 +52,13 @@ public class MapLibraryImpl implements MapLibrary {
     }
   }
 
-  public MapLibraryImpl(Logger logger, List<MapSourceFactory> factories) {
+  public MapLibraryImpl(
+      Logger logger, List<MapSourceFactory> factories, MapIncludeProcessor includes) {
     this.logger = checkNotNull(logger); // Logger should be visible in-game
     this.factories = Collections.synchronizedList(checkNotNull(factories));
     this.maps = Collections.synchronizedSortedMap(new ConcurrentSkipListMap<>());
     this.failed = Collections.synchronizedSet(new HashSet<>());
+    this.includes = includes;
   }
 
   @Override
@@ -187,7 +191,7 @@ public class MapLibraryImpl implements MapLibrary {
 
   private MapContext loadMap(MapSource source, @Nullable String mapId) throws MapException {
     final MapContext context;
-    try (final MapFactory factory = new MapFactoryImpl(logger, source)) {
+    try (final MapFactory factory = new MapFactoryImpl(logger, source, includes)) {
       context = factory.load();
     } catch (MapMissingException e) {
       failed.remove(source);
