@@ -7,6 +7,7 @@ import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.actions.ActionNode;
 import tc.oc.pgm.action.actions.ChatMessageAction;
+import tc.oc.pgm.action.actions.KillEntitiesAction;
 import tc.oc.pgm.action.actions.ScopeSwitchAction;
 import tc.oc.pgm.action.actions.SetVariableAction;
 import tc.oc.pgm.api.filter.Filter;
@@ -178,5 +179,11 @@ public class ActionParser {
             expression, variables.getVariableNames(scope), variables.getContextBuilder(scope));
 
     return new SetVariableAction<>(scope, var, formula);
+  }
+
+  @MethodParser("kill-entities")
+  public KillEntitiesAction parseKillEntities(Element el, Class<?> scope)
+      throws InvalidXMLException {
+    return new KillEntitiesAction(factory.getFilters().parseFilterProperty(el, "filter"));
   }
 }
