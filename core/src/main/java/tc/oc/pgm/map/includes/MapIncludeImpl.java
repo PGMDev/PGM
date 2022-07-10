@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.Collections;
 import org.jdom2.Content;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
@@ -16,14 +15,13 @@ import tc.oc.pgm.api.map.includes.MapInclude;
 public class MapIncludeImpl implements MapInclude {
 
   private final String id;
-  private final Collection<Content> content;
+  private final Document source;
 
   public MapIncludeImpl(File file) throws MapMissingException, JDOMException, IOException {
     try {
       InputStream fileStream = new FileInputStream(file);
-      Document doc = MapIncludeProcessorImpl.DOCUMENT_FACTORY.get().build(fileStream);
       this.id = file.getName().replace(".xml", "");
-      this.content = Collections.unmodifiableCollection(doc.getRootElement().cloneContent());
+      this.source = MapIncludeProcessorImpl.DOCUMENT_FACTORY.get().build(fileStream);
     } catch (FileNotFoundException e) {
       throw new MapMissingException(file.getPath(), "Unable to read map include document", e);
     }
@@ -36,7 +34,7 @@ public class MapIncludeImpl implements MapInclude {
 
   @Override
   public Collection<Content> getContent() {
-    return content;
+    return source.getRootElement().cloneContent();
   }
 
   @Override
