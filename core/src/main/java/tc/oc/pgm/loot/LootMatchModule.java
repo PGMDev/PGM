@@ -104,52 +104,11 @@ public class LootMatchModule implements MatchModule, Listener {
               }
               // add maybe items
               for (Maybe maybe : definition.maybeLootables) {
-                if (maybe.getFilter().query(matchPlayer).isAllowed()) {
-                  for (Loot loot : maybe.getMaybeItems()) {
-                    containerInventory.addItem(loot.getStack());
-                  }
-                }
+                addMaybeLootables(maybe, containerInventory, matchPlayer);
               }
               // add any items
               for (Any any : definition.anyLootables) {
-                Random rand = match.getRandom();
-                if (!any.getAnyItems().isEmpty()) {
-                  List<Loot> anyItems = new ArrayList<>(any.getAnyItems());
-                  // TODO make count range work
-                  for (int i = 0; i < any.getCount(); ) {
-                    Loot chosenItem = anyItems.get(rand.nextInt(anyItems.size()));
-                    containerInventory.addItem(chosenItem.getStack());
-                    if (any.isUnique()) {
-                      anyItems.remove(chosenItem);
-                    }
-                    i++;
-                  }
-                }
-                if (!any.getOptions().isEmpty()) {
-                  List<Option> options = new ArrayList<>(any.getOptions());
-                  // TODO implement weight probability
-                  double accumulatedWeight = 0;
-                  for (Option option : options) {
-                    accumulatedWeight += option.getWeight();
-                  }
-
-                  for (int i = 0; i < any.getCount(); ) {
-                    double random = rand.nextDouble() * accumulatedWeight;
-                    if (options.get(i).getWeight() >= random) {
-                      Option chosenOption = options.get(i);
-                      if (chosenOption.getFilter().query(matchPlayer).isAllowed()) {
-                        containerInventory.addItem(chosenOption.getItem().getStack());
-                        if (any.isUnique()) {
-                          options.remove(chosenOption);
-                          // remove weight too?
-                          accumulatedWeight -= chosenOption.getWeight();
-                        }
-                        i++;
-                        // do we still count the option if it is ineligible by the filter?
-                      }
-                    }
-                  }
-                }
+                addAnyLootables(any, containerInventory, matchPlayer);
               }
             }
           }
@@ -174,6 +133,89 @@ public class LootMatchModule implements MatchModule, Listener {
             this.countdownContext.start(countdown, definition.refillInterval);
           }
         }
+      }
+    }
+  }
+
+  public void addAnyLootables(Any any, Inventory containerInventory, MatchPlayer matchPlayer) {
+    Random rand = match.getRandom();
+    if (!any.getAnyItems().isEmpty()) {
+      List<Loot> anyItems = new ArrayList<>(any.getAnyItems());
+      List<Any> anyChildren = new ArrayList<>(any.getAnyChildren());
+      List<Maybe> maybeChildren = new ArrayList<>(any.getMaybeChildren());
+      // TODO make count range work
+      for (int i = 0; i < any.getCount(); ) {
+        int accumulated = anyItems.size() + anyChildren.size() + maybeChildren.size();
+        int randomNumber = rand.nextInt(accumulated);
+        if (randomNumber <= anyItems.size()) {
+          Loot chosenItem = anyItems.get(rand.nextInt(anyItems.size()));
+          containerInventory.addItem(chosenItem.getStack());
+          if (any.isUnique()) {
+            anyItems.remove(chosenItem);
+          }
+        } else if (randomNumber <= anyItems.size() + anyChildren.size()) {
+          Any chosenAny = anyChildren.get(rand.nextInt(anyChildren.size()));
+          addAnyLootables(chosenAny, containerInventory, matchPlayer);
+          if (any.isUnique()) {
+            anyChildren.remove(chosenAny);
+          }
+        } else {
+          Maybe chosenMaybe = maybeChildren.get(rand.nextInt(maybeChildren.size()));
+          addMaybeLootables(chosenMaybe, containerInventory, matchPlayer);
+          if (any.isUnique()) {
+            maybeChildren.remove(chosenMaybe);
+          }
+        }
+        i++;
+      }
+    }
+    if (!any.getOptions().isEmpty()) {
+      List<Option> options = new ArrayList<>(any.getOptions());
+      // TODO implement weight probability
+      double accumulatedWeight = 0;
+      for (Option option : options) {
+        accumulatedWeight += option.getWeight();
+      }
+      for (int i = 0; i < any.getCount(); ) {
+        double random = rand.nextDouble() * accumulatedWeight;
+        if (options.get(i).getWeight() >= random) {
+          Option chosenOption = options.get(i);
+          if (chosenOption.getFilter().query(matchPlayer).isAllowed()) {
+            if (chosenOption.getItem() != null) {
+              containerInventory.addItem(chosenOption.getItem().getStack());
+            } else if (!chosenOption.getAnyChildren().isEmpty()) {
+              for (Any anyChild : chosenOption.getAnyChildren()) {
+                addAnyLootables(anyChild, containerInventory, matchPlayer);
+              }
+            } else {
+              for (Maybe maybeChild : chosenOption.getMaybeChildren()) {
+                addMaybeLootables(maybeChild, containerInventory, matchPlayer);
+              }
+            }
+            if (any.isUnique()) {
+              options.remove(chosenOption);
+              // remove weight too?
+              accumulatedWeight -= chosenOption.getWeight();
+            }
+            i++;
+            // do we still count the option if it is ineligible by the filter?
+          }
+        }
+      }
+    }
+  }
+
+  public void addMaybeLootables(
+      Maybe maybe, Inventory containerInventory, MatchPlayer matchPlayer) {
+    if (maybe.getFilter().query(matchPlayer).isAllowed()) {
+      for (Loot loot : maybe.getMaybeItems()) {
+        containerInventory.addItem(loot.getStack());
+      }
+      for (Any any : maybe.getAnyChildren()) {
+        addAnyLootables(any, containerInventory, matchPlayer);
+      }
+      for (Maybe maybeChild : maybe.getMaybeChildren()) {
+        addMaybeLootables(maybeChild, containerInventory, matchPlayer);
       }
     }
   }
