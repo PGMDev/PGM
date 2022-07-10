@@ -6,15 +6,19 @@ import tc.oc.pgm.api.filter.Filter;
 public class Option {
   private final double weight;
   private final Filter filter;
-  private final Loot item;
+  private final List<Loot> lootables;
   private final List<Any> anyChildren;
   private final List<Maybe> maybeChildren;
 
   public Option(
-      double weight, Filter filter, Loot item, List<Any> anyChildren, List<Maybe> maybeChildren) {
+      double weight,
+      Filter filter,
+      List<Loot> lootables,
+      List<Any> anyChildren,
+      List<Maybe> maybeChildren) {
     this.weight = weight;
     this.filter = filter;
-    this.item = item;
+    this.lootables = lootables;
     this.anyChildren = anyChildren;
     this.maybeChildren = maybeChildren;
   }
@@ -27,8 +31,8 @@ public class Option {
     return filter;
   }
 
-  public Loot getItem() {
-    return item;
+  public List<Loot> getLootables() {
+    return lootables;
   }
 
   public List<Any> getAnyChildren() {

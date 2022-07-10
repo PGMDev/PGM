@@ -181,8 +181,10 @@ public class LootMatchModule implements MatchModule, Listener {
         if (options.get(i).getWeight() >= random) {
           Option chosenOption = options.get(i);
           if (chosenOption.getFilter().query(matchPlayer).isAllowed()) {
-            if (chosenOption.getItem() != null) {
-              containerInventory.addItem(chosenOption.getItem().getStack());
+            if (!chosenOption.getLootables().isEmpty()) {
+              for (Loot loot : chosenOption.getLootables()) {
+                containerInventory.addItem(loot.getStack());
+              }
             } else if (!chosenOption.getAnyChildren().isEmpty()) {
               for (Any anyChild : chosenOption.getAnyChildren()) {
                 addAnyLootables(anyChild, containerInventory, matchPlayer);

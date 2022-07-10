@@ -144,11 +144,10 @@ public class LootModule implements MapModule {
         for (Element optionEl : optionsEl) {
           double weight = XMLUtils.parseNumber(optionEl.getAttribute("weight"), Double.class, 1.0);
           Filter filter = filterParser.parseFilterProperty(optionEl, "filter", StaticFilter.ALLOW);
-          ItemStack stack = kitParser.parseItem(optionEl.getChild("item"), false);
-          Loot item = new Loot(stack, id);
+          List<Loot> lootables = parseAndAddItems(optionEl, id, kitParser);
           List<Any> anyChildren = parseAnyItems(optionEl, id, kitParser, filterParser);
           List<Maybe> maybeChildren = parseMaybeItems(optionEl, id, kitParser, filterParser);
-          options.add(new Option(weight, filter, item, anyChildren, maybeChildren));
+          options.add(new Option(weight, filter, lootables, anyChildren, maybeChildren));
         }
         if (!options.isEmpty() && !anyItems.isEmpty()) {
           throw new InvalidXMLException("all <any> children must be enclosed in <option>", anyEl);
