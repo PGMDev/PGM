@@ -316,7 +316,8 @@ public class BlockTransformListener implements Listener {
           // Data values 0-7 represent water on the ground, and increase by 1 as they spread
           newState.setRawData((byte) (oldData + 1));
         } else {
-          // Otherwise, the previous block must have been flowing down, so it spreads to a data value of 1
+          // Otherwise, the previous block must have been flowing down, so it spreads to a data
+          // value of 1
           newState.setRawData((byte) (1));
         }
       }
