@@ -1,6 +1,5 @@
 package tc.oc.pgm.structure;
 
-import org.bukkit.World;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.feature.Feature;
 import tc.oc.pgm.api.match.Match;

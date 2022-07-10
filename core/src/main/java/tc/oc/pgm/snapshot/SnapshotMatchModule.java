@@ -1,11 +1,10 @@
 package tc.oc.pgm.snapshot;
 
-import com.google.common.collect.ImmutableList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
@@ -26,8 +25,7 @@ import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.renewable.RenewableMatchModule;
-import tc.oc.pgm.structure.StructureMatchModule;
+import tc.oc.pgm.util.MaterialDataWithLocation;
 import tc.oc.pgm.util.chunk.ChunkVector;
 import tc.oc.pgm.util.nms.NMSHacks;
 
@@ -46,10 +44,11 @@ public class SnapshotMatchModule implements MatchModule, Listener {
 
     @Override
     public SnapshotMatchModule createMatchModule(Match match) throws ModuleLoadException {
-      //if(match.getModule(RenewableMatchModule.class) != null || match.getModule(StructureMatchModule.class) != null){
-        return new SnapshotMatchModule(match);
-      //}
-      //return null; //Don't need this if neither renewables nor structures have been loaded
+      // if(match.getModule(RenewableMatchModule.class) != null ||
+      // match.getModule(StructureMatchModule.class) != null){
+      return new SnapshotMatchModule(match);
+      // }
+      // return null; //Don't need this if neither renewables nor structures have been loaded
     }
   }
 
@@ -78,24 +77,36 @@ public class SnapshotMatchModule implements MatchModule, Listener {
     }
   }
 
-  public List<BlockState> getOriginalMaterials(Region region) {
-    List<BlockState> blockStates = new LinkedList<>();
+  /**
+   * Get the original material data for a {@code region}.
+   *
+   * @param region the region to get block states from
+   * @param materialFilter filters which blocks that will be included in the returned list
+   */
+  public List<MaterialDataWithLocation> getOriginalMaterialData(
+      Region region, Predicate<Material> materialFilter) {
+    List<MaterialDataWithLocation> materialData = new LinkedList<>();
     ChunkVector chunkVector = null;
     ChunkSnapshot snapshot = null;
     for (BlockVector blockVector : region.getBlockVectors()) {
       int x = blockVector.getBlockX();
       int y = blockVector.getBlockY();
       int z = blockVector.getBlockZ();
-      if(chunkVector == null || x >> 4 != chunkVector.getChunkX() || z >> 4 != chunkVector.getChunkZ()){
+      // If this block is in the same chunk as the previous one, keep using the same snapshot
+      // without
+      // fetching a new one
+      if (chunkVector == null
+          || z >> 4 != chunkVector.getChunkZ()
+          || x >> 4 != chunkVector.getChunkX()) {
         chunkVector = ChunkVector.ofBlock(blockVector);
         snapshot = chunkSnapshots.get(chunkVector);
       }
-      BlockState state = match.getWorld().getBlockAt(x, y, z).getState();
       BlockVector chunkPos = chunkVector.worldToChunk(x, y, z);
-      state.setMaterialData(snapshot.getMaterialData(chunkPos));
-      blockStates.add(state);
+      MaterialData data = snapshot.getMaterialData(chunkPos);
+      if (!materialFilter.test(data.getItemType())) continue;
+      materialData.add(new MaterialDataWithLocation(data, x, y, z));
     }
-    return blockStates;
+    return materialData;
   }
 
   public MaterialData getOriginalMaterial(Vector pos) {

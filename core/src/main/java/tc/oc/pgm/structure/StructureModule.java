@@ -21,12 +21,10 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
-import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.filters.FilterParser;
 import tc.oc.pgm.filters.StaticFilter;
 import tc.oc.pgm.filters.dynamic.FilterMatchModule;
 import tc.oc.pgm.regions.CuboidValidation;
-import tc.oc.pgm.regions.RegionMatchModule;
 import tc.oc.pgm.snapshot.SnapshotMatchModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -100,8 +98,10 @@ public class StructureModule implements MapModule<StructureMatchModule> {
             structures.get(elDynamic.getAttribute("structure").getValue());
 
         final FilterParser filterParser = factory.getFilters();
-        final Filter trigger = filterParser.parseFilterProperty(elDynamic, "trigger", StaticFilter.ALLOW);
-        final Filter filter = filterParser.parseFilterProperty(elDynamic, "filter", StaticFilter.ALLOW);
+        final Filter trigger =
+            filterParser.parseFilterProperty(elDynamic, "trigger", StaticFilter.ALLOW);
+        final Filter filter =
+            filterParser.parseFilterProperty(elDynamic, "filter", StaticFilter.ALLOW);
 
         final DynamicDefinition definition =
             new DynamicDefinition(id, structure, trigger, filter, position, offset);
