@@ -149,9 +149,6 @@ public class LootModule implements MapModule {
           List<Maybe> maybeChildren = parseMaybeItems(optionEl, id, kitParser, filterParser);
           options.add(new Option(weight, filter, lootables, anyChildren, maybeChildren));
         }
-        if (!options.isEmpty() && !anyItems.isEmpty()) {
-          throw new InvalidXMLException("all <any> children must be enclosed in <option>", anyEl);
-        }
         List<Any> anyChildren = parseAnyItems(anyEl, id, kitParser, filterParser);
         List<Maybe> maybeChildren = parseMaybeItems(anyEl, id, kitParser, filterParser);
         anyLootables.add(new Any(anyItems, options, count, unique, anyChildren, maybeChildren));
