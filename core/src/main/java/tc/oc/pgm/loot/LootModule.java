@@ -50,43 +50,9 @@ public class LootModule implements MapModule {
           if (id == null) {
             id = LootableDefinition.makeDefaultId("lootable", lootableIdSerial);
           }
-          List<Loot> lootables = new ArrayList<>();
-          parseAndAddItems(lootEl, lootables, kitParser, id);
-
-          List<Any> anyLootables = new ArrayList<>();
-          for (Element anyEl : lootEl.getChildren("any")) {
-            int count =
-                XMLUtils.parseNumberInRange(
-                    Node.fromAttr(anyEl, "count"), Integer.class, Range.atLeast(1), 1);
-            boolean unique = XMLUtils.parseBoolean(anyEl.getAttribute("unique"), true);
-            List<Loot> anyItems = new ArrayList<>();
-            parseAndAddItems(anyEl, anyItems, kitParser, id);
-
-            // items inside <option>
-            List<Element> optionsEl = anyEl.getChildren("option");
-            List<Option> options = new ArrayList<>();
-            for (Element optionEl : optionsEl) {
-              double weight =
-                  XMLUtils.parseNumber(optionEl.getAttribute("weight"), Double.class, 1.0);
-              Filter filter =
-                  filterParser.parseFilterProperty(optionEl, "filter", StaticFilter.ALLOW);
-              ItemStack stack = kitParser.parseItem(optionEl.getChild("item"), false);
-              Loot item = new Loot(stack, id);
-              options.add(new Option(weight, filter, item));
-            }
-            if (!options.isEmpty() && !anyItems.isEmpty()) {
-              throw new InvalidXMLException("all <any> children must contain <option>", anyEl);
-            }
-            anyLootables.add(new Any(anyItems, options, count, unique));
-          }
-
-          List<Maybe> maybeLootables = new ArrayList<>();
-          for (Element maybeEl : lootEl.getChildren("maybe")) {
-            Filter filter = filterParser.parseRequiredFilterProperty(maybeEl, "filter");
-            List<Loot> maybeItems = new ArrayList<>();
-            parseAndAddItems(maybeEl, maybeItems, kitParser, id);
-            maybeLootables.add(new Maybe(maybeItems, filter));
-          }
+          List<Loot> lootables = parseAndAddItems(lootEl, id, kitParser);
+          List<Any> anyLootables = parseAnyItems(lootEl, id, kitParser, filterParser);
+          List<Maybe> maybeLootables = parseMaybeItems(lootEl, id, kitParser, filterParser);
 
           Filter filter = null;
           Filter refillTrigger = null;
@@ -150,13 +116,62 @@ public class LootModule implements MapModule {
       return lootModule;
     }
 
-    public void parseAndAddItems(Element el, List<Loot> lootList, KitParser kitParser, String id)
+    public List<Loot> parseAndAddItems(Element el, String id, KitParser kitParser)
         throws InvalidXMLException {
+      List<Loot> lootList = new ArrayList<>();
       for (Element itemEl : XMLUtils.getChildren(el, "item")) {
         ItemStack stack = kitParser.parseItem(itemEl, false);
         Loot item = new Loot(stack, id);
         lootList.add(item);
       }
+      return lootList;
+    }
+
+    public List<Any> parseAnyItems(
+        Element lootEl, String id, KitParser kitParser, FilterParser filterParser)
+        throws InvalidXMLException {
+      List<Any> anyLootables = new ArrayList<>();
+      for (Element anyEl : lootEl.getChildren("any")) {
+        int count =
+            XMLUtils.parseNumberInRange(
+                Node.fromAttr(anyEl, "count"), Integer.class, Range.atLeast(1), 1);
+        boolean unique = XMLUtils.parseBoolean(anyEl.getAttribute("unique"), true);
+        List<Loot> anyItems = parseAndAddItems(anyEl, id, kitParser);
+
+        // items inside <option>
+        List<Element> optionsEl = anyEl.getChildren("option");
+        List<Option> options = new ArrayList<>();
+        for (Element optionEl : optionsEl) {
+          double weight = XMLUtils.parseNumber(optionEl.getAttribute("weight"), Double.class, 1.0);
+          Filter filter = filterParser.parseFilterProperty(optionEl, "filter", StaticFilter.ALLOW);
+          ItemStack stack = kitParser.parseItem(optionEl.getChild("item"), false);
+          Loot item = new Loot(stack, id);
+          List<Any> anyChildren = parseAnyItems(optionEl, id, kitParser, filterParser);
+          List<Maybe> maybeChildren = parseMaybeItems(optionEl, id, kitParser, filterParser);
+          options.add(new Option(weight, filter, item, anyChildren, maybeChildren));
+        }
+        if (!options.isEmpty() && !anyItems.isEmpty()) {
+          throw new InvalidXMLException("all <any> children must contain <option>", anyEl);
+        }
+        List<Any> anyChildren = parseAnyItems(anyEl, id, kitParser, filterParser);
+        List<Maybe> maybeChildren = parseMaybeItems(anyEl, id, kitParser, filterParser);
+        anyLootables.add(new Any(anyItems, options, count, unique, anyChildren, maybeChildren));
+      }
+      return anyLootables;
+    }
+
+    public List<Maybe> parseMaybeItems(
+        Element lootEl, String id, KitParser kitParser, FilterParser filterParser)
+        throws InvalidXMLException {
+      List<Maybe> maybeLootables = new ArrayList<>();
+      for (Element maybeEl : lootEl.getChildren("maybe")) {
+        Filter filter = filterParser.parseRequiredFilterProperty(maybeEl, "filter");
+        List<Loot> maybeItems = parseAndAddItems(maybeEl, id, kitParser);
+        List<Maybe> maybeChildren = parseMaybeItems(maybeEl, id, kitParser, filterParser);
+        List<Any> anyChildren = parseAnyItems(maybeEl, id, kitParser, filterParser);
+        maybeLootables.add(new Maybe(maybeItems, filter, maybeChildren, anyChildren));
+      }
+      return maybeLootables;
     }
   }
 }
