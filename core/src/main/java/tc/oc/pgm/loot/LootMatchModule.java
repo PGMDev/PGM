@@ -148,19 +148,20 @@ public class LootMatchModule implements MatchModule, Listener {
         int accumulated = anyItems.size() + anyChildren.size() + maybeChildren.size();
         int randomNumber = rand.nextInt(accumulated);
         if (randomNumber <= anyItems.size()) {
-          Loot chosenItem = anyItems.get(rand.nextInt(anyItems.size()));
+          Loot chosenItem = anyItems.get(randomNumber);
           containerInventory.addItem(chosenItem.getStack());
           if (any.isUnique()) {
             anyItems.remove(chosenItem);
           }
         } else if (randomNumber <= anyItems.size() + anyChildren.size()) {
-          Any chosenAny = anyChildren.get(rand.nextInt(anyChildren.size()));
+          Any chosenAny = anyChildren.get(randomNumber - anyItems.size());
           addAnyLootables(chosenAny, containerInventory, matchPlayer);
           if (any.isUnique()) {
             anyChildren.remove(chosenAny);
           }
         } else {
-          Maybe chosenMaybe = maybeChildren.get(rand.nextInt(maybeChildren.size()));
+          Maybe chosenMaybe =
+              maybeChildren.get(randomNumber - (anyItems.size() - anyChildren.size()));
           addMaybeLootables(chosenMaybe, containerInventory, matchPlayer);
           if (any.isUnique()) {
             maybeChildren.remove(chosenMaybe);
