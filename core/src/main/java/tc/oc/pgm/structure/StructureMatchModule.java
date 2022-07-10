@@ -5,21 +5,31 @@ import java.util.List;
 import java.util.stream.Collectors;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.dynamic.FilterMatchModule;
 
 public class StructureMatchModule implements MatchModule {
 
   private final DynamicScheduler scheduler;
+  private final Match match;
+  private final List<DynamicDefinition> dynamicDefinitions;
 
   public StructureMatchModule(Match match, List<DynamicDefinition> dynamicDefinitions) {
+    this.match = match;
+    this.dynamicDefinitions = dynamicDefinitions;
     this.scheduler =
         new DynamicScheduler(
             match,
             Comparator.comparing(
                 dynamic ->
-                    dynamicDefinitions.indexOf(
+                    this.dynamicDefinitions.indexOf(
                         dynamic.getDefinition()))); // TODO does this sort backwards?
+
+  }
+
+  @Override
+  public void load() throws ModuleLoadException {
     List<Dynamic> dynamics =
         dynamicDefinitions.stream().map(d -> new Dynamic(d, match)).collect(Collectors.toList());
 
