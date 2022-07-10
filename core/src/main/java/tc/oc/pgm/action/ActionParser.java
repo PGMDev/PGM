@@ -122,7 +122,7 @@ public class ActionParser {
     }
   }
 
-  @MethodParser("trigger")
+  @MethodParser("action")
   public <B extends Filterable<?>> ActionDefinition<? super B> parseDefinition(
       Element el, Class<B> bound) throws InvalidXMLException {
     if (bound == null) bound = parseFilterable(Node.fromRequiredAttr(el, "scope"));
