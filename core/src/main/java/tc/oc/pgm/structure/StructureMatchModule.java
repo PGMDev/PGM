@@ -25,7 +25,6 @@ public class StructureMatchModule implements MatchModule {
                 dynamic ->
                     this.dynamicDefinitions.indexOf(
                         dynamic.getDefinition()))); // TODO does this sort backwards?
-
   }
 
   @Override

@@ -17,11 +17,12 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
 
   private final AtomicBoolean loaded;
   private final Map<Class<? extends M>, F> factories;
-  //A set of factories only used when they are requested as a dependency of some other factory
+  // A set of factories only used when they are requested as a dependency of some other factory
   private final Map<Class<? extends M>, F> dependencyOnlyFactories;
   private Map<Class<? extends M>, M> modules;
 
-  public ModuleGraph(Map<Class<? extends M>, F> factories, Map<Class<? extends M>, F> dependencyOnlyFactories) {
+  public ModuleGraph(
+      Map<Class<? extends M>, F> factories, Map<Class<? extends M>, F> dependencyOnlyFactories) {
     this.loaded = new AtomicBoolean(true); // unloadAll will change to false
     this.factories = factories; // No copies since every graph would be duplicated
     this.dependencyOnlyFactories = dependencyOnlyFactories;
@@ -88,13 +89,16 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
         throw new ModuleLoadException(
             key, "Required but not registered in " + getClass().getSimpleName());
       }
-      factory = dependencyOnlyFactories.get(key); //Only check this if a module is required as a dependency for some other module
-      if (factory == null) throw new ModuleLoadException(
-          key,
-          "Required by "
-              + requiredBy.getSimpleName()
-              + " but not registered in "
-              + getClass().getSimpleName());
+      factory =
+          dependencyOnlyFactories.get(
+              key); // Only check this if a module is required as a dependency for some other module
+      if (factory == null)
+        throw new ModuleLoadException(
+            key,
+            "Required by "
+                + requiredBy.getSimpleName()
+                + " but not registered in "
+                + getClass().getSimpleName());
     }
 
     return factory;

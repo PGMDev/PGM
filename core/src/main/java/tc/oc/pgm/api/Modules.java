@@ -137,12 +137,12 @@ public interface Modules {
       new ConcurrentHashMap<>();
 
   Map<Class<? extends MapModule>, MapModuleFactory<? extends MapModule>> MAP_DEPENDENCY_ONLY =
-      new ConcurrentHashMap<>(); //No modules fit this yet, exists for consistency.
+      new ConcurrentHashMap<>(); // No modules fit this yet, exists for consistency.
   Map<Class<? extends MatchModule>, MatchModuleFactory<? extends MatchModule>> MATCH =
       new ConcurrentHashMap<>();
 
-  Map<Class<? extends MatchModule>, MatchModuleFactory<? extends MatchModule>> MATCH_DEPENDENCY_ONLY =
-      new ConcurrentHashMap<>();
+  Map<Class<? extends MatchModule>, MatchModuleFactory<? extends MatchModule>>
+      MATCH_DEPENDENCY_ONLY = new ConcurrentHashMap<>();
   Map<Class<? extends MapModule>, Class<? extends MatchModule>> MAP_TO_MATCH =
       new ConcurrentHashMap<>();
 
@@ -160,7 +160,8 @@ public interface Modules {
     if (match != null) MAP_TO_MATCH.put(map, match);
   }
 
-  static <M extends MatchModule> void registerDependencyOnly(Class<M> match, MatchModuleFactory<M> factory) {
+  static <M extends MatchModule> void registerDependencyOnly(
+      Class<M> match, MatchModuleFactory<M> factory) {
     if (MATCH_DEPENDENCY_ONLY.containsKey(checkNotNull(match)))
       throw new IllegalArgumentException(match.getSimpleName() + " was registered twice");
     MATCH_DEPENDENCY_ONLY.put(match, checkNotNull(factory));
@@ -280,8 +281,7 @@ public interface Modules {
     // MapModules that are also MatchModules
     register(WorldTimeModule.class, WorldTimeModule.class, new WorldTimeModule.Factory());
 
-
-    //MatchModules only used if required as a dependency by other modules
+    // MatchModules only used if required as a dependency by other modules
     registerDependencyOnly(SnapshotMatchModule.class, new SnapshotMatchModule.Factory());
   }
 }
