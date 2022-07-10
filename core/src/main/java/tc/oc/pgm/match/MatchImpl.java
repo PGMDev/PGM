@@ -740,7 +740,7 @@ public class MatchImpl implements Match {
       extends ModuleGraph<MatchModule, MatchModuleFactory<? extends MatchModule>> {
 
     private ModuleLoader() throws ModuleLoadException {
-      super(new HashMap<>(Modules.MATCH));
+      super(new HashMap<>(Modules.MATCH), new HashMap<>(Modules.MATCH_DEPENDENCY_ONLY));
       getMap().getModules().stream()
           .forEach(module -> addFactory(Modules.MAP_TO_MATCH.get(module.getClass()), module));
       loadAll();
