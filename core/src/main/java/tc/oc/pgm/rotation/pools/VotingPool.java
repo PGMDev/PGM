@@ -70,6 +70,7 @@ public class VotingPool extends MapPool {
     if (currentPoll == null) return getRandom();
 
     MapInfo map = currentPoll.finishVote();
+    updateScores(currentPoll.getVotes());
     manager.getVoteOptions().clear();
     currentPoll = null;
     return map != null ? map : getRandom();

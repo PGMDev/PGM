@@ -32,7 +32,7 @@ public class MapVotePicker {
   // with larger numbers.
   private static final double MINIMUM_WEIGHT = 0.00000001;
 
-  private static final Formula DEFAULT_MODIFIER = Formula.pow(c -> c.score, Formula.constant(2));
+  private static final Formula DEFAULT_MODIFIER = c -> Math.pow(c.score, 2);
 
   private final MapPoolManager manager;
   private final Formula modifier;
@@ -43,7 +43,7 @@ public class MapVotePicker {
 
     Formula formula = DEFAULT_MODIFIER;
     try {
-      formula = Formula.of(config, "modifier", DEFAULT_MODIFIER);
+      formula = Formula.of(config.getString("modifier"), DEFAULT_MODIFIER);
     } catch (InvalidConfigurationException e) {
       PGM.get().getLogger().log(Level.SEVERE, "Failed to load vote picker formula", e);
     }
