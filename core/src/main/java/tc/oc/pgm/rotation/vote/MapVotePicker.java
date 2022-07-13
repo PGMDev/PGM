@@ -123,6 +123,6 @@ public class MapVotePicker {
     List<MapTag> gamemodes =
         map.getTags().stream().filter(MapTag::isGamemode).collect(Collectors.toList());
 
-    return selected.stream().filter(s -> Collections.disjoint(gamemodes, s.getTags())).count();
+    return selected.stream().filter(s -> !Collections.disjoint(gamemodes, s.getTags())).count();
   }
 }
