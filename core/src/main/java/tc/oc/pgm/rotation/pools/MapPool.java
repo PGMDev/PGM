@@ -1,4 +1,4 @@
-package tc.oc.pgm.rotation;
+package tc.oc.pgm.rotation.pools;
 
 import static tc.oc.pgm.util.text.TextParser.parseDuration;
 
@@ -15,6 +15,7 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.rotation.MapPoolManager;
 
 /** Rotation of maps, a type of {@link MapOrder} */
 public abstract class MapPool implements MapOrder, Comparable<MapPool> {
@@ -108,9 +109,6 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
    */
   @Override
   public void setNextMap(MapInfo map) {}
-
-  @Override
-  public void resetNextMap() {}
 
   /**
    * Called when this map pool is going to be switched out

@@ -19,7 +19,7 @@ public class RandomMapOrder implements MapOrder {
 
   private final Random random;
   private final Deque<WeakReference<MapInfo>> deque;
-  private List<MapInfo> origMaps;
+  private final List<MapInfo> origMaps;
 
   public RandomMapOrder(List<MapInfo> maps) {
     this.random = new Random();
@@ -69,14 +69,11 @@ public class RandomMapOrder implements MapOrder {
 
   @Override
   public void setNextMap(MapInfo map) {
-    // Set next maps are sent to the front of the deque
-    deque.addFirst(new WeakReference<>(map));
-  }
-
-  @Override
-  public void resetNextMap() {
-    if (deque.pollFirst() != null) {
-      deque.removeFirst();
+    if (map == null) {
+      if (deque.pollFirst() != null) deque.removeFirst();
+    } else {
+      // Set next maps are sent to the front of the deque
+      deque.addFirst(new WeakReference<>(map));
     }
   }
 }

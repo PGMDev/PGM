@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -14,6 +15,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -27,6 +29,10 @@ import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.events.MapPoolAdjustEvent;
+import tc.oc.pgm.rotation.pools.MapPool;
+import tc.oc.pgm.rotation.pools.Rotation;
+import tc.oc.pgm.rotation.pools.VotingPool;
+import tc.oc.pgm.rotation.vote.VotePoolOptions;
 import tc.oc.pgm.util.TimeUtils;
 
 /**
@@ -55,15 +61,15 @@ public class MapPoolManager implements MapOrder {
   private MapInfo overriderMap;
 
   /** Options related to voting pools, allows for custom voting @see {@link VotingPool} * */
-  private CustomVotingPoolOptions options;
+  private final VotePoolOptions options;
 
-  private Datastore database;
+  private final Datastore database;
 
   public MapPoolManager(Logger logger, File mapPoolsFile, Datastore database) {
     this.logger = logger;
     this.mapPoolsFile = mapPoolsFile;
     this.database = database;
-    this.options = new CustomVotingPoolOptions();
+    this.options = new VotePoolOptions();
 
     if (!mapPoolsFile.exists()) {
       try {
@@ -204,11 +210,11 @@ public class MapPoolManager implements MapOrder {
         .orElse(null);
   }
 
-  protected MapInfo getOverriderMap() {
+  public MapInfo getOverriderMap() {
     return overriderMap;
   }
 
-  public CustomVotingPoolOptions getCustomVoteOptions() {
+  public VotePoolOptions getVoteOptions() {
     return options;
   }
 
@@ -236,33 +242,29 @@ public class MapPoolManager implements MapOrder {
   @Override
   public MapInfo getNextMap() {
     if (overriderMap != null) return overriderMap;
-    if (activeMapPool != null) return activeMapPool.getNextMap();
-    if (activeMapPool == null) return getFallback().getNextMap();
-    return null;
+    return getOrder().getNextMap();
   }
 
   @Override
   public void setNextMap(MapInfo map) {
     overriderMap = map;
-
     // Notify pool/fallback a next map has been set
-    if (activeMapPool != null) {
-      activeMapPool.setNextMap(map);
-    } else {
-      getFallback().setNextMap(map);
-    }
+    getOrder().setNextMap(map);
   }
 
-  @Override
-  public void resetNextMap() {
-    if (overriderMap != null) {
-      overriderMap = null;
+  public double getActivePlayers(Match match) {
+    if (match == null) {
+      Iterator<Match> matches = PGM.get().getMatchManager().getMatches();
+      // Fallback to just raw online playercount
+      if (!matches.hasNext()) return Bukkit.getOnlinePlayers().size();
+      match = matches.next();
     }
+    double obsBias = match.getModule(BlitzMatchModule.class) != null ? 0.85 : 0.5;
+    return match.getParticipants().size() + match.getObservers().size() * obsBias;
   }
 
   public Optional<MapPool> getAppropriateDynamicPool(Match match) {
-    double obsBias = match.getModule(BlitzMatchModule.class) != null ? 0.85 : 0.5;
-    double activePlayers = match.getParticipants().size() + match.getObservers().size() * obsBias;
+    double activePlayers = getActivePlayers(match);
     return mapPools.keySet().stream()
         .filter(MapPool::isDynamic)
         .filter(pool -> activePlayers >= pool.getPlayers())
@@ -307,5 +309,9 @@ public class MapPoolManager implements MapOrder {
 
   private boolean hasMatchCountLimit() {
     return !activeMapPool.isDynamic() && (matchCountLimit > 0);
+  }
+
+  private MapOrder getOrder() {
+    return activeMapPool != null ? activeMapPool : getFallback();
   }
 }

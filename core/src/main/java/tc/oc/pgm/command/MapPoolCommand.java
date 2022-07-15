@@ -27,11 +27,11 @@ import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.cycle.CycleCountdown;
-import tc.oc.pgm.rotation.MapPoll;
-import tc.oc.pgm.rotation.MapPool;
 import tc.oc.pgm.rotation.MapPoolManager;
-import tc.oc.pgm.rotation.Rotation;
-import tc.oc.pgm.rotation.VotingPool;
+import tc.oc.pgm.rotation.pools.MapPool;
+import tc.oc.pgm.rotation.pools.Rotation;
+import tc.oc.pgm.rotation.pools.VotingPool;
+import tc.oc.pgm.rotation.vote.MapPoll;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.named.MapNameStyle;
@@ -43,7 +43,7 @@ public final class MapPoolCommand {
   private static final DecimalFormat SCORE_FORMAT = new DecimalFormat("00.00%");
 
   @Command(
-      aliases = {"pool", "rotation", "rot"},
+      aliases = {"pool"},
       desc = "List the maps in the map pool",
       usage = "[page] [-p pool] [-s scores] [-c chance of vote]")
   public static void pool(
@@ -96,7 +96,7 @@ public final class MapPoolCommand {
     if (chance && votes != null) {
       double maxWeight = 0, currWeight;
       for (MapInfo map : votes.getMaps()) {
-        chances.put(map, currWeight = MapPoll.getWeight(votes.getMapScore(map)));
+        chances.put(map, currWeight = votes.mapPicker.getWeight(null, map, votes.getMapScore(map)));
         maxWeight += currWeight;
       }
       double finalMaxWeight = maxWeight;
@@ -127,7 +127,7 @@ public final class MapPoolCommand {
   }
 
   @Command(
-      aliases = {"pools", "rotations", "rots"},
+      aliases = {"pools"},
       desc = "List all the map pools",
       flags = "d")
   public static void pools(
@@ -204,7 +204,7 @@ public final class MapPoolCommand {
   }
 
   @Command(
-      aliases = {"setpool", "setrot"},
+      aliases = {"setpool"},
       desc = "Change the map pool",
       usage = "[pool name] -r (revert to dynamic) -t (time limit for map pool) -m (match # limit)",
       flags = "rtm",

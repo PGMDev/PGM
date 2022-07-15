@@ -1,7 +1,7 @@
-package tc.oc.pgm.rotation;
+package tc.oc.pgm.rotation.vote;
 
-import static tc.oc.pgm.rotation.MapPoll.VOTE_BOOK_METADATA;
-import static tc.oc.pgm.rotation.MapPoll.VOTE_BOOK_TAG;
+import static tc.oc.pgm.rotation.vote.MapPoll.VOTE_BOOK_METADATA;
+import static tc.oc.pgm.rotation.vote.MapPoll.VOTE_BOOK_TAG;
 
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
@@ -16,24 +16,23 @@ import tc.oc.pgm.events.ListenerScope;
 @ListenerScope(MatchScope.LOADED)
 final class VotingBookListener implements Listener {
 
-  private final VotingPool votingPool;
+  private final MapPoll poll;
   private final Match match;
 
-  public VotingBookListener(VotingPool votingPool, Match match) {
-    this.votingPool = votingPool;
+  public VotingBookListener(MapPoll poll, Match match) {
+    this.poll = poll;
     this.match = match;
   }
 
   @EventHandler
   public void openVote(PlayerInteractEvent event) {
     MatchPlayer player = match.getPlayer(event.getPlayer());
-    if (isRightClick(event.getAction())
-        && event.getMaterial() == Material.ENCHANTED_BOOK
-        && player != null
-        && votingPool.getCurrentPoll() != null) {
+    if (player != null
+        && poll.isRunning()
+        && isRightClick(event.getAction())
+        && event.getMaterial() == Material.ENCHANTED_BOOK) {
       String validator = VOTE_BOOK_TAG.get(event.getItem());
-      if (validator != null && validator.equals(VOTE_BOOK_METADATA))
-        votingPool.getCurrentPoll().sendBook(player, true);
+      if (validator != null && validator.equals(VOTE_BOOK_METADATA)) poll.sendBook(player, true);
     }
   }
 

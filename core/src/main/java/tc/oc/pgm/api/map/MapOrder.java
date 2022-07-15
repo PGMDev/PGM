@@ -29,12 +29,9 @@ public interface MapOrder {
    * Forces a specific map to be played next. The underlying {@link MapOrder} may ignore this, but
    * it is recommended not to.
    *
-   * @param map The map to set next
+   * @param map The map to set next, null to reset
    */
   void setNextMap(MapInfo map);
-
-  /** Removes any map that was set manually, returning the server to what was previously chosen. */
-  void resetNextMap();
 
   /**
    * Returns the duration used for cycles in {@link CycleMatchModule}.

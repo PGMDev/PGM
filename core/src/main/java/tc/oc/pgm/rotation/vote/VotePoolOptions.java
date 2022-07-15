@@ -1,26 +1,26 @@
-package tc.oc.pgm.rotation;
+package tc.oc.pgm.rotation.vote;
 
 import com.google.common.collect.Sets;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.rotation.pools.VotingPool;
 
-public class CustomVotingPoolOptions {
+public class VotePoolOptions {
 
   // Set of maps to be used in custom vote selection
-  private Set<MapInfo> customVoteMaps;
-
+  private final Set<MapInfo> customVoteMaps;
   // Whether custom map selection should replace existing entries
   private boolean replace;
 
-  public CustomVotingPoolOptions() {
+  public VotePoolOptions() {
     this.customVoteMaps = Sets.newHashSet();
     this.replace = true;
   }
 
   public boolean shouldOverride() {
-    return customVoteMaps.size() >= VotingPool.MIN_CUSTOM_VOTE_OPTIONS && !replace;
+    return customVoteMaps.size() >= MapVotePicker.MIN_CUSTOM_VOTE_OPTIONS && !replace;
   }
 
   public boolean isReplace() {
@@ -33,7 +33,7 @@ public class CustomVotingPoolOptions {
   }
 
   public boolean addVote(MapInfo map) {
-    if (customVoteMaps.size() < VotingPool.MAX_VOTE_OPTIONS) {
+    if (customVoteMaps.size() < MapVotePicker.MAX_VOTE_OPTIONS) {
       this.customVoteMaps.add(map);
       return true;
     }
@@ -58,6 +58,6 @@ public class CustomVotingPoolOptions {
 
   public Map<MapInfo, Double> getCustomVoteMapWeighted() {
     return customVoteMaps.stream()
-        .collect(Collectors.toMap(map -> map, x -> VotingPool.DEFAULT_WEIGHT));
+        .collect(Collectors.toMap(map -> map, x -> VotingPool.DEFAULT_SCORE));
   }
 }

@@ -1,4 +1,4 @@
-package tc.oc.pgm.rotation;
+package tc.oc.pgm.rotation.vote;
 
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.newline;
@@ -19,9 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.NavigableMap;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import net.kyori.adventure.inventory.Book;
@@ -38,6 +36,7 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
@@ -58,77 +57,22 @@ public class MapPoll {
   private static final Component VOTE_BOOK_TITLE =
       translatable("vote.title.map", NamedTextColor.GOLD, TextDecoration.BOLD);
 
-  // Workaround: ItemStacks cant have invisible metadata, so these are used as a replacement.
+  // Workaround: ItemStacks can't have invisible metadata, so these are used as a replacement.
   static final String VOTE_BOOK_METADATA = "vote_book";
   static final ItemTag<String> VOTE_BOOK_TAG = ItemTag.newString(VOTE_BOOK_METADATA);
 
   private final WeakReference<Match> match;
-  private final Map<MapInfo, Double> mapScores;
-  private final Set<MapInfo> overrides;
-  private final int voteSize;
 
-  private final Map<MapInfo, Set<UUID>> votes = new HashMap<>();
+  private final Map<MapInfo, Set<UUID>> votes;
+  private boolean running = true;
 
-  MapPoll(Match match, Map<MapInfo, Double> mapScores, Set<MapInfo> overrides, int voteSize) {
+  public MapPoll(Match match, List<MapInfo> maps) {
     this.match = new WeakReference<>(match);
-    this.mapScores = mapScores;
-    this.overrides = overrides;
-    this.voteSize = voteSize;
+    this.votes = new HashMap<>();
+    maps.forEach(m -> votes.put(m, new HashSet<>()));
 
-    selectMaps();
-  }
-
-  private void selectMaps() {
-    // Sorting beforehand, saves future key remaps, as bigger values are placed at the end
-    List<MapInfo> sortedDist =
-        mapScores.entrySet().stream()
-            .sorted(Comparator.comparingDouble(Map.Entry::getValue))
-            .map(Map.Entry::getKey)
-            .collect(Collectors.toList());
-
-    NavigableMap<Double, MapInfo> cumulativeScores = new TreeMap<>();
-    double maxWeight = cummulativeMap(0, sortedDist, cumulativeScores);
-
-    // Add all override maps before selecting random
-    overrides.forEach(map -> votes.put(map, new HashSet<>()));
-
-    for (int i = overrides.size(); i < voteSize; i++) {
-      NavigableMap<Double, MapInfo> subMap =
-          cumulativeScores.tailMap(Math.random() * maxWeight, true);
-      Map.Entry<Double, MapInfo> selected = subMap.pollFirstEntry();
-
-      if (selected == null) break; // No more maps to poll
-      votes.put(selected.getValue(), new HashSet<>()); // Add map to votes
-      if (votes.size() >= voteSize) break; // Skip replace logic after all maps have been selected
-
-      // Remove map from pool, updating cumulative scores
-      double selectedWeight = getWeight(selected.getValue());
-      maxWeight -= selectedWeight;
-
-      NavigableMap<Double, MapInfo> temp = new TreeMap<>();
-      cummulativeMap(selected.getKey() - selectedWeight, subMap.values(), temp);
-
-      subMap.clear();
-      cumulativeScores.putAll(temp);
-    }
-  }
-
-  private double getWeight(MapInfo map) {
-    return getWeight(mapScores.get(map));
-  }
-
-  public static double getWeight(Double score) {
-    if (score == null || score <= 0) return 0;
-    return Math.max(Math.pow(score, 2), Double.MIN_VALUE);
-  }
-
-  private double cummulativeMap(
-      double currWeight, Collection<MapInfo> maps, Map<Double, MapInfo> result) {
-    for (MapInfo map : maps) {
-      double score = getWeight(map);
-      if (score > 0) result.put(currWeight += score, map);
-    }
-    return currWeight;
+    match.addListener(new VotingBookListener(this, match), MatchScope.LOADED);
+    match.getPlayers().forEach(viewer -> sendBook(viewer, false));
   }
 
   public void announceWinner(MatchPlayer viewer, MapInfo winner) {
@@ -259,7 +203,7 @@ public class MapPoll {
    * @param uuids The players who voted
    * @return The number of votes counted
    */
-  private int countVotes(Set<UUID> uuids) {
+  private int countVotes(Collection<UUID> uuids) {
     return uuids.stream()
         .map(Bukkit::getPlayer)
         // Count disconnected players as 1, can't test for their perms
@@ -267,25 +211,28 @@ public class MapPoll {
         .sum();
   }
 
+  public boolean isRunning() {
+    return running;
+  }
+
   /**
    * Picks a winner and ends the vote, updating map scores based on votes
    *
    * @return The picked map to play after the vote
    */
-  MapInfo finishVote() {
+  public MapInfo finishVote() {
+    running = false;
     MapInfo picked = getMostVotedMap();
     Match match = this.match.get();
-    if (match != null) {
-      match.getPlayers().forEach(player -> announceWinner(player, picked));
-    }
-
-    updateScores();
+    if (match != null) match.getPlayers().forEach(player -> announceWinner(player, picked));
     return picked;
   }
 
-  private void updateScores() {
-    double voters = votes.values().stream().flatMap(Collection::stream).distinct().count();
-    if (voters == 0) return;
-    votes.forEach((m, v) -> mapScores.put(m, Math.max(v.size() / voters, Double.MIN_VALUE)));
+  public void cancel() {
+    running = false;
+  }
+
+  public Map<MapInfo, Set<UUID>> getVotes() {
+    return votes;
   }
 }

@@ -1,7 +1,8 @@
-package tc.oc.pgm.rotation;
+package tc.oc.pgm.rotation.pools;
 
 import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.rotation.MapPoolManager;
 
 public class DisabledMapPool extends MapPool {
   DisabledMapPool(MapPoolManager manager, ConfigurationSection section, String name) {
@@ -22,7 +23,4 @@ public class DisabledMapPool extends MapPool {
   public MapInfo getNextMap() {
     return null;
   }
-
-  @Override
-  public void resetNextMap() {}
 }
