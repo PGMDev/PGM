@@ -73,7 +73,7 @@ import tc.oc.pgm.events.PlayerParticipationStartEvent;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.features.MatchFeatureContext;
-import tc.oc.pgm.filters.dynamic.Filterable;
+import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.result.CompetitorVictoryCondition;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.ClassLogger;

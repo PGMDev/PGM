@@ -10,8 +10,8 @@ import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.filters.FilterParser;
-import tc.oc.pgm.filters.dynamic.Filterable;
+import tc.oc.pgm.filters.Filterable;
+import tc.oc.pgm.filters.parse.FilterParser;
 
 /**
  * Something that can answer "yes", "no" or "i don't care" to the imagined question: "Can X

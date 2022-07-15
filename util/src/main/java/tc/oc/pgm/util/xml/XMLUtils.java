@@ -451,15 +451,21 @@ public final class XMLUtils {
 
   public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
       Element el, Class<T> type, Range<T> def) throws InvalidXMLException {
+    Attribute count = el.getAttribute("count");
+
     Attribute lt = el.getAttribute("lt");
     Attribute lte = getAttribute(el, "lte", "max");
     Attribute gt = el.getAttribute("gt");
     Attribute gte = getAttribute(el, "gte", "min");
 
+    if (count != null && (lt != null || lte != null || gt != null || gte != null))
+      throw new InvalidXMLException("Count cannot be combined with min or max", el);
     if (lt != null && lte != null)
       throw new InvalidXMLException("Conflicting upper bound for numeric range", el);
     if (gt != null && gte != null)
       throw new InvalidXMLException("Conflicting lower bound for numeric range", el);
+
+    if (count != null) return Range.singleton(parseNumber(count, type, (T) null));
 
     BoundType lowerBoundType, upperBoundType;
     T lowerBound, upperBound;

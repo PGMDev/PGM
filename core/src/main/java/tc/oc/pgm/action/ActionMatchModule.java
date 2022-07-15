@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableList;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
-import tc.oc.pgm.filters.dynamic.FilterMatchModule;
-import tc.oc.pgm.filters.dynamic.Filterable;
+import tc.oc.pgm.filters.FilterMatchModule;
+import tc.oc.pgm.filters.Filterable;
 
 public class ActionMatchModule implements MatchModule {
   private final Match match;

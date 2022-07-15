@@ -18,7 +18,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.filters.BlockFilter;
+import tc.oc.pgm.filters.matcher.block.BlockFilter;
 import tc.oc.pgm.kits.ArmorType;
 import tc.oc.pgm.kits.KitMatchModule;
 
