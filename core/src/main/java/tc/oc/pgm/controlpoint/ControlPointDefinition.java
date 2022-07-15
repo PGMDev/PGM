@@ -42,6 +42,9 @@ public class ControlPointDefinition extends GoalDefinition {
   // Time it takes for a point to decay while unowned. (Time is accurate when near 100% capture)
   private final double decayRate;
 
+  // Time it takes for a point to decay while contested. (Time is accurate when near 100% capture)
+  private final double contestedRate;
+
   // Time it takes for a point to recover to captured state. (Accurate when almost uncaptured)
   private final double recoveryRate;
 
@@ -101,6 +104,7 @@ public class ControlPointDefinition extends GoalDefinition {
       double decayRate,
       double recoveryRate,
       double ownedDecayRate,
+      double contestedRate,
       float timeMultiplier,
       @Nullable TeamFactory initialOwner,
       CaptureCondition captureCondition,
@@ -123,6 +127,7 @@ public class ControlPointDefinition extends GoalDefinition {
     this.decayRate = decayRate;
     this.recoveryRate = recoveryRate;
     this.ownedDecayRate = ownedDecayRate;
+    this.contestedRate = contestedRate;
     this.timeMultiplier = timeMultiplier;
     this.initialOwner = initialOwner;
     this.captureCondition = captureCondition;
@@ -148,6 +153,8 @@ public class ControlPointDefinition extends GoalDefinition {
         + this.getRecoveryRate()
         + " ownedDecayRate="
         + this.getOwnedDecayRate()
+        + " contestedRate="
+        + this.getContestedRate()
         + " timeMultiplier="
         + this.getTimeMultiplier()
         + " initialOwner="
@@ -216,6 +223,10 @@ public class ControlPointDefinition extends GoalDefinition {
 
   public double getOwnedDecayRate() {
     return this.ownedDecayRate;
+  }
+
+  public double getContestedRate() {
+    return this.contestedRate;
   }
 
   public float getTimeMultiplier() {
