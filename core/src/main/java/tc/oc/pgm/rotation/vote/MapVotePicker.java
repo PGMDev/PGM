@@ -1,15 +1,17 @@
 package tc.oc.pgm.rotation.vote;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,6 +19,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.rotation.MapPoolManager;
+import tc.oc.pgm.util.math.Formula;
 
 /**
  * Responsible for picking the set of maps that will be on the vote. It's able to apply any
@@ -32,26 +35,28 @@ public class MapVotePicker {
   // with larger numbers.
   private static final double MINIMUM_WEIGHT = 0.00000001;
 
-  private static final Formula DEFAULT_MODIFIER = c -> Math.pow(c.score, 2);
+  private static final Formula<Context> DEFAULT_MODIFIER = c -> Math.pow(c.score, 2);
 
   private final MapPoolManager manager;
-  private final Formula modifier;
+  private final Formula<Context> modifier;
 
   public static MapVotePicker of(MapPoolManager manager, ConfigurationSection config) {
     // Create dummy config to read defaults off of.
     if (config == null) config = new MemoryConfiguration();
 
-    Formula formula = DEFAULT_MODIFIER;
+    Formula<Context> formula = DEFAULT_MODIFIER;
     try {
-      formula = Formula.of(config.getString("modifier"), DEFAULT_MODIFIER);
-    } catch (InvalidConfigurationException e) {
-      PGM.get().getLogger().log(Level.SEVERE, "Failed to load vote picker formula", e);
+      formula = Formula.of(config.getString("modifier"), Context.getKeys(), DEFAULT_MODIFIER);
+    } catch (IllegalArgumentException e) {
+      PGM.get()
+          .getLogger()
+          .log(Level.SEVERE, "Failed to load vote picker modifier formula, using fallback", e);
     }
 
     return new MapVotePicker(manager, formula);
   }
 
-  public MapVotePicker(MapPoolManager manager, Formula modifier) {
+  public MapVotePicker(MapPoolManager manager, Formula<Context> modifier) {
     this.manager = manager;
     this.modifier = modifier;
   }
@@ -108,8 +113,8 @@ public class MapVotePicker {
   public double getWeight(@Nullable List<MapInfo> selected, @NotNull MapInfo map, double score) {
     if ((selected != null && selected.contains(map)) || score <= 0) return 0;
 
-    Formula.Context context =
-        new Formula.Context(
+    Context context =
+        new Context(
             score,
             getRepeatedGamemodes(selected, map),
             map.getMaxPlayers().stream().mapToInt(i -> i).sum(),
@@ -124,5 +129,34 @@ public class MapVotePicker {
         map.getTags().stream().filter(MapTag::isGamemode).collect(Collectors.toList());
 
     return selected.stream().filter(s -> !Collections.disjoint(gamemodes, s.getTags())).count();
+  }
+
+  private static final class Context implements Supplier<Map<String, Double>> {
+    private double score;
+    private double sameGamemode;
+    private double mapsize;
+    private double players;
+
+    public Context(double score, double sameGamemode, double mapsize, double players) {
+      this.score = score;
+      this.sameGamemode = sameGamemode;
+      this.mapsize = mapsize;
+      this.players = players;
+    }
+
+    private Context() {}
+
+    public static Set<String> getKeys() {
+      return new Context().get().keySet();
+    }
+
+    @Override
+    public Map<String, Double> get() {
+      return ImmutableMap.of(
+          "score", score,
+          "same_gamemode", sameGamemode,
+          "mapsize", mapsize,
+          "players", players);
+    }
   }
 }

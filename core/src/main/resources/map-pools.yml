@@ -39,9 +39,19 @@ pools:
     #  - same_gamemode: amount of other maps of the same gamemode already picked for the vote
     #  - mapsize: the size for this map in total players (sum of all team counts)
     #  - players: amount of active players online (eg: obs count as half)
+    #
+    # WARNING: this is a complicated setting to modify on your own, it is not
+    #          recommended to modify it on your own unless you know what you're doing.
+    #
+    # The provided formula can dynamically pick best-sized map for a current player count, some alternatives:
+    #  - Make it so low scores are less-likely than higher scores (previous default)
+    #    pow(score, 2)
+    #  - Make it so repeated gamemodes on the same vote are 35% less likely each time, down to a minimum of 20%
+    #    pow(score * bound(1 - (0.35 * same_gamemode), 0.2, 1), 2)
     modifier: >-
       pow(
-        (score * bound(1 - (0.2 * same_gamemode), 0.2, 1)) *
+        score * 
+        bound(1 - (0.2 * same_gamemode), 0.2, 1) *
         bound(0.5 * (
           tanh(bound(-0.0025 * players + 0.5, 0.2, 1) * (mapsize - bound(players * 1.05, 0, 100))) -
           tanh(bound(-0.0025 * players + 0.5, 0.2, 1) * (mapsize - bound(0.005 * players ^ 2 + 0.95 * players + 5, 10, 150)))
