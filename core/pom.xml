@@ -52,6 +52,7 @@
                             <include>org.eclipse.jgit:org.eclipse.jgit:*</include>
                             <include>org.slf4j:slf4j-api:*</include>
                             <include>fr.minuskube.inv:smart-invs</include>
+                            <include>net.objecthunter:exp4j:*</include>
                         </includes>
                     </artifactSet>
                     <filters>
