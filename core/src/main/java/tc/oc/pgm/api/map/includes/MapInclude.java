@@ -14,6 +14,13 @@ public interface MapInclude {
   String getId();
 
   /**
+   * Get the system file time from when this MapInclude file was last modified.
+   *
+   * @return Time of last file modification
+   */
+  long getLastModified();
+
+  /**
    * Get a collection of {@link Content} which can be merged into an existing {@link Document}
    *
    * @return a collection of {@link Content}

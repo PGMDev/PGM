@@ -3,6 +3,7 @@ package tc.oc.pgm.api.map;
 import java.io.File;
 import java.io.InputStream;
 import tc.oc.pgm.api.map.exception.MapMissingException;
+import tc.oc.pgm.api.map.includes.StoredMapInclude;
 
 /** A source where {@link MapInfo} documents and files are downloaded. */
 public interface MapSource {
@@ -38,4 +39,14 @@ public interface MapSource {
    * @throws MapMissingException If the document can no longer be found.
    */
   boolean checkForUpdates() throws MapMissingException;
+
+  /**
+   * Adds a {@link StoredMapInclude} which holds information about a {@link MapInclude}
+   *
+   * @param include The {@link StoredMapInclude}
+   */
+  void addMapInclude(StoredMapInclude include);
+
+  /** Remove all associated {@link StoredMapInclude}, used when reloading document. */
+  void clearIncludes();
 }

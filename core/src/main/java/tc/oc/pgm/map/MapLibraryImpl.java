@@ -83,6 +83,11 @@ public class MapLibraryImpl implements MapLibrary {
     return maps.size();
   }
 
+  @Override
+  public MapIncludeProcessor getIncludeProcessor() {
+    return includes;
+  }
+
   private void logMapError(MapException err) {
     logger.log(Level.WARNING, err.getMessage(), err);
   }

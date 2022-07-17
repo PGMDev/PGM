@@ -3,6 +3,7 @@ package tc.oc.pgm.api.map;
 import java.util.Iterator;
 import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nullable;
+import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
 
 /** A library of {@link MapInfo}s and {@link MapContext}s. */
 public interface MapLibrary {
@@ -45,4 +46,11 @@ public interface MapLibrary {
    * @return A {@link MapContext}.
    */
   CompletableFuture<MapContext> loadExistingMap(String id);
+
+  /**
+   * Get the {@link MapIncludeProcessor}.
+   *
+   * @return A {@link MapIncludeProcessor}
+   */
+  MapIncludeProcessor getIncludeProcessor();
 }

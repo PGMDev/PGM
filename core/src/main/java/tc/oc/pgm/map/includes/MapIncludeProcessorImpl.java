@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -38,22 +37,27 @@ public class MapIncludeProcessorImpl implements MapIncludeProcessor {
     this.includes = Sets.newHashSet();
   }
 
-  @Nullable
-  private MapInclude getIncludeById(String id) {
+  public MapInclude getGlobalInclude() {
+    return getMapIncludeById("global");
+  }
+
+  @Override
+  public MapInclude getMapIncludeById(String includeId) {
     return includes.stream()
-        .filter(include -> include.getId().equalsIgnoreCase(id))
+        .filter(include -> include.getId().equalsIgnoreCase(includeId))
         .findAny()
         .orElse(null);
   }
 
   @Override
-  public MapInclude getGlobalInclude() {
-    return getIncludeById("global");
-  }
-
-  @Override
   public Collection<MapInclude> getMapIncludes(Document document) throws InvalidXMLException {
     Set<MapInclude> mapIncludes = Sets.newHashSet();
+
+    // Always add global include if present
+    if (getGlobalInclude() != null) {
+      mapIncludes.add(getGlobalInclude());
+    }
+
     List<Element> elements = document.getRootElement().getChildren("include");
     for (Element element : elements) {
 
@@ -69,7 +73,7 @@ public class MapIncludeProcessorImpl implements MapIncludeProcessor {
       }
 
       String id = XMLUtils.getRequiredAttribute(element, "id").getValue();
-      MapInclude include = getIncludeById(id);
+      MapInclude include = getMapIncludeById(id);
       if (include == null)
         throw new InvalidXMLException(
             "The provided include id '" + id + "' could not be found!", element);

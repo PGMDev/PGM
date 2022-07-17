@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicLong;
 import org.jdom2.Content;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
@@ -16,6 +17,7 @@ public class MapIncludeImpl implements MapInclude {
 
   private final String id;
   private final Document source;
+  private final AtomicLong lastModified;
 
   public MapIncludeImpl(File file) throws MapMissingException, JDOMException, IOException {
     try {
@@ -24,6 +26,8 @@ public class MapIncludeImpl implements MapInclude {
       this.source = MapIncludeProcessorImpl.DOCUMENT_FACTORY.get().build(fileStream);
     } catch (FileNotFoundException e) {
       throw new MapMissingException(file.getPath(), "Unable to read map include document", e);
+    } finally {
+      lastModified = new AtomicLong(file.lastModified());
     }
   }
 
@@ -41,5 +45,10 @@ public class MapIncludeImpl implements MapInclude {
   public boolean equals(Object other) {
     if (other == null || !(other instanceof MapInclude)) return false;
     return ((MapInclude) other).getId().equalsIgnoreCase(getId());
+  }
+
+  @Override
+  public long getLastModified() {
+    return lastModified.get();
   }
 }

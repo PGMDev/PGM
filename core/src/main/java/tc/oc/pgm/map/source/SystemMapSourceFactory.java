@@ -2,6 +2,7 @@ package tc.oc.pgm.map.source;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.Sets;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,11 +11,16 @@ import java.io.InputStream;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.exception.MapMissingException;
+import tc.oc.pgm.api.map.includes.MapInclude;
+import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
+import tc.oc.pgm.api.map.includes.StoredMapInclude;
 import tc.oc.pgm.util.FileUtils;
 
 public class SystemMapSourceFactory extends PathMapSourceFactory {
@@ -44,10 +50,14 @@ public class SystemMapSourceFactory extends PathMapSourceFactory {
 
     private final String dir;
     private final AtomicLong modified;
+    private final Set<StoredMapInclude> storedIncludes;
+    private final MapIncludeProcessor includes;
 
     private SystemMapSource(String dir) {
       this.dir = checkNotNull(dir);
       this.modified = new AtomicLong(-1);
+      this.storedIncludes = Sets.newHashSet();
+      this.includes = PGM.get().getMapLibrary().getIncludeProcessor();
     }
 
     private File getDirectory() throws MapMissingException {
@@ -118,7 +128,7 @@ public class SystemMapSourceFactory extends PathMapSourceFactory {
       final File file = getFile();
 
       final long mod = modified.get();
-      return mod > 0 && file.lastModified() > mod;
+      return (mod > 0 && file.lastModified() > mod) || checkForIncludeUpdates();
     }
 
     @Override
@@ -138,6 +148,26 @@ public class SystemMapSourceFactory extends PathMapSourceFactory {
           .append("dir", dir)
           .append("modified", modified.get())
           .build();
+    }
+
+    @Override
+    public void addMapInclude(StoredMapInclude include) {
+      this.storedIncludes.add(include);
+    }
+
+    @Override
+    public void clearIncludes() {
+      this.storedIncludes.clear();
+    }
+
+    private boolean checkForIncludeUpdates() {
+      for (StoredMapInclude stored : storedIncludes) {
+        MapInclude include = includes.getMapIncludeById(stored.getIncludeId());
+        if (stored.hasBeenModified(include.getLastModified())) {
+          return true;
+        }
+      }
+      return false;
     }
   }
 }

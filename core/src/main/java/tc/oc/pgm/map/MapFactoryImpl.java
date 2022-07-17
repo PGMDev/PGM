@@ -31,6 +31,7 @@ import tc.oc.pgm.filters.parse.LegacyFilterParser;
 import tc.oc.pgm.kits.FeatureKitParser;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.kits.LegacyKitParser;
+import tc.oc.pgm.map.includes.StoredMapIncludeImpl;
 import tc.oc.pgm.regions.FeatureRegionParser;
 import tc.oc.pgm.regions.LegacyRegionParser;
 import tc.oc.pgm.regions.RegionParser;
@@ -76,26 +77,28 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
     }
   }
 
+  private void storeInclude(MapInclude include) {
+    this.source.addMapInclude(new StoredMapIncludeImpl(include.getId(), include.getLastModified()));
+  }
+
   private void preLoad()
       throws IOException, JDOMException, InvalidXMLException, MapMissingException {
     if (document != null && !source.checkForUpdates()) {
       return; // If a document is present and there are no updates, skip loading again
     }
 
+    source.clearIncludes();
+
     try (final InputStream stream = source.getDocument()) {
       document = DOCUMENT_FACTORY.get().build(stream);
       document.setBaseURI(source.getId());
-    }
-
-    // Add global include file to the document if present
-    if (includes.getGlobalInclude() != null) {
-      document.getRootElement().addContent(0, includes.getGlobalInclude().getContent());
     }
 
     // Check for any included map sources, appending them to the document if present
     Collection<MapInclude> mapIncludes = includes.getMapIncludes(document);
     for (MapInclude include : mapIncludes) {
       document.getRootElement().addContent(0, include.getContent());
+      storeInclude(include);
     }
 
     info = new MapInfoImpl(document.getRootElement());
