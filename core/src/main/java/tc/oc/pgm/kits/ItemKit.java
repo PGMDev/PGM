@@ -43,7 +43,7 @@ public class ItemKit implements KitDefinition {
    */
   @Override
   public void apply(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {
-    ApplyItemKitEvent event = new ApplyItemKitEvent(player, this, force);
+    ApplyItemKitEvent event = new ApplyItemKitEvent(player, this, force, displacedItems);
     player.getMatch().callEvent(event);
     if (event.isCancelled()) {
       return;

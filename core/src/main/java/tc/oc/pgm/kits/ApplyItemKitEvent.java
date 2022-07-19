@@ -13,8 +13,10 @@ import tc.oc.pgm.api.player.MatchPlayer;
 public class ApplyItemKitEvent extends ApplyKitEvent {
   private final Map<Slot, ItemStack> slotItems;
   private final List<ItemStack> freeItems;
+  private final List<ItemStack> displacedItems;
 
-  public ApplyItemKitEvent(MatchPlayer player, ItemKit kit, boolean force) {
+  public ApplyItemKitEvent(
+      MatchPlayer player, ItemKit kit, boolean force, List<ItemStack> displacedItems) {
     super(player, kit, force);
 
     this.slotItems = new HashMap<>(kit.getSlotItems().size());
@@ -26,6 +28,7 @@ public class ApplyItemKitEvent extends ApplyKitEvent {
     for (ItemStack stack : kit.getFreeItems()) {
       this.freeItems.add(stack.clone());
     }
+    this.displacedItems = displacedItems;
   }
 
   /**
@@ -38,6 +41,10 @@ public class ApplyItemKitEvent extends ApplyKitEvent {
 
   public List<ItemStack> getFreeItems() {
     return freeItems;
+  }
+
+  public List<ItemStack> getDisplacedItems() {
+    return displacedItems;
   }
 
   /**
