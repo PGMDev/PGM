@@ -11,6 +11,7 @@ public class SpawnAttributes {
   public final Kit kit;
   public final boolean sequential;
   public final boolean spread;
+  public final boolean spreadTeammates;
   public final boolean exclusive;
   public final boolean persistent;
 
@@ -20,6 +21,7 @@ public class SpawnAttributes {
       Kit kit,
       boolean sequential,
       boolean spread,
+      boolean spreadTeammates,
       boolean exclusive,
       boolean persistent) {
     this.filter = filter;
@@ -27,11 +29,20 @@ public class SpawnAttributes {
     this.kit = kit;
     this.sequential = sequential;
     this.spread = spread;
+    this.spreadTeammates = spreadTeammates;
     this.exclusive = exclusive;
     this.persistent = persistent;
   }
 
   public SpawnAttributes() {
-    this(StaticFilter.ABSTAIN, new PointProviderAttributes(), null, false, false, false, false);
+    this(
+        StaticFilter.ABSTAIN,
+        new PointProviderAttributes(),
+        null,
+        false,
+        false,
+        false,
+        false,
+        false);
   }
 }
