@@ -14,8 +14,12 @@ public class SpreadPointProvider extends AggregatePointProvider {
 
   private static final int SAMPLE_COUNT = 16;
 
-  public SpreadPointProvider(Collection<? extends PointProvider> children) {
+  private final boolean spreadTeammates;
+
+  public SpreadPointProvider(
+      Collection<? extends PointProvider> children, boolean spreadTeammates) {
     super(children);
+    this.spreadTeammates = spreadTeammates;
   }
 
   @Override
@@ -34,7 +38,9 @@ public class SpreadPointProvider extends AggregatePointProvider {
         for (MatchPlayer enemy : match.getParticipants()) {
           if (enemy.isParticipating()
               && !enemy.isDead()
-              && (player == null || player.getParty() != enemy.getParty())) {
+              && (player == null
+                  || player.getParty() != enemy.getParty()
+                  || this.spreadTeammates)) {
             nearest = Math.min(nearest, pos.distanceSquared(enemy.getBukkit().getLocation()));
           }
         }

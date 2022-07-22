@@ -63,8 +63,8 @@ public class SpawnParser {
     PointProvider provider;
     if (attributes.sequential) {
       provider = new SequentialPointProvider(providers);
-    } else if (attributes.spread) {
-      provider = new SpreadPointProvider(providers);
+    } else if (attributes.spread || attributes.spreadTeammates) {
+      provider = new SpreadPointProvider(providers, attributes.spreadTeammates);
     } else {
       provider = new RandomPointProvider(providers);
     }
@@ -101,6 +101,8 @@ public class SpawnParser {
 
     boolean sequential = XMLUtils.parseBoolean(el.getAttribute("sequential"), parent.sequential);
     boolean spread = XMLUtils.parseBoolean(el.getAttribute("spread"), parent.spread);
+    boolean spreadTeammates =
+        XMLUtils.parseBoolean(el.getAttribute("spread-teammates"), parent.spreadTeammates);
     boolean exclusive = XMLUtils.parseBoolean(el.getAttribute("exclusive"), parent.exclusive);
     boolean persistent = XMLUtils.parseBoolean(el.getAttribute("persistent"), parent.persistent);
 
@@ -130,6 +132,7 @@ public class SpawnParser {
         && kit == parent.kit
         && sequential == parent.sequential
         && spread == parent.spread
+        && spreadTeammates == parent.spreadTeammates
         && exclusive == parent.exclusive
         && persistent == parent.persistent
         && !newFilters) {
@@ -142,6 +145,7 @@ public class SpawnParser {
           kit,
           sequential,
           spread,
+          spreadTeammates,
           exclusive,
           persistent);
     }
