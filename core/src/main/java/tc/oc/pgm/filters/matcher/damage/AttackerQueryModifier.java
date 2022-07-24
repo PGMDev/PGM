@@ -3,34 +3,26 @@ package tc.oc.pgm.filters.matcher.damage;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.DamageQuery;
-import tc.oc.pgm.api.filter.query.Query;
+import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.filters.modifier.QueryModifier;
-import tc.oc.pgm.filters.query.MatchQuery;
 import tc.oc.pgm.filters.query.PlayerStateQuery;
 
-public class AttackerQueryModifier extends QueryModifier<DamageQuery> {
+public class AttackerQueryModifier extends QueryModifier<DamageQuery, PlayerQuery> {
 
   public AttackerQueryModifier(Filter child) {
-    super(child);
+    super(child, PlayerQuery.class);
   }
 
   @Nullable
   @Override
-  protected Query modifyQuery(DamageQuery query) {
+  protected PlayerQuery transformQuery(DamageQuery query) {
     ParticipantState attacker = query.getDamageInfo().getAttacker();
-    if (attacker == null) {
-      // It's not at all clear what is the best thing to do in this case,
-      // but this seems to make sense. No player is available to query,
-      // so pass through a non-player query.
-      return new MatchQuery(query.getEvent(), query.getMatch());
-    } else {
-      return new PlayerStateQuery(query.getEvent(), attacker);
-    }
+    return attacker != null ? new PlayerStateQuery(query.getEvent(), attacker) : null;
   }
 
   @Override
-  public Class<? extends DamageQuery> getQueryType() {
+  public Class<? extends DamageQuery> queryType() {
     return DamageQuery.class;
   }
 }

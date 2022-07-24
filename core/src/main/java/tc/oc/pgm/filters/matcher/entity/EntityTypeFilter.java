@@ -21,7 +21,7 @@ public class EntityTypeFilter extends TypedFilter.Impl<EntityTypeQuery> {
   }
 
   @Override
-  public Class<? extends EntityTypeQuery> getQueryType() {
+  public Class<? extends EntityTypeQuery> queryType() {
     return EntityTypeQuery.class;
   }
 

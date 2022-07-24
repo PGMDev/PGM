@@ -14,7 +14,7 @@ public class PlayerClassFilter extends TypedFilter.Impl<PlayerQuery> {
   }
 
   @Override
-  public Class<? extends PlayerQuery> getQueryType() {
+  public Class<? extends PlayerQuery> queryType() {
     return PlayerQuery.class;
   }
 

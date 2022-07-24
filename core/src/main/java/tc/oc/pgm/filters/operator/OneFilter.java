@@ -1,9 +1,8 @@
 package tc.oc.pgm.filters.operator;
 
-import java.util.Arrays;
+import java.util.List;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
-import tc.oc.pgm.filters.matcher.StaticFilter;
 
 public class OneFilter extends MultiFilterFunction {
   public OneFilter(Iterable<Filter> filters) {
@@ -30,13 +29,10 @@ public class OneFilter extends MultiFilterFunction {
   }
 
   public static Filter of(Filter... filters) {
-    switch (filters.length) {
-      case 0:
-        return StaticFilter.ABSTAIN;
-      case 1:
-        return filters[0];
-      default:
-        return new OneFilter(Arrays.asList(filters));
-    }
+    return MultiFilterFunction.of(OneFilter::new, filters);
+  }
+
+  public static Filter of(List<Filter> filters) {
+    return MultiFilterFunction.of(OneFilter::new, filters);
   }
 }

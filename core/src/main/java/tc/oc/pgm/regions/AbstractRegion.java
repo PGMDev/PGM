@@ -121,7 +121,7 @@ public abstract class AbstractRegion extends TypedFilter.Impl<LocationQuery>
   }
 
   @Override
-  public Class<? extends LocationQuery> getQueryType() {
+  public Class<? extends LocationQuery> queryType() {
     return LocationQuery.class;
   }
 

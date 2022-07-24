@@ -11,8 +11,8 @@ public class StaticFilter implements FilterDefinition {
   }
 
   @Override
-  public Class<? extends Query> getQueryType() {
-    return Query.class;
+  public boolean respondsTo(Class<? extends Query> queryType) {
+    return response.isPresent();
   }
 
   @Override

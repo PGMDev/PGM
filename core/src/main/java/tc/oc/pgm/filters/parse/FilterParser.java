@@ -250,7 +250,7 @@ public abstract class FilterParser {
 
   @MethodParser("not")
   public Filter parseNot(Element el) throws InvalidXMLException {
-    return new InverseFilter(new AnyFilter(parseChildren(el)));
+    return new InverseFilter(AnyFilter.of(parseChildren(el)));
   }
 
   @MethodParser("team")

@@ -13,7 +13,7 @@ public class RelationFilter extends TypedFilter.Impl<DamageQuery> {
   }
 
   @Override
-  public Class<? extends DamageQuery> getQueryType() {
+  public Class<? extends DamageQuery> queryType() {
     return DamageQuery.class;
   }
 

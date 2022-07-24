@@ -28,7 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterListener;
-import tc.oc.pgm.api.filter.ParentFilter;
+import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.api.filter.ReactorFactory;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
@@ -132,7 +132,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
     // match load e.g. the goals
     for (Filter filter : this.listeners.rowKeySet()) {
       Map<Class<? extends Filterable<?>>, ListenerSet> row = this.listeners.row(filter);
-      for (Class<? extends Filterable<?>> scope : Filter.SCOPES) {
+      for (Class<? extends Filterable<?>> scope : Filterables.SCOPES) {
         ListenerSet set = row.get(scope);
         if (set == null) continue;
         match
@@ -157,18 +157,13 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   }
 
   private void findAndCreateReactorFactories(Filter filter) {
-    if (filter instanceof XMLFilterReference) {
-      this.findAndCreateReactorFactories(((XMLFilterReference) filter).get());
-      return;
-    }
-    if (filter instanceof ParentFilter) {
-      ((ParentFilter) filter).getChildren().forEach(this::findAndCreateReactorFactories);
-    }
-    if (filter instanceof ReactorFactory) {
-      ReactorFactory<? extends ReactorFactory.Reactor> factory =
-          (ReactorFactory<? extends ReactorFactory.Reactor>) filter;
-      activeReactors.computeIfAbsent(factory, f -> f.createReactor(match, this));
-    }
+    filter
+        .deepDependencies(Filter.class)
+        .filter(f -> f instanceof ReactorFactory)
+        .forEach(
+            factory ->
+                activeReactors.computeIfAbsent(
+                    (ReactorFactory<?>) factory, f -> f.createReactor(match, this)));
   }
 
   @Override

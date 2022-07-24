@@ -10,12 +10,12 @@ import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.LocationQuery;
+import tc.oc.pgm.filters.matcher.TypedFilter;
 import tc.oc.pgm.regions.Bounds;
 
 /** Represents an arbitrary region in a Bukkit world. */
-public interface Region extends Filter {
+public interface Region extends TypedFilter<LocationQuery> {
   /** Test if the region contains the given point */
   boolean contains(Vector point);
 

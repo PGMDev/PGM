@@ -29,7 +29,7 @@ public class CarryingFlagFilter extends TypedFilter.Impl<PartyQuery> {
   }
 
   @Override
-  public Class<? extends PartyQuery> getQueryType() {
+  public Class<? extends PartyQuery> queryType() {
     return PartyQuery.class;
   }
 

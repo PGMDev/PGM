@@ -24,7 +24,7 @@ public class StructuralLoadFilter extends TypedFilter.Impl<BlockQuery> {
   }
 
   @Override
-  public Class<? extends BlockQuery> getQueryType() {
+  public Class<? extends BlockQuery> queryType() {
     return BlockQuery.class;
   }
 

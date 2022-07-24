@@ -4,8 +4,8 @@ import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.filter.query.Query;
 
 /**
- * A filter that NEVER responds to queries outside of {@link #getQueryType()}, and SOMETIMES
- * responds to queries extending {@link #getQueryType()}.
+ * A filter that NEVER responds to queries outside of {@link #queryType()}, and SOMETIMES responds
+ * to queries extending {@link #queryType()}.
  *
  * <p>Queries of the latter type are passed to {@link #queryTyped(Query)}.
  *
@@ -13,12 +13,11 @@ import tc.oc.pgm.api.filter.query.Query;
  */
 public interface WeakTypedFilter<Q extends Query> extends FilterDefinition {
 
-  @Override
-  Class<? extends Q> getQueryType();
+  Class<? extends Q> queryType();
 
   @Override
   default QueryResponse query(Query query) {
-    Class<? extends Q> type = getQueryType();
+    Class<? extends Q> type = queryType();
     return type.isInstance(query) ? queryTyped(type.cast(query)) : QueryResponse.ABSTAIN;
   }
 

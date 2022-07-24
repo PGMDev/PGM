@@ -1,6 +1,7 @@
 package tc.oc.pgm.filters.parse;
 
 import org.jdom2.Element;
+import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -27,7 +28,7 @@ public class FeatureFilterParser extends FilterParser {
   @Override
   public Filter parse(Element el) throws InvalidXMLException {
     Filter filter = this.parseDynamic(el);
-    if (filter instanceof FilterDefinition) {
+    if (!(filter instanceof FeatureReference)) {
       factory.getFeatures().addFeature(el, (FilterDefinition) filter);
     }
     return filter;

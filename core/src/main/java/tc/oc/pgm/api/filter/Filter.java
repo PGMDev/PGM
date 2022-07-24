@@ -2,15 +2,11 @@ package tc.oc.pgm.api.filter;
 
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
-import java.util.List;
 import org.bukkit.event.Event;
 import tc.oc.pgm.api.feature.Feature;
+import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.query.Query;
-import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.party.Party;
-import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.filters.parse.FilterParser;
 
 /**
@@ -26,30 +22,17 @@ import tc.oc.pgm.filters.parse.FilterParser;
  *
  * @see Query
  */
-public interface Filter {
+public interface Filter extends FeatureDefinition {
 
-  /** {@link Filterable}s ordered from general to specific */
-  List<Class<? extends Filterable<?>>> SCOPES =
-      ImmutableList.of(Match.class, Party.class, MatchPlayer.class);
-
-  /**
-   * Filters with children are responsible for returning the events of their children.
-   *
-   * <p>Empty list tells us that the filter is not dynamic
-   */
-  default Collection<Class<? extends Event>> getRelevantEvents() {
-    return ImmutableList.of();
-  }
-
-  default boolean isDynamic() {
-    return !getRelevantEvents().isEmpty();
-  }
-
-  /** Least-derived query type that this filter might not abstain from */
-  Class<? extends Query> getQueryType();
-
+  /** ALLOW or DENY the given {@link Query}, or ABSTAIN from responding. */
   QueryResponse query(Query query);
 
+  /**
+   * Return true if this filter ALLOWs the given {@link Query}, false if this filter DENYes it, or
+   * throw a {@link UnsupportedOperationException} if this filter cannot respond to the given query.
+   *
+   * <p>{@link #assertRespondsTo(Class)} can be used to ensure that this method will not throw.
+   */
   default boolean response(Query query) {
     switch (query(query)) {
       case ALLOW:
@@ -60,6 +43,54 @@ public interface Filter {
         throw new UnsupportedOperationException(
             "Filter " + this + " did not respond to the query " + query);
     }
+  }
+
+  /**
+   * Return true only if ALL following conditions are true:
+   *
+   * <p>1. This filter always responds to queries of the given type (i.e. never ABSTAINS) 2. This
+   * filter's response is derived only from properties of the given query type, and not on any
+   * properties in subtypes of that query. 3. All dependencies of this filter also meet the above
+   * conditions.
+   */
+  boolean respondsTo(Class<? extends Query> queryType);
+
+  /**
+   * Throw a {@link FilterTypeException} unless this filter, and ALL dependency filters, return true
+   * from {@link #respondsTo(Class)} for the given query type.
+   *
+   * <p>If this filter has dependencies, it should call this method on them directly, so that the
+   * exception contains the specific filter that failed the test.
+   */
+  default void assertRespondsTo(Class<? extends Query> queryType) throws FilterTypeException {
+    if (!respondsTo(queryType)) {
+      throw new FilterTypeException(this, queryType);
+    }
+  }
+
+  /**
+   * Does this filter support dynamic notifications?
+   *
+   * <p>If this returns true, then any change in the response of this filter to a query that passes
+   * {@link #assertRespondsTo(Class)} must notify {@link FilterListener}s registered through {@link
+   * tc.oc.pgm.filters.FilterMatchModule}.
+   *
+   * <p>This method should NOT account for the behavior of any {@link #dependencies()}, as that is
+   * done automatically by the calling code. This method can return true as long as it does NOT
+   * change its response to any query, without firing a notification, at a time when none of its
+   * dynamic dependencies change their response.
+   */
+  default boolean isDynamic() {
+    return !getRelevantEvents().isEmpty();
+  }
+
+  /**
+   * Filters with children are responsible for returning the events of their children.
+   *
+   * <p>Empty list tells us that the filter is not dynamic
+   */
+  default Collection<Class<? extends Event>> getRelevantEvents() {
+    return ImmutableList.of();
   }
 
   enum QueryResponse {
@@ -73,6 +104,10 @@ public interface Filter {
 
     public boolean isDenied() {
       return this == DENY;
+    }
+
+    public boolean isPresent() {
+      return this != ABSTAIN;
     }
 
     public static QueryResponse any(QueryResponse... responses) {
@@ -113,18 +148,5 @@ public interface Filter {
     public static QueryResponse fromBoolean(boolean allow) {
       return allow ? ALLOW : DENY;
     }
-  }
-
-  /**
-   * Return the "scope" of this filter, which is the most general {@link Filterable} type that it
-   * responds to.
-   */
-  default Class<? extends Filterable<?>> getScope() {
-    for (Class<? extends Filterable<?>> scope : SCOPES) {
-      if (this.getQueryType().isAssignableFrom(scope)) return scope;
-    }
-
-    throw new IllegalStateException(
-        "Filter type " + this.getQueryType().getSimpleName() + " does not have a filterable scope");
   }
 }

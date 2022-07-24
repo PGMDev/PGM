@@ -8,7 +8,7 @@ import tc.oc.pgm.filters.matcher.TypedFilter;
 public class LegacyWorldFilter extends TypedFilter.Impl<Query> {
 
   @Override
-  public Class<? extends Query> getQueryType() {
+  public Class<? extends Query> queryType() {
     return Query.class;
   }
 

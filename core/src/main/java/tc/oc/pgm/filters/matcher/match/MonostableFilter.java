@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.api.filter.ReactorFactory;
 import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.api.match.Match;
@@ -41,11 +42,11 @@ public class MonostableFilter extends SingleFilterFunction
   public MonostableFilter(Filter filter, Duration duration) {
     super(filter);
     this.duration = duration;
-    this.scope = filter.getScope();
+    this.scope = Filterables.scope(filter);
   }
 
   @Override
-  public Class<MatchQuery> getQueryType() {
+  public Class<MatchQuery> queryType() {
     return MatchQuery.class;
   }
 
@@ -74,7 +75,7 @@ public class MonostableFilter extends SingleFilterFunction
     public Reactor(Match match, FilterMatchModule fmm) {
       super(match, fmm);
       match.addTickable(this, MatchScope.LOADED);
-      fmm.onChange(filter.getScope(), filter, this::matches);
+      fmm.onChange(scope, filter, this::matches);
     }
 
     boolean matches(Filterable<?> filterable, boolean response) {

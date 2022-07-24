@@ -143,7 +143,7 @@ public class FiniteBlockRegion extends AbstractRegion {
     for (SingleMaterialMatcher materialPattern : materials) {
       filters.add(new BlockFilter(materialPattern));
     }
-    return fromWorld(region, world, new AnyFilter(filters), proto);
+    return fromWorld(region, world, AnyFilter.of(filters), proto);
   }
 
   @SuppressWarnings("deprecation")

@@ -117,13 +117,13 @@ public class RenewableModule implements MapModule {
         if (inline.isEmpty()) {
           return def;
         } else {
-          return new AnyFilter(inline);
+          return AnyFilter.of(inline);
         }
       } else {
         if (inline.isEmpty()) {
           return property;
         } else {
-          return AllFilter.of(property, new AnyFilter(inline));
+          return AllFilter.of(property, AnyFilter.of(inline));
         }
       }
     }

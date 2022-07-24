@@ -12,7 +12,7 @@ public class SpawnReasonFilter extends TypedFilter.Impl<EntitySpawnQuery> {
   }
 
   @Override
-  public Class<? extends EntitySpawnQuery> getQueryType() {
+  public Class<? extends EntitySpawnQuery> queryType() {
     return EntitySpawnQuery.class;
   }
 

@@ -26,7 +26,7 @@ public class BlockFilter extends TypedFilter.Impl<MaterialQuery> {
   }
 
   @Override
-  public Class<? extends MaterialQuery> getQueryType() {
+  public Class<? extends MaterialQuery> queryType() {
     return MaterialQuery.class;
   }
 

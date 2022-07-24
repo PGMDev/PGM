@@ -64,7 +64,7 @@ public class CauseFilter extends TypedFilter.Impl<MatchQuery> {
   }
 
   @Override
-  public Class<? extends MatchQuery> getQueryType() {
+  public Class<? extends MatchQuery> queryType() {
     return MatchQuery.class;
   }
 

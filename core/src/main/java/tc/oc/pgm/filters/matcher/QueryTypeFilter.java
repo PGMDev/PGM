@@ -1,9 +1,8 @@
 package tc.oc.pgm.filters.matcher;
 
-import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.filter.query.Query;
 
-public class QueryTypeFilter implements FilterDefinition {
+public class QueryTypeFilter implements TypedFilter<Query> {
   protected final Class<? extends Query> type;
 
   public QueryTypeFilter(Class<? extends Query> type) {
@@ -11,13 +10,13 @@ public class QueryTypeFilter implements FilterDefinition {
   }
 
   @Override
-  public Class<? extends Query> getQueryType() {
+  public Class<? extends Query> queryType() {
     return Query.class;
   }
 
   @Override
-  public QueryResponse query(Query query) {
-    return QueryResponse.fromBoolean(type.isInstance(query));
+  public boolean matches(Query query) {
+    return type.isInstance(query);
   }
 
   @Override

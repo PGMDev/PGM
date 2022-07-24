@@ -55,7 +55,7 @@ public abstract class ControlPointParser {
     if (filters.isEmpty()) {
       visualMaterials = VISUAL_MATERIALS;
     } else {
-      visualMaterials = new AnyFilter(filters);
+      visualMaterials = AnyFilter.of(filters);
     }
 
     String name;

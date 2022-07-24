@@ -16,7 +16,7 @@ import tc.oc.pgm.filters.matcher.TypedFilter;
 public abstract class ParticipantFilter extends TypedFilter.Impl<PlayerQuery> {
 
   @Override
-  public Class<? extends PlayerQuery> getQueryType() {
+  public Class<? extends PlayerQuery> queryType() {
     return PlayerQuery.class;
   }
 

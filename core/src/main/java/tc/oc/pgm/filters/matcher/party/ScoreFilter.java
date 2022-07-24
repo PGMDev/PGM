@@ -25,7 +25,7 @@ public class ScoreFilter extends CompetitorFilter {
   }
 
   @Override
-  public Class<? extends PartyQuery> getQueryType() {
+  public Class<? extends PartyQuery> queryType() {
     return PartyQuery.class;
   }
 

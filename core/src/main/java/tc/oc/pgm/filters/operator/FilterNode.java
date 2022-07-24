@@ -20,8 +20,9 @@ public class FilterNode implements Filter {
   }
 
   @Override
-  public Class<? extends Query> getQueryType() {
-    return Query.class;
+  public boolean respondsTo(Class<? extends Query> queryType) {
+    // Legacy filter, does not need to support dynamic stuff at all.
+    return false;
   }
 
   protected boolean matches(Collection<Filter> matchers, Query query) {

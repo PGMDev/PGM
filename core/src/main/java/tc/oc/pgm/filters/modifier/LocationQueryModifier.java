@@ -8,14 +8,14 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.LocationQuery;
 import tc.oc.pgm.filters.query.BlockQuery;
 
-public abstract class LocationQueryModifier extends QueryModifier<LocationQuery> {
+public abstract class LocationQueryModifier extends QueryModifier<LocationQuery, LocationQuery> {
 
   LocationQueryModifier(Filter filter) {
-    super(filter);
+    super(filter, LocationQuery.class);
   }
 
   @Override
-  public Class<? extends LocationQuery> getQueryType() {
+  public Class<? extends LocationQuery> queryType() {
     return LocationQuery.class;
   }
 
@@ -54,7 +54,7 @@ public abstract class LocationQueryModifier extends QueryModifier<LocationQuery>
     }
 
     @Override
-    protected BlockQueryCustomLocation modifyQuery(LocationQuery query) {
+    protected BlockQueryCustomLocation transformQuery(LocationQuery query) {
       Location origin = query.getLocation();
       Location newLoc = origin.clone();
       newLoc.setX(relative[0] ? origin.getX() + coords.getX() : coords.getX());
@@ -78,7 +78,7 @@ public abstract class LocationQueryModifier extends QueryModifier<LocationQuery>
     }
 
     @Override
-    protected BlockQueryCustomLocation modifyQuery(LocationQuery query) {
+    protected BlockQueryCustomLocation transformQuery(LocationQuery query) {
       Location origin = query.getLocation();
       double x = coords.getX();
       double y = coords.getY();

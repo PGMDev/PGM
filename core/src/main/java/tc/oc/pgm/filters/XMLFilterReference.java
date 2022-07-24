@@ -1,10 +1,13 @@
 package tc.oc.pgm.filters;
 
 import java.util.Collection;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.bukkit.event.Event;
+import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
+import tc.oc.pgm.api.filter.FilterTypeException;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
@@ -27,17 +30,43 @@ public class XMLFilterReference extends XMLFeatureReference<FilterDefinition> im
   }
 
   @Override
-  public Collection<Class<? extends Event>> getRelevantEvents() {
-    return this.get().getRelevantEvents();
-  }
-
-  @Override
-  public Class<? extends Query> getQueryType() {
-    return get().getQueryType();
-  }
-
-  @Override
   public QueryResponse query(Query query) {
     return get().query(query);
+  }
+
+  @Override
+  public boolean response(Query query) {
+    return get().response(query);
+  }
+
+  @Override
+  public boolean respondsTo(Class<? extends Query> queryType) {
+    return get().respondsTo(queryType);
+  }
+
+  @Override
+  public void assertRespondsTo(Class<? extends Query> queryType) throws FilterTypeException {
+    get().assertRespondsTo(queryType);
+  }
+
+  @Override
+  public boolean isDynamic() {
+    return get().isDynamic();
+  }
+
+  @Override
+  public Collection<Class<? extends Event>> getRelevantEvents() {
+    return get().getRelevantEvents();
+  }
+
+  @Nullable
+  @Override
+  public Class<? extends FeatureDefinition> getDefinitionType() {
+    return get().getDefinitionType();
+  }
+
+  @Override
+  public Stream<? extends FeatureDefinition> dependencies() {
+    return get().dependencies();
   }
 }

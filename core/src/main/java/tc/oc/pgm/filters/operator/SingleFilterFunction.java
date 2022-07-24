@@ -2,17 +2,16 @@ package tc.oc.pgm.filters.operator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
 import java.util.Collection;
-import java.util.List;
+import java.util.stream.Stream;
 import org.bukkit.event.Event;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
-import tc.oc.pgm.api.filter.ParentFilter;
+import tc.oc.pgm.api.filter.FilterTypeException;
 import tc.oc.pgm.api.filter.query.Query;
 
 /** A filter that transforms the result of a single child filter */
-public abstract class SingleFilterFunction implements FilterDefinition, ParentFilter {
+public abstract class SingleFilterFunction implements FilterDefinition {
 
   protected final Filter filter;
 
@@ -21,18 +20,28 @@ public abstract class SingleFilterFunction implements FilterDefinition, ParentFi
   }
 
   @Override
+  public boolean respondsTo(Class<? extends Query> queryType) {
+    return filter.respondsTo(queryType);
+  }
+
+  @Override
+  public void assertRespondsTo(Class<? extends Query> queryType) throws FilterTypeException {
+    filter.assertRespondsTo(queryType);
+  }
+
+  @Override
+  public boolean isDynamic() {
+    return filter.isDynamic();
+  }
+
+  @Override
   public Collection<Class<? extends Event>> getRelevantEvents() {
     return this.filter.getRelevantEvents();
   }
 
   @Override
-  public Class<? extends Query> getQueryType() {
-    return filter.getQueryType();
-  }
-
-  @Override
-  public List<Filter> getChildren() {
-    return ImmutableList.of(this.filter);
+  public Stream<? extends Filter> dependencies() {
+    return Stream.of(this.filter);
   }
 
   @Override
