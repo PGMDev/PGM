@@ -38,7 +38,7 @@ public interface Filterable<Q extends MatchQuery> extends MatchQuery {
       return (F) this;
     } else {
       @Nullable Filterable<? super Q> parent = getFilterableParent();
-      return parent == null ? null : (F) parent;
+      return parent == null ? null : parent.getFilterableAncestor(type);
     }
   }
 

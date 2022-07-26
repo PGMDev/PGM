@@ -8,8 +8,7 @@ public interface FilterDispatcher {
 
   /**
    * Register the given {@link FilterListener} to receive notifications of changes to the response
-   * of the given {@link Filter} to any {@link tc.oc.pgm.filters.Filterable} assignable to the given
-   * scope.
+   * of the given {@link Filter} to any {@link Filterable} assignable to the given scope.
    *
    * <p>The listener is immediately notified of the current filter response for all existing
    * filterables.
@@ -23,7 +22,7 @@ public interface FilterDispatcher {
 
   /**
    * Register the given {@link FilterListener} to receive notifications of changes to the response
-   * of the given {@link Filter} to any {@link tc.oc.pgm.filters.Filterable}.
+   * of the given {@link Filter} to any {@link Filterable}.
    *
    * <p>The listener is immediately notified of the current filter response for all existing
    * filterables.
@@ -35,8 +34,7 @@ public interface FilterDispatcher {
 
   /**
    * Register the given listener to be notified whenever the response of the given {@link Filter}
-   * changes from DENY to ALLOW for any {@link tc.oc.pgm.filters.Filterable} assignable to the given
-   * scope.
+   * changes from DENY to ALLOW for any {@link Filterable} assignable to the given scope.
    *
    * <p>The listener is immediately notified of any existing filterables that are currently ALLOWed
    * by the filter.
@@ -50,7 +48,7 @@ public interface FilterDispatcher {
 
   /**
    * Register the given listener to be notified whenever the response of the given {@link Filter}
-   * changes from DENY to ALLOW for any {@link tc.oc.pgm.filters.Filterable}.
+   * changes from DENY to ALLOW for any {@link Filterable}.
    *
    * <p>The listener is immediately notified of any existing filterables that are currently ALLOWed
    * by the filter.
@@ -62,8 +60,7 @@ public interface FilterDispatcher {
 
   /**
    * Register the given listener to be notified whenever the response of the given {@link Filter}
-   * changes from ALLOW to DENY for any {@link tc.oc.pgm.filters.Filterable} assignable to the given
-   * scope.
+   * changes from ALLOW to DENY for any {@link Filterable} assignable to the given scope.
    *
    * <p>The listener is immediately notified of any existing filterables that are currently DENYed
    * by the filter.
@@ -77,7 +74,7 @@ public interface FilterDispatcher {
 
   /**
    * Register the given listener to be notified whenever the response of the given {@link Filter}
-   * changes from ALLOW to DENY for any {@link tc.oc.pgm.filters.Filterable}.
+   * changes from ALLOW to DENY for any {@link Filterable}.
    *
    * <p>The listener is immediately notified of any existing filterables that are currently DENYed
    * by the filter.
