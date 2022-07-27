@@ -1370,4 +1370,13 @@ public interface NMSHacks {
 
     item.remove();
   }
+
+  static void freezeEntity(Entity entity) {
+    net.minecraft.server.v1_8_R3.Entity nmsEntity = ((CraftEntity) entity).getHandle();
+    NBTTagCompound tag = new NBTTagCompound();
+    nmsEntity.c(tag);
+    tag.setBoolean("NoAI", true);
+    tag.setBoolean("NoGravity", true);
+    nmsEntity.f(tag);
+  }
 }

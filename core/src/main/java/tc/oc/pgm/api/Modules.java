@@ -103,6 +103,8 @@ import tc.oc.pgm.score.ScoreModule;
 import tc.oc.pgm.scoreboard.ScoreboardMatchModule;
 import tc.oc.pgm.scoreboard.SidebarMatchModule;
 import tc.oc.pgm.shield.ShieldMatchModule;
+import tc.oc.pgm.shops.ShopMatchModule;
+import tc.oc.pgm.shops.ShopModule;
 import tc.oc.pgm.snapshot.SnapshotMatchModule;
 import tc.oc.pgm.spawner.SpawnerMatchModule;
 import tc.oc.pgm.spawner.SpawnerModule;
@@ -256,6 +258,7 @@ public interface Modules {
     register(
         WorldBorderModule.class, WorldBorderMatchModule.class, new WorldBorderModule.Factory());
     register(SpawnerModule.class, SpawnerMatchModule.class, new SpawnerModule.Factory());
+    register(ShopModule.class, ShopMatchModule.class, new ShopModule.Factory());
 
     // MapModules that are also MatchModules
     register(WorldTimeModule.class, WorldTimeModule.class, new WorldTimeModule.Factory());

@@ -24,9 +24,10 @@ public class MultiTradeMatchModule implements MatchModule, Listener {
     this.logger = PGM.get().getGameLogger();
   }
 
-  @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+  @EventHandler(priority = EventPriority.NORMAL)
   public void onInteract(PlayerInteractEntityEvent event) {
     if (event.getRightClicked() instanceof Villager) {
+      if (event.isCancelled()) return;
       // Fallback to once-at-a-time trading if multi trade does not work
       if (ok) {
         event.setCancelled(true);
