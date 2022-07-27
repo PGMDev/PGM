@@ -21,6 +21,7 @@ public class TNTTracker extends AbstractTracker<TNTInfo> {
     super(TNTInfo.class, tmm, match);
   }
 
+  @SuppressWarnings("deprecation")
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
   public void onPlace(ParticipantBlockTransformEvent event) {
     if (event.getNewState().getType() == Material.TNT) {

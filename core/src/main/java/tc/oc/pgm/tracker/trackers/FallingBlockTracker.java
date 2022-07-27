@@ -39,9 +39,10 @@ public class FallingBlockTracker extends AbstractTracker<BlockInfo> implements D
     return null;
   }
 
+  @SuppressWarnings("deprecation")
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlace(ParticipantBlockTransformEvent event) {
-    if (event.getNewState().getMaterial().hasGravity()) {
+    if (event.getNewState().getType().hasGravity()) {
       blocks()
           .trackBlockState(
               event.getNewState(),
