@@ -30,9 +30,10 @@ public class CactiTracker extends AbstractTracker<BlockInfo> implements DamageRe
     return null;
   }
 
+  @SuppressWarnings("deprecation")
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlace(ParticipantBlockTransformEvent event) {
-    if (event.getNewState().getMaterial() == Material.CACTUS) {
+    if (event.getNewState().getType() == Material.CACTUS) {
       blocks()
           .trackBlockState(
               event.getNewState(),
