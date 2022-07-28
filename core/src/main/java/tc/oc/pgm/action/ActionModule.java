@@ -12,7 +12,7 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
-import tc.oc.pgm.filters.dynamic.FilterMatchModule;
+import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 
 public class ActionModule implements MapModule {

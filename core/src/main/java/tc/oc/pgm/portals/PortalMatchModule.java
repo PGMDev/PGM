@@ -11,7 +11,7 @@ import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.filters.dynamic.FilterMatchModule;
+import tc.oc.pgm.filters.FilterMatchModule;
 
 @ListenerScope(MatchScope.LOADED)
 public class PortalMatchModule implements MatchModule, Listener, Tickable {

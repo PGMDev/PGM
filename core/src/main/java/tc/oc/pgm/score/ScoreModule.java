@@ -24,7 +24,7 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.blitz.BlitzModule;
 import tc.oc.pgm.filters.FilterModule;
-import tc.oc.pgm.filters.StaticFilter;
+import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.Version;

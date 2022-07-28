@@ -22,8 +22,8 @@ import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;
-import tc.oc.pgm.filters.AnyFilter;
-import tc.oc.pgm.filters.BlockFilter;
+import tc.oc.pgm.filters.matcher.block.BlockFilter;
+import tc.oc.pgm.filters.operator.AnyFilter;
 import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.block.BlockVectors;
@@ -143,7 +143,7 @@ public class FiniteBlockRegion extends AbstractRegion {
     for (SingleMaterialMatcher materialPattern : materials) {
       filters.add(new BlockFilter(materialPattern));
     }
-    return fromWorld(region, world, new AnyFilter(filters), proto);
+    return fromWorld(region, world, AnyFilter.of(filters), proto);
   }
 
   @SuppressWarnings("deprecation")

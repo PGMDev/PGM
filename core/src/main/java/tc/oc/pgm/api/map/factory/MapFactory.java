@@ -6,7 +6,7 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.exception.MapException;
 import tc.oc.pgm.api.module.ModuleContext;
 import tc.oc.pgm.features.FeatureDefinitionContext;
-import tc.oc.pgm.filters.FilterParser;
+import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.Version;

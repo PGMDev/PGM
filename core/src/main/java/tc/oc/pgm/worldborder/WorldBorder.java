@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.time.Duration;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.filter.Filter;
-import tc.oc.pgm.filters.StaticFilter;
+import tc.oc.pgm.filters.matcher.StaticFilter;
 
 /** Parameters for the world border. */
 public class WorldBorder {

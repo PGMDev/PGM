@@ -10,9 +10,9 @@ import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
-import tc.oc.pgm.filters.AnyFilter;
-import tc.oc.pgm.filters.BlockFilter;
-import tc.oc.pgm.filters.FilterParser;
+import tc.oc.pgm.filters.matcher.block.BlockFilter;
+import tc.oc.pgm.filters.operator.AnyFilter;
+import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.regions.RegionParser;
@@ -55,7 +55,7 @@ public abstract class ControlPointParser {
     if (filters.isEmpty()) {
       visualMaterials = VISUAL_MATERIALS;
     } else {
-      visualMaterials = new AnyFilter(filters);
+      visualMaterials = AnyFilter.of(filters);
     }
 
     String name;

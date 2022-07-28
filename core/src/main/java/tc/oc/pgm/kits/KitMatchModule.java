@@ -27,7 +27,7 @@ import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerResetEvent;
-import tc.oc.pgm.filters.dynamic.FilterMatchModule;
+import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.kits.tag.Grenade;
 import tc.oc.pgm.kits.tag.ItemTags;
 import tc.oc.pgm.util.event.ItemTransferEvent;

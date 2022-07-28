@@ -28,7 +28,7 @@ import tc.oc.pgm.api.player.MatchPlayerResolver;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.features.MatchFeatureContext;
-import tc.oc.pgm.filters.dynamic.Filterable;
+import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.util.Audience;
 
 /**

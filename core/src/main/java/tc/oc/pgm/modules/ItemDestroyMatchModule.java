@@ -10,7 +10,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.filters.BlockFilter;
+import tc.oc.pgm.filters.matcher.block.BlockFilter;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ItemDestroyMatchModule implements MatchModule, Listener {

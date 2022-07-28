@@ -1,7 +1,7 @@
 package tc.oc.pgm.action;
 
 import tc.oc.pgm.api.filter.Filter;
-import tc.oc.pgm.filters.dynamic.Filterable;
+import tc.oc.pgm.filters.Filterable;
 
 public class Trigger<T extends Filterable<?>> {
   private final Class<T> scope;

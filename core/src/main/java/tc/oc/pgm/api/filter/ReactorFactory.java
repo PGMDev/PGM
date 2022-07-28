@@ -3,8 +3,8 @@ package tc.oc.pgm.api.filter;
 import org.bukkit.event.Event;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
-import tc.oc.pgm.filters.dynamic.FilterMatchModule;
-import tc.oc.pgm.filters.dynamic.Filterable;
+import tc.oc.pgm.filters.FilterMatchModule;
+import tc.oc.pgm.filters.Filterable;
 
 /**
  * Implemented by filters which can act dynamically but needs more than Bukkit {@link Event}s to

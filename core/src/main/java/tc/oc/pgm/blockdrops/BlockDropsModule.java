@@ -21,7 +21,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.FilterModule;
-import tc.oc.pgm.filters.FilterParser;
+import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.itemmeta.ItemModifyModule;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitModule;

@@ -1,18 +1,21 @@
 package tc.oc.pgm.api.filter;
 
-import javax.annotation.Nullable;
-import tc.oc.pgm.api.filter.query.Query;
+import tc.oc.pgm.filters.FilterMatchModule;
+import tc.oc.pgm.filters.Filterable;
 
 /**
- * Can be registered to listen for changes in the response to particular queries on particular
- * filters. When registered, the listener will be called immediately with null as oldResponse and
- * the current value of the query as newResponse. After that, the listener will only be called when
- * the response has changed.
+ * Handler of dynamic {@link Filter} events
+ *
+ * @see FilterMatchModule#onChange(Class, Filter, FilterListener)
  */
-public interface FilterListener {
-  void filterQueryChanged(
-      Filter filter,
-      Query query,
-      @Nullable Filter.QueryResponse oldResponse,
-      Filter.QueryResponse newResponse);
+@FunctionalInterface
+public interface FilterListener<F extends Filterable<?>> {
+
+  /**
+   * The callback method.
+   *
+   * @param filterable the filterable that the filter has a new response for
+   * @param response the new response, {@code true} if rise and {@code false} if fall
+   */
+  void filterQueryChanged(F filterable, boolean response);
 }

@@ -15,11 +15,11 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
-import tc.oc.pgm.filters.AllFilter;
-import tc.oc.pgm.filters.AnyFilter;
 import tc.oc.pgm.filters.FilterModule;
-import tc.oc.pgm.filters.FilterParser;
-import tc.oc.pgm.filters.StaticFilter;
+import tc.oc.pgm.filters.matcher.StaticFilter;
+import tc.oc.pgm.filters.operator.AllFilter;
+import tc.oc.pgm.filters.operator.AnyFilter;
+import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.regions.EverywhereRegion;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
@@ -117,13 +117,13 @@ public class RenewableModule implements MapModule {
         if (inline.isEmpty()) {
           return def;
         } else {
-          return new AnyFilter(inline);
+          return AnyFilter.of(inline);
         }
       } else {
         if (inline.isEmpty()) {
           return property;
         } else {
-          return AllFilter.of(property, new AnyFilter(inline));
+          return AllFilter.of(property, AnyFilter.of(inline));
         }
       }
     }
