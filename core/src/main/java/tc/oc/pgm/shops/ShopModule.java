@@ -1,16 +1,16 @@
 package tc.oc.pgm.shops;
 
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Villager;
@@ -39,8 +39,13 @@ public class ShopModule implements MapModule {
   private static final Collection<MapTag> TAGS =
       ImmutableList.of(new MapTag("shops", "Shops", false, true));
 
-  private final Set<Shop> shops = Sets.newHashSet();
-  private final Set<ShopKeeper> shopKeepers = Sets.newHashSet();
+  private final ImmutableMap<String, Shop> shops;
+  private final ImmutableSet<ShopKeeper> shopKeepers;
+
+  public ShopModule(Map<String, Shop> shops, Set<ShopKeeper> keepers) {
+    this.shops = ImmutableMap.copyOf(shops);
+    this.shopKeepers = ImmutableSet.copyOf(keepers);
+  }
 
   @Override
   public MatchModule createMatchModule(Match match) {
@@ -57,62 +62,50 @@ public class ShopModule implements MapModule {
     @Override
     public ShopModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      ShopModule module = new ShopModule();
       KitParser kitParser = factory.getKits();
-      SetMultimap<String, KeeperData> locations = parseShopKeepers(doc.getRootElement(), logger);
+      Map<String, Shop> shops = Maps.newHashMap();
+      Set<ShopKeeper> keepers = Sets.newHashSet();
 
       for (Element shop : XMLUtils.flattenElements(doc.getRootElement(), "shops")) {
-        Attribute shopName = XMLUtils.getRequiredAttribute(shop, "name");
+        Attribute shopId = XMLUtils.getRequiredAttribute(shop, "id");
+        String shopName = XMLUtils.getNullableAttribute(shop, "name");
         List<Category> categories = Lists.newArrayList();
 
         for (Element category : XMLUtils.getChildren(shop, "category")) {
-          Attribute categoryName = XMLUtils.getRequiredAttribute(category, "name");
+          Attribute categoryId = XMLUtils.getRequiredAttribute(category, "id");
           Attribute categoryMaterial = XMLUtils.getRequiredAttribute(category, "material");
           Material material = parseMaterial(categoryMaterial, category);
           List<Icon> icons = parseIcons(category, kitParser, logger);
 
-          categories.add(new Category(categoryName.getValue(), material, icons));
+          categories.add(new Category(categoryId.getValue(), material, icons));
         }
 
         if (categories.isEmpty()) {
           throw new InvalidXMLException("At least one <category> is required per shop", shop);
         }
 
-        Shop shopInstance = new Shop(shopName.getValue(), categories);
+        Shop shopInstance = new Shop(shopId.getValue(), shopName, categories);
         factory.getFeatures().addFeature(shop, shopInstance);
-        module.shops.add(shopInstance);
-
-        Set<KeeperData> shopKeeperLocations = locations.get(shopName.getValue());
-        if (shopKeeperLocations.isEmpty()) {
-          throw new InvalidXMLException("At least one <shopkeeper> is required per shop", shop);
-        }
-        shopKeeperLocations.stream()
-            .map(
-                data ->
-                    new ShopKeeper(
-                        data.getName(),
-                        data.getLocation(),
-                        data.getYaw(),
-                        data.getPitch(),
-                        data.getType(),
-                        shopInstance))
-            .forEach(keeper -> module.shopKeepers.add(keeper));
+        shops.put(shopInstance.getId(), shopInstance);
       }
 
-      return !module.shops.isEmpty() ? module : null;
+      keepers = parseShopKeepers(shops, doc.getRootElement(), logger);
+
+      return shops.isEmpty() ? null : new ShopModule(shops, keepers);
     }
   }
 
-  private static SetMultimap<String, KeeperData> parseShopKeepers(Element root, Logger logger)
-      throws InvalidXMLException {
-    SetMultimap<String, KeeperData> shopkeepers = HashMultimap.create();
+  private static Set<ShopKeeper> parseShopKeepers(
+      Map<String, Shop> shops, Element root, Logger logger) throws InvalidXMLException {
+    Set<ShopKeeper> keepers = Sets.newHashSet();
 
     for (Element shopkeeper : XMLUtils.flattenElements(root, "shopkeepers")) {
+      Attribute shopAttr = XMLUtils.getRequiredAttribute(shopkeeper, "shop");
       Attribute locationAttr = XMLUtils.getRequiredAttribute(shopkeeper, "location");
       Attribute yawAttr = XMLUtils.getRequiredAttribute(shopkeeper, "yaw");
       Attribute pitchAttr = XMLUtils.getRequiredAttribute(shopkeeper, "pitch");
-      Attribute typeAttr = XMLUtils.getRequiredAttribute(shopkeeper, "type");
 
+      String shopId = shopAttr.getValue();
       String name = XMLUtils.getNullableAttribute(shopkeeper, "name");
       Vector location = XMLUtils.parseVector(locationAttr);
       Float yaw = XMLUtils.parseNumber(yawAttr, Float.class, 0f);
@@ -120,10 +113,16 @@ public class ShopModule implements MapModule {
       Class<? extends Entity> mob =
           XMLUtils.parseEntityTypeAttribute(shopkeeper, "mob", Villager.class);
 
-      shopkeepers.put(typeAttr.getValue(), new KeeperData(name, location, yaw, pitch, mob));
+      if (!shops.containsKey(shopId)) {
+        throw new InvalidXMLException(
+            "No shop with id '" + shopId + "' could be found!", shopkeeper);
+      }
+      Shop shop = shops.get(shopId);
+
+      keepers.add(new ShopKeeper(name, location, yaw, pitch, mob, shop));
     }
 
-    return shopkeepers;
+    return keepers;
   }
 
   private static List<Icon> parseIcons(Element category, KitParser kits, Logger logger)
@@ -171,47 +170,5 @@ public class ShopModule implements MapModule {
       throw new InvalidXMLException("Invalid material type '" + attribute.getValue() + "'", el);
     }
     return type;
-  }
-
-  private static class KeeperData {
-    private final String name;
-    private final Vector location;
-    private final Class<? extends Entity> type;
-    private final Float yaw;
-    private final Float pitch;
-
-    public KeeperData(
-        @Nullable String name,
-        Vector location,
-        Float yaw,
-        Float pitch,
-        Class<? extends Entity> type) {
-      this.name = name;
-      this.location = location;
-      this.yaw = yaw;
-      this.pitch = pitch;
-      this.type = type;
-    }
-
-    @Nullable
-    public String getName() {
-      return name;
-    }
-
-    public Vector getLocation() {
-      return location;
-    }
-
-    public Float getYaw() {
-      return yaw;
-    }
-
-    public Float getPitch() {
-      return pitch;
-    }
-
-    public Class<? extends Entity> getType() {
-      return type;
-    }
   }
 }

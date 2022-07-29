@@ -50,14 +50,14 @@ public class ShopKeeper {
   }
 
   public String getName() {
-    return name == null || name.isEmpty() ? ChatColor.GRAY + getShop().getName() : colorize(name);
+    return name == null || name.isEmpty() ? ChatColor.GRAY + getShop().getId() : colorize(name);
   }
 
   public void spawn(World world) {
     Entity keeper = world.spawn(getLocation().toLocation(world, yaw, pitch), type);
     keeper.setCustomName(getName());
     keeper.setCustomNameVisible(true);
-    keeper.setMetadata(METADATA_KEY, new FixedMetadataValue(PGM.get(), shop.getName()));
+    keeper.setMetadata(METADATA_KEY, new FixedMetadataValue(PGM.get(), shop.getId()));
     NMSHacks.freezeEntity(keeper);
   }
 }

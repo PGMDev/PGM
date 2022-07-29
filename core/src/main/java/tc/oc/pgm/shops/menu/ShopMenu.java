@@ -34,7 +34,7 @@ public class ShopMenu extends InventoryMenu {
   private int highlightSlot = 1;
 
   public ShopMenu(Shop shop, MatchPlayer viewer) {
-    super(text(shop.getName(), NamedTextColor.GREEN), 6, viewer, null);
+    super(text(shop.getId(), NamedTextColor.GREEN), 6, viewer, null);
     this.shop = shop;
     this.categories = getCategoryItems();
     open();

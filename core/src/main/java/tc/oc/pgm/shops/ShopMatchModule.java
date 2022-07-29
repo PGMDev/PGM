@@ -1,7 +1,8 @@
 package tc.oc.pgm.shops;
 
-import java.util.Optional;
+import java.util.Map;
 import java.util.Set;
+import javax.annotation.Nullable;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
@@ -26,10 +27,10 @@ import tc.oc.pgm.shops.menu.ShopMenu;
 public class ShopMatchModule implements MatchModule, Listener {
 
   private Match match;
-  private final Set<Shop> shops;
+  private final Map<String, Shop> shops;
   private final Set<ShopKeeper> shopKeepers;
 
-  public ShopMatchModule(Match match, Set<Shop> shops, Set<ShopKeeper> shopKeepers) {
+  public ShopMatchModule(Match match, Map<String, Shop> shops, Set<ShopKeeper> shopKeepers) {
     this.match = match;
     this.shops = shops;
     this.shopKeepers = shopKeepers;
@@ -92,13 +93,12 @@ public class ShopMatchModule implements MatchModule, Listener {
     }
   }
 
+  @Nullable
   private Shop getShopFromEntity(Entity entity) {
     if (isKeeper(entity)) {
       MetadataValue meta = entity.getMetadata(ShopKeeper.METADATA_KEY, PGM.get());
       if (meta.asString() != null) {
-        Optional<Shop> shop =
-            shops.stream().filter(s -> s.getName().equalsIgnoreCase(meta.asString())).findAny();
-        return shop.orElse(null);
+        return shops.get(meta.asString());
       }
     }
     return null;

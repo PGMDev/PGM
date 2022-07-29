@@ -21,12 +21,18 @@ public class Shop implements FeatureDefinition {
 
   private static Sound PURCHASE_SOUND = sound(key("fire.ignite"), Sound.Source.MASTER, 1f, 1.4f);
 
+  private final String id;
   private final String name;
   private final ImmutableList<Category> categories;
 
-  public Shop(String name, List<Category> categories) {
-    this.name = name;
+  public Shop(String id, String name, List<Category> categories) {
+    this.id = id;
+    this.name = name != null ? name : id;
     this.categories = ImmutableList.copyOf(categories);
+  }
+
+  public String getId() {
+    return id;
   }
 
   public String getName() {
