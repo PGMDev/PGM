@@ -3,6 +3,7 @@ package tc.oc.pgm.shops.menu;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.bukkit.BukkitUtils.colorize;
 
 import com.google.common.collect.Lists;
 import fr.minuskube.inv.ClickableItem;
@@ -34,7 +35,7 @@ public class ShopMenu extends InventoryMenu {
   private int highlightSlot = 1;
 
   public ShopMenu(Shop shop, MatchPlayer viewer) {
-    super(text(shop.getId(), NamedTextColor.GREEN), 6, viewer, null);
+    super(text(colorize(shop.getName())), 6, viewer, null);
     this.shop = shop;
     this.categories = getCategoryItems();
     open();
@@ -116,15 +117,7 @@ public class ShopMenu extends InventoryMenu {
   }
 
   private ClickableItem getCategoryItem(Category category) {
-    return ClickableItem.of(
-        new ItemBuilder()
-            .material(category.getMaterial())
-            .name(ChatColor.GOLD + category.getName())
-            .flags(ItemFlag.values())
-            .build(),
-        c -> {
-          setCategory(category, c.getSlot());
-        });
+    return ClickableItem.of(category.getCategoryIcon(), c -> setCategory(category, c.getSlot()));
   }
 
   private ClickableItem getMenuSeperator(DyeColor color) {

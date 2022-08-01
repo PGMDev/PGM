@@ -4,12 +4,15 @@ import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.translatable;
 
-import com.google.common.collect.ImmutableList;
 import java.util.List;
-import net.kyori.adventure.sound.Sound;
+
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+
+import com.google.common.collect.ImmutableList;
+
+import net.kyori.adventure.sound.Sound;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -67,9 +70,20 @@ public class Shop implements FeatureDefinition {
 
     // Remove items from inventory
     PlayerInventory inventory = buyer.getInventory();
-    for (int i = 0; i < icon.getPrice(); i++) {
-      inventory.removeItem(new ItemStack(icon.getCurrency()));
+    int remaining = icon.getPrice();
+    for (int slot = 0; slot < inventory.getSize() && remaining > 0; slot++) {
+      ItemStack item = inventory.getItem(slot);
+      if (item == null || item.getType() != icon.getCurrency()) continue;
+      if (item.getAmount() > remaining) {
+        item.setAmount(item.getAmount() - remaining);
+        inventory.setItem(slot, item);
+        remaining = 0;
+      } else {
+        inventory.setItem(slot, null);
+        remaining -= item.getAmount();
+      }
     }
+
     buyer.getBukkit().updateInventory();
     buyer.applyKit(icon.getKit(), true);
     buyer.playSound(PURCHASE_SOUND);

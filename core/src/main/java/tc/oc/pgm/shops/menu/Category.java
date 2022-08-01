@@ -2,29 +2,29 @@ package tc.oc.pgm.shops.menu;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
-import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 public class Category {
 
   // Max amount of icons a category can hold
   public static final int MAX_ICONS = 28;
 
-  private String name;
-  private Material material;
-  private ImmutableList<Icon> icons;
+  private final String id;
+  private final ItemStack categoryIcon;
+  private final ImmutableList<Icon> icons;
 
-  public Category(String name, Material material, List<Icon> icons) {
-    this.name = name;
-    this.material = material;
+  public Category(String id, ItemStack categoryIcon, List<Icon> icons) {
+    this.id = id;
+    this.categoryIcon = categoryIcon;
     this.icons = ImmutableList.copyOf(icons);
   }
 
-  public String getName() {
-    return name;
+  public String getId() {
+    return id;
   }
 
-  public Material getMaterial() {
-    return material;
+  public ItemStack getCategoryIcon() {
+    return categoryIcon;
   }
 
   public ImmutableList<Icon> getIcons() {
@@ -34,7 +34,7 @@ public class Category {
   @Override
   public String toString() {
     return String.format(
-        "Category{name=%s, material=%s, icons=%s}",
-        getName(), getMaterial().toString(), getIcons().size());
+        "Category{id=%s, categoryIcon=%s, icons=%s}",
+        getId(), getCategoryIcon().toString(), getIcons().size());
   }
 }

@@ -30,8 +30,8 @@ import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.shops.menu.Category;
 import tc.oc.pgm.shops.menu.Icon;
-import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ShopModule implements MapModule {
@@ -67,26 +67,25 @@ public class ShopModule implements MapModule {
       Set<ShopKeeper> keepers = Sets.newHashSet();
 
       for (Element shop : XMLUtils.flattenElements(doc.getRootElement(), "shops")) {
-        Attribute shopId = XMLUtils.getRequiredAttribute(shop, "id");
+        String shopId = XMLUtils.getRequiredAttribute(shop, "id").getValue();
         String shopName = XMLUtils.getNullableAttribute(shop, "name");
         List<Category> categories = Lists.newArrayList();
 
         for (Element category : XMLUtils.getChildren(shop, "category")) {
           Attribute categoryId = XMLUtils.getRequiredAttribute(category, "id");
-          Attribute categoryMaterial = XMLUtils.getRequiredAttribute(category, "material");
-          Material material = parseMaterial(categoryMaterial, category);
+          ItemStack categoryIcon = kitParser.parseItem(category, false);
           List<Icon> icons = parseIcons(category, kitParser, logger);
 
-          categories.add(new Category(categoryId.getValue(), material, icons));
+          categories.add(new Category(categoryId.getValue(), categoryIcon, icons));
         }
 
         if (categories.isEmpty()) {
           throw new InvalidXMLException("At least one <category> is required per shop", shop);
         }
 
-        Shop shopInstance = new Shop(shopId.getValue(), shopName, categories);
+        Shop shopInstance = new Shop(shopId, shopName, categories);
         factory.getFeatures().addFeature(shop, shopInstance);
-        shops.put(shopInstance.getId(), shopInstance);
+        shops.put(shopId, shopInstance);
       }
 
       keepers = parseShopKeepers(shops, doc.getRootElement(), logger);
@@ -146,7 +145,7 @@ public class ShopModule implements MapModule {
 
   private static Icon parseIcon(Element icon, KitParser kits, Logger logger)
       throws InvalidXMLException {
-    Material currency = parseMaterial(XMLUtils.getRequiredAttribute(icon, "currency"), icon);
+    Material currency = XMLUtils.parseMaterial(Node.fromRequiredAttr(icon, "currency"));
     Integer price =
         XMLUtils.parseNumber(XMLUtils.getRequiredAttribute(icon, "price"), Integer.class);
     ItemStack item = kits.parseItem(icon, false);
@@ -160,15 +159,5 @@ public class ShopModule implements MapModule {
     }
 
     return new Icon(currency, price, item, kit);
-  }
-
-  private static Material parseMaterial(Attribute attribute, Element el)
-      throws InvalidXMLException {
-    if (attribute == null) return null;
-    Material type = Materials.parseMaterial(attribute.getValue());
-    if (type == null || (type == Material.AIR)) {
-      throw new InvalidXMLException("Invalid material type '" + attribute.getValue() + "'", el);
-    }
-    return type;
   }
 }
