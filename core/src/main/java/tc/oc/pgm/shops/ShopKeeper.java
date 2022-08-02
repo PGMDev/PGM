@@ -2,13 +2,16 @@ package tc.oc.pgm.shops;
 
 import static tc.oc.pgm.util.bukkit.BukkitUtils.colorize;
 
+import com.google.common.collect.ImmutableList;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.points.PointProvider;
 import tc.oc.pgm.util.nms.NMSHacks;
 
 public class ShopKeeper {
@@ -16,29 +19,25 @@ public class ShopKeeper {
   public static final String METADATA_KEY = "SHOP_KEEPER";
 
   private final String name;
-  private final Vector location;
-  private final float yaw;
-  private final float pitch;
+  private final ImmutableList<PointProvider> location;
   private final Class<? extends Entity> type;
   private final Shop shop;
 
   public ShopKeeper(
       @Nullable String name,
-      Vector location,
-      float yaw,
-      float pitch,
+      ImmutableList<PointProvider> location,
       Class<? extends Entity> type,
       Shop shop) {
     this.name = name;
     this.location = location;
-    this.yaw = yaw;
-    this.pitch = pitch;
     this.type = type;
     this.shop = shop;
   }
 
-  public Vector getLocation() {
-    return location;
+  @Nullable
+  public Location getLocation(Match match) {
+    // TODO: support multiple shopkeeper locations?
+    return location.stream().findAny().map(pp -> pp.getPoint(match, null)).orElse(null);
   }
 
   public Shop getShop() {
@@ -53,8 +52,11 @@ public class ShopKeeper {
     return name == null || name.isEmpty() ? ChatColor.GRAY + getShop().getId() : colorize(name);
   }
 
-  public void spawn(World world) {
-    Entity keeper = world.spawn(getLocation().toLocation(world, yaw, pitch), type);
+  public void spawn(Match match) {
+    if (getLocation(match) == null) return;
+
+    World world = match.getWorld();
+    Entity keeper = world.spawn(getLocation(match), type);
     keeper.setCustomName(getName());
     keeper.setCustomNameVisible(true);
     keeper.setMetadata(METADATA_KEY, new FixedMetadataValue(PGM.get(), shop.getId()));

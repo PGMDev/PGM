@@ -3,7 +3,6 @@ package tc.oc.pgm.shops;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
-import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -38,9 +37,8 @@ public class ShopMatchModule implements MatchModule, Listener {
 
   @Override
   public void enable() {
-    World world = match.getWorld();
     for (ShopKeeper keeper : shopKeepers) {
-      keeper.spawn(world);
+      keeper.spawn(match);
     }
   }
 

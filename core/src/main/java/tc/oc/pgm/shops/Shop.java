@@ -4,15 +4,12 @@ import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.translatable;
 
+import com.google.common.collect.ImmutableList;
 import java.util.List;
-
+import net.kyori.adventure.sound.Sound;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-
-import com.google.common.collect.ImmutableList;
-
-import net.kyori.adventure.sound.Sound;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.player.MatchPlayer;

@@ -15,7 +15,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -28,6 +27,9 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.kits.ItemKit;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitParser;
+import tc.oc.pgm.points.PointParser;
+import tc.oc.pgm.points.PointProvider;
+import tc.oc.pgm.points.PointProviderAttributes;
 import tc.oc.pgm.shops.menu.Category;
 import tc.oc.pgm.shops.menu.Icon;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -63,6 +65,7 @@ public class ShopModule implements MapModule {
     public ShopModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       KitParser kitParser = factory.getKits();
+      PointParser pointParser = new PointParser(factory);
       Map<String, Shop> shops = Maps.newHashMap();
       Set<ShopKeeper> keepers = Sets.newHashSet();
 
@@ -88,37 +91,38 @@ public class ShopModule implements MapModule {
         shops.put(shopId, shopInstance);
       }
 
-      keepers = parseShopKeepers(shops, doc.getRootElement(), logger);
+      keepers = parseShopKeepers(shops, doc.getRootElement(), pointParser, logger);
 
       return shops.isEmpty() ? null : new ShopModule(shops, keepers);
     }
   }
 
   private static Set<ShopKeeper> parseShopKeepers(
-      Map<String, Shop> shops, Element root, Logger logger) throws InvalidXMLException {
+      Map<String, Shop> shops, Element root, PointParser pointParser, Logger logger)
+      throws InvalidXMLException {
     Set<ShopKeeper> keepers = Sets.newHashSet();
 
     for (Element shopkeeper : XMLUtils.flattenElements(root, "shopkeepers")) {
       Attribute shopAttr = XMLUtils.getRequiredAttribute(shopkeeper, "shop");
-      Attribute locationAttr = XMLUtils.getRequiredAttribute(shopkeeper, "location");
-      Attribute yawAttr = XMLUtils.getRequiredAttribute(shopkeeper, "yaw");
-      Attribute pitchAttr = XMLUtils.getRequiredAttribute(shopkeeper, "pitch");
 
       String shopId = shopAttr.getValue();
       String name = XMLUtils.getNullableAttribute(shopkeeper, "name");
-      Vector location = XMLUtils.parseVector(locationAttr);
-      Float yaw = XMLUtils.parseNumber(yawAttr, Float.class, 0f);
-      Float pitch = XMLUtils.parseNumber(pitchAttr, Float.class, 0f);
       Class<? extends Entity> mob =
           XMLUtils.parseEntityTypeAttribute(shopkeeper, "mob", Villager.class);
+      ImmutableList<PointProvider> location =
+          ImmutableList.copyOf(pointParser.parse(shopkeeper, new PointProviderAttributes()));
+
+      if (location.isEmpty()) {
+        throw new InvalidXMLException("shopkeeper must have a location defined", shopkeeper);
+      }
 
       if (!shops.containsKey(shopId)) {
         throw new InvalidXMLException(
-            "No shop with id '" + shopId + "' could be found!", shopkeeper);
+            "No shop with id '" + shopId + "' could be found", shopkeeper);
       }
       Shop shop = shops.get(shopId);
 
-      keepers.add(new ShopKeeper(name, location, yaw, pitch, mob, shop));
+      keepers.add(new ShopKeeper(name, location, mob, shop));
     }
 
     return keepers;
