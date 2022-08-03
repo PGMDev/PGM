@@ -29,7 +29,7 @@ public class FeatureFilterParser extends FilterParser {
   public Filter parse(Element el) throws InvalidXMLException {
     Filter filter = this.parseDynamic(el);
     if (!(filter instanceof FeatureReference)) {
-      factory.getFeatures().addFeature(el, (FilterDefinition) filter);
+      factory.getFeatures().addFeature(el, filter);
     }
     return filter;
   }

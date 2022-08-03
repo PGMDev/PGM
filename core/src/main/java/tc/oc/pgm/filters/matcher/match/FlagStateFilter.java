@@ -41,7 +41,8 @@ public class FlagStateFilter extends TypedFilter.Impl<MatchQuery> {
   @Override
   public boolean matches(MatchQuery query) {
     Flag flag = this.flag.get().getGoal(query.getMatch());
-    if (flag == null) throw new IllegalStateException("Flag not found");
+    // FIXME: This may occur at load time. We need a better fix for this.
+    if (flag == null) return false;
 
     return flag.isCurrent(this.state) && (this.post == null || flag.isAtPost(this.post.get()));
   }
