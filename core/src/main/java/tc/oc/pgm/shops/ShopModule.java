@@ -14,7 +14,9 @@ import java.util.logging.Logger;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Villager;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -76,9 +78,8 @@ public class ShopModule implements MapModule {
 
         for (Element category : XMLUtils.getChildren(shop, "category")) {
           Attribute categoryId = XMLUtils.getRequiredAttribute(category, "id");
-          ItemStack categoryIcon = kitParser.parseItem(category, false);
+          ItemStack categoryIcon = applyItemFlags(kitParser.parseItem(category, false));
           List<Icon> icons = parseIcons(category, kitParser, logger);
-
           categories.add(new Category(categoryId.getValue(), categoryIcon, icons));
         }
 
@@ -163,5 +164,12 @@ public class ShopModule implements MapModule {
     }
 
     return new Icon(currency, price, item, kit);
+  }
+
+  private static ItemStack applyItemFlags(ItemStack stack) {
+    ItemMeta meta = stack.getItemMeta();
+    meta.addItemFlags(ItemFlag.values());
+    stack.setItemMeta(meta);
+    return stack;
   }
 }

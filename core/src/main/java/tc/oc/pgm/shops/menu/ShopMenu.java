@@ -32,12 +32,14 @@ public class ShopMenu extends InventoryMenu {
   private Shop shop;
   private Category category;
   private ClickableItem[] categories;
-  private int highlightSlot = 1;
+  private int highlight;
 
   public ShopMenu(Shop shop, MatchPlayer viewer) {
     super(text(colorize(shop.getName())), 6, viewer, null);
     this.shop = shop;
+    this.category = shop.getCategories().get(0);
     this.categories = getCategoryItems();
+    this.highlight = 1;
     open();
   }
 
@@ -70,12 +72,12 @@ public class ShopMenu extends InventoryMenu {
     if (!page.isLast()) contents.set(0, 8, getPageItem(getBukkit(), page.getPage() + 1, true));
 
     if (categories.length == 1) {
-      this.highlightSlot = 4;
+      highlight = 4;
     }
 
     // Menu divider & highlight
     contents.fillRow(1, getMenuSeperator(DyeColor.GRAY));
-    contents.set(1, highlightSlot, getMenuSeperator(DyeColor.GREEN));
+    contents.set(1, highlight, getMenuSeperator(DyeColor.GREEN));
   }
 
   private void renderIcons(InventoryContents contents) {
@@ -96,16 +98,12 @@ public class ShopMenu extends InventoryMenu {
   }
 
   private Category getCategory() {
-    if (category == null) {
-      category = shop.getCategories().get(0);
-    }
-
     return category;
   }
 
   private void setCategory(Category category, int slot) {
     this.category = category;
-    this.highlightSlot = slot;
+    this.highlight = slot;
   }
 
   private ClickableItem[] getCategoryItems() {
@@ -173,7 +171,7 @@ public class ShopMenu extends InventoryMenu {
         getPageIcon(page, next),
         c -> {
           getInventory().open(player, page);
-          this.highlightSlot = 1;
+          this.highlight = next ? 0 : 8;
         });
   }
 
