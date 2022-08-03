@@ -118,6 +118,8 @@ import tc.oc.pgm.tnt.TNTMatchModule;
 import tc.oc.pgm.tnt.TNTModule;
 import tc.oc.pgm.tntrender.TNTRenderMatchModule;
 import tc.oc.pgm.tracker.TrackerMatchModule;
+import tc.oc.pgm.variables.VariablesMatchModule;
+import tc.oc.pgm.variables.VariablesModule;
 import tc.oc.pgm.wool.WoolMatchModule;
 import tc.oc.pgm.wool.WoolModule;
 import tc.oc.pgm.worldborder.WorldBorderMatchModule;
@@ -185,6 +187,7 @@ public interface Modules {
     register(PickerMatchModule.class, new PickerMatchModule.Factory());
 
     // MapModules that create a MatchModule
+    register(VariablesModule.class, VariablesMatchModule.class, new VariablesModule.Factory());
     register(TeamModule.class, TeamMatchModule.class, new TeamModule.Factory());
     register(FreeForAllModule.class, FreeForAllMatchModule.class, new FreeForAllModule.Factory());
     register(RegionModule.class, RegionMatchModule.class, new RegionModule.Factory());

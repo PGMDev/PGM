@@ -8,19 +8,23 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.actions.ActionNode;
 import tc.oc.pgm.action.actions.ChatMessageAction;
 import tc.oc.pgm.action.actions.ScopeSwitchAction;
+import tc.oc.pgm.action.actions.SetVariableAction;
+import tc.oc.pgm.api.feature.FeatureDefinition;
+import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.api.map.factory.MapFactory;
-import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.party.Party;
-import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.FeatureDefinitionContext;
+import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
+import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
+import tc.oc.pgm.variables.VariableDefinition;
+import tc.oc.pgm.variables.VariablesModule;
 
 public class ActionParser {
 
@@ -100,32 +104,26 @@ public class ActionParser {
     }
   }
 
+  // Warning: this should only be used when you're certain those features load before filters.
+  private <T extends FeatureDefinition> T resolve(Node node, Class<T> cls)
+      throws InvalidXMLException {
+    XMLFeatureReference<T> ref = this.factory.getFeatures().createReference(node, cls);
+    ref.resolve();
+    return ref.get();
+  }
+
   public <T extends Filterable<?>> Trigger<T> parseTrigger(Element el) throws InvalidXMLException {
-    Class<T> cls = parseFilterable(Node.fromRequiredAttr(el, "scope"));
+    Class<T> cls = Filterables.parse(Node.fromRequiredAttr(el, "scope"));
     return new Trigger<>(
         cls,
         filters.parseReference(Node.fromRequiredAttr(el, "filter")),
         parseReference(Node.fromRequiredAttr(el, "trigger"), cls));
   }
 
-  @SuppressWarnings("unchecked")
-  private <T extends Filterable<?>> Class<T> parseFilterable(Node node) throws InvalidXMLException {
-    switch (node.getValueNormalize()) {
-      case "player":
-        return (Class<T>) MatchPlayer.class;
-      case "team":
-        return (Class<T>) Party.class;
-      case "match":
-        return (Class<T>) Match.class;
-      default:
-        throw new InvalidXMLException("Unknown scope, must be one of: player, team, match", node);
-    }
-  }
-
   @MethodParser("action")
   public <B extends Filterable<?>> ActionDefinition<? super B> parseDefinition(
       Element el, Class<B> bound) throws InvalidXMLException {
-    if (bound == null) bound = parseFilterable(Node.fromRequiredAttr(el, "scope"));
+    if (bound == null) bound = Filterables.parse(Node.fromRequiredAttr(el, "scope"));
 
     ImmutableList.Builder<Action<? super B>> builder = ImmutableList.builder();
     for (Element child : el.getChildren()) {
@@ -138,8 +136,8 @@ public class ActionParser {
   @MethodParser("switch-scope")
   public <O extends Filterable<?>, I extends Filterable<?>> Action<? super O> parseSwitchScope(
       Element el, Class<O> outer) throws InvalidXMLException {
-    if (outer == null) outer = parseFilterable(Node.fromRequiredAttr(el, "outer"));
-    Class<I> inner = parseFilterable(Node.fromRequiredAttr(el, "inner"));
+    if (outer == null) outer = Filterables.parse(Node.fromRequiredAttr(el, "outer"));
+    Class<I> inner = Filterables.parse(Node.fromRequiredAttr(el, "inner"));
 
     ActionDefinition<? super I> child = parseDefinition(el, inner);
 
@@ -159,5 +157,33 @@ public class ActionParser {
   @MethodParser("message")
   public ChatMessageAction parseChatMessage(Element el, Class<?> scope) throws InvalidXMLException {
     return new ChatMessageAction(XMLUtils.parseFormattedText(Node.fromRequiredAttr(el, "text")));
+  }
+
+  @MethodParser("set")
+  public <T extends Filterable<?>> SetVariableAction<T> parseSetVariable(Element el, Class<T> scope)
+      throws InvalidXMLException {
+    VariableDefinition<?> var =
+        this.factory
+            .getFeatures()
+            .get(Node.fromRequiredAttr(el, "var").getValue(), VariableDefinition.class);
+    if (scope == null) scope = Filterables.parse(Node.fromRequiredAttr(el, "scope"));
+
+    if (!Filterables.isAssignable(scope, var.getScope()))
+      throw new InvalidXMLException(
+          "Wrong variable scope for '"
+              + var.getId()
+              + "', expected "
+              + var.getScope().getSimpleName()
+              + " which cannot be found in "
+              + scope.getSimpleName(),
+          el);
+
+    VariablesModule vm = this.factory.needModule(VariablesModule.class);
+
+    String expression = Node.fromRequiredAttr(el, "formula").getValue();
+    Formula<T> formula =
+        Formula.of(expression, vm.getVariableNames(scope), vm.getContextBuilder(scope));
+
+    return new SetVariableAction<>(scope, var, formula);
   }
 }

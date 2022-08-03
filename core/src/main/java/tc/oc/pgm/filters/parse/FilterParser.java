@@ -38,6 +38,7 @@ import tc.oc.pgm.filters.matcher.match.MatchPhaseFilter;
 import tc.oc.pgm.filters.matcher.match.MonostableFilter;
 import tc.oc.pgm.filters.matcher.match.PlayerCountFilter;
 import tc.oc.pgm.filters.matcher.match.RandomFilter;
+import tc.oc.pgm.filters.matcher.match.VariableFilter;
 import tc.oc.pgm.filters.matcher.party.CompetitorFilter;
 import tc.oc.pgm.filters.matcher.party.GoalFilter;
 import tc.oc.pgm.filters.matcher.party.RankFilter;
@@ -83,6 +84,7 @@ import tc.oc.pgm.util.collection.ContextStore;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
+import tc.oc.pgm.variables.VariableDefinition;
 
 public abstract class FilterParser implements XMLParser<Filter, FilterDefinition> {
 
@@ -381,6 +383,14 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
     return this.factory.getFeatures().createReference(node, cls);
   }
 
+  // Warning: this should only be used when you're certain those features load before filters.
+  private <T extends FeatureDefinition> T resolve(Node node, Class<T> cls)
+      throws InvalidXMLException {
+    XMLFeatureReference<T> ref = reference(node, cls);
+    ref.resolve();
+    return ref.get();
+  }
+
   private <T extends FeatureDefinition> Optional<XMLFeatureReference<T>> optionalReference(
       Node node, Class<T> cls) {
     return node == null
@@ -425,10 +435,8 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
       throws InvalidXMLException {
     Node postAttr = Node.fromAttr(el, "post");
     return new FlagStateFilter(
-        this.factory.getFeatures().createReference(new Node(el), FlagDefinition.class),
-        postAttr == null
-            ? null
-            : this.factory.getFeatures().createReference(postAttr, PostDefinition.class),
+        reference(new Node(el), FlagDefinition.class),
+        postAttr == null ? null : reference(postAttr, PostDefinition.class),
         state);
   }
 
@@ -627,5 +635,13 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
         XMLUtils.parseNumericRange(el, Integer.class, Range.atLeast(1)),
         XMLUtils.parseBoolean(el.getAttribute("participants"), true),
         XMLUtils.parseBoolean(el.getAttribute("observers"), false));
+  }
+
+  @MethodParser("variable")
+  public Filter parseVariableFilter(Element el) throws InvalidXMLException {
+    //noinspection unchecked,rawtypes
+    return new VariableFilter(
+        resolve(Node.fromRequiredAttr(el, "var"), VariableDefinition.class),
+        XMLUtils.parseNumericRange(new Node(el), Double.class));
   }
 }
