@@ -12,13 +12,14 @@ public class Icon {
   private final ItemStack item;
   private final Kit kit;
 
-  public Icon(Material currency, int price, ItemStack item, Kit kit) {
+  public Icon(@Nullable Material currency, int price, ItemStack item, @Nullable Kit kit) {
     this.currency = currency;
     this.price = price;
     this.kit = kit;
     this.item = item;
   }
 
+  @Nullable
   public Material getCurrency() {
     return currency;
   }

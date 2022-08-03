@@ -150,9 +150,10 @@ public class ShopModule implements MapModule {
 
   private static Icon parseIcon(Element icon, KitParser kits, Logger logger)
       throws InvalidXMLException {
-    Material currency = XMLUtils.parseMaterial(Node.fromRequiredAttr(icon, "currency"));
     Integer price =
         XMLUtils.parseNumber(XMLUtils.getRequiredAttribute(icon, "price"), Integer.class);
+    Material currency =
+        price < 1 ? null : XMLUtils.parseMaterial(Node.fromRequiredAttr(icon, "currency"));
     ItemStack item = kits.parseItem(icon, false);
 
     Kit kit = null;

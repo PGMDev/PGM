@@ -7,7 +7,6 @@ import static net.kyori.adventure.text.Component.translatable;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import net.kyori.adventure.sound.Sound;
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import tc.oc.pgm.api.feature.FeatureDefinition;
@@ -44,15 +43,10 @@ public class Shop implements FeatureDefinition {
   }
 
   public boolean canPurchase(Icon icon, MatchPlayer buyer) {
-    Material currency = icon.getCurrency();
-    int price = icon.getPrice();
+    if (!buyer.getMatch().isRunning() || !buyer.isParticipating()) return false;
+    if (icon.getPrice() < 1) return true;
 
-    if (buyer.getMatch().isRunning() && buyer.isParticipating()) {
-      PlayerInventory inventory = buyer.getInventory();
-      return inventory.containsAtLeast(new ItemStack(currency), price);
-    }
-
-    return false;
+    return buyer.getInventory().containsAtLeast(new ItemStack(icon.getCurrency()), icon.getPrice());
   }
 
   public boolean purchase(Icon icon, MatchPlayer buyer) {
@@ -65,19 +59,21 @@ public class Shop implements FeatureDefinition {
       return false;
     }
 
-    // Remove items from inventory
-    PlayerInventory inventory = buyer.getInventory();
-    int remaining = icon.getPrice();
-    for (int slot = 0; slot < inventory.getSize() && remaining > 0; slot++) {
-      ItemStack item = inventory.getItem(slot);
-      if (item == null || item.getType() != icon.getCurrency()) continue;
-      if (item.getAmount() > remaining) {
-        item.setAmount(item.getAmount() - remaining);
-        inventory.setItem(slot, item);
-        remaining = 0;
-      } else {
-        inventory.setItem(slot, null);
-        remaining -= item.getAmount();
+    // Remove items from inventory when item is not free
+    if (icon.getPrice() > 1) {
+      PlayerInventory inventory = buyer.getInventory();
+      int remaining = icon.getPrice();
+      for (int slot = 0; slot < inventory.getSize() && remaining > 0; slot++) {
+        ItemStack item = inventory.getItem(slot);
+        if (item == null || item.getType() != icon.getCurrency()) continue;
+        if (item.getAmount() > remaining) {
+          item.setAmount(item.getAmount() - remaining);
+          inventory.setItem(slot, item);
+          remaining = 0;
+        } else {
+          inventory.setItem(slot, null);
+          remaining -= item.getAmount();
+        }
       }
     }
 

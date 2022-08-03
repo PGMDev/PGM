@@ -130,15 +130,29 @@ public class ShopMenu extends InventoryMenu {
 
   private ClickableItem getPurchasableItem(Icon icon) {
     boolean canPurchase = shop.canPurchase(icon, getViewer());
-    Component materialName = text(getMaterial(icon.getCurrency())).color(NamedTextColor.GOLD);
     NamedTextColor purchaseColor = canPurchase ? NamedTextColor.GREEN : NamedTextColor.RED;
+
+    Component price;
+
+    if (icon.getPrice() < 1) {
+      // Free item
+      price = translatable("shop.lore.free", NamedTextColor.GREEN);
+    } else {
+      // Normal item
+      Component materialName = text(getMaterial(icon.getCurrency())).color(NamedTextColor.GOLD);
+      price =
+          text()
+              .append(text(icon.getPrice(), purchaseColor))
+              .append(space())
+              .append(materialName)
+              .build();
+    }
+
     Component cost =
         text()
             .append(translatable("shop.lore.cost", NamedTextColor.GRAY))
             .append(text(": ", NamedTextColor.DARK_GRAY))
-            .append(text(icon.getPrice(), purchaseColor))
-            .append(space())
-            .append(materialName)
+            .append(price)
             .build();
     Component click =
         translatable("shop.lore." + (canPurchase ? "purchase" : "insufficient"), purchaseColor);
