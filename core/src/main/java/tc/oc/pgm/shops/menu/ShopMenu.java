@@ -11,7 +11,9 @@ import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.Pagination;
 import fr.minuskube.inv.content.SlotIterator;
 import java.util.List;
+import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.ChatColor;
@@ -28,6 +30,9 @@ import tc.oc.pgm.util.inventory.ItemBuilder;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class ShopMenu extends InventoryMenu {
+
+  private static final String SYMBOL_SUFFICIENT = "\u2714 "; // ✔
+  private static final String SYMBOL_INSUFFICIENT = "\u2715 "; // ✕
 
   private Shop shop;
   private Category category;
@@ -132,32 +137,59 @@ public class ShopMenu extends InventoryMenu {
     boolean canPurchase = shop.canPurchase(icon, getViewer());
     NamedTextColor purchaseColor = canPurchase ? NamedTextColor.GREEN : NamedTextColor.RED;
 
-    Component price;
+    List<Component> price = Lists.newArrayList();
 
-    if (icon.getPrice() < 1) {
+    if (icon.isFree()) {
       // Free item
-      price = translatable("shop.lore.free", NamedTextColor.GREEN);
+      price.add(translatable("shop.lore.free", NamedTextColor.GREEN));
     } else {
-      // Normal item
-      Component materialName = text(getMaterial(icon.getCurrency())).color(NamedTextColor.GOLD);
       price =
-          text()
-              .append(text(icon.getPrice(), purchaseColor))
-              .append(space())
-              .append(materialName)
-              .build();
+          icon.getPayments().stream()
+              .map(
+                  p -> {
+                    boolean hasPayment = p.hasPayment(getViewer().getInventory());
+                    Component materialName =
+                        text(getMaterial(p.getCurrency())).color(NamedTextColor.GOLD);
+                    Component prefix =
+                        icon.getPayments().size() == 1
+                            ? null
+                            : text(
+                                hasPayment ? SYMBOL_SUFFICIENT : SYMBOL_INSUFFICIENT,
+                                hasPayment ? NamedTextColor.GREEN : NamedTextColor.DARK_RED);
+
+                    TextComponent.Builder priceComponent = text();
+
+                    if (prefix != null) {
+                      priceComponent.append(prefix);
+                    }
+
+                    priceComponent
+                        .append(
+                            text(
+                                p.getPrice(),
+                                hasPayment ? NamedTextColor.GREEN : NamedTextColor.RED))
+                        .append(space())
+                        .append(materialName);
+
+                    return priceComponent.build();
+                  })
+              .collect(Collectors.toList());
     }
 
-    Component cost =
+    TextComponent.Builder cost =
         text()
             .append(translatable("shop.lore.cost", NamedTextColor.GRAY))
-            .append(text(": ", NamedTextColor.DARK_GRAY))
-            .append(price)
-            .build();
+            .append(text(": ", NamedTextColor.DARK_GRAY));
+
+    // Display free or single item price on the same line as cost
+    if (price.size() == 1) {
+      cost.append(price.get(0));
+    }
+
     Component click =
         translatable("shop.lore." + (canPurchase ? "purchase" : "insufficient"), purchaseColor);
 
-    String costLore = TextTranslations.translateLegacy(cost, getBukkit());
+    String costLore = TextTranslations.translateLegacy(cost.build(), getBukkit());
     String clickLore = TextTranslations.translateLegacy(click, getBukkit());
 
     ItemStack item = icon.getItem().clone();
@@ -167,6 +199,12 @@ public class ShopMenu extends InventoryMenu {
       lore.addAll(meta.getLore());
     }
     lore.add(costLore);
+    // Display payment requirements on different lines
+    if (price.size() > 1) {
+      for (Component line : price) {
+        lore.add(TextTranslations.translateLegacy(line, getBukkit()));
+      }
+    }
     lore.add(clickLore);
     meta.setLore(lore);
     meta.addItemFlags(ItemFlag.values());

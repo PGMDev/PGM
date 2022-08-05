@@ -1,31 +1,29 @@
 package tc.oc.pgm.shops.menu;
 
+import com.google.common.collect.ImmutableList;
+import java.util.List;
 import javax.annotation.Nullable;
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.kits.Kit;
 
 public class Icon {
 
-  private final Material currency;
-  private final int price;
+  private ImmutableList<Payment> payments;
   private final ItemStack item;
   private final Kit kit;
 
-  public Icon(@Nullable Material currency, int price, ItemStack item, @Nullable Kit kit) {
-    this.currency = currency;
-    this.price = price;
+  public Icon(List<Payment> payments, ItemStack item, @Nullable Kit kit) {
+    this.payments = ImmutableList.copyOf(payments);
     this.kit = kit;
     this.item = item;
   }
 
-  @Nullable
-  public Material getCurrency() {
-    return currency;
+  public boolean isFree() {
+    return payments.isEmpty() || payments.stream().anyMatch(p -> p.getPrice() < 1);
   }
 
-  public int getPrice() {
-    return price;
+  public ImmutableList<Payment> getPayments() {
+    return payments;
   }
 
   public ItemStack getItem() {

@@ -14,6 +14,7 @@ import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.shops.menu.Category;
 import tc.oc.pgm.shops.menu.Icon;
+import tc.oc.pgm.shops.menu.Payment;
 
 @FeatureInfo(name = "shops")
 public class Shop implements FeatureDefinition {
@@ -44,9 +45,9 @@ public class Shop implements FeatureDefinition {
 
   public boolean canPurchase(Icon icon, MatchPlayer buyer) {
     if (!buyer.getMatch().isRunning() || !buyer.isParticipating()) return false;
-    if (icon.getPrice() < 1) return true;
+    if (icon.isFree()) return true;
 
-    return buyer.getInventory().containsAtLeast(new ItemStack(icon.getCurrency()), icon.getPrice());
+    return icon.getPayments().stream().allMatch(p -> p.hasPayment(buyer.getInventory()));
   }
 
   public boolean purchase(Icon icon, MatchPlayer buyer) {
@@ -59,20 +60,21 @@ public class Shop implements FeatureDefinition {
       return false;
     }
 
-    // Remove items from inventory when item is not free
-    if (icon.getPrice() > 1) {
+    if (!icon.isFree()) {
       PlayerInventory inventory = buyer.getInventory();
-      int remaining = icon.getPrice();
-      for (int slot = 0; slot < inventory.getSize() && remaining > 0; slot++) {
-        ItemStack item = inventory.getItem(slot);
-        if (item == null || item.getType() != icon.getCurrency()) continue;
-        if (item.getAmount() > remaining) {
-          item.setAmount(item.getAmount() - remaining);
-          inventory.setItem(slot, item);
-          remaining = 0;
-        } else {
-          inventory.setItem(slot, null);
-          remaining -= item.getAmount();
+      for (Payment payment : icon.getPayments()) {
+        int remaining = payment.getPrice();
+        for (int slot = 0; slot < inventory.getSize() && remaining > 0; slot++) {
+          ItemStack item = inventory.getItem(slot);
+          if (item == null || item.getType() != payment.getCurrency()) continue;
+          if (item.getAmount() > remaining) {
+            item.setAmount(item.getAmount() - remaining);
+            inventory.setItem(slot, item);
+            remaining = 0;
+          } else {
+            inventory.setItem(slot, null);
+            remaining -= item.getAmount();
+          }
         }
       }
     }

@@ -34,6 +34,7 @@ import tc.oc.pgm.points.PointProvider;
 import tc.oc.pgm.points.PointProviderAttributes;
 import tc.oc.pgm.shops.menu.Category;
 import tc.oc.pgm.shops.menu.Icon;
+import tc.oc.pgm.shops.menu.Payment;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -150,10 +151,17 @@ public class ShopModule implements MapModule {
 
   private static Icon parseIcon(Element icon, KitParser kits, Logger logger)
       throws InvalidXMLException {
-    Integer price =
-        XMLUtils.parseNumber(XMLUtils.getRequiredAttribute(icon, "price"), Integer.class);
-    Material currency =
-        price < 1 ? null : XMLUtils.parseMaterial(Node.fromRequiredAttr(icon, "currency"));
+
+    List<Payment> payments = Lists.newArrayList();
+
+    for (Element payment : XMLUtils.getChildren(icon, "payment")) {
+      payments.add(parsePayment(payment));
+    }
+
+    if (payments.isEmpty()) {
+      payments.add(parsePayment(icon));
+    }
+
     ItemStack item = kits.parseItem(icon, false);
 
     Kit kit = null;
@@ -164,7 +172,15 @@ public class ShopModule implements MapModule {
       kit = new ItemKit(Maps.newHashMap(), Lists.newArrayList(item));
     }
 
-    return new Icon(currency, price, item, kit);
+    return new Icon(payments, item, kit);
+  }
+
+  private static Payment parsePayment(Element element) throws InvalidXMLException {
+    Integer price =
+        XMLUtils.parseNumber(XMLUtils.getRequiredAttribute(element, "price"), Integer.class);
+    Material currency =
+        price < 1 ? null : XMLUtils.parseMaterial(Node.fromRequiredAttr(element, "currency"));
+    return new Payment(currency, price);
   }
 
   private static ItemStack applyItemFlags(ItemStack stack) {
