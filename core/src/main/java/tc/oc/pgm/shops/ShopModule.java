@@ -176,8 +176,7 @@ public class ShopModule implements MapModule {
   }
 
   private static Payment parsePayment(Element element) throws InvalidXMLException {
-    Integer price =
-        XMLUtils.parseNumber(XMLUtils.getRequiredAttribute(element, "price"), Integer.class);
+    Integer price = XMLUtils.parseNumber(Node.fromAttr(element, "price"), Integer.class, 0);
     Material currency =
         price < 1 ? null : XMLUtils.parseMaterial(Node.fromRequiredAttr(element, "currency"));
     return new Payment(currency, price);
