@@ -18,7 +18,6 @@ import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
-import tc.oc.pgm.events.ItemRemovedByActionEvent;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.MetadataUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
@@ -114,11 +113,6 @@ public class Spawner implements Listener, Tickable {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onItemDespawn(ItemDespawnEvent event) {
-    handleEntityRemoveEvent(event.getEntity(), event.getEntity().getItemStack().getAmount());
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR)
-  public void onItemRemovedByAction(ItemRemovedByActionEvent event) {
     handleEntityRemoveEvent(event.getEntity(), event.getEntity().getItemStack().getAmount());
   }
 
