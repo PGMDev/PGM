@@ -1,5 +1,7 @@
 package tc.oc.pgm.shops;
 
+import static tc.oc.pgm.shops.ShopKeeper.isKeeper;
+
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -13,8 +15,6 @@ import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
-import org.bukkit.metadata.MetadataValue;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -94,15 +94,9 @@ public class ShopMatchModule implements MatchModule, Listener {
   @Nullable
   private Shop getShopFromEntity(Entity entity) {
     if (isKeeper(entity)) {
-      MetadataValue meta = entity.getMetadata(ShopKeeper.METADATA_KEY, PGM.get());
-      if (meta.asString() != null) {
-        return shops.get(meta.asString());
-      }
+      String keeperId = ShopKeeper.getKeeperId(entity);
+      return shops.get(keeperId);
     }
     return null;
-  }
-
-  private boolean isKeeper(Entity entity) {
-    return entity != null && entity.hasMetadata(ShopKeeper.METADATA_KEY);
   }
 }

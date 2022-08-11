@@ -23,7 +23,7 @@ public class Shop implements FeatureDefinition {
 
   private final String id;
   private final String name;
-  private final ImmutableList<Category> categories;
+  private final List<Category> categories;
 
   public Shop(String id, String name, List<Category> categories) {
     this.id = id;
@@ -39,7 +39,7 @@ public class Shop implements FeatureDefinition {
     return name;
   }
 
-  public ImmutableList<Category> getCategories() {
+  public List<Category> getCategories() {
     return categories;
   }
 

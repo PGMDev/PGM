@@ -3,12 +3,15 @@ package tc.oc.pgm.shops;
 import static tc.oc.pgm.util.bukkit.BukkitUtils.colorize;
 
 import com.google.common.collect.ImmutableList;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.points.PointProvider;
@@ -16,28 +19,22 @@ import tc.oc.pgm.util.nms.NMSHacks;
 
 public class ShopKeeper {
 
-  public static final String METADATA_KEY = "SHOP_KEEPER";
+  private static final String METADATA_KEY = "SHOP_KEEPER";
 
   private final String name;
-  private final ImmutableList<PointProvider> location;
+  private final List<PointProvider> location;
   private final Class<? extends Entity> type;
   private final Shop shop;
 
   public ShopKeeper(
       @Nullable String name,
-      ImmutableList<PointProvider> location,
+      List<PointProvider> location,
       Class<? extends Entity> type,
       Shop shop) {
     this.name = name;
-    this.location = location;
+    this.location = ImmutableList.copyOf(location);
     this.type = type;
     this.shop = shop;
-  }
-
-  @Nullable
-  public Location getLocation(Match match) {
-    // TODO: support multiple shopkeeper locations?
-    return location.stream().findAny().map(pp -> pp.getPoint(match, null)).orElse(null);
   }
 
   public Shop getShop() {
@@ -53,13 +50,28 @@ public class ShopKeeper {
   }
 
   public void spawn(Match match) {
-    if (getLocation(match) == null) return;
+    if (match == null) throw new IllegalArgumentException("Match can not be null!");
 
-    World world = match.getWorld();
-    Entity keeper = world.spawn(getLocation(match), type);
-    keeper.setCustomName(getName());
-    keeper.setCustomNameVisible(true);
-    keeper.setMetadata(METADATA_KEY, new FixedMetadataValue(PGM.get(), shop.getId()));
-    NMSHacks.freezeEntity(keeper);
+    for (Location loc :
+        location.stream().map(pp -> pp.getPoint(match, null)).collect(Collectors.toList())) {
+      World world = match.getWorld();
+      Entity keeper = world.spawn(loc, type);
+      keeper.setCustomName(getName());
+      keeper.setCustomNameVisible(true);
+      keeper.setMetadata(METADATA_KEY, new FixedMetadataValue(PGM.get(), shop.getId()));
+      NMSHacks.freezeEntity(keeper);
+    }
+  }
+
+  public static boolean isKeeper(Entity entity) {
+    return entity != null && entity.hasMetadata(ShopKeeper.METADATA_KEY);
+  }
+
+  public static String getKeeperId(Entity entity) {
+    MetadataValue meta = entity.getMetadata(ShopKeeper.METADATA_KEY, PGM.get());
+    if (meta.asString() != null) {
+      return meta.asString();
+    }
+    return null;
   }
 }
