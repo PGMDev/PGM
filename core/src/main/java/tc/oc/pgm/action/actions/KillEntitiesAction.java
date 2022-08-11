@@ -2,6 +2,7 @@ package tc.oc.pgm.action.actions;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
@@ -23,7 +24,8 @@ public class KillEntitiesAction extends AbstractAction<Match> {
         .getEntities()
         .forEach(
             (Entity entity) -> {
-              if (filter.query(new EntityQuery(null, entity)).isAllowed()) {
+              if (!(entity instanceof Player)
+                  && filter.query(new EntityQuery(null, entity)).isAllowed()) {
                 if (entity instanceof Item) {
                   match.callEvent(new ItemDespawnEvent((Item) entity, entity.getLocation()));
                 }
