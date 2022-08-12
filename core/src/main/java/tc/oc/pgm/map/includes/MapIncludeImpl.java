@@ -51,4 +51,9 @@ public class MapIncludeImpl implements MapInclude {
   public long getLastModified() {
     return lastModified.get();
   }
+
+  @Override
+  public boolean hasBeenModified(long time) {
+    return time > lastModified.get();
+  }
 }

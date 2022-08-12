@@ -21,6 +21,14 @@ public interface MapInclude {
   long getLastModified();
 
   /**
+   * Gets whether the associated {@link MapInclude} files have changed since last loading.
+   *
+   * @param time The current system time
+   * @return True if given time is newer than last modified time
+   */
+  boolean hasBeenModified(long time);
+
+  /**
    * Get a collection of {@link Content} which can be merged into an existing {@link Document}
    *
    * @return a collection of {@link Content}

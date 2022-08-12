@@ -1,10 +1,12 @@
 package tc.oc.pgm.map.includes;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
@@ -16,13 +18,14 @@ import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.includes.MapInclude;
 import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
 import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.SAXHandler;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class MapIncludeProcessorImpl implements MapIncludeProcessor {
 
   private final Logger logger;
-  private final Set<MapInclude> includes;
+  private final Map<String, MapInclude> includes;
 
   protected static final ThreadLocal<SAXBuilder> DOCUMENT_FACTORY =
       ThreadLocal.withInitial(
@@ -34,7 +37,7 @@ public class MapIncludeProcessorImpl implements MapIncludeProcessor {
 
   public MapIncludeProcessorImpl(Logger logger) {
     this.logger = logger;
-    this.includes = Sets.newHashSet();
+    this.includes = Maps.newHashMap();
   }
 
   public MapInclude getGlobalInclude() {
@@ -43,10 +46,7 @@ public class MapIncludeProcessorImpl implements MapIncludeProcessor {
 
   @Override
   public MapInclude getMapIncludeById(String includeId) {
-    return includes.stream()
-        .filter(include -> include.getId().equalsIgnoreCase(includeId))
-        .findAny()
-        .orElse(null);
+    return includes.get(includeId);
   }
 
   @Override
@@ -61,15 +61,14 @@ public class MapIncludeProcessorImpl implements MapIncludeProcessor {
     List<Element> elements = document.getRootElement().getChildren("include");
     for (Element element : elements) {
 
-      String legacy = XMLUtils.getNullableAttribute(element, "src");
-      if (legacy != null) {
+      if (Node.fromAttr(element, "src") != null) {
         // Send a warning to legacy include statements without preventing them from loading
         logger.warning(
             "["
                 + document.getBaseURI()
                 + "] "
                 + "Legacy include statements are no longer supported, please upgrade to the <include id='name'/> format.");
-        return Sets.newHashSet();
+        continue;
       }
 
       String id = XMLUtils.getRequiredAttribute(element, "id").getValue();
@@ -97,7 +96,8 @@ public class MapIncludeProcessorImpl implements MapIncludeProcessor {
     File[] files = includeFiles.listFiles();
     for (File file : files) {
       try {
-        this.includes.add(new MapIncludeImpl(file));
+        MapIncludeImpl include = new MapIncludeImpl(file);
+        this.includes.put(include.getId(), include);
       } catch (MapMissingException | JDOMException | IOException error) {
         logger.info("Unable to load " + file.getName() + " include document");
         error.printStackTrace();

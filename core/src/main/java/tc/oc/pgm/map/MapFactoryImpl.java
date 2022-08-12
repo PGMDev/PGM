@@ -31,7 +31,6 @@ import tc.oc.pgm.filters.parse.LegacyFilterParser;
 import tc.oc.pgm.kits.FeatureKitParser;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.kits.LegacyKitParser;
-import tc.oc.pgm.map.includes.StoredMapIncludeImpl;
 import tc.oc.pgm.regions.FeatureRegionParser;
 import tc.oc.pgm.regions.LegacyRegionParser;
 import tc.oc.pgm.regions.RegionParser;
@@ -78,7 +77,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
   }
 
   private void storeInclude(MapInclude include) {
-    this.source.addMapInclude(new StoredMapIncludeImpl(include.getId(), include.getLastModified()));
+    this.source.addMapInclude(include);
   }
 
   private void preLoad()

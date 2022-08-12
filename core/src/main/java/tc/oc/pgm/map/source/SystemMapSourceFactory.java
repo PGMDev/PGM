@@ -15,12 +15,9 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.includes.MapInclude;
-import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
-import tc.oc.pgm.api.map.includes.StoredMapInclude;
 import tc.oc.pgm.util.FileUtils;
 
 public class SystemMapSourceFactory extends PathMapSourceFactory {
@@ -50,14 +47,12 @@ public class SystemMapSourceFactory extends PathMapSourceFactory {
 
     private final String dir;
     private final AtomicLong modified;
-    private final Set<StoredMapInclude> storedIncludes;
-    private final MapIncludeProcessor includes;
+    private final Set<MapInclude> storedIncludes;
 
     private SystemMapSource(String dir) {
       this.dir = checkNotNull(dir);
       this.modified = new AtomicLong(-1);
       this.storedIncludes = Sets.newHashSet();
-      this.includes = PGM.get().getMapLibrary().getIncludeProcessor();
     }
 
     private File getDirectory() throws MapMissingException {
@@ -151,7 +146,7 @@ public class SystemMapSourceFactory extends PathMapSourceFactory {
     }
 
     @Override
-    public void addMapInclude(StoredMapInclude include) {
+    public void addMapInclude(MapInclude include) {
       this.storedIncludes.add(include);
     }
 
@@ -161,9 +156,8 @@ public class SystemMapSourceFactory extends PathMapSourceFactory {
     }
 
     private boolean checkForIncludeUpdates() {
-      for (StoredMapInclude stored : storedIncludes) {
-        MapInclude include = includes.getMapIncludeById(stored.getIncludeId());
-        if (stored.hasBeenModified(include.getLastModified())) {
+      for (MapInclude include : storedIncludes) {
+        if (include.hasBeenModified(include.getLastModified())) {
           return true;
         }
       }

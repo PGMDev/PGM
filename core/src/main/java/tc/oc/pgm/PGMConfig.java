@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.logging.Level;
+import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
@@ -473,7 +474,7 @@ public final class PGMConfig implements Config {
   }
 
   @Override
-  public String getIncludesDirectory() {
+  public @Nullable String getIncludesDirectory() {
     return includesDirectory;
   }
 
