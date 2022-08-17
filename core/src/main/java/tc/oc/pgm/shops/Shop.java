@@ -9,30 +9,23 @@ import java.util.List;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import tc.oc.pgm.api.feature.FeatureDefinition;
-import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.shops.menu.Category;
 import tc.oc.pgm.shops.menu.Icon;
 import tc.oc.pgm.shops.menu.Payment;
 
-@FeatureInfo(name = "shops")
-public class Shop implements FeatureDefinition {
+public class Shop extends SelfIdentifyingFeatureDefinition {
 
   private static Sound PURCHASE_SOUND = sound(key("fire.ignite"), Sound.Source.MASTER, 1f, 1.4f);
 
-  private final String id;
   private final String name;
   private final List<Category> categories;
 
   public Shop(String id, String name, List<Category> categories) {
-    this.id = id;
+    super(id);
     this.name = name != null ? name : id;
     this.categories = ImmutableList.copyOf(categories);
-  }
-
-  public String getId() {
-    return id;
   }
 
   public String getName() {

@@ -25,7 +25,7 @@ import tc.oc.pgm.shops.menu.ShopMenu;
 @ListenerScope(MatchScope.RUNNING)
 public class ShopMatchModule implements MatchModule, Listener {
 
-  private Match match;
+  private final Match match;
   private final Map<String, Shop> shops;
   private final Set<ShopKeeper> shopKeepers;
 

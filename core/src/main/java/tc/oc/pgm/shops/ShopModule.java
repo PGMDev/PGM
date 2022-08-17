@@ -72,6 +72,7 @@ public class ShopModule implements MapModule {
       Map<String, Shop> shops = Maps.newHashMap();
       Set<ShopKeeper> keepers = Sets.newHashSet();
 
+      // Parse Shops
       for (Element shop : XMLUtils.flattenElements(doc.getRootElement(), "shops")) {
         String shopId = XMLUtils.getRequiredAttribute(shop, "id").getValue();
         String shopName = XMLUtils.getNullableAttribute(shop, "name");
@@ -93,41 +94,33 @@ public class ShopModule implements MapModule {
         shops.put(shopId, shopInstance);
       }
 
-      keepers = parseShopKeepers(shops, doc.getRootElement(), pointParser, logger);
+      // Parse Shopkeepers
+      for (Element shopkeeper : XMLUtils.flattenElements(doc.getRootElement(), "shopkeepers")) {
+        Attribute shopAttr = XMLUtils.getRequiredAttribute(shopkeeper, "shop");
+
+        String shopId = shopAttr.getValue();
+        String name = XMLUtils.getNullableAttribute(shopkeeper, "name");
+        Class<? extends Entity> mob =
+            XMLUtils.parseEntityTypeAttribute(shopkeeper, "mob", Villager.class);
+        ImmutableList<PointProvider> location =
+            ImmutableList.copyOf(pointParser.parse(shopkeeper, new PointProviderAttributes()));
+
+        if (location.isEmpty()) {
+          throw new InvalidXMLException("shopkeeper must have a location defined", shopkeeper);
+        }
+
+        Shop shop = shops.get(shopId);
+
+        if (shop == null) {
+          throw new InvalidXMLException(
+              "No shop with id '" + shopId + "' could be found", shopkeeper);
+        }
+
+        keepers.add(new ShopKeeper(name, location, mob, shop));
+      }
 
       return shops.isEmpty() ? null : new ShopModule(shops, keepers);
     }
-  }
-
-  private static Set<ShopKeeper> parseShopKeepers(
-      Map<String, Shop> shops, Element root, PointParser pointParser, Logger logger)
-      throws InvalidXMLException {
-    Set<ShopKeeper> keepers = Sets.newHashSet();
-
-    for (Element shopkeeper : XMLUtils.flattenElements(root, "shopkeepers")) {
-      Attribute shopAttr = XMLUtils.getRequiredAttribute(shopkeeper, "shop");
-
-      String shopId = shopAttr.getValue();
-      String name = XMLUtils.getNullableAttribute(shopkeeper, "name");
-      Class<? extends Entity> mob =
-          XMLUtils.parseEntityTypeAttribute(shopkeeper, "mob", Villager.class);
-      ImmutableList<PointProvider> location =
-          ImmutableList.copyOf(pointParser.parse(shopkeeper, new PointProviderAttributes()));
-
-      if (location.isEmpty()) {
-        throw new InvalidXMLException("shopkeeper must have a location defined", shopkeeper);
-      }
-
-      if (!shops.containsKey(shopId)) {
-        throw new InvalidXMLException(
-            "No shop with id '" + shopId + "' could be found", shopkeeper);
-      }
-      Shop shop = shops.get(shopId);
-
-      keepers.add(new ShopKeeper(name, location, mob, shop));
-    }
-
-    return keepers;
   }
 
   private static List<Icon> parseIcons(Element category, KitParser kits, Logger logger)
@@ -139,11 +132,11 @@ public class ShopModule implements MapModule {
 
     if (icons.size() > Category.MAX_ICONS) {
       throw new InvalidXMLException(
-          "Categories may only contain " + Category.MAX_ICONS + " icons", category);
+          "Categories may only contain up " + Category.MAX_ICONS + " icons", category);
     }
 
     if (icons.isEmpty()) {
-      throw new InvalidXMLException("At least one <item> is required per category", category);
+      throw new InvalidXMLException("At least one icon is required per category", category);
     }
 
     return icons;
