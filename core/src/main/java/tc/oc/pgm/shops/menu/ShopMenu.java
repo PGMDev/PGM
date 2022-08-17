@@ -86,7 +86,7 @@ public class ShopMenu extends InventoryMenu {
   }
 
   private void renderIcons(InventoryContents contents) {
-    for (int i = 2; i < 4; i++) {
+    for (int i = 2; i < 6; i++) {
       contents.fillRow(i, null);
     }
 
