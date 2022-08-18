@@ -1,7 +1,6 @@
 package tc.oc.pgm.shops.menu;
 
 import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 public class Payment {
@@ -23,6 +22,6 @@ public class Payment {
   }
 
   public boolean hasPayment(PlayerInventory inventory) {
-    return inventory.containsAtLeast(new ItemStack(getCurrency()), getPrice());
+    return inventory.contains(currency, price);
   }
 }
