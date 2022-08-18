@@ -2,7 +2,10 @@ package tc.oc.pgm.shops.menu;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 public class Category {
 
@@ -12,10 +15,12 @@ public class Category {
   private final String id;
   private final ItemStack categoryIcon;
   private final ImmutableList<Icon> icons;
+  private final Filter filter;
 
-  public Category(String id, ItemStack categoryIcon, List<Icon> icons) {
+  public Category(String id, ItemStack categoryIcon, Filter filter, List<Icon> icons) {
     this.id = id;
     this.categoryIcon = categoryIcon;
+    this.filter = filter;
     this.icons = ImmutableList.copyOf(icons);
   }
 
@@ -29,6 +34,17 @@ public class Category {
 
   public ImmutableList<Icon> getIcons() {
     return icons;
+  }
+
+  public ImmutableList<Icon> getVisibleIcons(MatchPlayer player) {
+    return ImmutableList.copyOf(
+        icons.stream()
+            .filter(icon -> icon.getFilter().query(player).isAllowed())
+            .collect(Collectors.toList()));
+  }
+
+  public Filter getFilter() {
+    return filter;
   }
 
   @Override

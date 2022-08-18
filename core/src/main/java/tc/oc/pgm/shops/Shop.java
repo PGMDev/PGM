@@ -6,6 +6,7 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
+import java.util.stream.Collectors;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -20,7 +21,7 @@ public class Shop extends SelfIdentifyingFeatureDefinition {
   private static Sound PURCHASE_SOUND = sound(key("fire.ignite"), Sound.Source.MASTER, 1f, 1.4f);
 
   private final String name;
-  private final List<Category> categories;
+  private final ImmutableList<Category> categories;
 
   public Shop(String id, String name, List<Category> categories) {
     super(id);
@@ -34,6 +35,12 @@ public class Shop extends SelfIdentifyingFeatureDefinition {
 
   public List<Category> getCategories() {
     return categories;
+  }
+
+  public List<Category> getVisibleCategories(MatchPlayer player) {
+    return categories.stream()
+        .filter(c -> c.getFilter().query(player).isAllowed())
+        .collect(Collectors.toList());
   }
 
   public boolean canPurchase(Icon icon, MatchPlayer buyer) {

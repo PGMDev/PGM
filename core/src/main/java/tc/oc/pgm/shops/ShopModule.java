@@ -20,12 +20,15 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.filters.matcher.StaticFilter;
+import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.ItemKit;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitParser;
@@ -68,6 +71,7 @@ public class ShopModule implements MapModule {
     public ShopModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       KitParser kitParser = factory.getKits();
+      FilterParser filterParser = factory.getFilters();
       PointParser pointParser = new PointParser(factory);
       Map<String, Shop> shops = Maps.newHashMap();
       Set<ShopKeeper> keepers = Sets.newHashSet();
@@ -81,8 +85,10 @@ public class ShopModule implements MapModule {
         for (Element category : XMLUtils.getChildren(shop, "category")) {
           Attribute categoryId = XMLUtils.getRequiredAttribute(category, "id");
           ItemStack categoryIcon = applyItemFlags(kitParser.parseItem(category, false));
-          List<Icon> icons = parseIcons(category, kitParser, logger);
-          categories.add(new Category(categoryId.getValue(), categoryIcon, icons));
+          List<Icon> icons = parseIcons(category, kitParser, filterParser, logger);
+          Filter filter = filterParser.parseFilterProperty(category, "filter", StaticFilter.ALLOW);
+
+          categories.add(new Category(categoryId.getValue(), categoryIcon, filter, icons));
         }
 
         if (categories.isEmpty()) {
@@ -123,11 +129,12 @@ public class ShopModule implements MapModule {
     }
   }
 
-  private static List<Icon> parseIcons(Element category, KitParser kits, Logger logger)
+  private static List<Icon> parseIcons(
+      Element category, KitParser kits, FilterParser filters, Logger logger)
       throws InvalidXMLException {
     List<Icon> icons = Lists.newArrayList();
     for (Element icon : XMLUtils.getChildren(category, "item")) {
-      icons.add(parseIcon(icon, kits, logger));
+      icons.add(parseIcon(icon, kits, filters, logger));
     }
 
     if (icons.size() > Category.MAX_ICONS) {
@@ -142,7 +149,7 @@ public class ShopModule implements MapModule {
     return icons;
   }
 
-  private static Icon parseIcon(Element icon, KitParser kits, Logger logger)
+  private static Icon parseIcon(Element icon, KitParser kits, FilterParser filters, Logger logger)
       throws InvalidXMLException {
 
     List<Payment> payments = Lists.newArrayList();
@@ -156,6 +163,7 @@ public class ShopModule implements MapModule {
     }
 
     ItemStack item = kits.parseItem(icon, false);
+    Filter filter = filters.parseFilterProperty(icon, "filter", StaticFilter.ALLOW);
 
     Kit kit = null;
     Attribute kitAttr = icon.getAttribute("kit");
@@ -165,7 +173,7 @@ public class ShopModule implements MapModule {
       kit = new ItemKit(Maps.newHashMap(), Lists.newArrayList(item));
     }
 
-    return new Icon(payments, item, kit);
+    return new Icon(payments, item, filter, kit);
   }
 
   private static Payment parsePayment(Element element) throws InvalidXMLException {

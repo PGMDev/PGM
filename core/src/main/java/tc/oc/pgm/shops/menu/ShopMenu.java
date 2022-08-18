@@ -42,7 +42,13 @@ public class ShopMenu extends InventoryMenu {
   public ShopMenu(Shop shop, MatchPlayer viewer) {
     super(text(colorize(shop.getName())), 6, viewer, null);
     this.shop = shop;
-    this.category = shop.getCategories().get(0);
+
+    if (shop.getVisibleCategories(viewer).isEmpty()) {
+      getViewer().sendWarning(translatable("shop.category.empty"));
+      return;
+    }
+
+    this.category = shop.getVisibleCategories(viewer).get(0);
     this.categories = getCategoryItems();
     this.highlight = 1;
     open();
@@ -90,9 +96,16 @@ public class ShopMenu extends InventoryMenu {
       contents.fillRow(i, null);
     }
 
+    List<Icon> icons = getCategory().getVisibleIcons(getViewer());
+
+    if (icons.isEmpty()) {
+      contents.set(4, 4, getNoItemsItem());
+      return;
+    }
+
     int row = 2;
     int col = 1;
-    for (Icon icon : getCategory().getIcons()) {
+    for (Icon icon : getCategory().getVisibleIcons(getViewer())) {
       contents.set(row, col, getPurchasableItem(icon));
       col++;
       if (col > 7) {
@@ -112,7 +125,7 @@ public class ShopMenu extends InventoryMenu {
   }
 
   private ClickableItem[] getCategoryItems() {
-    ClickableItem[] items = new ClickableItem[shop.getCategories().size()];
+    ClickableItem[] items = new ClickableItem[shop.getVisibleCategories(getViewer()).size()];
     for (int i = 0; i < shop.getCategories().size(); i++) {
       items[i] = getCategoryItem(shop.getCategories().get(i));
     }
@@ -129,6 +142,15 @@ public class ShopMenu extends InventoryMenu {
             .material(Material.STAINED_GLASS_PANE)
             .color(color)
             .name(" ")
+            .flags(ItemFlag.values())
+            .build());
+  }
+
+  private ClickableItem getNoItemsItem() {
+    return ClickableItem.empty(
+        new ItemBuilder()
+            .material(Material.BARRIER)
+            .name(ChatColor.RED + TextTranslations.translate("shop.item.empty", getBukkit()))
             .flags(ItemFlag.values())
             .build());
   }

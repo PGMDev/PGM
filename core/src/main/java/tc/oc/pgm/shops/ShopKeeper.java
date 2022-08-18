@@ -22,7 +22,7 @@ public class ShopKeeper {
   private static final String METADATA_KEY = "SHOP_KEEPER";
 
   private final String name;
-  private final List<PointProvider> location;
+  private final ImmutableList<PointProvider> location;
   private final Class<? extends Entity> type;
   private final Shop shop;
 
