@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Villager;
@@ -155,11 +156,11 @@ public class ShopModule implements MapModule {
     List<Payment> payments = Lists.newArrayList();
 
     for (Element payment : XMLUtils.getChildren(icon, "payment")) {
-      payments.add(parsePayment(payment));
+      payments.add(parsePayment(payment, kits));
     }
 
     if (payments.isEmpty()) {
-      payments.add(parsePayment(icon));
+      payments.add(parsePayment(icon, kits));
     }
 
     ItemStack item = kits.parseItem(icon, false);
@@ -176,11 +177,27 @@ public class ShopModule implements MapModule {
     return new Icon(payments, item, filter, kit);
   }
 
-  private static Payment parsePayment(Element element) throws InvalidXMLException {
-    Integer price = XMLUtils.parseNumber(Node.fromAttr(element, "price"), Integer.class, 0);
+  private static Payment parsePayment(Element element, KitParser kits) throws InvalidXMLException {
+    Node priceAttr = Node.fromAttr(element, "price");
+    Node currencyAttr = Node.fromAttr(element, "currency");
+    Node colorAttr = Node.fromAttr(element, "color");
+
+    Integer price = XMLUtils.parseNumber(priceAttr, Integer.class, 0);
     Material currency =
-        price < 1 ? null : XMLUtils.parseMaterial(Node.fromRequiredAttr(element, "currency"));
-    return new Payment(currency, price);
+        price <= 0 || currencyAttr == null ? null : XMLUtils.parseMaterial(currencyAttr);
+    ChatColor color = XMLUtils.parseChatColor(colorAttr, ChatColor.GOLD);
+
+    ItemStack item = null;
+    Element itemEl = XMLUtils.getUniqueChild(element, "item");
+    if (itemEl != null) {
+      item = kits.parseItem(itemEl, false);
+    }
+
+    if (currency == null && item == null && price > 0) {
+      throw new InvalidXMLException("A 'currency' attribute or child <item> is required", element);
+    }
+
+    return new Payment(currency, price, color, item);
   }
 
   private static ItemStack applyItemFlags(ItemStack stack) {

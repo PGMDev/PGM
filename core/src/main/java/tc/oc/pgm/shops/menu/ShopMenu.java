@@ -27,6 +27,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.menu.InventoryMenu;
 import tc.oc.pgm.shops.Shop;
 import tc.oc.pgm.util.inventory.ItemBuilder;
+import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class ShopMenu extends InventoryMenu {
@@ -170,8 +171,13 @@ public class ShopMenu extends InventoryMenu {
               .map(
                   p -> {
                     boolean hasPayment = p.hasPayment(getViewer().getInventory());
-                    Component materialName =
-                        text(getMaterial(p.getCurrency())).color(NamedTextColor.GOLD);
+
+                    Component currencyName =
+                        p.getItem() != null
+                            ? text(p.getItem().getItemMeta().getDisplayName())
+                            : text(getMaterial(p.getCurrency()))
+                                .color(TextFormatter.convert(p.getColor()));
+
                     Component prefix =
                         icon.getPayments().size() == 1
                             ? null
@@ -191,7 +197,7 @@ public class ShopMenu extends InventoryMenu {
                                 p.getPrice(),
                                 hasPayment ? NamedTextColor.GREEN : NamedTextColor.RED))
                         .append(space())
-                        .append(materialName);
+                        .append(currencyName);
 
                     return priceComponent.build();
                   })

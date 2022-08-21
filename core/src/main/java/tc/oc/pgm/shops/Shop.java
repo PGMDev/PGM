@@ -66,7 +66,7 @@ public class Shop extends SelfIdentifyingFeatureDefinition {
         int remaining = payment.getPrice();
         for (int slot = 0; slot < inventory.getSize() && remaining > 0; slot++) {
           ItemStack item = inventory.getItem(slot);
-          if (item == null || item.getType() != payment.getCurrency()) continue;
+          if (item == null || !payment.matches(item)) continue;
           if (item.getAmount() > remaining) {
             item.setAmount(item.getAmount() - remaining);
             inventory.setItem(slot, item);
