@@ -15,7 +15,8 @@ public class MercyRule {
   private Map.Entry<Competitor, Double> leader;
   private Map.Entry<Competitor, Double> trailer;
 
-  public MercyRule(ScoreMatchModule scoreMatchModule, int scoreLimit, int mercyLimit, int mercyLimitMin) {
+  public MercyRule(
+      ScoreMatchModule scoreMatchModule, int scoreLimit, int mercyLimit, int mercyLimitMin) {
     this.scoreMatchModule = scoreMatchModule;
     this.scoreLimit = scoreLimit;
     this.mercyLimit = mercyLimit;
