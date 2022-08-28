@@ -4,13 +4,11 @@ import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import javax.annotation.Nullable;
+import java.util.stream.Collectors;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -22,6 +20,7 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.countdowns.CountdownContext;
+import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.filters.FilterMatchModule;
 
@@ -88,42 +87,21 @@ public class ObjectiveModesMatchModule implements MatchModule, Listener {
         .build();
   }
 
-  public List<ModeChangeCountdown> getSortedCountdowns(boolean includeUnstarted) {
-    List<ModeChangeCountdown> listClone = new ArrayList<>(this.countdowns);
-    List<ModeChangeCountdown> unstartedCountdowns = new ArrayList<>();
-    // places countdowns triggered by filter at the bottom of list
-    for (ModeChangeCountdown listCloneItem : listClone) {
-      if (listCloneItem.getRemaining() == null) {
-        unstartedCountdowns.add(listCloneItem);
-        listClone.remove(listCloneItem);
-      }
-    }
-    Collections.sort(listClone);
-    if (includeUnstarted) {
-      listClone.addAll(unstartedCountdowns);
-    }
-
-    return listClone;
+  public List<ModeChangeCountdown> getSortedCountdowns(boolean includeAll) {
+    return this.countdowns.stream()
+        .filter(mcc -> includeAll || mcc.getRemaining() != null)
+        .sorted(
+            Comparator.<ModeChangeCountdown>nullsLast(
+                    Comparator.comparing(MatchCountdown::getRemaining))
+                .thenComparing(mcc -> mcc.getMode().getAfter()))
+        .collect(Collectors.toList());
   }
 
   public List<ModeChangeCountdown> getActiveCountdowns() {
-    List<ModeChangeCountdown> activeCountdowns =
-        new ArrayList<>(
-            Collections2.filter(
-                this.getAllCountdowns(),
-                new Predicate<ModeChangeCountdown>() {
-                  @Override
-                  public boolean apply(@Nullable ModeChangeCountdown countdown) {
-                    return ObjectiveModesMatchModule.this
-                            .getCountdown()
-                            .getTimeLeft(countdown)
-                            .getSeconds()
-                        > 0;
-                  }
-                }));
-    Collections.sort(activeCountdowns);
-
-    return activeCountdowns;
+    return getAllCountdowns().stream()
+        .filter(mcc -> mcc.getRemaining().getSeconds() > 0)
+        .sorted()
+        .collect(Collectors.toList());
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
