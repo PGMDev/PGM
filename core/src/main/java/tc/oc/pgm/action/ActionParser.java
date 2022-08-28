@@ -13,7 +13,7 @@ import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.features.FeatureDefinitionContext;
-import tc.oc.pgm.features.XMLFeatureReference;
+import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.Kit;
@@ -107,9 +107,13 @@ public class ActionParser {
   // Warning: this should only be used when you're certain those features load before filters.
   private <T extends FeatureDefinition> T resolve(Node node, Class<T> cls)
       throws InvalidXMLException {
-    XMLFeatureReference<T> ref = this.factory.getFeatures().createReference(node, cls);
-    ref.resolve();
-    return ref.get();
+    String id = node.getValueNormalize();
+    T val = this.factory.getFeatures().get(id, cls);
+    if (val == null)
+      throw new InvalidXMLException(
+          "Unknown " + SelfIdentifyingFeatureDefinition.makeTypeName(cls) + " ID '" + id + "'",
+          node);
+    return val;
   }
 
   public <T extends Filterable<?>> Trigger<T> parseTrigger(Element el) throws InvalidXMLException {
@@ -162,10 +166,7 @@ public class ActionParser {
   @MethodParser("set")
   public <T extends Filterable<?>> SetVariableAction<T> parseSetVariable(Element el, Class<T> scope)
       throws InvalidXMLException {
-    VariableDefinition<?> var =
-        this.factory
-            .getFeatures()
-            .get(Node.fromRequiredAttr(el, "var").getValue(), VariableDefinition.class);
+    VariableDefinition<?> var = resolve(Node.fromRequiredAttr(el, "var"), VariableDefinition.class);
     if (scope == null) scope = Filterables.parse(Node.fromRequiredAttr(el, "scope"));
 
     if (!Filterables.isAssignable(scope, var.getScope()))

@@ -22,6 +22,7 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.classes.ClassModule;
 import tc.oc.pgm.classes.PlayerClass;
+import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.filters.matcher.CauseFilter;
 import tc.oc.pgm.filters.matcher.StaticFilter;
@@ -386,9 +387,13 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   // Warning: this should only be used when you're certain those features load before filters.
   private <T extends FeatureDefinition> T resolve(Node node, Class<T> cls)
       throws InvalidXMLException {
-    XMLFeatureReference<T> ref = reference(node, cls);
-    ref.resolve();
-    return ref.get();
+    String id = node.getValueNormalize();
+    T val = this.factory.getFeatures().get(id, cls);
+    if (val == null)
+      throw new InvalidXMLException(
+          "Unknown " + SelfIdentifyingFeatureDefinition.makeTypeName(cls) + " ID '" + id + "'",
+          node);
+    return val;
   }
 
   private <T extends FeatureDefinition> Optional<XMLFeatureReference<T>> optionalReference(
