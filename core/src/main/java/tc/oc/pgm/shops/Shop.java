@@ -80,7 +80,7 @@ public class Shop extends SelfIdentifyingFeatureDefinition {
     }
 
     buyer.getBukkit().updateInventory();
-    buyer.applyKit(icon.getKit(), true);
+    icon.getAction().trigger(buyer);
     buyer.playSound(PURCHASE_SOUND);
     return true;
   }

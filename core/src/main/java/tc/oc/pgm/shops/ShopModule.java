@@ -1,5 +1,7 @@
 package tc.oc.pgm.shops;
 
+import static net.kyori.adventure.text.Component.text;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -13,6 +15,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemFlag;
@@ -21,6 +24,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.action.Action;
+import tc.oc.pgm.action.ActionParser;
+import tc.oc.pgm.action.actions.AbstractAction;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapTag;
@@ -28,10 +34,9 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.parse.FilterParser;
-import tc.oc.pgm.kits.ItemKit;
-import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.points.PointParser;
 import tc.oc.pgm.points.PointProvider;
@@ -73,6 +78,7 @@ public class ShopModule implements MapModule {
         throws InvalidXMLException {
       KitParser kitParser = factory.getKits();
       FilterParser filterParser = factory.getFilters();
+      ActionParser actionParser = new ActionParser(factory);
       PointParser pointParser = new PointParser(factory);
       Map<String, Shop> shops = Maps.newHashMap();
       Set<ShopKeeper> keepers = Sets.newHashSet();
@@ -86,7 +92,7 @@ public class ShopModule implements MapModule {
         for (Element category : XMLUtils.getChildren(shop, "category")) {
           Attribute categoryId = XMLUtils.getRequiredAttribute(category, "id");
           ItemStack categoryIcon = applyItemFlags(kitParser.parseItem(category, false));
-          List<Icon> icons = parseIcons(category, kitParser, filterParser, logger);
+          List<Icon> icons = parseIcons(category, kitParser, actionParser, filterParser, logger);
           Filter filter = filterParser.parseFilterProperty(category, "filter", StaticFilter.ALLOW);
 
           categories.add(new Category(categoryId.getValue(), categoryIcon, filter, icons));
@@ -131,11 +137,11 @@ public class ShopModule implements MapModule {
   }
 
   private static List<Icon> parseIcons(
-      Element category, KitParser kits, FilterParser filters, Logger logger)
+      Element category, KitParser kits, ActionParser actions, FilterParser filters, Logger logger)
       throws InvalidXMLException {
     List<Icon> icons = Lists.newArrayList();
     for (Element icon : XMLUtils.getChildren(category, "item")) {
-      icons.add(parseIcon(icon, kits, filters, logger));
+      icons.add(parseIcon(icon, kits, actions, filters, logger));
     }
 
     if (icons.size() > Category.MAX_ICONS) {
@@ -150,7 +156,8 @@ public class ShopModule implements MapModule {
     return icons;
   }
 
-  private static Icon parseIcon(Element icon, KitParser kits, FilterParser filters, Logger logger)
+  private static Icon parseIcon(
+      Element icon, KitParser kits, ActionParser actions, FilterParser filters, Logger logger)
       throws InvalidXMLException {
 
     List<Payment> payments = Lists.newArrayList();
@@ -166,15 +173,34 @@ public class ShopModule implements MapModule {
     ItemStack item = kits.parseItem(icon, false);
     Filter filter = filters.parseFilterProperty(icon, "filter", StaticFilter.ALLOW);
 
-    Kit kit = null;
-    Attribute kitAttr = icon.getAttribute("kit");
-    if (kitAttr != null) {
-      kit = kits.parseKitProperty(icon, "kit", null);
+    Action<? super MatchPlayer> action;
+    Node actionNode = Node.fromAttr(icon, "action", "kit");
+    if (actionNode != null) {
+      action = actions.parseReference(actionNode, null, MatchPlayer.class);
     } else {
-      kit = new ItemKit(Maps.newHashMap(), Lists.newArrayList(item));
+      // TODO: extract to a proper give-item action, handle full inventory situation.
+      action =
+          new AbstractAction<MatchPlayer>(MatchPlayer.class) {
+            @Override
+            public void trigger(MatchPlayer player) {
+              Map<Integer, ItemStack> overflow = player.getInventory().addItem(item);
+
+              // Drop extra items at feet
+              if (!overflow.isEmpty()) {
+                // will be translatable in production
+                player.sendWarning(
+                    text(
+                        "Purchase could not fit in your inventory, so it's been dropped at your feet"));
+                World world = player.getWorld();
+                overflow
+                    .values()
+                    .forEach(stack -> world.dropItemNaturally(player.getLocation(), stack));
+              }
+            }
+          };
     }
 
-    return new Icon(payments, item, filter, kit);
+    return new Icon(payments, item, filter, action);
   }
 
   private static Payment parsePayment(Element element, KitParser kits) throws InvalidXMLException {
