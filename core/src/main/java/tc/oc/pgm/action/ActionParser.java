@@ -185,7 +185,7 @@ public class ActionParser {
 
     VariablesModule vm = this.factory.needModule(VariablesModule.class);
 
-    String expression = Node.fromRequiredAttr(el, "formula").getValue();
+    String expression = Node.fromRequiredAttr(el, "value").getValue();
     Formula<T> formula =
         Formula.of(expression, vm.getVariableNames(scope), vm.getContextBuilder(scope));
 

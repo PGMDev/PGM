@@ -87,7 +87,8 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
         throws InvalidXMLException {
 
       ImmutableList.Builder<VariableDefinition<?>> variables = ImmutableList.builder();
-      for (Element variable : XMLUtils.flattenElements(doc.getRootElement(), "variables", "var")) {
+      for (Element variable :
+          XMLUtils.flattenElements(doc.getRootElement(), "variables", "variable")) {
 
         String id = Node.fromRequiredAttr(variable, "id").getValue();
         Class<? extends Filterable<?>> scope =
