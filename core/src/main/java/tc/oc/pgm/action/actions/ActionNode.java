@@ -2,14 +2,18 @@ package tc.oc.pgm.action.actions;
 
 import com.google.common.collect.ImmutableList;
 import tc.oc.pgm.action.Action;
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.filters.Filterable;
 
-public class ActionNode<B> extends AbstractAction<B> {
+public class ActionNode<B extends Filterable<?>> extends AbstractAction<B> {
   private final ImmutableList<Action<? super B>> actions;
+  private final Filter filter;
   private final Class<B> bound;
 
-  public ActionNode(ImmutableList<Action<? super B>> actions, Class<B> bound) {
+  public ActionNode(ImmutableList<Action<? super B>> actions, Filter filter, Class<B> bound) {
     super(bound);
     this.actions = actions;
+    this.filter = filter;
     this.bound = bound;
   }
 
@@ -20,8 +24,10 @@ public class ActionNode<B> extends AbstractAction<B> {
 
   @Override
   public void trigger(B t) {
-    for (Action<? super B> action : actions) {
-      action.trigger(t);
+    if (filter.query(t).isAllowed()) {
+      for (Action<? super B> action : actions) {
+        action.trigger(t);
+      }
     }
   }
 }

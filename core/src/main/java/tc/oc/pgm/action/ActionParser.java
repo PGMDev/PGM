@@ -10,11 +10,13 @@ import tc.oc.pgm.action.actions.ChatMessageAction;
 import tc.oc.pgm.action.actions.ScopeSwitchAction;
 import tc.oc.pgm.action.actions.SetVariableAction;
 import tc.oc.pgm.api.feature.FeatureDefinition;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.filters.Filterable;
+import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.util.MethodParser;
@@ -134,7 +136,9 @@ public class ActionParser {
       builder.add(parse(child, bound));
     }
 
-    return new ActionNode<>(builder.build(), bound);
+    Filter filter = filters.parseFilterProperty(el, "filter", StaticFilter.ALLOW);
+
+    return new ActionNode<>(builder.build(), filter, bound);
   }
 
   @MethodParser("switch-scope")
