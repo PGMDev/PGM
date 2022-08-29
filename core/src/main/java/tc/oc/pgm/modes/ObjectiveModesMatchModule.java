@@ -52,6 +52,7 @@ public class ObjectiveModesMatchModule implements MatchModule, Listener {
       if (mode.getFilter() != null) {
         // if filter returns ALLOW at any time in the match, start countdown for mode change
         fmm.onRise(
+            Match.class,
             mode.getFilter(),
             listener -> {
               if (!this.countdownContext.isRunning(countdown) && match.isRunning()) {

@@ -188,6 +188,16 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
       throw new IllegalStateException("Cannot register filter listener after match has started");
     }
 
+    // Ideally this should never happen. All features that try to register a dynamic filter should
+    // have ensured that the filter can respond dynamically to the scope, at XML parse time.
+    // However, that does not occur, nothing is validating dynamic filters' scopes at all.
+    // The proper fix is to have a validation, using FeatureValidation and all features
+    // that will use a filter dynamically to validate the scope.
+    if (!filter.respondsTo(scope)) {
+      throw new IllegalStateException(
+          "Filter " + filter + " does not respond to " + scope.getSimpleName() + " scope");
+    }
+
     final ListenerSet listenerSet =
         this.listeners.row(filter).computeIfAbsent(scope, s -> new ListenerSet());
 
