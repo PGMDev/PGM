@@ -56,6 +56,7 @@ public class WorldBorderModule implements MapModule {
                 "Cannot combine a filter and an explicit time for a world border", el);
           }
           filter = MonostableFilter.afterMatchStart(after);
+          factory.getFilters().getUsedContext().add(filter);
         }
 
         WorldBorder border =

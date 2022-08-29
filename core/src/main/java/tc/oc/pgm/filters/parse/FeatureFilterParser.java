@@ -5,12 +5,12 @@ import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.filters.XMLFilterReference;
 import tc.oc.pgm.filters.operator.AllowFilter;
 import tc.oc.pgm.filters.operator.DenyFilter;
 import tc.oc.pgm.filters.operator.InverseFilter;
 import tc.oc.pgm.util.MethodParser;
-import tc.oc.pgm.util.collection.ContextStore;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 
@@ -21,7 +21,7 @@ public class FeatureFilterParser extends FilterParser {
   }
 
   @Override
-  public ContextStore<?> getUsedContext() {
+  public FeatureDefinitionContext getUsedContext() {
     return factory.getFeatures();
   }
 

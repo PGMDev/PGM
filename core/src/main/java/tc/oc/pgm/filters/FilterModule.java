@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.ReactorFactory;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
@@ -22,7 +23,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 
 public class FilterModule implements MapModule<FilterMatchModule> {
 
-  private final ContextStore<?> filterContext;
+  private final ContextStore<? super Filter> filterContext;
 
   /**
    * Create the FilterModule.
@@ -30,7 +31,7 @@ public class FilterModule implements MapModule<FilterMatchModule> {
    * @param filterContext the context where all {@link Filters} for the relevant match can be found.
    *     Important to find {@link ReactorFactory}s
    */
-  private FilterModule(ContextStore<?> filterContext) {
+  private FilterModule(ContextStore<? super Filter> filterContext) {
     this.filterContext = filterContext;
   }
 
