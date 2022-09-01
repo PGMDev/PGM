@@ -10,7 +10,7 @@ import tc.oc.pgm.filters.query.EntityQuery;
 
 public class KillEntitiesAction extends AbstractAction<Match> {
 
-  Filter filter;
+  private final Filter filter;
 
   public KillEntitiesAction(Filter filter) {
     super(Match.class);
