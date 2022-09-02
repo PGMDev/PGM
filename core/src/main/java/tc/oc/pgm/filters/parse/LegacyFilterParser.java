@@ -10,7 +10,6 @@ import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.matcher.block.BlockFilter;
 import tc.oc.pgm.filters.operator.FilterNode;
 import tc.oc.pgm.util.MethodParser;
-import tc.oc.pgm.util.collection.ContextStore;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -26,7 +25,7 @@ public class LegacyFilterParser extends FilterParser {
   }
 
   @Override
-  public ContextStore<?> getUsedContext() {
+  public FilterContext getUsedContext() {
     return this.filterContext;
   }
 

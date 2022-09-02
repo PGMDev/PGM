@@ -100,20 +100,7 @@ public class ContextStore<T> implements Iterable<Map.Entry<String, T>> {
   }
 
   @SuppressWarnings("unchecked")
-  public <V extends T> Collection<V> getAll(Class<V> clazz) {
-    Set<V> results = new HashSet<>();
-
-    for (T t : this.getAll()) {
-      if (clazz.isAssignableFrom(t.getClass())) {
-        results.add((V) t);
-      }
-    }
-
-    return results;
-  }
-
-  @SuppressWarnings("unchecked")
-  public <V> Collection<V> getAllUnchecked(Class<V> clazz) {
+  public <V extends T> Iterable<V> getAll(Class<V> clazz) {
     Set<V> results = new HashSet<>();
 
     for (T t : this.getAll()) {
