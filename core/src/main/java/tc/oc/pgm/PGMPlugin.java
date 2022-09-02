@@ -36,6 +36,7 @@ import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.map.exception.MapException;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
+import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.module.Module;
@@ -57,6 +58,7 @@ import tc.oc.pgm.listeners.PGMListener;
 import tc.oc.pgm.listeners.ServerPingDataListener;
 import tc.oc.pgm.listeners.WorldProblemListener;
 import tc.oc.pgm.map.MapLibraryImpl;
+import tc.oc.pgm.map.includes.MapIncludeProcessorImpl;
 import tc.oc.pgm.match.MatchManagerImpl;
 import tc.oc.pgm.match.NoopVanishManager;
 import tc.oc.pgm.namedecorations.ConfigDecorationProvider;
@@ -85,6 +87,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   private Logger gameLogger;
   private Datastore datastore;
   private MapLibrary mapLibrary;
+  private MapIncludeProcessor mapIncludeProcessor;
   private List<MapSourceFactory> mapSourceFactories;
   private MatchManager matchManager;
   private MatchTabManager matchTabManager;
@@ -134,7 +137,8 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     asyncExecutorService = new BukkitExecutorService(this, true);
 
     mapSourceFactories = new ArrayList<>();
-    mapLibrary = new MapLibraryImpl(gameLogger, mapSourceFactories);
+    mapIncludeProcessor = new MapIncludeProcessorImpl(gameLogger);
+    mapLibrary = new MapLibraryImpl(gameLogger, mapSourceFactories, mapIncludeProcessor);
 
     saveDefaultConfig(); // Writes a config file, if one does not exist.
     reloadConfig(); // Populates "this.config", if there is an error, will be null
@@ -261,6 +265,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
     mapSourceFactories.clear();
     mapSourceFactories.addAll(config.getMapSourceFactories());
+    mapIncludeProcessor.reload(config);
 
     if (mapOrder != null) {
       mapOrder.reload();
