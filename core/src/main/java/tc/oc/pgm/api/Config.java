@@ -61,6 +61,14 @@ public interface Config {
   String getMapPoolFile();
 
   /**
+   * Gets a path to the includes directory.
+   *
+   * @return A path to the includes directory, or null for none.
+   */
+  @Nullable
+  String getIncludesDirectory();
+
+  /**
    * Gets a duration to wait before starting a match.
    *
    * @return A duration, if non-positive then starts immediately.

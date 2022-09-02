@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
@@ -19,6 +20,8 @@ import tc.oc.pgm.api.map.exception.MapException;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
+import tc.oc.pgm.api.map.includes.MapInclude;
+import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
 import tc.oc.pgm.api.module.ModuleGraph;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.features.FeatureDefinitionContext;
@@ -49,6 +52,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
 
   private final Logger logger;
   private final MapSource source;
+  private final MapIncludeProcessor includes;
   private Document document;
   private MapInfo info;
   private RegionParser regions;
@@ -56,10 +60,11 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
   private KitParser kits;
   private FeatureDefinitionContext features;
 
-  public MapFactoryImpl(Logger logger, MapSource source) {
+  public MapFactoryImpl(Logger logger, MapSource source, MapIncludeProcessor includes) {
     super(Modules.MAP); // Do not copy to avoid N copies of the factories
     this.logger = ClassLogger.get(checkNotNull(logger), getClass(), checkNotNull(source).getId());
     this.source = source;
+    this.includes = includes;
   }
 
   @Override
@@ -71,15 +76,28 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
     }
   }
 
+  private void storeInclude(MapInclude include) {
+    this.source.addMapInclude(include);
+  }
+
   private void preLoad()
       throws IOException, JDOMException, InvalidXMLException, MapMissingException {
     if (document != null && !source.checkForUpdates()) {
       return; // If a document is present and there are no updates, skip loading again
     }
 
+    source.clearIncludes();
+
     try (final InputStream stream = source.getDocument()) {
       document = DOCUMENT_FACTORY.get().build(stream);
       document.setBaseURI(source.getId());
+    }
+
+    // Check for any included map sources, appending them to the document if present
+    Collection<MapInclude> mapIncludes = includes.getMapIncludes(document);
+    for (MapInclude include : mapIncludes) {
+      document.getRootElement().addContent(0, include.getContent());
+      storeInclude(include);
     }
 
     info = new MapInfoImpl(document.getRootElement());

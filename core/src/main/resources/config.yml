@@ -31,6 +31,9 @@ map:
 
   # A path to a map pools file, or empty to disable map pools.
   pools: "map-pools.yml"
+  
+  # A path to the includes folder, or empty to disable map includes.
+  includes: "includes"
 
 # Sets the duration of various countdowns.
 #

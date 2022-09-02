@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.logging.Level;
+import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
@@ -56,6 +57,7 @@ public final class PGMConfig implements Config {
   // map.*
   private final List<MapSourceFactory> mapSourceFactories;
   private final String mapPoolFile;
+  private final String includesDirectory;
 
   // countdown.*
   private final Duration startTime;
@@ -159,6 +161,11 @@ public final class PGMConfig implements Config {
         mapPoolFile == null || mapPoolFile.isEmpty()
             ? null
             : new File(dataFolder, mapPoolFile).getAbsolutePath();
+    final String includesDirectory = config.getString("map.includes");
+    this.includesDirectory =
+        includesDirectory == null || includesDirectory.isEmpty()
+            ? null
+            : new File(dataFolder, includesDirectory).getAbsolutePath();
 
     this.startTime = parseDuration(config.getString("countdown.start", "30s"));
     this.huddleTime = parseDuration(config.getString("countdown.huddle", "0s"));
@@ -464,6 +471,11 @@ public final class PGMConfig implements Config {
   @Override
   public String getMapPoolFile() {
     return mapPoolFile;
+  }
+
+  @Override
+  public @Nullable String getIncludesDirectory() {
+    return includesDirectory;
   }
 
   @Override
