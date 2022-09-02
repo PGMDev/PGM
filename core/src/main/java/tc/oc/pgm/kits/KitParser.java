@@ -274,7 +274,13 @@ public abstract class KitParser {
       }
     }
 
-    return slotItems.isEmpty() && freeItems.isEmpty() ? null : new ItemKit(slotItems, freeItems);
+    if (slotItems.isEmpty() && freeItems.isEmpty()) return null;
+
+    boolean repairTools = XMLUtils.parseBoolean(Node.fromAttr(el, "repair-tools"), true);
+    boolean deductTools = XMLUtils.parseBoolean(Node.fromAttr(el, "deduct-tools"), true);
+    boolean deductItems = XMLUtils.parseBoolean(Node.fromAttr(el, "deduct-items"), true);
+
+    return new ItemKit(slotItems, freeItems, repairTools, deductTools, deductItems);
   }
 
   public Slot parseInventorySlot(Node node) throws InvalidXMLException {
