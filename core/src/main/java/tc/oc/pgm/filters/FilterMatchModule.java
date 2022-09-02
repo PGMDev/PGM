@@ -70,7 +70,7 @@ import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickable, Listener {
 
   private final Match match;
-  private final ContextStore<?> filterContext;
+  private final ContextStore<? super Filter> filterContext;
   private final List<Class<? extends Event>> listeningFor = new LinkedList<>();
 
   private final Map<ReactorFactory<?>, ReactorFactory.Reactor> activeReactors = new HashMap<>();
@@ -84,7 +84,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    * @param filterContext the context where all {@link Filters} for the relevant match can be found.
    *     Important to find {@link ReactorFactory}s
    */
-  public FilterMatchModule(Match match, ContextStore<?> filterContext) {
+  public FilterMatchModule(Match match, ContextStore<? super Filter> filterContext) {
     this.match = match;
     this.filterContext = filterContext;
   }
@@ -110,7 +110,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
     // for dynamic listening. This could potentially result in a need to register a specific event
     // listener.
     this.filterContext // Check for any factories hidden in filter trees
-        .getAllUnchecked(Filter.class)
+        .getAll(Filter.class)
         .forEach(this::findAndCreateReactorFactories);
 
     // Then register all event listeners

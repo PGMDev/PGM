@@ -1,6 +1,7 @@
 package tc.oc.pgm.features;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.SetMultimap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,6 +34,19 @@ public class FeatureDefinitionContext extends ContextStore<FeatureDefinition> {
   /** Return the XML element associated with the given feature */
   public Element getNode(FeatureDefinition definition) {
     return definitionNodes.get(definition);
+  }
+
+  @Override
+  public String add(FeatureDefinition obj) {
+    String id = super.add(obj);
+    definitions.add(obj);
+    return id;
+  }
+
+  @Override
+  public void add(String name, FeatureDefinition obj) {
+    super.add(name, obj);
+    this.definitions.add(obj);
   }
 
   /**
@@ -150,5 +164,10 @@ public class FeatureDefinitionContext extends ContextStore<FeatureDefinition> {
   @Override
   public Collection<FeatureDefinition> getAll() {
     return this.definitions;
+  }
+
+  @Override
+  public <T extends FeatureDefinition> Iterable<T> getAll(Class<T> type) {
+    return Iterables.filter(definitions, type);
   }
 }

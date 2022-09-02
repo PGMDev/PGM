@@ -96,13 +96,11 @@ public abstract class FilterParser {
   }
 
   /**
-   * Gets the context used by this parser to store filters/filter references. Must use {@code
-   * ?}(wildcard) since {@link Filter} does not extend {@link FeatureDefinition}.
-   * (ContextStore&lt;Filter&gt; vs ContextStore&lt;FeatureDefinition&gt;)
+   * Gets the context used by this parser to store filters/filter references.
    *
    * @return the context where this parser puts its parsed filters
    */
-  public abstract ContextStore<?> getUsedContext();
+  public abstract ContextStore<? super Filter> getUsedContext();
 
   /**
    * The top-level method for parsing an individual filter element. This method should call {@link
