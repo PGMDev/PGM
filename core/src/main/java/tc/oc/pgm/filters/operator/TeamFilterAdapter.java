@@ -1,6 +1,8 @@
 package tc.oc.pgm.filters.operator;
 
+import java.util.Collection;
 import java.util.Optional;
+import org.bukkit.event.Event;
 import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.filters.matcher.TypedFilter;
@@ -39,6 +41,11 @@ public class TeamFilterAdapter extends TypedFilter.Impl<MatchQuery> {
   @Override
   public boolean isDynamic() {
     return filter.isDynamic();
+  }
+
+  @Override
+  public Collection<Class<? extends Event>> getRelevantEvents() {
+    return filter.getRelevantEvents();
   }
 
   @Override
