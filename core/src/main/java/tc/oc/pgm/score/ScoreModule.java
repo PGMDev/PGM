@@ -100,7 +100,14 @@ public class ScoreModule implements MapModule {
       for (Element scoreEl : scoreElements) {
         config.scoreLimit = XMLUtils.parseNumber(scoreEl.getChild("limit"), Integer.class, -1);
         config.mercyLimit = XMLUtils.parseNumber(scoreEl.getChild("mercy"), Integer.class, -1);
-        config.mercyLimitMin = XMLUtils.parseNumber(scoreEl.getChild("min"), Integer.class, -1);
+        // This works
+        // config.mercyLimitMin = XMLUtils.parseNumber(scoreEl.getChild("min"), Integer.class, -1);
+
+        List<Element> mercyElements = scoreEl.getChildren("mercy");
+        for (Element mercyEl : mercyElements) {
+          config.mercyLimitMin =
+              XMLUtils.parseNumber(Node.fromAttr(mercyEl, "min"), Integer.class, -1);
+        }
 
         // For backwards compatibility, default kill/death points to 1 if proto is old and <king/>
         // tag
