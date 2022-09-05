@@ -23,8 +23,8 @@ public class MapDevCommand {
     MatchPlayer filterable = target.map(match::getPlayer).orElse(sender);
 
     sender.sendMessage(text("Showing variables for " + filterable.getNameLegacy() + ":"));
-    match.getFeatureContext().getAll(Variable.class).stream()
-        .map(v -> (Variable<?>) v)
-        .forEach(v -> sender.sendMessage(text(v.getId() + ": " + v.getValue(filterable))));
+    for (Variable<?> v : match.getFeatureContext().getAll(Variable.class)) {
+      sender.sendMessage(text(v.getId() + ": " + v.getValue(filterable)));
+    }
   }
 }
