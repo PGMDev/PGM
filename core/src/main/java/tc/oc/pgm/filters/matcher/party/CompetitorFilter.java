@@ -12,23 +12,28 @@ import tc.oc.pgm.filters.matcher.TypedFilter;
  *
  * <p>Any other type of {@link Party} is denied.
  */
-public abstract class CompetitorFilter extends TypedFilter.Impl<PartyQuery> {
+public interface CompetitorFilter extends TypedFilter<PartyQuery> {
 
   /**
    * Does ANY {@link Competitor} match the filter?
    *
    * <p>The base method queries each competitor one by one.
    */
-  public boolean matchesAny(MatchQuery query) {
+  default boolean matchesAny(MatchQuery query) {
     return query.getMatch().getCompetitors().stream()
         .anyMatch(competitor -> matches(query, competitor));
   }
 
   /** Respond to the given {@link Competitor} */
-  public abstract boolean matches(MatchQuery query, Competitor competitor);
+  boolean matches(MatchQuery query, Competitor competitor);
 
   @Override
-  public final boolean matches(PartyQuery query) {
+  default boolean matches(PartyQuery query) {
     return query.getParty() instanceof Competitor && matches(query, (Competitor) query.getParty());
+  }
+
+  @Override
+  default Class<? extends PartyQuery> queryType() {
+    return PartyQuery.class;
   }
 }
