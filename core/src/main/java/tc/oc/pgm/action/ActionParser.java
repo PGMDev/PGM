@@ -9,12 +9,10 @@ import tc.oc.pgm.action.actions.ActionNode;
 import tc.oc.pgm.action.actions.ChatMessageAction;
 import tc.oc.pgm.action.actions.ScopeSwitchAction;
 import tc.oc.pgm.action.actions.SetVariableAction;
-import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.features.FeatureDefinitionContext;
-import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.parse.FilterParser;
@@ -31,15 +29,20 @@ import tc.oc.pgm.variables.VariablesModule;
 public class ActionParser {
 
   private final MapFactory factory;
+  private final FeatureDefinitionContext features;
   private final FilterParser filters;
+  private final VariablesModule variables;
   private final Map<String, Method> methodParsers;
 
   public ActionParser(MapFactory factory) {
     this.factory = factory;
+    this.features = factory.getFeatures();
     this.filters = factory.getFilters();
+    this.variables = factory.needModule(VariablesModule.class);
     this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
   }
 
+  @SuppressWarnings("unchecked")
   public <B extends Filterable<?>> Action<? super B> parse(Element el, @Nullable Class<B> bound)
       throws InvalidXMLException {
     String id = FeatureDefinitionContext.parseId(el);
@@ -62,8 +65,7 @@ public class ActionParser {
 
     // We don't need to add references, they should already be added by whoever created them.
     if (result instanceof ActionDefinition)
-      //noinspection unchecked
-      factory.getFeatures().addFeature(el, (ActionDefinition<? super B>) result);
+      features.addFeature(el, (ActionDefinition<? super B>) result);
     return result;
   }
 
@@ -82,8 +84,7 @@ public class ActionParser {
 
   public <B> Action<? super B> parseReference(Node node, String id, Class<B> bound)
       throws InvalidXMLException {
-    return factory
-        .getFeatures()
+    return features
         .addReference(new XMLActionReference<>(factory.getFeatures(), node, id, bound));
   }
 
@@ -104,18 +105,6 @@ public class ActionParser {
     } else {
       throw new InvalidXMLException("Unknown trigger type: " + el.getName(), el);
     }
-  }
-
-  // Warning: this should only be used when you're certain those features load before filters.
-  private <T extends FeatureDefinition> T resolve(Node node, Class<T> cls)
-      throws InvalidXMLException {
-    String id = node.getValueNormalize();
-    T val = this.factory.getFeatures().get(id, cls);
-    if (val == null)
-      throw new InvalidXMLException(
-          "Unknown " + SelfIdentifyingFeatureDefinition.makeTypeName(cls) + " ID '" + id + "'",
-          node);
-    return val;
   }
 
   public <T extends Filterable<?>> Trigger<T> parseTrigger(Element el) throws InvalidXMLException {
@@ -170,7 +159,8 @@ public class ActionParser {
   @MethodParser("set")
   public <T extends Filterable<?>> SetVariableAction<T> parseSetVariable(Element el, Class<T> scope)
       throws InvalidXMLException {
-    VariableDefinition<?> var = resolve(Node.fromRequiredAttr(el, "var"), VariableDefinition.class);
+    VariableDefinition<?> var =
+        features.resolve(Node.fromRequiredAttr(el, "var"), VariableDefinition.class);
     if (scope == null) scope = Filterables.parse(Node.fromRequiredAttr(el, "scope"));
 
     if (!Filterables.isAssignable(scope, var.getScope()))
@@ -183,11 +173,10 @@ public class ActionParser {
               + scope.getSimpleName(),
           el);
 
-    VariablesModule vm = this.factory.needModule(VariablesModule.class);
-
     String expression = Node.fromRequiredAttr(el, "value").getValue();
     Formula<T> formula =
-        Formula.of(expression, vm.getVariableNames(scope), vm.getContextBuilder(scope));
+        Formula.of(
+            expression, variables.getVariableNames(scope), variables.getContextBuilder(scope));
 
     return new SetVariableAction<>(scope, var, formula);
   }

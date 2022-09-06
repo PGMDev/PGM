@@ -23,8 +23,8 @@ public class VariableDefinition<T extends Filterable<?>> extends SelfIdentifying
     return def;
   }
 
+  @SuppressWarnings("unchecked")
   public Variable<T> getVariable(Match match) {
-    //noinspection unchecked
     return (Variable<T>) match.getFeatureContext().get(this.getId());
   }
 }

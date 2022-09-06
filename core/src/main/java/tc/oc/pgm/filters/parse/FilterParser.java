@@ -15,7 +15,6 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
-import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -23,7 +22,7 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.classes.ClassModule;
 import tc.oc.pgm.classes.PlayerClass;
-import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
+import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.filters.matcher.CauseFilter;
 import tc.oc.pgm.filters.matcher.StaticFilter;
@@ -77,7 +76,6 @@ import tc.oc.pgm.flag.state.Returned;
 import tc.oc.pgm.flag.state.State;
 import tc.oc.pgm.goals.GoalDefinition;
 import tc.oc.pgm.teams.TeamFactory;
-import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
@@ -93,11 +91,11 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   protected final Map<String, Method> methodParsers;
   protected final MapFactory factory;
-  protected final TeamModule teamModule;
+  protected final FeatureDefinitionContext features;
 
   public FilterParser(MapFactory factory) {
     this.factory = factory;
-    this.teamModule = factory.getModule(TeamModule.class);
+    this.features = factory.getFeatures();
 
     this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
   }
@@ -382,33 +380,11 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
     return GroundedFilter.INSTANCE;
   }
 
-  private <T extends FeatureDefinition> XMLFeatureReference<T> reference(Node node, Class<T> cls) {
-    return this.factory.getFeatures().createReference(node, cls);
-  }
-
-  // Warning: this should only be used when you're certain those features load before filters.
-  private <T extends FeatureDefinition> T resolve(Node node, Class<T> cls)
-      throws InvalidXMLException {
-    String id = node.getValueNormalize();
-    T val = this.factory.getFeatures().get(id, cls);
-    if (val == null)
-      throw new InvalidXMLException(
-          "Unknown " + SelfIdentifyingFeatureDefinition.makeTypeName(cls) + " ID '" + id + "'",
-          node);
-    return val;
-  }
-
-  private <T extends FeatureDefinition> Optional<XMLFeatureReference<T>> optionalReference(
-      Node node, Class<T> cls) {
-    return node == null
-        ? Optional.empty()
-        : Optional.of(this.factory.getFeatures().createReference(node, cls));
-  }
-
   private Filter parseExplicitTeam(Element el, CompetitorFilter filter) throws InvalidXMLException {
     final boolean any = XMLUtils.parseBoolean(el.getAttribute("any"), false);
     final Optional<XMLFeatureReference<TeamFactory>> team =
-        optionalReference(Node.fromAttr(el, "team"), TeamFactory.class);
+        Optional.ofNullable(Node.fromAttr(el, "team"))
+            .map(n -> features.createReference(n, TeamFactory.class));
 
     if (any && team.isPresent())
       throw new InvalidXMLException("Cannot combine attributes 'team' and 'any'", el);
@@ -417,7 +393,7 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   }
 
   private GoalFilter goalFilter(Element el) throws InvalidXMLException {
-    return new GoalFilter(reference(new Node(el), GoalDefinition.class));
+    return new GoalFilter(features.createReference(new Node(el), GoalDefinition.class));
   }
 
   @MethodParser("objective")
@@ -432,18 +408,15 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("captured")
   public Filter parseCaptured(Element el) throws InvalidXMLException {
-    final GoalFilter goal = goalFilter(el);
-    Optional<XMLFeatureReference<TeamFactory>> team =
-        optionalReference(Node.fromAttr(el, "team"), TeamFactory.class);
-    return team.isPresent() ? new TeamFilterAdapter(team, goal) : goal;
+    return parseExplicitTeam(el, goalFilter(el));
   }
 
   protected FlagStateFilter parseFlagState(Element el, Class<? extends State> state)
       throws InvalidXMLException {
     Node postAttr = Node.fromAttr(el, "post");
     return new FlagStateFilter(
-        reference(new Node(el), FlagDefinition.class),
-        postAttr == null ? null : reference(postAttr, PostDefinition.class),
+        features.createReference(new Node(el), FlagDefinition.class),
+        postAttr == null ? null : features.createReference(postAttr, PostDefinition.class),
         state);
   }
 
@@ -469,8 +442,7 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("carrying-flag")
   public CarryingFlagFilter parseCarryingFlag(Element el) throws InvalidXMLException {
-    return new CarryingFlagFilter(
-        this.factory.getFeatures().createReference(new Node(el), FlagDefinition.class));
+    return new CarryingFlagFilter(features.createReference(new Node(el), FlagDefinition.class));
   }
 
   @MethodParser("cause")
@@ -647,7 +619,7 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   @MethodParser("variable")
   public Filter parseVariableFilter(Element el) throws InvalidXMLException {
     VariableDefinition<?> varDef =
-        resolve(Node.fromRequiredAttr(el, "var"), VariableDefinition.class);
+        features.resolve(Node.fromRequiredAttr(el, "var"), VariableDefinition.class);
     Range<Double> range = XMLUtils.parseNumericRange(new Node(el), Double.class);
 
     if (varDef.getScope() == Party.class)

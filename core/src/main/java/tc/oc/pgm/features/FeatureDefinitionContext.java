@@ -125,6 +125,25 @@ public class FeatureDefinitionContext extends ContextStore<FeatureDefinition> {
     return this.createReference(node, null, type, def);
   }
 
+  /**
+   * Warning: this should only be used when you're certain those features load before you call this
+   *
+   * @param node The XML node containing the ID of the feature
+   * @param cls The type of feature
+   * @return The feature if available
+   * @throws InvalidXMLException If the requested feature is not available
+   */
+  public <T extends FeatureDefinition> T resolve(Node node, Class<T> cls)
+      throws InvalidXMLException {
+    String id = node.getValueNormalize();
+    T val = get(id, cls);
+    if (val == null)
+      throw new InvalidXMLException(
+          "Unknown " + SelfIdentifyingFeatureDefinition.makeTypeName(cls) + " ID '" + id + "'",
+          node);
+    return val;
+  }
+
   public <T extends FeatureDefinition> void validate(
       T definition, FeatureValidation<T> validation, Node node) throws InvalidXMLException {
     validations.add(new PendingValidation<>(definition, validation, node));
