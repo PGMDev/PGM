@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -81,6 +82,9 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
 
   public static class Factory implements MapModuleFactory<VariablesModule> {
 
+    // The limitation is due to them being used in exp4j formulas for.
+    private static final Pattern VARIABLE_ID = Pattern.compile("[A-Za-z_]\\w*");
+
     @Nullable
     @Override
     public VariablesModule parse(MapFactory factory, Logger logger, Document doc)
@@ -91,6 +95,10 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
           XMLUtils.flattenElements(doc.getRootElement(), "variables", "variable")) {
 
         String id = Node.fromRequiredAttr(variable, "id").getValue();
+        if (!VARIABLE_ID.matcher(id).matches())
+          throw new InvalidXMLException(
+              "Variable IDs must start with a letter or the underscore _ and can only include letters, digits or underscores.",
+              variable);
         Class<? extends Filterable<?>> scope =
             Filterables.parse(Node.fromRequiredAttr(variable, "scope"));
         double def = XMLUtils.parseNumber(Node.fromAttr(variable, "default"), Double.class, 0d);
