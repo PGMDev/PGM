@@ -103,8 +103,7 @@ public class CoreModule implements MapModule {
           region = parser.parseChildren(coreEl);
           parser.validate(region, BlockBoundedValidation.INSTANCE, new Node(coreEl));
         } else {
-          region =
-              parser.parseRequiredRegionProperty(coreEl, BlockBoundedValidation.INSTANCE, "region");
+          region = parser.parseRequiredProperty(coreEl, "region", BlockBoundedValidation.INSTANCE);
         }
 
         String id = coreEl.getAttributeValue("id");

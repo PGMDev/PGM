@@ -11,10 +11,10 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import tc.oc.pgm.util.PrettyPaginatedResult;
+import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 
 /** Class used to display a paginated list of monument modes */
-public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountdown> {
+public class ModesPaginatedResult extends PrettyPaginatedComponentResults<ModeChangeCountdown> {
 
   private final ObjectiveModesMatchModule modes;
   public static final TextComponent SYMBOL_INCOMPLETE =
@@ -22,14 +22,19 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
   public static final TextComponent SYMBOL_COMPLETE = text("\u2714", NamedTextColor.GREEN); // ✔
 
   public ModesPaginatedResult(ObjectiveModesMatchModule modes) {
-    // TODO translate this
-    super("Monument Modes");
+    super(null);
+    this.modes = modes;
+  }
+
+  public ModesPaginatedResult(
+      Component header, int resultsPerPage, ObjectiveModesMatchModule modes) {
+    super(header, resultsPerPage);
     this.modes = Preconditions.checkNotNull(modes);
   }
 
   @Override
   public Component format(ModeChangeCountdown countdown, int index) {
-    String materialName = countdown.getMode().getPreformattedMaterialName();
+    String name = countdown.getMode().getLegacyName();
     Duration timeFromStart = countdown.getMode().getAfter();
     Duration remainingTime = countdown.getRemaining();
     boolean isRunning = countdown.getMatch().isRunning();
@@ -37,7 +42,8 @@ public class ModesPaginatedResult extends PrettyPaginatedResult<ModeChangeCountd
     TextComponent.Builder builder = text();
 
     builder.append(text((index + 1) + ". ", NamedTextColor.GOLD));
-    builder.append(text(materialName + " - ", NamedTextColor.LIGHT_PURPLE));
+    builder.append(text(name, NamedTextColor.LIGHT_PURPLE));
+    builder.append(space());
     builder.append(clock(timeFromStart).color(NamedTextColor.AQUA));
     if (!isRunning && countdown.getMode().getFilter() != null) {
       builder.append(space()).append(SYMBOL_INCOMPLETE);

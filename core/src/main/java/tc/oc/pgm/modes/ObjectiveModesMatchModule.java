@@ -20,7 +20,6 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.countdowns.CountdownContext;
-import tc.oc.pgm.countdowns.MatchCountdown;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.filters.FilterMatchModule;
 
@@ -29,6 +28,20 @@ public class ObjectiveModesMatchModule implements MatchModule, Listener {
 
   private static final Sound SOUND =
       sound(key("mob.zombie.remedy"), Sound.Source.MASTER, 0.15f, 1.2f);
+
+  // Sort by what's the next known mode to trigger
+  // - Sort by remaining time (applicable while match is running).
+  // - Non-triggered filtered modes go last (if triggered, they'd have a remaining time)
+  // - Then sort by after time defined in monument mode
+  // - Lastly sort by name
+  private static final Comparator<ModeChangeCountdown> MODE_COMPARATOR =
+      Comparator.comparing(
+              ModeChangeCountdown::getRemaining, Comparator.nullsLast(Comparator.naturalOrder()))
+          .thenComparing(
+              ModeChangeCountdown::getMode,
+              Comparator.comparing((Mode m) -> m.getFilter() != null)
+                  .thenComparing(Mode::getAfter)
+                  .thenComparing(Mode::getLegacyName));
 
   private final Match match;
   private final List<Mode> modes;
@@ -91,10 +104,7 @@ public class ObjectiveModesMatchModule implements MatchModule, Listener {
   public List<ModeChangeCountdown> getSortedCountdowns(boolean includeAll) {
     return this.countdowns.stream()
         .filter(mcc -> includeAll || mcc.getRemaining() != null)
-        .sorted(
-            Comparator.<ModeChangeCountdown>nullsLast(
-                    Comparator.comparing(MatchCountdown::getRemaining))
-                .thenComparing(mcc -> mcc.getMode().getAfter()))
+        .sorted(MODE_COMPARATOR)
         .collect(Collectors.toList());
   }
 

@@ -2,6 +2,7 @@ package tc.oc.pgm.filters.parse;
 
 import org.jdom2.Element;
 import tc.oc.pgm.api.feature.FeatureReference;
+import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -40,6 +41,19 @@ public class FeatureFilterParser extends FilterParser {
         .getFeatures()
         .addReference(
             new XMLFilterReference(factory.getFeatures(), node, value, FilterDefinition.class));
+  }
+
+  @Override
+  public void validate(Filter filter, FeatureValidation<FilterDefinition> validation, Node node)
+      throws InvalidXMLException {
+    if (filter instanceof XMLFilterReference) {
+      factory.getFeatures().validate((XMLFilterReference) filter, validation);
+    } else if (filter instanceof FilterDefinition) {
+      factory.getFeatures().validate((FilterDefinition) filter, validation, node);
+    } else {
+      throw new IllegalStateException(
+          "Attempted validation on a filter which is neither definition nor reference.");
+    }
   }
 
   @MethodParser("filter")

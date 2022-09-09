@@ -188,14 +188,13 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
       throw new IllegalStateException("Cannot register filter listener after match has started");
     }
 
-    // Ideally this should never happen. All features that try to register a dynamic filter should
-    // have ensured that the filter can respond dynamically to the scope, at XML parse time.
-    // However, that does not occur, nothing is validating dynamic filters' scopes at all.
-    // The proper fix is to have a validation, using FeatureValidation and all features
-    // that will use a filter dynamically to validate the scope.
-    if (!filter.respondsTo(scope)) {
+    /**
+     * This should never happen. If any feature is going to register a dynamic filter, it should
+     * validate at parse time using a {@link tc.oc.pgm.filters.parse.DynamicFilterValidation}
+     */
+    if (!filter.isDynamic() || !filter.respondsTo(scope)) {
       throw new IllegalStateException(
-          "Filter " + filter + " does not respond to " + scope.getSimpleName() + " scope");
+          "Filter " + filter + " doesn't respond to " + scope.getSimpleName() + " scope.");
     }
 
     final ListenerSet listenerSet =
@@ -227,16 +226,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   }
 
   /**
-   * @param filter The filter to listen to
-   * @param listener The listener that handles the response
-   * @throws IllegalStateException if the match is running at register time
-   */
-  @Override
-  public void onChange(Filter filter, FilterListener<? super Filterable<?>> listener) {
-    onChange((Class) Filterable.class, filter, listener);
-  }
-
-  /**
    * @param scope The scope of the filter listener
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
@@ -258,16 +247,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   }
 
   /**
-   * @param filter The filter to listen to
-   * @param listener The listener that handles the response
-   * @throws IllegalStateException if the match is running at register time
-   */
-  @Override
-  public void onRise(Filter filter, Consumer<? super Filterable<?>> listener) {
-    onRise((Class) Filterable.class, filter, listener);
-  }
-
-  /**
    * @param scope The scope of the filter listener
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
@@ -286,16 +265,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
                 + " filter="
                 + filter);
     register(scope, filter, false, (filterable, response) -> listener.accept(filterable));
-  }
-
-  /**
-   * @param filter The filter to listen to
-   * @param listener The listener that handles the response
-   * @throws IllegalStateException if the match is running at register time
-   */
-  @Override
-  public void onFall(Filter filter, Consumer<? super Filterable<?>> listener) {
-    onFall((Class) Filterable.class, filter, listener);
   }
 
   /** Returns the last response a given filter gave to a given filterable */

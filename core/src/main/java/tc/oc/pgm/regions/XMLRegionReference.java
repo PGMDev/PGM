@@ -21,11 +21,6 @@ import tc.oc.pgm.util.xml.Node;
 public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> implements Region {
 
   public XMLRegionReference(
-      FeatureDefinitionContext context, Node node, Class<RegionDefinition> type) {
-    super(context, node, type);
-  }
-
-  public XMLRegionReference(
       FeatureDefinitionContext context,
       Node node,
       @Nullable String id,

@@ -17,6 +17,7 @@ import org.jdom2.Attribute;
 import org.jdom2.Element;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.classes.ClassModule;
@@ -77,12 +78,13 @@ import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.XMLParser;
 import tc.oc.pgm.util.collection.ContextStore;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public abstract class FilterParser {
+public abstract class FilterParser implements XMLParser<Filter, FilterDefinition> {
 
   protected final Map<String, Method> methodParsers;
   protected final MapFactory factory;
@@ -93,6 +95,11 @@ public abstract class FilterParser {
     this.teamModule = factory.getModule(TeamModule.class);
 
     this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
+  }
+
+  @Override
+  public String type() {
+    return "filter";
   }
 
   /**
@@ -109,36 +116,25 @@ public abstract class FilterParser {
    */
   public abstract Filter parse(Element el) throws InvalidXMLException;
 
+  @Override
+  public Filter parsePropertyElement(Element property) throws InvalidXMLException {
+    return parseChild(property);
+  }
+
   /**
    * Return the filter referenced by the given name/id, and assume it appears in the given {@link
    * Node} for error reporting purposes.
    */
   public abstract Filter parseReference(Node node, String value) throws InvalidXMLException;
 
-  public Filter parseReference(Node node) throws InvalidXMLException {
-    return parseReference(node, node.getValue());
-  }
-
   public boolean isFilter(Element el) {
     return methodParsers.containsKey(el.getName()) || factory.getRegions().isRegion(el);
   }
 
-  public List<Element> getFilterChildren(Element parent) {
-    List<Element> elements = new ArrayList<Element>();
+  public void parseFilterChildren(Element parent) throws InvalidXMLException {
     for (Element el : parent.getChildren()) {
-      if (this.isFilter(el)) {
-        elements.add(el);
-      }
+      if (isFilter(el)) this.parse(el);
     }
-    return elements;
-  }
-
-  public List<Filter> parseFilterChildren(Element parent) throws InvalidXMLException {
-    List<Filter> filters = new ArrayList<>();
-    for (Element el : getFilterChildren(parent)) {
-      filters.add(this.parse(el));
-    }
-    return filters;
   }
 
   protected Method getParserFor(Element el) {
@@ -160,16 +156,7 @@ public abstract class FilterParser {
     }
   }
 
-  public Filter parseChild(Element parent) throws InvalidXMLException {
-    if (parent.getChildren().isEmpty()) {
-      throw new InvalidXMLException("Expected a child filter", parent);
-    } else if (parent.getChildren().size() > 1) {
-      throw new InvalidXMLException("Expected only one child filter, not multiple", parent);
-    }
-    return this.parse(parent.getChildren().get(0));
-  }
-
-  public List<Filter> parseChildren(Element parent) throws InvalidXMLException {
+  protected List<Filter> parseChildren(Element parent) throws InvalidXMLException {
     List<Filter> filters = Lists.newArrayList();
     for (Element el : parent.getChildren()) {
       filters.add(this.parse(el));
@@ -179,29 +166,16 @@ public abstract class FilterParser {
 
   /** These "property" methods are the ones to use for parsing filters as part of other modules. */
   public @Nullable Filter parseFilterProperty(Element el, String name) throws InvalidXMLException {
-    return this.parseFilterProperty(el, name, null);
+    return this.parseProperty(el, name, null, null);
   }
 
   public Filter parseRequiredFilterProperty(Element el, String name) throws InvalidXMLException {
-    Filter filter = this.parseFilterProperty(el, name);
-    if (filter == null) throw new InvalidXMLException("Missing required filter '" + name + "'", el);
-    return filter;
+    return parseRequiredProperty(el, name);
   }
 
   public Filter parseFilterProperty(Element el, String name, @Nullable Filter def)
       throws InvalidXMLException {
-    Attribute attr = el.getAttribute(name);
-    Element child = XMLUtils.getUniqueChild(el, name);
-    if (attr != null) {
-      if (child != null) {
-        throw new InvalidXMLException(
-            "Filter reference conflicts with inline filter '" + name + "'", el);
-      }
-      return this.parseReference(new Node(attr));
-    } else if (child != null) {
-      return this.parseChild(child);
-    }
-    return def;
+    return parseProperty(el, name, def);
   }
 
   /**
@@ -643,10 +617,10 @@ public abstract class FilterParser {
 
   @MethodParser("players")
   public PlayerCountFilter parsePlayerCountFilter(Element el) throws InvalidXMLException {
-    Filter child =
-        el.getChildren().isEmpty()
-            ? parseFilterProperty(el, "filter", StaticFilter.ALLOW)
-            : parseChild(el);
+    Node node = Node.fromAttr(el, "filter");
+    if (node == null) node = new Node(el);
+
+    Filter child = parseProperty(node, StaticFilter.ALLOW, DynamicFilterValidation.PLAYER);
 
     return new PlayerCountFilter(
         child,

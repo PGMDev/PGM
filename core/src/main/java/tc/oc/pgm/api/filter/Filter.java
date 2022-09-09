@@ -31,7 +31,7 @@ public interface Filter extends FeatureDefinition {
    * Return true if this filter ALLOWs the given {@link Query}, false if this filter DENYes it, or
    * throw a {@link UnsupportedOperationException} if this filter cannot respond to the given query.
    *
-   * <p>{@link #assertRespondsTo(Class)} can be used to ensure that this method will not throw.
+   * <p>{@link #respondsTo(Class)} can be used to ensure that this method will not throw.
    */
   default boolean response(Query query) {
     switch (query(query)) {
@@ -56,23 +56,10 @@ public interface Filter extends FeatureDefinition {
   boolean respondsTo(Class<? extends Query> queryType);
 
   /**
-   * Throw a {@link FilterTypeException} unless this filter, and ALL dependency filters, return true
-   * from {@link #respondsTo(Class)} for the given query type.
-   *
-   * <p>If this filter has dependencies, it should call this method on them directly, so that the
-   * exception contains the specific filter that failed the test.
-   */
-  default void assertRespondsTo(Class<? extends Query> queryType) throws FilterTypeException {
-    if (!respondsTo(queryType)) {
-      throw new FilterTypeException(this, queryType);
-    }
-  }
-
-  /**
    * Does this filter support dynamic notifications?
    *
    * <p>If this returns true, then any change in the response of this filter to a query that passes
-   * {@link #assertRespondsTo(Class)} must notify {@link FilterListener}s registered through {@link
+   * {@link #respondsTo(Class)} must notify {@link FilterListener}s registered through {@link
    * tc.oc.pgm.filters.FilterMatchModule}.
    *
    * <p>This method should NOT account for the behavior of any {@link #dependencies()}, as that is

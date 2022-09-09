@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 import org.bukkit.event.Event;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
-import tc.oc.pgm.api.filter.FilterTypeException;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 
@@ -25,12 +24,6 @@ public abstract class MultiFilterFunction implements FilterDefinition {
   @Override
   public boolean respondsTo(Class<? extends Query> queryType) {
     return !filters.isEmpty() && filters.stream().allMatch(f -> f.respondsTo(queryType));
-  }
-
-  @Override
-  public void assertRespondsTo(Class<? extends Query> queryType) throws FilterTypeException {
-    if (filters.isEmpty()) throw new FilterTypeException(this, queryType);
-    for (Filter filter : filters) filter.assertRespondsTo(queryType);
   }
 
   @Override

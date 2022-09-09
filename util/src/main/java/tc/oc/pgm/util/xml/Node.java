@@ -96,20 +96,32 @@ public class Node {
   }
 
   public int getStartLine() {
+    return getStartLine(node);
+  }
+
+  private static int getStartLine(Object node) {
     if (node instanceof InheritingElement) {
       return ((InheritingElement) node).getStartLine();
     } else if (node instanceof Located) {
       return ((Located) node).getLine();
+    } else if (node instanceof Attribute) {
+      return getStartLine(((Attribute) node).getParent());
     } else {
       return 0;
     }
   }
 
   public int getEndLine() {
+    return getEndLine(node);
+  }
+
+  public static int getEndLine(Object node) {
     if (node instanceof InheritingElement) {
       return ((InheritingElement) node).getEndLine();
     } else if (node instanceof Located) {
       return ((Located) node).getLine();
+    } else if (node instanceof Attribute) {
+      return getEndLine(((Attribute) node).getParent());
     } else {
       return 0;
     }
