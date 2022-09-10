@@ -8,11 +8,11 @@ import org.bukkit.inventory.PlayerInventory;
 
 public class Payment {
 
-  private ChatColor color;
-  private Material currency;
-  private int price;
+  private final ChatColor color;
+  private final Material currency;
+  private final int price;
 
-  private ItemStack item;
+  private final @Nullable ItemStack item;
 
   public Payment(Material currency, int price, ChatColor color, @Nullable ItemStack item) {
     this.currency = currency;
@@ -33,15 +33,16 @@ public class Payment {
     return color;
   }
 
-  public ItemStack getItem() {
+  public @Nullable ItemStack getItem() {
     return item;
   }
 
   public boolean hasPayment(PlayerInventory inventory) {
-    return item != null ? inventory.contains(item, price) : inventory.contains(currency, price);
+    return price <= 0
+        || (item != null ? inventory.contains(item, price) : inventory.contains(currency, price));
   }
 
   public boolean matches(ItemStack item) {
-    return getItem() != null ? item.isSimilar(getItem(), true) : item.getType() == currency;
+    return this.item != null ? item.isSimilar(this.item, true) : item.getType() == currency;
   }
 }

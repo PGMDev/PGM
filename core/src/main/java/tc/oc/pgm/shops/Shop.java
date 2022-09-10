@@ -76,6 +76,11 @@ public class Shop extends SelfIdentifyingFeatureDefinition {
             remaining -= item.getAmount();
           }
         }
+
+        // Should never happen, canPurchase checks for payment being available in the inventory
+        if (remaining > 0) {
+          throw new IllegalStateException("Player couldn't pay for their purchase.");
+        }
       }
     }
 

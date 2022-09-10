@@ -19,9 +19,10 @@ public class ItemKit implements KitDefinition {
   protected final boolean repairTools;
   protected final boolean deductTools;
   protected final boolean deductItems;
+  protected final boolean dropOverflow;
 
   public ItemKit(Map<Slot, ItemStack> slotItems, List<ItemStack> freeItems) {
-    this(slotItems, freeItems, true, true, true);
+    this(slotItems, freeItems, true, true, true, false);
   }
 
   public ItemKit(
@@ -29,12 +30,14 @@ public class ItemKit implements KitDefinition {
       List<ItemStack> freeItems,
       boolean repairTools,
       boolean deductTools,
-      boolean deductItems) {
-    this.slotItems = ImmutableMap.copyOf(slotItems);
-    this.freeItems = ImmutableList.copyOf(freeItems);
+      boolean deductItems,
+      boolean dropOverflow) {
+    this.slotItems = slotItems == null ? ImmutableMap.of() : ImmutableMap.copyOf(slotItems);
+    this.freeItems = freeItems == null ? ImmutableList.of() : ImmutableList.copyOf(freeItems);
     this.repairTools = repairTools;
     this.deductTools = deductTools;
     this.deductItems = deductItems;
+    this.dropOverflow = dropOverflow;
   }
 
   public ImmutableMap<Slot, ItemStack> getSlotItems() {
@@ -142,6 +145,13 @@ public class ItemKit implements KitDefinition {
 
     // Add the kit's free items to displacedItems
     displacedItems.addAll(event.getFreeItems());
+  }
+
+  @Override
+  public void applyLeftover(MatchPlayer player, List<ItemStack> leftover) {
+    if (!dropOverflow || leftover.isEmpty()) return;
+    for (ItemStack item : leftover) player.getWorld().dropItemNaturally(player.getLocation(), item);
+    leftover.clear();
   }
 
   @Override

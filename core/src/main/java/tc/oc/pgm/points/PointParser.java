@@ -66,13 +66,22 @@ public class PointParser {
    */
   public List<PointProvider> parseChildren(Element el, PointProviderAttributes attributes)
       throws InvalidXMLException {
-    return parseChildren(new ArrayList<PointProvider>(), el, attributes);
+    return parseChildren(new ArrayList<>(), el, attributes);
+  }
+
+  public PointProvider parseSingle(Element el, PointProviderAttributes attributes)
+      throws InvalidXMLException {
+    List<PointProvider> points = new ArrayList<>();
+    parsePoint(points, el, attributes);
+    if (points.size() == 1) return points.get(0);
+    throw new InvalidXMLException(
+        "Expected one location, either as direct value or as a single child region", el);
   }
 
   /** Parse the given element as a {@link PointProvider} or container of PointProviders. */
   public List<PointProvider> parse(Element el, PointProviderAttributes attributes)
       throws InvalidXMLException {
-    return parsePoint(new ArrayList<PointProvider>(), el, attributes);
+    return parsePoint(new ArrayList<>(), el, attributes);
   }
 
   private List<PointProvider> parsePoint(

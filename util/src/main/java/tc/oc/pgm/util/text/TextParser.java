@@ -452,8 +452,8 @@ public final class TextParser {
     if (text.startsWith("{\"") && text.endsWith("\"}")) {
       try {
         return GsonComponentSerializer.gson().deserialize(text);
-      } catch (JsonSyntaxException e) {
-        throw invalidFormat(text, Component.class, e);
+      } catch (Throwable t) {
+        throw invalidFormat(text, Component.class, t);
       }
     }
 

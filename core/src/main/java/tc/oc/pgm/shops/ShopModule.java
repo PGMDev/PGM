@@ -1,6 +1,6 @@
 package tc.oc.pgm.shops;
 
-import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -9,13 +9,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemFlag;
@@ -26,7 +26,6 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.action.Action;
 import tc.oc.pgm.action.ActionParser;
-import tc.oc.pgm.action.actions.AbstractAction;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapTag;
@@ -37,7 +36,10 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.parse.FilterParser;
+import tc.oc.pgm.kits.ItemKit;
+import tc.oc.pgm.kits.KitNode;
 import tc.oc.pgm.kits.KitParser;
+import tc.oc.pgm.kits.OverflowWarningKit;
 import tc.oc.pgm.points.PointParser;
 import tc.oc.pgm.points.PointProvider;
 import tc.oc.pgm.points.PointProviderAttributes;
@@ -115,12 +117,7 @@ public class ShopModule implements MapModule {
         String name = XMLUtils.getNullableAttribute(shopkeeper, "name");
         Class<? extends Entity> mob =
             XMLUtils.parseEntityTypeAttribute(shopkeeper, "mob", Villager.class);
-        ImmutableList<PointProvider> location =
-            ImmutableList.copyOf(pointParser.parse(shopkeeper, new PointProviderAttributes()));
-
-        if (location.isEmpty()) {
-          throw new InvalidXMLException("shopkeeper must have a location defined", shopkeeper);
-        }
+        PointProvider location = pointParser.parseSingle(shopkeeper, new PointProviderAttributes());
 
         Shop shop = shops.get(shopId);
 
@@ -170,6 +167,10 @@ public class ShopModule implements MapModule {
       payments.add(parsePayment(icon, kits));
     }
 
+    if (payments.size() != payments.stream().map(Payment::getCurrency).distinct().count()) {
+      throw new InvalidXMLException("Payment materials must be unique within an icon", icon);
+    }
+
     ItemStack item = kits.parseItem(icon, false);
     Filter filter = filters.parseFilterProperty(icon, "filter", StaticFilter.ALLOW);
 
@@ -178,26 +179,10 @@ public class ShopModule implements MapModule {
     if (actionNode != null) {
       action = actions.parseReference(actionNode, null, MatchPlayer.class);
     } else {
-      // TODO: extract to a proper give-item action, handle full inventory situation.
       action =
-          new AbstractAction<MatchPlayer>(MatchPlayer.class) {
-            @Override
-            public void trigger(MatchPlayer player) {
-              Map<Integer, ItemStack> overflow = player.getInventory().addItem(item);
-
-              // Drop extra items at feet
-              if (!overflow.isEmpty()) {
-                // will be translatable in production
-                player.sendWarning(
-                    text(
-                        "Purchase could not fit in your inventory, so it's been dropped at your feet"));
-                World world = player.getWorld();
-                overflow
-                    .values()
-                    .forEach(stack -> world.dropItemNaturally(player.getLocation(), stack));
-              }
-            }
-          };
+          KitNode.of(
+              new ItemKit(null, Collections.singletonList(item), false, false, false, true),
+              new OverflowWarningKit(translatable("shop.purchase.overflow")));
     }
 
     return new Icon(payments, item, filter, action);

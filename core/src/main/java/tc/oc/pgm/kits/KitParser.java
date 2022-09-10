@@ -146,6 +146,7 @@ public abstract class KitParser {
     kits.add(this.parseTeamSwitchKit(el));
     kits.add(this.parseMaxHealthKit(el));
     kits.add(this.parseActionKit(el));
+    kits.add(this.parseOverflowWarning(el));
     kits.addAll(this.parseRemoveKits(el));
 
     kits.removeAll(Collections.singleton((Kit) null)); // Remove any nulls returned above
@@ -280,8 +281,9 @@ public abstract class KitParser {
     boolean repairTools = XMLUtils.parseBoolean(Node.fromAttr(el, "repair-tools"), true);
     boolean deductTools = XMLUtils.parseBoolean(Node.fromAttr(el, "deduct-tools"), true);
     boolean deductItems = XMLUtils.parseBoolean(Node.fromAttr(el, "deduct-items"), true);
+    boolean dropOverflow = XMLUtils.parseBoolean(Node.fromAttr(el, "drop-overflow"), false);
 
-    return new ItemKit(slotItems, freeItems, repairTools, deductTools, deductItems);
+    return new ItemKit(slotItems, freeItems, repairTools, deductTools, deductItems, dropOverflow);
   }
 
   public Slot parseInventorySlot(Node node) throws InvalidXMLException {
@@ -766,5 +768,12 @@ public abstract class KitParser {
     }
 
     return new ActionKit(builder.build());
+  }
+
+  public OverflowWarningKit parseOverflowWarning(Element parent) throws InvalidXMLException {
+    Node node = Node.fromChildOrAttr(parent, "overflow-warning");
+    if (node == null) return null;
+
+    return new OverflowWarningKit(XMLUtils.parseFormattedText(node));
   }
 }
