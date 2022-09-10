@@ -84,8 +84,7 @@ public class ActionParser {
 
   public <B> Action<? super B> parseReference(Node node, String id, Class<B> bound)
       throws InvalidXMLException {
-    return features
-        .addReference(new XMLActionReference<>(factory.getFeatures(), node, id, bound));
+    return features.addReference(new XMLActionReference<>(factory.getFeatures(), node, id, bound));
   }
 
   protected Method getParserFor(Element el) {
