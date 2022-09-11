@@ -15,6 +15,7 @@ public class Mode extends SelfIdentifyingFeatureDefinition {
   private final Duration after;
   private final @Nullable Filter filter;
   private final @Nullable String name;
+  private final String legacyName;
   private final Component componentName;
   private final Duration showBefore;
 
@@ -34,13 +35,17 @@ public class Mode extends SelfIdentifyingFeatureDefinition {
     this.after = after;
     this.filter = filter;
     this.name = name;
-    this.componentName =
-        text(name != null ? name : getPreformattedMaterialName(), NamedTextColor.RED);
+    this.legacyName = name != null ? name : getPreformattedMaterialName();
+    this.componentName = text(legacyName, NamedTextColor.RED);
     this.showBefore = showBefore;
   }
 
   public MaterialData getMaterialData() {
     return this.material;
+  }
+
+  public String getLegacyName() {
+    return legacyName;
   }
 
   public Component getComponentName() {

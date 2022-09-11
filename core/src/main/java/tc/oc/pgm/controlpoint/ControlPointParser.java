@@ -39,13 +39,16 @@ public abstract class ControlPointParser {
     FilterParser filterParser = factory.getFilters();
 
     Region captureRegion =
-        regionParser.parseRequiredRegionProperty(elControlPoint, "capture-region", "capture");
+        regionParser.parseProperty(
+            Node.fromRequiredChildOrAttr(elControlPoint, "capture-region", "capture"));
     Region progressDisplayRegion =
-        regionParser.parseRegionProperty(
-            elControlPoint, BlockBoundedValidation.INSTANCE, "progress-display-region", "progress");
+        regionParser.parseProperty(
+            Node.fromChildOrAttr(elControlPoint, "progress-display-region", "progress"),
+            BlockBoundedValidation.INSTANCE);
     Region ownerDisplayRegion =
-        regionParser.parseRegionProperty(
-            elControlPoint, BlockBoundedValidation.INSTANCE, "owner-display-region", "captured");
+        regionParser.parseProperty(
+            Node.fromChildOrAttr(elControlPoint, "owner-display-region", "captured"),
+            BlockBoundedValidation.INSTANCE);
 
     Filter captureFilter = filterParser.parseFilterProperty(elControlPoint, "capture-filter");
     Filter playerFilter = filterParser.parseFilterProperty(elControlPoint, "player-filter");

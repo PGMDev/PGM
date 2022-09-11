@@ -18,6 +18,7 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.FilterMatchModule;
+import tc.oc.pgm.filters.parse.DynamicFilterValidation;
 import tc.oc.pgm.itemmeta.ItemModifyModule;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.teams.TeamModule;
@@ -77,7 +78,8 @@ public class KitModule implements MapModule {
     private KitRule parseRule(MapFactory factory, Element el) throws InvalidXMLException {
       KitRule.Action action = TextParser.parseEnum(el.getName(), KitRule.Action.class);
       Kit kit = factory.getKits().parseKitProperty(el, "kit");
-      Filter filter = factory.getFilters().parseFilterProperty(el, "filter");
+      Filter filter =
+          factory.getFilters().parseProperty(el, "filter", DynamicFilterValidation.PLAYER);
 
       return new KitRule(action, kit, filter);
     }

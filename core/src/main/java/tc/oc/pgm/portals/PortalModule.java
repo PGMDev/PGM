@@ -29,6 +29,7 @@ import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.operator.InverseFilter;
+import tc.oc.pgm.filters.parse.DynamicFilterValidation;
 import tc.oc.pgm.regions.RFAContext;
 import tc.oc.pgm.regions.RFAScope;
 import tc.oc.pgm.regions.RandomPointsValidation;
@@ -91,8 +92,7 @@ public class PortalModule implements MapModule {
         }
 
         Region exit =
-            regionParser.parseRegionProperty(
-                portalEl, RandomPointsValidation.INSTANCE, "destination");
+            regionParser.parseProperty(portalEl, "destination", RandomPointsValidation.INSTANCE);
 
         if (exit != null) {
           // If there is an explicit exit region, create a transform for it and combine
@@ -107,9 +107,12 @@ public class PortalModule implements MapModule {
         }
 
         // Dynamic filters
-        Filter forward = factory.getFilters().parseFilterProperty(portalEl, "forward");
-        Filter reverse = factory.getFilters().parseFilterProperty(portalEl, "reverse");
-        Filter transit = factory.getFilters().parseFilterProperty(portalEl, "transit");
+        Filter forward =
+            factory.getFilters().parseProperty(portalEl, "forward", DynamicFilterValidation.PLAYER);
+        Filter reverse =
+            factory.getFilters().parseProperty(portalEl, "reverse", DynamicFilterValidation.PLAYER);
+        Filter transit =
+            factory.getFilters().parseProperty(portalEl, "transit", DynamicFilterValidation.PLAYER);
 
         // Check for conflicting dynamic filters
         if (transit != null && (forward != null || reverse != null)) {
