@@ -6,7 +6,6 @@ import com.google.common.collect.Range;
 import java.util.Collection;
 import org.bukkit.event.Event;
 import tc.oc.pgm.api.filter.query.MatchQuery;
-import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.event.CompetitorScoreChangeEvent;
 import tc.oc.pgm.blitz.BlitzPlayerEliminatedEvent;
@@ -15,7 +14,7 @@ import tc.oc.pgm.goals.events.GoalProximityChangeEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
 
 /** Match whether a {@link Competitor}'s score is within a range. */
-public class RankFilter extends CompetitorFilter {
+public class RankFilter implements CompetitorFilter {
 
   private final Range<Integer> positions;
 
@@ -31,11 +30,6 @@ public class RankFilter extends CompetitorFilter {
         GoalTouchEvent.class,
         GoalProximityChangeEvent.class,
         BlitzPlayerEliminatedEvent.class);
-  }
-
-  @Override
-  public Class<? extends PartyQuery> queryType() {
-    return PartyQuery.class;
   }
 
   @Override

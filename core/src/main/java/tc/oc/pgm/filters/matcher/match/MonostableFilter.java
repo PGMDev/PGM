@@ -23,7 +23,7 @@ public class MonostableFilter extends SingleFilterFunction
     implements TypedFilter<MatchQuery>, ReactorFactory<MonostableFilter.Reactor> {
 
   private final Duration duration;
-  final Class<? extends Filterable<?>> scope;
+  private final Class<? extends Filterable<?>> scope;
 
   public static Filter afterMatchStart(Duration duration) {
     return AllFilter.of(after(MatchPhaseFilter.RUNNING, duration), MatchPhaseFilter.RUNNING);

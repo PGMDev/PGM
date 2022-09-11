@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.bukkit.event.Event;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.query.MatchQuery;
-import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.goals.GoalDefinition;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
@@ -17,7 +16,7 @@ import tc.oc.pgm.goals.events.GoalCompleteEvent;
  * query. If the anyTeam flag is set, then the filter matches when any team has completed the
  * objective.
  */
-public class GoalFilter extends CompetitorFilter {
+public class GoalFilter implements CompetitorFilter {
   private final FeatureReference<? extends GoalDefinition> goal;
 
   public GoalFilter(FeatureReference<? extends GoalDefinition> goal) {
@@ -27,11 +26,6 @@ public class GoalFilter extends CompetitorFilter {
   @Override
   public Collection<Class<? extends Event>> getRelevantEvents() {
     return Collections.singleton(GoalCompleteEvent.class);
-  }
-
-  @Override
-  public Class<? extends PartyQuery> queryType() {
-    return PartyQuery.class;
   }
 
   public boolean matches(MatchQuery query, Optional<Competitor> competitor) {

@@ -5,13 +5,12 @@ import java.util.Collection;
 import java.util.Collections;
 import org.bukkit.event.Event;
 import tc.oc.pgm.api.filter.query.MatchQuery;
-import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.event.CompetitorScoreChangeEvent;
 import tc.oc.pgm.score.ScoreMatchModule;
 
 /** Match whether a {@link Competitor}'s score is within a range. */
-public class ScoreFilter extends CompetitorFilter {
+public class ScoreFilter implements CompetitorFilter {
 
   private final Range<Integer> values;
 
@@ -22,11 +21,6 @@ public class ScoreFilter extends CompetitorFilter {
   @Override
   public Collection<Class<? extends Event>> getRelevantEvents() {
     return Collections.singleton(CompetitorScoreChangeEvent.class);
-  }
-
-  @Override
-  public Class<? extends PartyQuery> queryType() {
-    return PartyQuery.class;
   }
 
   @Override

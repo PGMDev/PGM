@@ -26,21 +26,34 @@ public interface Formula<T> extends ToDoubleFunction<T> {
       throws IllegalArgumentException {
     if (expression == null) return fallback;
 
-    Expression exp = new ExpressionBuilder(expression).variables(variables).function(BOUND).build();
-
-    return new ExpFormula<>(exp);
+    return Formula.of(expression, variables, T::get);
   }
 
-  class ExpFormula<T extends Supplier<Map<String, Double>>> implements Formula<T> {
-    private final Expression expression;
+  static <T> Formula<T> of(String expression, Set<String> variables, ContextBuilder<T> context)
+      throws IllegalArgumentException {
 
-    private ExpFormula(Expression expression) {
+    Expression exp = new ExpressionBuilder(expression).variables(variables).function(BOUND).build();
+
+    return new ExpFormula<>(exp, context);
+  }
+
+  class ExpFormula<T> implements Formula<T> {
+    private final Expression expression;
+    private final ContextBuilder<T> context;
+
+    private ExpFormula(Expression expression, ContextBuilder<T> context) {
       this.expression = expression;
+      this.context = context;
     }
 
     @Override
     public double applyAsDouble(T value) {
-      return expression.setVariables(value.get()).evaluate();
+      return expression.setVariables(context.getVariables(value)).evaluate();
     }
+  }
+
+  @FunctionalInterface
+  interface ContextBuilder<T> {
+    Map<String, Double> getVariables(T t);
   }
 }

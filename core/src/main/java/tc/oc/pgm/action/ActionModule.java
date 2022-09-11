@@ -14,8 +14,9 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.variables.VariablesModule;
 
-public class ActionModule implements MapModule {
+public class ActionModule implements MapModule<ActionMatchModule> {
 
   private final ImmutableList<Trigger<?>> triggers;
 
@@ -31,11 +32,16 @@ public class ActionModule implements MapModule {
 
   @Nullable
   @Override
-  public MatchModule createMatchModule(Match match) throws ModuleLoadException {
+  public ActionMatchModule createMatchModule(Match match) throws ModuleLoadException {
     return new ActionMatchModule(match, triggers);
   }
 
   public static class Factory implements MapModuleFactory<ActionModule> {
+
+    @Override
+    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+      return ImmutableList.of(VariablesModule.class);
+    }
 
     @Nullable
     @Override
