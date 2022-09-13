@@ -1374,9 +1374,9 @@ public interface NMSHacks {
   static void freezeEntity(Entity entity) {
     net.minecraft.server.v1_8_R3.Entity nmsEntity = ((CraftEntity) entity).getHandle();
     NBTTagCompound tag = new NBTTagCompound();
-    nmsEntity.c(tag);
+    nmsEntity.c(tag); // save to tag
     tag.setBoolean("NoAI", true);
     tag.setBoolean("NoGravity", true);
-    nmsEntity.f(tag);
+    nmsEntity.f(tag); // load from tag
   }
 }

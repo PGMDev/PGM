@@ -5,7 +5,6 @@ import static tc.oc.pgm.util.bukkit.BukkitUtils.colorize;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
@@ -47,8 +46,9 @@ public class ShopKeeper {
     if (match == null) throw new IllegalArgumentException("Match can not be null!");
 
     Location loc = location.getPoint(match, null);
-    World world = match.getWorld();
-    Entity keeper = world.spawn(loc, type);
+    loc.getWorld().getChunkAt(loc); // Load chunk
+
+    Entity keeper = loc.getWorld().spawn(loc, type);
     keeper.setCustomName(getName());
     keeper.setCustomNameVisible(true);
     keeper.setMetadata(METADATA_KEY, new FixedMetadataValue(PGM.get(), shop.getId()));

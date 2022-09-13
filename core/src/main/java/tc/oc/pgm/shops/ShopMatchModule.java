@@ -19,10 +19,11 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.ObserverInteractEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.shops.menu.ShopMenu;
 
-@ListenerScope(MatchScope.RUNNING)
+@ListenerScope(MatchScope.LOADED)
 public class ShopMatchModule implements MatchModule, Listener {
 
   private final Match match;
@@ -36,7 +37,7 @@ public class ShopMatchModule implements MatchModule, Listener {
   }
 
   @Override
-  public void enable() {
+  public void load() {
     for (ShopKeeper keeper : shopKeepers) {
       keeper.spawn(match);
     }
@@ -49,16 +50,23 @@ public class ShopMatchModule implements MatchModule, Listener {
     }
   }
 
-  @EventHandler(priority = EventPriority.LOWEST)
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onClickShopKeeper(PlayerInteractEntityEvent event) {
     if (event.getRightClicked() == null) return;
-    if (match.getParticipant(event.getPlayer()) == null) return;
 
-    MatchPlayer participant = match.getParticipant(event.getPlayer());
+    MatchPlayer player = match.getPlayer(event.getPlayer());
+    if (player == null) return;
+
     Shop shop = getShopFromEntity(event.getRightClicked());
-
     if (shop != null) {
-      new ShopMenu(shop, participant);
+      new ShopMenu(shop, player);
+      event.setCancelled(true);
+    }
+  }
+
+  @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+  public void onClickShopKeeper(ObserverInteractEvent event) {
+    if (isKeeper(event.getClickedEntity())) {
       event.setCancelled(true);
     }
   }
