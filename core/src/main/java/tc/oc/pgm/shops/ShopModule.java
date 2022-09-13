@@ -36,7 +36,6 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.parse.FilterParser;
-import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.kits.ItemKit;
 import tc.oc.pgm.kits.KitNode;
 import tc.oc.pgm.kits.KitParser;
