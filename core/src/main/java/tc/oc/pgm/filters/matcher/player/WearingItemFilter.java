@@ -9,10 +9,11 @@ import org.bukkit.event.player.PlayerItemBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.kits.ApplyKitEvent;
+import tc.oc.pgm.util.inventory.ItemMatcher;
 
 public class WearingItemFilter extends ParticipantItemFilter {
-  public WearingItemFilter(ItemStack base) {
-    super(base);
+  public WearingItemFilter(ItemMatcher matcher) {
+    super(matcher);
   }
 
   @Override

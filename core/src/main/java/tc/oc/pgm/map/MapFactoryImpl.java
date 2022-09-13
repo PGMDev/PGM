@@ -120,8 +120,10 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
       throw e;
     } catch (IOException e) {
       throw new MapException(source, info, "Unable to read map document", e);
-    } catch (ModuleLoadException | InvalidXMLException e) {
+    } catch (InvalidXMLException e) {
       throw new MapException(source, info, e.getMessage(), e);
+    } catch (ModuleLoadException e) {
+      throw new MapException(source, info, e.getFullMessage(), e);
     } catch (JDOMParseException e) {
       final InvalidXMLException cause = InvalidXMLException.fromJDOM(e, source.getId());
       throw new MapException(source, info, cause.getMessage(), cause);

@@ -458,17 +458,17 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("carrying")
   public CarryingItemFilter parseHasItem(Element el) throws InvalidXMLException {
-    return new CarryingItemFilter(factory.getKits().parseRequiredItem(el));
+    return new CarryingItemFilter(factory.getKits().parseItemMatcher(el));
   }
 
   @MethodParser("holding")
   public HoldingItemFilter parseHolding(Element el) throws InvalidXMLException {
-    return new HoldingItemFilter(factory.getKits().parseRequiredItem(el));
+    return new HoldingItemFilter(factory.getKits().parseItemMatcher(el));
   }
 
   @MethodParser("wearing")
   public WearingItemFilter parseWearingItem(Element el) throws InvalidXMLException {
-    return new WearingItemFilter(factory.getKits().parseRequiredItem(el));
+    return new WearingItemFilter(factory.getKits().parseItemMatcher(el));
   }
 
   @MethodParser("effect")
