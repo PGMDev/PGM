@@ -34,7 +34,7 @@ public interface XMLParser<F, FD extends FeatureDefinition> {
     return parseReference(node, node.getValue());
   }
 
-  F parseReference(Node node, String value) throws InvalidXMLException;
+  F parseReference(Node node, String id) throws InvalidXMLException;
 
   void validate(F f, FeatureValidation<FD> validation, Node node) throws InvalidXMLException;
 

@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.action.ActionModule;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
@@ -54,7 +55,7 @@ public class KitModule implements MapModule {
 
     @Override
     public Collection<Class<? extends MapModule>> getWeakDependencies() {
-      return ImmutableList.of(TeamModule.class);
+      return ImmutableList.of(ActionModule.class, TeamModule.class);
     }
 
     @Override

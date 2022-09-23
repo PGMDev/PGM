@@ -39,7 +39,7 @@ public abstract class RegionParser implements XMLParser<Region, RegionDefinition
    */
   public abstract Region parse(Element el) throws InvalidXMLException;
 
-  public abstract Region parseReference(Node node, String value) throws InvalidXMLException;
+  public abstract Region parseReference(Node node, String id) throws InvalidXMLException;
 
   public Region parseReference(Attribute attribute) throws InvalidXMLException {
     return parseReference(new Node(attribute));

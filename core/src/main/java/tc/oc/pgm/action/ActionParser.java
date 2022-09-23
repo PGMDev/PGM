@@ -10,10 +10,12 @@ import tc.oc.pgm.action.actions.ChatMessageAction;
 import tc.oc.pgm.action.actions.KillEntitiesAction;
 import tc.oc.pgm.action.actions.ScopeSwitchAction;
 import tc.oc.pgm.action.actions.SetVariableAction;
+import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.features.FeatureDefinitionContext;
+import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.parse.FilterParser;
@@ -48,23 +50,13 @@ public class ActionParser {
       throws InvalidXMLException {
     String id = FeatureDefinitionContext.parseId(el);
 
+    Node node = new Node(el);
     if (id != null && maybeReference(el)) {
-      return parseReference(new Node(el), id, bound);
+      return parseReference(node, id, bound);
     }
 
     Action<? super B> result = parseDynamic(el, bound);
-
-    Class<?> childBound = result.getScope();
-    if (bound != null && !childBound.isAssignableFrom(bound)) {
-      throw new InvalidXMLException(
-          "Wrong trigger target, expected "
-              + bound.getSimpleName()
-              + " rather than "
-              + childBound.getSimpleName(),
-          new Node(el));
-    }
-
-    // We don't need to add references, they should already be added by whoever created them.
+    if (bound != null) validate(result, ActionScopeValidation.of(bound), node);
     if (result instanceof ActionDefinition)
       features.addFeature(el, (ActionDefinition<? super B>) result);
     return result;
@@ -75,7 +67,7 @@ public class ActionParser {
   }
 
   private boolean maybeReference(Element el) {
-    return "trigger".equals(el.getName()) && el.getChildren().isEmpty();
+    return "action".equals(el.getName()) && el.getChildren().isEmpty();
   }
 
   public <B> Action<? super B> parseReference(Node node, Class<B> bound)
@@ -85,7 +77,23 @@ public class ActionParser {
 
   public <B> Action<? super B> parseReference(Node node, String id, Class<B> bound)
       throws InvalidXMLException {
-    return features.addReference(new XMLActionReference<>(factory.getFeatures(), node, id, bound));
+    Action<? super B> action = features.addReference(new XMLActionReference<>(features, node, id));
+    validate(action, ActionScopeValidation.of(bound), node);
+    return action;
+  }
+
+  @SuppressWarnings("rawtypes, unchecked")
+  public void validate(
+      Action<?> action, FeatureValidation<ActionDefinition<?>> validation, Node node)
+      throws InvalidXMLException {
+    if (action instanceof XMLFeatureReference) {
+      factory.getFeatures().validate((XMLFeatureReference) action, validation);
+    } else if (action instanceof ActionDefinition) {
+      factory.getFeatures().validate((ActionDefinition) action, validation, node);
+    } else {
+      throw new IllegalStateException(
+          "Attempted validation on an action which is neither definition nor reference.");
+    }
   }
 
   protected Method getParserFor(Element el) {
@@ -93,17 +101,17 @@ public class ActionParser {
   }
 
   @SuppressWarnings("unchecked")
-  private <T, B extends Filterable<?>> Action<T> parseDynamic(Element el, Class<B> bound)
+  private <T, B extends Filterable<?>> Action<T> parseDynamic(Element el, Class<B> scope)
       throws InvalidXMLException {
     Method parser = getParserFor(el);
     if (parser != null) {
       try {
-        return (Action<T>) parser.invoke(this, el, bound);
+        return (Action<T>) parser.invoke(this, el, scope);
       } catch (Exception e) {
         throw InvalidXMLException.coerce(e, new Node(el));
       }
     } else {
-      throw new InvalidXMLException("Unknown trigger type: " + el.getName(), el);
+      throw new InvalidXMLException("Unknown action type: " + el.getName(), el);
     }
   }
 
@@ -112,31 +120,48 @@ public class ActionParser {
     return new Trigger<>(
         cls,
         filters.parseReference(Node.fromRequiredAttr(el, "filter")),
-        parseReference(Node.fromRequiredAttr(el, "trigger"), cls));
+        parseReference(Node.fromRequiredAttr(el, "trigger", "action"), cls));
+  }
+
+  private <B extends Filterable<?>> Class<B> parseScope(Element el, Class<B> scope)
+      throws InvalidXMLException {
+    return parseScope(el, scope, "scope");
+  }
+
+  private <B extends Filterable<?>> Class<B> parseScope(Element el, Class<B> scope, String attr)
+      throws InvalidXMLException {
+    if (scope == null) return Filterables.parse(Node.fromRequiredAttr(el, attr));
+
+    Node node = Node.fromAttr(el, attr);
+    if (node != null && Filterables.parse(node) != scope)
+      throw new InvalidXMLException(
+          "Wrong scope defined for action, scope must be " + scope.getSimpleName(), el);
+    return scope;
   }
 
   @MethodParser("action")
-  public <B extends Filterable<?>> ActionDefinition<? super B> parseDefinition(
-      Element el, Class<B> bound) throws InvalidXMLException {
-    if (bound == null) bound = Filterables.parse(Node.fromRequiredAttr(el, "scope"));
+  public <B extends Filterable<?>> ActionNode<? super B> parseAction(Element el, Class<B> scope)
+      throws InvalidXMLException {
+    scope = parseScope(el, scope);
 
     ImmutableList.Builder<Action<? super B>> builder = ImmutableList.builder();
     for (Element child : el.getChildren()) {
-      builder.add(parse(child, bound));
+      builder.add(parse(child, scope));
     }
 
     Filter filter = filters.parseFilterProperty(el, "filter", StaticFilter.ALLOW);
+    Filter untriggerFilter = filters.parseFilterProperty(el, "untrigger-filter", StaticFilter.DENY);
 
-    return new ActionNode<>(builder.build(), filter, bound);
+    return new ActionNode<>(builder.build(), filter, untriggerFilter, scope);
   }
 
   @MethodParser("switch-scope")
   public <O extends Filterable<?>, I extends Filterable<?>> Action<? super O> parseSwitchScope(
       Element el, Class<O> outer) throws InvalidXMLException {
-    if (outer == null) outer = Filterables.parse(Node.fromRequiredAttr(el, "outer"));
-    Class<I> inner = Filterables.parse(Node.fromRequiredAttr(el, "inner"));
+    outer = parseScope(el, outer, "outer");
+    Class<I> inner = parseScope(el, null, "inner");
 
-    ActionDefinition<? super I> child = parseDefinition(el, inner);
+    ActionDefinition<? super I> child = parseAction(el, inner);
 
     Action<? super O> result = ScopeSwitchAction.of(child, outer, inner);
     if (result == null) {
@@ -161,7 +186,7 @@ public class ActionParser {
       throws InvalidXMLException {
     VariableDefinition<?> var =
         features.resolve(Node.fromRequiredAttr(el, "var"), VariableDefinition.class);
-    if (scope == null) scope = Filterables.parse(Node.fromRequiredAttr(el, "scope"));
+    scope = parseScope(el, scope);
 
     if (!Filterables.isAssignable(scope, var.getScope()))
       throw new InvalidXMLException(
