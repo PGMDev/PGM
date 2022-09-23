@@ -134,6 +134,9 @@ public class PGMListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW)
   public void addPlayerOnJoin(final PlayerJoinEvent event) {
+    // Player already left. Because quit already happened, we must ignore the join.
+    if (!event.getPlayer().isOnline()) return;
+
     Match match = this.mm.getMatch(event.getPlayer().getWorld());
     if (match == null) {
       event
