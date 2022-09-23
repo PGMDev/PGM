@@ -36,11 +36,8 @@ public class FeatureFilterParser extends FilterParser {
   }
 
   @Override
-  public Filter parseReference(Node node, String value) throws InvalidXMLException {
-    return factory
-        .getFeatures()
-        .addReference(
-            new XMLFilterReference(factory.getFeatures(), node, value, FilterDefinition.class));
+  public Filter parseReference(Node node, String id) throws InvalidXMLException {
+    return features.addReference(new XMLFilterReference(factory.getFeatures(), node, id));
   }
 
   @Override

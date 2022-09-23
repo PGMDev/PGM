@@ -90,10 +90,10 @@ public class LegacyFilterParser extends FilterParser {
   }
 
   @Override
-  public Filter parseReference(Node node, String value) throws InvalidXMLException {
-    Filter filter = this.filterContext.get(value);
+  public Filter parseReference(Node node, String id) throws InvalidXMLException {
+    Filter filter = this.filterContext.get(id);
     if (filter == null) {
-      throw new InvalidXMLException("No filter named '" + value + "'", node);
+      throw new InvalidXMLException("No filter named '" + id + "'", node);
     }
     return filter;
   }

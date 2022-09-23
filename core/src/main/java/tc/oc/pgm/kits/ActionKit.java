@@ -20,4 +20,11 @@ public class ActionKit extends AbstractKit {
       t.trigger(player);
     }
   }
+
+  @Override
+  public void remove(MatchPlayer player) {
+    for (Action<? super MatchPlayer> t : actions) {
+      t.untrigger(player);
+    }
+  }
 }

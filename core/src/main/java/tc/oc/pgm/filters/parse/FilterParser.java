@@ -128,7 +128,7 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
    * Return the filter referenced by the given name/id, and assume it appears in the given {@link
    * Node} for error reporting purposes.
    */
-  public abstract Filter parseReference(Node node, String value) throws InvalidXMLException;
+  public abstract Filter parseReference(Node node, String id) throws InvalidXMLException;
 
   public boolean isFilter(Element el) {
     return methodParsers.containsKey(el.getName()) || factory.getRegions().isRegion(el);

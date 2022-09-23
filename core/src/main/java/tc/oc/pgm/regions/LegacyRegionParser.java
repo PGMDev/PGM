@@ -38,10 +38,10 @@ public class LegacyRegionParser extends RegionParser {
   }
 
   @Override
-  public Region parseReference(Node node, String name) throws InvalidXMLException {
-    Region region = this.regionContext.get(name);
+  public Region parseReference(Node node, String id) throws InvalidXMLException {
+    Region region = this.regionContext.get(id);
     if (region == null) {
-      throw new InvalidXMLException("Unknown region '" + name + "'", node);
+      throw new InvalidXMLException("Unknown region '" + id + "'", node);
     } else {
       return region;
     }

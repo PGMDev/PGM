@@ -15,17 +15,8 @@ import tc.oc.pgm.util.xml.Node;
 /** A {@link Filter} that delegates all methods to an XML reference */
 public class XMLFilterReference extends XMLFeatureReference<FilterDefinition> implements Filter {
 
-  public XMLFilterReference(
-      FeatureDefinitionContext context, Node node, Class<FilterDefinition> type) {
-    this(context, node, null, type);
-  }
-
-  public XMLFilterReference(
-      FeatureDefinitionContext context,
-      Node node,
-      @Nullable String id,
-      Class<FilterDefinition> type) {
-    super(context, node, id, type);
+  public XMLFilterReference(FeatureDefinitionContext context, Node node, @Nullable String id) {
+    super(context, node, id, FilterDefinition.class);
   }
 
   @Override
