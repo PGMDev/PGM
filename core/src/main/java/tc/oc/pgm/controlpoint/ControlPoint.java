@@ -44,7 +44,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
   protected static final Sound BAD_SOUND =
       sound(key("mob.blaze.death"), Sound.Source.MASTER, 0.4f, 0.8f);
 
-  protected final ControlPointPlayerTracker playerTracker;
+  protected final RegionPlayerTracker playerTracker;
   protected final ControlPointBlockDisplay blockDisplay;
 
   protected final Vector centerPoint;
@@ -77,7 +77,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
 
     this.centerPoint = this.getCaptureRegion().getBounds().getCenterPoint();
 
-    this.playerTracker = new ControlPointPlayerTracker(match, this.getCaptureRegion());
+    this.playerTracker = new RegionPlayerTracker(match, this.getCaptureRegion());
 
     this.blockDisplay = new ControlPointBlockDisplay(match, this);
   }
@@ -98,7 +98,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
     return blockDisplay;
   }
 
-  public ControlPointPlayerTracker getPlayerTracker() {
+  public RegionPlayerTracker getPlayerTracker() {
     return playerTracker;
   }
 
@@ -292,7 +292,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
     // team
     int defenderCount = 0;
 
-    for (MatchPlayer player : this.playerTracker.getPlayersOnPoint()) {
+    for (MatchPlayer player : this.playerTracker.getPlayers()) {
       Competitor team = player.getCompetitor();
       if (this.canDominate(player)) {
         defenderCount++;
@@ -405,7 +405,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
    * <p>If there is no neutral state, then the point is always either being captured by a specific
    * team, or not being captured at all.
    */
-  private void dominate(Competitor dominantTeam, Duration dominantTime, boolean contested) {
+  protected void dominate(Competitor dominantTeam, Duration dominantTime, boolean contested) {
     if (dominantTeam != null && contested) {
       throw new IllegalArgumentException(
           "Control point cannot be contested if there is a dominant team.");

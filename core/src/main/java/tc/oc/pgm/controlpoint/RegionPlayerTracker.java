@@ -16,18 +16,26 @@ import tc.oc.pgm.util.MatchPlayers;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
 /** Tracks which players are on a control point and answers some queries about them */
-public class ControlPointPlayerTracker implements Listener {
-  protected final Match match;
-  protected final Region captureRegion;
-  protected final Set<MatchPlayer> playersOnPoint = Sets.newHashSet();
+public class RegionPlayerTracker implements Listener {
+  private final Match match;
+  private final Set<MatchPlayer> playersOnPoint = Sets.newHashSet();
 
-  public ControlPointPlayerTracker(Match match, Region captureRegion) {
+  private Region region;
+
+  public RegionPlayerTracker(Match match, Region region) {
     this.match = match;
-    this.captureRegion = captureRegion;
+    this.region = region;
   }
 
-  public Set<MatchPlayer> getPlayersOnPoint() {
+  public Set<MatchPlayer> getPlayers() {
     return this.playersOnPoint;
+  }
+
+  public void setRegion(Region region) {
+    this.region = region;
+    for (MatchPlayer player : match.getPlayers()) {
+      handlePlayerMove(player.getBukkit(), player.getLocation().toVector());
+    }
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -40,11 +48,11 @@ public class ControlPointPlayerTracker implements Listener {
     this.handlePlayerMove(event.getPlayer(), event.getTo().toVector());
   }
 
-  private void handlePlayerMove(Player bukkit, Vector to) {
+  public void handlePlayerMove(Player bukkit, Vector to) {
     MatchPlayer player = this.match.getPlayer(bukkit);
     if (!MatchPlayers.canInteract(player)) return;
 
-    if (!player.getBukkit().isDead() && this.captureRegion.contains(to.toBlockVector())) {
+    if (!player.getBukkit().isDead() && this.region.contains(to.toBlockVector())) {
       this.playersOnPoint.add(player);
     } else {
       this.playersOnPoint.remove(player);

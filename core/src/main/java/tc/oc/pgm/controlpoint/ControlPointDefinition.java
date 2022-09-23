@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import org.bukkit.util.BlockVector;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.goals.GoalDefinition;
 import tc.oc.pgm.goals.ShowOptions;
@@ -137,6 +138,10 @@ public class ControlPointDefinition extends GoalDefinition {
     this.pointsOwner = pointsOwner;
     this.pointsGrowth = pointsGrowth;
     this.showProgress = progress;
+  }
+
+  public ControlPoint build(Match match) {
+    return new ControlPoint(match, this);
   }
 
   @Override

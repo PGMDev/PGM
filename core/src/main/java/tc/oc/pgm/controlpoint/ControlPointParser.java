@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.bukkit.Material;
+import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
@@ -14,10 +15,12 @@ import tc.oc.pgm.filters.matcher.block.BlockFilter;
 import tc.oc.pgm.filters.operator.AnyFilter;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.goals.ShowOptions;
+import tc.oc.pgm.payload.PayloadDefinition;
 import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamModule;
+import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -31,8 +34,14 @@ public abstract class ControlPointParser {
           new BlockFilter(Material.STAINED_GLASS),
           new BlockFilter(Material.STAINED_GLASS_PANE));
 
+  public enum Type {
+    KING,
+    POINT,
+    PAYLOAD
+  };
+
   public static ControlPointDefinition parseControlPoint(
-      MapFactory factory, Element elControlPoint, boolean koth, AtomicInteger serialNumber)
+      MapFactory factory, Element elControlPoint, Type type, AtomicInteger serialNumber)
       throws InvalidXMLException {
     String id = elControlPoint.getAttributeValue("id");
     RegionParser regionParser = factory.getRegions();
@@ -87,6 +96,7 @@ public abstract class ControlPointParser {
     final Node attrRecovery = Node.fromAttr(elControlPoint, "recovery", "recovery-rate");
     final Node attrOwnedDecay = Node.fromAttr(elControlPoint, "owned-decay", "owned-decay-rate");
     final Node attrContested = Node.fromAttr(elControlPoint, "contested", "contested-rate");
+    boolean koth = type == Type.KING;
     if (attrIncremental == null) {
       recoveryRate =
           XMLUtils.parseNumber(attrRecovery, Double.class, koth ? 1D : Double.POSITIVE_INFINITY);
@@ -135,6 +145,41 @@ public abstract class ControlPointParser {
             "capture rule",
             ControlPointDefinition.CaptureCondition.EXCLUSIVE);
 
+    if (type == Type.PAYLOAD) {
+      BlockVector location =
+          BlockVectors.center(
+              XMLUtils.parseVector(Node.fromRequiredAttr(elControlPoint, "location")));
+      double radius =
+          XMLUtils.parseNumber(Node.fromRequiredAttr(elControlPoint, "radius"), Double.class);
+      return new PayloadDefinition(
+          id,
+          name,
+          required,
+          options,
+          captureRegion,
+          captureFilter,
+          playerFilter,
+          progressDisplayRegion,
+          ownerDisplayRegion,
+          visualMaterials,
+          capturableDisplayBeacon == null ? null : capturableDisplayBeacon.toBlockVector(),
+          timeToCapture,
+          decayRate,
+          recoveryRate,
+          ownedDecayRate,
+          contestedRate,
+          timeMultiplier,
+          initialOwner,
+          captureCondition,
+          neutralState,
+          permanent,
+          pointsPerSecond,
+          pointsOwner,
+          pointsGrowth,
+          showProgress,
+          location,
+          radius);
+    }
     return new ControlPointDefinition(
         id,
         name,

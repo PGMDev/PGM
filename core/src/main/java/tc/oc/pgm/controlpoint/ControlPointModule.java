@@ -3,7 +3,6 @@ package tc.oc.pgm.controlpoint;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
@@ -43,10 +42,10 @@ public class ControlPointModule implements MapModule<ControlPointMatchModule> {
 
   @Override
   public ControlPointMatchModule createMatchModule(Match match) {
-    List<ControlPoint> controlPoints = new LinkedList<>();
+    List<ControlPoint> controlPoints = new ArrayList<>(definitions.size());
 
     for (ControlPointDefinition definition : this.definitions) {
-      ControlPoint controlPoint = new ControlPoint(match, definition);
+      ControlPoint controlPoint = definition.build(match);
       match.getFeatureContext().add(controlPoint);
       match.needModule(GoalMatchModule.class).addGoal(controlPoint);
       controlPoints.add(controlPoint);
@@ -81,7 +80,8 @@ public class ControlPointModule implements MapModule<ControlPointMatchModule> {
       for (Element elControlPoint :
           XMLUtils.flattenElements(doc.getRootElement(), "control-points", "control-point")) {
         ControlPointDefinition definition =
-            ControlPointParser.parseControlPoint(factory, elControlPoint, false, serialNumber);
+            ControlPointParser.parseControlPoint(
+                factory, elControlPoint, ControlPointParser.Type.POINT, serialNumber);
         factory.getFeatures().addFeature(elControlPoint, definition);
         definitions.add(definition);
       }
@@ -90,10 +90,20 @@ public class ControlPointModule implements MapModule<ControlPointMatchModule> {
         for (Element hillEl : XMLUtils.flattenElements(kingEl, "hills", "hill")) {
           koth = true;
           ControlPointDefinition definition =
-              ControlPointParser.parseControlPoint(factory, hillEl, true, serialNumber);
+              ControlPointParser.parseControlPoint(
+                  factory, hillEl, ControlPointParser.Type.KING, serialNumber);
           factory.getFeatures().addFeature(kingEl, definition);
           definitions.add(definition);
         }
+      }
+
+      for (Element payloadEl :
+          XMLUtils.flattenElements(doc.getRootElement(), "payloads", "payload")) {
+        ControlPointDefinition definition =
+            ControlPointParser.parseControlPoint(
+                factory, payloadEl, ControlPointParser.Type.PAYLOAD, serialNumber);
+        factory.getFeatures().addFeature(payloadEl, definition);
+        definitions.add(definition);
       }
 
       if (!definitions.isEmpty()) {
