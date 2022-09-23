@@ -21,6 +21,7 @@ import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.attribute.AttributeModifier;
@@ -384,6 +385,12 @@ public final class XMLUtils {
   private static final Pattern RANGE_RE =
       Pattern.compile("\\s*(\\(|\\[)\\s*([^,]+)\\s*,\\s*([^\\)\\]]+)\\s*(\\)|\\])\\s*");
 
+  public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
+      @Nullable Node node, Class<T> type, @Nullable Range<T> fallback) throws InvalidXMLException {
+    if (node == null) return fallback;
+    return parseNumericRange(node, type);
+  }
+
   /**
    * Parse a range in the standard mathematical format e.g.
    *
@@ -394,7 +401,7 @@ public final class XMLUtils {
    * <p>Also supports singleton ranges derived from providing a number with no delimiter
    */
   public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
-      Node node, Class<T> type) throws InvalidXMLException {
+      @NotNull Node node, Class<T> type) throws InvalidXMLException {
     Matcher matcher = RANGE_RE.matcher(node.getValue());
     if (!matcher.matches()) {
       T value = parseNumber(node, node.getValue(), type, true);

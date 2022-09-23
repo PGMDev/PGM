@@ -17,6 +17,10 @@ public class ModuleLoadException extends RuntimeException {
     return key;
   }
 
+  public String getFullMessage() {
+    return getMessage() + (key != null ? " @ " + key.getSimpleName() : "");
+  }
+
   public ModuleLoadException(Class<? extends Module> key, String message) {
     this(key, message, null);
   }

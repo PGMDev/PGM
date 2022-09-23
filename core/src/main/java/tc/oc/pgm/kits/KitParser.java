@@ -51,6 +51,7 @@ import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -396,12 +397,31 @@ public abstract class KitParser {
     return itemStack;
   }
 
-  public ItemStack parseRequiredItem(Element parent) throws InvalidXMLException {
+  public ItemMatcher parseItemMatcher(Element parent) throws InvalidXMLException {
     ItemStack stack = parseItem(parent.getChild("item"), false);
-    if (stack == null) {
-      throw new InvalidXMLException("Item expected", parent);
+    if (stack == null) throw new InvalidXMLException("Item expected", parent);
+
+    Range<Integer> amount =
+        XMLUtils.parseNumericRange(Node.fromAttr(parent, "amount"), Integer.class, null);
+    if (amount == null) amount = Range.atLeast(stack.getAmount());
+    else if (stack.getAmount() != 1)
+      throw new InvalidXMLException("Cannot combine amount range with an item amount", parent);
+
+    boolean ignoreDurability =
+        XMLUtils.parseBoolean(Node.fromAttr(parent, "ignore-durability"), true);
+    boolean ignoreMetadata = XMLUtils.parseBoolean(Node.fromAttr(parent, "ignore-metadata"), false);
+    boolean ignoreName =
+        XMLUtils.parseBoolean(Node.fromAttr(parent, "ignore-name"), ignoreMetadata);
+    boolean ignoreEnchantments =
+        XMLUtils.parseBoolean(Node.fromAttr(parent, "ignore-enchantments"), ignoreMetadata);
+
+    if (ignoreMetadata && (!ignoreName || !ignoreEnchantments)) {
+      throw new InvalidXMLException(
+          "Cannot ignore metadata but respect name or enchantments", parent);
     }
-    return stack;
+
+    return new ItemMatcher(
+        stack, amount, ignoreDurability, ignoreMetadata, ignoreName, ignoreEnchantments);
   }
 
   public ItemStack parseItem(Element el, boolean allowAir) throws InvalidXMLException {
