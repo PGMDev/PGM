@@ -420,4 +420,9 @@ public interface Config {
    * @return A map of experimental settings.
    */
   Map<String, Object> getExperiments();
+
+  default boolean getExperimentAsBool(String key, boolean def) {
+    Object exp = getExperiments().getOrDefault(key, def);
+    return exp instanceof Boolean ? (Boolean) exp : exp.toString().equals("true");
+  }
 }
