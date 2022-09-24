@@ -1,6 +1,5 @@
 package tc.oc.pgm.scoreboard;
 
-import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
@@ -68,7 +67,9 @@ import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.events.TeamRespawnsChangeEvent;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.concurrent.RateLimiter;
 import tc.oc.pgm.util.event.player.PlayerLocaleChangeEvent;
+import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;
 import tc.oc.pgm.wool.MonumentWool;
@@ -97,6 +98,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
   protected final Map<Goal, BlinkTask> blinkingGoals = new HashMap<>();
 
   protected @Nullable Future<?> renderTask;
+  private final RateLimiter rateLimit = new RateLimiter(50, 1000, 40, 1000);
 
   private final Match match;
   private final Component title;
@@ -254,6 +256,8 @@ public class SidebarMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void matchEnd(MatchFinishEvent event) {
     renderSidebarDebounce();
+    // After match end, timeout rate-limit indefinitely
+    rateLimit.setTimeout(Long.MAX_VALUE);
   }
 
   private Component renderTitle(final Config config, final MapInfo map) {
@@ -361,14 +365,18 @@ public class SidebarMatchModule implements MatchModule, Listener {
   private void renderSidebarDebounce() {
     // Debounced render
     if (this.renderTask == null || renderTask.isDone()) {
+      Runnable render =
+          () -> {
+            rateLimit.beforeTask();
+            SidebarMatchModule.this.renderTask = null;
+            SidebarMatchModule.this.renderSidebar();
+            rateLimit.afterTask();
+          };
+
       this.renderTask =
           match
               .getExecutor(MatchScope.LOADED)
-              .submit(
-                  () -> {
-                    this.renderTask = null;
-                    this.renderSidebar();
-                  });
+              .schedule(render, rateLimit.getDelay(), TimeUnit.MILLISECONDS);
     }
   }
 
@@ -411,7 +419,10 @@ public class SidebarMatchModule implements MatchModule, Listener {
             text = renderBlitz(competitor);
           }
           if (text.length() != 0) text += " ";
-          rows.add(text + TextTranslations.translateLegacy(competitor.getName(), viewer));
+          rows.add(
+              text
+                  + TextTranslations.translateLegacy(
+                      competitor.getName(NameStyle.SIMPLE_COLOR), viewer));
 
           // No point rendering more scores, usually seen in FFA
           if (rows.size() >= MAX_ROWS) break;
