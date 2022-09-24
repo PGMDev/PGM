@@ -75,7 +75,8 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
           match.needModule(TeamMatchModule.class).getTeam(this.definition.getInitialOwner());
     }
 
-    this.centerPoint = this.getCaptureRegion().getBounds().getCenterPoint();
+    Region capture = this.getCaptureRegion();
+    this.centerPoint = capture == null ? null : capture.getBounds().getCenterPoint();
 
     this.playerTracker = new RegionPlayerTracker(match, this.getCaptureRegion());
 

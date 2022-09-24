@@ -14,6 +14,7 @@ public class PayloadDefinition extends ControlPointDefinition {
 
   private final BlockVector location;
   private final double radius;
+  private final Filter displayFilter;
 
   public PayloadDefinition(
       @Nullable String id,
@@ -42,7 +43,8 @@ public class PayloadDefinition extends ControlPointDefinition {
       float pointsGrowth,
       boolean progress,
       BlockVector location,
-      double radius) {
+      double radius,
+      Filter displayFilter) {
     super(
         id,
         name,
@@ -71,6 +73,7 @@ public class PayloadDefinition extends ControlPointDefinition {
         progress);
     this.location = location;
     this.radius = radius;
+    this.displayFilter = displayFilter;
   }
 
   public BlockVector getLocation() {
@@ -79,6 +82,10 @@ public class PayloadDefinition extends ControlPointDefinition {
 
   public double getRadius() {
     return radius;
+  }
+
+  public Filter getDisplayFilter() {
+    return displayFilter;
   }
 
   public Payload build(Match match) {

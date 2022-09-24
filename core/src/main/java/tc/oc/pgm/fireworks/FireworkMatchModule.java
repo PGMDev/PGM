@@ -16,6 +16,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.event.EventHandler;
@@ -219,12 +220,9 @@ public class FireworkMatchModule implements MatchModule, Listener {
       double angle = 2 * Math.PI / count * i;
       double dx = radius * Math.cos(angle);
       double dz = radius * Math.sin(angle);
-      Location baseLocation = center.clone().add(dx, 0, dz);
+      Location loc = getOpenSpaceAbove(center.clone().add(dx, 0, dz));
 
-      Block block = baseLocation.getBlock();
-      if (block == null || !block.getType().isOccluding()) {
-        spawnFirework(getOpenSpaceAbove(baseLocation), effect, power);
-      }
+      if (loc != null) spawnFirework(loc, effect, power);
     }
   }
 
@@ -254,14 +252,17 @@ public class FireworkMatchModule implements MatchModule, Listener {
   public static Location getOpenSpaceAbove(Location location) {
     Preconditions.checkNotNull(location, "location");
 
-    Location result = location.clone();
-    while (true) {
-      Block block = result.getBlock();
-      if (block == null || block.getType() == Material.AIR) break;
+    Block block = location.getBlock();
 
-      result.setY(result.getY() + 1);
-    }
+    int maxSearch = 5;
+    while (block != null && block.getType().isOccluding() && maxSearch-- > 0)
+      block = block.getRelative(BlockFace.UP);
+    if (maxSearch < 0) return null;
 
-    return result;
+    maxSearch = 40;
+    while (block != null && block.getType() != Material.AIR && maxSearch-- > 0)
+      block = block.getRelative(BlockFace.UP);
+
+    return maxSearch < 0 || block == null ? null : block.getLocation();
   }
 }

@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.controlpoint.ControlPoint;
 import tc.oc.pgm.payload.track.Track;
 
@@ -19,7 +20,7 @@ public class Payload extends ControlPoint {
   private final PayloadDefinition definition;
 
   private final Track track;
-  private final PayloadRegion region;
+  private final PayloadRegion captureRegion;
 
   private Competitor dominantTeam;
   private Vector position;
@@ -30,26 +31,42 @@ public class Payload extends ControlPoint {
     this.definition = definition;
 
     this.track = new Track(match, definition.getLocation());
-    this.region = new PayloadRegion(this);
-    this.playerTracker.setRegion(region);
-
     this.position = definition.getLocation();
+    this.captureRegion = new PayloadRegion(this::getCenterPoint, definition.getRadius());
+    this.playerTracker.setRegion(captureRegion);
+  }
+
+  @Override
+  public Region getCaptureRegion() {
+    return captureRegion;
+  }
+
+  public Vector getCenterPoint() {
+    return position;
   }
 
   @Override
   public void tick(Duration duration) {
     super.tick(duration);
 
-    Vector oldPos = position;
-    position = track.getVector(getCompletion());
+    double progress = getCompletion();
+    if (isCompleted()) progress = 1 - progress;
 
-    if (!oldPos.toBlockVector().equals(position.toBlockVector())) playerTracker.setRegion(region);
+    Vector oldPos = position;
+    position = track.getVector(progress);
+
+    if (!oldPos.toBlockVector().equals(position.toBlockVector()))
+      playerTracker.setRegion(captureRegion);
 
     tickDisplay(match.getTick().tick);
   }
 
   private void tickDisplay(long tick) {
-    Color color = dominantTeam == null ? Color.WHITE : dominantTeam.getFullColor();
+    if (!definition.getDisplayFilter().query(match).isAllowed()) return;
+    Color color =
+        dominantTeam != null
+            ? dominantTeam.getFullColor()
+            : controllingTeam != null ? controllingTeam.getFullColor() : Color.WHITE;
 
     Location loc = position.toLocation(match.getWorld()).add(0, 0.5, 0);
     spawnParticle(loc, color);
@@ -91,15 +108,6 @@ public class Payload extends ControlPoint {
 
   private float rgbToParticle(int rgb) {
     return (float) Math.max(0.001, rgb / 255.0);
-  }
-
-  @Override
-  public PayloadDefinition getDefinition() {
-    return (PayloadDefinition) super.getDefinition();
-  }
-
-  public Vector getCurrentPosition() {
-    return position;
   }
 
   @Override
