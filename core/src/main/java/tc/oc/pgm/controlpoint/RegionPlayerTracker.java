@@ -18,7 +18,7 @@ import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 /** Tracks which players are on a control point and answers some queries about them */
 public class RegionPlayerTracker implements Listener {
   private final Match match;
-  private final Set<MatchPlayer> playersOnPoint = Sets.newHashSet();
+  private final Set<MatchPlayer> players = Sets.newHashSet();
 
   private Region region;
 
@@ -28,7 +28,7 @@ public class RegionPlayerTracker implements Listener {
   }
 
   public Set<MatchPlayer> getPlayers() {
-    return this.playersOnPoint;
+    return this.players;
   }
 
   public void setRegion(Region region) {
@@ -53,14 +53,14 @@ public class RegionPlayerTracker implements Listener {
     if (!MatchPlayers.canInteract(player)) return;
 
     if (!player.getBukkit().isDead() && this.region.contains(to.toBlockVector())) {
-      this.playersOnPoint.add(player);
+      this.players.add(player);
     } else {
-      this.playersOnPoint.remove(player);
+      this.players.remove(player);
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerDespawn(final ParticipantDespawnEvent event) {
-    playersOnPoint.remove(event.getPlayer());
+    players.remove(event.getPlayer());
   }
 }

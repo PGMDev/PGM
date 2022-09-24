@@ -14,10 +14,15 @@ class CurvedRail implements RailOffset {
 
   @Override
   public Vector getOffset(double progress) {
-    BlockFace direction = progress < 0.5 ? from : to;
-    // Frame progress between 0.5 -> 0 -> 0.5, but in different directions
-    progress = Math.abs(progress - 0.5);
-    return new Vector(direction.getModX(), 0, direction.getModZ()).multiply(progress).setY(-0.5);
+    double remaining = 1 - progress;
+
+    progress *= 0.5;
+    remaining *= 0.5;
+
+    return new Vector(
+        remaining * from.getModX() + progress * to.getModX(),
+        -0.5,
+        remaining * from.getModZ() + progress * to.getModZ());
   }
 
   @Override

@@ -7,24 +7,29 @@ import org.bukkit.util.Vector;
 import tc.oc.pgm.regions.AbstractRegion;
 import tc.oc.pgm.regions.Bounds;
 
-/** This is a region that is not immutable. The origin point of the sphere can move. */
+/** This is a region that is not immutable. The origin point of the cylinder can move. */
 public class PayloadRegion extends AbstractRegion {
 
-  private final Supplier<Vector> origin;
+  private final Supplier<Vector> base;
   private final double radius;
   private final double radiusSq;
 
-  public PayloadRegion(Supplier<Vector> origin, double radius) {
+  public PayloadRegion(Supplier<Vector> base, double radius) {
     checkArgument(radius >= 0);
 
-    this.origin = origin;
+    this.base = base;
     this.radius = radius;
     this.radiusSq = Math.pow(radius, 2);
   }
 
   @Override
   public boolean contains(Vector point) {
-    return origin.get().distanceSquared(point) <= radiusSq;
+    Vector base = this.base.get();
+
+    return point.getY() >= (base.getY() - 2.5)
+        && point.getY() <= (base.getY() + 2.5)
+        && Math.pow(point.getX() - base.getX(), 2) + Math.pow(point.getZ() - base.getZ(), 2)
+            < this.radiusSq;
   }
 
   @Override
@@ -34,13 +39,14 @@ public class PayloadRegion extends AbstractRegion {
 
   @Override
   public Bounds getBounds() {
-    Vector diagonal = new Vector(this.radius, this.radius, this.radius);
+    Vector base = this.base.get();
     return new Bounds(
-        origin.get().clone().subtract(diagonal), this.origin.get().clone().add(diagonal));
+        new Vector(base.getX() - this.radius, base.getY() - 2.5, base.getZ() - this.radius),
+        new Vector(base.getX() + this.radius, base.getY() + 2.5, base.getZ() + this.radius));
   }
 
   @Override
   public String toString() {
-    return "PayloadRegion{origin=[" + this.origin.get() + "],radiusSq=" + this.radiusSq + "}";
+    return "PayloadRegion{base=[" + this.base.get() + "],radiusSq=" + this.radiusSq + "}";
   }
 }
