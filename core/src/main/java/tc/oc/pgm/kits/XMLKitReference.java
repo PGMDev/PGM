@@ -25,6 +25,11 @@ public class XMLKitReference extends XMLFeatureReference<KitDefinition> implemen
   }
 
   @Override
+  public void applyLeftover(MatchPlayer player, List<ItemStack> leftover) {
+    get().applyLeftover(player, leftover);
+  }
+
+  @Override
   public boolean isRemovable() {
     return get().isRemovable();
   }

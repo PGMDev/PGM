@@ -1,5 +1,6 @@
 package tc.oc.pgm.kits;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -23,6 +24,11 @@ public class KitNode extends AbstractKit {
     this.potionParticles = potionParticles;
   }
 
+  public static Kit of(Kit... kits) {
+    if (kits.length == 0) return EMPTY;
+    return new KitNode(Arrays.asList(kits), StaticFilter.ALLOW, null, null);
+  }
+
   @Override
   public void applyPostEvent(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {
     if (this.filter.query(player).isAllowed()) {
@@ -37,11 +43,23 @@ public class KitNode extends AbstractKit {
   }
 
   @Override
+  public void applyLeftover(MatchPlayer player, List<ItemStack> leftover) {
+    for (Kit kit : this.kits) kit.applyLeftover(player, leftover);
+  }
+
+  @Override
   public boolean isRemovable() {
     for (Kit kit : kits) {
       if (!kit.isRemovable()) return false;
     }
     return true;
+  }
+
+  @Override
+  public void untrigger(MatchPlayer player) {
+    for (Kit kit : kits) {
+      if (kit.isRemovable()) kit.remove(player);
+    }
   }
 
   @Override

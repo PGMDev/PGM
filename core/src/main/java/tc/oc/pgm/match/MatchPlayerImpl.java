@@ -364,8 +364,13 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   public void applyKit(Kit kit, boolean force) {
     List<ItemStack> displacedItems = new ArrayList<>();
     kit.apply(this, force, displacedItems);
-    for (ItemStack stack : displacedItems) {
-      getInventory().addItem(stack);
+
+    if (displacedItems.size() > 0) {
+      Collection<ItemStack> leftover =
+          getInventory().addItem(displacedItems.toArray(new ItemStack[0])).values();
+      if (leftover.size() > 0) {
+        kit.applyLeftover(this, new ArrayList<>(leftover));
+      }
     }
 
     match
