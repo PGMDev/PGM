@@ -400,8 +400,13 @@ public abstract class KitParser {
   }
 
   public ItemMatcher parseItemMatcher(Element parent) throws InvalidXMLException {
-    ItemStack stack = parseItem(parent.getChild("item"), false);
-    if (stack == null) throw new InvalidXMLException("Item expected", parent);
+    return parseItemMatcher(parent, "item");
+  }
+
+  public ItemMatcher parseItemMatcher(Element parent, String childName) throws InvalidXMLException {
+    ItemStack stack = parseItem(parent.getChild(childName), false);
+    if (stack == null)
+      throw new InvalidXMLException("Child " + childName + " element expected", parent);
 
     Range<Integer> amount =
         XMLUtils.parseNumericRange(Node.fromAttr(parent, "amount"), Integer.class, null);
