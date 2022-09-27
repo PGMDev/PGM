@@ -31,7 +31,7 @@ public final class FreeForAllCommand {
 
     audience.sendMessage(
         translatable(
-            "match.resize.max",
+            "match.resize.min",
             translatable("match.info.players", NamedTextColor.YELLOW),
             text(ffa.getMinPlayers(), NamedTextColor.AQUA)));
   }
