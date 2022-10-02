@@ -3,7 +3,7 @@ package tc.oc.pgm.controlpoint;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.bukkit.Material;
+import java.util.stream.Collectors;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
@@ -16,6 +16,7 @@ import tc.oc.pgm.filters.matcher.block.BlockFilter;
 import tc.oc.pgm.filters.operator.AnyFilter;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.goals.ShowOptions;
+import tc.oc.pgm.kits.tag.ItemModifier;
 import tc.oc.pgm.payload.PayloadDefinition;
 import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.regions.EverywhereRegion;
@@ -30,11 +31,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public abstract class ControlPointParser {
   private static final Filter VISUAL_MATERIALS =
       AnyFilter.of(
-          new BlockFilter(Material.WOOL),
-          new BlockFilter(Material.CARPET),
-          new BlockFilter(Material.STAINED_CLAY),
-          new BlockFilter(Material.STAINED_GLASS),
-          new BlockFilter(Material.STAINED_GLASS_PANE));
+          ItemModifier.COLOR_AFFECTED.stream().map(BlockFilter::new).collect(Collectors.toList()));
 
   public enum Type {
     HILL,

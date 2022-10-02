@@ -27,6 +27,7 @@ import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.filters.query.DamageQuery;
+import tc.oc.pgm.kits.tag.ItemModifier;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.event.ItemTransferEvent;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
@@ -75,6 +76,7 @@ public class KillRewardMatchModule implements MatchModule, Listener {
 
       for (ItemStack stack : items) {
         ItemStack clone = stack.clone();
+        ItemModifier.apply(clone, killer);
         PlayerItemTransferEvent event =
             new PlayerItemTransferEvent(
                 null,
