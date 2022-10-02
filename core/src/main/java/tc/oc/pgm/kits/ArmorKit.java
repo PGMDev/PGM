@@ -4,19 +4,17 @@ import java.util.List;
 import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.kits.tag.ItemModifier;
 
 public class ArmorKit extends AbstractKit {
   public static class ArmorItem {
     public final ItemStack stack;
     public final boolean locked;
-    public final boolean teamColor;
 
-    public ArmorItem(ItemStack stack, boolean locked, boolean teamColor) {
+    public ArmorItem(ItemStack stack, boolean locked) {
       this.stack = stack;
       this.locked = locked;
-      this.teamColor = teamColor;
     }
   }
 
@@ -41,12 +39,7 @@ public class ArmorKit extends AbstractKit {
       int slot = entry.getKey().ordinal();
       if (force || wearing[slot] == null || wearing[slot].getType() == Material.AIR) {
         wearing[slot] = entry.getValue().stack.clone();
-
-        if (entry.getValue().teamColor) {
-          LeatherArmorMeta meta = (LeatherArmorMeta) wearing[slot].getItemMeta();
-          meta.setColor(player.getParty().getFullColor());
-          wearing[slot].setItemMeta(meta);
-        }
+        ItemModifier.apply(wearing[slot], player);
 
         KitMatchModule kitMatchModule = player.getMatch().getModule(KitMatchModule.class);
         if (kitMatchModule != null) {

@@ -3,11 +3,13 @@ package tc.oc.pgm.action;
 import com.google.common.collect.ImmutableList;
 import java.lang.reflect.Method;
 import java.util.Map;
+import org.bukkit.inventory.ItemStack;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.actions.ActionNode;
 import tc.oc.pgm.action.actions.ChatMessageAction;
 import tc.oc.pgm.action.actions.KillEntitiesAction;
+import tc.oc.pgm.action.actions.ReplaceItemAction;
 import tc.oc.pgm.action.actions.ScopeSwitchAction;
 import tc.oc.pgm.action.actions.SetVariableAction;
 import tc.oc.pgm.api.feature.FeatureValidation;
@@ -22,6 +24,7 @@ import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
+import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -210,5 +213,16 @@ public class ActionParser {
   public KillEntitiesAction parseKillEntities(Element el, Class<?> scope)
       throws InvalidXMLException {
     return new KillEntitiesAction(factory.getFilters().parseFilterProperty(el, "filter"));
+  }
+
+  @MethodParser("replace-item")
+  public ReplaceItemAction parseReplaceItem(Element el, Class<?> scope) throws InvalidXMLException {
+    ItemMatcher matcher = factory.getKits().parseItemMatcher(el, "find");
+    ItemStack item = factory.getKits().parseItem(el.getChild("replace"), true);
+
+    boolean keepAmount = XMLUtils.parseBoolean(el.getAttribute("keep-amount"), false);
+    boolean keepEnchants = XMLUtils.parseBoolean(el.getAttribute("keep-enchants"), false);
+
+    return new ReplaceItemAction(matcher, item, keepAmount, keepEnchants);
   }
 }

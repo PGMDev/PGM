@@ -43,6 +43,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.doublejump.DoubleJumpKit;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.kits.tag.Grenade;
+import tc.oc.pgm.kits.tag.ItemModifier;
 import tc.oc.pgm.kits.tag.ItemTags;
 import tc.oc.pgm.projectile.ProjectileDefinition;
 import tc.oc.pgm.shield.ShieldKit;
@@ -219,10 +220,7 @@ public abstract class KitParser {
     ItemStack stack = parseItem(el, true);
     boolean locked = XMLUtils.parseBoolean(el.getAttribute("locked"), false);
 
-    boolean teamColor =
-        stack.getItemMeta() instanceof LeatherArmorMeta
-            && XMLUtils.parseBoolean(el.getAttribute("team-color"), false);
-    return new ArmorKit.ArmorItem(stack, locked, teamColor);
+    return new ArmorKit.ArmorItem(stack, locked);
   }
 
   public ArmorKit parseArmorKit(Element el) throws InvalidXMLException {
@@ -400,8 +398,13 @@ public abstract class KitParser {
   }
 
   public ItemMatcher parseItemMatcher(Element parent) throws InvalidXMLException {
-    ItemStack stack = parseItem(parent.getChild("item"), false);
-    if (stack == null) throw new InvalidXMLException("Item expected", parent);
+    return parseItemMatcher(parent, "item");
+  }
+
+  public ItemMatcher parseItemMatcher(Element parent, String childName) throws InvalidXMLException {
+    ItemStack stack = parseItem(parent.getChild(childName), false);
+    if (stack == null)
+      throw new InvalidXMLException("Child " + childName + " element expected", parent);
 
     Range<Integer> amount =
         XMLUtils.parseNumericRange(Node.fromAttr(parent, "amount"), Integer.class, null);
@@ -566,6 +569,9 @@ public abstract class KitParser {
   }
 
   public void parseCustomNBT(Element el, ItemStack itemStack) throws InvalidXMLException {
+    if (XMLUtils.parseBoolean(el.getAttribute("team-color"), false))
+      ItemModifier.TEAM_COLOR.set(itemStack, true);
+
     if (XMLUtils.parseBoolean(el.getAttribute("grenade"), false)) {
       Grenade.ITEM_TAG.set(
           itemStack,

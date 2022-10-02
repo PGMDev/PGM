@@ -24,6 +24,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.kits.tag.ItemModifier;
 import tc.oc.pgm.menu.InventoryMenu;
 import tc.oc.pgm.shops.Shop;
 import tc.oc.pgm.util.inventory.ItemBuilder;
@@ -221,6 +222,7 @@ public class ShopMenu extends InventoryMenu {
     String clickLore = TextTranslations.translateLegacy(click, getBukkit());
 
     ItemStack item = icon.getItem().clone();
+    ItemModifier.apply(item, getViewer());
     ItemMeta meta = item.getItemMeta();
     List<String> lore = Lists.newArrayList();
     if (meta.getLore() != null) {
