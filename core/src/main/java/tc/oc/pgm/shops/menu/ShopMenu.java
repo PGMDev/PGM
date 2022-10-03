@@ -103,10 +103,6 @@ public class ShopMenu extends InventoryMenu {
       }
     }
 
-    if (categories.length == 1) {
-      highlight = 4;
-    }
-
     // Menu divider & highlight
     contents.fillRow(1, getMenuSeperator(DyeColor.GRAY));
     contents.set(1, highlight, getMenuSeperator(DyeColor.GREEN));
