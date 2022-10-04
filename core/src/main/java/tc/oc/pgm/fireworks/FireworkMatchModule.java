@@ -208,6 +208,7 @@ public class FireworkMatchModule implements MatchModule, Listener {
 
   public void spawnFireworkDisplay(
       Location center, Color color, int count, double radius, int power) {
+    if (Double.isInfinite(radius)) return;
     FireworkEffect effect =
         FireworkEffect.builder()
             .with(Type.BURST)
@@ -229,8 +230,8 @@ public class FireworkMatchModule implements MatchModule, Listener {
   public void spawnFireworkDisplay(
       World world, Region region, Color color, int count, double radiusMultiplier, int power) {
     final Bounds bound = region.getBounds();
-    final double radius = bound.getMax().subtract(bound.getMin()).multiply(0.5).length();
-    final Location center = bound.getMin().getMidpoint(bound.getMax()).toLocation(world);
+    final double radius = bound.getSize().setY(0).multiply(0.5).length();
+    final Location center = bound.getCenterPoint().toLocation(world);
     this.spawnFireworkDisplay(center, color, count, radiusMultiplier * radius, power);
   }
 
@@ -254,15 +255,18 @@ public class FireworkMatchModule implements MatchModule, Listener {
 
     Block block = location.getBlock();
 
-    int maxSearch = 5;
+    int maxSearch = 25;
     while (block != null && block.getType().isOccluding() && maxSearch-- > 0)
       block = block.getRelative(BlockFace.UP);
-    if (maxSearch < 0) return null;
+    if (maxSearch < 0 || block == null) return null;
 
-    maxSearch = 40;
+    maxSearch = 25;
     while (block != null && block.getType() != Material.AIR && maxSearch-- > 0)
       block = block.getRelative(BlockFace.UP);
+    if (maxSearch < 0 || block == null) return null;
 
-    return maxSearch < 0 || block == null ? null : block.getLocation();
+    // Returning original location ensure x & z are not affected.
+    location.setY(block.getY() + 0.5d);
+    return location;
   }
 }
