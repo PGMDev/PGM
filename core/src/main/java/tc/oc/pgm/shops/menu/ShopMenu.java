@@ -52,7 +52,7 @@ public class ShopMenu extends InventoryMenu {
 
     this.category = shop.getVisibleCategories(viewer).get(0);
     this.categories = getCategoryItems();
-    this.highlight = 1;
+    this.highlight = getStartingIndex();
     open();
   }
 
@@ -71,21 +71,36 @@ public class ShopMenu extends InventoryMenu {
     this.renderIcons(contents);
   }
 
+  private int getStartingIndex() {
+    return categories.length == 1 ? 4 : (categories.length <= 9 ? 0 : 1);
+  }
+
+  private boolean isPaginated() {
+    return categories.length > 9;
+  }
+
   private void renderHeader(InventoryContents contents) {
-    Pagination page = contents.pagination();
-    page.setItems(categories);
-    page.setItemsPerPage(7);
-    page.addToIterator(
-        contents.newIterator(SlotIterator.Type.HORIZONTAL, 0, categories.length == 1 ? 4 : 1));
+    if (isPaginated()) {
+      Pagination page = contents.pagination();
+      page.setItems(categories);
+      page.setItemsPerPage(7);
+      page.addToIterator(contents.newIterator(SlotIterator.Type.HORIZONTAL, 0, getStartingIndex()));
 
-    // Previous button
-    if (!page.isFirst()) contents.set(0, 0, getPageItem(getBukkit(), page.getPage() - 1, false));
+      // Previous button
+      if (!page.isFirst()) contents.set(0, 0, getPageItem(getBukkit(), page.getPage() - 1, false));
 
-    // Next button
-    if (!page.isLast()) contents.set(0, 8, getPageItem(getBukkit(), page.getPage() + 1, true));
+      // Next button
+      if (!page.isLast()) contents.set(0, 8, getPageItem(getBukkit(), page.getPage() + 1, true));
+    } else {
 
-    if (categories.length == 1) {
-      highlight = 4;
+      // Center icon if only one category is present
+      if (categories.length == 1) {
+        contents.set(0, 4, categories[0]);
+      } else {
+        for (ClickableItem item : categories) {
+          contents.add(item);
+        }
+      }
     }
 
     // Menu divider & highlight
@@ -94,11 +109,11 @@ public class ShopMenu extends InventoryMenu {
   }
 
   private void renderIcons(InventoryContents contents) {
+    List<Icon> icons = getCategory().getVisibleIcons(getViewer());
+
     for (int i = 2; i < 6; i++) {
       contents.fillRow(i, null);
     }
-
-    List<Icon> icons = getCategory().getVisibleIcons(getViewer());
 
     if (icons.isEmpty()) {
       contents.set(4, 4, getNoItemsItem());
