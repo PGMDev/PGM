@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -120,7 +121,7 @@ public class TeamModule implements MapModule<TeamMatchModule> {
     boolean plural = XMLUtils.parseBoolean(el.getAttribute("plural"), false);
 
     ChatColor color = XMLUtils.parseChatColor(Node.fromAttr(el, "color"), ChatColor.WHITE);
-    ChatColor overheadColor = XMLUtils.parseChatColor(Node.fromAttr(el, "overhead-color"), null);
+    DyeColor dyeColor = XMLUtils.parseDyeColor(el.getAttribute("dye-color"), null);
     NameTagVisibility nameTagVisibility =
         XMLUtils.parseNameTagVisibility(
             Node.fromAttr(el, "show-name-tags"), NameTagVisibility.ALWAYS);
@@ -141,7 +142,7 @@ public class TeamModule implements MapModule<TeamMatchModule> {
             name,
             plural,
             color,
-            overheadColor,
+            dyeColor,
             minPlayers,
             maxPlayers,
             maxOverfill,

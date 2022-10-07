@@ -7,7 +7,7 @@ import tc.oc.pgm.api.match.Match;
 public class ObserverParty extends PartyImpl {
 
   public ObserverParty(final Match match) {
-    super(match, "Observers", ChatColor.AQUA);
+    super(match, "Observers", ChatColor.AQUA, null);
   }
 
   @Override

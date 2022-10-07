@@ -13,6 +13,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
+import org.bukkit.DyeColor;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.party.event.PartyRenameEvent;
@@ -33,12 +34,17 @@ public class PartyImpl implements Party, Audience {
   private final String id;
   private final ChatColor chatColor;
   private final Color color;
+  private final DyeColor dyeColor;
   private String legacyName;
   private Component name;
   private Component prefix;
   private boolean plural;
 
-  public PartyImpl(final Match match, final String name, final ChatColor chatColor) {
+  public PartyImpl(
+      final Match match,
+      final String name,
+      final ChatColor chatColor,
+      final @Nullable DyeColor dyeColor) {
     this.match = requireNonNull(match);
     this.query = new PartyQuery(null, this);
     this.memberMap = new HashMap<>();
@@ -47,6 +53,7 @@ public class PartyImpl implements Party, Audience {
     this.id = requireNonNull(name);
     this.chatColor = chatColor == null ? ChatColor.WHITE : chatColor;
     this.color = BukkitUtils.colorOf(this.chatColor);
+    this.dyeColor = dyeColor == null ? BukkitUtils.chatColorToDyeColor(this.chatColor) : dyeColor;
     this.setName(name);
   }
 
@@ -143,6 +150,11 @@ public class PartyImpl implements Party, Audience {
   @Override
   public Color getFullColor() {
     return this.color;
+  }
+
+  @Override
+  public DyeColor getDyeColor() {
+    return this.dyeColor;
   }
 
   @Override

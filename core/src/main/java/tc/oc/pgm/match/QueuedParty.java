@@ -26,7 +26,7 @@ public class QueuedParty extends PartyImpl {
   private List<MatchPlayer> memberOrder;
 
   public QueuedParty(final Match match) {
-    super(match, "Participants", ChatColor.YELLOW);
+    super(match, "Participants", ChatColor.YELLOW, null);
   }
 
   @Override

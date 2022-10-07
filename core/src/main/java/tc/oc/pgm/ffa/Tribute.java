@@ -1,7 +1,7 @@
 package tc.oc.pgm.ffa;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.*;
 import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.util.Collection;
@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
+import org.bukkit.DyeColor;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.match.Match;
@@ -46,6 +47,7 @@ public class Tribute implements Competitor {
   private final String username;
   private final ChatColor chatColor;
   private final Color color;
+  private final DyeColor dyeColor;
   private final PartyQuery query;
 
   protected @Nullable MatchPlayer player;
@@ -58,6 +60,7 @@ public class Tribute implements Competitor {
     this.username = player.getBukkit().getName();
     this.chatColor = color == null ? ChatColor.YELLOW : color;
     this.color = BukkitUtils.colorOf(this.chatColor);
+    this.dyeColor = BukkitUtils.chatColorToDyeColor(this.chatColor);
     this.query = new PartyQuery(null, this);
   }
 
@@ -89,6 +92,11 @@ public class Tribute implements Competitor {
   @Override
   public Color getFullColor() {
     return this.color;
+  }
+
+  @Override
+  public DyeColor getDyeColor() {
+    return dyeColor;
   }
 
   @Override
