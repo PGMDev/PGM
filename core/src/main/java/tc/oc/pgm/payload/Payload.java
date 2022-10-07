@@ -1,7 +1,6 @@
 package tc.oc.pgm.payload;
 
 import java.time.Duration;
-import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Effect;
@@ -17,7 +16,6 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.controlpoint.ControlPoint;
 import tc.oc.pgm.payload.track.Track;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 public class Payload extends ControlPoint {
 
@@ -144,8 +142,7 @@ public class Payload extends ControlPoint {
 
   private void updateWool() {
     Competitor display = getDisplayTeam();
-    DyeColor color =
-        BukkitUtils.chatColorToDyeColor(display != null ? display.getColor() : ChatColor.WHITE);
+    DyeColor color = display != null ? display.getDyeColor() : DyeColor.WHITE;
 
     Wool data = (Wool) minecart.getDisplayBlock();
     data.setColor(color);

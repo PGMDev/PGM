@@ -1,13 +1,12 @@
 package tc.oc.pgm.kits.tag;
 
 import com.google.common.collect.ImmutableSet;
-import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.inventory.tag.ItemTag;
 
 public class ItemModifier {
@@ -36,12 +35,12 @@ public class ItemModifier {
       leather.setColor(player.getParty().getFullColor());
       item.setItemMeta(meta);
     } else if (COLOR_AFFECTED.contains(item.getType())) {
-      item.setDurability(getWoolColor(player.getParty().getColor()));
+      item.setDurability(getWoolColor(player.getParty().getDyeColor()));
     }
   }
 
   @SuppressWarnings("deprecation")
-  private static byte getWoolColor(ChatColor color) {
-    return BukkitUtils.chatColorToDyeColor(color).getWoolData();
+  private static byte getWoolColor(DyeColor color) {
+    return color.getWoolData();
   }
 }

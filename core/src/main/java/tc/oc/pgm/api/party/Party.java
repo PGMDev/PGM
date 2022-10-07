@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
+import org.bukkit.DyeColor;
 import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
@@ -99,6 +100,13 @@ public interface Party extends Audience, Named, Filterable<PartyQuery>, PartyQue
    * @return a color
    */
   Color getFullColor();
+
+  /**
+   * Gets the {@link DyeColor} of the party.
+   *
+   * @return a dye color
+   */
+  DyeColor getDyeColor();
 
   /**
    * Gets a chat prefix for the party.

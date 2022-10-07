@@ -29,7 +29,7 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
   private JoinMatchModule jmm;
 
   public Team(final TeamFactory info, final Match match) {
-    super(match, requireNonNull(info).getDefaultName(), info.getDefaultColor());
+    super(match, requireNonNull(info).getDefaultName(), info.getDefaultColor(), info.getDyeColor());
     this.info = info;
     this.min = info.getMinPlayers();
     this.max = info.getMaxPlayers();

@@ -17,7 +17,6 @@ import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.regions.SectorRegion;
 import tc.oc.pgm.renewable.BlockImage;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 /** Displays the status of a ControlPoint by coloring blocks in specified regions */
 public class ControlPointBlockDisplay implements Listener {
@@ -87,7 +86,7 @@ public class ControlPointBlockDisplay implements Listener {
           this.controllerDisplayImage.restore(block);
         }
       } else {
-        byte blockData = BukkitUtils.chatColorToDyeColor(controllingTeam.getColor()).getWoolData();
+        byte blockData = controllingTeam.getDyeColor().getWoolData();
         for (Block block : this.controllerDisplayRegion.getBlocks()) {
           block.setData(blockData);
         }
@@ -104,7 +103,7 @@ public class ControlPointBlockDisplay implements Listener {
         .query(new BlockQuery(block))
         .isAllowed()) {
       if (team != null) {
-        block.setData(BukkitUtils.chatColorToDyeColor(team.getColor()).getWoolData());
+        block.setData(team.getDyeColor().getWoolData());
       } else {
         this.progressDisplayImage.restore(block);
       }
