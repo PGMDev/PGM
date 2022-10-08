@@ -29,6 +29,9 @@ dependency-reduced-pom.xml
 xcuserdata
 *class
 
+# VSCode files
+.vscode
+
 # Minecraft generated files
 banned-ips.json
 banned-players.json
