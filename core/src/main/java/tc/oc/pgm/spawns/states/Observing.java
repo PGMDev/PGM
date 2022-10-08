@@ -121,7 +121,7 @@ public class Observing extends State {
   @Override
   public void onEvent(PlayerJoinPartyEvent event) {
     if (event.getNewParty() instanceof Competitor && event.getMatch().isRunning()) {
-      transition(new Joining(smm, player));
+      transition(new Joining(smm, player, smm.getDeathTick(event.getPlayer())));
     }
   }
 
