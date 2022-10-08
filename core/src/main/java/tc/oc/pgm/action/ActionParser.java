@@ -1,14 +1,18 @@
 package tc.oc.pgm.action;
 
+import static net.kyori.adventure.text.Component.empty;
+
 import com.google.common.collect.ImmutableList;
 import java.lang.reflect.Method;
 import java.util.Map;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.actions.ActionNode;
-import tc.oc.pgm.action.actions.ChatMessageAction;
 import tc.oc.pgm.action.actions.KillEntitiesAction;
+import tc.oc.pgm.action.actions.MessageAction;
 import tc.oc.pgm.action.actions.ReplaceItemAction;
 import tc.oc.pgm.action.actions.ScopeSwitchAction;
 import tc.oc.pgm.action.actions.SetVariableAction;
@@ -180,8 +184,25 @@ public class ActionParser {
   }
 
   @MethodParser("message")
-  public ChatMessageAction parseChatMessage(Element el, Class<?> scope) throws InvalidXMLException {
-    return new ChatMessageAction(XMLUtils.parseFormattedText(Node.fromRequiredAttr(el, "text")));
+  public MessageAction parseChatMessage(Element el, Class<?> scope) throws InvalidXMLException {
+    Component text = XMLUtils.parseFormattedText(Node.fromChildOrAttr(el, "text"));
+    Component actionbar = XMLUtils.parseFormattedText(Node.fromChildOrAttr(el, "actionbar"));
+
+    Node titleNode = Node.fromChildOrAttr(el, "title");
+    Node subtitleNode = Node.fromChildOrAttr(el, "subtitle");
+    Title title = null;
+    if (titleNode != null || subtitleNode != null)
+      title =
+          Title.title(
+              XMLUtils.parseFormattedText(titleNode, empty()),
+              XMLUtils.parseFormattedText(subtitleNode, empty()),
+              XMLUtils.parseTitleTimes(el, Title.DEFAULT_TIMES));
+
+    if (text == null && actionbar == null && title == null)
+      throw new InvalidXMLException(
+          "Expected at least one of text, title, subtitle or actionbar", el);
+
+    return new MessageAction(text, actionbar, title);
   }
 
   @MethodParser("set")
