@@ -97,8 +97,8 @@ public class ShopMenu extends InventoryMenu {
       if (categories.length == 1) {
         contents.set(0, 4, categories[0]);
       } else {
-        for (ClickableItem item : categories) {
-          contents.add(item);
+        for (int i = 0; i < categories.length; i++) {
+          contents.set(0, i, categories[i]);
         }
       }
     }
