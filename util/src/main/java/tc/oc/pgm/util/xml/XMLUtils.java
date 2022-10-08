@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
@@ -1117,5 +1118,14 @@ public final class XMLUtils {
     } catch (TextException e) {
       throw new InvalidXMLException(node, e);
     }
+  }
+
+  public static Title.Times parseTitleTimes(Element el, Title.Times def)
+      throws InvalidXMLException {
+    Duration fadeIn = XMLUtils.parseDuration(Node.fromAttr(el, "fade-in"), def.fadeIn());
+    Duration stay = XMLUtils.parseDuration(Node.fromAttr(el, "stay"), def.stay());
+    Duration fadeOut = XMLUtils.parseDuration(Node.fromAttr(el, "fade-out"), def.fadeOut());
+
+    return Title.Times.times(fadeIn, stay, fadeOut);
   }
 }
