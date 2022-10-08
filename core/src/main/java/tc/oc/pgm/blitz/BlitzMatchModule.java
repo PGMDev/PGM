@@ -100,11 +100,14 @@ public class BlitzMatchModule implements MatchModule, Listener {
   public void handleJoin(final PlayerParticipationStartEvent event) {
     MatchPlayer player = event.getPlayer();
     TeamMatchModule tmm = player.getMatch().getModule(TeamMatchModule.class);
-    if (match.isRunning() && (tmm == null || !tmm.isForced(player))) {
-      event.cancel(
-          translatable(
-              "blitz.joinDenied", translatable("gamemode.blitz.name", NamedTextColor.AQUA)));
-    }
+
+    if (!match.isRunning() || (tmm != null && tmm.isForced(player))) return;
+
+    int lives = this.lifeManager.getLives(event.getPlayer().getId());
+    if (config.getJoinFilter().query(player.getMatch()).isAllowed() && lives > 0) return;
+
+    event.cancel(
+        translatable("blitz.joinDenied", translatable("gamemode.blitz.name", NamedTextColor.AQUA)));
   }
 
   @EventHandler
