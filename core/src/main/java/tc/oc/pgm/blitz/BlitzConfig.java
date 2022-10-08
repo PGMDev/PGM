@@ -10,13 +10,15 @@ public class BlitzConfig {
   private final int lives;
   private final boolean broadcastLives;
   private final Filter filter;
+  private final Filter joinFilter;
 
-  public BlitzConfig(int lives, boolean broadcastLives, Filter filter) {
+  public BlitzConfig(int lives, boolean broadcastLives, Filter filter, Filter joinFilter) {
     checkArgument(lives > 0, "lives must be greater than zero");
 
     this.lives = lives;
     this.broadcastLives = broadcastLives;
     this.filter = filter;
+    this.joinFilter = joinFilter;
   }
 
   /**
@@ -34,5 +36,9 @@ public class BlitzConfig {
 
   public Filter getFilter() {
     return this.filter;
+  }
+
+  public Filter getJoinFilter() {
+    return joinFilter;
   }
 }

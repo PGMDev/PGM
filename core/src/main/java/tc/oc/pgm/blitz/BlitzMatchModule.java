@@ -26,11 +26,13 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
+import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerParticipationStartEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.TeamMatchModule;
 
+@ListenerScope(MatchScope.RUNNING)
 public class BlitzMatchModule implements MatchModule, Listener {
 
   private final Match match;
@@ -89,22 +91,28 @@ public class BlitzMatchModule implements MatchModule, Listener {
       if (event.getNewParty() != null && event.getNewParty() instanceof Competitor) {
         // Player switching teams, check if match needs to end
         checkEnd();
-      } else {
-        // Player is going to obs, eliminate them
+      } else if (config.getFilter().query(event.getPlayer()).isAllowed()) {
+        // Player is going to obs and filter allows, eliminate them
         this.handleElimination(event.getPlayer(), (Competitor) event.getOldParty());
       }
     }
   }
 
+  public boolean canJoin(MatchPlayer player) {
+    if (isPlayerEliminated(player.getId())) return false;
+
+    TeamMatchModule tmm = player.getMatch().getModule(TeamMatchModule.class);
+    if (!match.isRunning() || (tmm != null && tmm.isForced(player))) return true;
+
+    return config.getJoinFilter().query(player.getMatch()).isAllowed();
+  }
+
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void handleJoin(final PlayerParticipationStartEvent event) {
-    MatchPlayer player = event.getPlayer();
-    TeamMatchModule tmm = player.getMatch().getModule(TeamMatchModule.class);
-    if (match.isRunning() && (tmm == null || !tmm.isForced(player))) {
-      event.cancel(
-          translatable(
-              "blitz.joinDenied", translatable("gamemode.blitz.name", NamedTextColor.AQUA)));
-    }
+    if (canJoin(event.getPlayer())) return;
+
+    event.cancel(
+        translatable("blitz.joinDenied", translatable("gamemode.blitz.name", NamedTextColor.AQUA)));
   }
 
   @EventHandler

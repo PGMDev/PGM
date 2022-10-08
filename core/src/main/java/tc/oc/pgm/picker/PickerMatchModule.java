@@ -113,9 +113,9 @@ public class PickerMatchModule implements MatchModule, Listener {
 
   private final Match match;
   private final Set<MatchPlayer> picking = new HashSet<>();
-  private boolean hasTeams;
-  private boolean hasClasses;
-  private boolean isBlitz;
+  private final boolean hasTeams;
+  private final boolean hasClasses;
+  private final boolean isBlitz;
 
   private PickerMatchModule(Match match) {
     this.match = match;
@@ -174,17 +174,12 @@ public class PickerMatchModule implements MatchModule, Listener {
     return teams;
   }
 
-  /** Get if the player participated in blitz match and was eliminated * */
-  private boolean hasParticipated(MatchPlayer player) {
-    return isBlitz && match.getModule(BlitzMatchModule.class).isPlayerEliminated(player.getId());
-  }
-
   /** Does the player have any use for the picker? */
   private boolean canUse(MatchPlayer player) {
     if (player == null) return false;
 
     // Player is eliminated from Blitz
-    if (isBlitz && match.isRunning() && hasParticipated(player)) return false;
+    if (isBlitz && !match.needModule(BlitzMatchModule.class).canJoin(player)) return false;
 
     // Player is not observing or dead
     if (!(player.isObserving() || player.isDead())) return false;
