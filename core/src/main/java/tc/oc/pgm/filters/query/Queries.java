@@ -1,8 +1,8 @@
 package tc.oc.pgm.filters.query;
 
-import javax.annotation.Nullable;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.Event;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.query.BlockQuery;
 import tc.oc.pgm.api.player.ParticipantState;
 

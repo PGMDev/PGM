@@ -1,7 +1,7 @@
 package tc.oc.pgm.tracker.info;
 
-import javax.annotation.Nullable;
 import org.bukkit.Location;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.time.Tick;

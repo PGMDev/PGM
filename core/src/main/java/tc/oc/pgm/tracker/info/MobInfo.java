@@ -1,7 +1,7 @@
 package tc.oc.pgm.tracker.info;
 
-import javax.annotation.Nullable;
 import org.bukkit.entity.LivingEntity;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.MeleeInfo;
 

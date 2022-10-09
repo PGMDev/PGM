@@ -1,9 +1,9 @@
 package tc.oc.pgm.util.tablist;
 
 import java.util.UUID;
-import javax.annotation.Nullable;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.skin.Skin;
 
 /** Implements part of {@link TabEntry} with a few generally useful properties */

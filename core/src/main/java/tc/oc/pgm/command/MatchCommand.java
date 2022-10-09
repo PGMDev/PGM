@@ -14,14 +14,14 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchPhase;
 import tc.oc.pgm.api.party.Competitor;
@@ -184,22 +184,22 @@ public final class MatchCommand {
     sb.append(
         text(
             goal.renderSidebarStatusText(competitor, viewingParty),
-            TextFormatter.convert(goal.renderSidebarStatusColor(competitor, viewingParty))));
+            goal.renderSidebarStatusColor(competitor, viewingParty)));
 
     sb.append(space());
     if (goal instanceof ProximityGoal) {
       ProximityGoal<?> proxGoal = (ProximityGoal<?>) goal;
       String proximityText = proxGoal.renderProximity(competitor, viewingParty);
       if (proximityText != null && !proximityText.isEmpty()) {
-        ChatColor proximityColor = proxGoal.renderProximityColor(competitor, viewingParty);
-        sb.append(text(proximityText, TextFormatter.convert(proximityColor)));
+        TextColor proximityColor = proxGoal.renderProximityColor(competitor, viewingParty);
+        sb.append(text(proximityText, proximityColor));
         sb.append(space());
       }
     }
 
     sb.append(
         goal.renderSidebarLabelText(competitor, viewingParty)
-            .color(TextFormatter.convert(goal.renderSidebarLabelColor(competitor, viewingParty))));
+            .color(goal.renderSidebarLabelColor(competitor, viewingParty)));
 
     return sb.build();
   }

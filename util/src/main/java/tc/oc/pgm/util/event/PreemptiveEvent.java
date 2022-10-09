@@ -1,9 +1,9 @@
 package tc.oc.pgm.util.event;
 
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
+import org.jetbrains.annotations.Nullable;
 
 /** A {@link Cancellable} event that can be preempted with a reason. */
 public abstract class PreemptiveEvent extends Event implements Cancellable {

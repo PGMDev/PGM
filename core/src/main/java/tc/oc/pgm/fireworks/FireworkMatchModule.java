@@ -1,6 +1,8 @@
 package tc.oc.pgm.fireworks;
 
-import com.google.common.base.Preconditions;
+import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.Assert.assertTrue;
+
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.Collections;
@@ -236,9 +238,9 @@ public class FireworkMatchModule implements MatchModule, Listener {
   }
 
   public static Firework spawnFirework(Location location, FireworkEffect effect, int power) {
-    Preconditions.checkNotNull(location, "location");
-    Preconditions.checkNotNull(effect, "firework effect");
-    Preconditions.checkArgument(power >= 0, "power must be positive");
+    assertNotNull(location, "location");
+    assertNotNull(effect, "firework effect");
+    assertTrue(power >= 0, "power must be positive");
 
     FireworkMeta meta = (FireworkMeta) Bukkit.getItemFactory().getItemMeta(Material.FIREWORK);
     meta.setPower(power);
@@ -251,7 +253,7 @@ public class FireworkMatchModule implements MatchModule, Listener {
   }
 
   public static Location getOpenSpaceAbove(Location location) {
-    Preconditions.checkNotNull(location, "location");
+    assertNotNull(location, "location");
 
     Block block = location.getBlock();
 

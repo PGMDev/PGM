@@ -19,7 +19,6 @@ import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -29,6 +28,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.Gamemode;
@@ -332,8 +332,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
     }
 
     sb.append(" ");
-    final TextColor color =
-        TextFormatter.convert(goal.renderSidebarLabelColor(competitor, viewingParty));
+    final TextColor color = goal.renderSidebarLabelColor(competitor, viewingParty);
     sb.append(
         TextTranslations.translateLegacy(
             goal.renderSidebarLabelText(competitor, viewingParty).color(color), viewer));

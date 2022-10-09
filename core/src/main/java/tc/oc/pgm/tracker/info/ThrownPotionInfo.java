@@ -1,9 +1,9 @@
 package tc.oc.pgm.tracker.info;
 
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.potion.PotionEffectType;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
 import tc.oc.pgm.util.inventory.InventoryUtils;

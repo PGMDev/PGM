@@ -1,9 +1,9 @@
 package tc.oc.pgm.points;
 
 import java.util.Collection;
-import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 
 /** Try each child once, in order */

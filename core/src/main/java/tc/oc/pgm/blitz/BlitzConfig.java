@@ -1,6 +1,6 @@
 package tc.oc.pgm.blitz;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import tc.oc.pgm.api.filter.Filter;
 
@@ -13,7 +13,7 @@ public class BlitzConfig {
   private final Filter joinFilter;
 
   public BlitzConfig(int lives, boolean broadcastLives, Filter filter, Filter joinFilter) {
-    checkArgument(lives > 0, "lives must be greater than zero");
+    assertTrue(lives > 0, "lives must be greater than zero");
 
     this.lives = lives;
     this.broadcastLives = broadcastLives;

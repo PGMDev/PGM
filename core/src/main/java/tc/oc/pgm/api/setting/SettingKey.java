@@ -1,6 +1,5 @@
 package tc.oc.pgm.api.setting;
 
-import static com.google.common.base.Preconditions.*;
 import static tc.oc.pgm.api.setting.SettingValue.*;
 
 import com.google.common.collect.ImmutableList;
@@ -84,7 +83,6 @@ public enum SettingKey {
   }
 
   SettingKey(List<String> aliases, Material icon, SettingValue... values) {
-    checkArgument(!aliases.isEmpty(), "aliases is empty");
     this.aliases = ImmutableList.copyOf(aliases);
     this.icon = icon;
     this.values = values;

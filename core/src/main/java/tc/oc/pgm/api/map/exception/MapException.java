@@ -1,8 +1,8 @@
 package tc.oc.pgm.api.map.exception;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -28,8 +28,8 @@ public class MapException extends Exception {
 
   public MapException(
       String location, @Nullable MapInfo info, String message, @Nullable Throwable cause) {
-    super(checkNotNull(message), cause);
-    this.location = checkNotNull(location);
+    super(assertNotNull(message), cause);
+    this.location = assertNotNull(location);
     this.info = info;
   }
 

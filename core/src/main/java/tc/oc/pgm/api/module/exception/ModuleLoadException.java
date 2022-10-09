@@ -1,6 +1,6 @@
 package tc.oc.pgm.api.module.exception;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.module.Module;
 
 /** When a {@link Module} or its factory is unable to load. */

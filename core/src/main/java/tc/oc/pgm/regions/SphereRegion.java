@@ -1,6 +1,6 @@
 package tc.oc.pgm.regions;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import org.bukkit.util.Vector;
 
@@ -10,7 +10,7 @@ public class SphereRegion extends AbstractRegion {
   protected final double radiusSq;
 
   public SphereRegion(Vector origin, double radius) {
-    checkArgument(radius >= 0);
+    assertTrue(radius >= 0);
 
     this.origin = origin;
     this.radius = radius;

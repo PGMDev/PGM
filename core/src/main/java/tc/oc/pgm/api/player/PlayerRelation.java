@@ -1,8 +1,8 @@
 package tc.oc.pgm.api.player;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents the competitive relationship between two {@link ParticipantState}s. The attacker can
@@ -19,7 +19,7 @@ public enum PlayerRelation {
   ENEMY; // different teams (same/different player doesn't matter)
 
   public static PlayerRelation get(ParticipantState victim, @Nullable MatchPlayerState attacker) {
-    checkNotNull(victim);
+    assertNotNull(victim);
 
     if (attacker == null || !attacker.getParty().isParticipating()) {
       return NEUTRAL;

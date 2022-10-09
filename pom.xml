@@ -231,14 +231,21 @@
                 </configuration>
             </plugin>
 
-            <!-- Make sure people are compiling against the correct JDK -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <version>3.1.0</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>de.skuzzle.enforcer</groupId>
+                        <artifactId>restrict-imports-enforcer-rule</artifactId>
+                        <version>2.0.0</version>
+                    </dependency>
+                </dependencies>
                 <executions>
+                     <!-- Make sure people are compiling against the correct JDK -->
                     <execution>
-                        <id>enforce-versions</id>
+                        <id>enforce-jdk</id>
                         <goals>
                             <goal>enforce</goal>
                         </goals>
@@ -248,6 +255,29 @@
                                     <!-- Fuzzy match -->
                                     <version>[${maven.compiler.target},)</version>
                                 </requireJavaVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                    <!-- Make sure people do not import restricted classes -->
+                    <execution>
+                        <id>enforce-imports</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <RestrictImports>
+                                    <reason>Use org.jetbrains.annotations to add annotations</reason>
+                                    <bannedImport>javax.annotation.**</bannedImport>
+                                </RestrictImports>
+                                <RestrictImports>
+                                    <reason>Use tc.oc.pgm.util.Assert to add assertions</reason>
+                                    <bannedImports>
+                                        <bannedImport>com.google.common.base.Preconditions.**</bannedImport>
+                                        <bannedImport>java.util.Objects.requireNonNull</bannedImport>
+                                    </bannedImports>
+                                </RestrictImports>
                             </rules>
                         </configuration>
                     </execution>

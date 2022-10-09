@@ -1,6 +1,5 @@
 package tc.oc.pgm.util.event;
 
-import javax.annotation.Nullable;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Cancellable;
@@ -22,6 +21,7 @@ import org.bukkit.event.vehicle.VehicleEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.event.weather.WeatherEvent;
 import org.bukkit.event.world.WorldEvent;
+import org.jetbrains.annotations.Nullable;
 
 /** An event that wraps another event. */
 public abstract class GeneralizedEvent extends PreemptiveEvent {

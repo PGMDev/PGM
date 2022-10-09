@@ -1,7 +1,7 @@
 package tc.oc.pgm.blitz;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
@@ -13,7 +13,7 @@ public class LifeManager {
   final Map<UUID, Integer> livesLeft = Maps.newHashMap();
 
   public LifeManager(int lives) {
-    checkArgument(lives > 0, "lives must be greater than zero");
+    assertTrue(lives > 0, "lives must be greater than zero");
 
     this.lives = lives;
   }
@@ -23,7 +23,7 @@ public class LifeManager {
   }
 
   public int getLives(UUID player) {
-    checkNotNull(player, "player id");
+    assertNotNull(player, "player id");
 
     Integer livesLeft = this.livesLeft.get(player);
     if (livesLeft != null) {
@@ -34,7 +34,7 @@ public class LifeManager {
   }
 
   public int addLives(UUID player, int dlives) {
-    checkNotNull(player, "player id");
+    assertNotNull(player, "player id");
 
     int lives = Math.max(0, this.getLives(player) + dlives);
     this.livesLeft.put(player, lives);

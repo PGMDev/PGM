@@ -1,6 +1,7 @@
 package tc.oc.pgm.util.attribute;
 
-import com.google.common.base.Preconditions;
+import static tc.oc.pgm.util.Assert.assertNotNull;
+
 import net.minecraft.server.v1_8_R3.AttributeMapBase;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -19,7 +20,7 @@ public class AttributeMapImpl implements AttributeMap {
 
   @Override
   public AttributeInstance getAttribute(Attribute attribute) {
-    Preconditions.checkArgument(attribute != null, "attribute");
+    assertNotNull(attribute, "attribute");
     net.minecraft.server.v1_8_R3.AttributeInstance nms = handle.a(toMinecraft(attribute.name()));
 
     return (nms == null) ? null : new AttributeInstanceImpl(nms, attribute);

@@ -2,7 +2,7 @@ package tc.oc.pgm.teams;
 
 import static tc.oc.pgm.api.map.MapProtos.FILTER_FEATURES;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;

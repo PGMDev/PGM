@@ -173,8 +173,4 @@ public interface BukkitUtils {
           .put(PotionEffectType.ABSORPTION, "Absorption")
           .put(PotionEffectType.SATURATION, "Saturation")
           .build();
-
-  static ChatColor convertColor(net.md_5.bungee.api.ChatColor color) {
-    return ChatColor.getByChar(color.toString().charAt(1));
-  }
 }

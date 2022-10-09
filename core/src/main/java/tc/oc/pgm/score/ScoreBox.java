@@ -1,12 +1,13 @@
 package tc.oc.pgm.score;
 
-import com.google.common.base.Preconditions;
+import static tc.oc.pgm.util.Assert.assertNotNull;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -29,12 +30,9 @@ public class ScoreBox {
       Filter filter,
       ImmutableMap<SingleMaterialMatcher, Double> redeemables,
       boolean silent) {
-    Preconditions.checkNotNull(region, "region");
-    Preconditions.checkNotNull(filter, "filter");
-
-    this.region = region;
+    this.region = assertNotNull(region, "region");
     this.score = score;
-    this.trigger = filter;
+    this.trigger = assertNotNull(filter, "filter");
     this.redeemables = redeemables;
     this.silent = silent;
   }
@@ -60,7 +58,7 @@ public class ScoreBox {
   }
 
   public @Nullable Instant getLastScoreTime(MatchPlayerState player) {
-    Preconditions.checkNotNull(player, "player");
+    assertNotNull(player, "player");
 
     return this.lastScoreTime.get(player);
   }
@@ -75,8 +73,8 @@ public class ScoreBox {
   }
 
   public void setLastScoreTime(MatchPlayerState player, Instant time) {
-    Preconditions.checkNotNull(player, "player");
-    Preconditions.checkNotNull(time, "time");
+    assertNotNull(player, "player");
+    assertNotNull(time, "time");
 
     this.lastScoreTime.put(player, time);
   }

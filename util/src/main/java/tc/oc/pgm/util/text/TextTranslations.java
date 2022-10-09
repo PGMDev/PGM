@@ -1,8 +1,8 @@
 package tc.oc.pgm.util.text;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -26,7 +26,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
@@ -36,6 +35,7 @@ import net.kyori.adventure.translation.Translator;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /** A singleton for accessing {@link MessageFormat} and {@link Component} translations. */
 @SuppressWarnings("UnstableApiUsage")
@@ -108,7 +108,7 @@ public final class TextTranslations {
 
   static {
     // If the source locale has no text translations, consider this a fatal error
-    checkArgument(
+    assertTrue(
         loadKeys(SOURCE_LOCALE) > 0,
         "no text translations found (are .properties files being included properly?)");
     // Attempt to pre-fetch the locale of the console, but if not present, is not a fatal error

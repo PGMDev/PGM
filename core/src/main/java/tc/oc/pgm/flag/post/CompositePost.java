@@ -1,7 +1,7 @@
 package tc.oc.pgm.flag.post;
 
 import com.google.common.collect.ImmutableList;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 
 public class CompositePost extends PostDefinition {

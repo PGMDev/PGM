@@ -1,9 +1,9 @@
 package tc.oc.pgm.tracker.info;
 
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.block.BlockState;
 import org.bukkit.material.MaterialData;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;

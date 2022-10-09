@@ -3,9 +3,9 @@ package tc.oc.pgm.modes;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.text.TemporalComponent.clock;
 
-import com.google.common.base.Preconditions;
 import java.time.Duration;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -29,7 +29,7 @@ public class ModesPaginatedResult extends PrettyPaginatedComponentResults<ModeCh
   public ModesPaginatedResult(
       Component header, int resultsPerPage, ObjectiveModesMatchModule modes) {
     super(header, resultsPerPage);
-    this.modes = Preconditions.checkNotNull(modes);
+    this.modes = assertNotNull(modes);
   }
 
   @Override

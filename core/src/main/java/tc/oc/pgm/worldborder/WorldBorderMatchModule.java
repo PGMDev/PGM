@@ -1,19 +1,19 @@
 package tc.oc.pgm.worldborder;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -37,8 +37,8 @@ public class WorldBorderMatchModule implements MatchModule, Listener {
 
   public WorldBorderMatchModule(Match match, List<WorldBorder> borders) {
     this.match = match;
-    checkNotNull(borders);
-    checkArgument(!borders.isEmpty());
+    assertNotNull(borders);
+    assertTrue(!borders.isEmpty());
     this.borders = borders;
   }
 

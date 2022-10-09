@@ -1,8 +1,8 @@
 package tc.oc.pgm.db;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.MapActivity;
 
 class MapActivityImpl implements MapActivity {
@@ -12,7 +12,7 @@ class MapActivityImpl implements MapActivity {
   private boolean active;
 
   MapActivityImpl(String poolName, @Nullable String mapName, boolean active) {
-    this.poolName = checkNotNull(poolName, "map pool name is null");
+    this.poolName = assertNotNull(poolName, "map pool name is null");
     this.mapName = mapName;
     this.active = active;
   }

@@ -1,9 +1,9 @@
 package tc.oc.pgm.util.bukkit;
 
-import com.google.common.base.Preconditions;
+import static tc.oc.pgm.util.Assert.assertNotNull;
+
 import java.lang.reflect.Method;
 import java.util.logging.Level;
-import javax.annotation.Nonnull;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -13,12 +13,13 @@ import org.bukkit.plugin.AuthorNagException;
 import org.bukkit.plugin.IllegalPluginAccessException;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredListener;
+import org.jetbrains.annotations.NotNull;
 
 public interface Events {
 
-  static void callEvent(@Nonnull Event event, @Nonnull EventPriority priority) {
-    Preconditions.checkNotNull(event, "event");
-    Preconditions.checkNotNull(priority, "priority");
+  static void callEvent(@NotNull Event event, @NotNull EventPriority priority) {
+    assertNotNull(event, "event");
+    assertNotNull(priority, "priority");
 
     // CraftBukkit does not expose the event calling logic in a flexible
     // enough way, so we have to do a bit of copy and paste.

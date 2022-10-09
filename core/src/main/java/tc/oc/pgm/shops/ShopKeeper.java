@@ -2,12 +2,12 @@ package tc.oc.pgm.shops;
 
 import static tc.oc.pgm.util.bukkit.BukkitUtils.colorize;
 
-import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.points.PointProvider;

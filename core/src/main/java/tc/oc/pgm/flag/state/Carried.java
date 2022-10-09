@@ -12,9 +12,9 @@ import java.util.Deque;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Location;
@@ -24,6 +24,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.MatchScope;
@@ -411,9 +412,9 @@ public class Carried extends Spawned implements Missing {
   }
 
   @Override
-  public org.bukkit.ChatColor getStatusColor(Party viewer) {
+  public TextColor getStatusColor(Party viewer) {
     if (this.flag.getDefinition().hasMultipleCarriers()) {
-      return this.carrier.getParty().getColor();
+      return this.carrier.getParty().getTextColor();
     } else {
       return super.getStatusColor(viewer);
     }

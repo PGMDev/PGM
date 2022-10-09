@@ -1,11 +1,11 @@
 package tc.oc.pgm.util.event;
 
-import javax.annotation.Nullable;
 import org.bukkit.entity.Item;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 /** An event when an {@link ItemStack} moves in or out of an {@link Inventory}. */
 public class ItemTransferEvent extends GeneralizedEvent {

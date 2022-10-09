@@ -1,6 +1,6 @@
 package tc.oc.pgm.match;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.lang.ref.WeakReference;
@@ -14,13 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
-import org.apache.commons.lang3.builder.CompareToBuilder;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -30,6 +24,8 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffect;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
@@ -87,7 +83,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   public MatchPlayerImpl(Match match, Player player) {
     this.logger =
         ClassLogger.get(
-            checkNotNull(match).getLogger(), getClass(), checkNotNull(player).getName());
+            assertNotNull(match).getLogger(), getClass(), assertNotNull(player).getName());
     this.match = match;
     this.id = player.getUniqueId();
     this.bukkit = new WeakReference<>(player);
@@ -454,7 +450,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   }
 
   @Override
-  public @Nonnull Audience audience() {
+  public @NotNull Audience audience() {
     return audience;
   }
 
@@ -483,33 +479,37 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
 
   @Override
   public int compareTo(MatchPlayer o) {
-    return new CompareToBuilder()
-        .append(getMatch(), o.getMatch())
-        .append(this.getId(), o.getId())
-        .build();
+    final int diff = this.id.compareTo(o.getId());
+    if (diff == 0) {
+      return this.match.getId().compareTo(o.getMatch().getId());
+    }
+    return diff;
   }
 
   @Override
   public int hashCode() {
-    return new HashCodeBuilder().append(getMatch()).append(this.getId()).build();
+    int hash = 7;
+    hash = 31 * hash + this.id.hashCode();
+    hash = 31 * hash + this.match.hashCode();
+    return hash;
   }
 
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof MatchPlayer)) return false;
     final MatchPlayer o = (MatchPlayer) obj;
-    return new EqualsBuilder()
-        .append(getMatch(), o.getMatch())
-        .append(this.getId(), o.getId())
-        .isEquals();
+    return this.id.equals(o.getId()) && this.match.equals(o.getMatch());
   }
 
   @Override
   public String toString() {
-    return new ToStringBuilder(this)
-        .append("id", this.getId())
-        .append("bukkit", getBukkit())
-        .append("match", getMatch().getId())
-        .build();
+    final Player player = this.getBukkit();
+    return "MatchPlayer{id="
+        + this.id
+        + ", player="
+        + (player == null ? "<null>" : player.getName())
+        + ", match="
+        + this.match.getId()
+        + "}";
   }
 }

@@ -1,11 +1,11 @@
 package tc.oc.pgm.filters.query;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
-import javax.annotation.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.jetbrains.annotations.Nullable;
 
 public class EntitySpawnQuery extends EntityQuery
     implements tc.oc.pgm.api.filter.query.EntitySpawnQuery {
@@ -15,7 +15,7 @@ public class EntitySpawnQuery extends EntityQuery
   public EntitySpawnQuery(
       @Nullable Event event, Entity entity, CreatureSpawnEvent.SpawnReason spawnReason) {
     super(event, entity);
-    this.spawnReason = checkNotNull(spawnReason);
+    this.spawnReason = assertNotNull(spawnReason);
   }
 
   @Override

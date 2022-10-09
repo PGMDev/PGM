@@ -1,12 +1,12 @@
 package tc.oc.pgm.util.event;
 
-import javax.annotation.Nullable;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * An event when an {@link ItemStack} moves in or out of an {@link PlayerInventory}.

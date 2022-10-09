@@ -9,6 +9,7 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.event.ClickEvent.runCommand;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
+import static net.kyori.adventure.text.format.Style.style;
 import static net.kyori.adventure.title.Title.title;
 import static tc.oc.pgm.util.TimeUtils.MAX_TICK;
 import static tc.oc.pgm.util.TimeUtils.fromTicks;
@@ -16,19 +17,17 @@ import static tc.oc.pgm.util.TimeUtils.fromTicks;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -57,8 +56,8 @@ import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.event.vehicle.VehicleMoveEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
@@ -71,8 +70,8 @@ import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
+import tc.oc.pgm.util.inventory.ItemBuilder;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.LOADED)
 public class FreezeMatchModule implements MatchModule, Listener {
@@ -110,19 +109,13 @@ public class FreezeMatchModule implements MatchModule, Listener {
   }
 
   private ItemStack getFreezeTool(CommandSender viewer) {
-    ItemStack stack = new ItemStack(TOOL_MATERIAL);
-    ItemMeta meta = stack.getItemMeta();
-    meta.setDisplayName(
-        ChatColor.WHITE
-            + ChatColor.BOLD.toString()
-            + TextTranslations.translate("moderation.freeze.itemName", viewer));
-    meta.addItemFlags(ItemFlag.values());
-    meta.setLore(
-        Collections.singletonList(
-            ChatColor.GRAY
-                + TextTranslations.translate("moderation.freeze.itemDescription", viewer)));
-    stack.setItemMeta(meta);
-    return stack;
+    return new ItemBuilder()
+        .material(TOOL_MATERIAL)
+        .flags(ItemFlag.values())
+        .name(viewer, translatable("moderation.freeze.itemName", style(TextDecoration.BOLD)))
+        .lore(
+            viewer, translatable("moderation.freeze.itemDewscription", style(NamedTextColor.GRAY)))
+        .build();
   }
 
   @EventHandler

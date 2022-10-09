@@ -1,17 +1,17 @@
 package tc.oc.pgm.tracker.trackers;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.Listener;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -63,7 +63,7 @@ public class EntityTracker implements Listener {
   }
 
   public @Nullable TrackerInfo resolveInfo(Entity entity) {
-    return entities.get(checkNotNull(entity));
+    return entities.get(assertNotNull(entity));
   }
 
   public @Nullable <T extends TrackerInfo> T resolveInfo(Entity entity, Class<T> infoType) {
@@ -81,7 +81,7 @@ public class EntityTracker implements Listener {
   }
 
   public void trackEntity(Entity entity, @Nullable TrackerInfo info) {
-    checkNotNull(entity);
+    assertNotNull(entity);
     if (info == null) {
       entities.remove(entity);
       logger.fine("Clear entity=" + entity);

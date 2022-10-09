@@ -8,9 +8,9 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.Nullable;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
@@ -30,6 +30,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.util.BlockVector;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.filter.query.LocationQuery;
 import tc.oc.pgm.api.filter.query.Query;
@@ -200,6 +201,10 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
   public ChatColor getBukkitColor() {
     return BukkitUtils.dyeColorToChatColor(this.getDyeColor());
+  }
+
+  public TextColor getTextColor() {
+    return TextFormatter.convert(this.getBukkitColor());
   }
 
   @Override
@@ -448,12 +453,12 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   }
 
   @Override
-  public ChatColor renderSidebarStatusColor(@Nullable Competitor competitor, Party viewer) {
+  public TextColor renderSidebarStatusColor(@Nullable Competitor competitor, Party viewer) {
     return this.state.getStatusColor(viewer);
   }
 
   @Override
-  public ChatColor renderSidebarLabelColor(@Nullable Competitor competitor, Party viewer) {
+  public TextColor renderSidebarLabelColor(@Nullable Competitor competitor, Party viewer) {
     return this.state.getLabelColor(viewer);
   }
 

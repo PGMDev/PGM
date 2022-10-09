@@ -3,10 +3,10 @@ package tc.oc.pgm.util.material.matcher;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Set;
-import javax.annotation.Nullable;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
 public class CompoundMaterialMatcher implements MaterialMatcher {

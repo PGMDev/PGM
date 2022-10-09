@@ -1,6 +1,6 @@
 package tc.oc.pgm.db;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.UUID;
 import tc.oc.pgm.api.setting.SettingKey;
@@ -13,12 +13,12 @@ class SettingsImpl implements Settings {
   private long bit;
 
   SettingsImpl(UUID id, long bit) {
-    this.id = checkNotNull(id, "settings id is null");
+    this.id = assertNotNull(id, "settings id is null");
     this.bit = bit;
   }
 
   public static long bitSettings(SettingValue value) {
-    return 1 << (checkNotNull(value, "setting value is null").ordinal() + 1);
+    return 1 << (assertNotNull(value, "setting value is null").ordinal() + 1);
   }
 
   protected final long getBit() {

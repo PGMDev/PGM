@@ -1,12 +1,12 @@
 package tc.oc.pgm.api.setting;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
 import org.bukkit.DyeColor;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.StringUtils;
 
 /**
@@ -57,9 +57,9 @@ public enum SettingValue {
   private final DyeColor color;
 
   SettingValue(String group, String name, DyeColor color) {
-    this.key = checkNotNull(group);
-    this.name = checkNotNull(name);
-    this.color = checkNotNull(color);
+    this.key = assertNotNull(group);
+    this.name = assertNotNull(name);
+    this.color = assertNotNull(color);
   }
 
   /**

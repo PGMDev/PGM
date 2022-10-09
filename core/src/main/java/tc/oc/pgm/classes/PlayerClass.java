@@ -1,15 +1,24 @@
 package tc.oc.pgm.classes;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
-import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.kits.Kit;
 
 public class PlayerClass {
+  private final String name;
+  private final String familyName;
+  private final @Nullable String description;
+  private final @Nullable String longdescription;
+  private final boolean sticky;
+  private final Set<Kit> kits;
+  private final MaterialData icon;
+  private final boolean restrict;
+
   public PlayerClass(
       String name,
       String familyName,
@@ -19,13 +28,13 @@ public class PlayerClass {
       Set<Kit> kits,
       MaterialData icon,
       boolean restrict) {
-    this.name = checkNotNull(name, "name");
-    this.familyName = checkNotNull(familyName, "family name");
+    this.name = assertNotNull(name, "name");
+    this.familyName = assertNotNull(familyName, "family name");
     this.description = description;
     this.longdescription = longdescription;
     this.sticky = sticky;
-    this.kits = ImmutableSet.copyOf(checkNotNull(kits, "kits"));
-    this.icon = checkNotNull(icon, "icon");
+    this.kits = ImmutableSet.copyOf(assertNotNull(kits, "kits"));
+    this.icon = assertNotNull(icon, "icon");
     this.restrict = restrict;
   }
 
@@ -102,13 +111,4 @@ public class PlayerClass {
     if (!this.icon.equals(other.icon)) return false;
     return true;
   }
-
-  final String name;
-  final String familyName;
-  final @Nullable String description;
-  final @Nullable String longdescription;
-  final boolean sticky;
-  final Set<Kit> kits;
-  final MaterialData icon;
-  final boolean restrict;
 }

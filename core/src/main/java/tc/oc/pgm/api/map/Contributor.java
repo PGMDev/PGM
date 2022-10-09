@@ -1,7 +1,7 @@
 package tc.oc.pgm.api.map;
 
 import java.util.UUID;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.named.Named;
 
 /** A named individual that helped contribute to a {@link MapInfo}. */

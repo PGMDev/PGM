@@ -7,11 +7,11 @@ import static tc.oc.pgm.util.text.TextException.exception;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Text;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.ChatColor;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.classes.ClassMatchModule;

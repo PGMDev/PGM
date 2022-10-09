@@ -1,6 +1,7 @@
 package tc.oc.pgm.kits;
 
-import com.google.common.base.Preconditions;
+import static tc.oc.pgm.util.Assert.assertTrue;
+
 import java.util.List;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -9,7 +10,7 @@ public class HealthKit extends AbstractKit {
   protected final int halfHearts;
 
   public HealthKit(int halfHearts) {
-    Preconditions.checkArgument(
+    assertTrue(
         0 < halfHearts && halfHearts <= 20,
         "halfHearts must be greater than 0 and less than or equal to 20");
     this.halfHearts = halfHearts;

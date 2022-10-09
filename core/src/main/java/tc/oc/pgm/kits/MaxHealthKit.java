@@ -1,6 +1,6 @@
 package tc.oc.pgm.kits;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import java.util.List;
 import org.bukkit.inventory.ItemStack;
@@ -13,7 +13,7 @@ public class MaxHealthKit extends AbstractKit {
   private final double maxHealth;
 
   public MaxHealthKit(double maxHealth) {
-    checkArgument(maxHealth > 0, "max health must be greater than zero");
+    assertTrue(maxHealth > 0, "max health must be greater than zero");
     this.maxHealth = maxHealth;
   }
 
