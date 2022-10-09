@@ -72,6 +72,7 @@ public class BlockDropsModule implements MapModule {
 
         boolean dropOnWrongTool =
             XMLUtils.parseBoolean(Node.fromChildOrAttr(elRule, "wrong-tool", "wrongtool"), false);
+        boolean breakable = XMLUtils.parseBoolean(Node.fromChildOrAttr(elRule, "break"), true);
         boolean punchable = XMLUtils.parseBoolean(Node.fromChildOrAttr(elRule, "punch"), false);
         boolean trample = XMLUtils.parseBoolean(Node.fromChildOrAttr(elRule, "trample"), false);
         Float fallChance =
@@ -105,6 +106,7 @@ public class BlockDropsModule implements MapModule {
                 filter,
                 region,
                 dropOnWrongTool,
+                breakable,
                 punchable,
                 trample,
                 new BlockDrops(

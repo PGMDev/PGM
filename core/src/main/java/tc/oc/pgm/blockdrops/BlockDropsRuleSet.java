@@ -13,6 +13,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -100,12 +101,12 @@ public class BlockDropsRuleSet {
     if (event instanceof BlockBreakEvent) {
       rightToolUsed =
           NMSHacks.canMineBlock(material, ((BlockBreakEvent) event).getPlayer().getItemInHand());
-      ;
     } else {
       rightToolUsed = true;
     }
 
     for (BlockDropsRule rule : this.rules) {
+      if (event instanceof BlockTransformEvent && !rule.breakable) continue;
       if (event instanceof PlayerPunchBlockEvent && !rule.punch) continue;
       if (event instanceof PlayerTrampleBlockEvent && !rule.trample) continue;
       if (rule.region != null && !rule.region.contains(block)) continue;
