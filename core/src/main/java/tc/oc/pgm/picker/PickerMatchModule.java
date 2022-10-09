@@ -575,7 +575,7 @@ public class PickerMatchModule implements MatchModule, Listener {
   }
 
   private ItemStack createClassButton(MatchPlayer viewer, PlayerClass cls) {
-    ItemStack item = new ItemStack(cls.getIcon());
+    ItemStack item = cls.getIcon().toItemStack(1);
     ItemMeta meta = item.getItemMeta();
 
     meta.setDisplayName(

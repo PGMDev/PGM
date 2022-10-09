@@ -4,8 +4,8 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.kits.Kit;
 
@@ -16,7 +16,7 @@ public class PlayerClass {
   private final @Nullable String longdescription;
   private final boolean sticky;
   private final Set<Kit> kits;
-  private final Material icon;
+  private final MaterialData icon;
   private final boolean restrict;
 
   public PlayerClass(
@@ -26,7 +26,7 @@ public class PlayerClass {
       @Nullable String longdescription,
       boolean sticky,
       Set<Kit> kits,
-      Material icon,
+      MaterialData icon,
       boolean restrict) {
     this.name = requireNonNull(name, "name");
     this.familyName = requireNonNull(familyName, "family name");
@@ -62,7 +62,7 @@ public class PlayerClass {
     return this.kits;
   }
 
-  public Material getIcon() {
+  public MaterialData getIcon() {
     return this.icon;
   }
 

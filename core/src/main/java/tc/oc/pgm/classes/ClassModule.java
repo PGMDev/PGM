@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-import org.bukkit.Material;
+import org.bukkit.material.MaterialData;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
@@ -178,7 +178,7 @@ public class ClassModule implements MapModule {
         kits.add(kit);
       }
 
-      Material icon = XMLUtils.parseMaterial(Node.fromAttr(classEl, "icon"));
+      MaterialData icon = XMLUtils.parseMaterialData(Node.fromAttr(classEl, "icon"));
 
       boolean restrict = XMLUtils.parseBoolean(classEl.getAttribute("restrict"), false);
 
