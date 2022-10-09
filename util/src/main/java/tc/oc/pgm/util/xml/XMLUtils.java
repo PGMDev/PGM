@@ -22,6 +22,7 @@ import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.Version;
@@ -520,7 +521,8 @@ public final class XMLUtils {
     }
   }
 
-  public static @Nullable Duration parseDuration(Node node) throws InvalidXMLException {
+  @Contract("null -> null; !null -> !null")
+  public static Duration parseDuration(Node node) throws InvalidXMLException {
     return parseDuration(node, null);
   }
 

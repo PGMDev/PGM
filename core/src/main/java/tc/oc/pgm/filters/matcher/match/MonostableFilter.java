@@ -26,7 +26,7 @@ public class MonostableFilter extends SingleFilterFunction
   private final Class<? extends Filterable<?>> scope;
 
   public static Filter afterMatchStart(Duration duration) {
-    return AllFilter.of(after(MatchPhaseFilter.RUNNING, duration), MatchPhaseFilter.RUNNING);
+    return after(MatchPhaseFilter.RUNNING, duration);
   }
 
   /**
@@ -36,7 +36,7 @@ public class MonostableFilter extends SingleFilterFunction
    * @param duration the duration to delay this filters rise
    */
   public static Filter after(Filter filter, Duration duration) {
-    return new InverseFilter(new MonostableFilter(filter, duration));
+    return AllFilter.of(filter, new InverseFilter(new MonostableFilter(filter, duration)));
   }
 
   public MonostableFilter(Filter filter, Duration duration) {
