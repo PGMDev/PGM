@@ -7,9 +7,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
@@ -59,7 +59,7 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
     List<MapInfo> mapList =
         section.getStringList("maps").stream()
             .map(mapName -> getMap(library, mapName))
-            .filter(Objects::NotNull)
+            .filter(Objects::nonNull)
             .collect(Collectors.toList());
     this.maps = Collections.unmodifiableList(mapList);
   }

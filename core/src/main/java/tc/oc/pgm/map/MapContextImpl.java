@@ -1,6 +1,6 @@
 package tc.oc.pgm.map;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
@@ -23,8 +23,8 @@ public class MapContextImpl extends MapInfoImpl implements MapContext {
 
   public MapContextImpl(MapInfo info, MapSource source, Collection<MapModule> modules) {
     super(info);
-    this.source = checkNotNull(source);
-    this.modules = ImmutableList.copyOf(checkNotNull(modules));
+    this.source = requireNonNull(source);
+    this.modules = ImmutableList.copyOf(requireNonNull(modules));
 
     for (MapModule module : this.modules) {
       this.tags.addAll(module.getTags());

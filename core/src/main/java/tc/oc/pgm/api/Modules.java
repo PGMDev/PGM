@@ -1,6 +1,6 @@
 package tc.oc.pgm.api;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -137,16 +137,16 @@ public interface Modules {
       new ConcurrentHashMap<>();
 
   static <M extends MatchModule> void register(Class<M> match, MatchModuleFactory<M> factory) {
-    if (MATCH.containsKey(checkNotNull(match)))
+    if (MATCH.containsKey(requireNonNull(match)))
       throw new IllegalArgumentException(match.getSimpleName() + " was registered twice");
-    MATCH.put(match, checkNotNull(factory));
+    MATCH.put(match, requireNonNull(factory));
   }
 
   static <M extends MatchModule, N extends MapModule<M>> void register(
       Class<N> map, @Nullable Class<M> match, MapModuleFactory<N> factory) {
-    if (MAP.containsKey(checkNotNull(map)) || MAP_TO_MATCH.containsKey(map))
+    if (MAP.containsKey(requireNonNull(map)) || MAP_TO_MATCH.containsKey(map))
       throw new IllegalArgumentException(map.getSimpleName() + " was registered twice");
-    MAP.put(map, checkNotNull(factory));
+    MAP.put(map, requireNonNull(factory));
     if (match != null) MAP_TO_MATCH.put(map, match);
   }
 

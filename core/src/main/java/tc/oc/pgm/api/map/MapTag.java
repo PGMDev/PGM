@@ -1,7 +1,7 @@
 package tc.oc.pgm.api.map;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
@@ -32,7 +32,7 @@ public final class MapTag implements Comparable<MapTag> {
       final boolean gamemode,
       final boolean auxiliary) {
     checkArgument(
-        PATTERN.matcher(checkNotNull(id)).matches(), name + " must match " + PATTERN.pattern());
+        PATTERN.matcher(requireNonNull(id)).matches(), name + " must match " + PATTERN.pattern());
     this.id = id;
     if (gamemode) {
       this.name = translatable("gamemode." + internalId + ".name");

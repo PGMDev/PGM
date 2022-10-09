@@ -1,6 +1,6 @@
 package tc.oc.pgm.api.party.event;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.party.Party;
@@ -13,8 +13,8 @@ public class PartyRenameEvent extends PartyEvent {
 
   public PartyRenameEvent(Party party, String oldName, String newName) {
     super(party);
-    this.oldName = checkNotNull(oldName, "old name");
-    this.newName = checkNotNull(newName, "new name");
+    this.oldName = requireNonNull(oldName, "old name");
+    this.newName = requireNonNull(newName, "new name");
   }
 
   /**

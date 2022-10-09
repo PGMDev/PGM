@@ -1,9 +1,9 @@
 package tc.oc.pgm.filters.query;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.event.Event;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 
@@ -13,7 +13,7 @@ public class PartyQuery extends Query implements tc.oc.pgm.api.filter.query.Part
 
   public PartyQuery(@Nullable Event event, Party party) {
     super(event);
-    this.party = checkNotNull(party);
+    this.party = requireNonNull(party);
   }
 
   @Override

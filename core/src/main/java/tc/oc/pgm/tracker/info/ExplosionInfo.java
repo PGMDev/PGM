@@ -1,9 +1,9 @@
 package tc.oc.pgm.tracker.info;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.Location;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.CauseInfo;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
@@ -16,7 +16,7 @@ public class ExplosionInfo implements DamageInfo, RangedInfo, CauseInfo {
   private final PhysicalInfo explosive;
 
   public ExplosionInfo(PhysicalInfo explosive) {
-    this.explosive = checkNotNull(explosive);
+    this.explosive = requireNonNull(explosive);
   }
 
   public PhysicalInfo getExplosive() {

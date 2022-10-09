@@ -74,7 +74,7 @@ public class SpectateMatchModule implements MatchModule, Listener {
     final Collection<UUID> list = spectators.get(player);
     if (list == null) return ImmutableList.of();
     return Collections.unmodifiableList(
-        list.stream().map(match::getPlayer).filter(Objects::NotNull).collect(Collectors.toList()));
+        list.stream().map(match::getPlayer).filter(Objects::nonNull).collect(Collectors.toList()));
   }
 
   /** Get the {@link MatchPlayer}s currently spectating the given {@link MatchPlayer}, if any. */

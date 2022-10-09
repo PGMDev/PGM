@@ -11,12 +11,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
@@ -134,7 +134,7 @@ public class PortalModule implements MapModule {
         // Figure out the forward trigger, from the dynamic filters or entrance region
         Filter forwardFinal =
             Stream.of(forward, transit, entrance)
-                .filter(Objects::NotNull)
+                .filter(Objects::nonNull)
                 .findFirst()
                 .orElseThrow(
                     () ->
@@ -146,7 +146,7 @@ public class PortalModule implements MapModule {
         Filter inverseTransit = transit != null ? new InverseFilter(transit) : null;
 
         final Optional<Filter> reverseFinal =
-            Stream.of(reverse, inverseTransit, exit).filter(Objects::NotNull).findFirst();
+            Stream.of(reverse, inverseTransit, exit).filter(Objects::nonNull).findFirst();
 
         // Portal is always bidirectional if a reverse dynamic filter is specified,
         // otherwise it must be enabled explicitly.

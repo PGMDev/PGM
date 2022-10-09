@@ -1,7 +1,7 @@
 package tc.oc.pgm.goals;
 
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.DyeColor;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;

@@ -1,10 +1,11 @@
 package tc.oc.pgm.goals.events;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.time.Instant;
+import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.goals.TouchableGoal;
@@ -45,9 +46,9 @@ public class GoalTouchEvent extends GoalEvent {
     this.firstForCompetitor = firstForCompetitor;
     this.firstForPlayer = firstForPlayer;
     this.firstForPlayerLife = firstForPlayerLife;
-    this.goal = Preconditions.checkNotNull(goal, "Goal");
+    this.goal = requireNonNull(goal, "Goal");
     this.player = player;
-    this.time = Preconditions.checkNotNull(time, "Time");
+    this.time = requireNonNull(time, "Time");
   }
 
   public GoalTouchEvent(TouchableGoal goal, Instant time) {

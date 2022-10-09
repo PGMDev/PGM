@@ -1,12 +1,12 @@
 package tc.oc.pgm.db;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.util.UUID;
-import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.util.UsernameResolver;
 import tc.oc.pgm.util.named.NameStyle;
@@ -18,7 +18,7 @@ class UsernameImpl implements Username {
   private String name;
 
   UsernameImpl(UUID id, @Nullable String name) {
-    this.id = checkNotNull(id, "username id is null");
+    this.id = requireNonNull(id, "username id is null");
     setName(name);
   }
 

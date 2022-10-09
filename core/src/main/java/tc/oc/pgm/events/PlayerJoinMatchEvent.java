@@ -1,6 +1,6 @@
 package tc.oc.pgm.events;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -19,6 +19,6 @@ import tc.oc.pgm.api.player.event.MatchPlayerAddEvent;
 public class PlayerJoinMatchEvent extends PlayerJoinPartyEvent {
 
   public PlayerJoinMatchEvent(MatchPlayer player, Party newParty) {
-    super(player, null, checkNotNull(newParty));
+    super(player, null, requireNonNull(newParty));
   }
 }

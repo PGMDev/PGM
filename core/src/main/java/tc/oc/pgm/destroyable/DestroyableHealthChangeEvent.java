@@ -1,8 +1,8 @@
 package tc.oc.pgm.destroyable;
 
+import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.match.Match;
 
 /**

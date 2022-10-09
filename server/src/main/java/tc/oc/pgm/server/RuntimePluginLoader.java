@@ -1,6 +1,6 @@
 package tc.oc.pgm.server;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static tc.oc.pgm.util.reflect.ReflectionUtils.readField;
 
 import java.io.File;
@@ -37,7 +37,7 @@ public class RuntimePluginLoader implements PluginLoader {
   private final PluginLoader loader;
 
   public RuntimePluginLoader(Server server) {
-    this.server = checkNotNull(server);
+    this.server = requireNonNull(server);
     this.loader = new JavaPluginLoader(server);
   }
 

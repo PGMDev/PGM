@@ -3,11 +3,11 @@ package tc.oc.pgm.util.tablist;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.text.TextTranslations;
 

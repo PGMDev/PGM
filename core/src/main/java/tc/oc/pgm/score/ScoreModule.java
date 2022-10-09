@@ -1,6 +1,7 @@
 package tc.oc.pgm.score;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -10,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-import org.jetbrains.annotations.NotNull;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
@@ -39,8 +40,8 @@ public class ScoreModule implements MapModule {
   private static final MapTag BOX_TAG = new MapTag("scorebox", "Scorebox", false, true);
 
   public ScoreModule(@NotNull ScoreConfig config, @NotNull Set<ScoreBoxFactory> scoreBoxFactories) {
-    Preconditions.checkNotNull(config, "score config");
-    Preconditions.checkNotNull(scoreBoxFactories, "score box factories");
+    requireNonNull(config, "score config");
+    requireNonNull(scoreBoxFactories, "score box factories");
 
     this.config = config;
     this.scoreBoxFactories = scoreBoxFactories;

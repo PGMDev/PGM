@@ -1,6 +1,7 @@
 package tc.oc.pgm.score;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import java.time.Duration;
@@ -29,12 +30,9 @@ public class ScoreBox {
       Filter filter,
       ImmutableMap<SingleMaterialMatcher, Double> redeemables,
       boolean silent) {
-    Preconditions.checkNotNull(region, "region");
-    Preconditions.checkNotNull(filter, "filter");
-
-    this.region = region;
+    this.region = requireNonNull(region, "region");
     this.score = score;
-    this.trigger = filter;
+    this.trigger = requireNonNull(filter, "filter");
     this.redeemables = redeemables;
     this.silent = silent;
   }
@@ -60,7 +58,7 @@ public class ScoreBox {
   }
 
   public @Nullable Instant getLastScoreTime(MatchPlayerState player) {
-    Preconditions.checkNotNull(player, "player");
+    requireNonNull(player, "player");
 
     return this.lastScoreTime.get(player);
   }
@@ -75,8 +73,8 @@ public class ScoreBox {
   }
 
   public void setLastScoreTime(MatchPlayerState player, Instant time) {
-    Preconditions.checkNotNull(player, "player");
-    Preconditions.checkNotNull(time, "time");
+    requireNonNull(player, "player");
+    requireNonNull(time, "time");
 
     this.lastScoreTime.put(player, time);
   }

@@ -2,8 +2,8 @@ package tc.oc.pgm.filters;
 
 import java.util.Collection;
 import java.util.stream.Stream;
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.event.Event;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;

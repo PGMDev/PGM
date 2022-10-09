@@ -1,6 +1,6 @@
 package tc.oc.pgm.command;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
@@ -23,12 +23,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent.Builder;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.Contributor;
@@ -126,7 +126,7 @@ public final class MapCommand {
   private static boolean matchesTags(
       MapInfo map, @Nullable Collection<String> posTags, @Nullable Collection<String> negTags) {
     int matches = 0;
-    for (MapTag tag : checkNotNull(map).getTags()) {
+    for (MapTag tag : requireNonNull(map).getTags()) {
       if (negTags != null && negTags.contains(tag.getId())) {
         return false;
       }
@@ -138,8 +138,8 @@ public final class MapCommand {
   }
 
   private static boolean matchesAuthor(MapInfo map, String query) {
-    checkNotNull(map);
-    query = checkNotNull(query).toLowerCase();
+    requireNonNull(map);
+    query = requireNonNull(query).toLowerCase();
 
     for (Contributor contributor : map.getAuthors()) {
       if (contributor.getNameLegacy().toLowerCase().contains(query)) {
@@ -150,14 +150,14 @@ public final class MapCommand {
   }
 
   private static boolean matchesName(MapInfo map, String query) {
-    checkNotNull(map);
-    query = checkNotNull(query).toLowerCase();
+    requireNonNull(map);
+    query = requireNonNull(query).toLowerCase();
     return map.getName().toLowerCase().contains(query);
   }
 
   private static boolean matchesPhase(MapInfo map, String query) {
-    checkNotNull(map);
-    query = checkNotNull(query).toLowerCase();
+    requireNonNull(map);
+    query = requireNonNull(query).toLowerCase();
     return map.getPhase().equals(Phase.of(query));
   }
 
@@ -270,7 +270,7 @@ public final class MapCommand {
   }
 
   private Component createTagsComponent(Collection<MapTag> tags) {
-    checkNotNull(tags);
+    requireNonNull(tags);
 
     Builder result = text().append(mapInfoLabel("map.info.tags"));
     MapTag[] mapTags = tags.toArray(new MapTag[0]);
@@ -300,8 +300,8 @@ public final class MapCommand {
   }
 
   private static Component createPlayerLimitComponent(CommandSender sender, MapInfo map) {
-    checkNotNull(sender);
-    checkNotNull(map);
+    requireNonNull(sender);
+    requireNonNull(map);
 
     Collection<Integer> maxPlayers = map.getMaxPlayers();
     if (maxPlayers.isEmpty()) {

@@ -1,6 +1,6 @@
 package tc.oc.pgm.tracker.info;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import org.bukkit.Location;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -12,7 +12,7 @@ public class TNTInfo extends OwnerInfoBase implements RangedInfo {
 
   public TNTInfo(ParticipantState owner, Location origin) {
     super(owner);
-    this.origin = checkNotNull(origin);
+    this.origin = requireNonNull(origin);
   }
 
   @Override

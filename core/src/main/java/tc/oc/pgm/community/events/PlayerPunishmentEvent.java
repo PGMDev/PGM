@@ -1,6 +1,6 @@
 package tc.oc.pgm.community.events;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.time.Duration;
 import org.bukkit.command.CommandSender;
@@ -26,12 +26,12 @@ public class PlayerPunishmentEvent extends PreemptiveEvent {
       String reason,
       Duration duration,
       boolean silent) {
-    this.sender = checkNotNull(sender);
-    this.player = checkNotNull(player);
-    this.punishment = checkNotNull(punishment);
-    this.reason = checkNotNull(reason);
-    this.duration = checkNotNull(duration);
-    this.silent = checkNotNull(silent);
+    this.sender = requireNonNull(sender);
+    this.player = requireNonNull(player);
+    this.punishment = requireNonNull(punishment);
+    this.reason = requireNonNull(reason);
+    this.duration = requireNonNull(duration);
+    this.silent = requireNonNull(silent);
   }
 
   public CommandSender getSender() {

@@ -8,11 +8,11 @@ import static tc.oc.pgm.util.text.TextTranslations.translate;
 
 import com.google.common.collect.Range;
 import java.util.Locale;
-import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.util.ComponentMessageThrowable;
+import org.jetbrains.annotations.Nullable;
 
 /** An exception with a localized error message. */
 public class TextException extends RuntimeException implements ComponentMessageThrowable {

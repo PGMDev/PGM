@@ -1,6 +1,6 @@
 package tc.oc.pgm.listeners;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
@@ -191,7 +191,7 @@ public class PGMListener implements Listener {
 
   public static void announceJoinOrLeave(
       MatchPlayer player, boolean join, boolean staffOnly, boolean force) {
-    checkNotNull(player);
+    requireNonNull(player);
     Collection<MatchPlayer> viewers =
         player.getMatch().getPlayers().stream()
             .filter(p -> !staffOnly || p.getBukkit().hasPermission(Permissions.STAFF))

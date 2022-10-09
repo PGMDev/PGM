@@ -1,12 +1,12 @@
 package tc.oc.pgm.classes;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.kits.Kit;
 
 public class PlayerClass {
@@ -28,13 +28,13 @@ public class PlayerClass {
       Set<Kit> kits,
       Material icon,
       boolean restrict) {
-    this.name = checkNotNull(name, "name");
-    this.familyName = checkNotNull(familyName, "family name");
+    this.name = requireNonNull(name, "name");
+    this.familyName = requireNonNull(familyName, "family name");
     this.description = description;
     this.longdescription = longdescription;
     this.sticky = sticky;
-    this.kits = ImmutableSet.copyOf(checkNotNull(kits, "kits"));
-    this.icon = checkNotNull(icon, "icon");
+    this.kits = ImmutableSet.copyOf(requireNonNull(kits, "kits"));
+    this.icon = requireNonNull(icon, "icon");
     this.restrict = restrict;
   }
 

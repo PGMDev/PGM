@@ -1,7 +1,7 @@
 package tc.oc.pgm.api.event;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -32,23 +32,23 @@ public class BlockTransformEvent extends GeneralizedEvent {
   private BlockDrops drops;
 
   public BlockTransformEvent(Event cause, Block block, BlockState oldState, BlockState newState) {
-    super(checkNotNull(cause));
-    this.block = checkNotNull(block);
-    this.oldState = checkNotNull(oldState);
-    this.newState = checkNotNull(newState);
+    super(requireNonNull(cause));
+    this.block = requireNonNull(block);
+    this.oldState = requireNonNull(oldState);
+    this.newState = requireNonNull(newState);
     checkArgument(block.getWorld().equals(oldState.getWorld()));
     checkArgument(block.getWorld().equals(newState.getWorld()));
   }
 
   public BlockTransformEvent(Event cause, BlockState oldState, BlockState newState) {
-    this(cause, checkNotNull(oldState).getBlock(), oldState, newState);
+    this(cause, requireNonNull(oldState).getBlock(), oldState, newState);
   }
 
   public BlockTransformEvent(Event cause, Block block, MaterialData newMaterial) {
     this(
         cause,
         block,
-        checkNotNull(block).getState(),
+        requireNonNull(block).getState(),
         BlockStates.cloneWithMaterial(block, newMaterial));
   }
 
@@ -56,7 +56,7 @@ public class BlockTransformEvent extends GeneralizedEvent {
     this(
         cause,
         block,
-        checkNotNull(block).getState(),
+        requireNonNull(block).getState(),
         BlockStates.cloneWithMaterial(block, newMaterial));
   }
 

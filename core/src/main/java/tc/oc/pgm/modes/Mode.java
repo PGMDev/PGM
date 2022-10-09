@@ -3,10 +3,10 @@ package tc.oc.pgm.modes;
 import static net.kyori.adventure.text.Component.text;
 
 import java.time.Duration;
-import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.material.MaterialData;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 

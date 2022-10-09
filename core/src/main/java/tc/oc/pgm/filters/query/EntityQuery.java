@@ -1,10 +1,10 @@
 package tc.oc.pgm.filters.query;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.query.EntityTypeQuery;
 import tc.oc.pgm.api.match.Match;
@@ -15,7 +15,7 @@ public class EntityQuery extends Query implements EntityTypeQuery {
 
   public EntityQuery(@Nullable Event event, Entity entity) {
     super(event);
-    this.entity = checkNotNull(entity);
+    this.entity = requireNonNull(entity);
   }
 
   @Override

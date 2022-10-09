@@ -1,17 +1,14 @@
 package tc.oc.pgm.match;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.util.Optional;
 import java.util.UUID;
-import org.jetbrains.annotations.NotNull;
 import net.kyori.adventure.text.Component;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -20,7 +17,6 @@ import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.named.NameStyle;
 
 public class MatchPlayerStateImpl implements MatchPlayerState {
-
   private final Match match;
   private final String username;
   private final UUID uuid;
@@ -29,10 +25,10 @@ public class MatchPlayerStateImpl implements MatchPlayerState {
   private final Audience audience;
 
   protected MatchPlayerStateImpl(MatchPlayer player) {
-    this.match = checkNotNull(player).getMatch();
+    this.match = requireNonNull(player).getMatch();
     this.username = player.getBukkit().getName();
     this.uuid = player.getId();
-    this.party = checkNotNull(player.getParty());
+    this.party = requireNonNull(player.getParty());
     this.location = player.getBukkit().getLocation().toVector();
     this.audience = getPlayer().isPresent() ? getPlayer().get() : Audience.empty();
   }
@@ -81,27 +77,32 @@ public class MatchPlayerStateImpl implements MatchPlayerState {
 
   @Override
   public int hashCode() {
-    return new HashCodeBuilder().append(getMatch()).append(getParty()).append(getId()).build();
+    int hash = 7;
+    hash = 31 * hash + this.getId().hashCode();
+    hash = 31 * hash + this.getParty().hashCode();
+    hash = 31 * hash + this.getMatch().hashCode();
+    return hash;
   }
 
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof MatchPlayerState)) return false;
     final MatchPlayerState o = (MatchPlayerState) obj;
-    return new EqualsBuilder()
-        .append(getMatch(), o.getMatch())
-        .append(getParty(), o.getParty())
-        .append(getId(), o.getId())
-        .isEquals();
+    return this.getId().equals(o.getId())
+        && this.getParty().equals(o.getParty())
+        && this.getMatch().equals(o.getMatch());
   }
 
   @Override
   public String toString() {
-    return new ToStringBuilder(this)
-        .append("id", getId())
-        .append("party", getParty().getDefaultName())
-        .append("match", getMatch().getId())
-        .append("location", location)
-        .build();
+    return "MatchPlayerState{id="
+        + this.getId()
+        + ", party="
+        + this.getParty().getDefaultName()
+        + ", match="
+        + this.getMatch().getId()
+        + ", location="
+        + this.location
+        + "}";
   }
 }

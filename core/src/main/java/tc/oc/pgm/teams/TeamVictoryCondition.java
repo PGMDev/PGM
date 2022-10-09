@@ -1,6 +1,6 @@
 package tc.oc.pgm.teams;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static net.kyori.adventure.text.Component.translatable;
 
 import net.kyori.adventure.text.Component;
@@ -13,7 +13,7 @@ public class TeamVictoryCondition extends ImmediateVictoryCondition {
   private TeamFactory teamDefinition;
 
   public TeamVictoryCondition(TeamFactory teamDefinition) {
-    this.teamDefinition = checkNotNull(teamDefinition);
+    this.teamDefinition = requireNonNull(teamDefinition);
   }
 
   public Team getTeam(Match match) {

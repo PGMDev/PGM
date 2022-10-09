@@ -1,9 +1,10 @@
 package tc.oc.pgm.blitz;
 
-import com.google.common.base.Preconditions;
-import org.jetbrains.annotations.NotNull;
+import static java.util.Objects.requireNonNull;
+
 import org.bukkit.Location;
 import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerEvent;
@@ -20,14 +21,9 @@ public class BlitzPlayerEliminatedEvent extends MatchPlayerEvent {
       @NotNull Competitor competitor,
       @NotNull Location deathLocation) {
     super(player);
-
-    Preconditions.checkNotNull(player, "match player");
-    Preconditions.checkNotNull(competitor, "competitor");
-    Preconditions.checkNotNull(deathLocation, "death location");
-
-    this.player = player;
-    this.competitor = competitor;
-    this.deathLocation = deathLocation;
+    this.player = requireNonNull(player, "match player");
+    this.competitor = requireNonNull(competitor, "competitor");
+    this.deathLocation = requireNonNull(deathLocation, "death location");
   }
 
   /**

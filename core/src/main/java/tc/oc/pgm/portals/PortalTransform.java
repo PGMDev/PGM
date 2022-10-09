@@ -1,6 +1,6 @@
 package tc.oc.pgm.portals;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Optional;
 import java.util.Random;
@@ -123,8 +123,8 @@ public interface PortalTransform extends InvertibleOperator<PortalTransform> {
     private final Region to;
 
     private Regional(Optional<Region> from, Region to) {
-      this.from = checkNotNull(from);
-      this.to = checkNotNull(to);
+      this.from = requireNonNull(from);
+      this.to = requireNonNull(to);
       this.random = new Random();
     }
 
@@ -168,8 +168,8 @@ public interface PortalTransform extends InvertibleOperator<PortalTransform> {
     private final PortalTransform first, last;
 
     private Concatenate(PortalTransform first, PortalTransform last) {
-      this.first = checkNotNull(first);
-      this.last = checkNotNull(last);
+      this.first = requireNonNull(first);
+      this.last = requireNonNull(last);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package tc.oc.pgm.fireworks;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
@@ -236,8 +238,8 @@ public class FireworkMatchModule implements MatchModule, Listener {
   }
 
   public static Firework spawnFirework(Location location, FireworkEffect effect, int power) {
-    Preconditions.checkNotNull(location, "location");
-    Preconditions.checkNotNull(effect, "firework effect");
+    requireNonNull(location, "location");
+    requireNonNull(effect, "firework effect");
     Preconditions.checkArgument(power >= 0, "power must be positive");
 
     FireworkMeta meta = (FireworkMeta) Bukkit.getItemFactory().getItemMeta(Material.FIREWORK);
@@ -251,7 +253,7 @@ public class FireworkMatchModule implements MatchModule, Listener {
   }
 
   public static Location getOpenSpaceAbove(Location location) {
-    Preconditions.checkNotNull(location, "location");
+    requireNonNull(location, "location");
 
     Block block = location.getBlock();
 

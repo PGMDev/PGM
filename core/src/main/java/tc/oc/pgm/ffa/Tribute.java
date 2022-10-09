@@ -1,6 +1,6 @@
 package tc.oc.pgm.ffa;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static net.kyori.adventure.text.Component.*;
 import static tc.oc.pgm.util.text.PlayerComponent.player;
 
@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
@@ -16,6 +15,7 @@ import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -156,7 +156,7 @@ public class Tribute implements Competitor {
 
   @Override
   public void addPlayer(final MatchPlayer player) {
-    checkPlayer(checkNotNull(player).getId());
+    checkPlayer(requireNonNull(player).getId());
     this.player = player;
     this.players = Collections.unmodifiableList(Collections.singletonList(player));
   }

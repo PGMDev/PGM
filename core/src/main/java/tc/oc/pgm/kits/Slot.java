@@ -6,12 +6,12 @@ import com.google.common.collect.Range;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 
 /**

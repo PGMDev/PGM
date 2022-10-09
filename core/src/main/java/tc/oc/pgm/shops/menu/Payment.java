@@ -1,10 +1,10 @@
 package tc.oc.pgm.shops.menu;
 
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.jetbrains.annotations.Nullable;
 
 public class Payment {
 

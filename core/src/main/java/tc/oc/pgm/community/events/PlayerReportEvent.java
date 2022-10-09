@@ -1,6 +1,6 @@
 package tc.oc.pgm.community.events;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -14,9 +14,9 @@ public class PlayerReportEvent extends PreemptiveEvent {
   private final String reason;
 
   public PlayerReportEvent(MatchPlayer sender, MatchPlayer player, String reason) {
-    this.sender = checkNotNull(sender);
-    this.player = checkNotNull(player);
-    this.reason = checkNotNull(reason);
+    this.sender = requireNonNull(sender);
+    this.player = requireNonNull(player);
+    this.reason = requireNonNull(reason);
   }
 
   public MatchPlayer getSender() {

@@ -1,14 +1,15 @@
 package tc.oc.pgm.countdowns;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.bukkit.scheduler.BukkitRunnable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.util.ClassLogger;
@@ -33,8 +34,8 @@ public class CountdownRunner extends BukkitRunnable {
   private Future<?> task = null;
 
   public CountdownRunner(@NotNull Match match, Logger parentLogger, @NotNull Countdown countdown) {
-    Preconditions.checkNotNull(match, "match");
-    Preconditions.checkNotNull(countdown, "countdown");
+    requireNonNull(match, "match");
+    requireNonNull(countdown, "countdown");
 
     this.match = match;
     this.logger = ClassLogger.get(parentLogger, getClass());

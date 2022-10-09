@@ -1,11 +1,11 @@
 package tc.oc.pgm.tracker.trackers;
 
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.tracker.DamageResolver;
 import tc.oc.pgm.api.tracker.info.DamageInfo;

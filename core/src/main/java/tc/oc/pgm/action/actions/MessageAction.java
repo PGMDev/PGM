@@ -1,8 +1,8 @@
 package tc.oc.pgm.action.actions;
 
-import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.Audience;
 
 public class MessageAction extends AbstractAction<Audience> {

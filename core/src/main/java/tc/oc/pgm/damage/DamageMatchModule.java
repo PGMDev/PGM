@@ -1,9 +1,8 @@
 package tc.oc.pgm.damage;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.List;
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
@@ -20,6 +19,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.DamageQuery;
 import tc.oc.pgm.api.filter.query.Query;
@@ -151,7 +151,7 @@ public class DamageMatchModule implements MatchModule, Listener {
   /** Query the given damage event and cancel it if the result was denied. */
   public Filter.QueryResponse processDamageEvent(
       Cancellable event, ParticipantState victim, DamageInfo damageInfo) {
-    Filter.QueryResponse response = queryDamage(checkNotNull(event), victim, damageInfo);
+    Filter.QueryResponse response = queryDamage(requireNonNull(event), victim, damageInfo);
     if (response.isDenied()) {
       event.setCancelled(true);
     }

@@ -1,7 +1,7 @@
 package tc.oc.pgm.filters.matcher;
 
-import com.google.common.base.Preconditions;
-import org.jetbrains.annotations.Nullable;
+import static java.util.Objects.requireNonNull;
+
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -13,6 +13,7 @@ import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.api.tracker.info.*;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
@@ -59,8 +60,7 @@ public class CauseFilter extends TypedFilter.Impl<MatchQuery> {
   private final Cause cause;
 
   public CauseFilter(Cause cause) {
-    Preconditions.checkNotNull(cause);
-    this.cause = cause;
+    this.cause = requireNonNull(cause, "cause");
   }
 
   @Override

@@ -10,7 +10,7 @@ public class PlayerClassFilter extends TypedFilter.Impl<PlayerQuery> {
   protected final PlayerClass playerClass;
 
   public PlayerClassFilter(PlayerClass playerClass) {
-    this.playerClass = Preconditions.checkNotNull(playerClass, "player class");
+    this.playerClass = Preconditions.requireNonNull(playerClass, "player class");
   }
 
   @Override

@@ -1,6 +1,6 @@
 package tc.oc.pgm.result;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static net.kyori.adventure.text.Component.translatable;
 
 import net.kyori.adventure.text.Component;
@@ -13,7 +13,7 @@ public class CompetitorVictoryCondition extends ImmediateVictoryCondition {
   private final Competitor competitor;
 
   public CompetitorVictoryCondition(Competitor competitor) {
-    this.competitor = checkNotNull(competitor);
+    this.competitor = requireNonNull(competitor);
   }
 
   @Override

@@ -1,6 +1,6 @@
 package tc.oc.pgm.listeners;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -45,10 +45,10 @@ public class ServerPingDataListener implements Listener {
       MapOrder mapOrder,
       Logger parentLogger,
       VanishManager vanishManager) {
-    this.matchManager = checkNotNull(matchManager);
-    this.mapOrder = checkNotNull(mapOrder);
-    this.logger = ClassLogger.get(checkNotNull(parentLogger), ServerPingDataListener.class);
-    this.vanishManager = checkNotNull(vanishManager);
+    this.matchManager = requireNonNull(matchManager);
+    this.mapOrder = requireNonNull(mapOrder);
+    this.logger = ClassLogger.get(requireNonNull(parentLogger), ServerPingDataListener.class);
+    this.vanishManager = requireNonNull(vanishManager);
     this.ready = new AtomicBoolean();
     this.legacySportPaper = new AtomicBoolean();
     this.matchCache =
@@ -104,8 +104,8 @@ public class ServerPingDataListener implements Listener {
   }
 
   private void serializeMatch(Match match, JsonObject jsonObject) {
-    checkNotNull(match);
-    checkNotNull(jsonObject);
+    requireNonNull(match);
+    requireNonNull(jsonObject);
 
     jsonObject.addProperty("state", match.getPhase().toString());
     jsonObject.addProperty("duration", match.getDuration().getSeconds());
@@ -121,7 +121,7 @@ public class ServerPingDataListener implements Listener {
   }
 
   private void appendNextMap(JsonObject jsonObject) {
-    checkNotNull(jsonObject);
+    requireNonNull(jsonObject);
 
     MapInfo nextMap = mapOrder.getNextMap();
 
@@ -133,8 +133,8 @@ public class ServerPingDataListener implements Listener {
   }
 
   private void serializeMap(MapInfo map, JsonObject jsonObject) {
-    checkNotNull(map);
-    checkNotNull(jsonObject);
+    requireNonNull(map);
+    requireNonNull(jsonObject);
 
     jsonObject.addProperty("id", map.getId());
     jsonObject.addProperty("name", map.getName());
@@ -171,8 +171,8 @@ public class ServerPingDataListener implements Listener {
   }
 
   private void serializeContributor(Contributor contributor, JsonObject jsonObject) {
-    checkNotNull(contributor, "contributor");
-    checkNotNull(jsonObject, "jsonObject");
+    requireNonNull(contributor, "contributor");
+    requireNonNull(jsonObject, "jsonObject");
 
     jsonObject.addProperty("name", contributor.getNameLegacy());
     if (contributor instanceof PlayerContributor) {

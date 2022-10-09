@@ -2,10 +2,10 @@ package tc.oc.pgm.events;
 
 import static net.kyori.adventure.text.Component.translatable;
 
-import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerEvent;

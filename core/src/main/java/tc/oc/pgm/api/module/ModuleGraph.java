@@ -1,6 +1,6 @@
 package tc.oc.pgm.api.module;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -75,7 +75,7 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
 
   protected F getFactory(Class<? extends M> key, @Nullable Class<? extends M> requiredBy)
       throws ModuleLoadException {
-    if (checkNotNull(key) == requiredBy) {
+    if (requireNonNull(key) == requiredBy) {
       throw new ModuleLoadException(key, "Required itself (is there a circular dependency?)");
     }
 

@@ -1,6 +1,6 @@
 package tc.oc.pgm.flag.event;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.party.Competitor;
@@ -17,7 +17,7 @@ public class FlagCaptureEvent extends GoalCompleteEvent {
   private final boolean allFlagsCaptured;
 
   public FlagCaptureEvent(Flag flag, MatchPlayer carrier, NetDefinition net) {
-    super(flag.getMatch(), flag, (Competitor) checkNotNull(carrier).getParty(), true);
+    super(flag.getMatch(), flag, (Competitor) requireNonNull(carrier).getParty(), true);
     this.net = net;
     this.carrier = carrier;
 

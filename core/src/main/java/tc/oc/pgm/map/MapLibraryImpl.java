@@ -1,6 +1,6 @@
 package tc.oc.pgm.map;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.Iterators;
 import java.lang.ref.SoftReference;
@@ -18,8 +18,8 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.ChatColor;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
@@ -46,16 +46,16 @@ public class MapLibraryImpl implements MapLibrary {
     private final SoftReference<MapContext> context;
 
     private MapEntry(MapSource source, MapInfo info, MapContext context) {
-      this.source = checkNotNull(source);
-      this.info = checkNotNull(info);
-      this.context = new SoftReference<>(checkNotNull(context));
+      this.source = requireNonNull(source);
+      this.info = requireNonNull(info);
+      this.context = new SoftReference<>(requireNonNull(context));
     }
   }
 
   public MapLibraryImpl(
       Logger logger, List<MapSourceFactory> factories, MapIncludeProcessor includes) {
-    this.logger = checkNotNull(logger); // Logger should be visible in-game
-    this.factories = Collections.synchronizedList(checkNotNull(factories));
+    this.logger = requireNonNull(logger); // Logger should be visible in-game
+    this.factories = Collections.synchronizedList(requireNonNull(factories));
     this.maps = Collections.synchronizedSortedMap(new ConcurrentSkipListMap<>());
     this.failed = Collections.synchronizedSet(new HashSet<>());
     this.includes = includes;

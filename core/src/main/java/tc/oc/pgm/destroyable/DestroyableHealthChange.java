@@ -1,10 +1,11 @@
 package tc.oc.pgm.destroyable;
 
-import com.google.common.base.Preconditions;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import static java.util.Objects.requireNonNull;
+
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 
 /** Provides additional information about why a {@link Destroyable} was damaged. */
@@ -25,7 +26,7 @@ public class DestroyableHealthChange {
       @NotNull BlockState newState,
       @Nullable ParticipantState playerCause,
       int healthChange) {
-    Preconditions.checkNotNull(oldState, "old block state");
+    requireNonNull(oldState, "old block state");
 
     this.oldState = oldState;
     this.newState = newState;

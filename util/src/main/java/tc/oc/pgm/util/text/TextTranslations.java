@@ -26,7 +26,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
@@ -36,6 +35,7 @@ import net.kyori.adventure.translation.Translator;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /** A singleton for accessing {@link MessageFormat} and {@link Component} translations. */
 @SuppressWarnings("UnstableApiUsage")

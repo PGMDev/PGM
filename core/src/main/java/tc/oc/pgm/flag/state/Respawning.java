@@ -4,12 +4,12 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
-import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Location;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.Post;

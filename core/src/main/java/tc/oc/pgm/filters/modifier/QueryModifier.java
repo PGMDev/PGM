@@ -1,11 +1,11 @@
 package tc.oc.pgm.filters.modifier;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Collection;
 import java.util.stream.Stream;
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.event.Event;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.filters.matcher.WeakTypedFilter;
@@ -26,7 +26,7 @@ public abstract class QueryModifier<Q extends Query, R extends Query>
   private final Class<R> innerQueryType;
 
   protected QueryModifier(Filter filter, Class<R> innerQueryType) {
-    this.filter = checkNotNull(filter, "filter may not be null");
+    this.filter = requireNonNull(filter, "filter may not be null");
     this.innerQueryType = innerQueryType;
   }
 

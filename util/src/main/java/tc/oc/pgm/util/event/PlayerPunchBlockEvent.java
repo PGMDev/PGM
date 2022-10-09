@@ -1,6 +1,6 @@
 package tc.oc.pgm.util.event;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -15,7 +15,7 @@ public class PlayerPunchBlockEvent extends PlayerBlockEvent implements Cancellab
 
   public PlayerPunchBlockEvent(
       final Event cause, final Player player, final RayBlockIntersection ray) {
-    super(cause, player, checkNotNull(ray).getBlock());
+    super(cause, player, requireNonNull(ray).getBlock());
     this.ray = ray;
   }
   /**

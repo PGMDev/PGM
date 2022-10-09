@@ -1,9 +1,9 @@
 package tc.oc.pgm.api.match.event;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchPhase;
 
@@ -23,7 +23,7 @@ public class MatchPhaseChangeEvent extends MatchEvent {
     super(match);
 
     this.oldState = oldState;
-    this.newState = checkNotNull(newState, "new match state");
+    this.newState = requireNonNull(newState, "new match state");
   }
 
   /**

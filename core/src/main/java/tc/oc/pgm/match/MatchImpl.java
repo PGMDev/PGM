@@ -1,7 +1,7 @@
 package tc.oc.pgm.match;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;
 import java.io.File;
@@ -20,8 +20,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.Nullable;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -31,6 +29,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredListener;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.feature.Feature;
@@ -115,9 +114,9 @@ public class MatchImpl implements Match {
   private final MatchFeatureContext features;
 
   protected MatchImpl(String id, MapContext map, World world) {
-    this.id = checkNotNull(id);
-    this.map = checkNotNull(map);
-    this.world = new WeakReference<>(checkNotNull(world));
+    this.id = requireNonNull(id);
+    this.map = requireNonNull(map);
+    this.world = new WeakReference<>(requireNonNull(world));
     this.matchModules = new ConcurrentHashMap<>();
 
     this.logger = ClassLogger.get(PGM.get().getLogger(), getClass());
@@ -317,7 +316,7 @@ public class MatchImpl implements Match {
     private final RegisteredListener listener;
 
     private EventExecutor(RegisteredListener listener) {
-      this.listener = checkNotNull(listener);
+      this.listener = requireNonNull(listener);
     }
 
     @Override
@@ -452,7 +451,7 @@ public class MatchImpl implements Match {
 
   @Override
   public boolean setParty(MatchPlayer player, Party party) {
-    return setOrClearPlayerParty(player, checkNotNull(party));
+    return setOrClearPlayerParty(player, requireNonNull(party));
   }
 
   /**
@@ -653,7 +652,7 @@ public class MatchImpl implements Match {
   @Override
   public void addParty(Party party) {
     logger.fine("Adding party " + party);
-    checkNotNull(party);
+    requireNonNull(party);
     checkState(party.getPlayers().isEmpty(), "Party already contains players");
     checkState(parties.add(party), "Party is already in this match");
 
@@ -674,7 +673,7 @@ public class MatchImpl implements Match {
   public void removeParty(Party party) {
     logger.fine("Removing party " + party);
 
-    checkNotNull(party);
+    requireNonNull(party);
     checkState(parties.contains(party), "Party is not in this match");
     checkState(party.getPlayers().isEmpty(), "Party still has players in it");
 
@@ -710,7 +709,7 @@ public class MatchImpl implements Match {
     private final MatchScope scope;
 
     private TickableTask(MatchScope scope) {
-      this.scope = checkNotNull(scope);
+      this.scope = requireNonNull(scope);
     }
 
     @Override
@@ -927,12 +926,15 @@ public class MatchImpl implements Match {
 
   @Override
   public String toString() {
-    return new ToStringBuilder(this)
-        .append("id", getId())
-        .append("map", getMap())
-        .append("world", getWorld())
-        .append("scope", getScope())
-        .append("state", getPhase())
-        .build();
+    final World world = this.world.get();
+    return "Match{id="
+        + this.id
+        + ", map="
+        + this.map.getId()
+        + ", world="
+        + (world == null ? "<null>" : world.getName())
+        + ", phase="
+        + this.getPhase()
+        + "}";
   }
 }

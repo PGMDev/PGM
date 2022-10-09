@@ -2,12 +2,12 @@ package tc.oc.pgm.api.player;
 
 import java.util.List;
 import java.util.UUID;
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.PlayerInventory;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.Tickable;

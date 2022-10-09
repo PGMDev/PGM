@@ -1,20 +1,19 @@
 package tc.oc.pgm.map;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bukkit.Difficulty;
 import org.jdom2.Element;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapInfo;
@@ -69,11 +68,11 @@ public class MapInfoImpl implements MapInfo {
       @Nullable Collection<Gamemode> gamemodes,
       Phase phase,
       @Nullable boolean friendlyFire) {
-    this.name = checkNotNull(name);
-    this.id = checkNotNull(MapInfo.normalizeName(id == null ? name : id));
-    this.proto = checkNotNull(proto);
-    this.version = checkNotNull(version);
-    this.description = checkNotNull(description);
+    this.name = requireNonNull(name);
+    this.id = requireNonNull(MapInfo.normalizeName(id == null ? name : id));
+    this.proto = requireNonNull(proto);
+    this.version = requireNonNull(version);
+    this.description = requireNonNull(description);
     this.created = created;
     this.authors = authors == null ? new LinkedList<>() : authors;
     this.contributors = contributors == null ? new LinkedList<>() : contributors;
@@ -90,7 +89,7 @@ public class MapInfoImpl implements MapInfo {
 
   public MapInfoImpl(MapInfo info) {
     this(
-        checkNotNull(info).getId(),
+        requireNonNull(info).getId(),
         info.getProto(),
         info.getVersion(),
         info.getName(),
@@ -111,7 +110,7 @@ public class MapInfoImpl implements MapInfo {
 
   public MapInfoImpl(Element root) throws InvalidXMLException {
     this(
-        checkNotNull(root).getChildTextNormalize("slug"),
+        requireNonNull(root).getChildTextNormalize("slug"),
         XMLUtils.parseSemanticVersion(Node.fromRequiredAttr(root, "proto")),
         XMLUtils.parseSemanticVersion(Node.fromRequiredChildOrAttr(root, "version")),
         Node.fromRequiredChildOrAttr(root, "name").getValueNormalize(),
@@ -235,7 +234,7 @@ public class MapInfoImpl implements MapInfo {
 
   @Override
   public String toString() {
-    return new ToStringBuilder(this).append("id", getId()).build();
+    return "MapInfo{id=" + this.id + ", version=" + this.version + "}";
   }
 
   @Override

@@ -6,12 +6,12 @@ import static net.kyori.adventure.title.Title.title;
 import static tc.oc.pgm.util.TimeUtils.fromTicks;
 
 import java.time.Duration;
-import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Location;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.ObserverInteractEvent;
 import tc.oc.pgm.spawns.RespawnOptions;

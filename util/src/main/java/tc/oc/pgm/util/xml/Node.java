@@ -1,15 +1,16 @@
 package tc.oc.pgm.util.xml;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import org.jetbrains.annotations.Nullable;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.located.Located;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A hybrid wrapper for either an {@link Element} or an {@link Attribute}, enabling both of them to
@@ -20,13 +21,11 @@ public class Node {
   private final Object node;
 
   public Node(Element element) {
-    Preconditions.checkNotNull(element);
-    this.node = element;
+    this.node = requireNonNull(element);
   }
 
   public Node(Attribute attribute) {
-    Preconditions.checkNotNull(attribute);
-    this.node = attribute;
+    this.node = requireNonNull(attribute);
   }
 
   public String getName() {

@@ -2,8 +2,8 @@ package tc.oc.pgm.kits;
 
 import com.google.common.base.Preconditions;
 import java.util.List;
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 
 public class FlyKit extends AbstractKit {

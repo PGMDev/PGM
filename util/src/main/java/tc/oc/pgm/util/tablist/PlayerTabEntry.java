@@ -3,9 +3,9 @@ package tc.oc.pgm.util.tablist;
 import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.util.UUID;
-import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;

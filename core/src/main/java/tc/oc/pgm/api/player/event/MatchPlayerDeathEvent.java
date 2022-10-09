@@ -1,10 +1,10 @@
 package tc.oc.pgm.api.player.event;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.PlayerRelation;
@@ -19,9 +19,9 @@ public class MatchPlayerDeathEvent extends MatchPlayerEvent {
 
   public MatchPlayerDeathEvent(
       PlayerDeathEvent parent, MatchPlayer victim, DamageInfo damageInfo, boolean predicted) {
-    super(checkNotNull(victim));
-    this.parent = checkNotNull(parent);
-    this.damageInfo = checkNotNull(damageInfo);
+    super(requireNonNull(victim));
+    this.parent = requireNonNull(parent);
+    this.damageInfo = requireNonNull(damageInfo);
     this.predicted = predicted;
   }
 

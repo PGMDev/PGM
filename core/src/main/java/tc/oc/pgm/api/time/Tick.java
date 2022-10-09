@@ -1,7 +1,6 @@
 package tc.oc.pgm.api.time;
 
 import java.time.Instant;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /** Represents a Minecraft server {@link Tick}. */
 public final class Tick implements Comparable<Tick> {
@@ -30,6 +29,6 @@ public final class Tick implements Comparable<Tick> {
 
   @Override
   public String toString() {
-    return ToStringBuilder.reflectionToString(this);
+    return "Tick{tick=" + this.tick + ", epoch=" + this.instant.toEpochMilli() + "}";
   }
 }

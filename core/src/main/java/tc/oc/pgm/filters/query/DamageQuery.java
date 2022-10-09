@@ -1,9 +1,9 @@
 package tc.oc.pgm.filters.query;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.event.Event;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
 
@@ -19,8 +19,8 @@ public class DamageQuery extends PlayerStateQuery
       DamageInfo damageInfo,
       ParticipantState defaultPlayer) {
     super(event, defaultPlayer);
-    this.damageInfo = checkNotNull(damageInfo);
-    this.victim = checkNotNull(victim);
+    this.damageInfo = requireNonNull(damageInfo);
+    this.victim = requireNonNull(victim);
   }
 
   public static DamageQuery victimDefault(

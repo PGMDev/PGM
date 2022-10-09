@@ -1,12 +1,12 @@
 package tc.oc.pgm.filters.query;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.Event;
 import org.bukkit.material.MaterialData;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.query.BlockQuery;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -21,7 +21,7 @@ public class PlayerBlockQuery extends PlayerStateQuery implements BlockQuery {
 
   public PlayerBlockQuery(@Nullable Event event, ParticipantState player, BlockState block) {
     super(event, player);
-    this.block = checkNotNull(block);
+    this.block = requireNonNull(block);
   }
 
   @Override

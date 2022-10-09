@@ -1,6 +1,6 @@
 package tc.oc.pgm.match;
 
-import static java.util.Objects.requireNotNull;
+import static java.util.Objects.requireNonNull;
 import static net.kyori.adventure.text.Component.text;
 
 import java.util.Collection;
@@ -8,12 +8,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.party.event.PartyRenameEvent;
@@ -46,12 +46,12 @@ public class PartyImpl implements Party, Audience {
       final String name,
       final ChatColor chatColor,
       final @Nullable DyeColor dyeColor) {
-    this.match = requireNotNull(match);
+    this.match = requireNonNull(match);
     this.query = new PartyQuery(null, this);
     this.memberMap = new HashMap<>();
     this.memberList = Collections.unmodifiableCollection(this.memberMap.values());
     this.audience = Audience.get(this.memberMap.values());
-    this.id = requireNotNull(name);
+    this.id = requireNonNull(name);
     this.chatColor = chatColor == null ? ChatColor.WHITE : chatColor;
     this.color = BukkitUtils.colorOf(this.chatColor);
     this.dyeColor = dyeColor == null ? BukkitUtils.chatColorToDyeColor(this.chatColor) : dyeColor;
@@ -81,7 +81,7 @@ public class PartyImpl implements Party, Audience {
 
   @Override
   public void addPlayer(final MatchPlayer player) {
-    this.memberMap.put(requireNotNull(player).getId(), player);
+    this.memberMap.put(requireNonNull(player).getId(), player);
   }
 
   @Override

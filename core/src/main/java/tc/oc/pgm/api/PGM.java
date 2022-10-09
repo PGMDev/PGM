@@ -1,13 +1,13 @@
 package tc.oc.pgm.api;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import fr.minuskube.inv.InventoryManager;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.MatchManager;
@@ -50,7 +50,7 @@ public interface PGM extends Plugin {
       get();
       throw new IllegalArgumentException("PGM was already initialized!");
     } catch (IllegalStateException e) {
-      GLOBAL.set(checkNotNull(pgm, "PGM cannot be null!"));
+      GLOBAL.set(requireNonNull(pgm, "PGM cannot be null!"));
     }
     return get();
   }

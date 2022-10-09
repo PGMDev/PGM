@@ -1,7 +1,7 @@
 package tc.oc.pgm.util;
 
-import org.jetbrains.annotations.Nullable;
 import org.jdom2.Element;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.util.xml.InvalidXMLException;

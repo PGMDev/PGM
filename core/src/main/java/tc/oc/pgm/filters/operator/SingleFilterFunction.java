@@ -1,6 +1,6 @@
 package tc.oc.pgm.filters.operator;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Collection;
 import java.util.stream.Stream;
@@ -15,7 +15,7 @@ public abstract class SingleFilterFunction implements FilterDefinition {
   protected final Filter filter;
 
   public SingleFilterFunction(Filter filter) {
-    this.filter = checkNotNull(filter, "filter may not be null");
+    this.filter = requireNonNull(filter, "filter may not be null");
   }
 
   @Override

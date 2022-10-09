@@ -1,6 +1,7 @@
 package tc.oc.pgm.gamerules;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.util.Map;
 import tc.oc.pgm.api.map.GameRule;
 import tc.oc.pgm.api.match.Match;
@@ -14,7 +15,7 @@ public class GameRulesMatchModule implements MatchModule {
 
   public GameRulesMatchModule(Match match, Map<String, String> gameRules) {
     this.match = match;
-    this.gameRules = Preconditions.checkNotNull(gameRules, "gamerules");
+    this.gameRules = requireNonNull(gameRules, "gamerules");
   }
 
   @Override

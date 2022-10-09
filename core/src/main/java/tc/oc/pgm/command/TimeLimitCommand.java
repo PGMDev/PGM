@@ -5,8 +5,8 @@ import static tc.oc.pgm.util.text.TemporalComponent.clock;
 
 import app.ashcon.intake.Command;
 import java.time.Duration;
-import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.VictoryCondition;

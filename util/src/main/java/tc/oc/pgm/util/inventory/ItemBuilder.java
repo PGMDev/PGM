@@ -2,7 +2,6 @@ package tc.oc.pgm.util.inventory;
 
 import com.google.common.collect.Lists;
 import java.util.Arrays;
-import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -14,6 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Dye;
 import org.bukkit.material.MaterialData;
 import org.bukkit.material.Wool;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.text.TextTranslations;
 
 /** A nice way to build {@link ItemStack}s. */

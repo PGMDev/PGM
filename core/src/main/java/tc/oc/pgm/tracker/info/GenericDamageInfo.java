@@ -1,9 +1,9 @@
 package tc.oc.pgm.tracker.info;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.CauseInfo;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
@@ -16,7 +16,7 @@ public class GenericDamageInfo implements DamageInfo, CauseInfo {
 
   public GenericDamageInfo(
       EntityDamageEvent.DamageCause damageType, @Nullable PhysicalInfo damager) {
-    this.damageType = checkNotNull(damageType);
+    this.damageType = requireNonNull(damageType);
     this.damager = damager;
   }
 

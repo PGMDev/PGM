@@ -2,12 +2,12 @@ package tc.oc.pgm.api.party;
 
 import java.util.Collection;
 import java.util.UUID;
-import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;

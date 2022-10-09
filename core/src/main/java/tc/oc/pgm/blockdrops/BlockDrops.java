@@ -2,9 +2,9 @@ package tc.oc.pgm.blockdrops;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.kits.Kit;
 
 /** The result of breaking a block */

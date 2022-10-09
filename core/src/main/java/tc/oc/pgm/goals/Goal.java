@@ -1,12 +1,12 @@
 package tc.oc.pgm.goals;
 
 import java.util.Optional;
-import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.Feature;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;

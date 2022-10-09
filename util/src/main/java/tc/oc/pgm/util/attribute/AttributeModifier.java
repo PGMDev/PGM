@@ -1,9 +1,10 @@
 package tc.oc.pgm.util.attribute;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.apache.commons.lang.Validate;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.util.NumberConversions;
 
@@ -20,14 +21,10 @@ public class AttributeModifier implements ConfigurationSerializable {
   }
 
   public AttributeModifier(UUID uuid, String name, double amount, Operation operation) {
-    Validate.notNull(uuid, "uuid");
-    Validate.notEmpty(name, "Name cannot be empty");
-    Validate.notNull(operation, "operation");
-
-    this.uuid = uuid;
-    this.name = name;
+    this.uuid = requireNonNull(uuid, "uuid");
+    this.name = requireNonNull(name, "name");
     this.amount = amount;
-    this.operation = operation;
+    this.operation = requireNonNull(operation, "operation");
   }
 
   /**

@@ -1,11 +1,11 @@
 package tc.oc.pgm.api.event;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.block.Block;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.tracker.info.SpleefInfo;
@@ -17,9 +17,9 @@ public class PlayerSpleefEvent extends Event {
   private final SpleefInfo info;
 
   public PlayerSpleefEvent(MatchPlayer victim, Block block, SpleefInfo info) {
-    this.victim = checkNotNull(victim);
-    this.block = checkNotNull(block);
-    this.info = checkNotNull(info);
+    this.victim = requireNonNull(victim);
+    this.block = requireNonNull(block);
+    this.info = requireNonNull(info);
   }
 
   public MatchPlayer getVictim() {

@@ -1,6 +1,6 @@
 package tc.oc.pgm.api.player.event;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.match.Match;
@@ -38,7 +38,7 @@ public class MatchPlayerAddEvent extends MatchPlayerEvent {
    * @param initialParty The {@link Party} the {@link MatchPlayer} should join.
    */
   public final void setInitialParty(Party initialParty) {
-    this.initialParty = checkNotNull(initialParty);
+    this.initialParty = requireNonNull(initialParty);
   }
 
   private static final HandlerList handlers = new HandlerList();

@@ -2,9 +2,9 @@ package tc.oc.pgm.projectile;
 
 import java.time.Duration;
 import java.util.List;
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.potion.PotionEffect;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 

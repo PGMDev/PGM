@@ -1,6 +1,7 @@
 package tc.oc.pgm.filters.matcher.player;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.Range;
 import java.util.Collection;
 import org.bukkit.potion.PotionEffect;
@@ -14,7 +15,7 @@ public class EffectFilter extends ParticipantFilter {
   protected final boolean amplifier;
 
   public EffectFilter(PotionEffect base, Range<Integer> duration, boolean amplifier) {
-    this.base = Preconditions.checkNotNull(base);
+    this.base = requireNonNull(base);
     this.duration = duration;
     this.amplifier = amplifier;
   }

@@ -13,7 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -299,10 +298,8 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     // Ensure that the title of the inventory is <= 32 characters long to appease Minecraft's
     // restrictions on inventory titles
     String title =
-        StringUtils.substring(
-            TextTranslations.translateLegacy(player(holder, NameStyle.CONCISE, viewer), viewer),
-            0,
-            32);
+        TextTranslations.translateLegacy(player(holder, NameStyle.CONCISE, viewer), viewer)
+            .substring(0, 32);
 
     Inventory preview = Bukkit.getServer().createInventory(viewer, 45, title);
 

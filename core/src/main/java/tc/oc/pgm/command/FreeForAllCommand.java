@@ -6,8 +6,8 @@ import static tc.oc.pgm.util.text.TextException.exception;
 
 import app.ashcon.intake.Command;
 import com.google.common.collect.Range;
-import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;

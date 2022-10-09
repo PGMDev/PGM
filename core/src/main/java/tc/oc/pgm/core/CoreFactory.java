@@ -1,8 +1,8 @@
 package tc.oc.pgm.core;
 
 import com.google.common.collect.ImmutableSet;
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.material.MaterialData;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.goals.ProximityGoalDefinition;

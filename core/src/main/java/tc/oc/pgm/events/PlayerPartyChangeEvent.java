@@ -2,8 +2,8 @@ package tc.oc.pgm.events;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerEvent;

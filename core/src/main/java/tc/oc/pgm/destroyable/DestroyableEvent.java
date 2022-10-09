@@ -1,6 +1,7 @@
 package tc.oc.pgm.destroyable;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.event.MatchEvent;
@@ -11,10 +12,7 @@ public abstract class DestroyableEvent extends MatchEvent {
 
   public DestroyableEvent(@NotNull Match match, @NotNull Destroyable destroyable) {
     super(match);
-
-    Preconditions.checkNotNull(destroyable, "destroyable");
-
-    this.destroyable = destroyable;
+    this.destroyable = requireNonNull(destroyable, "destroyable");
   }
 
   /**

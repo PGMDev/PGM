@@ -1,6 +1,6 @@
 package tc.oc.pgm.events;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.party.Party;
@@ -12,7 +12,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
  */
 public class PlayerJoinPartyEvent extends PlayerPartyChangeEvent {
   public PlayerJoinPartyEvent(MatchPlayer player, @Nullable Party oldParty, Party newParty) {
-    super(player, oldParty, checkNotNull(newParty));
+    super(player, oldParty, requireNonNull(newParty));
   }
 
   /** Overridden to remove @Nullable */

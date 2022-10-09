@@ -1,10 +1,10 @@
 package tc.oc.pgm.payload.track;
 
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.material.MaterialData;
 import org.bukkit.material.Rails;
+import org.jetbrains.annotations.Nullable;
 
 public enum RailDirection {
   SOUTH(new StraightRail(BlockFace.SOUTH), new StraightRail(BlockFace.NORTH)),
