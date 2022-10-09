@@ -7,6 +7,10 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerEvent;
 
 public class PlayerClassChangeEvent extends MatchPlayerEvent {
+  private final MatchPlayer player;
+  private final String family;
+  private final PlayerClass oldClass;
+  private final PlayerClass newClass;
 
   public PlayerClassChangeEvent(
       MatchPlayer player, String family, PlayerClass oldClass, PlayerClass newClass) {
@@ -32,11 +36,6 @@ public class PlayerClassChangeEvent extends MatchPlayerEvent {
   public PlayerClass getNewClass() {
     return this.newClass;
   }
-
-  final MatchPlayer player;
-  final String family;
-  final PlayerClass oldClass;
-  final PlayerClass newClass;
 
   @Override
   public HandlerList getHandlers() {

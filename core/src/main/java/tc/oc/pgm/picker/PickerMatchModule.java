@@ -15,7 +15,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
@@ -575,7 +575,7 @@ public class PickerMatchModule implements MatchModule, Listener {
   }
 
   private ItemStack createClassButton(MatchPlayer viewer, PlayerClass cls) {
-    ItemStack item = cls.getIcon().toItemStack(1);
+    ItemStack item = new ItemStack(cls.getIcon());
     ItemMeta meta = item.getItemMeta();
 
     meta.setDisplayName(
