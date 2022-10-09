@@ -7,7 +7,8 @@ import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import tc.oc.pgm.api.map.MapProtos;
@@ -20,8 +21,8 @@ import tc.oc.pgm.util.ClassLogger;
 /** Basic {@link Goal} implementation with fields for the definition and match */
 public abstract class SimpleGoal<T extends GoalDefinition> implements Goal<T> {
 
-  public static final ChatColor COLOR_INCOMPLETE = ChatColor.RED;
-  public static final ChatColor COLOR_COMPLETE = ChatColor.GREEN;
+  public static final TextColor COLOR_INCOMPLETE = NamedTextColor.RED;
+  public static final TextColor COLOR_COMPLETE = NamedTextColor.GREEN;
 
   public static final String SYMBOL_INCOMPLETE = "\u2715"; // ✕
   public static final String SYMBOL_COMPLETE = "\u2714"; // ✔
@@ -104,7 +105,7 @@ public abstract class SimpleGoal<T extends GoalDefinition> implements Goal<T> {
     }
   }
 
-  public ChatColor renderSidebarStatusColor(@Nullable Competitor competitor, Party viewer) {
+  public TextColor renderSidebarStatusColor(@Nullable Competitor competitor, Party viewer) {
     return isCompleted() ? COLOR_COMPLETE : COLOR_INCOMPLETE;
   }
 
@@ -112,8 +113,8 @@ public abstract class SimpleGoal<T extends GoalDefinition> implements Goal<T> {
     return isCompleted() ? SYMBOL_COMPLETE : SYMBOL_INCOMPLETE;
   }
 
-  public ChatColor renderSidebarLabelColor(@Nullable Competitor competitor, Party viewer) {
-    return ChatColor.WHITE;
+  public TextColor renderSidebarLabelColor(@Nullable Competitor competitor, Party viewer) {
+    return NamedTextColor.WHITE;
   }
 
   public Component renderSidebarLabelText(@Nullable Competitor competitor, Party viewer) {

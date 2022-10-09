@@ -9,7 +9,8 @@ import java.util.Iterator;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -32,7 +33,7 @@ import tc.oc.pgm.util.Audience;
 public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends ProximityGoal<T>
     implements Listener {
 
-  public static final ChatColor COLOR_TOUCHED = ChatColor.YELLOW;
+  public static final TextColor COLOR_TOUCHED = NamedTextColor.YELLOW;
   public static final String SYMBOL_TOUCHED = "\u2733"; // ✳
 
   protected boolean touched;
@@ -59,14 +60,12 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
   public abstract Component getTouchMessage(@Nullable ParticipantState toucher, boolean self);
 
   @Override
-  public net.md_5.bungee.api.ChatColor renderProximityColor(Competitor team, Party viewer) {
-    return hasTouched(team)
-        ? net.md_5.bungee.api.ChatColor.YELLOW
-        : super.renderProximityColor(team, viewer);
+  public TextColor renderProximityColor(Competitor team, Party viewer) {
+    return hasTouched(team) ? NamedTextColor.YELLOW : super.renderProximityColor(team, viewer);
   }
 
   @Override
-  public ChatColor renderSidebarStatusColor(@Nullable Competitor competitor, Party viewer) {
+  public TextColor renderSidebarStatusColor(@Nullable Competitor competitor, Party viewer) {
     return shouldShowTouched(competitor, viewer)
         ? COLOR_TOUCHED
         : super.renderSidebarStatusColor(competitor, viewer);

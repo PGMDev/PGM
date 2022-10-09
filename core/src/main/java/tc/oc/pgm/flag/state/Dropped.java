@@ -4,6 +4,8 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
 import java.time.Instant;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import tc.oc.pgm.api.party.Party;
@@ -82,11 +84,11 @@ public class Dropped extends Uncarried implements Missing {
   }
 
   @Override
-  public ChatColor getStatusColor(Party viewer) {
+  public TextColor getStatusColor(Party viewer) {
     if (this.isCountingDown()) {
-      return ChatColor.AQUA;
+      return NamedTextColor.AQUA;
     } else if (this.flag.getDefinition().hasMultipleCarriers()) {
-      return ChatColor.WHITE;
+      return NamedTextColor.WHITE;
     } else {
       return super.getStatusColor(viewer);
     }

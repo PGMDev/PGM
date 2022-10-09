@@ -35,6 +35,7 @@ public class PartyImpl implements Party, Audience {
   private final ChatColor chatColor;
   private final Color color;
   private final DyeColor dyeColor;
+  private final TextColor textColor;
   private String legacyName;
   private Component name;
   private Component prefix;
@@ -54,6 +55,7 @@ public class PartyImpl implements Party, Audience {
     this.chatColor = chatColor == null ? ChatColor.WHITE : chatColor;
     this.color = BukkitUtils.colorOf(this.chatColor);
     this.dyeColor = dyeColor == null ? BukkitUtils.chatColorToDyeColor(this.chatColor) : dyeColor;
+    this.textColor = TextFormatter.convert(this.chatColor);
     this.setName(name);
   }
 
@@ -155,6 +157,11 @@ public class PartyImpl implements Party, Audience {
   @Override
   public DyeColor getDyeColor() {
     return this.dyeColor;
+  }
+
+  @Override
+  public TextColor getTextColor() {
+    return this.textColor;
   }
 
   @Override

@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Location;
@@ -411,9 +412,9 @@ public class Carried extends Spawned implements Missing {
   }
 
   @Override
-  public org.bukkit.ChatColor getStatusColor(Party viewer) {
+  public TextColor getStatusColor(Party viewer) {
     if (this.flag.getDefinition().hasMultipleCarriers()) {
-      return this.carrier.getParty().getColor();
+      return this.carrier.getParty().getTextColor();
     } else {
       return super.getStatusColor(viewer);
     }

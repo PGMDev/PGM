@@ -8,7 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.kyori.adventure.sound.Sound;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.event.HandlerList;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.match.Match;
@@ -34,7 +35,7 @@ import tc.oc.pgm.util.collection.DefaultMapAdapter;
 public class ControlPoint extends SimpleGoal<ControlPointDefinition>
     implements IncrementalGoal<ControlPointDefinition> {
 
-  public static final ChatColor COLOR_NEUTRAL_TEAM = ChatColor.WHITE;
+  public static final TextColor COLOR_NEUTRAL_TEAM = NamedTextColor.WHITE;
 
   public static final String SYMBOL_CP_INCOMPLETE = "\u29be"; // ⦾
   public static final String SYMBOL_CP_COMPLETE = "\u29bf"; // ⦿
@@ -183,8 +184,8 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
   }
 
   @Override
-  public ChatColor renderSidebarStatusColor(@Nullable Competitor competitor, Party viewer) {
-    return this.capturingTeam == null ? COLOR_NEUTRAL_TEAM : this.capturingTeam.getColor();
+  public TextColor renderSidebarStatusColor(@Nullable Competitor competitor, Party viewer) {
+    return this.capturingTeam == null ? COLOR_NEUTRAL_TEAM : this.capturingTeam.getTextColor();
   }
 
   @Override
@@ -197,8 +198,8 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
   }
 
   @Override
-  public ChatColor renderSidebarLabelColor(@Nullable Competitor competitor, Party viewer) {
-    return this.controllingTeam == null ? COLOR_NEUTRAL_TEAM : this.controllingTeam.getColor();
+  public TextColor renderSidebarLabelColor(@Nullable Competitor competitor, Party viewer) {
+    return this.controllingTeam == null ? COLOR_NEUTRAL_TEAM : this.controllingTeam.getTextColor();
   }
 
   /** Ownership of the ControlPoint for a specific team given as a real number from 0 to 1. */

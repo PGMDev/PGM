@@ -2,7 +2,8 @@ package tc.oc.pgm.goals;
 
 import java.util.Map;
 import javax.annotation.Nullable;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.EventHandler;
@@ -160,8 +161,8 @@ public abstract class ProximityGoal<T extends ProximityGoalDefinition> extends O
         && (viewer == team || viewer.isObserving());
   }
 
-  public ChatColor renderProximityColor(Competitor team, Party viewer) {
-    return ChatColor.GRAY;
+  public TextColor renderProximityColor(Competitor team, Party viewer) {
+    return NamedTextColor.GRAY;
   }
 
   public String renderProximity(@Nullable Competitor team, Party viewer) {

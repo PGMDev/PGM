@@ -5,7 +5,8 @@ import static net.kyori.adventure.text.Component.translatable;
 import java.util.Collections;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
@@ -27,6 +28,7 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.TextFormatter;
 
 public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
     implements Goal<MonumentWoolFactory> {
@@ -165,11 +167,11 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
   }
 
   @Override
-  public ChatColor renderSidebarStatusColor(@Nullable Competitor competitor, Party viewer) {
+  public TextColor renderSidebarStatusColor(@Nullable Competitor competitor, Party viewer) {
     if (getDyeColor() == DyeColor.BLUE) {
-      return ChatColor.DARK_BLUE; // DARK_BLUE looks ok on sidebar, but not in chat
+      return NamedTextColor.DARK_BLUE; // DARK_BLUE looks ok on sidebar, but not in chat
     } else {
-      return BukkitUtils.dyeColorToChatColor(this.getDyeColor());
+      return TextFormatter.convert(BukkitUtils.dyeColorToChatColor(this.getDyeColor()));
     }
   }
 

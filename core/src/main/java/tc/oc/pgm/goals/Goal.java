@@ -4,7 +4,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import tc.oc.pgm.api.feature.Feature;
@@ -69,11 +69,11 @@ public interface Goal<T extends GoalDefinition> extends Feature<T> {
 
   Sound getCompletionSound(boolean positive);
 
-  ChatColor renderSidebarStatusColor(@Nullable Competitor competitor, Party viewer);
+  TextColor renderSidebarStatusColor(@Nullable Competitor competitor, Party viewer);
 
   String renderSidebarStatusText(@Nullable Competitor competitor, Party viewer);
 
-  ChatColor renderSidebarLabelColor(@Nullable Competitor competitor, Party viewer);
+  TextColor renderSidebarLabelColor(@Nullable Competitor competitor, Party viewer);
 
   Component renderSidebarLabelText(@Nullable Competitor competitor, Party viewer);
 }

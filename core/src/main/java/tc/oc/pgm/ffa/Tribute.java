@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
@@ -22,6 +23,7 @@ import tc.oc.pgm.filters.query.PartyQuery;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.TextFormatter;
 
 /**
  * Wraps a single {@link MatchPlayer} in a free-for-all match.
@@ -48,6 +50,7 @@ public class Tribute implements Competitor {
   private final ChatColor chatColor;
   private final Color color;
   private final DyeColor dyeColor;
+  private final TextColor textColor;
   private final PartyQuery query;
 
   protected @Nullable MatchPlayer player;
@@ -61,6 +64,7 @@ public class Tribute implements Competitor {
     this.chatColor = color == null ? ChatColor.YELLOW : color;
     this.color = BukkitUtils.colorOf(this.chatColor);
     this.dyeColor = BukkitUtils.chatColorToDyeColor(this.chatColor);
+    this.textColor = TextFormatter.convert(color);
     this.query = new PartyQuery(null, this);
   }
 
@@ -97,6 +101,11 @@ public class Tribute implements Competitor {
   @Override
   public DyeColor getDyeColor() {
     return dyeColor;
+  }
+
+  @Override
+  public TextColor getTextColor() {
+    return this.textColor;
   }
 
   @Override

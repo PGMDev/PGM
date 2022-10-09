@@ -332,8 +332,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
     }
 
     sb.append(" ");
-    final TextColor color =
-        TextFormatter.convert(goal.renderSidebarLabelColor(competitor, viewingParty));
+    final TextColor color = goal.renderSidebarLabelColor(competitor, viewingParty);
     sb.append(
         TextTranslations.translateLegacy(
             goal.renderSidebarLabelText(competitor, viewingParty).color(color), viewer));

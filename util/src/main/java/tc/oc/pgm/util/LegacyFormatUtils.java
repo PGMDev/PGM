@@ -3,7 +3,7 @@ package tc.oc.pgm.util;
 import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.List;
-import net.md_5.bungee.api.ChatColor;
+import org.bukkit.ChatColor;
 
 /**
  * These utilities should no longer be used, instead use {@link tc.oc.pgm.util.text.TextFormatter}
@@ -582,9 +582,5 @@ public final class LegacyFormatUtils {
       }
     }
     return String.valueOf(chars);
-  }
-
-  public static net.md_5.bungee.api.ChatColor convert(Enum<?> color) {
-    return net.md_5.bungee.api.ChatColor.valueOf(color.name());
   }
 }
