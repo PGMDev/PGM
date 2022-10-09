@@ -7,8 +7,8 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -43,7 +43,7 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
           .build(
               new CacheLoader<UUID, DecorationCacheEntry>() {
                 @Override
-                public DecorationCacheEntry load(@Nonnull UUID uuid) {
+                public DecorationCacheEntry load(@NotNull UUID uuid) {
                   return new DecorationCacheEntry(uuid);
                 }
               });
@@ -135,7 +135,7 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
   }
 
   @Override
-  @Nonnull
+  @NotNull
   public NameDecorationProvider getProvider() {
     return provider;
   }

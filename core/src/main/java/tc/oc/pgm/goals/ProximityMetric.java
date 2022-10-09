@@ -1,6 +1,6 @@
 package tc.oc.pgm.goals;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.jdom2.Element;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;

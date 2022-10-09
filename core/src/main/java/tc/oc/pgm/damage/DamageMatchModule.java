@@ -3,7 +3,7 @@ package tc.oc.pgm.damage;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;

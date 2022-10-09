@@ -2,7 +2,7 @@ package tc.oc.pgm.command;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Switch;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;

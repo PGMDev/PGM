@@ -2,7 +2,7 @@ package tc.oc.pgm.util.tablist;
 
 import java.awt.*;
 import java.util.UUID;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;

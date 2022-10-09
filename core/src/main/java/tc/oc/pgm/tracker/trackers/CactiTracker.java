@@ -1,6 +1,6 @@
 package tc.oc.pgm.tracker.trackers;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;

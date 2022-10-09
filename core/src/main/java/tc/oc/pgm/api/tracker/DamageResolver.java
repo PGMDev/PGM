@@ -1,6 +1,6 @@
 package tc.oc.pgm.api.tracker;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityDamageEvent;
 import tc.oc.pgm.api.tracker.info.DamageInfo;

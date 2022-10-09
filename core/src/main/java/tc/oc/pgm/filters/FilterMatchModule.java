@@ -536,7 +536,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    */
   @SuppressWarnings("unchecked")
   public <T extends ReactorFactory.Reactor> @NotNull T getReactor(ReactorFactory<T> factory) {
-    return (T) Objects.requireNonNull(this.activeReactors.get(factory), "reactor");
+    return (T) Objects.requireNotNull(this.activeReactors.get(factory), "reactor");
   }
 
   private static class DummyListener implements Listener {}

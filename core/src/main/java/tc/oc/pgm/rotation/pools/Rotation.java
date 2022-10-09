@@ -1,7 +1,7 @@
 package tc.oc.pgm.rotation.pools;
 
 import java.util.logging.Level;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;

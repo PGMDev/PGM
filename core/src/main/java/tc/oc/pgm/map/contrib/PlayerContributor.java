@@ -3,7 +3,7 @@ package tc.oc.pgm.map.contrib;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.UUID;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;

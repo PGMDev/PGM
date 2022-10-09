@@ -6,7 +6,7 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.base.Splitter;
 import java.util.regex.Pattern;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import tc.oc.pgm.api.match.Match;

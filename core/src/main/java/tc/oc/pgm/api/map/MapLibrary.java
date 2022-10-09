@@ -2,7 +2,7 @@ package tc.oc.pgm.api.map;
 
 import java.util.Iterator;
 import java.util.concurrent.CompletableFuture;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
 
 /** A library of {@link MapInfo}s and {@link MapContext}s. */

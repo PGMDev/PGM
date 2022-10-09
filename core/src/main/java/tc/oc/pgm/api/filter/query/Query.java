@@ -1,6 +1,6 @@
 package tc.oc.pgm.api.filter.query;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.Location;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.CreatureSpawnEvent;

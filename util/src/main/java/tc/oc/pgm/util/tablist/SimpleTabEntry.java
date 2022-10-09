@@ -1,7 +1,7 @@
 package tc.oc.pgm.util.tablist;
 
 import java.util.UUID;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.skin.Skin;

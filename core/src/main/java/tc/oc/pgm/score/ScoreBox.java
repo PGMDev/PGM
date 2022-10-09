@@ -6,7 +6,7 @@ import com.google.common.collect.Maps;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.ParticipantState;

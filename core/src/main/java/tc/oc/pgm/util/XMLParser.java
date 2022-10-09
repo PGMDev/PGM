@@ -1,6 +1,6 @@
 package tc.oc.pgm.util;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.jdom2.Element;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.feature.FeatureValidation;

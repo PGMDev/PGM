@@ -8,7 +8,7 @@ import static tc.oc.pgm.util.text.TextTranslations.translate;
 
 import com.google.common.collect.Range;
 import java.util.Locale;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;

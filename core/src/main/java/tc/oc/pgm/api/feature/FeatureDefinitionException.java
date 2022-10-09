@@ -1,6 +1,6 @@
 package tc.oc.pgm.api.feature;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /** A checked exception indicating a problem related to a particular {@link FeatureDefinition} */
 public class FeatureDefinitionException extends Exception {

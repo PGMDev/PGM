@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -137,7 +137,7 @@ public class MatchManagerImpl implements MatchManager, Listener {
     }
     return matchById.values().stream()
         .map(m -> m.getPlayer(bukkit))
-        .filter(Objects::nonNull)
+        .filter(Objects::NotNull)
         .findFirst()
         .orElse(null);
   }

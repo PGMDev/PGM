@@ -3,7 +3,7 @@ package tc.oc.pgm.util.tablist;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;

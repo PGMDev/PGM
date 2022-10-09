@@ -1,6 +1,6 @@
 package tc.oc.pgm.action.actions;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import tc.oc.pgm.util.Audience;

@@ -3,8 +3,8 @@ package tc.oc.pgm.namedecorations;
 import static net.kyori.adventure.text.Component.text;
 
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
@@ -49,7 +49,7 @@ public interface NameDecorationRegistry extends Listener, NameDecorationProvider
    */
   void setProvider(@Nullable NameDecorationProvider provider);
 
-  @Nonnull
+  @NotNull
   NameDecorationProvider getProvider();
 
   default String getPrefix(UUID uuid) {

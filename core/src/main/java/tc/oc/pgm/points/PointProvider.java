@@ -1,6 +1,6 @@
 package tc.oc.pgm.points;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import tc.oc.pgm.api.match.Match;

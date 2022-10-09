@@ -6,7 +6,7 @@ import static tc.oc.pgm.util.text.TemporalComponent.clock;
 
 import java.time.Duration;
 import java.util.Collection;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.match.Match;

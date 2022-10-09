@@ -3,7 +3,7 @@ package tc.oc.pgm.regions;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Random;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;

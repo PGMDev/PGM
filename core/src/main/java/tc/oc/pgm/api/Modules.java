@@ -4,7 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.ActionMatchModule;
 import tc.oc.pgm.action.ActionModule;
 import tc.oc.pgm.api.map.MapModule;

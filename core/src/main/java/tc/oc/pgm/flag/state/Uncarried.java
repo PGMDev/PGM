@@ -2,7 +2,7 @@ package tc.oc.pgm.flag.state;
 
 import static net.kyori.adventure.text.Component.translatable;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;

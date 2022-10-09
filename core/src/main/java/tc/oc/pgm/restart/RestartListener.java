@@ -3,7 +3,7 @@ package tc.oc.pgm.restart;
 import java.time.Duration;
 import java.util.Iterator;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;

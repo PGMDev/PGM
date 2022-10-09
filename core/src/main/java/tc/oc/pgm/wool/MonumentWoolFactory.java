@@ -2,7 +2,7 @@ package tc.oc.pgm.wool;
 
 import static net.kyori.adventure.text.Component.text;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.DyeColor;

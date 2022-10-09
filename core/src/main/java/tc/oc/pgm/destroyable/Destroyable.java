@@ -17,8 +17,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
@@ -133,7 +133,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
   // Remove @Nullable
   @Override
-  public @Nonnull Team getOwner() {
+  public @NotNull Team getOwner() {
     Team owner = super.getOwner();
     if (owner == null) {
       throw new IllegalStateException("destroyable " + getId() + " has no owner");
@@ -562,11 +562,11 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return this.isDestroyed() && this.canComplete(team);
   }
 
-  public @Nonnull List<DestroyableHealthChange> getEvents() {
+  public @NotNull List<DestroyableHealthChange> getEvents() {
     return ImmutableList.copyOf(this.events);
   }
 
-  public @Nonnull ImmutableList<DestroyableContribution> getContributions() {
+  public @NotNull ImmutableList<DestroyableContribution> getContributions() {
     if (this.contributions != null) {
       return this.contributions;
     }

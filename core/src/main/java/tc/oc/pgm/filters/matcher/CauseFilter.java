@@ -1,7 +1,7 @@
 package tc.oc.pgm.filters.matcher;
 
 import com.google.common.base.Preconditions;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;

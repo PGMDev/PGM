@@ -1,6 +1,6 @@
 package tc.oc.pgm.goals;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.teams.TeamFactory;
 
 /**

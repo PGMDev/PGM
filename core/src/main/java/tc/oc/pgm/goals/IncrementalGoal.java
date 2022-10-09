@@ -1,6 +1,6 @@
 package tc.oc.pgm.goals;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /** A {@link Goal} that is completed gradually, and can report completion as a percentage */
 public interface IncrementalGoal<T extends GoalDefinition> extends Goal<T> {

@@ -2,7 +2,7 @@ package tc.oc.pgm.filters.matcher.match;
 
 import java.util.Collection;
 import java.util.Collections;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.event.Event;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.query.MatchQuery;

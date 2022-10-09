@@ -1,9 +1,9 @@
 package tc.oc.pgm.teams;
 
-import static java.util.Objects.requireNonNull;
+import static java.util.Objects.requireNotNull;
 
 import java.util.Collection;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.apache.commons.lang.math.Fraction;
 import org.bukkit.scoreboard.NameTagVisibility;
 import tc.oc.pgm.api.feature.Feature;
@@ -29,7 +29,7 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
   private JoinMatchModule jmm;
 
   public Team(final TeamFactory info, final Match match) {
-    super(match, requireNonNull(info).getDefaultName(), info.getDefaultColor(), info.getDyeColor());
+    super(match, requireNotNull(info).getDefaultName(), info.getDefaultColor(), info.getDyeColor());
     this.info = info;
     this.min = info.getMinPlayers();
     this.max = info.getMaxPlayers();

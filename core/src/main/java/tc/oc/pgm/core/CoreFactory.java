@@ -1,7 +1,7 @@
 package tc.oc.pgm.core;
 
 import com.google.common.collect.ImmutableSet;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.material.MaterialData;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.region.Region;

@@ -7,8 +7,8 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -72,7 +72,7 @@ public class Broadcast implements Comparable<Broadcast> {
   }
 
   @Override
-  public int compareTo(@Nonnull Broadcast o) {
+  public int compareTo(@NotNull Broadcast o) {
     return this.after.compareTo(o.after);
   }
 

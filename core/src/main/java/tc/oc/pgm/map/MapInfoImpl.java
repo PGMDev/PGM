@@ -7,7 +7,7 @@ import static net.kyori.adventure.text.Component.translatable;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;

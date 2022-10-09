@@ -3,7 +3,7 @@ package tc.oc.pgm.api.map;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.jdom2.Document;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.match.Match;

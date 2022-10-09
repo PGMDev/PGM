@@ -2,7 +2,7 @@ package tc.oc.pgm.modules;
 
 import static net.kyori.adventure.text.Component.translatable;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.World;

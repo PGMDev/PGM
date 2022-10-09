@@ -1,7 +1,7 @@
 package tc.oc.pgm.spawns;
 
 import java.time.Duration;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.util.TimeUtils;

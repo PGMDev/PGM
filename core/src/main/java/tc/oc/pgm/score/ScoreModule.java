@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
@@ -38,7 +38,7 @@ public class ScoreModule implements MapModule {
       new MapTag("tdm", "deathmatch", "Deathmatch", true, false);
   private static final MapTag BOX_TAG = new MapTag("scorebox", "Scorebox", false, true);
 
-  public ScoreModule(@Nonnull ScoreConfig config, @Nonnull Set<ScoreBoxFactory> scoreBoxFactories) {
+  public ScoreModule(@NotNull ScoreConfig config, @NotNull Set<ScoreBoxFactory> scoreBoxFactories) {
     Preconditions.checkNotNull(config, "score config");
     Preconditions.checkNotNull(scoreBoxFactories, "score box factories");
 
@@ -64,10 +64,10 @@ public class ScoreModule implements MapModule {
     return new ScoreMatchModule(match, this.config, scoreBoxes.build());
   }
 
-  private final @Nonnull ScoreConfig config;
-  private final @Nonnull Set<ScoreBoxFactory> scoreBoxFactories;
+  private final @NotNull ScoreConfig config;
+  private final @NotNull Set<ScoreBoxFactory> scoreBoxFactories;
 
-  @Nonnull
+  @NotNull
   public ScoreConfig getConfig() {
     return config;
   }

@@ -3,7 +3,7 @@ package tc.oc.pgm.filters.query;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.UUID;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;

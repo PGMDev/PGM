@@ -2,7 +2,7 @@ package tc.oc.pgm.doublejump;
 
 import java.util.Iterator;
 import java.util.Map;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;

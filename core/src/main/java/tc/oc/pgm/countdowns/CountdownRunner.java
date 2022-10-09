@@ -6,8 +6,8 @@ import java.time.Instant;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.scheduler.BukkitRunnable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
@@ -32,7 +32,7 @@ public class CountdownRunner extends BukkitRunnable {
 
   private Future<?> task = null;
 
-  public CountdownRunner(@Nonnull Match match, Logger parentLogger, @Nonnull Countdown countdown) {
+  public CountdownRunner(@NotNull Match match, Logger parentLogger, @NotNull Countdown countdown) {
     Preconditions.checkNotNull(match, "match");
     Preconditions.checkNotNull(countdown, "countdown");
 
@@ -45,15 +45,15 @@ public class CountdownRunner extends BukkitRunnable {
     return this.task != null;
   }
 
-  public @Nonnull CountdownRunner start(Duration remaining) {
+  public @NotNull CountdownRunner start(Duration remaining) {
     return this.start(remaining, null);
   }
 
-  public @Nonnull CountdownRunner start(Duration remaining, @Nullable Duration interval) {
+  public @NotNull CountdownRunner start(Duration remaining, @Nullable Duration interval) {
     return this.start(remaining, interval, 1);
   }
 
-  public @Nonnull CountdownRunner start(
+  public @NotNull CountdownRunner start(
       Duration remaining, @Nullable Duration interval, int count) {
     logger.fine("STARTING countdown " + countdown + " for duration " + remaining);
 
@@ -150,7 +150,7 @@ public class CountdownRunner extends BukkitRunnable {
     }
   }
 
-  public @Nonnull Countdown getCountdown() {
+  public @NotNull Countdown getCountdown() {
     return this.countdown;
   }
 }

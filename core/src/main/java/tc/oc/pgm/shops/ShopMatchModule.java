@@ -4,7 +4,7 @@ import static tc.oc.pgm.shops.ShopKeeper.isKeeper;
 
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;

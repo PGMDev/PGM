@@ -3,7 +3,7 @@ package tc.oc.pgm.modes;
 import static net.kyori.adventure.text.Component.text;
 
 import java.time.Duration;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.material.MaterialData;

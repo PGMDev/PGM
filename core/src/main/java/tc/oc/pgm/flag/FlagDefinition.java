@@ -1,7 +1,7 @@
 package tc.oc.pgm.flag;
 
 import java.util.Collection;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.DyeColor;
 import tc.oc.pgm.api.feature.FeatureInfo;

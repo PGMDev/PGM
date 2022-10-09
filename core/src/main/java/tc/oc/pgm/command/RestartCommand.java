@@ -5,7 +5,7 @@ import static net.kyori.adventure.text.Component.translatable;
 import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Switch;
 import java.time.Duration;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.format.NamedTextColor;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;

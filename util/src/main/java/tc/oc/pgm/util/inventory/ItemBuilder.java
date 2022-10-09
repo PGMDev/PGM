@@ -2,7 +2,7 @@ package tc.oc.pgm.util.inventory;
 
 import com.google.common.collect.Lists;
 import java.util.Arrays;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;

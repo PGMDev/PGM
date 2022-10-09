@@ -1,7 +1,7 @@
 package tc.oc.pgm.damage;
 
 import com.google.common.collect.SetMultimap;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;

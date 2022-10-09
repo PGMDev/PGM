@@ -3,7 +3,7 @@ package tc.oc.pgm.wool;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.util.Collections;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;

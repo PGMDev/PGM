@@ -4,7 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.util.UUID;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import tc.oc.pgm.api.player.Username;

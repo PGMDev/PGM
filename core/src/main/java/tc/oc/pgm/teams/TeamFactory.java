@@ -1,6 +1,6 @@
 package tc.oc.pgm.teams;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.scoreboard.NameTagVisibility;

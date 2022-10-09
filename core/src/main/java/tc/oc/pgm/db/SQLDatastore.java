@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.map.MapActivity;
 import tc.oc.pgm.api.player.Username;

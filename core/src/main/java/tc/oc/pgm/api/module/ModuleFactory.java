@@ -1,7 +1,7 @@
 package tc.oc.pgm.api.module;
 
 import java.util.Collection;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /** A generic factory for creating {@link Module}s and their dependencies. */
 public interface ModuleFactory<M extends Module> {

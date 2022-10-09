@@ -1,6 +1,6 @@
 package tc.oc.pgm.tracker.info;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.block.BlockState;
 import org.bukkit.material.MaterialData;

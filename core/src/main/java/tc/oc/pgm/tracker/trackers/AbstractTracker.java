@@ -1,7 +1,7 @@
 package tc.oc.pgm.tracker.trackers;
 
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Listener;

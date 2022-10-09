@@ -1,6 +1,6 @@
 package tc.oc.pgm.features;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.util.xml.InvalidXMLException;
