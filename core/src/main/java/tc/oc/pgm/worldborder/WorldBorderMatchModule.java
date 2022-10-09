@@ -1,7 +1,7 @@
 package tc.oc.pgm.worldborder;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import java.time.Duration;
 import java.util.List;
@@ -37,8 +37,8 @@ public class WorldBorderMatchModule implements MatchModule, Listener {
 
   public WorldBorderMatchModule(Match match, List<WorldBorder> borders) {
     this.match = match;
-    requireNonNull(borders);
-    checkArgument(!borders.isEmpty());
+    assertNotNull(borders);
+    assertTrue(!borders.isEmpty());
     this.borders = borders;
   }
 

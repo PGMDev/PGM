@@ -1,6 +1,6 @@
 package tc.oc.pgm.filters.query;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
@@ -15,7 +15,7 @@ public class EntityQuery extends Query implements EntityTypeQuery {
 
   public EntityQuery(@Nullable Event event, Entity entity) {
     super(event);
-    this.entity = requireNonNull(entity);
+    this.entity = assertNotNull(entity);
   }
 
   @Override

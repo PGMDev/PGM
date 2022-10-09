@@ -1,6 +1,6 @@
 package tc.oc.pgm.worldborder;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.time.Duration;
 import org.bukkit.util.Vector;
@@ -31,14 +31,14 @@ public class WorldBorder {
       double buffer,
       double warningDistance,
       Duration warningTime) {
-    this.filter = requireNonNull(filter);
-    this.center = requireNonNull(center);
+    this.filter = assertNotNull(filter);
+    this.center = assertNotNull(center);
     this.size = size;
-    this.duration = requireNonNull(duration);
+    this.duration = assertNotNull(duration);
     this.damage = damage;
     this.buffer = buffer;
     this.warningDistance = warningDistance;
-    this.warningTime = requireNonNull(warningTime);
+    this.warningTime = assertNotNull(warningTime);
   }
 
   public boolean isMoving() {

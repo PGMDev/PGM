@@ -1,6 +1,6 @@
 package tc.oc.pgm.filters.query;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.UUID;
 import org.bukkit.Location;
@@ -24,7 +24,7 @@ public class PlayerStateQuery extends Query implements PlayerQuery {
 
   public PlayerStateQuery(@Nullable Event event, MatchPlayerState playerState) {
     super(event);
-    this.playerState = requireNonNull(playerState);
+    this.playerState = assertNotNull(playerState);
   }
 
   @Override

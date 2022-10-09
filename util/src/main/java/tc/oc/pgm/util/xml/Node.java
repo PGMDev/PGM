@@ -1,6 +1,6 @@
 package tc.oc.pgm.util.xml;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
@@ -21,11 +21,11 @@ public class Node {
   private final Object node;
 
   public Node(Element element) {
-    this.node = requireNonNull(element);
+    this.node = assertNotNull(element);
   }
 
   public Node(Attribute attribute) {
-    this.node = requireNonNull(attribute);
+    this.node = assertNotNull(attribute);
   }
 
   public String getName() {

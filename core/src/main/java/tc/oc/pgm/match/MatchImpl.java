@@ -1,7 +1,7 @@
 package tc.oc.pgm.match;
 
-import static com.google.common.base.Preconditions.checkState;
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import java.io.File;
@@ -114,9 +114,9 @@ public class MatchImpl implements Match {
   private final MatchFeatureContext features;
 
   protected MatchImpl(String id, MapContext map, World world) {
-    this.id = requireNonNull(id);
-    this.map = requireNonNull(map);
-    this.world = new WeakReference<>(requireNonNull(world));
+    this.id = assertNotNull(id);
+    this.map = assertNotNull(map);
+    this.world = new WeakReference<>(assertNotNull(world));
     this.matchModules = new ConcurrentHashMap<>();
 
     this.logger = ClassLogger.get(PGM.get().getLogger(), getClass());
@@ -316,7 +316,7 @@ public class MatchImpl implements Match {
     private final RegisteredListener listener;
 
     private EventExecutor(RegisteredListener listener) {
-      this.listener = requireNonNull(listener);
+      this.listener = assertNotNull(listener);
     }
 
     @Override
@@ -451,7 +451,7 @@ public class MatchImpl implements Match {
 
   @Override
   public boolean setParty(MatchPlayer player, Party party) {
-    return setOrClearPlayerParty(player, requireNonNull(party));
+    return setOrClearPlayerParty(player, assertNotNull(party));
   }
 
   /**
@@ -475,11 +475,11 @@ public class MatchImpl implements Match {
   private boolean setOrClearPlayerParty(MatchPlayer player, @Nullable Party newParty) {
     Party oldParty = player.getParty();
 
-    checkState(this == player.getMatch(), "Player belongs to a different match");
-    checkState(
+    assertTrue(this == player.getMatch(), "Player belongs to a different match");
+    assertTrue(
         oldParty == null || players.containsValue(player),
         "Joining player is already in the match");
-    checkState(
+    assertTrue(
         newParty == null || newParty.isAutomatic() || parties.contains(newParty),
         "Party is not in this match and cannot be automatically added");
 
@@ -652,9 +652,9 @@ public class MatchImpl implements Match {
   @Override
   public void addParty(Party party) {
     logger.fine("Adding party " + party);
-    requireNonNull(party);
-    checkState(party.getPlayers().isEmpty(), "Party already contains players");
-    checkState(parties.add(party), "Party is already in this match");
+    assertNotNull(party);
+    assertTrue(party.getPlayers().isEmpty(), "Party already contains players");
+    assertTrue(parties.add(party), "Party is already in this match");
 
     if (party instanceof Competitor) {
       competitors.add((Competitor) party);
@@ -673,9 +673,9 @@ public class MatchImpl implements Match {
   public void removeParty(Party party) {
     logger.fine("Removing party " + party);
 
-    requireNonNull(party);
-    checkState(parties.contains(party), "Party is not in this match");
-    checkState(party.getPlayers().isEmpty(), "Party still has players in it");
+    assertNotNull(party);
+    assertTrue(parties.contains(party), "Party is not in this match");
+    assertTrue(party.getPlayers().isEmpty(), "Party still has players in it");
 
     callEvent(
         party instanceof Competitor
@@ -709,7 +709,7 @@ public class MatchImpl implements Match {
     private final MatchScope scope;
 
     private TickableTask(MatchScope scope) {
-      this.scope = requireNonNull(scope);
+      this.scope = assertNotNull(scope);
     }
 
     @Override

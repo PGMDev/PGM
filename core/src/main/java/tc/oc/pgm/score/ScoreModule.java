@@ -1,6 +1,6 @@
 package tc.oc.pgm.score;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -40,8 +40,8 @@ public class ScoreModule implements MapModule {
   private static final MapTag BOX_TAG = new MapTag("scorebox", "Scorebox", false, true);
 
   public ScoreModule(@NotNull ScoreConfig config, @NotNull Set<ScoreBoxFactory> scoreBoxFactories) {
-    requireNonNull(config, "score config");
-    requireNonNull(scoreBoxFactories, "score box factories");
+    assertNotNull(config, "score config");
+    assertNotNull(scoreBoxFactories, "score box factories");
 
     this.config = config;
     this.scoreBoxFactories = scoreBoxFactories;

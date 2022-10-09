@@ -1,6 +1,6 @@
 package tc.oc.pgm.match;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.util.Optional;
@@ -25,10 +25,10 @@ public class MatchPlayerStateImpl implements MatchPlayerState {
   private final Audience audience;
 
   protected MatchPlayerStateImpl(MatchPlayer player) {
-    this.match = requireNonNull(player).getMatch();
+    this.match = assertNotNull(player).getMatch();
     this.username = player.getBukkit().getName();
     this.uuid = player.getId();
-    this.party = requireNonNull(player.getParty());
+    this.party = assertNotNull(player.getParty());
     this.location = player.getBukkit().getLocation().toVector();
     this.audience = getPlayer().isPresent() ? getPlayer().get() : Audience.empty();
   }

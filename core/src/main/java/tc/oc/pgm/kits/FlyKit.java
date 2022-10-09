@@ -1,6 +1,7 @@
 package tc.oc.pgm.kits;
 
-import com.google.common.base.Preconditions;
+import static tc.oc.pgm.util.Assert.assertTrue;
+
 import java.util.List;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -15,7 +16,7 @@ public class FlyKit extends AbstractKit {
   protected final float flySpeedMultiplier;
 
   public FlyKit(boolean allowFlight, @Nullable Boolean flying, float flySpeedMultiplier) {
-    Preconditions.checkArgument(
+    assertTrue(
         flying == null || !(flying && !allowFlight),
         "Flying cannot be true if allow-flight is false");
 

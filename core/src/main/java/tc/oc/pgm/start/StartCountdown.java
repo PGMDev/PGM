@@ -1,7 +1,7 @@
 package tc.oc.pgm.start;
 
-import static java.util.Objects.requireNonNull;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.time.Duration;
 import net.kyori.adventure.bossbar.BossBar;
@@ -28,7 +28,7 @@ public class StartCountdown extends PreMatchCountdown {
 
   public StartCountdown(Match match, boolean forced, Duration huddle) {
     super(match, BossBar.Color.GREEN);
-    this.huddle = requireNonNull(huddle);
+    this.huddle = assertNotNull(huddle);
     this.forced = forced;
     this.tmm = match.getModule(TeamMatchModule.class);
   }

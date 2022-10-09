@@ -1,6 +1,6 @@
 package tc.oc.pgm.api;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import fr.minuskube.inv.InventoryManager;
 import java.util.concurrent.ScheduledExecutorService;
@@ -50,7 +50,7 @@ public interface PGM extends Plugin {
       get();
       throw new IllegalArgumentException("PGM was already initialized!");
     } catch (IllegalStateException e) {
-      GLOBAL.set(requireNonNull(pgm, "PGM cannot be null!"));
+      GLOBAL.set(assertNotNull(pgm, "PGM cannot be null!"));
     }
     return get();
   }

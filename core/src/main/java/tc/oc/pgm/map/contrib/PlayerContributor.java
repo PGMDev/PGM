@@ -1,6 +1,6 @@
 package tc.oc.pgm.map.contrib;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.base.Objects;
 import java.util.UUID;
@@ -18,7 +18,7 @@ public class PlayerContributor implements Contributor {
   private final @Nullable String contribution;
 
   public PlayerContributor(UUID id, @Nullable String contribution) {
-    this.id = requireNonNull(id);
+    this.id = assertNotNull(id);
     this.username = PGM.get().getDatastore().getUsername(id);
     this.contribution = contribution;
   }

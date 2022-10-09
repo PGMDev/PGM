@@ -1,6 +1,6 @@
 package tc.oc.pgm.tracker.info;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.Nullable;
@@ -16,7 +16,7 @@ public class GenericDamageInfo implements DamageInfo, CauseInfo {
 
   public GenericDamageInfo(
       EntityDamageEvent.DamageCause damageType, @Nullable PhysicalInfo damager) {
-    this.damageType = requireNonNull(damageType);
+    this.damageType = assertNotNull(damageType);
     this.damager = damager;
   }
 

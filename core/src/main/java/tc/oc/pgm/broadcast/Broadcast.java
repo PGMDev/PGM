@@ -1,10 +1,10 @@
 package tc.oc.pgm.broadcast;
 
-import static java.util.Objects.requireNonNull;
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.time.Duration;
 import net.kyori.adventure.sound.Sound;
@@ -63,11 +63,11 @@ public class Broadcast implements Comparable<Broadcast> {
       @Nullable Duration every,
       Component message,
       @Nullable Filter filter) {
-    this.type = requireNonNull(type);
-    this.after = requireNonNull(after);
+    this.type = assertNotNull(type);
+    this.after = assertNotNull(after);
     this.count = count;
     this.every = every;
-    this.message = requireNonNull(message);
+    this.message = assertNotNull(message);
     this.filter = filter;
   }
 

@@ -1,6 +1,6 @@
 package tc.oc.pgm.map.source;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.Sets;
 import java.io.File;
@@ -49,7 +49,7 @@ public class SystemMapSourceFactory extends PathMapSourceFactory {
     private final Set<MapInclude> storedIncludes;
 
     private SystemMapSource(String dir) {
-      this.dir = requireNonNull(dir);
+      this.dir = assertNotNull(dir);
       this.modified = new AtomicLong(-1);
       this.storedIncludes = Sets.newHashSet();
     }

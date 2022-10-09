@@ -1,6 +1,6 @@
 package tc.oc.pgm.map;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.Random;
 import org.bukkit.World;
@@ -29,7 +29,7 @@ public class WorldInfoImpl implements WorldInfo {
 
   public WorldInfoImpl(Element element) throws InvalidXMLException {
     this(
-        parseSeed(requireNonNull(element).getAttributeValue("seed")),
+        parseSeed(assertNotNull(element).getAttributeValue("seed")),
         XMLUtils.parseBoolean(element.getAttribute("vanilla"), false),
         XMLUtils.parseEnum(
                 Node.fromLastChildOrAttr(element, "environment"),

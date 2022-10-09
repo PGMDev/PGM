@@ -1,7 +1,7 @@
 package tc.oc.pgm.ffa;
 
-import static java.util.Objects.requireNonNull;
 import static net.kyori.adventure.text.Component.*;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.util.Collection;
@@ -156,7 +156,7 @@ public class Tribute implements Competitor {
 
   @Override
   public void addPlayer(final MatchPlayer player) {
-    checkPlayer(requireNonNull(player).getId());
+    checkPlayer(assertNotNull(player).getId());
     this.player = player;
     this.players = Collections.unmodifiableList(Collections.singletonList(player));
   }

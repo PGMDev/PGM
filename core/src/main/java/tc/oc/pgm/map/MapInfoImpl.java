@@ -1,8 +1,8 @@
 package tc.oc.pgm.map;
 
-import static java.util.Objects.requireNonNull;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -68,11 +68,11 @@ public class MapInfoImpl implements MapInfo {
       @Nullable Collection<Gamemode> gamemodes,
       Phase phase,
       @Nullable boolean friendlyFire) {
-    this.name = requireNonNull(name);
-    this.id = requireNonNull(MapInfo.normalizeName(id == null ? name : id));
-    this.proto = requireNonNull(proto);
-    this.version = requireNonNull(version);
-    this.description = requireNonNull(description);
+    this.name = assertNotNull(name);
+    this.id = assertNotNull(MapInfo.normalizeName(id == null ? name : id));
+    this.proto = assertNotNull(proto);
+    this.version = assertNotNull(version);
+    this.description = assertNotNull(description);
     this.created = created;
     this.authors = authors == null ? new LinkedList<>() : authors;
     this.contributors = contributors == null ? new LinkedList<>() : contributors;
@@ -89,7 +89,7 @@ public class MapInfoImpl implements MapInfo {
 
   public MapInfoImpl(MapInfo info) {
     this(
-        requireNonNull(info).getId(),
+        assertNotNull(info).getId(),
         info.getProto(),
         info.getVersion(),
         info.getName(),
@@ -110,7 +110,7 @@ public class MapInfoImpl implements MapInfo {
 
   public MapInfoImpl(Element root) throws InvalidXMLException {
     this(
-        requireNonNull(root).getChildTextNormalize("slug"),
+        assertNotNull(root).getChildTextNormalize("slug"),
         XMLUtils.parseSemanticVersion(Node.fromRequiredAttr(root, "proto")),
         XMLUtils.parseSemanticVersion(Node.fromRequiredChildOrAttr(root, "version")),
         Node.fromRequiredChildOrAttr(root, "name").getValueNormalize(),

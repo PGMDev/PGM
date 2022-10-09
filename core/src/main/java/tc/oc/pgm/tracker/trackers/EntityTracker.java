@@ -1,6 +1,6 @@
 package tc.oc.pgm.tracker.trackers;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -63,7 +63,7 @@ public class EntityTracker implements Listener {
   }
 
   public @Nullable TrackerInfo resolveInfo(Entity entity) {
-    return entities.get(requireNonNull(entity));
+    return entities.get(assertNotNull(entity));
   }
 
   public @Nullable <T extends TrackerInfo> T resolveInfo(Entity entity, Class<T> infoType) {
@@ -81,7 +81,7 @@ public class EntityTracker implements Listener {
   }
 
   public void trackEntity(Entity entity, @Nullable TrackerInfo info) {
-    requireNonNull(entity);
+    assertNotNull(entity);
     if (info == null) {
       entities.remove(entity);
       logger.fine("Clear entity=" + entity);

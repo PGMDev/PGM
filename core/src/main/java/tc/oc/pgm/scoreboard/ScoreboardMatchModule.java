@@ -1,6 +1,6 @@
 package tc.oc.pgm.scoreboard;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -218,7 +218,7 @@ public class ScoreboardMatchModule implements MatchModule, Listener {
   }
 
   public Scoreboard getScoreboard(Party party) {
-    return requireNonNull(partyScoreboards.get(party));
+    return assertNotNull(partyScoreboards.get(party));
   }
 
   public void updatePartyScoreboardTeam(Party party) {

@@ -1,5 +1,7 @@
 package tc.oc.pgm.filters;
 
+import static tc.oc.pgm.util.Assert.assertNotNull;
+
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -12,7 +14,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -536,7 +537,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    */
   @SuppressWarnings("unchecked")
   public <T extends ReactorFactory.Reactor> @NotNull T getReactor(ReactorFactory<T> factory) {
-    return (T) Objects.requireNonNull(this.activeReactors.get(factory), "reactor");
+    return (T) assertNotNull(this.activeReactors.get(factory), "reactor");
   }
 
   private static class DummyListener implements Listener {}

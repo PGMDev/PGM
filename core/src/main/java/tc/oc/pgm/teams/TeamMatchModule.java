@@ -1,13 +1,13 @@
 package tc.oc.pgm.teams;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Objects.requireNonNull;
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.title.Title.title;
+import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -287,7 +287,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
   }
 
   public boolean forceJoin(MatchPlayer player, Team newTeam, boolean autoJoin) {
-    requireNonNull(newTeam);
+    assertNotNull(newTeam);
     Party oldTeam = player.getParty();
     if (oldTeam == newTeam) return true;
 
@@ -559,7 +559,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
   }
 
   public boolean kickPlayerOffTeam(Team kickFrom, boolean forBalance) {
-    checkArgument(kickFrom.getMatch() == match);
+    assertTrue(kickFrom.getMatch() == match);
 
     // Find all players who can be bumped
     List<MatchPlayer> kickable = new ArrayList<>();

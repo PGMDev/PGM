@@ -1,6 +1,6 @@
 package tc.oc.pgm.blitz;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
@@ -29,7 +29,7 @@ public class BlitzModule implements MapModule {
   private final BlitzConfig config;
 
   public BlitzModule(BlitzConfig config) {
-    this.config = requireNonNull(config);
+    this.config = assertNotNull(config);
   }
 
   @Override

@@ -1,7 +1,7 @@
 package tc.oc.pgm.result;
 
-import static java.util.Objects.requireNonNull;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import net.kyori.adventure.text.Component;
 import tc.oc.pgm.api.match.Match;
@@ -13,7 +13,7 @@ public class CompetitorVictoryCondition extends ImmediateVictoryCondition {
   private final Competitor competitor;
 
   public CompetitorVictoryCondition(Competitor competitor) {
-    this.competitor = requireNonNull(competitor);
+    this.competitor = assertNotNull(competitor);
   }
 
   @Override

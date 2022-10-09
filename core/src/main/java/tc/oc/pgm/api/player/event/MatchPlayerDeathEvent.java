@@ -1,6 +1,6 @@
 package tc.oc.pgm.api.player.event;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -19,9 +19,9 @@ public class MatchPlayerDeathEvent extends MatchPlayerEvent {
 
   public MatchPlayerDeathEvent(
       PlayerDeathEvent parent, MatchPlayer victim, DamageInfo damageInfo, boolean predicted) {
-    super(requireNonNull(victim));
-    this.parent = requireNonNull(parent);
-    this.damageInfo = requireNonNull(damageInfo);
+    super(assertNotNull(victim));
+    this.parent = assertNotNull(parent);
+    this.damageInfo = assertNotNull(damageInfo);
     this.predicted = predicted;
   }
 

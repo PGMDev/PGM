@@ -1,6 +1,6 @@
 package tc.oc.pgm.filters.modifier;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.Collection;
 import java.util.stream.Stream;
@@ -26,7 +26,7 @@ public abstract class QueryModifier<Q extends Query, R extends Query>
   private final Class<R> innerQueryType;
 
   protected QueryModifier(Filter filter, Class<R> innerQueryType) {
-    this.filter = requireNonNull(filter, "filter may not be null");
+    this.filter = assertNotNull(filter, "filter may not be null");
     this.innerQueryType = innerQueryType;
   }
 

@@ -1,6 +1,6 @@
 package tc.oc.pgm.classes;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
@@ -28,13 +28,13 @@ public class PlayerClass {
       Set<Kit> kits,
       MaterialData icon,
       boolean restrict) {
-    this.name = requireNonNull(name, "name");
-    this.familyName = requireNonNull(familyName, "family name");
+    this.name = assertNotNull(name, "name");
+    this.familyName = assertNotNull(familyName, "family name");
     this.description = description;
     this.longdescription = longdescription;
     this.sticky = sticky;
-    this.kits = ImmutableSet.copyOf(requireNonNull(kits, "kits"));
-    this.icon = requireNonNull(icon, "icon");
+    this.kits = ImmutableSet.copyOf(assertNotNull(kits, "kits"));
+    this.icon = assertNotNull(icon, "icon");
     this.restrict = restrict;
   }
 

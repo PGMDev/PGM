@@ -1,6 +1,6 @@
 package tc.oc.pgm.map;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.Iterators;
 import java.lang.ref.SoftReference;
@@ -46,16 +46,16 @@ public class MapLibraryImpl implements MapLibrary {
     private final SoftReference<MapContext> context;
 
     private MapEntry(MapSource source, MapInfo info, MapContext context) {
-      this.source = requireNonNull(source);
-      this.info = requireNonNull(info);
-      this.context = new SoftReference<>(requireNonNull(context));
+      this.source = assertNotNull(source);
+      this.info = assertNotNull(info);
+      this.context = new SoftReference<>(assertNotNull(context));
     }
   }
 
   public MapLibraryImpl(
       Logger logger, List<MapSourceFactory> factories, MapIncludeProcessor includes) {
-    this.logger = requireNonNull(logger); // Logger should be visible in-game
-    this.factories = Collections.synchronizedList(requireNonNull(factories));
+    this.logger = assertNotNull(logger); // Logger should be visible in-game
+    this.factories = Collections.synchronizedList(assertNotNull(factories));
     this.maps = Collections.synchronizedSortedMap(new ConcurrentSkipListMap<>());
     this.failed = Collections.synchronizedSet(new HashSet<>());
     this.includes = includes;

@@ -1,7 +1,7 @@
 package tc.oc.pgm.timelimit;
 
-import static java.util.Objects.requireNonNull;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.text.TemporalComponent.clock;
 
 import java.time.Duration;
@@ -30,7 +30,7 @@ public class TimeLimit extends SelfIdentifyingFeatureDefinition implements Victo
       @Nullable VictoryCondition result,
       boolean show) {
     super(id);
-    this.duration = requireNonNull(duration);
+    this.duration = assertNotNull(duration);
     this.overtime = overtime;
     this.maxOvertime = maxOvertime;
     this.endOvertime = minOvertime;

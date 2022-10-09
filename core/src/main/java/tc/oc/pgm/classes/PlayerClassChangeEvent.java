@@ -1,6 +1,6 @@
 package tc.oc.pgm.classes;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -15,10 +15,10 @@ public class PlayerClassChangeEvent extends MatchPlayerEvent {
   public PlayerClassChangeEvent(
       MatchPlayer player, String family, PlayerClass oldClass, PlayerClass newClass) {
     super(player);
-    this.player = requireNonNull(player, "player");
-    this.family = requireNonNull(family, "family");
-    this.oldClass = requireNonNull(oldClass, "old class");
-    this.newClass = requireNonNull(newClass, "new class");
+    this.player = assertNotNull(player, "player");
+    this.family = assertNotNull(family, "family");
+    this.oldClass = assertNotNull(oldClass, "old class");
+    this.newClass = assertNotNull(newClass, "new class");
   }
 
   public MatchPlayer getPlayer() {

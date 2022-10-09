@@ -1,6 +1,6 @@
 package tc.oc.pgm.match;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.lang.ref.WeakReference;
@@ -83,7 +83,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   public MatchPlayerImpl(Match match, Player player) {
     this.logger =
         ClassLogger.get(
-            requireNonNull(match).getLogger(), getClass(), requireNonNull(player).getName());
+            assertNotNull(match).getLogger(), getClass(), assertNotNull(player).getName());
     this.match = match;
     this.id = player.getUniqueId();
     this.bukkit = new WeakReference<>(player);

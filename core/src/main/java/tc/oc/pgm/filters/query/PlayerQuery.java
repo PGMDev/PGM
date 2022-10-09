@@ -1,6 +1,6 @@
 package tc.oc.pgm.filters.query;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -21,7 +21,7 @@ public class PlayerQuery extends Query implements tc.oc.pgm.api.filter.query.Pla
 
   public PlayerQuery(@Nullable Event event, MatchPlayer player, @Nullable Location location) {
     super(event);
-    this.player = requireNonNull(player);
+    this.player = assertNotNull(player);
     this.location = location != null ? location : player.getBukkit().getLocation();
     this.blockCenter = this.location.getBlock().getLocation();
   }

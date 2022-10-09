@@ -1,6 +1,6 @@
 package tc.oc.pgm.filters.matcher;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -60,7 +60,7 @@ public class CauseFilter extends TypedFilter.Impl<MatchQuery> {
   private final Cause cause;
 
   public CauseFilter(Cause cause) {
-    this.cause = requireNonNull(cause, "cause");
+    this.cause = assertNotNull(cause, "cause");
   }
 
   @Override

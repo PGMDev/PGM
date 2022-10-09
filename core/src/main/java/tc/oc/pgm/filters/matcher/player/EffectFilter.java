@@ -1,6 +1,6 @@
 package tc.oc.pgm.filters.matcher.player;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.Range;
 import java.util.Collection;
@@ -15,7 +15,7 @@ public class EffectFilter extends ParticipantFilter {
   protected final boolean amplifier;
 
   public EffectFilter(PotionEffect base, Range<Integer> duration, boolean amplifier) {
-    this.base = requireNonNull(base);
+    this.base = assertNotNull(base);
     this.duration = duration;
     this.amplifier = amplifier;
   }

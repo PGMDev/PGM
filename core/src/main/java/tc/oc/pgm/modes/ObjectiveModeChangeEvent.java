@@ -1,6 +1,6 @@
 package tc.oc.pgm.modes;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.Collection;
 import org.bukkit.event.HandlerList;
@@ -58,7 +58,7 @@ public class ObjectiveModeChangeEvent extends MatchEvent {
   }
 
   public void setName(@NotNull String name) {
-    this.name = requireNonNull(name, "name");
+    this.name = assertNotNull(name, "name");
   }
 
   public String getName() {

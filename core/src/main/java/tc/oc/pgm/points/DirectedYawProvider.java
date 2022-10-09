@@ -1,12 +1,12 @@
 package tc.oc.pgm.points;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.util.Vector;
 
 public class DirectedYawProvider implements AngleProvider {
   public DirectedYawProvider(Vector target) {
-    this.target = requireNonNull(target, "target");
+    this.target = assertNotNull(target, "target");
   }
 
   @Override

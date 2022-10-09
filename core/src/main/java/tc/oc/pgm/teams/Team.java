@@ -1,6 +1,6 @@
 package tc.oc.pgm.teams;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.Collection;
 import org.apache.commons.lang.math.Fraction;
@@ -29,7 +29,7 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
   private JoinMatchModule jmm;
 
   public Team(final TeamFactory info, final Match match) {
-    super(match, requireNonNull(info).getDefaultName(), info.getDefaultColor(), info.getDyeColor());
+    super(match, assertNotNull(info).getDefaultName(), info.getDefaultColor(), info.getDyeColor());
     this.info = info;
     this.min = info.getMinPlayers();
     this.max = info.getMaxPlayers();

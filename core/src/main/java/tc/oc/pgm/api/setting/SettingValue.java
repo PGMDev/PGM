@@ -1,6 +1,6 @@
 package tc.oc.pgm.api.setting;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -57,9 +57,9 @@ public enum SettingValue {
   private final DyeColor color;
 
   SettingValue(String group, String name, DyeColor color) {
-    this.key = requireNonNull(group);
-    this.name = requireNonNull(name);
-    this.color = requireNonNull(color);
+    this.key = assertNotNull(group);
+    this.name = assertNotNull(name);
+    this.color = assertNotNull(color);
   }
 
   /**

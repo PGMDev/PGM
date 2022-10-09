@@ -1,6 +1,6 @@
 package tc.oc.pgm.points;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -20,7 +20,7 @@ public class RegionPointProvider implements PointProvider {
 
   public RegionPointProvider(Region region, PointProviderAttributes attributes) {
     this.attributes = attributes;
-    this.region = requireNonNull(region, "region");
+    this.region = assertNotNull(region, "region");
     ;
   }
 

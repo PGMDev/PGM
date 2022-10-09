@@ -1,6 +1,6 @@
 package tc.oc.pgm.map.source;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -22,7 +22,7 @@ public abstract class PathMapSourceFactory implements MapSourceFactory {
 
   protected PathMapSourceFactory(String path) {
     this.sources = new ConcurrentSkipListMap<>();
-    this.path = requireNonNull(path);
+    this.path = assertNotNull(path);
   }
 
   protected abstract MapSource loadSource(String dir);

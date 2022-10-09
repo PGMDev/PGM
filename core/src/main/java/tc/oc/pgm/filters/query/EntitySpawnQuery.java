@@ -1,6 +1,6 @@
 package tc.oc.pgm.filters.query;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
@@ -15,7 +15,7 @@ public class EntitySpawnQuery extends EntityQuery
   public EntitySpawnQuery(
       @Nullable Event event, Entity entity, CreatureSpawnEvent.SpawnReason spawnReason) {
     super(event, entity);
-    this.spawnReason = requireNonNull(spawnReason);
+    this.spawnReason = assertNotNull(spawnReason);
   }
 
   @Override

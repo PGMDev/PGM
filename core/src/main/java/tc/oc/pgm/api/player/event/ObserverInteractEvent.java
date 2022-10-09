@@ -1,6 +1,6 @@
 package tc.oc.pgm.api.player.event;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -35,7 +35,7 @@ public class ObserverInteractEvent extends MatchPlayerEvent implements Cancellab
       @Nullable Entity clickedEntity,
       @Nullable ItemStack clickedItem) {
     super(player);
-    this.clickType = requireNonNull(clickType);
+    this.clickType = assertNotNull(clickType);
     this.clickedBlock = clickedBlock;
     this.clickedEntity = clickedEntity;
     this.clickedItem = clickedItem;

@@ -1,6 +1,6 @@
 package tc.oc.pgm.filters.query;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
@@ -19,8 +19,8 @@ public class DamageQuery extends PlayerStateQuery
       DamageInfo damageInfo,
       ParticipantState defaultPlayer) {
     super(event, defaultPlayer);
-    this.damageInfo = requireNonNull(damageInfo);
-    this.victim = requireNonNull(victim);
+    this.damageInfo = assertNotNull(damageInfo);
+    this.victim = assertNotNull(victim);
   }
 
   public static DamageQuery victimDefault(

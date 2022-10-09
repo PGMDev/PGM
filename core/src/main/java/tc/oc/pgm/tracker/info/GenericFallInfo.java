@@ -1,6 +1,6 @@
 package tc.oc.pgm.tracker.info;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.Location;
 import org.jetbrains.annotations.Nullable;
@@ -14,8 +14,8 @@ public class GenericFallInfo implements FallInfo {
   private final Location origin;
 
   public GenericFallInfo(To to, Location origin) {
-    this.to = requireNonNull(to);
-    this.origin = requireNonNull(origin);
+    this.to = assertNotNull(to);
+    this.origin = assertNotNull(origin);
   }
 
   public GenericFallInfo(To to, Location location, double distance) {

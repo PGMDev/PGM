@@ -1,6 +1,6 @@
 package tc.oc.pgm.events;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.party.Party;
@@ -14,7 +14,7 @@ public class PlayerLeavePartyEvent extends MatchPlayerEvent {
 
   public PlayerLeavePartyEvent(MatchPlayer player, Party oldParty) {
     super(player);
-    this.oldParty = requireNonNull(oldParty);
+    this.oldParty = assertNotNull(oldParty);
   }
 
   public Party getParty() {

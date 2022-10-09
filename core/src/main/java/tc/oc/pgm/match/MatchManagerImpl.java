@@ -1,6 +1,6 @@
 package tc.oc.pgm.match;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Range;
@@ -46,7 +46,7 @@ public class MatchManagerImpl implements MatchManager, Listener {
   private final long destroyDelaySecs;
 
   public MatchManagerImpl(Logger logger) {
-    this.logger = ClassLogger.get(requireNonNull(logger), getClass());
+    this.logger = ClassLogger.get(assertNotNull(logger), getClass());
     this.matchById = Collections.synchronizedMap(new LinkedHashMap<>());
     this.matchByWorld = new HashMap<>();
 
@@ -69,8 +69,8 @@ public class MatchManagerImpl implements MatchManager, Listener {
   public void onMatchLoad(MatchLoadEvent event) {
     final Match match = event.getMatch();
 
-    matchById.put(requireNonNull(match).getId(), match);
-    matchByWorld.put(requireNonNull(match.getWorld()).getName(), match);
+    matchById.put(assertNotNull(match).getId(), match);
+    matchByWorld.put(assertNotNull(match.getWorld()).getName(), match);
 
     logger.info("Loaded match-" + match.getId() + " (" + match.getMap().getId() + ")");
 
@@ -85,8 +85,8 @@ public class MatchManagerImpl implements MatchManager, Listener {
   public void onMatchUnload(MatchUnloadEvent event) {
     final Match match = event.getMatch();
 
-    matchById.remove(requireNonNull(match).getId());
-    matchByWorld.remove(requireNonNull(match.getWorld()).getName());
+    matchById.remove(assertNotNull(match).getId());
+    matchByWorld.remove(assertNotNull(match.getWorld()).getName());
 
     PGM.get()
         .getAsyncExecutor()

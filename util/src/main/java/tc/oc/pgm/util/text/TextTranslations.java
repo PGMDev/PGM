@@ -1,8 +1,8 @@
 package tc.oc.pgm.util.text;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -108,7 +108,7 @@ public final class TextTranslations {
 
   static {
     // If the source locale has no text translations, consider this a fatal error
-    checkArgument(
+    assertTrue(
         loadKeys(SOURCE_LOCALE) > 0,
         "no text translations found (are .properties files being included properly?)");
     // Attempt to pre-fetch the locale of the console, but if not present, is not a fatal error

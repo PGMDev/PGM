@@ -1,6 +1,6 @@
 package tc.oc.pgm.destroyable;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -26,7 +26,7 @@ public class DestroyableHealthChange {
       @NotNull BlockState newState,
       @Nullable ParticipantState playerCause,
       int healthChange) {
-    requireNonNull(oldState, "old block state");
+    assertNotNull(oldState, "old block state");
 
     this.oldState = oldState;
     this.newState = newState;

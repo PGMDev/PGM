@@ -1,6 +1,6 @@
 package tc.oc.pgm.db;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.util.UUID;
@@ -18,7 +18,7 @@ class UsernameImpl implements Username {
   private String name;
 
   UsernameImpl(UUID id, @Nullable String name) {
-    this.id = requireNonNull(id, "username id is null");
+    this.id = assertNotNull(id, "username id is null");
     setName(name);
   }
 

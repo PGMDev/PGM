@@ -1,12 +1,12 @@
 package tc.oc.pgm.command;
 
-import static java.util.Objects.requireNonNull;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.event.ClickEvent.runCommand;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.text.TextException.invalidFormat;
 
 import app.ashcon.intake.Command;
@@ -126,7 +126,7 @@ public final class MapCommand {
   private static boolean matchesTags(
       MapInfo map, @Nullable Collection<String> posTags, @Nullable Collection<String> negTags) {
     int matches = 0;
-    for (MapTag tag : requireNonNull(map).getTags()) {
+    for (MapTag tag : assertNotNull(map).getTags()) {
       if (negTags != null && negTags.contains(tag.getId())) {
         return false;
       }
@@ -138,8 +138,8 @@ public final class MapCommand {
   }
 
   private static boolean matchesAuthor(MapInfo map, String query) {
-    requireNonNull(map);
-    query = requireNonNull(query).toLowerCase();
+    assertNotNull(map);
+    query = assertNotNull(query).toLowerCase();
 
     for (Contributor contributor : map.getAuthors()) {
       if (contributor.getNameLegacy().toLowerCase().contains(query)) {
@@ -150,14 +150,14 @@ public final class MapCommand {
   }
 
   private static boolean matchesName(MapInfo map, String query) {
-    requireNonNull(map);
-    query = requireNonNull(query).toLowerCase();
+    assertNotNull(map);
+    query = assertNotNull(query).toLowerCase();
     return map.getName().toLowerCase().contains(query);
   }
 
   private static boolean matchesPhase(MapInfo map, String query) {
-    requireNonNull(map);
-    query = requireNonNull(query).toLowerCase();
+    assertNotNull(map);
+    query = assertNotNull(query).toLowerCase();
     return map.getPhase().equals(Phase.of(query));
   }
 
@@ -270,7 +270,7 @@ public final class MapCommand {
   }
 
   private Component createTagsComponent(Collection<MapTag> tags) {
-    requireNonNull(tags);
+    assertNotNull(tags);
 
     Builder result = text().append(mapInfoLabel("map.info.tags"));
     MapTag[] mapTags = tags.toArray(new MapTag[0]);
@@ -300,8 +300,8 @@ public final class MapCommand {
   }
 
   private static Component createPlayerLimitComponent(CommandSender sender, MapInfo map) {
-    requireNonNull(sender);
-    requireNonNull(map);
+    assertNotNull(sender);
+    assertNotNull(map);
 
     Collection<Integer> maxPlayers = map.getMaxPlayers();
     if (maxPlayers.isEmpty()) {

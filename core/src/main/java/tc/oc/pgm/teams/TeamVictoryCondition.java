@@ -1,7 +1,7 @@
 package tc.oc.pgm.teams;
 
-import static java.util.Objects.requireNonNull;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import net.kyori.adventure.text.Component;
 import tc.oc.pgm.api.match.Match;
@@ -13,7 +13,7 @@ public class TeamVictoryCondition extends ImmediateVictoryCondition {
   private TeamFactory teamDefinition;
 
   public TeamVictoryCondition(TeamFactory teamDefinition) {
-    this.teamDefinition = requireNonNull(teamDefinition);
+    this.teamDefinition = assertNotNull(teamDefinition);
   }
 
   public Team getTeam(Match match) {

@@ -1,6 +1,6 @@
 package tc.oc.pgm.filters.query;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
@@ -21,7 +21,7 @@ public class PlayerBlockQuery extends PlayerStateQuery implements BlockQuery {
 
   public PlayerBlockQuery(@Nullable Event event, ParticipantState player, BlockState block) {
     super(event, player);
-    this.block = requireNonNull(block);
+    this.block = assertNotNull(block);
   }
 
   @Override

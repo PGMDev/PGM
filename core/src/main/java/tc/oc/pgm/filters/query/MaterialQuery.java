@@ -1,6 +1,6 @@
 package tc.oc.pgm.filters.query;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +14,7 @@ public class MaterialQuery extends Query implements tc.oc.pgm.api.filter.query.M
 
   public MaterialQuery(@Nullable Event event, MaterialData material) {
     super(event);
-    this.material = requireNonNull(material);
+    this.material = assertNotNull(material);
   }
 
   @Override

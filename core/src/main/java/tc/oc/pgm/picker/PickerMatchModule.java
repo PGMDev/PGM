@@ -1,10 +1,10 @@
 package tc.oc.pgm.picker;
 
-import static com.google.common.base.Preconditions.checkState;
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -206,7 +206,7 @@ public class PickerMatchModule implements MatchModule, Listener {
   }
 
   private String getWindowTitle(MatchPlayer player) {
-    checkState(hasTeams || hasClasses); // Window should not open if there is nothing to pick
+    assertTrue(hasTeams || hasClasses); // Window should not open if there is nothing to pick
 
     String key;
     if (hasTeams && hasClasses) {

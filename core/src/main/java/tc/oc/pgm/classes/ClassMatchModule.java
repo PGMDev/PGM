@@ -1,7 +1,7 @@
 package tc.oc.pgm.classes;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -35,9 +35,9 @@ public class ClassMatchModule implements MatchModule, Listener {
   public ClassMatchModule(
       Match match, String family, Map<String, PlayerClass> classes, PlayerClass defaultClass) {
     this.match = match;
-    this.family = requireNonNull(family, "family");
-    this.classes = requireNonNull(classes, "classes");
-    this.defaultClass = requireNonNull(defaultClass, "default class");
+    this.family = assertNotNull(family, "family");
+    this.classes = assertNotNull(classes, "classes");
+    this.defaultClass = assertNotNull(defaultClass, "default class");
 
     this.classesByName =
         Sets.newTreeSet(
@@ -161,9 +161,9 @@ public class ClassMatchModule implements MatchModule, Listener {
    * @throws IllegalStateException if the player may not change classes
    */
   public PlayerClass setPlayerClass(UUID userId, PlayerClass cls) {
-    requireNonNull(userId, "player id");
-    requireNonNull(cls, "player class");
-    checkArgument(this.classes.containsValue(cls), "class is not valid for this match");
+    assertNotNull(userId, "player id");
+    assertNotNull(cls, "player class");
+    assertTrue(this.classes.containsValue(cls), "class is not valid for this match");
 
     if (!this.getCanChangeClass(userId)) {
       throw new IllegalStateException("cannot change sticky class");

@@ -1,6 +1,6 @@
 package tc.oc.pgm.damage;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.List;
 import org.bukkit.entity.Entity;
@@ -151,7 +151,7 @@ public class DamageMatchModule implements MatchModule, Listener {
   /** Query the given damage event and cancel it if the result was denied. */
   public Filter.QueryResponse processDamageEvent(
       Cancellable event, ParticipantState victim, DamageInfo damageInfo) {
-    Filter.QueryResponse response = queryDamage(requireNonNull(event), victim, damageInfo);
+    Filter.QueryResponse response = queryDamage(assertNotNull(event), victim, damageInfo);
     if (response.isDenied()) {
       event.setCancelled(true);
     }

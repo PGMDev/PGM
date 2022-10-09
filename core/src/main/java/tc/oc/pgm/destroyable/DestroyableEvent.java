@@ -1,6 +1,6 @@
 package tc.oc.pgm.destroyable;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.match.Match;
@@ -12,7 +12,7 @@ public abstract class DestroyableEvent extends MatchEvent {
 
   public DestroyableEvent(@NotNull Match match, @NotNull Destroyable destroyable) {
     super(match);
-    this.destroyable = requireNonNull(destroyable, "destroyable");
+    this.destroyable = assertNotNull(destroyable, "destroyable");
   }
 
   /**

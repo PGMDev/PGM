@@ -1,6 +1,6 @@
 package tc.oc.pgm.util.event.entity;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Explosive;
@@ -19,7 +19,7 @@ public class ExplosionPrimeByEntityEvent extends ExplosionPrimeEvent {
 
   public ExplosionPrimeByEntityEvent(Entity what, float radius, boolean fire, Entity primer) {
     super(what, radius, fire);
-    this.primer = requireNonNull(primer);
+    this.primer = assertNotNull(primer);
   }
 
   public ExplosionPrimeByEntityEvent(Explosive explosive, Entity primer) {

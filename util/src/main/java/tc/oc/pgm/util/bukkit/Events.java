@@ -1,6 +1,6 @@
 package tc.oc.pgm.util.bukkit;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.lang.reflect.Method;
 import java.util.logging.Level;
@@ -18,8 +18,8 @@ import org.jetbrains.annotations.NotNull;
 public interface Events {
 
   static void callEvent(@NotNull Event event, @NotNull EventPriority priority) {
-    requireNonNull(event, "event");
-    requireNonNull(priority, "priority");
+    assertNotNull(event, "event");
+    assertNotNull(priority, "priority");
 
     // CraftBukkit does not expose the event calling logic in a flexible
     // enough way, so we have to do a bit of copy and paste.

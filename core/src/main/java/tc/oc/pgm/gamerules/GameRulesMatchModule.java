@@ -1,6 +1,6 @@
 package tc.oc.pgm.gamerules;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.Map;
 import tc.oc.pgm.api.map.GameRule;
@@ -15,7 +15,7 @@ public class GameRulesMatchModule implements MatchModule {
 
   public GameRulesMatchModule(Match match, Map<String, String> gameRules) {
     this.match = match;
-    this.gameRules = requireNonNull(gameRules, "gamerules");
+    this.gameRules = assertNotNull(gameRules, "gamerules");
   }
 
   @Override

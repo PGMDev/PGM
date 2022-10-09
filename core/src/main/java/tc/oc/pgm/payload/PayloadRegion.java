@@ -1,6 +1,6 @@
 package tc.oc.pgm.payload;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import java.util.function.Supplier;
 import org.bukkit.util.Vector;
@@ -15,7 +15,7 @@ public class PayloadRegion extends AbstractRegion {
   private final double radiusSq;
 
   public PayloadRegion(Supplier<Vector> base, double radius) {
-    checkArgument(radius >= 0);
+    assertTrue(radius >= 0);
 
     this.base = base;
     this.radius = radius;

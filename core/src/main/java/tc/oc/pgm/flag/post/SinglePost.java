@@ -1,6 +1,6 @@
 package tc.oc.pgm.flag.post;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import java.time.Duration;
@@ -59,8 +59,8 @@ public class SinglePost extends PostDefinition {
       Filter respawnFilter) {
     super(id);
 
-    checkArgument(respawnTime == null || respawnSpeed == null);
-    if (respawnSpeed != null) checkArgument(respawnSpeed > 0);
+    assertTrue(respawnTime == null || respawnSpeed == null);
+    if (respawnSpeed != null) assertTrue(respawnSpeed > 0);
 
     this.owner = owner;
     this.recoverTime = recoverTime;

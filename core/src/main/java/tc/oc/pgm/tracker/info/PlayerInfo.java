@@ -1,6 +1,6 @@
 package tc.oc.pgm.tracker.info;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;
@@ -17,7 +17,7 @@ public class PlayerInfo implements OwnerInfo, MeleeInfo, PhysicalInfo {
   private final ItemInfo weapon;
 
   public PlayerInfo(ParticipantState player, @Nullable ItemInfo weapon) {
-    this.player = requireNonNull(player);
+    this.player = assertNotNull(player);
     this.weapon = weapon;
   }
 

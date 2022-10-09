@@ -1,6 +1,6 @@
 package tc.oc.pgm.blitz;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.Location;
 import org.bukkit.event.HandlerList;
@@ -21,9 +21,9 @@ public class BlitzPlayerEliminatedEvent extends MatchPlayerEvent {
       @NotNull Competitor competitor,
       @NotNull Location deathLocation) {
     super(player);
-    this.player = requireNonNull(player, "match player");
-    this.competitor = requireNonNull(competitor, "competitor");
-    this.deathLocation = requireNonNull(deathLocation, "death location");
+    this.player = assertNotNull(player, "match player");
+    this.competitor = assertNotNull(competitor, "competitor");
+    this.deathLocation = assertNotNull(deathLocation, "death location");
   }
 
   /**

@@ -1,6 +1,6 @@
 package tc.oc.pgm.util.attribute;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,10 +21,10 @@ public class AttributeModifier implements ConfigurationSerializable {
   }
 
   public AttributeModifier(UUID uuid, String name, double amount, Operation operation) {
-    this.uuid = requireNonNull(uuid, "uuid");
-    this.name = requireNonNull(name, "name");
+    this.uuid = assertNotNull(uuid, "uuid");
+    this.name = assertNotNull(name, "name");
     this.amount = amount;
-    this.operation = requireNonNull(operation, "operation");
+    this.operation = assertNotNull(operation, "operation");
   }
 
   /**

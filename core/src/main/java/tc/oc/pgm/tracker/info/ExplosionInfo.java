@@ -1,6 +1,6 @@
 package tc.oc.pgm.tracker.info;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.Location;
 import org.jetbrains.annotations.Nullable;
@@ -16,7 +16,7 @@ public class ExplosionInfo implements DamageInfo, RangedInfo, CauseInfo {
   private final PhysicalInfo explosive;
 
   public ExplosionInfo(PhysicalInfo explosive) {
-    this.explosive = requireNonNull(explosive);
+    this.explosive = assertNotNull(explosive);
   }
 
   public PhysicalInfo getExplosive() {

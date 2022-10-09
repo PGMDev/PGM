@@ -1,6 +1,6 @@
 package tc.oc.pgm.filters.query;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
@@ -12,7 +12,7 @@ public class MatchQuery extends Query implements tc.oc.pgm.api.filter.query.Matc
 
   public MatchQuery(@Nullable Event event, Match match) {
     super(event);
-    this.match = requireNonNull(match);
+    this.match = assertNotNull(match);
   }
 
   @Override

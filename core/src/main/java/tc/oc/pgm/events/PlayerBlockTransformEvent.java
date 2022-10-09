@@ -1,6 +1,6 @@
 package tc.oc.pgm.events;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -21,13 +21,13 @@ public class PlayerBlockTransformEvent extends BlockTransformEvent {
   public PlayerBlockTransformEvent(
       Event cause, BlockState oldState, BlockState newState, MatchPlayerState player) {
     super(cause, oldState, newState);
-    this.player = requireNonNull(player);
+    this.player = assertNotNull(player);
   }
 
   public PlayerBlockTransformEvent(
       Event cause, Block oldBlock, Material newMaterial, MatchPlayerState player) {
     super(cause, oldBlock, newMaterial);
-    this.player = requireNonNull(player);
+    this.player = assertNotNull(player);
   }
 
   public MatchPlayerState getPlayerState() {

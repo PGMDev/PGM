@@ -1,6 +1,6 @@
 package tc.oc.pgm.teams.events;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.party.event.PartyEvent;
@@ -12,7 +12,7 @@ public class TeamResizeEvent extends PartyEvent {
 
   public TeamResizeEvent(Team team) {
     super(team);
-    this.team = requireNonNull(team, "team");
+    this.team = assertNotNull(team, "team");
   }
 
   public Team getTeam() {

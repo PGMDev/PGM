@@ -1,6 +1,6 @@
 package tc.oc.pgm.score;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.ImmutableMap;
 import tc.oc.pgm.api.filter.Filter;
@@ -21,8 +21,8 @@ public class ScoreBoxFactory {
       Filter filter,
       ImmutableMap<SingleMaterialMatcher, Double> redeemables,
       boolean silent) {
-    requireNonNull(region, "region");
-    requireNonNull(filter, "filter");
+    assertNotNull(region, "region");
+    assertNotNull(filter, "filter");
 
     this.region = region;
     this.score = score;

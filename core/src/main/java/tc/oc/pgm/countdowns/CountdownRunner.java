@@ -1,6 +1,6 @@
 package tc.oc.pgm.countdowns;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -34,8 +34,8 @@ public class CountdownRunner extends BukkitRunnable {
   private Future<?> task = null;
 
   public CountdownRunner(@NotNull Match match, Logger parentLogger, @NotNull Countdown countdown) {
-    requireNonNull(match, "match");
-    requireNonNull(countdown, "countdown");
+    assertNotNull(match, "match");
+    assertNotNull(countdown, "countdown");
 
     this.match = match;
     this.logger = ClassLogger.get(parentLogger, getClass());

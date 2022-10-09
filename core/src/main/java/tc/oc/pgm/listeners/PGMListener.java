@@ -1,9 +1,9 @@
 package tc.oc.pgm.listeners;
 
-import static java.util.Objects.requireNonNull;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.Collection;
 import java.util.Random;
@@ -191,7 +191,7 @@ public class PGMListener implements Listener {
 
   public static void announceJoinOrLeave(
       MatchPlayer player, boolean join, boolean staffOnly, boolean force) {
-    requireNonNull(player);
+    assertNotNull(player);
     Collection<MatchPlayer> viewers =
         player.getMatch().getPlayers().stream()
             .filter(p -> !staffOnly || p.getBukkit().hasPermission(Permissions.STAFF))

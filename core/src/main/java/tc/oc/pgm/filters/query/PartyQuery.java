@@ -1,6 +1,6 @@
 package tc.oc.pgm.filters.query;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +13,7 @@ public class PartyQuery extends Query implements tc.oc.pgm.api.filter.query.Part
 
   public PartyQuery(@Nullable Event event, Party party) {
     super(event);
-    this.party = requireNonNull(party);
+    this.party = assertNotNull(party);
   }
 
   @Override

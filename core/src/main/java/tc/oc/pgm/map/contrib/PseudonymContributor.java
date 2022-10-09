@@ -1,7 +1,7 @@
 package tc.oc.pgm.map.contrib;
 
-import static java.util.Objects.requireNonNull;
 import static net.kyori.adventure.text.Component.text;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.base.Objects;
 import java.util.UUID;
@@ -17,7 +17,7 @@ public class PseudonymContributor implements Contributor {
   private final @Nullable String contribution;
 
   public PseudonymContributor(String name, @Nullable String contribution) {
-    this.name = requireNonNull(name);
+    this.name = assertNotNull(name);
     this.contribution = contribution;
   }
 

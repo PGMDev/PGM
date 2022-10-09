@@ -1,6 +1,6 @@
 package tc.oc.pgm.api.match.event;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +23,7 @@ public class MatchPhaseChangeEvent extends MatchEvent {
     super(match);
 
     this.oldState = oldState;
-    this.newState = requireNonNull(newState, "new match state");
+    this.newState = assertNotNull(newState, "new match state");
   }
 
   /**

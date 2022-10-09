@@ -1,6 +1,6 @@
 package tc.oc.pgm.api.player;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +19,7 @@ public enum PlayerRelation {
   ENEMY; // different teams (same/different player doesn't matter)
 
   public static PlayerRelation get(ParticipantState victim, @Nullable MatchPlayerState attacker) {
-    requireNonNull(victim);
+    assertNotNull(victim);
 
     if (attacker == null || !attacker.getParty().isParticipating()) {
       return NEUTRAL;

@@ -1,6 +1,6 @@
 package tc.oc.pgm.util.collection;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.ForwardingSet;
 import gnu.trove.impl.Constants;
@@ -33,8 +33,8 @@ public class RankedSet<E> extends ForwardingSet<E> {
   private boolean sorted;
 
   public RankedSet(Set<E> set, Comparator<E> comparator) {
-    this.set = requireNonNull(set);
-    this.comparator = requireNonNull(comparator);
+    this.set = assertNotNull(set);
+    this.comparator = assertNotNull(comparator);
   }
 
   public RankedSet(Comparator<E> comparator) {

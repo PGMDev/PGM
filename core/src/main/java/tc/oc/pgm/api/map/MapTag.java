@@ -1,10 +1,10 @@
 package tc.oc.pgm.api.map;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Objects.requireNonNull;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import java.util.regex.Pattern;
 import net.kyori.adventure.text.Component;
@@ -31,8 +31,8 @@ public final class MapTag implements Comparable<MapTag> {
       final String name,
       final boolean gamemode,
       final boolean auxiliary) {
-    checkArgument(
-        PATTERN.matcher(requireNonNull(id)).matches(), name + " must match " + PATTERN.pattern());
+    assertTrue(
+        PATTERN.matcher(assertNotNull(id)).matches(), name + " must match " + PATTERN.pattern());
     this.id = id;
     if (gamemode) {
       this.name = translatable("gamemode." + internalId + ".name");

@@ -1,6 +1,6 @@
 package tc.oc.pgm.tracker.trackers;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -66,7 +66,7 @@ public class BlockTracker implements Listener {
 
   public void trackBlockState(
       Block block, @Nullable Material material, @Nullable TrackerInfo info) {
-    requireNonNull(block);
+    assertNotNull(block);
     if (info != null) {
       blocks.put(block, info);
       if (material != null) {
@@ -81,12 +81,12 @@ public class BlockTracker implements Listener {
   }
 
   public void trackBlockState(BlockState state, @Nullable TrackerInfo info) {
-    requireNonNull(state);
+    assertNotNull(state);
     trackBlockState(state.getBlock(), state.getType(), info);
   }
 
   public void clearBlock(Block block) {
-    requireNonNull(block);
+    assertNotNull(block);
     blocks.remove(block);
     materials.remove(block);
     logger.fine("Clear block=" + block);

@@ -1,6 +1,6 @@
 package tc.oc.pgm.db;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.MapActivity;
@@ -12,7 +12,7 @@ class MapActivityImpl implements MapActivity {
   private boolean active;
 
   MapActivityImpl(String poolName, @Nullable String mapName, boolean active) {
-    this.poolName = requireNonNull(poolName, "map pool name is null");
+    this.poolName = assertNotNull(poolName, "map pool name is null");
     this.mapName = mapName;
     this.active = active;
   }

@@ -1,6 +1,6 @@
 package tc.oc.pgm.goals.events;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.time.Instant;
 import org.bukkit.event.HandlerList;
@@ -46,9 +46,9 @@ public class GoalTouchEvent extends GoalEvent {
     this.firstForCompetitor = firstForCompetitor;
     this.firstForPlayer = firstForPlayer;
     this.firstForPlayerLife = firstForPlayerLife;
-    this.goal = requireNonNull(goal, "Goal");
+    this.goal = assertNotNull(goal, "Goal");
     this.player = player;
-    this.time = requireNonNull(time, "Time");
+    this.time = assertNotNull(time, "Time");
   }
 
   public GoalTouchEvent(TouchableGoal goal, Instant time) {

@@ -1,6 +1,6 @@
 package tc.oc.pgm.filters.query;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.Objects;
 import org.bukkit.Location;
@@ -29,18 +29,18 @@ public class BlockQuery extends Query implements tc.oc.pgm.api.filter.query.Bloc
 
   public BlockQuery(@Nullable Event event, World world, int x, int y, int z) {
     super(event);
-    this.world = requireNonNull(world);
+    this.world = assertNotNull(world);
     this.x = x;
     this.y = y;
     this.z = z;
   }
 
   public BlockQuery(@Nullable Event event, World world, BlockVector pos) {
-    this(event, world, requireNonNull(pos).getBlockX(), pos.getBlockY(), pos.getBlockZ());
+    this(event, world, assertNotNull(pos).getBlockX(), pos.getBlockY(), pos.getBlockZ());
   }
 
   public BlockQuery(@Nullable Event event, BlockState block) {
-    this(event, requireNonNull(block).getWorld(), block.getX(), block.getY(), block.getZ());
+    this(event, assertNotNull(block).getWorld(), block.getX(), block.getY(), block.getZ());
     this.block = block;
   }
 

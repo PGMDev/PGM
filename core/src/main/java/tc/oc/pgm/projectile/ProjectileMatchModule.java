@@ -1,6 +1,6 @@
 package tc.oc.pgm.projectile;
 
-import static com.google.common.base.Preconditions.checkState;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -86,7 +86,7 @@ public class ProjectileMatchModule implements MatchModule, Listener {
           player.getEyeLocation().getDirection().multiply(projectileDefinition.velocity);
       Entity projectile;
       try {
-        checkState(launchingDefinition.get() == null, "nested projectile launch");
+        assertTrue(launchingDefinition.get() == null, "nested projectile launch");
         launchingDefinition.set(projectileDefinition);
         if (realProjectile) {
           projectile =

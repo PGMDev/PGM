@@ -1,6 +1,6 @@
 package tc.oc.pgm.classes;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -40,9 +40,9 @@ public class ClassModule implements MapModule {
   final PlayerClass defaultClass;
 
   public ClassModule(String family, Map<String, PlayerClass> classes, PlayerClass defaultClass) {
-    this.family = requireNonNull(family, "family");
-    this.classes = ImmutableMap.copyOf(requireNonNull(classes, "classes"));
-    this.defaultClass = requireNonNull(defaultClass, "default class");
+    this.family = assertNotNull(family, "family");
+    this.classes = ImmutableMap.copyOf(assertNotNull(classes, "classes"));
+    this.defaultClass = assertNotNull(defaultClass, "default class");
   }
 
   @Override

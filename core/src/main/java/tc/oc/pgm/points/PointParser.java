@@ -1,6 +1,6 @@
 package tc.oc.pgm.points;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ public class PointParser {
   final RegionParser regionParser;
 
   public PointParser(MapFactory factory) {
-    this.factory = requireNonNull(factory);
+    this.factory = assertNotNull(factory);
     this.regionParser = factory.getRegions();
   }
 

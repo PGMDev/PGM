@@ -1,6 +1,6 @@
 package tc.oc.pgm.api.event;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.block.Block;
 import org.bukkit.event.Event;
@@ -17,9 +17,9 @@ public class PlayerSpleefEvent extends Event {
   private final SpleefInfo info;
 
   public PlayerSpleefEvent(MatchPlayer victim, Block block, SpleefInfo info) {
-    this.victim = requireNonNull(victim);
-    this.block = requireNonNull(block);
-    this.info = requireNonNull(info);
+    this.victim = assertNotNull(victim);
+    this.block = assertNotNull(block);
+    this.info = assertNotNull(info);
   }
 
   public MatchPlayer getVictim() {

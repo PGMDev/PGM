@@ -1,6 +1,6 @@
 package tc.oc.pgm.tracker.info;
 
-import static java.util.Objects.requireNonNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -19,7 +19,7 @@ public class EntityInfo extends OwnerInfoBase implements PhysicalInfo {
   public EntityInfo(
       EntityType entityType, @Nullable String customName, @Nullable ParticipantState owner) {
     super(owner);
-    this.entityType = requireNonNull(entityType);
+    this.entityType = assertNotNull(entityType);
     this.customName = customName;
   }
 

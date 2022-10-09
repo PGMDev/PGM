@@ -1,7 +1,7 @@
 package tc.oc.pgm.tracker.info;
 
-import static java.util.Objects.requireNonNull;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Location;
@@ -24,9 +24,9 @@ public class ProjectileInfo implements PhysicalInfo, DamageInfo, RangedInfo {
       @Nullable PhysicalInfo shooter,
       Location origin,
       @Nullable String customName) {
-    this.projectile = requireNonNull(projectile);
+    this.projectile = assertNotNull(projectile);
     this.shooter = shooter;
-    this.origin = requireNonNull(origin);
+    this.origin = assertNotNull(origin);
     this.customName = customName;
   }
 
