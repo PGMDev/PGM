@@ -11,6 +11,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 
 public class DynamicFilterValidation implements FeatureValidation<FilterDefinition> {
+  public static final DynamicFilterValidation ANY = new DynamicFilterValidation(null);
   public static final DynamicFilterValidation PLAYER =
       new DynamicFilterValidation(MatchPlayer.class);
   public static final DynamicFilterValidation PARTY = new DynamicFilterValidation(Party.class);
@@ -25,7 +26,7 @@ public class DynamicFilterValidation implements FeatureValidation<FilterDefiniti
   @Override
   public void validate(FilterDefinition definition, Node node) throws InvalidXMLException {
     if (!definition.isDynamic()) throw new InvalidXMLException("Filter must be dynamic", node);
-    if (!definition.respondsTo(type))
+    if (type != null && !definition.respondsTo(type))
       throw new InvalidXMLException(
           "Expected a filter that can react to changes in "
               + type.getSimpleName()

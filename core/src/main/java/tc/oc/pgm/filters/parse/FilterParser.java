@@ -506,12 +506,20 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("countdown")
   public Filter parseCountdownFilter(Element el) throws InvalidXMLException {
-    final Duration duration = XMLUtils.parseDuration(Node.fromRequiredAttr(el, "duration"), null);
-    if (!duration.isNegative() && !duration.isZero()) {
-      return new MonostableFilter(parseChild(el), duration);
-    } else {
-      return StaticFilter.DENY;
-    }
+    Duration duration = XMLUtils.parseDuration(Node.fromRequiredAttr(el, "duration"));
+    if (duration.isNegative() || duration.isZero()) return StaticFilter.DENY;
+
+    Filter child = parseProperty(Node.fromAttrOrSelf(el, "filter"), DynamicFilterValidation.ANY);
+    return new MonostableFilter(child, duration);
+  }
+
+  @MethodParser("after")
+  public Filter parseAfterFilter(Element el) throws InvalidXMLException {
+    Duration duration = XMLUtils.parseDuration(Node.fromRequiredAttr(el, "duration"));
+    Filter child = parseProperty(Node.fromAttrOrSelf(el, "filter"), DynamicFilterValidation.ANY);
+
+    if (duration.isNegative() || duration.isZero()) return child;
+    return MonostableFilter.after(child, duration);
   }
 
   @MethodParser("rank")
@@ -607,10 +615,9 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("players")
   public PlayerCountFilter parsePlayerCountFilter(Element el) throws InvalidXMLException {
-    Node node = Node.fromAttr(el, "filter");
-    if (node == null) node = new Node(el);
-
-    Filter child = parseProperty(node, StaticFilter.ALLOW, DynamicFilterValidation.PLAYER);
+    Filter child =
+        parseProperty(
+            Node.fromAttrOrSelf(el, "filter"), StaticFilter.ALLOW, DynamicFilterValidation.PLAYER);
 
     return new PlayerCountFilter(
         child,
