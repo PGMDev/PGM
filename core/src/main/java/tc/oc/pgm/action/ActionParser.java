@@ -9,6 +9,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Element;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.actions.ActionNode;
 import tc.oc.pgm.action.actions.KillEntitiesAction;
@@ -89,6 +90,17 @@ public class ActionParser {
     return action;
   }
 
+  public <B extends Filterable<?>> Action<? super B> parseProperty(
+      @NotNull Node node, Class<B> bound) throws InvalidXMLException {
+    if (node.isAttribute()) return this.parseReference(node, bound);
+
+    ActionNode<? super B> result = this.parseAction(node.getElement(), bound);
+
+    if (bound != null) validate(result, ActionScopeValidation.of(bound), node);
+    features.addFeature(node.getElement(), result);
+    return result;
+  }
+
   @SuppressWarnings("rawtypes, unchecked")
   public void validate(
       Action<?> action, FeatureValidation<ActionDefinition<?>> validation, Node node)
@@ -126,8 +138,8 @@ public class ActionParser {
     Class<T> cls = Filterables.parse(Node.fromRequiredAttr(el, "scope"));
     return new Trigger<>(
         cls,
-        filters.parseReference(Node.fromRequiredAttr(el, "filter")),
-        parseReference(Node.fromRequiredAttr(el, "trigger", "action"), cls));
+        filters.parseProperty(el, "filter"),
+        parseProperty(Node.fromRequiredChildOrAttr(el, "trigger", "action"), cls));
   }
 
   private <B extends Filterable<?>> Class<B> parseScope(Element el, Class<B> scope)
