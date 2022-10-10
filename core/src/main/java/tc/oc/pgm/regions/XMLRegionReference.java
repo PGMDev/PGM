@@ -3,7 +3,9 @@ package tc.oc.pgm.regions;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.stream.Stream;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
@@ -131,5 +133,15 @@ public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> im
   @Override
   public Class<? extends LocationQuery> queryType() {
     return LocationQuery.class;
+  }
+
+  @Override
+  public Stream<BlockVector> getBlockPositions() {
+    return get().getBlockPositions();
+  }
+
+  @Override
+  public Iterable<Block> getBlocks(World world) {
+    return get().getBlocks(world);
   }
 }

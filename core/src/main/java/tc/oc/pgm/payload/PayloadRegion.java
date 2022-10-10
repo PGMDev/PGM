@@ -4,11 +4,11 @@ import static tc.oc.pgm.util.Assert.assertTrue;
 
 import java.util.function.Supplier;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.regions.AbstractRegion;
+import tc.oc.pgm.api.region.RegionDefinition;
 import tc.oc.pgm.regions.Bounds;
 
 /** This is a region that is not immutable. The origin point of the cylinder can move. */
-public class PayloadRegion extends AbstractRegion {
+public class PayloadRegion implements RegionDefinition {
 
   private final Supplier<Vector> base;
   private final double radius;

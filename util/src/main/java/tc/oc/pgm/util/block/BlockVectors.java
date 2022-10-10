@@ -48,6 +48,10 @@ public interface BlockVectors {
         && point.getZ() <= blockLocation.getZ() + 1;
   }
 
+  static Block blockAt(World world, BlockVector vector) {
+    return world.getBlockAt(vector.getBlockX(), vector.getBlockY(), vector.getBlockZ());
+  }
+
   /** BlockVector encoding API - pack a BlockVector into a single long */
   int SHIFT = 21;
 

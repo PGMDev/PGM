@@ -1,8 +1,9 @@
 package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.RegionDefinition;
 
-public class HalfspaceRegion extends AbstractRegion {
+public class HalfspaceRegion implements RegionDefinition {
   private final Vector normal; // unit normal
   private final double offset; // parameter of the plane equation
 

@@ -156,6 +156,17 @@ public class Node {
   }
 
   /**
+   * Return a new Node wrapping an Attribute of the given Element matching one of the given names,
+   * or the element itself if the given Element has no matching Attributes. Note: this is mostly
+   * useful for properties that are allowed as either refs or direct children.
+   */
+  public static Node fromAttrOrSelf(Element el, String... aliases) throws InvalidXMLException {
+    Node node = null;
+    for (String alias : aliases) node = wrapUnique(node, true, alias, el.getAttribute(alias));
+    return node != null ? node : new Node(el);
+  }
+
+  /**
    * Return a new Node wrapping the named Attribute of the given Element. If the Attribute does not
    * exist, throw an InvalidXMLException complaining about it.
    */

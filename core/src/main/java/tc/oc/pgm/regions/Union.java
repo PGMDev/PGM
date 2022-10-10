@@ -2,8 +2,9 @@ package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.api.region.RegionDefinition;
 
-public class Union extends AbstractRegion {
+public class Union implements RegionDefinition {
   private final Region[] regions;
 
   public Union(Region... regions) {

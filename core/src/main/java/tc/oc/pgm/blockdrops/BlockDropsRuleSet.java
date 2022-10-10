@@ -6,12 +6,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
+import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
@@ -46,7 +46,7 @@ public class BlockDropsRuleSet {
   public BlockDropsRuleSet subsetAffecting(FiniteBlockRegion region) {
     ImmutableList.Builder<BlockDropsRule> subset = ImmutableList.builder();
     for (BlockDropsRule rule : this.rules) {
-      for (Block block : region.getBlocks()) {
+      for (BlockVector block : region.getBlockVectors()) {
         if (rule.region == null || rule.region.contains(block)) {
           subset.add(rule);
           break;
