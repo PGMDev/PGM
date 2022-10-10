@@ -5,11 +5,11 @@ import static net.kyori.adventure.text.Component.empty;
 import com.google.common.collect.ImmutableList;
 import java.lang.reflect.Method;
 import java.util.Map;
-import javax.annotation.Nonnull;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Element;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.actions.ActionNode;
 import tc.oc.pgm.action.actions.KillEntitiesAction;
@@ -91,7 +91,7 @@ public class ActionParser {
   }
 
   public <B extends Filterable<?>> Action<? super B> parseProperty(
-      @Nonnull Node node, Class<B> bound) throws InvalidXMLException {
+      @NotNull Node node, Class<B> bound) throws InvalidXMLException {
     if (node.isAttribute()) return this.parseReference(node, bound);
 
     ActionNode<? super B> result = this.parseAction(node.getElement(), bound);
