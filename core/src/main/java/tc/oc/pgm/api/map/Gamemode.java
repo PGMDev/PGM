@@ -18,6 +18,7 @@ public enum Gamemode {
   RAGE("rage"),
   RACE_FOR_WOOL("rfw"),
   SCOREBOX("scorebox"),
+  SKYWARS("skywars"),
   DEATHMATCH("tdm");
 
   private final String id;
