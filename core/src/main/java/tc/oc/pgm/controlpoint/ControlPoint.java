@@ -2,11 +2,13 @@ package tc.oc.pgm.controlpoint;
 
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
+import static net.kyori.adventure.text.Component.text;
 
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.event.HandlerList;
@@ -37,8 +39,8 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
 
   public static final TextColor COLOR_NEUTRAL_TEAM = NamedTextColor.WHITE;
 
-  public static final String SYMBOL_CP_INCOMPLETE = "\u29be"; // ⦾
-  public static final String SYMBOL_CP_COMPLETE = "\u29bf"; // ⦿
+  public static final Component SYMBOL_CP_INCOMPLETE = text("\u29be"); // ⦾
+  public static final Component SYMBOL_CP_COMPLETE = text("\u29bf"); // ⦿
 
   protected static final Sound GOOD_SOUND =
       sound(key("portal.travel"), Sound.Source.MASTER, 0.35f, 2f);
@@ -189,11 +191,11 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
   }
 
   @Override
-  public String renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
+  public Component renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
     if (Duration.ZERO.equals(this.capturingTime)) {
       return this.controllingTeam == null ? SYMBOL_CP_INCOMPLETE : SYMBOL_CP_COMPLETE;
     } else {
-      return this.renderCompletion();
+      return text(this.renderCompletion());
     }
   }
 

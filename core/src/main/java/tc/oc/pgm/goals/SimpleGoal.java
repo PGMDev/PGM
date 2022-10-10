@@ -2,6 +2,7 @@ package tc.oc.pgm.goals;
 
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
+import static net.kyori.adventure.text.Component.text;
 
 import java.util.logging.Logger;
 import net.kyori.adventure.sound.Sound;
@@ -24,8 +25,8 @@ public abstract class SimpleGoal<T extends GoalDefinition> implements Goal<T> {
   public static final TextColor COLOR_INCOMPLETE = NamedTextColor.RED;
   public static final TextColor COLOR_COMPLETE = NamedTextColor.GREEN;
 
-  public static final String SYMBOL_INCOMPLETE = "\u2715"; // ✕
-  public static final String SYMBOL_COMPLETE = "\u2714"; // ✔
+  public static final Component SYMBOL_INCOMPLETE = text("\u2715"); // ✕
+  public static final Component SYMBOL_COMPLETE = text("\u2714"); // ✔
 
   protected static final Sound GOOD_SOUND =
       sound(key("portal.travel"), Sound.Source.MASTER, 0.7f, 2f);
@@ -109,7 +110,7 @@ public abstract class SimpleGoal<T extends GoalDefinition> implements Goal<T> {
     return isCompleted() ? COLOR_COMPLETE : COLOR_INCOMPLETE;
   }
 
-  public String renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
+  public Component renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
     return isCompleted() ? SYMBOL_COMPLETE : SYMBOL_INCOMPLETE;
   }
 

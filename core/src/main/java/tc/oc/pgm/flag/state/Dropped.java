@@ -4,6 +4,7 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
 import java.time.Instant;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
@@ -95,7 +96,7 @@ public class Dropped extends Uncarried implements Missing {
   }
 
   @Override
-  public String getStatusSymbol(Party viewer) {
+  public Component getStatusSymbol(Party viewer) {
     return Flag.DROPPED_SYMBOL;
   }
 }

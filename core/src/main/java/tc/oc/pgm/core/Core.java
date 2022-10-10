@@ -1,15 +1,17 @@
 package tc.oc.pgm.core;
 
 import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.format.Style.style;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.util.Collections;
 import java.util.Set;
 import net.kyori.adventure.text.Component;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -214,16 +216,16 @@ public class Core extends TouchableGoal<CoreFactory>
   }
 
   @Override
-  public String renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
+  public Component renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
     if (this.getShowProgress() || viewer.isObserving()) {
-      String text = this.renderCompletion();
-      if (PGM.get().getConfiguration().showProximity()) {
-        String precise = this.renderPreciseCompletion();
-        if (precise != null) {
-          text += " " + ChatColor.GRAY + precise;
-        }
+      if (!PGM.get().getConfiguration().showProximity()) {
+        return text(this.renderCompletion());
       }
-      return text;
+      return text()
+          .content(this.renderCompletion())
+          .append(space())
+          .append(text(this.renderPreciseCompletion(), style(NamedTextColor.GRAY)))
+          .build();
     } else {
       return super.renderSidebarStatusText(competitor, viewer);
     }

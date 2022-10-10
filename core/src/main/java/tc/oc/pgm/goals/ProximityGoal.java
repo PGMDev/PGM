@@ -1,6 +1,10 @@
 package tc.oc.pgm.goals;
 
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.text;
+
 import java.util.Map;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Location;
@@ -165,8 +169,10 @@ public abstract class ProximityGoal<T extends ProximityGoalDefinition> extends O
     return NamedTextColor.GRAY;
   }
 
-  public String renderProximity(@Nullable Competitor team, Party viewer) {
-    if (!shouldShowProximity(team, viewer)) return "";
+  public Component renderProximity(@Nullable Competitor team, Party viewer) {
+    if (!shouldShowProximity(team, viewer)) {
+      return empty();
+    }
 
     String text;
     double distance = this.getMinimumDistance(team);
@@ -176,7 +182,7 @@ public abstract class ProximityGoal<T extends ProximityGoalDefinition> extends O
       text = LegacyFormatUtils.tiny(String.format("%.1f", distance));
     }
 
-    return renderProximityColor(team, viewer) + text;
+    return text(text, renderProximityColor(team, viewer));
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

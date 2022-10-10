@@ -112,7 +112,7 @@ public class Respawning extends Spawned implements Returning {
   }
 
   @Override
-  public String getStatusSymbol(Party viewer) {
+  public Component getStatusSymbol(Party viewer) {
     return Flag.RESPAWNING_SYMBOL;
   }
 

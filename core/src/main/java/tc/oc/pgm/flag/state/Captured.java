@@ -2,6 +2,7 @@ package tc.oc.pgm.flag.state;
 
 import static net.kyori.adventure.text.Component.translatable;
 
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Location;
@@ -80,7 +81,7 @@ public class Captured extends BaseState implements Returning {
   }
 
   @Override
-  public String getStatusSymbol(Party viewer) {
+  public Component getStatusSymbol(Party viewer) {
     return Flag.RESPAWNING_SYMBOL;
   }
 

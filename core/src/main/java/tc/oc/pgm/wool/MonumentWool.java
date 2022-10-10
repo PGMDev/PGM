@@ -1,5 +1,6 @@
 package tc.oc.pgm.wool;
 
+import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.util.Collections;
@@ -33,9 +34,9 @@ import tc.oc.pgm.util.text.TextFormatter;
 public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
     implements Goal<MonumentWoolFactory> {
 
-  public static final String SYMBOL_WOOL_INCOMPLETE = "\u2b1c"; // ⬜
-  public static final String SYMBOL_WOOL_TOUCHED = "\u2592"; // ▒
-  public static final String SYMBOL_WOOL_COMPLETE = "\u2b1b"; // ⬛
+  public static final Component SYMBOL_WOOL_INCOMPLETE = text("\u2b1c"); // ⬜
+  public static final Component SYMBOL_WOOL_TOUCHED = text("\u2592"); // ▒
+  public static final Component SYMBOL_WOOL_COMPLETE = text("\u2b1b"); // ⬛
 
   protected boolean placed = false;
   private final Location woolLocation;
@@ -176,7 +177,7 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
   }
 
   @Override
-  public String renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
+  public Component renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
     if (this.isCompleted()) {
       return SYMBOL_WOOL_COMPLETE;
     } else if (shouldShowTouched(competitor, viewer)) {

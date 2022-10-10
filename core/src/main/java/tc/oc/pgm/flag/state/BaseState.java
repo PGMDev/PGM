@@ -1,10 +1,13 @@
 package tc.oc.pgm.flag.state;
 
+import static net.kyori.adventure.text.Component.text;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Location;
@@ -179,15 +182,15 @@ public abstract class BaseState implements Runnable, State {
     return NamedTextColor.WHITE;
   }
 
-  public String getStatusText(Party viewer) {
+  public Component getStatusText(Party viewer) {
     if (this.isCountingDown()) {
-      return String.valueOf(this.getRemainingSeconds());
+      return text(this.getRemainingSeconds());
     } else {
       return this.getStatusSymbol(viewer);
     }
   }
 
-  public abstract String getStatusSymbol(Party viewer);
+  public abstract Component getStatusSymbol(Party viewer);
 
   public void onEvent(GoalEvent event) {}
 

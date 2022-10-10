@@ -71,7 +71,7 @@ public interface Goal<T extends GoalDefinition> extends Feature<T> {
 
   TextColor renderSidebarStatusColor(@Nullable Competitor competitor, Party viewer);
 
-  String renderSidebarStatusText(@Nullable Competitor competitor, Party viewer);
+  Component renderSidebarStatusText(@Nullable Competitor competitor, Party viewer);
 
   TextColor renderSidebarLabelColor(@Nullable Competitor competitor, Party viewer);
 

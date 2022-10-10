@@ -2,6 +2,7 @@ package tc.oc.pgm.flag;
 
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
+import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableSet;
@@ -70,10 +71,10 @@ import tc.oc.pgm.util.text.TextTranslations;
 
 public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
-  public static final String RESPAWNING_SYMBOL = "\u2690"; // ⚐
-  public static final String RETURNED_SYMBOL = "\u2691"; // ⚑
-  public static final String DROPPED_SYMBOL = "\u2691"; // ⚑
-  public static final String CARRIED_SYMBOL = "\u2794"; // ➔
+  public static final Component RESPAWNING_SYMBOL = text("\u2690"); // ⚐
+  public static final Component RETURNED_SYMBOL = text("\u2691"); // ⚑
+  public static final Component DROPPED_SYMBOL = text("\u2691"); // ⚑
+  public static final Component CARRIED_SYMBOL = text("\u2794"); // ➔
 
   public static final Sound PICKUP_SOUND_OWN =
       sound(key("mob.wither.idle"), Sound.Source.MASTER, 0.7f, 1.2f);
@@ -448,7 +449,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   }
 
   @Override
-  public String renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
+  public Component renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
     return this.state.getStatusText(viewer);
   }
 

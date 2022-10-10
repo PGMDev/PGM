@@ -421,7 +421,7 @@ public class Carried extends Spawned implements Missing {
   }
 
   @Override
-  public String getStatusSymbol(Party viewer) {
+  public Component getStatusSymbol(Party viewer) {
     return Flag.CARRIED_SYMBOL;
   }
 }

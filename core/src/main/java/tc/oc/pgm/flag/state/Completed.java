@@ -1,6 +1,7 @@
 package tc.oc.pgm.flag.state;
 
 import java.util.Collections;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Location;
 import tc.oc.pgm.api.party.Party;
@@ -33,7 +34,7 @@ public class Completed extends Returned {
   }
 
   @Override
-  public String getStatusSymbol(Party viewer) {
+  public Component getStatusSymbol(Party viewer) {
     return SimpleGoal.SYMBOL_COMPLETE;
   }
 }

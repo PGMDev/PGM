@@ -3,8 +3,10 @@ package tc.oc.pgm.destroyable;
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.format.Style.style;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -19,7 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -518,16 +520,16 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   }
 
   @Override
-  public String renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
+  public Component renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
     if (this.getShowProgress() || (viewer.isObserving() && this.getBreaksRequired() > 1)) {
-      String text = this.renderCompletion();
-      if (PGM.get().getConfiguration().showProximity()) {
-        String precise = this.renderPreciseCompletion();
-        if (precise != null) {
-          text += " " + ChatColor.GRAY + precise;
-        }
+      if (!PGM.get().getConfiguration().showProximity()) {
+        return text(this.renderCompletion());
       }
-      return text;
+      return text()
+          .content(this.renderCompletion())
+          .append(space())
+          .append(text(this.renderPreciseCompletion(), style(NamedTextColor.GRAY)))
+          .build();
     } else {
       return super.renderSidebarStatusText(competitor, viewer);
     }

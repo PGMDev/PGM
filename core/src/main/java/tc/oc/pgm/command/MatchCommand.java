@@ -1,5 +1,6 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
@@ -182,17 +183,16 @@ public final class MatchCommand {
     TextComponent.Builder sb = text().append(space());
 
     sb.append(
-        text(
-            goal.renderSidebarStatusText(competitor, viewingParty),
-            goal.renderSidebarStatusColor(competitor, viewingParty)));
+        goal.renderSidebarStatusText(competitor, viewingParty)
+            .color(goal.renderSidebarStatusColor(competitor, viewingParty)));
 
     sb.append(space());
     if (goal instanceof ProximityGoal) {
       ProximityGoal<?> proxGoal = (ProximityGoal<?>) goal;
-      String proximityText = proxGoal.renderProximity(competitor, viewingParty);
-      if (proximityText != null && !proximityText.isEmpty()) {
+      Component proximity = proxGoal.renderProximity(competitor, viewingParty);
+      if (proximity != empty()) {
         TextColor proximityColor = proxGoal.renderProximityColor(competitor, viewingParty);
-        sb.append(text(proximityText, proximityColor));
+        sb.append(proximity.color(proximityColor));
         sb.append(space());
       }
     }

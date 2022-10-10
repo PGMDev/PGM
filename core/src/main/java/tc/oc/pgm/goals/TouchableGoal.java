@@ -34,7 +34,7 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
     implements Listener {
 
   public static final TextColor COLOR_TOUCHED = NamedTextColor.YELLOW;
-  public static final String SYMBOL_TOUCHED = "\u2733"; // ✳
+  public static final Component SYMBOL_TOUCHED = text("\u2733"); // ✳
 
   protected boolean touched;
   protected final Set<Competitor> touchingCompetitors = new HashSet<>();
@@ -72,7 +72,7 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
   }
 
   @Override
-  public String renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
+  public Component renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
     return shouldShowTouched(competitor, viewer)
         ? SYMBOL_TOUCHED
         : super.renderSidebarStatusText(competitor, viewer);
