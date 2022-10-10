@@ -1,8 +1,9 @@
 package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.RegionDefinition;
 
-public class RectangleRegion extends AbstractRegion {
+public class RectangleRegion implements RegionDefinition {
   protected final double minX;
   protected final double minZ;
   protected final double maxX;

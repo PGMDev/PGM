@@ -65,7 +65,7 @@ public class Core extends TouchableGoal<CoreFactory>
             match.getWorld(),
             match.getMap().getProto(),
             new SingleMaterialMatcher(this.material));
-    if (this.casingRegion.getBlocks().isEmpty()) {
+    if (this.casingRegion.getBlockVolume() == 0) {
       match
           .getLogger()
           .warning("No casing world (" + this.material + ") found in core " + this.getName());
@@ -78,7 +78,7 @@ public class Core extends TouchableGoal<CoreFactory>
             match.getMap().getProto(),
             new SingleMaterialMatcher(Material.LAVA, (byte) 0),
             new SingleMaterialMatcher(Material.STATIONARY_LAVA, (byte) 0));
-    if (this.lavaRegion.getBlocks().isEmpty()) {
+    if (this.lavaRegion.getBlockVolume() == 0) {
       match.getLogger().warning("No lava found in core " + this.getName());
     }
 
@@ -232,7 +232,7 @@ public class Core extends TouchableGoal<CoreFactory>
   @Override
   @SuppressWarnings("deprecation")
   public void replaceBlocks(MaterialData newMaterial) {
-    for (Block block : this.getCasingRegion().getBlocks()) {
+    for (Block block : this.getCasingRegion().getBlocks(match.getWorld())) {
       if (this.isObjectiveMaterial(block)) {
         block.setTypeIdAndData(newMaterial.getItemTypeId(), newMaterial.getData(), true);
       }

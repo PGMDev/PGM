@@ -1,8 +1,9 @@
 package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.RegionDefinition;
 
-public class CircleRegion extends AbstractRegion {
+public class CircleRegion implements RegionDefinition {
   protected final double x;
   protected final double z;
   protected final double radius;

@@ -2,8 +2,9 @@ package tc.oc.pgm.regions;
 
 import java.util.Random;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.RegionDefinition;
 
-public class CuboidRegion extends AbstractRegion {
+public class CuboidRegion implements RegionDefinition {
   private final Bounds bounds;
 
   public CuboidRegion(Vector pos1, Vector pos2) {

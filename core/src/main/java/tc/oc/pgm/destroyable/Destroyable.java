@@ -117,7 +117,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
             match.getWorld(),
             this.materialPatterns,
             match.getMap().getProto());
-    if (this.blockRegion.getBlocks().isEmpty()) {
+    if (this.blockRegion.getBlockVolume() == 0) {
       match.getLogger().warning("No destroyable blocks found in destroyable " + this.getName());
     }
 
@@ -199,9 +199,9 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
       this.buildMaterialHealthMap();
     } else {
       this.blockMaterialHealth = null;
-      this.maxHealth = this.blockRegion.getBlocks().size();
+      this.maxHealth = this.blockRegion.getBlockVolume();
       this.health = 0;
-      for (Block block : this.blockRegion.getBlocks()) {
+      for (Block block : this.blockRegion.getBlocks(match.getWorld())) {
         if (this.hasMaterial(block.getState().getData())) {
           this.health++;
         }
@@ -214,7 +214,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
       return false;
     }
 
-    for (Block block : this.blockRegion.getBlocks()) {
+    for (Block block : this.blockRegion.getBlocks(match.getWorld())) {
       for (MaterialData material : this.materials) {
         BlockDrops drops = this.blockDropsRuleSet.getDrops(block.getState(), material);
         if (drops != null && drops.replacement != null && this.hasMaterial(drops.replacement)) {
@@ -234,7 +234,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     this.health = 0;
     Set<MaterialData> visited = new HashSet<>();
     try {
-      for (Block block : blockRegion.getBlocks()) {
+      for (Block block : blockRegion.getBlocks(match.getWorld())) {
         Map<MaterialData, Integer> materialHealthMap = new HashMap<>();
         int blockMaxHealth = 0;
 
@@ -612,7 +612,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     // of the destroyable: individual block health can only decrease, while the total health
     // percentage can only increase.
 
-    for (Block block : this.getBlockRegion().getBlocks()) {
+    for (Block block : this.getBlockRegion().getBlocks(match.getWorld())) {
       BlockState oldState = block.getState();
       int oldHealth = this.getBlockHealth(oldState);
 

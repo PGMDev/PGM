@@ -20,12 +20,14 @@ import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.PlayerRelation;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.classes.ClassModule;
 import tc.oc.pgm.classes.PlayerClass;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.filters.matcher.CauseFilter;
 import tc.oc.pgm.filters.matcher.StaticFilter;
+import tc.oc.pgm.filters.matcher.block.BlocksFilter;
 import tc.oc.pgm.filters.matcher.block.MaterialFilter;
 import tc.oc.pgm.filters.matcher.block.StructuralLoadFilter;
 import tc.oc.pgm.filters.matcher.block.VoidFilter;
@@ -75,6 +77,7 @@ import tc.oc.pgm.flag.state.Dropped;
 import tc.oc.pgm.flag.state.Returned;
 import tc.oc.pgm.flag.state.State;
 import tc.oc.pgm.goals.GoalDefinition;
+import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.MethodParser;
@@ -625,5 +628,14 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
     if (varDef.getScope() == Party.class)
       return parseExplicitTeam(el, new TeamVariableFilter(varDef, range));
     else return new VariableFilter(varDef, range);
+  }
+
+  @MethodParser("blocks")
+  public Filter parseBlocksFilter(Element el) throws InvalidXMLException {
+    Region region =
+        factory.getRegions().parseRequiredProperty(el, "region", BlockBoundedValidation.INSTANCE);
+    Filter child = parseProperty(Node.fromAttrOrSelf(el, "filter"), MaterialFilter.NOT_AIR);
+
+    return new BlocksFilter(region, child);
   }
 }

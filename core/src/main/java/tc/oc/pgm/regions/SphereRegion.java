@@ -3,8 +3,9 @@ package tc.oc.pgm.regions;
 import static tc.oc.pgm.util.Assert.assertTrue;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.RegionDefinition;
 
-public class SphereRegion extends AbstractRegion {
+public class SphereRegion implements RegionDefinition {
   protected final Vector origin;
   protected final double radius;
   protected final double radiusSq;

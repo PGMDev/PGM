@@ -7,6 +7,7 @@ import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.Set;
 import org.bukkit.util.BlockVector;
 
@@ -26,8 +27,17 @@ public class BlockVectorSet implements Set<BlockVector> {
     this(new TLongHashSet(capacity));
   }
 
+  public BlockVectorSet(Collection<? extends BlockVector> that) {
+    this(that.size());
+    addAll(that);
+  }
+
   public BlockVectorSet() {
     this(Constants.DEFAULT_CAPACITY);
+  }
+
+  public static BlockVectorSet of(Collection<? extends BlockVector> that) {
+    return that instanceof BlockVectorSet ? (BlockVectorSet) that : new BlockVectorSet(that);
   }
 
   @Override
@@ -184,5 +194,16 @@ public class BlockVectorSet implements Set<BlockVector> {
    */
   public BlockVector getAt(int n) {
     return BlockVectors.decodePos(getEncodedAt(n));
+  }
+
+  public BlockVector chooseRandom(Random random) {
+    // The Trove set uses a sparse array, so there isn't really any
+    // faster way to do this, not even by messing with Trove internals.
+    final TLongIterator iterator = set.iterator();
+    long encoded = 0;
+    for (int n = random.nextInt(size()); n >= 0; n--) {
+      encoded = iterator.next();
+    }
+    return BlockVectors.decodePos(encoded);
   }
 }
