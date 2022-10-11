@@ -5,13 +5,12 @@ import static net.kyori.adventure.text.Component.translatable;
 import app.ashcon.intake.Command;
 import net.kyori.adventure.text.format.NamedTextColor;
 import tc.oc.pgm.api.Permissions;
-import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.command.graph.Sender;
 import tc.oc.pgm.restart.CancelRestartEvent;
 import tc.oc.pgm.restart.RestartManager;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.timelimit.TimeLimitCountdown;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
-import tc.oc.pgm.util.Audience;
 
 public final class CancelCommand {
 
@@ -19,21 +18,21 @@ public final class CancelCommand {
       aliases = {"cancel", "cancelrestart", "cr"},
       desc = "Cancels all countdowns",
       perms = Permissions.STOP)
-  public void cancel(Audience audience, Match match) {
+  public void cancel(Sender context) {
     if (RestartManager.isQueued()) {
-      match.callEvent(new CancelRestartEvent());
-      audience.sendMessage(translatable("admin.cancelRestart.restartUnqueued", NamedTextColor.RED));
+      context.getMatch().callEvent(new CancelRestartEvent());
+      context.sendMessage(translatable("admin.cancelRestart.restartUnqueued", NamedTextColor.RED));
       return;
     }
 
-    if (!match.getCountdown().getAll(TimeLimitCountdown.class).isEmpty()) {
-      final TimeLimitMatchModule limits = match.getModule(TimeLimitMatchModule.class);
+    if (!context.getMatch().getCountdown().getAll(TimeLimitCountdown.class).isEmpty()) {
+      final TimeLimitMatchModule limits = context.getMatch().getModule(TimeLimitMatchModule.class);
       limits.cancel();
       limits.setTimeLimit(null);
     }
 
-    match.getCountdown().cancelAll();
-    match.needModule(StartMatchModule.class).setAutoStart(false);
-    audience.sendMessage(translatable("admin.cancelCountdowns", NamedTextColor.GREEN));
+    context.getMatch().getCountdown().cancelAll();
+    context.getMatch().needModule(StartMatchModule.class).setAutoStart(false);
+    context.sendMessage(translatable("admin.cancelCountdowns", NamedTextColor.GREEN));
   }
 }

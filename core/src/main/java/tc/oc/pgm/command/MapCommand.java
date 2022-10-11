@@ -15,7 +15,6 @@ import app.ashcon.intake.bukkit.parametric.Type;
 import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
 import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
-import app.ashcon.intake.parametric.annotation.Text;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Sets;
 import java.time.LocalDate;
@@ -36,9 +35,9 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.Phase;
+import tc.oc.pgm.command.graph.Sender;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.pools.MapPool;
-import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
@@ -52,8 +51,7 @@ public final class MapCommand {
       desc = "List all maps loaded",
       usage = "[-a <author>] [-t <tag1>,<tag2>] [-n <name>]")
   public void maps(
-      Audience audience,
-      CommandSender sender,
+      Sender sender,
       MapLibrary library,
       @Default("1") Integer page,
       @Fallback(Type.NULL) @Switch('t') String tags,
@@ -101,7 +99,8 @@ public final class MapCommand {
             NamedTextColor.DARK_AQUA,
             NamedTextColor.AQUA,
             true);
-    Component listHeader = TextFormatter.horizontalLineHeading(sender, title, NamedTextColor.BLUE);
+    Component listHeader =
+        TextFormatter.horizontalLineHeading(sender.getSender(), title, NamedTextColor.BLUE);
 
     new PrettyPaginatedComponentResults<MapInfo>(listHeader, resultsPerPage) {
       @Override
@@ -120,7 +119,7 @@ public final class MapCommand {
                     .clickEvent(runCommand("/map " + map.getName())))
             .build();
       }
-    }.display(audience, ImmutableSortedSet.copyOf(maps), page);
+    }.display(sender, ImmutableSortedSet.copyOf(maps), page);
   }
 
   private static boolean matchesTags(
@@ -165,15 +164,15 @@ public final class MapCommand {
       aliases = {"map", "mapinfo"},
       desc = "Show info about a map",
       usage = "[map name] - defaults to the current map")
-  public void map(Audience audience, CommandSender sender, @Text MapInfo map) {
-    audience.sendMessage(
+  public void map(Sender sender, @Default("current") MapInfo map) {
+    sender.sendMessage(
         TextFormatter.horizontalLineHeading(
-            sender,
+            sender.getSender(),
             text(map.getName() + " ", NamedTextColor.DARK_AQUA)
                 .append(text(map.getVersion().toString(), NamedTextColor.GRAY)),
             NamedTextColor.RED));
 
-    audience.sendMessage(
+    sender.sendMessage(
         text()
             .append(mapInfoLabel("map.info.objective"))
             .append(text(map.getDescription(), NamedTextColor.GOLD))
@@ -181,24 +180,24 @@ public final class MapCommand {
 
     Collection<Contributor> authors = map.getAuthors();
     if (authors.size() == 1) {
-      audience.sendMessage(
+      sender.sendMessage(
           text()
               .append(mapInfoLabel("map.info.author.singular"))
               .append(formatContribution(authors.iterator().next()))
               .build());
     } else {
-      audience.sendMessage(mapInfoLabel("map.info.author.plural"));
+      sender.sendMessage(mapInfoLabel("map.info.author.plural"));
       for (Contributor author : authors) {
-        audience.sendMessage(
+        sender.sendMessage(
             text().append(space()).append(space()).append(formatContribution(author)).build());
       }
     }
 
     Collection<Contributor> contributors = map.getContributors();
     if (!contributors.isEmpty()) {
-      audience.sendMessage(mapInfoLabel("map.info.contributors"));
+      sender.sendMessage(mapInfoLabel("map.info.contributors"));
       for (Contributor contributor : contributors) {
-        audience.sendMessage(
+        sender.sendMessage(
             text().append(space()).append(space()).append(formatContribution(contributor)).build());
       }
     }
@@ -208,7 +207,7 @@ public final class MapCommand {
       DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
       String date = created.format(formatter);
 
-      audience.sendMessage(
+      sender.sendMessage(
           text()
               .append(mapInfoLabel("map.info.created"))
               .append(text(date, NamedTextColor.GOLD))
@@ -216,11 +215,11 @@ public final class MapCommand {
     }
 
     if (!map.getRules().isEmpty()) {
-      audience.sendMessage(mapInfoLabel("map.info.rules"));
+      sender.sendMessage(mapInfoLabel("map.info.rules"));
 
       int i = 0;
       for (String rule : map.getRules()) {
-        audience.sendMessage(
+        sender.sendMessage(
             text()
                 .append(text(++i + ") ", NamedTextColor.WHITE))
                 .append(text(rule, NamedTextColor.GOLD))
@@ -228,27 +227,27 @@ public final class MapCommand {
       }
     }
 
-    audience.sendMessage(
+    sender.sendMessage(
         text()
             .append(mapInfoLabel("map.info.playerLimit"))
-            .append(createPlayerLimitComponent(sender, map))
+            .append(createPlayerLimitComponent(sender.getSender(), map))
             .build());
 
     if (sender.hasPermission(Permissions.DEBUG)) {
-      audience.sendMessage(
+      sender.sendMessage(
           text()
               .append(mapInfoLabel("map.info.proto"))
               .append(text(map.getProto().toString(), NamedTextColor.GOLD))
               .build());
 
-      audience.sendMessage(
+      sender.sendMessage(
           text()
               .append(mapInfoLabel("map.info.phase"))
               .append(map.getPhase().toComponent().color(NamedTextColor.GOLD))
               .build());
     }
 
-    audience.sendMessage(createTagsComponent(map.getTags()));
+    sender.sendMessage(createTagsComponent(map.getTags()));
 
     if (PGM.get().getMapOrder() instanceof MapPoolManager) {
       String mapPools =
@@ -258,7 +257,7 @@ public final class MapCommand {
                   .map(MapPool::getName)
                   .collect(Collectors.joining(", "));
       if (!mapPools.isEmpty()) {
-        audience.sendMessage(
+        sender.sendMessage(
             text()
                 .append(mapInfoLabel("map.info.pools"))
                 .append(text(mapPools))

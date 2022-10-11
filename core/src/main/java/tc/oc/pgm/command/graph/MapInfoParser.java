@@ -8,8 +8,8 @@ import app.ashcon.intake.argument.MissingArgumentException;
 import app.ashcon.intake.bukkit.parametric.provider.BukkitProvider;
 import app.ashcon.intake.parametric.annotation.Default;
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.List;
+import java.util.StringJoiner;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
@@ -27,46 +27,51 @@ final class MapInfoParser implements BukkitProvider<MapInfo> {
       throws ArgumentException {
     final PGM pgm = PGM.get();
 
-    MapInfo map = null;
+    MapInfo map;
     if (args.hasNext()) {
       map = pgm.getMapLibrary().getMap(getRemainingText(args));
-    } else if (isNextMap(annotations)) {
-      map = pgm.getMapOrder().getNextMap();
     } else {
-      final Match match = pgm.getMatchManager().getMatch(sender);
-      if (match != null) {
-        map = match.getMap();
-      }
+      map = getDefault(pgm, sender, annotations);
     }
 
-    if (map == null && !isNextMap(annotations)) {
-      throw exception("map.notFound");
-    }
+    if (map == null) throw exception("map.notFound");
 
     return map;
   }
 
   private String getRemainingText(CommandArgs args) throws MissingArgumentException {
-    StringBuilder mapName = new StringBuilder();
-    boolean first = true;
+    StringJoiner mapName = new StringJoiner(" ");
 
     while (args.hasNext()) {
-      if (!first) {
-        mapName.append(" ");
-      }
-
-      mapName.append(args.next());
-      first = false;
+      mapName.add(args.next());
     }
 
     return mapName.toString();
   }
 
-  private boolean isNextMap(List<? extends Annotation> annotations) {
-    return annotations.stream()
-        .filter(o -> o instanceof Default)
-        .findFirst()
-        .filter(value -> Arrays.asList(((Default) value).value()).contains("next"))
-        .isPresent();
+  private MapInfo getDefault(
+      PGM pgm, CommandSender sender, List<? extends Annotation> annotations) {
+    for (Annotation ann : annotations) {
+      if (!(ann instanceof Default)) continue;
+
+      for (String def : ((Default) ann).value()) {
+        MapInfo map = getDefault(pgm, sender, def);
+        if (map != null) return map;
+      }
+    }
+    return null;
+  }
+
+  private MapInfo getDefault(PGM pgm, CommandSender sender, String def) {
+    switch (def) {
+      case "next":
+        return pgm.getMapOrder().getNextMap();
+      case "current":
+        final Match match = pgm.getMatchManager().getMatch(sender);
+        return match != null ? match.getMap() : null;
+      default:
+        throw new IllegalArgumentException(
+            "Unsupported @Default value: " + def + ", expected one of: next, current");
+    }
   }
 }

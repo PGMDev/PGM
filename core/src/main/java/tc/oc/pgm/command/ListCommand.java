@@ -11,13 +11,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.command.graph.Sender;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 
@@ -27,18 +26,17 @@ public final class ListCommand {
   @Command(
       aliases = {"list", "who", "online", "ls"},
       desc = "View a list of online players")
-  public void list(CommandSender sender, Audience viewer, Match match) {
-    TeamMatchModule tmm = match.getModule(TeamMatchModule.class);
+  public void list(Sender sender) {
+    Match match = sender.getMatch();
+    TeamMatchModule tmm = sender.getMatch().getModule(TeamMatchModule.class);
     if (tmm != null) {
-      viewer.sendMessage(translatable("command.list.teams", NamedTextColor.GRAY));
+      sender.sendMessage(translatable("command.list.teams", NamedTextColor.GRAY));
       tmm.getTeams()
           .forEach(
               team ->
-                  sendTeamInfo(
-                      viewer, sender, team.getName(), team.getPlayers(), team.getMaxPlayers()));
+                  sendTeamInfo(sender, team.getName(), team.getPlayers(), team.getMaxPlayers()));
     } else {
       sendTeamInfo(
-          viewer,
           sender,
           translatable("command.list.participants"),
           match.getParticipants(),
@@ -46,14 +44,10 @@ public final class ListCommand {
     }
     // Observers
     sendTeamInfo(
-        viewer,
-        sender,
-        match.getDefaultParty().getName(),
-        match.getDefaultParty().getPlayers(),
-        -1);
+        sender, match.getDefaultParty().getName(), match.getDefaultParty().getPlayers(), -1);
 
     // Total count
-    viewer.sendMessage(
+    sender.sendMessage(
         translatable(
             "command.list.online",
             NamedTextColor.GRAY,
@@ -61,11 +55,7 @@ public final class ListCommand {
   }
 
   private void sendTeamInfo(
-      Audience viewer,
-      CommandSender sender,
-      Component teamName,
-      Collection<MatchPlayer> players,
-      int max) {
+      Sender sender, Component teamName, Collection<MatchPlayer> players, int max) {
     Component teamLine =
         text()
             .append(teamName)
@@ -77,13 +67,13 @@ public final class ListCommand {
                     ? formatVanishCount(players)
                     : empty())
             .build();
-    viewer.sendMessage(teamLine);
+    sender.sendMessage(teamLine);
     if (!players.isEmpty()) {
-      viewer.sendMessage(formatNames(players, sender));
+      sender.sendMessage(formatNames(players, sender));
     }
   }
 
-  private Component formatNames(Collection<MatchPlayer> players, CommandSender sender) {
+  private Component formatNames(Collection<MatchPlayer> players, Sender sender) {
     List<Component> names =
         players.stream()
             .filter(mp -> sender.hasPermission(Permissions.STAFF) || !isVanished(mp.getId()))

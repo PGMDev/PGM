@@ -112,6 +112,8 @@ public class CommandGraph extends BasicBukkitCommandGraph {
       bind(MatchPlayer.class, new MatchPlayerProvider());
       bind(MapInfo.class, new MapInfoParser());
       bind(Party.class, new PartyProvider());
+      bind(Sender.class, new SenderProvider());
+      bind(Sender.Player.class, new SenderProvider.PlayerSenderProvider());
       bind(TeamMatchModule.class, new TeamsProvider());
       bind(VictoryCondition.class, new VictoryConditionProvider());
       bind(SettingKey.class, new SettingKeyParser());

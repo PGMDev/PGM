@@ -1,17 +1,17 @@
 package tc.oc.pgm.command;
 
-import static tc.oc.pgm.util.text.TextException.exception;
-
 import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
-import java.time.Duration;
-import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
-import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.command.graph.Sender;
 import tc.oc.pgm.cycle.CycleMatchModule;
+
+import java.time.Duration;
+
+import static tc.oc.pgm.util.text.TextException.exception;
 
 public final class CycleCommand {
 
@@ -21,12 +21,12 @@ public final class CycleCommand {
       flags = "f",
       perms = Permissions.START)
   public void cycle(
-      Match match,
       MapOrder mapOrder,
-      @Nullable Duration duration,
+      Sender sender,
+      @Default("null") Duration duration,
       @Default("next") MapInfo map,
       @Switch('f') boolean force) {
-    if (match.isRunning() && !force) {
+    if (sender.getMatch().isRunning() && !force) {
       throw exception("admin.matchRunning.cycle");
     }
 
@@ -34,7 +34,7 @@ public final class CycleCommand {
       mapOrder.setNextMap(map);
     }
 
-    match.needModule(CycleMatchModule.class).startCountdown(duration);
+    sender.getMatch().needModule(CycleMatchModule.class).startCountdown(duration);
   }
 
   @Command(
@@ -44,7 +44,7 @@ public final class CycleCommand {
       flags = "f",
       perms = Permissions.START)
   public void recycle(
-      Match match, MapOrder mapOrder, @Nullable Duration duration, @Switch('f') boolean force) {
-    cycle(match, mapOrder, duration, match.getMap(), force);
+      MapOrder mapOrder, Sender sender, @Default("null") Duration duration, @Switch('f') boolean force) {
+    cycle(mapOrder, sender, duration, sender.getMatch().getMap(), force);
   }
 }

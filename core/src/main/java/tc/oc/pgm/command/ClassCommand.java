@@ -13,9 +13,9 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.ChatColor;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.PlayerClass;
+import tc.oc.pgm.command.graph.Sender;
 import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -25,16 +25,16 @@ public final class ClassCommand {
   @Command(
       aliases = {"class", "selectclass", "c", "cl"},
       desc = "Select your class")
-  public void classSelect(Match match, MatchPlayer player, @Nullable @Text String query) {
-    final ClassMatchModule classes = getClasses(match);
-    final PlayerClass currentClass = classes.getSelectedClass(player.getId());
+  public void classSelect(Sender.Player sender, @Nullable @Text String query) {
+    final ClassMatchModule classes = getClasses(sender.getMatch());
+    final PlayerClass currentClass = classes.getSelectedClass(sender.getId());
 
     if (query == null) {
-      player.sendMessage(
+      sender.sendMessage(
           translatable("match.class.current", NamedTextColor.GREEN)
               .append(space())
               .append(text(currentClass.getName(), NamedTextColor.GOLD, TextDecoration.BOLD)));
-      player.sendMessage(translatable("match.class.view", NamedTextColor.GOLD));
+      sender.sendMessage(translatable("match.class.view", NamedTextColor.GOLD));
     } else {
       final PlayerClass newClass = StringUtils.bestFuzzyMatch(query, classes.getClasses(), 0.9);
 
@@ -43,18 +43,18 @@ public final class ClassCommand {
       }
 
       try {
-        classes.setPlayerClass(player.getId(), newClass);
+        classes.setPlayerClass(sender.getPlayer().getId(), newClass);
       } catch (IllegalStateException e) {
         throw exception("match.class.sticky");
       }
 
-      player.sendMessage(
+      sender.sendMessage(
           translatable(
               "match.class.ok",
               NamedTextColor.GREEN,
               text(newClass.getName(), NamedTextColor.GOLD, TextDecoration.UNDERLINED)));
-      if (player.isParticipating()) {
-        player.sendMessage(translatable("match.class.queue", NamedTextColor.GREEN));
+      if (sender.getPlayer().isParticipating()) {
+        sender.sendMessage(translatable("match.class.queue", NamedTextColor.GREEN));
       }
     }
   }
@@ -62,15 +62,15 @@ public final class ClassCommand {
   @Command(
       aliases = {"classlist", "classes", "listclasses", "cls"},
       desc = "List all available classes")
-  public void classList(Match match, MatchPlayer player) {
-    final ClassMatchModule classes = getClasses(match);
+  public void classList(Sender.Player player) {
+    final ClassMatchModule classes = getClasses(player.getMatch());
     final PlayerClass currentClass = classes.getSelectedClass(player.getId());
 
     player.sendMessage(
         text(
             LegacyFormatUtils.dashedChatMessage(
                 ChatColor.GOLD
-                    + TextTranslations.translate("match.class.title", player.getBukkit()),
+                    + TextTranslations.translate("match.class.title", player.getSender()),
                 "-",
                 ChatColor.RED.toString())));
     int i = 1;
@@ -81,7 +81,7 @@ public final class ClassCommand {
 
       if (cls == currentClass) {
         color = NamedTextColor.GOLD;
-      } else if (cls.canUse(player.getBukkit())) {
+      } else if (cls.canUse(player.getSender())) {
         color = NamedTextColor.GREEN;
       } else {
         color = NamedTextColor.RED;

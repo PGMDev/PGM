@@ -4,10 +4,9 @@ import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Switch;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Permissions;
-import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
-import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.command.graph.Sender;
 import tc.oc.pgm.join.JoinMatchModule;
 
 public final class JoinCommand {
@@ -18,18 +17,17 @@ public final class JoinCommand {
       usage = "[team] - defaults to random",
       flags = "f",
       perms = Permissions.JOIN)
-  public void join(
-      Match match, MatchPlayer player, @Switch('f') boolean force, @Nullable Party team) {
+  public void join(Sender.Player sender, @Switch('f') boolean force, @Nullable Party team) {
     if (team != null && !(team instanceof Competitor)) {
-      leave(player, match);
+      leave(sender);
       return;
     }
 
-    final JoinMatchModule join = match.needModule(JoinMatchModule.class);
-    if (force && player.getBukkit().hasPermission(Permissions.JOIN_FORCE)) {
-      join.forceJoin(player, (Competitor) team);
+    final JoinMatchModule join = sender.getMatch().needModule(JoinMatchModule.class);
+    if (force && sender.hasPermission(Permissions.JOIN_FORCE)) {
+      join.forceJoin(sender.getPlayer(), (Competitor) team);
     } else {
-      join.join(player, (Competitor) team);
+      join.join(sender.getPlayer(), (Competitor) team);
     }
   }
 
@@ -37,7 +35,7 @@ public final class JoinCommand {
       aliases = {"leave", "obs", "spectator", "spec"},
       desc = "Leave the match",
       perms = Permissions.LEAVE)
-  public void leave(MatchPlayer player, Match match) {
-    match.needModule(JoinMatchModule.class).leave(player);
+  public void leave(Sender.Player sender) {
+    sender.getMatch().needModule(JoinMatchModule.class).leave(sender.getPlayer());
   }
 }
