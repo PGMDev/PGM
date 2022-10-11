@@ -5,11 +5,11 @@ import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TextException.exception;
 
 import app.ashcon.intake.Command;
+import app.ashcon.intake.parametric.annotation.Maybe;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
-import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
@@ -67,7 +67,7 @@ public final class SettingCommand {
       desc = "Toggle or set the value of a setting",
       usage = "[setting name] <option>")
   public void toggle(
-      CommandSender sender, MatchPlayer player, SettingKey key, @Nullable String query) {
+      CommandSender sender, MatchPlayer player, SettingKey key, @Maybe String query) {
     final Settings setting = player.getSettings();
     final SettingValue old = setting.getValue(key);
 

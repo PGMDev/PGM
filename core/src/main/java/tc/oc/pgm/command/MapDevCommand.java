@@ -3,8 +3,6 @@ package tc.oc.pgm.command;
 import static net.kyori.adventure.text.Component.text;
 
 import app.ashcon.intake.Command;
-import app.ashcon.intake.bukkit.parametric.Type;
-import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
 import java.util.Optional;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.Permissions;
@@ -18,8 +16,7 @@ public class MapDevCommand {
       aliases = {"variables"},
       desc = "Inspect pgm variables",
       perms = Permissions.DEBUG)
-  public void showVariables(
-      Match match, MatchPlayer sender, @Fallback(Type.NULL) Optional<Player> target) {
+  public void showVariables(Match match, MatchPlayer sender, Optional<Player> target) {
     MatchPlayer filterable = target.map(match::getPlayer).orElse(sender);
 
     sender.sendMessage(text("Showing variables for " + filterable.getNameLegacy() + ":"));

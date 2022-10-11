@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TextException.exception;
 
 import app.ashcon.intake.Command;
+import app.ashcon.intake.parametric.annotation.Maybe;
 import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
 import com.google.common.collect.Range;
@@ -12,7 +13,6 @@ import java.util.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
@@ -31,7 +31,7 @@ public final class TeamCommand {
       desc = "Force a player onto a team",
       perms = Permissions.JOIN_FORCE)
   public void force(
-      Match match, TeamMatchModule teams, MatchPlayer sender, Player player, @Nullable Party team) {
+      Match match, TeamMatchModule teams, MatchPlayer sender, Player player, @Maybe Party team) {
     final MatchPlayer joiner = match.getPlayer(player);
     if (joiner == null) throw exception("command.playerNotFound");
 
@@ -108,7 +108,7 @@ public final class TeamCommand {
       TeamMatchModule teams,
       String teamName,
       String maxPlayers,
-      @Nullable String maxOverfill) {
+      @Maybe String maxOverfill) {
     for (Team team : getTeams(teams, teamName)) {
       if (maxPlayers.equalsIgnoreCase("reset")) {
         team.resetMaxSize();

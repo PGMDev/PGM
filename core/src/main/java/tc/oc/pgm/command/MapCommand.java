@@ -11,8 +11,6 @@ import static tc.oc.pgm.util.text.TextException.invalidFormat;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
-import app.ashcon.intake.bukkit.parametric.Type;
-import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
 import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
@@ -28,7 +26,6 @@ import net.kyori.adventure.text.TextComponent.Builder;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.CommandSender;
-import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.Contributor;
@@ -56,10 +53,10 @@ public final class MapCommand {
       CommandSender sender,
       MapLibrary library,
       @Default("1") Integer page,
-      @Fallback(Type.NULL) @Switch('t') String tags,
-      @Fallback(Type.NULL) @Switch('a') String author,
-      @Fallback(Type.NULL) @Switch('n') String name,
-      @Fallback(Type.NULL) @Switch('p') String phaseType)
+      @Switch('t') String tags,
+      @Switch('a') String author,
+      @Switch('n') String name,
+      @Switch('p') String phaseType)
       throws CommandException {
     Stream<MapInfo> search = Sets.newHashSet(library.getMaps()).stream();
     if (tags != null) {
@@ -124,7 +121,7 @@ public final class MapCommand {
   }
 
   private static boolean matchesTags(
-      MapInfo map, @Nullable Collection<String> posTags, @Nullable Collection<String> negTags) {
+      MapInfo map, Collection<String> posTags, Collection<String> negTags) {
     int matches = 0;
     for (MapTag tag : assertNotNull(map).getTags()) {
       if (negTags != null && negTags.contains(tag.getId())) {

@@ -5,9 +5,9 @@ import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TextException.exception;
 
 import app.ashcon.intake.Command;
+import app.ashcon.intake.parametric.annotation.Maybe;
 import com.google.common.collect.Range;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
@@ -41,7 +41,7 @@ public final class FreeForAllCommand {
       desc = "Set the max players",
       usage = "(reset | <max-players) [max-overfill]",
       perms = Permissions.RESIZE)
-  public void max(Audience audience, Match match, String maxPlayers, @Nullable String maxOverfill) {
+  public void max(Audience audience, Match match, String maxPlayers, @Maybe String maxOverfill) {
     final FreeForAllMatchModule ffa = getFfa(match);
     if (maxPlayers.equalsIgnoreCase("reset")) {
       ffa.setMaxPlayers(null, null);

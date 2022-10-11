@@ -5,8 +5,7 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
-import app.ashcon.intake.bukkit.parametric.Type;
-import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
+import app.ashcon.intake.parametric.annotation.Maybe;
 import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
 import net.kyori.adventure.text.Component;
@@ -54,7 +53,7 @@ public final class MapOrderCommand {
       CommandSender sender,
       @Switch('f') boolean force,
       @Switch('r') boolean reset,
-      @Fallback(Type.NULL) @Text MapInfo map,
+      @Maybe @Text MapInfo map,
       MapOrder mapOrder,
       Match match)
       throws CommandException {

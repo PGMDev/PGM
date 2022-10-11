@@ -7,6 +7,7 @@ import static net.kyori.adventure.text.Component.translatable;
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Default;
+import app.ashcon.intake.parametric.annotation.Maybe;
 import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
 import java.text.DecimalFormat;
@@ -20,7 +21,6 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
@@ -214,7 +214,7 @@ public final class MapPoolCommand {
       CommandSender source,
       Match match,
       MapOrder mapOrder,
-      @Nullable String poolName,
+      @Maybe String poolName,
       @Switch('r') boolean reset,
       @Switch('t') Duration timeLimit,
       @Switch('m') Integer matchLimit)

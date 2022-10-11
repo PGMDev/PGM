@@ -7,8 +7,7 @@ import static net.kyori.adventure.text.event.HoverEvent.showText;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
-import app.ashcon.intake.bukkit.parametric.Type;
-import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
+import app.ashcon.intake.parametric.annotation.Maybe;
 import app.ashcon.intake.parametric.annotation.Text;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,7 +41,7 @@ public class VotingCommand {
   public void addMap(
       Audience viewer,
       CommandSender sender,
-      @Fallback(Type.NULL) @Text MapInfo map,
+      @Maybe @Text MapInfo map,
       MapOrder mapOrder,
       Match match)
       throws CommandException {
@@ -75,7 +74,7 @@ public class VotingCommand {
   public void removeMap(
       Audience viewer,
       CommandSender sender,
-      @Fallback(Type.NULL) @Text MapInfo map,
+      @Maybe @Text MapInfo map,
       MapOrder mapOrder,
       Match match)
       throws CommandException {

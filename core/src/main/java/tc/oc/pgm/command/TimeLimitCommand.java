@@ -4,9 +4,9 @@ import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TemporalComponent.clock;
 
 import app.ashcon.intake.Command;
+import app.ashcon.intake.parametric.annotation.Maybe;
 import java.time.Duration;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.VictoryCondition;
@@ -27,10 +27,10 @@ public final class TimeLimitCommand {
       Audience audience,
       Match match,
       Duration duration,
-      @Nullable VictoryCondition result,
-      @Nullable Duration overtime,
-      @Nullable Duration maxOvertime,
-      @Nullable Duration endOvertime) {
+      @Maybe VictoryCondition result,
+      @Maybe Duration overtime,
+      @Maybe Duration maxOvertime,
+      @Maybe Duration endOvertime) {
 
     final TimeLimitMatchModule time = match.needModule(TimeLimitMatchModule.class);
 
