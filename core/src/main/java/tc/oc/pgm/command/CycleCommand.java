@@ -6,6 +6,7 @@ import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Maybe;
 import app.ashcon.intake.parametric.annotation.Switch;
+import app.ashcon.intake.parametric.annotation.Text;
 import java.time.Duration;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
@@ -24,7 +25,7 @@ public final class CycleCommand {
       Match match,
       MapOrder mapOrder,
       @Maybe Duration duration,
-      @Default("next") MapInfo map,
+      @Text @Default("next") MapInfo map,
       @Switch('f') boolean force) {
     if (match.isRunning() && !force) {
       throw exception("admin.matchRunning.cycle");

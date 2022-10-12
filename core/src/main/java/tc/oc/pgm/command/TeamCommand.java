@@ -31,7 +31,11 @@ public final class TeamCommand {
       desc = "Force a player onto a team",
       perms = Permissions.JOIN_FORCE)
   public void force(
-      Match match, TeamMatchModule teams, MatchPlayer sender, Player player, @Maybe Party team) {
+      Match match,
+      TeamMatchModule teams,
+      MatchPlayer sender,
+      Player player,
+      @Text @Maybe Party team) {
     final MatchPlayer joiner = match.getPlayer(player);
     if (joiner == null) throw exception("command.playerNotFound");
 

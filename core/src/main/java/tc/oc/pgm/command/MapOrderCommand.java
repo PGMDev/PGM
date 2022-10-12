@@ -51,11 +51,11 @@ public final class MapOrderCommand {
   public void setNext(
       Audience viewer,
       CommandSender sender,
+      MapOrder mapOrder,
+      Match match,
       @Switch('f') boolean force,
       @Switch('r') boolean reset,
-      @Maybe @Text MapInfo map,
-      MapOrder mapOrder,
-      Match match)
+      @Maybe @Text MapInfo map)
       throws CommandException {
     if (RestartManager.isQueued() && !force) {
       throw new CommandException(TextTranslations.translate("map.setNext.confirm", sender));

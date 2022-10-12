@@ -41,9 +41,9 @@ public class VotingCommand {
   public void addMap(
       Audience viewer,
       CommandSender sender,
-      @Maybe @Text MapInfo map,
       MapOrder mapOrder,
-      Match match)
+      Match match,
+      @Maybe @Text MapInfo map)
       throws CommandException {
     VotePoolOptions vote = getVoteOptions(sender, mapOrder);
 
@@ -74,9 +74,9 @@ public class VotingCommand {
   public void removeMap(
       Audience viewer,
       CommandSender sender,
-      @Maybe @Text MapInfo map,
       MapOrder mapOrder,
-      Match match)
+      Match match,
+      @Maybe @Text MapInfo map)
       throws CommandException {
     VotePoolOptions vote = getVoteOptions(sender, mapOrder);
     if (vote.removeMap(map)) {

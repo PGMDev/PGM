@@ -75,7 +75,7 @@ public class CommandGraph extends BasicBukkitCommandGraph {
     register(new ListCommand());
     register(new MapCommand());
     register(new MapOrderCommand());
-    register(new MapPoolCommand());
+    register(new MapPoolCommand()); //
     register(new MatchCommand());
     register(new ModeCommand(), "mode", "modes");
     register(new ProximityCommand());
