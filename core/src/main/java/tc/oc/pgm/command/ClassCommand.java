@@ -1,27 +1,7 @@
 package tc.oc.pgm.command;
 
-import static net.kyori.adventure.text.Component.space;
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.Component.translatable;
-import static tc.oc.pgm.util.text.TextException.exception;
-
-import app.ashcon.intake.Command;
-import app.ashcon.intake.parametric.annotation.Maybe;
-import app.ashcon.intake.parametric.annotation.Text;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.ChatColor;
-import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.classes.ClassMatchModule;
-import tc.oc.pgm.classes.PlayerClass;
-import tc.oc.pgm.util.LegacyFormatUtils;
-import tc.oc.pgm.util.StringUtils;
-import tc.oc.pgm.util.text.TextTranslations;
-
 public final class ClassCommand {
-
+  /*
   @Command(
       aliases = {"class", "selectclass", "c", "cl"},
       desc = "Select your class")
@@ -104,5 +84,5 @@ public final class ClassCommand {
       throw exception("match.class.notEnabled");
     }
     return classes;
-  }
+  }*/
 }

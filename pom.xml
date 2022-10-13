@@ -130,12 +130,31 @@
         </dependency>
 
         <!-- Framework for defining and parsing commands -->
-        <!-- TODO: move to EngineHub/Piston or Mojang/brigadier -->
         <dependency>
-            <groupId>app.ashcon.intake</groupId>
-            <artifactId>intake-bukkit</artifactId>
-            <version>1.3-SNAPSHOT</version>
-            <scope>compile</scope>
+            <groupId>cloud.commandframework</groupId>
+            <artifactId>cloud-core</artifactId>
+            <version>1.7.1</version>
+        </dependency>
+        <dependency>
+            <groupId>cloud.commandframework</groupId>
+            <artifactId>cloud-annotations</artifactId>
+            <version>1.7.1</version>
+        </dependency>
+        <dependency>
+            <groupId>cloud.commandframework</groupId>
+            <artifactId>cloud-paper</artifactId>
+            <version>1.7.1</version>
+        </dependency>
+        <dependency>
+            <groupId>cloud.commandframework</groupId>
+            <artifactId>cloud-minecraft-extras</artifactId>
+            <version>1.7.1</version>
+        </dependency>
+        <!-- Allows registering brigadier mappings -->
+        <dependency>
+            <groupId>me.lucko</groupId>
+            <artifactId>commodore</artifactId>
+            <version>1.9</version>
         </dependency>
 
         <!-- Small reflection library for Scoreboards -->

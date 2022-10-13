@@ -3,8 +3,10 @@ package tc.oc.pgm.command;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TextException.exception;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.parametric.annotation.Maybe;
+import cloud.commandframework.annotations.Argument;
+import cloud.commandframework.annotations.CommandDescription;
+import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
 import java.time.Duration;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
@@ -15,11 +17,10 @@ import tc.oc.pgm.util.Audience;
 
 public final class StartCommand {
 
-  @Command(
-      aliases = {"start", "begin"},
-      desc = "Start the match",
-      perms = Permissions.START)
-  public void start(Audience audience, Match match, @Maybe Duration duration) {
+  @CommandMethod("start|begin [duration]")
+  @CommandDescription("Start the match")
+  @CommandPermission(Permissions.START)
+  public void start(Audience audience, Match match, @Argument("duration") Duration duration) {
     if (match.isRunning()) {
       throw exception("admin.start.matchRunning");
     } else if (match.isFinished()) {

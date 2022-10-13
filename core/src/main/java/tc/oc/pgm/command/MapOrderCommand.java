@@ -2,12 +2,14 @@ package tc.oc.pgm.command;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.text.TextException.exception;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.CommandException;
-import app.ashcon.intake.parametric.annotation.Maybe;
-import app.ashcon.intake.parametric.annotation.Switch;
-import app.ashcon.intake.parametric.annotation.Text;
+import cloud.commandframework.annotations.Argument;
+import cloud.commandframework.annotations.CommandDescription;
+import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
+import cloud.commandframework.annotations.Flag;
+import cloud.commandframework.annotations.specifier.FlagYielding;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
@@ -20,20 +22,15 @@ import tc.oc.pgm.restart.RestartManager;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.MapNameStyle;
-import tc.oc.pgm.util.text.TextTranslations;
 
 public final class MapOrderCommand {
 
-  @Command(
-      aliases = {"nextmap", "mn", "mapnext", "nm", "next"},
-      desc = "Show which map is playing next")
+  @CommandMethod("nextmap|mn|mapnext|nm|next")
+  @CommandDescription("Show which map is playing next")
   public void nextmap(Audience audience, MapOrder mapOrder) {
     final MapInfo next = mapOrder.getNextMap();
 
-    if (next == null) {
-      audience.sendMessage(translatable("map.noNextMap", NamedTextColor.RED));
-      return;
-    }
+    if (next == null) throw exception("map.noNextMap");
 
     audience.sendMessage(
         translatable(
@@ -42,23 +39,19 @@ public final class MapOrderCommand {
             next.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS)));
   }
 
-  @Command(
-      aliases = {"setnext", "sn"},
-      desc = "Change the next map",
-      usage = "[map name] -f (force) -r (revert)",
-      flags = "fr",
-      perms = Permissions.SETNEXT)
+  @CommandMethod("setnext|sn [map]")
+  @CommandDescription("Change the next map")
+  @CommandPermission(Permissions.SETNEXT)
   public void setNext(
       Audience viewer,
       CommandSender sender,
       MapOrder mapOrder,
       Match match,
-      @Switch('f') boolean force,
-      @Switch('r') boolean reset,
-      @Maybe @Text MapInfo map)
-      throws CommandException {
+      @Flag(value = "force", aliases = "f") boolean force,
+      @Flag(value = "reset", aliases = "r") boolean reset,
+      @Argument("map") @FlagYielding MapInfo map) {
     if (RestartManager.isQueued() && !force) {
-      throw new CommandException(TextTranslations.translate("map.setNext.confirm", sender));
+      throw exception("map.setNext.confirm");
     }
 
     if (reset) {

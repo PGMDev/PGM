@@ -1,23 +1,6 @@
-package tc.oc.pgm.command.graph;
+package tc.oc.pgm.command.util;
 
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.Component.translatable;
-import static tc.oc.pgm.util.text.TextException.unknown;
-
-import app.ashcon.intake.CommandException;
-import app.ashcon.intake.InvalidUsageException;
-import app.ashcon.intake.InvocationCommandException;
-import app.ashcon.intake.bukkit.BukkitIntake;
-import app.ashcon.intake.fluent.CommandGraph;
-import app.ashcon.intake.util.auth.AuthorizationException;
-import com.google.common.base.Joiner;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.util.ComponentMessageThrowable;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.plugin.Plugin;
-import tc.oc.pgm.util.Audience;
-
+/*
 public final class CommandExecutor extends BukkitIntake {
 
   public CommandExecutor(Plugin plugin, CommandGraph commandGraph) {
@@ -65,3 +48,4 @@ public final class CommandExecutor extends BukkitIntake {
     return false;
   }
 }
+*/

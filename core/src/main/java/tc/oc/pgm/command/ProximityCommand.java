@@ -4,7 +4,8 @@ import static net.kyori.adventure.text.Component.text;
 import static tc.oc.pgm.util.text.TextException.exception;
 import static tc.oc.pgm.util.text.TextException.noPermission;
 
-import app.ashcon.intake.Command;
+import cloud.commandframework.annotations.CommandDescription;
+import cloud.commandframework.annotations.CommandMethod;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.ChatColor;
@@ -23,9 +24,8 @@ import tc.oc.pgm.util.text.TextTranslations;
 // TODO: make the output nicer and translate
 public final class ProximityCommand {
 
-  @Command(
-      aliases = {"proximity", "prox"},
-      desc = "Show the progress of each objective")
+  @CommandMethod("proximity|prox")
+  @CommandDescription("Show the progress of each objective")
   public void proximity(MatchPlayer player, Match match) {
     if (player != null && player.isParticipating()) {
       throw noPermission();

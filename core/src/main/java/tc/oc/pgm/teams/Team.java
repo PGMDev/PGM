@@ -112,7 +112,7 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
   }
 
   public void setMinSize(@Nullable Integer minPlayers) {
-    this.min = minPlayers;
+    this.min = minPlayers == null ? info.getMinPlayers() : minPlayers;
     getMatch().callEvent(new TeamResizeEvent(this));
   }
 
@@ -121,8 +121,8 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
   }
 
   public void setMaxSize(@Nullable Integer maxPlayers, @Nullable Integer maxOverfill) {
-    this.max = maxPlayers;
-    this.overfill = maxOverfill;
+    this.max = maxPlayers == null ? info.getMaxPlayers() : maxPlayers;
+    this.overfill = maxOverfill == null ? info.getMaxOverfill() : maxOverfill;
     getMatch().callEvent(new TeamResizeEvent(this));
     module().updateMaxPlayers();
   }

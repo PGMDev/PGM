@@ -8,9 +8,9 @@ import static net.kyori.adventure.text.event.ClickEvent.runCommand;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static net.kyori.adventure.title.Title.title;
 import static tc.oc.pgm.util.TimeUtils.fromTicks;
+import static tc.oc.pgm.util.text.TextException.exception;
 import static tc.oc.pgm.util.text.TextTranslations.translate;
 
-import app.ashcon.intake.CommandException;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Comparator;
@@ -42,6 +42,7 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.util.inventory.tag.ItemTag;
 import tc.oc.pgm.util.named.MapNameStyle;
+import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextTranslations;
 
 /** Represents a polling process, with a set of options. */
@@ -177,11 +178,11 @@ public class MapPoll {
    * @param vote The map to vote for/against
    * @param player The player voting
    * @return true if the player is now voting for the map, false otherwise
-   * @throws CommandException If the map is not an option in the poll
+   * @throws tc.oc.pgm.util.text.TextException If the map is not an option in the poll
    */
-  public boolean toggleVote(MapInfo vote, UUID player) throws CommandException {
+  public boolean toggleVote(MapInfo vote, UUID player) throws TextException {
     Set<UUID> votes = this.votes.get(vote);
-    if (votes == null) throw new CommandException(vote.getName() + " is not an option in the poll");
+    if (votes == null) throw exception("map.notFound");
 
     if (votes.add(player)) return true;
     votes.remove(player);

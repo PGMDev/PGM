@@ -4,49 +4,51 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TextException.exception;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.parametric.annotation.Maybe;
-import app.ashcon.intake.parametric.annotation.Switch;
-import app.ashcon.intake.parametric.annotation.Text;
+import cloud.commandframework.annotations.Argument;
+import cloud.commandframework.annotations.CommandDescription;
+import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
+import cloud.commandframework.annotations.Flag;
+import cloud.commandframework.annotations.specifier.Greedy;
 import com.google.common.collect.Range;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.entity.Player;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextParser;
 
+@CommandMethod("team")
 public final class TeamCommand {
 
-  @Command(
-      aliases = {"force"},
-      desc = "Force a player onto a team",
-      perms = Permissions.JOIN_FORCE)
+  @CommandMethod("force <player> [team]")
+  @CommandDescription("Force a player onto a team")
+  @CommandPermission(Permissions.JOIN_FORCE)
   public void force(
       Match match,
-      TeamMatchModule teams,
       MatchPlayer sender,
-      Player player,
-      @Text @Maybe Party team) {
-    final MatchPlayer joiner = match.getPlayer(player);
-    if (joiner == null) throw exception("command.playerNotFound");
+      @Argument("player") MatchPlayer joiner,
+      @Argument("team") Party team) {
 
-    teams.setForced(joiner, true);
     final Party oldParty = joiner.getParty();
-    if (team == null) {
-      teams.forceJoin(joiner, null);
-    } else if (!(team instanceof Competitor)) {
-      match.setParty(joiner, team);
+    final JoinMatchModule join = match.needModule(JoinMatchModule.class);
+
+    if (team != null && !(team instanceof Competitor)) {
+      join.leave(joiner);
     } else {
-      teams.forceJoin(joiner, (Competitor) team);
+      match.moduleOptional(TeamMatchModule.class).ifPresent(tmm -> tmm.setForced(joiner, true));
+      join.forceJoin(joiner, (Competitor) team);
     }
 
     sender.sendMessage(
@@ -58,13 +60,11 @@ public final class TeamCommand {
             oldParty.getName()));
   }
 
-  @Command(
-      aliases = {"shuffle"},
-      desc = "Shuffle players among the teams",
-      flags = "af",
-      perms = Permissions.JOIN_FORCE)
+  @CommandMethod("shuffle")
+  @CommandDescription("Shuffle players among the teams")
+  @CommandPermission(Permissions.JOIN_FORCE)
   public void shuffle(
-      Match match, TeamMatchModule teams, @Switch('a') boolean all, @Switch('f') boolean force) {
+      Match match, TeamMatchModule teams, @Flag("a") boolean all, @Flag("f") boolean force) {
     if (match.isRunning() && !force) {
       throw exception("match.shuffle.err");
     }
@@ -78,91 +78,88 @@ public final class TeamCommand {
     match.sendMessage(translatable("match.shuffle.ok", NamedTextColor.GREEN));
   }
 
-  @Command(
-      aliases = {"alias"},
-      desc = "Rename a team",
-      usage = "<old name> <new name>",
-      perms = Permissions.GAMEPLAY)
-  public void alias(Match match, TeamMatchModule teams, Party team, @Text String newName) {
-    if (newName.length() > 32) {
-      newName = newName.substring(0, 32);
-    } else if (!(team instanceof Team)) {
-      throw exception("command.teamNotFound");
+  @CommandMethod("alias <teams> <name>")
+  @CommandDescription("Rename a team")
+  @CommandPermission(Permissions.GAMEPLAY)
+  public void alias(
+      Match match,
+      TeamMatchModule teams,
+      @Argument("teams") Team team,
+      @Argument("name") @Greedy String name) {
+    if (name.length() > 32) {
+      name = name.substring(0, 32);
     }
 
     for (Team other : teams.getTeams()) {
-      if (other.getNameLegacy().equalsIgnoreCase(newName)) {
-        throw exception("match.alias.err", text(newName));
+      if (other.getNameLegacy().equalsIgnoreCase(name)) {
+        throw exception("match.alias.err", text(name));
       }
     }
 
     final Component oldName = team.getName().color(NamedTextColor.GRAY);
-    ((Team) team).setName(newName);
+    team.setName(name);
 
     match.sendMessage(translatable("match.alias.ok", oldName, team.getName()));
   }
 
-  @Command(
-      aliases = {"size"},
-      desc = "Set the max players on a team",
-      usage = "<team> (reset | <max-players) [max-overfill]",
-      perms = Permissions.RESIZE)
+  @CommandMethod("size <teams> <max-players> [max-overfill]")
+  @CommandDescription("Set the max players on a team")
+  @CommandPermission(Permissions.RESIZE)
   public void max(
       Audience audience,
-      TeamMatchModule teams,
-      String teamName,
-      String maxPlayers,
-      @Maybe String maxOverfill) {
-    for (Team team : getTeams(teams, teamName)) {
-      if (maxPlayers.equalsIgnoreCase("reset")) {
-        team.resetMaxSize();
-      } else {
-        final int max = TextParser.parseInteger(maxPlayers, Range.atLeast(team.getMinPlayers()));
-        final int overfill =
-            maxOverfill == null
-                ? (int) Math.ceil(1.25 * max)
-                : TextParser.parseInteger(maxOverfill, Range.atLeast(max));
+      @Argument("teams") Collection<Team> teams,
+      @Argument("max-players") int maxPlayers,
+      @Argument("max-overfill") Integer maxOverfill) {
+    for (Team team : teams) {
+      TextParser.assertInRange(maxPlayers, Range.atLeast(team.getMinPlayers()));
 
-        team.setMaxSize(max, overfill);
-      }
+      if (maxOverfill == null) maxOverfill = (int) Math.ceil(1.25 * maxPlayers);
+      else TextParser.assertInRange(maxOverfill, Range.atLeast(maxPlayers));
 
+      team.setMaxSize(maxPlayers, maxOverfill);
       audience.sendMessage(
           translatable(
               "match.resize.max", team.getName(), text(team.getMaxPlayers(), NamedTextColor.AQUA)));
     }
   }
 
-  @Command(
-      aliases = {"min"},
-      desc = "Set the min players on a team",
-      usage = "<team> (reset | <min-players>)",
-      perms = Permissions.RESIZE)
-  public void min(Audience audience, TeamMatchModule teams, String teamName, String minPlayers) {
-    for (Team team : getTeams(teams, teamName)) {
-      if (minPlayers.equalsIgnoreCase("reset")) {
-        team.resetMinSize();
-      } else {
-        team.setMinSize(TextParser.parseInteger(minPlayers, Range.atLeast(0)));
-      }
+  @CommandMethod("size <teams> reset")
+  @CommandDescription("Reset the max players on a team")
+  @CommandPermission(Permissions.RESIZE)
+  public void max(Audience audience, @Argument("teams") Collection<Team> teams) {
+    for (Team team : teams) {
+      team.resetMaxSize();
+      audience.sendMessage(
+          translatable(
+              "match.resize.max", team.getName(), text(team.getMaxPlayers(), NamedTextColor.AQUA)));
+    }
+  }
 
+  @CommandMethod("min <teams> <min-players>")
+  @CommandDescription("Set the min players on a team")
+  @CommandPermission(Permissions.RESIZE)
+  public void min(
+      Audience audience,
+      @Argument("teams") Collection<Team> teams,
+      @Argument("min-players") int minPlayers) {
+    TextParser.assertInRange(minPlayers, Range.atLeast(0));
+    for (Team team : teams) {
+      team.setMinSize(minPlayers);
       audience.sendMessage(
           translatable(
               "match.resize.min", team.getName(), text(team.getMinPlayers(), NamedTextColor.AQUA)));
     }
   }
 
-  private Collection<Team> getTeams(TeamMatchModule teams, String query) {
-    final Collection<Team> list;
-    if (query.equalsIgnoreCase("*")) {
-      list = teams.getTeams();
-    } else {
-      final Team team = teams.bestFuzzyMatch(query);
-      list = team == null ? Collections.emptyList() : Collections.singletonList(team);
+  @CommandMethod("min <teams> reset")
+  @CommandDescription("Reset the min players on a team")
+  @CommandPermission(Permissions.RESIZE)
+  public void min(Audience audience, @Argument("teams") Collection<Team> teams) {
+    for (Team team : teams) {
+      team.resetMinSize();
+      audience.sendMessage(
+          translatable(
+              "match.resize.min", team.getName(), text(team.getMinPlayers(), NamedTextColor.AQUA)));
     }
-
-    if (list.isEmpty()) {
-      throw exception("command.teamNotFound");
-    }
-    return list;
   }
 }

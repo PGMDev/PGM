@@ -256,13 +256,11 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
   public boolean canPreviewInventory(Player viewer, Player holder) {
     MatchPlayer matchViewer = match.getPlayer(viewer);
     MatchPlayer matchHolder = match.getPlayer(holder);
-    return matchViewer != null
-        && matchHolder != null
-        && canPreviewInventory(matchViewer, matchHolder);
+    return canPreviewInventory(matchViewer, matchHolder);
   }
 
   public boolean canPreviewInventory(MatchPlayer viewer, MatchPlayer holder) {
-    return viewer.isObserving() && holder.isAlive();
+    return viewer != null && holder != null && viewer.isObserving() && holder.isAlive();
   }
 
   protected void scheduleCheck(Player updater) {

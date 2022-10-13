@@ -1,11 +1,11 @@
 package tc.oc.pgm.api.map;
 
-import java.text.Normalizer;
 import java.time.LocalDate;
 import java.util.Collection;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -163,10 +163,6 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
   }
 
   static String normalizeName(@Nullable String idOrName) {
-    return idOrName == null
-        ? ""
-        : Normalizer.normalize(idOrName, Normalizer.Form.NFD)
-            .replaceAll("[^A-Za-z0-9]", "")
-            .toLowerCase();
+    return StringUtils.normalize(idOrName);
   }
 }

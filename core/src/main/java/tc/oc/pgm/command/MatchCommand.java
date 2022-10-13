@@ -7,7 +7,8 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TemporalComponent.clock;
 
-import app.ashcon.intake.Command;
+import cloud.commandframework.annotations.CommandDescription;
+import cloud.commandframework.annotations.CommandMethod;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -40,12 +41,10 @@ import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;
 
-// TODO: improve format and translate
 public final class MatchCommand {
 
-  @Command(
-      aliases = {"match", "matchinfo"},
-      desc = "Show the match info")
+  @CommandMethod("match|matchinfo")
+  @CommandDescription("Show the match info")
   public void match(Audience viewer, CommandSender sender, Match match) {
     // indicates whether we have game information from the match yet
     boolean haveGameInfo =

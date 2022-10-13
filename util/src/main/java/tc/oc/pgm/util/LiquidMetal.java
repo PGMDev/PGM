@@ -14,6 +14,10 @@ public final class LiquidMetal {
   public static final double SCORE_TRAILING_BUT_STARTED = 0.9;
   public static final double SCORE_BUFFER = 0.85;
 
+  public static boolean match(String string, String abbreviation) {
+    return score(string, abbreviation) > 0.75;
+  }
+
   public static double score(String string, String abbreviation) {
     if (abbreviation == null || abbreviation.length() == 0) return SCORE_TRAILING;
     if (abbreviation.length() > string.length()) return SCORE_NO_MATCH;

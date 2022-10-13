@@ -43,6 +43,7 @@ import tc.oc.pgm.join.JoinHandler;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.join.JoinResult;
 import tc.oc.pgm.match.ObserverParty;
+import tc.oc.pgm.match.PartyImpl;
 import tc.oc.pgm.match.QueuedParty;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
@@ -221,9 +222,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
   }
 
   public @Nullable Team bestFuzzyMatch(String name, double threshold) {
-    Map<String, Team> byName = new HashMap<>();
-    for (Team team : getTeams()) byName.put(team.getNameLegacy(), team);
-    return StringUtils.bestFuzzyMatch(name, byName, threshold);
+    return StringUtils.bestFuzzyMatch(name, getTeams(), PartyImpl::getNameLegacy, threshold);
   }
 
   protected void setAutoJoin(MatchPlayer player, boolean autoJoined) {

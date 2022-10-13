@@ -1,0 +1,78 @@
+package tc.oc.pgm.command.parsers;
+
+import static cloud.commandframework.arguments.parser.ArgumentParseResult.failure;
+import static cloud.commandframework.arguments.parser.ArgumentParseResult.success;
+import static tc.oc.pgm.command.util.ParserConstants.CURRENT;
+import static tc.oc.pgm.util.text.TextException.exception;
+
+import cloud.commandframework.arguments.parser.ArgumentParseResult;
+import cloud.commandframework.arguments.parser.ArgumentParser;
+import cloud.commandframework.context.CommandContext;
+import cloud.commandframework.exceptions.parsing.NoInputProvidedException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Queue;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.bukkit.command.CommandSender;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.VictoryCondition;
+import tc.oc.pgm.result.NullVictoryCondition;
+import tc.oc.pgm.result.VictoryConditions;
+import tc.oc.pgm.teams.Team;
+import tc.oc.pgm.teams.TeamMatchModule;
+import tc.oc.pgm.timelimit.TimeLimit;
+import tc.oc.pgm.timelimit.TimeLimitMatchModule;
+import tc.oc.pgm.util.text.TextException;
+
+public class VictoryConditionParser implements ArgumentParser<CommandSender, VictoryCondition> {
+
+  @Override
+  public @NonNull ArgumentParseResult<@NonNull VictoryCondition> parse(
+      @NonNull CommandContext<@NonNull CommandSender> context,
+      @NonNull Queue<@NonNull String> inputQueue) {
+    final String input = inputQueue.peek();
+    if (input == null) {
+      return failure(new NoInputProvidedException(VictoryConditionParser.class, context));
+    }
+
+    final Match match = PGM.get().getMatchManager().getMatch(context.getSender());
+    if (match == null) return failure(exception("command.onlyPlayers"));
+
+    // Default to current tl victory condition
+    if (input.equals(CURRENT)) {
+      final TimeLimitMatchModule time = match.needModule(TimeLimitMatchModule.class);
+      final TimeLimit existing = time.getTimeLimit();
+      VictoryCondition result = existing == null ? null : existing.getResult();
+      return success(result == null ? NullVictoryCondition.INSTANCE : result);
+    }
+
+    try {
+      return success(VictoryConditions.parseNotNull(match, input));
+    } catch (TextException e) {
+      return failure(e);
+    }
+  }
+
+  private static final List<String> BASE_SUGGESTIONS =
+      Arrays.asList("default", "tie", "objectives", "score");
+
+  @Override
+  public @NonNull List<@NonNull String> suggestions(
+      @NonNull CommandContext<CommandSender> context, @NonNull String input) {
+    final Match match = PGM.get().getMatchManager().getMatch(context.getSender());
+    if (match == null) return BASE_SUGGESTIONS;
+
+    TeamMatchModule tmm = match.getModule(TeamMatchModule.class);
+    if (tmm == null) return BASE_SUGGESTIONS;
+
+    return Stream.concat(
+            BASE_SUGGESTIONS.stream(),
+            tmm.getParticipatingTeams().stream()
+                .map(Team::getNameLegacy)
+                .map(name -> name.replace(" ", "")))
+        .collect(Collectors.toList());
+  }
+}

@@ -1,42 +1,60 @@
 package tc.oc.pgm.util;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
 import org.bukkit.ChatColor;
 
 public final class StringUtils {
   private StringUtils() {}
 
-  public static <T> T bestFuzzyMatch(String search, Iterable<T> options, double threshold) {
-    Map<String, T> map = new HashMap<>();
-    for (T t : options) {
-      map.put(t.toString(), t);
-    }
-
-    return bestFuzzyMatch(search, map, threshold);
+  public static <T> T bestFuzzyMatch(String query, Iterable<T> options, double threshold) {
+    return bestFuzzyMatch(query, options, Object::toString, threshold);
   }
 
   public static <T> T bestFuzzyMatch(String query, Map<String, T> choices, double threshold) {
+    Map.Entry<String, T> entry =
+        bestFuzzyMatch(query, choices.entrySet(), Map.Entry::getKey, threshold);
+    return entry == null ? null : entry.getValue();
+  }
+
+  public static <T> T bestFuzzyMatch(
+      String query, Iterable<T> choices, Function<T, String> toString, double threshold) {
+    return bestFuzzyMatch(query, choices.iterator(), toString, threshold);
+  }
+
+  public static <T> T bestFuzzyMatch(
+      String query, Iterator<T> choices, Function<T, String> toString, double threshold) {
     T bestObj = null;
     double bestScore = 0.0;
-    for (Map.Entry<String, T> entry : choices.entrySet()) {
-      double score = LiquidMetal.score(entry.getKey(), query);
+    while (choices.hasNext()) {
+      T next = choices.next();
+      double score = LiquidMetal.score(toString.apply(next), query);
       if (score > bestScore) {
-        bestObj = entry.getValue();
+        bestObj = next;
         bestScore = score;
       } else if (score == bestScore) {
         bestObj = null;
       }
     }
-
     return bestScore < threshold ? null : bestObj;
   }
 
   public static String truncate(String text, int length) {
     return text.substring(0, Math.min(text.length(), length));
+  }
+
+  public static String normalize(String text) {
+    return text == null
+        ? ""
+        : Normalizer.normalize(text, Normalizer.Form.NFD)
+            .replaceAll("[^A-Za-z0-9]", "")
+            .toLowerCase(Locale.ROOT);
   }
 
   public static String substring(String text, int begin, int end) {

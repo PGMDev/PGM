@@ -28,6 +28,7 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Chunk;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.util.LiquidMetal;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.Version;
@@ -88,11 +89,14 @@ public final class TextParser {
       }
     }
 
-    if (range != null && !range.contains(number)) {
-      throw outOfRange(text, range);
-    }
+    if (range != null) assertInRange(number, range);
 
     return number;
+  }
+
+  public static <T extends Comparable<T>> void assertInRange(
+      @NotNull T val, @NotNull Range<T> range) {
+    if (!range.contains(val)) throw outOfRange(val.toString(), range);
   }
 
   /**

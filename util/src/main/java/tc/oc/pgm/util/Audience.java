@@ -11,6 +11,7 @@ import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
@@ -22,8 +23,8 @@ public interface Audience extends ForwardingAudience.Single {
   Sound WARNING_SOUND = sound(key("note.bass"), Sound.Source.MASTER, 1f, 0.75f);
   Component WARNING_MESSAGE = text(" \u26a0 ", NamedTextColor.YELLOW); // ⚠
 
-  default void sendWarning(Component message) {
-    sendMessage(WARNING_MESSAGE.append(message.colorIfAbsent(NamedTextColor.RED)));
+  default void sendWarning(ComponentLike message) {
+    sendMessage(WARNING_MESSAGE.append(message.asComponent().colorIfAbsent(NamedTextColor.RED)));
     playSound(WARNING_SOUND);
   }
 

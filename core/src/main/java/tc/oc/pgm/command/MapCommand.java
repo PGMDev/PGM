@@ -6,14 +6,15 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.event.ClickEvent.runCommand;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
+import static tc.oc.pgm.command.util.ParserConstants.CURRENT;
 import static tc.oc.pgm.util.Assert.assertNotNull;
-import static tc.oc.pgm.util.text.TextException.invalidFormat;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.CommandException;
-import app.ashcon.intake.parametric.annotation.Default;
-import app.ashcon.intake.parametric.annotation.Switch;
-import app.ashcon.intake.parametric.annotation.Text;
+import cloud.commandframework.annotations.Argument;
+import cloud.commandframework.annotations.CommandDescription;
+import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.Flag;
+import cloud.commandframework.annotations.specifier.Greedy;
+import cloud.commandframework.annotations.specifier.Range;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Sets;
 import java.time.LocalDate;
@@ -44,24 +45,22 @@ import tc.oc.pgm.util.text.TextTranslations;
 
 public final class MapCommand {
 
-  @Command(
-      aliases = {"maps", "maplist", "ml"},
-      desc = "List all maps loaded",
-      usage = "[-a <author>] [-t <tag1>,<tag2>] [-n <name>]")
+  @CommandMethod("maps|maplist|ml [page]")
+  @CommandDescription("List all maps loaded")
   public void maps(
       Audience audience,
       CommandSender sender,
       MapLibrary library,
-      @Default("1") Integer page,
-      @Switch('t') String tags,
-      @Switch('a') String author,
-      @Switch('n') String name,
-      @Switch('p') String phaseType)
-      throws CommandException {
+      @Argument(value = "page", defaultValue = "1") @Range(min = "1") int page,
+      @Flag(value = "tags", aliases = "t", repeatable = true) List<String> tags,
+      @Flag(value = "author", aliases = "a") String author,
+      @Flag(value = "name", aliases = "n") String name,
+      @Flag(value = "phase", aliases = "p") Phase phase) {
     Stream<MapInfo> search = Sets.newHashSet(library.getMaps()).stream();
-    if (tags != null) {
+    if (!tags.isEmpty()) {
       final Map<Boolean, Set<String>> tagSet =
-          Stream.of(tags.split(","))
+          tags.stream()
+              .flatMap(t -> Arrays.stream(t.split(",")))
               .map(String::toLowerCase)
               .map(String::trim)
               .collect(
@@ -80,9 +79,6 @@ public final class MapCommand {
     if (name != null) {
       search = search.filter(map -> matchesName(map, name));
     }
-
-    Phase phase = phaseType == null ? Phase.PRODUCTION : Phase.of(phaseType);
-    if (phase == null) throw invalidFormat(phaseType, Phase.class, null);
 
     search = search.filter(map -> map.getPhase() == phase);
 
@@ -158,11 +154,12 @@ public final class MapCommand {
     return map.getPhase().equals(Phase.of(query));
   }
 
-  @Command(
-      aliases = {"map", "mapinfo"},
-      desc = "Show info about a map",
-      usage = "[map name] - defaults to the current map")
-  public void map(Audience audience, CommandSender sender, @Text MapInfo map) {
+  @CommandMethod("map|mapinfo [map]")
+  @CommandDescription("Show info about a map")
+  public void map(
+      Audience audience,
+      CommandSender sender,
+      @Argument(value = "map", defaultValue = CURRENT) @Greedy MapInfo map) {
     audience.sendMessage(
         TextFormatter.horizontalLineHeading(
             sender,

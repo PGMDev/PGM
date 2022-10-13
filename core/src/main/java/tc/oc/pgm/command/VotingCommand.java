@@ -1,38 +1,10 @@
 package tc.oc.pgm.command;
 
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.Component.translatable;
-import static net.kyori.adventure.text.event.ClickEvent.runCommand;
-import static net.kyori.adventure.text.event.HoverEvent.showText;
+import cloud.commandframework.annotations.CommandMethod;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.CommandException;
-import app.ashcon.intake.parametric.annotation.Maybe;
-import app.ashcon.intake.parametric.annotation.Text;
-import java.util.List;
-import java.util.stream.Collectors;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
-import tc.oc.pgm.api.Permissions;
-import tc.oc.pgm.api.map.MapInfo;
-import tc.oc.pgm.api.map.MapOrder;
-import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.listeners.ChatDispatcher;
-import tc.oc.pgm.rotation.MapPoolManager;
-import tc.oc.pgm.rotation.pools.VotingPool;
-import tc.oc.pgm.rotation.vote.MapVotePicker;
-import tc.oc.pgm.rotation.vote.VotePoolOptions;
-import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.UsernameFormatUtils;
-import tc.oc.pgm.util.named.MapNameStyle;
-import tc.oc.pgm.util.text.TextFormatter;
-import tc.oc.pgm.util.text.TextTranslations;
-
+@CommandMethod("vote|votes")
 public class VotingCommand {
-
+  /*
   @Command(
       aliases = {"add"},
       desc = "Add a custom map to the next vote",
@@ -208,5 +180,5 @@ public class VotingCommand {
 
     throw new CommandException(
         ChatColor.RED + TextTranslations.translate("pool.mapPoolsDisabled", sender));
-  }
+  }*/
 }

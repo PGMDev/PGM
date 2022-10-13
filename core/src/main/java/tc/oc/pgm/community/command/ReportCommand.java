@@ -2,45 +2,21 @@ package tc.oc.pgm.community.command;
 
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
-import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
-import static net.kyori.adventure.text.event.HoverEvent.showText;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.CommandException;
-import app.ashcon.intake.parametric.annotation.Default;
-import app.ashcon.intake.parametric.annotation.Switch;
-import app.ashcon.intake.parametric.annotation.Text;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import java.time.Duration;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.community.events.PlayerReportEvent;
-import tc.oc.pgm.listeners.ChatDispatcher;
-import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.PrettyPaginatedComponentResults;
-import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.text.TemporalComponent;
-import tc.oc.pgm.util.text.TextFormatter;
 
 public class ReportCommand {
 
@@ -55,7 +31,7 @@ public class ReportCommand {
 
   private final Cache<UUID, Report> RECENT_REPORTS =
       CacheBuilder.newBuilder().expireAfterWrite(REPORT_EXPIRE_HOURS, TimeUnit.HOURS).build();
-
+  /*
   @Command(
       aliases = {"report"},
       usage = "<player> <reason>",
@@ -200,7 +176,7 @@ public class ReportCommand {
             .build();
       }
     }.display(audience, reportList, page);
-  }
+  }*/
 
   private class Report implements Comparable<Report> {
     private final UUID targetUUID;

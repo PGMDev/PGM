@@ -1,18 +1,7 @@
-package tc.oc.pgm.command.graph;
+package tc.oc.pgm.command.parsers;
 
-import static tc.oc.pgm.util.text.TextException.invalidFormat;
-
-import app.ashcon.intake.argument.ArgumentException;
-import app.ashcon.intake.argument.CommandArgs;
-import app.ashcon.intake.argument.Namespace;
-import app.ashcon.intake.bukkit.parametric.provider.BukkitProvider;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-import org.bukkit.command.CommandSender;
-import tc.oc.pgm.api.setting.SettingKey;
-
-final class SettingKeyParser implements BukkitProvider<SettingKey> {
+/*
+final class SettingKeyParser implements ParserSupplier<SettingKey> {
 
   @Override
   public String getName() {
@@ -52,3 +41,4 @@ final class SettingKeyParser implements BukkitProvider<SettingKey> {
     return suggestions;
   }
 }
+*/

@@ -2,23 +2,21 @@ package tc.oc.pgm.command;
 
 import static tc.oc.pgm.util.text.TextException.exception;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.parametric.annotation.Maybe;
-import app.ashcon.intake.parametric.annotation.Text;
+import cloud.commandframework.annotations.Argument;
+import cloud.commandframework.annotations.CommandDescription;
+import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.party.Competitor;
-import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.teams.Team;
 
 public final class FinishCommand {
 
-  @Command(
-      aliases = {"finish", "end"},
-      desc = "End the match",
-      usage = "[competitor]",
-      perms = Permissions.STOP)
-  public void end(Match match, @Text @Maybe Party team) {
-    if (!match.finish(team instanceof Competitor ? (Competitor) team : null)) {
+  @CommandMethod("finish|end [team]")
+  @CommandDescription("End the match")
+  @CommandPermission(Permissions.STOP)
+  public void end(Match match, @Argument("team") Team team) {
+    if (!match.finish(team)) {
       throw exception("admin.end.unknownError");
     }
   }

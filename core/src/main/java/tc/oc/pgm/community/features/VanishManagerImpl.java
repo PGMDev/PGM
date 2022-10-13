@@ -3,9 +3,10 @@ package tc.oc.pgm.community.features;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.CommandException;
-import app.ashcon.intake.parametric.annotation.Switch;
+import cloud.commandframework.annotations.CommandDescription;
+import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
+import cloud.commandframework.annotations.Flag;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
@@ -129,11 +130,10 @@ public class VanishManagerImpl implements VanishManager, Listener {
   }
 
   /* Commands */
-  @Command(
-      aliases = {"vanish", "v"},
-      desc = "Toggle vanish status",
-      perms = Permissions.VANISH)
-  public void vanish(MatchPlayer sender, @Switch('s') boolean silent) throws CommandException {
+  @CommandMethod("vanish|v")
+  @CommandDescription("Toggle vanish status")
+  @CommandPermission(Permissions.VANISH)
+  public void vanish(MatchPlayer sender, @Flag(value = "silent", aliases = "s") boolean silent) {
     if (setVanished(sender, !isVanished(sender.getId()), silent)) {
       sender.sendWarning(translatable("vanish.activate").color(NamedTextColor.GREEN));
     } else {

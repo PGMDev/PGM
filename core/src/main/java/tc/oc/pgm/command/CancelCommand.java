@@ -2,7 +2,9 @@ package tc.oc.pgm.command;
 
 import static net.kyori.adventure.text.Component.translatable;
 
-import app.ashcon.intake.Command;
+import cloud.commandframework.annotations.CommandDescription;
+import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
 import net.kyori.adventure.text.format.NamedTextColor;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
@@ -15,10 +17,9 @@ import tc.oc.pgm.util.Audience;
 
 public final class CancelCommand {
 
-  @Command(
-      aliases = {"cancel", "cancelrestart", "cr"},
-      desc = "Cancels all countdowns",
-      perms = Permissions.STOP)
+  @CommandMethod("cancel|cancelrestart|cr")
+  @CommandDescription("Cancels all countdowns")
+  @CommandPermission(Permissions.STOP)
   public void cancel(Audience audience, Match match) {
     if (RestartManager.isQueued()) {
       match.callEvent(new CancelRestartEvent());

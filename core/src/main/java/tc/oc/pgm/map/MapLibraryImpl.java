@@ -12,12 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.Spliterators;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.StreamSupport;
+import java.util.stream.Stream;
 import org.bukkit.ChatColor;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.MapContext;
@@ -29,6 +28,8 @@ import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
+import tc.oc.pgm.util.LiquidMetal;
+import tc.oc.pgm.util.StreamUtils;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.UsernameResolver;
 
@@ -74,8 +75,19 @@ public class MapLibraryImpl implements MapLibrary {
   }
 
   @Override
+  public Stream<MapInfo> getMaps(@Nullable String query) {
+    if (query == null) return maps.values().stream().map(e -> e.info);
+
+    String normalized = MapInfo.normalizeName(query);
+
+    return maps.entrySet().stream()
+        .filter(e -> LiquidMetal.match(e.getKey(), normalized))
+        .map(e -> e.getValue().info);
+  }
+
+  @Override
   public Iterator<MapInfo> getMaps() {
-    return maps.values().stream().map(entry -> entry.info).iterator();
+    return getMaps(null).iterator();
   }
 
   @Override
@@ -159,10 +171,9 @@ public class MapLibraryImpl implements MapLibrary {
 
     return CompletableFuture.runAsync(
             () ->
-                StreamSupport.stream(
-                        Spliterators.spliteratorUnknownSize(
-                            Iterators.concat(sources.iterator()), 0),
-                        true)
+                StreamUtils.of(Iterators.concat(sources.iterator()))
+                    .parallel()
+                    .unordered()
                     .forEach(source -> loadMapSafe(source, null)))
         .thenRunAsync(() -> logMapSuccess(fail, ok))
         .thenRunAsync(UsernameResolver::resolveAll);
