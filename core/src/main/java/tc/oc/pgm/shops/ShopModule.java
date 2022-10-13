@@ -25,6 +25,7 @@ import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.action.Action;
+import tc.oc.pgm.action.ActionModule;
 import tc.oc.pgm.action.ActionParser;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
@@ -32,7 +33,6 @@ import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.parse.FilterParser;
@@ -50,7 +50,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class ShopModule implements MapModule {
+public class ShopModule implements MapModule<ShopMatchModule> {
 
   private static final Collection<MapTag> TAGS =
       ImmutableList.of(new MapTag("shops", "Shops", false, true));
@@ -64,7 +64,7 @@ public class ShopModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public ShopMatchModule createMatchModule(Match match) {
     return new ShopMatchModule(match, shops, shopKeepers);
   }
 
@@ -74,6 +74,11 @@ public class ShopModule implements MapModule {
   }
 
   public static class Factory implements MapModuleFactory<ShopModule> {
+
+    @Override
+    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+      return ImmutableList.of(ActionModule.class);
+    }
 
     @Override
     public ShopModule parse(MapFactory factory, Logger logger, Document doc)
