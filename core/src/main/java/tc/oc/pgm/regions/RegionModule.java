@@ -71,16 +71,18 @@ public class RegionModule implements MapModule {
         }
       }
 
-      // Support deprecated <lanes> syntax
+      // Support legacy <lanes> syntax
       for (Element laneEl : XMLUtils.flattenElements(doc.getRootElement(), "lanes", "lane")) {
         rfaParser.parseLane(laneEl);
       }
 
       // Support deprecated <playable> syntax
-      Element playableEl = XMLUtils.getUniqueChild(doc.getRootElement(), "playable");
-      if (playableEl != null) rfaParser.parsePlayable(playableEl);
+      if (factory.getProto().isOlderThan(MapProtos.MODULE_SUBELEMENT_VERSION)) {
+        Element playableEl = XMLUtils.getUniqueChild(doc.getRootElement(), "playable");
+        if (playableEl != null) rfaParser.parsePlayable(playableEl);
+      }
 
-      // Support deprecated <maxbuildheight> syntax
+      // Support <maxbuildheight> syntax
       Element heightEl = XMLUtils.getUniqueChild(doc.getRootElement(), "maxbuildheight");
       if (heightEl != null) rfaParser.parseMaxBuildHeight(heightEl);
 
