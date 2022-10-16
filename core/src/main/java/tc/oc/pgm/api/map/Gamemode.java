@@ -15,6 +15,7 @@ public enum Gamemode {
   KING_OF_THE_HILL("koth"),
   KING_OF_THE_FLAG("kotf"),
   MIXED("mixed"),
+  PAYLOAD("pd"),
   RAGE("rage"),
   RACE_FOR_WOOL("rfw"),
   SCOREBOX("scorebox"),
