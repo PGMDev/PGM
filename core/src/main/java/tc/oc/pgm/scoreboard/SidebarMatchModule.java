@@ -300,10 +300,33 @@ public class SidebarMatchModule implements MatchModule, Listener {
       break;
     }
 
+    boolean isBlitz = false;
+    boolean isRage = false;
+    for (final MapTag tag : map.getTags()) {
+      if (tag.getId().matches("blitz")) {
+        isBlitz = true;
+        continue;
+      }
+      if (tag.getId().matches("rage")) {
+        isRage = true;
+      }
+    }
     // Second, append auxiliary game modes
     for (final MapTag tag : map.getTags()) {
       if (!tag.isGamemode() || !tag.isAuxiliary()) continue;
 
+      // Display "Blitz: Rage" instead of "Blitz and Rage"
+      if (isBlitz && isRage && games.size() < 2) {
+        if (tag.getId().matches("blitz")) {
+          // Add this only once
+          games.add(translatable("gamemode.br.name").color(NamedTextColor.AQUA));
+          continue;
+        }
+        if (tag.getId().matches("rage")) {
+          // Do not display "Rage"
+          continue;
+        }
+      }
       // There can only be 2 game modes
       if (games.size() < 2) {
         games.add(tag.getName().color(NamedTextColor.AQUA));
