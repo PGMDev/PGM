@@ -5,7 +5,6 @@ import java.util.Collection;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.Nullable;
-import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -38,9 +37,16 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
   /**
    * Get a unique, human-readable name for the map.
    *
-   * @return A name, alphanumeric with spaces are allowed.
+   * @return A name, alphanumeric with spaces allowed.
    */
   String getName();
+
+  /**
+   * Get the maps' name, but normalized to standard english characters and lower case.
+   *
+   * @return The map's name, lowercase with spaces allowed.
+   */
+  String getNormalizedName();
 
   /**
    * Gets a styled map name.
@@ -160,9 +166,5 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
   @Override
   default int compareTo(MapInfo o) {
     return getId().compareTo(o.getId());
-  }
-
-  static String normalizeName(@Nullable String idOrName) {
-    return StringUtils.normalize(idOrName);
   }
 }

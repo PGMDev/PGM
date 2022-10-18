@@ -16,7 +16,6 @@ import cloud.commandframework.annotations.Flag;
 import cloud.commandframework.annotations.specifier.Greedy;
 import cloud.commandframework.annotations.specifier.Range;
 import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Sets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -38,6 +37,7 @@ import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.pools.MapPool;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
+import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -56,7 +56,7 @@ public final class MapCommand {
       @Flag(value = "author", aliases = "a") String author,
       @Flag(value = "name", aliases = "n") String name,
       @Flag(value = "phase", aliases = "p") Phase phase) {
-    Stream<MapInfo> search = Sets.newHashSet(library.getMaps()).stream();
+    Stream<MapInfo> search = library.getMaps(name);
     if (!tags.isEmpty()) {
       final Map<Boolean, Set<String>> tagSet =
           tags.stream()
@@ -73,14 +73,13 @@ public final class MapCommand {
     }
 
     if (author != null) {
-      search = search.filter(map -> matchesAuthor(map, author));
+      String query = StringUtils.normalize(author);
+      search = search.filter(map -> matchesAuthor(map, query));
     }
 
-    if (name != null) {
-      search = search.filter(map -> matchesName(map, name));
-    }
-
-    search = search.filter(map -> map.getPhase() == phase);
+    // FIXME: change when cloud gets support for default flag values
+    final Phase finalPhase = phase == null ? Phase.PRODUCTION : phase;
+    search = search.filter(map -> map.getPhase() == finalPhase);
 
     Set<MapInfo> maps = search.collect(Collectors.toCollection(TreeSet::new));
     int resultsPerPage = 8;
@@ -131,27 +130,12 @@ public final class MapCommand {
   }
 
   private static boolean matchesAuthor(MapInfo map, String query) {
-    assertNotNull(map);
-    query = assertNotNull(query).toLowerCase();
-
     for (Contributor contributor : map.getAuthors()) {
-      if (contributor.getNameLegacy().toLowerCase().contains(query)) {
+      if (StringUtils.normalize(contributor.getNameLegacy()).contains(query)) {
         return true;
       }
     }
     return false;
-  }
-
-  private static boolean matchesName(MapInfo map, String query) {
-    assertNotNull(map);
-    query = assertNotNull(query).toLowerCase();
-    return map.getName().toLowerCase().contains(query);
-  }
-
-  private static boolean matchesPhase(MapInfo map, String query) {
-    assertNotNull(map);
-    query = assertNotNull(query).toLowerCase();
-    return map.getPhase().equals(Phase.of(query));
   }
 
   @CommandMethod("map|mapinfo [map]")

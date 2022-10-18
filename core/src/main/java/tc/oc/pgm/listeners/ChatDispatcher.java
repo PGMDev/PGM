@@ -47,7 +47,6 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.ffa.Tribute;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.Players;
-import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
@@ -321,8 +320,7 @@ public class ChatDispatcher implements Listener {
         sendGlobal(player.getMatch(), player, message.substring(1));
       } else if (message.startsWith(DM_SYMBOL) && message.contains(" ")) {
         final String target = message.substring(1, message.indexOf(" "));
-        final MatchPlayer receiver =
-            getApproximatePlayer(player.getMatch(), target, player.getBukkit());
+        final MatchPlayer receiver = Players.getMatchPlayer(event.getPlayer(), target);
         if (receiver == null) {
           player.sendWarning(translatable("chat.message.unknownTarget", text(target)));
         } else {
@@ -432,11 +430,6 @@ public class ChatDispatcher implements Listener {
                                 UsernameFormatUtils.CONSOLE_NAME,
                                 TextTranslations.getLocale(player.getBukkit())),
                             message))));
-  }
-
-  private MatchPlayer getApproximatePlayer(Match match, String query, CommandSender sender) {
-    return StringUtils.bestFuzzyMatch(
-        query, match.getPlayers(), pl -> Players.getVisibleName(sender, pl.getBukkit()), 0.75);
   }
 
   private void sendMutedMessage(MatchPlayer player) {

@@ -20,8 +20,11 @@ import cloud.commandframework.exceptions.CommandExecutionException;
 import cloud.commandframework.exceptions.InvalidCommandSenderException;
 import cloud.commandframework.exceptions.InvalidSyntaxException;
 import cloud.commandframework.exceptions.NoPermissionException;
+import cloud.commandframework.exceptions.parsing.ParserException;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.extra.confirmation.CommandConfirmationManager;
+import cloud.commandframework.keys.CloudKey;
+import cloud.commandframework.keys.SimpleCloudKey;
 import cloud.commandframework.meta.CommandMeta;
 import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import cloud.commandframework.paper.PaperCommandManager;
@@ -30,12 +33,14 @@ import io.leangen.geantyref.TypeToken;
 import java.lang.reflect.Type;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.util.ComponentMessageThrowable;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
@@ -91,6 +96,9 @@ import tc.oc.pgm.util.Audience;
 
 public class CommandGraph {
 
+  public static final CloudKey<LinkedList<String>> INPUT_QUEUE =
+      SimpleCloudKey.of("_pgm_input_queue_", new TypeToken<LinkedList<String>>() {});
+
   private final PGM pgm;
   private final PaperCommandManager<CommandSender> manager;
   private final MinecraftHelp<CommandSender> minecraftHelp;
@@ -117,6 +125,10 @@ public class CommandGraph {
     // Register asynchronous completions
     if (this.manager.hasCapability(CloudBukkitCapabilities.ASYNCHRONOUS_COMPLETION))
       this.manager.registerAsynchronousCompletions();
+
+    // Add the input queue to the context, this allows greedy suggestions to work on it
+    this.manager.registerCommandPreProcessor(
+        context -> context.getCommandContext().store(INPUT_QUEUE, context.getInputQueue()));
 
     // By default, suggestions run by a filtered processor.
     // That prevents valid suggestions like "s" -> "Something" or "someh" -> "Something"
@@ -288,19 +300,22 @@ public class CommandGraph {
 
   private <E extends Exception> void handleException(CommandSender cs, E e) {
     Audience audience = Audience.get(cs);
-    ComponentMessageThrowable messageThrowable = getMessageThrowable(e);
-
-    if (messageThrowable != null) {
-      final Component message = messageThrowable.componentMessage();
-      if (message != null) audience.sendWarning(message);
-    } else {
-      audience.sendWarning(unknown(e).componentMessage());
-      e.printStackTrace();
-    }
+    Component message = getMessage(e);
+    if (message != null) audience.sendWarning(message);
   }
 
-  private ComponentMessageThrowable getMessageThrowable(Throwable t) {
-    if (t == null || t instanceof ComponentMessageThrowable) return (ComponentMessageThrowable) t;
-    return getMessageThrowable(t.getCause());
+  private @Nullable Component getMessage(Throwable t) {
+    ComponentMessageThrowable messageThrowable = getParentCause(t, ComponentMessageThrowable.class);
+    if (messageThrowable != null) return messageThrowable.componentMessage();
+
+    ParserException parseException = getParentCause(t, ParserException.class);
+    if (parseException != null) return text(parseException.getMessage());
+
+    return unknown(t).componentMessage();
+  }
+
+  private <T> T getParentCause(Throwable t, Class<T> type) {
+    if (t == null || type.isInstance(t)) return type.cast(t);
+    return getParentCause(t.getCause(), type);
   }
 }

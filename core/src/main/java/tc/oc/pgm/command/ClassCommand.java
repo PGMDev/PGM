@@ -16,7 +16,7 @@ public final class ClassCommand {
               .append(text(currentClass.getName(), NamedTextColor.GOLD, TextDecoration.BOLD)));
       player.sendMessage(translatable("match.class.view", NamedTextColor.GOLD));
     } else {
-      final PlayerClass newClass = StringUtils.bestFuzzyMatch(query, classes.getClasses(), 0.9);
+      final PlayerClass newClass = StringUtils.bestFuzzyMatch(query, classes.getClasses());
 
       if (newClass == null) {
         throw exception("match.class.notFound");

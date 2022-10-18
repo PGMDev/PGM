@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -29,7 +30,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Chunk;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
-import tc.oc.pgm.util.LiquidMetal;
+import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
@@ -337,20 +338,13 @@ public final class TextParser {
       String text, Class<E> type, Range<E> range, boolean fuzzyMatch) throws TextException {
     assertNotNull(text, "cannot parse enum " + type.getSimpleName().toLowerCase() + "  from null");
 
-    double maxScore = 0;
-    E value = null;
+    String name = text.replace(' ', '_');
+    E value =
+        StringUtils.bestFuzzyMatch(
+            name, Arrays.stream(type.getEnumConstants()).iterator(), Enum::name);
 
-    for (E each : type.getEnumConstants()) {
-      final double score = LiquidMetal.score(each.name(), text.replace(' ', '_'));
-      if (score >= maxScore) {
-        maxScore = score;
-        value = each;
-      }
-      if (score >= 1) break;
-    }
-
-    if (maxScore < 0.25 || (!fuzzyMatch && maxScore < 1)) {
-      throw invalidFormat(text, type, value.name().toLowerCase(), null);
+    if (value == null || (!fuzzyMatch && !name.equalsIgnoreCase(value.name()))) {
+      throw invalidFormat(text, type, value != null ? value.name().toLowerCase() : null, null);
     }
 
     if (range != null && !range.contains(value)) {

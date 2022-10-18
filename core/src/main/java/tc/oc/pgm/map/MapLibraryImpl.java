@@ -64,11 +64,14 @@ public class MapLibraryImpl implements MapLibrary {
 
   @Override
   public MapInfo getMap(String idOrName) {
-    idOrName = MapInfo.normalizeName(idOrName);
 
-    MapEntry map = maps.get(idOrName);
+    // Exact match
+    MapEntry map = maps.get(StringUtils.slugify(idOrName));
     if (map == null) {
-      map = StringUtils.bestFuzzyMatch(idOrName, maps, 0.75);
+      // Fuzzy match
+      map =
+          StringUtils.bestFuzzyMatch(
+              StringUtils.normalize(idOrName), maps.values(), m -> m.info.getNormalizedName());
     }
 
     return map == null ? null : map.info;
@@ -76,13 +79,12 @@ public class MapLibraryImpl implements MapLibrary {
 
   @Override
   public Stream<MapInfo> getMaps(@Nullable String query) {
-    if (query == null) return maps.values().stream().map(e -> e.info);
-
-    String normalized = MapInfo.normalizeName(query);
-
-    return maps.entrySet().stream()
-        .filter(e -> LiquidMetal.match(e.getKey(), normalized))
-        .map(e -> e.getValue().info);
+    Stream<MapInfo> maps = this.maps.values().stream().map(e -> e.info);
+    if (query != null) {
+      String normalized = StringUtils.normalize(query);
+      maps = maps.filter(mi -> LiquidMetal.match(mi.getNormalizedName(), normalized));
+    }
+    return maps;
   }
 
   @Override

@@ -711,7 +711,7 @@ public class PickerMatchModule implements MatchModule, Listener {
     }
 
     if (hasTeams && Button.TEAM_JOIN.matches(material)) {
-      Team team = player.getMatch().needModule(TeamMatchModule.class).bestFuzzyMatch(name, 1);
+      Team team = player.getMatch().needModule(TeamMatchModule.class).getTeam(name);
       if (team != null) {
         this.scheduleClose(player);
         this.scheduleJoin(player, team);

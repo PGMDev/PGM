@@ -13,23 +13,22 @@ import org.bukkit.ChatColor;
 public final class StringUtils {
   private StringUtils() {}
 
-  public static <T> T bestFuzzyMatch(String query, Iterable<T> options, double threshold) {
-    return bestFuzzyMatch(query, options, Object::toString, threshold);
+  public static <T> T bestFuzzyMatch(String query, Iterable<T> options) {
+    return bestFuzzyMatch(query, options, Object::toString);
   }
 
-  public static <T> T bestFuzzyMatch(String query, Map<String, T> choices, double threshold) {
-    Map.Entry<String, T> entry =
-        bestFuzzyMatch(query, choices.entrySet(), Map.Entry::getKey, threshold);
+  public static <T> T bestFuzzyMatch(String query, Map<String, T> choices) {
+    Map.Entry<String, T> entry = bestFuzzyMatch(query, choices.entrySet(), Map.Entry::getKey);
     return entry == null ? null : entry.getValue();
   }
 
   public static <T> T bestFuzzyMatch(
-      String query, Iterable<T> choices, Function<T, String> toString, double threshold) {
-    return bestFuzzyMatch(query, choices.iterator(), toString, threshold);
+      String query, Iterable<T> choices, Function<T, String> toString) {
+    return bestFuzzyMatch(query, choices.iterator(), toString);
   }
 
   public static <T> T bestFuzzyMatch(
-      String query, Iterator<T> choices, Function<T, String> toString, double threshold) {
+      String query, Iterator<T> choices, Function<T, String> toString) {
     T bestObj = null;
     double bestScore = 0.0;
     while (choices.hasNext()) {
@@ -38,11 +37,13 @@ public final class StringUtils {
       if (score > bestScore) {
         bestObj = next;
         bestScore = score;
+        // Perfect match, no need to keep searching
+        if (score >= 1) break;
       } else if (score == bestScore) {
         bestObj = null;
       }
     }
-    return bestScore < threshold ? null : bestObj;
+    return bestScore < 0.75 ? null : bestObj;
   }
 
   public static String truncate(String text, int length) {
@@ -53,8 +54,12 @@ public final class StringUtils {
     return text == null
         ? ""
         : Normalizer.normalize(text, Normalizer.Form.NFD)
-            .replaceAll("[^A-Za-z0-9]", "")
+            .replaceAll("[^A-Za-z0-9 ]", "")
             .toLowerCase(Locale.ROOT);
+  }
+
+  public static String slugify(String text) {
+    return normalize(text).replace(" ", "");
   }
 
   public static String substring(String text, int begin, int end) {

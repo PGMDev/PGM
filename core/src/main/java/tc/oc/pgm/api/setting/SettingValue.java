@@ -101,8 +101,7 @@ public enum SettingValue {
             query,
             Stream.of(SettingValue.values())
                 .filter(entry -> entry.getKey().equals(key))
-                .collect(Collectors.toMap(SettingValue::getName, Function.identity())),
-            0.6);
+                .collect(Collectors.toMap(SettingValue::getName, Function.identity())));
     if (value == null) {
       return key.getDefaultValue();
     }

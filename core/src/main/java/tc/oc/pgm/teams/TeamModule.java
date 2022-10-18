@@ -41,17 +41,17 @@ public class TeamModule implements MapModule<TeamMatchModule> {
 
   @Override
   public Collection<MapTag> getTags() {
-    final int id = teams.size();
-    Collection<MapTag> tags = TAGS.get(id);
+    final int size = teams.size();
+    Collection<MapTag> tags = TAGS.get(size);
     if (tags == null) {
       tags =
           ImmutableList.of(
               new MapTag(
-                  id + "team" + (id == 1 ? "" : "s"),
-                  id + " Team" + (id == 1 ? "" : "s"),
+                  size + "team" + (size == 1 ? "" : "s"),
+                  size + " Team" + (size == 1 ? "" : "s"),
                   false,
                   true));
-      TAGS.put(id, tags);
+      TAGS.put(size, tags);
     }
     return tags;
   }
@@ -95,7 +95,7 @@ public class TeamModule implements MapModule<TeamMatchModule> {
   }
 
   public TeamFactory getTeamByName(String name) {
-    return StringUtils.bestFuzzyMatch(name, getTeams(), 0.9);
+    return StringUtils.bestFuzzyMatch(name, getTeams());
   }
 
   // ---------------------

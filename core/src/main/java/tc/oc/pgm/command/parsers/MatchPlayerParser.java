@@ -10,15 +10,10 @@ import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.exceptions.parsing.NoInputProvidedException;
 import java.util.List;
 import java.util.Queue;
-import java.util.stream.Collectors;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.Players;
-import tc.oc.pgm.util.StringUtils;
 
 public class MatchPlayerParser implements ArgumentParser<CommandSender, MatchPlayer> {
 
@@ -33,17 +28,7 @@ public class MatchPlayerParser implements ArgumentParser<CommandSender, MatchPla
     }
 
     CommandSender sender = context.getSender();
-
-    Player player =
-        StringUtils.bestFuzzyMatch(
-            input,
-            Bukkit.getOnlinePlayers().stream()
-                .filter(p -> Players.shouldShow(sender, p))
-                .iterator(),
-            p -> Players.getVisibleName(sender, p),
-            0.75);
-
-    MatchPlayer mp = PGM.get().getMatchManager().getPlayer(player);
+    MatchPlayer mp = Players.getMatchPlayer(sender, input);
 
     return mp != null ? success(mp) : failure(exception("command.playerNotFound"));
   }
@@ -53,10 +38,6 @@ public class MatchPlayerParser implements ArgumentParser<CommandSender, MatchPla
       @NotNull CommandContext<CommandSender> context, @NotNull String input) {
     CommandSender sender = context.getSender();
 
-    return Bukkit.getOnlinePlayers().stream()
-        .filter(p -> Players.shouldShow(sender, p))
-        .map(p -> Players.getVisibleName(sender, p))
-        .filter(n -> input.toLowerCase().startsWith(n.toLowerCase()))
-        .collect(Collectors.toList());
+    return Players.getPlayerNames(sender, input);
   }
 }

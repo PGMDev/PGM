@@ -5,15 +5,9 @@ import static tc.oc.pgm.util.text.TextException.exception;
 
 import cloud.commandframework.arguments.parser.ArgumentParseResult;
 import cloud.commandframework.arguments.parser.ParserParameters;
-import cloud.commandframework.arguments.parser.StandardParameters;
 import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.paper.PaperCommandManager;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import org.bukkit.command.CommandSender;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -23,9 +17,12 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
+import tc.oc.pgm.command.util.CommandGraph;
 import tc.oc.pgm.util.LiquidMetal;
 
 public class MapInfoParser extends StringLikeParser<CommandSender, MapInfo> {
+
+  private static final String FAKE_SPACE = "┈", SPACE = " ";
 
   private final MapLibrary library;
   private final MatchManager matchManager;
@@ -45,7 +42,7 @@ public class MapInfoParser extends StringLikeParser<CommandSender, MapInfo> {
       final Match match = matchManager.getMatch(context.getSender());
       if (match != null) map = match.getMap();
     } else {
-      map = library.getMap(text);
+      map = library.getMap(suggestionToText(text));
     }
 
     return map != null
@@ -56,45 +53,44 @@ public class MapInfoParser extends StringLikeParser<CommandSender, MapInfo> {
   @Override
   public @NonNull List<@NonNull String> suggestions(
       @NonNull CommandContext<CommandSender> context, @NonNull String input) {
-    List<String> text = getInput(context.getRawInput(), input);
+    List<String> inputQueue = context.get(CommandGraph.INPUT_QUEUE);
+    if (inputQueue.isEmpty()) inputQueue.add(input);
+
+    // Actual total input from the player
+    String text = suggestionToText(String.join(SPACE, inputQueue));
+
+    // Words to keep, as they cannot be replaced (they're not the last arg)
+    String keep =
+        suggestionToText(String.join(SPACE, inputQueue.subList(0, inputQueue.size() - 1))) + " ";
 
     return library
-        .getMaps(String.join(" ", text))
+        .getMaps(text)
         .map(MapInfo::getName)
-        .map(name -> getSuggestion(text, name))
+        .map(name -> getSuggestion(name, keep))
         .collect(Collectors.toList());
   }
 
-  private List<String> getInput(LinkedList<String> rawInput, String input) {
-    if (!options.has(StandardParameters.GREEDY) && !options.has(StandardParameters.FLAG_YIELDING))
-      return Collections.singletonList(input);
+  private String getSuggestion(String suggestion, String input) {
+    // At least one of the two has no spaces, algorithm isn't needed.
+    if (input.length() > 1 && suggestion.contains(SPACE)) {
+      int matchIdx = LiquidMetal.getIndexOf(suggestion, input);
 
-    List<String> value = new ArrayList<>();
+      // Should never happen!
+      if (matchIdx == -1)
+        throw new IllegalStateException(
+            "Suggestion is not matched by input! '" + suggestion + "', '" + input + "'");
 
-    Iterator<String> it = rawInput.descendingIterator();
-    while (it.hasNext()) {
-      String val = it.next();
-      value.add(val);
-      if (val.equals(input)) break;
+      suggestion = suggestion.substring(matchIdx + 1);
     }
-    Collections.reverse(value);
-    return value;
+
+    return textToSuggestion(suggestion);
   }
 
-  private String getSuggestion(List<String> input, String value) {
-    // At least one of the two has no spaces, algorithm makes no sense.
-    if (input.size() <= 1 || !value.contains(" ")) return value.replace(" ", "┈");
+  private String textToSuggestion(String text) {
+    return text.replace(SPACE, FAKE_SPACE).replace(":", "");
+  }
 
-    String[] words = value.split(" ");
-
-    StringJoiner joiner = new StringJoiner("┈");
-
-    int maxReplace = input.size() - 1;
-    for (int i = 0, j = 0; j < words.length; j++) {
-      if (i < maxReplace && LiquidMetal.match(words[j], input.get(i))) i++;
-      else joiner.add(words[j]);
-    }
-
-    return joiner.toString();
+  private String suggestionToText(String text) {
+    return text.replace(FAKE_SPACE, SPACE);
   }
 }
