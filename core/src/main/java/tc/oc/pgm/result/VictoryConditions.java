@@ -2,6 +2,7 @@ package tc.oc.pgm.result;
 
 import static tc.oc.pgm.util.text.TextException.invalidFormat;
 
+import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -19,21 +20,21 @@ public class VictoryConditions {
   private VictoryConditions() {}
 
   public static @Nullable VictoryCondition parseNullable(MapFactory factory, @Nullable String raw) {
-    VictoryCondition vc = parseNotNull(null, factory, raw);
-    return vc == NullVictoryCondition.INSTANCE ? null : vc;
+    return parse(null, factory, raw);
   }
 
-  public static @NotNull VictoryCondition parseNotNull(Match match, @Nullable String raw) {
-    return parseNotNull(match, null, raw);
+  public static @NotNull Optional<VictoryCondition> parseOptional(
+      Match match, @Nullable String raw) {
+    return Optional.ofNullable(parse(match, null, raw));
   }
 
-  public static @NotNull VictoryCondition parseNotNull(
+  public static @Nullable VictoryCondition parse(
       Match match, MapFactory factory, @Nullable String raw) {
-    if (raw == null) return NullVictoryCondition.INSTANCE;
+    if (raw == null) return null;
 
     switch (raw.toLowerCase()) {
       case "default":
-        return NullVictoryCondition.INSTANCE;
+        return null;
       case "tie":
         return new TieVictoryCondition();
       case "objectives":

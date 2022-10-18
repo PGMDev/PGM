@@ -34,6 +34,7 @@ import java.lang.reflect.Type;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import net.kyori.adventure.text.Component;
@@ -51,6 +52,7 @@ import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.command.AdminCommand;
 import tc.oc.pgm.command.CancelCommand;
 import tc.oc.pgm.command.ClassCommand;
@@ -83,6 +85,7 @@ import tc.oc.pgm.command.parsers.MapInfoParser;
 import tc.oc.pgm.command.parsers.MapPoolParser;
 import tc.oc.pgm.command.parsers.MatchPlayerParser;
 import tc.oc.pgm.command.parsers.PartyParser;
+import tc.oc.pgm.command.parsers.SettingKeyParser;
 import tc.oc.pgm.command.parsers.TeamParser;
 import tc.oc.pgm.command.parsers.TeamsParser;
 import tc.oc.pgm.command.parsers.VictoryConditionParser;
@@ -222,7 +225,7 @@ public class CommandGraph {
     register(ChatDispatcher.get());
   }
 
-  public void register(Object command, String... aliases) {
+  public void register(Object command) {
     annotationParser.parse(command);
   }
 
@@ -263,8 +266,10 @@ public class CommandGraph {
     registerParser(Party.class, PartyParser::new);
     registerParser(Team.class, TeamParser::new);
     registerParser(TypeFactory.parameterizedClass(Collection.class, Team.class), TeamsParser::new);
-    registerParser(VictoryCondition.class, new VictoryConditionParser());
-    // registerParser(SettingKey.class, new SettingKeyParser());
+    registerParser(
+        TypeFactory.parameterizedClass(Optional.class, VictoryCondition.class),
+        new VictoryConditionParser());
+    registerParser(SettingKey.class, new SettingKeyParser());
     // registerParser(SettingValue.class, new EnumProvider<>(SettingValue.class));
   }
 
@@ -274,6 +279,10 @@ public class CommandGraph {
 
   private <T> void registerParser(Class<T> type, ParserBuilder<T> parser) {
     parsers.registerParserSupplier(TypeToken.get(type), op -> parser.create(manager, op));
+  }
+
+  private <T> void registerParser(Type type, ArgumentParser<CommandSender, T> parser) {
+    parsers.registerParserSupplier(TypeToken.get(type), op -> parser);
   }
 
   private <T> void registerParser(Type type, ParserBuilder<T> parser) {

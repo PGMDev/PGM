@@ -9,11 +9,11 @@ import cloud.commandframework.annotations.CommandDescription;
 import cloud.commandframework.annotations.CommandMethod;
 import cloud.commandframework.annotations.CommandPermission;
 import java.time.Duration;
+import java.util.Optional;
 import net.kyori.adventure.text.format.NamedTextColor;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.VictoryCondition;
-import tc.oc.pgm.result.NullVictoryCondition;
 import tc.oc.pgm.timelimit.TimeLimit;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.pgm.util.Audience;
@@ -28,12 +28,10 @@ public final class TimeLimitCommand {
       Audience audience,
       Match match,
       @Argument("duration") Duration duration,
-      @Argument(value = "result", defaultValue = CURRENT) VictoryCondition result,
+      @Argument(value = "result", defaultValue = CURRENT) Optional<VictoryCondition> result,
       @Argument("overtime") Duration overtime,
       @Argument("max-overtime") Duration maxOvertime,
       @Argument("end-overtime") Duration endOvertime) {
-    if (result == NullVictoryCondition.INSTANCE) result = null;
-
     final TimeLimitMatchModule time = match.needModule(TimeLimitMatchModule.class);
 
     time.cancel();
@@ -44,7 +42,7 @@ public final class TimeLimitCommand {
             overtime,
             maxOvertime,
             endOvertime,
-            result,
+            result.orElse(null),
             true));
     time.start();
 
@@ -53,6 +51,6 @@ public final class TimeLimitCommand {
             "match.timeLimit.commandOutput",
             NamedTextColor.YELLOW,
             clock(duration).color(NamedTextColor.AQUA),
-            result != null ? result.getDescription(match) : translatable("misc.unknown")));
+            result.map(r -> r.getDescription(match)).orElse(translatable("misc.unknown"))));
   }
 }

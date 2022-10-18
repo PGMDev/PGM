@@ -19,7 +19,7 @@ import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.pools.MapPool;
 import tc.oc.pgm.util.StringUtils;
 
-public class MapPoolParser implements ArgumentParser<CommandSender, MapPool> {
+public final class MapPoolParser implements ArgumentParser<CommandSender, MapPool> {
 
   @Override
   public @NonNull ArgumentParseResult<MapPool> parse(

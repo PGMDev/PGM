@@ -11,6 +11,7 @@ import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.exceptions.parsing.NoInputProvidedException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,7 +20,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.VictoryCondition;
-import tc.oc.pgm.result.NullVictoryCondition;
 import tc.oc.pgm.result.VictoryConditions;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
@@ -27,10 +27,11 @@ import tc.oc.pgm.timelimit.TimeLimit;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.pgm.util.text.TextException;
 
-public class VictoryConditionParser implements ArgumentParser<CommandSender, VictoryCondition> {
+public final class VictoryConditionParser
+    implements ArgumentParser<CommandSender, Optional<VictoryCondition>> {
 
   @Override
-  public @NonNull ArgumentParseResult<@NonNull VictoryCondition> parse(
+  public @NonNull ArgumentParseResult<@NonNull Optional<VictoryCondition>> parse(
       @NonNull CommandContext<@NonNull CommandSender> context,
       @NonNull Queue<@NonNull String> inputQueue) {
     final String input = inputQueue.peek();
@@ -45,12 +46,11 @@ public class VictoryConditionParser implements ArgumentParser<CommandSender, Vic
     if (input.equals(CURRENT)) {
       final TimeLimitMatchModule time = match.needModule(TimeLimitMatchModule.class);
       final TimeLimit existing = time.getTimeLimit();
-      VictoryCondition result = existing == null ? null : existing.getResult();
-      return success(result == null ? NullVictoryCondition.INSTANCE : result);
+      return success(Optional.ofNullable(existing).map(TimeLimit::getResult));
     }
 
     try {
-      return success(VictoryConditions.parseNotNull(match, input));
+      return success(VictoryConditions.parseOptional(match, input));
     } catch (TextException e) {
       return failure(e);
     }

@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.Players;
 
-public class MatchPlayerParser implements ArgumentParser<CommandSender, MatchPlayer> {
+public final class MatchPlayerParser implements ArgumentParser<CommandSender, MatchPlayer> {
 
   @Override
   public @NotNull ArgumentParseResult<@NotNull MatchPlayer> parse(

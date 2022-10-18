@@ -20,7 +20,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -339,9 +338,7 @@ public final class TextParser {
     assertNotNull(text, "cannot parse enum " + type.getSimpleName().toLowerCase() + "  from null");
 
     String name = text.replace(' ', '_');
-    E value =
-        StringUtils.bestFuzzyMatch(
-            name, Arrays.stream(type.getEnumConstants()).iterator(), Enum::name);
+    E value = StringUtils.bestFuzzyMatch(name, type);
 
     if (value == null || (!fuzzyMatch && !name.equalsIgnoreCase(value.name()))) {
       throw invalidFormat(text, type, value != null ? value.name().toLowerCase() : null, null);

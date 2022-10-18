@@ -18,11 +18,9 @@ import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.command.util.CommandGraph;
-import tc.oc.pgm.util.LiquidMetal;
+import tc.oc.pgm.util.StringUtils;
 
-public class MapInfoParser extends StringLikeParser<CommandSender, MapInfo> {
-
-  private static final String FAKE_SPACE = "┈", SPACE = " ";
+public final class MapInfoParser extends StringLikeParser<CommandSender, MapInfo> {
 
   private final MapLibrary library;
   private final MatchManager matchManager;
@@ -42,7 +40,7 @@ public class MapInfoParser extends StringLikeParser<CommandSender, MapInfo> {
       final Match match = matchManager.getMatch(context.getSender());
       if (match != null) map = match.getMap();
     } else {
-      map = library.getMap(suggestionToText(text));
+      map = library.getMap(StringUtils.suggestionToText(text));
     }
 
     return map != null
@@ -54,43 +52,14 @@ public class MapInfoParser extends StringLikeParser<CommandSender, MapInfo> {
   public @NonNull List<@NonNull String> suggestions(
       @NonNull CommandContext<CommandSender> context, @NonNull String input) {
     List<String> inputQueue = context.get(CommandGraph.INPUT_QUEUE);
-    if (inputQueue.isEmpty()) inputQueue.add(input);
-
-    // Actual total input from the player
-    String text = suggestionToText(String.join(SPACE, inputQueue));
 
     // Words to keep, as they cannot be replaced (they're not the last arg)
-    String keep =
-        suggestionToText(String.join(SPACE, inputQueue.subList(0, inputQueue.size() - 1))) + " ";
+    String keep = StringUtils.getMustKeepText(inputQueue);
 
     return library
-        .getMaps(text)
+        .getMaps(StringUtils.getText(inputQueue))
         .map(MapInfo::getName)
-        .map(name -> getSuggestion(name, keep))
+        .map(name -> StringUtils.getSuggestion(name, keep))
         .collect(Collectors.toList());
-  }
-
-  private String getSuggestion(String suggestion, String input) {
-    // At least one of the two has no spaces, algorithm isn't needed.
-    if (input.length() > 1 && suggestion.contains(SPACE)) {
-      int matchIdx = LiquidMetal.getIndexOf(suggestion, input);
-
-      // Should never happen!
-      if (matchIdx == -1)
-        throw new IllegalStateException(
-            "Suggestion is not matched by input! '" + suggestion + "', '" + input + "'");
-
-      suggestion = suggestion.substring(matchIdx + 1);
-    }
-
-    return textToSuggestion(suggestion);
-  }
-
-  private String textToSuggestion(String text) {
-    return text.replace(SPACE, FAKE_SPACE).replace(":", "");
-  }
-
-  private String suggestionToText(String text) {
-    return text.replace(FAKE_SPACE, SPACE);
   }
 }

@@ -1,5 +1,6 @@
 package tc.oc.pgm.util;
 
+import com.google.common.collect.Iterators;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,7 +12,13 @@ import java.util.function.Function;
 import org.bukkit.ChatColor;
 
 public final class StringUtils {
+  public static final String FAKE_SPACE = "┈", SPACE = " ";
+
   private StringUtils() {}
+
+  public static <E extends Enum<E>> E bestFuzzyMatch(String query, Class<E> enumClass) {
+    return bestFuzzyMatch(query, Iterators.forArray(enumClass.getEnumConstants()), Enum::name);
+  }
 
   public static <T> T bestFuzzyMatch(String query, Iterable<T> options) {
     return bestFuzzyMatch(query, options, Object::toString);
@@ -44,6 +51,40 @@ public final class StringUtils {
       }
     }
     return bestScore < 0.75 ? null : bestObj;
+  }
+
+  public static String getSuggestion(String suggestion, String input) {
+    // At least one of the two has no spaces, algorithm isn't needed.
+    if (input.length() > 1 && suggestion.contains(SPACE)) {
+      int matchIdx = LiquidMetal.getIndexOf(suggestion, input);
+
+      // Should never happen!
+      if (matchIdx == -1)
+        throw new IllegalStateException(
+            "Suggestion is not matched by input! '" + suggestion + "', '" + input + "'");
+
+      suggestion = suggestion.substring(matchIdx + 1);
+    }
+
+    return textToSuggestion(suggestion);
+  }
+
+  public static String textToSuggestion(String text) {
+    return text.replace(SPACE, FAKE_SPACE).replace(":", "");
+  }
+
+  public static String suggestionToText(String text) {
+    return text.replace(FAKE_SPACE, SPACE);
+  }
+
+  public static String getText(List<String> inputQueue) {
+    if (inputQueue.isEmpty()) return "";
+    return suggestionToText(String.join(SPACE, inputQueue));
+  }
+
+  public static String getMustKeepText(List<String> inputQueue) {
+    if (inputQueue.isEmpty()) return "";
+    return suggestionToText(String.join(SPACE, inputQueue.subList(0, inputQueue.size() - 1))) + " ";
   }
 
   public static String truncate(String text, int length) {
