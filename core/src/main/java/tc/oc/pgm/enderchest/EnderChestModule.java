@@ -13,6 +13,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.parse.FilterParser;
+import tc.oc.pgm.regions.RandomPointsValidation;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -58,8 +59,9 @@ public class EnderChestModule implements MapModule {
 
       for (Element dropoffEl :
           XMLUtils.flattenElements(doc.getRootElement(), "enderchest", "dropoff")) {
-        Region region = regions.parseRequiredRegionProperty(dropoffEl, "region");
-        Filter filter = filters.parseRequiredFilterProperty(dropoffEl, "filter");
+        Region region =
+            regions.parseRequiredProperty(dropoffEl, "region", RandomPointsValidation.INSTANCE);
+        Filter filter = filters.parseRequiredProperty(dropoffEl, "filter");
         dropoffs.add(new Dropoff(region, filter));
       }
 
